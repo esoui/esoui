@@ -1,7 +1,8 @@
 MAIL_ENTRY_SORT_KEYS =
 {
-    ["secsSinceReceived"]  = { numeric = true },
-    ["priority"] = { numeric = true, tiebreaker = "secsSinceReceived" }
+    ["secsSinceReceived"]  = { numeric = true, tiebreaker = "mailId" },
+    ["priority"] = { numeric = true, tiebreaker = "secsSinceReceived" },
+    ["mailId"] = { isId64 = true },
 }
 MAIL_ENTRY_FIRST_SORT_KEY = "priority"
 
@@ -116,12 +117,12 @@ function ZO_MailInteractionFragment:New()
     return ZO_SceneFragment.New(self)
 end
 
-function ZO_SceneFragment:Show()                            
+function ZO_MailInteractionFragment:Show()                            
     RequestOpenMailbox()
     self:OnShown()
 end
 
-function ZO_SceneFragment:Hide()
+function ZO_MailInteractionFragment:Hide()
     CloseMailbox()
     self:OnHidden()
 end

@@ -4,15 +4,10 @@ local FULL_PIN_ALPHA = 1
 local DEFAULT_VIBRATION_PS4 = 0.25
 local DEFAULT_VIBRATION_XB1 = 0.05
 
+local NORMAL_TEXTURE = "EsoUI/Art/Lockpicking/pins.dds"
+local SET_TEXTURE = "EsoUI/Art/Lockpicking/pins_set.dds"
+
 ZO_Lockpick = ZO_Object:Subclass()
-
-local LOCKPICK_KEYBOARD_STYLE = {
-    timerFont = "ZoFontWinH3",
-}
-
-local LOCKPICK_GAMEPAD_STYLE = {
-    timerFont = "ZoFontGamepad34",
-}
 
 function ZO_Lockpick:New(...)
     local lockPick = ZO_Object.New(self)
@@ -25,16 +20,20 @@ function ZO_Lockpick:Initialize(control)
     control.owner = self
     self.body = control:GetNamedChild("Body")
 
+    -- Keyboard specific controls
     self.infoBar = control:GetNamedChild("InfoBar")
-    self.lockLevel = self.infoBar:GetNamedChild("LockLevel")
-    self.lockpicksLeft = self.infoBar:GetNamedChild("LockpicksLeft")
-
-    self.gamepadInfoBar = control:GetNamedChild("GamepadInfoBar")
-    self.gamepadLockLevel = self.gamepadInfoBar:GetNamedChild("Difficulty")
-    self.gamepadLockpicksLeft = self.gamepadInfoBar:GetNamedChild("LockpicksRemaining")
-
+    self.lockLevelLabel = self.infoBar:GetNamedChild("LockLevel")
+    self.lockpicksLeftLabel = self.infoBar:GetNamedChild("LockpicksLeft")
     self.timer = ZO_TimerBar:New(control:GetNamedChild("TimerBar"))
     self.timer:SetDirection(TIMER_BAR_COUNTS_DOWN)
+
+    -- Gamepad specific controls
+    self.gamepadInfoBar = control:GetNamedChild("GamepadInfoBar")
+    self.gamepadLockLevelLabel = self.gamepadInfoBar:GetNamedChild("Difficulty")
+    self.gamepadLockpicksLeftLabel = self.gamepadInfoBar:GetNamedChild("LockpicksRemaining")
+    self.gamepadTimer = ZO_TimerBar:New(control:GetNamedChild("GamepadTimerBar"))
+    self.gamepadTimer:SetDirection(TIMER_BAR_COUNTS_DOWN)
+
     self.lockpick = control:GetNamedChild("Lockpick")
 
     self.lockpickBreakLeft = control:GetNamedChild("LockpickBreakLeft")
@@ -46,7 +45,7 @@ function ZO_Lockpick:Initialize(control)
 
     self.springs = {}
 
-    for i=1, NUM_LOCKPICK_CHAMBERS do
+    for i = 1, NUM_LOCKPICK_CHAMBERS do
         local spring = control:GetNamedChild("Spring" .. i)
         spring.pin = control:GetNamedChild("Pin" .. i)
         spring.pin.highlight = spring.pin:GetNamedChild("Highlight")
@@ -60,7 +59,73 @@ function ZO_Lockpick:Initialize(control)
     end
 
     self.stealthIcon = ZO_StealthIcon:New(control:GetNamedChild("StealthIcon"))
-    control:RegisterForEvent(EVENT_STEALTH_STATE_CHANGED, function(event, unitTag, ...) if unitTag == "player" then  self.stealthIcon:OnStealthStateChanged(...) end end)
+
+    local LOCKPICK_WINDOW_INTERACTION =
+    {
+        type = "Lockpick",
+        interactTypes = { INTERACTION_LOCKPICK }
+    }
+
+    local function OnSceneStateChange(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:GatherExtents()
+
+            self.virtualMouseX = nil
+            self.virtualNormalizedMouseX = nil
+
+            self:ResetChambers()
+
+            local now = GetFrameTimeMilliseconds()
+            local timerStartS = now / 1000
+            local timerEndS = (now + GetLockpickingTimeLeft()) / 1000
+            if SCENE_MANAGER:IsShowing("lockpickKeyboard") then
+                self.lockLevelLabel:SetText(zo_strformat(SI_LOCKPICK_LEVEL, GetString("SI_LOCKQUALITY", GetLockQuality())))
+                self.lockpicksLeftLabel:SetText(zo_strformat(SI_LOCKPICK_PICKS_REMAINING, GetNumLockpicksLeft()))
+
+                self.infoBar:SetHidden(false)
+                self.gamepadInfoBar:SetHidden(true)
+
+                self.timer:Start(timerStartS, timerEndS)
+                self.gamepadTimer:Stop()
+            elseif SCENE_MANAGER:IsShowing("lockpickGamepad") then
+                self.gamepadLockLevelLabel:SetText(GetString("SI_LOCKQUALITY", GetLockQuality()))
+                self.gamepadLockpicksLeftLabel:SetText(GetNumLockpicksLeft())
+
+                self.infoBar:SetHidden(true)
+                self.gamepadInfoBar:SetHidden(false)
+
+                self.gamepadTimer:Start(timerStartS, timerEndS)
+                self.timer:Stop()
+            end
+
+            PlaySound(SOUNDS.LOCKPICKING_START)
+
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            HideMouse()
+            self.inactivityStart = nil
+        elseif newState == SCENE_HIDDEN then
+            if self:IsPickBroken() then
+                self:EndLockpickBreak()
+            end
+            self.settingChamberIndex = nil
+            self:UpdatePinAlpha(FULL_PIN_ALPHA)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            ShowMouse()
+        end
+    end
+
+    LOCK_PICK_SCENE = ZO_InteractScene:New("lockpickKeyboard", SCENE_MANAGER, LOCKPICK_WINDOW_INTERACTION)
+    LOCK_PICK_SCENE:RegisterCallback("StateChange", OnSceneStateChange)
+
+    LOCK_PICK_GAMEPAD_SCENE = ZO_InteractScene:New("lockpickGamepad", SCENE_MANAGER, LOCKPICK_WINDOW_INTERACTION)
+    LOCK_PICK_GAMEPAD_SCENE:RegisterCallback("StateChange", OnSceneStateChange)
+
+    self:RegisterForEvents()
+end
+
+function ZO_Lockpick:RegisterForEvents()
+    self.control:RegisterForEvent(EVENT_STEALTH_STATE_CHANGED, function(event, unitTag, ...) self.stealthIcon:OnStealthStateChanged(...) end)
+    self.control:AddFilterForEvent(EVENT_STEALTH_STATE_CHANGED, REGISTER_FILTER_UNIT_TAG, "player")
 
     self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
@@ -81,10 +146,10 @@ function ZO_Lockpick:Initialize(control)
     local function OnLockpickBroke(eventCode, inactivityDuration)
         PlaySound(SOUNDS.LOCKPICKING_BREAK)
         self:OnLockpickBroke(inactivityDuration)
-        if SCENE_MANAGER:IsShowing("lockpick") then
-            self.lockpicksLeft:SetText(zo_strformat(SI_LOCKPICK_PICKS_REMAINING, GetNumLockpicksLeft()))
-        elseif SCENE_MANAGER:IsShowing("lockpick_gamepad") then
-            self.gamepadLockpicksLeft:SetText(GetNumLockpicksLeft())
+        if SCENE_MANAGER:IsShowing("lockpickKeyboard") then
+            self.lockpicksLeftLabel:SetText(zo_strformat(SI_LOCKPICK_PICKS_REMAINING, GetNumLockpicksLeft()))
+        elseif SCENE_MANAGER:IsShowing("lockpickGamepad") then
+            self.gamepadLockpicksLeftLabel:SetText(GetNumLockpicksLeft())
         end
     end
 
@@ -92,65 +157,7 @@ function ZO_Lockpick:Initialize(control)
     self.control:RegisterForEvent(EVENT_LOCKPICK_FAILED, OnLockpickFailed)
     self.control:RegisterForEvent(EVENT_LOCKPICK_SUCCESS, OnLockpickSuccess)
     self.control:RegisterForEvent(EVENT_LOCKPICK_BROKE, OnLockpickBroke)
-
-    local LOCKPICK_WINDOW_INTERACTION =
-    {
-        type = "Lockpick",
-        interactTypes = { INTERACTION_LOCKPICK }
-    }
-
-    local function OnSceneStateChange(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:GatherExtents()
-
-            self.virtualMouseX = nil
-            self.virtualNormalizedMouseX = nil
-
-            self:ResetChambers()
-            
-            if SCENE_MANAGER:IsShowing("lockpick") then
-                self.lockLevel:SetText(zo_strformat(SI_LOCKPICK_LEVEL, GetString("SI_LOCKQUALITY", GetLockQuality())))
-                self.lockpicksLeft:SetText(zo_strformat(SI_LOCKPICK_PICKS_REMAINING, GetNumLockpicksLeft()))
-
-                self.infoBar:SetHidden(false)
-                self.gamepadInfoBar:SetHidden(true)
-            elseif SCENE_MANAGER:IsShowing("lockpick_gamepad") then
-                self.gamepadLockLevel:SetText(GetString("SI_LOCKQUALITY", GetLockQuality()))
-                self.gamepadLockpicksLeft:SetText(GetNumLockpicksLeft())
-
-                self.infoBar:SetHidden(true)
-                self.gamepadInfoBar:SetHidden(false)
-            end
-
-            local now = GetFrameTimeMilliseconds()
-            self.timer:Start(now / 1000, (now + GetLockpickingTimeLeft()) / 1000)
-            PlaySound(SOUNDS.LOCKPICKING_START)
-
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-            HideMouse()
-            self.inactivityStart = nil
-        elseif newState == SCENE_HIDDEN then
-            if self:IsPickBroken() then
-                self:EndLockpickBreak()
-            end
-            self.settingChamberIndex = nil
-            self:UpdatePinAlpha(FULL_PIN_ALPHA)
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-            ShowMouse()
-        end
-    end
-
-    LOCK_PICK_SCENE = ZO_InteractScene:New("lockpick", SCENE_MANAGER, LOCKPICK_WINDOW_INTERACTION)
-    LOCK_PICK_SCENE:RegisterCallback("StateChange", OnSceneStateChange)
-
-    LOCK_PICK_GAMEPAD_SCENE = ZO_InteractScene:New("lockpick_gamepad", SCENE_MANAGER, LOCKPICK_WINDOW_INTERACTION)
-    LOCK_PICK_GAMEPAD_SCENE:RegisterCallback("StateChange", OnSceneStateChange)
-
-    ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, LOCKPICK_KEYBOARD_STYLE, LOCKPICK_GAMEPAD_STYLE)
 end
-
-local NORMAL_TEXTURE = [[EsoUI/Art/Lockpicking/pins.dds]]
-local SET_TEXTURE = [[EsoUI/Art/Lockpicking/pins_set.dds]]
 
 do
     local RANGE = 24
@@ -163,7 +170,7 @@ do
         end
     end
 
-    local LoosenessFunctions = 
+    local LoosenessFunctions =
     {
         GenerateLoosenessFunction(function(x)
             return math.cos(math.atan(x)) 
@@ -182,7 +189,7 @@ do
         end),
     }
     function ZO_Lockpick:ResetChambers()
-        for i=1, NUM_LOCKPICK_CHAMBERS do
+        for i = 1, NUM_LOCKPICK_CHAMBERS do
             local spring = self.springs[i]
             spring:SetHeight(spring.height)
             spring:SetTextureRotation(0)
@@ -226,15 +233,15 @@ do
         end
 
         spring:SetHeight((1 - spring.interpolatedChamberProgress) * PIN_MOVEMENT_PERCENT * spring.height + spring.height * PIN_CONSTANT_PERCENT + springResistance)
-        
+
         if stress then
             self:ApplyLoosenessToChamber(chamberIndex, baseSpringResistance)
             if chamberProgress < 1 and stress == 0 then
                 self:PlayVibration(0.0, self.defaultVibration)
             else
                 self:PlayVibration(0, self.defaultVibration + (stress * 0.75))
-            end    
-        end            
+            end
+        end
     end
 end
 
@@ -422,7 +429,7 @@ function ZO_Lockpick:OnUpdate(ending)
         self.playedStressSound = false
     end
 
-    for i=1, NUM_LOCKPICK_CHAMBERS do
+    for i = 1, NUM_LOCKPICK_CHAMBERS do
         if self.settingChamberIndex ~= i then
             local spring = self.springs[i]
             if zo_abs(spring.totalProgress - spring.interpolatedChamberProgress) > MIN_PERCENT_BEFORE_FINISHING then
@@ -514,7 +521,7 @@ function ZO_Lockpick:FindClosestChamberIndexToLockpick()
 
     local closestDistance = math.huge
     local closestIndex
-    for i=1, NUM_LOCKPICK_CHAMBERS do
+    for i = 1, NUM_LOCKPICK_CHAMBERS do
         local spring = self.springs[i]
 
         local distanceToLockpick = zo_abs((spring:GetCenter() - windowLeft) - (self.virtualMouseX))
@@ -528,20 +535,27 @@ function ZO_Lockpick:FindClosestChamberIndexToLockpick()
 end
 
 function ZO_Lockpick:OnLockpickBroke(inactivityDuration)
-    if inactivityDuration > 0 and self.settingChamberIndex then
-        self.lockpick:SetHidden(true)
-        self.breakingChamberIndex = self.settingChamberIndex
-        self.lockpickBreakLeft:SetHidden(false)
-        self.lockpickBreakRight:SetHidden(false)
-        self.inactivityDuration = inactivityDuration
-        self.inactivityStart = GetFrameTimeMilliseconds()
+    if self.settingChamberIndex then
+        --A broken pick clears out the setting chamber on the client so stop depressing it here too. Store off settingChamberIndex since that's the champer we broke the pick on and it's cleared by EndDepressingPin.
+        local activeChamberIndex = self.settingChamberIndex
+        self:EndDepressingPin()
 
-        self:UpdatePinAlpha(PARTIAL_PIN_ALPHA)
+        --If there is a time we have to wait before we can try to pick the lock again then run the break animation
+        if inactivityDuration > 0 then
+            self.lockpick:SetHidden(true)
+            self.breakingChamberIndex = activeChamberIndex
+            self.lockpickBreakLeft:SetHidden(false)
+            self.lockpickBreakRight:SetHidden(false)
+            self.inactivityDuration = inactivityDuration
+            self.inactivityStart = GetFrameTimeMilliseconds()
+
+            self:UpdatePinAlpha(PARTIAL_PIN_ALPHA)
+        end
     end
 end
 
 function ZO_Lockpick:UpdatePinAlpha(alpha, ingoreIndex, allowHighlights)
-    for i=1, NUM_LOCKPICK_CHAMBERS do
+    for i = 1, NUM_LOCKPICK_CHAMBERS do
         local spring = self.springs[i]
         if i ~= ingoreIndex then
             spring:SetAlpha(alpha)
@@ -634,19 +648,15 @@ end
 function ZO_Lockpick:SetHidden(hidden)
     self.hidden = hidden
     if hidden then
-        SCENE_MANAGER:Hide("lockpick")
-        SCENE_MANAGER:Hide("lockpick_gamepad") 
+        SCENE_MANAGER:Hide("lockpickKeyboard")
+        SCENE_MANAGER:Hide("lockpickGamepad")
     else
         if IsInGamepadPreferredMode() then
-            SCENE_MANAGER:Show("lockpick_gamepad")
+            SCENE_MANAGER:Show("lockpickGamepad")
         else
-            SCENE_MANAGER:Show("lockpick")
+            SCENE_MANAGER:Show("lockpickKeyboard")
         end
     end
-end
-
-function ZO_Lockpick:ApplyPlatformStyle(style)
-    self.timer.time:SetFont(style.timerFont)
 end
 
 function ZO_Lockpick_OnInitialized(control)

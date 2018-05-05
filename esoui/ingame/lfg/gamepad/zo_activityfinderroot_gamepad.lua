@@ -66,12 +66,9 @@ end
 
 function ActivityFinderRoot_Gamepad:SetupList(list)
     local function CategoryEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        local isLevelLocked = false
-        local lowestLevelLimit, lowestRankLimit
-        if data.data.activityFinderObject then
-            isLevelLocked, lowestLevelLimit, lowestRankLimit = data.data.activityFinderObject:GetLevelLockInfo()
-        end
-        enabled = enabled and not isLevelLocked
+        local activityFinderObject = data.data.activityFinderObject
+        local isLocked = activityFinderObject and (activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0)
+        enabled = enabled and not isLocked
         data.enabled = enabled
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
@@ -80,15 +77,17 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     local function OnSelectedMenuEntry(_, selectedData)
-        if selectedData.data.isRoleSelector then
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-            GAMEPAD_GROUP_ROLES_BAR:Activate()
-        else
-            GAMEPAD_GROUP_ROLES_BAR:Deactivate()
-            self:RefreshTooltip(selectedData.data)
-        end
+        if GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:GetState() ~= SCENE_HIDDEN then
+            if selectedData.data.isRoleSelector then
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+                GAMEPAD_GROUP_ROLES_BAR:Activate()
+            else
+                GAMEPAD_GROUP_ROLES_BAR:Deactivate()
+                self:RefreshTooltip(selectedData.data)
+            end
 
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
     end
 
     list:SetOnSelectedDataChangedCallback(OnSelectedMenuEntry)
@@ -133,6 +132,11 @@ do
                     lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
                 elseif lowestPointsLimit then
                     lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestPointsLimit)
+                end
+            else
+                local numLocations = data.activityFinderObject:GetNumLocations()
+                if numLocations == 0 then
+                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
                 end
             end
 

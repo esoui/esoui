@@ -116,10 +116,7 @@ function LoreLibraryGamepad:PerformUpdate()
             local templateName
 
             if isHeader then
-                lastCategory = categoryIndex
-
                 entryData:SetHeader(categoryData.name)
-
                 templateName = "ZO_GamepadLoreCollectionEntryTemplateWithHeader"
             else
                 templateName = "ZO_GamepadLoreCollectionEntryTemplate"

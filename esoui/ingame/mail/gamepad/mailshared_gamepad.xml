@@ -2,7 +2,6 @@
     <Controls>
         <Label name="ZO_Mail_Gamepad_Label" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true" />
         <Label name="ZO_Mail_Gamepad_Value" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
-        <Label name="ZO_Mail_Gamepad_ValueBackground" inherits="ZO_MailInbox_Gamepad_Value" virtual="true" />
 
         <Button name="ZO_MailAttachmentSlot_Gamepad" inherits="ZO_InventorySlot_Gamepad" virtual="true">
             <Dimensions x="55" y="55" />
@@ -51,22 +50,18 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_Mail_Gamepad_LabelBox" virtual="true">
+        <Backdrop name="ZO_Mail_Gamepad_LabelBox" virtual="true" inherits="ZO_DefaultBackdrop_Gamepad" resizeToFitDescendents="true">
+            <ResizeToFitPadding height="12"/>
             <OnInitialized>
-                self.edit = self:GetNamedChild("Backdrop"):GetNamedChild("Label")
+                self.edit = self:GetNamedChild("Label")
             </OnInitialized>
             <Controls>
-                <Backdrop name="$(parent)Backdrop" inherits="ZO_DefaultBackdrop_Gamepad">
-                    <AnchorFill />
-                    <Controls>
-                        <Label name="$(parent)Label" font="ZoFontGamepad34">
-                            <Anchor point="TOPLEFT" offsetX="11" offsetY="2" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2" />
-                        </Label>
-                    </Controls>
-                </Backdrop>
+                <Label name="$(parent)Label" font="ZoFontGamepad34" minLineCount="1" maxLineCount="1">
+                    <Anchor point="TOPLEFT" offsetX="11" offsetY="6" />
+                    <Anchor point="TOPRIGHT" offsetX="-11" offsetY="6" />
+                </Label>
             </Controls>
-        </Control>
+        </Backdrop>
 
         <Control name="ZO_Mail_Gamepad_Scrollable_LabelBox" virtual="true">
             <OnInitialized>

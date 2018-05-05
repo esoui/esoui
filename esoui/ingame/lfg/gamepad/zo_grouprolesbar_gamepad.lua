@@ -3,9 +3,8 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
     [LFG_ROLE_DPS] =
     {
         optionName = GetString("SI_LFGROLE", LFG_ROLE_DPS),
-        icon = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
-        iconUp = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_dps_up.dds",
-        iconDown = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_dps_down.dds",
+        iconUp = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps_up.dds",
+        iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps_down.dds",
         role = LFG_ROLE_DPS,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_DPS_TOOLTIP),
     },
@@ -13,9 +12,8 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
     [LFG_ROLE_HEAL] =
     {
         optionName = GetString("SI_LFGROLE", LFG_ROLE_HEAL),
-        icon = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
-        iconUp = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_healer_up.dds",
-        iconDown = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_healer_down.dds",
+        iconUp = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer_up.dds",
+        iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer_down.dds",
         role = LFG_ROLE_HEAL,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_HEAL_TOOLTIP),
     },
@@ -23,9 +21,8 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
     [LFG_ROLE_TANK] =
     {
         optionName = GetString("SI_LFGROLE", LFG_ROLE_TANK),
-        icon = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
-        iconUp = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_tank_up.dds",
-        iconDown = "EsoUI/Art/LFG/Gamepad/gp_LFG_roleIcon_tank_down.dds",
+        iconUp = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank_up.dds",
+        iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank_down.dds",
         role = LFG_ROLE_TANK,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_TANK_TOOLTIP),
     },

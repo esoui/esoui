@@ -24,6 +24,7 @@ MENU_CATEGORY_MAIL = 14
 MENU_CATEGORY_NOTIFICATIONS = 15
 MENU_CATEGORY_HELP = 16
 MENU_CATEGORY_ACTIVITY_FINDER = 17
+MENU_CATEGORY_GIFT_INVENTORY = 18
 
 --
 --[[ MainMenu Singleton ]]--
@@ -38,13 +39,8 @@ function MainMenu_Manager:New(...)
 end
 
 function MainMenu_Manager:Initialize()
-    self.playerStateTable =
-        {
-            isDead = IsUnitDead("player"),
-            inCombat = IsUnitInCombat("player"),
-            isReviving = IsUnitReincarnating("player"),
-            isWerewolf = IsWerewolf(),
-        }
+    self.playerStateTable = {}
+    self:UpdateAllPlayerStates()
 
     local PLAYER_IS_DEAD = false
     local PLAYER_IS_ALIVE = true
@@ -93,11 +89,17 @@ function MainMenu_Manager:OnPlayerStateUpdate()
     self:FireCallbacks("OnPlayerStateUpdate")
 end
 
-function MainMenu_Manager:RefreshPlayerState()
+function MainMenu_Manager:UpdateAllPlayerStates()
     local stateTable = self.playerStateTable
     stateTable.isDead = IsUnitDead("player")
     stateTable.inCombat = IsUnitInCombat("player")
     stateTable.isReviving = IsUnitReincarnating("player")
+    stateTable.isSwimming = IsUnitSwimming("player")
+    stateTable.isWerewolf = IsWerewolf()
+end
+
+function MainMenu_Manager:RefreshPlayerState()
+    self:UpdateAllPlayerStates()
     self:OnPlayerStateUpdate()
 end
 

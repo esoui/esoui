@@ -12,8 +12,8 @@
                                     <OnInitialized>
                                         self.codNotice = self:GetNamedChild("CODNotice")
                                         self.addressLabel = self:GetNamedChild("AddressLabel")
-                                        self.addressEdit = self:GetNamedChild("Address")
-                                        self.subjectEdit = self:GetNamedChild("Subject")
+                                        self.addressEdit = self:GetNamedChild("AddressField")
+                                        self.subjectEdit = self:GetNamedChild("SubjectField")
                                         self.bodyEdit = self:GetNamedChild("Body")
                                         self.attachmentsBox = self:GetNamedChild("AttachmentsBox")
                                         self.attachmentsNone = self.attachmentsBox:GetNamedChild("NoAttachments")
@@ -41,23 +41,21 @@
                                         <Label name="$(parent)AddressLabel" inherits="ZO_Mail_Gamepad_Label">
                                             <!-- Dynamically anchored to either parent or CODNotice -->
                                         </Label>
-                                        <Control name="$(parent)Address" inherits="ZO_Mail_Gamepad_LabelBox">
-                                            <Dimensions y="43" />
+                                        <Backdrop name="$(parent)AddressField" inherits="ZO_Mail_Gamepad_LabelBox">
                                             <Anchor point="TOPRIGHT" />
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)AddressLabel" relativePoint="BOTTOMLEFT" />
-                                        </Control>
+                                        </Backdrop>
 
                                         <Label name="$(parent)SubjectLabel" text="SI_GAMEPAD_MAIL_SUBJECT_LABEL" inherits="ZO_Mail_Gamepad_Label">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Address" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)AddressField" relativePoint="BOTTOMLEFT" offsetY="15" />
                                         </Label>
-                                        <Control name="$(parent)Subject" inherits="ZO_Mail_Gamepad_LabelBox">
-                                            <Dimensions y="43" />
+                                        <Backdrop name="$(parent)SubjectField" inherits="ZO_Mail_Gamepad_LabelBox">
                                             <Anchor point="TOPRIGHT" />
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" />
-                                        </Control>
+                                        </Backdrop>
 
                                         <Label name="$(parent)BodyLabel" text="SI_GAMEPAD_MAIL_BODY_LABEL" inherits="ZO_Mail_Gamepad_Label">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subject" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectField" relativePoint="BOTTOMLEFT" offsetY="15" />
                                         </Label>
                                         
                                         <Control name="$(parent)Body" inherits="ZO_Mail_Gamepad_Scrollable_LabelBox">

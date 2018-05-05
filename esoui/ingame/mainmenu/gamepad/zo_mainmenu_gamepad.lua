@@ -1,397 +1,442 @@
 local MENU_ENTRIES = {}
 local CATEGORY_TO_ENTRY_DATA = {}
 
-do
-    local MENU_MAIN_ENTRIES =
-    {
-        MARKET          = 1,
-        CROWN_CRATES     = 2,
-        NOTIFICATIONS   = 3,
-        COLLECTIONS     = 4,
-        INVENTORY       = 5,
-        CHARACTER       = 6,
-        SKILLS          = 7,
-        CHAMPION        = 8,
-        CAMPAIGN        = 9,
-        JOURNAL         = 10,
-        SOCIAL          = 11,
-        ACTIVITY_FINDER = 12,
-        HELP            = 13,
-        OPTIONS         = 14,
-        LOG_OUT         = 15,
-    }
-    local MENU_JOURNAL_ENTRIES =
-    {
-        QUESTS              = 1,
-        CADWELLS_JOURNAL    = 2,
-        LORE_LIBRARY        = 3,
-        ACHIEVEMENTS        = 4,
-        LEADERBOARDS        = 5,
-    }
-    local MENU_SOCIAL_ENTRIES =
-    {
-        VOICE_CHAT  = 1,
-        TEXT_CHAT   = 2,
-        EMOTES      = 3,
-        GROUP       = 4,
-        GUILDS      = 5,
-        FRIENDS     = 6,
-        IGNORED     = 7,
-        MAIL        = 8,
-    }
+local MENU_MAIN_ENTRIES =
+{
+    CROWN_STORE     = 1,
+    ANNOUNCEMENTS   = 2,
+    NOTIFICATIONS   = 3,
+    COLLECTIONS     = 4,
+    INVENTORY       = 5,
+    CHARACTER       = 6,
+    SKILLS          = 7,
+    CHAMPION        = 8,
+    CAMPAIGN        = 9,
+    JOURNAL         = 10,
+    SOCIAL          = 11,
+    ACTIVITY_FINDER = 12,
+    HELP            = 13,
+    OPTIONS         = 14,
+    LOG_OUT         = 15,
+}
+local MENU_CROWN_STORE_ENTRIES =
+{
+    CROWN_STORE         = 1,
+    DAILY_LOGIN_REWARDS = 2,
+    CROWN_CRATES        = 3,
+    CHAPTERS            = 4,
+    GIFT_INVENTORY      = 5,
+}
+local MENU_JOURNAL_ENTRIES =
+{
+    QUESTS              = 1,
+    CADWELLS_JOURNAL    = 2,
+    LORE_LIBRARY        = 3,
+    ACHIEVEMENTS        = 4,
+    LEADERBOARDS        = 5,
+}
+local MENU_SOCIAL_ENTRIES =
+{
+    VOICE_CHAT  = 1,
+    TEXT_CHAT   = 2,
+    EMOTES      = 3,
+    GROUP       = 4,
+    GUILDS      = 5,
+    FRIENDS     = 6,
+    IGNORED     = 7,
+    MAIL        = 8,
+}
 
-    local MENU_ENTRY_DATA =
+local MENU_ENTRY_DATA =
+{
+    [MENU_MAIN_ENTRIES.CROWN_STORE] =
     {
-        [MENU_MAIN_ENTRIES.NOTIFICATIONS] =
+        customTemplate = "ZO_GamepadMenuCrownStoreEntryTemplate",
+        name = GetString(SI_GAMEPAD_MAIN_MENU_CROWN_STORE_CATEGORY),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
+        header = GetString(SI_ESO_PLUS_TITLE),
+        postPadding = 70,
+        showHeader = function() return IsESOPlusSubscriber() end,
+        isNewCallback = function(entryData)
+            for entryIndex, entry in ipairs(entryData.subMenu) do
+                if entry:IsNew() then
+                    return true
+                end
+            end
+            return false
+        end,
+        subMenu =
         {
-            scene = "gamepad_notifications_root",
-            name =
-                function()
-                    local numNotifications = GAMEPAD_NOTIFICATIONS and GAMEPAD_NOTIFICATIONS:GetNumNotifications() or 0
-                    return zo_strformat(SI_GAMEPAD_MAIN_MENU_NOTIFICATIONS, numNotifications)
+            [MENU_CROWN_STORE_ENTRIES.CROWN_STORE] =
+            {
+                scene = "gamepad_market_pre_scene",
+                sceneGroup = "gamepad_market_scenegroup",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_CROWN_STORE_ENTRY),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
+            },
+            [MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS] =
+            {
+                name = GetString(SI_GAMEPAD_MAIN_MENU_DAILY_LOGIN_REWARDS_ENTRY),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_dailyLoginRewards.dds",
+                shouldDisableFunction = function()
+                    return GetNumRewardsInCurrentDailyLoginMonth() == 0
                 end,
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_notifications.dds",
-            isNewCallback =
-                function()
-                    return true --new icon indicator should always display
+                fragmentGroupCallback = function()
+                    return {ZO_DAILY_LOGIN_REWARDS_GAMEPAD:GetFragment(), GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT}
                 end,
-            isVisibleCallback =
-                function()
-                    if GAMEPAD_NOTIFICATIONS then
-                        return GAMEPAD_NOTIFICATIONS:GetNumNotifications() > 0
-                    else
-                        return false
-                    end
+                activatedCallback = function(self)
+                    self:ActivateHelperPanel(ZO_DAILY_LOGIN_REWARDS_GAMEPAD)
                 end,
-        },
-        [MENU_MAIN_ENTRIES.MARKET] =
-        {
-            scene = "gamepad_market_pre_scene",
-            additionalScenes =
-                {
-                    "gamepad_market",
-                    "gamepad_market_preview",
-                    "gamepad_market_bundle_contents",
-                    "gamepad_market_purchase",
-                    "gamepad_market_locked",
-                },
-            customTemplate = "ZO_GamepadMenuCrownStoreEntryTemplate",
-            name = GetString(SI_GAMEPAD_MAIN_MENU_MARKET_ENTRY),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
-            header = GetString(SI_ESO_PLUS_TITLE),
-            postPadding = 70,
-            showHeader = function() return IsESOPlusSubscriber() end
-        },
-        [MENU_MAIN_ENTRIES.CROWN_CRATES] =
-        {
-            scene = "crownCrateGamepad",
-            name = GetString(SI_MAIN_MENU_CROWN_CRATES),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_crownCrates.dds",
-            isNewCallback =
-                function()
-                    return GetNextOwnedCrownCrateId() ~= nil
+                isNewCallback = function()
+                    return GetDailyLoginClaimableRewardIndex() ~= nil
                 end,
-            disableWhenDead = true,
-            disableWhenReviving = true,
-            disableWhenSwimming = true,
-            disableWhenWerewolf = true,
-            isNewCallback =
-                function()
+            },
+            [MENU_CROWN_STORE_ENTRIES.CROWN_CRATES] =
+            {
+                scene = "crownCrateGamepad",
+                name = GetString(SI_MAIN_MENU_CROWN_CRATES),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_crownCrates.dds",
+                disableWhenDead = true,
+                disableWhenReviving = true,
+                disableWhenSwimming = true,
+                disableWhenWerewolf = true,
+                isNewCallback = function()
                     return GetNumOwnedCrownCrateTypes() > 0
                 end,
-            isVisibleCallback = function()
-                --An unusual case, we don't want to blow away this option if you're already in the scene when it's disabled
-                --Crown crates will properly refresh again when it closes its scene
-                return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
-            end,
-        },
-        [MENU_MAIN_ENTRIES.COLLECTIONS] =
-        {
-            scene = "gamepadCollectionsBook",
-            name = GetString(SI_MAIN_MENU_COLLECTIONS),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
-            isNewCallback =
-                function()
-                    return (GAMEPAD_COLLECTIONS_BOOK and GAMEPAD_COLLECTIONS_BOOK:HasAnyNewCollectibles()) or (COLLECTIONS_BOOK_SINGLETON and COLLECTIONS_BOOK_SINGLETON:DoesAnyDLCHaveQuestPending())
+                isVisibleCallback = function()
+                    --An unusual case, we don't want to blow away this option if you're already in the scene when it's disabled
+                    --Crown crates will properly refresh again when it closes its scene
+                    return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
                 end,
-        },
-        [MENU_MAIN_ENTRIES.INVENTORY] =
-        {
-            scene = "gamepad_inventory_root",
-            name = GetString(SI_MAIN_MENU_INVENTORY),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_inventory.dds",
-            isNewCallback =
-                function()
-                    return SHARED_INVENTORY:AreAnyItemsNew(nil, nil, BAG_BACKPACK, BAG_VIRTUAL)
-                end,
-        },
-        [MENU_MAIN_ENTRIES.CHARACTER] =
-        {
-            scene = "gamepad_stats_root",
-            name = GetString(SI_MAIN_MENU_CHARACTER),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
-            canLevel =
-                function()
-                    return GetAttributeUnspentPoints() > 0
-                end
-        },
-        [MENU_MAIN_ENTRIES.SKILLS] =
-        {
-            scene = "gamepad_skills_root",
-            customTemplate = "ZO_GamepadNewAnimatingMenuEntryTemplate",
-            name = GetString(SI_MAIN_MENU_SKILLS),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_skills.dds",
-            canLevel =
-                function()
-                    return GetAvailableSkillPoints() > 0
-                end,
-        },
-        [MENU_MAIN_ENTRIES.CHAMPION] =
-        {
-            scene = "gamepad_championPerks_root",
-            name = GetString(SI_MAIN_MENU_CHAMPION),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_champion.dds",
-            isNewCallback =
-                function()
-                    if CHAMPION_PERKS then
-                        return CHAMPION_PERKS:IsChampionSystemNew()
-                    end
-                end,
-            isVisibleCallback =
-                function()
-                    return IsChampionSystemUnlocked()
-                end,
-            canLevel =
-                function()
-                    if CHAMPION_PERKS then
-                        return CHAMPION_PERKS:HasAnySpendableUnspentPoints()
-                    end
-                end,
-        },
-        [MENU_MAIN_ENTRIES.CAMPAIGN] =
-        {
-            scene = "gamepad_campaign_root",
-            name = GetString(SI_PLAYER_MENU_CAMPAIGNS),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_allianceWar.dds",
-            isNewCallback =
-                function()
-                    local tutorialId = GetTutorialId(TUTORIAL_TRIGGER_CAMPAIGN_BROWSER_OPENED)
-                    if CanTutorialBeSeen(tutorialId) then
-                        return not HasSeenTutorial(tutorialId)
-                    end
-                    return false
-                end,
-            isVisibleCallback =
-                function()
-                    local currentLevel = GetUnitLevel("player")
-                    return currentLevel >= GetMinLevelForCampaignTutorial()
-                end,
-        },
-        [MENU_MAIN_ENTRIES.JOURNAL] =
-        {
-            customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
-            name = GetString(SI_MAIN_MENU_JOURNAL),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quests.dds",
-            subMenu =
+            },
+            [MENU_CROWN_STORE_ENTRIES.CHAPTERS] =
             {
-                [MENU_JOURNAL_ENTRIES.QUESTS] =
-                {
-                    scene = "gamepad_quest_journal",
-                    name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_QUESTS),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quests.dds",
-                    header = GetString(SI_MAIN_MENU_JOURNAL),
-                },
-                [MENU_JOURNAL_ENTRIES.CADWELLS_JOURNAL] =
-                {
-                    scene = "cadwellGamepad",
-                    name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_CADWELL),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_cadwell.dds",
-                    isVisibleCallback =
-                        function()
-                            return GetCadwellProgressionLevel() > CADWELL_PROGRESSION_LEVEL_BRONZE
-                        end,
-                },
-                [MENU_JOURNAL_ENTRIES.LORE_LIBRARY] =
-                {
-                    scene = "loreLibraryGamepad",
-                    name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_LORE_LIBRARAY),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_loreLibrary.dds",
-                },
-                [MENU_JOURNAL_ENTRIES.ACHIEVEMENTS] =
-                {
-                    scene = "achievementsGamepad",
-                    name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_ACHIEVEMENTS),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_achievements.dds",
-                },
-                [MENU_JOURNAL_ENTRIES.LEADERBOARDS] =
-                {
-                    scene = "gamepad_leaderboards",
-                    name = GetString(SI_JOURNAL_MENU_LEADERBOARDS),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_leaderBoards.dds",
-                },
-            }
+                scene = "chapterUpgradeGamepad",
+                sceneGroup = "gamepad_chapterUpgrade_scenegroup",
+                name = GetString(SI_MAIN_MENU_CHAPTERS),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_chapters.dds",
+                isVisibleCallback = function()
+                    return ZO_CHAPTER_UPGRADE_MANAGER:GetNumChapterUpgrades() > 0
+                end,
+            },
+            [MENU_CROWN_STORE_ENTRIES.GIFT_INVENTORY] =
+            {
+                scene = "giftInventoryGamepad",
+                name = GetString(SI_MAIN_MENU_GIFT_INVENTORY),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_giftInventory.dds",
+                isNewCallback = function()
+                    return GIFT_INVENTORY_MANAGER and GIFT_INVENTORY_MANAGER:HasAnyUnseenGifts()
+                end,
+            },
         },
-        [MENU_MAIN_ENTRIES.SOCIAL] =
+    },
+    [MENU_MAIN_ENTRIES.ANNOUNCEMENTS] =
+    {
+        name = GetString(SI_MAIN_MENU_ANNOUNCEMENTS),
+        icon = "EsoUI/Art/AnnounceWindow/gamepad/gp_announcement_Icon.dds",
+        activatedCallback = function()
+            SCENE_MANAGER:Show("marketAnnouncement")
+            RequestMarketAnnouncement()
+        end,
+    },
+    [MENU_MAIN_ENTRIES.NOTIFICATIONS] =
+    {
+        scene = "gamepad_notifications_root",
+        name = function()
+            local numNotifications = GAMEPAD_NOTIFICATIONS and GAMEPAD_NOTIFICATIONS:GetNumNotifications() or 0
+            return zo_strformat(SI_GAMEPAD_MAIN_MENU_NOTIFICATIONS, numNotifications)
+        end,
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_notifications.dds",
+        isNewCallback = function()
+            return true --new icon indicator should always display
+        end,
+        isVisibleCallback = function()
+            if GAMEPAD_NOTIFICATIONS then
+                return GAMEPAD_NOTIFICATIONS:GetNumNotifications() > 0
+            else
+                return false
+            end
+        end,
+    },
+    [MENU_MAIN_ENTRIES.COLLECTIONS] =
+    {
+        scene = "gamepadCollectionsBook",
+        name = GetString(SI_MAIN_MENU_COLLECTIONS),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
+        isNewCallback = function()
+            return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles()
+        end,
+    },
+    [MENU_MAIN_ENTRIES.INVENTORY] =
+    {
+        scene = "gamepad_inventory_root",
+        name = GetString(SI_MAIN_MENU_INVENTORY),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_inventory.dds",
+        isNewCallback = function()
+            return SHARED_INVENTORY:AreAnyItemsNew(nil, nil, BAG_BACKPACK, BAG_VIRTUAL)
+        end,
+    },
+    [MENU_MAIN_ENTRIES.CHARACTER] =
+    {
+        scene = "gamepad_stats_root",
+        name = GetString(SI_MAIN_MENU_CHARACTER),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
+        canLevel = function()
+            return HasPendingLevelUpReward() or GetAttributeUnspentPoints() > 0
+        end
+    },
+    [MENU_MAIN_ENTRIES.SKILLS] =
+    {
+        scene = "gamepad_skills_root",
+        customTemplate = "ZO_GamepadNewAnimatingMenuEntryTemplate",
+        name = GetString(SI_MAIN_MENU_SKILLS),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_skills.dds",
+        canLevel = function()
+            return GetAvailableSkillPoints() > 0
+        end,
+        isNewCallback =  function()
+            local CHECK_ABILITIES_IN_SKILL_LINES = true
+            return NEW_SKILL_CALLOUTS and NEW_SKILL_CALLOUTS:AreAnySkillLinesNew(CHECK_ABILITIES_IN_SKILL_LINES)
+        end,
+    },
+    [MENU_MAIN_ENTRIES.CHAMPION] =
+    {
+        scene = "gamepad_championPerks_root",
+        name = GetString(SI_MAIN_MENU_CHAMPION),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_champion.dds",
+        isNewCallback = function()
+            if CHAMPION_PERKS then
+                return CHAMPION_PERKS:IsChampionSystemNew()
+            end
+        end,
+        isVisibleCallback = function()
+            return IsChampionSystemUnlocked()
+        end,
+        canLevel = function()
+            if CHAMPION_PERKS then
+                return CHAMPION_PERKS:HasAnySpendableUnspentPoints()
+            end
+        end,
+    },
+    [MENU_MAIN_ENTRIES.CAMPAIGN] =
+    {
+        scene = "gamepad_campaign_root",
+        name = GetString(SI_PLAYER_MENU_CAMPAIGNS),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_allianceWar.dds",
+        isNewCallback = function()
+            local tutorialId = GetTutorialId(TUTORIAL_TRIGGER_CAMPAIGN_BROWSER_OPENED)
+            if CanTutorialBeSeen(tutorialId) then
+                return not HasSeenTutorial(tutorialId)
+            end
+            return false
+        end,
+        isVisibleCallback = function()
+            local currentLevel = GetUnitLevel("player")
+            return currentLevel >= GetMinLevelForCampaignTutorial()
+        end,
+    },
+    [MENU_MAIN_ENTRIES.JOURNAL] =
+    {
+        customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
+        name = GetString(SI_MAIN_MENU_JOURNAL),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_journal.dds",
+        subMenu =
         {
-            customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
-            name = GetString(SI_MAIN_MENU_SOCIAL),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_multiplayer.dds",
-            isNewCallback =
-                function()
+            [MENU_JOURNAL_ENTRIES.QUESTS] =
+            {
+                scene = "gamepad_quest_journal",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_QUESTS),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quests.dds",
+                header = GetString(SI_MAIN_MENU_JOURNAL),
+            },
+            [MENU_JOURNAL_ENTRIES.CADWELLS_JOURNAL] =
+            {
+                scene = "cadwellGamepad",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_CADWELL),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_cadwell.dds",
+                isVisibleCallback = function()
+                    return GetCadwellProgressionLevel() > CADWELL_PROGRESSION_LEVEL_BRONZE
+                end,
+            },
+            [MENU_JOURNAL_ENTRIES.LORE_LIBRARY] =
+            {
+                scene = "loreLibraryGamepad",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_LORE_LIBRARAY),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_loreLibrary.dds",
+            },
+            [MENU_JOURNAL_ENTRIES.ACHIEVEMENTS] =
+            {
+                scene = "achievementsGamepad",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_ACHIEVEMENTS),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_achievements.dds",
+            },
+            [MENU_JOURNAL_ENTRIES.LEADERBOARDS] =
+            {
+                scene = "gamepad_leaderboards",
+                name = GetString(SI_JOURNAL_MENU_LEADERBOARDS),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_leaderBoards.dds",
+            },
+        }
+    },
+    [MENU_MAIN_ENTRIES.SOCIAL] =
+    {
+        customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
+        name = GetString(SI_MAIN_MENU_SOCIAL),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_multiplayer.dds",
+        isNewCallback = function()
+            return HasUnreadMail()
+        end,
+        subMenu =
+        {
+            [MENU_SOCIAL_ENTRIES.VOICE_CHAT] =
+            {
+                scene = "gamepad_voice_chat",
+                name = GetString(SI_MAIN_MENU_GAMEPAD_VOICECHAT),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_communications.dds",
+                header = GetString(SI_MAIN_MENU_SOCIAL),
+                isVisibleCallback = IsConsoleUI
+            },
+            [MENU_SOCIAL_ENTRIES.TEXT_CHAT] =
+            {
+                scene = "gamepadChatMenu",
+                name = GetString(SI_GAMEPAD_TEXT_CHAT),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_textChat.dds",
+                header = not IsConsoleUI() and GetString(SI_MAIN_MENU_SOCIAL) or nil,
+                isVisibleCallback = IsChatSystemAvailableForCurrentPlatform
+            },
+            [MENU_SOCIAL_ENTRIES.EMOTES] =
+            {
+                scene = "gamepad_player_emote",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_EMOTES),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_emotes.dds",
+                header = (not IsConsoleUI() and not IsChatSystemAvailableForCurrentPlatform()) and GetString(SI_MAIN_MENU_SOCIAL) or nil,
+            },
+            [MENU_SOCIAL_ENTRIES.GROUP] =
+            {
+                scene = "gamepad_groupList",
+                name = GetString(SI_PLAYER_MENU_GROUP),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_groups.dds",
+            },
+            [MENU_SOCIAL_ENTRIES.GUILDS] =
+            {
+                scene = "gamepad_guild_hub",
+                name = GetString(SI_MAIN_MENU_GUILDS),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_guilds.dds",
+            },
+            [MENU_SOCIAL_ENTRIES.FRIENDS] =
+            {
+                scene = "gamepad_friends",
+                name = GetString(SI_GAMEPAD_CONTACTS_FRIENDS_LIST_TITLE),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_contacts.dds",
+            },
+            [MENU_SOCIAL_ENTRIES.IGNORED] =
+            {
+                scene = "gamepad_ignored",
+                name = GetString(SI_GAMEPAD_CONTACTS_IGNORED_LIST_TITLE),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_contacts.dds",
+                isVisibleCallback = function()
+                    return not IsConsoleUI()
+                end,
+            },
+            [MENU_SOCIAL_ENTRIES.MAIL] =
+            {
+                scene = "mailManagerGamepad",
+                name = GetString(SI_MAIN_MENU_MAIL),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_mail.dds",
+                isNewCallback = function()
                     return HasUnreadMail()
                 end,
-            subMenu =
-            {
-                [MENU_SOCIAL_ENTRIES.VOICE_CHAT] =
-                {
-                    scene = "gamepad_voice_chat",
-                    name = GetString(SI_MAIN_MENU_GAMEPAD_VOICECHAT),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_communications.dds",
-                    header = GetString(SI_MAIN_MENU_SOCIAL),
-                    isVisibleCallback = IsConsoleUI
-                },
-                [MENU_SOCIAL_ENTRIES.TEXT_CHAT] =
-                {
-                    scene = "gamepadChatMenu",
-                    name = GetString(SI_GAMEPAD_TEXT_CHAT),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_textChat.dds",
-                    header = not IsConsoleUI() and GetString(SI_MAIN_MENU_SOCIAL) or nil,
-                    isVisibleCallback = IsChatSystemAvailableForCurrentPlatform
-                },
-                [MENU_SOCIAL_ENTRIES.EMOTES] =
-                {
-                    scene = "gamepad_player_emote",
-                    name = GetString(SI_GAMEPAD_MAIN_MENU_EMOTES),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_emotes.dds",
-                    header = (not IsConsoleUI() and not IsChatSystemAvailableForCurrentPlatform()) and GetString(SI_MAIN_MENU_SOCIAL) or nil,
-                },
-                [MENU_SOCIAL_ENTRIES.GROUP] =
-                {
-                    scene = "gamepad_groupList",
-                    name = GetString(SI_PLAYER_MENU_GROUP),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_groups.dds",
-                },
-                [MENU_SOCIAL_ENTRIES.GUILDS] =
-                {
-                    scene = "gamepad_guild_hub",
-                    name = GetString(SI_MAIN_MENU_GUILDS),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_guilds.dds",
-                },
-                [MENU_SOCIAL_ENTRIES.FRIENDS] =
-                {
-                    scene = "gamepad_friends",
-                    name = GetString(SI_GAMEPAD_CONTACTS_FRIENDS_LIST_TITLE),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_contacts.dds",
-                },
-                [MENU_SOCIAL_ENTRIES.IGNORED] =
-                {
-                    scene = "gamepad_ignored",
-                    name = GetString(SI_GAMEPAD_CONTACTS_IGNORED_LIST_TITLE),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_contacts.dds",
-                    isVisibleCallback =
-                        function()
-                            return not IsConsoleUI()
-                        end,
-                },
-                [MENU_SOCIAL_ENTRIES.MAIL] =
-                {
-                    scene = "mailManagerGamepad",
-                    name = GetString(SI_MAIN_MENU_MAIL),
-                    icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_mail.dds",
-                    isNewCallback =
-                        function()
-                            return HasUnreadMail()
-                        end,
-                    disableWhenDead = true,
-                    disableWhenInCombat = true,
-                    disableWhenReviving = true,
-                },
-            }
-        },
-        [MENU_MAIN_ENTRIES.ACTIVITY_FINDER] =
-        {
-            scene = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME,
-            name = GetString(SI_MAIN_MENU_ACTIVITY_FINDER),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_activityFinder.dds",
-        },
-        [MENU_MAIN_ENTRIES.HELP] =
-        {
-            scene = "helpRootGamepad",
-            name = GetString(SI_MAIN_MENU_HELP),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_help.dds",
-        },
-        [MENU_MAIN_ENTRIES.OPTIONS] =
-        {
-            scene = "gamepad_options_root",
-            name = GetString(SI_GAMEPAD_OPTIONS_MENU),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_settings.dds",
-        },
-        [MENU_MAIN_ENTRIES.LOG_OUT] =
-        {
-            name = GetString(SI_GAME_MENU_LOGOUT),
-            icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_logout.dds",
-            activatedCallback =
-                function()
-                    ZO_Dialogs_ShowPlatformDialog("LOG_OUT")
-                end,
-        },
-    }
-
-    CATEGORY_TO_ENTRY_DATA =
+                disableWhenDead = true,
+                disableWhenInCombat = true,
+                disableWhenReviving = true,
+            },
+        }
+    },
+    [MENU_MAIN_ENTRIES.ACTIVITY_FINDER] =
     {
-        [MENU_CATEGORY_NOTIFICATIONS]   = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.NOTIFICATIONS],
-        [MENU_CATEGORY_MARKET]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.MARKET],
-        [MENU_CATEGORY_CROWN_CRATES]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_CRATES],
-        [MENU_CATEGORY_COLLECTIONS]     = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.COLLECTIONS],
-        [MENU_CATEGORY_INVENTORY]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.INVENTORY],
-        [MENU_CATEGORY_CHARACTER]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CHARACTER],
-        [MENU_CATEGORY_SKILLS]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SKILLS],
-        [MENU_CATEGORY_CHAMPION]        = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CHAMPION],
-        [MENU_CATEGORY_ALLIANCE_WAR]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CAMPAIGN],
-        [MENU_CATEGORY_JOURNAL]         = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.JOURNAL].subMenu[MENU_JOURNAL_ENTRIES.QUESTS],
-        [MENU_CATEGORY_GROUP]           = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.GROUP],
-        [MENU_CATEGORY_CONTACTS]        = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.FRIENDS],
-        [MENU_CATEGORY_GUILDS]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.GUILDS],
-        [MENU_CATEGORY_MAIL]            = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.MAIL],
-        [MENU_CATEGORY_ACTIVITY_FINDER] = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.ACTIVITY_FINDER],
-        [MENU_CATEGORY_HELP]            = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.HELP],
-        [MENU_CATEGORY_MAP]             = { scene = "gamepad_worldMap" }, --no gamepad menu entry for world map
-    }
+        scene = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME,
+        name = GetString(SI_MAIN_MENU_ACTIVITY_FINDER),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_activityFinder.dds",
+    },
+    [MENU_MAIN_ENTRIES.HELP] =
+    {
+        scene = "helpRootGamepad",
+        name = GetString(SI_MAIN_MENU_HELP),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_help.dds",
+    },
+    [MENU_MAIN_ENTRIES.OPTIONS] =
+    {
+        scene = "gamepad_options_root",
+        name = GetString(SI_GAMEPAD_OPTIONS_MENU),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_settings.dds",
+    },
+    [MENU_MAIN_ENTRIES.LOG_OUT] =
+    {
+        name = GetString(SI_GAME_MENU_LOGOUT),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_logout.dds",
+        activatedCallback = function()
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT")
+        end,
+    },
+}
 
-    local function CreateEntry(data)
-        local name = data.name
-        if type(name) == "function" then
-            name = "" --will be updated whenever the list is generated
-        end
+CATEGORY_TO_ENTRY_DATA =
+{
+    [MENU_CATEGORY_NOTIFICATIONS]   = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.NOTIFICATIONS],
+    [MENU_CATEGORY_MARKET]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_STORE],
+    [MENU_CATEGORY_CROWN_CRATES]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_CRATES],
+    [MENU_CATEGORY_GIFT_INVENTORY]  = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.GIFT_INVENTORY],
+    [MENU_CATEGORY_COLLECTIONS]     = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.COLLECTIONS],
+    [MENU_CATEGORY_INVENTORY]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.INVENTORY],
+    [MENU_CATEGORY_CHARACTER]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CHARACTER],
+    [MENU_CATEGORY_SKILLS]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SKILLS],
+    [MENU_CATEGORY_CHAMPION]        = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CHAMPION],
+    [MENU_CATEGORY_ALLIANCE_WAR]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CAMPAIGN],
+    [MENU_CATEGORY_JOURNAL]         = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.JOURNAL].subMenu[MENU_JOURNAL_ENTRIES.QUESTS],
+    [MENU_CATEGORY_GROUP]           = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.GROUP],
+    [MENU_CATEGORY_CONTACTS]        = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.FRIENDS],
+    [MENU_CATEGORY_GUILDS]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.GUILDS],
+    [MENU_CATEGORY_MAIL]            = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.SOCIAL].subMenu[MENU_SOCIAL_ENTRIES.MAIL],
+    [MENU_CATEGORY_ACTIVITY_FINDER] = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.ACTIVITY_FINDER],
+    [MENU_CATEGORY_HELP]            = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.HELP],
+    [MENU_CATEGORY_MAP]             = { scene = "gamepad_worldMap" }, --no gamepad menu entry for world map
+}
 
-        local entry = ZO_GamepadEntryData:New(name, data.icon, nil, nil, data.isNewCallback)
-        entry:SetIconTintOnSelection(true)
-        entry:SetIconDisabledTintOnSelection(true)
-
-        local header = data.header
-        if header then
-            entry:SetHeader(header)
-        end
-
-        entry.canLevel = data.canLevel
-
-        entry.data = data
-        return entry
+local function CreateEntry(data)
+    local name = data.name
+    if type(name) == "function" then
+        name = "" --will be updated whenever the list is generated
     end
 
-    for _, data in ipairs(MENU_ENTRY_DATA) do
-        local newEntry = CreateEntry(data)
+    local entry = ZO_GamepadEntryData:New(name, data.icon, nil, nil, data.isNewCallback)
+    entry:SetIconTintOnSelection(true)
+    entry:SetIconDisabledTintOnSelection(true)
 
-        if data.subMenu then
-            newEntry.subMenu = {}
-            for _, subMenuData in ipairs(data.subMenu) do
-                local newSubMenuEntry = CreateEntry(subMenuData)
-                table.insert(newEntry.subMenu, newSubMenuEntry)
-            end
-        end
-
-        table.insert(MENU_ENTRIES, newEntry)
+    local header = data.header
+    if header then
+        entry:SetHeader(header)
     end
+
+    entry.canLevel = data.canLevel
+
+    entry.data = data
+    return entry
+end
+
+for menuEntryId, data in ipairs(MENU_ENTRY_DATA) do
+    local newEntry = CreateEntry(data)
+
+    newEntry.id = menuEntryId
+    if data.subMenu then
+        newEntry.subMenu = {}
+        for submenuEntryId, subMenuData in ipairs(data.subMenu) do
+            local newSubMenuEntry = CreateEntry(subMenuData)
+            newSubMenuEntry.id = submenuEntryId
+            table.insert(newEntry.subMenu, newSubMenuEntry)
+        end
+    end
+
+    table.insert(MENU_ENTRIES, newEntry)
 end
 
 local MODE_MAIN_LIST = 1
@@ -432,6 +477,7 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
     end)
     MAIN_MENU_MANAGER:RegisterCallback("OnPlayerStateUpdate", function() self:UpdateEntryEnabledStates() end)
+    control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, function() self:UpdateEntryEnabledStates() end)
 end
 
 function ZO_MainMenuManager_Gamepad:OnShowing()
@@ -443,6 +489,7 @@ end
 
 function ZO_MainMenuManager_Gamepad:OnHiding()
     self.mode = MODE_MAIN_LIST
+    self:DeactivateHelperPanel()
 end
 
 do
@@ -481,52 +528,60 @@ do
             end
         end
     end
-    
+
     local function EntryWithSubMenuSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    
+
         local color = data:GetNameColor(selected)
         if type(color) == "function" then
             color = color(data)
         end
         control:GetNamedChild("Arrow"):SetColor(color:UnpackRGBA())
     end
-    
+
     local function CrownStoreEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    
+
         local balanceLabel = control:GetNamedChild("Balance")
         balanceLabel:SetText(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE))
-    
+
         local remainingCrownsLabel = control:GetNamedChild("RemainingCrowns")
-        local currencyString = ZO_CommaDelimitNumber(GetPlayerCrowns())
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(GetPlayerCrowns()))
         remainingCrownsLabel:SetText(currencyString)
+
+        local color = data:GetNameColor(selected)
+        if type(color) == "function" then
+            color = color(data)
+        end
+        control:GetNamedChild("Arrow"):SetColor(color:UnpackRGBA())
     end
-    
+
     function ZO_MainMenuManager_Gamepad:SetupList(list)
         list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    
+
         list:AddDataTemplate("ZO_GamepadMenuEntryTemplateWithArrow", EntryWithSubMenuSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplateWithArrow", EntryWithSubMenuSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    
+
         list:AddDataTemplate("ZO_GamepadNewAnimatingMenuEntryTemplate", AnimatingLabelEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    
-        list:AddDataTemplateWithHeader("ZO_GamepadMenuCrownStoreEntryTemplate", CrownStoreEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadCrownStoreMenuEntryHeaderTemplate")
+
         list:AddDataTemplate("ZO_GamepadMenuCrownStoreEntryTemplate", CrownStoreEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadMenuCrownStoreEntryTemplate", CrownStoreEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadCrownStoreMenuEntryHeaderTemplate")
     end
 end
 
 local function ShouldDisableEntry(entryData)
-    if MAIN_MENU_MANAGER:IsPlayerDead() and entryData.disableWhenDead then
+    if entryData.disableWhenDead and MAIN_MENU_MANAGER:IsPlayerDead() then
         return true
-    elseif MAIN_MENU_MANAGER:IsPlayerInCombat() and entryData.disableWhenInCombat then
+    elseif entryData.disableWhenInCombat and MAIN_MENU_MANAGER:IsPlayerInCombat() then
         return true
-    elseif MAIN_MENU_MANAGER:IsPlayerReviving() and entryData.disableWhenReviving then
+    elseif entryData.disableWhenReviving and MAIN_MENU_MANAGER:IsPlayerReviving() then
         return true
-    elseif MAIN_MENU_MANAGER:IsPlayerSwimming() and entryData.disableWhenSwimming then
+    elseif entryData.disableWhenSwimming and MAIN_MENU_MANAGER:IsPlayerSwimming() then
         return true
-    elseif MAIN_MENU_MANAGER:IsPlayerWerewolf() and entryData.disableWhenWerewolf then
+    elseif entryData.disableWhenWerewolf and MAIN_MENU_MANAGER:IsPlayerWerewolf() then
+        return true
+    elseif entryData.shouldDisableFunction and entryData.shouldDisableFunction() then
         return true
     end
 
@@ -583,11 +638,18 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
         end
     end
 
+    self.exitHelperPanelFunction = function()
+        self:DeactivateHelperPanel()
+    end
+
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", MarkNewnessDirty)
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_LEVEL_UPDATE, MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_MAIL_NUM_UNREAD_CHANGED, MarkNewnessDirty)
     MAIN_MENU_MANAGER:RegisterCallback("OnBlockingSceneCleared", OnBlockingSceneCleared)
+    GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", MarkNewnessDirty)
+    EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, MarkNewnessDirty)
+    EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_DAILY_LOGIN_REWARDS_CLAIMED, MarkNewnessDirty)
 
     self:UpdateEntryEnabledStates()
 end
@@ -640,7 +702,7 @@ function ZO_MainMenuManager_Gamepad:SwitchToSelectedScene(list)
             list:SetActive(false)
             SCENE_MANAGER:Push("playerSubmenu")
         elseif activatedCallback then
-            activatedCallback()
+            activatedCallback(self)
         end
 
     else
@@ -652,64 +714,118 @@ function ZO_MainMenuManager_Gamepad:Exit()
     SCENE_MANAGER:Hide("mainMenuGamepad")
 end
 
-local function AddEntryToList(list, entry)
-    local entryData = entry.data
+do
+    local DEFAULT_MENU_ENTRY_SCENE_NAME = "gamepad_inventory_root"
 
-    if not entryData.isVisibleCallback or entryData.isVisibleCallback() then
-        local customTemplate = entryData.customTemplate
-        local postPadding = entryData.postPadding or 0
-        local entryTemplate = customTemplate and customTemplate or "ZO_GamepadNewMenuEntryTemplate"
+    local function AddEntryToList(list, entry, menuEntryToEntryIndex)
+        local entryData = entry.data
+
+        if not entryData.isVisibleCallback or entryData.isVisibleCallback() then
+            local customTemplate = entryData.customTemplate
+            local postPadding = entryData.postPadding or 0
+            local entryTemplate = customTemplate and customTemplate or "ZO_GamepadNewMenuEntryTemplate"
        
-        local showHeader = entryData.showHeader
-        local useHeader = entry.header
-        if type(showHeader) == "function" then
-            useHeader = showHeader()
-        elseif type(showHeader) == "boolean" then
-            useHeader = showHeader
-        end
+            local showHeader = entryData.showHeader
+            local useHeader = entry.header
+            if type(showHeader) == "function" then
+                useHeader = showHeader()
+            elseif type(showHeader) == "boolean" then
+                useHeader = showHeader
+            end
 
-        local name = entryData.name
-        if type(name) == "function" then
-            entry:SetText(name())
-        end
+            local name = entryData.name
+            if type(name) == "function" then
+                entry:SetText(name())
+            end
 
-        if useHeader then
-            list:AddEntryWithHeader(entryTemplate, entry, 0, postPadding)
+            if useHeader then
+                list:AddEntryWithHeader(entryTemplate, entry, 0, postPadding)
+            else
+                list:AddEntry(entryTemplate, entry, 0, postPadding)
+            end
+            menuEntryToEntryIndex[entry.id] = list:GetNumEntries()
+
+            return true
+        end
+        return false
+    end
+
+    function ZO_MainMenuManager_Gamepad:RefreshMainList()
+        self.mainList:Clear()
+
+        self.mainMenuEntryToListIndex = {}
+        -- if we haven't yet initialized, set the default selection
+        -- we only need to default the first time the Player Menu is shown
+        -- so as soon as we init, we don't need to update this any more
+        if self.initialized then
+            for _, entry in ipairs(MENU_ENTRIES) do
+                AddEntryToList(self.mainList, entry, self.mainMenuEntryToListIndex)
+            end
         else
-            list:AddEntry(entryTemplate, entry, 0, postPadding)
+            --The entry we want to start on may not be at the top, and its index can be variable since entries are contextually visible
+            local currentMenuIndex = 0
+            local defaultEntryIndex = 1
+            for _, entry in ipairs(MENU_ENTRIES) do
+                if AddEntryToList(self.mainList, entry, self.mainMenuEntryToListIndex) then
+                    currentMenuIndex = currentMenuIndex + 1
+                    if entry.data.scene == DEFAULT_MENU_ENTRY_SCENE_NAME then
+                        defaultEntryIndex = currentMenuIndex
+                    end
+                end
+            end
+
+            self.mainList:SetDefaultSelectedIndex(defaultEntryIndex)
+        end
+
+        self.mainList:Commit()
+    end
+
+    function ZO_MainMenuManager_Gamepad:RefreshSubList(mainListEntry)
+        self.subList:Clear()
+        self.subMenuEntryToListIndex = {}
+
+        if mainListEntry and mainListEntry.subMenu then
+            for _, entry in ipairs(mainListEntry.subMenu) do
+                AddEntryToList(self.subList, entry, self.subMenuEntryToListIndex)
+            end
+        end
+
+        self.subList:Commit()
+    end
+end
+
+function ZO_MainMenuManager_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+    if list == self.subList then
+        if oldSelectedData and oldSelectedData.data.fragmentGroupCallback then
+            local fragmentGroup = oldSelectedData.data.fragmentGroupCallback()
+            SCENE_MANAGER:RemoveFragmentGroup(fragmentGroup)
+        end
+
+        if selectedData and selectedData.data.fragmentGroupCallback then
+            local fragmentGroup = selectedData.data.fragmentGroupCallback()
+            SCENE_MANAGER:AddFragmentGroup(fragmentGroup)
         end
     end
 end
 
-function ZO_MainMenuManager_Gamepad:RefreshMainList()
-    self.mainList:Clear()
-
-    for _, entry in ipairs(MENU_ENTRIES) do
-        AddEntryToList(self.mainList, entry)
-    end
-
-    -- if we haven't yet initialized, set the default selection to be the inventory
-    -- we only need to default to inventory the first time the Player Menu is shown
-    -- so as soon as we init, we don't need to update this any more
-    if not self.initialized then
-        -- notifications will appear at the top of the list if there are any available
-        local INVENTORY_LIST_INDEX = GAMEPAD_NOTIFICATIONS:GetNumNotifications() == 0 and 4 or 5 -- 4 and 5 correspond to collections and inventory, respectively 
-        self.mainList:SetDefaultSelectedIndex(INVENTORY_LIST_INDEX)
-    end
-
-    self.mainList:Commit()
+function ZO_MainMenuManager_Gamepad:ActivateHelperPanel(panel)
+    self:DeactivateCurrentList()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self.activeHelperPanel = panel
+    panel:RegisterCallback("PanelSelectionEnd", self.exitHelperPanelFunction)
+    panel:Activate()
 end
 
-function ZO_MainMenuManager_Gamepad:RefreshSubList(mainListEntry)
-    self.subList:Clear()
-
-    if mainListEntry and mainListEntry.subMenu then
-        for _, entry in ipairs(mainListEntry.subMenu) do
-            AddEntryToList(self.subList, entry)
+function ZO_MainMenuManager_Gamepad:DeactivateHelperPanel()
+    if self.activeHelperPanel then
+        self.activeHelperPanel:Deactivate()
+        if self:IsShowing() then
+            self:ActivateCurrentList()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         end
+        self.activeHelperPanel:UnregisterCallback("PanelSelectionEnd", self.exitHelperPanelFunction)
+        self.activeHelperPanel = nil
     end
-
-    self.subList:Commit()
 end
 
 function ZO_MainMenuManager_Gamepad:IsShowing()
@@ -731,6 +847,12 @@ function ZO_MainMenuManager_Gamepad:OnNumNotificationsChanged(numNotifications)
 end
 
 function ZO_MainMenuManager_Gamepad:IsEntrySceneShowing(entryData)
+    if entryData.sceneGroup then
+        if SCENE_MANAGER:IsSceneGroupShowing(entryData.sceneGroup) then
+            return true
+        end
+    end
+
     if entryData.additionalScenes then
         for _, scene in ipairs(entryData.additionalScenes) do
             if SCENE_MANAGER:IsShowing(scene) then
@@ -792,6 +914,14 @@ function ZO_MainMenuManager_Gamepad:AttemptShowBaseScene()
     else
         SCENE_MANAGER:ShowBaseScene()
     end
+end
+
+function ZO_MainMenuManager_Gamepad:ShowDailyLoginRewardsEntry()
+    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.CROWN_STORE])
+    local entry = self.mainList:GetTargetData()
+    self:RefreshSubList(entry)
+    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS])
+    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu")
 end
 
 function ZO_MainMenu_Gamepad_OnInitialized(self)

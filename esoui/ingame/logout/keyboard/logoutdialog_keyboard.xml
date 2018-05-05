@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Logout_Exit_Dialog_Base" inherits="ZO_CustomDialogBase" virtual="true">
+            <Controls>
+                <Label name="$(parent)MainText" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+
+                <Texture name="$(parent)TileDivider" inherits="ZO_DialogDivider">
+                    <Anchor point="TOP" relativeTo="$(parent)MainText" relativePoint="BOTTOM" offsetY="20" />
+                </Texture>
+
+                <Control name="$(parent)DailyRewardTile" inherits="ZO_DailyRewardsTile_Keyboard_Control">
+                    <Anchor point="TOP" relativeTo="$(parent)TileDivider" relativePoint="BOTTOM" offsetY="10" />
+                </Control>
+            </Controls>
+        </Control>
+        
+		<TopLevelControl name="ZO_LogoutDialog_Keyboard" inherits="ZO_Logout_Exit_Dialog_Base" hidden="true">
+            <OnInitialized>
+                ZO_LogoutDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)MainText" text="SI_LOG_OUT_DIALOG" override="true" />
+            </Controls>
+        </TopLevelControl>
+	</Controls>
+</GuiXml>

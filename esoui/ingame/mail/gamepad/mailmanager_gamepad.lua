@@ -43,7 +43,7 @@ local function SetupMoney(control, codFee, attachedMoney)
         control.moneyNone:SetHidden(true)
 
     elseif hasCod then
-        local notEnoughMoney = (not control.outbox) and (codFee > GetCarriedCurrencyAmount(CURT_MONEY))
+        local notEnoughMoney = (not control.outbox) and (codFee > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
             
         ZO_CurrencyControl_SetSimpleCurrency(control.moneyValue, CURT_MONEY, codFee, control.codMoneyOptions, nil, notEnoughMoney)
 
@@ -75,11 +75,11 @@ local function SetupEmptyAttachmentIcon(icon)
 end
 
 local function CreateAttachmentSlot(parent, previous, index, emptyAttachmentSlotIcon)
-    local PADDING = 0
+    local PADDING = 8
 
     local newControl = CreateControlFromVirtual("$(parent)AttachmentSlot", parent, "ZO_MailAttachmentSlot_Gamepad", index)
-    newControl:SetAnchor(TOPLEFT, previous, TOPRIGHT, 0, PADDING)
-    newControl:SetAnchor(BOTTOMLEFT, previous, BOTTOMRIGHT, 0, PADDING)
+    newControl:SetAnchor(TOPLEFT, previous, TOPRIGHT, PADDING, 0)
+    newControl:SetAnchor(BOTTOMLEFT, previous, BOTTOMRIGHT, PADDING, 0)
 
     newControl.index = index
     newControl.icon = newControl:GetNamedChild("Icon")
@@ -316,10 +316,15 @@ function MailManager_Gamepad:ShowTab(tabIndex, pushScene)
     end
 end
 
-function MailManager_Gamepad:SwitchToHeader(headerData)
+function MailManager_Gamepad:SwitchToHeader(headerData, tabIndex)
     self.activeHeader = headerData
     if headerData then
         ZO_GamepadGenericHeader_Refresh(self.header, headerData)
+
+        if tabIndex ~= nil then
+            ZO_GamepadGenericHeader_SetActiveTabIndex(self.header, tabIndex)
+        end
+
         if headerData.tabBarEntries then
             ZO_GamepadGenericHeader_Activate(self.header)
         else

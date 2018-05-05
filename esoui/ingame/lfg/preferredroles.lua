@@ -140,10 +140,8 @@ function ZO_PreferredRolesButton_OnClicked(buttonControl, mouseButton)
     local role = buttonControl.role
 
     local toggleCheckOn = buttonState == BSTATE_NORMAL
-    if toggleCheckOn or PREFERRED_ROLES:GetSelectedRoleCount() > 1 then --enforce having at least one role selected
-        ZO_CheckButton_SetCheckState(buttonControl, toggleCheckOn)
-        PREFERRED_ROLES:SetRoleToggled(role, toggleCheckOn, USER_REQUESTED)
-    end
+    ZO_CheckButton_SetCheckState(buttonControl, toggleCheckOn)
+    PREFERRED_ROLES:SetRoleToggled(role, toggleCheckOn, USER_REQUESTED)
 end
 
 do

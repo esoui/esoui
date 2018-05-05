@@ -1,4 +1,6 @@
-ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING = 20
+local MAX_ITEM_REWARDS = 3
+ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_X = 20
+ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_Y = 10
 
 ------------------
 --Initialization--
@@ -38,7 +40,7 @@ end
 
 function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateLocationData", function() self:RefreshView() end)
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function() self:OnActivityFinderStatusUpdate() end)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function(status) self:OnActivityFinderStatusUpdate(status) end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnHandleLFMPromptResponse", function() self:OnHandleLFMPromptResponse() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", function() self:RefreshFilters() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnCooldownsUpdate", function() self:OnCooldownsUpdate() end)
@@ -56,19 +58,19 @@ function ZO_ActivityFinderTemplate_Shared:InitializeSingularPanelControls(reward
     self.rewardsHeader = rewardsSection:GetNamedChild("Header")
     local rewardsEntries = rewardsSection:GetNamedChild("Entries")
     self.rewardEntryPaddingControl = rewardsEntries:GetNamedChild("Padding")
-    local itemRewardControl = rewardsEntries:GetNamedChild("ItemReward")
-    local xpRewardControl = rewardsEntries:GetNamedChild("XPReward")
+    self.itemRewardControls = {}
+    for i = 1, MAX_ITEM_REWARDS do
+        local itemRewardControl = CreateControlFromVirtual("$(parent)ItemReward" .. i, rewardsEntries, "ZO_ActivityFinderTemplateRewardTemplate_Shared")
+        ApplyTemplateToControl(itemRewardControl, rewardsTemplate)
+        table.insert(self.itemRewardControls, itemRewardControl)
+    end
 
-    ApplyTemplateToControl(itemRewardControl, rewardsTemplate)
-    ApplyTemplateToControl(xpRewardControl, rewardsTemplate)
-    self.itemRewardLabel = itemRewardControl:GetNamedChild("Text")
-    self.itemRewardIcon = itemRewardControl:GetNamedChild("Icon")
+    local xpRewardControl = rewardsEntries:GetNamedChild("XPReward")
     self.xpRewardLabel = xpRewardControl:GetNamedChild("Text")
-    self.xpRewardIcon = xpRewardControl:GetNamedChild("Icon")
-    self.xpRewardLabel:SetText(zo_strformat(SI_ACTIVITY_FINDER_RANDOM_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(0))) --TODO: Implement XP reward hook
-    self.itemRewardControl = itemRewardControl
+    ApplyTemplateToControl(xpRewardControl, rewardsTemplate)
     self.xpRewardControl = xpRewardControl
 
+    self.rewardsSection = rewardsSection
     self.singularSection = panel
 end
 
@@ -80,7 +82,7 @@ function ZO_ActivityFinderTemplate_Shared:RefreshFilters()
     assert(false) --Must override
 end
 
-function ZO_ActivityFinderTemplate_Shared:OnActivityFinderStatusUpdate()
+function ZO_ActivityFinderTemplate_Shared:OnActivityFinderStatusUpdate(status)
     assert(false) --Must override
 end
 
@@ -93,52 +95,94 @@ function ZO_ActivityFinderTemplate_Shared:OnCooldownsUpdate()
 end
 
 do
-    local ITEM_REWARD_COLOR_MAP =
-    {
-        [LFG_ITEM_REWARD_TYPE_STANDARD] = GetItemQualityColor(ITEM_QUALITY_MAGIC),
-        [LFG_ITEM_REWARD_TYPE_DAILY] = GetItemQualityColor(ITEM_QUALITY_ARCANE),
-    }
+    local DAILY_HEADER = GetString(SI_ACTIVITY_FINDER_DAILY_REWARD_HEADER)
+    local STANDARD_HEADER = GetString(SI_ACTIVITY_FINDER_STANDARD_REWARD_HEADER)
 
-    local DAILY_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_DAILY_REWARD_HEADER)
-    local STANDARD_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_STANDARD_REWARD_HEADER)
+    local g_previousControl = nil
+    local g_nextControlOnSameLine = false
 
-    function ZO_ActivityFinderTemplate_Shared:RefreshRewards(currentSelectionIsRandom, activityType)
-        local hideItemReward = true
-        local hideXPReward = true
-        if currentSelectionIsRandom then
-            local itemRewardType, xpReward = GetLFGActivityRewardData(activityType)
-            if itemRewardType ~= LFG_ITEM_REWARD_TYPE_NONE then
-                self.itemRewardLabel:SetText(GetString("SI_LFGITEMREWARDTYPE", itemRewardType))
-                self.itemRewardLabel:SetColor(ITEM_REWARD_COLOR_MAP[itemRewardType]:UnpackRGBA())
-                hideItemReward = false
+    local function AnchorRewardControl(rewardControl)
+        rewardControl:ClearAnchors()
+        if g_previousControl then
+            if g_nextControlOnSameLine then
+                rewardControl:SetAnchor(LEFT, g_previousControl, RIGHT, ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_X, 0)
+            else
+                rewardControl:SetAnchor(TOPLEFT, g_previousControl, BOTTOMLEFT, 0, ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING_Y)
+            end
+        else
+            rewardControl:SetAnchor(TOPLEFT)
+        end
+
+        g_nextControlOnSameLine = not g_nextControlOnSameLine
+        if g_nextControlOnSameLine then
+            g_previousControl = rewardControl
+        end
+    end
+
+    local g_rewardControlsToAnchor = {}
+
+    function ZO_ActivityFinderTemplate_Shared:RefreshRewards(location)
+        local currentSelectionHasRewardsData = location:HasRewardData()
+        local hideRewards = true
+        local description = ""
+        if currentSelectionHasRewardsData then
+            local rewardUIDataId, xpReward = location:GetRewardData()
+            ZO_ClearNumericallyIndexedTable(g_rewardControlsToAnchor)
+
+            local numShownItemRewardNodes = 0
+            if rewardUIDataId ~= 0 then
+                numShownItemRewardNodes = GetNumLFGActivityRewardUINodes(rewardUIDataId)
+
+                assert(numShownItemRewardNodes <= MAX_ITEM_REWARDS) --If we've allowed for more nodes in the def, we haven't accounted for it in the UI
+
+                for nodeIndex = 1, numShownItemRewardNodes do
+                    local displayName, icon, textColorRed, textColorBlue, textColorGreen = GetLFGActivityRewardUINodeInfo(rewardUIDataId, nodeIndex)
+
+                    local itemRewardControl = self.itemRewardControls[nodeIndex]
+                    itemRewardControl.icon:SetTexture(icon)
+                    itemRewardControl.text:SetText(displayName)
+                    itemRewardControl.text:SetColor(textColorRed, textColorBlue, textColorGreen)
+                    itemRewardControl:SetHidden(false)
+                    table.insert(g_rewardControlsToAnchor, itemRewardControl)
+                    hideRewards = false
+                end
+
+                description = GetLFGActivityRewardDescriptionOverride(rewardUIDataId)
+            end
+
+            for nodeIndex = numShownItemRewardNodes + 1, MAX_ITEM_REWARDS do
+                self.itemRewardControls[nodeIndex]:SetHidden(true)
             end
 
             if xpReward > 0 then
-                self.xpRewardLabel:SetText(zo_strformat(SI_ACTIVITY_FINDER_RANDOM_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(xpReward)))
-                hideXPReward = false
+                self.xpRewardLabel:SetText(zo_strformat(SI_ACTIVITY_FINDER_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(xpReward)))
+                self.xpRewardControl:SetHidden(false)
+                local xpIndex = #g_rewardControlsToAnchor > 0 and 2 or 1 -- Design always wants XP to be the second thing in the left-to right/top to bottom grid (unless it's the only thing)
+                table.insert(g_rewardControlsToAnchor, xpIndex, self.xpRewardControl)
+                hideRewards = false
+            else
+                self.xpRewardControl:SetHidden(true)
+            end
+            
+            g_previousControl = nil
+            g_nextControlOnSameLine = false
+            for _, control in ipairs(g_rewardControlsToAnchor) do
+                AnchorRewardControl(control)
             end
         end
 
-        self.itemRewardLabel:SetHidden(hideItemReward)
-        self.itemRewardIcon:SetHidden(hideItemReward)
-        self.rewardEntryPaddingControl:SetWidth(hideItemReward and 0 or ZO_ACTIVITY_FINDER_REWARD_ENTRY_PADDING)
-        self.xpRewardLabel:SetHidden(hideXPReward)
-        self.xpRewardIcon:SetHidden(hideXPReward)
-        if hideItemReward and hideXpReward then
-            self.rewardsHeader:SetHidden(true)
-        else
-            self.rewardsHeader:SetText(IsEligibleForDailyActivityReward() and DAILY_HEADER or STANDARD_HEADER)
-            self.rewardsHeader:SetHidden(false)
+        if description == "" then
+            description = location:GetDescription()
         end
-        self.rewardsHeader:SetHidden(hideItemReward and hideXPReward)
-    end
-end
 
-function ZO_ActivityFinderTemplate_Shared.SetGroupSizeRangeText(labelControl, entryData, groupIconFormat)
-    if entryData.minGroupSize ~= entryData.maxGroupSize then
-        labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_RANGE_FORMAT, entryData.minGroupSize, entryData.maxGroupSize, groupIconFormat))
-    else
-        labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_SIMPLE_FORMAT, entryData.minGroupSize, groupIconFormat))
+        self.descriptionLabel:SetText(description)
+
+        if hideRewards then
+            self.rewardsSection:SetHidden(true)
+        else
+            self.rewardsHeader:SetText(location:IsEligibleForDailyReward() and DAILY_HEADER or STANDARD_HEADER)
+            self.rewardsSection:SetHidden(false)
+        end
     end
 end
 
@@ -146,11 +190,12 @@ function ZO_ActivityFinderTemplate_Shared:GetLFMPromptInfo()
     local shouldShowLFMPrompt = false
     local lfmPromptActivityName
     if CanSendLFMRequest() then
-        local activityType, activityIndex = GetCurrentLFGActivity()
+        local activityId = GetCurrentLFGActivityId()
+        local activityType = GetActivityType(activityId)
         local modes = self.dataManager:GetFilterModeData()
         if ZO_IsElementInNumericallyIndexedTable(modes:GetActivityTypes(), activityType) then
             shouldShowLFMPrompt = true
-            lfmPromptActivityName = GetLFGOption(activityType, activityIndex)
+            lfmPromptActivityName = GetActivityName(activityId)
         end
     end
     return shouldShowLFMPrompt, lfmPromptActivityName
@@ -158,34 +203,57 @@ end
 
 function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfoByActivity(activityType)
     local isLevelLocked = false
-    local lowestLevelLimit, lowestChampionPointLimit
+    local lowestLevelLimit, highestLevelLimit, lowestChampionPointLimit, highestChampionPointLimit
 
     local maxLevel = GetMaxLevel()
 
     local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
     for _, location in ipairs(locationData) do
-        if location.levelMin == maxLevel then --This is a veteran activity
-            if not lowestChampionPointLimit or location.championPointsMin < lowestChampionPointLimit then
-                lowestChampionPointLimit = location.championPointsMin
+        local locationLevelMin = location:GetLevelMin()
+        if locationLevelMin == maxLevel then --This is a veteran activity
+            local locationChampionPointsMin = location:GetChampionPointsMin()
+            local locationChampionPointsMax = location:GetChampionPointsMax()
+
+            if not lowestChampionPointLimit or locationChampionPointsMin < lowestChampionPointLimit then
+                lowestChampionPointLimit = locationChampionPointsMin
+            end
+
+            if not highestChampionPointLimit or locationChampionPointsMax > highestChampionPointLimit then
+                highestChampionPointLimit = locationChampionPointsMax
             end
         else
-            if not lowestLevelLimit or location.levelMin < lowestLevelLimit then
-                lowestLevelLimit = location.levelMin
+            local locationLevelMax = location:GetLevelMax()
+
+            if not lowestLevelLimit or locationLevelMin < lowestLevelLimit then
+                lowestLevelLimit = locationLevelMin
+            end
+
+            if not highestLevelLimit or locationLevelMax > highestLevelLimit then
+                highestLevelLimit = locationLevelMax
             end
         end
     end
     
     if lowestLevelLimit then
-        if GetUnitLevel("player") < lowestLevelLimit  then
+        local playerLevel = GetUnitLevel("player")
+        if playerLevel < lowestLevelLimit or playerLevel > highestLevelLimit then
             isLevelLocked = true
         end
     elseif lowestChampionPointLimit then
-        if not CanUnitGainChampionPoints("player") or GetPlayerChampionPointsEarned() < lowestChampionPointLimit then
+        if not CanUnitGainChampionPoints("player") then
             isLevelLocked = true
+        else
+            local playerChampionPoints = GetPlayerChampionPointsEarned()
+            if playerChampionPoints < lowestChampionPointLimit or playerChampionPoints > highestChampionPointLimit then
+                isLevelLocked = true
+            end
         end
+    else
+        -- No location data found for this activity type, so lock it down
+        isLevelLocked = true
     end
 
-    return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit
+    return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit, highestLevelLimit, highestChampionPointLimit
 end
 
 function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfo()
@@ -211,15 +279,27 @@ function ZO_ActivityFinderTemplate_Shared:GetLevelLockInfo()
     return isLevelLocked, lowestLevelLimit, lowestChampionPointLimit
 end
 
+function ZO_ActivityFinderTemplate_Shared:GetNumLocations()
+    local numLocations = 0
+
+    local modes = self.dataManager:GetFilterModeData()
+    for _, activityType in ipairs(modes:GetActivityTypes()) do
+        numLocations = numLocations + ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes())
+    end
+
+    return numLocations
+end
+
 function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
     local isGloballyLocked = false
     local globalLockReasons =
     {
-        isActivityQueueOnCooldown = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityQueueOnCooldown(),
-        isLockedByNotLeader = not IsUnitSoloOrGroupLeader("player"),
+        isLockedByManager = self.dataManager:GetManagerLockInfo(),
+        isLockedByNotLeader = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader(),
+        isActiveWorldBattleground = IsActiveWorldBattleground(),
     }
 
-    for i, reason in pairs(globalLockReasons) do
+    for _, reason in pairs(globalLockReasons) do
         if reason == true then
             isGloballyLocked = true
             break
@@ -229,19 +309,14 @@ function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
     return isGloballyLocked, globalLockReasons
 end
 
-local function ActivityQueueCooldownTextCallback()
-    local expireTimeS = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetActivityQueueCooldownExpireTimeS()
-    local timeRemainingS = zo_max(expireTimeS - GetFrameTimeSeconds(), 0)
-    local formattedTimeText = ZO_FormatTime(timeRemainingS, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-    return zo_strformat(SI_LFG_LOCK_REASON_QUEUE_COOLDOWN_VERBOSE, formattedTimeText)
-end
-
 function ZO_ActivityFinderTemplate_Shared:GetGlobalLockText()
     local isGloballyLocked, globalLockReasons = self:GetGlobalLockInfo()
     local lockReasonText
     if isGloballyLocked then
-        if globalLockReasons.isActivityQueueOnCooldown then
-            lockReasonText = ActivityQueueCooldownTextCallback
+        if globalLockReasons.isActiveWorldBattleground then
+            lockReasonText = GetString(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
+        elseif globalLockReasons.isLockedByManager then
+            lockReasonText = self.dataManager:GetManagerLockText()
         elseif globalLockReasons.isLockedByNotLeader then
             lockReasonText = GetString(SI_ACTIVITY_FINDER_LOCKED_NOT_LEADER_TEXT)
         end
@@ -268,4 +343,23 @@ function ZO_ActivityFinderTemplate_Shared:GetLockTextByActivity(activityType)
         lockText = self:GetLevelLockTextByActivity(activityType)
     end
     return lockText
+end
+
+function ZO_ActivityFinderTemplate_Shared.AppendSetDataToTooltip(setTypesSectionControl, setData)
+    local hideControls = true
+    local setTypesHeader = setTypesSectionControl:GetNamedChild("Header")
+    local setTypesList = setTypesSectionControl:GetNamedChild("List")
+
+    if setData:IsSetEntryType() then
+        local setTypesHeaderText = setData:GetSetTypesHeaderText()
+        local setTypesListText = setData:GetSetTypesListText()
+        if setTypesHeaderText ~= "" and setTypesListText ~= "" then
+            setTypesHeader:SetText(setTypesHeaderText)
+            setTypesList:SetText(setTypesListText)
+            hideControls = false
+        end
+    end
+
+    setTypesHeader:SetHidden(hideControls)
+    setTypesList:SetHidden(hideControls)
 end

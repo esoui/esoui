@@ -51,44 +51,39 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeFilters()
         titleText = self.categoryData.name,
     }
 
-    local modes = self.dataManager:GetFilterModeData()
-    local randomEntryDatas = {}
-
-    --Init potential randoms
-    for _, activityType in ipairs(modes:GetActivityTypes()) do
-        local randomInfo = modes:GetRandomInfo(activityType)
-        if randomInfo and DoesLFGActivityHasAllOption(activityType) then
-            local activityName = zo_strformat(SI_ACTIVITY_FINDER_RANDOM_TITLE_FORMAT, GetString("SI_LFGACTIVITY", activityType))
-            local minGroupSize, maxGroupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupSizeRangeForActivityType(activityType)
-            local entryData = ZO_GamepadEntryData:New(activityName, RANDOM_CATEGORY_ICON)
-            entryData.data =
-            {
-                activityType = activityType,
-                nameGamepad = activityName,
-                description = randomInfo.description,
-                descriptionTextureGamepad = randomInfo.gamepadBackground,
-                isRandom = true,
-                minGroupSize = minGroupSize,
-                maxGroupSize = maxGroupSize,
-            }
-            entryData:SetIconTintOnSelection(true)
-            table.insert(randomEntryDatas, entryData)
-        end
-    end
-
-    self.randomEntryDatas = randomEntryDatas
     self.randomHeaderData =
     {
-        titleText = modes:GetRandomFilterName(),
+        titleText = self.dataManager:GetFilterModeData():GetRandomFilterName(),
     }
 
     self:RefreshSpecificFilters()
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:InitializeLists()
-    --When we have "random" entries, we have the user drill down into a further subcategory
+    --When we have "random" entries and "specific" entries, we have the user drill down into a further subcategory
     --Where they can either select from a list of random activitiy types, or a list of specific activities
-    if #self.randomEntryDatas > 0 then
+    local modes = self.dataManager:GetFilterModeData()
+    local activityTypes = modes:GetActivityTypes()
+    local hasEntriesWithRewards = false
+    local hasEntriesWithoutRewards = false
+    for _, activityType in ipairs(activityTypes) do
+        local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
+        for _, location in ipairs(locationData) do
+            if modes:IsEntryTypeVisible(location:GetEntryType()) then
+                if location:HasRewardData() then
+                    hasEntriesWithRewards = true
+                else
+                    hasEntriesWithoutRewards = true
+                end
+
+                if hasEntriesWithRewards and hasEntriesWithoutRewards then
+                    break
+                end
+            end
+        end
+    end
+
+    if hasEntriesWithRewards and hasEntriesWithoutRewards then
         self.categoryList = self:GetMainList()
         self:AddRolesMenuEntry(self.categoryList)
         local filterModes = self.dataManager:GetFilterModeData()
@@ -96,7 +91,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeLists()
         local randomEntryData = ZO_GamepadEntryData:New(filterModes:GetRandomFilterName(), RANDOM_CATEGORY_ICON)
         randomEntryData.data =
         {
-            isRandom = true,
+            navigationMode = NAVIGATION_MODES.RANDOM_ENTRIES,
         }
         randomEntryData:SetIconTintOnSelection(true)
         self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", randomEntryData)
@@ -104,7 +99,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeLists()
         local specificEntryData = ZO_GamepadEntryData:New(filterModes:GetSpecificFilterName(), self.categoryData.menuIcon)
         specificEntryData.data =
         {
-            isRandom = false,
+            navigationMode = NAVIGATION_MODES.SPECIFIC_ENTRIES,
         }
         specificEntryData:SetIconTintOnSelection(true)
 
@@ -119,6 +114,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeLists()
     else
         self.entryList = self:GetMainList()
         self.hasCategories = false
+        self.defaultNavigationMode = hasEntriesWithRewards and NAVIGATION_MODES.RANDOM_ENTRIES or NAVIGATION_MODES.SPECIFIC_ENTRIES
     end
     
     self.entryList:AddDataTemplate("ZO_GamepadItemSubEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
@@ -139,6 +135,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeSingularPanelControls(rewar
         end
     end
     self.lockReasonLabel:SetHandler("OnUpdate", OnLockReasonLabelUpdate)
+    self.setTypesSectionControl = self.singularSection:GetNamedChild("SetTypesSection")
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:RegisterEvents()
@@ -186,10 +183,8 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                     GAMEPAD_GROUP_ROLES_BAR:ToggleSelected()
                 else
                     if self.navigationMode == NAVIGATION_MODES.CATEGORIES then
-                        local navigationMode = entryData.isRandom and NAVIGATION_MODES.RANDOM_ENTRIES or NAVIGATION_MODES.SPECIFIC_ENTRIES
+                        local navigationMode = entryData.navigationMode
                         self:SetNavigationMode(navigationMode)
-                    elseif self.navigationMode == NAVIGATION_MODES.RANDOM_ENTRIES then
-                        ZO_ACTIVITY_FINDER_ROOT_MANAGER:ToggleActivityTypeSelected(entryData.activityType)
                     else
                         ZO_ACTIVITY_FINDER_ROOT_MANAGER:ToggleLocationSelected(entryData)
                     end
@@ -244,9 +239,8 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
             visible = function()
                 local anySelected = ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsAnyLocationSelected()
                 local currentlySearching = IsCurrentlySearchingForGroup()
-                local lookingAtEntries = self.entryList:IsActive()
-                local playerCanToggleQueue = IsUnitSoloOrGroupLeader("player")
-                return playerCanToggleQueue and anySelected and (lookingAtEntries or currentlySearching)
+                local playerCanToggleQueue = not ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsLockedByNotLeader()
+                return playerCanToggleQueue and (anySelected or currentlySearching)
             end,
         }
     }
@@ -298,34 +292,37 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
     self.entryList:Clear()
     self:AddRolesMenuEntry(self.entryList)
     local isSearching = IsCurrentlySearchingForGroup()
-    
+    local lockReasonTextOverride = self:GetGlobalLockText()
+    local modes = self.dataManager:GetFilterModeData()
+
+    local function AddLocationEntry(location)
+        local entryData = ZO_GamepadEntryData:New(location:GetNameGamepad(), self.categoryData.menuIcon)
+        entryData.data = location
+        entryData.data:SetLockReasonTextOverride(lockReasonTextOverride)
+        entryData:SetEnabled(not location:IsLocked() and not isSearching)
+        entryData:SetSelected(location:IsSelected())
+        self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
+    end
+
     if self.navigationMode == NAVIGATION_MODES.RANDOM_ENTRIES then
-        for _, entryData in ipairs(self.randomEntryDatas) do
-            local lockReasonText = self:GetLockTextByActivity(entryData.data.activityType)
-            if not lockReasonText then
-                local reason = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLockReasonForActivityType(entryData.data.activityType)
-                if reason then
-                    lockReasonText = reason
+        local modeActivityTypes = modes:GetActivityTypes()
+        ZO_ACTIVITY_FINDER_ROOT_MANAGER:RebuildSelections(modeActivityTypes)
+        for _, activityType in ipairs(modeActivityTypes) do
+            local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
+            for _, location in ipairs(locationData) do
+                if modes:IsEntryTypeVisible(location:GetEntryType()) and location:HasRewardData() and location:DoesPlayerMeetLevelRequirements() then
+                    AddLocationEntry(location)
                 end
             end
-
-            entryData.data.isLocked = lockReasonText ~= nil
-            entryData.data.lockReasonText = lockReasonText
-
-            entryData:SetEnabled(not entryData.data.isLocked and not isSearching)
-            entryData:SetSelected(ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityTypeSelected(entryData.data.activityType))
-            self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
         end
     else
-        local lockReasonTextOverride = self:GetGlobalLockText()
+        ZO_ACTIVITY_FINDER_ROOT_MANAGER:RebuildSelections( {self.currentSpecificActivityType } )
         local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(self.currentSpecificActivityType)
-        for locationIndex, location in ipairs(locationData) do
-            local specificEntryData = ZO_GamepadEntryData:New(location.nameGamepad, self.categoryData.menuIcon)
-            specificEntryData.data = location
-            specificEntryData.data.lockReasonTextOverride = lockReasonTextOverride
-            specificEntryData:SetEnabled(not location.isLocked and not isSearching)
-            specificEntryData:SetSelected(location.isSelected)
-            self.entryList:AddEntry("ZO_GamepadItemSubEntryTemplate", specificEntryData)
+
+        for _, location in ipairs(locationData) do
+            if modes:IsEntryTypeVisible(location:GetEntryType()) and not location:HasRewardData() then
+                AddLocationEntry(location)
+            end
         end
     end
 
@@ -341,14 +338,16 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshSpecificFilters()
 
     local validActivityTypes = {}
     for _, activityType in ipairs(modeActivityTypes) do
-        local isLocked = self:GetLevelLockInfoByActivity(activityType)
-        if not isLocked then
-            local data =
-            {
-                activityType = activityType,
-                name = GetString("SI_LFGACTIVITY", activityType)
-            }
-            table.insert(validActivityTypes, data)
+        if ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes()) > 0 then
+            local isLocked = self:GetLevelLockInfoByActivity(activityType)
+            if not isLocked then
+                local data =
+                {
+                    activityType = activityType,
+                    name = GetString("SI_LFGACTIVITY", activityType)
+                }
+                table.insert(validActivityTypes, data)
+            end
         end
     end
 
@@ -387,9 +386,13 @@ function ZO_ActivityFinderTemplate_Gamepad:OnActivityFinderStatusUpdate()
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:OnShowing()
-    local navigationMode = self.hasCategories and NAVIGATION_MODES.CATEGORIES or NAVIGATION_MODES.SPECIFIC_ENTRIES
+    local navigationMode = self.hasCategories and NAVIGATION_MODES.CATEGORIES or self.defaultNavigationMode
     self.isShowingSingularPanel = false
     self:SetNavigationMode(navigationMode)
+    --If we have no categories we go straight into the default view, which means navigation mode never technically changes, so the header never gets reactivated
+    if not self.hasCategories then
+        self:RefreshHeaderAndView(self.specificHeaderData)
+    end
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:OnShow()
@@ -456,10 +459,9 @@ do
 
                         self.backgroundTexture:SetTexture(entryData.descriptionTextureGamepad)
                         self.titleLabel:SetText(entryData.nameGamepad)
-                        self.descriptionLabel:SetText(entryData.description)
-                        ZO_ActivityFinderTemplate_Shared.SetGroupSizeRangeText(self.groupSizeRangeLabel, entryData, GROUP_SIZE_ICON_FORMAT)
+                        entryData:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
 
-                        self:RefreshRewards(entryData.isRandom, entryData.activityType)
+                        self:RefreshRewards(entryData)
                         if entryData.isLocked then
                             local lockReasonText = entryData.lockReasonTextOverride or entryData.lockReasonText
                             if type(lockReasonText) == "function" then
@@ -472,7 +474,8 @@ do
                         else
                             self.lockControl:SetHidden(true)
                         end
-                    
+                        
+                        ZO_ActivityFinderTemplate_Shared.AppendSetDataToTooltip(self.setTypesSectionControl, entryData)
                         return
                     end
                 end
@@ -494,7 +497,7 @@ function ZO_ActivityFinderTemplate_Gamepad:OnCooldownsUpdate()
             if targetData then
                 local entryData = targetData.data
                 if not entryData.isRoleSelector then
-                    self:RefreshRewards(entryData.isRandom, entryData.activityType)
+                    self:RefreshRewards(entryData)
                 end
             end
         end

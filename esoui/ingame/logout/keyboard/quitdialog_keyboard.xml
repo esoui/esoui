@@ -1,0 +1,12 @@
+<GuiXml>
+    <Controls>
+		<TopLevelControl name="ZO_QuitDialog_Keyboard" inherits="ZO_Logout_Exit_Dialog_Base" hidden="true">
+            <OnInitialized>
+                ZO_QuitDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+				<Label name="$(parent)MainText" text="SI_QUIT_DIALOG" override="true" />
+            </Controls>
+        </TopLevelControl>
+	</Controls>
+</GuiXml>

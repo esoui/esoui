@@ -11,7 +11,7 @@
 
         <Texture name="ZO_PinHighlightTemplate" virtual="true" textureFile="EsoUI/Art/Lockpicking/pins_over.dds" layer="OVERLAY" blendMode="ADD" alpha="0" />
         
-        <TopLevelControl name="ZO_LockpickPanel" hidden="true" mouseEnabled="true">
+        <TopLevelControl name="ZO_LockpickPanel" tier="HIGH" hidden="true" mouseEnabled="true">
             <AnchorFill/>
             
             <OnInitialized>
@@ -29,7 +29,7 @@
             </OnMouseUp>
 
             <Controls>
-                <Texture name="$(parent)Body" textureFile="EsoUI/Art/Lockpicking/lock_body.dds">
+                <Texture name="$(parent)Body" tier="LOW" textureFile="EsoUI/Art/Lockpicking/lock_body.dds">
                     <Dimensions x="512" y="512" />
                     <Anchor point="CENTER" />
                 </Texture>
@@ -128,32 +128,32 @@
                     <TextureCoords left="0.0" right="0.84375" top="0.0" bottom="0.703125" />
                 </Texture>
 
-                <Texture name="$(parent)Lockpick" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/lock_pick.dds" layer="OVERLAY" >
+                <Texture name="$(parent)Lockpick" pixelRoundingEnabled="false" tier="LOW" textureFile="EsoUI/Art/Lockpicking/lock_pick.dds" layer="OVERLAY" >
                     <Dimensions x="452" y="110" />
                     <TextureCoords left="0.0" right="0.8828125" top="0.0" bottom="0.859375" />
                 </Texture>
 
-                <Texture name="$(parent)LockpickBreakLeft" pixelRoundingEnabled="false" hidden="true" textureFile="EsoUI/Art/Lockpicking/lock_pick_broken_left.dds" layer="OVERLAY" >
+                <Texture name="$(parent)LockpickBreakLeft" pixelRoundingEnabled="false" tier="LOW" hidden="true" textureFile="EsoUI/Art/Lockpicking/lock_pick_broken_left.dds" layer="OVERLAY" >
                     <Dimensions x="452" y="110" />
                     <TextureCoords left="0.0" right="0.8828125" top="0.0" bottom="0.859375" />
                 </Texture>
 
-                <Texture name="$(parent)LockpickBreakRight" pixelRoundingEnabled="false" hidden="true" textureFile="EsoUI/Art/Lockpicking/lock_pick_broken_right.dds" layer="OVERLAY" >
+                <Texture name="$(parent)LockpickBreakRight" pixelRoundingEnabled="false" tier="LOW" hidden="true" textureFile="EsoUI/Art/Lockpicking/lock_pick_broken_right.dds" layer="OVERLAY" >
                     <Dimensions x="452" y="110" />
                     <TextureCoords left="0.0" right="0.8828125" top="0.0" bottom="0.859375" />
                 </Texture>
 
-                <Texture name="$(parent)TensionTop" textureFile="EsoUI/Art/Lockpicking/lock_tensioner_top.dds" layer="OVERLAY">
+                <Texture name="$(parent)TensionTop" textureFile="EsoUI/Art/Lockpicking/lock_tensioner_top.dds" tier="LOW" layer="OVERLAY">
                     <Dimensions x="256" y="256" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Body" offsetX="-85" offsetY="229" />
                 </Texture>
 
-                <Texture name="$(parent)TensionBottom" textureFile="EsoUI/Art/Lockpicking/lock_tensioner_bottom.dds" layer="OVERLAY">
+                <Texture name="$(parent)TensionBottom" textureFile="EsoUI/Art/Lockpicking/lock_tensioner_bottom.dds" tier="LOW" layer="OVERLAY">
                     <Dimensions x="256" y="64" />
                     <Anchor point="TOP" relativeTo="$(parent)TensionTop" relativePoint="BOTTOM" />
                 </Texture>
 
-                <Texture name="$(parent)Mask" textureFile="EsoUI/Art/Lockpicking/lock_mask.dds" layer="OVERLAY">
+                <Texture name="$(parent)Mask" textureFile="EsoUI/Art/Lockpicking/lock_mask.dds" tier="LOW" layer="OVERLAY" level="1">
                     <Dimensions x="128" y="256" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Body" offsetX="57" offsetY="5" />
                 </Texture>
@@ -207,8 +207,28 @@
                         </Label>
                     </Controls>
                 </Control>
+
+                <Control name="$(parent)GamepadTimerBar">
+                    <Dimensions x="400" y="30" />
+                    <Anchor point="TOP" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetY="45" />
+
+                    <Controls>
+                        <StatusBar name="$(parent)Status" inherits="ZO_GamepadArrowStatusBarWithBGLarge" tier="MEDIUM">
+                            <AnchorFill/>
+
+                            <OnInitialized>
+                                ZO_StatusBar_InitializeDefaultColors(self)
+                                self.gloss = self:GetNamedChild("Gloss")
+                            </OnInitialized>
+                        </StatusBar>
+                        <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="CENTER" />
+                        </Label>
+                    </Controls>
+                </Control>
+
                 <Control name="$(parent)StealthIcon" inherits="ZO_StealthIconContainer">
-                    <Anchor point="TOP"  relativeTo="$(parent)TimerBar" relativePoint="BOTTOM" offsetY="60"/>
+                    <Anchor point="TOP" relativeTo="$(parent)TimerBar" relativePoint="BOTTOM" offsetY="60"/>
                 </Control>
             </Controls>
         </TopLevelControl>

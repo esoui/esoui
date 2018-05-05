@@ -18,7 +18,7 @@ end
 
 local function GetEntryColors(mailData)
     local hasCOD = (mailData.codAmount > 0)
-    local hasEnoughMoney = (mailData.codAmount <= GetCarriedCurrencyAmount(CURT_MONEY))
+    local hasEnoughMoney = (mailData.codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
     if not hasEnoughMoney then
         return ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD, ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD
     end
@@ -123,7 +123,7 @@ function ZO_MailInbox_Gamepad:AttachmentSelectionChanged(list, selectedData, old
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
     if selectedData then
         local EQUIPPED = false
-        GAMEPAD_TOOLTIPS:LayoutGenericItem(GAMEPAD_LEFT_TOOLTIP, selectedData.itemLink, EQUIPPED, selectedData.creator)
+        GAMEPAD_TOOLTIPS:LayoutItem(GAMEPAD_LEFT_TOOLTIP, selectedData.itemLink, EQUIPPED, selectedData.creator)
     end
 end
 
@@ -179,7 +179,7 @@ end
 
 local function SetupList(list)
     list:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplate("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:AddDataTemplate("ZO_GamepadMenuEntryNoCapitalization", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 end
 
 function ZO_MailInbox_Gamepad:InitializeMailList()
@@ -195,7 +195,7 @@ local function GetInventoryString()
 end
 
 local function UpdatePlayerGold(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_MAIL_HEADER_MONEY_OPTIONS_GAMEPAD)
+    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_MAIL_HEADER_MONEY_OPTIONS_GAMEPAD)
     return true
 end
 
@@ -238,7 +238,7 @@ function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
     end
     local function CanTakeAttachments()
         local mailData = self:GetActiveMailData()
-        local hasEnoughCOD = mailData and mailData.codAmount <= GetCarriedCurrencyAmount(CURT_MONEY)
+        local hasEnoughCOD = mailData and mailData.codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
 
         return IsReadInfoReady() and (self:GetActiveMailHasAttachedItems() or self:GetActiveMailHasAttachedGold()) and hasEnoughCOD
     end
@@ -516,8 +516,7 @@ end
 function ZO_MailInbox_Gamepad:ReportPlayer()
     if IsMailReportable(self:GetActiveMailData()) then
         local displayName = self:GetActiveMailSender()
-        SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-        ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(displayName)
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(displayName, function() ZO_PlatformIgnorePlayer(displayName) end)
     else
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_MAIL_INBOX_CANNOT_REPORT))
     end
@@ -664,8 +663,8 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
         entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_RECEIVED_TEXT, mailData:GetReceivedText()))
         entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText()))
 
-		local safeIdKey = zo_getSafeId64Key(mailId)
-		self.mailDataById[safeIdKey] = mailData
+        local safeIdKey = zo_getSafeId64Key(mailId)
+        self.mailDataById[safeIdKey] = mailData
         self.mailEntryDataById[safeIdKey] = entryData
 
         -- Setup icons.
@@ -678,7 +677,7 @@ function ZO_MailInbox_Gamepad:RefreshMailList()
 
     for i=1, #entries do
         local entryData = entries[i]
-        self.mailList:AddEntry("ZO_GamepadMenuEntryExpandingNoCapWithTwoSubLabel", entryData)
+        self.mailList:AddEntry("ZO_GamepadMenuEntryNoCapitalization", entryData)
     end
 
     self.mailList:Commit()
@@ -714,7 +713,7 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId)
     MAIL_MANAGER_GAMEPAD:RefreshKeybind()
 
     -- Get the data.
-	local safeIdKey = zo_getSafeId64Key(mailId)
+    local safeIdKey = zo_getSafeId64Key(mailId)
     local mailData = self.mailDataById[safeIdKey]
     local entryData = self.mailEntryDataById[safeIdKey]
     local wasUnread = mailData.unread
@@ -745,6 +744,10 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId)
 
     for i = mailData.numAttachments + 1, MAX_READ_ATTACHMENTS do
         self.inbox:ClearAttachment(i)
+    end
+
+    if noAttachments and MAIL_MANAGER_GAMEPAD:IsCurrentList(self.attachmentsList) then
+        self:EnterMailList()
     end
 
     -- Update the mail list (mostly for unread icon update).

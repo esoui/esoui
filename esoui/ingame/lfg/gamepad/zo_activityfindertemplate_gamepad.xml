@@ -12,7 +12,7 @@
             <Controls>
                 <Control name="$(parent)SingularSection" inherits="ZO_ActivityFinderSingularTemplate_Shared ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
                     <Controls>
-                        <Texture name="$(parent)Background" override="true">
+                        <Texture name="$(parent)Background" override="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                             <TextureCoords right="ZO_GAMEPAD_ACTIVITY_FINDER_BACKGROUND_TEXTURE_COORD_RIGHT"/>
                             <Dimensions y="ZO_GAMEPAD_ACTIVITY_FINDER_BACKGROUND_TEXTURE_SQUARE_DIMENSION" />
                             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
@@ -32,23 +32,32 @@
                             <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
                         </Label>
+                        
+                        <Control name="$(parent)SetTypesSection" inherits="ZO_ActivityFinderTemplateSetTypesSection_Shared">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" />
+
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad27">
+                                    <Anchor point="TOPLEFT" offsetY="30"/>
+                                    <Anchor point="TOPRIGHT" offsetY="30"/>
+                                </Label>
+
+                                <Label name="$(parent)List" override="true" font="ZoFontGamepadHeaderDataValue">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                                </Label>
+                            </Controls>
+                        </Control>
 
                         <Control name="$(parent)RewardsSection" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="50" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="BOTTOMLEFT" offsetY="50" />
                             
                             <Controls>
-                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42">
-                                    <Anchor point="TOPLEFT" />
-                                </Label>
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" />
 
                                 <Control name="$(parent)Entries" override="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                    
-                                    <Controls>
-                                        <Control name="$(parent)ItemReward" override="true">
-                                            <Anchor point="TOPLEFT" />
-                                        </Control>
-                                    </Controls>
                                 </Control>
                             </Controls>
                         </Control>
