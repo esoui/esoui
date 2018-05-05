@@ -25,7 +25,7 @@ do
                 extractionBurst.phase2Animation:GetAnimation(1):SetAnimatedControl(extractionBurst)
 
                 extractionBurst.phase1Animation:GetAnimation(2):SetHandler("OnStop", function()
-                    if not IsPerformingCraftProcess() and not extractionBurst.phase2Animation:IsPlaying() then
+                    if not IsAwaitingCraftingProcessResponse() and not extractionBurst.phase2Animation:IsPlaying() then
                         extractionBurst.phase2Animation:PlayFromStart()
                     end
                 end)

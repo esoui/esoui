@@ -1,5 +1,8 @@
 ALCHEMY_TRAIT_STRIDE = 5
 
+ZO_ALCHEMY_MODE_CREATION = 1
+ZO_ALCHEMY_MODE_RECIPES = 2
+
 function ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType)
     if filterType == nil then
         return true
@@ -45,6 +48,15 @@ function ZO_SharedAlchemy:Initialize(control)
     self:InitializeTooltip()
     self:InitializeSlots()
     self:InitializeSharedEvents()
+
+    self.alchemyStationInteraction =
+    {
+        type = "Alchemy Station",
+        End = function()
+            SCENE_MANAGER:ShowBaseScene()
+        end,
+        interactTypes = { INTERACTION_CRAFT },
+    }
 
     ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.skillInfo, CRAFTING_TYPE_ALCHEMY)
 
@@ -98,6 +110,10 @@ function ZO_SharedAlchemy:GetReagentSlotOffset(thirdSlotUnlocked)
     -- Should be overriden for screen-specific spacing
 end
 
+function ZO_SharedAlchemy:UpdateTooltip()
+    -- Should be overridden
+end
+
 function ZO_SharedAlchemy:UpdateTooltipLayout()
     -- Should be overridden
 end
@@ -129,7 +145,9 @@ function ZO_SharedAlchemy:InitializeSlots()
 end
 
 function ZO_SharedAlchemy:UpdateThirdAlchemySlot()
-    self:ClearSelections()
+    local SUPPRESS_SOUND = true
+    local IGNORE_REQUIREMENTS = true
+    self:ClearSelections(SUPPRESS_SOUND, IGNORE_REQUIREMENTS)
 
     local slotContainer = self.control:GetNamedChild("SlotContainer")
     local reagentsLabel = slotContainer:GetNamedChild("ReagentsLabel")
@@ -173,16 +191,7 @@ function ZO_SharedAlchemy:CanItemBeAddedToCraft(bagId, slotIndex)
 end
 
 function ZO_SharedAlchemy:CreateInteractScene(name)
-    local ALCHEMY_STATION_INTERACTION =
-    {
-        type = "Alchemy Station",
-        End = function()
-            SCENE_MANAGER:Hide(name)
-        end,
-        interactTypes = { INTERACTION_CRAFT },
-    }
-
-    return ZO_InteractScene:New(name, SCENE_MANAGER, ALCHEMY_STATION_INTERACTION)
+    return ZO_InteractScene:New(name, SCENE_MANAGER, self.alchemyStationInteraction)
 end
 
 function ZO_SharedAlchemy:IsItemAlreadySlottedToCraft(bagId, slotIndex)
@@ -375,13 +384,13 @@ function ZO_SharedAlchemy:IsSlotted(bagId, slotIndex)
     return false
 end
 
-function ZO_SharedAlchemy:ClearSelections()
-    self.solventSlot:SetItem(nil)
+function ZO_SharedAlchemy:ClearSelections(suppressSound, ignoreUsabilityRequirement)
+    local NO_BAG = nil
+    local NO_INDEX = nil
+    self.solventSlot:SetItem(NO_BAG, NO_INDEX, suppressSound, ignoreUsabilityRequirement)
 
     for i, slot in ipairs(self.reagentSlots) do
-        if slot:MeetsUsabilityRequirement() then
-            slot:SetItem(nil, nil, nil, true)
-        end
+        slot:SetItem(NO_BAG, NO_INDEX, suppressSound, ignoreUsabilityRequirement)
     end
 
     self:OnReagentSlotChanged()
@@ -413,6 +422,7 @@ function ZO_SharedAlchemy:IsCraftable()
             end
         end
     end
+    return false
 end
 
 function ZO_SharedAlchemy:Create()
@@ -454,16 +464,6 @@ function ZO_SharedAlchemy:FindReagentSlotIndexBySlotControl(slotControl)
         if slot:IsSlotControl(slotControl) then
             return i
         end
-    end
-end
-
-function ZO_SharedAlchemy:UpdateTooltip()
-    if self:IsCraftable() then
-        self.tooltip:SetHidden(false)
-        self.tooltip:ClearLines()
-        self:UpdateTooltipLayout()
-    else
-        self.tooltip:SetHidden(true)
     end
 end
 
@@ -537,11 +537,11 @@ function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUs
 
     if self:HasItem() then
         if self.createsLevelLabel then
-            local craftingSubItemType, _, resultingItemLevel, championRequiredLevel = select(2, GetItemCraftingInfo(bagId, slotIndex))
+            local craftingSubItemType, _, resultingItemLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(bagId, slotIndex))
             local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
 
-            if championRequiredLevel and championRequiredLevel > 0 then
-                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, championRequiredLevel, itemTypeString))
+            if requiredChampionPoints and requiredChampionPoints > 0 then
+                self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, requiredChampionPoints, itemTypeString))
             else
                 self.createsLevelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_LEVEL, resultingItemLevel, itemTypeString))
             end

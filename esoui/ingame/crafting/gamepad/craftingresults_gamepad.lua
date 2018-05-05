@@ -30,7 +30,7 @@ do
             label:SetText(data.text)
 
             if data.color then
-		        label:SetColor(data.color:UnpackRGBA())
+                label:SetColor(data.color:UnpackRGBA())
             else
                 label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
             end
@@ -104,12 +104,17 @@ end
 function ZO_CraftingResults_Gamepad:DisplayCraftingResult(itemInfo)
     local smithingObject = ZO_Smithing_GetActiveObject()
     local isSmithingDeconstructing = smithingObject and not smithingObject:IsDeconstructing()
-    local isCreating = isSmithingDeconstructing 
-                       or ZO_Enchanting_IsInCreationMode() 
-                       or ZO_Provisioning_IsSceneShowing() 
+    local isCreating = isSmithingDeconstructing
+                       or ZO_Enchanting_IsInCreationMode()
+                       or ZO_Provisioning_IsSceneShowing()
                        or ZO_Alchemy_IsSceneShowing()
 
-    local headerTextId = isCreating and SI_GAMEPAD_CRAFTING_COMPLETED_ITEM or SI_GAMEPAD_CRAFTING_DECONSTRUCTED_ITEM
+    local headerTextId = SI_GAMEPAD_CRAFTING_DECONSTRUCTED_ITEM
+    if isCreating then
+        headerTextId = SI_GAMEPAD_CRAFTING_COMPLETED_ITEM
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        headerTextId = SI_GAMEPAD_RETRAIT_COMPLETED_RESULT_HEADER
+    end
 
     local displayData =
     {

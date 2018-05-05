@@ -11,12 +11,13 @@
                         </Control>
 
                         <Control name="$(parent)MaterialList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
+                            <Dimensions y="335"/>
                             <Anchor point="TOPLEFT" relativeTo="$(parent)PatternList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)PatternList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
 
                             <Controls>
                                 <Control name="$(parent)Spinner">
-                                    <Dimensions x="130" y="36" />
+                                    <Dimensions y="36" />
                                     <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="BOTTOM" offsetY="4"/>
                                     <Controls>
                                         <Button name="$(parent)Decrease">
@@ -39,12 +40,18 @@
                                             />
                                         </Button>
 
-                                        <Label name="$(parent)Display" font="ZoFontGamepad42" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                                        <Label name="$(parent)Display" font="ZoFontGamepad36" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                                             <Anchor point="TOPLEFT" offsetX="34" offsetY="-4" />
                                             <Anchor point="BOTTOMRIGHT" offsetX="-34" />
                                         </Label>
                                     </Controls>
                                 </Control>
+
+                                <Label name="$(parent)ExtraInfoLabel" override="true">
+                                    <ClearAnchors/>
+                                    <Dimensions x="360"/>
+                                    <Anchor point="TOP" relativeTo="$(parent)Spinner" relativePoint="BOTTOM" offsetY="15"/>
+                                </Label>
                             </Controls>
                         </Control>
 
@@ -54,8 +61,7 @@
                         </Control>
 
                         <Control name="$(parent)TraitList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)StyleList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)StyleList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
+                            <!-- The anchor for this is dynamically set -->
                         </Control>
 
                         <Control name="$(parent)BottomPadding">
@@ -78,7 +84,7 @@
                         <Control name="$(parent)ScrollChild" override="true">
                             <Anchor point="TOPLEFT"/>
                             <Anchor point="TOPRIGHT"/>
-                            <!-- controls are parented to this in lua, see ZO_GamepadSmithingCreation:SetupScrollPanel() -->
+                            <!-- controls are parented to this in lua, see ZO_GamepadSmithingCreation:InitializeScrollPanel() -->
                         </Control>
                     </Controls>
                 </Control>

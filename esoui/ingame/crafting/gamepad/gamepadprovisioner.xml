@@ -1,10 +1,25 @@
 <GuiXml>
     <Controls>
-        <Button name="ZO_ProvisionerIngredientBarSlotTemplate" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
+        <Button name="ZO_ProvisionerIngredientBarSlotTemplate" virtual="true">
+            <OnInitialized>
+                ZO_ProvisionerIngredientBarSlotTemplate_OnInitialized(self)
+            </OnInitialized>
+            <Dimensions x="205" y="205" />
+
             <Controls>
-                <Label name="$(parent)IngredientName" font="ZoFontGamepad34" horizontalAlignment="CENTER" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="2" wrapMode="ELLIPSIS">
-                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" />
-                    <Dimensions x="132"/>
+                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad" excludeFromResizeToFitExtents="true">
+                    <AnchorFill/>
+                </Backdrop>
+                <Texture name="$(parent)Icon" level="2">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="57" offsetY="57" />
+                </Texture>
+                <Control name="$(parent)Count" inherits="ZO_FractionDisplay">
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT" offsetX="-57" offsetY="57"/>
+                </Control>
+                <Label name="$(parent)IngredientName" horizontalAlignment="CENTER" verticalAlignment="CENTER" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" offsetX="12" offsetY="95"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12"/>
                 </Label>
             </Controls>
         </Button>
@@ -43,10 +58,12 @@
                     </Controls>
                 </Scroll>
 
-                <Control name="$(parent)IngredientsBar" inherits="ZO_GamepadCraftingIngredientBarTemplate" />
+                <Control name="$(parent)IngredientsBar" inherits="ZO_GamepadCraftingIngredientBarTemplate">
+                    <Dimensions y="205"/>
+                </Control>
 
                 <Control name="$(parent)Tooltip" inherits="ZO_CraftingTooltip_Gamepad">
-                    <Anchor point="BOTTOM" relativeTo="$(parent)IngredientsBar" relativePoint="TOP" offsetY="-ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y"/>
+                    <Anchor point="BOTTOM" relativeTo="$(parent)IngredientsBar" relativePoint="TOP" offsetY="-61"/>
                 </Control>
             </Controls>
         </TopLevelControl>

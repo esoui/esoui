@@ -6,19 +6,20 @@ function ZO_CrownCratesAnimatable:New(...)
     return obj
 end
 
-function ZO_CrownCratesAnimatable:Initialize(control)
+function ZO_CrownCratesAnimatable:Initialize(control, animationSource, ...)
     self.control = control
+	self.animationSource = animationSource
     control:Create3DRenderSpace()
     self.playingAnimationTimelines = {}
-
     self.textureControls = {}
-    for i = 1, control:GetNumChildren() do
-        local childControl = control:GetChild(i)
-        if childControl:GetType() == CT_TEXTURE then
-            table.insert(self.textureControls, childControl)
-            childControl:Create3DRenderSpace()
-        end
-    end
+    self.particles = {}
+    self.nextCallLaterId = 1
+    self.callLaterPrefix = string.format("%sCallLater", control:GetName())
+    self.callLaters = {}
+end
+
+function ZO_CrownCratesAnimatable:AddTexture(textureControl)
+	table.insert(self.textureControls, textureControl)
 end
 
 function ZO_CrownCratesAnimatable:Reset()
@@ -29,6 +30,12 @@ function ZO_CrownCratesAnimatable:Reset()
         textureControl:SetAlpha(0)
         textureControl:SetMouseEnabled(false)
     end
+
+    for _, callLaterName in pairs(self.callLaters) do
+        EVENT_MANAGER:UnregisterForUpdate(callLaterName)
+    end
+
+    self:ReleaseAllParticles()
 end
 
 function ZO_CrownCratesAnimatable:GetControl()
@@ -36,7 +43,7 @@ function ZO_CrownCratesAnimatable:GetControl()
 end
 
 function ZO_CrownCratesAnimatable:AcquireAndApplyAnimationTimeline(animationType, textureControl, customOnStop)
-    local animationPool = CROWN_CRATES:GetAnimationPool(animationType)
+    local animationPool = self.animationSource:GetAnimationPool(animationType)
     local animationTimeline, animationTimelineKey = animationPool:AcquireObject()
     animationTimeline.animationType = animationType
     animationTimeline:SetHandler("OnStop", function(timeline, completedPlaying)
@@ -150,4 +157,79 @@ function ZO_CrownCratesAnimatable:SetupBezierArcBetween(translateAnimation, star
     local yOffset = arcHeightInScreenPercent * frustumHeightMidpointWorld   
     translateAnimation:SetBezierControlPoint(1, midX, midY + yOffset, midZ)
     translateAnimation:SetBezierControlPoint(2, midX, midY + yOffset, midZ)
+end
+
+function ZO_CrownCratesAnimatable:AcquireCrateSpecificParticle(particleType, crownCrateParticleEffects)
+    self:ReleaseParticle(particleType)
+    local particlePool = self.crownCratesManager:GetCrateSpecificCardParticlePool(GetCurrentCrownCrateId(), crownCrateParticleEffects)
+    local particle, particleKey = particlePool:AcquireObject()
+    return particleType, particle, particlePool, particleKey
+end
+
+function ZO_CrownCratesAnimatable:AcquireTierSpecificParticle(particleType, crownCrateTierParticleEffects)
+    self:ReleaseParticle(particleType)
+    local particlePool = self.crownCratesManager:GetTierSpecificCardParticlePool(self.crownCrateTierId, crownCrateTierParticleEffects)
+    local particle, particleKey = particlePool:AcquireObject()
+    return particleType, particle, particlePool, particleKey
+end
+
+function ZO_CrownCratesAnimatable:StartCrateSpecificParticleEffects(particleType, crownCrateParticleEffects)
+    self:StartParticle(self:AcquireCrateSpecificParticle(particleType, crownCrateParticleEffects))
+    PlayCrownCrateSpecificParticleSoundAndVibration(GetCurrentCrownCrateId(), crownCrateParticleEffects)
+end
+
+function ZO_CrownCratesAnimatable:StartTierSpecificParticleEffects(particleType, crownCrateTierParticleEffects)
+	self:StartParticle(self:AcquireTierSpecificParticle(particleType, crownCrateTierParticleEffects))
+    PlayCrownCrateTierSpecificParticleSoundAndVibration(self.crownCrateTierId, crownCrateTierParticleEffects)
+end
+
+function ZO_CrownCratesAnimatable:StartParticle(particleType, particle, particlePool, particleKey)
+    particle.particlePool = particlePool
+    particle.particleKey = particleKey
+    self.particles[particleType] = particle
+    particle:FollowControl(self.control)
+    particle:Start()
+end
+
+function ZO_CrownCratesAnimatable:ReleaseParticle(particleType)
+    local particle = self.particles[particleType]
+    if particle then
+        particle.particlePool:ReleaseObject(particle.particleKey)
+        particle.particlePool = nil
+        particle.particleKey = nil
+        self.particles[particleType] = nil
+    end
+end
+
+function ZO_CrownCratesAnimatable:ReleaseAllParticles()
+    for particleType in pairs(self.particles) do
+        self:ReleaseParticle(particleType)
+    end
+end
+
+function ZO_CrownCratesAnimatable:DestroyParticle(particleType)
+    local particle = self.particles[particleType]
+	if particle then
+		local key = particle.particleKey
+		local pool = particle.particlePool
+		self:ReleaseParticle(particleType)
+		pool:DestroyFreeObject(key, ZO_CrownCrates.DeleteParticle)
+	end
+end
+
+function ZO_CrownCratesAnimatable:CallLater(func, ms)
+    local id = self.nextCallLaterId
+    local name = self.callLaterPrefix..self.nextCallLaterId
+    self.nextCallLaterId = self.nextCallLaterId + 1
+
+    EVENT_MANAGER:RegisterForUpdate(name, ms,
+        function()
+            self.callLaters[id] = nil
+            EVENT_MANAGER:UnregisterForUpdate(name)
+            func(id)
+        end)
+    
+    self.callLaters[id] = name
+
+    return id
 end

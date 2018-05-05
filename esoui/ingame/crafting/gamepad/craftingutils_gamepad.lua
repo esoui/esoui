@@ -11,6 +11,8 @@ function ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(keyb
 	end
 
 	local genericStartButton = {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Crafting Default Exit",
 			alignment = KEYBIND_STRIP_ALIGN_LEFT,
 			keybind = "UI_SHORTCUT_EXIT",
 			order = -10000,
@@ -57,7 +59,7 @@ end
 -- Generic crafting header functions
 function ZO_GamepadCraftingUtils_GetLineNameForCraftingType(craftingType)
     local skillType, skillIndex = GetCraftingSkillLineIndices(craftingType)
-    local lineName, _ = GetSkillLineInfo(skillType, skillIndex)
+    local lineName = GetSkillLineInfo(skillType, skillIndex)
     local text = zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, lineName)
 
     return text
@@ -83,15 +85,16 @@ function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString,
         if tabBarFirstEntry.text then
             titleString = tabBarFirstEntry.text
         end
+        if tabBarFirstEntry.callback then
+            tabBarFirstEntry:callback()
+        end
     end
 
     local function GetCapacity()
         return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
     end
 
-    craftingObject.headerData = {
-	    titleText = titleString,
-    }
+    craftingObject.headerData = { }
 
     if showCapacity or showCapacity == nil then        
         craftingObject.headerData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
@@ -101,6 +104,9 @@ function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString,
     if tabBarEntries and #tabBarEntries > 1 then 
         craftingObject.headerData.tabBarEntries = ZO_ShallowTableCopy(tabBarEntries)
         craftingObject.headerData.titleText = nil
+    else
+        craftingObject.headerData.tabBarEntries = nil
+        craftingObject.headerData.titleText = titleString
     end
 end
 
@@ -194,4 +200,18 @@ end
 function ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(control, resizeHandler)
     local CRAFTING_TOOLTIP_OFFSET_X = -3
     ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(control, ZO_CRAFTING_TOOLTIP_STYLES, resizeHandler, RIGHT, CRAFTING_TOOLTIP_OFFSET_X)
+end
+
+do
+    local GAMEPAD_SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE =
+    {
+       [SMITHING_FILTER_TYPE_RAW_MATERIALS] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_refine_emptySlot.dds",
+       [SMITHING_FILTER_TYPE_WEAPONS] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_weaponSlot.dds",
+       [SMITHING_FILTER_TYPE_ARMOR] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_apparelSlot.dds",
+       [SMITHING_FILTER_TYPE_JEWELRY] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_jewelrySlot.dds",
+    }
+
+    function ZO_GamepadCraftingUtils_GetItemSlotTextureFromSmithingFilter(smithingFilter)
+        return GAMEPAD_SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE[smithingFilter]
+    end
 end

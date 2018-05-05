@@ -17,22 +17,20 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
-        <Button name="ZO_SmithingListSlot" inherits="ZO_ItemSlot" pixelRoundingEnabled="false" virtual="true">
+        <Control name="ZO_SmithingListSlot" virtual="true">
             <Dimensions x="64" y="64" />
-            <Textures mouseOver="" pressedMouseOver="" />
-        </Button>
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="2">
+                    <AnchorFill/>
+                </Texture>
 
-        <Button name="ZO_GamepadSmithingListSlot" inherits="ZO_ItemSlot_Gamepad" pixelRoundingEnabled="false" virtual="true">
-            <Dimensions x="64" y="64" />
-            <Textures mouseOver="" pressedMouseOver="" />
-        </Button>
-
-        <Texture name="ZO_SmithingListHighlight" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha=".35" virtual="true">
-            <Dimensions x="128" y="128" />
-            <OnInitialized>
-                self.pulseAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("SmithingHorizontalScrollListPulse", self)
-            </OnInitialized>
-        </Texture>
+                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="1" />
+                    <!-- Allow extra space for large stack counts like 898.8k -->
+                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
+                </Label>
+            </Controls>
+        </Control>
 
         <Control name="ZO_SmithingHorizontalListTemplate" virtual="true">
             <Dimensions x="500" y="125" />
@@ -119,12 +117,6 @@
                     <AnchorFill/>
                 </Texture>
             </Controls>
-        </Control>
-
-        <Control name="ZO_SmithingPanelAnchors" virtual="true">
-            <Dimensions x="565" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
         </Control>
     </Controls>
 </GuiXml>

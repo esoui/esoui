@@ -1,0 +1,65 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CrownGemificationRow" inherits="ZO_PlayerInventorySlot" virtual="true">
+            <OnMouseEnter>
+                ZO_CrownGemificationRow_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_CrownGemificationRow_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_CrownGemificationRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+        </Control>
+        
+        <TopLevelControl name="ZO_CrownGemification_KeyboardTopLevel" hidden="true" inherits="ZO_NarrowRightPanelFootPrint">
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontHeader4" modifyTextType="UPPERCASE" text="SI_GEMIFICATION_TITLE">
+                    <Anchor point="TOPRIGHT"/>
+                </Label>
+
+                <Control name="$(parent)TitleBarDivider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="RIGHT" constrains="X"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="3" constrains="Y"/>
+                </Control>
+                
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleBarDivider" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10"/>
+                </Control>
+
+                <Control name="$(parent)MenuBarDivider" inherits="ZO_WideHorizontalDivider">
+                    <Anchor point="RIGHT" constrains="X"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Tabs" relativePoint="BOTTOM" offsetY="13" constrains="Y"/>
+                </Control>
+
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBarDivider" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MenuBarDivider" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="5"/>
+                    <Dimensions y="32"/>
+                    <Controls>
+                        <Control name="$(parent)GemTotal" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GEMIFICATION_SORT_TYPE_GEM_TOTAL), "gemTotal", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPRIGHT"/>
+                            <Dimensions x="165" y="32"/>
+                        </Control>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_INVENTORY_SORT_TYPE_NAME), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" offsetX="121"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GemTotal" relativePoint="TOPLEFT" offsetX="-5"/>
+                            <Dimensions y="32"/>
+                        </Control>
+                    </Controls>
+                </Control>
+                    
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

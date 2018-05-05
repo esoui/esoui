@@ -1,0 +1,304 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CrownCrateCardPrimaryDealAnimation">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_PRIMARY_DEAL_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_PRIMARY_DEAL_DURATION_MS"
+                        startPitch="ZO_CROWN_CRATES_PRIMARY_DEAL_START_PITCH_RADIANS"
+                        endPitch="ZO_CROWN_CRATES_PRIMARY_DEAL_END_PITCH_RADIANS"
+                        startYaw="ZO_CROWN_CRATES_PRIMARY_DEAL_START_YAW_RADIANS"
+                        endYaw="ZO_CROWN_CRATES_PRIMARY_DEAL_END_YAW_RADIANS"
+                        startRoll="ZO_CROWN_CRATES_PRIMARY_DEAL_START_ROLL_RADIANS"
+                        endRoll="ZO_CROWN_CRATES_PRIMARY_DEAL_END_ROLL_RADIANS">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardBonusSlideAnimation">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_BONUS_SLIDE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_BONUS_SLIDE_TILT_UP_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+                <Rotate3DAnimation delay="ZO_CROWN_CRATES_BONUS_SLIDE_TILT_UP_DURATION_MS" duration="ZO_CROWN_CRATES_BONUS_SLIDE_UNTILT_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardBonusDealAnimation">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_DURATION_MS">
+                </Translate3DAnimation>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_BONUS_DEAL_TO_HAND_DURATION_MS" delay="ZO_CROWN_CRATES_BONUS_DEAL_TO_HAND_START_MS">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_DURATION_MS"
+                        startPitch="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_START_PITCH_RADIANS"
+                        endPitch="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_END_PITCH_RADIANS"
+                        startYaw="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_START_YAW_RADIANS"
+                        endYaw="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_END_YAW_RADIANS"
+                        startRoll="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_START_ROLL_RADIANS"
+                        endRoll="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_END_ROLL_RADIANS">
+                </Rotate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_BONUS_DEAL_TILT_DURATION_MS" delay="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_DURATION_MS"
+                        startPitch="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_END_PITCH_RADIANS"
+                        endPitch="0"
+                        startYaw="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_END_YAW_RADIANS"
+                        endYaw="0"
+                        startRoll="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_END_ROLL_RADIANS"
+                        endRoll="0">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_BONUS_DEAL_TO_HAND_DURATION_MS" delay="ZO_CROWN_CRATES_BONUS_DEAL_TO_HAND_START_MS"
+                        startPitch="0"
+                        endPitch="ZO_CROWN_CRATES_PRIMARY_DEAL_END_PITCH_RADIANS"
+                        startYaw="0"
+                        endYaw="ZO_CROWN_CRATES_PRIMARY_DEAL_END_YAW_RADIANS"
+                        startRoll="0"
+                        endRoll="ZO_CROWN_CRATES_PRIMARY_DEAL_END_ROLL_RADIANS">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardBonusDealGlowAnimation">
+            <Animations>
+                <AlphaAnimation delay="ZO_CROWN_CRATES_BONUS_DEAL_TO_SCREEN_DURATION_MS" duration="ZO_CROWN_CRATES_BONUS_DEAL_TILT_DURATION_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation delay="ZO_CROWN_CRATES_BONUS_DEAL_TO_HAND_START_MS" duration="ZO_CROWN_CRATES_BONUS_DEAL_TO_HAND_DURATION_MS" startAlpha="1" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardMysterySelectedGlowAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_MYSTERY_SELECTION_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardMysterySelectAnimation">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_MYSTERY_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardMysteryDeselectAnimation">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_MYSTERY_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_MYSTERY_SELECTION_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardRevealAnimation">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_REVEAL_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_REVEAL_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardLeaveAnimation">
+            <Animations>
+                <Translate3DAnimation duration="ZO_CROWN_CRATES_LEAVE_MOVE_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInCubic(progress)
+                    </EasingFunction>
+                </Translate3DAnimation>
+                <Rotate3DAnimation duration="ZO_CROWN_CRATES_LEAVE_SPIN_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseInCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardRevealedSelectedGlowAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_REVEALED_SELECTION_DURATION_MS" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardGemifyCardAnimation">
+            <Animations>
+                <Rotate3DAnimation delay="ZO_CROWN_CRATES_GEMIFY_SHOW_SPIN_DELAY_MS" duration="ZO_CROWN_CRATES_GEMIFY_SPIN_DURATION_MS"
+                        startPitch="ZO_CROWN_CRATES_GEMIFY_BEGIN_PITCH_RADIANS"
+                        endPitch="ZO_CROWN_CRATES_GEMIFY_END_PITCH_RADIANS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </Rotate3DAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardGemifyOverlayAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_GEMIFY_SHOW_DURATION_MS" delay="ZO_CROWN_CRATES_GEMIFY_SHOW_START_MS" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardGemifySingleGemAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_GEMIFY_SINGLE_GEM_DURATION_MS"  startAlpha="0" endAlpha="0.75">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <TranslateAnimation duration="ZO_CROWN_CRATES_GEMIFY_SINGLE_GEM_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+                <ScaleAnimation duration="ZO_CROWN_CRATES_GEMIFY_SINGLE_GEM_DURATION_MS" startScale="2.5" endScale="1">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardGemifyColorTintAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_GEMIFY_COLOR_TINT_IN_DURATION_MS" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="ZO_CROWN_CRATES_GEMIFY_COLOR_TINT_OUT_DURATION_MS" delay="ZO_CROWN_CRATES_GEMIFY_COLOR_TINT_OUT_DELAY_MS"  startAlpha="1" endAlpha="0" />
+                <AlphaAnimation duration="ZO_CROWN_CRATES_GEMIFY_COLOR_TINT_IN_SECOND_DURATION_MS" delay="ZO_CROWN_CRATES_GEMIFY_COLOR_TINT_IN_SECOND_DELAY_MS"  startAlpha="0" endAlpha="0.9" />
+                <AlphaAnimation duration="ZO_CROWN_CRATES_GEMIFY_COLOR_TINT_OUT_SECOND_DURATION_MS" delay="ZO_CROWN_CRATES_GEMIFY_COLOR_TINT_OUT_SECOND_DELAY_MS"  startAlpha="0.9" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardGemifyFinalGemAnimation">
+            <Animations>
+                <ScaleAnimation duration="ZO_CROWN_CRATES_GEMIFY_FINAL_GEM_UP_DURATION_MS" startScale="1" endScale="1.5" />
+                <ScaleAnimation duration="ZO_CROWN_CRATES_GEMIFY_FINAL_GEM_DOWN_DURATION_MS" delay="ZO_CROWN_CRATES_GEMIFY_FINAL_GEM_DOWN_DELAY_MS" startScale="1.5" endScale="1" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardGemifyCrownGemsTextAnimation">
+            <Animations>
+                <TranslateAnimation duration="ZO_CROWN_CRATES_GEMIFY_GEM_GAIN_TEXT_TRANSLATE_DURATION_MS" deltaY="-80">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_GEMIFY_GEM_GAIN_TEXT_ALPHA_DURATION_MS" delay="ZO_CROWN_CRATES_GEMIFY_GEM_GAIN_TEXT_ALPHA_DELAY_MS" startAlpha="1" endAlpha="0" />
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardShowInfo">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_CARD_SHOW_INFO_DURATION_MS" startAlpha="0" endAlpha="1"/>
+                <TranslateAnimation duration="ZO_CROWN_CRATES_CARD_SHOW_INFO_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_CrownCrateCardHideInfo">
+            <Animations>
+                <AlphaAnimation duration="ZO_CROWN_CRATES_CARD_HIDE_INFO_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_CrownCrateCardTexture" virtual="true">
+            <LocalDimensions3D x="ZO_CROWN_CRATES_CARD_WIDTH_WORLD" y="ZO_CROWN_CRATES_CARD_HEIGHT_WORLD"/>
+        </Texture>
+
+        <Label name="ZO_CrownCrateCardCrownGemsText" horizontalAlignment="CENTER" virtual="true" tier="HIGH"/>
+        
+        <Control name="ZO_CrownCrateCard" virtual="true" hidden="true" tier="LOW">
+            <Controls>
+                <Control name="$(parent)SetCollectibleActiveArea" hidden="true">
+                    <Dimensions x="ZO_CROWN_CRATES_CARD_WIDTH_REVEALED_UI" y="ZO_CROWN_CRATES_CARD_HEIGHT_REVEALED_UI" />
+                    <Controls>
+                        <Texture name="$(parent)Overlay" textureFile="EsoUI/Art/CrownCrates/crownCrate_activateCollectibleOverlay.dds" level="ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_ACTIVATION_OVERLAY">
+                            <TextureCoords left="ZO_CROWN_CRATES_CARD_LEFT_COORD" right="ZO_CROWN_CRATES_CARD_RIGHT_COORD" top="ZO_CROWN_CRATES_CARD_TOP_COORD" bottom="ZO_CROWN_CRATES_CARD_BOTTOM_COORD" />
+                            <AnchorFill />
+                        </Texture>
+                        <Control name="$(parent)Keybind" inherits="ZO_KeybindButton" tier="MEDIUM">
+                            <Anchor point="BOTTOM" offsetY="-55" />
+
+                            <OnInitialized>
+                                local NO_CALLBACK = nil
+                                ZO_KeybindButtonTemplate_Setup(self, "UI_SHORTCUT_TERTIARY", NO_CALLBACK, GetString(SI_COLLECTIBLE_ACTION_SET_ACTIVE))
+                            </OnInitialized>
+
+                            <Controls>
+                                <Label name="$(parent)NameLabel" override="true">
+                                    <!-- Due to the way resizeToFitDescendants calculates its width, the parent ends up being too big, making it not look centered -->
+                                    <!-- So we need to account for that. It would be best to fix resizeToFitDescendants but that would be... potentially far reaching... -->
+                                    <Anchor point="RIGHT" offsetX="-20" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)NameArea">
+                    <Anchor point="TOP" relativeTo="$(parent)SetCollectibleActiveArea" relativePoint="BOTTOM" />
+                    <Dimensions x="ZO_CROWN_CRATES_CARD_WIDTH_REVEALED_UI" y="ZO_CROWN_CRATES_REVEAL_INFO_AREA_HEIGHT_UI" />
+                    <Controls>
+                        <Label name="$(parent)Text" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" offsetX="ZO_CROWN_CRATES_CARD_INFO_INSET_X" offsetY="5" />
+                            <Anchor point="TOPRIGHT" offsetX="-ZO_CROWN_CRATES_CARD_INFO_INSET_X" offsetY="5" />
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)RewardTypeArea">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)SetCollectibleActiveArea" relativePoint="TOP" />
+                    <Dimensions x="ZO_CROWN_CRATES_CARD_WIDTH_REVEALED_UI" />
+                    <Controls>
+                        <Label name="$(parent)Text" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                            <Anchor point="BOTTOMLEFT" offsetX="ZO_CROWN_CRATES_CARD_INFO_INSET_X" offsetY="-5" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_CROWN_CRATES_CARD_INFO_INSET_X" offsetY="-5" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_CrownCrateSingleGem" textureFile="EsoUI/Art/CrownCrates/Rewards/crownCrate_reward_gems.dds" virtual="true" hidden="true" tier="HIGH">
+            <TextureCoords left="ZO_CROWN_CRATES_CARD_LEFT_COORD" right="ZO_CROWN_CRATES_CARD_RIGHT_COORD" top="ZO_CROWN_CRATES_CARD_TOP_COORD" bottom="ZO_CROWN_CRATES_CARD_BOTTOM_COORD" />
+            <Dimensions x="ZO_CROWN_CRATES_CARD_WIDTH_REVEALED_UI" y="ZO_CROWN_CRATES_CARD_HEIGHT_REVEALED_UI"/>
+        </Texture>
+    </Controls>
+</GuiXml>

@@ -17,9 +17,13 @@ function ZO_GamepadCraftingInventory:InitializeList()
     self:AddListDataTypes()
 end
 
+function ZO_GamepadCraftingInventory:SetNoItemLabelText(text)
+    self.list:SetNoItemText(text)
+end
+
 function ZO_GamepadCraftingInventory:AddListDataTypes()
     -- intended to be overridden for custom data types
-    self:AddVerticalScrollDataTypes("ZO_GamepadSubMenuEntryWithSubLabel")
+    self:AddVerticalScrollDataTypes("ZO_GamepadItemSubEntry")
 end
 
 function ZO_GamepadCraftingInventory:AddVerticalScrollDataTypes(verticalScrollCraftEntryType, setupTemplate, setupHeaderTemplate)
@@ -61,6 +65,7 @@ function ZO_GamepadCraftingInventory:PerformFullRefresh()
     end
 end
 
+-- This sort is appropriate for gear, like armor and weapons
 local DEFAULT_GAMEPAD_CRAFTING_ITEM_SORT =
 {
     customSortData = { tiebreaker = "bestItemCategoryName" },
@@ -84,10 +89,49 @@ function ZO_GamepadCraftingInventory:SetCustomSort(customDataSortFunction)
     self.customDataSortFunction = customDataSortFunction
 end
 
+function ZO_GamepadCraftingInventory:SetCustomBestItemCategoryNameFunction(customBestItemCategoryNameFunction)
+    self.customBestItemCategoryNameFunction = customBestItemCategoryNameFunction
+end
+
 function ZO_GamepadCraftingInventory:SetVerticalScrollCraftEntryType(type)
     self.verticalScrollCraftEntryType = type
     self.verticalScrollCraftEntryTypeTemplate = type .. "Template"
     self.verticalScrollCraftEntryTypeWithHeaderTemplate = type .. "TemplateWithHeader"
+end
+
+function ZO_GamepadCraftingInventory:GenerateCraftingInventoryEntryData(bagId, slotIndex, stackCount, slotData)
+    local itemName = GetItemName(bagId, slotIndex)
+    local icon = GetItemInfo(bagId, slotIndex)
+    local name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)
+    local customSortData = self.customDataSortFunction and self.customDataSortFunction(bagId, slotIndex) or 0
+
+    local newData = ZO_GamepadEntryData:New(name)
+    newData:InitializeCraftingInventoryVisualData(bagId, slotIndex, stackCount, customSortData, self.customBestItemCategoryNameFunction, slotData)
+    ZO_InventorySlot_SetType(newData, self.baseSlotType)
+
+    if self.customExtraDataFunction then
+        self.customExtraDataFunction(bagId, slotIndex, newData)
+    end
+
+    return newData
+end
+
+function ZO_GamepadCraftingInventory:AddFilteredDataToList(filteredDataTable)
+    local sortFunction = self.sortFunction or ZO_GamepadCraftingInventory_DefaultItemSortComparator
+
+    table.sort(filteredDataTable, sortFunction)
+
+    local lastBestItemCategoryName
+    for i, itemData in ipairs(filteredDataTable) do
+        if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
+            lastBestItemCategoryName = itemData.bestItemCategoryName
+            itemData:SetHeader(zo_strformat(SI_GAMEPAD_CRAFTING_INVENTORY_HEADER, lastBestItemCategoryName))
+        end
+
+        local template = self:GetListEntryTemplate(itemData)
+
+        self.list:AddEntry(template, itemData)
+    end
 end
 
 function ZO_GamepadCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
@@ -100,40 +144,33 @@ function ZO_GamepadCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(p
     local filteredDataTable = {}
     for itemId, itemInfo in pairs(list) do
         if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType) then
-            local bagId = itemInfo.bag
-            local slotIndex = itemInfo.index
-            local itemName = GetItemName(bagId, slotIndex)
-            local icon = GetItemInfo(bagId, slotIndex)
-            local name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)
-            local customSortData = self.customDataSortFunction and self.customDataSortFunction(bagId, slotIndex) or 0
-
-            local data = ZO_GamepadEntryData:New(name)
-            data:InitializeCraftingInventoryVisualData(itemInfo, customSortData)
-            filteredDataTable[#filteredDataTable + 1] = data
-
-            if self.customExtraDataFunction then
-                self.customExtraDataFunction(bagId, slotIndex, filteredDataTable[#filteredDataTable])
-            end
+            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
         end
         self.itemCounts[itemId] = itemInfo.stack
     end
 
-    table.sort(filteredDataTable, ZO_GamepadCraftingInventory_DefaultItemSortComparator)
+    self:AddFilteredDataToList(filteredDataTable)
 
-    local lastBestItemCategoryName
-    for i, itemData in ipairs(filteredDataTable) do
-        local nextItemData = filteredDataTable[i + 1]
-        local isNextEntryAHeader = nextItemData and nextItemData.bestItemCategoryName ~= itemData.bestItemCategoryName
+    return list
+end
 
-        if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
-            lastBestItemCategoryName = itemData.bestItemCategoryName
-            itemData:SetHeader(zo_strformat(SI_GAMEPAD_CRAFTING_INVENTORY_HEADER, lastBestItemCategoryName))
+function ZO_GamepadCraftingInventory:GetIndividualInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data, useWornBag)
+    local bagsToUse = useWornBag and ZO_ALL_CRAFTING_INVENTORY_BAGS_AND_WORN or ZO_ALL_CRAFTING_INVENTORY_BAGS_WITHOUT_WORN
+    local list = SHARED_INVENTORY:GenerateFullSlotData(predicate, unpack(bagsToUse))
+
+    ZO_ClearTable(self.itemCounts)
+
+    local filteredDataTable = {}
+    for i, slotData in ipairs(list) do
+        local bagId = slotData.bagId
+        local slotIndex = slotData.slotIndex
+        if not filterFunction or filterFunction(bagId, slotIndex, filterType) then
+            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(bagId, slotIndex, slotData.stackCount, slotData)
         end
-
-        local template = self:GetListEntryTemplate(itemData)
-
-        self.list:AddEntry(template, itemData)
+        self.itemCounts[i] = slotData.stackCount
     end
+
+    self:AddFilteredDataToList(filteredDataTable)
 
     return list
 end

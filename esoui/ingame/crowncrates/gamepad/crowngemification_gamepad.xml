@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CrownGemification_GamepadTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)Gemifiables" inherits="ZO_Gamepad_ParametricList_Screen_ListContainer">
+                                    <Controls>
+                                        <Label name="$(parent)EmptyText" verticalAlignment="CENTER" horizontalAlignment="CENTER" font="ZoFontGamepad27" text="SI_GEMIFICATION_NOTHING_TO_EXTRACT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <AnchorFill/>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

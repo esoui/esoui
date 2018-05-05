@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CutsceneTopLevel" tier="HIGH" level="ZO_HIGH_TIER_CUTSCENE_UNDERLAY" hidden="true" mouseEnabled="true">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_Cutscene_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Background" color="000000">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

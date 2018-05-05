@@ -12,26 +12,46 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
 
     self.tooltip = floatingControl:GetNamedChild("Tooltip")
 
-    if refinementOnly then
-        self.mode = ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS
-    else
-        self.mode = ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS
-    end
+    local ADDITIONAL_MOUSEOVER_BINDS = nil
+    local DONT_USE_KEYBIND_STRIP = false
+    self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT, ADDITIONAL_MOUSEOVER_BINDS, DONT_USE_KEYBIND_STRIP)
 
     self:InitializeInventory(refinementOnly)
     self:InitExtractionSlot(scene.name)
+
+    if refinementOnly then
+        self:SetFilterType(SMITHING_FILTER_TYPE_RAW_MATERIALS)
+    else
+        self:SetFilterType(SMITHING_FILTER_TYPE_WEAPONS)
+    end
 
     self:InitializeKeybindStripDescriptors()
 
     self.inventory.list:SetOnSelectedDataChangedCallback(function(list, selectedData)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        self.itemActions:SetInventorySlot(selectedData)
         if selectedData and selectedData.bagId and selectedData.slotIndex then
             local SHOW_COMBINED_COUNT = true
-            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex, nil, SHOW_COMBINED_COUNT)
+            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex, SHOW_COMBINED_COUNT)
         else
             GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
         end
     end)
+
+    local function AddTabEntry(tabBarEntries, filterType)
+        if ZO_CraftingUtils_CanSmithingFilterBeCraftedHere(filterType) then
+            local entry = {}
+            entry.text = GetString("SI_SMITHINGFILTERTYPE", filterType)
+            entry.callback = function()
+                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                    self:SetFilterType(filterType)
+                end
+            end
+            entry.filterType = filterType
+
+            table.insert(tabBarEntries, entry)
+        end
+    end
 
     scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -42,8 +62,9 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
             local tabBarEntries = {}
 
             if not refinementOnly then
-                self:AddEntry(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS), ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS, CanSmithingWeaponPatternsBeCraftedHere(), tabBarEntries)
-                self:AddEntry(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL), ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR, CanSmithingApparelPatternsBeCraftedHere(), tabBarEntries)
+                AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_WEAPONS)
+                AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_ARMOR)
+                AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_JEWELRY)
 
                 local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(GetCraftingInteractionType())
 
@@ -53,20 +74,20 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
                     ZO_GamepadGenericHeader_Activate(self.owner.header)
                 end
             else
-                local titleString = GetString(SI_SMITHING_TAB_REFINMENT)
+                local titleString = GetString(SI_SMITHING_TAB_REFINEMENT)
 
                 ZO_GamepadCraftingUtils_SetupGenericHeader(self.owner, titleString)
             end
 
             ZO_GamepadCraftingUtils_RefreshGenericHeader(self.owner)
 
-            -- tab bar / screen state fight with each other when switching between apparel only / other stations when sharing a tab bar...kick apparel station to the right mode
+            -- tab bar / screen state fight with each other when switching between apparel only / other stations when sharing a tab bar...kick apparel station to the right filterType
             if #tabBarEntries == 1 then
-                self:ChangeMode(tabBarEntries[1].mode)
+                self:SetFilterType(tabBarEntries[1].filterType)
             end
 
             -- used to update extraction slot UI with text / etc., PC does this as well
-            self:RemoveItemFromWorkbench()
+            self:RemoveItemFromCraft()
 
             self.owner:SetEnableSkillBar(true)
 
@@ -75,6 +96,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
 
             self.inventory:HandleDirtyEvent()
         elseif newState == SCENE_HIDDEN then
+            self.itemActions:SetInventorySlot(nil)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
             self.inventory:Deactivate()
@@ -91,40 +113,30 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
         end
     end)
 
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
+        if SCENE_MANAGER:IsShowing("gamepad_smithing_refine") or SCENE_MANAGER:IsShowing("gamepad_smithing_deconstruct") then
+            ZO_GamepadGenericHeader_Deactivate(self.owner.header)
+        end
+    end)
+
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
         if SCENE_MANAGER:IsShowing("gamepad_smithing_refine") or SCENE_MANAGER:IsShowing("gamepad_smithing_deconstruct") then
             if not self.extractionSlot:HasItem() then
                 self.tooltip:SetHidden(true)
             end
             self:UpdateSelection()
+            ZO_GamepadGenericHeader_Activate(self.owner.header)
         end
     end)
 end
 
-function ZO_GamepadSmithingExtraction:ChangeMode(mode)
-    self.mode = mode
-    self.inventory.filterType = mode
+function ZO_GamepadSmithingExtraction:SetFilterType(filterType)
+    self.inventory.filterType = filterType
 
     self.inventory:HandleDirtyEvent()
     -- used to update extraction slot UI with text / etc., PC does this as well
     -- note that on gamepad this gives a possibly unwanted side effect of losing the active item when switching filters
-    self:RemoveItemFromWorkbench()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
-function ZO_GamepadSmithingExtraction:AddEntry(name, mode, allowed, tabBarEntries)
-    if allowed then
-        local entry = {}
-        entry.text = name
-        entry.callback = function()
-            if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                self:ChangeMode(mode)
-            end
-        end
-        entry.mode = mode
-
-        table.insert(tabBarEntries, entry)
-    end
+    self:RemoveItemFromCraft()
 end
 
 function ZO_GamepadSmithingExtraction:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
@@ -136,11 +148,11 @@ end
 
 function ZO_GamepadSmithingExtraction:InitializeInventory(refinementOnly)
     local inventory = self.panelControl:GetNamedChild("Inventory")
-    self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, refinementOnly)
+    self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, refinementOnly, SLOT_TYPE_CRAFTING_COMPONENT)
 
     -- turn refinement stacks red if they don't have a large enough quantity in them to be refineable
     self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
-        if self.mode == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+        if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
             data.meetsUsageRequirement = data.stackCount >= GetRequiredSmithingRefinementStackSize()
         end
     end
@@ -174,49 +186,43 @@ function ZO_GamepadSmithingExtraction:UpdateSelection()
     self:UpdateEmptySlotIcon()
 end
 
-do
-    local MODE_TO_ICON_MAP = {
-        [ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_apparelSlot.dds",
-        [ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_weaponSlot.dds",
-        [ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_refine_emptySlot.dds",
-    }
+function ZO_GamepadSmithingExtraction:UpdateEmptySlotIcon()
+    if not self.extractionSlot:HasItem() then
+        local slotBG = self.extractionSlot.control:GetNamedChild("Bg")
+        local emptySlotIconControl = self.extractionSlot.control:GetNamedChild("EmptySlotIcon")
+        local iconPath = ZO_GamepadCraftingUtils_GetItemSlotTextureFromSmithingFilter(self:GetFilterType())
+        
+        -- emptySlotIcon stores an icon path, not the control itself
+        self.extractionSlot.emptySlotIcon = iconPath
+        emptySlotIconControl:SetTexture(iconPath)
+        self.extractionSlot:ShowEmptySlotIcon(true)
 
-    function ZO_GamepadSmithingExtraction:UpdateEmptySlotIcon()
-        if not self.extractionSlot:HasItem() then
-            local slotBG = self.extractionSlot.control:GetNamedChild("Bg")
-            local emptySlotIconControl = self.extractionSlot.control:GetNamedChild("EmptySlotIcon")
-            local iconPath = MODE_TO_ICON_MAP[self.mode]
-            
-            -- emptySlotIcon stores an icon path, not the control itself
-            self.extractionSlot.emptySlotIcon = iconPath
-            emptySlotIconControl:SetTexture(iconPath)
-            self.extractionSlot:ShowEmptySlotIcon(true)
+        -- reanchor slot icon based on special refine "you need 10 of this" text
+        emptySlotIconControl:ClearAnchors()
 
-            -- reanchor slot icon based on special refine "you need 10 of this" text
-            emptySlotIconControl:ClearAnchors()
-
-            local newAnchor = nil
-            if self.mode == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
-                newAnchor = ZO_Anchor:New(TOP, slotBG, TOP, 0, 10)
-            else
-                newAnchor = ZO_Anchor:New(CENTER, slotBG)
-            end
-
-            newAnchor:AddToControl(emptySlotIconControl)
+        local newAnchor = nil
+        if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+            newAnchor = ZO_Anchor:New(TOP, slotBG, TOP, 0, 10)
+        else
+            newAnchor = ZO_Anchor:New(CENTER, slotBG)
         end
+
+        newAnchor:AddToControl(emptySlotIconControl)
     end
 end
 
-function ZO_GamepadSmithingExtraction:AddItemToWorkbench()
-    local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
-    self:AddItemToCraft(bagId, slotIndex)
+function ZO_GamepadSmithingExtraction:AddItemToCraft(bagId, slotIndex)
+    ZO_SharedSmithingExtraction.AddItemToCraft(self, bagId, slotIndex)
+    -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSelection()
 
     if bagId and slotIndex then
         self.tooltip.tip:ClearLines()
         local SHOW_COMBINED_COUNT = true
-        self.tooltip.tip:LayoutBagItem(bagId, slotIndex, nil, SHOW_COMBINED_COUNT)
+        self.tooltip.tip:LayoutBagItem(bagId, slotIndex, SHOW_COMBINED_COUNT)
         self.tooltip.icon:SetTexture(GetItemInfo(bagId, slotIndex))
         self.tooltip:SetHidden(false)
 
@@ -224,8 +230,11 @@ function ZO_GamepadSmithingExtraction:AddItemToWorkbench()
     end
 end
 
-function ZO_GamepadSmithingExtraction:RemoveItemFromWorkbench()
-    self:ClearSelections()
+function ZO_GamepadSmithingExtraction:RemoveItemFromCraft()
+    ZO_SharedSmithingExtraction.RemoveItemFromCraft(self)
+    -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSelection()
 
@@ -237,7 +246,7 @@ function ZO_GamepadSmithingExtraction:ConfirmRefineOrDestroy()
 end
 
 function ZO_GamepadSmithingExtraction:HasEnoughToRefine()
-    if self.mode == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+    if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
         local bagId, slotIndex = self.extractionSlot:GetBagAndSlot()
         return ZO_SharedSmithingExtraction_DoesItemMeetRefinementStackRequirement(bagId, slotIndex, self.extractionSlot:GetStackCount())
     else
@@ -269,9 +278,9 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
                         end,
             callback = function()
                 if self:IsCurrentSelected() then
-                    self:RemoveItemFromWorkbench()
+                    self:RemoveItemFromCraft()
                 else
-                    self:AddItemToWorkbench()
+                    self:AddItemToCraft(self.inventory:CurrentSelectionBagAndSlot())
                 end
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
@@ -280,32 +289,29 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
         -- Perform craft
         {
             name = function()
-                if self.mode == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR then
+                if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+                    return GetString(SI_SMITHING_TAB_REFINEMENT)
+                else
                     return GetString(SI_SMITHING_TAB_DECONSTRUCTION)
-                elseif self.mode == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS then
-                    return GetString(SI_SMITHING_TAB_DECONSTRUCTION)
-                elseif self.mode == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
-                    return GetString(SI_SMITHING_TAB_REFINMENT)
                 end
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
         
             callback = function() self:ConfirmRefineOrDestroy() end,
 
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasEnoughToRefine() and self:HasSelections() end,
+            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasEnoughToRefine() and self:HasSelections() end,
         },
 
-        -- Clear selections
+        -- Item Options
         {
-            name = function()
-                return GetString(SI_CRAFTING_CLEAR_SELECTIONS)
-            end,
+            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() end,
             callback = function()
-                self:RemoveItemFromWorkbench()
-                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+                self:ShowItemActions()
             end,
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory:CurrentSelection() ~= nil
+            end
         },
     }
 
@@ -314,38 +320,83 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 
+function ZO_GamepadSmithingExtraction:AddKeybinds()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingExtraction:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingExtraction:ShowItemActions()
+    local dialogData = 
+    {
+        targetData = self.inventory:CurrentSelection(),
+        itemActions = self.itemActions,
+    }
+
+    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
+end
+
 ZO_GamepadExtractionInventory = ZO_GamepadCraftingInventory:Subclass()
 
 function ZO_GamepadExtractionInventory:New(...)
     return ZO_GamepadCraftingInventory.New(self, ...)
 end
 
+local GAMEPAD_CRAFTING_RAW_MATERIAL_SORT =
+{
+    customSortData = { tiebreaker = "text" },
+    text = {},
+}
+
 function ZO_GamepadExtractionInventory:Initialize(owner, control, refinementOnly, ...)
     local inventory = ZO_GamepadCraftingInventory.Initialize(self, control, ...)
     self.owner = owner
-    self.noItemsLabel = control.noItemsLabel
 
     if refinementOnly then
-        self.filterType = ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS
+        self.filterType = SMITHING_FILTER_TYPE_RAW_MATERIALS
+        self:SetOverrideItemSort(function(left, right)
+            return ZO_TableOrderingFunction(left, right, "customSortData", GAMEPAD_CRAFTING_RAW_MATERIAL_SORT, ZO_SORT_ORDER_UP)
+        end)
     else
-        self.filterType = ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS
+        self.filterType = SMITHING_FILTER_TYPE_WEAPONS
+        local DEFAULT_SORT = nil
+        self:SetOverrideItemSort(DEFAULT_SORT)
     end
+
+    self:SetCustomSort(function(bagId, slotIndex)
+                            local traitInformation = GetItemTraitInformation(bagId, slotIndex)
+                            return ZO_GetItemTraitInformation_SortOrder(traitInformation)
+                       end)
+
+    self:SetCustomBestItemCategoryNameFunction(function(slotData, data)
+                                                    if slotData.traitInformation then
+                                                        if slotData.traitInformation == ITEM_TRAIT_INFORMATION_ORNATE then
+                                                            local traitType = GetItemTrait(slotData.bagId, slotData.slotIndex)
+                                                            slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTRAITTYPE", traitType))
+                                                        elseif slotData.traitInformation == ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED or slotData.traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
+                                                            slotData.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTRAITINFORMATION", slotData.traitInformation))
+                                                        else
+                                                            --If it is not ornate or trait related then use no header. We take advantage of the fact that empty string sorts to the top to order this.
+                                                            slotData.bestItemCategoryName = ""
+                                                        end
+                                                    end
+                                               end)
 end
 
 function ZO_GamepadExtractionInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
-    self.owner:OnInventoryUpdate(validItemIds)
+    local validItems
+    if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+        validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+    else
+        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+    end
+    self.owner:OnInventoryUpdate(validItems, self.filterType)
 
-    -- handle no items in a filter cases / show text to the user
-    self.noItemsLabel:SetHidden(#data > 0)
-    if #data < 1 then
-        if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR then
-            self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_ARMOR))
-        elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS then
-            self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_WEAPONS))
-        elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
-            self.noItemsLabel:SetText(GetString(SI_SMITHING_EXTRACTION_NO_MATERIALS))
-        end
+    -- if we don't have any items to show, make sure out NoItemLabel is updated
+    if #data == 0 then
+        self:SetNoItemLabelText(GetString("SI_SMITHINGFILTERTYPE_EXTRACTNONE", self.filterType))
     end
 end
 

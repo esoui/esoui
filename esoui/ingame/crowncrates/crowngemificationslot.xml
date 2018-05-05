@@ -1,0 +1,61 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CrownCrateGemificationSlotSet">
+            <Animations>
+                <CustomAnimation duration="ZO_MANUAL_GEMIFY_SET_SWING_DURATION">
+                    <UpdateFunction>
+                        ZO_ManualGemifySwing_OnUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <TopLevelControl name="ZO_CrownGemificationSlotTopLevel" hidden="true">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)Card" inherits="ZO_CrownCrateCard"/>
+                <Control name="$(parent)Info">
+                    <Anchor point="TOP" relativeTo="$(parent)CardNameArea" offsetY="5"/>
+                    <Dimensions x="400" y="170"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG"/>
+                        <Control name="$(parent)Contents" resizeToFitDescendents="true">
+                            <Anchor point="CENTER"/>
+                            <Controls>
+                                <Label name="$(parent)Name" horizontalAlignment="CENTER">
+                                    <Anchor point="TOP"/>
+                                    <Dimensions x="370"/>
+                                </Label>
+                                <Control name="$(parent)Conversion" resizeToFitDescendents="true">
+                                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="15"/>
+                                    <Controls>
+                                        <Label name="$(parent)Required">
+                                            <Anchor point="TOPLEFT"/>
+                                        </Label>
+                                        <Texture name="$(parent)RequiredIcon" layer="OVERLAY">
+                                            <Dimensions x="64" y="64"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Required" relativePoint="TOPRIGHT" offsetX="5"/>
+                                        </Texture>
+                                        <Texture name="$(parent)Arrow">
+                                            <Dimensions y="64"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)RequiredIcon" relativePoint="TOPRIGHT" offsetX="10"/>
+                                        </Texture>
+                                        <Label name="$(parent)GemAmount">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" offsetX="10"/>
+                                        </Label>
+                                        <Texture name="$(parent)GemIcon" textureFile="EsoUI/Art/CrownCrates/Rewards/crownCrate_reward_gems.dds">
+                                            <Dimensions x="64" y="64"/>
+                                            <TextureCoords left="0.33" top="0.33" right="0.66" bottom="0.66"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)GemAmount" relativePoint="TOPRIGHT" offsetX="5"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>                        
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

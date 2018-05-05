@@ -5,7 +5,6 @@
             <OnInitialized>
                 self.nameLabel = self:GetNamedChild("Name")
                 self.statusLabel = self:GetNamedChild("Status")
-                self.lockIcon = self:GetNamedChild("LockIcon")
                 self.timerIcon = self:GetNamedChild("TimerIcon")
             </OnInitialized>
 
@@ -15,10 +14,6 @@
                     <Anchor point="LEFT" />
                 </Texture>
 
-                <Texture name="$(parent)LockIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER"/>
-                </Texture>
                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds">
                     <Dimensions x="32" y="32" />
                     <Anchor point="CENTER"/>
@@ -39,7 +34,22 @@
             </Controls>
         </Button>
 
-        <Button name="ZO_GamepadSmithingResearchListSlot" inherits="ZO_GamepadSmithingListSlot" virtual="true">
+        <Control name="ZO_GamepadSmithingListSlot" virtual="true">
+            <Dimensions x="64" y="64" />
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="2">
+                    <AnchorFill/>
+                </Texture>
+
+                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGamepad27" inheritScale="false">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="1" />
+                    <!-- Allow extra space for large stack counts like 898.8k -->
+                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSmithingResearchListSlot" inherits="ZO_GamepadSmithingListSlot" virtual="true">
             <OnInitialized>
                 self.timerIcon = self:GetNamedChild("TimerIcon")
             </OnInitialized>
@@ -50,7 +60,7 @@
                     <Anchor point="CENTER" relativePoint="BOTTOMRIGHT"/>
                 </Texture>
             </Controls>
-        </Button>
+        </Control>
 
         <Control name="ZO_GamepadSmithingResearchPanelContent" inherits="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
             <Controls>
@@ -74,11 +84,11 @@
                                     </OnInitialized>
                                     <AnchorFill/>
                                 </StatusBar>
-                                                
+
                                 <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                     <Anchor point="CENTER" />
                                 </Label>
-                                                
+
                                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds" tier="HIGH">
                                     <Dimensions x="32" y="32" />
                                     <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT"/>
@@ -111,7 +121,7 @@
                             <Anchor point="BOTTOMRIGHT"/>
                         </Control>
                     </Controls>
-                </Control>                
+                </Control>
             </Controls>
         </Control>
     </Controls>

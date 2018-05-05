@@ -1,19 +1,5 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_EnchantingSlotContainer_Gamepad" virtual="true">
-            <Dimensions x="512" y="128" />
-            <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y" offsetX="160"/>
-        </Control>
-
-        <Control name="ZO_ExtractionEnchantingSlotContainer_Gamepad" inherits="ZO_EnchantingSlotContainer_Gamepad" virtual="true">
-            <Controls>
-                <Texture name="$(parent)LandingArea" textureFile="EsoUI/Art/Crafting/crafting_enchanting_extraction_landingArea_overlay.dds">
-                    <Dimensions x="236" y="236" />
-                    <Anchor point="CENTER" offsetY="50" />
-                </Texture>
-            </Controls>
-        </Control>
-        
         <Button name="ZO_GamepadEnchantingRuneCraftingSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">

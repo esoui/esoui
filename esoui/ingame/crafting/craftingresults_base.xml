@@ -6,7 +6,7 @@
             </EasingFunction>
         </AlphaAnimation>
 
-        <AnimationTimeline name="CraftingResultTooltipAnimation">
+        <AnimationTimeline name="CraftingResultTooltipAnimation_Base">
             <Animations>
                 <!-- Tooltip -->
                 <AlphaAnimation delay="1300" duration="700" startAlpha="1" endAlpha="0">
@@ -23,7 +23,11 @@
                         self:GetTimeline():Stop()
                     </OnStop>
                 </AlphaAnimation>
-                
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="CraftingResultTooltipAnimation" inherits="CraftingResultTooltipAnimation_Base">
+            <Animations>
                 <!-- Tooltip background glow -->
                 <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
                     <EasingFunction>

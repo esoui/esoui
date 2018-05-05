@@ -113,6 +113,8 @@
                     PlaySound(SOUNDS.CLOTHIER_EXTRACT_START_ANIM)
                 elseif craftingType == CRAFTING_TYPE_WOODWORKING then
                     PlaySound(SOUNDS.WOODWORKER_EXTRACT_START_ANIM)
+                elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+                    PlaySound(SOUNDS.JEWELRYCRAFTER_EXTRACT_START_ANIM)
                 end
             </OnPlay>
             <Animations>
@@ -228,7 +230,9 @@
             <Textures mouseOver="" pressedMouseOver="" />
             
             <Controls>
-                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha="0" level="0">
+                <Texture name="$(parent)Icon" override="true" pixelRoundingEnabled="false"/>
+
+                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" pixelRoundingEnabled="false" alpha="0" level="0">
                     <Dimensions x="128" y="128"/>
                     <Anchor point="CENTER"/>
                 </Texture>

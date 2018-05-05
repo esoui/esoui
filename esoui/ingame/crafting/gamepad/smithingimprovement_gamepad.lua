@@ -39,8 +39,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
     self.floatingControl = floatingControl
 
     -- called before initialize on purpose, as functions called from it need these
-    self.mode = ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS
-    self.tooltip = floatingControl:GetNamedChild("Tooltip")
+    self.mode = SMITHING_FILTER_TYPE_WEAPONS
     self.sourceTooltip = floatingControl:GetNamedChild("SourceTooltip")
     self.qualityBridge = floatingControl:GetNamedChild("QualityBridge")
     self.resultTooltip = floatingControl:GetNamedChild("ResultTooltip")
@@ -52,19 +51,20 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
     self:InitializeInventory()
     self:InitializeKeybindStripDescriptors()
 
+    local ADDITIONAL_OVERBINDS = nil
+    local DONT_USE_KEYBIND_STRIP = false
+    self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT, ADDITIONAL_OVERBINDS, DONT_USE_KEYBIND_STRIP)
+
     -- set up inventory keybinds and tooltips
     self.inventory.list:SetOnSelectedDataChangedCallback(function(list, selectedData)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        self.itemActions:SetInventorySlot(selectedData)
         if selectedData and selectedData.bagId and selectedData.slotIndex then
-            self.tooltip.tip:ClearLines()
-            self.tooltip.tip:LayoutBagItem(selectedData.bagId, selectedData.slotIndex)
-            self.tooltip.icon:SetTexture(selectedData.pressedIcon)
-            self.tooltip:SetHidden(false)
-
-            -- purposely not showing this one yet...
+            self.sourceTooltip.scrollTooltip:ResetToTop()
             self.sourceTooltip.tip:ClearLines()
             self.sourceTooltip.tip:LayoutBagItem(selectedData.bagId, selectedData.slotIndex)
             self.sourceTooltip.icon:SetTexture(selectedData.pressedIcon)
+            self.sourceTooltip:SetHidden(false)
 
             self:Refresh()
 
@@ -73,7 +73,6 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self.selectedItem = selectedData
 
             if not self:HasSelections() then
-                self.sourceTooltip:SetHidden(true)
                 self.resultTooltip:SetHidden(true)
                 self.slotContainer:SetHidden(true)
                 self:EnableQualityBridge(false)
@@ -86,13 +85,18 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             end
 
             self.spinner:Deactivate()
-            self.spinner:SetValue(1)
 
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(ZO_SharedSmithingImprovement_GetImprovementTooltipSounds())
+
+            GAMEPAD_CRAFTING_RESULTS:ClearSecondaryTooltipAnimationControls()
+            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.sourceTooltip)
+            GAMEPAD_CRAFTING_RESULTS:AddSecondaryTooltipAnimationControl(self.qualityBridge)
         else
-            self.tooltip.tip:ClearLines()
-            self.tooltip:SetHidden(true)
+            self.sourceTooltip.tip:ClearLines()
+            self.sourceTooltip:SetHidden(true)
+
+            GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
 
             self:ClearBoosterRowHighlight()
 
@@ -102,6 +106,19 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
         end
     end)
 
+    local function AddTabEntry(tabBarEntries, filterType)
+        if ZO_CraftingUtils_CanSmithingFilterBeCraftedHere(filterType) then
+            local entry = {}
+            entry.text = GetString("SI_SMITHINGFILTERTYPE", filterType)
+            entry.callback = function()
+                self:ChangeMode(filterType)
+            end
+            entry.mode = filterType
+
+            table.insert(tabBarEntries, entry)
+        end
+    end
+
     scene:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             KEYBIND_STRIP:RemoveDefaultExit()
@@ -110,9 +127,9 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
             -- LB / RB handling for switching filters on improvement screen
             local tabBarEntries = {}
-
-            self:AddEntry(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS), ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS, CanSmithingWeaponPatternsBeCraftedHere(), tabBarEntries)
-            self:AddEntry(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL), ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR, CanSmithingApparelPatternsBeCraftedHere(), tabBarEntries)
+            AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_WEAPONS)
+            AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_ARMOR)
+            AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_JEWELRY)
 
             local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(GetCraftingInteractionType())
 
@@ -133,7 +150,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             end
 
             -- used to update extraction slot UI with text / etc., PC does this as well
-            self:RemoveItemFromWorkbench()
+            self:RemoveItemFromCraft()
 
             if self.selectedItem then
                 self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
@@ -141,12 +158,11 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
             self.owner:SetEnableSkillBar(true)
         elseif newState == SCENE_HIDDEN then
+            self.itemActions:SetInventorySlot(nil)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
             self:SetInventoryActive(false)
 
-            self.tooltip.tip:ClearLines()
-            self.tooltip:SetHidden(true)
             self.sourceTooltip.tip:ClearLines()
             self.sourceTooltip:SetHidden(true)
             self.resultTooltip.tip:ClearLines()
@@ -161,7 +177,6 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self.owner:SetEnableSkillBar(false)
 
             self.spinner:Deactivate()
-            self.spinner:SetValue(1)
         end
     end)
 
@@ -173,9 +188,14 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
         if SCENE_MANAGER:IsShowing("gamepad_smithing_improvement") then
-            self:RemoveItemFromWorkbench()
+            local bagId, slotIndex, tradeskill = self:GetCurrentImprovementParams()
+            if CanItemBeSmithingImproved(bagId, slotIndex, tradeskill) then
+                self:AddItemToCraft(bagId, slotIndex)
+            else
+                self:RemoveItemFromCraft()
+                self:SetInventoryActive(true)
+            end
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-            self:SetInventoryActive(true)
 
             if self.shouldActivateTabBar then
                 ZO_GamepadGenericHeader_Activate(self.owner.header)
@@ -188,17 +208,12 @@ function ZO_GamepadSmithingImprovement:ChangeMode(mode)
     self.mode = mode
     self.inventory.filterType = mode
 
-    if self.mode == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR then
-        self.inventory.noItemsLabel:SetText(GetString(SI_SMITHING_IMPROVE_NO_ARMOR))
-    elseif self.mode == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS then
-        self.inventory.noItemsLabel:SetText(GetString(SI_SMITHING_IMPROVE_NO_WEAPONS))
-    end
-
+    self.inventory:SetNoItemLabelText(GetString("SI_SMITHINGFILTERTYPE_IMPROVENONE", self.mode))
     self.inventory:HandleDirtyEvent()
     -- used to update improvement slot UI with text / etc., PC does this as well
     -- note that on gamepad this gives a possibly unwanted side effect of losing the active item when switching filters
     if not GAMEPAD_CRAFTING_RESULTS:IsCraftInProgress() then
-        self:RemoveItemFromWorkbench()
+        self:RemoveItemFromCraft()
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -207,19 +222,6 @@ function ZO_GamepadSmithingImprovement:ChangeMode(mode)
         self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
     else
         self:ClearBoosterRowHighlight()
-    end
-end
-
-function ZO_GamepadSmithingImprovement:AddEntry(name, mode, allowed, tabBarEntries)
-    if allowed then
-        local entry = {}
-        entry.text = name
-        entry.callback = function()
-            self:ChangeMode(mode)
-        end
-        entry.mode = mode
-
-        table.insert(tabBarEntries, entry)
     end
 end
 
@@ -236,18 +238,11 @@ function ZO_GamepadSmithingImprovement:InitializeSlots()
 
     self.improvementChanceLabel = self.slotContainer.extraInfoLabel
     self.spinner = ZO_Spinner_Gamepad:New(self.slotContainer:GetNamedChild("Spinner"))
-    self.spinner:SetValue(1)
 
     self.boosterStackCount = self.boosterSlot:GetNamedChild("StackCount")
 
     self.spinner:RegisterCallback("OnValueChanged", function(value)
         self:RefreshImprovementChance()
-
-        local row = self:GetRowForSelection()
-        if row then
-            local color = value > row.currentStack and ZO_ERROR_COLOR or ZO_SELECTED_TEXT
-            self.improvementChanceLabel:SetColor(color:UnpackRGBA())
-        end
 
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end)
@@ -257,7 +252,11 @@ end
 
 function ZO_GamepadSmithingImprovement:InitializeInventory()
     self.inventoryControl = self.panelControl:GetNamedChild("Inventory")
-    self.inventory = ZO_GamepadImprovementInventory:New(self, self.inventoryControl)
+    self.inventory = ZO_GamepadImprovementInventory:New(self, self.inventoryControl, SLOT_TYPE_CRAFTING_COMPONENT)
+
+    self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
+        data:SetIgnoreTraitInformation(true)
+    end)
 end
 
 function ZO_GamepadSmithingImprovement:IsCurrentSelected()
@@ -269,15 +268,6 @@ function ZO_GamepadSmithingImprovement:IsCurrentSelected()
 end
 
 function ZO_GamepadSmithingImprovement:UpdateSelection()
-    local bagId, slotIndex = self.improvementSlot:GetBagAndSlot()
-    for _, data in pairs(self.inventory.list.dataList) do
-        if data.bagId == bagId and data.slotIndex == slotIndex then
-            data.isEquippedInCurrentCategory = true
-        else
-            data.isEquippedInCurrentCategory = false
-        end
-    end
-
     if self.selectedItem then
         self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
     else
@@ -287,15 +277,20 @@ function ZO_GamepadSmithingImprovement:UpdateSelection()
     self.inventory:PerformFullRefresh()
 end
 
-function ZO_GamepadSmithingImprovement:AddItemToWorkbench()
-    local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
-    self:AddItemToCraft(bagId, slotIndex)
+function ZO_GamepadSmithingImprovement:AddItemToCraft(bagId, slotIndex)
+    ZO_SharedSmithingImprovement.AddItemToCraft(self, bagId, slotIndex)
+    -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSelection()
 
     if self.selectedItem then
-        self.tooltip:SetHidden(true)
-        self.sourceTooltip:SetHidden(false)
+        self.sourceTooltip.scrollTooltip:ResetToTop()
+        self.sourceTooltip:ClearAnchors()
+        local offsetX = 21
+        self.sourceTooltip:SetAnchor(RIGHT, self.qualityBridge, LEFT, offsetX)
+
         self.slotContainer:SetHidden(false)
 
         -- I need the functionality of a crafting slot, but don't want to see these things (essentially an invisible crafting slot)
@@ -306,21 +301,29 @@ function ZO_GamepadSmithingImprovement:AddItemToWorkbench()
         self:SetInventoryActive(false)
         ZO_GamepadGenericHeader_Deactivate(self.owner.header)
         self.spinner:Activate()
-        self.spinner:SetValue(1)
     end
 end
 
-function ZO_GamepadSmithingImprovement:RemoveItemFromWorkbench()
+function ZO_GamepadSmithingImprovement:RemoveItemFromCraft()
+    ZO_SharedSmithingImprovement.RemoveItemFromCraft(self)
+
+     -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+
     self:SetImprovementSlotItem(nil)
     self:UpdateSelection()
 
-    self.tooltip:SetHidden(false)
-    self.sourceTooltip:SetHidden(true)
+    self.sourceTooltip:SetHidden(false)
+    self.sourceTooltip.scrollTooltip:ResetToTop()
+    self.sourceTooltip:ClearAnchors()
+    self.sourceTooltip:SetAnchor(CENTER, self.qualityBridge, CENTER)
+
     self.slotContainer:SetHidden(true)
 
     if not self.selectedItem then
-        self.tooltip.tip:ClearLines()
-        self.tooltip:SetHidden(true)
+        self.sourceTooltip.tip:ClearLines()
+        self.sourceTooltip:SetHidden(true)
     end
 
     self:SetInventoryActive(true)
@@ -330,7 +333,6 @@ function ZO_GamepadSmithingImprovement:RemoveItemFromWorkbench()
     end
 
     self.spinner:Deactivate()
-    self.spinner:SetValue(1)
 end
 
 function ZO_GamepadSmithingImprovement:ConfirmImprove()
@@ -348,6 +350,8 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
 
         -- need to have special exits for this scene
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Smithing Improvement Default Exit",
             keybind = "UI_SHORTCUT_EXIT",
             callback = function()
                 SCENE_MANAGER:ShowBaseScene()
@@ -370,7 +374,7 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
                 if self:IsCurrentSelected() then
-                    self:RemoveItemFromWorkbench()
+                    self:RemoveItemFromCraft()
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
                 else
                     SCENE_MANAGER:HideCurrentScene()
@@ -389,7 +393,7 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and not self:IsCurrentSelected() end,
             callback = function() 
-                self:AddItemToWorkbench()
+                self:AddItemToCraft(self.inventory:CurrentSelectionBagAndSlot())
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
         },
@@ -403,7 +407,19 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
         
             callback = function() self:ConfirmImprove() end,
 
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() and self:CanImprove() end,
+            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() and self:CanImprove() end,
+        },
+
+        -- Item Options
+        {
+            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                self:ShowItemActions()
+            end,
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory:CurrentSelection() ~= nil
+            end
         },
     }
 
@@ -417,58 +433,19 @@ function ZO_GamepadSmithingImprovement:RefreshImprovementChance()
     if row then
         self.slotContainer.selectedLabel:SetText(zo_strformat(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_SELECTION, GetString("SI_ITEMQUALITY", row.quality), self.spinner:GetValue(), row.reagentName))
     end
+    self:ColorizeText(row)
 end
 
 function ZO_GamepadSmithingImprovement:OnSlotChanged()
-    self.currentQuality = nil
+    ZO_SharedSmithingImprovement.OnSlotChanged(self)
 
-    local hasItem = self.improvementSlot:HasItem()
-    if hasItem then
-        local row = self:GetRowForSelection()
-        if row then
-            self.spinner:SetMinMax(1, self:FindMaxBoostersToApply())
-
-            self.currentQuality = row.quality - 1 -- need the "from" quality
-
-            self.spinner:SetSoftMax(row.currentStack)
-
-            self.boosterSlot.craftingType = GetCraftingInteractionType()
-            self.boosterSlot.index = row.index
-
-            ZO_ItemSlot_SetupSlot(self.boosterSlot, row.currentStack, row.icon)
-            self:RefreshImprovementChance()
-
-            self:ColorizeText(row)
-        else
-            self:ClearSelections()
-            return
-        end
-    else
-        self.canImprove = false
-
-        self.improvementChanceLabel:SetText(GetString(SI_SMITHING_IMPROVE_CHANCE_HEADER))
-        self:ClearBoosterRowHighlight()
-
-        self.owner:OnImprovementSlotChanged()
-    end
-
-    self.boosterSlot:SetHidden(not hasItem)
-
-    if hasItem then
-        self.resultTooltip:SetHidden(false)
-        self.resultTooltip.tip:ClearLines()
-        self:SetupResultTooltip(self:GetCurrentImprovementParams())
+    if self.improvementSlot:HasItem() then
         self:EnableQualityBridge(true, self.currentQuality)
     else
-        self.resultTooltip:SetHidden(true)
         self:EnableQualityBridge(false)
     end
 
     self.inventory:HandleVisibleDirtyEvent()
-end
-
-function ZO_GamepadSmithingImprovement:Improve()
-    self:SharedImprove("CONFIRM_IMPROVE_ITEM")
 end
 
 function ZO_GamepadSmithingImprovement:HighlightBoosterRow(rowToHighlight)
@@ -516,14 +493,16 @@ function ZO_GamepadSmithingImprovement:ColorizeText(qualityRow)
         spinnerIcon:SetTexture(qualityRow.icon)
         spinnerStackCount:SetText(qualityRow.currentStack)
 
-        local colorForText = (qualityRow.currentStack == 0) and ZO_ERROR_COLOR or ZO_SELECTED_TEXT
-        spinnerStackCount:SetColor(colorForText:UnpackRGBA())
-        spinnerDisplay:SetColor(colorForText:UnpackRGBA())
-        self.improvementChanceLabel:SetColor(colorForText:UnpackRGBA())
+        local hasMaterialColor = (qualityRow.currentStack == 0) and ZO_ERROR_COLOR or ZO_SELECTED_TEXT
+        local canUpgradeColor = (self.spinner:GetValue() > qualityRow.currentStack) and ZO_ERROR_COLOR or ZO_SELECTED_TEXT
+        spinnerStackCount:SetColor(hasMaterialColor:UnpackRGBA())
+        spinnerDisplay:SetColor(canUpgradeColor:UnpackRGBA())
+        self.improvementChanceLabel:SetColor(canUpgradeColor:UnpackRGBA())
     end
 end
 
 function ZO_GamepadSmithingImprovement:SetupResultTooltip(...)
+    self.resultTooltip.tip:ClearLines()
     self.resultTooltip.tip:LayoutImprovedSmithingItem(...)
 end
 
@@ -535,6 +514,24 @@ function ZO_GamepadSmithingImprovement:SetInventoryActive(active)
         self.inventory:Deactivate()
         self.inventoryControl:SetHidden(true)
     end
+end
+
+function ZO_GamepadSmithingImprovement:AddKeybinds()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingImprovement:RemoveKeybinds()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadSmithingImprovement:ShowItemActions()
+    local dialogData = 
+    {
+        targetData = self.inventory:CurrentSelection(),
+        itemActions = self.itemActions,
+    }
+
+    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
 end
 
 do
@@ -571,8 +568,17 @@ function ZO_GamepadImprovementInventory:Initialize(owner, control, ...)
     ZO_GamepadCraftingInventory.Initialize(self, control, ...)
 
     self.owner = owner
-    self.noItemsLabel = control.noItemsLabel
-    self.filterType = ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS
+    self.filterType = SMITHING_FILTER_TYPE_WEAPONS
+    self:SetCustomSort(function(bagId, slotIndex) return bagId end) -- sort equipped items (BAG_WORN) to the top of the list
+    self:SetCustomBestItemCategoryNameFunction(function(slotData)                                                
+                                                    if slotData.bagId == BAG_WORN then
+                                                        local equipSlot = ZO_Character_GetEquipSlotForEquipType(slotData.equipType)
+                                                        local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
+                                                        slotData.bestItemCategoryName = zo_strformat(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM, GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
+                                                    else
+                                                        slotData.bestItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(slotData)
+                                                    end
+                                               end)
 end
 
 function ZO_GamepadImprovementInventory:GetCurrentFilterType()
@@ -580,10 +586,9 @@ function ZO_GamepadImprovementInventory:GetCurrentFilterType()
 end
 
 function ZO_GamepadImprovementInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data)
-    self.owner:OnInventoryUpdate(validItemIds)
-
-    self.noItemsLabel:SetHidden(#data > 0)
+    local USE_WORN_BAG = true
+    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
+    self.owner:OnInventoryUpdate(validItems)
 
     self.owner.spinner:GetControl():SetHidden(#data < 1 or not self.owner:HasSelections())
 end

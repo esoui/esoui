@@ -1,8 +1,5 @@
 ZO_SharedSmithingResearch = ZO_Object:Subclass()
 
-ZO_SMITHING_RESEARCH_FILTER_TYPE_WEAPONS = 1
-ZO_SMITHING_RESEARCH_FILTER_TYPE_ARMOR = 2
-
 function ZO_SharedSmithingResearch:New(...)
     local smithingResearch = ZO_Object.New(self)
     smithingResearch:Initialize(...)
@@ -23,7 +20,19 @@ function ZO_SharedSmithingResearch:Initialize(control, owner, slotContainerName)
         self:HandleDirtyEvent()
     end
 
-    self.control:RegisterForEvent(EVENT_FINISHED_SMITHING_TRAIT_RESEARCH, HandleDirtyEvent)
+    local function OnResearchComplete(eventId, craftingType, researchLineIndex, traitIndex)
+        local cancelDialog = ZO_Dialogs_FindDialog("CONFIRM_CANCEL_RESEARCH")
+        if cancelDialog then
+            local data = cancelDialog.data
+            if data.craftingType == craftingType and data.researchLineIndex == researchLineIndex and data.traitIndex == traitIndex then
+                ZO_Dialogs_ReleaseDialog("CONFIRM_CANCEL_RESEARCH")
+            end
+        end
+        self:HandleDirtyEvent()
+    end
+
+    self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, OnResearchComplete)
+    self.control:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_CANCELED, HandleDirtyEvent)
 
     self.dirty = true
 end
@@ -41,9 +50,9 @@ end
 
 local MIN_SCALE = .6
 local MAX_SCALE = 1.0
-local BASE_NUM_ITEMS_IN_LIST = 7
+local BASE_NUM_ITEMS_IN_LIST = 5
 
-function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl, listSlotContainerName)
+function ZO_SharedSmithingResearch:InitializeResearchLineList(scollListClass, listSlotContainerName)
     local listContainer = self.control:GetNamedChild("ResearchLineList")
     listContainer.titleLabel:SetText(GetString(SI_SMITHING_RESEARCH_LINE_HEADER))
     listContainer.selectedLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
@@ -72,10 +81,12 @@ function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl,
             
             if data.researchingTraitIndex then
                 local durationSecs, timeRemainingSecs = GetSmithingResearchLineTraitTimes(data.craftingType, data.researchLineIndex, data.researchingTraitIndex)
-                local now = GetFrameTimeSeconds()
-                local timeElapsed = durationSecs - timeRemainingSecs
-                self.timer:Start(now - timeElapsed, now + timeRemainingSecs)
-                listContainer.extraInfoLabel:SetHidden(true)
+                if durationSecs and timeRemainingSecs then
+                    local now = GetFrameTimeSeconds()
+                    local timeElapsed = durationSecs - timeRemainingSecs
+                    self.timer:Start(now - timeElapsed, now + timeRemainingSecs)
+                    listContainer.extraInfoLabel:SetHidden(true)
+                end
             else
                 self.timer:Stop()
                 listContainer.extraInfoLabel:SetHidden(false)
@@ -93,13 +104,15 @@ function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl,
 
         ZO_ItemSlot_SetAlwaysShowStackCount(control, researchableCount > 0)
         ZO_ItemSlot_SetupSlot(control, researchableCount, data.icon)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     local function EqualityFunction(leftData, rightData)
         return leftData.craftingType == rightData.craftingType and leftData.researchLineIndex == rightData.researchLineIndex
     end
 
-    self.researchLineList = scrollListControl:New(listContainer.listControl, listSlotContainerName, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction)
+    self.researchLineList = scollListClass:New(listContainer.listControl, listSlotContainerName, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction)
+    listContainer:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_TIMES_UPDATED, function() self.researchLineList:RefreshVisible() end)
 
     local highlightTexture = listContainer.highlightTexture
     self.researchLineList:SetSelectionHighlightInfo(highlightTexture, highlightTexture and highlightTexture.pulseAnimation)
@@ -110,6 +123,7 @@ end
 
 function ZO_SharedSmithingResearch:OnControlsAcquired()
     -- Subclasses must implement this function if needed.
+    self.owner:OnResearchSlotChanged()
 end
 
 function ZO_SharedSmithingResearch:HandleDirtyEvent()
@@ -117,15 +131,6 @@ function ZO_SharedSmithingResearch:HandleDirtyEvent()
         self.dirty = true
     else
         self:Refresh()
-    end
-end
-
-local function DetermineResearchLineFilterType(craftingType, researchLineIndex)
-    local traitType = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, 1)
-    if ZO_CraftingUtils_IsTraitAppliedToWeapons(traitType) then
-        return ZO_SMITHING_RESEARCH_FILTER_TYPE_WEAPONS
-    elseif ZO_CraftingUtils_IsTraitAppliedToArmor(traitType) then
-        return ZO_SMITHING_RESEARCH_FILTER_TYPE_ARMOR
     end
 end
 
@@ -143,7 +148,7 @@ function ZO_SharedSmithingResearch:GenerateResearchTraitCounts(virtualInventoryL
 
     for itemId, itemInfo in pairs(virtualInventoryList) do
         local traitIndex = GetTraitIndexForItem(itemInfo.bag, itemInfo.index, craftingType, researchLineIndex, numTraits)
-        if traitIndex and not IsItemPlayerLocked(itemInfo.bag, itemInfo.index) then
+        if traitIndex then
             counts = counts or {}
             counts[traitIndex] = (counts[traitIndex] or 0) + 1
         end
@@ -169,45 +174,58 @@ function ZO_SharedSmithingResearch:FindResearchingTraitIndex(craftingType, resea
     return nil, areAllTraitsKnown
 end
 
-function ZO_SharedSmithingResearch:Refresh()
-    self.dirty = false
+do
+    local function IsNotLockedOrRetraitedItem(bagId, slotIndex)
+        return not IsItemPlayerLocked(bagId, slotIndex) and GetItemTraitInformation(bagId, slotIndex) ~= ITEM_TRAIT_INFORMATION_RETRAITED
+    end
 
-    self.researchLineList:Clear()
-    local craftingType = GetCraftingInteractionType()
+    function ZO_SharedSmithingResearch.IsResearchableItem(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
+        return CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
+                and IsNotLockedOrRetraitedItem(bagId, slotIndex)
+    end
 
-    local numCurrentlyResearching = 0
+    function ZO_SharedSmithingResearch:Refresh()
+        self.dirty = false
 
-    local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, nil, PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK))
+        self.researchLineList:Clear()
+        local craftingType = GetCraftingInteractionType()
 
-    for researchLineIndex = 1, GetNumSmithingResearchLines(craftingType) do
-        local name, icon, numTraits, timeRequiredForNextResearchSecs = GetSmithingResearchLineInfo(craftingType, researchLineIndex)
-        if numTraits > 0 then
-            local researchingTraitIndex, areAllTraitsKnown = self:FindResearchingTraitIndex(craftingType, researchLineIndex, numTraits)
-            if researchingTraitIndex then
-                numCurrentlyResearching = numCurrentlyResearching + 1
-            end
+        local numCurrentlyResearching = 0
 
-            if DetermineResearchLineFilterType(craftingType, researchLineIndex) == self.typeFilter then
-                local itemTraitCounts = self:GenerateResearchTraitCounts(virtualInventoryList, craftingType, researchLineIndex, numTraits)
-                local data = { craftingType = craftingType, researchLineIndex = researchLineIndex, name = name, icon = icon, numTraits = numTraits, timeRequiredForNextResearchSecs = timeRequiredForNextResearchSecs, researchingTraitIndex = researchingTraitIndex, areAllTraitsKnown = areAllTraitsKnown, itemTraitCounts = itemTraitCounts }
-                self.researchLineList:AddEntry(data)
+        local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsNotLockedOrRetraitedItem)
+        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsNotLockedOrRetraitedItem, virtualInventoryList)
+
+        for researchLineIndex = 1, GetNumSmithingResearchLines(craftingType) do
+            local name, icon, numTraits, timeRequiredForNextResearchSecs = GetSmithingResearchLineInfo(craftingType, researchLineIndex)
+            if numTraits > 0 then
+                local researchingTraitIndex, areAllTraitsKnown = self:FindResearchingTraitIndex(craftingType, researchLineIndex, numTraits)
+                if researchingTraitIndex then
+                    numCurrentlyResearching = numCurrentlyResearching + 1
+                end
+
+                local expectedTypeFilter = ZO_CraftingUtils_GetSmithingFilterFromTrait(GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, 1))
+                if expectedTypeFilter == self.typeFilter then
+                    local itemTraitCounts = self:GenerateResearchTraitCounts(virtualInventoryList, craftingType, researchLineIndex, numTraits)
+                    local data = { craftingType = craftingType, researchLineIndex = researchLineIndex, name = name, icon = icon, numTraits = numTraits, timeRequiredForNextResearchSecs = timeRequiredForNextResearchSecs, researchingTraitIndex = researchingTraitIndex, areAllTraitsKnown = areAllTraitsKnown, itemTraitCounts = itemTraitCounts }
+                    self.researchLineList:AddEntry(data)
+                end
             end
         end
-    end
 
-    self.researchLineList:Commit()
+        self.researchLineList:Commit()
 
-    local maxResearchable = GetMaxSimultaneousSmithingResearch(craftingType)
-    if numCurrentlyResearching >= maxResearchable then
-        self.atMaxResearchLimit = true
-    else
-        self.atMaxResearchLimit = false
-    end
+        local maxResearchable = GetMaxSimultaneousSmithingResearch(craftingType)
+        if numCurrentlyResearching >= maxResearchable then
+            self.atMaxResearchLimit = true
+        else
+            self.atMaxResearchLimit = false
+        end
 
-    self:RefreshCurrentResearchStatusDisplay(numCurrentlyResearching, maxResearchable)
+        self:RefreshCurrentResearchStatusDisplay(numCurrentlyResearching, maxResearchable)
 
-    if self.activeRow then
-        self:OnResearchRowActivate(self.activeRow)
+        if self.activeRow then
+            self:OnResearchRowActivate(self.activeRow)
+        end
     end
 end
 
@@ -297,7 +315,16 @@ function ZO_SharedSmithingResearch:OnResearchRowDeactivate(row)
 end
 
 function ZO_SharedSmithingResearch:IsResearchable()
-    return self.activeRow and self.activeRow.researchable and self:CanResearchCurrentTraitLine()
+    return (self.activeRow ~= nil) and self.activeRow.researchable and self:CanResearchCurrentTraitLine()
+end
+
+function ZO_SharedSmithingResearch:IsResearching()
+    if self.activeRow then
+        local activeRow = self.activeRow
+        local durationSecs, timeRemainingSecs = GetSmithingResearchLineTraitTimes(activeRow.craftingType, activeRow.researchLineIndex, activeRow.traitIndex)
+        return durationSecs ~= nil
+    end
+    return false
 end
 
 function ZO_SharedSmithingResearch:GetSelectedData()
@@ -326,4 +353,24 @@ function ZO_SharedSmithingResearch:CanResearchCurrentTraitLine()
         end
     end
     return canResearchCurrentTraitLine
+end
+
+function ZO_SharedSmithingResearch:CanCancelResearch()
+    return self.numTraits and not self:CanResearchCurrentTraitLine()
+end
+
+function ZO_SharedSmithingResearch:CancelResearch()
+    local dialogData = {}
+    dialogData.craftingType = self.craftingType
+    dialogData.researchLineIndex = self.researchLineIndex
+
+    local dialogParams = {}
+    local researchingTrait = self:FindResearchingTraitIndex(self.craftingType, self.researchLineIndex, self.numTraits)
+    local traitType, traitDescription, known = GetSmithingResearchLineTraitInfo(self.craftingType, self.researchLineIndex, researchingTrait)
+    local researchLineName = GetSmithingResearchLineInfo(self.craftingType, self.researchLineIndex)
+    dialogData.traitIndex = researchingTrait
+    dialogParams.mainTextParams = { researchLineName, GetString("SI_ITEMTRAITTYPE", traitType), GetString(SI_PERFORM_ACTION_CONFIRMATION) }
+
+    local dialogName = IsInGamepadPreferredMode() and ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG or "CONFIRM_CANCEL_RESEARCH"
+    ZO_Dialogs_ShowPlatformDialog(dialogName, dialogData, dialogParams)
 end

@@ -15,8 +15,8 @@ function ZO_SharedCraftingInventory:Initialize(control, slotType, connectInfoFn,
 
     self:InitializeList()
 
-	if not connectInfoFn then connectInfoFn = ZO_InventoryInfoBar_ConnectStandardBar end
-	if not connectInfoControl then connectInfoControl = control:GetNamedChild("InfoBar") end
+    if not connectInfoFn then connectInfoFn = ZO_InventoryInfoBar_ConnectStandardBar end
+    if not connectInfoControl then connectInfoControl = control:GetNamedChild("InfoBar") end
     if connectInfoControl then connectInfoFn(connectInfoControl) end
 
     local function HandleInventoryChanged()
@@ -93,6 +93,11 @@ function ZO_SharedCraftingInventory:ChangeFilter(filterData)
     -- intended to be overwritten, but should call base
 end
 
+--- When set, overrides the crafting inventory's default sort function.
+function ZO_SharedCraftingInventory:SetOverrideItemSort(itemSortFunction)
+    self.sortFunction = itemSortFunction
+end
+
 function ZO_SharedCraftingInventory:SetCustomExtraData(customExtraDataFunction)
     self.customExtraDataFunction = customExtraDataFunction
 end
@@ -110,6 +115,23 @@ function ZO_SharedCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(pr
     return nil
 end
 
+assert(17 == BAG_MAX_VALUE) -- if you add a new bag, check to see if you need to add it to crafting inventories
+
+ZO_ALL_CRAFTING_INVENTORY_BAGS_AND_WORN = 
+{
+    BAG_BACKPACK, BAG_BANK, BAG_SUBSCRIBER_BANK, BAG_WORN
+}
+
+ZO_ALL_CRAFTING_INVENTORY_BAGS_WITHOUT_WORN = 
+{
+    BAG_BACKPACK, BAG_BANK, BAG_SUBSCRIBER_BANK
+}
+
+function ZO_SharedCraftingInventory:GetIndividualInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data, useWornBag)
+    -- intended to be overwritten
+    return nil
+end
+
 function ZO_SharedCraftingInventory:GetStackCount(bagId, slotIndex)
     local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
     return self.itemCounts[itemInstanceId] or 0
@@ -123,3 +145,6 @@ function ZO_SharedCraftingInventory:Hide()
     self.control:SetHidden(true)
 end
 
+function ZO_SharedCraftingInventory:SetNoItemLabelText(text)
+    -- intended to be overwritten
+end

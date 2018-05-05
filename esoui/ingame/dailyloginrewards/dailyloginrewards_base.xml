@@ -1,0 +1,7 @@
+<GuiXml>        
+    <Controls>
+        <Backdrop name="ZO_DailyLoginRewards_Highlight" centerColor="00000000" hidden="true" layer="OVERLAY" level="ZO_MARKET_TILE_HIGHLIGHT_LEVEL" blendMode="ADD" virtual="true">
+            <Edge file="EsoUI/Art/Tooltips/UI-Border.dds" edgeFileWidth="128" edgeFileHeight="16" />
+        </Backdrop>
+	</Controls>
+</GuiXml>

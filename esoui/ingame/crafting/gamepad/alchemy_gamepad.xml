@@ -143,13 +143,29 @@
 
         <TopLevelControl name="ZO_GamepadAlchemyTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true"/>
         
-        <TopLevelControl name="ZO_GamepadAlchemyTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+        <TopLevelControl name="ZO_GamepadAlchemyTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>
                 ZO_GamepadAlchemy_OnInitialized(self)
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)SlotContainer" inherits="ZO_GamepadCraftingIngredientBarTemplate" />
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Mode" inherits="ZO_VerticalParametricScrollListTemplate" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Control>
+                        <Control name="$(parent)Inventory" inherits="ZO_GamepadCraftingInventoryTemplate" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+
+                <Control name="$(parent)SlotContainer" inherits="ZO_GamepadCraftingIngredientBarTemplate" hidden="true"/>
 
                 <Control name="$(parent)Tooltip" inherits="ZO_CraftingTooltip_Gamepad" hidden="true">
                     <Anchor point="BOTTOM" relativeTo="$(parent)SlotContainer" relativePoint="TOP" offsetY="-ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y" />

@@ -9,6 +9,7 @@ end
 ENCHANTING_MODE_NONE = 0
 ENCHANTING_MODE_CREATION = 1
 ENCHANTING_MODE_EXTRACTION = 2
+ENCHANTING_MODE_RECIPES = 3
 
 NO_FILTER = -1
 EXTRACTION_FILTER = -2
@@ -135,13 +136,7 @@ function ZO_SharedEnchanting:InitializeCreationSlots()
 end
 
 function ZO_SharedEnchanting:InitializeExtractionSlots()
-    self.extractionSlotContainer = self.control:GetNamedChild("ExtractionSlotContainer")
-
-    self.extractionSlot = ZO_SharedEnchantExtractionSlot:New(self, self.extractionSlotContainer:GetNamedChild("ExtractionSlot"), self.inventory)
-
-    -- TODO: replace with extraction assets when they're made
-    self.extractionSlotAnimation = ZO_CraftingEnchantExtractSlotAnimation:New("enchanting", function() return self.enchantingMode == ENCHANTING_MODE_EXTRACTION end)
-    self.extractionSlotAnimation:AddSlot(self.extractionSlot)
+    assert(false) -- override in derived classes
 end
 
 function ZO_SharedEnchanting:InitializeKeybindStripDescriptors()
@@ -311,7 +306,7 @@ function ZO_SharedEnchanting:CanItemBeAddedToCraft(bagId, slotIndex)
 end
 
 function ZO_SharedEnchanting:AddItemToCraft(bagId, slotIndex)
-    if not IsPerformingCraftProcess() then
+    if not ZO_CraftingUtils_IsPerformingCraftProcess() then
         local usedInCraftingType, _, runeType, rankRequirement, rarityRequirement = GetItemCraftingInfo(bagId, slotIndex)
         if usedInCraftingType == CRAFTING_TYPE_ENCHANTING then
             if self.enchantingMode == ENCHANTING_MODE_CREATION then
@@ -326,7 +321,7 @@ function ZO_SharedEnchanting:AddItemToCraft(bagId, slotIndex)
 end
 
 function ZO_SharedEnchanting:RemoveItemFromCraft(bagId, slotIndex)
-    if not IsPerformingCraftProcess() then
+    if not ZO_CraftingUtils_IsPerformingCraftProcess() then
         local usedInCraftingType, _, runeType, rankRequirement, rarityRequirement = GetItemCraftingInfo(bagId, slotIndex)
         if usedInCraftingType == CRAFTING_TYPE_ENCHANTING then
             if self.enchantingMode == ENCHANTING_MODE_CREATION then

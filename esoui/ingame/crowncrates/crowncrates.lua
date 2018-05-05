@@ -5,7 +5,7 @@ do
 
     ZO_CROWN_CRATES_BUY_CRATES_KEYBIND_KEYBOARD =
     {
-        keybind = "UI_SHORTCUT_TERTIARY",
+        keybind = "UI_SHORTCUT_QUATERNARY",
         name = GetString(SI_CROWN_CRATE_BUY_CRATES_KEYBIND),
         callback = BuyCratesCallback,
     }
@@ -13,7 +13,7 @@ do
     ZO_CROWN_CRATES_BUY_CRATES_KEYBIND_GAMEPAD =
     {
         keybind = "UI_SHORTCUT_RIGHT_STICK",
-        name = GetString(SI_CROWN_CRATE_BUY_CRATES_KEYBIND),
+        name = GetString(SI_GAMEPAD_CROWN_CRATE_BUY_CRATES_KEYBIND),
         callback = BuyCratesCallback,
     }
 end
@@ -25,6 +25,7 @@ end
 --Crown Crates
 -------------------
 
+local g_crownCratesManager
 local IDLE_CHATTER_ANIMATION_NOTE = "UI_Chatter"
 local REFRESH_DECK_FX_ANIM_NOTE = "UI_RefreshDeckFx"
 
@@ -38,9 +39,18 @@ end
 
 function ZO_CrownCrates:Initialize(control)
     self.control = control
-
-    CROWN_CRATES_PACK_OPENING = ZO_CrownCratesPackOpening:New(self)
-    CROWN_CRATES_PACK_CHOOSING = ZO_CrownCratesPackChoosing:New(self)
+    self.packChoosing = ZO_CrownCratesPackChoosing:New(self)
+    self.packOpening = ZO_CrownCratesPackOpening:New(self)
+    self.gemificationSlot = ZO_CrownGemificationSlot:New(self)
+    if ZO_CrownGemification_Keyboard then
+        self.gemificationKeyboard = ZO_CrownGemification_Keyboard:New(self, self.gemificationSlot)
+    end
+    if ZO_CrownGemification_Gamepad then
+        self.gemificationGamepad = ZO_CrownGemification_Gamepad:New(self, self.gemificationSlot)
+    end
+    self.stateMachine = ZO_CrownCratesStateMachine:New(self, self.packChoosing, self.packOpening, self.gemificationKeyboard, self.gemificationGamepad, self.gemificationSlot)
+    self.packChoosing:SetStateMachine(self.stateMachine)
+    self.packOpening:SetStateMachine(self.stateMachine)
 
     self:InitializeCrownGemsQuantity()
 
@@ -65,32 +75,32 @@ function ZO_CrownCrates:Initialize(control)
         end
     end
 
-    local function OnStateChangeCallback() 
-        self:RefreshApplicableInputTypeKeybinds() 
+    local function OnStateChangeCallback()
+        self:RefreshApplicableInputTypeKeybinds()
     end
 
     local function SharedStateChangeCallback(oldState, newState)
         if newState == SCENE_SHOWING then
             self:PerformDeferredInitializationShared()
-            self.control:SetHidden(false)
             self:UpdateCrownGemsQuantity()
-            ZO_CROWN_CRATE_STATE_MACHINE:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.SCENE_SHOWN)
-            ZO_CROWN_CRATE_STATE_MACHINE:RegisterCallback("OnStateChange", OnStateChangeCallback)
+            self.stateMachine:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.SCENE_SHOWN)
+            self.stateMachine:RegisterCallback("OnStateChange", OnStateChangeCallback)
             TriggerTutorial(TUTORIAL_TRIGGER_CROWN_CRATE_UI_OPENED)
             PlaySound(SOUNDS.CROWN_CRATES_SCENE_OPEN)
+            SetCrownCrateUIMenuActive(true)
         elseif newState == SCENE_HIDING then
             PlaySound(SOUNDS.CROWN_CRATES_SCENE_CLOSED)
         elseif newState == SCENE_HIDDEN then
-            self.control:SetHidden(true)
             self.selectedCard = nil
-            ZO_CROWN_CRATE_STATE_MACHINE:UnregisterCallback("OnStateChange", OnStateChangeCallback)
+            self.stateMachine:UnregisterCallback("OnStateChange", OnStateChangeCallback)
             self:RemoveInputTypeKeybinds()
-            ZO_CrownCrateStateMachine_Reset()
+            self.stateMachine:Reset()
             --Actually delete the particle effects from memory so they don't consume part of the particle effect budget when the scene is hidden.
             self:DeleteAllParticles()
             if self.mainMenuDirty then
                 UpdateMainMenu()
             end
+            SetCrownCrateUIMenuActive(false)
         end
     end
 
@@ -113,9 +123,6 @@ function ZO_CrownCrates:Initialize(control)
             self:AddApplicableInputTypeKeybinds()
         end
     end)
-
-    --Initialize state--
-    ZO_CrownCrateStateMachine_Reset()
 
     local function UpdateMainMenuWhenClosed()
         if SYSTEMS:IsShowing("crownCrate") then
@@ -150,9 +157,12 @@ end
 
 function ZO_CrownCrates:InitializeCrownGemsQuantity()
     self.crownGemsAvailableQuantity = ZO_CrownCratesGemsCounter
-    CROWN_CRATE_GEMS_AVAILABLE_QUANTITY_FRAGMENT = ZO_FadeSceneFragment:New(self.crownGemsAvailableQuantity)
+    CROWN_CRATE_GEMS_AVAILABLE_QUANTITY_FRAGMENT = ZO_SimpleSceneFragment:New(self.crownGemsAvailableQuantity)
 
     self.gemsUpdateCountAnimationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_CrownCrateGainGemsUpdateCount")
+    self.gemsUpdateCountAnimationTimeline:GetAnimation(1):SetUpdateFunction(function(animation, progress)
+        self:UpdateGemsAnimation(self, progress)
+    end)
     self.gemsUpdateCountAnimationTimeline:SetHandler("OnStop", function(timeline, completedPlaying)
         if completedPlaying then
             self.crownGemsAvailableQuantity.gemsIcon:SetScale(1)
@@ -166,11 +176,6 @@ end
 
 function ZO_CrownCrates:RefreshCrownGemsQuantityTemplate()
     ApplyTemplateToControl(self.crownGemsAvailableQuantity, ZO_GetPlatformTemplate("ZO_CrownCrates_GemsCounter"))
-    self.formattedGemIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(MKCT_CROWN_GEMS), "100%")
-end
-
-function ZO_CrownCrates:GetFormattedGemIcon()
-    return self.formattedGemIcon
 end
 
 function ZO_CrownCrates:PerformDeferredInitializationShared()
@@ -198,48 +203,46 @@ function ZO_CrownCrates:PerformDeferredInitializationGamepad()
     end
 end
 
-do
-    local function IsCrownCrateStateAllRevealed()
-        return ZO_CROWN_CRATE_STATE_MACHINE:GetCurrentState() == ZO_CROWN_CRATE_STATES.ALL_REVEALED
-    end
-
-    function ZO_CrownCrates:InitializeGamepadKeybindStripDescriptors()
-        local function BackCallback()
-            if IsCrownCrateStateAllRevealed() then
-                ZO_CROWN_CRATE_STATE_MACHINE:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.BACK_TO_MANIFEST)
-            else
-                self:AttemptExit()
-            end
+function ZO_CrownCrates:InitializeGamepadKeybindStripDescriptors()
+    local function BackCallback()
+        if self.stateMachine:IsCurrentStateByName("ALL_REVEALED") then
+            self.stateMachine:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.BACK_TO_MANIFEST)
+        else
+            self:AttemptExit()
         end
-
-        self.gamepadSharedKeybindStripDescriptor =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            {
-                name = GetString(SI_GAMEPAD_BACK_OPTION),
-                keybind = "UI_SHORTCUT_NEGATIVE",
-                enabled = ZO_CrownCrateStateMachine_CanUseBackKeybind_Gamepad,
-                callback = BackCallback,
-            }
-        }
     end
 
-    function ZO_CrownCrates:InitializeKeyboardKeybindStripDescriptors()
-        local function BackCallback()
-            ZO_CROWN_CRATE_STATE_MACHINE:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.BACK_TO_MANIFEST)
-        end
-
-        self.keyboardSharedKeybindStripDescriptor =
+    self.gamepadSharedKeybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            {
-                name = GetString(SI_CROWN_CRATE_CHANGE_CRATE_KEYBIND),
-                keybind = "UI_SHORTCUT_NEGATIVE",
-                visible = IsCrownCrateStateAllRevealed,
-                callback = BackCallback,
-            }
+            name = GetString(SI_GAMEPAD_BACK_OPTION),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            enabled = function()
+                return self.stateMachine:CanUseBackKeybind_Gamepad()
+            end,
+            callback = BackCallback,
         }
+    }
+end
+
+function ZO_CrownCrates:InitializeKeyboardKeybindStripDescriptors()
+    local function BackCallback()
+        self.stateMachine:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.BACK_TO_MANIFEST)
     end
+
+    self.keyboardSharedKeybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        {
+            name = GetString(SI_CROWN_CRATE_CHANGE_CRATE_KEYBIND),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            visible = function()
+                return self.stateMachine:IsCurrentStateByName("ALL_REVEALED")
+            end,
+            callback = BackCallback,
+        }
+    }
 end
 
 function ZO_CrownCrates:RefreshApplicableInputTypeKeybinds()
@@ -278,8 +281,8 @@ function ZO_CrownCrates:UpdateDirectionalInput()
         selectedDirection = -1
     end
 
-    CROWN_CRATES_PACK_OPENING:HandleDirectionalInput(selectedDirection)
-    CROWN_CRATES_PACK_CHOOSING:HandleDirectionalInput(selectedDirection)
+    self.packOpening:HandleDirectionalInput(selectedDirection)
+    self.packChoosing:HandleDirectionalInput(selectedDirection)
 end
 
 function ZO_CrownCrates:AttemptExit()
@@ -312,34 +315,49 @@ function ZO_CrownCrates:InitializeAnimationPools()
         [ZO_CROWN_CRATES_ANIMATION_PACK_HIDE] = ZO_AnimationPool:New("ZO_CrownCratePackHide"),
         [ZO_CROWN_CRATES_ANIMATION_PACK_CHOOSE] = ZO_AnimationPool:New("ZO_CrownCratePackChoose"),
         [ZO_CROWN_CRATES_ANIMATION_PACK_OPEN] = ZO_AnimationPool:New("ZO_CrownCratePackOpen"),
+        [ZO_CROWN_CRATES_ANIMATION_PACK_SHOW_FROM_SIDE] = ZO_AnimationPool:New("ZO_CrownCratePackShowFromSide"),
+        [ZO_CROWN_CRATES_ANIMATION_PACK_HIDE_AND_EXIT_SIDE] = ZO_AnimationPool:New("ZO_CrownCratePackHideAndExitSide"),
         [ZO_CROWN_CRATES_ANIMATION_GEMIFY_SINGLE_GEM_GAIN] = ZO_AnimationPool:New("ZO_CrownCrateCardGemifySingleGemAnimation"),
         [ZO_CROWN_CRATES_ANIMATION_GEMIFY_COLOR_TINT] = ZO_AnimationPool:New("ZO_CrownCrateCardGemifyColorTintAnimation"),
         [ZO_CROWN_CRATES_ANIMATION_GEMIFY_FINAL_GEM] = ZO_AnimationPool:New("ZO_CrownCrateCardGemifyFinalGemAnimation"),
         [ZO_CROWN_CRATES_ANIMATION_GEMIFY_CROWN_GEM_TEXT] = ZO_AnimationPool:New("ZO_CrownCrateCardGemifyCrownGemsTextAnimation"),
+        [ZO_CROWN_CRATES_ANIMATION_MANUAL_GEMIFY_SET] = ZO_AnimationPool:New("ZO_CrownCrateGemificationSlotSet"),
     }
-    
-    do
-        local function FloatWobbleReset(animation, pool)
-            animation:Stop()
-        end
-        
-        local CardFloatEase = ZO_GenerateCubicBezierEase(.25, -0.1, .75, 1.1)
 
-        local function InsertRotateAnimations(animationTimeline, startFunctionName, endFunctionName, startRadians, direction, offsetMS)
-            local halfWobbleDuration = ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_DURATION_MS * 0.5
+    self:CreateWobbleAnimationPool(ZO_CROWN_CRATES_ANIMATION_MYSTERY_SELECTED,
+        ZO_CROWN_CRATES_PRIMARY_DEAL_END_PITCH_RADIANS,
+        ZO_CROWN_CRATES_PRIMARY_DEAL_END_YAW_RADIANS,
+        ZO_CROWN_CRATES_PRIMARY_DEAL_END_ROLL_RADIANS,
+        ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_MAGNITUDE_RADIANS,
+        ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_DURATION_MS,
+        ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_SPACING_MS)
+end
+
+do
+    local function FloatWobbleReset(animation, pool)
+        animation:Stop()
+    end
+        
+    local CardFloatEase = ZO_GenerateCubicBezierEase(.25, -0.1, .75, 1.1)
+    local ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_NUM_SETS = 8
+    local ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_NUM_PER_SET = 3
+
+    function ZO_CrownCrates:CreateWobbleAnimationPool(animationType, rootPitchRadians, rootYawRadians, rootRollRadians, wobbleMagnitudeRadians, wobbleDurationMS, wobbleSpacingMS)
+        local function InsertRotateAnimations(animationTimeline, startFunctionName, endFunctionName, startRadians, magnitudeRadians, direction, offsetMS, durationMS)
+            local halfWobbleDuration = durationMS * 0.5
             local rotateAnimation = animationTimeline:InsertAnimation(ANIMATION_ROTATE3D, nil, offsetMS)
             rotateAnimation:SetDuration(halfWobbleDuration)
             rotateAnimation:SetEasingFunction(CardFloatEase)
             local unrotateAnimation = animationTimeline:InsertAnimation(ANIMATION_ROTATE3D, nil, offsetMS + halfWobbleDuration)
             unrotateAnimation:SetDuration(halfWobbleDuration)
             unrotateAnimation:SetEasingFunction(CardFloatEase)
-            local endRadians = startRadians + ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_MAGNITUDE_RADIANS * direction
+            local endRadians = startRadians + magnitudeRadians * direction
             rotateAnimation[startFunctionName](rotateAnimation, startRadians)
             rotateAnimation[endFunctionName](rotateAnimation, endRadians)
             unrotateAnimation[startFunctionName](unrotateAnimation, endRadians)
             unrotateAnimation[endFunctionName](unrotateAnimation, startRadians)
         end
-    
+
         local function FloatWobbleFactory(pool)
             local animationTimeline = ANIMATION_MANAGER:CreateTimeline()
             animationTimeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
@@ -355,19 +373,19 @@ function ZO_CrownCrates:InitializeAnimationPools()
                     end
 
                     if axisIndex == 1 then
-                        InsertRotateAnimations(animationTimeline, "SetStartPitch", "SetEndPitch", ZO_CROWN_CRATES_PRIMARY_DEAL_END_PITCH_RADIANS, direction, currentOffsetMS)
+                        InsertRotateAnimations(animationTimeline, "SetStartPitch", "SetEndPitch", rootPitchRadians, wobbleMagnitudeRadians, direction, currentOffsetMS, wobbleDurationMS)
                     elseif axisIndex == 2 then
-                        InsertRotateAnimations(animationTimeline, "SetStartYaw", "SetEndYaw", ZO_CROWN_CRATES_PRIMARY_DEAL_END_YAW_RADIANS, direction, currentOffsetMS)
+                        InsertRotateAnimations(animationTimeline, "SetStartYaw", "SetEndYaw", rootYawRadians, wobbleMagnitudeRadians, direction, currentOffsetMS, wobbleDurationMS)
                     else
-                        InsertRotateAnimations(animationTimeline, "SetStartRoll", "SetEndRoll", ZO_CROWN_CRATES_PRIMARY_DEAL_END_ROLL_RADIANS, direction, currentOffsetMS)
+                        InsertRotateAnimations(animationTimeline, "SetStartRoll", "SetEndRoll", rootRollRadians, wobbleMagnitudeRadians, direction, currentOffsetMS, wobbleDurationMS)
                     end
-                    currentOffsetMS = currentOffsetMS + ZO_CROWN_CRATES_MYSTERY_SELECTED_WOBBLE_SPACING_MS
+                    currentOffsetMS = currentOffsetMS + wobbleSpacingMS
                 end
             end
             return animationTimeline
         end
 
-        self.animationPools[ZO_CROWN_CRATES_ANIMATION_MYSTERY_SELECTED] = ZO_ObjectPool:New(FloatWobbleFactory, FloatWobbleReset)
+        self.animationPools[animationType] = ZO_ObjectPool:New(FloatWobbleFactory, FloatWobbleReset)
     end
 end
 
@@ -389,7 +407,7 @@ function ZO_CrownCrates:GetCrateSpecificCardParticlePool(crownCrateId, crownCrat
         local function Factory(pool)
             local positionX, positionY, positionZ = 0, 0, 0
             local particleId = CreateCrownCrateSpecificParticleEffect(crownCrateId, crownCrateParticleEffects, positionX, positionY, positionZ)
-            return ZO_Particle:New(particleId)
+            return ZO_WorldParticle:New(particleId)
         end
 
         local function Reset(particle, pool)
@@ -411,7 +429,7 @@ function ZO_CrownCrates:GetTierSpecificCardParticlePool(crownCrateTierId, crownC
         local function Factory(pool)
             local positionX, positionY, positionZ = 0, 0, 0
             local particleId = CreateCrownCrateTierSpecificParticleEffect(crownCrateTierId, crownCrateTierParticleEffects, positionX, positionY, positionZ)
-            return ZO_Particle:New(particleId)
+            return ZO_WorldParticle:New(particleId)
         end
 
         local function Reset(particle, pool)
@@ -420,25 +438,25 @@ function ZO_CrownCrates:GetTierSpecificCardParticlePool(crownCrateTierId, crownC
 
         crateTierTable[crownCrateTierParticleEffects] = ZO_ObjectPool:New(Factory, Reset)
     end
-    
+
     return crateTierTable[crownCrateTierParticleEffects]
 end
 
-function ZO_CrownCrates:DeleteAllParticles()
-    local function DeleteParticle(particle)
-        particle:Delete()
-    end
+function ZO_CrownCrates.DeleteParticle(particle)
+    particle:Delete()
+end
 
+function ZO_CrownCrates:DeleteAllParticles()
     for _, crateTable in pairs(self.crateSpecificCardParticlePools) do
         for _, particlePool in pairs(crateTable) do
-            particlePool:DestroyAllFreeObjects(DeleteParticle)
+            particlePool:DestroyAllFreeObjects(ZO_CrownCrates.DeleteParticle)
         end
     end
     self.crateSpecificCardParticlePools = {}
 
     for _, crateTierTable in pairs(self.tierSpecificCardParticlePools) do
         for _, particlePool in pairs(crateTierTable) do
-            particlePool:DestroyAllFreeObjects(DeleteParticle)
+            particlePool:DestroyAllFreeObjects(ZO_CrownCrates.DeleteParticle)
         end
     end
     self.tierSpecificCardParticlePools = {}
@@ -485,6 +503,7 @@ do
                     control:SetHandler("OnUpdate", function()
                         if DidMouseMoveFarEnough(control.mouseExitX, control.mouseExitY) then
                             onMouseEnter()
+                            control:SetHandler("OnUpdate", nil)
                         end
                     end)
                 end
@@ -527,7 +546,7 @@ function ZO_CrownCrates.ComputeSlotCenterUIPositionY(slotHeightUI, slotHeightOff
 end
 
 function ZO_CrownCrates:UpdateGemsLabel(amount)
-    self.crownGemsAvailableQuantity.gemsLabel:SetText(ZO_CommaDelimitNumber(amount))
+    self.crownGemsAvailableQuantity.gemsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(amount)))
 end
 
 function ZO_CrownCrates:UpdateCrownGemsQuantity()
@@ -536,49 +555,9 @@ function ZO_CrownCrates:UpdateCrownGemsQuantity()
     self.currentCrownGems = currentCrownGems
 end
 
-do
-    local TIME_ADDED_PER_CROWN_GEM_MS = 500
-    local TIME_MULTIPLER_FOR_CROWN_GEMS = 2
-    local TIME_BASE_VALUE_FOR_CROWN_GEMS_MS= 150
-    local function CalculateGemUpdateAnimation(amount)
-        return math.sqrt(amount * TIME_ADDED_PER_CROWN_GEM_MS) * TIME_MULTIPLER_FOR_CROWN_GEMS + TIME_BASE_VALUE_FOR_CROWN_GEMS_MS
-    end
-
-    function ZO_CrownCrates:AddCrownGems(amount)
-        if amount <= 0 then
-            return
-        end
-
-        local previousGemTotal = self.currentCrownGems 
-        self.currentCrownGems = previousGemTotal + amount
-
-        local gemUpdateAnimation = self.gemsUpdateCountAnimationTimeline:GetFirstAnimation()
-        if not self.gemsUpdateCountAnimationTimeline:IsPlaying() then
-            local calcDuration = CalculateGemUpdateAnimation(amount)
-            self.previousGemTotal = previousGemTotal
-            self.currentGemAnimationValue = previousGemTotal
-            gemUpdateAnimation:SetDuration(calcDuration)
-            self.gemsUpdateCountAnimationTimeline:PlayFromStart()
-        else
-            local currentTimelineProgression = self.gemsUpdateCountAnimationTimeline:GetProgress()
-            local newTargetAmount = self.currentCrownGems - self.currentGemAnimationValue
-            local newDuration = CalculateGemUpdateAnimation(newTargetAmount) + (gemUpdateAnimation:GetDuration() * currentTimelineProgression)
-            gemUpdateAnimation:SetDuration(newDuration)
-        end
-
-        TriggerCrownCrateNPCAnimation(CROWN_CRATE_NPC_ANIMATION_TYPE_GEMS_AWARDED)
-    end
-
-    local GEMS_UPDATE_REFRESH_RATE = 0.05 -- only update text when a certain percentage to the next step is reached
-    function ZO_CrownCrates:UpdateGemsAnimation(animation, progress)
-        local difference = self.currentCrownGems - self.previousGemTotal
-        local delta = (difference) * progress
-        local nextValue = zo_floor(delta + self.previousGemTotal)
-        if (nextValue - self.currentGemAnimationValue) / difference > GEMS_UPDATE_REFRESH_RATE then
-            self:UpdateGemsLabel(nextValue)
-            self.currentGemAnimationValue = nextValue
-        end
-    end
+function ZO_CrownCrates:AddCrownGems(amount)
+    self.currentCrownGems = self.currentCrownGems + amount
+    self:UpdateGemsLabel(self.currentCrownGems)
 end
 
 function ZO_CrownCrates:GetControl()
@@ -589,15 +568,23 @@ function ZO_CrownCrates:GetCameraLocalPositionFromWorldPosition(worldX, worldY, 
     return self.control:Convert3DWorldPositionToLocalPosition(worldX, worldY, worldZ)
 end
 
+function ZO_CrownCrates:FireStateMachineTrigger(trigger)
+    self.stateMachine:FireCallbacks(trigger)
+end
+
 --Lifecycle
 function ZO_CrownCrates:LockLocalSpaceToCurrentCamera()
     Set3DRenderSpaceToCurrentCamera(self.control:GetName())
-    CROWN_CRATES_PACK_OPENING:OnLockLocalSpaceToCurrentCamera()
-    CROWN_CRATES_PACK_CHOOSING:OnLockLocalSpaceToCurrentCamera()
+    self.packOpening:OnLockLocalSpaceToCurrentCamera()
+    self.packChoosing:OnLockLocalSpaceToCurrentCamera()
 end
 
 --Global XML
 
+function ZO_CrownCrates_FireStateMachineTrigger(trigger)
+    g_crownCratesManager:FireStateMachineTrigger(trigger)
+end
+
 function ZO_CrownCrates_OnInitialized(self)
-    CROWN_CRATES = ZO_CrownCrates:New(self)
+    g_crownCratesManager = ZO_CrownCrates:New(self)
 end
