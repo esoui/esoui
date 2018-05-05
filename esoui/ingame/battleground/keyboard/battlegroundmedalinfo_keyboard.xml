@@ -1,0 +1,104 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_BattlegroundMatchInfo_Keyboard_StatRow" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Header" override="true" font="ZoFontWinH4" />
+
+                <Label name="$(parent)Value" override="true" font="ZoFontWinH4" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BattlegroundMatchInfo_Keyboard_MedalRow" inherits="ZO_BattlegroundMatchInfo_Shared_MedalRow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Controls>
+                        <Label name="$(parent)Count" override="true" font="ZoFontKeyboard24ThickOutline">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-5" />
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Control name="$(parent)Text" override="true" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" font="ZoFontWinH4">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Points" override="true" font="ZoFontWinH4">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_BattlegroundMatchInfo_KeyboardTopLevel" inherits="ZO_BattlegroundMatchInfo_SharedTopLevel" mouseEnabled="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedThinTallRightPanelBackground" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedThinTallRightPanelBackground" offsetX="-14" />
+
+            <OnInitialized>
+                ZO_BattlegroundMatchInfo_Keyboard_OnInitialize(self, "ZO_BattlegroundMatchInfo_Keyboard_MedalRow", ZO_BATTLEGROUND_MATCH_INFO_MEDAL_ANCHOR_PADDING_Y_KEYBOARD)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true"> <!-- This makes it easier to shared code between gamepad and keyboard -->
+                    <AnchorFill />
+                    <Controls>
+                        <Label name="$(parent)PlayerName" override="true" font="ZoFontWinH2" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Texture name="$(parent)PlayerClass" override="true" >
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)PlayerName" relativePoint="LEFT" offsetX="-5" />
+                        </Texture>
+                
+                        <Label name="$(parent)Title" override="true" font="ZoFontHeader2" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PlayerName" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSide_divider.dds">
+                            <Dimensions y="4" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                            <Anchor point="LEFT" offsetX="-100" constrains="X" />
+                            <TextureCoords left="1" right="0" top="0" bottom="1" />
+                        </Texture>
+
+                        <Control name="$(parent)Stats" override="true">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                            <Anchor point="LEFT" constrains="X" />
+
+                            <Controls>
+                                <Control name="$(parent)DamageDealt" override="true" inherits="ZO_BattlegroundMatchInfo_Keyboard_StatRow">
+                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="LEFT" constrains="X" />
+                                </Control>
+
+                                <Control name="$(parent)HealingDone" override="true" inherits="ZO_BattlegroundMatchInfo_Keyboard_StatRow">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DamageDealt" relativePoint="BOTTOMRIGHT" />
+                                    <Anchor point="LEFT" constrains="X" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)MedalsHeader" override="true" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Stats" relativePoint="BOTTOMLEFT" offsetY="20" />
+                        </Label>
+
+                        <Control name="$(parent)Medals" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)MedalsHeader" relativePoint="BOTTOMLEFT" offsetY="ZO_BATTLEGROUND_MATCH_INFO_MEDAL_ANCHOR_PADDING_Y_KEYBOARD" />
+                            <Anchor point="RIGHT" constrains="X" />
+                        </Control>
+
+                        <Label name="$(parent)NoMedalsText" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Medals" />
+                            <Anchor point="RIGHT" constrains="X" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

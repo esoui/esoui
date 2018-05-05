@@ -1,0 +1,71 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_BattlegroundMatchInfo_Shared_StatRow" resizeToFitDescendents="true" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT"/>
+                </Label>
+
+                <Label name="$(parent)Value" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BattlegroundMatchInfo_Shared_MedalRow" hidden="true" virtual="true">
+            <Dimensions y="64" />
+
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="TOPLEFT" />
+
+                    <Controls>
+                        <Label name="$(parent)Count" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5" />
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Control name="$(parent)Text">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="RIGHT" constrains="X" />
+
+                    <Controls>
+                        <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS" />
+
+                        <Label name="$(parent)Points" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_BattlegroundMatchInfo_SharedTopLevel" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container"> <!-- This makes it easier to shared code between gamepad and keyboard -->
+                    <Controls>
+                        <Label name="$(parent)PlayerName" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+
+                        <Texture name="$(parent)PlayerClass" />
+
+                        <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_BATTLEGROUND_MATCH_INFO_PANEL_TITLE" />
+
+                        <Control name="$(parent)Stats" resizeToFitDescendents="true">
+                            <Controls>
+                                <Control name="$(parent)DamageDealt" inherits="ZO_BattlegroundMatchInfo_Shared_StatRow" />
+
+                                <Control name="$(parent)HealingDone" inherits="ZO_BattlegroundMatchInfo_Shared_StatRow" />
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)MedalsHeader" modifyTextType="UPPERCASE" text="SI_BATTLEGROUND_MATCH_INFO_PANEL_MEDALS_HEADER" />
+
+                        <Control name="$(parent)Medals" resizeToFitDescendents="true" />
+
+                        <Label name="$(parent)NoMedalsText" text="SI_BATTLEGROUND_MATCH_INFO_PANEL_NO_MEDALS_TEXT" hidden="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

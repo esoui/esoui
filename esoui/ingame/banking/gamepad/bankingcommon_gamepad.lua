@@ -18,51 +18,24 @@ function ZO_GamepadBankCommonInventoryList:Initialize(control, bankMode, ...)
     self.list:AddDataTemplate("ZO_GamepadBankCurrencySelectorTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 end
 
-do 
-    local BANK_DEPOSIT_ENTRY_MONEY = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_BANK_DEPOSIT_GOLD_ENTRY_NAME),"EsoUI/Art/Bank/Gamepad/gp_bank_menuIcon_gold_deposit.dds")
-    BANK_DEPOSIT_ENTRY_MONEY:SetIconTintOnSelection(true)
-    BANK_DEPOSIT_ENTRY_MONEY:SetIconDisabledTintOnSelection(true)
-    BANK_DEPOSIT_ENTRY_MONEY.currencyType = CURT_MONEY
-
-    local BANK_WITHDRAW_ENTRY_MONEY = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_BANK_WITHDRAW_GOLD_ENTRY_NAME),"EsoUI/Art/Bank/Gamepad/gp_bank_menuIcon_gold_withdraw.dds")
-    BANK_WITHDRAW_ENTRY_MONEY:SetIconTintOnSelection(true)
-    BANK_WITHDRAW_ENTRY_MONEY:SetIconDisabledTintOnSelection(true)
-    BANK_WITHDRAW_ENTRY_MONEY.currencyType = CURT_MONEY
-
-    local BANK_DEPOSIT_ENTRY_TELVAR_STONES = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_BANK_DEPOSIT_STONES_ENTRY_NAME),"EsoUI/Art/Bank/Gamepad/gp_bank_menuIcon_telvar_deposit.dds")
-    BANK_DEPOSIT_ENTRY_TELVAR_STONES:SetIconTintOnSelection(true)
-    BANK_DEPOSIT_ENTRY_TELVAR_STONES:SetIconDisabledTintOnSelection(true)
-    BANK_DEPOSIT_ENTRY_TELVAR_STONES.currencyType = CURT_TELVAR_STONES
-
-    local BANK_WITHDRAW_ENTRY_TELVAR_STONES = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_BANK_WITHDRAW_STONES_ENTRY_NAME),"EsoUI/Art/Bank/Gamepad/gp_bank_menuIcon_telvar_withdraw.dds")
-    BANK_WITHDRAW_ENTRY_TELVAR_STONES:SetIconTintOnSelection(true)
-    BANK_WITHDRAW_ENTRY_TELVAR_STONES:SetIconDisabledTintOnSelection(true)
-    BANK_WITHDRAW_ENTRY_TELVAR_STONES.currencyType = CURT_TELVAR_STONES
-    
-    local CURRENCY_TYPE_DEPOSIT_WITHDRAW_ENTRY_INFO =
-    {
-        [CURT_MONEY] = 
-        { 
-            [BANKING_GAMEPAD_MODE_WITHDRAW] = BANK_WITHDRAW_ENTRY_MONEY,
-            [BANKING_GAMEPAD_MODE_DEPOSIT] = BANK_DEPOSIT_ENTRY_MONEY,
-        },
-        [CURT_TELVAR_STONES] = 
-        { 
-            [BANKING_GAMEPAD_MODE_WITHDRAW] = BANK_WITHDRAW_ENTRY_TELVAR_STONES,
-            [BANKING_GAMEPAD_MODE_DEPOSIT] = BANK_DEPOSIT_ENTRY_TELVAR_STONES,
-        },
-    }
-
-    function ZO_GamepadBankCommonInventoryList:AddDepositWithdrawEntry(currencyType, isEnabled)
-        local entryData = CURRENCY_TYPE_DEPOSIT_WITHDRAW_ENTRY_INFO[currencyType][self.mode]
-        entryData:SetEnabled(isEnabled)
-
-        self.list:AddEntry("ZO_GamepadBankCurrencySelectorTemplate", entryData)
-    end
-end
-
 function ZO_GamepadBankCommonInventoryList:SetBankMode(mode)
     self.mode = mode
+end
+
+function ZO_GamepadBankCommonInventoryList:GetBankMode()
+    return self.mode
+end
+
+function ZO_GamepadBankCommonInventoryList:IsInWithdrawMode()
+    return self.mode == BANKING_GAMEPAD_MODE_WITHDRAW
+end
+
+function ZO_GamepadBankCommonInventoryList:IsInDepositMode()
+    return self.mode == BANKING_GAMEPAD_MODE_DEPOSIT
+end
+
+function ZO_GamepadBankCommonInventoryList:GetTargetControl()
+    return self.list:GetTargetControl()
 end
 
 --[[
@@ -80,8 +53,6 @@ function ZO_BankingCommon_Gamepad:Initialize(control, bankScene)
     self.mode = BANKING_GAMEPAD_MODE_WITHDRAW
     
     self:SetCurrencyType(CURT_MONEY) --default to gold until list is initialized
-    self.telvarStoneBankFee = GetTelvarStoneBankingFee()    --cache these guys cause they're static and referenced a lot
-    self.telvarStoneMinDeposit = GetTelvarStoneMinimumDeposit()
 
     self:CreateEventTable()
 
@@ -98,14 +69,14 @@ function ZO_BankingCommon_Gamepad:OnStateChanged(oldState, newState)
         ZO_GamepadGenericHeader_Activate(self.header)
         self.header:SetHidden(false)
 
-        self:SetCurrentList(self.currentItemList)
+        self:SetCurrentList(self:GetMainListForMode())
         self:AddKeybinds()
         self:OnSceneShowing()
     elseif newState == SCENE_SHOWN then
         self:OnSceneShown()
     elseif newState == SCENE_HIDING then
-        self:OnSelectionChanged(nil)
         self:HideSelector()
+        self:OnTargetChanged(nil)
         self:OnSceneHiding()
     elseif newState == SCENE_HIDDEN then
         self:UnregisterForEvents()
@@ -122,7 +93,7 @@ end
 
 function ZO_BankingCommon_Gamepad:OnDeferredInitialize()
     self:InitializeLists()
-
+    
     self:InitializeHeader()
 
     self:InitializeWithdrawDepositKeybindDescriptor()
@@ -176,8 +147,8 @@ function ZO_BankingCommon_Gamepad:InitializeWithdrawDepositSelector()
     self.selector:SetClampValues(true)
     self.selectorCurrency = selectorContainer:GetNamedChild("CurrencyTexture")
          
-    selectorContainer:RegisterForEvent(EVENT_MONEY_UPDATE, OnUpdateEvent)
-    selectorContainer:RegisterForEvent(EVENT_TELVAR_STONE_UPDATE, OnUpdateEvent)
+    selectorContainer:RegisterForEvent(EVENT_CARRIED_CURRENCY_UPDATE, OnUpdateEvent)
+    selectorContainer:RegisterForEvent(EVENT_BANKED_CURRENCY_UPDATE, OnUpdateEvent)
     selectorContainer:RegisterForEvent(EVENT_GUILD_BANKED_MONEY_UPDATE, OnUpdateEvent)
     selectorContainer:RegisterForEvent(EVENT_GUILD_BANK_ITEMS_READY, OnUpdateEvent)
     self.selector:RegisterCallback("OnValueChanged", function() self:UpdateInput(self.selector:GetValue()) end)
@@ -191,10 +162,10 @@ function ZO_BankingCommon_Gamepad:InitializeWithdrawDepositKeybindDescriptor()
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
             name = function()
-                if self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
-                    return GetString(SI_BANK_WITHDRAW_GOLD_BIND)
-                else
-                    return GetString(SI_BANK_DEPOSIT_GOLD_BIND)
+                if self:IsInWithdrawMode() then
+                    return GetString(SI_BANK_WITHDRAW_BIND)
+                elseif self:IsInDepositMode() then
+                    return GetString(SI_BANK_DEPOSIT_BIND)
                 end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
@@ -203,11 +174,11 @@ function ZO_BankingCommon_Gamepad:InitializeWithdrawDepositKeybindDescriptor()
             end,
             callback = function()
                 local amount = self.selector:GetValue()
-                local data = self.currentItemList:GetTargetData()
+                local data = self:GetTargetData()
 
-                if self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
+                if self:IsInWithdrawMode() then
                     self:WithdrawFunds(data.currencyType, amount)
-                elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
+                elseif self:IsInDepositMode() then
                     self:DepositFunds(data.currencyType, amount)
                 end
                 self:HideSelector()
@@ -224,33 +195,17 @@ function ZO_BankingCommon_Gamepad:InitializeWithdrawDepositKeybindDescriptor()
     }
 end
 
-local CURRENCY_TYPE_TO_TEXTURE =
-{
-    [CURT_MONEY] = "EsoUI/Art/currency/gamepad/gp_gold.dds",
-    [CURT_TELVAR_STONES] = "EsoUI/Art/currency/gamepad/gp_telvar.dds",
-}
-
 function ZO_BankingCommon_Gamepad:SetSelectorCurrency(currencyType)
-    self.selectorCurrency:SetTexture(CURRENCY_TYPE_TO_TEXTURE[currencyType])
+    self.selectorCurrency:SetTexture(ZO_Currency_GetGamepadCurrencyIcon(currencyType))
 end
 
 function ZO_BankingCommon_Gamepad:UpdateInput()
     local currentFunds = self.maxInputFunction(self.currencyType)
-    local meetsMinDeposit = true
-    local meetsBankFee = true
-    
-    if self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
-        if self.currencyType == CURT_TELVAR_STONES then
-            local selectorValue = self.selector:GetValue()
-            meetsMinDeposit = selectorValue >= self.telvarStoneMinDeposit
-            meetsBankFee = self.telvarStoneBankFee == 0 or selectorValue > self.telvarStoneBankFee
-        end
-    end
 
     self.selector:SetMaxValue(currentFunds)
     self:SetSelectorCurrency(self.currencyType)
 
-    local hasEnough = (currentFunds >= self.selector:GetValue()) and meetsMinDeposit and meetsBankFee
+    local hasEnough = currentFunds >= self.selector:GetValue()
     self.hasEnough = hasEnough
     self.selector:SetTextColor(hasEnough and ZO_SELECTED_TEXT or ZO_ERROR_COLOR)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.selectorKeybindStripDescriptor) -- The keybindings need visible to check for self.hasEnough
@@ -259,7 +214,7 @@ end
 local function OnSelectedDataChanged(list, selectedData)
     local selector = selectedData.selectorContainer
     if selector then
-    	list:GetTargetControl():SetHidden(true)
+        list:GetTargetControl():SetHidden(true)
         selectedData.selectorContainer = nil
         list:RemoveOnSelectedDataChangedCallback(OnSelectedDataChanged)
     end
@@ -268,16 +223,16 @@ end
 function ZO_BankingCommon_Gamepad:ShowSelector()
     self:UpdateInput()
     self.selectorContainer:SetHidden(false)
-    self.currentItemList:Deactivate()
+    local currentList = self:GetCurrentList()
+    currentList:Deactivate()
     
-    local list = self.currentItemList.list
-    local targetControl = list:GetTargetControl()
+    local targetControl = currentList:GetTargetControl()
     if targetControl then
         targetControl:SetHidden(true)
     else
         --if the targetControl doesn't exist because of trigger scrolling, wait til selection changed to hide control
-        list:SetOnSelectedDataChangedCallback(OnSelectedDataChanged)
-        local targetData = list:GetTargetData()
+        currentList:SetOnSelectedDataChangedCallback(OnSelectedDataChanged)
+        local targetData = currentList:GetTargetData()
         if targetData then
             targetData.selectorContainer = self.selectorContainer
         end
@@ -299,8 +254,9 @@ function ZO_BankingCommon_Gamepad:HideSelector()
         self.selectorContainer:SetHidden(true)
         self.selector:Clear()
         self.selector:Deactivate()
-        self.currentItemList:Activate()
-        self.currentItemList.list:GetTargetControl():SetHidden(false)
+        local currentList = self:GetCurrentList()
+        currentList:Activate()
+        currentList:GetTargetControl():SetHidden(false)
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.selectorKeybindStripDescriptor)
         self:AddKeybinds()
         self.selectorActive = false
@@ -329,9 +285,17 @@ function ZO_BankingCommon_Gamepad:SetDepositList(list)
     self.depositList = list
 end
 
--- set the bag that will be banked from, banked is a word.
-function ZO_BankingCommon_Gamepad:SetBankedBag(bag)
-    self.bankedBag = bag
+function ZO_BankingCommon_Gamepad:ClearBankedBags()
+    self.bankedBags = {}
+end
+
+-- set the bag(s) that will be banked from, banked is a word.
+function ZO_BankingCommon_Gamepad:AddBankedBag(bag)
+    if self.bankedBags then
+        table.insert(self.bankedBags, bag)
+    else
+        self.bankedBags = {bag}
+    end
 end
 
 -- set the bag that the player is carrying, probably always backpack
@@ -379,7 +343,11 @@ function ZO_BankingCommon_Gamepad:RefreshHeaderData()
         headerData.data2HeaderText = GetString(SI_GAMEPAD_BANK_PLAYER_FUNDS_LABEL)
         headerData.data2Text = function(...) return self:SetCurrentCarriedAmount(...) end
     else
-        headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_BANK_CAPACITY_LABEL)
+        if GetBankingBag() == BAG_BANK then
+            headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_BANK_CAPACITY_LABEL)
+        else
+            headerData.data1HeaderText = GetString(SI_GAMEPAD_BANK_HOUSE_BANK_CAPACITY_LABEL)
+        end
         headerData.data1Text = function(...) return self:SetBankCapacityHeaderText(...) end
 
         headerData.data2HeaderText = GetString(SI_GAMEPAD_BANK_PLAYER_CAPACITY_LABEL)
@@ -397,7 +365,6 @@ function ZO_BankingCommon_Gamepad:OnCategoryChanged(selectedData)
     self:RemoveKeybinds()
 
     self:SetCurrentList(selectedData.itemList)
-    self.currentItemList = selectedData.itemList
     self:SetCurrentKeybindDescriptor(selectedData.keybind)
 
     self:AddKeybinds()
@@ -408,15 +375,17 @@ end
 function ZO_BankingCommon_Gamepad:SetCurrentCarriedAmount(control)
     local moneyAmount = self:GetDepositMoneyAmount()
 
-    self:SetSimpleCurrency(control, moneyAmount, self.currencyType, BANKING_GAMEPAD_MODE_DEPOSIT)
+    self:SetSimpleCurrency(control, moneyAmount, self.currencyType, BANKING_GAMEPAD_MODE_DEPOSIT, ZO_BANKING_CURRENCY_LABEL_OPTIONS)
     -- must return a non-nil value so that the control isn't auto-hidden
     return true
 end
 
 function ZO_BankingCommon_Gamepad:SetCurrentBankedAmount(control)
     local moneyAmount = self:GetWithdrawMoneyAmount()
+    local currencyOptions = self:GetWithdrawMoneyOptions()
+    local obfuscateAmount = self:DoesObfuscateWithdrawAmount()
 
-    self:SetSimpleCurrency(control, moneyAmount, self.currencyType, BANKING_GAMEPAD_MODE_WITHDRAW)
+    self:SetSimpleCurrency(control, moneyAmount, self.currencyType, BANKING_GAMEPAD_MODE_WITHDRAW, currencyOptions, obfuscateAmount)
     -- must return a non-nil value so that the control isn't auto-hidden
     return true
 end
@@ -427,28 +396,30 @@ end
 
 -- private functions
 
-local BANKING_CURRENCY_LABEL_OPTIONS = ZO_ShallowTableCopy(ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+function ZO_BankingCommon_Gamepad:SetSimpleCurrency(control, amount, currencyType, colorMinValueForMode, options, obfuscateAmount)
+    options.color = nil -- Reset the color
 
-function ZO_BankingCommon_Gamepad:SetSimpleCurrency(control, amount, currencyType, colorMinValueForMode)
-    BANKING_CURRENCY_LABEL_OPTIONS.color = nil        -- Reset the color
-    
-    if self.mode == BANKING_GAMEPAD_MODE_WITHDRAW then
+    if self:IsInWithdrawMode() then
         if (colorMinValueForMode == self.mode and amount == 0) or (colorMinValueForMode ~= self.mode and amount == self:GetMaxBankedFunds(currencyType)) then
-            BANKING_CURRENCY_LABEL_OPTIONS.color = ZO_ERROR_COLOR
+            options.color = ZO_ERROR_COLOR
         end
-    elseif self.mode == BANKING_GAMEPAD_MODE_DEPOSIT then
-        if (colorMinValueForMode == self.mode and amount == 0) or (colorMinValueForMode ~= self.mode and amount == GetMaxCarriedCurrencyAmount(currencyType)) then
-            BANKING_CURRENCY_LABEL_OPTIONS.color = ZO_ERROR_COLOR
+    elseif self:IsInDepositMode() then
+        if (colorMinValueForMode == self.mode and amount == 0) or (colorMinValueForMode ~= self.mode and amount == GetMaxPossibleCurrency(currencyType, CURRENCY_LOCATION_CHARACTER)) then
+            options.color = ZO_ERROR_COLOR
         end
     end
 
-    ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, amount, BANKING_CURRENCY_LABEL_OPTIONS)
+    local displayOptions =
+    {
+        obfuscateAmount = obfuscateAmount,
+    }
+    ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, amount, options, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
 end
 
 function ZO_BankingCommon_Gamepad:RecolorCapacityHeader(control, usedSlots, bagSize, recolorMode)
     local color = ZO_SELECTED_TEXT
 
-    if recolorMode == self.mode and usedSlots == bagSize then
+    if recolorMode == self.mode and usedSlots >= bagSize then
         color = ZO_ERROR_COLOR
     end
 
@@ -456,8 +427,15 @@ function ZO_BankingCommon_Gamepad:RecolorCapacityHeader(control, usedSlots, bagS
 end
 
 function ZO_BankingCommon_Gamepad:SetBankCapacityHeaderText(control)
-    local usedSlots = GetNumBagUsedSlots(self.bankedBag)
-    local bagSize = GetBagSize(self.bankedBag)
+    local usedSlots = 0
+    local bagSize = 0
+
+    if self.bankedBags then
+        for index, bagId in ipairs(self.bankedBags) do  
+            usedSlots = usedSlots + GetNumBagUsedSlots(bagId)
+            bagSize = bagSize + GetBagUseableSize(bagId)
+        end
+    end
 
     self:RecolorCapacityHeader(control, usedSlots, bagSize, BANKING_GAMEPAD_MODE_DEPOSIT)
 
@@ -473,25 +451,55 @@ function ZO_BankingCommon_Gamepad:SetPlayerCapacityHeaderText(control)
     return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, usedSlots, bagSize)
 end
 
-function ZO_BankingCommon_Gamepad:OnSelectionChanged(_, selectedData)
-    self:SetCurrencyType(selectedData and selectedData.currencyType or nil)
-    self:LayoutInventoryItemTooltip(selectedData)
-    self:OnSelectionChangedCallback()
+function ZO_BankingCommon_Gamepad:OnTargetChanged(list, targetData)
+    self:SetCurrencyType(targetData and targetData.currencyType or nil)
+    self:LayoutBankingEntryTooltip(targetData)
+    self:OnTargetChangedCallback()
 
     self:RefreshHeaderData()
 end
 
-function ZO_BankingCommon_Gamepad:LayoutInventoryItemTooltip(inventoryData)
+function ZO_BankingCommon_Gamepad:LayoutBankingEntryTooltip(inventoryData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
-
     if inventoryData and inventoryData.bagId then
         GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, inventoryData.bagId, inventoryData.slotIndex)
     end
 end
 
--- functions that should be overwritten
+function ZO_BankingCommon_Gamepad:GetTargetData()
+    local currentList = self:GetCurrentList()
+    if currentList then
+        return currentList:GetTargetData()
+    end
+end
+
+function ZO_BankingCommon_Gamepad:GetMode()
+    return self.mode
+end
+
+function ZO_BankingCommon_Gamepad:IsInWithdrawMode()
+    return self.mode == BANKING_GAMEPAD_MODE_WITHDRAW
+end
+
+function ZO_BankingCommon_Gamepad:IsInDepositMode()
+    return self.mode == BANKING_GAMEPAD_MODE_DEPOSIT
+end
+
+function ZO_BankingCommon_Gamepad:GetMainListForMode()
+    return self:IsInWithdrawMode() and self.withdrawList or self.depositList
+end
+
+-- functions that must be overwritten
 
 function ZO_BankingCommon_Gamepad:GetWithdrawMoneyAmount()
+    assert(false)
+end
+
+function ZO_BankingCommon_Gamepad:GetWithdrawMoneyOptions()
+    assert(false)
+end
+
+function ZO_BankingCommon_Gamepad:DoesObfuscateWithdrawAmount()
     assert(false)
 end
 
@@ -540,7 +548,7 @@ end
 function ZO_BankingCommon_Gamepad:OnCategoryChangedCallback(selectedData)
 end
 
-function ZO_BankingCommon_Gamepad:OnSelectionChangedCallback()
+function ZO_BankingCommon_Gamepad:OnTargetChangedCallback()
 end
 
 function ZO_BankingCommon_Gamepad:OnDeferredInitialization()

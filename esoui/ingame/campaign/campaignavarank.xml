@@ -11,7 +11,7 @@
                     <Anchor point="TOPLEFT"/>
                 </Texture>
                 <Label name="$(parent)Rank" font="ZoFontCallout3">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="-7"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="1"/>
                 </Label>
                 <Label name="$(parent)Name" font="ZoFontHeader2" modifyTextType="UPPERCASE">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="TOPRIGHT" offsetX="14" offsetY="10"/>

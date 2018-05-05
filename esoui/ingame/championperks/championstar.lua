@@ -152,29 +152,31 @@ function ZO_ChampionStar:RefreshPointsMinMax()
             local attributeType = self.constellation:GetAttributeType()
             local numAvailablePoints = CHAMPION_PERKS:GetNumAvailablePoints(attributeType)
             local maxPossiblePointsInSkill = GetMaxPossiblePointsInChampionSkill()
+            local currentPendingPoints = self:GetNumPendingPoints()
 
             --there is a limit to the number of points that can be spent across all perks in an attribute type
             local numAvailablePointsUntilMaxSpendableCap = CHAMPION_PERKS:GetNumAvailablePointsUntilMaxSpendableCap(attributeType)
             --include the number of points that we have pending or spent in the amount we can spend of the cap
             if CHAMPION_PERKS:IsInRespecMode() then
-                numAvailablePointsUntilMaxSpendableCap = numAvailablePointsUntilMaxSpendableCap + self:GetNumPendingPoints()
+                numAvailablePointsUntilMaxSpendableCap = numAvailablePointsUntilMaxSpendableCap + currentPendingPoints
             else
-                numAvailablePointsUntilMaxSpendableCap = numAvailablePointsUntilMaxSpendableCap + self:GetNumPendingPoints() + self.spentPoints
+                numAvailablePointsUntilMaxSpendableCap = numAvailablePointsUntilMaxSpendableCap + currentPendingPoints + self.spentPoints
             end
 
             local maxPossiblePoints = zo_min(maxPossiblePointsInSkill, numAvailablePointsUntilMaxSpendableCap)
 
             self.onValueChangedEnabled = false
             if CHAMPION_PERKS:IsInRespecMode() then
-                self.pointsSpinner:SetMinMax(0, zo_min(numAvailablePoints + self:GetNumPendingPoints(), maxPossiblePoints))
-                self.pointsSpinner:SetValue(self:GetNumPendingPoints() + self.pointsSpinner:GetMin())
+                self.pointsSpinner:SetMinMax(0, zo_min(numAvailablePoints + currentPendingPoints, maxPossiblePoints))
+                self.pointsSpinner:SetValue(currentPendingPoints + self.pointsSpinner:GetMin())
             else
-                self.pointsSpinner:SetMinMax(self.spentPoints, zo_min(self.spentPoints + numAvailablePoints + self:GetNumPendingPoints(), maxPossiblePoints))
-                self.pointsSpinner:SetValue(self:GetNumPendingPoints() + self.pointsSpinner:GetMin())
+                self.pointsSpinner:SetMinMax(self.spentPoints, zo_min(self.spentPoints + numAvailablePoints + currentPendingPoints, maxPossiblePoints))
+                self.pointsSpinner:SetValue(currentPendingPoints + self.pointsSpinner:GetMin())
             end
             self.onValueChangedEnabled = true
 
-            if self.pointsSpinner:GetValue() - self.pointsSpinner:GetMin() ~= currentPendingPoints then
+            local previousPendingPoints = currentPendingPoints
+            if self.pointsSpinner:GetValue() - self.pointsSpinner:GetMin() ~= previousPendingPoints then
                 self:OnValueChanged()
             end
         end
@@ -352,7 +354,7 @@ function ZO_ChampionStar:RefreshTexture()
     local animationCellsSize = textureInfo.animationCellsSize
 
     self.pulseTimeline:Stop()
-    self.texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(size, size, self.depth))
+    self.texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(size, size, self.depth, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.texture:SetTextureCoords(0, 1 / animationCellsSize, 0, 1 / animationCellsSize)
     local textureAnimation = self.pulseTimeline:GetFirstAnimation()
     textureAnimation:SetImageData(animationCellsSize, animationCellsSize)
@@ -598,7 +600,7 @@ function ZO_ChampionStar:PlayOneShotAnimation(animationInfo)
 
     local timeline, texture = CHAMPION_PERKS:AcquireOneShotAnimation(animationInfo, self.oneShotAnimationOnReleaseCallback)
     self.sceneNode:AddControl(texture, self.x, self.y, self.depth)
-    texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(STAR_ONE_SHOT_ANIMATION_SIZE, STAR_ONE_SHOT_ANIMATION_SIZE, self.depth + 0.01))
+    texture:SetDimensions(self.sceneNode:ComputeSizeForDepth(STAR_ONE_SHOT_ANIMATION_SIZE, STAR_ONE_SHOT_ANIMATION_SIZE, self.depth + 0.01, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.oneShotAnimationTimeline = timeline
     self.oneShotAnimationInfo = animationInfo
     if animationInfo.reverse then

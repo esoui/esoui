@@ -16,6 +16,9 @@ local SKY_DEPTH = 5
 local ZOOMED_IN_CAMERA_Z = 0.9
 local ZOOMED_IN_CAMERA_Y = 1035
 local ZOOMED_OUT_CAMERA_Z = -1.2
+--Champion computes all of its sizes off of a reference camera depth of -1 since it uses two camera levels. What the reference depth is doesn't really matter,
+--it's just important that it stays constant so we can use one measurement system at both zoom levels.
+ZO_CHAMPION_REFERENCE_CAMERA_Z = -1
 
 do
     local ATTRIBUTE_TO_CONSTELLATION_GROUP_NAME =
@@ -148,7 +151,7 @@ function ChampionPerks:Initialize(control)
             SetShouldRenderWorld(true)
         elseif newState == SCENE_HIDDEN then
             if self:HasUnsavedChanges() and AreChampionPointsActive() then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
+                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
             end
             self:ResetToZoomedOut()
             self:RemoveSharedKeybinds()
@@ -231,16 +234,16 @@ function ChampionPerks:SetupCustomConfirmDialog()
         },
         mainText =
         {
-            text = zo_strformat(SI_CHAMPION_DIALOG_TEXT_FORMAT, GetString(SI_CHAMPION_DIALOG_CONFIRM_POINT_COST)),
+            text = zo_strformat(SI_CHAMPION_DIALOG_CONFIRM_POINT_COST),
         },
         setup = function(dialog)
             if SCENE_MANAGER:IsCurrentSceneGamepad() then
-                local icon = zo_iconFormat(ZO_GAMEPAD_CURRENCY_ICON_GOLD_TEXTURE, 24, 24)
-                gamepadData.data1.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetCarriedCurrencyAmount(CURT_MONEY)) , icon)
-                gamepadData.data2.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetChampionRespecCost()), icon)
+                local gamepadGoldIconMarkup =  ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
+                gamepadData.data1.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)), gamepadGoldIconMarkup)
+                gamepadData.data2.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetChampionRespecCost()), gamepadGoldIconMarkup)
                 dialog.setupFunc(dialog, gamepadData)
             else
-                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("BalanceAmount"), CURT_MONEY,  GetCarriedCurrencyAmount(CURT_MONEY))
+                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("BalanceAmount"), CURT_MONEY,  GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
                 ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("RespecCost"), CURT_MONEY,  GetChampionRespecCost())
             end
         end,
@@ -434,10 +437,10 @@ function ChampionPerks:InitializeSharedKeybindStripDescriptors()
             name = function()
                 if self:IsRespecNeeded() then
                     local cost = GetChampionRespecCost()
-                    if GetCarriedCurrencyAmount(CURT_MONEY) < cost then
+                    if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < cost then
                         cost = ZO_ERROR_COLOR:Colorize(cost)
                     end
-                    return zo_strformat(SI_CHAMPION_CONFIRM_SPEND_RESPEC_ACTION, cost, ZO_Currency_GetPlatformFormattedGoldIcon())
+                    return zo_strformat(SI_CHAMPION_CONFIRM_SPEND_RESPEC_ACTION, cost, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY))
                 else
                     return GetString(SI_CHAMPION_CONFIRM_SPEND_POINTS_ACTION)
                 end
@@ -454,7 +457,7 @@ function ChampionPerks:InitializeSharedKeybindStripDescriptors()
                 end
 
                 if self:IsRespecNeeded() then
-                    return GetCarriedCurrencyAmount(CURT_MONEY) >= GetChampionRespecCost()
+                    return GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= GetChampionRespecCost()
                 else
                     return true
                 end
@@ -546,6 +549,8 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
             enabled = function() return not self:IsAnimating() end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Star Remove Points",
             ethereal = true,
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             handlesKeyUp = true,
@@ -568,12 +573,15 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
                         else
                             selectedStar:StartRemovingPoints()
                         end
+                        return true
                     end
                 end
                 return false
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Star Add Points",
             ethereal = true,
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             handlesKeyUp = true,
@@ -596,11 +604,15 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
                         else
                             selectedStar:StartAddingPoints()
                         end
+                        return true
                     end
                 end
+                return false
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Rotate Left",
             ethereal = true,
             keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             callback = function()
@@ -610,6 +622,8 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Rotate Right",
             ethereal = true,
             keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             callback = function()
@@ -683,7 +697,7 @@ function ChampionPerks:BuildStarSpirals()
         local texture = CreateControlFromVirtual(self.canvasControl:GetName().."StarSpiral", self.canvasControl, "ZO_ConstellationStarSpiral", i)
         local spiralNode = self.sceneGraph:CreateNode("starSpiral"..i)
         spiralNode:SetParent(self.rootNode)
-        texture:SetDimensions(spiralNode:ComputeSizeForDepth(4000, 4000, STAR_SPIRAL_START_DEPTH))
+        texture:SetDimensions(spiralNode:ComputeSizeForDepth(4000, 4000, STAR_SPIRAL_START_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
         spiralNode:AddControl(texture, 0, 0, STAR_SPIRAL_START_DEPTH)
         self.starSpiralNodes[i] = spiralNode
     end
@@ -703,7 +717,7 @@ function ChampionPerks:BuildClouds()
         local skyCloudTexture = CreateControlFromVirtual(self.canvasControl:GetName().."SkyCloud", self.canvasControl, skyCloudTemplate, i)
         local skyCloudNode = self.sceneGraph:CreateNode("skyCloud"..i)
         skyCloudNode:SetParent(self.skyCloudsNode)
-        skyCloudTexture:SetDimensions(skyCloudNode:ComputeSizeForDepth(512, 256, SKY_CLOUD_DEPTH))
+        skyCloudTexture:SetDimensions(skyCloudNode:ComputeSizeForDepth(512, 256, SKY_CLOUD_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
         skyCloudNode:AddControl(skyCloudTexture, 0, 800 + (i % 3) * 75, SKY_CLOUD_DEPTH)
         skyCloudNode:SetRotation(((i - 1) / NUM_CLOUDS) * 2 * math.pi)
     end
@@ -720,12 +734,12 @@ function ChampionPerks:BuildSceneGraph()
 
     self.closeClouds1Node = self.sceneGraph:CreateNode("closeClouds1")
     self.closeClouds1Node:SetParent(self.rootNode)
-    self.closeClouds1Texture:SetDimensions(self.closeClouds1Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH))
+    self.closeClouds1Texture:SetDimensions(self.closeClouds1Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.closeClouds1Node:AddControl(self.closeClouds1Texture, 0, 0, CLOSE_CLOUDS_DEPTH)
 
     self.closeClouds2Node = self.sceneGraph:CreateNode("closeClouds2")
     self.closeClouds2Node:SetParent(self.rootNode)
-    self.closeClouds2Texture:SetDimensions(self.closeClouds2Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH))
+    self.closeClouds2Texture:SetDimensions(self.closeClouds2Node:ComputeSizeForDepth(4500, 4500, CLOSE_CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.closeClouds2Node:AddControl(self.closeClouds2Texture, 0, 0, CLOSE_CLOUDS_DEPTH)
 
     self:BuildClouds()
@@ -735,43 +749,43 @@ function ChampionPerks:BuildSceneGraph()
     self.colorCloudsNode = self.sceneGraph:CreateNode("colorClouds")
     self.colorCloudsNode:SetParent(self.rootNode)
     self.colorCloudsNode:SetRotation(6.11)
-    self.colorCloudsTexture:SetDimensions(self.colorCloudsNode:ComputeSizeForDepth(1300, 1300, COLOR_CLOUDS_DEPTH))
+    self.colorCloudsTexture:SetDimensions(self.colorCloudsNode:ComputeSizeForDepth(1300, 1300, COLOR_CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.colorCloudsNode:AddControl(self.colorCloudsTexture, 0, 0, COLOR_CLOUDS_DEPTH)
 
     self.cloudsNode = self.sceneGraph:CreateNode("clouds")
     self.cloudsNode:SetParent(self.rootNode)
-    self.cloudsTexture:SetDimensions(self.cloudsNode:ComputeSizeForDepth(1300, 1300, CLOUDS_DEPTH))
+    self.cloudsTexture:SetDimensions(self.cloudsNode:ComputeSizeForDepth(1300, 1300, CLOUDS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.cloudsNode:AddControl(self.cloudsTexture, 0, 0, CLOUDS_DEPTH)
 
     self.smokeNode = self.sceneGraph:CreateNode("smoke")
     self.smokeNode:SetParent(self.rootNode)
-    self.smokeTexture:SetDimensions(self.smokeNode:ComputeSizeForDepth(1300, 1300, SMOKE_DEPTH))
+    self.smokeTexture:SetDimensions(self.smokeNode:ComputeSizeForDepth(1300, 1300, SMOKE_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.smokeNode:AddControl(self.smokeTexture, 0, 0, SMOKE_DEPTH)
 
     self.skyNode = self.sceneGraph:CreateNode("sky")
     self.skyNode:SetParent(self.rootNode)
     local skyTexture = self.canvasControl:GetNamedChild("Sky")
-    skyTexture:SetDimensions(self.skyNode:ComputeSizeForDepth(9000, 9000, SKY_DEPTH))
+    skyTexture:SetDimensions(self.skyNode:ComputeSizeForDepth(9000, 9000, SKY_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.skyNode:AddControl(skyTexture, 0, 0, SKY_DEPTH)
 
     self.darknessRingNode = self.sceneGraph:CreateNode("darknessRing")
     self.darknessRingNode:SetParent(self.rootNode)
-    self.darknessRingTexture:SetDimensions(self.darknessRingNode:ComputeSizeForDepth(1400, 1400, CONSTELLATIONS_DARKNESS_DEPTH))
+    self.darknessRingTexture:SetDimensions(self.darknessRingNode:ComputeSizeForDepth(1400, 1400, CONSTELLATIONS_DARKNESS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.darknessRingNode:AddControl(self.darknessRingTexture, 0, 0, CONSTELLATIONS_DARKNESS_DEPTH)
     self.darknessRingNode:SetRotation(6.11)
 
     self.radialSelectorNode = self.sceneGraph:CreateNode("radialSelector")
     self.radialSelectorNode:SetParent(self.sceneGraph:GetCameraNode())
-    self.radialSelectorTexture:SetDimensions(self.radialSelectorNode:ComputeSizeForDepth(512, 128, CONSTELLATIONS_DEPTH))
+    self.radialSelectorTexture:SetDimensions(self.radialSelectorNode:ComputeSizeForDepth(512, 128, CONSTELLATIONS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.radialSelectorNode:AddControl(self.radialSelectorTexture, 0, -580, CONSTELLATIONS_DEPTH)
 
     self.centerInfoBGNode = self.sceneGraph:CreateNode("centerInfoBG")
     self.centerInfoBGNode:SetParent(self.rootNode)
-    self.centerInfoBGTexture:SetDimensions(self.centerInfoBGNode:ComputeSizeForDepth(512, 512, CENTER_INFO_BG_DEPTH))
+    self.centerInfoBGTexture:SetDimensions(self.centerInfoBGNode:ComputeSizeForDepth(512, 512, CENTER_INFO_BG_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.centerInfoBGNode:AddControl(self.centerInfoBGTexture, 0, 0, CENTER_INFO_BG_DEPTH)
 
     self.ring = ZO_SceneNodeRing:New(self.rootNode)
-    self.ring:SetRadius(self.rootNode:ComputeSizeForDepth(self.constellationInnerRadius, self.constellationInnerRadius, CONSTELLATIONS_DEPTH))
+    self.ring:SetRadius(self.rootNode:ComputeSizeForDepth(self.constellationInnerRadius, self.constellationInnerRadius, CONSTELLATIONS_DEPTH, ZO_CHAMPION_REFERENCE_CAMERA_Z))
     self.constellations = {}
 
     for i = 1, GetNumChampionDisciplines() do
@@ -892,10 +906,17 @@ function ChampionPerks:ApplyCenterInfoStyle(constants)
     self.radialSelectorNode:SetControlPosition(self.radialSelectorTexture, 0, constants.RADIAL_SELECTOR_Y, CONSTELLATIONS_DEPTH)
 end
 
+function ChampionPerks:RefreshInactiveAlertMessage()
+    local active, activeReason = AreChampionPointsActive()
+    if not active then
+        self.inactiveAlert.messageLabel:SetText(GetString("SI_CHAMPIONPOINTACTIVEREASON", activeReason))
+    end
+end
+
 function ChampionPerks:ApplyInactiveAlertStyle(constants, control)
     control.messageLabel:SetFont(constants.INACTIVE_ALERT_FONT)
     control.messageLabel:SetModifyTextType(constants.INACTIVE_ALERT_MODIFY_TEXT_TYPE)
-    control.messageLabel:SetText(GetString(SI_CHAMPION_NO_ABILITIES_INACTIVE_ALERT))
+    self:RefreshInactiveAlertMessage()
     control:ClearAnchors()
     control:SetAnchor(TOPLEFT, nil, TOPLEFT, constants.INACTIVE_ALERT_OFFSETX, constants.INACTIVE_ALERT_OFFSETY)
 end
@@ -1028,7 +1049,7 @@ local MOUSEOVER_SOUNDS = {
 
 function ChampionPerks:RefreshCursorAndPlayMouseover()
     local newCursor = MOUSE_CURSOR_DO_NOT_CARE
-    local attributeType = ATTRIBUTE_TYPE_NONE
+    local attributeType = ATTRIBUTE_NONE
     if self.zoomedInMouseoverState == ZOOMED_IN_MOUSEOVER_STATE_LEFT then
         newCursor = MOUSE_CURSOR_NEXT_LEFT
         if self.leftOfChosenConstellation then
@@ -1366,7 +1387,7 @@ function ChampionPerks:ToggleRespecMode()
     if isInRespecMode and self:HasUnsavedChanges() then
         self:ShowDialog("CHAMPION_CONFIRM_CANCEL_RESPEC")
     elseif not isInRespecMode then
-        self:ShowDialog("CHAMPION_CONFIRM_ENTER_RESPEC", nil, { mainTextParams = { GetChampionRespecCost(), ZO_Currency_GetPlatformFormattedGoldIcon() } })
+        self:ShowDialog("CHAMPION_CONFIRM_ENTER_RESPEC", nil, { mainTextParams = { GetChampionRespecCost(), ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY) } })
     else
         self:SetInRespecMode(not isInRespecMode)
     end
@@ -1741,10 +1762,12 @@ function ChampionPerks:SetState(state)
 
         if state == STATE_ZOOMED_OUT then
             self.centerAlphaInterpolator:SetTargetBase(1)
-            local active, activeReason = AreChampionPointsActive()
+            local active = AreChampionPointsActive()
             if not active then
                 self.inactiveAlert.messageLabel:SetHidden(false)
-                self.inactiveAlert.messageLabel:SetText(GetString("SI_CHAMPIONPOINTACTIVEREASON", activeReason))
+                self:RefreshInactiveAlertMessage()
+            else
+                self.inactiveAlert.messageLabel:SetHidden(true)
             end
         else
             self.centerAlphaInterpolator:SetCurrentValue(0)
@@ -2194,6 +2217,7 @@ function ChampionPerks:CleanDirty()
         self:RefreshChosenConstellationInfo()
         self:RefreshSelectedConstellationInfo()
         KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
+        self.hasUnsavedChanges = self:HasUnsavedChanges()
         self.dirty = false
     end
 end
@@ -2234,6 +2258,13 @@ function ChampionPerks:OnPlayerActivated()
     if SYSTEMS:IsShowing("champion") then
         --Refresh confirm and redistribute keybinds (which can be disabled by being in an AvA campaign) on loading into a new zone
         self:RefreshApplicableSharedKeybinds()
+    end
+    --If we jumped somewhere just reset everything to zero since the backend was destroyed which means C++ thinks we have no pending points.
+    --If the system isn't initialized this means that the UI was reloaded so we don't clear in that case.
+    if self.initialized and self.hasUnsavedChanges then
+        self:ResetPendingPoints()
+        self:MarkDirty()
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_RESET_ALERT))
     end
 end
 

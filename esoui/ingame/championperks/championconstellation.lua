@@ -27,7 +27,7 @@ function ZO_ChampionConstellation:Initialize(sceneGraph, node, disciplineIndex, 
     local cRight = (((disciplineIndex - 1) % 3) + 1) / 3
     local cTop = zo_floor((disciplineIndex - 1) / 3) / 3
     local cBottom = (zo_floor((disciplineIndex - 1) / 3) + 1) / 3
-    local constellationWidth, constellationHeight = self.rotatedNode:ComputeSizeForDepth(425, 425, constellationsDepth)
+    local constellationWidth, constellationHeight = self.rotatedNode:ComputeSizeForDepth(425, 425, constellationsDepth, ZO_CHAMPION_REFERENCE_CAMERA_Z)
     
     self.constellationTexture = CreateControlFromVirtual(canvasControl:GetName().."Constellation", canvasControl, "ZO_Constellation", disciplineIndex)
     self.constellationTexture:SetTextureCoords(cLeft, cRight, cTop, cBottom)

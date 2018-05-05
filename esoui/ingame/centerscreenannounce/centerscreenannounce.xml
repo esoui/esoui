@@ -1,6 +1,6 @@
 <GuiXml>
     <Animations>
-        <AnimationTimeline name="CenterScreenLargeText">
+        <AnimationTimeline name="CenterScreenLargeTextWipe">
             <Animations>
                 <!-- Keep the height "large" so that we don't have to worry about fitting the scroll around the text -->
                 <SizeAnimation duration="1700" startWidth="ZO_MIN_CSA_SCROLL_WIDTH" endWidth="ZO_MAX_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
@@ -22,18 +22,73 @@
 
         <AnimationTimeline name="CenterScreenSmallTextTranslate">
             <Animations>
-                <TranslateAnimation duration="1000" deltaX="0" deltaY="0" anchorIndex="0">
+                <TranslateAnimation duration="800" deltaX="0" deltaY="0" anchorIndex="0">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                 </TranslateAnimation>
             </Animations>
         </AnimationTimeline>
+        
+        <AnimationTimeline name="CenterScreenMajorTextPopIn">
+            <Animations>
+                <ScaleAnimation duration="150" startScale="1.2" endScale="1.0"/>
+                <AlphaAnimation duration="150" startAlpha="0.0" endAlpha="1.0"/>
+                <AlphaAnimation duration="150" delay="675" startAlpha="1.0" endAlpha="0"/>
+                <ScaleAnimation duration="150" delay="675" startScale="1" endScale="0.9"/>
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="CenterScreenCountdownLoop">
+            <Animations>
+                <ScaleAnimation duration="100" startScale="0.8" endScale="1.2"/>
+                <ScaleAnimation duration="75" delay="100" startScale="1.2" endScale="1.0"/>
+                <AlphaAnimation duration="50" startAlpha="0.0" endAlpha="1.0"/>
+                <AlphaAnimation duration="50" delay="950" startAlpha="1.0" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="CenterScreenCountdownEndImage">
+            <Animations>
+                <ScaleAnimation duration="150" startScale="1.2" endScale="1.0"/>
+                <AlphaAnimation duration="150" startAlpha="0.0" endAlpha="1.0"/>
+                <AlphaAnimation duration="100" delay="2500" startAlpha="1.0" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="CenterScreenCountdownBuffer">
+            <Animations>
+                <!-- duration is set in code -->
+                <CustomAnimation />
+            </Animations>
+        </AnimationTimeline>
+    
+        <AnimationTimeline name="CenterScreenMajorTextContainerExpand">
+            <Animations>
+                <CustomAnimation duration="100">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
     </Animations>
 
     <Controls>
+        <Control name="ZO_CenterScreenAnnounceCountdownTextTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Countdown" horizontalAlignment="CENTER">
+                    <Anchor point="CENTER" />
+                </Label>
+                <Texture name="$(parent)EndImage" >
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
         <Label name="ZO_CenterScreenAnnounceTextTemplate" horizontalAlignment="CENTER" virtual="true">
-            <Dimensions x="1160" />
+            <Dimensions x="1280" />
             <Anchor point="TOP" />
         </Label>
 
@@ -42,6 +97,39 @@
         </Label>
         <Label name="ZO_CenterScreenAnnounceSmallTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" virtual="true" />
 
+        <Scroll name="ZO_CenterScreenAnnounceLargeTextLineTemplate" virtual="true">
+            <FadeGradient x1="1" y1="0" size1="512" x2="-1" y2="0" size2="512" />
+                    
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_CenterScreenAnnounceLargeTextTemplate">
+                    <Anchor point="TOP" relativeTo="$(grandparent)MajorLineContainer" relativePoint="BOTTOM"/>
+                    <Controls>
+                        <Label name="$(parent)Combined" inherits="ZO_CenterScreenAnnounceSmallTextTemplate">
+                            <Controls>
+                                <Texture name="$(parent)Icon" level="3">
+                                    <Dimensions x="50" y="50" />
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
+                                    <Controls>
+                                        <Texture name="$(parent)BG" hidden="true" level="2">
+                                            <AnchorFill />
+                                        </Texture>
+
+                                        <Texture name="$(parent)Frame" layer="CONTROLS">
+                                            <AnchorFill />
+                                        </Texture>
+                                    </Controls>
+                                </Texture>
+                            </Controls>
+                        </Label>
+                                
+                        <Control name="$(parent)RaidCompleteText" inherits="ZO_RaidCompleteText">
+                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                        </Control>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Scroll>
+            
         <Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Keyboard_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" font="ZoFontCenterScreenAnnounceLarge">
@@ -87,7 +175,7 @@
 
         <Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Gamepad_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" font="ZoFontGamepadBold45">
+                <Label name="$(parent)Text" font="ZoFontGamepadBold48">
                     <Controls>
                         <Label name="$(parent)Combined" font="ZoFontGamepad42">
                             <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
@@ -152,11 +240,29 @@
         </Control>
 
         <Control name="ZO_CenterScreenAnnounce_Keyboard_Template" virtual="true">
-            <Anchor point="TOP" offsetY="190" />
+            <Anchor point="TOP" offsetY="230" />
+
+            <Controls>
+                <Control name="$(parent)MajorLineContainer">
+                    <Anchor point="TOP" offsetY="10" />
+                </Control>
+                <Control name="$(parent)CountdownLineContainer">
+                    <Anchor point="TOP" offsetY="80" />
+                </Control>
+            </Controls>
         </Control>
 
         <Control name="ZO_CenterScreenAnnounce_Gamepad_Template" virtual="true">
-            <Anchor point="TOP" offsetY="270" />
+            <Anchor point="TOP" offsetY="290" />
+
+            <Controls>
+                <Control name="$(parent)MajorLineContainer">
+                    <Anchor point="TOP" />
+                </Control>
+                <Control name="$(parent)CountdownLineContainer">
+                    <Anchor point="TOP" offsetY="10" />
+                </Control>
+            </Controls>
         </Control>
 
         <TopLevelControl name="ZO_CenterScreenAnnounce" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
@@ -167,38 +273,13 @@
             </OnInitialized>
 
             <Controls>
-                <Scroll name="$(parent)LargeTextContainer">
-                    <FadeGradient x1="1" y1="0" size1="512" x2="-1" y2="0" size2="512" />
-                    
-                    <Controls>
-                        <Label name="$(parent)Text" inherits="ZO_CenterScreenAnnounceLargeTextTemplate">
-                            <Anchor point="TOP" relativeTo="ZO_CenterScreenAnnounce" />
-                            <Controls>
-                                <Label name="$(parent)Combined" inherits="ZO_CenterScreenAnnounceSmallTextTemplate">
-                                    <Controls>
-                                        <Texture name="$(parent)Icon" level="3">
-                                            <Dimensions x="50" y="50" />
-                                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
-                                            <Controls>
-                                                <Texture name="$(parent)BG" hidden="true" level="2">
-                                                    <AnchorFill />
-                                                </Texture>
-
-                                                <Texture name="$(parent)Frame" layer="CONTROLS">
-                                                    <AnchorFill />
-                                                </Texture>
-                                            </Controls>
-                                        </Texture>
-                                    </Controls>
-                                </Label>
-                                
-                                <Control name="$(parent)RaidCompleteText" inherits="ZO_RaidCompleteText">
-                                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" />
-                                </Control>
-                            </Controls>
-                        </Label>
-                    </Controls>
-                </Scroll>
+                <Control name="$(parent)MajorLineContainer" />
+                
+                <Control name="$(parent)CountdownLineContainer" />
+            
+                <Control name="$(parent)SmallLineContainer" resizeToFitDescendents="true" >
+                    <Anchor point="TOP" relativeTo="$(parent)MajorLineContainer" relativePoint="BOTTOM" offsetY="20"/>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

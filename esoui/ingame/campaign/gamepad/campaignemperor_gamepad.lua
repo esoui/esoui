@@ -2,11 +2,7 @@
 -- CampaignEmperor Gamepad
 --------------------------------------------
 
-local CampaignEmperor_Gamepad = ZO_Object.MultiSubclass(CampaignEmperor_Shared, ZO_SortFilterList_Gamepad)
-
-local function MagnitudeQuery()
-    return DIRECTIONAL_INPUT:GetY(ZO_DI_RIGHT_STICK)
-end
+local CampaignEmperor_Gamepad = ZO_Object.MultiSubclass(CampaignEmperor_Shared, ZO_NoSelectionSortFilterList_Gamepad)
 
 local function LeaderboardEntrySelectionCallback()
     -- Add to this function if there is something to be done on selection when scrolling through a leaderboard.
@@ -20,12 +16,8 @@ function CampaignEmperor_Gamepad:New(control)
 end
 
 function CampaignEmperor_Gamepad:Initialize(control)
-    local SCROLL_AS_BLOCK = true
-    ZO_SortFilterList_Gamepad.InitializeSortFilterList(self, control, MagnitudeQuery, SCROLL_AS_BLOCK)
+    ZO_NoSelectionSortFilterList_Gamepad.InitializeSortFilterList(self, control)
     CampaignEmperor_Shared.Initialize(self, control)
-
-    self.movementController:SetNumTicksToStartAccelerating(2)
-    self.movementController:SetAccelerationMagnitudeFactor(6)
 
     self.scrollIndicator = GetControl(control, "ScrollIndicator")
     self.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
@@ -53,8 +45,7 @@ function CampaignEmperor_Gamepad:Initialize(control)
 
     self:SetupLeaderboardAlliances()
 
-    local ALWAYS_ANIMATE = true
-    CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignEmperor_Gamepad, ALWAYS_ANIMATE)
+    CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignEmperor_Gamepad)
     CAMPAIGN_EMPEROR_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                                     if(newState == SCENE_FRAGMENT_SHOWN) then
                                                                         QueryCampaignLeaderboardData()

@@ -1,27 +1,24 @@
-local CSA_INACTIVE = 0
-CSA_EVENT_SMALL_TEXT = 1
-CSA_EVENT_LARGE_TEXT = 2
-CSA_EVENT_COMBINED_TEXT = 3
-CSA_EVENT_NO_TEXT = 4
-CSA_EVENT_RAID_COMPLETE_TEXT = 5
+CSA_CATEGORY_SMALL_TEXT = 1
+CSA_CATEGORY_LARGE_TEXT = 2
+CSA_CATEGORY_NO_TEXT = 3
+CSA_CATEGORY_RAID_COMPLETE_TEXT = 4
+CSA_CATEGORY_MAJOR_TEXT = 5
+CSA_CATEGORY_COUNTDOWN_TEXT = 6
 
-CSA_OPTION_SUPPRESS_ICON_FRAME = true
+local DEFAULT_PRIORITY = 1
+
+local CSA_OPTION_SUPPRESS_ICON_FRAME = true
+local CSA_OPTION_QUEUE_IMMEDIATELY = true
+local CSA_OPTION_SHOW_IMMEDIATELY = true
+
+local CSA_LINE_TYPE_SMALL = 1
+local CSA_LINE_TYPE_LARGE = 2
+local CSA_LINE_TYPE_MAJOR = 3
+local CSA_LINE_TYPE_COUNTDOWN = 4
 
 ZO_MAX_CSA_SCROLL_WIDTH = 2184
 ZO_MIN_CSA_SCROLL_WIDTH = 512
 ZO_MAX_CSA_SCROLL_HEIGHT = 500
-
-local ARG_INDEX_SOUND = 1
-local ARG_INDEX_MESSAGE = 2
-local ARG_INDEX_COMBINED_MESSAGE = 3
-local ARG_INDEX_ICON = 4
-local ARG_INDEX_ICON_BG = 5
-local ARG_INDEX_EXPIRING_CALLBACK = 6
-local ARG_INDEX_BAR_PARAMS = 7
-local ARG_INDEX_LIFESPAN = 8
-local ARG_INDEX_SUPPRESS_FRAME = 9
-local ARG_INDEX_QUEUE_IMMEDIATELY = 10
-local ARG_INDEX_SHOW_IMMEDIATELY = 11
 
 local ARG_BREAKDOWN_INDEX_SCORE = 1
 local ARG_BREAKDOWN_INDEX_TIME = 2
@@ -32,10 +29,31 @@ local ARG_BREAKDOWN_INDEX_VITALITY_PERCENT = 5
 local SMALL_TEXT_FONT_KEYBOARD = "ZoFontCenterScreenAnnounceSmall"
 local SMALL_TEXT_FONT_GAMEPAD = "ZoFontGamepad42"
 
+local COUNTDOWN_TEXT_FONT_KEYBOARD = "ZoFontCallout3"
+local COUNTDOWN_TEXT_FONT_GAMEPAD = "ZoFontGamepadBold61"
+
 local SMALL_TEXT_SPACING_KEYBOARD = 0
 local SMALL_TEXT_SPACING_GAMEPAD = 10
 
 local DEFAULT_FADE_OUT_TIME = 3500
+
+local WAIT_INTERVAL_SECONDS = 0.5
+local NO_WAIT_INTERVAL_SECONDS = 0
+
+local BAR_PARAMS_WAIT_INTERVAL_MS = 500
+local BAR_PARAMS_NO_WAIT_INTERVAL_MS = 0
+
+local INITIAL_SMALL_LINE_OFFSET_KEYBOARD_Y = 100
+local INITIAL_SMALL_LINE_OFFSET_GAMEPAD_Y = 110
+
+local MAX_SMALL_LINE_FADE_OUT_TIME = 3400
+
+local MAX_SMALL_TEXT_LINES = 4
+local MAX_MAJOR_TEXT_LINES = 2
+
+---------------------------------------------
+-- Center Screen Player Progress Bar Params
+---------------------------------------------
 
 local CenterScreenPlayerProgressBarParams = ZO_Object:Subclass()
 
@@ -50,9 +68,10 @@ function CenterScreenPlayerProgressBarParams:Reset()
     self.stop = nil
     self.sound = nil
     self.showNoGain = false
+    self.triggeringEvent = nil
 end
 
-function CenterScreenPlayerProgressBarParams:Set(barType, startLevel, start, stop, sound)
+function CenterScreenPlayerProgressBarParams:Set(barType, startLevel, start, stop, sound, triggeringEvent)
     self.type = barType
     self.startLevel = startLevel
     self.start = start
@@ -61,7 +80,7 @@ function CenterScreenPlayerProgressBarParams:Set(barType, startLevel, start, sto
 end
 
 function CenterScreenPlayerProgressBarParams:GetParams()
-    return self.type, self.startLevel, self.start, self.stop, self.sound
+    return self.type, self.startLevel, self.start, self.stop, self.sound, self.triggeringEvent
 end
 
 function CenterScreenPlayerProgressBarParams:SetShowNoGain(showNoGain)
@@ -72,246 +91,513 @@ function CenterScreenPlayerProgressBarParams:SetSound(sound)
     self.sound = sound
 end
 
-local function CallExpiringCallbackTimeline(timeline, offset)
-    CENTER_SCREEN_ANNOUNCE:CallExpiringCallback(timeline.m_control)
+function CenterScreenPlayerProgressBarParams:SetTriggeringEvent(triggeringEvent)
+    self.triggeringEvent = triggeringEvent
 end
 
-local CenterScreenAnnounce = ZO_Object:Subclass()
-
-function CenterScreenAnnounce:New(...)
-    local announce = ZO_Object.New(self)
-    announce:Initialize(...)
-    return announce
+function CenterScreenPlayerProgressBarParams:GetTriggeringEvent()
+    return self.triggeringEvent
 end
 
-function CenterScreenAnnounce:InitializeLineAnimation(line, timelineTemplate, timelineMemberKey, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor)
-    local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(timelineTemplate, line)
-    line[timelineMemberKey] = timeline
-    timeline.m_control = line
+---------------------------------------------
+-- Center Screen Message Params
+---------------------------------------------
+
+ZO_CenterScreenMessageParams = ZO_Object:Subclass()
+
+function ZO_CenterScreenMessageParams:New()
+    local messageParams = ZO_Object.New(self)
+    messageParams:Initialize()
+    return messageParams
+end
+
+function ZO_CenterScreenMessageParams:Initialize()
+    self:Reset()
+end
+
+function ZO_CenterScreenMessageParams:Reset()
+    ZO_ClearTable(self)
+    self.lifespanMS = DEFAULT_FADE_OUT_TIME
+    self.priority = DEFAULT_PRIORITY
+end
+
+function ZO_CenterScreenMessageParams:SetSound(sound)
+    self.sound = sound
+end
+
+function ZO_CenterScreenMessageParams:GetSound()
+    return self.sound
+end
+
+function ZO_CenterScreenMessageParams:SetText(mainText, secondaryText)
+    self.mainText = mainText
+    self.secondaryText = secondaryText
+end
+
+function ZO_CenterScreenMessageParams:GetMainText()
+    return self.mainText
+end
+
+function ZO_CenterScreenMessageParams:GetSecondaryText()
+    return self.secondaryText
+end
+
+function ZO_CenterScreenMessageParams:SetIconData(icon, iconBg)
+    self.icon = icon
+    self.iconBg = iconBg
+end
+
+function ZO_CenterScreenMessageParams:GetIconData()
+    return self.icon, self.iconBg
+end
+
+function ZO_CenterScreenMessageParams:SetExpiringCallback(callback)
+    self.expiringCallback = callback
+end
+
+function ZO_CenterScreenMessageParams:GetExpiringCallback()
+    return self.expiringCallback
+end
+
+function ZO_CenterScreenMessageParams:SetBarParams(barParams)
+    self.barParams = barParams
+end
+
+function ZO_CenterScreenMessageParams:GetBarParams()
+    return self.barParams
+end
+
+function ZO_CenterScreenMessageParams:SetLifespanMS(lifespanMS)
+    self.lifespanMS = lifespanMS
+end
+
+function ZO_CenterScreenMessageParams:GetLifespanMS()
+    return self.lifespanMS
+end
+
+function ZO_CenterScreenMessageParams:MarkSuppressIconFrame()
+    self.suppressIconFrame = CSA_OPTION_SUPPRESS_ICON_FRAME
+end
+
+function ZO_CenterScreenMessageParams:GetSuppressIconFrame()
+    return self.suppressIconFrame
+end
+
+function ZO_CenterScreenMessageParams:MarkQueueImmediately(reinsertStompedMessage)
+    self.queueImmediately = CSA_OPTION_QUEUE_IMMEDIATELY
+    self.reinsertStompedMessage = reinsertStompedMessage
+end
+
+function ZO_CenterScreenMessageParams:GetQueueImmediately()
+    return self.queueImmediately, self.reinsertStompedMessage
+end
+
+function ZO_CenterScreenMessageParams:MarkShowImmediately()
+    self.showImmediately = CSA_OPTION_SHOW_IMMEDIATELY
+end
+
+function ZO_CenterScreenMessageParams:GetShowImmediately()
+    return self.showImmediately
+end
+
+function ZO_CenterScreenMessageParams:GetMostUniqueMessage()
+    return self.secondaryText or self.mainText
+end
+
+function ZO_CenterScreenMessageParams:SetCategory(category)
+    self.category = category
+end
+
+function ZO_CenterScreenMessageParams:GetCategory()
+    return self.category
+end
+
+function ZO_CenterScreenMessageParams:SetObjectPoolKey(key)
+    self.key = key
+end
+
+function ZO_CenterScreenMessageParams:SetCSAType(csaType)
+    self.csaType = csaType
+    local priority = CENTER_SCREEN_ANNOUNCE:GetPriority(csaType)
+    self:SetPriority(priority)
+end
+
+function ZO_CenterScreenMessageParams:GetCSAType()
+    return self.csaType
+end
+
+function ZO_CenterScreenMessageParams:SetPriority(priority)
+    self.priority = priority
+end
+
+function ZO_CenterScreenMessageParams:GetPriority()
+    return self.priority
+end
+
+function ZO_CenterScreenMessageParams:SetQueuedOrder(queuedOrder)
+    self.queuedOrder = queuedOrder
+end
+
+function ZO_CenterScreenMessageParams:GetQueuedOrder()
+    return self.queuedOrder
+end
+
+function ZO_CenterScreenMessageParams:SetEndOfRaidData(endOfRaidData)
+    self.endOfRaidData = endOfRaidData
+end
+
+function ZO_CenterScreenMessageParams:GetEndOfRaidData()
+    return self.endOfRaidData
+end
+
+function ZO_CenterScreenMessageParams:MarkIsAvAEvent()
+    self.avaEvent = true
+end
+
+function ZO_CenterScreenMessageParams:IsAvAEvent()
+    return self.avaEvent
+end
+
+function ZO_CenterScreenMessageParams:CallExpiringCallback()
+    local expiringCallback = self:GetExpiringCallback()
+    if expiringCallback then
+        expiringCallback()
+    end
+end
+
+function ZO_CenterScreenMessageParams:PlaySound()
+    local soundId = self:GetSound()
+    if soundId then 
+        PlaySound(soundId) 
+    end
+end
+
+function ZO_CenterScreenMessageParams:ConvertOldParams(sound, message, combinedMessage, icon, iconBg, expiringCallback, barParams, lifespan, suppressFrame, queueImmediately, showImmediately, reinsertStompedMessage)
+    self:SetSound(sound)
+    self:SetText(message, combinedMessage)
+    self:SetIconData(icon, iconBg)
+    self:SetExpiringCallback(expiringCallback)
+    self:SetBarParams(barParams)
+    self:SetLifespanMS(lifespan)
+    if suppressFrame then
+        self:MarkSuppressIconFrame()
+    end
+    if queueImmediately then
+        self:MarkQueueImmediately(reinsertStompedMessage)
+    end
+    if showImmediately then
+        self:MarkShowImmediately()
+    end
+end
+
+------------------------------------
+-- Center Screen Announcement Line
+------------------------------------
+
+ZO_CenterScreenAnnouncementLine = ZO_CallbackObject:Subclass()
+
+function ZO_CenterScreenAnnouncementLine:New(...)
+    local announcementLine = ZO_CallbackObject.New(self)
+    announcementLine:Initialize(...)
+    return announcementLine
+end
+
+function ZO_CenterScreenAnnouncementLine:Initialize(control)
+    self.control = control
+    self:CreateTimelines()
+end
+
+function ZO_CenterScreenAnnouncementLine:Reset()
+    -- only clean up message params if they are not being reinserted into the queue
+    -- because the current message asked to resinsert stomped message
+    if self.shouldCleanupMessageParams then
+        CENTER_SCREEN_ANNOUNCE:ReleaseMessageParams(self.messageParams)
+    end
+    self.messageParams = nil
+    self.shouldCleanupMessageParams = true
+    self.control:SetHandler("OnUpdate", nil)
+
+    self.control:SetHidden(true)
+    self.control:ClearAnchors()
+
+    self.key = nil
+end
+
+function ZO_CenterScreenAnnouncementLine:OnAcquire()
+    self.control:SetHidden(false)
+    self:ApplyPlatformStyle()
+end
+
+function ZO_CenterScreenAnnouncementLine:SetMessageParams(messageParams)
+    self.messageParams = messageParams
+end
+
+function ZO_CenterScreenAnnouncementLine:GetMessageParams()
+    return self.messageParams
+end
+
+function ZO_CenterScreenAnnouncementLine:SetShouldCleanupMessageParams(cleanup)
+    self.shouldCleanupMessageParams = cleanup
+end
+
+function ZO_CenterScreenAnnouncementLine:GetCleanupMessageParams()
+    return self.shouldCleanupMessageParams
+end
+
+function ZO_CenterScreenAnnouncementLine:GetControl()
+    return self.control
+end
+
+function ZO_CenterScreenAnnouncementLine:SetKey(key)
+    self.key = key
+end
+
+function ZO_CenterScreenAnnouncementLine:GetKey()
+    return self.key
+end
+
+function ZO_CenterScreenAnnouncementLine:TrySettingDynamicText(label, textOrFunction)
+    if type(textOrFunction) == "function" then
+        label.dynamicTextFunction = textOrFunction
+        label:SetHandler("OnUpdate", function(label) label:SetText(label.dynamicTextFunction()) end)
+    else
+        label:SetText(textOrFunction)
+        label:SetHandler("OnUpdate", nil)
+    end
+end
+
+function ZO_CenterScreenAnnouncementLine:CreateAnimationWithExpiringCallback(timelineTemplate, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor)
+    local lineControl = self:GetControl()
+    local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(timelineTemplate, lineControl)
+    timeline.announcementLine = self
     timeline:SetHandler("OnStop", stopHandler)
 
-    if(expiringCallbackCheckOffset and expiringCallbackExecutor) then
+    if expiringCallbackCheckOffset and expiringCallbackExecutor then
         timeline:InsertCallback(expiringCallbackExecutor, expiringCallbackCheckOffset)
     end
 
+    return timeline
 end
 
-function CenterScreenAnnounce:InitializeWipeAnimation(container, timelineTemplate, timelineMemberKey, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor, wipeIn, wipeOut)
-    self:InitializeLineAnimation(container, timelineTemplate, timelineMemberKey, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor)
+function ZO_CenterScreenAnnouncementLine:CreateWipeAnimation(timelineTemplate, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor, wipeIn, wipeOut)
+    local timeline = self:CreateAnimationWithExpiringCallback(timelineTemplate, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor)
 
-    local timeline = container[timelineMemberKey]
     local wipeInAnim = timeline:GetAnimation(1)
     wipeInAnim:SetHandler("OnPlay", wipeIn)
 
     local wipeOutAnim = timeline:GetAnimation(2)
     wipeOutAnim:SetHandler("OnPlay", wipeOut)
+
+    return timeline
 end
 
-local WAIT_INTERVAL_SECONDS = 0.5
-local NO_WAIT_INTERVAL_SECONDS = 0
+function ZO_CenterScreenAnnouncementLine:OnLineComplete(completedPlayback)
+    if not completedPlayback then return end
 
-do
-    local handlers = ZO_CenterScreenAnnounce_GetHandlers()
-    local queueableHandlers = ZO_CenterScreenAnnounce_GetQueueableHandlers()
+    self:FireCallbacks("OnLineComplete", self)
+end
 
-    function CenterScreenAnnounce:OnCenterScreenEvent(eventId, ...)
-        if handlers[eventId] then
-            if queueableHandlers[eventId] then
-                local timeNowSeconds = GetFrameTimeMilliseconds() / 1000 
-                local waitingQueueData = CENTER_SCREEN_ANNOUNCE:GetWaitingQueueEventData(eventId)
-                if waitingQueueData then
-                    local conditions = queueableHandlers[eventId].conditionParameters or {}
-                    local passConditions = true
-                    for k,condition in ipairs(conditions) do
-                        if waitingQueueData.eventData[condition] ~= select(condition, ...) then
-                            passConditions = false
-                            break
-                        end
-                    end
-                    if passConditions then
-                        local updateParametersTable = queueableHandlers[eventId].updateParameters
-                        if updateParametersTable then
-                            for i,entry in pairs(updateParametersTable) do
-                                waitingQueueData.eventData[entry] = select(entry, ...)
-                            end
-                        end
-                        waitingQueueData.nextUpdateTimeSeconds = timeNowSeconds + queueableHandlers[eventId].updateTimeDelaySeconds
-                        return
-                    end
-                end
+function ZO_CenterScreenAnnouncementLine:GetLineType()
+    assert(false) -- override in derived classes
+end 
 
-                local data = 
-                {
-                    eventId = eventId,
-                    eventData = { ... },
-                    nextUpdateTimeSeconds = timeNowSeconds + queueableHandlers[eventId].updateTimeDelaySeconds
-                }
-                table.insert(self.m_waitingQueue, data)
-                CENTER_SCREEN_ANNOUNCE.waitingQueueController:SetHandler("OnUpdate", CENTER_SCREEN_ANNOUNCE.m_onWaitingUpdateHandler)
-            else
-                CENTER_SCREEN_ANNOUNCE:AddMessage(eventId, handlers[eventId](...))
-            end
-        end
-    end
+function ZO_CenterScreenAnnouncementLine:ApplyPlatformStyle()
+    assert(false) -- override in derived classes
+end
 
-    function CenterScreenAnnounce:Initialize(control)
-        self.m_control = control
-        control.m_object = self
+function ZO_CenterScreenAnnouncementLine:CreateTimelines(...)
+    assert(false) -- override in derived classes
+end
 
-        self.m_displayQueue = {}
-        self.m_waitingQueue = {}
-        self.m_activeSmallTextLines = {}
-        self.allowedCategories = {}
-        self.m_activeLineCount = 0
-        self.m_hasActiveBar = false
-        self.m_displayMode = CSA_INACTIVE
-        self.m_largeTextContainer = control:GetNamedChild("LargeTextContainer")
-        self.m_largeText = self.m_largeTextContainer:GetNamedChild("Text")
-        self.m_smallCombinedText = self.m_largeText:GetNamedChild("Combined")    
-        self.m_smallCombinedIcon = self.m_smallCombinedText:GetNamedChild("Icon")
-        self.m_smallCombinedIconBG = self.m_smallCombinedText:GetNamedChild("IconBG")
-        self.m_smallCombinedIconFrame = self.m_smallCombinedText:GetNamedChild("IconFrame")
-        self.m_nextQueueIndex = 1
+------------------------------------------
+-- Center Screen Announcement Small Line
+------------------------------------------
 
-        self.longformBreakdownContainer = self.m_largeText:GetNamedChild("RaidCompleteText")
-        self.breakdownLabel1 = self.longformBreakdownContainer:GetNamedChild("TimeAmount")
-        self.breakdownLabel2 = self.longformBreakdownContainer:GetNamedChild("ScoreAmount")
-        self.breakdownLabel3 = self.longformBreakdownContainer:GetNamedChild("VitalityAmount")
-        self.breakdownIconLabel = self.longformBreakdownContainer:GetNamedChild("VitalityPercent")
-        self.breakdownIcon = self.longformBreakdownContainer:GetNamedChild("VitalityIcon")
+ZO_CenterScreenAnnouncementSmallLine = ZO_CenterScreenAnnouncementLine:Subclass()
 
-        self.waitingQueueController = self.m_largeTextContainer
+function ZO_CenterScreenAnnouncementSmallLine:New(...)
+    return ZO_CenterScreenAnnouncementLine.New(self, ...)
+end
 
-        -- Recent message handler, using a 250 ms expiry delay
-        self.m_recentMessages = ZO_RecentMessages:New(250)
+function ZO_CenterScreenAnnouncementSmallLine:Reset()
+    ZO_CenterScreenAnnouncementLine.Reset(self)
 
-        local function OnFadeOutComplete(timeline, completedPlayback)
-            if(not completedPlayback) then return end
+    self.fadeInTimeline:Stop()
+    self.fadeOutTimeline:Stop()
+    self.translationTimeline:Stop()
+end
 
-            local control = timeline.m_control
-            self:ReleaseLine(control)
-            self:UpdateDisplay(control) -- passing in the control whose animation just finished...yes, it's already been released
-        end
+function ZO_CenterScreenAnnouncementSmallLine:SetText(text)
+    self:TrySettingDynamicText(self.control, text)
+end
 
-        local function OnSmallLineTranslateComplete(timeline, completedPlayback)
-            if(not completedPlayback) then return end
+function ZO_CenterScreenAnnouncementSmallLine:OnAcquire()
+    ZO_CenterScreenAnnouncementLine.OnAcquire(self)
+    self.acquisitionTimeMS = GetFrameTimeMilliseconds()
+end
 
-            local control = timeline.m_control
-            if(self:IsTopLine(control)) then
-                local offset = zo_clamp(GetFrameTimeMilliseconds() - control.m_acquisitionTime, 0, 2500)
-                control.m_fadeOutTimeline:PlayFromStart(offset)
-            end
-        end 
+function ZO_CenterScreenAnnouncementSmallLine:GetAcquisitionTimeMS()
+    return self.acquisitionTimeMS
+end
 
-        local function OnSmallTextLineCheckNextEvent(timeline, offset)
-            self.m_lastSmallLineMovedOutOfTheWay = true
-            self:UpdateDisplay(timeline.m_control, true)
-        end
+function ZO_CenterScreenAnnouncementSmallLine:BecomeTopSmallLine(container)
+    local smallLineControl = self:GetControl()
+    local distanceFromDestination = smallLineControl:GetTop() - container:GetTop()
+    smallLineControl:SetAnchor(TOP, container, TOP, 0, distanceFromDestination)
+    self:SetAndPlayTranslationAnimation(-distanceFromDestination)
+end
 
-        local function SetupWipeIn(animation, container)
-            container:ClearAnchors()
-            container:SetAnchor(TOPLEFT, control, TOPLEFT, -512, 0)
-        end
+function ZO_CenterScreenAnnouncementSmallLine:SetWipeOutLifespan(lifespan)
+    local fadeOutTimeline = self.fadeOutTimeline
+    local fadeOutAnimation = fadeOutTimeline:GetAnimation(1)
+    fadeOutTimeline:SetAnimationOffset(fadeOutAnimation, lifespan)
+end
 
-        local function SetupWipeOut(animation, container)
-            container:ClearAnchors()
-            container:SetAnchor(TOPRIGHT, control, TOPRIGHT, 512, 0)
-        end
+function ZO_CenterScreenAnnouncementSmallLine:SetAndPlayStartingAnimation(translationDetlaY)
+    self:SetAndPlayTranslationAnimation(translationDetlaY)
+    self.fadeInTimeline:PlayFromStart()
+end
 
-        self:InitializeWipeAnimation(self.m_largeTextContainer, "CenterScreenLargeText", "m_timeline", OnFadeOutComplete, DEFAULT_FADE_OUT_TIME, CallExpiringCallbackTimeline, SetupWipeIn, SetupWipeOut)
-    
-        local function SmallLineFactory(line)
-            self:InitializeLineAnimation(line, "CenterScreenSmallTextFadeIn", "m_fadeInTimeline")
-            self:InitializeLineAnimation(line, "CenterScreenSmallTextFadeOut", "m_fadeOutTimeline", OnFadeOutComplete, 0, CallExpiringCallbackTimeline)
-            self:InitializeLineAnimation(line, "CenterScreenSmallTextTranslate", "m_translateTimeline", OnSmallLineTranslateComplete)
+function ZO_CenterScreenAnnouncementSmallLine:SetAndPlayTranslationAnimation(translationDetlaY)
+    local translateTimeline = self.translationTimeline
+    translateTimeline:GetAnimation(1):SetTranslateDeltas(0, translationDetlaY)
+    translateTimeline:PlayFromStart()
+end
 
-            line.m_translateTimeline:InsertCallback(OnSmallTextLineCheckNextEvent, 500)
+function ZO_CenterScreenAnnouncementSmallLine:PlayFadeOutAnimation(offset)
+    self.fadeOutTimeline:PlayFromStart(offset)
+end
 
-            return line
-        end
+function ZO_CenterScreenAnnouncementSmallLine:ApplyPlatformStyle()
+    local isGamepad = IsInGamepadPreferredMode()
+    self.control:SetFont(isGamepad and SMALL_TEXT_FONT_GAMEPAD or SMALL_TEXT_FONT_KEYBOARD)
+end
 
-        local function SmallLineReset(line)
-            line.m_key = nil
-        end
+function ZO_CenterScreenAnnouncementSmallLine:OnSmallLineTranslateComplete(completedPlayback)
+    if not completedPlayback then return end
 
-        local function SmallLineAcquire(line)
-            line.m_acquisitionTime = GetFrameTimeMilliseconds()
-            line:SetFont(IsInGamepadPreferredMode() and SMALL_TEXT_FONT_GAMEPAD or SMALL_TEXT_FONT_KEYBOARD)
-        end
-
-        self.m_pool = ZO_ControlPool:New("ZO_CenterScreenAnnounceSmallTextTemplate", control)
-        self.m_pool:SetCustomFactoryBehavior(SmallLineFactory)
-        self.m_pool:SetCustomResetBehavior(SmallLineReset)
-        self.m_pool:SetCustomAcquireBehavior(SmallLineAcquire)
-        self.MAX_SMALL_TEXT_LINES = 5
-
-        local testLine, testKey = self.m_pool:AcquireObject()
-        testLine:SetFont(SMALL_TEXT_FONT_KEYBOARD)
-        self.INITIAL_LINE_OFFSET_KEYBOARD = (testLine:GetFontHeight() + SMALL_TEXT_SPACING_KEYBOARD) * self.MAX_SMALL_TEXT_LINES
-        testLine:SetFont(SMALL_TEXT_FONT_GAMEPAD)
-        self.INITIAL_LINE_OFFSET_GAMEPAD = (testLine:GetFontHeight() + SMALL_TEXT_SPACING_GAMEPAD) * self.MAX_SMALL_TEXT_LINES
-        self.m_pool:ReleaseObject(testKey)
-
-        self.m_nextUpdateTimeSeconds = 0
-
-        local function OnUpdate(control, timeNow)
-            if timeNow > self.m_nextUpdateTimeSeconds then
-                self.m_nextUpdateTimeSeconds = timeNow + 0.02
-                self:TryDisplayingNextQueuedMessage()
-            end
-        end
-
-        local handlers = ZO_CenterScreenAnnounce_GetHandlers()
-        local function OnUpdateWaiting(control, timeNow)
-            for i,entry in ipairs(self.m_waitingQueue) do
-                if timeNow > entry.nextUpdateTimeSeconds then
-                    local eventId = entry.eventId
-                    table.remove(self.m_waitingQueue, i)
-                    CENTER_SCREEN_ANNOUNCE:AddMessage(eventId, handlers[eventId](unpack(entry.eventData)))
-                end
-            end
-
-            if #self.m_waitingQueue == 0 then
-                self.waitingQueueController:SetHandler("OnUpdate", nil)
-            end
-        end
-
-        self.m_onUpdateHandler = OnUpdate
-        self.m_onWaitingUpdateHandler = OnUpdateWaiting
-
-        PLAYER_PROGRESS_BAR:RegisterCallback("Show", function()
-            --if the announcement has begun fading out ("expiring") before the bar even shows, we don't need to hold
-            if(PLAYER_PROGRESS_BAR:GetOwner() == CENTER_SCREEN_ANNOUNCE and self.m_displayMode ~= CSA_EVENT_NO_TEXT and self.m_largeTextContainer.m_timeline.beforeExpiring) then
-                PLAYER_PROGRESS_BAR:SetHoldBeforeFadeOut(true)
-            end
-        end)
-
-        PLAYER_PROGRESS_BAR:RegisterCallback("Complete", function()
-            self.m_hasActiveBar = false
-            self:CheckNowInactive()
-        end)
-
-        local function BarParamFactory(pool)
-            return CenterScreenPlayerProgressBarParams:New()
-        end
-
-        local function BarParamReset(params)
-            params:Reset()
-            params.key = nil
-        end
-
-        self.m_barParamsPool = ZO_ObjectPool:New(BarParamFactory, BarParamReset)
-
-        self:ApplyStyle() -- Setup initial visual style based on current mode.
-        control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
-
-        for event in pairs(handlers) do
-            control:RegisterForEvent(event, function(eventId, ...) self:OnCenterScreenEvent(eventId, ...) end)
-        end
+    local centerScreenAnnounceManager = CENTER_SCREEN_ANNOUNCE
+    if centerScreenAnnounceManager:IsTopSmallLine(self) then
+        centerScreenAnnounceManager:CallExpiringCallback(self)
+        local offset = zo_clamp(GetFrameTimeMilliseconds() - self:GetAcquisitionTimeMS(), 0, MAX_SMALL_LINE_FADE_OUT_TIME)
+        self:PlayFadeOutAnimation(offset)
     end
 end
 
-local function AnchorIconToText(iconControl, textControl)
+function ZO_CenterScreenAnnouncementSmallLine.OnSmallLineTranslatePartialComplete()
+    CENTER_SCREEN_ANNOUNCE:TryDisplayingNextQueuedMessage()
+end
+
+function ZO_CenterScreenAnnouncementSmallLine:CreateTimelines(translationCompleteCallback, translationDisplayNextMessageCallback)
+    self.fadeInTimeline = self:CreateAnimationWithExpiringCallback("CenterScreenSmallTextFadeIn")
+    self.fadeOutTimeline = self:CreateAnimationWithExpiringCallback("CenterScreenSmallTextFadeOut", function(_,completedPlayback) self:OnLineComplete(completedPlayback) end)
+
+    local translateTimeline = self:CreateAnimationWithExpiringCallback("CenterScreenSmallTextTranslate", function(_,completedPlayback) self:OnSmallLineTranslateComplete(completedPlayback) end)
+    translateTimeline:InsertCallback(self.OnSmallLineTranslatePartialComplete, 500)
+    self.translationTimeline = translateTimeline
+end
+
+function ZO_CenterScreenAnnouncementSmallLine:GetLineType()
+    return CSA_LINE_TYPE_SMALL
+end
+
+------------------------------------------
+-- Center Screen Announcement Large Line
+------------------------------------------
+
+ZO_CenterScreenAnnouncementLargeLine = ZO_CenterScreenAnnouncementLine:Subclass()
+
+function ZO_CenterScreenAnnouncementLargeLine:New(...)
+    return ZO_CenterScreenAnnouncementLine.New(self, ...)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:Initialize(control)
+    ZO_CenterScreenAnnouncementLine.Initialize(self, control)
+
+    self.largeText = self.control:GetNamedChild("Text")
+    self.smallCombinedText = self.largeText:GetNamedChild("Combined")    
+    self.smallCombinedIcon = self.smallCombinedText:GetNamedChild("Icon")
+    self.smallCombinedIconBG = self.smallCombinedText:GetNamedChild("IconBG")
+    self.smallCombinedIconFrame = self.smallCombinedText:GetNamedChild("IconFrame")
+
+    self.raidCompleteContainer = self.largeText:GetNamedChild("RaidCompleteText")
+    self.raidTimeAmountLabel = self.raidCompleteContainer:GetNamedChild("TimeAmount")
+    self.raidScoreAmountLabel = self.raidCompleteContainer:GetNamedChild("ScoreAmount")
+    self.raidVitalityAmountLabel = self.raidCompleteContainer:GetNamedChild("VitalityAmount")
+    self.raidVitalityPercentLabel = self.raidCompleteContainer:GetNamedChild("VitalityPercent")
+    self.raidVitalityIcon = self.raidCompleteContainer:GetNamedChild("VitalityIcon")
+
+    self.smallCombinedIcon:SetHidden(true)
+    self.raidCompleteContainer:SetHidden(true)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:Reset()
+    self.largeText:SetHandler("OnUpdate", nil)
+    self.smallCombinedText:SetHandler("OnUpdate", nil)
+
+    self.smallCombinedIcon:SetHidden(true)
+    self.raidCompleteContainer:SetHidden(true)
+    self.wipeAnimationTimeline:Stop()
+
+    ZO_CenterScreenAnnouncementLine.Reset(self)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:SetLargeText(text)
+    self:TrySettingDynamicText(self.largeText, text)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:SetSmallCombinedText(text)
+    self:TrySettingDynamicText(self.smallCombinedText, text)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:SetIcon(icon, iconBg, suppressIconFrame)
+    self.smallCombinedIcon:SetHidden(icon == nil)
+    self.smallCombinedIconBG:SetHidden(iconBg == nil)
+    self.smallCombinedIconFrame:SetHidden(suppressIconFrame)
+
+    if icon then
+        self.smallCombinedIcon:SetTexture(icon)
+        self:AnchorIconToText(self.smallCombinedIcon, self.smallCombinedText)
+    end
+
+    if iconBg then
+        self.smallCombinedIconBG:SetTexture(iconBg)
+    end
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:SetRaidBreakdownText(raidArgumentTable)
+    self.raidCompleteContainer:SetHidden(false)
+    self:TrySettingDynamicText(self.raidTimeAmountLabel, raidArgumentTable[ARG_BREAKDOWN_INDEX_TIME])
+    self:TrySettingDynamicText(self.raidScoreAmountLabel, raidArgumentTable[ARG_BREAKDOWN_INDEX_SCORE])
+    self:TrySettingDynamicText(self.raidVitalityAmountLabel, raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT])
+    self:TrySettingDynamicText(self.raidVitalityPercentLabel, raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_PERCENT])
+
+    if raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT] == 0 then
+        self.raidVitalityPercentLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        self.raidVitalityIcon:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+    else
+        self.raidVitalityPercentLabel:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+        self.raidVitalityIcon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+    end
+
+    if raidArgumentTable[ARG_BREAKDOWN_INDEX_SHOW_AS_ERROR] then
+        self.raidTimeAmountLabel:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+    else
+        self.raidTimeAmountLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+    end
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:ApplyPlatformStyle()
+    ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_CenterScreenAnnounce_LargeTextContainer"))
+    local isGamepad = IsInGamepadPreferredMode()
+    if not self.smallCombinedIcon:IsHidden() then
+        self:AnchorIconToText(self.smallCombinedIcon, self.smallCombinedText)
+    end
+
+    self.smallCombinedIconFrame:SetTexture(isGamepad and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame64.dds" or "EsoUI/Art/ActionBar/abilityFrame64_up.dds")
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:AnchorIconToText(iconControl, textControl)
     -- Dynamically anchor the icon to the start of the text
     local textWidth = textControl:GetTextWidth()
     local lineWidth = textControl:GetWidth()
@@ -321,54 +607,465 @@ local function AnchorIconToText(iconControl, textControl)
     iconControl:SetAnchor(RIGHT, textControl, LEFT, centeringOffset - 10, 0)            
 end
 
-function CenterScreenAnnounce:ApplyStyle()
-    ApplyTemplateToControl(self.m_control, ZO_GetPlatformTemplate("ZO_CenterScreenAnnounce"))
-    ApplyTemplateToControl(self.m_largeTextContainer, ZO_GetPlatformTemplate("ZO_CenterScreenAnnounce_LargeTextContainer"))
+function ZO_CenterScreenAnnouncementLargeLine.SetupWipeIn(animation, control)
+    control:ClearAnchors()
+    control:SetAnchor(TOPLEFT, control:GetParent(), TOPLEFT, -560, 0)
+end
 
+function ZO_CenterScreenAnnouncementLargeLine.SetupWipeOut(animation, control)
+    control:ClearAnchors()
+    control:SetAnchor(TOPRIGHT, control:GetParent(), TOPRIGHT, 560, 0)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback(timeline) 
+    CENTER_SCREEN_ANNOUNCE:CallExpiringCallback(timeline.announcementLine) 
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:CreateTimelines()
+    self.wipeAnimationTimeline = self:CreateWipeAnimation("CenterScreenLargeTextWipe", function(_,completedPlayback) self:OnLineComplete(completedPlayback) end, DEFAULT_FADE_OUT_TIME, ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback, ZO_CenterScreenAnnouncementLargeLine.SetupWipeIn, ZO_CenterScreenAnnouncementLargeLine.SetupWipeOut)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:SetWipeTimelineLifespan(lifespan)
+    local fadeOutAnimation = self.wipeAnimationTimeline:GetAnimation(2)
+    self.wipeAnimationTimeline:SetAnimationOffset(fadeOutAnimation, lifespan)
+    self.wipeAnimationTimeline:SetCallbackOffset(ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback, lifespan)
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:PlayWipeAnimation()
+    self.wipeAnimationTimeline:PlayFromStart()
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:GetLineType()
+    return CSA_LINE_TYPE_LARGE
+end
+
+------------------------------------------
+-- Center Screen Announcement Major Line
+------------------------------------------
+
+ZO_CenterScreenAnnouncementMajorLine = ZO_CenterScreenAnnouncementLine:Subclass()
+
+function ZO_CenterScreenAnnouncementMajorLine:New(...)
+    return ZO_CenterScreenAnnouncementLine.New(self, ...)
+end
+
+function ZO_CenterScreenAnnouncementMajorLine:Reset()
+    ZO_CenterScreenAnnouncementLine.Reset(self)
+
+    self.popInAnimationTimeline:Stop()
+end
+
+function ZO_CenterScreenAnnouncementMajorLine:SetText(text)
+    self:TrySettingDynamicText(self.control, text)
+end
+
+function ZO_CenterScreenAnnouncementMajorLine:SetPopInLifespan(lifespan)
+    local popInAnimationTimeline = self.popInAnimationTimeline
+    local alphaOutAnimation = popInAnimationTimeline:GetAnimation(3)
+    local scaleOutAnimation = popInAnimationTimeline:GetAnimation(4)
+    popInAnimationTimeline:SetAnimationOffset(alphaOutAnimation, lifespan)
+    popInAnimationTimeline:SetAnimationOffset(scaleOutAnimation, lifespan)
+end
+
+function ZO_CenterScreenAnnouncementMajorLine:SetAndPlayStartingAnimation(lifespan)
+    self:SetPopInLifespan(lifespan)
+    self.popInAnimationTimeline:PlayFromStart()
+end
+
+function ZO_CenterScreenAnnouncementMajorLine:CreateTimelines()
+    self.popInAnimationTimeline = self:CreateAnimationWithExpiringCallback("CenterScreenMajorTextPopIn", function(_,completedPlayback) self:OnLineComplete(completedPlayback) end)
+end
+
+function ZO_CenterScreenAnnouncementMajorLine:ApplyPlatformStyle()
     local isGamepad = IsInGamepadPreferredMode()
-    local smallFont = isGamepad and SMALL_TEXT_FONT_GAMEPAD or SMALL_TEXT_FONT_KEYBOARD
-    local smallLines = self.m_pool:GetActiveObjects()
-    for _, smallLine in pairs(smallLines) do
-        smallLine:SetFont(smallFont)
-    end
-
-    local iconControl = self.m_smallCombinedIcon
-    if not iconControl:IsHidden() then
-        AnchorIconToText(iconControl, self.m_smallCombinedText)
-    end
-
-    self.m_smallCombinedIconFrame:SetTexture(isGamepad and "EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame64.dds" or "EsoUI/Art/ActionBar/abilityFrame64_up.dds")
+    self.control:SetFont(isGamepad and SMALL_TEXT_FONT_GAMEPAD or SMALL_TEXT_FONT_KEYBOARD)
 end
 
-function CenterScreenAnnounce:OnGamepadPreferredModeChanged()
-    self:ApplyStyle()
+function ZO_CenterScreenAnnouncementMajorLine:GetLineType()
+    return CSA_LINE_TYPE_MAJOR
 end
 
-function CenterScreenAnnounce:IsInactive()
-    return self.m_displayMode == CSA_INACTIVE
+-----------------------------------------------
+-- Center Screen Announcement Countdown Line
+-----------------------------------------------
+
+ZO_CenterScreenAnnouncementCountdownLine = ZO_CenterScreenAnnouncementLine:Subclass()
+
+function ZO_CenterScreenAnnouncementCountdownLine:New(...)
+    return ZO_CenterScreenAnnouncementLine.New(self, ...)
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:Initialize(control)
+    ZO_CenterScreenAnnouncementLine.Initialize(self, control)
+
+    self.countdownControl = self.control:GetNamedChild("Countdown")
+    self.endImageControl = self.control:GetNamedChild("EndImage")
+    self.endImageControl:SetHidden(true)
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:Reset()
+    ZO_CenterScreenAnnouncementLine.Reset(self)
+    self.endImageControl:SetTexture(nil)
+    self.endImageControl:SetHidden(true)
+
+    self.countdownLoopAnimationTimeline:Stop()
+    self.countdownEndImageAnimationTimeline:Stop()
+    self.countdownBufferAnimationTimeline:Stop()
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:SetAndPlayStartingAnimation(lifespanMS)
+    self.finalFrameTimeMS = GetFrameTimeMilliseconds() + lifespanMS
+    local lifespanS = lifespanMS / 1000
+    self.countdownTimeS = zo_floor(lifespanS)
+    self.currentCountdownTimeS = self.countdownTimeS
+    local runOverTimeMS = (lifespanS - self.countdownTimeS) * 1000
+    if runOverTimeMS > 0 then
+        local bufferAnimation = self.countdownBufferAnimationTimeline:GetAnimation(1)
+        bufferAnimation:SetDuration(runOverTimeMS)
+        self.countdownBufferAnimationTimeline:PlayFromStart()
+    else
+        self:PlayCountdownLoopAnimation()
+    end
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:SetEndImageTexture(texture)
+    self.endImageControl:SetTexture(texture)
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:CreateTimelines()
+    self.countdownLoopAnimationTimeline = self:CreateAnimationWithExpiringCallback("CenterScreenCountdownLoop", function(_,completedPlayback) self:OnCountDownAnimationEnd(completedPlayback) end)
+    self.countdownEndImageAnimationTimeline = self:CreateAnimationWithExpiringCallback("CenterScreenCountdownEndImage", function(_,completedPlayback) self:OnLineComplete(completedPlayback) end)
+    self.countdownBufferAnimationTimeline = self:CreateAnimationWithExpiringCallback("CenterScreenCountdownBuffer", function(_,completedPlayback) self:OnBufferComplete(completedPlayback) end)
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:PlayCountdownLoopAnimation()
+    self.countdownControl:SetText(self.currentCountdownTimeS)
+    PlaySound(SOUNDS.COUNTDOWN_TICK)
+    self.countdownLoopAnimationTimeline:PlayFromStart()
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:OnBufferComplete(completedPlayback)
+    if not completedPlayback then return end
+
+    self:PlayCountdownLoopAnimation()
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:OnCountDownAnimationEnd(completedPlayback)
+    if not completedPlayback then return end
+
+    self.currentCountdownTimeS = self.currentCountdownTimeS - 1
+    
+    if self.currentCountdownTimeS > 0 then
+        self:PlayCountdownLoopAnimation()
+    elseif self.endImageControl:IsHidden() then
+        self.messageParams:PlaySound()
+        self.endImageControl:SetHidden(false)
+        self.countdownControl:SetText("")
+        self.countdownEndImageAnimationTimeline:PlayFromStart()
+    end
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:ApplyPlatformStyle()
+    local isGamepad = IsInGamepadPreferredMode()
+    self.countdownControl:SetFont(isGamepad and COUNTDOWN_TEXT_FONT_GAMEPAD or COUNTDOWN_TEXT_FONT_KEYBOARD)
+end
+
+function ZO_CenterScreenAnnouncementCountdownLine:GetLineType()
+    return CSA_LINE_TYPE_COUNTDOWN
+end
+
+-----------------------------------
+-- Center Screen Announce Manager
+-----------------------------------
+
+local CenterScreenAnnounce = ZO_Object:Subclass()
+
+function CenterScreenAnnounce:New(...)
+    local announce = ZO_Object.New(self)
+    announce:Initialize(...)
+    return announce
+end
+
+do
+    local eventHandlers = ZO_CenterScreenAnnounce_GetEventHandlers()
+    local queueableEventHandlers = ZO_CenterScreenAnnounce_GetQueueableEventHandlers()
+    local callbackHandlers = ZO_CenterScreenAnnounce_GetCallbackHandlers()
+
+    function CenterScreenAnnounce:OnCenterScreenEvent(eventId, ...)
+        if eventHandlers[eventId] then
+            if queueableEventHandlers[eventId] then
+                local timeNowSeconds = GetFrameTimeMilliseconds() / 1000 
+                local waitingQueueData = CENTER_SCREEN_ANNOUNCE:GetWaitingQueueEventData(eventId)
+                if waitingQueueData then
+                    local conditions = queueableEventHandlers[eventId].conditionParameters or {}
+                    local passConditions = true
+                    for k,condition in ipairs(conditions) do
+                        if waitingQueueData.eventData[condition] ~= select(condition, ...) then
+                            passConditions = false
+                            break
+                        end
+                    end
+                    if passConditions then
+                        local updateParametersTable = queueableEventHandlers[eventId].updateParameters
+                        if updateParametersTable then
+                            for i,entry in pairs(updateParametersTable) do
+                                waitingQueueData.eventData[entry] = select(entry, ...)
+                            end
+                        end
+                        waitingQueueData.nextUpdateTimeSeconds = timeNowSeconds + queueableEventHandlers[eventId].updateTimeDelaySeconds
+                        return
+                    end
+                end
+
+                local data = 
+                {
+                    eventId = eventId,
+                    eventData = { ... },
+                    nextUpdateTimeSeconds = timeNowSeconds + queueableEventHandlers[eventId].updateTimeDelaySeconds
+                }
+                table.insert(self.waitingQueue, data)
+            else
+                local eventHandler = eventHandlers[eventId]
+                self:AddMessageWithParams(eventHandler(...))
+            end
+        end
+    end
+
+    function CenterScreenAnnounce:Initialize(control)
+        self.control = control
+        control.object = self
+
+        self.displayQueue = {}
+        self.waitingQueue = {}
+        self.allowedCategories = {}
+        self.pendingMajorMessages = {}
+        self.activeLines = 
+        {
+            [CSA_LINE_TYPE_SMALL] = {},
+            [CSA_LINE_TYPE_LARGE] = {},
+            [CSA_LINE_TYPE_MAJOR] = {},
+            [CSA_LINE_TYPE_COUNTDOWN] = {},
+        }
+        self.hasActiveLevelBar = false
+
+        self.smallLineContainer = control:GetNamedChild("SmallLineContainer")
+        self.majorLineContainer = control:GetNamedChild("MajorLineContainer")
+        self.countdownLineContainer = control:GetNamedChild("CountdownLineContainer")
+        local majorContainerTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenMajorTextContainerExpand", self.majorLineContainer)
+        local containerHieghtAnimation = majorContainerTimeline:GetFirstAnimation()
+        containerHieghtAnimation:SetUpdateFunction(function(animation, progress) self:SetMajorLineContainerHeight(progress) end)
+        majorContainerTimeline:SetHandler("OnStop", function(timeline, completedPlayback) self:OnMajorLineContainerAnimationComplete(completedPlayback) end)
+        self.majorLineContainerTimeline = majorContainerTimeline
+
+        self.nextQueueIndex = 1
+
+        -- Recent message handler, using a 250 ms expiry delay
+        self.recentMessages = ZO_RecentMessages:New(250)
+
+        self.nextUpdateTimeSeconds = 0
+
+        local function OnCenterScreenAnnounceUpdate(control, timeNow)
+            -- Check if we can show the next message
+            if timeNow > self.nextUpdateTimeSeconds then
+                self.nextUpdateTimeSeconds = timeNow + 0.02
+                self:TryDisplayingNextQueuedMessage()
+            end
+
+            -- Check the waiting Queue for any lingering events that need to be pushed
+            for i,entry in ipairs(self.waitingQueue) do
+                if timeNow > entry.nextUpdateTimeSeconds then
+                    local eventId = entry.eventId
+                    table.remove(self.waitingQueue, i)
+                    local handler = eventHandlers[eventId]
+                    self:AddMessageWithParams(handler(unpack(entry.eventData)))
+                end
+            end
+        end
+
+        self.control:SetHandler("OnUpdate", OnCenterScreenAnnounceUpdate)
+
+        self.platformStyle = ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
+
+        -- Events
+        local function OnCenterScreenEvent(eventId, ...)
+            self:OnCenterScreenEvent(eventId, ...)
+        end
+
+        for event, data in pairs(eventHandlers) do
+            control:RegisterForEvent(event, OnCenterScreenEvent)
+        end
+
+        -- Calbbacks
+        for _, data in ipairs(callbackHandlers) do
+            data.callbackManager:RegisterCallback(data.callbackRegistration, function(...) self:AddMessageWithParams(data.callbackFunction(...)) end)
+        end
+
+        self:InitializeMessagePools()
+        self:InitializeLinePools()
+    end
+end
+
+function CenterScreenAnnounce:InitializeMessagePools()
+    PLAYER_PROGRESS_BAR:RegisterCallback("Show", function()
+        --if the announcement has begun fading out ("expiring") before the bar even shows, we don't need to hold
+        if PLAYER_PROGRESS_BAR:GetOwner() == CENTER_SCREEN_ANNOUNCE and self:HasAnyActiveLines() and self.isBeforeMessageExpiring then
+            PLAYER_PROGRESS_BAR:SetHoldBeforeFadeOut(true)
+        end
+    end)
+
+    PLAYER_PROGRESS_BAR:RegisterCallback("Complete", function()
+        self.hasActiveLevelBar = false
+        self:CheckNowInactive()
+    end)
+
+    local function BarParamFactory(pool)
+        return CenterScreenPlayerProgressBarParams:New()
+    end
+
+    local function BarParamReset(params)
+        params:Reset()
+        params.key = nil
+    end
+
+    self.barParamsPool = ZO_ObjectPool:New(BarParamFactory, BarParamReset)
+
+    local function MessageParamFactory(pool)
+        return ZO_CenterScreenMessageParams:New()
+    end
+
+    local function MessageParamReset(params)
+        local barParams = params:GetBarParams()
+        if barParams then
+            self.barParamsPool:ReleaseObject(barParams.key)
+        end
+        params:Reset()
+    end
+
+    self.messageParamsPool = ZO_ObjectPool:New(MessageParamFactory, MessageParamReset)
+end
+
+function CenterScreenAnnounce:InitializeLinePools()
+    -- Large Line Pool
+    self.largeLinePool = self:CreateLinePool("$(parent)LargeLine", "ZO_CenterScreenAnnounceLargeTextLineTemplate", self.control, ZO_CenterScreenAnnouncementLargeLine)
+
+    -- Small Line Pool
+    self.smallLinePool = self:CreateLinePool("$(parent)SmallLine", "ZO_CenterScreenAnnounceSmallTextTemplate", self.smallLineContainer, ZO_CenterScreenAnnouncementSmallLine)
+
+    -- Major Line Pool
+    self.majorLinePool = self:CreateLinePool("$(parent)MajorLine", "ZO_CenterScreenAnnounceSmallTextTemplate", self.majorLineContainer, ZO_CenterScreenAnnouncementMajorLine)
+
+    -- get the text height to compute the height needed when we animate the area of a major event line
+    local testLine, testKey = self.majorLinePool:AcquireObject()
+    local testLineControl = testLine:GetControl()
+    testLineControl:SetFont(SMALL_TEXT_FONT_KEYBOARD)
+    self.MAJOR_LINE_HEIGHT_KEYBOARD = testLineControl:GetFontHeight()
+    testLineControl:SetFont(SMALL_TEXT_FONT_GAMEPAD)
+    self.MAJOR_LINE_HEIGHT_GAMEPAD = testLineControl:GetFontHeight()
+    self.majorLinePool:ReleaseObject(testKey)
+
+    -- Countdown Line Pool
+    self.countdownLinePool = self:CreateLinePool("$(parent)CountdownLine", "ZO_CenterScreenAnnounceCountdownTextTemplate", self.control, ZO_CenterScreenAnnouncementCountdownLine)
+
+    self.allLinePools =
+    {
+        [CSA_LINE_TYPE_SMALL] = self.smallLinePool,
+        [CSA_LINE_TYPE_LARGE] = self.largeLinePool,
+        [CSA_LINE_TYPE_MAJOR] = self.majorLinePool,
+        [CSA_LINE_TYPE_COUNTDOWN] = self.countdownLinePool,
+    }
+end
+
+do
+    local function LineReset(line)
+        line:Reset()
+    end
+
+    function CenterScreenAnnounce:CreateLinePool(controlName, controlTemplate, parentControl, lineType)
+        local function OnLineComplete(completedLine)
+            local SKIP_DISPLAY_NEXT = true
+            local lineType = completedLine:GetLineType()
+            self:ReleaseLine(completedLine, SKIP_DISPLAY_NEXT)
+            if lineType == CSA_LINE_TYPE_SMALL and self:HasActiveLines(CSA_LINE_TYPE_SMALL) then
+                self:MoveSmallLinesUp()
+            elseif lineType == CSA_LINE_TYPE_MAJOR then
+                self:StartMajorLineContainerAnimation()
+            end
+            self:TryDisplayingNextQueuedMessage()
+        end
+
+        local function LineFactory(pool)
+            local lineControl = ZO_ObjectPool_CreateNamedControl(controlName, controlTemplate, pool, parentControl)
+            local line = lineType:New(lineControl)
+            line:RegisterCallback("OnLineComplete", OnLineComplete)
+            return line
+        end
+
+        local linePool = ZO_ObjectPool:New(LineFactory, LineReset)
+        linePool:SetCustomAcquireBehavior(function(newLine) newLine:OnAcquire() end)
+
+        return linePool
+    end
+end
+
+function CenterScreenAnnounce:ApplyPlatformStyle()
+    ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_CenterScreenAnnounce"))
+
+    for _, lineStyleTable in pairs(self.activeLines) do
+        for _, line in ipairs(lineStyleTable) do
+            line:ApplyPlatformStyle()
+        end
+    end
 end
 
 function CenterScreenAnnounce:CreateBarParams(...)
-    local barParams, key = self.m_barParamsPool:AcquireObject()
+    local barParams, key = self.barParamsPool:AcquireObject()
     barParams.key = key
     barParams:Set(...)
     return barParams
+end
+
+function CenterScreenAnnounce:CreateMessageParams(category, sound)
+    local messageParams, key = self.messageParamsPool:AcquireObject()
+    messageParams:SetSound(sound)
+    messageParams:SetObjectPoolKey(key)
+    messageParams:SetCategory(category)
+    return messageParams
+end
+
+function CenterScreenAnnounce:ReleaseMessageParams(messageParams)
+    self.messageParamsPool:ReleaseObject(messageParams.key)
 end
 
 function CenterScreenAnnounce:CanDisplayMessage(category)
     if SYSTEMS:GetObject("craftingResults"):HasEntries() then
         return false
     end
-    if(self.m_displayMode == CSA_INACTIVE) then return true end
-    if(category == CSA_EVENT_SMALL_TEXT and self.m_displayMode == category) then
-        return self.m_lastSmallLineMovedOutOfTheWay and (#self.m_activeSmallTextLines < self.MAX_SMALL_TEXT_LINES)
+
+    if self:HasActiveLines(CSA_LINE_TYPE_COUNTDOWN) then
+        return false -- nothing can show during a countdown (for now)
+    elseif self.hasActiveLevelBar then
+         -- we can only show one bar increase on the player progress bar at a time
+         -- attempting to show a second before the first has completed will cause errors
+        return false
+    end
+
+    if category == CSA_CATEGORY_COUNTDOWN_TEXT or category == CSA_CATEGORY_MAJOR_TEXT then
+        return true -- these events must always show as soon as possible
+    elseif self:HasActiveLines(CSA_LINE_TYPE_SMALL) then
+        if category == CSA_CATEGORY_SMALL_TEXT then
+            return #self.activeLines[CSA_LINE_TYPE_SMALL] < MAX_SMALL_TEXT_LINES
+        else
+            return false
+        end
+    elseif self:HasActiveLines(CSA_LINE_TYPE_LARGE) then
+        return false
     end
     
-    return false
+    return true
 end
 
 function CenterScreenAnnounce:GetWaitingQueueEventData(eventId)
-    for i,entry in pairs(self.m_waitingQueue) do
+    for i,entry in ipairs(self.waitingQueue) do
         if entry.eventId == eventId then
             return entry
         end
@@ -377,60 +1074,84 @@ function CenterScreenAnnounce:GetWaitingQueueEventData(eventId)
     return nil
 end
 
+function CenterScreenAnnounce:AddActiveLine(line)
+    local lineType = line:GetLineType()
+    table.insert(self.activeLines[lineType], line)
+end
+
+function CenterScreenAnnounce:RemoveActiveLine(line)
+    local lineType = line:GetLineType()
+    local activeLinesForType = self.activeLines[lineType]
+    for i, activeLine in ipairs(activeLinesForType) do
+        if line == activeLine then
+            local lineType = line:GetLineType()
+            local linePool = self.allLinePools[lineType]
+            linePool:ReleaseObject(line:GetKey())
+            table.remove(activeLinesForType, i)
+            return
+        end
+    end
+end
+
+function CenterScreenAnnounce:RemoveAllActiveLines()
+    for lineType, activeLinesByType in ipairs(self.activeLines) do
+        local linePool = self.allLinePools[lineType]
+        linePool:ReleaseAllObjects()
+        ZO_ClearNumericallyIndexedTable(activeLinesByType)
+    end
+end
+
+function CenterScreenAnnounce:HasActiveLines(lineType)
+    return #self.activeLines[lineType] > 0
+end
+
+function CenterScreenAnnounce:HasAnyActiveLines()
+    for _, lines in pairs(self.activeLines) do
+        if #lines > 0 then
+            return true
+        end
+    end
+
+    return false
+end
+
+function CenterScreenAnnounce:GetMostRecentLine(lineType)
+    local lineTable = self.activeLines[lineType]
+    return lineTable[#lineTable]
+end
+
+function CenterScreenAnnounce:GetOldestLine(lineType)
+    return self.activeLines[lineType][1]
+end
+
 local messagePriorities = {}
 
 function CenterScreenAnnounce:GetPriority(eventId)
-    return messagePriorities[eventId] or 1
+    return messagePriorities[eventId] or DEFAULT_PRIORITY
 end
 
-function CenterScreenAnnounce:CreateMessagePayload(eventId, category, queuedOrder, ...)
-    local priority = self:GetPriority(eventId)
-    local eventData = { ... }
-    eventData.priority = priority
-    eventData.category = category
-    eventData.length = select("#", ...)
-    eventData.queuedOrder = queuedOrder
-
-    return priority, eventData
-end
-
-function CenterScreenAnnounce:QueueMessage(eventId, category, ...)
-    self.m_control:SetHandler("OnUpdate", self.m_onUpdateHandler)
-
-    --Delay choosing the next message to show by WAIT_INTERVAL_SECONDS each time a new message comes in to stabilize a bit
-    local timeNowSeconds = GetFrameTimeMilliseconds() / 1000
-    local shouldQueueImmediately = select(ARG_INDEX_QUEUE_IMMEDIATELY, ...)
-    local waitOffset = shouldQueueImmediately and NO_WAIT_INTERVAL_SECONDS or WAIT_INTERVAL_SECONDS
-    self.m_nextUpdateTimeSeconds = timeNowSeconds + waitOffset
-
-    local priority, data = self:CreateMessagePayload(eventId, category, self.m_nextQueueIndex, ...)
-    table.insert(self.m_displayQueue, data)
-    self.m_nextQueueIndex = self.m_nextQueueIndex + 1
-    self.m_isQueueDirty = true
-end
-
-local function SortEventData(left, right)
-    if(left.priority ~= right.priority) then
-        return left.priority > right.priority
+local function SortMessageParams(left, right)
+    if left:GetPriority() ~= right:GetPriority() then
+        return left:GetPriority() > right:GetPriority()
     else
-        local leftBarParams = left[ARG_INDEX_BAR_PARAMS]
-        local rightBarParams = right[ARG_INDEX_BAR_PARAMS]
-        if(leftBarParams ~= nil and rightBarParams ~= nil) then
-            if(leftBarParams.startLevel ~= rightBarParams.startLevel) then
+        local leftBarParams = left:GetBarParams()
+        local rightBarParams = right:GetBarParams()
+        if leftBarParams ~= nil and rightBarParams ~= nil then
+            if leftBarParams.startLevel ~= rightBarParams.startLevel then
                 return leftBarParams.startLevel < rightBarParams.startLevel
             else
-                if(leftBarParams.start ~= rightBarParams.start) then
+                if leftBarParams.start ~= rightBarParams.start then
                     return leftBarParams.start < rightBarParams.start
                 else
-                    if(leftBarParams.stop ~= rightBarParams.stop) then
+                    if leftBarParams.stop ~= rightBarParams.stop then
                         return leftBarParams.stop < rightBarParams.stop
                     else
                         return false
                     end
                 end
             end
-        elseif (left.queuedOrder ~= right.queuedOrder) then
-            return left.queuedOrder < right.queuedOrder
+        elseif left:GetQueuedOrder() ~= right:GetQueuedOrder() then
+            return left:GetQueuedOrder() < right:GetQueuedOrder()
         else
             return false
         end
@@ -439,50 +1160,42 @@ end
 
 function CenterScreenAnnounce:SortQueue()
     local maxBarTypePriorities = {}
-    for _, eventData in ipairs(self.m_displayQueue) do
-        local barParams = eventData[ARG_INDEX_BAR_PARAMS]
-        if(barParams) then
+    for _, messageParams in ipairs(self.displayQueue) do
+        local barParams = messageParams:GetBarParams()
+        if barParams then
             local barType = barParams:GetParams()
             local currentMaxPriority = maxBarTypePriorities[barType]
-            if(currentMaxPriority == nil or eventData.priority > currentMaxPriority) then
-                maxBarTypePriorities[barType] = eventData.priority
+            if currentMaxPriority == nil or messageParams:GetPriority() > currentMaxPriority then
+                maxBarTypePriorities[barType] = messageParams:GetPriority()
             end
         end
     end
 
-    for _, eventData in ipairs(self.m_displayQueue) do
-        local barParams = eventData[ARG_INDEX_BAR_PARAMS]
-        if(barParams) then
+    for _, messageParams in ipairs(self.displayQueue) do
+        local barParams = messageParams:GetBarParams()
+        if barParams then
             local barType = barParams:GetParams()
-            eventData.priority = maxBarTypePriorities[barType]
+            messageParams:SetPriority(maxBarTypePriorities[barType])
         end
     end
 
-    table.sort(self.m_displayQueue, SortEventData)
+    table.sort(self.displayQueue, SortMessageParams)
 end
 
-function CenterScreenAnnounce:GetNumQueuedEvents()
-    return #self.m_displayQueue
-end
-
-function CenterScreenAnnounce:PeekNextEvent()
-    return self.m_displayQueue[1]
-end
-
-function CenterScreenAnnounce:DoesNextEventHaveBar()
-    local nextEvent = self:PeekNextEvent()
-    if(nextEvent) then
-        local params = nextEvent[ARG_INDEX_BAR_PARAMS]
+function CenterScreenAnnounce:DoesNextMessageHaveBarParams()
+    local nextMessage = self:GetNextShowableMessage()
+    if nextMessage then
+        local params = nextMessage:GetBarParams()
         return params ~= nil
     end
     return false
 end
 
-function CenterScreenAnnounce:DoesNextEventHaveBarType(barType)
-    local nextEvent = self:PeekNextEvent()
-    if(nextEvent) then
-        local params = nextEvent[ARG_INDEX_BAR_PARAMS]
-        if(params and barType == params.type) then
+function CenterScreenAnnounce:DoesNextMessageHaveBarType(barType)
+    local nextMessage = self:GetNextShowableMessage()
+    if nextMessage then
+        local params = nextMessage:GetBarParams()
+        if params and barType == params.type then
             return true
         end
     end
@@ -490,85 +1203,104 @@ function CenterScreenAnnounce:DoesNextEventHaveBarType(barType)
 end
 
 function CenterScreenAnnounce:HasBarTypeInQueue(barType)
-    for _, event in ipairs(self.m_displayQueue) do
-        local currentParams = event[ARG_INDEX_BAR_PARAMS]
-        if(currentParams and barType == currentParams.type) then
+    for _, messageParams in ipairs(self.displayQueue) do
+        local currentParams = messageParams:GetBarParams()
+        if currentParams and barType == currentParams.type then
             return true
         end
     end
     return false
 end
 
-function CenterScreenAnnounce:RemoveNextEvent()
-    return table.remove(self.m_displayQueue, 1)
-end
-
-function CenterScreenAnnounce:DisplayNextQueuedEvent()
-    local nextEvent = self:RemoveNextEvent()
-    self:DisplayMessage(nextEvent.category, unpack(nextEvent, 1, nextEvent.length))
-    self.m_control:SetHandler("OnUpdate", nil)
-end
-
-function CenterScreenAnnounce:MoveSmallTextLinesUp(completedLine)
-    self.m_lastSmallLineMovedOutOfTheWay = (#self.m_activeSmallTextLines == 0)
-
-    local nextTop = completedLine:GetTop()
-    for index, line in ipairs(self.m_activeSmallTextLines) do
-        local distanceFromDestination = line:GetTop() - nextTop
-        nextTop = nextTop + line.m_lineHeight
-
-        local timeline = line.m_translateTimeline
-        timeline:Stop()
-        timeline:GetAnimation(1):SetTranslateDeltas(0, -distanceFromDestination)
-        timeline:PlayFromStart()
+function CenterScreenAnnounce:MoveSmallLinesUp()
+    local oldestSmallLine = self:GetOldestLine(CSA_LINE_TYPE_SMALL)
+    if oldestSmallLine then
+        oldestSmallLine:BecomeTopSmallLine(self.smallLineContainer)
     end
 end
 
-function CenterScreenAnnounce:IsTopLine(line)
-    return (self.m_activeSmallTextLines[1] == line)
+function CenterScreenAnnounce:EndAllSmallLines()
+    for index, line in ipairs(self.activeLines[CSA_LINE_TYPE_SMALL]) do
+        self:RemoveActiveLine(line)
+    end
+end
+
+function CenterScreenAnnounce:IsTopSmallLine(line)
+    return self.activeLines[CSA_LINE_TYPE_SMALL][1] == line
+end
+
+function CenterScreenAnnounce:SetMajorLineContainerHeight(animationProgress)
+    local allMajorLines = self.activeLines[CSA_LINE_TYPE_MAJOR]
+    local numCurrentMajorLines = zo_clamp(#allMajorLines + #self.pendingMajorMessages, 0, MAX_MAJOR_TEXT_LINES)
+    local isGamepadMode = IsInGamepadPreferredMode()
+    local lineSpacing = isGamepadMode and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD
+    local textHeight = isGamepadMode and self.MAJOR_LINE_HEIGHT_GAMEPAD or self.MAJOR_LINE_HEIGHT_KEYBOARD
+
+    local calculatedContainerHeight = (lineSpacing + textHeight) * numCurrentMajorLines
+
+    self.majorLineContainer:SetHeight(zo_lerp(self.startingMajorContainerHeight, calculatedContainerHeight, animationProgress))
+end
+
+function CenterScreenAnnounce:OnMajorLineContainerAnimationComplete(completedPlayback)
+    if completedPlayback then
+        -- add pending messages from newest to oldest, with any older ones being discarded
+        for i = #self.pendingMajorMessages, 1, -1 do
+            if #self.activeLines[CSA_LINE_TYPE_MAJOR] == MAX_MAJOR_TEXT_LINES then
+                self:ReleaseMessageParams(self.pendingMajorMessages[i])
+            else
+                if not self:DisplayMessage(self.pendingMajorMessages[i]) then
+                    self:ReleaseMessageParams(self.pendingMajorMessages[i])
+                end
+            end
+        end
+        ZO_ClearNumericallyIndexedTable(self.pendingMajorMessages)
+    end
+end
+
+function CenterScreenAnnounce:StartMajorLineContainerAnimation(message)
+    self.startingMajorContainerHeight = self.majorLineContainer:GetHeight()
+    table.insert(self.pendingMajorMessages, message)
+    self.majorLineContainerTimeline:PlayFromStart()
+end
+
+function CenterScreenAnnounce:GetNextShowableMessage(removeEntry)
+    for i, messageParams in ipairs(self.displayQueue) do
+        if self:CanDisplayMessage(messageParams:GetCategory()) then
+            if removeEntry then
+                table.remove(self.displayQueue, i)
+            end
+            return messageParams
+        end
+    end
 end
 
 function CenterScreenAnnounce:TryDisplayingNextQueuedMessage()
-    if(self.m_isQueueDirty) then
+    if self.isQueueDirty then
         self:SortQueue()
-        self.m_isQueueDirty = false
+        self.isQueueDirty = false
     end
 
-    local nextEvent = self:PeekNextEvent()
-    if(nextEvent and self:CanDisplayMessage(nextEvent.category)) then
-        self:DisplayNextQueuedEvent()
+    local REMOVE_FROM_TABLE = true
+    local nextMessage = self:GetNextShowableMessage(REMOVE_FROM_TABLE)
+    if nextMessage then
+        if nextMessage:GetCategory() == CSA_CATEGORY_MAJOR_TEXT and #self.activeLines[CSA_LINE_TYPE_MAJOR] < MAX_MAJOR_TEXT_LINES then
+            self:StartMajorLineContainerAnimation(nextMessage)
+        else
+            self:DisplayMessage(nextMessage)
+        end
     end
 end
 
-function CenterScreenAnnounce:UpdateDisplay(completedLine, skipSmallBlockMove)
-    if(self.m_displayMode == CSA_EVENT_SMALL_TEXT and not skipSmallBlockMove) then
-        self:MoveSmallTextLinesUp(completedLine)
-    end
-
-    self:TryDisplayingNextQueuedMessage()
+function CenterScreenAnnounce:ReleaseLine(completedLine, skipDisplayNext)
+    self:RemoveActiveLine(completedLine)
+    self:CheckNowInactive(skipDisplayNext)
 end
 
-function CenterScreenAnnounce:ReleaseLine(completedLine)
-    self.m_activeLineCount = self.m_activeLineCount - 1
-    if(completedLine.m_key) then
-        completedLine:SetHandler("OnUpdate", nil)
-
-        self.m_pool:ReleaseObject(completedLine.m_key)
-
-        assert(self.m_activeSmallTextLines[1] == completedLine)
-        table.remove(self.m_activeSmallTextLines, 1)
-    elseif completedLine == self.m_largeTextContainer then
-        self.m_largeText:SetHandler("OnUpdate", nil)
-        self.m_smallCombinedText:SetHandler("OnUpdate", nil)
-    end
-
-    self:CheckNowInactive()
-end
-
-function CenterScreenAnnounce:CheckNowInactive()
-    if(self.m_activeLineCount == 0 and self.m_hasActiveBar == false) then
-        self.m_displayMode = CSA_INACTIVE
-        self:TryDisplayingNextQueuedMessage()
+function CenterScreenAnnounce:CheckNowInactive(skipDisplayNext)
+    if not self:HasAnyActiveLines() and self.hasActiveLevelBar == false then
+        if not skipDisplayNext then
+            self:TryDisplayingNextQueuedMessage()
+        end
     end
 end
 
@@ -580,341 +1312,347 @@ function CenterScreenAnnounce:SetRejectCategory(category, reject)
     self.allowedCategories[category] = not reject
 end
 
-local TrySettingDynamicText
-do
-    local function SetDynamicTextHelper(label)
-        label:SetText(label.dynamicTextFunction())
-    end
-
-    function TrySettingDynamicText(label, textOrFunction)
-        if type(textOrFunction) == "function" then
-            label.dynamicTextFunction = textOrFunction
-            label:SetHandler("OnUpdate", SetDynamicTextHelper)
-        else
-            label:SetText(textOrFunction)
-            label:SetHandler("OnUpdate", nil)
-        end
-    end
-end
-
 local setupFunctions =
 {
-    [CSA_EVENT_SMALL_TEXT] = function(self, ...)
-        self.m_lastSmallLineMovedOutOfTheWay = false
-        local line, poolKey = self.m_pool:AcquireObject()
-        line.m_key = poolKey
+    [CSA_CATEGORY_SMALL_TEXT] = function(self, messageParams)
+        local announcementSmallLine, poolKey = self.smallLinePool:AcquireObject()
+        announcementSmallLine:SetKey(poolKey)
+        local lineControl = announcementSmallLine:GetControl()
 
-        TrySettingDynamicText(line, select(ARG_INDEX_MESSAGE, ...))
-        line.m_lineHeight = line:GetTextHeight() + (IsInGamepadPreferredMode() and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD)
+        announcementSmallLine:SetText(messageParams:GetMostUniqueMessage())
 
-        -- check for an overriding lifespan coming from the handlers, if not stick with the default        
-        local fadeOutAnimation = line.m_fadeOutTimeline:GetAnimation(1)
-        local lifespan = select(ARG_INDEX_LIFESPAN, ...)
+        announcementSmallLine:SetWipeOutLifespan(messageParams:GetLifespanMS())
 
-        if(lifespan) then
-            line.m_fadeOutTimeline:SetAnimationOffset(fadeOutAnimation, lifespan)
-            line.m_fadeOutTimeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
+        local isGamepadMode = IsInGamepadPreferredMode()
+        local initialLineOffset = isGamepadMode and INITIAL_SMALL_LINE_OFFSET_GAMEPAD_Y or INITIAL_SMALL_LINE_OFFSET_KEYBOARD_Y
+        local lineSpacing = isGamepadMode and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD
+
+        local mostRecentSmallLine = self:GetMostRecentLine(CSA_LINE_TYPE_SMALL)
+        if mostRecentSmallLine then
+            initialLineOffset = (initialLineOffset + lineSpacing) / (#self.activeLines[CSA_LINE_TYPE_SMALL])
+            local recentLineControl = mostRecentSmallLine:GetControl()
+            lineControl:SetAnchor(TOP, recentLineControl, BOTTOM, 0, initialLineOffset)
         else
-            line.m_fadeOutTimeline:SetAnimationOffset(fadeOutAnimation, DEFAULT_FADE_OUT_TIME)
-            line.m_fadeOutTimeline:SetCallbackOffset(CallExpiringCallbackTimeline, DEFAULT_FADE_OUT_TIME)
+            lineControl:SetAnchor(TOP, self.smallLineContainer, TOP, 0, initialLineOffset)
         end
 
-        line.m_fadeInTimeline:PlayFromStart()
-        line:ClearAnchors()
-        
-        local numSmallText = #self.m_activeSmallTextLines + 1
-        self.m_activeSmallTextLines[numSmallText] = line
+        announcementSmallLine:SetAndPlayStartingAnimation(-initialLineOffset)
 
-        local initialLineOffset = IsInGamepadPreferredMode() and self.INITIAL_LINE_OFFSET_GAMEPAD or self.INITIAL_LINE_OFFSET_KEYBOARD
-        local initialAnchorOffset = initialLineOffset
-        local translateAnimationOffset = -initialLineOffset
-        local translateTimeline = line.m_translateTimeline
-
-        if(numSmallText > 1) then
-            local totalLinesHeight = 0
-            for i = 1, numSmallText - 1 do -- don't include the latest line, we don't care about its height
-                totalLinesHeight = totalLinesHeight + self.m_activeSmallTextLines[i].m_lineHeight
-            end
-
-            if(totalLinesHeight >= initialAnchorOffset) then
-                translateAnimationOffset = nil
-                initialAnchorOffset = totalLinesHeight
-            else
-                translateAnimationOffset = -(initialLineOffset - totalLinesHeight)
-            end
-        end
-
-        line:SetAnchor(TOP, nil, TOP, 0, initialAnchorOffset) -- lines always appear at the bottom and scroll up
-
-        if(translateAnimationOffset ~= nil) then
-            translateTimeline:GetAnimation(1):SetTranslateDeltas(0, translateAnimationOffset)
-            translateTimeline:PlayFromStart()
-        end
-
-        self.longformBreakdownContainer:SetHidden(true)
-
-        return line
+        return announcementSmallLine
     end,
 
-    [CSA_EVENT_LARGE_TEXT] = function(self, ...)
-        TrySettingDynamicText(self.m_largeText, select(ARG_INDEX_MESSAGE, ...))
-        TrySettingDynamicText(self.m_smallCombinedText, "")
+    [CSA_CATEGORY_LARGE_TEXT] = function(self, messageParams)
+        local showImmediately = messageParams:GetShowImmediately()
+        -- if we acquire our object before we call RemoveAllActiveLines, we will reset everything we setup for it
+        if showImmediately then
+            self:RemoveAllActiveLines()
+        end
+
+        local largeMessageLine, poolKey = self.largeLinePool:AcquireObject()
+        largeMessageLine:SetKey(poolKey)
+
+        largeMessageLine:SetLargeText(messageParams:GetMainText())
+        largeMessageLine:SetSmallCombinedText(messageParams:GetSecondaryText())
         
-        local showImmediately = select(ARG_INDEX_SHOW_IMMEDIATELY, ...)
         -- check for an overriding lifespan coming from the handlers, if not stick with the default        
-        local lifespan = select(ARG_INDEX_LIFESPAN, ...)
-        lifespan = lifespan or DEFAULT_FADE_OUT_TIME
+        local lifespanMS = messageParams:GetLifespanMS()
 
-        if not showImmediately then
-            local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
-            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, lifespan)
-            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
+        --We always want to make sure the fadeout happens at the end of the lifespan of the current
+        --message even if that message shows immediately.
+        largeMessageLine:SetWipeTimelineLifespan(lifespanMS)
 
-            self.m_largeTextContainer.m_timeline:PlayFromStart()
-            self.m_largeTextContainer.m_timeline.beforeExpiring = true
-        else
-            local endTime = lifespan + GetFrameTimeMilliseconds()
+        local largeMessageControl = largeMessageLine:GetControl()
+        if showImmediately then
+            local endTime = lifespanMS + GetFrameTimeMilliseconds()
             local function UpdateShowAnnouncementTime(control, timeS)
                 local timeLeftMS = endTime - (timeS * 1000)
                 if timeLeftMS <= 0 then
-                    local control = self.m_largeTextContainer
-                    self:CallExpiringCallback(control)
-                    control:SetDimensions(ZO_MIN_CSA_SCROLL_WIDTH, ZO_MAX_CSA_SCROLL_HEIGHT)
-                    self:ReleaseLine(control)
-                    self:UpdateDisplay(control)
-                    control:SetHandler("OnUpdate", nil)
+                    self:CallExpiringCallback(largeMessageLine)
+                    largeMessageControl:SetDimensions(ZO_MIN_CSA_SCROLL_WIDTH, ZO_MAX_CSA_SCROLL_HEIGHT)
+                    self:ReleaseLine(largeMessageLine)
                 end
             end
 
-            self.m_largeTextContainer:SetHandler("OnUpdate", UpdateShowAnnouncementTime)
-            self.m_largeTextContainer:SetDimensions(ZO_MAX_CSA_SCROLL_WIDTH, ZO_MAX_CSA_SCROLL_HEIGHT)
-        end
-
-        self.m_smallCombinedIcon:SetHidden(true)
-        self.longformBreakdownContainer:SetHidden(true)
-
-        return self.m_largeTextContainer
-    end,
-
-    [CSA_EVENT_COMBINED_TEXT] = function(self, ...)
-        local smallText = self.m_smallCombinedText
-        TrySettingDynamicText(self.m_largeText, select(ARG_INDEX_MESSAGE, ...))
-        TrySettingDynamicText(smallText, select(ARG_INDEX_COMBINED_MESSAGE, ...))
-
-        -- check for an overriding lifespan coming from the handlers, if not stick with the default        
-        local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
-        local lifespan = select(ARG_INDEX_LIFESPAN, ...)
-
-        if(lifespan) then
-            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, lifespan)
-            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
+            largeMessageControl:SetHandler("OnUpdate", UpdateShowAnnouncementTime)
+            largeMessageControl:SetDimensions(ZO_MAX_CSA_SCROLL_WIDTH, ZO_MAX_CSA_SCROLL_HEIGHT)
+            local ANIMATION = nil
+            largeMessageLine.SetupWipeIn(ANIMATION, largeMessageControl)
         else
-            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, DEFAULT_FADE_OUT_TIME)
-            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, DEFAULT_FADE_OUT_TIME)
+            largeMessageLine:PlayWipeAnimation()
+            self.isBeforeMessageExpiring = true 
         end
 
-        self.m_largeTextContainer.m_timeline:PlayFromStart()
-        self.m_largeTextContainer.m_timeline.beforeExpiring = true
+        local icon, iconBg = messageParams:GetIconData()
+        largeMessageLine:SetIcon(icon, iconBg, messageParams:GetSuppressIconFrame() == CSA_OPTION_SUPPRESS_ICON_FRAME)
 
-        -- NOTE: Combined text is the only thing that uses icons for now...and only on the small text label.
-        local icon = select(ARG_INDEX_ICON, ...)
-        local iconControl = self.m_smallCombinedIcon
-        iconControl:SetHidden(icon == nil)
-        iconControl:GetNamedChild("Frame"):SetHidden(select(ARG_INDEX_SUPPRESS_FRAME, ...) == CSA_OPTION_SUPPRESS_ICON_FRAME)
-        
-        if(icon) then
-            iconControl:SetTexture(icon)
-            AnchorIconToText(iconControl, smallText)
-        end
-
-        local iconBG = select(ARG_INDEX_ICON_BG, ...)
-        self.m_smallCombinedIconBG:SetHidden(iconBG == nil)
-
-        if(iconBG) then
-            self.m_smallCombinedIconBG:SetTexture(iconBG)
-        end
-
-        self.longformBreakdownContainer:SetHidden(true)
-
-        return self.m_largeTextContainer
+        return largeMessageLine
     end,
 
-    [CSA_EVENT_NO_TEXT] = function(self, ...)
+    [CSA_CATEGORY_RAID_COMPLETE_TEXT] = function(self, messageParams)
+        local largeMessageLine, poolKey = self.largeLinePool:AcquireObject()
+        largeMessageLine:SetKey(poolKey)
+
+        largeMessageLine:SetLargeText(messageParams:GetMainText())
+        largeMessageLine:SetSmallCombinedText(messageParams:GetSecondaryText())
+        largeMessageLine:SetRaidBreakdownText(messageParams:GetEndOfRaidData())
+
+        largeMessageLine:SetWipeTimelineLifespan(messageParams:GetLifespanMS())
+        largeMessageLine:PlayWipeAnimation()
+        self.isBeforeMessageExpiring = true
+
+        return largeMessageLine
+    end,
+
+    [CSA_CATEGORY_NO_TEXT] = function(self, messageParams)
         return nil
     end,
 
-    [CSA_EVENT_RAID_COMPLETE_TEXT] = function(self,...)
-        TrySettingDynamicText(self.m_largeText, select(ARG_INDEX_MESSAGE, ...))
-        TrySettingDynamicText(self.m_smallCombinedText, "")
-        local raidArgumentTable = select(ARG_INDEX_COMBINED_MESSAGE, ...)
-        TrySettingDynamicText(self.breakdownLabel1, raidArgumentTable[ARG_BREAKDOWN_INDEX_TIME])
-        TrySettingDynamicText(self.breakdownLabel2, raidArgumentTable[ARG_BREAKDOWN_INDEX_SCORE])
-        TrySettingDynamicText(self.breakdownLabel3, raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT])
-        TrySettingDynamicText(self.breakdownIconLabel, raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_PERCENT])
+    [CSA_CATEGORY_MAJOR_TEXT] = function(self, messageParams)
+        local announcementMajorLine, poolKey = self.majorLinePool:AcquireObject()
+        announcementMajorLine:SetKey(poolKey)
+        local lineControl = announcementMajorLine:GetControl()
+        announcementMajorLine:SetText(messageParams:GetMostUniqueMessage())
 
-        if raidArgumentTable[ARG_BREAKDOWN_INDEX_VITALITY_AMOUNT] == 0 then
-            self.breakdownIconLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
-            self.breakdownIcon:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
-        else
-            self.breakdownIconLabel:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
-            self.breakdownIcon:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+        local isGamepadMode = IsInGamepadPreferredMode()
+        local lineSpacing = isGamepadMode and SMALL_TEXT_SPACING_GAMEPAD or SMALL_TEXT_SPACING_KEYBOARD
+
+        local textHeight = lineControl:GetTextHeight()
+        local allMajorLines = self.activeLines[CSA_LINE_TYPE_MAJOR]
+        local numCurrentMajorLines = #allMajorLines
+
+        -- We do not wait for older lines to be removed if we want to add
+        -- a new major event. Instead just forcefully remove the oldest one
+        if numCurrentMajorLines == MAX_MAJOR_TEXT_LINES then
+            self:RemoveActiveLine(allMajorLines[1])
+            numCurrentMajorLines = #allMajorLines
         end
 
-        if raidArgumentTable[ARG_BREAKDOWN_INDEX_SHOW_AS_ERROR] then
-            self.breakdownLabel1:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
-        else
-            self.breakdownLabel1:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        for i, line in ipairs(allMajorLines) do
+            local otherLineControl = line:GetControl()
+            otherLineControl:ClearAnchors()
+            otherLineControl:SetAnchor(TOP, self.majorLineContainer, TOP, 0, (lineSpacing + textHeight) * (numCurrentMajorLines - i + 1))
         end
 
-        local fadeOutAnimation = self.m_largeTextContainer.m_timeline:GetAnimation(2)
-        local lifespan = select(ARG_INDEX_LIFESPAN, ...)
+        lineControl:SetAnchor(TOP, self.majorLineContainer, TOP, 0, 0)
 
-        if lifespan then
-            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, lifespan)
-            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, lifespan)
-        else
-            self.m_largeTextContainer.m_timeline:SetAnimationOffset(fadeOutAnimation, DEFAULT_FADE_OUT_TIME)
-            self.m_largeTextContainer.m_timeline:SetCallbackOffset(CallExpiringCallbackTimeline, DEFAULT_FADE_OUT_TIME)
-        end
+        announcementMajorLine:SetAndPlayStartingAnimation(messageParams:GetLifespanMS())
 
-        self.m_largeTextContainer.m_timeline:PlayFromStart()
-        self.m_largeTextContainer.m_timeline.beforeExpiring = true
+        return announcementMajorLine
+    end,
 
-        self.m_smallCombinedIcon:SetHidden(true)
-        self.longformBreakdownContainer:SetHidden(false)
+    [CSA_CATEGORY_COUNTDOWN_TEXT] = function(self, messageParams)
+        -- Nothing can show while countdowns are showing
+        self:RemoveAllActiveLines()
 
-        return self.m_largeTextContainer
+        local announcementCountdownLine, poolKey = self.countdownLinePool:AcquireObject()
+        announcementCountdownLine:SetKey(poolKey)
+        local lineControl = announcementCountdownLine:GetControl()
+
+        announcementCountdownLine:SetEndImageTexture(messageParams:GetIconData())
+        announcementCountdownLine:SetAndPlayStartingAnimation(messageParams:GetLifespanMS())
+
+        lineControl:SetAnchor(TOP, self.countdownLineContainer)
+
+        return announcementCountdownLine
     end,
 }
 
-function CenterScreenAnnounce:SetExpiringCallback(line, callback)
-    line.m_expiringCallback = callback
-end
+function CenterScreenAnnounce:CallExpiringCallback(announcementLine)
+    announcementLine:GetMessageParams():CallExpiringCallback()
 
-function CenterScreenAnnounce:CallExpiringCallback(control)
-    if(control.m_expiringCallback) then
-        control.m_expiringCallback()
-        control.m_expiringCallback = nil
-    end
-    if(control.m_timeline) then
-        control.m_timeline.beforeExpiring = false
-    end
-    if(PLAYER_PROGRESS_BAR:GetOwner() == self) then
+    self.isBeforeMessageExpiring = false
+
+    if PLAYER_PROGRESS_BAR:GetOwner() == self then
         PLAYER_PROGRESS_BAR:SetHoldBeforeFadeOut(false)
     end
 end
 
-function CenterScreenAnnounce:DisplayMessage(category, ...)
-    if self:ShouldRejectCategory(category) then
+-- Legacy support for addons
+function CenterScreenAnnounce:AddMessage(eventId, category, ...)
+    local messageParams = self:CreateMessageParams(category)
+    messageParams:ConvertOldParams(...)
+    self:AddMessageWithParams(messageParams)
+end
+
+do
+    local ALLOWED_TYPES_WHILE_CRAFTING = 
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COUNTER_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_OPTIONAL_STEP_ADVANCED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+    }
+
+    function CenterScreenAnnounce:AddMessageWithParams(messageParams)
+        if not messageParams then
+            return
+        end
+
+        local category = messageParams:GetCategory()
+        if category ~= nil then
+            local csaType = messageParams:GetCSAType()
+            local isAvAEvent = messageParams:IsAvAEvent()
+            local barParams = messageParams:GetBarParams()
+            if category == CSA_CATEGORY_NO_TEXT and barParams == nil then
+                return
+            end
+
+            -- prevent unwanted announcements from appearing when the user is crafting
+            if ZO_CraftingUtils_IsCraftingWindowOpen() and not ALLOWED_TYPES_WHILE_CRAFTING[csaType] then
+                return
+            end
+
+            -- prevent unwanted announcements that have been specified as supressed
+            if self:GetSupressAnnouncementByType(csaType) then
+                return
+            end
+
+            if isAvAEvent and not self:CanShowAvAEvent() then
+                return
+            end
+
+            -- Checking the recency of the message should be sufficient for duplicate messages
+            -- Otherwise, this needs to combine the full message text into a single string and check the recency of that.
+            -- MLR: Changing to use the Combined message when available because when multiple similar messages come in on the same frame,
+            -- the recency sees them as the same message and only the first will display.
+            local message = messageParams:GetMostUniqueMessage()
+
+            if message == nil or self.recentMessages:ShouldDisplayMessage(message) then
+                self:QueueMessage(messageParams)
+            else
+                messageParams:CallExpiringCallback()
+            end
+        end
+    end
+end
+
+function CenterScreenAnnounce:QueueMessage(messageParams)
+    --Delay choosing the next message to show by WAIT_INTERVAL_SECONDS each time a new message comes in to stabilize a bit
+    local timeNowSeconds = GetFrameTimeMilliseconds() / 1000
+    local shouldQueueImmediately, reinsertStompedMsg = messageParams:GetQueueImmediately()
+    local category = messageParams:GetCategory()
+
+    -- events that should QueueImmediately and the countdown event both need to display their message immediately
+    if shouldQueueImmediately or category == CSA_CATEGORY_COUNTDOWN_TEXT then
+        local oldestLine = self:GetOldestLine(CSA_LINE_TYPE_LARGE)
+        if oldestLine then
+            if reinsertStompedMsg then
+                --If we are interrupting a message, lets put the current message back in the queue so it can come back 
+                --up when were done with the immediate message that is interrupting.
+                table.insert(self.displayQueue, 1, oldestLine:GetMessageParams())
+                oldestLine:SetShouldCleanupMessageParams(false)
+            end
+            self:ReleaseLine(oldestLine)
+        end
+
+        -- this has to be called after we check on the current message
+        self:DisplayMessage(messageParams)
+
         return
+    end
+    
+    local waitOffset = shouldQueueImmediately and NO_WAIT_INTERVAL_SECONDS or WAIT_INTERVAL_SECONDS
+    self.nextUpdateTimeSeconds = timeNowSeconds + waitOffset
+
+    table.insert(self.displayQueue, messageParams)
+    self.nextQueueIndex = self.nextQueueIndex + 1
+    self.isQueueDirty = true
+end
+
+function CenterScreenAnnounce:DisplayMessage(messageParams)
+    local category = messageParams:GetCategory()
+    if self:ShouldRejectCategory(category) then
+        self.messageParamsPool:ReleaseObject(messageParams.key)
+        return false
     end
 
     local setupFunction = setupFunctions[category]
-    if(setupFunction) then
-        self.m_displayMode = category
-
-        local displayLine = setupFunction(self, ...)
-        if(displayLine) then
-            self:SetExpiringCallback(displayLine, select(ARG_INDEX_EXPIRING_CALLBACK, ...))
-            self.m_activeLineCount = self.m_activeLineCount + 1
+    if setupFunction then
+        local displayLine = setupFunction(self, messageParams)
+        if displayLine then
+            self:AddActiveLine(displayLine)
+            displayLine:SetMessageParams(messageParams)
         end
 
-        local soundId = select(ARG_INDEX_SOUND, ...)
-        if(soundId) then PlaySound(soundId) end
-
-        local barParams = select(ARG_INDEX_BAR_PARAMS, ...)
-        if(barParams and (category == CSA_EVENT_LARGE_TEXT or category == CSA_EVENT_COMBINED_TEXT or category == CSA_EVENT_NO_TEXT)) then
-            local barType, startLevel, start, stop, sound = barParams:GetParams()
-            if(stop - start > 0 or barParams.showNoGain) then
-                self.m_hasActiveBar = true
-                PLAYER_PROGRESS_BAR:ShowIncrease(barType, startLevel, start, stop, sound, category == CSA_EVENT_NO_TEXT and 0 or 500, self)
-            end
-            self.m_barParamsPool:ReleaseObject(barParams.key)
-        end
-    end
-end
-
-local ALLOWED_EVENTS_WHILE_CRAFTING = 
-{
-    [EVENT_QUEST_ADDED] = true,
-    [EVENT_QUEST_CONDITION_COUNTER_CHANGED] = true,
-    [EVENT_QUEST_ADVANCED] = true,
-    [EVENT_QUEST_COMPLETE] = true,
-    [EVENT_OBJECTIVE_COMPLETED] = true,
-    [EVENT_QUEST_OPTIONAL_STEP_ADVANCED] = true,
-    [EVENT_ACHIEVEMENT_AWARDED] = true,
-    [EVENT_BROADCAST] = true,
-}
-
-function CenterScreenAnnounce:AddMessage(eventId, category, ...)
-    if(category ~= nil) then
-        local barParams = select(ARG_INDEX_BAR_PARAMS, ...)
-        if(category == CSA_EVENT_NO_TEXT and barParams == nil) then
-            return
+        -- Countdown events play their sound at the end of the countdown
+        if category ~= CSA_CATEGORY_COUNTDOWN_TEXT then
+            messageParams:PlaySound()
         end
 
-        -- prevent unwanted announcements from appearing when the user is crafting
-        if ZO_CraftingUtils_IsCraftingWindowOpen() and not ALLOWED_EVENTS_WHILE_CRAFTING[eventId] then
-            return
-        end
-
-        -- prevent unwanted announcements that have been specified as supressed
-        if self:GetSupressAnnouncementByEvent(eventId) then
-            return
-        end
-
-        -- Checking the recency of the message should be sufficient for duplicate messages
-        -- Otherwise, this needs to combine the full message text into a single string and check the recency of that.
-        -- MLR: Changing to use the Combined message when available because when multiple similar messages come in on the same frame,
-        -- the recency sees them as the same message and only the first will display.
-        local message = select(ARG_INDEX_COMBINED_MESSAGE, ...) or select(ARG_INDEX_MESSAGE, ...)
-
-        if(message == nil or self.m_recentMessages:ShouldDisplayMessage(message)) then
-            self:QueueMessage(eventId, category, ...)
-        else
-            local expiringCallback = select(ARG_INDEX_EXPIRING_CALLBACK, ...)
-            if expiringCallback then
-                expiringCallback()
+        local barParams = messageParams:GetBarParams()
+        if barParams then
+            if category == CSA_CATEGORY_LARGE_TEXT or category == CSA_CATEGORY_NO_TEXT then
+                local barType, startLevel, start, stop, sound = barParams:GetParams()
+                if stop - start > 0 or barParams.showNoGain then
+                    self.hasActiveLevelBar = true
+                    PLAYER_PROGRESS_BAR:ShowIncrease(barType, startLevel, start, stop, sound, category == CSA_CATEGORY_NO_TEXT and BAR_PARAMS_NO_WAIT_INTERVAL_MS or BAR_PARAMS_WAIT_INTERVAL_MS, self)
+                    if not (barType and PLAYER_PROGRESS_BAR:GetBarTypeInfoByBarType(barType)) then
+                        local INVALID_VALUE = -1
+                        internalassert(false, string.format("CSA Bad Bar Params; barType: %d. Triggering Event: %d", barType or INVALID_VALUE, barParams:GetTriggeringEvent() or INVALID_VALUE))
+                    end
+                end
             end
         end
-    end
-end
 
-function CenterScreenAnnounce:SupressAnnouncementByEvent(eventId)
-    if not self.suppressAnnouncements then
-        self.suppressAnnouncements = {}
-    end
+        if not displayLine then
+            self.messageParamsPool:ReleaseObject(messageParams.key)
+        end
 
-    if not self.suppressAnnouncements[eventId] then
-        self.suppressAnnouncements[eventId] = 0
-    end
-
-    self.suppressAnnouncements[eventId] = self.suppressAnnouncements[eventId] + 1
-end
-
-function CenterScreenAnnounce:GetSupressAnnouncementByEvent(eventId)
-    if self.suppressAnnouncements and self.suppressAnnouncements[eventId] then
-        return self.suppressAnnouncements[eventId] > 0
+        return true
     end
 
     return false
 end
 
-function CenterScreenAnnounce:ResumeAnnouncementByEvent(eventId)
-    if self.suppressAnnouncements and self.suppressAnnouncements[eventId] then
-        self.suppressAnnouncements[eventId] = self.suppressAnnouncements[eventId] - 1
+function CenterScreenAnnounce:SupressAnnouncementByType(csaType)
+    if not self.suppressAnnouncements then
+        self.suppressAnnouncements = {}
     end
+
+    if not self.suppressAnnouncements[csaType] then
+        self.suppressAnnouncements[csaType] = 0
+    end
+
+    self.suppressAnnouncements[csaType] = self.suppressAnnouncements[csaType] + 1
+end
+
+function CenterScreenAnnounce:GetSupressAnnouncementByType(csaType)
+    if self.suppressAnnouncements and self.suppressAnnouncements[csaType] then
+        return self.suppressAnnouncements[csaType] > 0
+    end
+
+    return false
+end
+
+function CenterScreenAnnounce:ResumeAnnouncementByType(csaType)
+    if self.suppressAnnouncements and self.suppressAnnouncements[csaType] then
+        self.suppressAnnouncements[csaType] = self.suppressAnnouncements[csaType] - 1
+    end
+end
+
+function CenterScreenAnnounce:CanShowAvAEvent()
+    local setting = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_AVA_NOTIFICATIONS))
+    if setting == ACTION_BAR_SETTING_CHOICE_ON then
+        return true
+    elseif setting == ACTION_BAR_SETTING_CHOICE_AUTOMATIC then
+        return IsPlayerInAvAWorld()
+    end
+
+    return false
 end
 
 -- Exposed so that external code can add custom events with appropriate priorities
 local nextAutoPriority = 1
-function ZO_CenterScreenAnnounce_SetEventPriority(eventId, priority)
-    if(priority == nil) then
+function ZO_CenterScreenAnnounce_SetPriority(csaType, priority)
+    if priority == nil then
         priority = nextAutoPriority
         nextAutoPriority = nextAutoPriority + 1
     end
     
-    messagePriorities[eventId] = priority
+    messagePriorities[csaType] = priority
 end
 
 function ZO_CenterScreenAnnounce_Initialize(self)

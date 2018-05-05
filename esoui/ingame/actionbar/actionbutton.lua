@@ -19,7 +19,7 @@ local ACTION_BUTTON_BORDERS = {normal = "EsoUI/Art/ActionBar/abilityFrame64_up.d
 local function HasAbility(slotnum)
     local slotType = GetSlotType(slotnum)
 
-    return(slotType == ACTION_TYPE_ABILITY)
+    return slotType == ACTION_TYPE_ABILITY
 end
 
 ActionButton = ZO_Object:Subclass()
@@ -27,8 +27,7 @@ ActionButton = ZO_Object:Subclass()
 function ActionButton:New(slotNum, buttonType, parent, controlTemplate)
     local newB = ZO_Object.New(self)
 
-    if(newB)
-    then
+    if newB then
         local ctrlName = "ActionButton"..slotNum
 
         local slotCtrl = CreateControlFromVirtual(ctrlName, parent, controlTemplate)
@@ -69,13 +68,13 @@ function ActionButton:New(slotNum, buttonType, parent, controlTemplate)
         local onChanged = (slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) and onUltimateChanged or nil
         ZO_Keybindings_RegisterLabelForBindingUpdate(newB.buttonText, "ACTION_BUTTON_".. slotNum, HIDE_UNBOUND, "GAMEPAD_ACTION_BUTTON_".. slotNum, onChanged)
 
-		if slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
-			slotCtrl:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId)
-														if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_ULTIMATE_NUMBER then
-															newB:RefreshUltimateNumberVisibility()
-														end
-													end)
-		end
+        if slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+            slotCtrl:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId)
+                                                        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_ULTIMATE_NUMBER then
+                                                            newB:RefreshUltimateNumberVisibility()
+                                                        end
+                                                    end)
+        end
     end
 
     return newB
@@ -105,20 +104,14 @@ function ActionButton:HasAction()
     return self.hasAction
 end
 
-function ActionButton:HandlePressAndRelease()
-    OnSlotDownAndUp(self:GetSlot())
-end
-
-function ActionButton:HandlePress()
-    if(self.usable) then
+function ActionButton:OnPress()
+    if self.usable then
         self.button:SetState(BSTATE_PRESSED, false)
     end
-    OnSlotDown(self:GetSlot())
 end
 
-function ActionButton:HandleRelease()
+function ActionButton:OnRelease()
     self:ResetVisualState()
-    OnSlotUp(self:GetSlot())
 end
 
 function ActionButton:ResetVisualState()
@@ -144,19 +137,16 @@ end
 local function SetupAbilitySlot(slotObject, slotId)
     SetupActionSlotWithBg(slotObject, slotId)
 
-	if slotId == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
-		slotObject:RefreshUltimateNumberVisibility()
-	else
-		slotObject:SetupCount(nil)
-	end
+    if slotId == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
+        slotObject:RefreshUltimateNumberVisibility()
+    else
+        slotObject:ClearCount()
+    end
 end
 
 local function SetupItemSlot(slotObject, slotId)
-    local itemCount = GetSlotItemCount(slotId)
-    local consumable = IsSlotItemConsumable(slotId)
-
     SetupActionSlotWithBg(slotObject, slotId)
-    slotObject:SetupCount(itemCount, consumable)
+    slotObject:SetupCount()
 end
 
 local function SetupSiegeActionSlot(slotObject, slotId)
@@ -165,10 +155,10 @@ end
 
 local function SetupCollectibleActionSlot(slotObject, slotId)
     SetupActionSlotWithBg(slotObject, slotId)
-    slotObject:SetupCount(nil)
+    slotObject:ClearCount()
 end
 
-SetupSlotHandlers = 
+SetupSlotHandlers =
 {
     [ACTION_TYPE_ABILITY]       = SetupAbilitySlot,
     [ACTION_TYPE_ITEM]          = SetupItemSlot,
@@ -176,13 +166,24 @@ SetupSlotHandlers =
     [ACTION_TYPE_COLLECTIBLE]   = SetupCollectibleActionSlot,
 }
 
-function ActionButton:SetupCount(count, consumable)
-    if(count and count >= 0 and consumable) then
-        self.countText:SetHidden(false)
-        self.countText:SetText(count)
-    else
-        self.countText:SetHidden(true)
+function ActionButton:SetupCount()
+    local slotId = self:GetSlot()
+    local slotType = GetSlotType(slotId)
+    local stackCount
+    if slotType == ACTION_TYPE_ITEM then
+        stackCount = GetSlotItemCount(slotId)
     end
+
+    if stackCount and stackCount >= 0 then
+        self.countText:SetHidden(false)
+        self.countText:SetText(stackCount)
+    else
+        self:ClearCount()
+    end
+end
+
+function ActionButton:ClearCount()
+    self.countText:SetHidden(true)
 end
 
 function ActionButton:HandleSlotChanged()
@@ -190,8 +191,7 @@ function ActionButton:HandleSlotChanged()
     local slotType = GetSlotType(slotId)
 
     local setupSlotHandler = SetupSlotHandlers[slotType]
-    if(setupSlotHandler)
-    then
+    if setupSlotHandler then
         setupSlotHandler(self, slotId)
     else
         self:Clear()
@@ -205,14 +205,13 @@ function ActionButton:HandleSlotChanged()
     self:UpdateState()
 
     local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
-    if(mouseOverControl == self.button)
-    then
+    if mouseOverControl == self.button then
         ZO_AbilitySlot_OnMouseEnter(self.button)
     end
 end
 
 function ActionButton:Clear()
-    if(self.buttonType == ACTION_BUTTON_TYPE_LOCKED) then
+    if self.buttonType == ACTION_BUTTON_TYPE_LOCKED then
         self.slot:SetHidden(true)
     else
         local isGamepad = IsInGamepadPreferredMode()
@@ -229,38 +228,38 @@ function ActionButton:RefreshUltimateNumberVisibility()
         self.countText:SetHidden(false)
         self:UpdateUltimateNumber()
     else
-        self:SetupCount(nil)
+        self:ClearCount()
     end
 end
 
 function ActionButton:UpdateUltimateNumber()
-	self.countText:SetText(GetUnitPower("player", POWERTYPE_ULTIMATE))
+    self.countText:SetText(GetUnitPower("player", POWERTYPE_ULTIMATE))
 end
 
 function ActionButton:UpdateActivationHighlight()
     local slotnum = self:GetSlot()
     local slotType = GetSlotType(slotnum)
-    local slotIsEmpty = (slotType == 0)
+    local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
 
     local showHighlight = not slotIsEmpty and HasActivationHighlight(slotnum) and not self.useFailure and not self.showingCooldown
     local isShowingHighlight = self.activationHighlight:IsHidden() == false
 
-    if(showHighlight ~= isShowingHighlight) then
+    if showHighlight ~= isShowingHighlight then
         self.activationHighlight:SetHidden(not showHighlight)
 
-        if(showHighlight) then
+        if showHighlight then
             local _, _, activationAnimation = GetSlotTexture(slotnum)
             self.activationHighlight:SetTexture(activationAnimation)
 
             self.activationHighlight.animation = self.activationHighlight.animation or CreateSimpleAnimation(ANIMATION_TEXTURE, self.activationHighlight)
             local anim = self.activationHighlight.animation
 
-            anim:SetImageData(64,1)
+            anim:SetImageData(64, 1)
             anim:SetFramerate(30)
             anim:GetTimeline():PlayFromStart()
         else
             local anim = self.activationHighlight.animation
-            if(anim) then
+            if anim then
                 anim:GetTimeline():Stop()
             end
         end
@@ -285,34 +284,32 @@ end
 function ActionButton:UpdateUseFailure()
     local slotnum = self:GetSlot()
     local slotType = GetSlotType(slotnum)
-    local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
 
     self.itemQtyFailure = false
-    if(not slotIsEmpty and (slotType == ACTION_TYPE_ITEM)) then
+    local soulGemFailure = false
+    if slotType == ACTION_TYPE_ITEM then
         self.itemQtyFailure = (GetSlotItemCount(slotnum) == 0)
+    elseif slotType == ACTION_TYPE_ABILITY then
+        local isSoulGemAbility = IsSlotSoulTrap(slotnum)
+        if isSoulGemAbility and not DoesInventoryContainEmptySoulGem() then
+            soulGemFailure = true
+        end
     end
 
-	local soulGemFailure = false
-	if(not slotIsEmpty and slotType == ACTION_TYPE_ABILITY) then
-		local isSoulGemAbility = IsSlotSoulTrap(slotnum)
-		if(isSoulGemAbility and not DoesInventoryContainEmptySoulGem()) then
-			soulGemFailure = true
-		end
-	end
-
     local costFailure = HasCostFailure(slotnum)
-    local nonCostFailure = not slotIsEmpty and
+    local nonCostFailure = slotType ~= ACTION_TYPE_NOTHING and
                            self.itemQtyFailure or
                            soulGemFailure or
-					       HasTargetFailure(slotnum) or
-					       HasRequirementFailure(slotnum) or
-					       HasWeaponSlotFailure(slotnum) or
-					       HasStatusEffectFailure(slotnum) or
-					       HasFallingFailure(slotnum) or
-					       HasSwimmingFailure(slotnum) or
-					       HasMountedFailure(slotnum) or
+                           HasTargetFailure(slotnum) or
+                           HasRequirementFailure(slotnum) or
+                           HasWeaponSlotFailure(slotnum) or
+                           HasStatusEffectFailure(slotnum) or
+                           HasFallingFailure(slotnum) or
+                           HasSwimmingFailure(slotnum) or
+                           HasMountedFailure(slotnum) or
                            HasReincarnatingFailure(slotnum) or
-                           HasRangeFailure(slotnum)
+                           HasRangeFailure(slotnum) or
+                           HasLeapKeepTargetFailure(slotnum)
 
     self.costFailureOnly = costFailure and not nonCostFailure
     self.useFailure = costFailure or nonCostFailure
@@ -329,10 +326,23 @@ function ActionButton:UpdateUsable()
         usable = true
     end
 
-    if usable ~= self.usable or isGamepad ~= self.isGamepad then
+    local slotId = self:GetSlot()
+    local slotType = GetSlotType(slotId)
+    local stackEmpty = false
+    if slotType == ACTION_TYPE_ITEM then
+        local stackCount = GetSlotItemCount(slotId)
+        if stackCount <= 0 then
+            stackEmpty = true
+            usable = false
+        end
+    end
+
+    if usable ~= self.usable or isGamepad ~= self.isGamepad or stackEmpty ~= self.stackEmpty then
         self.usable = usable
         self.isGamepad = isGamepad
-        local useDesaturation = isShowingCooldown and not self.useFailure
+        self.stackEmpty = stackEmpty
+
+        local useDesaturation = isShowingCooldown and not self.useFailure or self.stackEmpty
         ZO_ActionSlot_SetUnusable(self.icon, not usable, useDesaturation)
     end
 end
@@ -380,14 +390,17 @@ function ActionButton:UpdateCooldown(options)
     local slotnum = self:GetSlot()
     local remain, duration, global, globalSlotType = GetSlotCooldownInfo(slotnum)
     local isInCooldown = duration > 0
-    local showGlobalForCollectible = global and GetSlotType(slotnum) == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
-    local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalForCollectible)
+    local slotType = GetSlotType(slotnum)
+    local showGlobalCooldownForCollectible = global and slotType == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
+    local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalCooldownForCollectible)
 
     self.cooldown:SetHidden(not showCooldown)
 
+    local updateChromaQuickslot = slotType ~= ACTION_TYPE_ABILITY and ZO_RZCHROMA_EFFECTS
+
     if showCooldown then
         self.cooldown:StartCooldown(remain, duration, CD_TYPE_RADIAL, nil, NO_LEADING_EDGE)
-        if(self.cooldownCompleteAnim.animation) then
+        if self.cooldownCompleteAnim.animation then
             self.cooldownCompleteAnim.animation:GetTimeline():PlayInstantlyToStart()
         end
 
@@ -405,6 +418,9 @@ function ActionButton:UpdateCooldown(options)
         end
 
         self.slot:SetHandler("OnUpdate", function() self:RefreshCooldown() end)
+        if updateChromaQuickslot then
+            ZO_RZCHROMA_EFFECTS:RemoveKeybindActionEffect("ACTION_BUTTON_9")
+        end
     else
         if self.showingCooldown then
             -- This ability was in a non-global cooldown, and now the cooldown is over...play animation and sound
@@ -421,6 +437,10 @@ function ActionButton:UpdateCooldown(options)
             anim:SetImageData(16,1)
             anim:SetFramerate(30)
             anim:GetTimeline():PlayFromStart()
+
+            if updateChromaQuickslot then
+                ZO_RZCHROMA_EFFECTS:AddKeybindActionEffect("ACTION_BUTTON_9")
+            end
         end
 
         self.icon.percentComplete = 1
@@ -436,7 +456,7 @@ function ActionButton:UpdateCooldown(options)
         else
             ZO_ContextualActionBar_RemoveReference()
         end
-                    
+
         self:UpdateActivationHighlight()
         if IsInGamepadPreferredMode() then
             self:SetCooldownHeight(self.icon.percentComplete)
@@ -477,7 +497,7 @@ end
 
 function ActionButton:ApplyStyle(template)
     ApplyTemplateToControl(self.slot, template)
-    
+
     local isGamepad = IsInGamepadPreferredMode()
     self.button:SetNormalTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.normal)
     self.button:SetPressedTexture(isGamepad and "" or ACTION_BUTTON_BORDERS.mouseDown)
@@ -641,25 +661,25 @@ do
         key:ClearAnchors()
         anchor:AddToControl(key)
     end
-    
+
     function ActionButton:AnchorKeysIn()
         if not self.keyAnchorInLeft then
             self.keyAnchorInLeft = ZO_Anchor:New(TOPRIGHT, self.slot, BOTTOMLEFT, 15, -15)
             self.keyAnchorInRight = ZO_Anchor:New(TOPLEFT, self.slot, BOTTOMRIGHT, -15, -15)
         end
-    
+
         if not self.leftKeyTimeline:IsPlaying() then
             AnchorKey(self.leftKey, self.keyAnchorInLeft)
             AnchorKey(self.rightKey, self.keyAnchorInRight)
         end
     end
-    
+
     function ActionButton:AnchorKeysOut()
         if not self.keyAnchorOutLeft then
             self.keyAnchorOutLeft = ZO_Anchor:New(TOPRIGHT, self.slot, BOTTOMLEFT, 0, -15)
             self.keyAnchorOutRight = ZO_Anchor:New(TOPLEFT, self.slot, BOTTOMRIGHT, 0, -15)
         end
-    
+
         if not self.leftKeyTimeline:IsPlaying() then
             AnchorKey(self.leftKey, self.keyAnchorOutLeft)
             AnchorKey(self.rightKey, self.keyAnchorOutRight)

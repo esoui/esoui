@@ -42,10 +42,18 @@ function ZO_ShouldShowAchievement(filterType, id)
     return false
 end
 
-function ZO_GetAchievementIds(categoryIndex, subCategoryIndex, numAchievements)
-    result = {}
-    for i = 1, numAchievements do
-        table.insert(result, GetAchievementId(categoryIndex, subCategoryIndex, i))
+function ZO_GetAchievementIds(categoryIndex, subcategoryIndex, numAchievements, considerSearchResults)
+    local result = {}
+    local searchResults = considerSearchResults and ACHIEVEMENTS_MANAGER:GetSearchResults()
+    if searchResults then
+        local effectiveSubcategoryIndex = subcategoryIndex or ZO_ACHIEVEMENTS_ROOT_SUBCATEGORY
+        searchResults = searchResults[categoryIndex][effectiveSubcategoryIndex]
+    end
+
+    for achievementIndex = 1, numAchievements do
+        if not searchResults or searchResults[achievementIndex] then
+            table.insert(result, GetAchievementId(categoryIndex, subcategoryIndex, achievementIndex))
+        end
     end
     return result
 end

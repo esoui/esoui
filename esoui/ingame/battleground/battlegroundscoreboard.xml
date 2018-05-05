@@ -1,0 +1,252 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_BattlegroundScoreboard_Timer_Keyboard_Template" virtual="true">
+            <ClearAnchors/>
+            <Anchor point="BOTTOMLEFT" offsetX="32" offsetY="-12" />
+            <Controls>
+                <Label name="$(parent)Timer" font="ZoFontKeybindStripDescription" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BattlegroundScoreboard_Timer_Gamepad_Template" virtual="true">
+            <ClearAnchors/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            <Controls>
+                <Label name="$(parent)Timer" font="ZoFontGamepad42" />
+            </Controls>
+        </Control>
+
+        <Label name="ZO_Battleground_Scoreboard_Score_Template" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true"/>
+        
+        <Control name="ZO_Battleground_Scoreboard_Player_Row" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" maxLineCount="1" wrapMode="ELLIPSIS">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_USER_ID_WIDTH" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+                <Label name="$(parent)MedalScore" inherits="ZO_Battleground_Scoreboard_Score_Template">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+                </Label>
+                <Label name="$(parent)Kills" inherits="ZO_Battleground_Scoreboard_Score_Template">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)MedalScore" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_OFFSET_X" />
+                </Label>
+                <Label name="$(parent)Deaths" inherits="ZO_Battleground_Scoreboard_Score_Template">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Kills" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+                </Label>
+                <Label name="$(parent)Assists" inherits="ZO_Battleground_Scoreboard_Score_Template">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Deaths" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+                </Label>
+                <Control name="$(parent)Highlight" alpha="0" excludeFromResizeToFitExtents="true" mouseEnabled="true">
+                    <AnchorFill />
+                    
+                    <OnMouseDown>
+                        ZO_Battleground_Scoreboard_Player_Row_OnMouseDown(self:GetParent(), button)
+                    </OnMouseDown>
+
+                    <OnMouseEnter>
+                        self:GetParent().owner:SetMouseOver(true)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        self:GetParent().owner:SetMouseOver(false)
+                    </OnMouseExit>
+                    
+                    <Controls>
+                        <Texture name="$(parent)Keyboard" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="-30" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="5" />
+                            <TextureCoords left="0" right=".76" top="0" bottom="1" />
+                        </Texture>
+                        <Backdrop name="$(parent)Gamepad" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="-15" offsetY="-4" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4" />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Battleground_Scoreboard_Player_Row_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH2" />
+                <Label name="$(parent)MedalScore" font="ZoFontWinH2" />
+                <Label name="$(parent)Kills" font="ZoFontWinH2" />
+                <Label name="$(parent)Deaths" font="ZoFontWinH2" />
+                <Label name="$(parent)Assists" font="ZoFontWinH2" />
+                <Control name="$(parent)Highlight">
+                    <Controls>
+                        <Texture name="$(parent)Keyboard" hidden="false" />
+                        <Backdrop name="$(parent)Gamepad" hidden="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Battleground_Scoreboard_Player_Row_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad34" />
+                <Label name="$(parent)MedalScore" font="ZoFontGamepad34" />
+                <Label name="$(parent)Kills" font="ZoFontGamepad34" />
+                <Label name="$(parent)Deaths" font="ZoFontGamepad34" />
+                <Label name="$(parent)Assists" font="ZoFontGamepad34" />
+                <Control name="$(parent)Highlight">
+                    <Controls>
+                        <Texture name="$(parent)Keyboard" hidden="true" />
+                        <Backdrop name="$(parent)Gamepad" hidden="false" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel" virtual="true">
+            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH" y="ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT" />
+            <Controls>
+                <Texture name="$(parent)Bg" color="FFAAFFFF">
+                    <Anchor point="TOPLEFT"/>
+                </Texture>
+                <Texture name="$(parent)NameIcon" level="2">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH" y="ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_HEIGHT" />
+                    <Anchor point="TOPLEFT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_OFFSET_X" offsetY="ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_OFFSET_Y"/>
+                </Texture>
+                <Label name="$(parent)Name" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)NameIcon" relativePoint="RIGHT"/>
+                </Label>
+                <Label name="$(parent)Score">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg" color="FFFFFF">
+                    <Dimensions x="1100" y="280"/>
+                    <Anchor point="TOPLEFT" offsetX="-ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH"/>
+                </Texture>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                <Label name="$(parent)Score" font="ZoFontCallout3"/>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Bg">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_WIDTH" y="5" />
+                    <Anchor point="TOPLEFT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_OFFSET_X"/>
+                </Texture>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)Score" font="ZoFontGamepad42"/>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Battleground_Scoreboard_Headers_Keyboard_Template" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundsKeyboard" offsetX ="ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH_KEYBOARD" offsetY="ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT_KEYBOARD" />
+            <Controls>
+                <Label name="$(parent)TeamScore" font="ZoFontHeader2"/>
+                <Label name="$(parent)UserId" font="ZoFontHeader2"/>
+                <Label name="$(parent)MedalScore" font="ZoFontHeader2"/>
+                <Label name="$(parent)Kills" font="ZoFontHeader2"/>
+                <Label name="$(parent)Deaths" font="ZoFontHeader2"/>
+                <Label name="$(parent)Assists" font="ZoFontHeader2"/>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_Battleground_Scoreboard_Headers_Gamepad_Template" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundsGamepad" offsetX ="ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH" offsetY="ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)TeamScore" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)UserId" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)MedalScore" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)Kills" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)Deaths" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)Assists" font="ZoFontGamepadBold27"/>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_BattlegroundScoreboardTopLevel_Keyboard_Template" virtual="true">
+            <AnchorFill />
+        </TopLevelControl>
+            
+        <TopLevelControl name="ZO_BattlegroundScoreboardTopLevel_Gamepad_Template" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_BackgroundNestedBg" relativePoint="TOPRIGHT" offsetX="-250"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_4_BackgroundNestedBg" relativePoint="BOTTOMLEFT" />
+        </TopLevelControl>
+            
+        <TopLevelControl name="ZO_BattlegroundScoreboardTopLevel" tier="MEDIUM" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_BattlegroundScoreboardTopLevel_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Backgrounds" mouseEnabled="true">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_WIDTH" y="ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_HEIGHT" />
+                    <Anchor point="CENTER" offsetY="-10"/>
+                    <Controls>
+                        <Backdrop name="$(parent)Gamepad" inherits="ZO_DefaultBackdrop_Gamepad" hidden="true">
+                            <AnchorFill />
+                        </Backdrop>
+                        <Texture name="$(parent)Keyboard" textureFile="EsoUI\Art\Battlegrounds\battlegrounds_scoreboardBG_left.dds" hidden="true">
+                            <Anchor point="CENTER" offsetY="ZO_BATTLEGROUND_SCOREBOARD_OFFSET_Y_KEYBOARD"/>
+                            <Dimensions x="1084" y="1024"/>
+                            <Controls>
+                                <Texture name="$(parent)BGRight" textureFile="EsoUI\Art\Battlegrounds\battlegrounds_scoreboardBG_right.dds">
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                                    <Dimensions x="64" y="1024"/>
+                                </Texture>
+                            </Controls>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Headers">
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH" y="ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT" />
+                    <Controls>
+                        <Label name="$(parent)TeamScore" text="SI_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH" />
+                            <Anchor point="TOPLEFT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X"/>
+                        </Label>
+                        <Label name="$(parent)UserId" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_USER_ID_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)TeamScore" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+                        </Label>
+                        <Label name="$(parent)MedalScore" modifyTextType="UPPERCASE" maxLineCount="2" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_MEDALS_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)UserId" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+
+                            <OnInitialized>
+                                self:SetText(GetString("SI_SCORETRACKERENTRYTYPE", SCORE_TRACKER_TYPE_SCORE))
+                            </OnInitialized>
+                        </Label>
+                        <Label name="$(parent)Kills" text="SI_BATTLEGROUND_SCOREBOARD_HEADER_KILLS" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)MedalScore" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+                        </Label>
+                        <Label name="$(parent)Deaths" text="SI_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Kills" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+                        </Label>
+                        <Label name="$(parent)Assists" text="SI_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_WIDTH" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Deaths" relativePoint="RIGHT" offsetX="ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_BattlegroundScoreboard_Timer_TopLevel" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="true">
+            <OnInitialized>
+                ZO_Battleground_Scoreboard_In_Game_Timer_OnInitialize(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Timer">
+                    <Anchor point="BOTTOMLEFT"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

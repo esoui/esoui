@@ -1,0 +1,85 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_BattlegroundScoreHud" virtual="true" mouseEnabled="true">
+            <Dimensions x="235" y="172"/>
+            <OnInitialized>
+                ZO_BattlegroundScoreHud_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ObjectiveStateDisplay" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Control>
+                <Control name="$(parent)Teams">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ObjectiveStateDisplay" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                    <Anchor point="TOPRIGHT"  relativeTo="$(parent)ObjectiveStateDisplay" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                </Control>
+                <Texture name="$(parent)PlayerTeamIndicator" textureFile="EsoUI/Art/Battlegrounds/battlegrounds_scoreTracker_playerTeamIndicator.dds" alpha="0.7">
+                    <Dimensions x="16" y="16"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_BattlegroundScoreHudScoreLabel_Keyboard_Template" font="ZoFontWinH2" virtual="true">
+            <Dimensions x="38"/>
+        </Label>
+        <Label name="ZO_BattlegroundScoreHudScoreLabel_Gamepad_Template" font="ZoFontGamepad27" virtual="true">
+            <Dimensions x="36"/>
+        </Label>
+
+        <Control name="ZO_BattlegroundTeamSection_Keyboard_Template" virtual="true">
+            <Dimensions x="220" y="24"/>
+            <Controls>
+                <Control name="$(parent)ScoreDisplay" override="true">
+                    <Controls>
+                        <Label name="$(parent)Value" override="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3" offsetY="-1"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ScoreDisplayValue" relativePoint="LEFT" offsetX="-3" offsetY="1"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BattlegroundTeamSection_Gamepad_Template" virtual="true">
+            <Dimensions x="220" y="26"/>
+            <Controls>
+                <Control name="$(parent)ScoreDisplay" override="true">
+                    <Controls>
+                        <Label name="$(parent)Value" override="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3" offsetY="2"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ScoreDisplayValue" relativePoint="LEFT" offsetX="-3"/>
+                </Texture>
+            </Controls>
+        </Control>
+            
+        <Control name="ZO_BattlegroundTeamSection" virtual="true">
+            <Controls>
+                <Control name="$(parent)ScoreDisplay" inherits="ZO_AttributeBar">
+                    <Dimensions x="146"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Controls>
+                        <Control name="$(parent)BgContainer" override="true">
+                            <Dimensions x="146"/>
+                        </Control>
+                        <Label name="$(parent)Value" horizontalAlignment="CENTER" override="true">
+                            <ClearAnchors/>
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3" offsetY="2"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)Icon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ScoreDisplayValue" relativePoint="LEFT" offsetX="-3"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

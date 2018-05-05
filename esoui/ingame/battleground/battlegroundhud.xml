@@ -1,0 +1,63 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_BattlegroundHudTopLevel_Keyboard" virtual="true">
+            <Dimensions x="251" y="230"/>
+            <Controls>
+                <Control name="$(parent)KeybindButton" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="21"/>
+                </Control>
+                <Label name="$(parent)Header" override="true" font="ZoFontGameShadow" modifyTextType="NONE">
+                    <ClearAnchors/>
+                    <Anchor point="LEFT" relativeTo="$(parent)KeybindButton" relativePoint="RIGHT"/>
+                </Label>
+                <Label name="$(parent)State" override="true" font="ZoFontGameShadow">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="11" offsetY="2"/>
+                </Label>
+                <Control name="$(parent)BattlegroundScoreHud" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)State" relativePoint="BOTTOMLEFT" offsetX="-20"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_BattlegroundHudTopLevel_Gamepad" virtual="true">
+            <Dimensions x="292" y="267"/>
+            <Controls>
+                <Label name="$(parent)Header" override="true" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE">
+                    <ClearAnchors/>
+                    <Anchor point="TOPRIGHT"/>
+                </Label>
+                <Control name="$(parent)KeybindButton" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-5"/>
+                </Control>
+                <Label name="$(parent)State" override="true" font="ZoFontGamepad34">
+                    <ClearAnchors/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                </Label>
+                <Control name="$(parent)BattlegroundScoreHud" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)State" relativePoint="BOTTOMRIGHT" offsetX="3"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_BattlegroundHUDFragmentTopLevel" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_ActivityTracker" relativePoint="BOTTOMRIGHT"/>
+            <OnInitialized>
+                ZO_BattlegroundHUDFragmentTopLevel_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton"/>
+                
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Label name="$(parent)State"/>
+
+                <Control name="$(parent)BattlegroundScoreHud" inherits="ZO_BattlegroundScoreHud"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

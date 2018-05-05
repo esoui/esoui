@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_BattlegroundScoreboardEndOfGameTopLevel" tier="HIGH" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_BattlegroundScoreboardEndOfGameTopLevel_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)ClosingTimer" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Anchor point="TOP" relativeTo="ZO_BattlegroundScoreboardTopLevelBackgrounds" relativePoint="BOTTOM" constrains="X" />
+                    <Anchor point="BOTTOM" offsetY="-30" constrains="Y" />
+                </Label>
+                
+                <Control name="$(parent)KeybindContainer" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)ClosingTimer" relativePoint="TOP" offsetY="-10"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -28,7 +28,7 @@ local function InitializeCampaignSelectDialog(screen)
             screen.nowCost = nowCost
             screen.endCost = endCost
             screen.isFree = screen.nowCost == 0
-            screen.numAlliancePoints = GetAlliancePoints()
+            screen.numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
             screen.hasEnough = screen.nowCost <= screen.numAlliancePoints
 
             dialog:setupFunc()
@@ -42,10 +42,11 @@ local function InitializeCampaignSelectDialog(screen)
         parametricList =
         {
             {
-                template = "ZO_CampaignBrowserDialogsGamepadMenuEntry",
+                template = "ZO_GamepadMenuEntryTemplate",
                 text = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN),
                 icon = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_home.dds",
                 templateData = {
+                    showUnselectedSublabels = true,
                     isHome = true,
                     subLabels = {
                         function(control)
@@ -60,7 +61,7 @@ local function InitializeCampaignSelectDialog(screen)
                 },
             },
             {
-                template = "ZO_CampaignBrowserDialogsGamepadMenuEntry",
+                template = "ZO_GamepadMenuEntryTemplate",
                 text = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_CHOOSE_GUEST_CAMPAIGN),
                 icon = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_guest.dds",
                 templateData = {
@@ -459,7 +460,7 @@ local function InitializeCampaignSetHomeConfirmDialog(screen)
             screen.nowCost = nowCost
             screen.endCost = endCost
             screen.isFree = screen.nowCost == 0
-            screen.numAlliancePoints = GetAlliancePoints()
+            screen.numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
             screen.hasEnoughNow = screen.nowCost <= screen.numAlliancePoints
             screen.hasEnoughEnd = screen.endCost <= screen.numAlliancePoints
 
@@ -478,6 +479,7 @@ local function InitializeCampaignSetHomeConfirmDialog(screen)
                 text = GetString(SI_GAMEPAD_CAMPAIGN_SELECT_HOME_NOW),
                 templateData = {
                     isNow = true,
+                    showUnselectedSublabels = true,
                     subLabels = {
                         function(control)
                             if screen.isFree then
@@ -494,9 +496,10 @@ local function InitializeCampaignSetHomeConfirmDialog(screen)
                 },
             },
             {
-                template = "ZO_CampaignBrowserDialogsGamepadMenuEntryExtraInfo",
+                template = "ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon",
                 text = GetString(SI_GAMEPAD_CAMPAIGN_SELECT_HOME_ON_END),
                 templateData = {
+                    showUnselectedSublabels = true,
                     subLabels = {
                         GetString(SI_GAMEPAD_CAMPAIGN_SELECT_HOME_ON_END_INFO),
                         function(control)
@@ -573,8 +576,8 @@ local function InitializeCampaignAbandonHomeConfirmDialog(screen)
             local alliancePointCost, goldCost = ZO_AbandonHomeCampaign_GetCost()
             screen.alliancePointCost = alliancePointCost
             screen.goldCost = goldCost
-            screen.numAlliancePoints = GetAlliancePoints()
-            screen.numGoldAvailable = GetCurrentMoney()
+            screen.numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
+            screen.numGoldAvailable = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
             screen.hasEnoughAlliancePoints = screen.alliancePointCost <= screen.numAlliancePoints
             screen.hasEnoughGold = screen.goldCost <= screen.numGoldAvailable
 
@@ -600,9 +603,6 @@ local function InitializeCampaignAbandonHomeConfirmDialog(screen)
                 text = "",
                 templateData = {
                     useAlliancePoints = true,
-                    subLabels = {
-                        ""
-                    },
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function()
                         UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_HOME_USE_ALLIANCE_POINTS)
@@ -618,6 +618,7 @@ local function InitializeCampaignAbandonHomeConfirmDialog(screen)
                 text = GetString(SI_ABANDON_HOME_CAMPAIGN_USE_ALLIANCE_POINTS),
                 templateData = {
                     useAlliancePoints = true,
+                    showUnselectedSublabels = true,
                     subLabels = {
                         function(control)
                             return GAMEPAD_AVA_BROWSER:GetPriceMessage(screen.alliancePointCost, screen.hasEnoughAlliancePoints)
@@ -637,6 +638,7 @@ local function InitializeCampaignAbandonHomeConfirmDialog(screen)
                 template = "ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon",
                 text = GetString(SI_ABANDON_HOME_CAMPAIGN_USE_GOLD),
                 templateData = {
+                    showUnselectedSublabels = true,
                     subLabels = {
                         function(control)
                             local USE_GOLD = true

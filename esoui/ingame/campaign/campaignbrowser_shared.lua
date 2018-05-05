@@ -7,7 +7,7 @@ local CAMPAIGN_DATA = 1
 local CAMPAIGN_QUEUE_DATA = 2
 
 function ZO_CampaignBrowser_Shared:New(...)
-    return ZO_Object.New(self, ...)
+    return ZO_Object.New(self)
 end
 
 function ZO_CampaignBrowser_Shared:CanHome(data)
@@ -34,28 +34,24 @@ function ZO_CampaignBrowser_Shared:CanQueue(data)
     local canQueueIndividual = false
     local canQueueGroup = false
     if data then
-        if(GetCurrentCampaignId() ~= data.id and DoesPlayerMeetCampaignRequirements(data.id)) then
-            if(GetAssignedCampaignId() == data.id or GetGuestCampaignId() == data.id or data.numGroupMembers > 0) then
-                canQueueIndividual = not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
-                if(not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_GROUP)) then
-                    if(IsUnitGrouped("player") and IsUnitGroupLeader("player") and not IsInLFGGroup()) then
+        if not IsActiveWorldBattleground() and GetCurrentCampaignId() ~= data.id and DoesPlayerMeetCampaignRequirements(data.id) then
+            if GetAssignedCampaignId() == data.id or GetGuestCampaignId() == data.id or data.numGroupMembers > 0 then
+                canQueueIndividual = not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL) 
+                if canQueueIndividual and IsPlayerInAvAWorld() and IsUnitDead("player") then
+                    canQueueIndividual = false
+                elseif not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_GROUP) then
+                    if IsUnitGrouped("player") and IsUnitGroupLeader("player") and not IsInLFGGroup() and not IsGroupCrossAlliance() then
                         canQueueGroup = true
                     end
-                end        
+                end
             end
         end
     end
     return canQueueIndividual, canQueueGroup
 end
 
-function ZO_CampaignBrowser_Shared:CanLeave(data)
-    if data then
-        if(data.type == CAMPAIGN_QUEUE_DATA) then
-            if(IsQueuedForCampaign(data.id, data.isGroup)) then
-                return true
-            end
-        end
-    end
+function ZO_CampaignBrowser_Shared:CanLeave(campaignId, isGroup)
+    return CanLeaveCampaignQueue(campaignId, isGroup) == LEAVE_CAMPAIGN_QUEUE_ERROR_NONE
 end
 
 function ZO_CampaignBrowser_Shared:DoQueue(data)
@@ -75,12 +71,17 @@ function ZO_CampaignBrowser_Shared:DoQueue(data)
                     QueueForCampaign(data.id, CAMPAIGN_QUEUE_GROUP)
                 end
             end
-
-            if IsInLFGGroup() and GetCurrentLFGActivity() ~= LFG_ACTIVITY_AVA then
-                ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING", {onAcceptCallback = QueueCallback })
-            else
-                QueueCallback()
+            
+            if IsInLFGGroup() then
+                local activityId = GetCurrentLFGActivityId()
+                local activityType = GetActivityType(activityId)
+                if activityType ~= LFG_ACTIVITY_AVA then
+                    ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING", {onAcceptCallback = QueueCallback })
+                    return
+                end
             end
+
+            QueueCallback()
         end
     end
 end

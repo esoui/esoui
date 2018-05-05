@@ -1,7 +1,5 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GamepadAvAItem" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true" />
-
         <Label name="ZO_AvALabelTitleTemplate" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" />
         <Label name="ZO_AvALabelDataTemplate" font="ZoFontGamepad34" modifyTextType="NONE" virtual="true" />
         <Label name="ZO_AvALabelCopyTemplate" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
@@ -70,6 +68,15 @@
                 <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
                     <Controls>
                         <Control name="$(parent)ContentContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)NoInformationWarning" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Message" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" text="SI_GAMEPAD_CAMPAIGN_BROWSER_NO_INFORMATION">
+                            <Anchor point="LEFT"/>
+                            <Anchor point="RIGHT"/>
+                        </Label>
                     </Controls>
                 </Control>
                 

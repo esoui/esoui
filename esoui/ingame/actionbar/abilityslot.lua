@@ -3,10 +3,9 @@
 ABILITY_SLOT_TYPE_ACTIONBAR = 1
 ABILITY_SLOT_TYPE_QUICKSLOT = 2
 
-local BUTTON_LEFT = 1
-local BUTTON_RIGHT = 2
-
 local USE_BASE_ABILITY = true
+
+local g_abilitySlotWithTooltipShowing = nil
 
 function ZO_ActionSlot_SetupSlot(iconControl, buttonControl, icon, normalFrame, downFrame, cooldownIconControl)
     iconControl:SetHidden(false)
@@ -123,31 +122,30 @@ local AbilityClicked =
 {
     [ABILITY_SLOT_TYPE_ACTIONBAR] =
     {
-        [BUTTON_LEFT] =
+        [MOUSE_BUTTON_INDEX_LEFT] =
         {
             function(abilitySlot) 
                 return TryPlaceAction(abilitySlot)
             end,
         },
 
-        [BUTTON_RIGHT] =
+        [MOUSE_BUTTON_INDEX_RIGHT] =
         {
             function(abilitySlot)
                 return TryShowActionMenu(abilitySlot)
             end,
         },
-
     },
     [ABILITY_SLOT_TYPE_QUICKSLOT] =
     {
-        [BUTTON_LEFT] =
+        [MOUSE_BUTTON_INDEX_LEFT] =
         {
             function(abilitySlot)
                 return TryPlaceQuickslotAction(abilitySlot)
             end,
         },
 
-        [BUTTON_RIGHT] =
+        [MOUSE_BUTTON_INDEX_RIGHT] =
         {
             function(abilitySlot)
                 return TryShowQuickslotActionMenu(abilitySlot)
@@ -161,8 +159,7 @@ function ZO_AbilitySlot_OnSlotClicked(abilitySlot, buttonId)
 end
 
 local function TryClearQuickslot(abilitySlot)
-    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum)
-    then
+    if IsSlotUsed(abilitySlot.slotNum) and not IsSlotLocked(abilitySlot.slotNum) then
         ClearSlot(abilitySlot.slotNum)
         return true
     end
@@ -172,7 +169,7 @@ local AbilityDoubleClicked =
 {
     [ABILITY_SLOT_TYPE_QUICKSLOT] =
     {
-        [BUTTON_LEFT] =
+        [MOUSE_BUTTON_INDEX_LEFT] =
         {
             function(abilitySlot)
                 return TryClearQuickslot(abilitySlot)
@@ -252,7 +249,7 @@ function ZO_AbilitySlot_OnReceiveDrag(abilitySlot, button)
 end
 
 local function AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
-    abilitySlotWithTooltipShowing = abilitySlot
+    g_abilitySlotWithTooltipShowing = abilitySlot
     abilitySlot.activeTooltip = tooltip
     InitializeTooltip(tooltip, owner, BOTTOM, 0, -5, TOP)
 
@@ -300,8 +297,6 @@ local AbilityEnter =
     },
 }
 
-abilitySlotWithTooltipShowing = nil
-
 function ZO_AbilitySlot_OnMouseEnter(abilitySlot)
     RunHandlers(AbilityEnter, abilitySlot)
 end
@@ -322,15 +317,15 @@ function ZO_AbilitySlot_OnMouseExit(abilitySlot)
     end
 
     abilitySlot.activeTooltip = nil
-    abilitySlotWithTooltipShowing = nil
+    g_abilitySlotWithTooltipShowing = nil
 
     RunHandlers(AbilityExit, abilitySlot)
 end
 
 local function OnAbilityCooldownUpdated(event, abilityId)
-    if(abilitySlotWithTooltipShowing and abilitySlotWithTooltipShowing.actionId == abilityId)
+    if(g_abilitySlotWithTooltipShowing and g_abilitySlotWithTooltipShowing.actionId == abilityId)
     then
-        ZO_AbilitySlot_OnMouseEnter(abilitySlotWithTooltipShowing)
+        ZO_AbilitySlot_OnMouseEnter(g_abilitySlotWithTooltipShowing)
     end
 end
 

@@ -62,7 +62,6 @@ function ZO_CampaignOverviewManager:InitializeCategories()
     local function CategorySetup(node, control, overviewType, down)
         local info = CAMPAIGN_OVERVIEW_TYPE_INFO[overviewType]
 
-        local name = GetCampaignRulesetName(rulesetId)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(info.name)
         control.overviewType = overviewType
