@@ -35,43 +35,21 @@ function ZO_QuickslotManager:New(container)
 
     manager.tabs = GetControl(container, "Tabs")
 
-    local function CreateNewTabFilterData(filterType, normal, pressed, highlight)
-        local filterString = GetString("SI_ITEMFILTERTYPE", filterType)
+    manager.quickslotFilters = {}
 
-        local tabData =
-        {
-            -- Custom data
-            activeTabText = filterString,
-            tooltipText = filterString,
-            sortKey = "name",
-            sortOrder = ZO_SORT_ORDER_UP,
+    manager:InsertCollectibleCategories()
 
-            -- Menu bar data
-            descriptor = filterType,
-            normal = normal,
-            pressed = pressed,
-            highlight = highlight,
-            callback = function(tabData) manager:ChangeFilter(tabData) end,
-        }
-
-        return tabData
-    end
-
-    manager.quickslotFilters =
-    {
-        CreateNewTabFilterData(ITEMFILTERTYPE_COLLECTIBLE,
-                          "EsoUI/Art/MainMenu/menuBar_collections_up.dds",
-                          "EsoUI/Art/MainMenu/menuBar_collections_down.dds",
-                          "EsoUI/Art/MainMenu/menuBar_collections_over.dds"),
-        CreateNewTabFilterData(ITEMFILTERTYPE_QUICKSLOT,
+    table.insert(manager.quickslotFilters, manager:CreateNewTabFilterData(ITEMFILTERTYPE_QUICKSLOT,
+                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUICKSLOT),
                           "EsoUI/Art/Inventory/inventory_tabIcon_items_up.dds",
                           "EsoUI/Art/Inventory/inventory_tabIcon_items_down.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_items_over.dds"),
-        CreateNewTabFilterData(ITEMFILTERTYPE_ALL,
+                          "EsoUI/Art/Inventory/inventory_tabIcon_items_over.dds"))
+
+    table.insert(manager.quickslotFilters, manager:CreateNewTabFilterData(ITEMFILTERTYPE_ALL,
+                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL),
                           "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds",
                           "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds"),
-    }
+                          "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds"))
 
     local menuBarData =
     {
@@ -163,7 +141,7 @@ function ZO_QuickslotManager:New(container)
         manager:HideAllQuickSlotDropCallouts()
     end
 
-    manager:RefreshCurrency(GetCarriedCurrencyAmount(CURT_MONEY))
+    manager:RefreshCurrency(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
 
     manager:CreateQuickSlots()
     UpdateAllQuickSlots()
@@ -241,8 +219,8 @@ function ZO_QuickslotManager:New(container)
                                                                 manager.quickSlotState = false
                                                             end
                                                         end)
-    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("FullCollectionsInventoryUpdate", RefreshQuickslotWindow)
-    COLLECTIONS_INVENTORY_SINGLETON:RegisterCallback("SingleCollectionsInventoryUpdate", RefreshQuickslotWindow)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshQuickslotWindow)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshQuickslotWindow)
 
     return manager
 end
@@ -442,7 +420,7 @@ function ZO_QuickslotManager:ApplySort()
 end
 
 function ZO_QuickslotManager:RefreshCurrency(value)
-    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, value, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+    ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, value, ZO_KEYBOARD_CURRENCY_OPTIONS)
 end
 
 function ZO_QuickslotManager:ValidateOrClearAllQuickslots()
@@ -464,7 +442,8 @@ function ZO_QuickslotManager:UpdateList()
     elseif currentFilterType == ITEMFILTERTYPE_QUICKSLOT then
         self:AppendItemData(scrollData)
     elseif currentFilterType == ITEMFILTERTYPE_COLLECTIBLE then
-        self:AppendCollectiblesData(scrollData)
+        local collectibleCategoryData = self.currentFilter.extraInfo
+        self:AppendCollectiblesData(scrollData, collectibleCategoryData)
     end
 
     self:ApplySort()
@@ -479,21 +458,22 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
         if slotData and slotData.stackCount > 0 then
             local itemData =
             {
-            iconFile = slotData.iconFile,
-            stackCount = slotData.stackCount,
-            sellPrice = slotData.sellPrice,
-            stackSellPrice = slotData.stackCount * slotData.sellPrice,
-            bagId = BAG_BACKPACK,
-            slotIndex = slotIndex,
-            meetsUsageRequirement = slotData.meetsUsageRequirement,
-            locked = slotData.locked,
-            quality = slotData.quality,
-            slotType = SLOT_TYPE_ITEM,
-            filterData = { GetItemFilterTypeInfo(BAG_BACKPACK, slotIndex) },
-            age = slotData.age,
-            stolen = IsItemStolen(BAG_BACKPACK, slotIndex),
-            name = slotData.name or zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(BAG_BACKPACK, slotIndex))
-        }
+                iconFile = slotData.iconFile,
+                stackCount = slotData.stackCount,
+                sellPrice = slotData.sellPrice,
+                stackSellPrice = slotData.stackCount * slotData.sellPrice,
+                bagId = BAG_BACKPACK,
+                slotIndex = slotIndex,
+                meetsUsageRequirement = slotData.meetsUsageRequirement,
+                locked = slotData.locked,
+                quality = slotData.quality,
+                slotType = SLOT_TYPE_ITEM,
+                filterData = { GetItemFilterTypeInfo(BAG_BACKPACK, slotIndex) },
+                age = slotData.age,
+                stolen = IsItemStolen(BAG_BACKPACK, slotIndex),
+                name = slotData.name or zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(BAG_BACKPACK, slotIndex)),
+                isGemmable = slotData.isGemmable,
+            }
 
             if self:ShouldAddItemToList(itemData) then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_QUICKSLOT_ITEM, itemData))
@@ -502,16 +482,22 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
     end
 end
 
-function ZO_QuickslotManager:AppendCollectiblesData(scrollData)
-    local data = COLLECTIONS_INVENTORY_SINGLETON:GetQuickslotData()
+function ZO_QuickslotManager:AppendCollectiblesData(scrollData, collectibleCategoryData)
+    local dataObjects
+    if collectibleCategoryData then
+        local categoryIndex = collectibleCategoryData:GetCategoryIndicies()
+        dataObjects = collectibleCategoryData:GetAllCollectibleDataObjects({ ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
+    else
+        dataObjects = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsStandardCategory }, { ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
+    end
 
-    for i = 1, #data do
-        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, data[i]))
+    for i, collectibleData in ipairs(dataObjects) do
+        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_COLLECTIBLE_ITEM, collectibleData))
     end
 end
 
 local function UpdateNewStatusControl(control, data)
-    PLAYER_INVENTORY:UpdateNewStatus(INVENTORY_BACKPACK, data.slotIndex)
+    PLAYER_INVENTORY:UpdateNewStatus(INVENTORY_BACKPACK, data.slotIndex, data.bagId)
 end
 
 function ZO_QuickslotManager:SetUpQuickSlot(control, data)
@@ -530,27 +516,30 @@ function ZO_QuickslotManager:SetUpQuickSlot(control, data)
 
     local statusControl = GetControl(control, "StatusTexture")
     statusControl:ClearIcons()
-    if (data.stolen) then
+    if data.stolen then
         statusControl:AddIcon(STOLEN_ICON_TEXTURE)
-        statusControl:Show()        
     end
+    if data.isGemmable then
+        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS))
+    end
+    statusControl:Show()
 
     UpdateNewStatusControl(control, data)
 end
 
 function ZO_QuickslotManager:SetUpCollectionSlot(control, data)
-    control:GetNamedChild("Name"):SetText(COLLECTIONS_INVENTORY_SINGLETON:GetCollectibleInventoryDisplayName(data))
-    control:GetNamedChild("ActiveIcon"):SetHidden(not data.active)
+    control:GetNamedChild("Name"):SetText(data:GetNameWithNickname())
+    control:GetNamedChild("ActiveIcon"):SetHidden(not data:IsActive())
 
     local slot = GetControl(control, "Button")
-    slot.collectibleId = data.collectibleId
-    slot.active = data.active
-    slot.categoryType = data.categoryType
+    slot.collectibleId = data:GetId()
+    slot.active = data:IsActive()
+    slot.categoryType = data:GetCategoryType()
     slot.inCooldown = false
     slot.cooldown = GetControl(slot, "Cooldown")
-    slot.cooldown:SetTexture(iconFile)
+    slot.cooldown:SetTexture(data:GetIcon())
     ZO_InventorySlot_SetType(slot, SLOT_TYPE_COLLECTIONS_INVENTORY)
-    ZO_ItemSlot_SetupSlotBase(slot, 1, data.iconFile)
+    ZO_ItemSlot_SetupSlotBase(slot, 1, data:GetIcon())
 end
 
 function ZO_QuickslotManager:UpdateFreeSlots()
@@ -560,6 +549,38 @@ function ZO_QuickslotManager:UpdateFreeSlots()
     else
         self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots))
     end
+end
+
+function ZO_QuickslotManager:InsertCollectibleCategories()
+    for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator() do
+        if DoesCollectibleCategoryContainSlottableCollectibles(categoryIndex) then
+            local name = categoryData:GetName()
+            local normalIcon, pressedIcon, mouseoverIcon = categoryData:GetKeyboardIcons()
+            local data = self:CreateNewTabFilterData(ITEMFILTERTYPE_COLLECTIBLE, name, normalIcon, pressedIcon, mouseoverIcon, categoryData)
+            table.insert(self.quickslotFilters, data)
+        end
+    end
+end
+
+function ZO_QuickslotManager:CreateNewTabFilterData(filterType, text, normal, pressed, highlight, extraInfo)
+    local tabData =
+    {
+        -- Custom data
+        activeTabText = text,
+        tooltipText = text,
+        sortKey = "name",
+        sortOrder = ZO_SORT_ORDER_UP,
+        extraInfo = extraInfo,
+
+        -- Menu bar data
+        descriptor = filterType,
+        normal = normal,
+        pressed = pressed,
+        highlight = highlight,
+        callback = function(tabData) self:ChangeFilter(tabData) end,
+    }
+
+    return tabData
 end
 
 -------------------

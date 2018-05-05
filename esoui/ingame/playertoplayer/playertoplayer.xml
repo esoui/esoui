@@ -40,7 +40,7 @@
                 </Cooldown>
             </Controls>
         </TopLevelControl>
-
+        
         <TopLevelControl name="ZO_PlayerToPlayerArea" hidden="true">
             <AnchorFill />
 
@@ -53,7 +53,8 @@
                     <Dimensions x="870"/>
                     <Anchor point="BOTTOM" offsetY="-285"/>
                     <Controls>
-                        <Label name="$(parent)Target" horizontalAlignment="CENTER" verticalAlignment="BOTTOM">
+                        <!-- Subtitles are anchored here, so we want to ensure we always have a line even before we've ever set the text on this label -->
+                        <Label name="$(parent)Target" horizontalAlignment="CENTER" verticalAlignment="BOTTOM" text=" ">
                             <Anchor point="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
                         </Label>
@@ -71,10 +72,10 @@
                                 </Label>
                                 
                                 <!-- Prompt Response -->
-                                <Control name="$(parent)PromptKeybindButton1" inherits="ZO_KeybindButton">
+                                <Control name="$(parent)PromptKeybindButton1" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT"/>
                                 </Control>
-                                <Control name="$(parent)PromptKeybindButton2" inherits="ZO_KeybindButton">
+                                <Control name="$(parent)PromptKeybindButton2" inherits="ZO_KeybindButtonChroma">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)PromptKeybindButton1" relativePoint="TOPRIGHT" offsetX="40"/>
                                 </Control>
                                 

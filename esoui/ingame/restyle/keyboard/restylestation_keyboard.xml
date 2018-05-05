@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_RestyleStationTopLevel_Keyboard" inherits="ZO_RestyleCommonTemplate_Keyboard" hidden="true">
+            <OnInitialized>
+                ZO_RestyleStation_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Search" override="true">
+                    <Controls>
+                        <EditBox name="$(parent)Box" override="true">
+                            <OnTextChanged>
+                                ZO_RestyleStation_Keyboard_OnSearchTextChanged(self)
+                            </OnTextChanged>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Tabs" inherits="ZO_LabelButtonBar">
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="-10" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_RestyleConfirmCostDialog_CostRow_Keyboard" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)Value" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_OutfitConfirmCostDialog_Keyboard" inherits="ZO_DialogBase" hidden="true">            
+            <OnInitialized>
+                ZO_OutfitConfirmCostDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Title" override="true">
+                    <Dimensions x="420" />
+                </Label>
+                
+                <Control name="$(parent)Contents" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)SelectCurrencyHeader" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_OUTFIT_CONFIRM_COMMIT_SELECT_CURRENCY_HEADER">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+
+                        <!-- Radio Buttons -->
+                        <Button name="$(parent)PerSlotRadioButton" inherits="ZO_LabeledRadioButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SelectCurrencyHeader" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10"/>
+                        </Button>
+                        
+                        <Button name="$(parent)FlatRadioButton" inherits="ZO_LabeledRadioButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PerSlotRadioButton" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                        </Button>
+
+                        <!-- Cost -->
+                        <Control name="$(parent)Cost" inherits="ZO_RestyleConfirmCostDialog_CostRow_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FlatRadioButton" relativePoint="BOTTOMLEFT" offsetY="20" offsetX="-20"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)SelectCurrencyHeader" constrains="X" />
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" text="SI_OUTFIT_CONFIRM_COMMIT_COST_HEADER_KEYBOARD" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Balance" inherits="ZO_RestyleConfirmCostDialog_CostRow_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Cost" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" text="SI_OUTFIT_CONFIRM_COMMIT_BALANCE_HEADER_KEYBOARD" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Cancel" inherits="ZO_DialogButton" >
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="BOTTOMRIGHT" offsetY="35" />
+                        </Control>
+
+                        <Control name="$(parent)Confirm" inherits="ZO_DialogButton" >
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Cancel" relativePoint="TOPLEFT" offsetX="-15"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

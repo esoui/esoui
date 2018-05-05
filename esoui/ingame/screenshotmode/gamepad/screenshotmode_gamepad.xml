@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ScreenshotMode_GamepadTopLevel" hidden="true">
+            <OnInitialized>
+                ZO_ScreenshotMode_GamepadTopLevel_OnInitialized(self)
+            </OnInitialized>
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)ExitButton" inherits="ZO_KeybindButton">
+                    <Anchor point="BOTTOM" offsetY="-100"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

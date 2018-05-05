@@ -9,18 +9,25 @@ local INTERACT_TYPE_FRIEND_REQUEST = 6
 local INTERACT_TYPE_GUILD_INVITE = 7
 local INTERACT_TYPE_CAMPAIGN_QUEUE = 8
 local INTERACT_TYPE_WORLD_EVENT_INVITE = 9
-local INTERACT_TYPE_LFG_JUMP_DUNGEON = 10
-local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 11
-local INTERACT_TYPE_GROUP_ELECTION = 12
-local INTERACT_TYPE_DUEL_INVITE = 13
+local INTERACT_TYPE_LFG_FIND_REPLACEMENT = 10
+local INTERACT_TYPE_GROUP_ELECTION = 11
+local INTERACT_TYPE_DUEL_INVITE = 12
+local INTERACT_TYPE_LFG_READY_CHECK = 13
+local INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS = 14
+local INTERACT_TYPE_GIFT_RECEIVED = 15
+
+local TIMED_PROMPTS =
+{
+    [INTERACT_TYPE_LFG_READY_CHECK] = true,
+    [INTERACT_TYPE_CAMPAIGN_QUEUE] = true,
+    [INTERACT_TYPE_WORLD_EVENT_INVITE] = true,
+    [INTERACT_TYPE_GROUP_ELECTION] = true,
+}
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
 
-local function ShouldUseRadialNotificationMenu(data)
-	if IsInGamepadPreferredMode() and data.pendingResponse then
-		return true
-	end
-	return false
+local function ShouldUseGamepadResponseMenu(data)
+    return IsInGamepadPreferredMode() and data.pendingResponse
 end
 
 function ZO_PlayerToPlayer:New(...)
@@ -87,11 +94,16 @@ do
         self.lastFailedPromptTime = GetFrameTimeMilliseconds()
 
         EVENT_MANAGER:RegisterForUpdate(control:GetName() .. "OnUpdate", 0, function() self:OnUpdate() end)
+        control:RegisterForEvent(EVENT_DUEL_STARTED, function() self:OnDuelStarted() end)
 
         SHARED_INFORMATION_AREA:AddPlayerToPlayer(self.container)
 
         ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
     end
+end
+
+function ZO_PlayerToPlayer:OnDuelStarted()
+    self:StopInteraction()
 end
 
 function ZO_PlayerToPlayer:CreateGamepadRadialMenu()
@@ -104,6 +116,7 @@ function ZO_PlayerToPlayer:CreateKeyboardRadialMenu()
     self.keyboardMenu:SetOnClearCallback(function() self:StopInteraction() end)
 end
 
+--Gets or creates the radial menu for the current keyboard/gamepad mode
 function ZO_PlayerToPlayer:GetRadialMenu()
     if IsInGamepadPreferredMode() then
         if not self.gamepadMenu then
@@ -116,6 +129,15 @@ function ZO_PlayerToPlayer:GetRadialMenu()
         end
         return self.keyboardMenu
     end
+end
+
+--Gets the radial menu that is currently showing
+function ZO_PlayerToPlayer:GetCurrentlyShowingRadialMenu()
+    if self.gamepadMenu and self.gamepadMenu:IsShown() then
+        return self.gamepadMenu
+    elseif self.keyboardMenu and self.keyboardMenu:IsShown() then
+        return self.keyboardMenu
+    end        
 end
 
 function ZO_PlayerToPlayer:InitializeKeybinds()
@@ -137,17 +159,11 @@ local function GetCampaignQueueData(campaignId, isGroup)
             campaignName = campaignName,
             messageFormat = isGroup and SI_NOTIFICATION_CAMPAIGN_QUEUE_MESSAGE_GROUP or SI_NOTIFICATION_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL,
             messageParams = { campaignName },
-            expiresAt = GetFrameTimeSeconds() + remainingSeconds,
+            expiresAtS = GetFrameTimeSeconds() + remainingSeconds,
+            dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CAMPAIGN_QUEUE),
         }
 
     return campaignData
-end
-
-local function ScriptedWorldEventUpdateFunction(data, isActive)
-    if isActive and data.messageParams and data.timeParam and type(data.timeParam) == "number" and #data.messageParams >= data.timeParam then
-        local timeLeftMS = GetScriptedEventInviteTimeRemainingMS(data.eventId)
-        data.messageParams[data.timeParam] = ZO_SELECTED_TEXT:Colorize(ZO_FormatTimeMilliseconds(timeLeftMS, TIME_FORMAT_STYLE_DESCRIPTIVE))
-    end
 end
 
 function ZO_PlayerToPlayer:InitializeIncomingEvents()
@@ -243,17 +259,26 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     local function OnPledgeOfMaraOffer(eventCode, targetCharacterName, isSender, targetDisplayName)
-        local ritualPrompt = isSender and SI_PLAYER_TO_PLAYER_OUTGOING_RITUAL_OF_MARA or SI_PLAYER_TO_PLAYER_INCOMING_RITUAL_OF_MARA
         PlaySound(SOUNDS.MARA_INVITE_RECEIVED)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA)
+
         local userFacingTargetName = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
-        local mainTextParams =
-        {
-            ZO_SELECTED_TEXT:Colorize(ZO_FormatUserFacingDisplayName(targetDisplayName)),
-            zo_floor(GetRingOfMaraExperienceBonus() * 100),
-            ZO_SELECTED_TEXT:Colorize(targetCharacterName),
-        }
-        self:AddDialogToIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA, targetCharacterName, targetDisplayName, zo_strformat(ritualPrompt, ZO_SELECTED_TEXT:Colorize(userFacingTargetName)), "RITUAL_OF_MARA_PROMPT", mainTextParams)
+        local ritualPromptStringId = isSender and SI_PLAYER_TO_PLAYER_OUTGOING_RITUAL_OF_MARA or SI_PLAYER_TO_PLAYER_INCOMING_RITUAL_OF_MARA
+        local ritualPromptText = zo_strformat(ritualPromptStringId, ZO_SELECTED_TEXT:Colorize(userFacingTargetName))
+
+        local function AcceptRitualOfMara()
+            ZO_Dialogs_ShowPlatformDialog("RITUAL_OF_MARA_PROMPT", nil,
+            {
+                mainTextParams =
+                {
+                    ZO_SELECTED_TEXT:Colorize(ZO_FormatUserFacingDisplayName(targetDisplayName)),
+                    zo_floor(GetRingOfMaraExperienceBonus() * 100),
+                    ZO_SELECTED_TEXT:Colorize(targetCharacterName),
+                }
+            })
+        end
+        local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA, targetCharacterName, targetDisplayName, ritualPromptText, AcceptRitualOfMara)
+        data.acceptText = GetString(SI_PLEDGE_OF_MARA_BEGIN_RITUAL_PROMPT)
     end
 
     local function OnPledgeOfMaraOfferRemoved()
@@ -327,6 +352,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnCampaignQueueStateChanged( _, campaignId, isGroup, state)
         if state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
             local campaignQueueData = GetCampaignQueueData(campaignId, isGroup)
+
+            local function DeferDecisionCallback()
+                self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId)
+            end
+
             --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
             local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId, nil,
                 function()
@@ -336,13 +366,13 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                 function()
                     ConfirmCampaignEntry(campaignId, isGroup, false)
                 end,
-                function()
-                    self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId)
-                end)
+                DeferDecisionCallback)
 
             promptData.messageFormat = campaignQueueData.messageFormat
             promptData.messageParams = campaignQueueData.messageParams
-            promptData.expiresAt = campaignQueueData.expiresAt
+            promptData.expiresAtS = campaignQueueData.expiresAtS
+            promptData.dialogTitle = campaignQueueData.dialogTitle
+            promptData.expirationCallback = DeferDecisionCallback
         else
             --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
             self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId)
@@ -352,7 +382,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnCampaignQueueLeft(_, campaignId, group)
         --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
         self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId)
-	end
+    end
 
     local function OnScriptedWorldEventInvite(eventCode, eventId, eventName, inviterName, questName)
         PlaySound(SOUNDS.SCRIPTED_WORLD_EVENT_INVITED)
@@ -365,37 +395,35 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                 DeclineWorldEventInvite(eventId)
             end)
 
-        local timeLeft = SCRIPTED_WORLD_EVENT_TIMEOUT_MS
+        local function DeferDecisionCallback()
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_WORLD_EVENT_INVITE)
+        end
+
+        local timeRemainingMS = GetScriptedEventInviteTimeRemainingMS(eventId)
+        data.expiresAtS = GetFrameTimeSeconds() + (timeRemainingMS / ZO_ONE_SECOND_IN_MILLISECONDS)
+        data.expirationCallback = DeferDecisionCallback
+        data.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_SCRIPTED_WORLD_EVENT)
 
         if inviterName == "" then
             if questName == "" then
                 data.messageFormat = SI_EVENT_INVITE
-                data.messageParams = { eventName, timeLeft }
-                data.timeParam = 2
+                data.messageParams = { eventName }
             else
                 data.messageFormat = SI_EVENT_INVITE_QUEST
-                data.messageParams = { eventName, questName, timeLeft }
-                data.timeParam = 3
+                data.messageParams = { eventName, questName }
             end
         else
             if questName == "" then
                 data.messageFormat = SI_EVENT_INVITE_NAMED
-                data.messageParams = { inviterName, eventName, timeLeft}
-                data.timeParam = 3
+                data.messageParams = { inviterName, eventName}
             else
                 data.messageFormat = SI_EVENT_INVITE_NAMED_QUEST
-                data.messageParams = { inviterName, eventName, questName, timeLeft }
-                data.timeParam = 4
+                data.messageParams = { inviterName, eventName, questName }
             end
-        end
-
-        for i = 1, #data.messageParams do
-          data.messageParams[i] = ZO_SELECTED_TEXT:Colorize(data.messageParams[i])
         end
 
         data.eventId = eventId
         data.questName = questName
-        data.updateFn = ScriptedWorldEventUpdateFunction
 
         data.uniqueSounds = {
             accept = SOUNDS.SCRIPTED_WORLD_EVENT_ACCEPTED,
@@ -405,6 +433,47 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnScriptedWorldEventInviteRemoved(eventCode, eventId)
         self:RemoveScriptedWorldEventFromIncomingQueue(eventId)
+    end
+
+    local function OnLevelUpRewardUpdated()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS)
+
+        local pendingRewardLevel = GetPendingLevelUpRewardLevel()
+        if pendingRewardLevel then
+            local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS, nil, nil, zo_strformat(SI_LEVEL_UP_REWARDS_AVAILABLE_NOTIFICATION, pendingRewardLevel),
+            function()
+                if IsInGamepadPreferredMode() then
+                    SCENE_MANAGER:Show("LevelUpRewardsClaimGamepad")
+                else
+                    SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CHARACTER)
+                end
+            end)
+            data.dontRemoveOnAccept = true
+            data.acceptText = GetString(SI_LEVEL_UP_REWARDS_OPEN_CLAIM_SCREEN_TEXT)
+            data.declineText = GetString(SI_LEVEL_UP_REWARDS_DISMISS_NOTIFICATION)
+        end
+    end
+
+    local function OnGiftsUpdated()
+        self:RemoveAllFromIncomingQueue(INTERACT_TYPE_GIFT_RECEIVED)
+
+        local giftList = GIFT_INVENTORY_MANAGER:GetGiftList(GIFT_STATE_RECEIVED)
+        for _, gift in ipairs(giftList) do
+            if not gift:HasBeenSeen() then
+                local NO_CHARACTER_NAME = nil
+                local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_GIFT_RECEIVED, NO_CHARACTER_NAME, gift:GetPlayerName(), zo_strformat(SI_PLAYER_TO_PLAYER_GIFT_RECEIVED, ZO_SELECTED_TEXT:Colorize(gift:GetUserFacingPlayerName())),
+                    function()
+                        local giftInventoryView = SYSTEMS:GetObject("giftInventoryView")
+                        giftInventoryView:SetupAndShowGift(gift)
+                    end,
+                    function()
+                        gift:View()
+                    end)
+                data.acceptText = GetString(SI_GIFT_INVENTORY_OPEN_CLAIM_SCREEN_TEXT)
+                data.declineText = GetString(SI_GIFT_INVENTORY_DISMISS_NOTIFICATION)
+                TriggerTutorial(TUTORIAL_TRIGGER_GIFT_RECEIVED)
+            end
+        end
     end
 
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
@@ -424,89 +493,39 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_REQUESTED, OnAgentChatRequested)
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_ACCEPTED, OnAgentChatAccepted)
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_DECLINED, OnAgentChatDeclined)
-	self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, OnCampaignQueueStateChanged)
-	self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_LEFT, OnCampaignQueueLeft)
+    self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, OnCampaignQueueStateChanged)
+    self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_LEFT, OnCampaignQueueLeft)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE, OnScriptedWorldEventInvite)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED, OnScriptedWorldEventInviteRemoved)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
+    self.control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, OnLevelUpRewardUpdated)
 
-    local function OnGroupingToolsJumpDungeonNotificationNew()
-        local activityType, activityIndex, timeRemainingSeconds = GetLFGJumpNotificationInfo()
-        local role = GetGroupMemberAssignedRole("player")
-
-        -- No prompt for AVA types
-        -- Also add a null check for an edge case that should someday soon get fixed
-        if activityType == LFG_ACTIVITY_AVA or not activityType or not activityIndex or not timeRemainingSeconds then
-            return
-        end
-
-        local function AcceptCallback()
-            AcceptLFGJumpNotification()
-        end
-        local function DeferDecisionCallback()
-            self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
-        end
-        
-        local dungeonName = GetLFGOption(activityType, activityIndex)
-
-        local messageFormat, messageParams
-        if role == LFG_ROLE_INVALID then
-            messageFormat = SI_LFG_JUMP_TO_DUNGEON_NO_ROLE_TEXT
-            messageParams = { dungeonName }
-        else
-            local roleIconPath = GetRoleIcon(role)
-            local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
-
-            messageFormat = SI_LFG_JUMP_TO_DUNGEON_TEXT
-            messageParams = { dungeonName, roleIconFormat, GetString("SI_LFGROLE", role) }
-        end
-        
-        PlaySound(SOUNDS.LFG_JUMP_DUNGEON)
-        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
-        
-        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON, nil, nil, nil, AcceptCallback, nil, DeferDecisionCallback)
-        promptData.acceptText = GetString(SI_LFG_JUMP_TO_DUNGEON_ACCEPT)
-        promptData.declineText = GetString(SI_LFG_JUMP_TO_DUNGEON_HIDE)
-
-        promptData.expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds
-        promptData.messageFormat = messageFormat
-        promptData.messageParams = messageParams
-        promptData.expirationCallback = ClearLFGJumpNotification
-    end
-    local function OnGroupingToolsJumpDungeonNotificationRemoved()
-        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
-    end
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_NEW, function(event, ...) OnGroupingToolsJumpDungeonNotificationNew(...) end)
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_JUMP_DUNGEON_NOTIFICATION_REMOVED, function(event, ...) OnGroupingToolsJumpDungeonNotificationRemoved(...) end)
-
+    GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", OnGiftsUpdated)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
-        local activityType, activityIndex = GetLFGFindReplacementNotificationInfo()
+        local activityId = GetActivityFindReplacementNotificationInfo()
 
-        local function AcceptCallback()
-            AcceptLFGFindReplacementNotification()
-        end
-        local function DeclineCallback()
-            DeclineLFGFindReplacementNotification()
-        end
         local function DeferDecisionCallback()
             self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         end
         
-        local dungeonName = GetLFGOption(activityType, activityIndex)
+        local dungeonName = GetActivityName(activityId)
         
         PlaySound(SOUNDS.LFG_FIND_REPLACEMENT)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         
         local text = zo_strformat(SI_LFG_FIND_REPLACEMENT_TEXT, dungeonName)
-        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT, nil, nil, text, AcceptCallback, DeclineCallback, DeferDecisionCallback)
+        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT, nil, nil, text, AcceptActivityFindReplacementNotification, DeclineActivityFindReplacementNotification, DeferDecisionCallback)
         promptData.acceptText = GetString(SI_LFG_FIND_REPLACEMENT_ACCEPT)
     end
     local function OnGroupingToolsFindReplacementNotificationRemoved()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
     end
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW, function(event, ...) OnGroupingToolsFindReplacementNotificationNew(...) end)
-    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED, function(event, ...) OnGroupingToolsFindReplacementNotificationRemoved(...) end)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW, OnGroupingToolsFindReplacementNotificationNew)
+    self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED, OnGroupingToolsFindReplacementNotificationRemoved)
+
 
     local function OnGroupElectionNotificationAdded()
         local electionType, timeRemainingSeconds, descriptor, targetUnitTag = GetGroupElectionInfo()
@@ -547,10 +566,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         promptData.acceptText = GetString(SI_YES)
         promptData.declineText = GetString(SI_NO)
 
-        promptData.expiresAt = GetFrameTimeSeconds() + timeRemainingSeconds
+        promptData.expiresAtS = GetFrameTimeSeconds() + timeRemainingSeconds
         promptData.messageFormat = messageFormat
         promptData.messageParams = messageParams
         promptData.expirationCallback = DeferDecisionCallback
+        promptData.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_GROUP_ELECTION)
         promptData.uniqueSounds = {
             accept = SOUNDS.GROUP_ELECTION_VOTE_SUBMITTED,
             decline = SOUNDS.GROUP_ELECTION_VOTE_SUBMITTED,
@@ -565,7 +585,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnPlayerActivated()
         local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()
-        if duelState == DUEL_STATE_CONSIDERING then
+        if duelState == DUEL_STATE_INVITE_CONSIDERING then
             OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName)
         end
 
@@ -580,9 +600,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnTradeWindowInviteConsidering(nil, tradeInviterCharacterName, tradeInviterDisplayName)
         end
 
-        local sharedQuestName = GetOfferedQuestShareInfo()
-        if sharedQuestName ~= "" then
-            OnQuestShared()
+        local questShareIds = { GetOfferedQuestShareIds() }
+        for _, questId in ipairs(questShareIds) do
+            OnQuestShared(EVENT_QUEST_SHARED, questId)
         end
 
         local pledgeTargetCharacterName, _, isSender, pledgeTargetDisplayName = GetPledgeOfMaraOfferInfo()
@@ -604,17 +624,23 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             end
         end
 
-        if HasLFGJumpNotification() then
-            OnGroupingToolsJumpDungeonNotificationNew()
+        if HasLFGReadyCheckNotification() then
+            self:OnGroupingToolsReadyCheckUpdated()
         end
 
-        if HasLFGFindReplacementNotification() then
+        if HasActivityFindReplacementNotification() then
             OnGroupingToolsFindReplacementNotificationNew()
         end
 
         if HasPendingGroupElectionVote() then
             OnGroupElectionNotificationAdded()
         end
+
+        if HasPendingLevelUpReward() then
+            OnLevelUpRewardUpdated()
+        end
+
+        OnGiftsUpdated()
     end
 
     local function OnPlayerDeactivated()
@@ -624,8 +650,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_RITUAL_OF_MARA)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_QUEST_SHARE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_WORLD_EVENT_INVITE)
-        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_JUMP_DUNGEON)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_QUEST_SHARE)
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
@@ -641,14 +668,14 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     self.control:RegisterForEvent(EVENT_GAME_CAMERA_UI_MODE_CHANGED, OnGameCameraUIModeChanged)
+
+    self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() 
+        self:StopInteraction()
+    end)
 end
 
 function ZO_PlayerToPlayer:SetHidden(hidden)
     SHARED_INFORMATION_AREA:SetHidden(self.container, hidden)
-end
-
-function ZO_PlayerToPlayer:IsHidden()
-    return SHARED_INFORMATION_AREA:IsHidden(self.container)
 end
 
 local INCOMING_MESSAGE_TEXT = {
@@ -674,7 +701,9 @@ local function NotificationDeferred(data)
 end
 
 local function NotificationAccepted(data)
-    data.pendingResponse = false
+    if not data.dontRemoveOnAccept then
+        data.pendingResponse = false
+    end
     if data.acceptCallback then
         data.acceptCallback()
         if data.uniqueSounds then
@@ -687,7 +716,9 @@ local function NotificationAccepted(data)
 end
 
 local function NotificationDeclined(data)
-    data.pendingResponse = false
+    if not data.dontRemoveOnDecline then
+        data.pendingResponse = false
+    end
     if data.declineCallback then
         data.declineCallback()
         if data.uniqueSounds then
@@ -699,17 +730,17 @@ local function NotificationDeclined(data)
     end
 end
 
-function ZO_PlayerToPlayer:ShowRadialNotificationMenu(data)
+function ZO_PlayerToPlayer:ShowGamepadResponseMenu(data)
     local menu = self:GetRadialMenu()
 
     if data.deferDecisionCallback then
         local deferDecisionText = data.deferDecisionText or GetString(SI_GAMEPAD_NOTIFICATIONS_DEFER_OPTION)
-	    menu:AddEntry( deferDecisionText, 
-					    "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
-					    "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
-					    function()
-						    NotificationDeferred(data)
-					    end)
+        menu:AddEntry( deferDecisionText, 
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
+                        function()
+                            NotificationDeferred(data)
+                        end)
     end
     
     local acceptText = data.acceptText or GetString(SI_GAMEPAD_NOTIFICATIONS_ACCEPT_OPTION)
@@ -732,15 +763,33 @@ function ZO_PlayerToPlayer:ShowRadialNotificationMenu(data)
 
     menu:Show()
 
-    self.showingNotificationMenu = true
+    self.showingGamepadResponseMenu = true
 end
 
--- inviter name is the decorated name that is choosen based on player preferences
--- where display and character name are descrete strings that are used to determine the creator of the entry
-function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLabel, displayName, characterName)
-    local data = { incomingType = incomingType, targetLabel = targetLabel, inviterName = inviterName, pendingResponse = true, displayName = displayName, characterName = characterName}
-    zo_binaryinsert(data, incomingType, self.incomingQueue)
-    return data
+do
+    local function IncomingEntryComparator(leftData, rightData)
+        -- leftData is the entry we're trying to add, rightData is the iterated existing entry to compare against
+        local isAddingTimedPrompt = TIMED_PROMPTS[leftData.incomingType]
+        local isComparingTimedPrompt = TIMED_PROMPTS[rightData.incomingType]
+        if isAddingTimedPrompt ~= isComparingTimedPrompt then
+            if isAddingTimedPrompt then
+                return -1 -- Time prompts trump non-timed prompts, move to front of queue
+            else
+                return 1 -- Non-timed prompt, move to after all timed prompts
+            end
+        else
+            -- Timed and Non-timed prompts are last in first out, most recent should go to the front of the queue
+            return -1
+        end
+    end
+    
+    -- inviter name is the decorated name that is choosen based on player preferences
+    -- where display and character name are descrete strings that are used to determine the creator of the entry
+    function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLabel, displayName, characterName)
+        local data = { incomingType = incomingType, targetLabel = targetLabel, inviterName = inviterName, pendingResponse = true, displayName = displayName, characterName = characterName}
+        zo_binaryinsert(data, data, self.incomingQueue, IncomingEntryComparator)
+        return data
+    end
 end
 
 function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName, displayName, targetLabel, acceptCallback, declineCallback, deferDecisionCallback)
@@ -755,28 +804,17 @@ function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName,
     return data
 end
 
-function ZO_PlayerToPlayer:AddDialogToIncomingQueue(incomingType, characterName, displayName, targetLabel, dialogName, mainTextParams)
-    local name = ZO_GetPrimaryPlayerNameWithSecondary(characterName, displayName)
-    local data = self:AddIncomingEntry(incomingType, name, targetLabel)
-    data.dialogName = dialogName
-    data.mainTextParams = mainTextParams
-
-    TriggerTutorial(TUTORIAL_TRIGGER_INCOMING_PLAYER_TO_PLAYER_NOTIFICATION)
-
-    return data
-end
-
 do
     local function DoesDataMatch(firstEntry, secondEntryType, secondCharacterName, secondDisplayName)
-        local removeWithoutName = characterName == nil and displayName == nil
-        local doesCharacterNameMatch = not secondCharacterName or firstEntry.characterName == secondCharacterName
-        local doesDisplayNameMatch = not secondDisplayName or firstEntry.displayName == secondDisplayName
-        local doesTypesMatch = firstEntry.incomingType == secondEntryType
-        return removeWithoutName or (doesCharacterNameMatch and doesDisplayNameMatch and doesTypesMatch)
+        if firstEntry.incomingType == secondEntryType then
+            local doesCharacterNameMatch = not secondCharacterName or firstEntry.characterName == secondCharacterName
+            local doesDisplayNameMatch = not secondDisplayName or firstEntry.displayName == secondDisplayName
+            return doesCharacterNameMatch and doesDisplayNameMatch
+        end
+        return false
     end
 
     function ZO_PlayerToPlayer:ExistsInQueue(incomingType, characterName, displayName)
-        local name = ZO_GetPrimaryPlayerNameWithSecondary(characterName, displayName)
         for i, incomingEntry in ipairs(self.incomingQueue) do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
                 return true
@@ -789,20 +827,42 @@ do
     function ZO_PlayerToPlayer:RemoveFromIncomingQueue(incomingType, characterName, displayName)
         for i, incomingEntry in ipairs(self.incomingQueue) do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
-                table.remove(self.incomingQueue, i)
-                if i == 1 and self.responding then
+                local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
+
+                if i == 1 and (self.responding or self.showingGamepadResponseMenu) then
                     self:StopInteraction()
                 end
                 break
             end
         end
     end
+
+    function ZO_PlayerToPlayer:RemoveAllFromIncomingQueue(incomingType, characterName, displayName)
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
+                local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
+
+                if i == 1 and (self.responding or self.showingGamepadResponseMenu) then
+                    self:StopInteraction()
+                end
+            end
+        end
+    end
+
+    function ZO_PlayerToPlayer:GetFromIncomingQueue(incomingType, characterName, displayName)
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
+                return incomingEntry
+            end
+        end
+        return nil
+    end
 end
 
 function ZO_PlayerToPlayer:RemoveGuildInviteFromIncomingQueue(guildId)
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.incomingType == INTERACT_TYPE_GUILD_INVITE and incomingEntry.guildId == guildId then
-            table.remove(self.incomingQueue, i)
+            self:RemoveEntryFromIncomingQueueTable(i)
             break
         end
     end
@@ -811,7 +871,7 @@ end
 function ZO_PlayerToPlayer:RemoveQuestShareFromIncomingQueue(questId)
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.incomingType == INTERACT_TYPE_QUEST_SHARE and incomingEntry.questId == questId then
-            table.remove(self.incomingQueue, i)
+            self:RemoveEntryFromIncomingQueueTable(i)
             break
         end
     end
@@ -820,13 +880,68 @@ end
 function ZO_PlayerToPlayer:RemoveScriptedWorldEventFromIncomingQueue(eventId, questName)
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.incomingType == INTERACT_TYPE_WORLD_EVENT_INVITE and (incomingEntry.eventId == eventId or incomingEntry.questName == questName) then
-            table.remove(self.incomingQueue, i)
+            self:RemoveEntryFromIncomingQueueTable(i)
+
             if i == 1 and self.responding then
                 self:StopInteraction()
             end
             break
         end
     end
+end
+
+function ZO_PlayerToPlayer:GetIndexFromIncomingQueue(incomingEntryToMatch)
+    if incomingEntryToMatch then
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if incomingEntryToMatch == incomingEntry then
+                return i
+            end
+        end
+    end
+    return nil
+end
+
+function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
+    if HasLFGReadyCheckNotification() then
+        local activityType, role, timeRemainingSeconds = GetLFGReadyCheckNotificationInfo()
+
+        local promptData = self:GetFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+        if not promptData then
+            local function DeferDecisionCallback()
+                self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+            end
+
+            local messageFormat, messageParams
+            local activityTypeText = GetString("SI_LFGACTIVITY", activityType)
+            local generalActivityText = ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS[activityType]
+            if role == LFG_ROLE_INVALID then
+                messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
+                messageParams = { activityTypeText, generalActivityText }
+            else
+                local roleIconPath = GetRoleIcon(role)
+                local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
+
+                messageFormat = SI_LFG_READY_CHECK_TEXT
+                messageParams = { activityTypeText, generalActivityText, roleIconFormat, GetString("SI_LFGROLE", role) }
+            end
+
+            promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK, nil, nil, nil, AcceptLFGReadyCheckNotification, DeclineLFGReadyCheckNotification, DeferDecisionCallback)
+            promptData.acceptText = GetString(SI_LFG_READY_CHECK_ACCEPT)
+            promptData.expiresAtS = GetFrameTimeSeconds() + timeRemainingSeconds
+            promptData.messageFormat = messageFormat
+            promptData.messageParams = messageParams
+            promptData.expirationCallback = DeferDecisionCallback
+            promptData.dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_LFG)
+
+            PlaySound(SOUNDS.LFG_READY_CHECK)
+        end
+    else
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+    end
+end
+
+function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckCancelled()
+    self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
 end
 
 local NO_LEADING_EDGE = false
@@ -837,7 +952,6 @@ end
 
 function ZO_PlayerToPlayer:OnEndSoulGemResurrection()
     self.resurrectProgressAnimation:PlayBackward()
-    self.targetLabel:SetHidden(true)
 end
 
 function ZO_PlayerToPlayer:SetDelayPromptTime(timeMs)
@@ -847,17 +961,17 @@ end
 function ZO_PlayerToPlayer:TryDisplayingIncomingRequests()
     if self.responding then
         local incomingEntryToRespondTo = self.incomingQueue[1]
-        if(incomingEntryToRespondTo.dialogName) then
-            ZO_Dialogs_ShowPlatformDialog(incomingEntryToRespondTo.dialogName, nil, {mainTextParams = incomingEntryToRespondTo.mainTextParams})
-            table.remove(self.incomingQueue, 1)
-            self.responding = false
-            self:StopInteraction()
-            return true
-        elseif ShouldUseRadialNotificationMenu(incomingEntryToRespondTo) then
-            LockCameraRotation(true)
-            RETICLE:RequestHidden(true)
-            self.targetLabel:SetHidden(true)
-            self:ShowRadialNotificationMenu(incomingEntryToRespondTo)
+        if ShouldUseGamepadResponseMenu(incomingEntryToRespondTo) then
+            --if there is only one option just accept it instead of showing a radial with one option
+            if not incomingEntryToRespondTo.declineCallback and not incomingEntryToRespondTo.deferDecisionCallback then
+                NotificationAccepted(incomingEntryToRespondTo)
+            else
+                LockCameraRotation(true)
+                RETICLE:RequestHidden(true)
+                self.targetLabel:SetHidden(true)
+                self:ShowGamepadResponseMenu(incomingEntryToRespondTo)
+            end
+
             return true
         end
     end
@@ -870,7 +984,8 @@ end
 
 function ZO_PlayerToPlayer:StartInteraction()
     if not SCENE_MANAGER:IsInUIMode() then
-        local isInteractionPossible = self:HasTarget() or self.responding
+        -- Keyboard only requires a target to start interaction, self.responding is only used by Gamepad and does not require a target 
+        local isInteractionPossible = self:HasTarget() or (IsInGamepadPreferredMode() and self.responding)
         if not isInteractionPossible then
             PlaySound(SOUNDS.NO_INTERACT_TARGET)
         elseif not self.isInteracting and not SHARED_INFORMATION_AREA:IsSuppressed() then
@@ -899,6 +1014,7 @@ end
 
 function ZO_PlayerToPlayer:StopInteraction()
     self.targetLabel:SetHidden(false)
+    local currentlyShowingRadialMenu = self:GetCurrentlyShowingRadialMenu()
     
     if self.isInteracting then
         self.isInteracting = false
@@ -907,41 +1023,79 @@ function ZO_PlayerToPlayer:StopInteraction()
 
         CancelSoulGemResurrection()
 
-        self:GetRadialMenu():SelectCurrentEntry()
+        if currentlyShowingRadialMenu then
+            currentlyShowingRadialMenu:SelectCurrentEntry()
+        end
 
         self.lastFailedPromptTime = GetFrameTimeMilliseconds() - self.msToDelayToShowPrompt
     elseif self.responding then
         self.responding = false
-        if self.showingNotificationMenu then
-            RETICLE:RequestHidden(false)
-            LockCameraRotation(false)
-            self:GetRadialMenu():SelectCurrentEntry()
-            self.showingNotificationMenu = false
+        if self.showingGamepadResponseMenu and currentlyShowingRadialMenu then
+            currentlyShowingRadialMenu:SelectCurrentEntry()
+        end
+    end
+
+    if self.showingGamepadResponseMenu then
+        self.showingGamepadResponseMenu = false
+        RETICLE:RequestHidden(false)
+        LockCameraRotation(false)
+        if currentlyShowingRadialMenu then
+            currentlyShowingRadialMenu:Clear()
         end
     end
 end
 
-function ZO_PlayerToPlayer:Accept()
-    self:OnPromptAccepted()
+function ZO_PlayerToPlayer:Accept(incomingEntry)
+    local index = self:GetIndexFromIncomingQueue(incomingEntry)
+    if index then
+        if not incomingEntry.dontRemoveOnAccept then
+            self:RemoveEntryFromIncomingQueueTable(index)
+        end
+        NotificationAccepted(incomingEntry)
+    else
+        self:OnPromptAccepted()
+    end
 end
 
-function ZO_PlayerToPlayer:Decline()
-    self:OnPromptDeclined()
+function ZO_PlayerToPlayer:Decline(incomingEntry)
+    local index = self:GetIndexFromIncomingQueue(incomingEntry)
+    if index then
+        if not incomingEntry.dontRemoveOnDecline then
+            self:RemoveEntryFromIncomingQueueTable(index)
+        end
+        NotificationDeclined(incomingEntry)
+    else
+        self:OnPromptDeclined()
+    end
 end
 
 --With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
 function ZO_PlayerToPlayer:OnPromptAccepted()
-    if(self.responding and #self.incomingQueue > 0) then
-        local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
+    if self.responding and #self.incomingQueue > 0 then
+        local incomingEntryToRespondTo = self.incomingQueue[1]
+        if not incomingEntryToRespondTo.dontRemoveOnAccept then
+            self:RemoveEntryFromIncomingQueueTable(1)
+        end
         NotificationAccepted(incomingEntryToRespondTo)
     end
 end
 
 function ZO_PlayerToPlayer:OnPromptDeclined()
-    if(self.responding and #self.incomingQueue > 0) then
-        local incomingEntryToRespondTo = table.remove(self.incomingQueue, 1)
+    if self.responding and #self.incomingQueue > 0 then
+        local incomingEntryToRespondTo = self.incomingQueue[1]
+        if not incomingEntryToRespondTo.dontRemoveOnDecline then
+            self:RemoveEntryFromIncomingQueueTable(1)
+        end
         NotificationDeclined(incomingEntryToRespondTo)
     end
+end
+
+function ZO_PlayerToPlayer:RemoveEntryFromIncomingQueueTable(index)
+    local incomingEntry = table.remove(self.incomingQueue, index)
+    if incomingEntry.expiresAtS then
+        ZO_Dialogs_ReleaseAllDialogsOfName("PTP_TIMED_RESPONSE_PROMPT", function(dialogData) return dialogData == incomingEntry end)
+    end
+    return incomingEntry
 end
 
 function ZO_PlayerToPlayer:SetTargetIdentification()
@@ -970,6 +1124,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
                 self.pendingResurrectInfo:SetText(GetString(SI_PLAYER_TO_PLAYER_RESURRECT_HAS_RESURRECT_PENDING))
             end
         else
+            self.pendingResurrectInfo:SetHidden(true)
             self.actionKeybindButton:SetHidden(false)
 
             local targetLevel = GetUnitEffectiveLevel(P2P_UNIT_TAG)
@@ -982,17 +1137,17 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
 
             local finalText
             if(ZO_Death_DoesReviveCostRaidLife()) then
-                finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, RAID_LIFE_ICON_MARKUP)           
+                finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, RAID_LIFE_ICON_MARKUP)
             else
                 finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup)
             end
 
-            self.actionKeybindButton:SetText(finalText) 
-        end        
+            self.actionKeybindButton:SetText(finalText)
+        end
 
         return true
     end
-
+    self.pendingResurrectInfo:SetHidden(true)
     return false
 end
 
@@ -1018,15 +1173,16 @@ function ZO_PlayerToPlayer:TryShowingStandardInteractLabel()
     return false
 end
 
-function ZO_PlayerToPlayer:TryShowingPromptAfterDelay()
+function ZO_PlayerToPlayer:ShouldShowPromptAfterDelay()
     local now = GetFrameTimeMilliseconds()
     if IsPlayerMoving() then
         self.lastFailedPromptTime = now
     else
         if now - self.lastFailedPromptTime >= self.msToDelayToShowPrompt then
-            self:SetHidden(false)
+            return true
         end
     end
+    return false
 end
 
 function ZO_PlayerToPlayer:ShowResponseActionKeybind(keybindText)
@@ -1034,43 +1190,19 @@ function ZO_PlayerToPlayer:ShowResponseActionKeybind(keybindText)
     self.actionKeybindButton:SetText(keybindText)
 end
 
-function ZO_PlayerToPlayer:SetupTargetLabel(incomingEntry)
-    self.targetLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
-
+function ZO_PlayerToPlayer_GetIncomingEntryDisplayText(incomingEntry)
     if incomingEntry.targetLabel then
-        self.targetLabel:SetText(incomingEntry.targetLabel)
+        return incomingEntry.targetLabel
     elseif incomingEntry.messageFormat then
-        if(incomingEntry.expiresAt) then
-            local remainingTime = zo_max(incomingEntry.expiresAt - GetFrameTimeSeconds(), 0)
+        if incomingEntry.expiresAtS then
+            local remainingTime = zo_max(incomingEntry.expiresAtS - GetFrameTimeSeconds(), 0)
             local formattedTime = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
             local params = {unpack(incomingEntry.messageParams)}
             table.insert(params, formattedTime)
-            self.targetLabel:SetText(zo_strformat(incomingEntry.messageFormat, unpack(params)))
-            if incomingEntry.expirationCallback and remainingTime == 0 then
-                incomingEntry.expirationCallback()
-            end
+            return zo_strformat(incomingEntry.messageFormat, unpack(params))
         else
-            self.targetLabel:SetText(zo_strformat(incomingEntry.messageFormat, unpack(incomingEntry.messageParams)))
-        end		
-    end
-    
-    local font = IsInGamepadPreferredMode() and "ZoFontGamepad42" or "ZoInteractionPrompt"
-    self.targetLabel:SetFont(font)
-end
-
-function ZO_PlayerToPlayer:GetKeyboardStringFromInteractionType(interactionType)
-    if interactionType == INTERACT_TYPE_RITUAL_OF_MARA then
-        return GetString(SI_PLEDGE_OF_MARA_BEGIN_RITUAL_PROMPT)
-    else
-        return GetString(SI_PLAYER_TO_PLAYER_ACTION_RESPOND)
-    end
-end
-
-function ZO_PlayerToPlayer:GetGamepadStringFromInteractionType(interactionType)
-    if interactionType and interactionType == INTERACT_TYPE_RITUAL_OF_MARA then
-        return GetString(SI_GAMEPAD_NOTIFICATIONS_PLEDGE_OF_MARA_BEGIN_RITUAL_PROMPT)
-    else
-        return GetString(SI_GAMEPAD_PLAYER_TO_PLAYER_ACTION_RESPOND)
+            return zo_strformat(incomingEntry.messageFormat, unpack(incomingEntry.messageParams))
+        end
     end
 end
 
@@ -1078,25 +1210,40 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
     if #self.incomingQueue > 0 then
         local incomingEntry = self.incomingQueue[1]
         if incomingEntry.pendingResponse then
-            self:SetupTargetLabel(incomingEntry)
+            -- Set text on the label
+            local displayText = ZO_PlayerToPlayer_GetIncomingEntryDisplayText(incomingEntry)
+            local font = IsInGamepadPreferredMode() and "ZoFontGamepad42" or "ZoInteractionPrompt"
+            self.targetLabel:SetText(displayText)
+            self.targetLabel:SetFont(font)
+            self.targetLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
-            if(incomingEntry.dialogName) then
-                self:ShowResponseActionKeybind(self:GetKeyboardStringFromInteractionType(incomingEntry.incomingType))
-            elseif ShouldUseRadialNotificationMenu(incomingEntry) then
-                if not self.showingNotificationMenu then
-                    self:ShowResponseActionKeybind(self:GetGamepadStringFromInteractionType(incomingEntry.incomingType))
+            --Check for expiration
+            if incomingEntry.messageFormat and incomingEntry.expiresAtS and incomingEntry.expirationCallback then
+                if GetFrameTimeSeconds() > incomingEntry.expiresAtS then
+                    incomingEntry.expirationCallback()
+                end
+            end
+
+            if ShouldUseGamepadResponseMenu(incomingEntry) then
+                if not self.showingGamepadResponseMenu then
+                    self:ShowResponseActionKeybind(GetString(SI_GAMEPAD_PLAYER_TO_PLAYER_ACTION_RESPOND))
                 end
             else
-                local acceptText = incomingEntry.acceptText or GetString(SI_DIALOG_ACCEPT)
-                local declineText = incomingEntry.declineText or GetString(SI_DIALOG_DECLINE)
-                self.promptKeybindButton1:SetText(acceptText)
-                self.promptKeybindButton2:SetText(declineText)
-                self.promptKeybindButton1:SetHidden(false)
-                self.promptKeybindButton2:SetHidden(false)
+                if incomingEntry.acceptCallback then
+                    local acceptText = incomingEntry.acceptText or GetString(SI_DIALOG_ACCEPT)
+                    self.promptKeybindButton1:SetText(acceptText)
+                    self.promptKeybindButton1.shouldHide = false
+                end
+                if incomingEntry.declineCallback then
+                    local declineText = incomingEntry.declineText or GetString(SI_DIALOG_DECLINE)
+                    self.promptKeybindButton2:SetText(declineText)
+                    self.promptKeybindButton2.shouldHide = false
+                end
                 self.shouldShowNotificationKeybindLayer = true
             end
 
             self.responding = true
+            incomingEntry.seen = true
             return true
         end
     end
@@ -1117,6 +1264,12 @@ function ZO_PlayerToPlayer:OnUpdate()
             local isActive = i == 1 and (self.responding or self.isInteracting)
             incomingEntry.updateFn(incomingEntry, isActive)
         end
+
+        if incomingEntry.expiresAtS and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
+            -- For time sensitive prompts, if the player can't see them, throw up a dialog before it's too late to respond
+            ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
+            incomingEntry.seen = true
+        end
     end
 
     if not self.control:IsHidden() then
@@ -1127,13 +1280,11 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.hasRequiredSoulGem = false
         self.failedRaidRevives = false
         self.responding = false
-        self:SetHidden(not self.isInteracting)
         self.actionKeybindButton:SetHidden(true)
         self.actionKeybindButton:SetEnabled(true)
         self.additionalInfo:SetHidden(true)
-        self.promptKeybindButton1:SetHidden(true)
-        self.promptKeybindButton2:SetHidden(true)
-        self.pendingResurrectInfo:SetHidden(true)
+        self.promptKeybindButton1.shouldHide = true
+        self.promptKeybindButton2.shouldHide = true
 
         if (not self.isInteracting) or (not IsConsoleUI()) then
             self.gamerID:SetHidden(true)
@@ -1141,16 +1292,34 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         self.shouldShowNotificationKeybindLayer = false
 
+        local hideSelf, hideTargetLabel
         local isReticleTargetInteractable = self:IsReticleTargetInteractable()
         if isReticleTargetInteractable and self:TryShowingResurrectLabel() then
-            self:SetHidden(false)
-        elseif not self.isInteracting and (self.showingNotificationMenu or not IsUnitInCombat("player")) and self:TryShowingResponseLabel() then
-            self:SetHidden(false)
+            hideSelf = false
+            hideTargetLabel = false
+        elseif not self.isInteracting and (self.showingGamepadResponseMenu or not IsUnitInCombat("player")) and self:TryShowingResponseLabel() then
+            hideSelf = false
+            hideTargetLabel = self.showingGamepadResponseMenu
         elseif not self.isInteracting and isReticleTargetInteractable and self:TryShowingStandardInteractLabel() then
-            self:TryShowingPromptAfterDelay()
+            hideSelf = not self:ShouldShowPromptAfterDelay()
+            hideTargetLabel = hideSelf
+        elseif self.isInteracting then
+            hideSelf = false
+            hideTargetLabel = true
+        else
+            hideSelf = true
+            hideTargetLabel = true
         end
+        
+        -- These must be called after we've determined what state they should be in
+        -- Because if we simply hide and re-show them, the Chroma behavior will not function correctly
+        self:SetHidden(hideSelf)
+        self.targetLabel:SetHidden(hideTargetLabel)
+        self.promptKeybindButton1:SetHidden(self.promptKeybindButton1.shouldHide)
+        self.promptKeybindButton2:SetHidden(self.promptKeybindButton2.shouldHide)
 
         local isNotificationLayerShown = IsActionLayerActiveByName(notificationsKeybindLayerName)
+
         if self.shouldShowNotificationKeybindLayer ~= isNotificationLayerShown then
             if(self.shouldShowNotificationKeybindLayer) then
                 PushActionLayerByName(notificationsKeybindLayerName)
@@ -1241,6 +1410,8 @@ local GAMEPAD_INTERACT_ICONS =
     {
         enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
         enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_down.dds",
+        disabledNormal =  "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_removeFromGroup_disabled.dds",
     },
     [SI_PLAYER_TO_PLAYER_ADD_FRIEND] =
     {
@@ -1301,7 +1472,6 @@ do
         local currentTargetDisplayName = self.currentTargetDisplayName
         local primaryName = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName);
         local primaryNameInternal = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName, USE_INTERNAL_FORMAT);
-        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(currentTargetDisplayName, currentTargetCharacterName);
         local platformIcons = IsInGamepadPreferredMode() and GAMEPAD_INTERACT_ICONS or KEYBOARD_INTERACT_ICONS
         local ENABLED = true
         local DISABLED = false
@@ -1321,21 +1491,42 @@ do
         end
 
         --Group--
-        local playerHasGroupPermissions = IsUnitSoloOrGroupLeader("player")
-        local errorReason = not playerHasGroupPermissions and GetString(SI_PLAYER_TO_PLAYER_GROUP_NOT_LEADER) or nil
+        local isGroupModificationAvailable = IsGroupModificationAvailable()
+        local groupModicationRequiresVoting = DoesGroupModificationRequireVote()
+        local isSoloOrLeader = IsUnitSoloOrGroupLeader("player")
+
+        local function AlertGroupDisabled()
+            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_PLAYER_TO_PLAYER_GROUP_DISABLED))
+        end
+
         if IsPlayerInGroup(currentTargetCharacterNameRaw) then
-            local function GroupKickOption()
-                GroupKickByName(currentTargetCharacterNameRaw) 
+            local groupKickEnabled = isGroupModificationAvailable and isSoloOrLeader and not groupModicationRequiresVoting
+            local groupKickFunction = nil
+            if groupKickEnabled then
+                groupKickFunction = function() GroupKickByName(currentTargetCharacterNameRaw) end
+            else
+                groupKickFunction = AlertGroupDisabled
             end
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], ENABLED, GroupKickOption, errorReason)
+            
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
         else
-            local function InviteOption()
-                local NOT_SENT_FROM_CHAT = false
-                local DISPLAY_INVITED_MESSAGE = true
-                TryGroupInviteByName(primaryNameInternal, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
+            local groupInviteEnabled = ENABLED_IF_NOT_IGNORED and isGroupModificationAvailable and isSoloOrLeader
+            local groupInviteFunction = nil
+            if groupInviteEnabled then
+                groupInviteFunction = function()
+                    local NOT_SENT_FROM_CHAT = false
+                    local DISPLAY_INVITED_MESSAGE = true
+                    TryGroupInviteByName(primaryNameInternal, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE)
+                end
+            else
+                if ENABLED_IF_NOT_IGNORED then
+                    groupInviteFunction = AlertGroupDisabled
+                else
+                    groupInviteFunction = AlertIgnored
+                end
             end
-            local groupInviteFunction = ENABLED_IF_NOT_IGNORED and InviteOption or AlertIgnored
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], ENABLED_IF_NOT_IGNORED and playerHasGroupPermissions, groupInviteFunction, errorReason)
+
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], groupInviteEnabled, groupInviteFunction)
         end
         
         --Friend--
@@ -1354,14 +1545,11 @@ do
         end
 
         --Report--
-        local reportCallback
-        if IsInGamepadPreferredMode() then
-            local dialogData = { characterName = currentTargetCharacterName, displayName = currentTargetDisplayName,}
-            reportCallback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_REPORT_PLAYER_DIALOG", dialogData, {mainTextParams = {formattedPlayerNames}}) end              
-        else
-            reportCallback = function() ZO_ReportPlayerDialog_Show(primaryName, REPORT_PLAYER_REASON_BOTTING, formattedPlayerNames) end
+        local function ReportCallback()
+            local nameToReport = IsInGamepadPreferredMode() and currentTargetDisplayName or primaryName
+            ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(nameToReport)
         end
-		self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, reportCallback)
+        self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, ReportCallback)
         
         --Duel--
         local duelState, partnerCharacterName, partnerDisplayName = GetDuelInfo()

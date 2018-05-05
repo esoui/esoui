@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_RetraitStationPanelAnchors" virtual="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+        </Control>
+
+        <TopLevelControl name="ZO_RetraitStation_KeyboardTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_RetraitStation_Keyboard_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ModeMenu" inherits="ZO_SceneMenu">
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+                    <Dimensions x="550"/>
+                </Control>
+
+                <Control name="$(parent)RetraitPanel" inherits="ZO_RetraitStation_RetraitPanel ZO_RetraitStationPanelAnchors" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

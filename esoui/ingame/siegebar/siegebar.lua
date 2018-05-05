@@ -63,7 +63,7 @@ function SiegeBar:New()
     EVENT_MANAGER:RegisterForEvent("SiegeBar", EVENT_DISABLE_SIEGE_PACKUP_ABILITY, function() manager:OnDisableSiegePackup() end)
     EVENT_MANAGER:RegisterForEvent("SiegeBar", EVENT_ENABLE_SIEGE_FIRE_ABILITY, function() manager:OnEnableSiegeFire() end)
     EVENT_MANAGER:RegisterForEvent("SiegeBar", EVENT_DISABLE_SIEGE_FIRE_ABILITY, function() manager:OnDisableSiegeFire() end)
-    EVENT_MANAGER:RegisterForEvent("SiegeBar", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function(eventId, isGamepadPreferred) manager.isDirty = true end)
+    EVENT_MANAGER:RegisterForEvent("SiegeBar", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function(eventId, isGamepadPreferred) manager:OnGamepadPreferredModeChanged() end)
     
     manager.isDirty = true
 
@@ -178,6 +178,11 @@ end
 
 function SiegeBar:OnDisableSiegeFire()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function SiegeBar:OnGamepadPreferredModeChanged()
+    self.isDirty = true
+    SiegeWeaponRelease()
 end
 
 --Local XML

@@ -1,0 +1,299 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_OutfitSelector_CheckBoxTemplate_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_GamepadCheckBoxTemplate_OnInitialized(self, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT)
+                self.statusIcon = self:GetNamedChild("StatusIndicator")
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Label" override="true" modifyTextType="NONE" />
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_OutfitSelector_List_Header" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75"/>
+            <Controls>
+                <Label name="$(parent)Title" text="SI_OUTFIT_SELECTOR_TITLE" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+                <Label name="$(parent)OutfitName" font="ZoFontGamepad34" wrapMode="ELLIPSIS" horizontalAlignment="CENTER">
+                    <Anchor point="CENTER" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="25" />
+                </Label>
+                <Texture name="$(parent)OpenDropdown" textureFile="EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="LEFT" relativeTo="$(parent)OutfitName" relativePoint="RIGHT" offsetX="10" offsetY="4"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Restyle_ApplyChanges_EntryTemplate_Gamepad" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                </Label>
+
+                <Control name="$(parent)AnchorHelper" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Price"/>
+                </Control>
+
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AnchorHelper" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_RestyleSlot_EntryTemplate_Gamepad" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_RestyleSlot_EntryTemplate_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Dyes" inherits="ZO_SwatchSlotDyes_WithHighlight_Gamepad" tier="MEDIUM">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_OutfitSlot_EntryTemplate_Gamepad" inherits="ZO_RestyleSlot_EntryTemplate_Gamepad" virtual="true">
+            <OnInitialized>
+                ZO_OutfitSlot_EntryTemplate_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                </Label>
+
+                <Control name="$(parent)AnchorHelper" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Price"/>
+                </Control>
+
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AnchorHelper" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+
+                <Backdrop name="$(parent)BorderedBackground" centerColor="FFFFFF">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPLEFT" offsetX="-4" offsetY="-4" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="4" offsetY="4" />
+                    <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_OutfitStyle_GridEntry_Template_Gamepad" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS" y="ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS" />
+
+            <OnInitialized>
+                self.borderBackground = self:GetNamedChild("BorderedBackground")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="1" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Texture>
+
+                <Backdrop name="$(parent)BorderedBackground" centerColor="FFFFFF">
+                    <AnchorFill />
+                    <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_DyeTool_GridEntry_Template_Gamepad" virtual="true">
+            <Dimensions x="ZO_DYE_TOOL_GRID_ENTRY_DIMENTIONS" y="ZO_DYE_TOOL_GRID_ENTRY_DIMENTIONS" />
+
+            <OnInitialized>
+                self.selectedBackground = self:GetNamedChild("SelectedBackground")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="1" >
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Texture>
+
+                <Texture name="$(parent)SelectedBackground" color="aaaaaf">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_RestyleTopLevel_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_Restyle_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Controls>
+                                <Control name="$(parent)RootList" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <AnchorFill/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_Outfits_Selector_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_OutfitSlot_Selector_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                            <Controls>
+                                <Control name="$(parent)RootList" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <AnchorFill/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_RestyleStation_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_Restyle_Station_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true" >
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)OutfitSelector" inherits="ZO_OutfitSelector_List_Header" >
+                                                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="25" />
+                                                </Control>
+
+                                                <Control name="$(parent)SavedPresets" resizeToFitDescendents="true">
+                                                    <Anchor point="TOP" relativeTo="$(parent)OutfitSelector" relativePoint="BOTTOM" offsetY="20" />
+
+                                                    <Controls>
+                                                        <Backdrop name="$(parent)SharedHighlight" inherits="ZO_DyeingHighlight_Gamepad" />
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)RootList" inherits="ZO_VerticalParametricScrollListTemplate">
+                                    <AnchorFill/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_Outfit_Slots_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_Outfit_Slots_Panel_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Anchor point="TOPLEFT" />
+
+            <Controls>
+                <Control name="$(parent)ContentHeader" resizeToFitDescendents="true" >
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+
+                    <Controls>
+                        <Control name="$(parent)SearchFilter" inherits="ZO_GamepadInteractiveFilterSearch">
+                            <Anchor point="TOPRIGHT" offsetX="-10" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)GridListPanel" inherits="ZO_GridScrollList_Gamepad" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="10" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_Dyeing_Slots_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_Dyeing_Slots_Panel_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            <Anchor point="TOPLEFT" />
+
+            <Controls>
+                <Control name="$(parent)ToolsGrid" inherits="ZO_GridScrollList_Gamepad" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background"/>
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" />
+                    <Dimensions y="100" />
+                </Control>
+
+                <Control name="$(parent)Tooltip">
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background"  offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Dimensions y="200" />
+                    <Controls>
+                        <Texture name="$(parent)Divider" inherits="ZO_GamepadHorizontalDivider">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" offsetY="6" />
+                        </Texture>
+                        <Texture name="$(parent)Image" resizeToFitFile="true" level="1">
+                            <Anchor point="CENTER" relativeTo="$(parent)Divider" />
+                        </Texture>
+                        <Control name="$(parent)Swatch" inherits="ZO_DyeingSlotSwatch_Gamepad" level="1">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="CENTER" relativeTo="$(parent)Divider" />
+                        </Control>
+                        <Control name="$(parent)ContentsAnchor" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Swatch" relativePoint="BOTTOM" offsetY="10" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
+                        </Control>
+                        <Control name="$(parent)Contents" inherits="ZO_Tooltip">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContentsAnchor" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)DyesGrid" inherits="ZO_GridScrollList_Gamepad" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ToolsGrid" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Tooltip" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-20"/>
+                </Control>
+                
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

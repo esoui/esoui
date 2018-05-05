@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_RestyleCommonTemplate_Keyboard" inherits="ZO_RightPanelFootPrint" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
+                    <Dimensions x="240"/>
+                    <Controls>
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_RESTYLE_SEARCH_EDIT_DEFAULT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
+                </Label>
+
+                <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                    <Dimensions x="353" />
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                </Control>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
+                    <Dimensions y="50" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Categories" relativePoint="RIGHT" constrains="X"/>
+
+                    <Controls>
+                        <Label name="$(parent)Money" override="true">
+                            <Anchor point="TOPRIGHT"  offsetX="-50" offsetY="5" />
+                        </Label>
+
+                        <Label name="$(parent)AltMoney" override="true" hidden="false">
+                            <Anchor point="TOPRIGHT"  relativeTo="$(parent)Money" relativePoint="TOPLEFT" offsetX="-15" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

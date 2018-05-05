@@ -96,7 +96,7 @@ end
 
 function ZO_Repair:UpdateMoney()
     if not self.control:IsControlHidden() then
-        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS)
+        ZO_CurrencyControl_SetSimpleCurrency(self.money, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_KEYBOARD_CURRENCY_OPTIONS)
     end
 end
 
@@ -155,7 +155,7 @@ function ZO_Repair:SetupRepairItem(control, data)
     local slotControl = GetControl(control, "Button")
     local nameControl = GetControl(control, "Name")
     local repairCostControl = GetControl(control, "SellPrice")
-    local statControl = GetControl(control, "StatValue")
+    local itemConditionControl = GetControl(control, "ItemCondition")
 
     statusControl:SetHidden(true)
 
@@ -169,7 +169,7 @@ function ZO_Repair:SetupRepairItem(control, data)
     repairCostControl:SetHidden(false)
     ZO_CurrencyControl_SetSimpleCurrency(repairCostControl, CURT_MONEY, data.repairCost, REPAIR_COST_CURRENCY_OPTIONS)
 
-    statControl:SetText(zo_strformat(SI_ITEM_CONDITION_PERCENT, data.condition))
+    itemConditionControl:SetText(zo_strformat(SI_ITEM_CONDITION_PERCENT, data.condition))
 end
 
 do

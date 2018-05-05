@@ -16,7 +16,6 @@ function ZO_GamepadQuickslot:Initialize(control)
     self.radialControl = container:GetNamedChild("Radial")
     self.radialMenu = ZO_RadialMenu:New(self.radialControl, "ZO_GamepadQuickslotRadialMenuEntryTemplate", nil, "SelectableItemRadialMenuEntryAnimation", "RadialMenu")
     self.radialMenu.activeIcon = self.radialControl:GetNamedChild("Icon")
-    self.radialMenu.activeCount = self.radialControl:GetNamedChild("CountText")
     --store entry controls to animate with later
     self.entryControls = {}
 
@@ -62,11 +61,9 @@ function ZO_GamepadQuickslot:Initialize(control)
             self.radialMenu:Clear()
         elseif newState == SCENE_HIDDEN then
             self.activeIcon = nil
-            self.activeCount = nil
             self.slotIndexForAnim = nil
             self.enteringMenuUnslottedItem = false
             self.radialMenu.activeIcon:SetHidden(false)
-            self.radialMenu.activeCount:SetHidden(false)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.navigationKeybindDescriptor)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.assignKeybindDescriptor)
@@ -79,15 +76,15 @@ function ZO_GamepadQuickslot:ResetActiveIcon()
     local slotIcon
 
     if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
-        local _, _, icon, _, unlocked = GetCollectibleInfo(self.collectibleToSlotId)
-        slotIcon = icon
-        slotEnabled = unlocked
-        self.radialMenu.activeCount:SetHidden(true)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.collectibleToSlotId)
+        if collectibleData then
+            slotIcon = collectibleData:GetIcon()
+            slotEnabled = collectibleData:IsUnlocked()
+        end
     elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
         local icon, stack, _, meetsUsageRequirements = GetItemInfo(self.itemToSlotId, self.itemToSlotIndex)
         slotIcon = icon
         slotEnabled = meetsUsageRequirements
-        self.radialMenu.activeCount:SetText(stack)
     end
 
     self.radialMenu.activeIcon:SetTexture(slotIcon)
@@ -149,12 +146,12 @@ function ZO_GamepadQuickslot:InitializeKeybindStrip()
 end
 
 local function UpdateAlliancePoints(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCarriedCurrencyAmount(CURT_ALLIANCE_POINTS), ZO_GAMEPAD_CURRENCY_OPTIONS)
+    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_ALLIANCE_POINTS, GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS)
     return true
 end
 
 local function UpdateGold(control)
-    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
     return true
 end
 
@@ -210,7 +207,6 @@ function ZO_GamepadQuickslot:RefreshQuickslotMenu()
     if self.enteringMenuUnslottedItem then
         ZO_PlaySparkleAnimation(self.radialControl)
         self.radialMenu.activeIcon:SetHidden(false)
-        self.radialMenu.activeCount:SetHidden(false)
     end
 
     self.radialMenu:ResetData()
@@ -240,7 +236,6 @@ function ZO_GamepadQuickslot:ShowQuickslotMenu()
         ClearSlot(slotNum)
         self.slotIndexForAnim = slotNum
         self.radialMenu.activeIcon:SetHidden(true)
-        self.radialMenu.activeCount:SetHidden(true)
     end
 end
 
@@ -270,9 +265,6 @@ function ZO_GamepadQuickslot:PopulateMenu()
 
     if self.activeIcon then
         self.radialMenu.activeIcon:SetTexture(self.activeIcon)
-    end
-    if self.activeCount then
-        self.radialMenu.activeCount:SetText(self.activeCount)
     end
 
     --sparkle animation on item switch (never on empty)
@@ -311,9 +303,7 @@ function ZO_GamepadQuickslot:TryAssignItemToSlot()
         end
 
         self.radialMenu.activeIcon:SetHidden(true)
-        self.radialMenu.activeCount:SetHidden(true)
         self.activeIcon = nil
-        self.activeCount = ""
         self.slotIndexForAnim = selectedData.data
     end
     self.enteringMenuUnslottedItem = false  --in case the player tries to assign the slotted item that is currently being unassigned so that the scene will properly hide

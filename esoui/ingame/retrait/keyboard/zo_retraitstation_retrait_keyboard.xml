@@ -1,0 +1,138 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_RetraitTraitListRow" mouseEnabled="true" virtual="true">
+            <Dimensions x="300" y="ZO_RETRAIT_TRAIT_LIST_ROW_HEIGHT" />
+
+            <OnInitialized>
+                self.background = self:GetNamedChild("Bg")
+                self.iconControl = self:GetNamedChild("Icon")
+                self.lockIconControl = self:GetNamedChild("LockIcon")
+                self.nameControl = self:GetNamedChild("Name")
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_RetraitStation_Retrait_Keyboard_OnTraitRowMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_RetraitStation_Retrait_Keyboard_OnTraitRowMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_RetraitStation_Retrait_Keyboard_OnTraitRowMouseUp(self, button, upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Icon" level="2">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="LEFT" offsetX="40" />
+                </Texture>
+
+                <Texture name="$(parent)LockIcon" textureFile="EsoUI/Art/Progression/progression_crafting_locked_up.dds" alpha="0.6" level="3" hidden="true">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_RetraitStation_RetraitPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
+                    <Controls>
+                        <Control name="$(parent)InfoBar" override="true">
+                            <Controls>
+                                <Label name="$(parent)RetraitCurrency" inherits="ZO_CurrencyTemplate">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Money" relativePoint="TOPLEFT" offsetX="-10"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SlotContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100" />
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds">
+                            <Dimensions x="512" y="512" />
+                            <Anchor point="TOP" />
+                        </Texture>
+
+                        <Label name="$(parent)ItemRetraitLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_RETRAIT_STATION_ITEM_TO_RETRAIT_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="110" offsetY="64" />
+                        </Label>
+
+                        <Label name="$(parent)CostLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_RETRAIT_STATION_RETRAIT_COST_HEADER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOP" relativePoint="TOPRIGHT" offsetX="-165" offsetY="64" />
+                        </Label>
+
+                        <Button name="$(parent)ItemRetraitSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)ItemRetraitLabel" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="185" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                            </Controls>
+                        </Button>
+
+                        <Button name="$(parent)RetraitCostSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)CostLabel" relativePoint="BOTTOM" offsetY="20" />
+
+                            <OnMouseEnter>
+                                ZO_RetraitStation_Retrait_Keyboard_OnRetraitCostSlotMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_RetraitStation_Retrait_Keyboard_OnRetraitCostSlotMouseExit(self)
+                            </OnMouseExit>
+                        </Button>
+
+                        <Label name="$(parent)AwaitingLabel" font="ZoFontWinH4" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Dimensions x="100" />
+                            <Anchor point="CENTER" relativeTo="$(parent)RetraitCostSlot" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)TraitContainer" hidden="true">
+                    <Dimensions x="460" y="480" />
+                    <Anchor point="CENTER" relativeTo="GuiRoot" offsetY="-40" />
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                            <AnchorFill />
+                        </Backdrop>
+
+                        <Label name="$(parent)SelectTraitLabel" text="SI_RETRAIT_STATION_SELECT_TRAIT_HEADER" font="ZoFontWinH2" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetY="20" />
+                            <Anchor point="TOPRIGHT" offsetY="20" />
+                        </Label>
+
+                        <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SelectTraitLabel" relativePoint="BOTTOMLEFT" offsetX="5" offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)SelectTraitLabel" relativePoint="BOTTOMRIGHT" offsetX="-5" offsetY="8" />
+                        </Texture>
+
+                        <Control name="$(parent)List" inherits="ZO_ScrollList">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TraitContainer" relativePoint="LEFT" offsetX="-25" />
+                </Tooltip>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>
