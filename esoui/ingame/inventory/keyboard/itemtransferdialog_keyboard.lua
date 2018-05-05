@@ -26,6 +26,7 @@ function ItemTransferDialog_Keyboard:Initialize(control)
 
     ZO_Dialogs_RegisterCustomDialog("ITEM_TRANSFER_ADD_TO_CRAFT_BAG_KEYBOARD",
     {
+        canQueue = true,
         customControl = control,
         setup = setupFunc,
         title =
@@ -89,7 +90,7 @@ function ItemTransferDialog_Keyboard:Refresh()
     self.iconControl:SetTexture(icon)
 
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
-    self.quantityControl:SetText(ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+    self.quantityControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
     self.quantityControl:SetHidden(stackCount <= 1)
 
     ZO_ItemSlot_SetupUsableAndLockedColor(self.slotControl, meetsUsageRequirement, locked)

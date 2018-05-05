@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LevelUpRewardsClaimBackground_Keyboard" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/centerscreen_right.dds" mouseEnabled="true">
+                    <TextureCoords bottom="0.87"/>
+                    <Dimensions x="64" />
+                    <Anchor point="TOPRIGHT" offsetX="65" offsetY="-60" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="90" offsetY="75" />
+                </Texture>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <TextureCoords bottom="0.87"/>
+                    <Dimensions x="1024" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Right" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_LevelUpRewardsArtTile_Keyboard" inherits="ZO_LevelUpRewardsArtTile" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Frame" override="true">
+                    <Dimensions x="ZO_LEVEL_UP_REWARDS_KEYBOARD_ART_WIDTH" y="ZO_LEVEL_UP_REWARDS_KEYBOARD_ART_HEIGHT" />
+                </Texture>
+                <Label name="$(parent)Title" font="ZoFontHeader2" override="true"/>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_LevelUpRewardsArtTileAndRewards_Keyboard" inherits="ZO_LevelUpRewardsArtTileAndRewards" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Frame" override="true">
+                    <Dimensions x="ZO_LEVEL_UP_REWARDS_KEYBOARD_ART_WIDTH" y="ZO_LEVEL_UP_REWARDS_KEYBOARD_ART_HEIGHT" />
+                </Texture>
+                <Label name="$(parent)Title" font="ZoFontHeader2" override="true"/>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

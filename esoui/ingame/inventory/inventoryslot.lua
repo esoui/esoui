@@ -40,9 +40,7 @@ CreateSlotType("SLOT_TYPE_LAUNDER")
 CreateSlotType("SLOT_TYPE_GAMEPAD_INVENTORY_ITEM")
 CreateSlotType("SLOT_TYPE_COLLECTIONS_INVENTORY")
 CreateSlotType("SLOT_TYPE_CRAFT_BAG_ITEM")
-
-local BUTTON_LEFT = 1
-local BUTTON_RIGHT = 2
+CreateSlotType("SLOT_TYPE_PENDING_RETRAIT_ITEM")
 
 local UpdateMouseoverCommand
 
@@ -134,7 +132,7 @@ function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsage
     slotControl.stackCount = stackCount
     local stackCountLabel = GetControl(slotControl, "StackCount")
     if stackCount > 1 or slotControl.alwaysShowStackCount then
-        stackCountLabel:SetText(ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
     else
         stackCountLabel:SetText("")
     end
@@ -166,24 +164,6 @@ function ZO_ItemSlot_GetAlwaysShowStackCount(slotControl)
     return slotControl.alwaysShowStackCount
 end
 
-function ZO_Inventory_SlotReset(slotControl)
-    slotControl:SetHidden(true)
-    slotControl:ClearAnchors()
-
-    slotControl.slotIndex = nil
-    slotControl.bagIndex = nil
-    slotControl.bagId = nil
-    slotControl.slotType = nil
-    slotControl.questIndex = nil
-    slotControl.toolIndex = nil
-    slotControl.stepIndex = nil
-
-    slotControl:SetNormalTexture(regularBorder)
-    slotControl:SetPressedTexture(regularBorder)
-
-    GetControl(slotControl,"Icon"):SetColor(1,1,1,1)
-end
-
 -- Bind a slot control to a specific type/bag/slot
 -- This should be called for all item slots (trade, mail, store, backpack, bank, crafting, etc...)
 -- The meaning of slotIndex/bagId are specific to those systems, but this is the API to bind the
@@ -200,6 +180,11 @@ end
 
 function ZO_Inventory_GetSlotIndex(slotControl)
     return slotControl.slotIndex
+end
+
+function ZO_Inventory_GetSlotDataForInventoryControl(slotControl)
+    local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(slotControl)
+    return SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
 end
 
 function ZO_Inventory_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
@@ -236,7 +221,7 @@ end
 -- Control Utils
 --
 
-local function GetInventorySlotComponents(inventorySlot)
+function ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
     -- Figure out what got passed in...inventorySlot could be a list or button type...
     local buttonPart = inventorySlot
     local listPart
@@ -254,36 +239,38 @@ local function GetInventorySlotComponents(inventorySlot)
     return buttonPart, listPart, multiIconPart
 end
 
-local function SetListHighlightHidden(listPart, hidden)
-    if(listPart) then
+local g_highlightAnimationProvider = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
+local g_controlScaleAnimationProvider = ZO_ReversibleAnimationProvider:New("IconSlotMouseOverAnimation")
+
+function ZO_InventorySlot_SetHighlightHidden(listPart, hidden, instant)
+    if listPart then
         local highlight = listPart:GetNamedChild("Highlight")
-        if(highlight and (highlight:GetType() == CT_TEXTURE)) then
-            if not highlight.animation then
-                highlight.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", highlight)
-            end
+        if highlight and highlight:GetType() == CT_TEXTURE then
             if hidden then
-                highlight.animation:PlayBackward()
+                g_highlightAnimationProvider:PlayBackward(highlight, instant)
             else
-                highlight.animation:PlayForward()
+                g_highlightAnimationProvider:PlayForward(highlight, instant)
             end
         end
     end
 end
 
-function ZO_InventorySlot_OnPoolReset(inventorySlot)
-    local buttonPart, listPart = GetInventorySlotComponents(inventorySlot)
-    if listPart then
-        local highlight = listPart:GetNamedChild("Highlight")
-        if highlight and highlight.animation then
-            highlight.animation:PlayFromEnd(highlight.animation:GetDuration())
-        end
+function ZO_InventorySlot_SetControlScaledUp(control, scaledUp, instant)
+    if control then
+        if scaledUp then
+            g_controlScaleAnimationProvider:PlayForward(control, instant)
+        else
+            g_controlScaleAnimationProvider:PlayBackward(control, instant)
+        end                
     end
-    if buttonPart then
-        if buttonPart and buttonPart.animation then
-            buttonPart.animation:PlayInstantlyToStart()
-        end
-    end
+end
 
+function ZO_InventorySlot_OnPoolReset(inventorySlot)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
+    local INSTANT = true
+    ZO_InventorySlot_SetHighlightHidden(listPart, true, INSTANT)
+    ZO_InventorySlot_SetControlScaledUp(buttonPart, false, INSTANT)
+    ZO_InventorySlot_SetControlScaledUp(multiIconPart, false, INSTANT)
     ZO_ObjectPool_DefaultResetControl(inventorySlot)
 end
 
@@ -349,8 +336,8 @@ local InventoryUpdateCooldown =
 }
 
 function ZO_InventorySlot_UpdateCooldowns(inventorySlot)
-    local inventorySlot = GetInventorySlotComponents(inventorySlot)
-    RunHandlers(InventoryUpdateCooldown, inventorySlot)
+    local inventorySlotButton = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
+    RunHandlers(InventoryUpdateCooldown, inventorySlotButton)
 end
 
 function ZO_GamepadItemSlot_UpdateCooldowns(inventorySlot, remaining, duration)
@@ -372,13 +359,14 @@ local function IsSendingMail()
 end
 
 local function CanUseSecondaryActionOnSlot(inventorySlot)
-    return not QUICKSLOT_WINDOW:AreQuickSlotsShowing() 
+    return inventorySlot
+           and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() 
            and not (TRADING_HOUSE and TRADING_HOUSE:IsAtTradingHouse())
            and not (ZO_Store_IsShopping and ZO_Store_IsShopping())
            and not IsSendingMail() 
            and not (TRADE_WINDOW and TRADE_WINDOW:IsTrading())
-           and not PLAYER_INVENTORY:IsBanking()
-           and not PLAYER_INVENTORY:IsGuildBanking()
+           and not IsBankOpen()
+           and not IsGuildBankOpen()
 end
 
 local function CanUseItemQuestItem(inventorySlot)
@@ -392,7 +380,7 @@ local function CanUseItemQuestItem(inventorySlot)
     return false
 end
 
-local function TryUseQuestItem(inventorySlot, buttonId)
+local function TryUseQuestItem(inventorySlot)
     if inventorySlot then
         if inventorySlot.toolIndex then
             UseQuestTool(inventorySlot.questIndex, inventorySlot.toolIndex)
@@ -403,8 +391,16 @@ local function TryUseQuestItem(inventorySlot, buttonId)
 end
 
 function ZO_InventorySlot_CanSplitItemStack(inventorySlot)
-    if(PLAYER_INVENTORY:DoesBagHaveEmptySlot(inventorySlot.bagId)) then
-        return ZO_InventorySlot_GetStackCount(inventorySlot) > 1
+    if ZO_InventorySlot_GetStackCount(inventorySlot) > 1 then
+        local hasFreeSlot = FindFirstEmptySlotInBag(inventorySlot.bagId) ~= nil
+        if not hasFreeSlot then
+            if inventorySlot.bagId == BAG_BANK then
+                hasFreeSlot = FindFirstEmptySlotInBag(BAG_SUBSCRIBER_BANK)
+            elseif inventorySlot.bagId == BAG_SUBSCRIBER_BANK then
+                hasFreeSlot = FindFirstEmptySlotInBag(BAG_BANK)
+            end
+        end
+        return hasFreeSlot        
     end
 end
 
@@ -447,7 +443,7 @@ do
 end
 
 local function CanEnchantItem(inventorySlot)
-    if(CanUseSecondaryActionOnSlot(inventorySlot)) then
+    if CanUseSecondaryActionOnSlot(inventorySlot) then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         return IsItemEnchantable(bag, index)
     end
@@ -467,33 +463,23 @@ local function TryEnchantItem(inventorySlot)
     
 end
 
-local function CanConvertItemStyle(inventorySlot)
+local function CanConvertToStyle(inventorySlot, toStyle)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if(CanUseSecondaryActionOnSlot(inventorySlot)) and not IsItemPlayerLocked(bag, index) then
-        return CanConvertItemStyleToImperial(bag, index)
+    if CanUseSecondaryActionOnSlot(inventorySlot) and not IsItemPlayerLocked(bag, index) then
+        return CanConvertItemStyle(bag, index, toStyle)
     end
 end
 
 local function IsSlotLocked(inventorySlot)
-    local slot = PLAYER_INVENTORY:SlotForInventoryControl(inventorySlot)
+    local slotData = ZO_Inventory_GetSlotDataForInventoryControl(inventorySlot)
 
-    if slot then
-        return slot.locked
-    end
-end
-
-local function TryConvertItemStyle(inventorySlot)
-    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    local itemName = GetItemLink(bag, index)
-    if(not IsSlotLocked(inventorySlot)) then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_CONVERT_IMPERIAL_STYLE", { bagId = bag, slotIndex = index }, {mainTextParams = { itemName }})
-    else
-        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_ERROR_ITEM_LOCKED))
+    if slotData then
+        return slotData.locked
     end
 end
 
 local function CanChargeItem(inventorySlot)
-    if(CanUseSecondaryActionOnSlot(inventorySlot)) then
+    if CanUseSecondaryActionOnSlot(inventorySlot) then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         return IsItemChargeable(bag, index)
     end
@@ -511,7 +497,7 @@ local function TryChargingItem(inventorySlot)
 end
 
 local function CanKitRepairItem(inventorySlot)
-    if(CanUseSecondaryActionOnSlot(inventorySlot)) then
+    if CanUseSecondaryActionOnSlot(inventorySlot) then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         return DoesItemHaveDurability(bag, index)
     end
@@ -531,15 +517,37 @@ end
 local function PlaceInventoryItem(inventorySlot)
     local cursorType = GetCursorContentType()
 
-    if(cursorType ~= MOUSE_CONTENT_EMPTY) then
+    if cursorType ~= MOUSE_CONTENT_EMPTY then
+        local sourceBag = GetCursorBagId()
+        local sourceSlot = GetCursorSlotIndex()
         local destBag, destSlot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        PlaceInInventory(destBag, destSlot)
+        ClearCursor()
+        if ZO_InventorySlot_WillItemBecomeBoundOnEquip(sourceBag, sourceSlot) then
+            local itemQuality = select(8, GetItemInfo(sourceBag, sourceSlot))
+            local itemQualityColor = GetItemQualityColor(itemQuality)
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = function() RequestMoveItem(sourceBag, sourceSlot, destBag, destSlot) end}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(sourceBag, sourceSlot))}})
+        else
+            RequestMoveItem(sourceBag, sourceSlot, destBag, destSlot)
+        end
         return true
     end
 end
 
 function TryPlaceInventoryItemInEmptySlot(targetBag)
     local emptySlotIndex = FindFirstEmptySlotInBag(targetBag)
+
+    if not emptySlotIndex and IsESOPlusSubscriber() then
+        -- The player may be trying to split a stack. If they're transacting on the bank or 
+        -- subscriber bank, then the other bag is also a valid target for the split item.
+        if targetBag == BAG_BANK then
+            targetBag = BAG_SUBSCRIBER_BANK
+            emptySlotIndex = FindFirstEmptySlotInBag(targetBag)
+        elseif targetBag == BAG_SUBSCRIBER_BANK then
+            targetBag = BAG_BANK
+            emptySlotIndex = FindFirstEmptySlotInBag(targetBag)
+        end
+    end
+
     if emptySlotIndex ~= nil then
         PlaceInInventory(targetBag, emptySlotIndex)
     else
@@ -550,23 +558,23 @@ end
 
 local function TryGuildBankDepositItem(sourceBag, sourceSlot)
     local guildId = GetSelectedGuildBankId()
-    if(guildId) then
-        if(not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_BANK_DEPOSIT)) then
+    if guildId then
+        if not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_BANK_DEPOSIT) then
             ZO_AlertEvent(EVENT_GUILD_BANK_TRANSFER_ERROR, GUILD_BANK_NO_DEPOSIT_PERMISSION)
             return
         end
 
-        if(not DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_BANK_DEPOSIT)) then
+        if not DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_BANK_DEPOSIT) then
             ZO_AlertEvent(EVENT_GUILD_BANK_TRANSFER_ERROR, GUILD_BANK_GUILD_TOO_SMALL)
             return
         end
 
-        if(IsItemStolen(sourceBag, sourceSlot)) then
+        if IsItemStolen(sourceBag, sourceSlot) then
             ZO_AlertEvent(EVENT_GUILD_BANK_TRANSFER_ERROR, GUILD_BANK_NO_DEPOSIT_STOLEN_ITEM)
             return
         end
 
-        if(GetNumBagFreeSlots(BAG_GUILDBANK) == 0) then
+        if GetNumBagFreeSlots(BAG_GUILDBANK) == 0 then
             ZO_AlertEvent(EVENT_GUILD_BANK_TRANSFER_ERROR, GUILD_BANK_NO_SPACE_LEFT)
             return
         end
@@ -576,22 +584,37 @@ local function TryGuildBankDepositItem(sourceBag, sourceSlot)
     ClearCursor()
 end
 
-local function TryGuildBankWithdrawItem(sourceSlotId)
+local function TryGuildBankWithdrawItem(sourceSlotIndex)
     local guildId = GetSelectedGuildBankId()
-    if(guildId) then
-        if(not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_BANK_WITHDRAW)) then
+    if guildId then
+        if not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_BANK_WITHDRAW) then
             ZO_AlertEvent(EVENT_GUILD_BANK_TRANSFER_ERROR, GUILD_BANK_NO_WITHDRAW_PERMISSION)
             return
         end
 
-        if(not DoesBagHaveSpaceFor(BAG_BACKPACK, sourceBag, sourceSlot)) then
+        if not DoesBagHaveSpaceFor(BAG_BACKPACK, BAG_GUILDBANK, sourceSlotIndex) then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_INVENTORY_FULL)
             return
         end
 
-        TransferFromGuildBank(sourceSlotId)
+        TransferFromGuildBank(sourceSlotIndex)
     end
     ClearCursor()
+end
+
+function ZO_TryMoveToInventoryFromBagAndSlot(bag, slotIndex)
+    if DoesBagHaveSpaceFor(BAG_BACKPACK, bag, slotIndex) then
+        local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
+        transferDialog:StartTransfer(bag, slotIndex, BAG_BACKPACK)
+    else
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_INVENTORY_FULL)
+    end
+     ClearCursor()
+end
+
+local function TryMoveToInventory(inventorySlot)
+    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    ZO_TryMoveToInventoryFromBagAndSlot(bag, index)
 end
 
 local function PlaceInventoryItemInStorage(targetInventorySlot)
@@ -609,22 +632,33 @@ local function PlaceInventoryItemInStorage(targetInventorySlot)
     local sourceBag, sourceSlotIndex = GetCursorBagId(), GetCursorSlotIndex()
     local sourceItemId = GetItemInstanceId(sourceBag, sourceSlotIndex)
 
-    if(targetType == SLOT_TYPE_ITEM or targetType == SLOT_TYPE_BANK_ITEM) then
-        if(sourceType == MOUSE_CONTENT_EQUIPPED_ITEM) then
+    -- Transferring from Craft Bag is going to be handled independently here because it has special needs
+    if sourceBag == BAG_VIRTUAL then
+        -- We can really only transfer from the Craft Bag to the BACKPACK and when we transfer
+        -- we want to prompt the option to choose a quantity (up to 200)
+        if sourceType == MOUSE_CONTENT_INVENTORY_ITEM then
+            if targetType == SLOT_TYPE_ITEM and targetBag == BAG_BACKPACK then
+                ZO_TryMoveToInventoryFromBagAndSlot(sourceBag, sourceSlotIndex)
+                return true
+            end
+        end
+        return false
+    elseif targetType == SLOT_TYPE_ITEM or targetType == SLOT_TYPE_BANK_ITEM then
+        if sourceType == MOUSE_CONTENT_EQUIPPED_ITEM then
             TryPlaceInventoryItemInEmptySlot(targetBag)
             return true
-        elseif(sourceType == MOUSE_CONTENT_INVENTORY_ITEM) then
+        elseif sourceType == MOUSE_CONTENT_INVENTORY_ITEM then
             -- if the items can stack, move the source to the clicked slot, otherwise try to move to an empty slot.
             -- never swap!
-            if(sourceBag == BAG_GUILDBANK) then
+            if sourceBag == BAG_GUILDBANK then
                 TryGuildBankWithdrawItem(sourceSlotIndex)
                 return true
             else
-                if(sourceItemId == targetItemId) then
+                if sourceItemId == targetItemId then
                     PlaceInInventory(targetBag, targetSlotIndex)
                     return true
                 else
-                    if(sourceBag == targetBag) then
+                    if sourceBag == targetBag then
                         ClearCursor()
                     else
                         TryPlaceInventoryItemInEmptySlot(targetBag)
@@ -632,12 +666,12 @@ local function PlaceInventoryItemInStorage(targetInventorySlot)
                     return true
                 end
             end
-        elseif(sourceType == MOUSE_CONTENT_QUEST_ITEM) then
+        elseif sourceType == MOUSE_CONTENT_QUEST_ITEM then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_INVENTORY_ERROR_NO_QUEST_ITEMS_IN_BANK))
             return false
         end
-    elseif(targetType == SLOT_TYPE_GUILD_BANK_ITEM) then
-        if(sourceType == MOUSE_CONTENT_QUEST_ITEM) then
+    elseif targetType == SLOT_TYPE_GUILD_BANK_ITEM then
+        if sourceType == MOUSE_CONTENT_QUEST_ITEM then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_INVENTORY_ERROR_NO_QUEST_ITEMS_IN_BANK))
             return false
         elseif sourceBag == BAG_GUILDBANK then
@@ -655,11 +689,11 @@ local function PlaceInventoryItemInStorage(targetInventorySlot)
 end
 
 local function TryBankItem(inventorySlot)
-    if(PLAYER_INVENTORY:IsBanking()) then
+    if IsBankOpen() then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if(bag == BAG_BANK) then
+        if bag == BAG_BANK or bag == BAG_SUBSCRIBER_BANK or IsHouseBankBag(bag) then
             --Withdraw
-            if(DoesBagHaveSpaceFor(BAG_BACKPACK, bag, index)) then
+            if DoesBagHaveSpaceFor(BAG_BACKPACK, bag, index) then
                 PickupInventoryItem(bag, index)
                 PlaceInTransfer()
             else
@@ -667,35 +701,46 @@ local function TryBankItem(inventorySlot)
             end
         else
             --Deposit
-            if(IsItemStolen(bag, index)) then
+            if IsItemStolen(bag, index) then
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_STOLEN_ITEM_CANNOT_DEPOSIT_MESSAGE)
-            elseif(not DoesBagHaveSpaceFor(BAG_BANK, bag, index)) then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_BANK_FULL)
             else
-                PickupInventoryItem(bag, index)
-                PlaceInTransfer()
-            end
+                local bankingBag = GetBankingBag()
+                local canAlsoBePlacedInSubscriberBank = bankingBag == BAG_BANK
+
+                if DoesBagHaveSpaceFor(bankingBag, bag, index) or (canAlsoBePlacedInSubscriberBank and DoesBagHaveSpaceFor(BAG_SUBSCRIBER_BANK, bag, index)) then
+                    PickupInventoryItem(bag, index)
+                    PlaceInTransfer()
+                else
+                    if canAlsoBePlacedInSubscriberBank and not IsESOPlusSubscriber() then
+                        if GetNumBagUsedSlots(BAG_SUBSCRIBER_BANK) > 0 then
+                            TriggerTutorial(TUTORIAL_TRIGGER_BANK_OVERFULL)
+                        else
+                            TriggerTutorial(TUTORIAL_TRIGGER_BANK_FULL_NO_ESO_PLUS)
+                        end
+                    end
+                    ZO_AlertEvent(EVENT_BANK_IS_FULL)
+                end                
+             end
         end
         return true
     end
 end
 
-local function TryMoveToInventory(inventorySlot)
-    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if DoesBagHaveSpaceFor(BAG_BACKPACK, bag, index) then
-        local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
-        transferDialog:StartTransfer(bag, index, BAG_BACKPACK)
-        return true
-    else
-        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_INVENTORY_FULL)
-    end
+local function CanMoveToCraftBag(bagId, slotIndex)
+    return HasCraftBagAccess() and CanItemBeVirtual(bagId, slotIndex) and not IsItemStolen(bagId, slotIndex)
 end
 
-local function TryMoveToCraftBag(inventorySlot)
-    local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
-    transferDialog:StartTransfer(bag, index, BAG_VIRTUAL)
-    return true
+local function TryMoveToCraftBag(bagId, slotIndex)
+    local slotData = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
+    if slotData then
+        if slotData.isGemmable then
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_STOW_GEMIFIABLE", { sourceBagId = bagId, sourceSlotIndex = slotIndex })
+        else
+            local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
+            transferDialog:StartTransfer(bagId, slotIndex, BAG_VIRTUAL)
+            return true
+        end
+    end
 end
 
 local function TryPreviewDyeStamp(inventorySlot)
@@ -727,7 +772,7 @@ end
 -- If called on an item inventory slot, returns the index of the attachment slot that's holding it, or nil if it's not attached.
 local function GetQueuedItemAttachmentSlotIndex(inventorySlot)
     local bag, attachmentIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if (bag) then
+    if bag then
         for i = 1, MAIL_MAX_ATTACHED_ITEMS do
             local bagId, slotIndex = GetQueuedItemAttachmentInfo(i)
             if bagId == bag and attachmentIndex == slotIndex then
@@ -745,23 +790,23 @@ local function IsItemAlreadyAttachedToMail(inventorySlot)
 end
 
 local function TryMailItem(inventorySlot)
-    if(IsSendingMail()) then
+    if IsSendingMail() then
         for i = 1, MAIL_MAX_ATTACHED_ITEMS do
             local queuedFromBag = GetQueuedItemAttachmentInfo(i)
 
-            if(queuedFromBag == 0) then
+            if queuedFromBag == 0 then
                 local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
                 local result = QueueItemAttachment(bag, index, i)
 
-                if(result == MAIL_ATTACHMENT_RESULT_ALREADY_ATTACHED) then
+                if result == MAIL_ATTACHMENT_RESULT_ALREADY_ATTACHED then
                     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_MAIL_ALREADY_ATTACHED))
-                elseif(result == MAIL_ATTACHMENT_RESULT_BOUND) then
+                elseif result == MAIL_ATTACHMENT_RESULT_BOUND then
                     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_MAIL_BOUND))
-                elseif(result == MAIL_ATTACHMENT_RESULT_ITEM_NOT_FOUND) then
+                elseif result == MAIL_ATTACHMENT_RESULT_ITEM_NOT_FOUND then
                     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_MAIL_ITEM_NOT_FOUND))
-                elseif(result == MAIL_ATTACHMENT_RESULT_LOCKED) then
+                elseif result == MAIL_ATTACHMENT_RESULT_LOCKED then
                     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_MAIL_LOCKED))
-                elseif(result == MAIL_ATTACHMENT_RESULT_STOLEN) then
+                elseif result == MAIL_ATTACHMENT_RESULT_STOLEN then
                     ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_STOLEN_ITEM_CANNOT_MAIL_MESSAGE))
                 else
                     UpdateMouseoverCommand(inventorySlot)
@@ -911,7 +956,7 @@ local function TryEquipItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local function DoEquip() 
         local equipSucceeds, possibleError = IsEquipable(bag, index)
-        if(equipSucceeds) then
+        if equipSucceeds then
             ClearCursor()
             EquipItem(bag, index)
             return true
@@ -920,8 +965,10 @@ local function TryEquipItem(inventorySlot)
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, possibleError)    
     end
     
-    if IsItemBoPAndTradeable(bag, index) then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_TRADE_BOP", {onAcceptCallback = DoEquip}, {mainTextParams = {GetItemName(bag, index)}})
+    if ZO_InventorySlot_WillItemBecomeBoundOnEquip(bag, index) then
+        local itemQuality = select(8, GetItemInfo(bag, index))
+        local itemQualityColor = GetItemQualityColor(itemQuality)
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = DoEquip}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(bag, index))}})
     else
         DoEquip()
     end
@@ -959,14 +1006,14 @@ local destroyableItems =
     [SLOT_TYPE_EQUIPMENT] = true,
     [SLOT_TYPE_BANK_ITEM] = true,
     [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] = true,
-    [SLOT_TYPE_CRAFT_BAG_ITEM] = true,
+    [SLOT_TYPE_CRAFT_BAG_ITEM] = false, -- There's no good reason to destroy from the Craft Bag
 }
 
 function ZO_InventorySlot_CanDestroyItem(inventorySlot)
     local slotType = ZO_InventorySlot_GetType(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    if(destroyableItems[slotType]) and not IsItemPlayerLocked(bag, index) then
-        if(slotType == SLOT_TYPE_EQUIPMENT) then
+    if destroyableItems[slotType] and not IsItemPlayerLocked(bag, index) then
+        if slotType == SLOT_TYPE_EQUIPMENT then
             return CanUnequipItem(inventorySlot) -- if you can unequip it, it can be destroyed.
         else
             return true
@@ -1015,24 +1062,24 @@ local function TryUseItem(inventorySlot)
     end
 end
 
--- TODO: This function is currently unused but when character worn slots are converted back to inventorySlots and integrated into the backpack window the call
--- to PlaceInEquipSlot will need to happen.
-local function PlaceEquippedItem(inventorySlot)
-    if(GetCursorContentType() ~= MOUSE_CONTENT_EMPTY) then
-        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        PlaceInEquipSlot(index)
-        return true
-    end
-end
-
 local function TryBuyMultiple(inventorySlot)
     ZO_BuyMultiple_OpenBuyMultiple(inventorySlot.index)
 end
 
 local function BuyItemFromStore(inventorySlot)
     local storeItemId = inventorySlot.index
-    BuyStoreItem(storeItemId, 1)
 
+    local itemData = {
+        currencyType1 = inventorySlot.specialCurrencyType1,
+        currencyType2 = inventorySlot.specialCurrencyType2,
+        price = inventorySlot.moneyCost,
+        currencyQuantity1 = inventorySlot.specialCurrencyQuantity1,
+        currencyQuantity2 = inventorySlot.specialCurrencyQuantity2,
+        meetsRequirementsToBuy = inventorySlot.meetsRequirements
+    }
+    if not ZO_Currency_TryShowThresholdDialog(storeItemId, inventorySlot.stackCount, itemData) then
+        BuyStoreItem(storeItemId, 1)
+    end
     return true
 end
 
@@ -1106,6 +1153,8 @@ local function CanItemBeAddedToCraft(inventorySlot)
         return ZO_Enchanting_GetVisibleEnchanting():CanItemBeAddedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         return ZO_Smithing_GetActiveObject():CanItemBeAddedToCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        return SYSTEMS:GetObject("retrait"):CanItemBeAddedToCraft(bag, slot)
     end
 
     return false
@@ -1119,6 +1168,8 @@ local function IsItemAlreadySlottedToCraft(inventorySlot)
         return ZO_Enchanting_GetVisibleEnchanting():IsItemAlreadySlottedToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         return ZO_Smithing_GetActiveObject():IsItemAlreadySlottedToCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        return SYSTEMS:GetObject("retrait"):IsItemAlreadySlottedToCraft(bag, slot)
     end
     return false
 end
@@ -1131,6 +1182,8 @@ local function TryAddItemToCraft(inventorySlot)
         ZO_Enchanting_GetVisibleEnchanting():AddItemToCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         ZO_Smithing_GetActiveObject():AddItemToCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        SYSTEMS:GetObject("retrait"):AddItemToCraft(bag, slot)
     end
     UpdateMouseoverCommand(inventorySlot)
 end
@@ -1143,6 +1196,8 @@ local function TryRemoveItemFromCraft(inventorySlot)
        ZO_Enchanting_GetVisibleEnchanting():RemoveItemFromCraft(bag, slot)
     elseif ZO_Smithing_IsSceneShowing() then
         ZO_Smithing_GetActiveObject():RemoveItemFromCraft(bag, slot)
+    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        SYSTEMS:GetObject("retrait"):RemoveItemFromCraft(bag, slot)
     end
     UpdateMouseoverCommand(inventorySlot)
 end
@@ -1154,6 +1209,7 @@ local function IsCraftingSlotType(slotType)
         or slotType == SLOT_TYPE_SMITHING_STYLE
         or slotType == SLOT_TYPE_SMITHING_TRAIT
         or slotType == SLOT_TYPE_SMITHING_BOOSTER
+        or slotType == SLOT_TYPE_PENDING_RETRAIT_ITEM
 end
 
 local function ShouldHandleClick(inventorySlot)
@@ -1166,7 +1222,7 @@ local function ShouldHandleClick(inventorySlot)
     if slotType == SLOT_TYPE_ITEM or slotType == SLOT_TYPE_BANK_ITEM then
         -- TODO: Check locked state here...locked slots do nothing?
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if(PLAYER_INVENTORY:IsSlotOccupied(bag, index)) then
+        if PLAYER_INVENTORY:IsSlotOccupied(bag, index) then
             return true
         end
 
@@ -1183,13 +1239,13 @@ local g_slotActions = ZO_InventorySlotActions:New()
 local function DiscoverSlotActionFromType(actionContainer, inventorySlot, ...)
     local slotType = ZO_InventorySlot_GetType(inventorySlot)
     local action = actionContainer[slotType]
-    if(action) then
+    if action then
         action(inventorySlot, ...)
     end
 end
 
 local function DefaultUseItemFunction(inventorySlot, slotActions)
-    if(CanUseItem(inventorySlot)) then
+    if CanUseItem(inventorySlot) then
         -- TODO: Localization will involve determining the correct name of the action that will be performed on the item (eat, drink, open, etc...)
         slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() TryUseItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
     end
@@ -1209,7 +1265,7 @@ local useActions =
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(inventorySlot, slotActions)
                                             local textEnum
                                             local category = inventorySlot.categoryType
-                                            if category == COLLECTIBLE_CATEGORY_TYPE_TROPHY then
+                                            if category == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
                                                 textEnum = SI_COLLECTIBLE_ACTION_USE
                                             elseif inventorySlot.active then
                                                 if category == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or category == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET then
@@ -1296,7 +1352,7 @@ local function IsCraftingActionVisible()
 end
 
 local function LinkHelper(slotActions, actionName, link)
-    if link then
+    if link and link ~= "" then
         if actionName == "link_to_chat" and IsChatSystemAvailableForCurrentPlatform() then
             local linkFn = function()
                 ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
@@ -1307,25 +1363,26 @@ local function LinkHelper(slotActions, actionName, link)
             end
 
             slotActions:AddSlotAction(SI_ITEM_ACTION_LINK_TO_CHAT, linkFn, "secondary", nil, {visibleWhenDead = true})
-        elseif actionName == "report_item" then
+        elseif actionName == "report_item" and GetLinkType(link) == LINK_TYPE_ITEM then
             slotActions:AddSlotAction(SI_ITEM_ACTION_REPORT_ITEM, 
                                         function()
                                             if IsInGamepadPreferredMode() then
-                                                 KEYBIND_STRIP:RemoveAllKeyButtonGroups()
-                                                 ZO_Help_Customer_Service_Gamepad_SetupItemIssueTicket(link)
-                                                 -- if we open up the help menu while interacting, we want to make sure that we are not
-                                                 -- just pushing the previous scene onto the stack since it will end the interaction
-                                                 -- and make the scene invalid when coming back to it after the help scene is closed
-                                                 if INTERACT_WINDOW:IsInteracting() then
-                                                    SCENE_MANAGER:Show("helpCustomerServiceGamepad")
-                                                 else
-                                                    SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-                                                 end
+                                                KEYBIND_STRIP:RemoveAllKeyButtonGroups()
+                                                HELP_ITEM_ASSISTANCE_GAMEPAD:InitWithDetails(link)
+                                                -- if we open up the help menu while interacting, we want to make sure that we are not
+                                                -- just pushing the previous scene onto the stack since it will end the interaction
+                                                -- and make the scene invalid when coming back to it after the help scene is closed
+                                                local sceneName = HELP_ITEM_ASSISTANCE_GAMEPAD:GetSceneName()
+                                                if INTERACT_WINDOW:IsInteracting() then
+                                                    SCENE_MANAGER:Show(sceneName)
+                                                else
+                                                    SCENE_MANAGER:Push(sceneName)
+                                                end
                                             else
-                                                HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
-                                                HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromItemLink(link)
+                                                HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ITEM_ASSISTANCE_KEYBOARD:GetFragment())
+                                                HELP_CUSTOMER_SERVICE_ITEM_ASSISTANCE_KEYBOARD:SetDetailsFromItemLink(link)
                                             end
-                                        end, 
+                                        end,
                                         "secondary")
         end
     end
@@ -1357,7 +1414,7 @@ local linkHelperActions =
     [SLOT_TYPE_CRAFTING_COMPONENT] =            function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
     [SLOT_TYPE_PENDING_CRAFTING_COMPONENT] =    function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
     [SLOT_TYPE_SMITHING_MATERIAL] =             function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetSmithingPatternMaterialItemLink, inventorySlot.patternIndex, inventorySlot.materialIndex)) end,
-    [SLOT_TYPE_SMITHING_STYLE] =                function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetSmithingStyleItemLink, inventorySlot.styleIndex)) end,
+    [SLOT_TYPE_SMITHING_STYLE] =                function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetItemStyleMaterialLink, inventorySlot.styleIndex)) end,
     [SLOT_TYPE_SMITHING_TRAIT] =                function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, inventorySlot.traitType ~= ITEM_TRAIT_TYPE_NONE and ZO_LinkHandler_CreateChatLink(GetSmithingTraitItemLink, inventorySlot.traitIndex)) end,
     [SLOT_TYPE_SMITHING_BOOSTER] =              function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetSmithingBoosterLink, inventorySlot)) end,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =             function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
@@ -1367,6 +1424,7 @@ local linkHelperActions =
     [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetInventoryCollectibleLink, inventorySlot)) end,
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =          function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
 }
 
 ---- Quickslot Action Handlers ----
@@ -1422,8 +1480,9 @@ local renameActions =
 {
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(slot, slotActions)
                                                 local collectibleId = slot.collectibleId
-                                                if IsCollectibleRenameable(collectibleId) then
-                                                    slotActions:AddSlotAction(SI_COLLECTIBLE_ACTION_RENAME, function() ZO_Dialogs_ShowDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId }) end, "keybind1")
+                                                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                                                if collectibleData and collectibleData:IsRenameable() then
+                                                    slotActions:AddSlotAction(SI_COLLECTIBLE_ACTION_RENAME, ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId), "keybind1")
                                                 end
                                             end
 }
@@ -1447,13 +1506,13 @@ local actionHandlers =
                         end,
 
     ["bank_deposit"]=   function(inventorySlot, slotActions)
-                            if(PLAYER_INVENTORY:IsBanking()) then
+                            if IsBankOpen() then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_DEPOSIT, function() TryBankItem(inventorySlot) end, "primary")
                             end
                         end,
 
     ["bank_withdraw"] = function(inventorySlot, slotActions)
-                            if(PLAYER_INVENTORY:IsBanking()) then
+                            if IsBankOpen() then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_WITHDRAW, function() TryBankItem(inventorySlot) end, "primary")
                             end
                         end,
@@ -1470,8 +1529,8 @@ local actionHandlers =
     ["guild_bank_withdraw"] =   function(inventorySlot, slotActions)
                                     if(GetSelectedGuildBankId()) then
                                         slotActions:AddSlotAction(SI_ITEM_ACTION_BANK_WITHDRAW, function()
-                                                                                                    local bag, slotId = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                                                                                    TryGuildBankWithdrawItem(slotId)
+                                                                                                    local _, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                                                                                    TryGuildBankWithdrawItem(slotIndex)
                                                                                                 end, "primary")
                                     end
                                 end,
@@ -1524,7 +1583,7 @@ local actionHandlers =
 
     ["gamepad_equip"] = function(inventorySlot, slotActions)
                             local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
+                            if GAMEPAD_INVENTORY_ROOT_SCENE:IsShowing() and IsEquipable(bag, index) and CanEquipItem(inventorySlot) then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_EQUIP, function() GAMEPAD_INVENTORY:TryEquipItem(inventorySlot) end, "primary")
                             end
                         end,
@@ -1580,7 +1639,7 @@ local actionHandlers =
                         end,
     ["mark_as_locked"] =  function(inventorySlot, slotActions)
                             local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and not IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() then
+                            if not IsSlotLocked(inventorySlot) and CanItemBePlayerLocked(bag, index) and not IsItemPlayerLocked(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsItemAlreadySlottedToCraft(inventorySlot) then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_LOCKED, function() MarkAsPlayerLockedHelper(bag, index, true) end, "secondary")
                             end
                         end,
@@ -1594,14 +1653,14 @@ local actionHandlers =
 
     ["mark_as_junk"] =  function(inventorySlot, slotActions)
                             local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                            if(not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
+                            if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, true) end, "secondary")
                             end
                         end,
 
     ["unmark_as_junk"] =    function(inventorySlot, slotActions)
                                 local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if(not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
+                                if not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() and not IsInGamepadPreferredMode() then
                                     slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, false) end, "secondary")
                                 end
                             end,
@@ -1633,8 +1692,18 @@ local actionHandlers =
                                         end,
 
     ["convert_to_imperial_style"] =     function(inventorySlot, slotActions)
-                                           if(CanConvertItemStyle(inventorySlot)) then
-                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_IMPERIAL_STYLE, function() TryConvertItemStyle(inventorySlot) end, "secondary")
+                                            local imperialStyleId = GetImperialStyleId()
+                                            if CanConvertToStyle(inventorySlot, imperialStyleId) then
+                                                local imperialStyleName = GetItemStyleName(imperialStyleId)
+                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_IMPERIAL_STYLE, function() ZO_Dialogs_ShowPlatformDialog("CONVERT_STYLE_MOVED", nil, { mainTextParams = { imperialStyleName }, titleParams = { imperialStyleName } }) end, "secondary")
+                                            end
+                                        end,
+
+    ["convert_to_morag_tong_style"] =     function(inventorySlot, slotActions)
+                                            local moragTongStyleId = GetMoragTongStyleId()
+                                            if CanConvertToStyle(inventorySlot, moragTongStyleId) then
+                                                local moragStyleName = GetItemStyleName(moragTongStyleId)
+                                                slotActions:AddSlotAction(SI_ITEM_ACTION_CONVERT_TO_MORAG_TONG_STYLE, function() ZO_Dialogs_ShowPlatformDialog("CONVERT_STYLE_MOVED", nil, { mainTextParams = { moragStyleName }, titleParams = { moragStyleName } }) end, "secondary")
                                             end
                                         end,
 
@@ -1668,9 +1737,9 @@ local actionHandlers =
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_ITEMS_FROM_CRAFT_BAG, function() TryMoveToInventory(inventorySlot) end, "primary")
                             end,
     ["move_to_craft_bag"] = function(inventorySlot, slotActions)
-                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if HasCraftBagAccess() and CanItemBeVirtual(bag, slot) and not IsItemStolen(bag, slot) then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(inventorySlot) end, "secondary")
+                                local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                if CanMoveToCraftBag(bagId, slotIndex) then
+                                    slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(bagId, slotIndex) end, "secondary")
                                 end
                             end,
     ["preview_dye_stamp"] = function(inventorySlot, slotActions)
@@ -1688,14 +1757,14 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                    { "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "destroy", "report_item" },
-    [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                   NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_STORE_BUY] =                     { "buy", "buy_multiple", "link_to_chat", "report_item" },
     [SLOT_TYPE_STORE_BUYBACK] =                 { "buyback", "link_to_chat", "report_item" },
     [SLOT_TYPE_BUY_MULTIPLE] =                  NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_BANK_ITEM] =                     { "bank_withdraw", "split_stack", "link_to_chat", "mark_as_locked", "unmark_as_locked", "mark_as_junk", "unmark_as_junk", "report_item" },
+    [SLOT_TYPE_BANK_ITEM] =                     { "bank_withdraw", "split_stack", "mark_as_locked", "unmark_as_locked", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
     [SLOT_TYPE_GUILD_BANK_ITEM] =               { "guild_bank_withdraw", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =        { "mail_detach", "link_to_chat", "report_item" },
     [SLOT_TYPE_MAIL_ATTACHMENT] =               NON_INTERACTABLE_ITEM_ACTIONS,
@@ -1706,7 +1775,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] =    { "trading_house_cancel_listing", "link_to_chat" },
     [SLOT_TYPE_REPAIR] =                        { "vendor_repair", "link_to_chat", "destroy", "report_item" },
     [SLOT_TYPE_PENDING_REPAIR] =                NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_CRAFTING_COMPONENT] =            { "add_to_craft", "remove_from_craft", "link_to_chat", "report_item" },
+    [SLOT_TYPE_CRAFTING_COMPONENT] =            { "add_to_craft", "remove_from_craft", "mark_as_locked", "unmark_as_locked", "link_to_chat", "report_item" },
     [SLOT_TYPE_PENDING_CRAFTING_COMPONENT] =    { "remove_from_craft", "link_to_chat", "report_item" },
     [SLOT_TYPE_SMITHING_MATERIAL] =             NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_SMITHING_STYLE] =                NON_INTERACTABLE_ITEM_ACTIONS,
@@ -1714,9 +1783,10 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =              NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =             NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =           { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "charge", "mark_as_locked", "unmark_as_locked", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                { "move_to_inventory", "use", "link_to_chat", "report_item" },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =          { "remove_from_craft", "link_to_chat", "report_item" },
 }
 
 -- Checks to see if a certain slot type should completely disable all actions
@@ -1754,7 +1824,7 @@ function ZO_InventorySlot_ShowContextMenu(inventorySlot)
 end
 
 function ZO_InventorySlot_DoPrimaryAction(inventorySlot)
-    inventorySlot = GetInventorySlotComponents(inventorySlot)
+    inventorySlot = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
     PerClickInitializeActions(inventorySlot, INVENTORY_SLOT_ACTIONS_PREVENT_CONTEXT_MENU)
     local actionPerformed = g_slotActions:DoPrimaryAction()
 
@@ -1772,7 +1842,7 @@ function ItemSlotHasFilterType(slotFilterData, itemFilterType)
     local hasFilterType = false
 
     if slotFilterData ~= nil and itemFilterType ~= nil then
-        for i=1, #slotFilterData do
+        for i = 1, #slotFilterData do
             if slotFilterData[i] == itemFilterType then
                 hasFilterType = true
                 break
@@ -1784,13 +1854,13 @@ function ItemSlotHasFilterType(slotFilterData, itemFilterType)
 end
 
 function ZO_InventorySlot_OnSlotClicked(inventorySlot, button)
-    inventorySlot = GetInventorySlotComponents(inventorySlot)
-    if(button == BUTTON_LEFT) then
+    inventorySlot = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
+    if button == MOUSE_BUTTON_INDEX_LEFT then
         -- Left clicks are only used as drops at the moment, use the receive drag handlers
         ZO_InventorySlot_OnReceiveDrag(inventorySlot)
-    elseif(button == BUTTON_RIGHT) then
+    elseif button == MOUSE_BUTTON_INDEX_RIGHT then
         -- Right clicks only open the context menu
-        if(ShouldHandleClick(inventorySlot)) then
+        if ShouldHandleClick(inventorySlot) then
             ZO_InventorySlot_ShowContextMenu(inventorySlot)
         end
     end
@@ -1799,7 +1869,7 @@ end
 --
 -- Mouse Over
 --
-local SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON = true, true, true
+local SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_PURCHASABLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON = true, true, true
 
 local InventoryEnter =
 {
@@ -1844,7 +1914,7 @@ local InventoryEnter =
     [SLOT_TYPE_EQUIPMENT] =
     {
         function(inventorySlot)
-            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            local _, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
             local _, isEquipped = GetEquippedItemInfo(index)
 
             if isEquipped then
@@ -2068,7 +2138,7 @@ local InventoryEnter =
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =
     {
         function(inventorySlot)
-            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            local _, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
             local _, isEquipped = GetEquippedItemInfo(index)
 
             if isEquipped then
@@ -2091,7 +2161,7 @@ local InventoryEnter =
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =
     {
         function(inventorySlot)
-            ItemTooltip:SetCollectible(inventorySlot.collectibleId, SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON)
+            ItemTooltip:SetCollectible(inventorySlot.collectibleId, SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_PURCHASABLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON)
             return true, ItemTooltip
         end
     },
@@ -2101,6 +2171,17 @@ local InventoryEnter =
             local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
             ItemTooltip:SetBagItem(bag, index)
             return true, ItemTooltip
+        end
+    },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =
+    {
+        function(inventorySlot)
+            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            if bag and index then
+                ItemTooltip:SetBagItem(bag, index)
+                return true, ItemTooltip
+            end
+            return false
         end
     },
 }
@@ -2151,33 +2232,23 @@ local NoComparisionTooltip =
     [SLOT_TYPE_SMITHING_TRAIT] = true,
     [SLOT_TYPE_SMITHING_BOOSTER] = true,
     [SLOT_TYPE_LIST_DIALOG_ITEM] = true,
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] = true,
 }
 
 function ZO_InventorySlot_OnMouseEnter(inventorySlot)
-    local buttonPart, listPart, multiIconPart = GetInventorySlotComponents(inventorySlot)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
 
     if inventorySlot.slotControlType == "listSlot" then
-        if((ZO_InventorySlot_GetStackCount(buttonPart) > 0) or (ZO_InventorySlot_GetStackCount(listPart) > 0)) then
-            if not buttonPart.animation then
-                buttonPart.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", buttonPart)
-            end
-
-            buttonPart.animation:PlayForward()
-
-            if multiIconPart then
-                if not multiIconPart.animation then
-                    multiIconPart.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", multiIconPart)
-                end
-
-                multiIconPart.animation:PlayForward()
-            end
+        if ZO_InventorySlot_GetStackCount(buttonPart) > 0 or ZO_InventorySlot_GetStackCount(listPart) > 0 then
+            ZO_InventorySlot_SetControlScaledUp(buttonPart, true)
+            ZO_InventorySlot_SetControlScaledUp(multiIconPart, true)
         end
     end
 
     InitializeTooltip(ItemTooltip)
     InitializeTooltip(InformationTooltip)
 
-    SetListHighlightHidden(listPart, false)
+    ZO_InventorySlot_SetHighlightHidden(listPart, false)
 
     local success, tooltipUsed = RunHandlers(InventoryEnter, buttonPart)
     if success then
@@ -2196,7 +2267,7 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
 
         ItemTooltip:SetHidden(tooltipUsed ~= ItemTooltip)
         InformationTooltip:SetHidden(tooltipUsed ~= InformationTooltip)
-        
+
         if tooltipUsed then
             if buttonPart.customTooltipAnchor then
                 buttonPart.customTooltipAnchor(tooltipUsed, buttonPart, ComparativeTooltip1, ComparativeTooltip2)
@@ -2278,7 +2349,7 @@ function ZO_PlayHideAnimationOnComparisonTooltip(tooltip)
 end
 
 function ZO_InventorySlot_OnMouseExit(inventorySlot)
-    local buttonPart, listPart, multiIconPart = GetInventorySlotComponents(inventorySlot)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
     ClearTooltip(ItemTooltip)
     ClearTooltip(InformationTooltip)
     ZO_PlayHideAnimationOnComparisonTooltip(ComparativeTooltip1)
@@ -2286,17 +2357,12 @@ function ZO_InventorySlot_OnMouseExit(inventorySlot)
 
     ZO_CharacterWindowStats_HideComparisonValues()
 
-    if buttonPart.animation then
-        buttonPart.animation:PlayBackward()
-    end
-
-    if multiIconPart and multiIconPart.animation then
-        multiIconPart.animation:PlayBackward()
-    end
+    ZO_InventorySlot_SetControlScaledUp(buttonPart, false)
+    ZO_InventorySlot_SetControlScaledUp(multiIconPart, false)
 
     UpdateMouseoverCommand(nil)
 
-    SetListHighlightHidden(listPart, true)
+    ZO_InventorySlot_SetHighlightHidden(listPart, true)
 
     --Perform any additional MouseExit actions
     if ZO_Enchanting_IsSceneShowing() then
@@ -2336,7 +2402,7 @@ local InventoryDragStart =
     },
     [SLOT_TYPE_EQUIPMENT] =
     {
-        function(inventorySlot, button)
+        function(inventorySlot)
             if not ZO_Character_IsReadOnly() then
                 local index = ZO_Inventory_GetSlotIndex(inventorySlot)
                 PickupEquippedItem(index)
@@ -2445,6 +2511,32 @@ local InventoryDragStart =
             return true
         end
     },
+    [SLOT_TYPE_CRAFT_BAG_ITEM] =
+    {
+        function(inventorySlot)
+            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            PickupInventoryItem(bag, index)
+            return true
+        end
+    },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =
+    {
+        function(inventorySlot)
+            if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                if bag and index then
+                    if ZO_RETRAIT_STATION_KEYBOARD then
+                        local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
+                        if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
+                            ZO_RETRAIT_STATION_KEYBOARD:RemoveItemFromCraft(bag, index)
+                            PickupInventoryItem(bag, index)
+                        end
+                    end
+                end
+            end
+            return true
+        end
+    },
 }
 
 function ZO_InventorySlot_OnDragStart(inventorySlot)
@@ -2455,8 +2547,8 @@ function ZO_InventorySlot_OnDragStart(inventorySlot)
         end
     end
 
-    if(GetCursorContentType() == MOUSE_CONTENT_EMPTY) then
-        inventorySlot = GetInventorySlotComponents(inventorySlot)
+    if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+        inventorySlot = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
         return RunHandlers(InventoryDragStart, inventorySlot)
     end
 end
@@ -2521,7 +2613,7 @@ local InventoryReceiveDrag =
     {
         function(inventorySlot)
             local bag, index = GetCursorBagId(), GetCursorSlotIndex()
-            if(index and bag == BAG_BACKPACK) then
+            if index and bag == BAG_BACKPACK then
                 PlaceInTradingHouse()
                 return true
             end
@@ -2553,12 +2645,41 @@ local InventoryReceiveDrag =
             end
         end
     },
+    [SLOT_TYPE_CRAFT_BAG_ITEM] =
+    {
+        function(inventorySlot)
+            local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
+            if CanMoveToCraftBag(bagId, slotIndex) then
+                ClearCursor()
+                return TryMoveToCraftBag(bagId, slotIndex)
+            end
+        end
+    },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =
+    {
+        function(inventorySlot)
+            if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
+                if bagId and slotIndex then
+                    ClearCursor()
+                    if ZO_RETRAIT_STATION_KEYBOARD then
+                        local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
+                        if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
+                            ZO_RETRAIT_STATION_KEYBOARD:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                        end
+                    end
+                    return true
+                end
+            end
+            return false
+        end
+    },
 }
 
 function ZO_InventorySlot_OnReceiveDrag(inventorySlot)
-    if(GetCursorContentType() ~= MOUSE_CONTENT_EMPTY) then
-        local inventorySlot = GetInventorySlotComponents(inventorySlot)
-        RunHandlers(InventoryReceiveDrag, inventorySlot)
+    if GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
+        local inventorySlotButton = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
+        RunHandlers(InventoryReceiveDrag, inventorySlotButton)
     end
 end
 
@@ -2566,26 +2687,70 @@ function ZO_InventorySlot_RemoveMouseOverKeybinds()
     UpdateMouseoverCommand(nil)
 end
 
-function ZO_InventorySlot_Status_OnMouseEnter(control)
-    local slotData = control:GetParent():GetParent().dataEntry.data
-    local isNew = slotData.brandNew
-    local isStolen = slotData.stolen
-    local tooltipText
-
-    if slotData.isPlayerLocked then
-        tooltipText = GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP)
-    elseif isNew and isStolen then
-        tooltipText = GetString(SI_INVENTORY_NEW_AND_STOLEN_ITEM_TOOLTIP)
-    elseif isNew then
-        tooltipText = GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP)
-    elseif isStolen then
-        tooltipText = GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP)
-    elseif slotData.isBoPTradeable then
-        tooltipText = GetString(SI_INVENTORY_TRADE_BOP_ITEM_TOOLTIP)
+function ZO_InventorySlot_WillItemBecomeBoundOnEquip(bagId, slotIndex)
+    if GetItemBindType(bagId, slotIndex) == BIND_TYPE_ON_EQUIP or IsItemBoPAndTradeable(bagId, slotIndex) then
+        return not IsItemBound(bagId, slotIndex)
     end
+    return false
+end
 
-    if tooltipText then
-        InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
-        SetTooltipText(InformationTooltip, tooltipText)
+function ZO_InventorySlot_TraitInfo_OnMouseEnter(control)
+    local _, listPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, false)
+
+    local slotData = control:GetParent().dataEntry.data
+    local traitInformation = slotData.traitInformation
+
+    if traitInformation and traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
+        local itemTrait = GetItemTrait(slotData.bagId, slotData.slotIndex)
+        local traitName = GetString("SI_ITEMTRAITTYPE", itemTrait)
+        local traitInformationString = GetString("SI_ITEMTRAITINFORMATION", traitInformation)
+        InitializeTooltip(InformationTooltip, control, TOPRIGHT, -10, 0, TOPLEFT)
+        InformationTooltip:AddLine(zo_strformat(SI_INVENTORY_TRAIT_STATUS_TOOLTIP, traitName, ZO_SELECTED_TEXT:Colorize(traitInformationString)), "", ZO_NORMAL_TEXT:UnpackRGB())
+        if traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
+            InformationTooltip:AddLine(GetString(SI_INVENTORY_TRAIT_STATUS_RETRAITED_NOT_RESEARCHABLE), "", ZO_NORMAL_TEXT:UnpackRGB())
+        end
+    end
+end
+
+function ZO_InventorySlot_TraitInfo_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+    local _, listPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, true)
+end
+
+do
+    local g_tooltipLines = {}
+
+    function ZO_InventorySlot_Status_OnMouseEnter(control)
+        local slotData = control:GetParent():GetParent().dataEntry.data
+
+        ZO_ClearNumericallyIndexedTable(g_tooltipLines)
+
+        if slotData.isPlayerLocked then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_PLAYER_LOCKED_ITEM_TOOLTIP))
+        end
+        if slotData.brandNew then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_NEW_ITEM_TOOLTIP))
+        end
+        if slotData.stolen then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP))
+        end
+        if slotData.isBoPTradeable then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_TRADE_BOP_ITEM_TOOLTIP))
+        end
+        if slotData.isGemmable then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_GEMMABLE_ITEM_TOOLTIP))
+        end
+        if slotData.bagId == BAG_WORN then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_EQUIPPED_ITEM_TOOLTIP))
+        end
+
+        if #g_tooltipLines > 0 then
+            InitializeTooltip(InformationTooltip, control, TOPRIGHT, -10, 0, TOPLEFT)
+            for _, lineText in ipairs(g_tooltipLines) do
+                InformationTooltip:AddLine(lineText, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+            end
+        end
     end
 end

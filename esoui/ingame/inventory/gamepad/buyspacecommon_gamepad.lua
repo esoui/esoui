@@ -27,7 +27,7 @@ function ZO_BuySpaceGamepad:PerformDeferredInitialization()
 
     local OnUpdate = function()
         if self.cost then
-            local canAfford = self.cost <= GetCarriedCurrencyAmount(CURT_MONEY)
+            local canAfford = self.cost <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
             if self.canAfford == nil or self.canAfford ~= canAfford then
                 self.canAfford = canAfford
             
@@ -39,7 +39,7 @@ function ZO_BuySpaceGamepad:PerformDeferredInitialization()
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end
             ZO_CurrencyControl_SetSimpleCurrency(self.costText, CURT_MONEY, self.cost, ZO_GAMEPAD_CURRENCY_OPTIONS)
-            ZO_CurrencyControl_SetSimpleCurrency(self.goldText, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS)
+            ZO_CurrencyControl_SetSimpleCurrency(self.goldText, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS)
         end
     end
 

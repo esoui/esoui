@@ -1,0 +1,74 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_UpcomingLevelUpRewards_GamepadRewardEntry" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50" />
+
+            <OnInitialized>
+                self.iconControl = self:GetNamedChild("Icon")
+                self.nameControl = self:GetNamedChild("Name")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="2">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="LEFT" offsetX="10" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="RIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_UpcomingLevelUpRewards_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_LevelUpRewardsUpcoming_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                    <Anchor point="TOP" offsetY="ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y" />
+                </Control>
+
+                <Label name="$(parent)Title" font="ZoFontGamepad27" text="SI_LEVEL_UP_REWARDS_UPCOMING_REWARDS_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT" offsetY="-10" />
+                </Label>
+
+                <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="8" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <OnInitialized>
+                        ZO_Scroll_Initialize_Gamepad(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Control name="$(parent)NextLevelContainer" inherits="ZO_LevelUpRewardsArtTileAndRewards_Gamepad">
+                                    <Anchor point="TOPLEFT" />
+                                    <Controls>
+                                        <Label name="$(parent)Title" override="true" text="SI_LEVEL_UP_REWARDS_NEXT_LEVEL_REWARD_HEADER" />
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)NextMilestoneContainer" inherits="ZO_LevelUpRewardsArtTileAndRewards_Gamepad" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)NextLevelContainer" relativePoint="BOTTOMLEFT" offsetY="50" />
+
+                                    <Controls>
+                                        <Label name="$(parent)Title" override="true" text="SI_LEVEL_UP_REWARDS_NEXT_MILESTONE_REWARD_HEADER" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        
+                        <Texture name="$(parent)ScrollIndicator" override="true">
+                            <Anchor point="CENTER" relativePoint="RIGHT" offsetY="-38" offsetX="37" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

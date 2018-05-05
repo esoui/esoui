@@ -4,6 +4,7 @@
             <OnInitialized>
                 self.rankLabel = self:GetNamedChild("Rank")
                 self.nameLabel = self:GetNamedChild("Name")
+                self.houseLabel = self:GetNamedChild("House")
                 self.characterNameLabel = self:GetNamedChild("CharacterName")
                 self.classIcon = self:GetNamedChild("ClassIcon")
                 self.allianceIcon = self:GetNamedChild("AllianceIcon")
@@ -19,6 +20,11 @@
                 <Label name="$(parent)Name" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" verticalAlignment="CENTER">
                     <Dimensions x="ZO_GAMEPAD_LEADERBOARD_LIST_USER_FACING_NAME_WIDTH" />
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Rank" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                </Label>
+              
+                <Label name="$(parent)House" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" verticalAlignment="CENTER">
+                    <Dimensions x="ZO_GAMEPAD_LEADERBOARD_LIST_HOUSE_NAME_WIDTH" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                 </Label>
 
                 <Label name="$(parent)CharacterName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" verticalAlignment="CENTER">
@@ -66,6 +72,14 @@
                                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Rank" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                                     <OnInitialized>
                                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+                              
+                                <Control name="$(parent)House" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_LEADERBOARD_LIST_HOUSE_NAME_WIDTH" />
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_HOUSING_LEADERBOARDS_HEADER_HOUSE), "house", TEXT_ALIGN_LEFT)
                                     </OnInitialized>
                                 </Control>
 

@@ -1,15 +1,15 @@
 function ZO_StackSplit_SplitItem(inventorySlotControl)
-    local slot = PLAYER_INVENTORY:SlotForInventoryControl(inventorySlotControl)
+    local slotData = ZO_Inventory_GetSlotDataForInventoryControl(inventorySlotControl)
 
-    if(slot) then
-        if(slot.locked) then
+    if slotData then
+        if slotData.locked then
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_ERROR_ITEM_LOCKED))
             return false
         end
         
         local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlotControl)
         local stackSize = GetSlotStackSize(bagId, slotIndex)
-        if(stackSize <= 1 or not ZO_InventorySlot_IsSplittableType(inventorySlotControl)) then
+        if stackSize <= 1 or not ZO_InventorySlot_IsSplittableType(inventorySlotControl) then
             return false
         end
 

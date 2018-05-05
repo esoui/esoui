@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_RaidLeaderboardsInformationArea" hidden="true" inherits="ZO_LeaderboardsInformationArea">
+        <TopLevelControl name="ZO_RaidLeaderboardsInformationArea" inherits="ZO_LeaderboardsInformationArea">
             <OnInitialized>
                 ZO_RaidLeaderboardsInformationArea_OnInitialized(self)
             </OnInitialized>

@@ -190,14 +190,17 @@ end
 
 function PlayerInventoryMenuBar:Initialize(control)
     ZO_InventoryMenuBar.Initialize(self, control)
+
+    SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function() self:UpdateInventoryKeybinds() end)
+
     -- Quickslot toggle button
     local quickslotToggleKeybind = {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Toggle Quickslots",
         keybind = "UI_SHORTCUT_QUICK_SLOTS",
-
         callback =  function()
                         self:ToggleQuickslotsTab()
                     end,
-
         ethereal = true,
     }
 
@@ -221,7 +224,7 @@ function PlayerInventoryMenuBar:Initialize(control)
                         return PLAYER_INVENTORY:IsShowingBackpack() and IsESOPlusSubscriber() and CanAnyItemsBeStoredInCraftBag(BAG_BACKPACK)
                     end,
         callback = function()
-            StowAllVirtualItems()
+            ZO_Inventory_TryStowAllMaterials()
         end,
     }
 
@@ -280,6 +283,10 @@ function PlayerInventoryMenuBar:OnFragmentShown()
 
     if AreAnyItemsStolen(INVENTORY_BACKPACK) then
         TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_STOLEN_ITEMS_PRESENT)
+    end
+
+    if HasPoisonInBag(INVENTORY_BACKPACK) then
+        TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_POISONS_PRESENT)
     end
 end
 

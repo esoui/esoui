@@ -34,6 +34,7 @@
                 self.rankLabel = GetControl(self, "Rank")
                 self.classIcon = GetControl(self, "Class")
                 self.nameLabel = GetControl(self, "Name")
+                self.houseLabel = GetControl(self, "House")
                 self.allianceIcon = GetControl(self, "Alliance")
                 self.pointsLabel = GetControl(self, "Points")
             </OnInitialized>
@@ -53,6 +54,11 @@
                     <OnMouseExit>
                         ZO_LeaderboardsRowName_OnMouseExit(self)
                     </OnMouseExit>
+                </Label>
+              
+                <Label name="$(parent)House" inherits="ZO_LeaderboardsRowLabel" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true">
+                    <Dimensions x="220" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10" />
                 </Label>
                 
                 <Texture name="$(parent)Class" mouseEnabled="true" layer="OVERLAY">
@@ -156,6 +162,11 @@
                             <Dimensions x="220" />
                             <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10" />
                         </Label>
+                      
+                        <Label name="$(parent)House" inherits="ZO_LeaderboardsHeaderLabel" text="SI_HOUSING_LEADERBOARDS_HEADER_HOUSE">
+                            <Dimensions x="220" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10" />
+                        </Label>
 
                         <Label name="$(parent)Class" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_CLASS" horizontalAlignment="CENTER">
                             <Dimensions x="100" />
@@ -170,6 +181,7 @@
                         <Label name="$(parent)Points" inherits="ZO_LeaderboardsHeaderLabel" horizontalAlignment="RIGHT">
                             <Anchor point="RIGHT" offsetX="-35" />
                         </Label>
+                        
                     </Controls>
                 </Control>
 

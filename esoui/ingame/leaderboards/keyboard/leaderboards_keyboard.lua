@@ -15,11 +15,21 @@ function ZO_LeaderboardsManager_Keyboard:Initialize(control, leaderboardControl)
 
     self.activeLeaderboardLabel = GetControl(control, "ActiveLeaderboard")
     self.pointsHeaderLabel = GetControl(control, "HeadersPoints")
+    self.classHeaderLabel = GetControl(control, "HeadersClass")
+    self.allianceHeaderLabel = GetControl(control, "HeadersAlliance")
+    self.houseHeaderLabel = GetControl(control, "HeadersHouse")
     self.emptyRow = GetControl(control, "EmptyRow")
 
     self:InitializeFilters()
     self:InitializeCategoryList()
     self:InitializeLeaderboard()
+
+    LEADERBOARDS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Leaderboards)
+    LEADERBOARDS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+                                                 if newState == SCENE_FRAGMENT_SHOWING then
+                                                     self:QueryData()
+                                                 end
+                                             end)
 end
 
 function ZO_LeaderboardsManager_Keyboard:InitializeFilters()
@@ -72,9 +82,11 @@ function ZO_LeaderboardsManager_Keyboard:InitializeCategoryList()
 end
 
 function ZO_LeaderboardsManager_Keyboard:InitializeScenes()
-    LEADERBOARDS_SCENE = ZO_Scene:New("leaderboards", SCENE_MANAGER)
+    ZO_LeaderboardsManager_Shared.InitializeScenes(self, "leaderboards")
+
+    LEADERBOARDS_SCENE = self:GetScene()
     LEADERBOARDS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
             self:OnLeaderboardSelected(self:GetSelectedLeaderboardData())
             self:RefreshData()
             if self.leaderboardObject then
@@ -82,8 +94,6 @@ function ZO_LeaderboardsManager_Keyboard:InitializeScenes()
             end
         end
     end)
-
-    self:RegisterMasterListUpdatedCallback(LEADERBOARDS_SCENE)
 end
 
 function ZO_LeaderboardsManager_Keyboard:AddCategory(name, normalIcon, pressedIcon, mouseoverIcon)
@@ -114,7 +124,31 @@ function ZO_LeaderboardsManager_Keyboard:AddEntry(leaderboardObject, name, title
         leaderboardRankType = leaderboardRankType,
     }
 
-    return self.navigationTree:AddNode(CATEGORY_ENTRY_TEMPLATE, entryData, parent, SOUNDS.LEADERBOARD_SUBCATEGORY_SELECTED)
+    local node = self.navigationTree:AddNode(CATEGORY_ENTRY_TEMPLATE, entryData, parent, SOUNDS.LEADERBOARD_SUBCATEGORY_SELECTED)
+    
+    local previouslySelectedData = self.previouslySelectedData
+    if previouslySelectedData then
+        if name == previouslySelectedData.name then
+            local previouslySelectedSubType = previouslySelectedData.subType
+            local subTypeFormat = type(subType)
+            if subTypeFormat == type(previouslySelectedSubType) then
+                if subTypeFormat == "table" then
+                    --Assume it's a match until proven otherwise in the below loop
+                    self.nodeToReselect = node
+                    for k, v in pairs(subType) do
+                        if v ~= previouslySelectedSubType[k] then
+                            self.nodeToReselect = nil
+                            break
+                        end
+                    end
+                elseif subType == previouslySelectedSubType then
+                    self.nodeToReselect = node
+                end
+            end
+        end
+    end
+
+    return node
 end
 
 function ZO_LeaderboardsManager_Keyboard:GetSelectedLeaderboardData()
@@ -122,16 +156,40 @@ function ZO_LeaderboardsManager_Keyboard:GetSelectedLeaderboardData()
 end
 
 function ZO_LeaderboardsManager_Keyboard:UpdateCategories()
+    self.previouslySelectedData = self.navigationTree:GetSelectedData()
+    self.nodeToReselect = nil
     self.navigationTree:Reset()
 
-    if CAMPAIGN_LEADERBOARDS then
-        CAMPAIGN_LEADERBOARDS:AddCategoriesToParentSystem()
-    end
-    if RAID_LEADERBOARDS then
-        RAID_LEADERBOARDS:AddCategoriesToParentSystem()
+    local campaignLeaderboards = CAMPAIGN_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(CAMPAIGN_LEADERBOARD_SYSTEM_NAME)
+    if campaignLeaderboards then
+        campaignLeaderboards:AddCategoriesToParentSystem()
     end
 
-    self.navigationTree:Commit()
+    local raidLeaderboards = RAID_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME)
+    if raidLeaderboards then
+        raidLeaderboards:AddCategoriesToParentSystem()
+    end
+
+    local housingLeaderboards = HOUSING_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(HOUSING_LEADERBOARD_SYSTEM_NAME)
+    if housingLeaderboards then
+        housingLeaderboards:AddCategoriesToParentSystem()
+    end
+
+    local battlegroundLeaderboards = BATTLEGROUND_LEADERBOARD_SYSTEM_NAME and SYSTEMS:GetKeyboardObject(BATTLEGROUND_LEADERBOARD_SYSTEM_NAME)
+    if battlegroundLeaderboards then
+        battlegroundLeaderboards:AddCategoriesToParentSystem()
+    end
+
+    self.navigationTree:Commit(self.nodeToReselect)
+end
+
+function ZO_LeaderboardsManager_Keyboard:RefreshLeaderboardType(leaderboardType)
+    local isHouseLeaderboard = leaderboardType == LEADERBOARD_TYPE_HOUSE
+    local isBattlegroundLeaderboard = leaderboardType == LEADERBOARD_TYPE_BATTLEGROUND
+    local shouldHideClassAndAlliance = isHouseLeaderboard or isBattlegroundLeaderboard
+    self.classHeaderLabel:SetHidden(shouldHideClassAndAlliance)
+    self.allianceHeaderLabel:SetHidden(shouldHideClassAndAlliance)
+    self.houseHeaderLabel:SetHidden(not isHouseLeaderboard)
 end
 
 function ZO_LeaderboardsManager_Keyboard:SetSelectedLeaderboardObject(leaderboardObject, subType)
@@ -169,8 +227,6 @@ function ZO_LeaderboardsManager_Keyboard:SelectNode(node)
 end
 
 function ZO_LeaderboardsManager_Keyboard:SetupLeaderboardPlayerEntry(control, data)
-    self.nameControl = control.nameLabel
-    
     self:SetupRow(control, data)
 
     ZO_LeaderboardsManager_Shared.SetupLeaderboardPlayerEntry(self, control, data)
@@ -185,33 +241,35 @@ function ZO_LeaderboardsManager_Keyboard:BuildMasterList()
 end
 
 function ZO_LeaderboardsManager_Keyboard:FilterScrollList()
-    local filteredClass = self.filterComboBox:GetSelectedItemData().classId
+    local selectedData = self.filterComboBox:GetSelectedItemData()
+    if selectedData then
+        local playerName = GetUnitName("player")
+        local filteredClass = self.filterComboBox:GetSelectedItemData().classId
 
-    local index = 0
-    local function PreAddCallback(data)
-        index = index + 1
-        data.index = index
+        local index = 0
+        local function PreAddCallback(data)
+            index = index + 1
+            data.index = index
+            data.recolorName = data.characterName == playerName
+        end
+
+        LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, filteredClass, PreAddCallback)
+
+        self.emptyRow:SetHidden(index > 0)
     end
-
-    LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, filteredClass, PreAddCallback)
-
-    self.emptyRow:SetHidden(index > 0)
 end
 
 function ZO_LeaderboardsManager_Keyboard:ColorRow(control, data)
-    local textColor = ZO_LeaderboardsManager_Shared.GetRowColors(data)
-    self.nameControl:SetColor(textColor:UnpackRGBA())
+    local nameColor = data.recolorName and ZO_SELECTED_TEXT or ZO_SECOND_CONTRAST_TEXT
+    control.nameLabel:SetColor(nameColor:UnpackRGBA())
 end
 
 function ZO_LeaderboardsManager_Keyboard:RepopulateFilterDropdown()
-    local isClassType = LEADERBOARD_LIST_MANAGER.leaderboardRankType == LEADERBOARD_TYPE_CLASS
-    local includeAllFilter = not isClassType
-
     local function OnFilterChanged(comboBox, entryText, entry)
         self:RefreshFilters()
     end
 
-    ZO_Leaderboards_PopulateDropdownFilter(self.filterComboBox, OnFilterChanged, includeAllFilter, isClassType)
+    ZO_Leaderboards_PopulateDropdownFilter(self.filterComboBox, OnFilterChanged, LEADERBOARD_LIST_MANAGER.leaderboardRankType)
 end
 
 --Global XML Handlers

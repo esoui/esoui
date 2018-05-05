@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_HousingLeaderboardsInformationArea" hidden="true" inherits="ZO_LeaderboardsInformationArea">
+            <OnInitialized>
+                ZO_HousingLeaderboardsInformationArea_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,12 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LevelUpRewardsArtTileAndRewards_Gamepad" inherits="ZO_LevelUpRewardsArtTileAndRewards" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Frame" override="true">
+                    <Dimensions x="ZO_LEVEL_UP_REWARDS_GAMEPAD_BACKGROUND_WIDTH" y="ZO_LEVEL_UP_REWARDS_GAMEPAD_BACKGROUND_HEIGHT" />
+                </Texture>
+                <Label name="$(parent)Title" font="ZoFontGamepad27" override="true"/>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

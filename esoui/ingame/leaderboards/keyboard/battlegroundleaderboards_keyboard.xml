@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_BattlegroundLeaderboardsInformationArea" hidden="true" inherits="ZO_LeaderboardsInformationArea">
+            <OnInitialized>
+                ZO_BattlegroundLeaderboardsInformationArea_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

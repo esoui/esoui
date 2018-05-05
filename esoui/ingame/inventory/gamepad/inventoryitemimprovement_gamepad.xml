@@ -6,7 +6,6 @@
         <Control name="ZO_Gamepad_ItemImprovement_ItemTemplate" inherits="ZO_GamepadItemSubEntryTemplate" hidden="true" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                self.subLabelCount = 3
                 self.subLabel1 = self:GetNamedChild("SubLabel1")
                 self.subLabel3 = self:GetNamedChild("SubLabel3")
                 

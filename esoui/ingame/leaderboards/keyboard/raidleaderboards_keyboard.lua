@@ -20,19 +20,21 @@ function ZO_RaidLeaderboardsManager_Keyboard:Initialize(control)
     
     ZO_RaidLeaderboardsManager_Shared.Initialize(self, control, LEADERBOARDS, LEADERBOARDS_SCENE, RAID_LEADERBOARD_FRAGMENT)
 
-    self:RegisterForEvents(control)
+    self:RegisterForEvents()
 
     RAID_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
                                                  if newState == SCENE_FRAGMENT_SHOWING then
                                                      self:UpdateAllInfo()
-                                                     QueryRaidLeaderboardData()
                                                  end
                                              end)
+
+    SYSTEMS:RegisterKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME, self)
+    LEADERBOARDS:UpdateCategories()
 end
 
 function ZO_RaidLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)
     local displayedScore = self.currentScoreData or GetString(SI_LEADERBOARDS_NO_SCORE_RECORDED)
-    self.currentScoreLabel:SetText(zo_strformat(SI_RAID_LEADERBOARDS_BEST_SCORE, displayedScore))
+    self.currentScoreLabel:SetText(zo_strformat(SI_LEADERBOARDS_BEST_SCORE, displayedScore))
 
     local rankingTypeText = GetString("SI_LEADERBOARDTYPE", LEADERBOARD_LIST_MANAGER.leaderboardRankType)
     local displayedRank = self.currentRankData or GetString(SI_LEADERBOARDS_NOT_RANKED)
@@ -53,7 +55,7 @@ function ZO_RaidLeaderboardsManager_Keyboard:UpdateRaidScore()
     ZO_RaidLeaderboardsManager_Shared.UpdateRaidScore(self)
 
     local eligible = not self.participating or self.credited
-    local currentScoreTextFormat = GetString(eligible and SI_RAID_LEADERBOARDS_CURRENT_SCORE or SI_RAID_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE)
+    local currentScoreTextFormat = GetString(eligible and SI_LEADERBOARDS_CURRENT_SCORE or SI_RAID_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE)
     self.scoringInfoLabel:SetText(zo_strformat(currentScoreTextFormat, self.currrentScoreData))
     self.scoringInfoHelpIcon:SetHidden(eligible)
 end
@@ -78,6 +80,4 @@ end
 
 function ZO_RaidLeaderboardsInformationArea_OnInitialized(self)
     RAID_LEADERBOARDS = ZO_RaidLeaderboardsManager_Keyboard:New(self)
-    LEADERBOARDS:UpdateCategories()
-    SYSTEMS:RegisterKeyboardObject(RAID_LEADERBOARD_SYSTEM_NAME, RAID_LEADERBOARDS)
 end

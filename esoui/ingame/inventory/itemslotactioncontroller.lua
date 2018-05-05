@@ -6,11 +6,10 @@ function ZO_ItemSlotActionsController:New(...)
     return command
 end
 
-function ZO_ItemSlotActionsController:Initialize(alignmentOverride, additionalMouseOverbinds)
-    self.alignment = KEYBIND_STRIP_ALIGN_RIGHT
-
+function ZO_ItemSlotActionsController:Initialize(alignmentOverride, additionalMouseOverbinds, useKeybindStrip)
     local slotActions = ZO_InventorySlotActions:New(INVENTORY_SLOT_ACTIONS_PREVENT_CONTEXT_MENU)
     self.slotActions = slotActions
+    self.useKeybindStrip = useKeybindStrip == nil and true or useKeybindStrip
 
     local primaryCommand =
     {
@@ -80,11 +79,19 @@ function ZO_ItemSlotActionsController:Initialize(alignmentOverride, additionalMo
     end
 end
 
+function ZO_ItemSlotActionsController:SetUseKeybindStrip(useKeybindStrip)
+    self.useKeybindStrip = useKeybindStrip
+end
+
 function ZO_ItemSlotActionsController:AddSubCommand(command, hasBind, activateCallback)
     self[#self + 1] = { command, hasBind = hasBind, activateCallback = activateCallback }
 end
 
 function ZO_ItemSlotActionsController:RefreshKeybindStrip()
+    if not self.useKeybindStrip then
+        return
+    end
+
     for i, command in ipairs(self) do
         if command.hasBind() then
             if KEYBIND_STRIP:HasKeybindButtonGroup(command) then

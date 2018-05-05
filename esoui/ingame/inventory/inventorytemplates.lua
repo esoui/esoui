@@ -11,24 +11,13 @@ do
         end
     end
 
-    local function UpdateSlots_Gamepad(infoBar, bagType)
-        local slotsLabel = infoBar:GetNamedChild("FreeSlots")
-
-        local numUsedSlots = GetNumBagUsedSlots(bagType)
-        local numSlots = GetBagSize(bagType)
-
-        if numUsedSlots < numSlots then
-            slotsLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-        else
-            slotsLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
-        end
-
-        slotsLabel:SetText(zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, numUsedSlots, numSlots))
-    end
-
-    local function InventoryInfoBar_ConnectStandardBar_Common(infoBar, options, updateInventorySlotFnc, currencyConnectFnc, bagType)
+    local function InventoryInfoBar_ConnectStandardBar_Common(infoBar, currencyType, currencyLocation, currencyOptions, updateInventorySlotFnc, bagType)
         if infoBar.isConnected then return end
 
+        -- setup the currency label, which will manage its own dirty state
+        ZO_SharedInventory_ConnectPlayerCurrencyLabel(infoBar:GetNamedChild("Money"), currencyType, currencyLocation, currencyOptions)
+
+        -- Setup handling for slot counts changing
         local slotsDirty = true
 
         local function OnInventoryUpdated()
@@ -39,8 +28,6 @@ do
                 slotsDirty = false
             end
         end
-
-        currencyConnectFnc(infoBar:GetNamedChild("Money"), options)
 
         if bagType == BAG_GUILDBANK then
             infoBar:RegisterForEvent(EVENT_GUILD_BANK_ITEM_ADDED, OnInventoryUpdated)
@@ -69,18 +56,6 @@ do
     end
 
     function ZO_InventoryInfoBar_ConnectStandardBar(infoBar)
-        InventoryInfoBar_ConnectStandardBar_Common(infoBar, ZO_KEYBOARD_CARRIED_CURRENCY_OPTIONS, UpdateInventorySlots, ZO_SharedInventory_ConnectPlayerCurrencyLabel, BAG_BACKPACK)
-    end
-
-    function ZO_InventoryInfoBar_Gamepad_ConnectStandardBar(infoBar)
-        InventoryInfoBar_ConnectStandardBar_Common(infoBar, ZO_GAMEPAD_CURRENCY_OPTIONS, UpdateSlots_Gamepad, ZO_SharedInventory_ConnectPlayerCurrencyLabel, BAG_BACKPACK)
-    end
-
-    function ZO_InventoryInfoBar_Gamepad_ConnectBankBar(infoBar)
-        InventoryInfoBar_ConnectStandardBar_Common(infoBar, ZO_GAMEPAD_CURRENCY_OPTIONS, UpdateSlots_Gamepad, ZO_SharedInventory_ConnectBankedCurrencyLabel, BAG_BANK)
-    end
-
-    function ZO_InventoryInfoBar_Gamepad_ConnectGuildBankBar(infoBar)
-        InventoryInfoBar_ConnectStandardBar_Common(infoBar, ZO_GAMEPAD_CURRENCY_OPTIONS, UpdateSlots_Gamepad, ZO_SharedInventory_ConnectGuildBankedCurrencyLabel, BAG_GUILDBANK)
+        InventoryInfoBar_ConnectStandardBar_Common(infoBar, CURT_MONEY, CURRENCY_LOCATION_CHARACTER, ZO_KEYBOARD_CURRENCY_OPTIONS, UpdateInventorySlots, BAG_BACKPACK)
     end
 end

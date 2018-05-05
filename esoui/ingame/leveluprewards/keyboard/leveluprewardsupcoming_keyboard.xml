@@ -1,0 +1,95 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_UpcomingLevelUpRewardsFadeInContentsAnimation">
+            <Animations>
+                <AlphaAnimation startAlpha="0" endAlpha="1" duration="ZO_UPCOMING_LEVEL_UP_REWARDS_KEYBOARD_SHOW_DURATION_MS"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_LevelUpRewards_UpcomingRewardRow" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_LEVEL_UP_REWARDS_KEYBOARD_ROW_WIDTH" y="ZO_UPCOMING_LEVEL_UP_REWARDS_KEYBOARD_REWARD_ROW_HEIGHT" />
+
+            <OnInitialized>
+                self.background = self:GetNamedChild("Bg")
+                self.iconControl = self:GetNamedChild("Icon")
+                self.nameControl = self:GetNamedChild("Name")
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_LevelUpRewards_RewardRow_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_LevelUpRewards_RewardRow_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                </Texture>
+
+                <Texture name="$(parent)Icon" level="2">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="RIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_UpcomingLevelUpRewards_Keyboard" hidden="true">
+            <Anchor point="TOPLEFT" relativePoint="LEFT" offsetY="-365" />
+            <Dimensions x="ZO_LEVEL_UP_REWARDS_KEYBOARD_SCREEN_WIDTH"/>
+            
+            <OnInitialized>
+                ZO_LevelUpRewardsUpcoming_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_LevelUpRewardsClaimBackground_Keyboard"/>
+
+                <Control name="$(parent)TitleDivider" inherits="ZO_LeftPanel_HorizontalDivider">
+                    <Anchor point="TOPLEFT" offsetY="42" />
+                    <Anchor point="TOPRIGHT" offsetY="42" />
+                </Control>
+
+                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_LEVEL_UP_REWARDS_UPCOMING_REWARDS_HEADER">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" offsetY="2" offsetX="32" />
+                </Label>
+
+                <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleDivider" relativePoint="BOTTOMLEFT"  offsetX="32" offsetY="8"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="32" />
+                    <Dimensions x="ZO_LEVEL_UP_REWARDS_KEYBOARD_SCROLL_WIDTH" />
+                    <OnInitialized>
+                        ZO_Scroll_Initialize(self)
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Control name="$(parent)NextLevelContainer" inherits="ZO_LevelUpRewardsArtTileAndRewards_Keyboard">
+                                    <Anchor point="TOPLEFT" />
+                                    <Controls>
+                                        <Label name="$(parent)Title" override="true" text="SI_LEVEL_UP_REWARDS_NEXT_LEVEL_REWARD_HEADER" />
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)NextMilestoneContainer" inherits="ZO_LevelUpRewardsArtTileAndRewards_Keyboard" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)NextLevelContainer" relativePoint="BOTTOMLEFT" offsetY="ZO_UPCOMING_LEVEL_UP_REWARDS_KEYBOARD_REWARD_CONTAINER_SPACING" />
+                                    <Controls>
+                                        <Label name="$(parent)Title" override="true" text="SI_LEVEL_UP_REWARDS_NEXT_MILESTONE_REWARD_HEADER" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

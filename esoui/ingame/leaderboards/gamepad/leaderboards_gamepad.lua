@@ -14,6 +14,7 @@ function ZO_LeaderboardsManager_Gamepad:Initialize(control)
 
     self.pointsHeaderLabel = GAMEPAD_LEADERBOARD_LIST:GetHeaderControl("PointsName")
 
+    self.leaderboardSystemObjects = {}
     self:InitializeCategoryList(control)
 end
 
@@ -74,9 +75,13 @@ function ZO_LeaderboardsManager_Gamepad:InitializeKeybindStripDescriptors()
 end
 
 function ZO_LeaderboardsManager_Gamepad:InitializeScenes()
-    GAMEPAD_LEADERBOARDS_SCENE = ZO_Scene:New("gamepad_leaderboards", SCENE_MANAGER)
+    ZO_LeaderboardsManager_Shared.InitializeScenes(self, "gamepad_leaderboards")
 
-    self:RegisterMasterListUpdatedCallback(GAMEPAD_LEADERBOARDS_SCENE)
+    GAMEPAD_LEADERBOARDS_SCENE = self:GetScene()
+end
+
+function ZO_LeaderboardsManager_Gamepad:RefreshLeaderboardType(leaderboardType)
+    GAMEPAD_LEADERBOARD_LIST:RefreshLeaderboardType(leaderboardType)
 end
 
 function ZO_LeaderboardsManager_Gamepad:PerformUpdate()
@@ -89,8 +94,7 @@ function ZO_LeaderboardsManager_Gamepad:PerformUpdate()
 end
 
 function ZO_LeaderboardsManager_Gamepad:OnShow()
-    QueryCampaignLeaderboardData()
-    QueryRaidLeaderboardData()
+    self:QueryData()
     self:RefreshCategoryList()
     self:OnLeaderboardSelected(self:GetSelectedLeaderboardData())
     TriggerTutorial(TUTORIAL_TRIGGER_LEADERBOARDS_OPENED)
@@ -109,6 +113,14 @@ end
 
 function ZO_LeaderboardsManager_Gamepad:OnDeferredInitialize()
     self:InitializeHeader()
+
+    for _, systemObject in ipairs(self.leaderboardSystemObjects) do
+        if systemObject.PerformDeferredInitialization then
+            systemObject:PerformDeferredInitialization()
+        end
+    end
+
+    self:UpdateCategories()
 end
 
 function ZO_LeaderboardsManager_Gamepad:AddCategory(name, normalIcon, pressedIcon, mouseoverIcon)
@@ -153,14 +165,17 @@ local function SortFunc(item1, item2)
     return ZO_TableOrderingFunction(item1, item2, "group", CATEGORY_SORT_KEYS, ZO_SORT_ORDER_UP)
 end
 
+function ZO_LeaderboardsManager_Gamepad:RegisterLeaderboardSystemObject(systemObject)
+    table.insert(self.leaderboardSystemObjects, systemObject)
+end
+
 function ZO_LeaderboardsManager_Gamepad:UpdateCategories()
     self.categoryListData = {}
 
-    if GAMEPAD_CAMPAIGN_LEADERBOARDS then
-        GAMEPAD_CAMPAIGN_LEADERBOARDS:AddCategoriesToParentSystem()
-    end
-    if GAMEPAD_RAID_LEADERBOARDS then
-        GAMEPAD_RAID_LEADERBOARDS:AddCategoriesToParentSystem()
+    for _, systemObject in ipairs(self.leaderboardSystemObjects) do
+        if systemObject.AddCategoriesToParentSystem then
+            systemObject:AddCategoriesToParentSystem()
+        end
     end
 
     if GAMEPAD_LEADERBOARDS_SCENE:IsShowing() then

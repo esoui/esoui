@@ -1,6 +1,7 @@
 --Layout consts, defining the widths of the list's columns as provided by design--
 ZO_GAMEPAD_LEADERBOARD_LIST_RANK_WIDTH = 116 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_USER_FACING_NAME_WIDTH = 340 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+ZO_GAMEPAD_LEADERBOARD_LIST_HOUSE_NAME_WIDTH = 580 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_CHARACTER_NAME_WIDTH = 340 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_CLASS_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_LEADERBOARD_LIST_ALLIANCE_WIDTH = 120 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
@@ -15,10 +16,39 @@ local LEADERBOARD_LIST_ENTRY_SORT_KEYS =
 {
     ["rank"] = { isNumeric = true },
     ["displayName"] = { },
+    ["house"] = { tiebreaker = "rank" },
     ["characterName"]  = { },
-    ["class"]  = { tiebreaker = "rank" },
+    ["class"] = { tiebreaker = "rank" },
     ["alliance"] = { tiebreaker = "rank", isNumeric = true },
     ["points"] = { tiebreaker = "rank", isNumeric = true},
+}
+
+local LEADERBOARD_TYPE_HIDDEN_COLUMNS =
+{
+    [LEADERBOARD_TYPE_OVERALL] =
+    {
+        ["house"] = true,
+    },
+    [LEADERBOARD_TYPE_CLASS] =
+    {
+        ["house"] = true,
+    },
+    [LEADERBOARD_TYPE_ALLIANCE] =
+    {
+        ["house"] = true,
+    },
+    [LEADERBOARD_TYPE_HOUSE] = 
+    {
+        ["characterName"] = true,
+        ["class"] = true,
+        ["alliance"] = true,
+    },
+    [LEADERBOARD_TYPE_BATTLEGROUND] = 
+    {
+        ["house"] = true,
+        ["class"] = true,
+        ["alliance"] = true,
+    },
 }
 
 local LeaderboardList_Gamepad = ZO_Object.MultiSubclass(ZO_GamepadInteractiveSortFilterList, ZO_SocialOptionsDialogGamepad)
@@ -56,16 +86,25 @@ function LeaderboardList_Gamepad:InitializeKeybinds()
     ZO_GamepadInteractiveSortFilterList.InitializeKeybinds(self)
 end
 
-function LeaderboardList_Gamepad:InitializeDropdownFilter()
-    ZO_GamepadInteractiveSortFilterList.InitializeDropdownFilter(self)
-    
-    self:RepopulateFilterDropdown()
-end
-
 function LeaderboardList_Gamepad:InitializeSearchFilter()
     ZO_GamepadInteractiveSortFilterList.InitializeSearchFilter(self)
 
     ZO_EditDefaultText_Initialize(self.searchEdit, ZO_GetPlatformAccountLabel())
+end
+
+function LeaderboardList_Gamepad:RefreshLeaderboardType(leaderboardType)
+    local hiddenColumns = LEADERBOARD_TYPE_HIDDEN_COLUMNS[leaderboardType]
+    if hiddenColumns then
+        local HIDDEN = true
+        self.sortHeaderGroup:SetHeadersHiddenFromKeyList(hiddenColumns, HIDDEN)
+
+        if hiddenColumns[self.currentSortKey] then
+            -- Table was sorted by a column that is gone now: fallback to rank
+            self.currentSortKey = "rank"
+            self.currentSortOrder = ZO_SORT_ORDER_UP
+            self.sortHeaderGroup:SelectHeaderByKey(self.currentSortKey, false, true)
+        end
+    end
 end
 
 function LeaderboardList_Gamepad:GetBackKeybindCallback()
@@ -91,14 +130,16 @@ function LeaderboardList_Gamepad:FilterScrollList()
     LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, filteredClass, PreAddCallback, SearchCallback)
 end
 
-function LeaderboardList_Gamepad:EntrySelectionCallback(oldData, newData)
-    ZO_GamepadInteractiveSortFilterList.EntrySelectionCallback(self, oldData, newData)
+function LeaderboardList_Gamepad:OnSelectionChanged(oldData, newData)
+    ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldData, newData)
     self:SetupOptions(newData)
 end
 
 function LeaderboardList_Gamepad:SetupLeaderboardPlayerEntry(control, data)
     ZO_LeaderboardsManager_Shared.SetupLeaderboardPlayerEntry(GAMEPAD_LEADERBOARDS, control, data)
-
+    
+    local leaderboardData = GAMEPAD_LEADERBOARDS:GetSelectedLeaderboardData()
+    control.characterNameLabel:SetHidden(leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_HOUSE)
     control.characterNameLabel:SetText(ZO_FormatUserFacingCharacterName(data.characterName))
 
     local nameColor = data.recolorName and PLAYER_NAME_COLOR or NAME_COLOR
@@ -107,6 +148,7 @@ function LeaderboardList_Gamepad:SetupLeaderboardPlayerEntry(control, data)
 
     local r, g, b, a = ZO_SELECTED_TEXT:UnpackRGBA()
     control.rankLabel:SetColor(r, g, b, a)
+    control.houseLabel:SetColor(r, g, b, a)
     control.characterNameLabel:SetColor(r, g, b, a)
     control.classIcon:SetColor(r, g, b, a)
     control.allianceIcon:SetColor(r, g, b, a)
@@ -126,9 +168,7 @@ function LeaderboardList_Gamepad:ColorName(control, data, textColor)
 end
 
 function LeaderboardList_Gamepad:RepopulateFilterDropdown()
-    local isClassType = LEADERBOARD_LIST_MANAGER.leaderboardRankType == LEADERBOARD_TYPE_CLASS
-    local includeAllFilter = not isClassType
-    ZO_Leaderboards_PopulateDropdownFilter(self.filterDropdown, nil, includeAllFilter, isClassType)
+    ZO_Leaderboards_PopulateDropdownFilter(self.filterDropdown, nil, LEADERBOARD_LIST_MANAGER.leaderboardRankType)
 end
 
 function ZO_LeaderboardList_Gamepad_OnInitialized(control)
