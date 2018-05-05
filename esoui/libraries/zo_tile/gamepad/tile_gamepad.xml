@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Tile_Gamepad_Control" virtual="true" />
+    </Controls>
+</GuiXml>

@@ -1,0 +1,23 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ClaimTileAnimation">
+            <Animations>
+                <AlphaAnimation applyToChildControlName="ClaimFlash" duration="100" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_ClaimTile_Control" inherits="ZO_ActionTile_Control" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)ClaimFlash" color="FFFFFFFF" layer="OVERLAY" alpha="0">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

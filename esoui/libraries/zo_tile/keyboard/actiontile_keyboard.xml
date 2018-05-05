@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ActionTile_Keyboard_Control" inherits="ZO_Tile_Keyboard_Control" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Label name="$(parent)Header" override="true" font="ZoFontWinH4" />
+
+                        <Label name="$(parent)Title" override="true" font="ZoFontWinH2" />
+
+                        <Button name="$(parent)ActionButton" inherits="ZO_DefaultButton">
+                            <Dimensions x="200" />
+                            <Anchor point="TOP" relativeTo="$(parent)Background"  relativePoint="BOTTOM" offsetY="-15" />
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ClaimTile_Keyboard_Control" inherits="ZO_ActionTile_Keyboard_Control" virtual="true" />
+    </Controls>
+</GuiXml>

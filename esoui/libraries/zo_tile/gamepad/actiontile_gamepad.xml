@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ActionTile_Gamepad_Control" inherits="ZO_Tile_Gamepad_Control" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Selection" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="true">
+                            <Anchor point="TOPLEFT"  offsetX="-3" offsetY="-3" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                        </Backdrop>
+                
+                        <Label name="$(parent)Header" override="true" font="ZoFontGamepad25" />
+
+                        <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>
