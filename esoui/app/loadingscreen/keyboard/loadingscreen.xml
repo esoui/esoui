@@ -14,19 +14,11 @@
         <AlphaAnimation name="FadeInOutAnimation" duration="200" startAlpha="0" endAlpha="1" />
 
         <AnimationTimeline name="LoadingCompleteAnimation">
-            <OnPlay>
-                self.control:SetMouseEnabled(not self:IsPlayingBackward())
-                self.control:SetKeyboardEnabled(not self:IsPlayingBackward())
-            </OnPlay>
-            <OnStop>
-                if LoadingScreen_Base_CanHide() and self:IsPlayingBackward() then
-                    self.control:SetHidden(true)
-                    SetGuiHidden("app", true)
-                end
-            </OnStop>
             <Animations>
+                <!-- Art -->
                 <AlphaAnimation inherits="PopToFullAlphaAnimation" />
 
+                <!-- Top Munge -->
                 <TranslateAnimation duration="850" anchorIndex="3">
                     <OnPlay>
                         if self:GetTimeline():IsPlayingBackward() then
@@ -38,6 +30,7 @@
                 </TranslateAnimation>
                 <AlphaAnimation inherits="PopToFullAlphaAnimation" />
 
+                <!-- Bottom Munge -->
                 <TranslateAnimation duration="850" anchorIndex="3">
                     <OnPlay>
                         if self:GetTimeline():IsPlayingBackward() then
@@ -53,7 +46,7 @@
     </Animations>
     
     <Controls>      
-        <TopLevelControl name="LoadingScreen" inherits="ZO_LoadingScreenBase" mouseEnabled="true" >
+        <TopLevelControl name="LoadingScreen" inherits="ZO_LoadingScreenBase" mouseEnabled="true">
             <AnchorFill />
             
             <OnInitialized>

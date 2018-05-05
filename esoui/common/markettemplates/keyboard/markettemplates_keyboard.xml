@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_MarketTextCallout_Keyboard" inherits="ZO_MarketTextCallout_Base" font="ZoFontWinT1" virtual="true">
+            <Controls>
+                <Control name="$(parent)Background" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Center" override="true" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds" />
+                        <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" />
+                        <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Label>
+    </Controls>
+</GuiXml>

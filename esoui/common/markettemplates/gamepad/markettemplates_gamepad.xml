@@ -1,0 +1,16 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_MarketTextCallout_Gamepad" inherits="ZO_MarketTextCallout_Base" virtual="true">
+            <Controls>
+                <Control name="$(parent)Background" override="true">
+                    <Dimensions y="64"/>
+                    <Controls>
+                        <Texture name="$(parent)Center" override="true" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_center.dds" />
+                        <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_fadedCap.dds" />
+                        <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Market/Gamepad/gp_market_callout_background_fadedCap.dds" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Label>
+    </Controls>
+</GuiXml>

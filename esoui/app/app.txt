@@ -1,6 +1,7 @@
 ; app UI files
 ## DependsOn: ZO_PregameLocalization ZO_AppAndInGame
 EsoUI\App\Globals\Globals.lua
+EsoUI\App\Globals\bindings.xml
 
 EsoUI\App\LoadingScreen\SharedLoadingScreen.lua
 EsoUI\App\LoadingScreen\SharedLoadingScreen.xml

@@ -13,3 +13,7 @@ function zo_mixin(object, ...)
     end
 end
 
+function ZO_ColorizeString(r, g, b, string)
+    return string.format("|c%.2x%.2x%.2x%s|r", math.floor(r * 255), math.floor(g * 255), math.floor(b * 255), string)
+end
+

@@ -9,19 +9,13 @@
         </AnimationTimeline>
 
         <AnimationTimeline name="GamepadLoadingCompleteAnimation">
-            <OnPlay>
-                self.control:SetKeyboardEnabled(not self:IsPlayingBackward())
-            </OnPlay>
-            <OnStop>
-                if LoadingScreen_Base_CanHide() and self:IsPlayingBackward() then
-                    self.control:SetHidden(true)
-                    SetGuiHidden("app", true)
-                end
-            </OnStop>
             <Animations>
+                <!-- Art -->
                 <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <!-- Top Munge / Bottom Munge -->
+                <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />                
                 <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />
-                <AlphaAnimation delay="1000" duration="1000" startAlpha="0" endAlpha="1" />
+                <!-- Info / Description / Description BG -->
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1" />
@@ -30,7 +24,7 @@
     </Animations>
 
     <Controls>
-        <TopLevelControl name="GamepadLoadingScreen" inherits="ZO_LoadingScreenBase" keyboardEnabled="false">
+        <TopLevelControl name="GamepadLoadingScreen" inherits="ZO_LoadingScreenBase">
             <AnchorFill />
 
             <OnInitialized>
@@ -64,7 +58,7 @@
                             <Anchor point="BOTTOM" relativePoint="TOP" />
                         </Label>
 
-                        <Texture name="$(grandparent)DescriptionBg" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_Loading_Text_Background-1024x256.dds" alpha="0">
+                        <Texture name="$(grandparent)DescriptionBg" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_Loading_Text_Background-1024x256.dds" alpha="0">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)ZoneDescription" relativePoint="TOPLEFT" offsetX="-300" offsetY="-100" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)ZoneDescription" relativePoint="BOTTOMRIGHT" offsetX="300" offsetY="100" />
                         </Texture>

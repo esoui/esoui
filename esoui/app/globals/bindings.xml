@@ -1,0 +1,9 @@
+<Bindings>
+    <Layer name="LoadingScreen" allowFallthrough="false">
+        <Category name="General">
+            <Action name="TOGGLE_FULLSCREEN" rebindable="false">
+                <Down>ToggleFullScreen()</Down>
+            </Action>
+        </Category>
+    </Layer>
+</Bindings>

@@ -1,9 +1,7 @@
 local LoadingScreen_Gamepad = {}
 
 function LoadingScreen_Gamepad:InitializeAnimations()
-    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation")
-    self.spinnerFadeAnimation:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenBg)
-    self.spinnerFadeAnimation:GetAnimation(2):SetAnimatedControl(GamepadLoadingScreenSpinner)
+    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation", GamepadLoadingScreenSpinner)
 
     self.animations = GetAnimationManager():CreateTimelineFromVirtual("GamepadLoadingCompleteAnimation")
     self.animations:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenArt)
@@ -13,6 +11,7 @@ function LoadingScreen_Gamepad:InitializeAnimations()
     self.animations:GetAnimation(5):SetAnimatedControl(GamepadLoadingScreenZoneDescription)
     self.animations:GetAnimation(6):SetAnimatedControl(GamepadLoadingScreenDescriptionBg)
     self.animations.control = self
+    self.animations:SetHandler("OnStop", function(timeline) self:LoadingCompleteAnimation_OnStop(timeline) end)
 
     self.longLoadAnimation = GetAnimationManager():CreateTimelineFromVirtual("LongLoadingAnimation")
     self.longLoadAnimation:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenTopMungeLongLoadMessage)

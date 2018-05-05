@@ -208,7 +208,8 @@ function ZO_GamepadPagedGrid:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            name = GetString(SI_GAMEPAD_PAGED_GRID_PREVIOUS_PAGE),
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Paged Grid Previous",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
             callback = function()
@@ -220,7 +221,8 @@ function ZO_GamepadPagedGrid:InitializeKeybindStripDescriptors()
         },
 
         {
-            name = GetString(SI_GAMEPAD_PAGED_GRID_NEXT_PAGE),
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Paged Grid Next",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
             callback = function()

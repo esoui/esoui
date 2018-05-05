@@ -59,7 +59,7 @@ function ZO_KeybindStrip_OnInitialized(control)
         keybind = "UI_SHORTCUT_EXIT",
         order = -10000,
         callback = function()
-            SCENE_MANAGER:ShowBaseScene()
+            SCENE_MANAGER:RequestShowLeaderBaseScene()
         end,
     }
 
@@ -69,8 +69,10 @@ function ZO_KeybindStrip_OnInitialized(control)
         order = -10000,
         ethereal = true,
         callback = function()
-            SCENE_MANAGER:ShowBaseScene()
+            SCENE_MANAGER:RequestShowLeaderBaseScene()
         end,
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Default Gamepad Exit",
     }
 
     function KEYBIND_STRIP:HasDefaultExit(stateIndex)

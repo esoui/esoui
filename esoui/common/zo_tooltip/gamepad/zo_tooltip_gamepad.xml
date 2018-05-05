@@ -1,0 +1,182 @@
+<!-- Tooltip Templates -->
+<GuiXml>
+    <Controls>
+        <Label name="ZO_Tooltip_StatusLabelTemplate" verticalAlignment="BOTTOM" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_CONTEXT_HIGHLIGHT" hidden="true" virtual="true">                            
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepad42",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad34",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad27",
+                        lineLimit = 1,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
+        </Label>
+        
+        <Control name="ZO_GamepadTooltipTemplate" virtual="true" hidden="true">
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Label name="$(parent)StatusLabelVisualLayer" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_CONTEXT_HIGHLIGHT" hidden="true">
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+                        </Label>
+                        
+                        <Label name="$(parent)StatusLabel" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)StatusLabelVisualLayer" relativePoint="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)StatusLabelValue" inherits="ZO_Tooltip_StatusLabelTemplate">
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)StatusLabel" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="3" />
+                        </Label>
+
+                        <Label name="$(parent)StatusLabelValueForVisualLayer" inherits="ZO_Tooltip_StatusLabelTemplate">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)StatusLabel" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="3" />
+                        </Label>
+
+                        <Control name="$(parent)BottomRail" inherits="ZO_GamepadHeaderHorizontalDividerSimple" tier="HIGH" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)StatusLabel" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y" />
+                        </Control>
+
+                        <Control name="$(parent)Tip" inherits="ZO_ScrollTooltip_Gamepad" tier="MEDIUM">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BottomRail" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadDialogTooltipTopLevel" tier="HIGH">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)LeftTooltip" inherits="ZO_GamepadTooltipTemplate ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true"/>
+
+                <Control name="$(parent)LeftHeaderContainer" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)ContentContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)LeftTooltipBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)LeftTooltipDarkBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+                        <Control name="$(parent)Darkener" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GamepadTooltipTopLevel" tier="MEDIUM">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_GamepadTooltip_OnInitialized(self, ZO_GamepadDialogTooltipTopLevel)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)LeftTooltip" inherits="ZO_GamepadTooltipTemplate ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true" />
+
+                <Control name="$(parent)LeftTooltipBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)LeftTooltipDarkBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+                        <Control name="$(parent)Darkener" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RightTooltip" inherits="ZO_GamepadTooltipTemplate ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true"/>
+
+                <Control name="$(parent)RightTooltipBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RightHeaderContainer" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)ContentContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)RightTooltipDarkBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+                        <Control name="$(parent)Darkener" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)MovableTooltip" inherits="ZO_GamepadTooltipTemplate ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true"/>
+
+                <Control name="$(parent)MovableTooltipBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)MovableTooltipDarkBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+                        <Control name="$(parent)Darkener" inherits="ZO_SharedGamepadNavQuadrant_4_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quadrant3Tooltip" inherits="ZO_GamepadTooltipTemplate ZO_GamepadGrid_NavQuadrant_3_Anchors" hidden="true"/>
+
+                <Control name="$(parent)Quadrant3TooltipBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_RightArrowGamepadNavQuadrant_3_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quadrant3HeaderContainer" inherits="ZO_GamepadGrid_NavQuadrant_3_Anchors" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)ContentContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quadrant3TooltipDarkBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_RightArrowGamepadNavQuadrant_3_Background_Template" />
+                        <Control name="$(parent)Darkener" inherits="ZO_RightArrowGamepadNavQuadrant_3_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quadrant1Tooltip" inherits="ZO_GamepadTooltipTemplate ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true"/>
+
+                <Control name="$(parent)Quadrant1TooltipBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Quadrant1TooltipDarkBg" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template" />
+                        <Control name="$(parent)Darkener" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

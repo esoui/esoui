@@ -49,9 +49,10 @@ function ZO_Gamepad_ParametricList_Screen:Initialize(control, createTabBar, acti
     self.activateOnShow = (activateOnShow ~= false) -- nil should be true
     self:SetScene(scene)
 
-    local headerContainer = container:GetNamedChild("HeaderContainer")
-    control.header = headerContainer.header
-    self.headerFragment = ZO_ConveyorSceneFragment:New(headerContainer, ALWAYS_ANIMATE)
+    self.headerContainer = container:GetNamedChild("HeaderContainer")
+    control.header = self.headerContainer.header
+    local ALWAYS_ANIMATE = true
+    self.headerFragment = ZO_ConveyorSceneFragment:New(self.headerContainer, ALWAYS_ANIMATE)
 
     self.header = control.header
     ZO_GamepadGenericHeader_Initialize(self.header, createTabBar)
@@ -97,6 +98,10 @@ function ZO_Gamepad_ParametricList_Screen:GetHeaderFragment()
     return self.headerFragment
 end
 
+function ZO_Gamepad_ParametricList_Screen:GetHeaderContainer()
+    return self.headerContainer
+end
+
 function ZO_Gamepad_ParametricList_Screen:ActivateCurrentList()
     if(self._currentList ~= nil) then
         self:TryAddListTriggers()
@@ -118,6 +123,10 @@ function ZO_Gamepad_ParametricList_Screen:EnableCurrentList()
             SCENE_MANAGER:AddFragment(currentFragment)
         end
         self:TryAddListTriggers()
+        if self.headerFocus and not DIRECTIONAL_INPUT:IsListening(self) then
+            self._currentList:SetDirectionalInputEnabled(false)
+            DIRECTIONAL_INPUT:Activate(self, self.control)
+        end
         self._currentList:Activate()
     end
 end
@@ -131,6 +140,9 @@ function ZO_Gamepad_ParametricList_Screen:DisableCurrentList()
         end
         self:TryRemoveListTriggers()
         self._currentList = nil
+        if self.headerFocus and DIRECTIONAL_INPUT:IsListening(self) then
+            DIRECTIONAL_INPUT:Deactivate(self)
+        end
     end
 end
 
@@ -227,6 +239,76 @@ function ZO_Gamepad_ParametricList_Screen:SetScene(scene)
     self.scene = scene
 end
 
+-- Header functions --
+
+function ZO_Gamepad_ParametricList_Screen:SetupHeaderFocus(headerFocus)
+    if self.headerFocus then
+        assert(false) -- only support one headerFocus ever
+    end
+
+    self.headerFocus = headerFocus
+    self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
+end
+
+function ZO_Gamepad_ParametricList_Screen:RequestEnterHeader()
+    if not self.headerFocus or self.headerFocus:IsActive() then
+        return
+    end
+
+    if self:CanEnterHeader() then
+        self._currentList:Deactivate()
+        self.headerFocus:Activate()
+        self:RefreshKeybinds()
+        self:OnEnterHeader()
+    end
+end
+
+function ZO_Gamepad_ParametricList_Screen:RequestLeaveHeader()
+    if not self.headerFocus or not self.headerFocus:IsActive() then
+        return
+    end
+
+    if self:CanLeaveHeader() then
+        self.headerFocus:Deactivate()
+        self._currentList:Activate()
+        self:RefreshKeybinds()
+        self:OnLeaveHeader()
+    end
+end
+
+function ZO_Gamepad_ParametricList_Screen:CanEnterHeader()
+    return true -- override function for implementation specific functionality
+end
+
+function ZO_Gamepad_ParametricList_Screen:CanLeaveHeader()
+    return self._currentList:GetNumItems() > 0 -- override function for implementation specific functionality
+end
+
+function ZO_Gamepad_ParametricList_Screen:OnEnterHeader()
+    -- override function for implementation specific functionality
+end
+
+function ZO_Gamepad_ParametricList_Screen:OnLeaveHeader()
+    -- override function for implementation specific functionality
+end
+
+function ZO_Gamepad_ParametricList_Screen:UpdateDirectionalInput()
+    local result = self.movementController:CheckMovement()
+    if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
+        if self.headerFocus:IsActive() then
+            self:RequestLeaveHeader()
+        else
+            self._currentList:MoveNext()
+        end
+    elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+        if self._currentList.selectedIndex ~= 1 then
+            self._currentList:MovePrevious()
+        else
+            self:RequestEnterHeader()
+        end
+    end
+end
+
 -- A function which should be called as the StateChanged callback for the scene.
 function ZO_Gamepad_ParametricList_Screen:OnStateChanged(oldState, newState)
     if newState == SCENE_SHOWING or newState == SCENE_GROUP_SHOWING then
@@ -249,6 +331,9 @@ function ZO_Gamepad_ParametricList_Screen:OnStateChanged(oldState, newState)
     elseif newState == SCENE_HIDDEN or newState == SCENE_GROUP_HIDDEN then
         if newState == SCENE_GROUP_HIDDEN and self.keybindStripDescriptor then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+        if DIRECTIONAL_INPUT:IsListening(self) then
+            DIRECTIONAL_INPUT:Deactivate(self)
         end
         self:Deactivate()
         self:OnHide()
@@ -371,6 +456,10 @@ function ZO_Gamepad_ParametricList_Screen:OnShowing()
     if self.dirty then
         self:PerformUpdate()
     end
+
+    if self.headerFocus and not DIRECTIONAL_INPUT:IsListening(self) then
+        DIRECTIONAL_INPUT:Activate(self, self.control)
+    end
 end
 
 -- A function called when the screen is fully shown. This may be overridden in a sub-class.
@@ -383,6 +472,9 @@ end
 
 -- A function called when the screen is fully hidden. This may be overridden in a sub-class.
 function ZO_Gamepad_ParametricList_Screen:OnHide()
+    if self.headerFocus and DIRECTIONAL_INPUT:IsListening(self) then
+        DIRECTIONAL_INPUT:Deactivate(self)
+    end
 end
 
 --[[ ----------- ]]

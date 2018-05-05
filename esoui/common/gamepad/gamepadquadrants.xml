@@ -185,9 +185,15 @@
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_SharedGamepadNavQuadrant_1_StaticBackground" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" />
+
         <Control name="ZO_AnchoredToQuadrant1Background" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_1_Background"/>
-            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_1_Background"/>
+            <OnEffectivelyShown>
+                ZO_AnchoredToQuadrant1Background_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+            <OnEffectivelyHidden>
+                ZO_AnchoredToQuadrant1Background_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
         </Control>
         
         <!-- Quadrant_2 -->
@@ -361,6 +367,12 @@
                 <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_2_3_Background_Template" />
             </Controls>
         </TopLevelControl>
+
+
+        <Control name="ZO_AnchoredToQuadrant_2_3_Background" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background"/>
+        </Control>
 
         <!-- Quadrant_2_3_4 -->
 

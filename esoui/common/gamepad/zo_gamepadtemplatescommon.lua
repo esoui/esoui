@@ -123,42 +123,33 @@ end
 --instantly). The GetHeight function should be able to compute what the height of the entry will be.
 
 do
-    local function ComputeHeightFromLabel(control)
-        return control.label:GetTextHeight()
-    end
-
-    function ZO_SharedGamepadEntry_SetHeightFromLabel(control)
-        control.GetHeight = ComputeHeightFromLabel
-    end
-end
-
-do
-    local function ComputeHeightWithSideLabel(control)
-        -- clean the dirty sublabel before trying to get the real information from the main label
-        local subLabelControl = control:GetNamedChild("SubLabel1")
-        subLabelControl:GetTextHeight()
-        return control.label:GetTextHeight()
-    end
-
-    function ZO_SharedGamepadEntry_SetHeightFromLabelWithSideLabel(control)
-        control.GetHeight = ComputeHeightWithSideLabel
-    end
-end
-
-do
-    local function ComputeHeightFromLabelAndSubLabels(control)
+    local function ComputeHeightFromStackedLabels(control)
         local height = control.label:GetTextHeight()
-        for i = 1, control.subLabelCount do
-            local subLabelControl = control:GetNamedChild("SubLabel"..i)
-            if not subLabelControl:IsHidden() then
-                height = height + subLabelControl:GetTextHeight()
+        if control.numSubLabels then
+            for i = 1, control.numSubLabels do
+                local subLabelControl = control:GetNamedChild("SubLabel"..i)
+                if not subLabelControl:IsControlHidden() then
+                    height = height + subLabelControl:GetTextHeight()
+                else
+                    break
+                end
             end
         end
         return height
     end
 
-    function ZO_SharedGamepadEntry_SetHeightFromSubLabels(control)
-        control.GetHeight = ComputeHeightFromLabelAndSubLabels
+    function ZO_SharedGamepadEntry_SetHeightFromLabels(control)
+        control.GetHeight = ComputeHeightFromStackedLabels
+    end
+end
+
+do
+    local function ComputeHeightFromLabelOnly(control)
+        return control.label:GetTextHeight()
+    end
+
+    function ZO_SharedGamepadEntry_SetHeightFromLabelOnly(control)
+        control.GetHeight = ComputeHeightFromLabelOnly
     end
 end
 
@@ -249,10 +240,16 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, subStatusIc
                 icon:SetDesaturation(data.iconDesaturation)
             end
 
+            if data.textureSampleProcessingWeights then
+                for type, weight in pairs(data.textureSampleProcessingWeights) do
+                    icon:SetTextureSampleProcessingWeight(type, weight)
+                end
+            end
+
             if stackCountLabel then
                 local stackCount = data.stackCount
                 if stackCount and stackCount > 1 then
-                    stackCountLabel:SetText(ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+                    stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
                 else
                     stackCountLabel:SetText("")
                 end
@@ -268,6 +265,7 @@ local function ZO_SharedGamepadEntryIconSetup(icon, stackCountLabel, subStatusIc
                 if data.isBoPTradeable then
                     subStatusIcon:AddIcon(ZO_TRADE_BOP_ICON)
                 end
+
                 subStatusIcon:Show()
             end
 
@@ -304,29 +302,26 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         --multi-icons control their own alpha, don't set it directly on the icon if you're using a multi-icon
         statusIndicator:ClearIcons()
         
-		if data.isEquippedInCurrentCategory then
+        if data.isEquippedInCurrentCategory then
             statusIndicator:AddIcon(EQUIPPED_THIS_SLOT_TEXTURE)
         elseif data.isEquippedInAnotherCategory then
             statusIndicator:AddIcon(EQUIPPED_OTHER_SLOT_TEXTURE)
         end
 
-		if data.isHiddenByWardrobe then
-			statusIndicator:AddIcon(ITEM_IS_HIDDEN_TEXTURE)
+        if data.isHiddenByWardrobe then
+            statusIndicator:AddIcon(ITEM_IS_HIDDEN_TEXTURE)
         end
 
-        local isItemNew
-        if type(data.brandNew) == "function" then
-            isItemNew = data.brandNew()
-        else 
-            isItemNew = data.brandNew
-        end
-
-        if isItemNew and data.enabled then
+        if data:IsNew() and data.enabled then
             statusIndicator:AddIcon(ZO_GAMEPAD_NEW_ICON_32)
         end
 
-        if (data.stolen) then
+        if data.stolen then
             statusIndicator:AddIcon(STOLEN_ICON_TEXTURE)
+        end
+
+        if data.isGemmable then
+            statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS))
         end
 
         if data.isMailAttached then
@@ -336,12 +331,12 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         if data.isTradeItem then
             statusIndicator:AddIcon(TRADE_ITEM_TEXTURE)
         end
-                
+
         if data.isEarnedAchievement then
             statusIndicator:AddIcon(ACHIEVEMENT_EARNED_TEXTURE)
         end
 
-        if data.canLevel and data.canLevel() then
+        if data:CanLevel() then
             statusIndicator:AddIcon(CAN_LEVEL_TEXTURE)
         end
 
@@ -352,15 +347,11 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         if data.isAssisted then
             statusIndicator:AddIcon(ASSISTED_TEXTURE)
         end
-	
-	    if data.isChannelActive then
-            statusIndicator:AddIcon(SPEAKER_TEXTURE)
-        end
 
         if data.isChannelActive then
             statusIndicator:AddIcon(SPEAKER_TEXTURE)
-        end     
- 
+        end
+
         if data.isSelected then
             statusIndicator:AddIcon(SELECTED_TEXTURE)
         end
@@ -369,7 +360,65 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32)
         end
 
+        if data.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE and not data.ignoreTraitInformation then
+            statusIndicator:AddIcon(GetPlatformTraitInformationIcon(data.traitInformation))
+        end
+
         statusIndicator:Show()
+    end
+end
+
+local function ZO_SharedGamepadEntrySubLabelsSetup(control, data, selected)
+    local numUsedSubLabels = 0
+    if data.subLabels and (selected or data.showUnselectedSublabels) then
+        local labelColor = data:GetSubLabelColor(selected)
+        if type(labelColor) == "function" then
+            labelColor = labelColor(data)
+        end
+
+        local previousLabelControl
+        for _, subLabelTextProvider in ipairs(data.subLabels) do
+            local subLabelText
+            if type(subLabelTextProvider) == "function" then
+                subLabelText = subLabelTextProvider()
+            else
+                subLabelText = subLabelTextProvider
+            end
+            if subLabelText and subLabelText ~= "" then
+                numUsedSubLabels = numUsedSubLabels + 1
+                local labelControlName = "SubLabel"..numUsedSubLabels
+                local labelControl = control:GetNamedChild(labelControlName)
+                if not labelControl then
+                    --Sub Labels are largely created dynamically, but some templates include their own SubLabel1, SubLabel2, etc. We can make use of those
+                    --in place of created our own.
+                    labelControl = CreateControlFromVirtual(control:GetName()..labelControlName, control, data:GetSubLabelTemplate())
+                    if previousLabelControl then
+                        labelControl:SetAnchor(TOPLEFT, previousLabelControl, BOTTOMLEFT)
+                        labelControl:SetAnchor(TOPRIGHT, previousLabelControl, BOTTOMRIGHT)
+                    else
+                        labelControl:SetAnchor(TOPLEFT, control.label, BOTTOMLEFT)
+                        labelControl:SetAnchor(TOPRIGHT, control.label, BOTTOMRIGHT)
+                    end
+                end                
+                labelControl:SetText(subLabelText)
+                labelControl:SetHidden(false)
+                labelControl:SetColor(labelColor:UnpackRGBA())
+                previousLabelControl = labelControl
+            end
+        end
+
+        if #data.subLabels > 0 then
+            if not control.numSubLabels then
+                control.numSubLabels = 0
+            end
+            control.numSubLabels = zo_max(control.numSubLabels, numUsedSubLabels)
+        end
+    end
+
+    if control.numSubLabels then
+        for i = numUsedSubLabels + 1, control.numSubLabels do
+            control:GetNamedChild("SubLabel"..i):SetHidden(true)
+        end
     end
 end
 
@@ -409,7 +458,6 @@ end
 --For instance control.craftingInfo was turned into a subLabel for
 --future use by other systems and Timer/TimerOverlay was turned into control.cooldown
 function ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    
     if data.alphaChangeOnSelection or data.disabled then
         control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, data.disabled))
     else
@@ -445,36 +493,7 @@ function ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDurin
         end
     end
 
-    if control.subLabelCount then
-        local labelColor = data:GetSubLabelColor(selected)
-        if type(labelColor) == "function" then
-            labelColor = labelColor(data)
-        end
-
-        local subLabels = data.subLabels
-        for i = 1, control.subLabelCount do
-            local label = control:GetNamedChild("SubLabel" .. i)
-            if label then
-                local text
-                if subLabels then
-                    local subLabel = subLabels[i]
-                    if type(subLabel) == "function" then
-                        text = subLabel()
-                    else
-                        text = subLabel
-                    end
-                end
-
-                if (selected or data.showUnselectedSublabels) and (text and text ~= "") then
-                    label:SetText(text)
-                    label:SetHidden(false)
-                    label:SetColor(labelColor:UnpackRGBA())
-                else
-                    label:SetHidden(true)
-                end
-            end
-        end
-    end
+    ZO_SharedGamepadEntrySubLabelsSetup(control, data, selected)
 end
 
 --[[ Global Helper Functions ]]--
@@ -734,7 +753,7 @@ function ZO_GetPlatformTemplate(baseTemplate)
 end
 
 function ZO_GamepadDefaultHorizontalListEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, selectedFromParent)
- 	control:SetText(data.text)
+    control:SetText(data.text)
     
     local color = selectedFromParent and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
     control:SetColor(color:UnpackRGBA())

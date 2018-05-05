@@ -43,7 +43,7 @@
         </Button>
         
         <TopLevelControl name="ZO_UIErrors" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_UI_ERRORS">
-            <Dimensions x="730" y="400" />
+            <Dimensions x="930" y="500" />
             <Anchor point="CENTER" />
             <OnInitialized>
                 ZO_UIErrors_Init(self)

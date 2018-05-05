@@ -114,9 +114,16 @@ function ZO_GamepadTabBarScrollList:Deactivate()
 end
 
 function ZO_GamepadTabBarScrollList:InitializeKeybindStripDescriptors()
+    local control = self:GetControl()
+    local debugName = "Gamepad Tab Bar"
+    if control then
+        debugName = debugName .. " " .. control:GetName()
+    end
     self.keybindStripDescriptor =
     {
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = debugName .. " Left Shoulder",
             keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             ethereal = true,
             callback = function()
@@ -127,6 +134,8 @@ function ZO_GamepadTabBarScrollList:InitializeKeybindStripDescriptors()
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = debugName .. " Right Shoulder",
             keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             ethereal = true,
             callback = function()

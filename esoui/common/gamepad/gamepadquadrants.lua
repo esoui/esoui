@@ -44,3 +44,17 @@ function ZO_GamepadGrid_BackgroundTextureBase_OnUpdate(self, timeS)
     bottom = top + ZO_GAMEPAD_PANEL_BG_BOTTOM_COORD
     self:SetTextureCoords(left, right, top, bottom)
 end
+
+--Only attach this screen to the quadrant 1 background when it is shown. Otherwise it is moving back and forth everytime any quadrant 1 UI is shown causing a bunch of unnecessary anchor update.
+function ZO_AnchoredToQuadrant1Background_OnEffectivelyShown(self)
+    self:ClearAnchors()
+    self:SetAnchor(TOPLEFT, ZO_SharedGamepadNavQuadrant_1_Background, TOPLEFT, 0, 0)
+    self:SetAnchor(BOTTOMRIGHT, ZO_SharedGamepadNavQuadrant_1_Background, BOTTOMRIGHT, 0, 0)
+end
+
+--When hidden anchor it to a non-moving variant of the quadrant background: this way existing layout code that assumes this is well anchored will see what it wants to see.
+function ZO_AnchoredToQuadrant1Background_OnEffectivelyHidden(self)
+    self:ClearAnchors()
+    self:SetAnchor(TOPLEFT, ZO_SharedGamepadNavQuadrant_1_StaticBackground, TOPLEFT, 0, 0)
+    self:SetAnchor(BOTTOMRIGHT, ZO_SharedGamepadNavQuadrant_1_StaticBackground, BOTTOMRIGHT, 0, 0)
+end 
