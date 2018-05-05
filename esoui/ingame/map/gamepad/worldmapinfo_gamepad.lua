@@ -10,13 +10,15 @@ function WorldMapInfo_Gamepad:Initialize(control)
 
     GAMEPAD_WORLD_MAP_INFO_FRAGMENT = ZO_FadeSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_INFO_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_SHOWING) then
-            ZO_GamepadGenericHeader_Activate(self.header)
+        if newState == SCENE_FRAGMENT_SHOWING then
             ZO_WorldMap_SetGamepadKeybindsShown(false)
+            ZO_GamepadGenericHeader_Activate(self.header)
             self:ShowCurrentFragments()
-        elseif(newState == SCENE_FRAGMENT_HIDDEN) then
+        elseif newState == SCENE_FRAGMENT_HIDING then
             ZO_GamepadGenericHeader_Deactivate(self.header)
             self:RemoveCurrentFragments()
+            ZO_WorldMap_SetGamepadKeybindsShown(true)
+            ZO_WorldMap_UpdateInteractKeybind_Gamepad()
         end
     end)
 end
@@ -29,9 +31,6 @@ end
 function WorldMapInfo_Gamepad:Hide()
     SCENE_MANAGER:RemoveFragment(GAMEPAD_WORLD_MAP_INFO_FRAGMENT)
     SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
-
-    ZO_WorldMap_SetGamepadKeybindsShown(true)
-    ZO_WorldMap_UpdateInteractKeybind_Gamepad()
 end
 
 function WorldMapInfo_Gamepad:ShowCurrentFragments()
@@ -85,6 +84,10 @@ function WorldMapInfo_Gamepad:InitializeTabs()
         {
             text = GetString(SI_MAP_INFO_MODE_FILTERS), 
             callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT, DOESNT_USE_RIGHT_SIDE_CONTENT) end
+        },
+        {
+            text = GetString(SI_MAP_INFO_MODE_HOUSES), 
+            callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_HOUSES:GetFragment(), DOESNT_USE_RIGHT_SIDE_CONTENT) end
         },
     }
 

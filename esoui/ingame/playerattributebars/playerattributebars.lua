@@ -96,7 +96,7 @@ local PAB_TEMPLATES = {
     statusBarGloss = "ZO_PlayerAttributeStatusBarGloss",
     statusBarSmall = "ZO_PlayerAttributeStatusBarSmall",
     statusBarGlossSmall = "ZO_PlayerAttributeStatusBarGlossSmall",
-	resourceNumbersLabel = "ZO_PlayerAttributeResourceNumbers",
+    resourceNumbersLabel = "ZO_PlayerAttributeResourceNumbers",
 
 }
 
@@ -107,7 +107,7 @@ local DELAY_BEFORE_FADING = 1500
 local ZO_PlayerAttributeBar = ZO_Object:Subclass()
 
 function ZO_PlayerAttributeBar:New(control, barControls, powerType, unitOverride, secondPriorityUnitTag)
-	self.control = control
+    self.control = control
 
     local bar = ZO_Object.New(self)
     bar.control = control
@@ -123,12 +123,13 @@ function ZO_PlayerAttributeBar:New(control, barControls, powerType, unitOverride
     bar.textEnabled = false
     bar.forcedVisibleReferences = 0
     bar:SetTextEnabled(ZO_PlayerAttributeBar.IsTextEnabled())
-    bar:RefreshColor()   
+    bar:RefreshColor()
     bar:UpdateStatusBar()
 
     control.playerAttributeBarObject = bar
 
     control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingType, settingId) bar:OnInterfaceSettingChanged(settingType, settingId) end)
+    control:AddFilterForEvent(EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() bar:OnPlayerActivated() end)
     
     control:RegisterForEvent(EVENT_POWER_UPDATE, function(_, unitTag, powerPoolIndex, powerType, current, max, effectiveMax) bar:OnPowerUpdate(unitTag, powerPoolIndex, powerType, current, max, effectiveMax) end)
@@ -173,7 +174,7 @@ function ZO_PlayerAttributeBar:UpdateStatusBar(current, max, effectiveMax)
 
     local forceInit = false
 
-    if(current == nil or max == nil or effectiveMax == nil) then        
+    if current == nil or max == nil or effectiveMax == nil then
         current, max, effectiveMax = GetUnitPower(self:GetEffectiveUnitTag(), self.powerType)
 
         forceInit = true
@@ -203,11 +204,11 @@ function ZO_PlayerAttributeBar:UpdateStatusBar(current, max, effectiveMax)
     end
     self:UpdateContextualFading()
 
-    if(self.textEnabled) then
+    if self.textEnabled then
         self.label:SetText(zo_strformat(SI_UNIT_FRAME_BARVALUE, current, max))
     end
 
-	self:UpdateResourceNumbersLabel(current, effectiveMax)
+    self:UpdateResourceNumbersLabel(current, effectiveMax)
 end
 
 function ZO_PlayerAttributeBar:ResetFadeOutDelay()
@@ -215,30 +216,47 @@ function ZO_PlayerAttributeBar:ResetFadeOutDelay()
 end
 
 local EXCLUDE_LINK_CHECK = true
-
 function ZO_PlayerAttributeBar:ShouldContextuallyShow(excludeLinkCheck)
+    -- externalVisibilityRequirement controls when the bar should never show, for example the mount stamina bar
+    -- should not show when the player is not mounted
     if self.externalVisibilityRequirement and not self.externalVisibilityRequirement() then
         return false
     end
+
     if self.max == 0 then
         return false
     end
-    if self.forceVisible then
+
+    local showSetting = ZO_PlayerAttributeBar.GetShowAttributBarsSetting()
+    if showSetting == RESOURCE_BARS_SETTING_CHOICE_ALWAYS_SHOW then
         return true
+    elseif showSetting == RESOURCE_BARS_SETTING_CHOICE_DONT_SHOW then
+        return false
+    else -- showSetting is RESOURCE_BARS_SETTING_CHOICE_AUTOMATIC and we'll just use the default behavior
+        -- forceVisible is largely controlled by a UnitAttributeVisualizer to show the bars when there is something affecting them
+        -- like an armor buff/debuff or a shield applied
+        if self.forceVisible then
+            return true
+        end
+
+        if (self.current < self.effectiveMax) and (self.current ~= 0) then
+            return true
+        end
+
+        if not self.IsPlayerFrameFadingEnabled() then
+            return true
+        end
+
+        if self.fadeOutDelay > GetFrameTimeMilliseconds() then
+            return true
+        end
+
+        if self.linkedVisibility and not excludeLinkCheck then
+            return self.linkedVisibility:ShouldContextuallyShow(EXCLUDE_LINK_CHECK)
+        end
+
+        return false
     end
-    if ((self.current < self.effectiveMax) and (self.current ~= 0)) then
-        return true
-    end
-    if not self.IsPlayerFrameFadingEnabled() then
-        return true
-    end
-    if self.fadeOutDelay > GetFrameTimeMilliseconds() then
-        return true
-    end
-    if self.linkedVisibility and not excludeLinkCheck then
-        return self.linkedVisibility:ShouldContextuallyShow(EXCLUDE_LINK_CHECK)
-    end
-    return false
 end
 
 function ZO_PlayerAttributeBar:LinkVisibility(otherAttributeBar)
@@ -261,6 +279,10 @@ function ZO_PlayerAttributeBar.IsPlayerFrameFadingEnabled()
     return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_FADE_PLAYER_BARS)
 end
 
+function ZO_PlayerAttributeBar.GetShowAttributBarsSetting()
+    return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_RESOURCE_BARS))
+end
+
 function ZO_PlayerAttributeBar:UpdateContextualFading()
     local shouldContextuallyShow = self:ShouldContextuallyShow()
     if shouldContextuallyShow ~= self.isContextuallyShown then
@@ -273,7 +295,7 @@ function ZO_PlayerAttributeBar:UpdateContextualFading()
         if self.linkedVisibility then
             self.linkedVisibility:UpdateContextualFading()
         end
-		self:UpdateResourceNumbersLabel(self.current, self.effectiveMax)
+        self:UpdateResourceNumbersLabel(self.current, self.effectiveMax)
     end
 end
 
@@ -297,16 +319,16 @@ function ZO_PlayerAttributeBar:SetForceVisible(forceVisible)
 end
 
 function ZO_PlayerAttributeBar:SetTextEnabled(enabled)
-    if(self.textEnabled ~= enabled) then
+    if self.textEnabled ~= enabled then
         self.textEnabled = enabled
-        if(enabled) then
-            if(not self.label) then
+        if enabled then
+            if not self.label then
                 self.label = CreateControlFromVirtual("$(parent)Label", self.control, "ZO_PlayerAttributeBarText")
             end
             self.label:SetHidden(false)
             self:UpdateStatusBar()
         else
-            if(self.label) then
+            if self.label then
                 self.label:SetHidden(true)
             end
         end
@@ -314,9 +336,9 @@ function ZO_PlayerAttributeBar:SetTextEnabled(enabled)
 end
 
 function ZO_PlayerAttributeBar:UpdateResourceNumbersLabel(current, maximum)
-	if self.control.resourceNumbersLabel then
-		self.control.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(current, maximum))
-	end
+    if self.control.resourceNumbersLabel then
+        self.control.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(current, maximum))
+    end
 end
 
 --Events
@@ -337,6 +359,10 @@ function ZO_PlayerAttributeBar:OnInterfaceSettingChanged(settingType, settingId)
             self:UpdateContextualFading()
         elseif settingId == UI_SETTING_ALWAYS_SHOW_STATUS_TEXT then
             self:SetTextEnabled(self.IsTextEnabled())
+        elseif settingId == UI_SETTING_RESOURCE_NUMBERS then
+            self:UpdateResourceNumbersLabel(self.current, self.effectiveMax)
+        elseif settingId ==UI_SETTING_SHOW_RESOURCE_BARS then
+            self:UpdateContextualFading()
         end
     end
 end
@@ -418,6 +444,8 @@ local PLAYER_ATTRIBUTE_VISUALIZER_SOUNDS =
         [STAT_STATE_SHIELD_LOST]        = SOUNDS.UAV_DAMAGE_SHIELD_LOST,
         [STAT_STATE_POSSESSION_APPLIED] = SOUNDS.UAV_POSSESSION_APPLIED,
         [STAT_STATE_POSSESSION_REMOVED] = SOUNDS.UAV_POSSESSION_REMOVED,
+        [STAT_STATE_TRAUMA_GAINED]      = SOUNDS.UAV_TRAUMA_ADDED,
+        [STAT_STATE_TRAUMA_LOST]        = SOUNDS.UAV_TRAUMA_LOST,
     },
 }
 
@@ -432,7 +460,7 @@ function ZO_PlayerAttributeBars:New(control)
     local healthControl = GetControl(control, "Health")
     local healthBarControls = {GetControl(healthControl, "BarLeft"), GetControl(healthControl, "BarRight")}
     healthControl.barControls = healthBarControls
-	healthControl.resourceNumbersLabel = GetControl(healthControl, "ResourceNumbers")
+    healthControl.resourceNumbersLabel = GetControl(healthControl, "ResourceNumbers")
     local healthAttributeBar = ZO_PlayerAttributeBar:New(healthControl, healthBarControls, POWERTYPE_HEALTH)
     table.insert(bars, healthAttributeBar)
     healthControl.warner = ZO_HealthWarner:New(healthControl)
@@ -456,7 +484,7 @@ function ZO_PlayerAttributeBars:New(control)
     local magickaControl = GetControl(control, "Magicka")
     local magickaBarControls = {GetControl(magickaControl, "Bar")}
     magickaControl.barControls = magickaBarControls
-	magickaControl.resourceNumbersLabel = GetControl(magickaControl, "ResourceNumbers")
+    magickaControl.resourceNumbersLabel = GetControl(magickaControl, "ResourceNumbers")
     local magickaAttributeBar = ZO_PlayerAttributeBar:New(magickaControl, magickaBarControls, POWERTYPE_MAGICKA)
     table.insert(bars, magickaAttributeBar)
     magickaControl.warner = ZO_ResourceWarner:New(magickaControl, POWERTYPE_MAGICKA)
@@ -474,7 +502,7 @@ function ZO_PlayerAttributeBars:New(control)
     local staminaControl = GetControl(control, "Stamina")
     local staminaBarControls = {GetControl(staminaControl, "Bar")}
     staminaControl.barControls = staminaBarControls
-	staminaControl.resourceNumbersLabel = GetControl(staminaControl, "ResourceNumbers")
+    staminaControl.resourceNumbersLabel = GetControl(staminaControl, "ResourceNumbers")
     local staminaAttributeBar = ZO_PlayerAttributeBar:New(staminaControl, staminaBarControls, POWERTYPE_STAMINA)
     table.insert(bars, staminaAttributeBar)
     staminaControl.warner = ZO_ResourceWarner:New(staminaControl, POWERTYPE_STAMINA)
@@ -570,7 +598,7 @@ function ZO_PlayerAttributeBars:New(control)
         barRightOverlayTemplate = "ZO_PowerShieldBarRightOverlayArrow",
     }
     barGroup.attributeVisualizer:AddModule(ZO_UnitVisualizer_PowerShieldModule:New(powerShieldLayoutInfo))
-    
+
     barGroup:ResizeToFitScreen()
 
     PLAYER_ATTRIBUTE_BARS_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
@@ -643,10 +671,10 @@ function ZO_PlayerAttributeBars:ApplyStyle()
             end
         end
 
-		local resourceNumbersLabel = bar.control:GetNamedChild("ResourceNumbers")
-		if resourceNumbersLabel then
-			ApplyTemplateToControl(resourceNumbersLabel, ZO_GetPlatformTemplate(PAB_TEMPLATES.resourceNumbersLabel))
-		end
+        local resourceNumbersLabel = bar.control:GetNamedChild("ResourceNumbers")
+        if resourceNumbersLabel then
+            ApplyTemplateToControl(resourceNumbersLabel, ZO_GetPlatformTemplate(PAB_TEMPLATES.resourceNumbersLabel))
+        end
     end
 end
 

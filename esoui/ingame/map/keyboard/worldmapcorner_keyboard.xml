@@ -10,7 +10,23 @@
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="20" offsetY="18"/>
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontWinH1">
+                    <Dimensions x="470" />
                     <Anchor point="TOPLEFT"/>
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontWinH1",
+                            },
+                            {
+                                font = "ZoFontWinH2",
+                            },
+                            {
+                                font = "ZoFontWinH3",
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
                 </Label>
                 <Label name="$(parent)Time" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>

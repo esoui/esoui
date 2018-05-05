@@ -1,29 +1,3 @@
-local function AddEmote(emoteIndex, ...)
-    for i = 1, select("#", ...) do
-        local cmd = select(i, ...)
-        if(SLASH_COMMANDS[cmd] == nil) then
-		    SLASH_COMMANDS[cmd] = function() PlayEmoteByIndex(emoteIndex) end
-        end
-    end
-end
-
-local function AddEmotes()
-	local numEmotes = GetNumEmotes()
-	for emoteIndex = 1, numEmotes, 1 do
-        AddEmote(emoteIndex, zo_strsplit(" ", GetEmoteSlashNameByIndex(emoteIndex)))
-	end
-end
-
-local function OnAddOnLoaded(event, name)
-    if name == "ZO_Ingame" then
-		AddEmotes()
-        EVENT_MANAGER:UnregisterForEvent("PlayerEmote_OnAddOnLoaded", EVENT_ADD_ON_LOADED)
-	end
-end
-     
-EVENT_MANAGER:RegisterForEvent("PlayerEmote_OnAddOnLoaded", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-
-
 local ZO_PlayerEmoteManager = ZO_CallbackObject:Subclass()
 
 function ZO_PlayerEmoteManager:New(...)
@@ -33,8 +7,71 @@ function ZO_PlayerEmoteManager:New(...)
 end
 
 function ZO_PlayerEmoteManager:Initialize()
-	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_PERSONALITY_CHANGED, function() self:RefreshPersonalityEmotes() end)
-	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:RefreshPersonalityEmotes() end)
+	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_PERSONALITY_CHANGED, function() self:BuildEmoteList() end)
+	EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:BuildEmoteList() end)
+    EVENT_MANAGER:RegisterForEvent("ZO_PlayerEmoteManager", EVENT_ADD_ON_LOADED, function(_, addOnName) self:OnAddOnLoaded(addOnName) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
+
+    self.emoteList = {}
+    self.emoteCategories = {}
+    self.emoteCategoryTypes = {}
+
+    self:BuildEmoteList()
+end
+
+function ZO_PlayerEmoteManager:OnAddOnLoaded(addOnName)
+    if addOnName == "ZO_Ingame" then
+		self:RefreshEmoteSlashCommands()
+        EVENT_MANAGER:UnregisterForEvent("ZO_PlayerEmoteManager", EVENT_ADD_ON_LOADED)
+	end
+end
+
+function ZO_PlayerEmoteManager:OnCollectionUpdated()
+    self:BuildEmoteList()
+    self:RefreshEmoteSlashCommands()
+end
+
+function ZO_PlayerEmoteManager:OnCollectibleUpdated(collectibleId)
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) then
+        self:BuildEmoteList()
+        self:RefreshEmoteSlashCommands()
+    end
+end
+
+function ZO_PlayerEmoteManager:AddOrRemoveEmoteSlashCommand(emoteIndex, add, ...)
+    for i = 1, select("#", ...) do
+        local cmd = select(i, ...)
+        if SLASH_COMMANDS[cmd] == nil then
+            if add then
+		        SLASH_COMMANDS[cmd] = function() PlayEmoteByIndex(emoteIndex) end
+            end
+        else
+            if not add then
+                SLASH_COMMANDS[cmd] = nil
+            end
+        end
+    end
+end
+
+function ZO_PlayerEmoteManager:RefreshEmoteSlashCommands()
+    local numEmotes = GetNumEmotes()
+	for emoteIndex = 1, numEmotes do
+        local lockedByCollectibleId = GetEmoteCollectibleId(emoteIndex)
+        local slashName = GetEmoteSlashNameByIndex(emoteIndex)
+        if lockedByCollectibleId then
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedByCollectibleId)
+            local add = collectibleData and collectibleData:IsUnlocked()
+            self:AddOrRemoveEmoteSlashCommand(emoteIndex, add, zo_strsplit(" ", slashName))
+        else
+            local ADD = true
+            self:AddOrRemoveEmoteSlashCommand(emoteIndex, ADD, zo_strsplit(" ", slashName))
+        end
+	end
+    if SLASH_COMMAND_AUTO_COMPLETE then
+        SLASH_COMMAND_AUTO_COMPLETE:InvalidateSlashCommandCache()
+    end
 end
 
 function ZO_PlayerEmoteManager:CompareEmotes(emoteA, emoteB)
@@ -58,113 +95,55 @@ local function CompareCategories(categoryA, categoryB)
 end
 
 function ZO_PlayerEmoteManager:GetEmoteItemInfo(emoteId)
-    if not self.emoteList then
-        self:InitializeEmoteList()
-    end
     return self.emoteList[emoteId]
 end
 
-function ZO_PlayerEmoteManager:InitializeEmoteList()
-    self.emoteList = {}
-    self.emoteCategories = {}
-    self.emoteCategoryTypes = {}
-	self.emotePersonalityCategoryAdded = false
+function ZO_PlayerEmoteManager:BuildEmoteList()
+    ZO_ClearTable(self.emoteList)
+    ZO_ClearTable(self.emoteCategories)
+    ZO_ClearNumericallyIndexedTable(self.emoteCategoryTypes)
 
-	for emoteIndex = 1, GetNumEmotes() do
-        local emoteSlashName, emoteCategory, emoteId, displayName, showInGamepadUI = GetEmoteInfo(emoteIndex)
-		local isOverriddenByPersonality = IsPlayerEmoteOverridden(emoteId)
+    for emoteIndex = 1, GetNumEmotes() do
+        local lockedByCollectibleId = GetEmoteCollectibleId(emoteIndex)
+        local collectibleData  = lockedByCollectibleId and ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedByCollectibleId)
+        if not collectibleData or collectibleData:IsUnlocked() then
+            local emoteSlashName, emoteCategory, emoteId, displayName, showInGamepadUI = GetEmoteInfo(emoteIndex)
+            if emoteSlashName ~= "" then
+                if not self.emoteCategories[emoteCategory] then
+                    self.emoteCategories[emoteCategory] = {}
+                    table.insert(self.emoteCategoryTypes, emoteCategory)
+                end
 
-        if emoteSlashName ~= "" then
-            if displayName == "" then 
-                displayName = string.sub(emoteSlashName,2) --Temp in case data isn't set up.
-            end
-            if not self.emoteCategories[emoteCategory] then
-                self.emoteCategories[emoteCategory] = {}
-                table.insert(self.emoteCategoryTypes, emoteCategory)
-            end
+                local isOverriddenByPersonality = IsPlayerEmoteOverridden(emoteId)
+                self.emoteList[emoteId] =   {
+                                                emoteCategory = emoteCategory,
+                                                emoteId = emoteId,
+                                                emoteIndex = emoteIndex,
+                                                displayName = displayName,
+                                                emoteSlashName = emoteSlashName,
+                                                showInGamepadUI = showInGamepadUI,
+                                                isOverriddenByPersonality = isOverriddenByPersonality,
+                                            }
 
-            self.emoteList[emoteId] =   {
-                                            emoteCategory = emoteCategory,
-                                            emoteId = emoteId,
-                                            emoteIndex = emoteIndex,
-                                            displayName = displayName,
-											emoteSlashName = emoteSlashName,
-                                            showInGamepadUI = showInGamepadUI,
-											isOverriddenByPersonality = isOverriddenByPersonality,
-                                        }
+                table.insert(self.emoteCategories[emoteCategory], emoteId)
 
-            table.insert(self.emoteCategories[emoteCategory], emoteId)
+                if isOverriddenByPersonality then
+                    if not self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
+                        self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] = {}
+                        table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_PERSONALITY_OVERRIDE)
+                    end
 
-			if isOverriddenByPersonality then
-				if not self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
-					self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] = {}
-					table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_PERSONALITY_OVERRIDE)
-					self.emotePersonalityCategoryAdded = true
-				end
+                    table.insert(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE], emoteId)
+                end
 
-				table.insert(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE], emoteId)
-			end
-        end
-	end
+                if collectibleData then
+                    if not self.emoteCategories[EMOTE_CATEGORY_COLLECTED] then
+                        self.emoteCategories[EMOTE_CATEGORY_COLLECTED] = {}
+                        table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_COLLECTED)
+                    end
 
-    local emoteSortFunction
-    if IsInGamepadPreferredMode() then
-        emoteSortFunction = function(...) self:CompareEmotesGamepad(...) end
-    else
-        emoteSortFunction = function(...) self:CompareEmotesKeyboard(...) end
-    end
-
-    for _, emoteList in pairs(self.emoteCategories) do
-        table.sort(emoteList, emoteSortFunction)
-    end
-
-    table.sort(self.emoteCategoryTypes, CompareCategories)
-end
-
-function ZO_PlayerEmoteManager:RefreshPersonalityEmotes()
-	if not self.emoteCategories then
-        self:InitializeEmoteList()
-    end
-
-	if self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
-		ZO_ClearNumericallyIndexedTable(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE])
-	end
-	local personalityEmoteAdded = false
-
-	for emoteIndex = 1, GetNumEmotes() do
-        local emoteSlashName, emoteCategory, emoteId, displayName, showInGamepadUI = GetEmoteInfo(emoteIndex)
-		local isOverriddenByPersonality = IsPlayerEmoteOverridden(emoteId)
-
-        if emoteSlashName ~= "" then
-            self.emoteList[emoteId].isOverriddenByPersonality = isOverriddenByPersonality
-
-			if isOverriddenByPersonality then
-				if not self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] then
-					self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE] = {}
-				end
-
-				if not self.emotePersonalityCategoryAdded then
-					self.emotePersonalityCategoryAdded = true
-					table.insert(self.emoteCategoryTypes, EMOTE_CATEGORY_PERSONALITY_OVERRIDE)
-				end
-
-				if displayName == "" then 
-					displayName = string.sub(emoteSlashName,2) --Temp in case data isn't set up.
-				end
-
-				personalityEmoteAdded = true
-
-				table.insert(self.emoteCategories[EMOTE_CATEGORY_PERSONALITY_OVERRIDE], emoteId)
-			end
-        end
-	end
-
-    if not personalityEmoteAdded and self.emotePersonalityCategoryAdded then
-        for i, categoryType in ipairs(self.emoteCategoryTypes) do
-            if categoryType == EMOTE_CATEGORY_PERSONALITY_OVERRIDE then
-                table.remove(self.emoteCategoryTypes, i)
-                self.emotePersonalityCategoryAdded = false
-                break
+                    table.insert(self.emoteCategories[EMOTE_CATEGORY_COLLECTED], emoteId)
+                end
             end
         end
     end
@@ -181,11 +160,13 @@ function ZO_PlayerEmoteManager:RefreshPersonalityEmotes()
     end
 
     table.sort(self.emoteCategoryTypes, CompareCategories)
+
+    self:FireCallbacks("EmoteListUpdated")
 end
 
 function ZO_PlayerEmoteManager:GetEmoteListForType(emoteType, optFilterFunction)
     if not self.emoteCategories then
-        self:InitializeEmoteList()
+        self:BuildEmoteList()
     end
 
     local emoteCategory = self.emoteCategories[emoteType]
@@ -205,7 +186,7 @@ end
 
 function ZO_PlayerEmoteManager:GetEmoteCategories()
     if not self.emoteCategoryTypes then
-        self:InitializeEmoteList()
+        self:BuildEmoteList()
     end
 
     return self.emoteCategoryTypes

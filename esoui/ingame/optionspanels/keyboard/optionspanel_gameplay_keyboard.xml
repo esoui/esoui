@@ -1,6 +1,22 @@
 <GuiXml>
     <Controls>
-        <Control name="Options_Gameplay_CombatSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+        <Control name="Options_Gameplay_GeneralSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_GAMEPLAY_OPTIONS_GENERAL)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_FootInverseKinematics" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_GeneralSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="Options_Gameplay_CombatSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_FootInverseKinematics" relativePoint="BOTTOMLEFT" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_AUDIO_OPTIONS_COMBAT)
                 ZO_OptionsWindow_InitializeControl(self)
@@ -15,8 +31,70 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Gameplay_DodgeDoubleTap" inherits="ZO_Options_Checkbox">
+        <Control name="Options_Gameplay_MonsterTellsColorSwapEnabled" inherits="ZO_Options_Checkbox">
             <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTells" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_COLOR_SWAP_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_MonsterTellsFriendlyColor" inherits="ZO_Options_Color">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTellsColorSwapEnabled" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_COLOR)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_MonsterTellsFriendlyBrightness" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTellsFriendlyColor" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_BRIGHTNESS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_MonsterTellsFriendlyTest" inherits="ZO_Options_InvokeCallback">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTellsFriendlyBrightness" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_FRIENDLY_TEST)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_MonsterTellsEnemyColor" inherits="ZO_Options_Color">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTellsFriendlyTest" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_ENEMY_COLOR)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_MonsterTellsEnemyBrightness" inherits="ZO_Options_Slider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTellsEnemyColor" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_ENEMY_BRIGHTNESS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_MonsterTellsEnemyTest" inherits="ZO_Options_InvokeCallback">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTellsEnemyBrightness" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_ENEMY_TEST)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Gameplay_DodgeDoubleTap" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_MonsterTellsEnemyTest" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="4" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_COMBAT, COMBAT_SETTING_ROLL_DODGE_DOUBLE_TAP)
                 ZO_OptionsWindow_InitializeControl(self)
@@ -120,16 +198,16 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Gameplay_HideHelm" inherits="ZO_Options_Checkbox">
+        <Control name="Options_Gameplay_HidePolymorphHelm" inherits="ZO_Options_Checkbox">
             <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_ToggleLootHistory" relativePoint="BOTTOMLEFT" offsetY="4" />
             <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_HIDE_HELM)
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
         </Control>
 
         <Control name="Options_Gameplay_HideMountStaminaUpgrade" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_HideHelm" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Gameplay_HidePolymorphHelm" relativePoint="BOTTOMLEFT" offsetY="4" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_HIDE_MOUNT_STAMINA_UPGRADE)
                 ZO_OptionsWindow_InitializeControl(self)

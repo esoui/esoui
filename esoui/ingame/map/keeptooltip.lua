@@ -60,8 +60,6 @@ local function Reset(self)
     self.historyPercent = 1.0
 end
 
-local KEYBOARD_TEL_VAR_ICON_TEXT = zo_iconFormat("EsoUI/Art/currency/currency_telvar.dds", 16, 16)
-local GAMEPAD_TEL_VAR_ICON_TEXT = zo_iconFormat("EsoUI/Art/currency/currency_telvar_32.dds", 24, 24)
 local DISTRICT_BONUS_VALUE_FORMAT = GetString(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_FORMAT)
 local DISTRICT_BONUS_RESTRICTION_TEXT = GetString(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_RESTRICTION_TEXT)
 
@@ -150,7 +148,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                 local objectiveId = GetKeepArtifactObjectiveId(keepId)
                 if(objectiveId ~= 0) then
                     local text
-                    local _, artifactType, artifactState, alliance1, alliance2 = GetAvAObjectiveInfo(keepId, objectiveId, battlegroundContext)
+                    local _, artifactType, artifactState = GetObjectiveInfo(keepId, objectiveId, battlegroundContext)
                     if(artifactType == OBJECTIVE_ARTIFACT_OFFENSIVE) then
                         text = zo_strformat(SI_TOOLTIP_ARTIFACT_TYPE_OFFENSIVE)
                     else
@@ -169,7 +167,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
             if(keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
                 local telVarBonusText = GetDistrictTelVarBonusText(keepId, battlegroundContext, alliance)
                 if telVarBonusText then
-                    local finalBonusText = zo_strformat(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT, telVarBonusText, KEYBOARD_TEL_VAR_ICON_TEXT)
+                    local finalBonusText = zo_strformat(SI_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT, telVarBonusText, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_TELVAR_STONES))
                     AddLine(self, finalBonusText, KEEP_TOOLTIP_NORMAL_LINE)
                     AddLine(self, DISTRICT_BONUS_RESTRICTION_TEXT, KEEP_TOOLTIP_NORMAL_LINE)
                 end
@@ -192,7 +190,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                         elseif(playerAlliance ~= alliance) then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_WRONG_OWNER), KEEP_TOOLTIP_NOT_ACCESSIBLE)
-                        elseif(showUnderAttackLine) then
+                        elseif(GetKeepUnderAttack(keepId, bgContext)) then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_UNDER_ATTACK), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                             showUnderAttackLine = false
                         elseif GetKeepUnderAttack(startingKeep, battlegroundContext) then
@@ -360,7 +358,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                 local objectiveId = GetKeepArtifactObjectiveId(keepId)
                 if(objectiveId ~= 0) then
                     local text
-                    local artifactName, artifactType, artifactState, alliance1, alliance2 = GetAvAObjectiveInfo(keepId, objectiveId, battlegroundContext)
+                    local artifactName, artifactType, artifactState = GetObjectiveInfo(keepId, objectiveId, battlegroundContext)
                     if(artifactType == OBJECTIVE_ARTIFACT_OFFENSIVE) then
                         text = GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_SCROLL_OFFENSIVE)
                     else
@@ -374,7 +372,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                     if isStolen then
                         self:LayoutIconStringLine(artifactSection, nil, GetString(SI_TOOLTIP_ARTIFACT_TAKEN), colorStyle, self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
                     else
-                        self:LayoutIconStringLine(artifactSection, nil, zo_strformat(SI_AVA_OBJECTIVE_ARTIFACT_TOOLTIP, artifactName), colorStyle, self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
+                        self:LayoutIconStringLine(artifactSection, nil, zo_strformat(SI_AVA_OBJECTIVE_DISPLAY_NAME_TOOLTIP, artifactName), colorStyle, self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
                     end
                     self:LayoutIconStringLine(artifactSection, nil, text, colorStyle, self.tooltip:GetStyle("mapLocationKeepElderScrollInfo"))
                     keepSection:AddSection(artifactSection)
@@ -385,7 +383,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
             if(keepType == KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
                 local telVarBonusText = GetDistrictTelVarBonusText(keepId, battlegroundContext, keepAlliance)
                 if telVarBonusText then
-                    local finalBonusText = zo_strformat(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT_FORMAT, telVarBonusText, GAMEPAD_TEL_VAR_ICON_TEXT)
+                    local finalBonusText = zo_strformat(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_TEXT_FORMAT, telVarBonusText, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_TELVAR_STONES))
                     local cityBonusSection = keepSection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
                     self:LayoutIconStringLine(cityBonusSection, nil, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_DISTRICT_TEL_VAR_BONUS_HEADER), self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
                     self:LayoutIconStringLine(cityBonusSection, nil, finalBonusText, self.tooltip:GetStyle("mapLocationKeepClaimed"), self.tooltip:GetStyle("keepBaseTooltipContent"))
@@ -424,8 +422,9 @@ local function GetImperialCityStrings(campaignId, isLockedByLinkedCollectible)
     local lockedText
     if isLockedByLinkedCollectible then
         local collectibleId = GetImperialCityCollectibleId()
-        local categoryName, collectibleName = ZO_GetCollectibleCategoryAndName(collectibleId)
-        lockedText = zo_strformat(SI_TOOLTIP_POI_LINKED_COLLECTIBLE_LOCKED, collectibleName, categoryName)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        local categoryData = collectibleData:GetCategoryData()
+        lockedText = zo_strformat(SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED, collectibleData:GetName(), categoryData:GetName())
     end
 
     return name, ruleText, lockedText
@@ -439,6 +438,8 @@ local function LayoutImperialCityTooltip(self, battlegroundContext, isLockedByLi
 
     local campaignId = GetPreferredCampaign()
     local name, ruleText, lockedText = GetImperialCityStrings(campaignId, isLockedByLinkedCollectible)
+    local campaignRulesetId = GetCampaignRulesetId(campaignId)
+    local accessType = GetCampaignRulesetImperialAccessRule(campaignRulesetId)
 
     --Name--
     local nameControl = GetControl(self, "Name")
@@ -526,7 +527,7 @@ local function LayoutImperialCityTooltip_Gamepad(self, battlegroundContext, isLo
 
     if lockedText then
         local collectibleLockedSection = citySection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
-        self:LayoutIconStringLine(collectibleLockedSection, ZO_GAMEPAD_CURRENCY_ICON_CROWNS_TEXTURE, lockedText, self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
+        self:LayoutIconStringLine(collectibleLockedSection, ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS), lockedText, self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
         citySection:AddSection(collectibleLockedSection)
     end
     self.tooltip:AddSection(citySection)

@@ -1,3 +1,20 @@
+local function AreMonsterTellsEnabled()
+    return tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_ENABLED)) ~= 0
+end
+
+local function OnMonsterTellsEnabledChanged(control)
+    ZO_SetControlActiveFromPredicate(control, AreMonsterTellsEnabled)
+end
+
+local function IsMonsterTellsColorSwapEnabled()
+    return AreMonsterTellsEnabled() and tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_MONSTER_TELLS_COLOR_SWAP_ENABLED)) ~= 0
+end
+
+local function OnMonsterTellsOrColorSwapEnabledChanged(control)
+    ZO_SetControlActiveFromPredicate(control, IsMonsterTellsColorSwapEnabled)
+end
+
+
 local ZO_OptionsPanel_Gameplay_ControlData =
 {
     --Combat
@@ -12,6 +29,95 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             settingId = COMBAT_SETTING_MONSTER_TELLS_ENABLED,
             text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENABLE,
             tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENABLE_TOOLTIP,
+            events = {[true] = "MonsterTellsEnabled_Changed", [false] = "MonsterTellsEnabled_Changed",},
+            gamepadHasEnabledDependencies = true,
+        },
+        --Options_Gameplay_MonsterTellsColorSwapEnabled
+        [COMBAT_SETTING_MONSTER_TELLS_COLOR_SWAP_ENABLED] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_COMBAT,
+            panel = SETTING_PANEL_GAMEPLAY,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_COLOR_SWAP_ENABLED,
+            text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_COLOR_SWAP_ENABLED,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_COLOR_SWAP_ENABLED_TOOLTIP,
+            events = {[true] = "MonsterTellsColorSwapEnabled_Changed", [false] = "MonsterTellsColorSwapEnabled_Changed",},
+            eventCallbacks =
+            {
+                ["MonsterTellsEnabled_Changed"] = OnMonsterTellsEnabledChanged,
+            },
+            gamepadIsEnabledCallback = AreMonsterTellsEnabled,
+            gamepadHasEnabledDependencies = true,
+        },
+        --Options_Gameplay_MonsterTellsFriendlyColor
+        [COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_COLOR] =
+        {
+            controlType = OPTIONS_COLOR,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_COLOR,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_FRIENDLY_COLOR,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_FRIENDLY_COLOR_TOOLTIP,
+            eventCallbacks =
+            {
+                ["MonsterTellsEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+                ["MonsterTellsColorSwapEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsMonsterTellsColorSwapEnabled,
+        },
+        --Options_Gameplay_MonsterTellsFriendlyBrightness
+        [COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_BRIGHTNESS] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_BRIGHTNESS,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_FRIENDLY_BRIGHTNESS,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_FRIENDLY_BRIGHTNESS_TOOLTIP,
+            minValue = 1,
+            maxValue = 50,
+            showValue = true,
+            eventCallbacks =
+            {
+                ["MonsterTellsEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+                ["MonsterTellsColorSwapEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsMonsterTellsColorSwapEnabled,
+        },
+        --Options_Gameplay_MonsterTellsEnemyColor
+        [COMBAT_SETTING_MONSTER_TELLS_ENEMY_COLOR] =
+        {
+            controlType = OPTIONS_COLOR,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_ENEMY_COLOR,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENEMY_COLOR,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENEMY_COLOR_TOOLTIP,
+            eventCallbacks =
+            {
+                ["MonsterTellsEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+                ["MonsterTellsColorSwapEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsMonsterTellsColorSwapEnabled,
+        },
+        --Options_Gameplay_MonsterTellsEnemyBrightness
+        [COMBAT_SETTING_MONSTER_TELLS_ENEMY_BRIGHTNESS] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_ENEMY_BRIGHTNESS,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENEMY_BRIGHTNESS,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENEMY_BRIGHTNESS_TOOLTIP,
+            minValue = 1,
+            maxValue = 50,
+            showValue = true,
+            eventCallbacks =
+            {
+                ["MonsterTellsEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+                ["MonsterTellsColorSwapEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsMonsterTellsColorSwapEnabled,
         },
         --Options_Gameplay_DodgeDoubleTap
         [COMBAT_SETTING_ROLL_DODGE_DOUBLE_TAP] =
@@ -132,11 +238,16 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             text = SI_INTERFACE_OPTIONS_LOOT_AUTO_ADD_TO_CRAFT_BAG,
             tooltipText = SI_INTERFACE_OPTIONS_LOOT_AUTO_ADD_TO_CRAFT_BAG_TOOLTIP,
             gamepadIsEnabledCallback = IsESOPlusSubscriber,
-            onInitializeFunction = function(control) 
-                                        if IsESOPlusSubscriber() then
-                                            ZO_Options_SetOptionActive(control)
-                                        else 
-                                            ZO_Options_SetOptionInactive(control)
+            onInitializeFunction = function(control, isKeyboardControl)
+                                        if isKeyboardControl then
+                                            --ZO_Options_SetOptionActive/Inactive are keyboard only functions. The gamepad manages active state through
+                                            --the gamepadIsEnabledCallback. Using ZO_Options_SetOptionActive/Inactive with gamepad controls will set them
+                                            --to the keyboard colors and also doesn't handle the parametric list's selected state's impact.
+                                            if IsESOPlusSubscriber() then
+                                                ZO_Options_SetOptionActive(control)
+                                            else 
+                                                ZO_Options_SetOptionInactive(control)
+                                            end
                                         end
                                     end
         },
@@ -155,15 +266,15 @@ local ZO_OptionsPanel_Gameplay_ControlData =
     --In world
     [SETTING_TYPE_IN_WORLD] =
     {
-        --Options_Gameplay_HideHelm
-        [IN_WORLD_UI_SETTING_HIDE_HELM] =
+        --Options_Gameplay_HidePolymorphHelm
+        [IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM] =
         {
             controlType = OPTIONS_CHECKBOX,
             system = SETTING_TYPE_IN_WORLD,
             panel = SETTING_PANEL_GAMEPLAY,
-            settingId = IN_WORLD_UI_SETTING_HIDE_HELM,
-            text = SI_INTERFACE_OPTIONS_HIDE_HELM,
-            tooltipText = SI_INTERFACE_OPTIONS_HIDE_HELM_TOOLTIP,
+            settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
+            text = SI_INTERFACE_OPTIONS_HIDE_POLYMORPH_HELM,
+            tooltipText = SI_INTERFACE_OPTIONS_HIDE_POLYMORPH_HELM_TOOLTIP,
         },
 
         --Options_Gameplay_HideMountStaminaUpgrade
@@ -212,6 +323,17 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             gamepadValidStringOverrides = {SI_GAMEPAD_OPTIONS_DEFAULT_SOUL_GEM_CHOICE_GOLD, SI_GAMEPAD_OPTIONS_DEFAULT_SOUL_GEM_CHOICE_CROWNS},
             valueStringPrefix = "SI_DEFAULTSOULGEMCHOICE",
         },
+
+        --Options_Gameplay_FootInverseKinematics
+        [IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_FOOT_INVERSE_KINEMATICS,
+            tooltipText = SI_INTERFACE_OPTIONS_FOOT_INVERSE_KINEMATICS_TOOLTIP,
+        },
     },
 
     --Tutorial
@@ -241,6 +363,48 @@ local ZO_OptionsPanel_Gameplay_ControlData =
                         end,
         },
     },
+
+    [SETTING_TYPE_CUSTOM] =
+    {
+        --Options_Gameplay_MonsterTellsFriendlyTest
+        [OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_FRIENDLY_TEST] =
+        {
+            controlType = OPTIONS_INVOKE_CALLBACK,
+            system = SETTING_TYPE_CUSTOM,
+            panel = SETTING_PANEL_GAMEPLAY,
+            settingId = OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_FRIENDLY_TEST,
+            text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_FRIENDLY_TEST,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_FRIENDLY_TEST_TOOLTIP,
+            eventCallbacks =
+            {
+                ["MonsterTellsEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+                ["MonsterTellsColorSwapEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsMonsterTellsColorSwapEnabled,
+            callback = function()
+                            StartWorldEffectOnPlayer(UI_WORLD_EFFECT_FRIENDLY_TELEGRAPH)
+                        end,
+        },
+        --Options_Gameplay_MonsterTellsEnemyTest
+        [OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_ENEMY_TEST] =
+        {
+            controlType = OPTIONS_INVOKE_CALLBACK,
+            system = SETTING_TYPE_CUSTOM,
+            panel = SETTING_PANEL_GAMEPLAY,
+            settingId = OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_ENEMY_TEST,
+            text = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENEMY_TEST,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_MONSTER_TELLS_ENEMY_TEST_TOOLTIP,
+            eventCallbacks =
+            {
+                ["MonsterTellsEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+                ["MonsterTellsColorSwapEnabled_Changed"] = OnMonsterTellsOrColorSwapEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsMonsterTellsColorSwapEnabled,
+            callback = function()
+                            StartWorldEffectOnPlayer(UI_WORLD_EFFECT_ENEMY_TELEGRAPH)
+                        end,
+        },
+    }
 }
 
 local ZO_SharedOptions_Gameplay_GamepadSettingsData = 
@@ -267,10 +431,11 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
         text = SI_GAMEPAD_OPTIONS_TEMPLATES,
         valid = {GAMEPAD_TEMPLATE_DEFAULT, GAMEPAD_TEMPLATE_ALTERNATE_INTERACT, GAMEPAD_TEMPLATE_WEAPON_TRICKS,},
         valueStringPrefix = "SI_GAMEPADTEMPLATE",
+        gamepadShowsControllerInfo = true,
 
         scrollListChangedCallback = ZO_GamepadOptions_RefreshGamepadInfoPanel,
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_GAMEPLAY, ZO_OptionsPanel_Gameplay_ControlData)
-SYSTEMS:GetObject("options"):AddTableToSystem(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_GAMEPAD, ZO_SharedOptions_Gameplay_GamepadSettingsData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_GAMEPLAY, ZO_OptionsPanel_Gameplay_ControlData)
+ZO_SharedOptions.AddTableToSystem(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_GAMEPAD, ZO_SharedOptions_Gameplay_GamepadSettingsData)

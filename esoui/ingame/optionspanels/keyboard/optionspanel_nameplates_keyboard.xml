@@ -378,20 +378,12 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Nameplates_QuestBestowers" inherits="ZO_Options_Checkbox">
-            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FollowerIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
-            <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS)
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Control>
-        
         <!-- End Indicators -->
         
         <!-- Begin Glows -->
 
         <Control name="Options_Nameplates_GlowThickness" inherits="ZO_Options_Slider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_QuestBestowers" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Nameplates_FollowerIndicators" relativePoint="BOTTOMLEFT" offsetY="4" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_NAMEPLATES, SETTING_TYPE_IN_WORLD, IN_WORLD_UI_SETTING_GLOW_THICKNESS)
                 ZO_OptionsWindow_InitializeControl(self)

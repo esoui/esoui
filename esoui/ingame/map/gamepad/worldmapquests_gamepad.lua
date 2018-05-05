@@ -46,8 +46,7 @@ end
 
 local BLACK = ZO_ColorDef:New(0, 0, 0)
 function WorldMapQuests_Gamepad:LayoutList()
-    self.hasQuests = #self.data.masterList > 0
-    self.noQuestsLabel:SetHidden(self.hasQuests)
+    self:RefreshNoQuestsLabel()
 
     self.questList:Clear()
     ZO_ClearTable(self.entriesByIndex)
@@ -63,7 +62,7 @@ function WorldMapQuests_Gamepad:LayoutList()
 
         entryData.questInfo = srcData
 
-        local isAssisted = ZO_QuestTracker.tracker:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
+        local isAssisted = FOCUSED_QUEST_TRACKER:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
         entryData.isAssisted = isAssisted
         if isAssisted then
             self.assistedEntryData = entryData
@@ -103,7 +102,7 @@ function WorldMapQuests_Gamepad:SetupQuestDetails()
     local questName = targetData.questInfo.name
     local questIndex = targetData.questInfo.questIndex
 
-    local isAssisted = ZO_QuestTracker.tracker:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
+    local isAssisted = FOCUSED_QUEST_TRACKER:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
 
     local questLevel = GetJournalQuestLevel(questIndex)
     local questColor = GetColorDefForCon(GetCon(questLevel))
@@ -165,7 +164,7 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
                 end
 
                 ZO_WorldMap_PanToQuest(questIndex)
-                QUEST_TRACKER:ForceAssist(questIndex)
+                FOCUSED_QUEST_TRACKER:ForceAssist(questIndex)
                 self.questList:RefreshVisible()
                 self:SetupQuestDetails()
                 PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
@@ -173,7 +172,7 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
 
             enabled = function()
                 local targetData = self.questList:GetTargetData()
-                return targetData and targetData.questInfo and targetData.questInfo.questIndex and not targetData.isAssisted
+                return targetData ~= nil and targetData.questInfo ~= nil and targetData.questInfo.questIndex ~= nil and not targetData.isAssisted
             end
         },
     }

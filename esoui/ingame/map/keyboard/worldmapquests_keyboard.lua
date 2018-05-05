@@ -15,12 +15,12 @@ function WorldMapQuests:Initialize(control)
     self.headerPool = ZO_ControlPool:New("ZO_WorldMapQuestHeader", control:GetNamedChild("PaneScrollChild"), "Header")
 
     WORLD_MAP_QUESTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", function(...) self:RefreshHeaders() end)
+    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", function(...) self:RefreshHeaders() end)
 end
 
 function WorldMapQuests:LayoutList()
-    self.noQuestsLabel:SetHidden(#self.data.masterList > 0)
-
+    self:RefreshNoQuestsLabel()
+    
     local prevHeader
     self.headerPool:ReleaseAllObjects()
     for i, data in ipairs(self.data.masterList) do
@@ -51,7 +51,7 @@ function WorldMapQuests:SetupQuestHeader(control, data)
     ZO_SelectableLabel_SetNormalColor(nameControl, ZO_ColorDef:New(GetColorForCon(GetCon(data.level))))
         
     --Assisted State
-    local isAssisted = ZO_QuestTracker.tracker:IsTrackTypeAssisted(TRACK_TYPE_QUEST, data.questIndex)
+    local isAssisted = FOCUSED_QUEST_TRACKER:IsTrackTypeAssisted(TRACK_TYPE_QUEST, data.questIndex)
     local assistedTexture = GetControl(control, "AssistedIcon")
     assistedTexture:SetHidden(not isAssisted)
 
@@ -65,7 +65,7 @@ function WorldMapQuests:QuestHeader_OnClicked(header, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local data = header.data
         ZO_WorldMap_PanToQuest(data.questIndex)
-        QUEST_TRACKER:ForceAssist(data.questIndex)
+        FOCUSED_QUEST_TRACKER:ForceAssist(data.questIndex)
     end
 end
 

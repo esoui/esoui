@@ -1,11 +1,3 @@
-local function SetControlActiveFromPredicate(control, predicate)
-    if predicate() then
-        ZO_Options_SetOptionActive(control)
-    else
-        ZO_Options_SetOptionInactive(control)
-    end
-end
-
 function ZO_OptionsPanel_Interface_ChatBubbleSpeedSliderValueFunc(value)
     if value <= .5 then
         return GetString(SI_INTERFACE_OPTIONS_FADE_RATE_VERY_SLOW)
@@ -49,68 +41,6 @@ function ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized(self)
     ZO_OptionsWindow_InitializeControl(self)
 end
 
-local function IsSCTEnabled()
-    return tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED)) ~= 0
-end
-
-local function OnSCTEnabledChanged(control)
-    SetControlActiveFromPredicate(control, IsSCTEnabled)
-end
-
-local function IsSCTAndOutgoingEnabled()
-    return IsSCTEnabled() and tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_OUTGOING_ENABLED)) ~= 0
-end
-
-local function OnSCTOrOutgoingEnabledChanged(control)
-    SetControlActiveFromPredicate(control, IsSCTAndOutgoingEnabled)
-end
-
-local function IsSCTAndIncomingEnabled()
-    return IsSCTEnabled() and tonumber(GetSetting(SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_INCOMING_ENABLED)) ~= 0
-end
-
-local function OnSCTOrIncomingEnabledChanged(control)
-    SetControlActiveFromPredicate(control, IsSCTAndIncomingEnabled)
-end
-
-local function GenerateSCTOutgoingOption(optionType)
-    local option =
-    {
-        controlType = OPTIONS_CHECKBOX,
-        system = SETTING_TYPE_COMBAT,
-        settingId = _G["COMBAT_SETTING_SCT_OUTGOING_"..optionType.."_ENABLED"],
-        panel = SETTING_PANEL_INTERFACE,
-        text = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_"..optionType.."_ENABLED"],
-        tooltipText = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_"..optionType.."_ENABLED_TOOLTIP"],
-        eventCallbacks =
-        {
-            ["SCTEnabled_Changed"] = OnSCTOrOutgoingEnabledChanged,
-            ["SCTOutgoingEnabled_Changed"] = OnSCTOrOutgoingEnabledChanged,
-        },
-        gamepadIsEnabledCallback = IsSCTAndOutgoingEnabled,
-    }
-    return option
-end
-
-local function GenerateSCTIncomingOption(optionType)
-    local option =
-    {
-        controlType = OPTIONS_CHECKBOX,
-        system = SETTING_TYPE_COMBAT,
-        settingId = _G["COMBAT_SETTING_SCT_INCOMING_"..optionType.."_ENABLED"],
-        panel = SETTING_PANEL_INTERFACE,
-        text = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_"..optionType.."_ENABLED"],
-        tooltipText = _G["SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_"..optionType.."_ENABLED_TOOLTIP"],
-        eventCallbacks =
-        {
-            ["SCTEnabled_Changed"] = OnSCTOrIncomingEnabledChanged,
-            ["SCTIncomingEnabled_Changed"] = OnSCTOrIncomingEnabledChanged,
-        },
-        gamepadIsEnabledCallback = IsSCTAndIncomingEnabled,
-    }
-    return option
-end
-
 local ZO_OptionsPanel_Interface_ControlData =
 {
     --UI Settings
@@ -146,30 +76,6 @@ local ZO_OptionsPanel_Interface_ControlData =
                 function() return GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER) end
             }
         },
-        --Options_Interface_ShowActionBar
-        [UI_SETTING_SHOW_ACTION_BAR] =
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_UI,
-            panel = SETTING_PANEL_INTERFACE,
-            settingId = UI_SETTING_SHOW_ACTION_BAR,
-            text = SI_INTERFACE_OPTIONS_ACTION_BAR,
-            tooltipText = SI_INTERFACE_OPTIONS_ACTION_BAR_TOOLTIP,
-            valid = {ACTION_BAR_SETTING_CHOICE_OFF, ACTION_BAR_SETTING_CHOICE_AUTOMATIC, ACTION_BAR_SETTING_CHOICE_ON,},
-            valueStringPrefix = "SI_ACTIONBARSETTINGCHOICE",
-        },
-		--Options_Interface_ResourceNumbers
-		[UI_SETTING_RESOURCE_NUMBERS] =
-		{
-			controlType = OPTIONS_FINITE_LIST,
-			system = SETTING_TYPE_UI,
-			panel = SETTING_PANEL_INTERFACE,
-			settingId = UI_SETTING_RESOURCE_NUMBERS,
-			text = SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS,
-			tooltipText = SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS_TOOLTIP,
-			valid = {RESOURCE_NUMBERS_SETTING_OFF, RESOURCE_NUMBERS_SETTING_NUMBER_ONLY, RESOURCE_NUMBERS_SETTING_PERCENT_ONLY, RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT},
-			valueStringPrefix = "SI_RESOURCENUMBERSSETTING",
-		},
         --Options_Interface_ShowRaidLives
         [UI_SETTING_SHOW_RAID_LIVES] =
         {
@@ -182,16 +88,6 @@ local ZO_OptionsPanel_Interface_ControlData =
             valid = {RAID_LIFE_VISIBILITY_CHOICE_OFF, RAID_LIFE_VISIBILITY_CHOICE_AUTOMATIC, RAID_LIFE_VISIBILITY_CHOICE_ON,},
             valueStringPrefix = "SI_RAIDLIFEVISIBILITYCHOICE",
         },
-		--Options_Interface_UltimateNumber
-		[UI_SETTING_ULTIMATE_NUMBER] =
-		{
-			controlType = OPTIONS_CHECKBOX,
-			system = SETTING_TYPE_UI,
-			panel = SETTING_PANEL_INTERFACE,
-			settingId = UI_SETTING_ULTIMATE_NUMBER,
-			text = SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER,
-			tooltipText = SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER_TOOLTP,
-		},
         --UI_Settings_ShowQuestTracker
         [UI_SETTING_SHOW_QUEST_TRACKER] =
         {
@@ -231,6 +127,18 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK,
             tooltipText = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK_TOOLTIP,
+        },
+        --Options_Interface_QuestBestowerIndicators
+        [UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
+            panel = SETTING_PANEL_INTERFACE,
+            text = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS,
+            tooltipText = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS_TOOLTIP,
+            events = {[true] = "Bestowers_On", [false] = "Bestowers_Off",},
+            gamepadHasEnabledDependencies = true,
         },
         --UI_Settings_ShowQuestTracker
         [UI_SETTING_COMPASS_QUEST_GIVERS] =
@@ -293,22 +201,6 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_ARMOR_INDICATOR,
             tooltipText = SI_ARMOR_INDICATOR_SETTINGS_TOOLTIP,
-        },
-    },
-
-    [SETTING_TYPE_ACTIVE_COMBAT_TIP] =
-    {
-        --Options_Interface_ActiveCombatTips
-        [0] =   --[[only one id right now]]
-        {
-            controlType = OPTIONS_FINITE_LIST,
-            system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
-            panel = SETTING_PANEL_INTERFACE,
-            settingId = 0, --[[only one id right now]]
-            text = SI_INTERFACE_OPTIONS_ACT_SETTING_LABEL,
-            tooltipText = SI_INTERFACE_OPTIONS_ACT_SETTING_LABEL_TOOLTIP,
-            valid = {ACT_SETTING_OFF, ACT_SETTING_AUTO, ACT_SETTING_ALWAYS,},
-            valueStringPrefix = "SI_ACTIVECOMBATTIPSETTING",
         },
     },
 
@@ -386,70 +278,6 @@ local ZO_OptionsPanel_Interface_ControlData =
         },
     },
 
-    --Combat
-    [SETTING_TYPE_COMBAT] =
-    {
-        [COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_COMBAT,
-            settingId = COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_COMBAT_SCT_ENABLED,
-            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_SCT_ENABLED_TOOLTIP,
-            events = {[true] = "SCTEnabled_Changed", [false] = "SCTEnabled_Changed",},
-            gamepadHasEnabledDependencies = true,
-        },
-        [COMBAT_SETTING_SCT_OUTGOING_ENABLED] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_COMBAT,
-            settingId = COMBAT_SETTING_SCT_OUTGOING_ENABLED,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_ENABLED,
-            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_SCT_OUTGOING_ENABLED_TOOLTIP,
-            events = {[true] = "SCTOutgoingEnabled_Changed", [false] = "SCTOutgoingEnabled_Changed",},
-            eventCallbacks =
-            {
-                ["SCTEnabled_Changed"]   = OnSCTEnabledChanged,
-            },
-            gamepadIsEnabledCallback = IsSCTEnabled,
-            gamepadHasEnabledDependencies = true,
-        },
-        [COMBAT_SETTING_SCT_OUTGOING_DAMAGE_ENABLED] = GenerateSCTOutgoingOption("DAMAGE"),
-        [COMBAT_SETTING_SCT_OUTGOING_DOT_ENABLED] = GenerateSCTOutgoingOption("DOT"),
-        [COMBAT_SETTING_SCT_OUTGOING_HEALING_ENABLED] = GenerateSCTOutgoingOption("HEALING"),
-        [COMBAT_SETTING_SCT_OUTGOING_HOT_ENABLED] = GenerateSCTOutgoingOption("HOT"),
-        [COMBAT_SETTING_SCT_OUTGOING_STATUS_EFFECTS_ENABLED] = GenerateSCTOutgoingOption("STATUS_EFFECTS"),
-        [COMBAT_SETTING_SCT_OUTGOING_PET_DAMAGE_ENABLED] = GenerateSCTOutgoingOption("PET_DAMAGE"),
-        [COMBAT_SETTING_SCT_OUTGOING_PET_DOT_ENABLED] = GenerateSCTOutgoingOption("PET_DOT"),
-        [COMBAT_SETTING_SCT_OUTGOING_PET_HEALING_ENABLED] = GenerateSCTOutgoingOption("PET_HEALING"),
-        [COMBAT_SETTING_SCT_OUTGOING_PET_HOT_ENABLED] = GenerateSCTOutgoingOption("PET_HOT"),
-        [COMBAT_SETTING_SCT_INCOMING_ENABLED] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_COMBAT,
-            settingId = COMBAT_SETTING_SCT_INCOMING_ENABLED,
-            panel = SETTING_PANEL_INTERFACE,
-            text = SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_ENABLED,
-            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_SCT_INCOMING_ENABLED_TOOLTIP,
-            events = {[true] = "SCTIncomingEnabled_Changed", [false] = "SCTIncomingEnabled_Changed",},
-            eventCallbacks =
-            {
-                ["SCTEnabled_Changed"]   = OnSCTEnabledChanged,
-            },
-            gamepadIsEnabledCallback = IsSCTEnabled,
-            gamepadHasEnabledDependencies = true,
-        },
-        [COMBAT_SETTING_SCT_INCOMING_DAMAGE_ENABLED] = GenerateSCTIncomingOption("DAMAGE"),
-        [COMBAT_SETTING_SCT_INCOMING_DOT_ENABLED] = GenerateSCTIncomingOption("DOT"),
-        [COMBAT_SETTING_SCT_INCOMING_HEALING_ENABLED] = GenerateSCTIncomingOption("HEALING"),
-        [COMBAT_SETTING_SCT_INCOMING_HOT_ENABLED] = GenerateSCTIncomingOption("HOT"),
-        [COMBAT_SETTING_SCT_INCOMING_PET_DAMAGE_ENABLED] = GenerateSCTIncomingOption("PET_DAMAGE"),
-        [COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED] = GenerateSCTIncomingOption("PET_DOT"),
-        [COMBAT_SETTING_SCT_INCOMING_STATUS_EFFECTS_ENABLED] = GenerateSCTIncomingOption("STATUS_EFFECTS"),
-    },
-
     --Custom
     [SETTING_TYPE_CUSTOM] =
     {
@@ -506,4 +334,4 @@ local ZO_OptionsPanel_Interface_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_INTERFACE, ZO_OptionsPanel_Interface_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_INTERFACE, ZO_OptionsPanel_Interface_ControlData)

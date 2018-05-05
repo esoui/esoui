@@ -1,0 +1,117 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_OutfitStyle_GridEntry_HighlightAnimation">
+            <Animations>
+                <AlphaAnimation duration="255" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_OutfitStyle_GridEntry_Template_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD" y="ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD" />
+
+            <OnInitialized>
+                self.highlight = self:GetNamedChild("Highlight")
+                self.equippedGlow = self:GetNamedChild("EquippedGlow")
+                self.statusMultiIcon = self:GetNamedChild("Status")
+                self.icon = self:GetNamedChild("Icon")
+            </OnInitialized>
+            
+            <OnMouseEnter>
+                ZO_OutfitStyle_GridEntry_Template_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+            
+            <OnMouseExit>
+                ZO_OutfitStyle_GridEntry_Template_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_OutfitStyle_GridEntry_Template_Keyboard_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                ZO_OutfitStyle_GridEntry_Template_Keyboard_OnMouseDoubleClick(self, button)
+            </OnMouseDoubleClick>
+            
+            <OnDragStart>
+                if button == MOUSE_BUTTON_INDEX_LEFT then
+                    ZO_OutfitStyle_GridEntry_Template_Keyboard_OnDragStart(self)
+                end
+            </OnDragStart>
+            
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_CenterlessBackdrop" level="0"/>
+
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Restyle/Keyboard/outfitSlot_hoverBackground.dds" layer="BACKGROUND" level="1" alpha="0">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)EquippedGlow" textureFile="EsoUI/Art/Restyle/Keyboard/outfitSlot_selectedBackground.dds" layer="BACKGROUND" level="ZO_RESTYLE_TEXTURE_LEVEL_EQUIPPED" hidden="true">
+                    <AnchorFill />
+                </Texture>
+                
+                <Texture name="$(parent)Icon" level="ZO_RESTYLE_TEXTURE_LEVEL_ICON" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Dimensions x="ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_ICON_DIMENSIONS_KEYBOARD" y="ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_ICON_DIMENSIONS_KEYBOARD"/>
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" level="ZO_RESTYLE_TEXTURE_LEVEL_STATUS" mouseEnabled="false">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                </Texture>
+            </Controls>
+        </Control>
+    
+        <TopLevelControl name="ZO_OutfitStylesPanelTopLevel_Keyboard" inherits="ZO_Restyle_Content_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_OutfitStylesPanel_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <StatusBar name="$(parent)ProgressStatusBar" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+
+                    <OnMouseEnter>
+                        ZO_OutfitStylesProgressBar_Keyboard_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_OutfitStylesProgressBar_Keyboard_OnMouseExit(self)
+                    </OnMouseExit>
+                    
+                    <Controls>
+                        <Label name="$(parent)Progress" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY">
+                            <Anchor point="CENTER" />
+                        </Label>
+                    </Controls>
+                </StatusBar>
+
+                <Control name="$(parent)TypeFilter" inherits="ZO_ComboBox">
+                    <Dimensions x="180"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ProgressStatusBar" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Control>
+                
+                <Button name="$(parent)ShowLocked" inherits="ZO_CheckButton">
+                    <Anchor point="LEFT" constrains="X" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)TypeFilter" relativePoint="LEFT" constrains="Y" />
+                </Button>
+
+                <Control name="$(parent)Pane" inherits="ZO_GridScrollList_Keyboard">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TypeFilter" relativePoint="BOTTOMRIGHT" offsetY="9" />
+                    <Anchor point="BOTTOMLEFT" />
+                </Control>
+
+                <Label name="$(parent)NoStylesLabel" font="ZoFontWinH4" horizontalAlignment="CENTER" text="SI_OUTFIT_NO_MATCHING_STYLES">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Pane" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Pane" offsetY="25" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

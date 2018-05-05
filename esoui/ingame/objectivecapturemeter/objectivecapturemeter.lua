@@ -22,32 +22,64 @@ local FULL_BAR_TIMEOUT_MS       = 4000
 -- Capture Meter textures
 -----------------
 
-local ALLIANCE_BADGE_TEXTURES = 
+-- badge textures
+local ALLIANCE_BADGE_TEXTURES =
 {
-	"EsoUI/Art/AvA/avaCaptureBar_allianceBadge_aldmeri.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_allianceBadge_ebonheart.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_allianceBadge_daggerfall.dds", 
+    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/AvA/avaCaptureBar_allianceBadge_aldmeri.dds",
+    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/AvA/avaCaptureBar_allianceBadge_ebonheart.dds",
+    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/AvA/avaCaptureBar_allianceBadge_daggerfall.dds",
 }
 
-local ALLIANCE_BAR_TEXTURES = 
+local BATTLEGROUND_TEAM_BADGE_TEXTURES =
 {
-	"EsoUI/Art/AvA/avaCaptureBar_fill_aldmeri.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_fill_ebonheart.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_fill_daggerfall.dds", 
+    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_orange.dds",
+    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_purple.dds",
+    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_green.dds",
 }
 
-local ALLIANCE_POINT_TEXTURES = 
+-- bar textures
+local ALLIANCE_BAR_TEXTURES =
 {
-	"EsoUI/Art/AvA/avaCaptureBar_point_aldmeri.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_point_ebonheart.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_point_daggerfall.dds", 
+    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/AvA/avaCaptureBar_fill_aldmeri.dds",
+    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/AvA/avaCaptureBar_fill_ebonheart.dds",
+    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/AvA/avaCaptureBar_fill_daggerfall.dds",
 }
 
-local ALLIANCE_TAIL_TEXTURES = 
+local BATTLEGROUND_TEAM_BAR_TEXTURES =
 {
-	"EsoUI/Art/AvA/avaCaptureBar_point-inverse_aldmeri.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_point-inverse_ebonheart.dds", 
-	"EsoUI/Art/AvA/avaCaptureBar_point-inverse_daggerfall.dds", 
+    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_orange.dds",
+    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_purple.dds",
+    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_green.dds",
+}
+
+-- point textures
+local ALLIANCE_POINT_TEXTURES =
+{
+    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/AvA/avaCaptureBar_point_aldmeri.dds",
+    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/AvA/avaCaptureBar_point_ebonheart.dds",
+    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/AvA/avaCaptureBar_point_daggerfall.dds",
+}
+
+local BATTLEGROUND_TEAM_POINT_TEXTURES =
+{
+    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_orange.dds",
+    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_purple.dds",
+    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_green.dds",
+}
+
+-- tail textures
+local ALLIANCE_TAIL_TEXTURES =
+{
+    [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/AvA/avaCaptureBar_point-inverse_aldmeri.dds",
+    [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/AvA/avaCaptureBar_point-inverse_ebonheart.dds",
+    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/AvA/avaCaptureBar_point-inverse_daggerfall.dds",
+}
+
+local BATTLEGROUND_TEAM_TAIL_TEXTURES =
+{
+    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_orange.dds",
+    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_purple.dds",
+    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_green.dds",
 }
 
 -------------------
@@ -97,11 +129,43 @@ function ZO_ObjectiveCaptureMeter:Initialize(control)
     ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
 end
 
+function ZO_ObjectiveCaptureMeter:GetBadgeTextureFromAlliance(alliance, isBattleground)
+    if isBattleground then
+        return BATTLEGROUND_TEAM_BADGE_TEXTURES[alliance]
+    else
+        return ALLIANCE_BADGE_TEXTURES[alliance]
+    end
+end
+
+function ZO_ObjectiveCaptureMeter:GetBarTextureFromAlliance(alliance, isBattleground)
+    if isBattleground then
+        return BATTLEGROUND_TEAM_BAR_TEXTURES[alliance]
+    else
+        return ALLIANCE_BAR_TEXTURES[alliance]
+    end
+end
+
+function ZO_ObjectiveCaptureMeter:GetPointTextureFromAlliance(alliance, isBattleground)
+    if isBattleground then
+        return BATTLEGROUND_TEAM_POINT_TEXTURES[alliance]
+    else
+        return ALLIANCE_POINT_TEXTURES[alliance]
+    end
+end
+
+function ZO_ObjectiveCaptureMeter:GetTailTextureFromAlliance(alliance, isBattleground)
+    if isBattleground then
+        return BATTLEGROUND_TEAM_TAIL_TEXTURES[alliance]
+    else
+        return ALLIANCE_TAIL_TEXTURES[alliance]
+    end
+end
+
 
 function ZO_ObjectiveCaptureMeter:ServerUpdate(eventCode, keepId, objectiveId, battlegroundContext, capturePoolValue, capturePoolSize, capturingPlayers, contestingPlayers, owningAlliance)
     -- Short-circuit if we're walking in to an already-owned flag.
-    if(capturePoolValue / capturePoolSize == 1 and (self.capturePercentage == nil or self.capturePercentage == 1)) then 
-        return 
+    if capturePoolValue / capturePoolSize == 1 and (self.capturePercentage == nil or self.capturePercentage == 1) then
+        return
     end
 
     -- Show the bar frame if we're within range
@@ -110,61 +174,74 @@ function ZO_ObjectiveCaptureMeter:ServerUpdate(eventCode, keepId, objectiveId, b
     self:SetHiddenForReason("inCaptureArea", false)
 
     -- Calculate percentage complete
-	self.capturePercentage = capturePoolValue / capturePoolSize;
+    self.capturePercentage = capturePoolValue / capturePoolSize;
 
     -- Turn on appropriate arrows
-    self.contestingArrow1:SetHidden(contestingPlayers - capturingPlayers < MIN_NUM_PLAYERS_ONE_ARROW)
-    self.contestingArrow2:SetHidden(contestingPlayers - capturingPlayers < MIN_NUM_PLAYERS_TWO_ARROWS)
-    self.contestingArrow3:SetHidden(contestingPlayers - capturingPlayers < MIN_NUM_PLAYERS_THREE_ARROWS)
-    self.capturingArrow1:SetHidden(capturingPlayers - contestingPlayers < MIN_NUM_PLAYERS_ONE_ARROW)
-    self.capturingArrow2:SetHidden(capturingPlayers - contestingPlayers < MIN_NUM_PLAYERS_TWO_ARROWS)
-    self.capturingArrow3:SetHidden(capturingPlayers - contestingPlayers < MIN_NUM_PLAYERS_THREE_ARROWS)
+    local numMoreContestingPlayers = contestingPlayers - capturingPlayers
+    self.contestingArrow1:SetHidden(numMoreContestingPlayers < MIN_NUM_PLAYERS_ONE_ARROW)
+    self.contestingArrow2:SetHidden(numMoreContestingPlayers < MIN_NUM_PLAYERS_TWO_ARROWS)
+    self.contestingArrow3:SetHidden(numMoreContestingPlayers < MIN_NUM_PLAYERS_THREE_ARROWS)
+
+    local numMoreCapturingPlayers = capturingPlayers - contestingPlayers
+    self.capturingArrow1:SetHidden(numMoreCapturingPlayers < MIN_NUM_PLAYERS_ONE_ARROW)
+    self.capturingArrow2:SetHidden(numMoreCapturingPlayers < MIN_NUM_PLAYERS_TWO_ARROWS)
+    self.capturingArrow3:SetHidden(numMoreCapturingPlayers < MIN_NUM_PLAYERS_THREE_ARROWS)
 
     -- Determine visibility of UI
-	if(owningAlliance ~= 0) then
+    if owningAlliance ~= 0 then
+        local isBattleground = IsActiveWorldBattleground()
+
         -- Show alliance-specific UI elements
-		self.ownerBadge:SetTexture(ALLIANCE_BADGE_TEXTURES[owningAlliance])
-		self.progressBar:SetTexture(ALLIANCE_BAR_TEXTURES[owningAlliance])
-		self.ownerBadge:SetHidden(false)
-		self.progressBar:SetHidden(false)
+        self.ownerBadge:SetTexture(self:GetBadgeTextureFromAlliance(owningAlliance, isBattleground))
+        self.progressBar:SetTexture(self:GetBarTextureFromAlliance(owningAlliance, isBattleground))
+        self.ownerBadge:SetHidden(false)
+        self.progressBar:SetHidden(false)
         self.lastOwningAlliance = owningAlliance
 
         -- Show appropriate endcap and arrows
-        if(self.capturePercentage == 1) then
-            self.endCap:SetHidden(true) 
-            self:HideShowArrows(0)  
+        if self.capturePercentage == 1 then
+            self.endCap:SetHidden(true)
+            self:HideShowArrows(0)
 
             -- Flag is fully captured, start the timer to fade out this UI
-            zo_callLater(function()
-                self:Hide()
-            end, FULL_BAR_TIMEOUT_MS)
+            zo_callLater(function() self:Hide() end, FULL_BAR_TIMEOUT_MS)
         else
-            if(capturingPlayers > contestingPlayers) then
+            if capturingPlayers > contestingPlayers then
                 -- Flag is being captured; make the endcap a point
-                self.endCap:SetTexture(ALLIANCE_POINT_TEXTURES[owningAlliance])  
-                self.endCap:SetHidden(false)       
-            elseif(capturingPlayers < contestingPlayers) then
-                -- Flag is being contested; make the endcap a tail
-                self.endCap:SetTexture(ALLIANCE_TAIL_TEXTURES[owningAlliance])
+                self.endCap:SetTexture(self:GetPointTextureFromAlliance(owningAlliance, isBattleground))
                 self.endCap:SetHidden(false)
+                -- if we are the team that "owns" the flag (i.e. we are capturing the point for our team)
+                -- then play a sound indicating that the point is being captured
+                if isBattleground and owningAlliance == GetUnitAlliance("player") then
+                    PlaySound(SOUNDS.BATTLEGROUND_CAPTURE_METER_CAPTURING)
+                end
+            elseif capturingPlayers < contestingPlayers then
+                -- Flag is being contested; make the endcap a tail
+                self.endCap:SetTexture(self:GetTailTextureFromAlliance(owningAlliance, isBattleground))
+                self.endCap:SetHidden(false)
+                -- if we aren't the team that owns the flag (i.e. we are taking the point from another team)
+                -- then play a sound indicating that the point is being contested
+                if isBattleground and owningAlliance ~= GetUnitAlliance("player") then
+                    PlaySound(SOUNDS.BATTLEGROUND_CAPTURE_METER_CONTESTING)
+                end
             else
                 -- Stalemate
-                self.endCap:SetHidden(true) 
-                self:HideShowArrows(0)  
+                self.endCap:SetHidden(true)
+                self:HideShowArrows(0)
             end
         end
-    elseif(not self.lastOwningAlliance) then -- Checks lastOwning alliance against both nil and 0
+    elseif not self.lastOwningAlliance then -- Checks lastOwning alliance against both nil and 0
         -- Hide alliance-specific UI elements
         self.ownerBadge:SetHidden(true)
-		self.progressBar:SetHidden(true)
-        self.endCap:SetHidden(true) 
-        self:HideShowArrows(0)  
+        self.progressBar:SetHidden(true)
+        self.endCap:SetHidden(true)
+        self:HideShowArrows(0)
     else
         -- In this case, the capture bar is going from nonzero to zero, which means we need to tween it down to zero and then
         -- hide the alliance-specific textures. This is handled in the AnimationTimeline's OnStop event.
     end
 
-    if(self.capTimeline.endPct == nil) then
+    if self.capTimeline.endPct == nil then
         self.capTimeline.endPct = self.capturePercentage
     end
 
@@ -179,18 +256,18 @@ function ZO_ObjectiveCaptureMeter:VelocityArrowUpdate(captureBarFillPercentage, 
                                -- Goes from 0.0-1.0, where 0.0 is 12.5% around the circle (starting from the top center)
                                -- and 1.0 is 87.5% of the way around.
 
-    if(visibleArrows > 0) then
+    if visibleArrows > 0 then
         -- We're displaying capturing arrows
-        if(ARROW_ARCLENGTH * zo_abs(visibleArrows) > captureBarFillPercentage * CAPTURE_BAR_ARCLENGTH) then
+        if ARROW_ARCLENGTH * zo_abs(visibleArrows) > captureBarFillPercentage * CAPTURE_BAR_ARCLENGTH then
             -- Our arrows are longer than our capture bar, anchor to the end
             arrowAnchorPointPct = ARROW_LENGTH * zo_abs(visibleArrows)
         else
             -- Our capture bar is longer than our arrows, position arrows to follow capture bar
             arrowAnchorPointPct = captureBarFillPercentage
         end
-    elseif(visibleArrows < 0) then
+    elseif visibleArrows < 0 then
         -- We're displaying contesting arrows
-        if(ARROW_ARCLENGTH * zo_abs(visibleArrows) + ENDCAP_ARCLENGTH > (1 - captureBarFillPercentage) * CAPTURE_BAR_ARCLENGTH) then
+        if ARROW_ARCLENGTH * zo_abs(visibleArrows) + ENDCAP_ARCLENGTH > (1 - captureBarFillPercentage) * CAPTURE_BAR_ARCLENGTH then
             -- Our arrows are longer than our capture bar, anchor to the end
             arrowAnchorPointPct = 1 - (ARROW_LENGTH * zo_abs(visibleArrows) + ENDCAP_LENGTH)
         else
@@ -202,13 +279,14 @@ function ZO_ObjectiveCaptureMeter:VelocityArrowUpdate(captureBarFillPercentage, 
         arrowAnchorPointPct = captureBarFillPercentage
     end
 
-    self.endCap:SetTextureRotation(-arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH)
-    self.capturingArrow1:SetTextureRotation(-arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH)
-    self.capturingArrow2:SetTextureRotation((-arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH) + ARROW_ARCLENGTH)
-    self.capturingArrow3:SetTextureRotation((-arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH) + (2 * ARROW_ARCLENGTH))
-    self.contestingArrow1:SetTextureRotation(-arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH)
-    self.contestingArrow2:SetTextureRotation((-arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH) - ARROW_ARCLENGTH)
-    self.contestingArrow3:SetTextureRotation((-arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH) - (2 * ARROW_ARCLENGTH))
+    local textureRotation = -arrowAnchorPointPct * CAPTURE_BAR_ARCLENGTH
+    self.endCap:SetTextureRotation(textureRotation)
+    self.capturingArrow1:SetTextureRotation(textureRotation)
+    self.capturingArrow2:SetTextureRotation(textureRotation + ARROW_ARCLENGTH)
+    self.capturingArrow3:SetTextureRotation(textureRotation + (2 * ARROW_ARCLENGTH))
+    self.contestingArrow1:SetTextureRotation(textureRotation)
+    self.contestingArrow2:SetTextureRotation(textureRotation - ARROW_ARCLENGTH)
+    self.contestingArrow3:SetTextureRotation(textureRotation - (2 * ARROW_ARCLENGTH))
 end
 
 function ZO_ObjectiveCaptureMeter:UpdateCaptureBar(progress)
@@ -219,12 +297,12 @@ function ZO_ObjectiveCaptureMeter:UpdateCaptureBar(progress)
 end
 
 function ZO_ObjectiveCaptureMeter:EasingAnimationStopped()
-    if(self.capturePercentage == 0) then
+    if self.capturePercentage == 0 then
         -- Hide alliance-specific UI elements
         self.ownerBadge:SetHidden(true)
-		self.progressBar:SetHidden(true)
-        self.endCap:SetHidden(true) 
-        self:HideShowArrows(0) 
+        self.progressBar:SetHidden(true)
+        self.endCap:SetHidden(true)
+        self:HideShowArrows(0)
     end
 end
 
@@ -258,19 +336,19 @@ end
 
 function ZO_ObjectiveCaptureMeter:GetVisibleArrows()
     local numArrows = 0
-    if(not self.capturingArrow1:IsHidden()) then
+    if not self.capturingArrow1:IsHidden() then
         numArrows = 1
-        if(not self.capturingArrow2:IsHidden()) then
+        if not self.capturingArrow2:IsHidden() then
             numArrows = 2
-            if(not self.capturingArrow3:IsHidden()) then
+            if not self.capturingArrow3:IsHidden() then
                 numArrows = 3
             end
         end
-    elseif(not self.contestingArrow1:IsHidden()) then
+    elseif not self.contestingArrow1:IsHidden() then
         numArrows = -1
-        if(not self.contestingArrow2:IsHidden()) then
+        if not self.contestingArrow2:IsHidden() then
             numArrows = -2
-            if(not self.contestingArrow3:IsHidden()) then
+            if not self.contestingArrow3:IsHidden() then
                 numArrows = -3
             end
         end

@@ -10,32 +10,17 @@ local interfaceSettingsHUD = {
     {
         panel = SETTING_PANEL_INTERFACE,
         system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_ACTION_BAR,
-    },
-	{
-		panel = SETTING_PANEL_INTERFACE,
-		system = SETTING_TYPE_UI,
-		settingId = UI_SETTING_RESOURCE_NUMBERS,
-	},
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
         settingId = UI_SETTING_SHOW_RAID_LIVES,
     },
     {
         panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
-        settingId = 0,
+        system = SETTING_TYPE_UI,
+        settingId = UI_SETTING_SHOW_QUEST_TRACKER,
     },
-	{
-		panel = SETTING_PANEL_INTERFACE,
-		system = SETTING_TYPE_UI,
-		settingId = UI_SETTING_ULTIMATE_NUMBER,
-	},
     {
         panel = SETTING_PANEL_INTERFACE,
         system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_QUEST_TRACKER,
+        settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
     },
     {
         panel = SETTING_PANEL_INTERFACE,
@@ -82,104 +67,6 @@ local interfaceSettingsChatBubbles = {
         settingId = CHAT_BUBBLE_SETTING_ENABLED_FOR_LOCAL_PLAYER,
     },
 }
-local interfaceSettingsScrollingCombatText = {
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED,
-        header = SI_INTERFACE_OPTIONS_SCT,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_DAMAGE_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_DOT_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_HEALING_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_HOT_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_STATUS_EFFECTS_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_DAMAGE_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_DOT_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_HEALING_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_OUTGOING_PET_HOT_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_DAMAGE_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_DOT_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_HEALING_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_HOT_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_STATUS_EFFECTS_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_PET_DAMAGE_ENABLED,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED,
-    },
-}
 
 GAMEPAD_SETTINGS_DATA =
 {
@@ -191,6 +78,11 @@ GAMEPAD_SETTINGS_DATA =
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
         },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE,
+        },        
     },
     [SETTING_PANEL_CAMERA] =
     {
@@ -199,10 +91,15 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_INVERT_Y,
         },
-		{
+        {
             panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_CAMERA,
             settingId = CAMERA_SETTING_ASSASSINATION_CAMERA,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_SCREEN_SHAKE,
         },
         {
             panel = SETTING_PANEL_CAMERA,
@@ -247,11 +144,52 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_VIBRATION,
         },
+		{
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS,
+			header = SI_GAMEPLAY_OPTIONS_GENERAL,
+        },
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_COMBAT,
             settingId = COMBAT_SETTING_MONSTER_TELLS_ENABLED,
             header = SI_AUDIO_OPTIONS_COMBAT,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_COLOR_SWAP_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_COLOR,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_FRIENDLY_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_FRIENDLY_TEST,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_ENEMY_COLOR,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_MONSTER_TELLS_ENEMY_BRIGHTNESS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_ENEMY_TEST,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -266,7 +204,7 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_IN_WORLD,
-            settingId = IN_WORLD_UI_SETTING_HIDE_HELM,
+            settingId = IN_WORLD_UI_SETTING_HIDE_POLYMORPH_HELM,
             header = SI_GAMEPLAY_OPTIONS_ITEMS,
         },
         {
@@ -400,6 +338,12 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_AUTO_DECLINE_DUEL_INVITES,
+        },
+
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,
         },
     },
     [SETTING_PANEL_INTERFACE] =
@@ -613,11 +557,6 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_NAMEPLATES,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
-        },
-        {
-            panel = SETTING_PANEL_NAMEPLATES,
             system = SETTING_TYPE_IN_WORLD,
             settingId = IN_WORLD_UI_SETTING_GLOW_THICKNESS,
         },
@@ -642,6 +581,177 @@ GAMEPAD_SETTINGS_DATA =
             settingId = IN_WORLD_UI_SETTING_INTERACTABLE_GLOW_INTENSITY,
         },
     },
+    [SETTING_PANEL_COMBAT] =
+    {
+        -- Hud Settings
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_ACTION_BAR,
+            header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_RESOURCE_BARS,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_RESOURCE_NUMBERS,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
+            settingId = 0,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_ULTIMATE_NUMBER,
+        },
+
+        -- SCT
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED,
+            header = SI_INTERFACE_OPTIONS_SCT,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_DAMAGE_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_DOT_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_HEALING_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_HOT_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_STATUS_EFFECTS_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_PET_DAMAGE_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_PET_DOT_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_PET_HEALING_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_OUTGOING_PET_HOT_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_DAMAGE_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_DOT_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_HEALING_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_HOT_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_STATUS_EFFECTS_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_PET_DAMAGE_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED,
+        },
+
+        -- Buff Debuff
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_ALL_ENABLED,
+            header = SI_BUFFS_OPTIONS_SECTION_TITLE,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_BUFFS_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_BUFFS_ENABLED_FOR_SELF,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_DEBUFFS_ENABLED_FOR_SELF,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_DEBUFFS_ENABLED_FOR_TARGET,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_DEBUFFS_ENABLED_FOR_TARGET_FROM_OTHERS,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_LONG_EFFECTS,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_BUFFS,
+            settingId = BUFFS_SETTING_PERMANENT_EFFECTS,
+        },
+    },
 }
 
 --Platform specific settings
@@ -651,6 +761,13 @@ if IsConsoleUI() then
         system = SETTING_TYPE_AUDIO,
         settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
     })
+    if ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting() then
+        table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], 1, {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
+        })
+    end
     table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
         panel = SETTING_PANEL_VIDEO,
         system = SETTING_TYPE_CUSTOM,
@@ -723,6 +840,14 @@ else
     })
 end
 
+if IsSystemUsingHDR() then
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
+        panel = SETTING_PANEL_VIDEO,
+        system = SETTING_TYPE_GRAPHICS,
+        settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
+    })
+end
+
 local function AddSettings(panel, settings)
     for _, entry in ipairs(settings) do
         table.insert(GAMEPAD_SETTINGS_DATA[panel], entry)
@@ -731,4 +856,3 @@ end
 
 AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsHUD)
 AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsChatBubbles)
-AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsScrollingCombatText)

@@ -111,6 +111,7 @@ function WorldMapFilterPanel_Gamepad:SetupDropDown(control, data, selected, rese
     control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, data.disabled))
 
     local dropDown = ZO_ComboBox_ObjectFromContainer(control:GetNamedChild("Selector"))
+    dropDown:SetSortsItems(false)
     dropDown:SetDeactivatedCallback(function() self:UnfocusDropDown() end)
 
     local function OnOptionChanged(_, entryText, entry)
@@ -172,8 +173,7 @@ end
 local PvEWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvEWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
 
 function PvEWorldMapFilterPanel_Gamepad:New(...)
-    local object = WorldMapFilterPanel_Gamepad.New(self, ...)
-    return object
+    return WorldMapFilterPanel_Gamepad.New(self, ...)
 end
 
 --PvP Filter Panel
@@ -181,8 +181,7 @@ end
 local PvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvPWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
 
 function PvPWorldMapFilterPanel_Gamepad:New(...)
-    local object = WorldMapFilterPanel_Gamepad.New(self, ...)
-    return object
+    return WorldMapFilterPanel_Gamepad.New(self, ...)
 end
 
 --Imperial PvP Filter Panel
@@ -190,8 +189,15 @@ end
 local ImperialPvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_ImperialPvPWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
 
 function ImperialPvPWorldMapFilterPanel_Gamepad:New(...)
-    local object = WorldMapFilterPanel_Gamepad.New(self, ...)
-    return object
+    return WorldMapFilterPanel_Gamepad.New(self, ...)
+end
+
+--Battleground Filter Panel
+
+local BattlegroundWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
+
+function BattlegroundWorldMapFilterPanel_Gamepad:New(...)
+    return WorldMapFilterPanel_Gamepad.New(self, ...)
 end
 
 --Filters
@@ -225,6 +231,7 @@ function WorldMapFilters_Gamepad:Initialize(control)
         self.pvePanel = PvEWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvE"), MAP_FILTER_TYPE_STANDARD, savedVars)
         self.pvpPanel = PvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
         self.imperialPvPPanel = ImperialPvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
+        self.battlegroundPanel = BattlegroundWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
     end)
 end
 
@@ -264,6 +271,8 @@ function WorldMapFilters_Gamepad:InitializeKeybindDescriptor()
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Filters Select",
             keybind = "UI_SHORTCUT_PRIMARY",
             ethereal = true,
 

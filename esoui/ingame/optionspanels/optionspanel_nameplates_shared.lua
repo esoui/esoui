@@ -1,11 +1,3 @@
-local function SetControlActiveFromPredicate(control, predicate)
-    if predicate() then
-        ZO_Options_SetOptionActive(control)
-    else
-        ZO_Options_SetOptionInactive(control)
-    end
-end
-
 local function AreNameplatesEnabled()
     return tonumber(GetSetting(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_NAMEPLATES)) ~= 0
 end
@@ -49,7 +41,7 @@ local function CreateNameplateDimmingOption(option, stringsPrefix, dependsOnOpti
     end
     
     local function SetupDimmingOptionEnabled(control)
-         SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
+         ZO_SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
     end
 
     local dependsOnOptionEventName = string.format("NameplateType%d_Changed", dependsOnOption)
@@ -111,7 +103,7 @@ local function CreateHealthbarDimmingOption(option, stringsPrefix, dependsOnOpti
     end
     
     local function SetupDimmingOptionEnabled(control)
-         SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
+         ZO_SetControlActiveFromPredicate(control, IsDimmingOptionEnabled)
     end
 
     local dependsOnOptionEventName = string.format("HealthbarType%d_Changed", dependsOnOption)
@@ -126,7 +118,7 @@ local function CreateHealthbarDimmingOption(option, stringsPrefix, dependsOnOpti
         tooltipText = _G["SI_INTERFACE_OPTIONS_HEALTHBARS_HIGHLIGHT_"..stringsPrefix.."_TOOLTIP"],
         valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
         valid = { ... },
-        gamepadIsEnabledCallback = AreNameplatesEnabled,
+        gamepadIsEnabledCallback = IsDimmingOptionEnabled,
         eventCallbacks =
         {
             ["AllHealthBars_Off"] = SetupDimmingOptionEnabled,
@@ -237,7 +229,7 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_HEALTHBAR_ALIGNMENT_TOOLTIP,
             valueStringPrefix = "SI_NAMEPLATEDISPLAYCHOICE",
             valid = { NAMEPLATE_CHOICE_LEFT, NAMEPLATE_CHOICE_CENTER },
-            gamepadIsEnabledCallback = AreNameplatesEnabled,
+            gamepadIsEnabledCallback = AreHealthbarsEnabled,
             eventCallbacks =
             {
                 ["AllHealthBars_Off"]   = ZO_Options_SetOptionInactive,
@@ -347,22 +339,6 @@ local ZO_OptionsPanel_Nameplates_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_NAMEPLATES_FOLLOWER_INDICATORS_TOOLTIP,
         },
     },
-    --UI
-    [SETTING_TYPE_UI] =
-    {
-        --Options_Nameplates_QuestBestowers
-        [UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
-            panel = SETTING_PANEL_NAMEPLATES,
-            text = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS,
-            tooltipText = SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS_TOOLTIP,
-            events = {[true] = "Bestowers_On", [false] = "Bestowers_Off",},
-            gamepadHasEnabledDependencies = true,
-        },
-    },
     --InWorld
     [SETTING_TYPE_IN_WORLD] =
     {
@@ -456,4 +432,4 @@ local ZO_OptionsPanel_Nameplates_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_NAMEPLATES, ZO_OptionsPanel_Nameplates_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_NAMEPLATES, ZO_OptionsPanel_Nameplates_ControlData)

@@ -25,6 +25,20 @@ function ZO_WorldMapQuests_Shared:Initialize(control)
     end
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapQuestsDataRefresh", LayoutList)
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function() self:RefreshNoQuestsLabel() end)
+end
+
+function ZO_WorldMapQuests_Shared:RefreshNoQuestsLabel()
+    if #self.data.masterList > 0 then
+        self.noQuestsLabel:SetHidden(true)    
+    else
+        self.noQuestsLabel:SetHidden(false)
+        if ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList() then
+            self.noQuestsLabel:SetText(GetString(SI_WORLD_MAP_NO_QUESTS))
+        else
+            self.noQuestsLabel:SetText(GetString(SI_WORLD_MAP_DOESNT_SHOW_QUESTS_DISTANCE))
+        end
+    end
 end
 
 -- Singleton shared data
@@ -60,7 +74,20 @@ function ZO_WorldMapQuestsData_Singleton:Initialize(control)
     end)
 end
 
+function ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList()
+    local mapType = GetMapType()
+    --We don't want to track any quests when we are showing these high map levels
+    if mapType == MAPTYPE_WORLD or mapType == MAPTYPE_COSMIC or mapType == MAPTYPE_ALLIANCE then
+        return false
+    end
+    return true
+end
+
 function ZO_WorldMapQuestsData_Singleton:OnQuestAvailable(questIndex)
+    if not ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList() then
+        return
+    end
+        
     if self:GetQuestMasterListIndex(questIndex) then
         -- We already have this quest in the list
         return
@@ -86,7 +113,7 @@ function ZO_WorldMapQuestsData_Singleton:OnQuestAvailable(questIndex)
         local questType = GetJournalQuestType(questIndex)
         local name = GetJournalQuestName(questIndex)
         local level = GetJournalQuestLevel(questIndex)
-        local displayType = GetJournalInstanceDisplayType(questIndex)
+        local displayType = GetJournalQuestInstanceDisplayType(questIndex)
         table.insert(self.masterList, {
             questIndex = questIndex,
             name = name,
@@ -117,11 +144,7 @@ function ZO_WorldMapQuestsData_Singleton:GetQuestMasterListIndex(questIndex)
 end
 
 function ZO_WorldMapQuestsData_Singleton:LayoutList(forceLayout)
-    local mapType = GetMapType()
-    if(mapType == MAPTYPE_WORLD or mapType == MAPTYPE_COSMIC or mapType == MAPTYPE_ALLIANCE) then return true end
-
     self:Sort()
-
     CALLBACK_MANAGER:FireCallbacks("OnWorldMapQuestsDataRefresh", forceLayout)
 end
 

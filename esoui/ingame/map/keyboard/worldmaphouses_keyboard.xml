@@ -1,0 +1,46 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapHouseHeader" virtual="true">
+            <Dimensions y="32"/>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_WorldMapHouseRow" virtual="true">
+            <Dimensions x="200" y="60"/>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_SelectableLabel" font="ZoFontHeader">
+                    <Anchor point="TOPLEFT" offsetX="ZO_MAP_HOUSES_KEYBOARD_ROW_PADDING_X" />
+                    <OnMouseDown>
+                        ZO_WorldMapHouseRow_OnMouseDown(self, button)
+                    </OnMouseDown>
+                    <OnMouseUp>
+                        ZO_WorldMapHouseRow_OnMouseUp(self, button, upInside)
+                    </OnMouseUp>
+                </Label>
+                <Label name="$(parent)Location" font="ZoFontHeader">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="10"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_WorldMapHouses" inherits="ZO_WorldMapInfoContent">
+            <OnInitialized>
+                ZO_WorldMapHouses_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" offsetX="20"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+
+                <Label name="$(parent)NoHouses" font="ZoFontHeader" text="SI_WORLD_MAP_NO_HOUSES" hidden="true">
+                    <Anchor point="TOP"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

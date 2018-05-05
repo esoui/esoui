@@ -8,7 +8,8 @@
         <Texture name="ZO_MapOverlay" virtual="true" level="1" />
         <Label name="ZO_MapLocation" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" layer="BACKGROUND" level="3" virtual="true" />
         <Texture name="ZO_MapBlob" virtual="true" level="2" blendMode="ADD" pixelRoundingEnabled="false"/>
-        <Texture name="ZO_PinBlob" textureFile="EsoUI/Art/Quest/map_areaPin.dds" virtual="true" level="6" pixelRoundingEnabled="false"/>
+        <!-- High tier to show over top of the gamepad ragged edge border-->
+        <Texture name="ZO_PinBlob" tier="HIGH" virtual="true" level="6" pixelRoundingEnabled="false" shaderEffectType="HALO"/>
 
         <Control name="ZO_MapPin" mouseEnabled="true" hidden="true" virtual="true">
             <Dimensions x="22" y="22" />
@@ -38,7 +39,7 @@
             </OnMouseExit>
 
             <Controls>
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/MapPins/UI-WorldMapPinHighlight.dds" pixelRoundingEnabled="false">
+                <Texture name="$(parent)Highlight" textureFile="$(MAP_PIN_PATH)UI-WorldMapPinHighlight.dds" pixelRoundingEnabled="false">
                     <AnchorFill />
                 </Texture>
 
@@ -235,7 +236,7 @@
                 </Control>
 
                 <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3">
-                    <Anchor point="TOP"/>
+                    <Anchor point="BOTTOM"/>
                 </Label>
 
                 <Scroll name="$(parent)Scroll" mouseEnabled="true">
@@ -461,31 +462,5 @@
                 </Label>
             </Controls>
         </TopLevelControl>
-
-        <TopLevelControl name="ZO_WorldMapChoice_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
-            <OnInitialized>
-                ZO_WorldMapChoice_Gamepad_Initialize(self)
-            </OnInitialized>
-
-            <Controls>
-                <!-- This uses non-standard positioning to fit with the worldmap -->
-                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template"/>
-
-                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
-                    <Controls>
-                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
-                            <Anchor point="TOPLEFT"/>
-                            <Anchor point="TOPRIGHT"/>
-                        </Control>
-
-                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" />
-                            <Anchor point="BOTTOMRIGHT"/>
-                        </Control>
-                    </Controls>
-                </Control>
-            </Controls>
-        </TopLevelControl>
-
     </Controls>
 </GuiXml>

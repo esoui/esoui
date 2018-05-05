@@ -86,6 +86,8 @@ function WorldMapKey_Gamepad:InitializeKeybindStripDescriptor()
             sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Exit Key",
             ethereal = true,
             keybind = "UI_SHORTCUT_LEFT_STICK",
             callback = function() ExitMapKey() end,
@@ -118,6 +120,7 @@ function WorldMapKey_Gamepad:RefreshKey()
         local previousAnchor = column
         local headerRelativePoint = TOPLEFT
         local allFilledOnce = false
+        local symbolList
 
         for sectionIndex = 1, numKeySections do
             local numSectionSymbols = GetNumMapKeySectionSymbols(sectionIndex)
@@ -157,7 +160,7 @@ function WorldMapKey_Gamepad:RefreshKey()
                 end
             end
             
-            sectionName = GetMapKeySectionName(sectionIndex)
+            local sectionName = GetMapKeySectionName(sectionIndex)
             local header = self.headerPool:AcquireObject()
             header:SetText(sectionName)
 
@@ -183,7 +186,7 @@ function WorldMapKey_Gamepad:RefreshKey()
                 symbol:SetAnchor(TOPLEFT, previousAnchor, BOTTOMLEFT, offsetX, params.SYMBOL_OFFSET_Y)
                 offsetX = 0
 
-                if(numSymbolsInColumn == 1) then
+                if numSymbolsInColumn == 1 then
                     symbolList = {}
                     table.insert(self.symbols, symbolList)
                 end

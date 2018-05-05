@@ -43,6 +43,23 @@ local ZO_OptionsPanel_Camera_ControlData =
             text = SI_INTERFACE_OPTIONS_CAMERA_ASSASSINATION_CAMERA,
             tooltipText = SI_INTERFACE_OPTIONS_CAMERA_ASSASSINATION_CAMERA_TOOLTIP,
         },
+        --Options_Camera_ScreenShake
+        [CAMERA_SETTING_SCREEN_SHAKE] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_SCREEN_SHAKE,
+            panel = SETTING_PANEL_CAMERA,
+            text = SI_INTERFACE_OPTIONS_CAMERA_SCREEN_SHAKE,
+            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_SCREEN_SHAKE_TOOLTIP,
+            minValue = 0.0,
+            maxValue = 1.0,
+            valueFormat = "%.2f",
+            showValue = true,
+            defaultMarker = 100,
+            showValueMin = 0,
+            showValueMax = 100,
+        },
         --Options_Camera_CameraSensitivityFirstPerson
         [CAMERA_SETTING_SENSITIVITY_FIRST_PERSON] =
         {
@@ -195,4 +212,4 @@ local ZO_OptionsPanel_Camera_ControlData =
     },
 }
 
-SYSTEMS:GetObject("options"):AddTableToPanel(SETTING_PANEL_CAMERA, ZO_OptionsPanel_Camera_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_CAMERA, ZO_OptionsPanel_Camera_ControlData)

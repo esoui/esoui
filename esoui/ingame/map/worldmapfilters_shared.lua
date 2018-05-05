@@ -110,15 +110,18 @@ function ZO_WorldMapFilters_Shared:Initialize(control)
         local mapFilterType = GetMapFilterType()
         local mode = ZO_WorldMap_GetMode()
         local newCurrentPanel
-        if(mapFilterType == MAP_FILTER_TYPE_STANDARD) then
+        if mapFilterType == MAP_FILTER_TYPE_STANDARD then
             newCurrentPanel = self.pvePanel
             self.pvePanel:SetMapMode(mode)
-        elseif(mapFilterType == MAP_FILTER_TYPE_AVA_CYRODIIL) then
+        elseif mapFilterType == MAP_FILTER_TYPE_AVA_CYRODIIL then
             newCurrentPanel = self.pvpPanel
             self.pvpPanel:SetMapMode(mode)
-        elseif(mapFilterType == MAP_FILTER_TYPE_AVA_IMPERIAL) then
+        elseif mapFilterType == MAP_FILTER_TYPE_AVA_IMPERIAL then
             newCurrentPanel = self.imperialPvPPanel
             self.imperialPvPPanel:SetMapMode(mode)
+        elseif mapFilterType == MAP_FILTER_TYPE_BATTLEGROUND then
+            newCurrentPanel = self.battlegroundPanel
+            self.battlegroundPanel:SetMapMode(mode)
         end
         if self.currentPanel and self.currentPanel ~= newCurrentPanel then
             self.currentPanel:SetHidden(true)
@@ -176,6 +179,16 @@ function ZO_ImperialPvPWorldMapFilterPanel_Shared:BuildControls()
     self:AddPinFilterCheckBox(MAP_FILTER_OBJECTIVES, ZO_WorldMap_RefreshAllPOIs, GetString(SI_WORLD_MAP_FILTERS_SHOW_DETAILS))
     self:AddPinFilterCheckBox(MAP_FILTER_GROUP_MEMBERS, ZO_WorldMap_RefreshGroupPins)
     self:AddPinFilterCheckBox(MAP_FILTER_KILL_LOCATIONS, ZO_WorldMap_RefreshKillLocations)
+
+    self:PostBuildControls()
+end
+
+ZO_BattlegroundWorldMapFilterPanel_Shared = ZO_Object:Subclass()
+
+function ZO_BattlegroundWorldMapFilterPanel_Shared:BuildControls()
+    self:PreBuildControls()
+
+    self:AddPinFilterCheckBox(MAP_FILTER_GROUP_MEMBERS, ZO_WorldMap_RefreshGroupPins)
 
     self:PostBuildControls()
 end

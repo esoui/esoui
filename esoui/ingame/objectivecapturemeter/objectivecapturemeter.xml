@@ -20,11 +20,11 @@
     <Controls>
         <Texture name="CapturingArrow" textureFile="EsoUI/Art/AvA/avaCaptureBar_arrow_capturing.dds" tier="MEDIUM" level="4" hidden="true" virtual="true">
             <Dimensions x="128" y="128" />
-            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)"/>
+            <Anchor point="CENTER"/>
         </Texture>
         <Texture name="ContestingArrow" textureFile="EsoUI/Art/AvA/avaCaptureBar_arrow_contesting.dds" tier="MEDIUM" level="4" hidden="true" virtual="true">
             <Dimensions x="128" y="128" />
-            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)"/>
+            <Anchor point="CENTER"/>
         </Texture>
 
         <Control name="ZO_ObjectiveCapture_Keyboard_Template" virtual="true">
@@ -54,15 +54,15 @@
                     <Controls>
                         <Texture name="$(parent)Background" textureFile="EsoUI/Art/AvA/avaCaptureMeter_BackGround.dds" level="1">
                             <Dimensions x="128" y="128" />
-                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                            <Anchor point="BOTTOM" />
                         </Texture>
                         <Cooldown name="$(parent)ProgressBar">
                             <Dimensions x="128" y="128" />
-                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                            <Anchor point="BOTTOM" />
                             <Controls>
                                 <Texture name="$(parent)EndCap" level="2">
                                     <Dimensions x="128" y="128" />
-                                    <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)"/>
+                                    <Anchor point="CENTER" />
                                 </Texture>
                                 <Texture name="$(parent)CapturingArrow1" inherits="CapturingArrow" />
                                 <Texture name="$(parent)CapturingArrow2" inherits="CapturingArrow" />
@@ -74,15 +74,15 @@
                         </Cooldown>
                         <Texture name="$(parent)MidpointDivider" textureFile="EsoUI/Art/AvA/avaCaptureBar_midpointDivider.dds" tier="MEDIUM" level="3">
                             <Dimensions x="128" y="128" />
-                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                            <Anchor point="BOTTOM" />
                         </Texture>
                         <Texture name="$(parent)OwnerBadge">
                             <Dimensions x="128" y="128" />
-                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                            <Anchor point="BOTTOM" />
                         </Texture>
                         <Texture name="$(parent)Frame" textureFile="EsoUI/Art/AvA/avaCaptureBar_barFrame.dds" tier="MEDIUM" level="4">
                             <Dimensions x="128" y="128" />
-                            <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)" />
+                            <Anchor point="BOTTOM" relativePoint="CENTER" />
                         </Texture>
                     </Controls>
                 </Control>
