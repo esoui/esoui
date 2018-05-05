@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Gamepad" inherits="ZO_MarketAnnouncement_MarketProductTemplate_Base" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Type" font="ZoFontGamepadBold34" override="true" />
+
+                <Label name="$(parent)Title" font="ZoFontGamepad34" override="true" />
+
+                <Label name="$(parent)TextCallout" font="ZoMarketGamepadCalloutFont" override="true" />
+
+                <Label name="$(parent)PreviousCost" font="ZoFontGamepadBold27" override="true" />
+
+                <Label name="$(parent)Cost" font="ZoFontGamepadBold27" override="true "/>
+
+                <Label name="$(parent)Purchased" font="ZoFontGamepadBold25" override="true" />
+
+                <Control name="$(parent)ProductDescription" inherits="ZO_ScrollContainer_Gamepad">
+                    <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH" />
+                    <Controls>
+                        <Control name="$(parent)Scroll" override="true">
+                            <Controls>
+                                <Control name="$(parent)Child" override="true">
+                                    <Controls>
+                                        <Label name="$(parent)ProductDescriptionText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed34">
+                                            <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH" />
+                                            <Anchor point="TOPLEFT" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)BundledProducts" font="ZoFontGamepad34" override="true">
+                    <Controls>
+                        <Label name="$(parent)Label" font="ZoFontGamepadBold25" override="true" />
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

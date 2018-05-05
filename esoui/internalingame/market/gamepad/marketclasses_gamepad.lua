@@ -22,6 +22,8 @@ end
 
 function ZO_GamepadMarketProduct:InitializeControls(control)
     ZO_LargeSingleMarketProduct_Base.InitializeControls(self, control)
+
+    self.normalBorder = self.control:GetNamedChild("HighlightNormal")
     self.focusData =
     {
         control = self.control,
@@ -48,6 +50,16 @@ do
     end
 end
 
+function ZO_GamepadMarketProduct:UpdateProductStyle()
+    ZO_LargeSingleMarketProduct_Base.UpdateProductStyle(self)
+
+     if self:IsPurchaseLocked() or self.isFree then
+        self.normalBorder:SetEdgeColor(ZO_MARKET_PRODUCT_PURCHASED_COLOR:UnpackRGB())
+    else
+        self.normalBorder:SetEdgeColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
+    end
+end
+
 function ZO_GamepadMarketProduct:GetFocusData()
     return self.focusData
 end
@@ -69,10 +81,6 @@ function ZO_GamepadMarketProduct:GetPreviewIndex()
     return self.previewIndex
 end
 
-function ZO_GamepadMarketProduct:GetProductForSell()
-    return self
-end
-
 --
 --[[ Gamepad Market Product Bundle Attachment ]]--
 --
@@ -87,25 +95,23 @@ function ZO_GamepadMarketProductBundleAttachment:GetTemplate()
     return ZO_GAMEPAD_MARKET_PRODUCT_BUNDLE_ATTACHMENT_TEMPLATE
 end
 
+function ZO_GamepadMarketProductBundleAttachment:GetPurchaseState()
+    local parentPurchaseState = GetMarketProductPurchaseState(self.bundleMarketProductId)
+    if parentPurchaseState == MARKET_PRODUCT_PURCHASE_STATE_PURCHASED then
+        return parentPurchaseState
+    end
+
+    return ZO_GamepadMarketProduct.GetPurchaseState(self)
+end
+
 function ZO_GamepadMarketProductBundleAttachment:Show(...)
     ZO_GamepadMarketProduct.Show(self, ...)
 
-    -- we want to show collectibles that we currently own as collected in the bundle viewer
-    local productType = self:GetProductType()
-    local collectibleOwned = false
-    if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-        local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
-        if not isPlaceholder then
-            collectibleOwned = owned
-        end
-    elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
-        -- Show bundles that have all their collectibles unlocked as collected
-        collectibleOwned = CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
-    end
+    local allCollectiblesOwned = self:AreAllCollectiblesUnlocked()
 
-    self.purchaseLabelControl:SetHidden(not collectibleOwned)
+    self.purchaseLabelControl:SetHidden(not allCollectiblesOwned)
 
-    if collectibleOwned then
+    if allCollectiblesOwned then
         self.purchaseLabelControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
     end
 
@@ -115,21 +121,17 @@ function ZO_GamepadMarketProductBundleAttachment:Show(...)
     self.textCallout:SetHidden(true)
 end
 
-function ZO_GamepadMarketProductBundleAttachment:SetBundle(bundle)
-    self.bundle = bundle
+function ZO_GamepadMarketProductBundleAttachment:SetBundleMarketProductId(bundleMarketProductId)
+    self.bundleMarketProductId = bundleMarketProductId
 end
 
 function ZO_GamepadMarketProductBundleAttachment:IsPurchaseLocked()
-     return self.bundle:IsPurchaseLocked()
-end
-
-function ZO_GamepadMarketProductBundleAttachment:GetProductForSell()
-    return self.bundle
+     return GetMarketProductPurchaseState(self.bundleMarketProductId) ~= MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED or ZO_GamepadMarketProduct.IsPurchaseLocked(self)
 end
 
 function ZO_GamepadMarketProductBundleAttachment:Reset()
     ZO_GamepadMarketProduct.Reset(self)
-    self.bundle = nil
+    self.bundleMarketProductId = nil
 end
 
 --

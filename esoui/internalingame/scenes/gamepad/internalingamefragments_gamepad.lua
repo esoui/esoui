@@ -58,23 +58,28 @@ GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Sha
 GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_4_Background)
 GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_3_Background)
 
+GAMEPAD_MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedWidth = 700,
+    dynamicFramingConsumedHeight = 400,
+})
+
+
 -- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
 
 -------------------------
 --Gamepad Market
 -------------------------
 
-GAMEPAD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("GamepadActions")
 GAMEPAD_MARKET_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket)
 GAMEPAD_MARKET_PREVIEW_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_Preview)
 GAMEPAD_MARKET_BUNDLE_CONTENTS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_BundleContents)
 GAMEPAD_MARKET_LOCKED_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadMarket_Locked, ALWAYS_ANIMATE)
 GAMEPAD_MARKET_PRE_SCENE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_PreScene)
-GAMEPAD_MARKET_CURRENCY_FOOTER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_CurrencyFooter)
 
 ZO_GAMEPAD_INTERNAL_INGAME_FRAGMENT_GROUP =
 {
-    GAMEPAD_ACTION_LAYER_FRAGMENT,
     GENERAL_ACTION_LAYER_FRAGMENT,
     KEYBIND_STRIP_GAMEPAD_MARKET_FRAGMENT,
 }

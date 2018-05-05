@@ -1,0 +1,93 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ConfirmSendGiftDialog_Keyboard" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_ConfirmSendGiftDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <OnInitialized>
+                        self:SetText(zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, ZO_GetPlatformAccountLabel()))
+                    </OnInitialized>
+                </Label>
+
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_DISPLAY_NAME_DEFAULT_TEXT))
+                            </OnInitialized>
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                            <OnTab>
+                                ZO_ConfirmSendGiftDialog_KeyboardNoteEdit:TakeFocus()
+                            </OnTab>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)NoteHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_CONFIRM_GIFT_KEYBOARD_GENERAL_NOTE_ENTRY_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+                <Backdrop name="$(parent)Note" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NoteHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NoteHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="GIFT_NOTE_MAX_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)NoteRandomText">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Note" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Note" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                    <Dimensions y="28"/>
+                    <Controls>
+                        <Button name="$(parent)Button" inherits="ZO_DefaultButton">
+                            <Anchor point="TOP"/>
+                            <Anchor point="BOTTOM"/>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)GiftIcon">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NoteRandomText" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                </Texture>
+                <Label name="$(parent)GiftName" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH3" maxLineCount="2">
+                    <Anchor point="LEFT" relativeTo="$(parent)GiftIcon" relativePoint="RIGHT" offsetX="10"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)NoteRandomText" relativePoint="RIGHT" constrains="X"/>
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Send" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GiftSendingDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_GiftSendingDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                
+                <Control name="$(parent)Loading" inherits="ZO_Loading">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self)
+                    </OnInitialized>
+                </Control>
+                
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

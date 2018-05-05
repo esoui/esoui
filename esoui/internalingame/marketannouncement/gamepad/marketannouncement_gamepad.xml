@@ -11,11 +11,8 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-    <Controls>
-        <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Gamepad" inherits="ZO_Gamepad_MarketProductTemplate" virtual="true" >
-            <Dimensions x="ZO_LARGE_SINGLE_MARKET_PRODUCT_WIDTH" y="ZO_LARGE_SINGLE_MARKET_PRODUCT_HEIGHT"/>
-        </Control>
-        
+    
+    <Controls>        
         <Button name="ZO_MarketAnnouncementCarouselArrowTemplate_Gamepad" virtual="true">
             <Dimensions x="32" y="64" />
             <Textures
@@ -52,56 +49,59 @@
 
             <Controls>
                 <Control name="$(parent)Container" override="true">
-                    <Anchor point="RIGHT" offsetX="-80"/>
                     <Controls>
                         <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop_Gamepad" override="true" />
 
                         <Label name="$(parent)Title" font="ZoFontGamepadBold48" override="true" />
-                        
-                        <Label name="$(parent)PositionTracker" font="ZoFontGamepad27" override="true" />
-
-                        <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple" override="true">
-                            <Dimensions y="8" />
-                        </Control>
 
                         <Control name="$(parent)Carousel" override="true">
                             <Controls>
+                                <Backdrop name="$(parent)Selection" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="true">
+                                    <Anchor point="TOPLEFT" relativePoint="$(parent)Carousel" offsetX="28" offsetY="-2" />
+                                    <Anchor point="BOTTOMRIGHT" relativePoint="$(parent)Carousel" offsetX="-28"/>
+                                </Backdrop>
+                                
                                 <Button name="$(parent)LeftArrow" inherits="ZO_MarketAnnouncementCarouselArrowTemplate_Gamepad" override="true">
                                     <TextureCoords left="1" right="0" top="0" bottom="1" />
                                 </Button>
                                 <Button name="$(parent)RightArrow" inherits="ZO_MarketAnnouncementCarouselArrowTemplate_Gamepad"  override="true" />
+
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <FadeGradient x1="1" y1="0" size1="0" x2="-1" y2="0" size2="0" />
+                                </Scroll>
                             </Controls>
                         </Control>
 
-                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
-                            <Dimensions x="620"/>
-                            <Anchor point="TOP" relativeTo="$(parent)Carousel" relativePoint="BOTTOM" offsetY="10"/>
-                            <Anchor point="BOTTOM" offsetY="-90"/>
-
+                        <Control name="$(parent)LockedCrownStore" override="true">
                             <Controls>
-                                <Control name="$(parent)ScrollChild" override="true">
+                                <Label name="$(parent)TitleText" override="true" font="ZoFontGamepadBold34" />
+                                <Label name="$(parent)DescriptionText" override="true" font="ZoFontGamepadCondensed27" />
+                            </Controls>
+                        </Control>
 
-                                    <OnInitialized>
-                                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
-                                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
-                                    </OnInitialized>
-
-                                    <Controls>
-                                        <Label name="$(parent)ProductDescription" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed34">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="620" />
-                                        </Label>
-                                    </Controls>
+                        <Control name="$(parent)Greeting" override="true">
+                            <Controls>
+                                <Control name="$(parent)TopDivider" inherits="ZO_GamepadHeaderHorizontalDividerSimple" override="true">
+                                    <Dimensions y="8"/>
                                 </Control>
                                 
-                                <Texture name="$(parent)ScrollIndicator" override="true">
-                                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="-45" />
-                                </Texture>
+                                <Label name="$(parent)Welcome" font="ZoFontGamepadCondensed34" override="true" />
+                                    
+                                <Control name="$(parent)BottomDivider" inherits="ZO_GamepadHeaderHorizontalDividerSimple" override="true">
+                                    <Dimensions y="8"/>
+                                </Control>
                             </Controls>
                         </Control>
 
-                        <Control name="$(parent)Keybinds" override="true">
-                            <Anchor point="BOTTOM" offsetY="-30"/>
+                        <Control name="$(parent)PrimaryAction" inherits="ZO_KeybindButton" text="SI_GAMEPAD_SELECT_OPTION">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Close" relativePoint="TOPLEFT" />
+                        </Control>
+
+                        <Control name="$(parent)TertiaryAction" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PrimaryAction" relativePoint="TOPLEFT" />
+                            <Controls>
+                                <Label name="$(parent)NameLabel" text="SI_MARKET_ANNOUNCEMENT_SCROLL_KEYBIND" override="true" />
+                            </Controls>
                         </Control>
                     </Controls>
                 </Control>

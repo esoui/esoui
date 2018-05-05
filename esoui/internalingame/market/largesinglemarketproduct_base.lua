@@ -5,9 +5,6 @@ ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y = 11
 ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET = 25
 ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y = -20
 
---account for the fade that we add to the sides of the callout
-ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET = 5
-
 --
 --[[ ZO_LargeSingleMarketProduct_Base ]]--
 --
@@ -24,7 +21,7 @@ end
 
 function ZO_LargeSingleMarketProduct_Base:InitializeControls(control)
     ZO_MarketProductBase.InitializeControls(self, control)
-    self.normalBorder = self.control:GetNamedChild("HighlightNormal")
+    self:SetTextCalloutYOffset(4)
 end
 
 do
@@ -39,27 +36,6 @@ do
     end
 end
 
-function ZO_LargeSingleMarketProduct_Base:PerformLayout(description, icon, background, isNew, isFeatured)
-    self.description = description
-end
-
-function ZO_LargeSingleMarketProduct_Base:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-    ZO_MarketProductBase.LayoutCostAndText(self, description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-
-    self.cost:ClearAnchors()
-    self.textCallout:ClearAnchors()
-
-    if self.isFree then
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 4)
-    elseif self.onSale then
-        self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, 4) -- x offset to account for strikethrough
-    else
-        self.cost:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET, ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.cost, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, 4)
-    end
-end
-
 -- Used for explicity show/hide without re-laying out the data via :Show
 function ZO_LargeSingleMarketProduct_Base:SetHidden(hidden)
     self.control:SetHidden(hidden)
@@ -70,10 +46,12 @@ function ZO_LargeSingleMarketProduct_Base:GetBackground()
 end
 
 function ZO_LargeSingleMarketProduct_Base:SetTitle(title)
-    local formattedTitle = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title)
+    local formattedTitle
     local stackCount = self:GetStackCount()
     if stackCount > 1 then
-        formattedTitle = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, formattedTitle, stackCount)
+        formattedTitle = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, title, stackCount)
+    else
+        formattedTitle = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, title)
     end
 
     self.title:SetText(formattedTitle)
@@ -82,19 +60,18 @@ end
 do
     local NO_CATEGORY_NAME = nil
     local NO_NICKNAME = nil
-    local IS_PURCHASEABLE = true
-    local BLANK_HINT = ""
     local HIDE_VISUAL_LAYER_INFO = false
     local NO_COOLDOWN = nil
     local HIDE_BLOCK_REASON = false
+    local DONT_SHOW_PURCHASABLE = false -- Don't show "purchasable" when we're actually in the Crown Store, even if it is flagged
     function ZO_LargeSingleMarketProduct_Base:Show(...)
         ZO_MarketProductBase.Show(self, ...)
         self:UpdateProductStyle()
 
         local productType = self:GetProductType()
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-            local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
-            self.tooltipLayoutArgs = { collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, IS_PURCHASEABLE, description, BLANK_HINT, isPlaceholder, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON}
+            local collectibleId, _, name, type, description, owned, isPlaceholder, _, hint = GetMarketProductCollectibleInfo(self:GetId())
+            self.tooltipLayoutArgs = { collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, DONT_SHOW_PURCHASABLE, description, hint, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON}
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             self.itemLink = GetMarketProductItemLink(self:GetId())
         end
@@ -138,10 +115,10 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
 
     if isPurchaseLocked or self.isFree then
         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, isFocused, purchaseState)
-        self.normalBorder:SetEdgeColor(ZO_MARKET_PRODUCT_PURCHASED_COLOR:UnpackRGB())
-    else
+    end
+
+    if not isPurchaseLocked then
         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.cost, isFocused, purchaseState)
-        self.normalBorder:SetEdgeColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
     end
 
     local textCalloutBackgroundColor

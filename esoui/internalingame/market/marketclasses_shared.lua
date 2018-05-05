@@ -19,6 +19,12 @@ ZO_MARKET_PRODUCT_PURCHASED_DESATURATION = 1
 ZO_MARKET_PRODUCT_NOT_PURCHASED_DESATURATION = 0
 
 ZO_FEATURED_PRESENTATION_INDEX = nil
+ZO_INVALID_PRESENTATION_INDEX = -1
+
+--account for the fade that we add to the sides of the callout
+ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET = 5
+
+ZO_MARKET_PRODUCT_HIGHLIGHT_ANIMATION_DURATION_MS = 255
 
 do
     local function GetTextColor(enabled, normalColor, disabledColor)
@@ -69,11 +75,11 @@ function ZO_MarketProductBase:New(...)
     return marketProduct
 end
 
-local DEFAULT_CURRENCY_ICON_SIZE = 32
 function ZO_MarketProductBase:Initialize(control, owner)
     self.owner = owner
     self.marketProductId = 0
     self.variation = 1
+    self.textCalloutYOffset = 0
 
     if control then
         self:InitializeControls(control)
@@ -99,7 +105,8 @@ function ZO_MarketProductBase:InitializeControls(control)
         self.rightCalloutBackground = self.textCalloutBackground:GetNamedChild("Right")
         self.centerCalloutBackground = self.textCalloutBackground:GetNamedChild("Center")
     end
-    self.bundledProductsLabel = control:GetNamedChild("BundledProducts")
+    self.numBundledProductsLabel = control:GetNamedChild("BundledProducts")
+    self.bundledProductsItemsLabel = control:GetNamedChild("BundledProductsLabel")
     self.bundleIndicator = control:GetNamedChild("BundleIndicator")
 end
 
@@ -109,6 +116,22 @@ end
 
 function ZO_MarketProductBase:SetId(marketProductId)
     self.marketProductId = marketProductId
+end
+
+function ZO_MarketProductBase:GetName()
+    return self.name
+end
+
+function ZO_MarketProductBase:SetName(name)
+    self.name = name
+end
+
+function ZO_MarketProductBase:GetIsFeatured()
+    return self.isFeatured
+end
+
+function ZO_MarketProductBase:SetIsFeatured(isFeatured)
+    self.isFeatured = isFeatured
 end
 
 function ZO_MarketProductBase:GetMarketProductInfo()
@@ -143,10 +166,6 @@ function ZO_MarketProductBase:GetNumAttachedCollectibles()
     return GetMarketProductNumCollectibles(self.marketProductId)
 end
 
-function ZO_MarketProductBase:GetNumAttachedItems()
-    return GetMarketProductNumItems(self.marketProductId)
-end
-
 function ZO_MarketProductBase:GetStackCount()
     return GetMarketProductStackCount(self.marketProductId)
 end
@@ -161,6 +180,10 @@ function ZO_MarketProductBase:GetHidesChildProducts()
     end
 
     return false
+end
+
+function ZO_MarketProductBase:IsGiftable()
+    return IsMarketProductGiftable(self.marketProductId, self.presentationIndex)
 end
 
 function ZO_MarketProductBase:GetMarketProductCrownCrateId()
@@ -179,12 +202,51 @@ function ZO_MarketProductBase:IsPurchaseLocked()
     return self.purchaseState ~= MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
 end
 
+function ZO_MarketProductBase:CanBePurchased()
+    return not (self:IsPurchaseLocked() or self:IsHouseCollectible() or self:IsPromo())
+end
+
+function ZO_MarketProductBase:IsBundle()
+    return GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
+end
+
+function ZO_MarketProductBase:IsPromo()
+    return GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_PROMO
+end
+
+function ZO_MarketProductBase:IsHouseCollectible()
+    if self:GetMarketProductType() == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+        local collectibleType = select(4, GetMarketProductCollectibleInfo(self:GetId()))
+        if collectibleType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+            return true
+        end
+    end
+
+    return false
+end
+
 function ZO_MarketProductBase:HasBeenPartiallyPurchased()
     return IsMarketProductPartiallyPurchased(self.marketProductId)
 end
 
 function ZO_MarketProductBase:HasSubscriptionUnlockedAttachments()
     return DoesMarketProductHaveSubscriptionUnlockedAttachments(self.marketProductId)
+end
+
+function ZO_MarketProductBase:AreAllCollectiblesUnlocked()
+    local allCollectiblesOwned = false
+    local productType = self:GetProductType()
+    if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+        local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self:GetId())
+        if not isPlaceholder then
+            allCollectiblesOwned = owned
+        end
+    elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
+        -- Show bundles that have all their collectibles unlocked as collected
+        allCollectiblesOwned = CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
+    end
+
+    return allCollectiblesOwned
 end
 
 function ZO_MarketProductBase:GetBackgroundSaturation(isPurchased)
@@ -194,6 +256,10 @@ end
 function ZO_MarketProductBase:IsLimitedTimeProduct()
     local remainingTime = self:GetTimeLeftInSeconds()
     return remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS
+end
+
+function ZO_MarketProductBase:SetTextCalloutYOffset(yOffset)
+    self.textCalloutYOffset = yOffset
 end
 
 do
@@ -207,100 +273,208 @@ do
     end
 end
 
-do
-    local NEW_STRING = GetString(SI_MARKET_TILE_CALLOUT_NEW)
-    local FOCUSED = true
-    local INHERIT_ICON_COLOR = true
-    local CURRENCY_ICON_SIZE = "100%"
-    function ZO_MarketProductBase:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-        local canPurchase = not self:IsPurchaseLocked()
-        local hideCallouts = true
-        local isFree = cost == 0 or costAfterDiscount == 0
-        self.isFree = isFree
+function ZO_MarketProductBase:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
+    self:SetIsFree(cost, costAfterDiscount)
 
-        if canPurchase then
-             -- callouts for new and on sale
-            local onSale = discountPercent > 0
+    -- setup the callouts for new, on sale, and LTO
+    self:SetupCalloutsDisplay(discountPercent, isNew)
 
-            local calloutUpdateHandler
-            -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
-            if self:IsLimitedTimeProduct() then
-                hideCallouts = false
-                self:UpdateRemainingTimeCalloutText()
-                calloutUpdateHandler = function() self:UpdateRemainingTimeCalloutText() end
-            elseif onSale then
-                hideCallouts = false
-                self.textCallout:SetText(zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent))
-                calloutUpdateHandler = nil
-                self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-            elseif isNew then
-                hideCallouts = false
-                self.textCallout:SetText(NEW_STRING)
-                calloutUpdateHandler = nil
-                self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-            end
+    -- layout the price labels
+    self:SetupPricingDisplay(currencyType, cost, costAfterDiscount)
 
-            self.textCallout:SetHandler("OnUpdate", calloutUpdateHandler)
+    self:SetupPurchaseLabelDisplay()
 
-            self.onSale = onSale
-            self.isNew = isNew
+    self.cost:ClearAnchors()
+    self.textCallout:ClearAnchors()
 
-            -- setup the cost
-            if onSale and not isFree then
-                self.previousCost:SetText(ZO_CommaDelimitNumber(cost))
-            end
-
-            if not isFree then
-                self.previousCost:SetHidden(not onSale)
-                self.previousCostStrikethrough:SetHidden(not onSale)
-                local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
-                local currencyString = zo_strformat(SI_CURRENCY_AMOUNT_WITH_ICON, ZO_CommaDelimitNumber(costAfterDiscount), currencyIcon)
-                self.cost:SetText(currencyString)
-            else
-                self.previousCost:SetHidden(true)
-                self.previousCostStrikethrough:SetHidden(true)
-                self.purchaseLabelControl:SetText(GetString(SI_MARKET_FREE_LABEL))
-                ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, FOCUSED, self.purchaseState)
-            end
-
-            self.purchaseLabelControl:SetHidden(not isFree)
-            self.cost:SetHidden(isFree)
-        else
-            self.previousCost:SetHidden(true)
-            if self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
-                local errorStringId = GetMarketProductCompleteErrorStringId(self.marketProductId)
-                self.purchaseLabelControl:SetText(GetErrorString(errorStringId))
-            elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE then
-                self.purchaseLabelControl:SetText(GetString(SI_MARKET_INSTANT_UNLOCK_INELIGIBLE_LABEL))
-            else
-                self.purchaseLabelControl:SetText(GetString(SI_MARKET_PURCHASED_LABEL))
-            end
-            ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, FOCUSED, self.purchaseState)
-
-            self.purchaseLabelControl:SetHidden(false)
-            self.cost:SetHidden(true)
-        end
-
-        self.textCallout:SetHidden(hideCallouts)
-
-        local isBundle = self:IsBundle()
-        if isBundle then
-            local numBundledProducts = GetMarketProductNumBundledProducts(self.marketProductId)
-            self.bundledProductsLabel:SetText(numBundledProducts)
-            -- hide the label if the result is 0 or 1 (which means either an empty bundle or what should be a single product...)
-            if numBundledProducts > 1 then
-                self.bundledProductsLabel:SetHidden(false)
-            else
-                self.bundledProductsLabel:SetHidden(true)
-            end
-        else
-            self.bundledProductsLabel:SetHidden(true)
-        end
-
-        self.bundleIndicator:SetHidden(not isBundle)
-
-        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.title, FOCUSED, self.purchaseState)
+    if self.onSale and not self.isFree then
+        self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
+        self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, self.textCalloutYOffset) -- x offset to account for strikethrough
+    else
+        self.cost:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, 10, -10)
+        self.textCallout:SetAnchor(BOTTOMLEFT, self.cost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, self.textCalloutYOffset)
     end
+
+    self:SetupBundleDisplay()
+
+    -- anchor the purchase control to the bottom right of the tile
+    -- if this is a bundle, account for the bundle indicators in the bottom right
+    self.purchaseLabelControl:ClearAnchors()
+    if self:IsBundle() then
+        self.purchaseLabelControl:SetAnchor(BOTTOMRIGHT, self.bundledProductsItemsLabel, BOTTOMLEFT, -10, 0)
+    else
+        self.purchaseLabelControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, -10, -10)
+    end
+
+    local FOCUSED = true
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.title, FOCUSED, self.purchaseState)
+end
+
+function ZO_MarketProductBase:SetIsFree(cost, costAfterDiscount)
+    self.isFree = cost == 0 or costAfterDiscount == 0
+end
+
+function ZO_MarketProductBase:ShouldShowCallouts()
+    return self:CanBePurchased() or self:IsPromo() or (self:IsHouseCollectible() and self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED)
+end
+
+function ZO_MarketProductBase:IsOnOrdinarySale(discountPercent)
+    return discountPercent > 0 and not (self:IsHouseCollectible() or self:IsPromo())
+end
+
+function ZO_MarketProductBase:GetCalloutText(discountPercent)
+    if self:IsOnOrdinarySale(discountPercent) then
+        return zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent)
+    else
+        -- for now, we'll just show a generic SALE tag, but in the future we may want to show the exact percents
+        return zo_strformat(SI_MARKET_TILE_CALLOUT_SALE)
+    end
+end
+
+function ZO_MarketProductBase:GetMarketProductListingsForHouseTemplate(houseTemplateId, displayGroup)
+    return { GetActiveMarketProductListingsForHouseTemplate(houseTemplateId, displayGroup) }
+end
+
+do
+    local PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE = 2
+    function ZO_MarketProductBase:GetHouseSaleMinMaxDiscountPercents()
+        local hasHouseOnSale = false
+        local houseMinDiscountPercent = nil
+        local houseMaxDiscountPercent = nil
+        if self:IsHouseCollectible() then
+            local productId = self:GetId()
+            local marketProductHouseId = GetMarketProductHouseId(productId)
+            local numHouseTemplates = GetNumHouseTemplatesForHouse(marketProductHouseId)
+            for index = 1, numHouseTemplates do
+                local houseTemplateId = GetHouseTemplateIdByIndexForHouse(marketProductHouseId, index)
+                local marketProductListings = self:GetMarketProductListingsForHouseTemplate(houseTemplateId, MARKET_DISPLAY_GROUP_CROWN_STORE)
+
+                --There could be multiple listings per template, one for each currency type.
+                for i = 1, #marketProductListings, PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE do
+                    local houseTemplateMarketProductId = marketProductListings[i]
+                    local presentationIndex = marketProductListings[i + 1]
+
+                    local _, _, hasDiscount, _, discountPercent = GetMarketProductPricingByPresentation(houseTemplateMarketProductId, presentationIndex)
+                    if hasDiscount then
+                        hasHouseOnSale = true
+
+                        if not houseMinDiscountPercent or discountPercent < houseMinDiscountPercent then
+                            houseMinDiscountPercent = discountPercent
+                        end
+
+                        if not houseMaxDiscountPercent or discountPercent > houseMaxDiscountPercent then
+                            houseMaxDiscountPercent = discountPercent
+                        end
+                    else
+                        houseMinDiscountPercent = 0
+                    end
+                end
+            end
+        end
+
+        return hasHouseOnSale, houseMinDiscountPercent, houseMaxDiscountPercent
+    end
+end
+
+function ZO_MarketProductBase:SetupCalloutsDisplay(discountPercent, isNew)
+    local hideCallouts = true
+    
+    -- setup the callouts for new, on sale, and LTO
+    if self:ShouldShowCallouts() then
+        local calloutUpdateHandler
+        local onOrdinarySale = self:IsOnOrdinarySale(discountPercent)
+        local hasHouseOnSale = self:GetHouseSaleMinMaxDiscountPercents()
+
+        self.onSale = onOrdinarySale or hasHouseOnSale
+        self.isNew = isNew
+
+        -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
+        if self:IsLimitedTimeProduct() then
+            hideCallouts = false
+            self:UpdateRemainingTimeCalloutText()
+            calloutUpdateHandler = function() self:UpdateRemainingTimeCalloutText() end
+        elseif self.onSale then
+            hideCallouts = false
+            self.textCallout:SetText(self:GetCalloutText(discountPercent))
+            calloutUpdateHandler = nil
+            self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+        elseif self.isNew then
+            hideCallouts = false
+            self.textCallout:SetText(GetString(SI_MARKET_TILE_CALLOUT_NEW))
+            calloutUpdateHandler = nil
+            self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+        end
+
+        self.textCallout:SetHandler("OnUpdate", calloutUpdateHandler)
+    end
+
+    self.textCallout:SetHidden(hideCallouts)
+end
+
+function ZO_MarketProductBase:SetupPricingDisplay(currencyType, cost, costAfterDiscount)
+    -- layout the price labels
+    local isHouseCollectible = self:IsHouseCollectible()
+    local hidePricingInfo = self.isFree or isHouseCollectible
+    -- setup the cost
+    if self.onSale and not hidePricingInfo then
+        self.previousCost:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(cost)))
+    end
+
+    if not hidePricingInfo then
+        self.previousCost:SetHidden(not self.onSale)
+        self.previousCostStrikethrough:SetHidden(not self.onSale)
+
+        local INHERIT_ICON_COLOR = true
+        local CURRENCY_ICON_SIZE = "100%"
+        local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
+        local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(costAfterDiscount)), currencyIcon)
+        self.cost:SetText(currencyString)
+    else
+        self.previousCost:SetHidden(true)
+        self.previousCostStrikethrough:SetHidden(true)
+        self.cost:SetText(GetString(SI_MARKET_FREE_LABEL))
+    end
+
+    local FOCUSED = true
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.cost, FOCUSED, self.purchaseState)
+    self.cost:SetHidden(isHouseCollectible or self:IsPromo())
+end
+
+function ZO_MarketProductBase:SetupPurchaseLabelDisplay()
+    local canBePurchased = self:CanBePurchased()
+    if not canBePurchased then
+        if self:IsPromo() then
+            self.purchaseLabelControl:SetText("")
+        elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED and self:IsHouseCollectible() then
+            self.purchaseLabelControl:SetText(GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT))
+        elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
+            local errorStringId = GetMarketProductCompleteErrorStringId(self.marketProductId)
+            self.purchaseLabelControl:SetText(GetErrorString(errorStringId))
+        elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE then
+            self.purchaseLabelControl:SetText(GetString(SI_MARKET_INSTANT_UNLOCK_INELIGIBLE_LABEL))
+        else
+            self.purchaseLabelControl:SetText(GetString(SI_MARKET_PURCHASED_LABEL))
+        end
+        local FOCUSED = true
+        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, FOCUSED, self.purchaseState)
+    end
+
+    self.purchaseLabelControl:SetHidden(canBePurchased)
+end
+
+function ZO_MarketProductBase:SetupBundleDisplay()
+    local isBundle = self:IsBundle()
+    if isBundle then
+        local numBundledProducts = GetMarketProductNumBundledProducts(self.marketProductId)
+        self.numBundledProductsLabel:SetText(numBundledProducts)
+        -- hide the label if the result is 0 or 1 (which means either an empty bundle or what should be a single product...)
+        local hideBundledProductsLabel = numBundledProducts <= 1
+        self.numBundledProductsLabel:SetHidden(hideBundledProductsLabel)
+    else
+        self.numBundledProductsLabel:SetHidden(true)
+    end
+
+    self.bundleIndicator:SetHidden(not isBundle)
 end
 
 function ZO_MarketProductBase:UpdateRemainingTimeCalloutText()
@@ -322,6 +496,10 @@ function ZO_MarketProductBase:GetPresentationIndex()
     return self.presentationIndex
 end
 
+function ZO_MarketProductBase:HasValidPresentationIndex()
+    return self.presentationIndex ~= ZO_INVALID_PRESENTATION_INDEX
+end
+
 function ZO_MarketProductBase:Show(marketProductId, presentationIndex)
     if marketProductId ~= nil then
         self:SetId(marketProductId)
@@ -334,10 +512,12 @@ function ZO_MarketProductBase:Show(marketProductId, presentationIndex)
     local name, description, icon, isNew, isFeatured = self:GetMarketProductInfo()
     local background = self:GetBackground()
 
-    self.name = name
+    self:SetName(name)
     self:SetTitle(name)
 
-    self:PerformLayout(description, icon, background, isNew, isFeatured)
+    self:SetIsFeatured(isFeatured)
+
+    self:PerformLayout(background)
 
     local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = self:GetMarketProductPricingByPresentation()
     self:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
@@ -357,11 +537,12 @@ end
 
 function ZO_MarketProductBase:Reset()
     self.control:SetHidden(true)
-    self:SetHighlightHidden(true)
+    self.highlight:SetHidden(true)
     self.textCallout:SetHidden(true)
     self.marketProductId = 0
     self.onSale = false
     self.isNew = false
+    self.background:SetTexture("")
 end
 
 function ZO_MarketProductBase:Refresh()
@@ -371,25 +552,25 @@ function ZO_MarketProductBase:Refresh()
     end
 end
 
-function ZO_MarketProductBase:SetHighlightHidden(hidden)
-    if self.highlight then
-        self.highlight:SetHidden(false) -- let alpha take care of the actual hiding
+do
+    local g_highlightAnimationProvider = ZO_ReversibleAnimationProvider:New("MarketProductHighlightAnimation")
+    function ZO_MarketProductBase:SetHighlightHidden(hidden)
+        if self.highlight then
+            self.highlight:SetHidden(false) -- let alpha take care of the actual hiding
 
-        if not self.highlightAnimation then
-            self.highlightAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("MarketProductHighlightAnimation", self.highlight)
-        end
-
-        if hidden then
-            self.highlightAnimation:PlayBackward()
-        else
-            self.highlightAnimation:PlayForward()
+            if hidden then
+                g_highlightAnimationProvider:PlayBackward(self.highlight)
+            else
+                g_highlightAnimationProvider:PlayForward(self.highlight)
+            end
         end
     end
-end
 
-function ZO_MarketProductBase:PlayHighlightAnimationToEnd()
-    if self.highlightAnimation then
-        self.highlightAnimation:PlayInstantlyToEnd()
+    function ZO_MarketProductBase:PlayHighlightAnimationToEnd()
+        if self.highlight then
+            local ANIMATE_INSTANTLY = true
+            g_highlightAnimationProvider:PlayForward(self.highlight, ANIMATE_INSTANTLY)
+        end
     end
 end
 
@@ -400,13 +581,8 @@ end
 -- MarketProduct Preview functions
 
 function ZO_MarketProductBase:HasPreview()
-    return CanPreviewMarketProduct(self.marketProductId)
-end
-
-function ZO_MarketProductBase:Preview()
-    PreviewMarketProduct(self.marketProductId, self.variation)
-    self.owner:RefreshActions()
-    PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
+    --Houses are special because as far as C is concerned they aren't previewable, but Lua allows for a roundabout preview with jumping to the house
+    return CanPreviewMarketProduct(self.marketProductId) or ZO_Market_Shared.GetMarketProductPreviewType(self) == ZO_MARKET_PREVIEW_TYPE_HOUSE
 end
 
 function ZO_MarketProductBase:EndPreview()
@@ -414,100 +590,14 @@ function ZO_MarketProductBase:EndPreview()
     self.owner:RefreshActions()
 end
 
-function ZO_MarketProductBase:GetPreviewVariationDisplayName()
-    local previewVariationDisplayName = GetMarketProductPreviewVariationDisplayName(self.marketProductId, self.variation)
-
-    if previewVariationDisplayName == "" then
-        return self.variation
-    else
-        return previewVariationDisplayName
-    end
-end
-
 function ZO_MarketProductBase:GetNumPreviewVariations()
     return GetNumMarketProductPreviewVariations(self.marketProductId)
 end
 
-function ZO_MarketProductBase:PreviewNextVariation()
-    if self:HasPreview() and self:GetNumPreviewVariations() > 0 then
-        self.variation = self.variation + 1
-
-        if self.variation > self:GetNumPreviewVariations() then
-            self.variation = 1
-        end
-
-        self:Preview()
-    end
-end
-
-function ZO_MarketProductBase:PreviewPreviousVariation()
-    if self:HasPreview() and self:GetNumPreviewVariations() > 0 then
-        self.variation = self.variation - 1
-
-        if self.variation < 1 then
-            self.variation = self:GetNumPreviewVariations()
-        end
-
-        self:Preview()
-    end
-end
-
-do
-    local SERVICE_TOKEN =
-    {
-        buttonText = GetString(SI_MARKET_LOG_OUT_TO_CHARACTER_SELECT_KEYBIND_LABEL),
-        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE),
-        GoToUseProductLocation = Logout,
-    }
-
-    local CROWN_CRATE =
-    {
-        buttonText = GetString(SI_MARKET_OPEN_CROWN_CRATES_KEYBIND_LABEL),
-        transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY),
-        GoToUseProductLocation = function()
-            if IsInGamepadPreferredMode() then
-                SCENE_MANAGER:Show("crownCrateGamepad")
-            else
-                SCENE_MANAGER:Show("crownCrateKeyboard")
-            end
-        end,
-    }
-
-    function ZO_MarketProductBase:GetUseProductInfo()
-        local instantUnlockType = GetMarketProductInstantUnlockType(self:GetId())
-        if IsMarketInstantUnlockServiceToken(instantUnlockType) then
-            return SERVICE_TOKEN
-        else
-            local marketProductType = self:GetMarketProductType()
-            if marketProductType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
-                return CROWN_CRATE
-            end
-        end
-    end
-
-    function ZO_MarketProductBase:HasUseProductInfo()
-        return self:GetUseProductInfo() ~= nil
-    end
-
-    function ZO_MarketProductBase:GoToUseProductLocation()
-        local useProductInfo = self:GetUseProductInfo()
-        if useProductInfo then
-            useProductInfo.GoToUseProductLocation()
-        end        
-    end
-end
 -- virtual functions
 
-function ZO_MarketProductBase:Purchase()
+function ZO_MarketProductBase:PerformLayout(background)
     -- to be overridden
-end
-
-function ZO_MarketProductBase:PerformLayout(name, description, icon, background, isNew, isFeatured)
-    -- to be overridden
-end
-
-function ZO_MarketProductBase:IsBundle()
-    return GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
 end
 
 function ZO_MarketProductBase:IsBlank()

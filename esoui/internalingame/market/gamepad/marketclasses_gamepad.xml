@@ -2,6 +2,16 @@
     <Controls>
         <Control name="ZO_Gamepad_MarketProductTemplate" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" hidden="true" virtual="true">
             <Controls>
+                <Control name="$(parent)Highlight" hidden="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineThick" layer="OVERLAY">
+                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+                
                 <Label name="$(parent)Title" font="ZoFontGamepad34" override="true" />
 
                 <Label name="$(parent)PreviousCost" font="ZoFontGamepadBold27" override="true" />

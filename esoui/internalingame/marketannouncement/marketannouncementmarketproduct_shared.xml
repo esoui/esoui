@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Base" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" virtual="true" >
+            <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_WIDTH" y="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_HEIGHT"/>
+
+            <Controls>
+                <Texture name="$(parent)OverlayGradient" override="true" textureFile="EsoUI/Art/AnnounceWindow/blackFade.dds" alpha="1" >
+                    <Dimensions x="400" />
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                </Texture>
+                
+                <Label name="$(parent)Type" text="SI_MARKET_ANNOUNCEMENT_TITLE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" override="true">
+                    <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH" />
+                    <Anchor point="TOPLEFT" offsetX="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_OFFSET_X" offsetY="30" />
+                </Label>
+
+                <Label name="$(parent)Title" maxLineCount="2" wrapMode="ELLIPSIS" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Type" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Type" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+
+                <Label name="$(parent)TextCallout" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)PreviousCost" override="true" />
+
+                <Label name="$(parent)Cost" override="true" />
+
+                <Label name="$(parent)Purchased" override="true"/>
+
+                <Label name="$(parent)BundledProducts" override="true">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-10"/>
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" />
+                    </Controls>
+                </Label>
+
+            </Controls>
+        </Control>
+    </Controls>
+ </GuiXml>

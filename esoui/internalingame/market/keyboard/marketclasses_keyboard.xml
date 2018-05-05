@@ -1,4 +1,29 @@
 <GuiXml>
+    <Animations>
+        <!-- We have two animations that are mirror each other so we can easily use ZO_ReversibleAnimationProvider for
+             hiding certain controls while showing others, since it expects to be played forward first before it can
+             be played backward -->
+        <AnimationTimeline name="ZO_KeyboardMarketProductFadeInAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_MARKET_PRODUCT_HIGHLIGHT_ANIMATION_DURATION_MS" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_KeyboardMarketProductFadeOutAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_MARKET_PRODUCT_HIGHLIGHT_ANIMATION_DURATION_MS" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
     <Controls>
         <Label name="ZO_MarketDefaultLabel" font="ZoFontHeader" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
@@ -48,25 +73,24 @@
         </Button>
 
         <Control name="ZO_MarketProductTemplate_Keyboard" inherits="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
-            
             <OnMouseEnter>
                 ZO_MarketProduct_OnMouseEnter(self) 
             </OnMouseEnter>
-            
+
             <OnMouseExit>
                 ZO_MarketProduct_OnMouseExit(self)
             </OnMouseExit>
-            
+
             <OnMouseUp>
                 if upInside then
                     self.marketProduct:OnClicked(button)
                 end
             </OnMouseUp>
-            
+
             <OnMouseDoubleClick>
                 self.marketProduct:OnDoubleClicked(button)
             </OnMouseDoubleClick>
-            
+
             <Controls>
                 <Backdrop name="$(parent)OverlayBorder" override="true">
                     <Edge file="EsoUI/Art/Market/Keyboard/market_cel_dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
@@ -77,9 +101,10 @@
                     <AnchorFill/>
                 </Backdrop>
 
-                <Label name="$(parent)Title" inherits="ZO_MarketDefaultLabel" font="ZoFontHeader3" maxLineCount="3" wrapMode="ELLIPSIS" mouseEnabled="true" override="true">
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" override="true">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
                     <Anchor point="TOPRIGHT" offsetX="-100" offsetY="10"/>
+
                     <OnMouseEnter>
                         ZO_MarketProduct_OnMouseEnter(self:GetParent())
                     </OnMouseEnter>
@@ -117,31 +142,52 @@
                 <Label name="$(parent)Purchased" font="ZoFontWinH4" override="true">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                 </Label>
-                
-                <Label name="$(parent)TextCallout" font="ZoFontWinT1" override="true">
+
+                <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard">
                     <Controls>
-                        <Control name="$(parent)Background" override="true">
+                        <Control name="$(parent)Background" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL">
                             <Dimensions y="32"/>
                             <Controls>
-                                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_center.dds" override="true"/>
-                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
-                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Market/Keyboard/market_callout_background_fadedCap.dds" override="true"/>
+                                <Texture name="$(parent)Center" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Left" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                <Texture name="$(parent)Right" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
                             </Controls>
                         </Control>
                     </Controls>
                 </Label>
-                
+
                 <Label name="$(parent)BundledProducts" font="ZoFontHeader3" override="true">
                     <Anchor point="BOTTOMRIGHT" offsetX="-15" offsetY="-6"/>
                     <Controls>
                         <Label name="$(parent)Label" font="ZoFontWinH4" override="true" />
                     </Controls>
                 </Label>
-                
+
                 <Texture name="$(parent)BundleIndicator" textureFile="EsoUI/Art/Market/Keyboard/market_bundleFlag.dds" override="true" />
+
+                <Button name="$(parent)Gift" hidden="true">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+                    <Textures normal="EsoUI/Art/Market/Keyboard/tabIcon_gifting_up.dds"
+                              pressed="EsoUI/Art/Market/Keyboard/tabIcon_gifting_down.dds"
+                              mouseOver="EsoUI/Art/Market/Keyboard/tabIcon_gifting_over.dds"
+                              disabled="EsoUI/Art/Market/Keyboard/tabIcon_gifting_disabled.dds" />
+
+                    <OnMouseEnter>
+                        ZO_MarketProductGiftButton_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_MarketProductGiftButton_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+
+                    <OnClicked>
+                        ZO_KeyboardMarketProduct_OnGiftClicked(self:GetParent())
+                    </OnClicked>
+                </Button>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_MarketProduct_Keyboard" inherits="ZO_MarketProductTemplate_Keyboard" virtual="true">
             <Dimensions x="ZO_MARKET_PRODUCT_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
             
@@ -152,7 +198,7 @@
                 </Texture>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_MarketProductBundle_Keyboard" inherits="ZO_MarketProductTemplate_Keyboard" virtual="true">
             <Dimensions x="ZO_MARKET_PRODUCT_BUNDLE_WIDTH" y="ZO_MARKET_PRODUCT_HEIGHT" />
             

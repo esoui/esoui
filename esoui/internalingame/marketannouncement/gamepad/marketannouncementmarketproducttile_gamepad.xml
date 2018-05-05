@@ -1,0 +1,27 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MarketAnnouncementMarketProductTile_Gamepad_Control" inherits="ZO_MarketAnnouncement_MarketProductTemplate_Gamepad" virtual="true">
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepad34",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontGamepad27",
+                        lineLimit = 2,
+                    }
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Title"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                ZO_MarketAnnouncementMarketProductTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <!-- Lua class inherits from an ActionTile though the xml does not inherit from ActionTile_Gamepad.
+                     Since ActionTile expects a Container object it is necessary to add this element manually to the xml -->
+                <Control name="$(parent)Container" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -4,7 +4,7 @@ local g_soundHandlers = {
             return SOUNDS.MARKET_CROWNS_SPENT
         end
     end,
-    [EVENT_CROWN_GEM_UPDATE] = function(crownGemAmount, difference)
+    [EVENT_CROWN_GEM_UPDATE] = function(crownGemAmount, difference, reason)
         if difference < 0 then
             return SOUNDS.MARKET_CROWN_GEMS_SPENT
         end

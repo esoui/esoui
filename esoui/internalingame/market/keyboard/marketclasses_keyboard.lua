@@ -4,9 +4,6 @@ ZO_MARKET_PRODUCT_BUNDLE_WIDTH = 2 * ZO_MARKET_PRODUCT_WIDTH + ZO_MARKET_PRODUCT
 ZO_MARKET_PRODUCT_HEIGHT = 200
 ZO_MARKET_PRODUCT_INSET = 20
 
---account for the fade that we add to the sides of the callout
-ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET = 5
-
 ZO_MARKET_DEFAULT_BACKGROUND_COLOR = ZO_ColorDef:New(1, 1, 1)
 ZO_MARKET_MOUSE_OVER_BACKGROUND_COLOR = ZO_ColorDef:New(.8, .8, .8)
 ZO_MARKET_PURCHASED_BACKGROUND_COLOR = ZO_ColorDef:New(.6, .6, .6)
@@ -21,11 +18,37 @@ function MarketProduct_Keyboard:New(...)
     return ZO_MarketProductBase.New(self, ...)
 end
 
-function MarketProduct_Keyboard:Initialize(controlId, controlTemplate, parent, iconPool, owner, name, ...)
-    local control = CreateControlFromVirtual(name or controlTemplate, parent, controlTemplate, controlId)
-    ZO_MarketProductBase.Initialize(self, control, owner, ...)
-    self.iconPool = ZO_MetaPool:New(iconPool)
-    self.activeMarketProductIcon = nil
+do
+    local TITLE_FONTS =
+    {
+        {
+            font = "ZoFontHeader3",
+            lineLimit = 3,
+        },
+        {
+            font = "ZoFontHeader2",
+            lineLimit = 4,
+        },
+        {
+            font = "ZoFontHeader",
+            lineLimit = 4,
+        },
+        {
+            font = "ZoFontWinH5",
+            lineLimit = 5,
+        },
+    }
+
+    function MarketProduct_Keyboard:Initialize(controlId, controlTemplate, parent, iconPool, owner, name, ...)
+        local control = CreateControlFromVirtual(name or controlTemplate, parent, controlTemplate, controlId)
+        ZO_MarketProductBase.Initialize(self, control, owner, ...)
+
+        self.giftButton = control:GetNamedChild("Gift")
+        self.iconPool = ZO_MetaPool:New(iconPool)
+        self.activeMarketProductIcon = nil
+        self:SetTextCalloutYOffset(-7)
+        ZO_FontAdjustingWrapLabel_OnInitialized(self.title, TITLE_FONTS, TEXT_WRAP_MODE_ELLIPSIS)
+    end
 end
 
 function MarketProduct_Keyboard:LayoutBackground(background)
@@ -44,21 +67,8 @@ function MarketProduct_Keyboard:LayoutBackground(background)
     self.hasBackground = hasBackground
 end
 
-function MarketProduct_Keyboard:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-    ZO_MarketProductBase.LayoutCostAndText(self, description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-
-    self.cost:ClearAnchors()
-    self.textCallout:ClearAnchors()
-
-    if self.isFree then
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.purchaseLabelControl, TOPLEFT, ZO_LARGE_SINGLE_MARKET_PRODUCT_CALLOUT_X_OFFSET, -7)
-    elseif self.onSale then
-        self.cost:SetAnchor(BOTTOMLEFT, self.previousCost, BOTTOMRIGHT, 10)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.previousCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, -7) -- x offset to account for strikethrough
-    else
-        self.cost:SetAnchor(BOTTOMLEFT, self.control, BOTTOMLEFT, 10, -10)
-        self.textCallout:SetAnchor(BOTTOMLEFT, self.cost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, -7)
-    end
+function MarketProduct_Keyboard:SetupCalloutsDisplay(discountPercent, isNew)
+    ZO_MarketProductBase.SetupCalloutsDisplay(self, discountPercent, isNew)
 
     local textCalloutBackgroundColor
     local textCalloutTextColor
@@ -80,27 +90,18 @@ function MarketProduct_Keyboard:LayoutCostAndText(description, currencyType, cos
 end
 
 function MarketProduct_Keyboard:Purchase()
-    PlaySound(SOUNDS.MARKET_PURCHASE_SELECTED)
-    
-    local hasErrors, dialogParams, promptBuyCrowns, allowContinue = ZO_MARKET_SINGLETON:GetMarketProductPurchaseErrorInfo(self.marketProductId)
+    MARKET:PurchaseMarketProduct(self.marketProductId, self:GetPresentationIndex())
+end
 
-    if promptBuyCrowns then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", ZO_BUY_CROWNS_URL_TYPE, dialogParams)
-    elseif not allowContinue then
-        local NO_DATA = nil
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DATA, dialogParams)
-    elseif hasErrors then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", {marketProduct = self}, dialogParams)
-    else
-        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProduct = self})
-    end
-
-    OnMarketStartPurchase(self.marketProductId)
+function MarketProduct_Keyboard:Gift()
+    MARKET:GiftMarketProduct(self.marketProductId, self:GetPresentationIndex())
 end
 
 function MarketProduct_Keyboard:Reset()
     ZO_MarketProductBase.Reset(self)
     self.iconPool:ReleaseAllObjects()
+    self.parentMarketProductId = nil
+    self.giftButton:SetHidden(true)
 end
 
 function MarketProduct_Keyboard:Refresh()
@@ -110,6 +111,16 @@ function MarketProduct_Keyboard:Refresh()
     ZO_MarketProductBase.Refresh(self)
 end
 
+function MarketProduct_Keyboard:RefreshAsChild()
+    -- need to release the icons before we refresh, because Show() will grab a new icon
+    self.iconPool:ReleaseAllObjects()
+    self.activeMarketProductIcon = nil
+    local productId = self:GetId()
+    if productId > 0 then
+        self:ShowAsChild(productId, self.parentMarketProductId)
+    end
+end
+
 function MarketProduct_Keyboard:InitializeMarketProductIcon(marketProductId, purchased)
     local marketProductIcon = self.iconPool:AcquireObject()
     marketProductIcon:Show(self, marketProductId, purchased)
@@ -117,9 +128,7 @@ function MarketProduct_Keyboard:InitializeMarketProductIcon(marketProductId, pur
 end
 
 function MarketProduct_Keyboard:EndPreview()
-    ZO_MarketProductBase.EndPreview(self)
-
-    self.owner:SetCurrentMultiVariationPreviewProduct(nil)
+    self.owner:EndCurrentPreview()
 end
 
 function MarketProduct_Keyboard:HasActiveIcon()
@@ -134,47 +143,89 @@ function MarketProduct_Keyboard:OnIconMouseEnter(activeIcon)
     self:OnMouseEnter()
 end
 
-function MarketProduct_Keyboard:OnMouseEnter()
-    self:SetHighlightHidden(self:IsPurchaseLocked())
+do
+    local g_fadeInAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_KeyboardMarketProductFadeInAnimation")
+    local g_fadeOutAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_KeyboardMarketProductFadeOutAnimation")
 
-    if self.hasBackground and not self:IsPurchaseLocked() then
-        self.background:SetColor(ZO_MARKET_MOUSE_OVER_BACKGROUND_COLOR:UnpackRGB())
+    function MarketProduct_Keyboard:OnMouseEnter()
+        if not self:IsPurchaseLocked() then
+            self:SetHighlightHidden(false)
+        end
+
+        if self.hasBackground and not self:IsPurchaseLocked() then
+            self.background:SetColor(ZO_MARKET_MOUSE_OVER_BACKGROUND_COLOR:UnpackRGB())
+        end
+
+        local marketProductId
+        if self:HasActiveIcon() then
+            marketProductId = self.activeMarketProductIcon:GetMarketProductId()
+        else
+            marketProductId = self.marketProductId
+        end
+
+        self:DisplayTooltip(self.control, marketProductId)
+
+        if self:IsGiftable() then
+            if not self.purchaseLabelControl:IsHidden() then
+                g_fadeOutAnimationProvider:PlayForward(self.purchaseLabelControl)
+            end
+
+            if not self.bundledProductsItemsLabel:IsHidden() then
+                g_fadeOutAnimationProvider:PlayForward(self.bundledProductsItemsLabel)
+            end
+
+            if not self.numBundledProductsLabel:IsHidden() then
+                g_fadeOutAnimationProvider:PlayForward(self.numBundledProductsLabel)
+            end
+
+            self.giftButton:SetHidden(false)
+            g_fadeInAnimationProvider:PlayForward(self.giftButton)
+        end
     end
 
-    local marketProductId
-    if self:HasActiveIcon() then
-        marketProductId = self.activeMarketProductIcon:GetMarketProductId()
-    else
-        marketProductId = self.marketProductId
+    function MarketProduct_Keyboard:OnMouseExit()
+        self.activeMarketProductIcon = nil
+        if not self:IsPurchaseLocked() then
+            self:SetHighlightHidden(true)
+        end
+
+        if self.hasBackground and not self:IsPurchaseLocked() then
+            self.background:SetColor(ZO_MARKET_DEFAULT_BACKGROUND_COLOR:UnpackRGB())
+        end
+
+        self:ClearTooltip()
+
+        if self:IsGiftable() then
+            local shouldShowPurchaseLabel = not self:CanBePurchased()
+            if shouldShowPurchaseLabel then
+                g_fadeOutAnimationProvider:PlayBackward(self.purchaseLabelControl)
+            end
+
+            if self:IsBundle() then
+                g_fadeOutAnimationProvider:PlayBackward(self.bundledProductsItemsLabel)
+            end
+
+            local hideBundledProductsLabel = not self:IsBundle() or GetMarketProductNumBundledProducts(self.marketProductId) <= 1
+            if not hideBundledProductsLabel then
+                g_fadeOutAnimationProvider:PlayBackward(self.numBundledProductsLabel)
+            end
+
+            g_fadeInAnimationProvider:PlayBackward(self.giftButton)
+        end
     end
-
-    self:DisplayTooltip(self.control, marketProductId)
-end
-
-function MarketProduct_Keyboard:OnMouseExit()
-    self.activeMarketProductIcon = nil
-    self:SetHighlightHidden(true)
-
-    if self.hasBackground and not self:IsPurchaseLocked() then
-        self.background:SetColor(ZO_MARKET_DEFAULT_BACKGROUND_COLOR:UnpackRGB())
-    end
-
-    self:ClearTooltip()
 end
 
 function MarketProduct_Keyboard:OnClicked(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
+        -- We don't use CanPreviewMarketProductPreviewType here because we don't want clicking on bundles to actually preview, lest we wouldn't be able to double click
         if self.owner:IsReadyToPreview() then
-            self.variation = 1
             self:Preview()
         end
     elseif button == MOUSE_BUTTON_INDEX_RIGHT then
         ClearMenu()
 
-        if not self:IsPurchaseLocked() then
-            local function PurchaseCallback()
-                self:Purchase()
-            end
+        if self:HasValidPresentationIndex() and self:CanBePurchased() then
+            local function PurchaseCallback() self:Purchase() end
             if self:IsBundle() then
                 AddMenuItem(GetString(SI_MARKET_ACTION_PURCHASE_BUNDLE), PurchaseCallback)
             else
@@ -182,25 +233,23 @@ function MarketProduct_Keyboard:OnClicked(button)
             end
         end
 
+        if self:HasValidPresentationIndex() and self:IsGiftable() then
+            local function GiftCallback() self:Gift() end
+            if self:IsBundle() then
+                AddMenuItem(GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT), GiftCallback)
+            else
+                AddMenuItem(GetString(SI_MARKET_GIFT_KEYBIND_TEXT), GiftCallback)
+            end
+        end
+
         local previewType = self.owner.GetMarketProductPreviewType(self)
         local canPreview = self.owner:CanPreviewMarketProductPreviewType(previewType)
         if canPreview then
-            if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE and not self:GetHidesChildProducts() then
-                AddMenuItem(GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT),
-                                        function()
-                                            self.owner:ShowBundleContents(self)
-                                        end)
-            elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
-                AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW),
-                                        function()
-                                            self.owner:ShowCrownCrateContents(self)
-                                        end)
-            else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
-                AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW),
-                                    function()
-                                        self.variation = 1
-                                        self:Preview()
-                                    end)
+            local function PreviewFunction() self:Preview() end
+            if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+                AddMenuItem(GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT), PreviewFunction)
+            else -- ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE, ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
+                AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), PreviewFunction)
             end
         elseif self:IsActivelyPreviewing() then
             AddMenuItem(GetString(SI_MARKET_ACTION_END_PREVIEW), function() self:EndPreview() end)
@@ -212,7 +261,7 @@ end
 
 function MarketProduct_Keyboard:OnDoubleClicked(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
-        if not self:IsPurchaseLocked() then
+        if self:CanBePurchased() and self:HasValidPresentationIndex() then
             self:Purchase()
         end
     end
@@ -235,25 +284,26 @@ function MarketProduct_Keyboard:IsActivelyPreviewing()
     -- To Be Overridden
 end
 
-function MarketProduct_Keyboard:ShowAsChild(...)
-    self:Show(...)
-
-    -- we want to show collectibles that we currently own as collected in the bundle viewer
-    local productType = self:GetProductType()
-    local collectibleOwned = false
-    if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-        local owned, isPlaceholder = select(6, GetMarketProductCollectibleInfo(self:GetId()))
-        if not isPlaceholder then
-            collectibleOwned = owned
+function MarketProduct_Keyboard:GetPurchaseState()
+    if self.parentMarketProductId then
+        local parentPurchaseState = GetMarketProductPurchaseState(self.parentMarketProductId)
+        if parentPurchaseState == MARKET_PRODUCT_PURCHASE_STATE_PURCHASED then
+            return parentPurchaseState
         end
-    elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
-        -- Show bundles that have all their collectibles unlocked as collected
-        collectibleOwned = CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
     end
 
-    self.purchaseLabelControl:SetHidden(not collectibleOwned)
+    return ZO_MarketProductBase.GetPurchaseState(self)
+end
 
-    if collectibleOwned then
+function MarketProduct_Keyboard:ShowAsChild(marketProductId, parentMarketProductId)
+    self.parentMarketProductId = parentMarketProductId
+    self:Show(marketProductId, ZO_INVALID_PRESENTATION_INDEX)
+
+    local allCollectiblesOwned = self:AreAllCollectiblesUnlocked()
+
+    self.purchaseLabelControl:SetHidden(not allCollectiblesOwned)
+
+    if allCollectiblesOwned then
         self.purchaseLabelControl:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
     end
 
@@ -337,8 +387,8 @@ function ZO_MarketProductBundle:Initialize(controlId, parent, iconPool, owner)
     MarketProduct_Keyboard.Initialize(self, controlId, "ZO_MarketProductBundle_Keyboard", parent, iconPool, owner)
 end
 
-function ZO_MarketProductBundle:PerformLayout(description, icon, background, isNew, isFeatured)
-    iconControls = self:CreateChildIconControlTable(self:IsPurchaseLocked())
+function ZO_MarketProductBundle:PerformLayout(background)
+    local iconControls = self:CreateChildIconControlTable(self:IsPurchaseLocked())
     self:LayoutIcons(iconControls)
 end
 
@@ -377,7 +427,9 @@ function ZO_MarketProductBundle:IsActivelyPreviewing()
 end
 
 function ZO_MarketProductBundle:HasPreview()
-    return self:HasActiveIcon() and CanPreviewMarketProduct(self.activeMarketProductIcon:GetMarketProductId())
+    if self:HasActiveIcon() then
+        return CanPreviewMarketProduct(self.activeMarketProductIcon:GetMarketProductId())
+    end
 end
 
 function ZO_MarketProductBundle:Preview(icon)
@@ -386,62 +438,14 @@ function ZO_MarketProductBundle:Preview(icon)
     if activeIcon then
         local attachmentId = activeIcon:GetMarketProductId()
         if CanPreviewMarketProduct(attachmentId) then
-            PreviewMarketProduct(attachmentId, self.variations[attachmentId])
-
-            if GetNumMarketProductPreviewVariations(attachmentId) > 1 then
-                self.currentPreviewingId = attachmentId
-                self.variations[self.currentPreviewingId] = 1
-                self.owner:SetCurrentMultiVariationPreviewProduct(self)
-            else
-                self.owner:SetCurrentMultiVariationPreviewProduct(nil)
-            end
-
-            self.owner:RefreshActions()
-            PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
+            self.owner:PreviewMarketProduct(attachmentId)
         end
-    end
-end
-
-function ZO_MarketProductBundle:EndPreview()
-    MarketProduct_Keyboard.EndPreview(self)
-    self.currentPreviewingId = nil
-end
-
-function ZO_MarketProductBundle:GetPreviewVariationDisplayName()
-    if self.currentPreviewingId then
-        local previewVariationDisplayName = GetMarketProductPreviewVariationDisplayName(self.currentPreviewingId, self.variations[self.currentPreviewingId])
-
-        if previewVariationDisplayName == "" then
-            return self.variations[self.currentPreviewingId]
+    else
+        if self:GetHidesChildProducts() then
+            self.owner:ShowBundleContentsAsList(self)
         else
-            return previewVariationDisplayName
+            self.owner:ShowBundleContents(self)
         end
-    end
-
-    return ""
-end
-
-function ZO_MarketProductBundle:PreviewNextVariation()
-    if self.currentPreviewingId then
-        self.variations[self.currentPreviewingId] = self.variations[self.currentPreviewingId] + 1
-
-        if self.variations[self.currentPreviewingId] > GetNumMarketProductPreviewVariations(self.currentPreviewingId) then
-            self.variations[self.currentPreviewingId] = 1
-        end
-
-        PreviewMarketProduct(self.currentPreviewingId, self.variations[self.currentPreviewingId])
-    end
-end
-
-function ZO_MarketProductBundle:PreviewPreviousVariation()
-    if self.currentPreviewingId then
-        self.variations[self.currentPreviewingId] = self.variations[self.currentPreviewingId] - 1
-
-        if self.variations[self.currentPreviewingId] < 1 then
-            self.variations[self.currentPreviewingId] = GetNumMarketProductPreviewVariations(self.currentPreviewingId)
-        end
-
-        PreviewMarketProduct(self.currentPreviewingId, self.variations[self.currentPreviewingId])
     end
 end
 
@@ -460,7 +464,7 @@ function ZO_MarketProductIndividual:Initialize(controlId, parent, iconPool, owne
 end
 
 local SINGLE_ICON_SIZE = 64
-function ZO_MarketProductIndividual:PerformLayout(description, icon, background, isNew, isFeatured)
+function ZO_MarketProductIndividual:PerformLayout(background)
     local productType = self:GetProductType()
     if productType ~= MARKET_PRODUCT_TYPE_NONE then
         local marketProductIcon = self:InitializeMarketProductIcon(self.marketProductId, self:IsPurchaseLocked())
@@ -485,13 +489,17 @@ function ZO_MarketProductIndividual:IsActivelyPreviewing()
 end
 
 function ZO_MarketProductIndividual:Preview()
-    ZO_MarketProductBase.Preview(self)
-    self.owner:SetCanBeginPreview(false, GetFrameTimeSeconds())
-
-    if self:GetNumPreviewVariations() > 1 then
-        self.owner:SetCurrentMultiVariationPreviewProduct(self)
-    else
-        self.owner:SetCurrentMultiVariationPreviewProduct(nil)
+    local previewType = self.owner.GetMarketProductPreviewType(self)
+    if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
+        self.owner:ShowBundleContents(self)
+    elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
+        self.owner:ShowCrownCrateContents(self)
+    elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+        self.owner:ShowBundleContentsAsList(self)
+    elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
+        self.owner:ShowHousePreviewDialog(self)
+    else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
+        self.owner:PreviewMarketProduct(self:GetId())
     end
 end
 
@@ -614,21 +622,28 @@ function ZO_MarketProductIcon:OnClicked(button)
         ClearMenu()
         local marketProduct = self.parentMarketProduct
 
-        if not marketProduct:IsPurchaseLocked() then
+        if marketProduct:HasValidPresentationIndex() and marketProduct:CanBePurchased() then
+            local function PurchaseCallback() marketProduct:Purchase() end
             if marketProduct:IsBundle() then
-                AddMenuItem(GetString(SI_MARKET_ACTION_PURCHASE_BUNDLE), function() marketProduct:Purchase() end)
+                AddMenuItem(GetString(SI_MARKET_ACTION_PURCHASE_BUNDLE), PurchaseCallback)
             else
-                AddMenuItem(GetString(SI_MARKET_ACTION_PURCHASE), function() marketProduct:Purchase() end)
+                AddMenuItem(GetString(SI_MARKET_ACTION_PURCHASE), PurchaseCallback)
+            end
+        end
+
+        if marketProduct:HasValidPresentationIndex() and marketProduct:IsGiftable() then
+            local function GiftCallback() marketProduct:Gift() end
+            if marketProduct:IsBundle() then
+                AddMenuItem(GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT), GiftCallback)
+            else
+                AddMenuItem(GetString(SI_MARKET_GIFT_KEYBIND_TEXT), GiftCallback)
             end
         end
 
         if IsPreviewingMarketProduct(self.marketProductId) then
             AddMenuItem(GetString(SI_MARKET_ACTION_END_PREVIEW), function() marketProduct:EndPreview() end)
         elseif CanPreviewMarketProduct(self.marketProductId) and IsCharacterPreviewingAvailable() then
-            AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), function()
-                                                                marketProduct.variation = 1
-                                                                marketProduct:Preview(self)
-                                                            end)
+            AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), function() marketProduct:Preview(self) end)
         end
 
         ShowMenu(self.control)
@@ -649,6 +664,20 @@ function ZO_MarketProduct_OnMouseExit(control)
     local marketProduct = control.marketProduct
     marketProduct:OnMouseExit()
     MARKET:MarketProductSelected(nil)
+end
+
+function ZO_MarketProductGiftButton_OnMouseEnter(control)
+    ZO_MarketProduct_OnMouseEnter(control)
+    WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+end
+
+function ZO_MarketProductGiftButton_OnMouseExit(control)
+    ZO_MarketProduct_OnMouseExit(control)
+end
+
+function ZO_KeyboardMarketProduct_OnGiftClicked(control)
+    local marketProduct = control.marketProduct
+    marketProduct:Gift()
 end
 
 function ZO_MarketProductIcon_OnMouseEnter(control)

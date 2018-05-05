@@ -2,7 +2,7 @@
     <Animations>
         <AnimationTimeline name="MarketProductHighlightAnimation">
             <Animations>
-                <AlphaAnimation duration="255" startAlpha="0" endAlpha=".7">
+                <AlphaAnimation duration="ZO_MARKET_PRODUCT_HIGHLIGHT_ANIMATION_DURATION_MS" startAlpha="0" endAlpha=".7">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
@@ -14,7 +14,7 @@
 
         <Control name="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
             <Controls>
-                <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL">
+                <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <AnchorFill />
                 </Texture>
                 
@@ -44,40 +44,8 @@
 
                 <Label name="$(parent)Cost" level="ZO_MARKET_TILE_TEXT_LEVEL" />
 
-                <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
-                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
-                </Label>
-                
-                <Label name="$(parent)TextCallout" modifyTextType="UPPERCASE">
-                    <Controls>
-                        <Control name="$(parent)Background" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                            <Anchor point="LEFT" />
-                            <Anchor point="RIGHT" />
-                            <Controls>
-                                <Texture name="$(parent)Center" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
-                                    <DimensionConstraints minX="0" />
-                                    <AnchorFill />
-                                </Texture>
-                                <Texture name="$(parent)Left" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                                    <TextureCoords left="0" right="1" top="0" bottom="1" />
-                                    <Dimensions x="16"/>
-                                    <DimensionConstraints minX="16" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Center" relativePoint="TOPLEFT"/>
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Center" relativePoint="BOTTOMLEFT"/>
-                                </Texture>
-                                <Texture name="$(parent)Right" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                                    <TextureCoords left="1" right="0" top="0" bottom="1" />
-                                    <Dimensions x="16"/>
-                                    <DimensionConstraints minX="16" />
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Center" relativePoint="TOPRIGHT"/>
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Center" relativePoint="BOTTOMRIGHT"/>
-                                </Texture>
-                            </Controls>
-                        </Control>
-                    </Controls>
-                </Label>
-                
+                <Label name="$(parent)TextCallout" />
+
                 <Label name="$(parent)BundledProducts" level="ZO_MARKET_TILE_TEXT_LEVEL" hidden="true">
                     <Anchor point="BOTTOMRIGHT"/>
                     <Controls>
@@ -90,6 +58,10 @@
                     <Dimensions x="128" y="128" />
                     <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
+
+                <Label name="$(parent)Purchased" level="ZO_MARKET_TILE_TEXT_LEVEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10"/>
+                </Label>
             </Controls>
         </Control>
     </Controls>

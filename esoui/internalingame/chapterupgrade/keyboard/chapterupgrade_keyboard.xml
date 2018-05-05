@@ -1,0 +1,189 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ChapterUpgradeRewardEntry_Keyboard_IconMouseOverAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.5"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_ChapterUpgrade_Keyboard_RewardsEntryHeader" inherits="ZO_ChapterUpgrade_Shared_RewardsEntryHeader" virtual="true">
+            <Dimensions y="ZO_CHAPTER_UPGRADE_KEYBOARD_REWARD_ENTRY_HEADER_HEIGHT" />
+            
+            <Controls>
+                <Label name="$(parent)Descriptor" override="true" font="ZoFontGameBold" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ChapterUpgrade_Keyboard_RewardsEditionEntryHeader" inherits="ZO_ChapterUpgrade_Shared_RewardsEditionEntryHeader" virtual="true">
+            <Dimensions y="ZO_CHAPTER_UPGRADE_KEYBOARD_REWARD_ENTRY_HEADER_HEIGHT" />
+            
+            <Controls>
+                <Label name="$(parent)Descriptor" override="true" font="ZoFontGameBold" />
+                
+                <Label name="$(parent)CollectorsLabel" override="true" font="ZoFontGameBold">
+                    <Dimensions x="130" />
+                </Label>
+
+                <Label name="$(parent)StandardLabel" override="true" font="ZoFontGameBold">
+                    <Dimensions x="130" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ChapterUpgrade_Keyboard_RewardsEntry" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ChapterUpgrade_Shared_RewardsEntry" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_CHAPTER_UPGRADE_KEYBOARD_REWARD_ENTRY_HEIGHT" />
+
+            <OnInitialized>
+                ZO_ChapterUpgradeRewardEntry_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="32" y="32" />
+                    
+                    <Anchor point="CENTER" offsetX="24" relativePoint="LEFT" />
+                </Texture>
+
+                <Texture name="$(parent)CollectorsCheckMark" override="true">
+                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="-65" />
+                </Texture>
+
+                <Texture name="$(parent)StandardCheckMark" override="true" >
+                    <Anchor point="CENTER" relativeTo="$(parent)CollectorsCheckMark" offsetX="-140" />
+                </Texture>
+
+                <Label name="$(parent)DisplayName" override="true" font="ZoFontGameBold">
+                    <Anchor point="LEFT" offsetX="60" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)StandardCheckMark" relativePoint="CENTER" offsetX="-75" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_ChapterUpgrade_KeyboardTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)UpgradeButtons" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Button name="$(parent)Standard" inherits="ZO_DefaultButton" text="SI_CHAPTER_UPGRADE_STANDARD_BUTTON">
+                            <Dimensions x="200" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" offsetX="-25" />
+                        </Button>
+
+                        <Button name="$(parent)Collectors" inherits="ZO_DefaultButton" text="SI_CHAPTER_UPGRADE_COLLECTORS_BUTTON">
+                            <Dimensions x="200" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="25" />
+
+                            <FontColors
+                                normalColor="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_COLLECTORS_EDITION"
+                                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
+                                mouseOverColor="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_COLLECTORS_EDITION_HIGHLIGHT"
+                                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+                            />
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)PurchasedButton" inherits="ZO_DefaultButton">
+                    <Dimensions x="200" />
+                    <Anchor point="BOTTOM" />
+
+                    <OnInitialized>
+                        self:SetText(GetString("SI_CHAPTERPURCHASESTATE", CHAPTER_PURCHASE_STATE_PURCHASED))
+                        self:SetState(BSTATE_DISABLED, true)
+                    </OnInitialized>
+                </Button>
+
+                <Control name="$(parent)Scroll" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)UpgradeButtons" relativePoint="TOPRIGHT" offsetY="-10" />
+
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Control name="$(parent)Pane" inherits="ZO_ChapterUpgradePane_SharedTemplate" resizeToFitDescendents="true">
+                                    <ResizeToFitPadding width="7" />
+                                    
+                                    <Anchor point="TOPLEFT" />
+                                    <Controls>
+                                        <Texture name="$(parent)Background" override="true" level="ZO_CHAPTER_UPGRADE_KEYBOARD_BACKGROUND_TEXTURE_LEVEL">
+                                            <Dimensions x="600" y="200" />
+                                            <Anchor point="TOPLEFT" offsetX="7" offsetY="4" />
+                                            <Controls>
+                                                <Backdrop name="$(parent)Border" override="true" inherits="ZO_DarkThinFrame" excludeFromResizeToFitExtents="true" />
+                                            </Controls>
+                                        </Texture>
+
+                                        <Label name="$(parent)Title" override="true" font="ZoFontWinH2" />
+
+                                        <Label name="$(parent)PurchaseState" override="true" font="ZoFontGameBold" />
+
+                                        <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard">
+                                            <Controls>
+                                                <Control name="$(parent)Background" override="true">
+                                                    <AnchorFill />
+                                                    <Controls>
+                                                        <Texture name="$(parent)Center" override="true" level="ZO_CHAPTER_UPGRADE_KEYBOARD_TEXT_CALLOUT_BACKGROUND_TEXTURE_LEVEL" />
+                                                        <Texture name="$(parent)Left" override="true" level="ZO_CHAPTER_UPGRADE_KEYBOARD_TEXT_CALLOUT_BACKGROUND_TEXTURE_LEVEL" />
+                                                        <Texture name="$(parent)Right" override="true" level="ZO_CHAPTER_UPGRADE_KEYBOARD_TEXT_CALLOUT_BACKGROUND_TEXTURE_LEVEL" />
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Label>
+
+                                        <Control name="$(parent)Release" override="true">
+                                            <Controls>
+                                                <Label name="$(parent)Date" override="true" font="ZoFontWinH2" />
+
+                                                <Label name="$(parent)Header" override="true" font="ZoFontGameBold" />
+                                            </Controls>
+                                        </Control>
+
+                                        <Label name="$(parent)Description" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                                        </Label>
+
+                                        <Control name="$(parent)PrePurchaseRewards" resizeToFitDescendents="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="15" />
+
+                                            <Controls>
+                                                <Control name="$(parent)Header" inherits="ZO_ChapterUpgrade_Keyboard_RewardsEntryHeader">
+                                                    <Anchor point="TOPLEFT" />
+                                                    <Anchor point="TOPRIGHT" />
+                                                    
+                                                    <Controls>
+                                                        <Label name="$(parent)Descriptor" override="true" text="SI_CHAPTER_UPGRADE_PREPURCHASE_HEADER" />
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+
+                                        <Control name="$(parent)EditionRewards" resizeToFitDescendents="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PrePurchaseRewards" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PrePurchaseRewards" relativePoint="BOTTOMRIGHT" />
+
+                                            <Controls>
+                                                <Control name="$(parent)Header" inherits="ZO_ChapterUpgrade_Keyboard_RewardsEditionEntryHeader">
+                                                    <Anchor point="TOPLEFT" />
+                                                    <Anchor point="TOPRIGHT" />
+
+                                                    <Controls>
+                                                        <Label name="$(parent)Descriptor" override="true" text="SI_CHAPTER_UPGRADE_CHOOSE_EDITION_HEADER" />
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

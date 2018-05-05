@@ -5,11 +5,92 @@
                 ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)ConfirmPurchase" inherits="ZO_DialogContentAnchors" font="ZoFontGame" text="SI_MARKET_CONFIRM_PURCHASE_TEXT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)ConfirmPurchase" inherits="ZO_DialogContentAnchors" font="ZoFontGame" text="SI_MARKET_CONFIRM_PURCHASE_RECIPIENT_SELECTOR_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Control name="$(parent)RadioButtons" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmPurchase" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ConfirmPurchase" relativePoint="BOTTOMRIGHT" offsetY="10" />
+
+                    <Controls>
+                        <Button name="$(parent)ForMe" inherits="ZO_DialogRadioButton">
+                            <Anchor point="TOPLEFT" />
+                            <Controls>
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_MARKET_CONFIRM_PURCHASE_FOR_ME_LABEL" />
+                            </Controls>
+                        </Button>
+
+                        <Button name="$(parent)AsGift" inherits="ZO_DialogRadioButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)ForMeLabel" relativePoint="RIGHT" offsetX="50" />
+                            <Controls>
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_MARKET_CONFIRM_PURCHASE_AS_GIFT_LABEL" />
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)GiftRecipient" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RadioButtons" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RadioButtons" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                    <Controls>
+                        <Label name="$(parent)EditLabel" font="ZoFontGame" text="SI_MARKET_CONFIRM_PURCHASE_GIFT_RECIPIENT_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)EditLabel" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)EditLabel" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_DISPLAY_NAME_DEFAULT_TEXT))
+                                    </OnInitialized>
+                                    <OnEffectivelyShown>
+                                        self:TakeFocus()
+                                    </OnEffectivelyShown>
+                                    <OnTab>
+                                        ZO_MarketPurchaseConfirmationDialogNoteEdit:TakeFocus()
+                                    </OnTab>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)NoteHeader" text="SI_CONFIRM_GIFT_KEYBOARD_GENERAL_NOTE_ENTRY_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GiftRecipientEdit" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GiftRecipientEdit" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+                
+                <Backdrop name="$(parent)Note" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NoteHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NoteHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="GIFT_NOTE_MAX_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GIFT_INVENTORY_REQUEST_GIFT_MESSAGE_TEXT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)NoteRandomText">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Note" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Note" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                    <Dimensions y="28"/>
+                    <Controls>
+                        <Button name="$(parent)Button" inherits="ZO_DefaultButton">
+                            <Anchor point="TOP"/>
+                            <Anchor point="BOTTOM"/>
+                        </Button>
+                    </Controls>
+                </Control>
 
                 <Control name="$(parent)ItemContainer">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmPurchase" relativePoint="BOTTOMLEFT" offsetY="20" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ConfirmPurchase" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <!-- The anchoring of this control is decided by Lua when we decide to hide/show the gifting parts of this dialog -->
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NoteRandomText" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NoteRandomText" relativePoint="BOTTOMRIGHT" offsetY="10" />
                     <Dimensions y="64"/>
                     <Controls>
                         <Texture name="$(parent)Icon" level="3">

@@ -4,9 +4,7 @@ ZO_GAMEPAD_MARKET_PAGE_NO_DIRECTION = 3 -- No movement, only fading
 ZO_GAMEPAD_MARKET_GRID_INITIAL_X_OFFSET = 22
 ZO_GAMEPAD_MARKET_GRID_INITIAL_Y_OFFSET = 62
 
-local SCROLL_BOTTOM_PADDING = 50
 local NUM_VISIBLE_ROWS = 2
-local MIN_SCROLL_POSITION = 0
 local MIN_SCROLL_VALUE = 0
 local MAX_SCROLL_VALUE = 100
 
@@ -18,7 +16,6 @@ ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN = 2
 ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN_MINUS_ONE = ZO_GAMEPAD_MARKET_PRODUCTS_PER_COLUMN - 1
 
 local INDIVIDUAL_PRODUCT_HALF_HEIGHT = ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT / 2
-local HIGHLIGHT_BOUNDARY_PADDING = 10
 
 local FOCUS_MOVEMENT_TYPES = 
 {
@@ -71,7 +68,7 @@ do
     }
 
     -- Used to map x/y movement to sound direction for sounds: TOPLEFT, TOP, TOPRIGHT // LEFT, MIDDLE, RIGHT // BOTTOMLEFT, BOTTOM, BOTTOMRIGHT
-    local DIR_SOUND_MAP = 
+    local DIR_SOUND_MAP_COL_ROW = 
     {
         [-1 ] = { [-1 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS, [ 0 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS, [ 1 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS },
         [ 0 ] = { [-1 ] = FOCUS_MOVEMENT_TYPES.MOVE_PREVIOUS, [ 0 ] = nil,                                [ 1 ] = FOCUS_MOVEMENT_TYPES.MOVE_NEXT     },
@@ -107,7 +104,7 @@ do
                     local selectedData = self.data[newIndex]
                     if selectedData then
                         self:SetFocusByIndex(newIndex)
-                        self.onPlaySoundFunction(DIR_SOUND_MAP[dy][dx])
+                        self.onPlaySoundFunction(DIR_SOUND_MAP_COL_ROW[dy][dx])
                     end
                 end
             end
@@ -268,7 +265,7 @@ do
         local buttonIcon = CreateControl(name, parent, CT_BUTTON)
         buttonIcon:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(keycode))
         buttonIcon:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        buttonIcon:SetAnchor(anchor, control, anchor)
+        buttonIcon:SetAnchor(anchor, parent, anchor)
         buttonIcon:SetHidden(true) -- hidden by default
         return buttonIcon
     end
@@ -307,6 +304,8 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptors = 
     {
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gampad Market Tab Bar Back",
             keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             ethereal = true,
             enabled = function() return self:GetNumItems() > 0 end,
@@ -317,6 +316,8 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Market Tab Bar Forward",
             keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             ethereal = true,
             enabled = function() return self:GetNumItems() > 0 end,
@@ -364,6 +365,30 @@ function ZO_GamepadMarket_GridScreen:Initialize(control, gridWidth, gridHeight, 
     self.headerContainer = self.fullPane:GetNamedChild("ContainerHeaderContainer")
     self.header = self.headerContainer.header
     self:InitializeHeader(initialTabBarEntries)
+
+    self.previewKeybindStripDesciptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        {
+            name = GetString(SI_GAMEPAD_PREVIEW_PREVIOUS),
+            keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+            callback = function()
+                self:MoveToPreviousPreviewProduct()
+            end,
+            visible = function() return self:HasMultiplePreviewProducts() end,
+            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() end,
+        },
+        {
+            name = GetString(SI_GAMEPAD_PREVIEW_NEXT),
+            keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+            callback = function()
+                self:MoveToNextPreviewProduct()
+            end,
+            visible = function() return self:HasMultiplePreviewProducts() end,
+            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() end,
+        },
+        KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
+    }
 end
 
 -- calculate offset needed to scroll grid entries to the absolute screen center instead of the relative container center
@@ -438,7 +463,7 @@ function ZO_GamepadMarket_GridScreen:AddEntry(marketProduct, control)
     self.focusList:AddEntry(focusData)
     self.itemsPerColumn = row + 1
 
-    if marketProduct:HasPreview() then
+    if CanPreviewMarketProduct(marketProduct:GetId()) then
         table.insert(self.previewProducts, marketProduct)
         marketProduct:SetPreviewIndex(#self.previewProducts)
     end
@@ -461,8 +486,6 @@ function ZO_GamepadMarket_GridScreen:FinishRowWithBlankTiles()
 end
 
 do
-    local USE_FADE_GRADIENT = true
-    local UPDATE_THUMB = true
     local SLIDER_MIN_VALUE = 0
     function ZO_GamepadMarket_GridScreen:FinishBuild()
         self.focusList:SetFocusToFirstEntry()
@@ -512,12 +535,37 @@ function ZO_GamepadMarket_GridScreen:RefreshHeader()
     end
 end
 
+function ZO_GamepadMarket_GridScreen:RefreshTabBarVisible()
+    if self.isInitialized then
+        self.header.tabBar:RefreshVisible()
+    end
+end
+
 function ZO_GamepadMarket_GridScreen:BeginPreview()
     self.previewIndex = self.selectedMarketProduct:GetPreviewIndex()
-    ZO_GAMEPAD_MARKET_PREVIEW:SetPreviewProductsContainer(self)
     self.isPreviewing = true
     self:Deactivate()
-    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)
+    
+    self.RefreshPreviewKeybindStrip = function()
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.previewKeybindStripDesciptor)
+    end
+
+    self.PreviewSceneOnStateChange = function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.previewKeybindStripDesciptor)
+            ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.RefreshPreviewKeybindStrip)
+        elseif newState == SCENE_SHOWN then
+            --Preventing an out of order issue with the begin preview mode
+            self:UpdatePreviewToCurrentPreviewedProduct()
+        elseif newState == SCENE_HIDDEN then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDesciptor)
+            GAMEPAD_MARKET_PREVIEW_SCENE:UnregisterCallback("StateChange", self.PreviewSceneOnStateChange)
+            ITEM_PREVIEW_GAMEPAD:UnregisterCallback(self.RefreshPreviewKeybindStrip)
+        end
+    end
+
+    GAMEPAD_MARKET_PREVIEW_SCENE:RegisterCallback("StateChange", self.PreviewSceneOnStateChange)
+    SCENE_MANAGER:Push(ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME)    
 end
 
 function ZO_GamepadMarket_GridScreen:EndCurrentPreview()
@@ -544,7 +592,7 @@ function ZO_GamepadMarket_GridScreen:MoveToPreviousPreviewProduct()
         self.previewIndex = #self.previewProducts - self.previewIndex
     end
 
-    return self:GetCurrentPreviewProductId()
+    self:UpdatePreviewToCurrentPreviewedProduct()
 end
 
 -- Supports wrapping around the preview list
@@ -555,7 +603,12 @@ function ZO_GamepadMarket_GridScreen:MoveToNextPreviewProduct()
         self.previewIndex = self.previewIndex - #self.previewProducts
     end
 
-    return self:GetCurrentPreviewProductId()
+    self:UpdatePreviewToCurrentPreviewedProduct()
+end
+
+function ZO_GamepadMarket_GridScreen:UpdatePreviewToCurrentPreviewedProduct()
+    ZO_Market_Shared.PreviewMarketProduct(ITEM_PREVIEW_GAMEPAD, self:GetCurrentPreviewProductId())
+    GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, self:GetCurrentPreviewProductId())
 end
 
 function ZO_GamepadMarket_GridScreen:OnShowing()
@@ -641,13 +694,6 @@ function ZO_GamepadMarket_GridScreen:UpdateTooltip()
     self:LayoutSelectedMarketProduct()
 end
 
-do
-    local g_purchaseManager = ZO_GamepadMarketPurchaseManager:New() -- Singleton purchase manager
-    function ZO_GamepadMarket_GridScreen:BeginPurchase(marketProduct, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        g_purchaseManager:BeginPurchase(marketProduct:GetProductForSell(), onPurchaseSuccessCallback, onPurchaseEndCallback)
-    end
-end
-
 function ZO_GamepadMarket_GridScreen:UpdatePreviousAndNewlySelectedProducts(previousSelectedProduct, newlySelectedProduct)
     if previousSelectedProduct and previousSelectedProduct ~= newlySelectedProduct then
         previousSelectedProduct:SetIsFocused(false)
@@ -658,24 +704,9 @@ function ZO_GamepadMarket_GridScreen:UpdatePreviousAndNewlySelectedProducts(prev
     end
 end
 
-function ZO_GamepadMarket_GridScreen:ScrollToPosition(scrollPosition, scrollInstantly)
-    if self.control:IsHidden() or scrollInstantly then -- Play animation instantly if the market control is hidden
-        ZO_Scroll_ScrollAbsoluteInstantly(self.contentContainer, scrollPosition)
-    else
-        ZO_Scroll_ScrollAbsolute(self.contentContainer, scrollPosition) -- Animate to scroll position
-    end
-
-    self:UpdateScrollbarAlpha()
-end
-
 function ZO_GamepadMarket_GridScreen:ScrollToGridEntry(entryData, scrollInstantly)
-    local scrollPosition = entryData.gridY == 1 and 0 or (entryData.centerScrollHeight - self.scrollToCenterOffsetY)
-    self:ScrollToPosition(scrollPosition, scrollInstantly)
-end
-
-function ZO_GamepadMarket_GridScreen:ScrollToGridScrollYPosition()
-    local scrollPosition = (self.gridScrollYPosition - 1) * (self.itemHeight + self.itemPadding)
-    self:ScrollToPosition(scrollPosition)
+    ZO_Scroll_ScrollControlIntoCentralView(self.contentContainer, entryData.control, scrollInstantly)
+    self:UpdateScrollbarAlpha()
 end
 
 do

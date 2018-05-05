@@ -75,10 +75,12 @@
     <Layer name="MarketAnnouncement" allowFallthrough="false">
         <Category>
             <Action name="MARKET_ANNOUNCEMENT_CLOSE" hideAction="true">
-                <Down>SYSTEMS:GetObject("marketAnnouncement"):OnMarketAnnouncementCloseKeybind()</Down>
+                <Down>SYSTEMS:GetObject("marketAnnouncement"):OnCloseClicked()</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
-            <Action name="MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
-                <Down>SYSTEMS:GetObject("marketAnnouncement"):OnMarketAnnouncementViewCrownStoreKeybind()</Down>
+            <Action name="MARKET_ANNOUNCEMENT_SELECT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+                <Down>SYSTEMS:GetObject("marketAnnouncement"):OnSelectionClicked()</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
         </Category>
     </Layer>
