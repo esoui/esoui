@@ -129,8 +129,14 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(eventId, loginError, lin
         ZO_Dialogs_ReleaseDialog(self.isLinking and "LINKING_ACCOUNTS_KEYBOARD" or "CREATING_ACCOUNT_KEYBOARD")
 
         dialogName = self.isLinking and "LINKING_ACCOUNTS_ERROR_KEYBOARD" or "CREATE_ACCOUNT_ERROR_KEYBOARD"
-        dialogText = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
-
+        if linkingError == ACCOUNT_CREATE_LINK_ERROR_EXTERNAL_REFERENCE_ALREADY_USED or linkingError == ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED then
+            local serviceType = GetPlatformServiceType()
+            local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
+            dialogText = zo_strformat(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT, accountTypeName)
+        else
+            dialogText = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
+        end
+        
         CREATE_LINK_ACCOUNT_KEYBOARD:GetPasswordEdit():Clear()
 
         -- We need to switch back to the login fragment to refresh session ID, or else the player won't be able to finish

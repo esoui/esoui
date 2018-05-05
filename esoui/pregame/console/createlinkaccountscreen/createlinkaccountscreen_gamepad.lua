@@ -44,7 +44,7 @@ function CreateLinkAccount_Console:AddOption(title, imagesFragment, selectedStat
     option:SetFontScaleOnSelection(true)
     option.selectedCallback = function() PregameStateManager_SetState(selectedState) end
     option.imagesFragment = imagesFragment
-    self.optionsList:AddEntry("ZO_GamepadMenuEntryExpandingWithOneSubLabel", option)
+    self.optionsList:AddEntry("ZO_GamepadMenuEntryTemplate", option)
 end
 
 function CreateLinkAccount_Console:SetupOptions()
@@ -54,7 +54,7 @@ function CreateLinkAccount_Console:SetupOptions()
 
     self.optionsList:Clear()
 
-    self.optionsList:AddDataTemplate("ZO_GamepadMenuEntryExpandingWithOneSubLabel", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.optionsList:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     self:AddOption(GetString(SI_CREATEACCOUNT_HEADER), CREATE_ACCOUNT_IMAGES_FRAGMENT_CONSOLE, "CreateAccountSetup")
     self:AddOption(GetString(SI_CONSOLE_LINKACCOUNT_HEADER), LINK_ACCOUNT_IMAGES_FRAGMENT_CONSOLE, "LinkAccount")

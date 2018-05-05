@@ -1,0 +1,46 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ChapterUpgrade_Keyboard_HeaderLabel" font="ZoFontWinH2" virtual="true" />
+
+        <Label name="ZO_ChapterUpgrade_Keyboard_InfoLabel" font="ZoFontWinH3" virtual="true" />
+        
+        <Button name="ZO_ChapterUpgradeButton_Keyboard" font="ZoFontWinH2" inherits="ZO_ExtraLargeButton" virtual="true">
+            <Dimensions x="230" y="60"/>
+        </Button>
+
+        <TopLevelControl name="ZO_ChapterUpgrade_Keyboard" inherits="ZO_ChapterUpgrade_Shared" hidden="true">
+            <OnInitialized>
+                ZO_ChapterUpgrade_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)TextContainer" override="true">
+                    <Controls>
+                        <Label name="$(parent)ChapterSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Keyboard_HeaderLabel"/>
+                        <Label name="$(parent)ChapterSummary" override="true" inherits="ZO_ChapterUpgrade_Keyboard_InfoLabel" />
+                        <Label name="$(parent)RegistrationSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Keyboard_HeaderLabel"/>
+                        <Label name="$(parent)RegistrationSummary" override="true" inherits="ZO_ChapterUpgrade_Keyboard_InfoLabel" />
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)UpgradeButton" inherits="ZO_ChapterUpgradeButton_Keyboard" override="true">
+                    <OnClicked>
+                        CHAPTER_UPGRADE_SCREEN_KEYBOARD:UpgradeButtonClicked()
+                    </OnClicked>
+                </Button>
+                <Button name="$(parent)EnterCodeButton" inherits="ZO_ChapterUpgradeButton_Keyboard" override="true">
+                    <OnClicked>
+                        CHAPTER_UPGRADE_SCREEN_KEYBOARD:EnterCodeButtonClicked()
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)CharacterSelectButton" inherits="ZO_DefaultButton" text="SI_CHAPTER_UPGRADE_CONTINUE">
+                    <Dimensions x="200" />
+                    <Anchor point="BOTTOM" offsetY="-50" />
+                    <OnClicked>
+                        CHAPTER_UPGRADE_SCREEN_KEYBOARD:ShowContinueDialog()
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

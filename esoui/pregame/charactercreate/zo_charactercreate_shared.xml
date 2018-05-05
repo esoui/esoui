@@ -25,12 +25,6 @@
     </Animations>
 
     <Controls>
-        <Control name="ZO_PaperdollManipulation_Shared" virtual="true">
-            <Dimensions x="580"/>
-            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" relativePoint="TOP"/>
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" relativePoint="BOTTOM"/>
-        </Control>
-        
         <TopLevelControl name="ZO_CharacterCreateOverlay" topmost="true" tier="HIGH" layer="OVERLAY" level="1000" mouseEnabled="false" hidden="true">
             <AnchorFill />
 

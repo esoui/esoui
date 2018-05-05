@@ -6,10 +6,7 @@ ZO_LoginBase_Keyboard = ZO_Object:Subclass()
 
 local DMM_LOGIN_LOGO_DATA = {
     leftSideTexturePath = "EsoUI/Art/Login/jp_login_logo_left.dds",
-    leftSideWidth = 512,
     rightSideTexturePath = "EsoUI/Art/Login/jp_login_logo_right.dds",
-    rightSideWidth = 256,
-    height = 256,       -- Left and right logos share the same height
 }
 
 function ZO_LoginBase_Keyboard:New(...)
@@ -22,8 +19,8 @@ function ZO_LoginBase_Keyboard:Initialize(control)
     self.control = control
 
     self.bgMunge = control:GetNamedChild("BGMunge")
-    self.esoLogo = control:GetNamedChild("ESOLogo")
-    self.esoLogoRightSide = self.esoLogo:GetNamedChild("Right")
+    self.esoLogoLeftSide = control:GetNamedChild("ESOLogoLeft")
+    self.esoLogoRightSide = control:GetNamedChild("ESOLogoRight")
 
     self:UpdateEsoLogo()
 
@@ -46,11 +43,8 @@ function ZO_LoginBase_Keyboard:UpdateEsoLogo()
         end
 
         if logoData then
-            self.esoLogo:SetTexture(logoData.leftSideTexturePath)
-            self.esoLogo:SetDimensions(logoData.leftSideWidth, logoData.height)
-            
+            self.esoLogoLeftSide:SetTexture(logoData.leftSideTexturePath)
             self.esoLogoRightSide:SetTexture(logoData.rightSideTexturePath)
-            self.esoLogoRightSide:SetDimensions(logoData.rightSideWidth, logoData.height)
         end
 
         self.logoUpdated = true

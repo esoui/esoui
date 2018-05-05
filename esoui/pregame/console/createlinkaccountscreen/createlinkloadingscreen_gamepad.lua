@@ -193,7 +193,13 @@ local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debug
         dialogText = GetString("SI_LOGINAUTHERROR", loginError)
     elseif(linkingError ~= ACCOUNT_CREATE_LINK_ERROR_NO_ERROR) then
         dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LINK_FAILED)
-        dialogText = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
+        if linkingError == ACCOUNT_CREATE_LINK_ERROR_EXTERNAL_REFERENCE_ALREADY_USED or linkingError == ACCOUNT_CREATE_LINK_ERROR_USER_ALREADY_LINKED then
+            local serviceType = GetPlatformServiceType()
+            local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
+            dialogText = zo_strformat(SI_LINKACCOUNT_ALREADY_LINKED_ERROR_FORMAT, accountTypeName)
+        else
+            dialogText = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
+        end
     end
     
     if(loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED or linkingError == ACCOUNT_CREATE_LINK_ERROR_ACCOUNT_NOT_VERIFIED) then

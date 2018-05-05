@@ -12,9 +12,9 @@
                 <Control name="$(parent)EULAContainer">
                     <AnchorFill/>
                     <Controls>
-                        <Texture name="$(parent)Fill" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav2Journal_focus_left.dds">
-                            <Anchor point="TOPLEFT" offsetY="115" />
-                            <Anchor point="BOTTOMRIGHT" offsetY="-70" />
+                        <Texture name="$(parent)Fill" textureFile="EsoUI/Art/Windows/Gamepad/panelBG_focus_512.dds">
+                            <Anchor point="TOPLEFT" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="-70"/>
                         </Texture>
 
                         <Texture name="$(parent)LeftDivider" inherits="ZO_GamepadGrid_LeftVertDivider">
@@ -36,7 +36,7 @@
                             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
                             <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
                             <Controls>
-                                <Label name="$(parent)Title" font="ZoFontGamepadBold42" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                <Label name="$(parent)Title" font="ZoFontGamepadBold48" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                     <Anchor point="BOTTOMLEFT" />
                                     <Anchor point="BOTTOMRIGHT" />
                                 </Label>

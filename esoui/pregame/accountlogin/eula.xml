@@ -33,6 +33,21 @@
                     </OnLinkClicked>
                 </Label>
 
+                <Label name="$(parent)NotifyUpdatedText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Container" relativePoint="BOTTOMLEFT" offsetY="15" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Container" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                </Label>
+
+                <Control name="$(parent)ReadTextCheckContainer" resizeToFitDescendents="true" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NotifyUpdatedText" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                    
+                    <Controls>
+                        <Button name="$(parent)CheckBox" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" />
+                        </Button>
+                    </Controls>
+                </Control>
+                
                 <Control name="$(parent)Disagree" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Agree" inherits="ZO_CustomDialogButton"/>
             </Controls>

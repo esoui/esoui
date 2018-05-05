@@ -109,32 +109,14 @@
             </OnInitialized>
         </Button>
 
-        <Button name="CharacterCreateTemplateRow" font="ZoFontGame" horizontalAlignment="LEFT" virtual="true">
-            <Dimensions x="350" y="20"/>
-            <NormalOffset x="15" y="0" />
-            <PressedOffset x="17" y="2" />
-            
-            <FontColors
-                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
-                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
-                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
-                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
-            />
+        <Control name="ZO_PaperdollManipulation" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="328"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-430"/>
 
-            <OnMouseEnter>
-                ZO_ScrollList_MouseEnter(GetControl("ZO_CharacterCreateTemplateList"), self)
-            </OnMouseEnter>
+            <OnInitialized>
+                ZO_PaperdollManipulation_OnInitialized(self)
+            </OnInitialized>
 
-            <OnMouseExit>
-                ZO_ScrollList_MouseExit(GetControl("ZO_CharacterCreateTemplateList"), self)
-            </OnMouseExit>
-
-            <OnMouseUp>
-                ZO_CharacterCreateTemplateEntry_OnClicked(self)
-            </OnMouseUp>
-        </Button>
-
-        <Control name="ZO_PaperdollManipulation" inherits="ZO_PaperdollManipulation_Shared" virtual="true">
             <OnMouseEnter>
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
             </OnMouseEnter>
@@ -144,14 +126,8 @@
             </OnMouseExit>
 
             <OnMouseDown>
-                if(button == MOUSE_BUTTON_INDEX_LEFT) then
-                    CharacterCreateStartMouseSpin()
-                end
+                CharacterCreateStartMouseSpin()
             </OnMouseDown>
-
-            <OnMouseUp>
-                CharacterCreateStopMouseSpin()
-            </OnMouseUp>
 
             <OnMouseWheel>
                 MoveCharacterCameraZoomAmount(delta / zo_abs(delta))

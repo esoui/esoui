@@ -179,3 +179,10 @@ function ZO_CharacterSelect_OnCharacterRenamedCommon(eventCode, characterId, res
         ZO_Dialogs_ShowPlatformDialog("CHARACTER_SELECT_RENAME_CHARACTER_ERROR", { callback = errorCallback }, dialogParams)
     end
 end
+
+function ZO_CharacterSelect_SetChromaColorForCharacterIndex(index)
+    if ZO_RZCHROMA_EFFECTS then
+        local characterData = g_characterDataList[index]
+        ZO_RZCHROMA_EFFECTS:SetAlliance(characterData.alliance)
+    end
+end

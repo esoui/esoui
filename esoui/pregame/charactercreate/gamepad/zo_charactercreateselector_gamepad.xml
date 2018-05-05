@@ -1,8 +1,17 @@
 <GuiXml>
     <Controls>
-        
+
+        <Control name="ZO_CharacterCreateSelectorHighlight_Gamepad" excludeFromResizeToFitExtents="true" hidden="true" virtual="true">
+            <Dimensions x="84" y="84" />
+            <Controls>
+                <Backdrop name="$(parent)Box" inherits="ZO_GamepadWhiteSelectorHighlight" level="2">
+                    <AnchorFill />
+                </Backdrop>
+            </Controls>
+        </Control>
+
         <Control name="ZO_CharacterCreateSelectorSelected_Gamepad" excludeFromResizeToFitExtents="true" hidden="true" virtual="true">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="84" y="84" />
             <Controls>
                 <Backdrop name="$(parent)Box" inherits="ZO_GamepadGreySelectorHighlight" level="1">
                     <AnchorFill />

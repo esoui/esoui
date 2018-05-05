@@ -83,7 +83,8 @@
 
             <Controls>
                 <Control name="$(parent)Credentials" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOMLEFT" offsetX="130" offsetY="50" />
+                    <Anchor point="TOP" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOM" offsetY="-10" />
+                    
                     <Controls>
                         <Backdrop name="$(parent)AccountName" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH"/>
@@ -151,8 +152,8 @@
                 </Control>
 
                 <Label name="$(parent)RelaunchGameLabel" inherits="ZO_LoginMenuEditLabel" text="SI_KEYBOARD_PLEASE_RESTART_GAME" modifyTextType="NONE" horizontalAlignment="CENTER" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOMLEFT" offsetX="130" offsetY="50" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOMRIGHT" offsetX="130" offsetY="50" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Credentials" offsetY="-60" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Credentials" offsetY="-60" />
                 </Label>
 
                 <Button name="$(parent)Login" inherits="ZO_LoginMenuButton" text="SI_LOGIN">
@@ -169,10 +170,10 @@
                 </Button>
 
                 <Control name="$(parent)Announcements" hidden="true">
-                    <Dimensions y="240" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Credentials" relativePoint="BOTTOMLEFT" offsetY="120" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Credentials" relativePoint="BOTTOMRIGHT" offsetY="120" />
-
+                    <Dimensions x="500" y="240" />
+                    <Anchor point="TOP" relativeTo="$(parent)Credentials" relativePoint="BOTTOM" offsetY="120" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)BGMunge" offsetY="15" constrains="Y" />
+                    
                     <Controls>
                         <Label name="$(parent)Title" font="ZoFontWinH3" text="SI_LOGIN_ANNOUNCEMENTS_TITLE" modifyTextType="UPPERCASE">
                             <Anchor point="TOPLEFT" />

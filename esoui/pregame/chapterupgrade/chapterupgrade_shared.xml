@@ -1,0 +1,79 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ChapterUpgrade_Shared_HeaderLabel" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+
+        <Label name="ZO_ChapterUpgrade_Shared_InfoLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" lineSpacing="10" virtual="true" />
+
+        <Control name="ZO_ChapterUpgrade_Shared_InstructionsSection" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Header" inherits="ZO_ChapterUpgrade_Shared_HeaderLabel">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" offsetX="-40"/>
+                        </Label>
+                        <Label name="$(parent)Instructions" inherits="ZO_ChapterUpgrade_Shared_InfoLabel">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ChapterUpgrade_Shared" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Texture name="$(parent)Bg" color="000000">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Image" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <TextureCoords left="0" right="0.8203125" top="0" bottom="0.5126953125"/>
+                    <Anchor point="CENTER" relativeTo="GuiRoot" />
+                </Texture>
+
+                <Texture name="$(parent)Logo" tier="MEDIUM" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Dimensions x="650" y="650"/>
+                    <Anchor point="RIGHT" offsetX="-150" relativePoint="CENTER" offsetY="-30" />
+                    <TextureCoords left="0" right="0.634765" top="0" bottom="0.634765"/>
+                </Texture>
+
+                <Control name="$(parent)TextContainer" resizeToFitDescendents="true">
+                    <Dimensions x="860" />
+                    <DimensionConstraints minY="350" />
+                    <Anchor point="LEFT" relativePoint="CENTER" offsetY="-100" />
+                    <Controls>
+                        <Label name="$(parent)ChapterSummaryHeader" inherits="ZO_ChapterUpgrade_Shared_HeaderLabel">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                        
+                        <Label name="$(parent)ChapterSummary" inherits="ZO_ChapterUpgrade_Shared_InfoLabel">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ChapterSummaryHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                            <Anchor point="RIGHT" constrains="X" />
+                        </Label>
+                        
+                        <Label name="$(parent)RegistrationSummaryHeader" inherits="ZO_ChapterUpgrade_Shared_HeaderLabel" text="SI_CHAPTER_UPGRADE_REGISTRATION_SUMMARY_HEADER">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ChapterSummary" relativePoint="BOTTOMLEFT" offsetY="40" />
+                        </Label>
+                        
+                        <Label name="$(parent)RegistrationSummary" inherits="ZO_ChapterUpgrade_Shared_InfoLabel">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RegistrationSummaryHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                            <Anchor point="RIGHT" constrains="X" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)EnterCodeButton" text="SI_CHAPTER_UPGRADE_ENTER_CODE_BUTTON" modifyTextType="UPPERCASE" >
+                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="60" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TextContainerRegistrationSummary" relativePoint="LEFT" constrains="X" />
+                </Button>
+                
+                <Button name="$(parent)UpgradeButton" text="SI_CHAPTER_UPGRADE_PURCHASE_BUTTON" modifyTextType="UPPERCASE" >
+                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="60" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)EnterCodeButton" relativePoint="RIGHT" offsetX="70" constrains="X" />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

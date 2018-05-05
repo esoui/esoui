@@ -75,10 +75,6 @@ function ZO_GameStartup_Gamepad:Initialize(control)
                 end
             end)
 
-    local function ReturnToIIS()
-        PregameStateManager_SetState("Disconnect")
-    end
-
     ZO_Dialogs_RegisterCustomDialog("FREE_TRIAL_INACTIVE", {
         canQueue = true,
         gamepadInfo =
@@ -95,7 +91,7 @@ function ZO_GameStartup_Gamepad:Initialize(control)
         },
         noChoiceCallback = function()
                 if IsConsoleUI() then
-                    ReturnToIIS()
+                    ZO_Disconnect()
                 end
             end,
         buttons = 
@@ -106,7 +102,7 @@ function ZO_GameStartup_Gamepad:Initialize(control)
                 callback = function()
                         if IsConsoleUI() then
                            ShowConsoleESOGameClientUI()
-                           ReturnToIIS()
+                           ZO_Disconnect()
                         end
                     end,
             },
@@ -115,7 +111,7 @@ function ZO_GameStartup_Gamepad:Initialize(control)
                 keybind = "DIALOG_NEGATIVE",
                 callback = function()
                         if IsConsoleUI() then
-                            ReturnToIIS()
+                            ZO_Disconnect()
                         end
                     end,
             },

@@ -78,6 +78,7 @@ local function DoCharacterSelection(index)
     SetCharacterManagerMode(CHARACTER_MODE_SELECTION)
     SetSuppressCharacterChanges(false)
     SelectCharacterToView(index)
+    ZO_CharacterSelect_SetChromaColorForCharacterIndex(index)
 end
 
 local SetupCharacterList
@@ -265,17 +266,9 @@ local function ContextFilter(callback)
     end
 end
 
-local function OnPregameCharacterListReceived(characterCount, previousCharacterCount)
-    if (characterCount > 0) then
-        if PregameStateManager_GetCurrentState() ~= "CharacterSelect" then
-            PregameStateManager_SetState("CharacterSelect")
-        end
-    end
-end
+ZO_CHARACTER_SELECT_ENTRY_HEIGHT = 90
 
 function ZO_CharacterSelect_Initialize(self)
-    ZO_CharacterSelectRealmName:SetText("")
-
     local function OnCharacterSelectionChanged(previouslySelected, selected)
         SelectedCharacterChanged(self, previouslySelected, selected)
     end
@@ -293,34 +286,28 @@ function ZO_CharacterSelect_Initialize(self)
 
     local function OnPregameFullyLoaded()
         if ZO_CharacterSelect_CanShowAdditionalSlotsInfo() then
-            local label = ZO_CharacterSelectExtraCharacterSlots
-            local labelHeight = label:GetHeight()
-            label:SetText(zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, ZO_CharacterSelect_GetAdditionalSlotsRemaining()))
-            
-            -- The label won't update automatically, but we need to recommit the scroll list once it does to ensure that all characters in the
-            -- list can be selected.
-            local oldUpdateFn = label:GetHandler("OnUpdate")
-            label:SetHandler("OnUpdate", function(...)
-                    if oldUpdateFn then
-                        oldUpdateFn(...)
-                    end
+            ZO_CharacterSelectExtraCharacterSlots:SetHidden(false)
+            ZO_CharacterSelectExtraCharacterSlots:SetText(zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, ZO_CharacterSelect_GetAdditionalSlotsRemaining()))
+            ZO_CharacterSelectCharacterSlots:SetAnchor(TOP, nil, TOP, 0, 10)
+        else
+            ZO_CharacterSelectExtraCharacterSlots:SetHidden(true)
+            ZO_CharacterSelectCharacterSlots:SetAnchor(TOP, nil, TOP, 0, 31)
+        end
 
-                    if label:GetHeight() ~= labelHeight then
-                        -- Recommit and recenter scroll list
-                        ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
-                        local characterData = ZO_CharacterSelect_GetBestSelectionData()
-                        if characterData then
-                            ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
-                        end
+        local chapterUpgradeId = GetCurrentChapterUpgradeId()
+        if chapterUpgradeId == 0 or IsChapterOwned(chapterUpgradeId) then
+            ZO_CharacterSelectChapterUpgrade:SetHidden(true)
+        else
+            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
+            ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId)))
+            ZO_CharacterSelectChapterUpgradeImage:SetTexture(GetCurrentChapterMediumLogoFileIndex())
 
-                        label:SetHandler("OnUpdate", oldUpdateFn)
-                    end
-                end)
+            ZO_CharacterSelectChapterUpgrade:SetHidden(false)
         end
     end
 
     local list = ZO_CharacterSelectScrollList
-    ZO_ScrollList_AddDataType(list, CHARACTER_DATA, "ZO_CharacterEntry", 80, SetupCharacterEntry)
+    ZO_ScrollList_AddDataType(list, CHARACTER_DATA, "ZO_CharacterEntry", ZO_CHARACTER_SELECT_ENTRY_HEIGHT, SetupCharacterEntry)
     ZO_ScrollList_EnableSelection(list, "ZO_TallListHighlight", OnCharacterSelectionChanged)
     ZO_ScrollList_EnableHighlight(list, "ZO_TallListHighlight")
     ZO_ScrollList_SetDeselectOnReselect(list, false)
@@ -333,7 +320,6 @@ function ZO_CharacterSelect_Initialize(self)
     self:RegisterForEvent(EVENT_CHARACTER_RENAME_RESULT, ContextFilter(OnCharacterRenamed))
 
     CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", ContextFilter(OnCharacterConstructionReady))
-    CALLBACK_MANAGER:RegisterCallback("PregameCharacterListReceived", ContextFilter(OnPregameCharacterListReceived))
     CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", ContextFilter(OnPregameFullyLoaded))
 
     CHARACTER_SELECT_FRAGMENT = ZO_FadeSceneFragment:New(self, 300)
@@ -447,6 +433,17 @@ function ZO_CharacterSelectDelete_OnMouseEnter(control)
 end
 
 function ZO_CharacterSelectDelete_OnMouseExit()
+    ClearTooltip(InformationTooltip)
+end
+
+function ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseEnter(control)
+    local platformServiceType = GetPlatformServiceType()
+    local upgradeMethodsStringId = ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[platformServiceType] and SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_OR_CODE or SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_ONLY
+    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 5, 0, BOTTOMRIGHT)
+    InformationTooltip:AddLine(GetString(upgradeMethodsStringId), "", ZO_NORMAL_TEXT:UnpackRGB())
+end
+
+function ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseExit()
     ClearTooltip(InformationTooltip)
 end
 

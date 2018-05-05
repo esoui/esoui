@@ -17,14 +17,19 @@
                     </Controls>
                 </Texture>
 
-                <Texture name="$(parent)ESOLogo" textureFile="EsoUI/Art/Login/login_logo_left.dds" resizeToFitFile="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGMunge" offsetX="-34" offsetY="70" />
+                <Control name="$(parent)ESOLogo" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)BGMunge" relativePoint="TOP" offsetX="90" offsetY="385" />
+                    
                     <Controls>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/Login/login_logo_left.dds" resizeToFitFile="true">
+                            <Anchor point="BOTTOMLEFT" />
+                        </Texture>
+
                         <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_logo_right.dds" resizeToFitFile="true">
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Left" relativePoint="BOTTOMRIGHT" />
                         </Texture>
                     </Controls>
-                </Texture>
+                </Control>
             </Controls>
         </Control>
 
