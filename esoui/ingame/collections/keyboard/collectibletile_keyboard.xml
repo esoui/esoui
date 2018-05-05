@@ -1,0 +1,69 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_CollectibleTile_Keyboard_MouseOverIconAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.23"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Label name="ZO_CollectibleTileDefaultLabel" font="ZoFontWindowSubtitle" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true" />
+        
+        <Control name="ZO_CollectibleTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y" />
+            
+            <OnInitialized>
+                ZO_CollectibleTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true" level="3" hidden="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions x="ZO_COLLECTIBLE_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_COLLECTIBLE_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+                            <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
+                        </Texture>
+                        
+                        <Label name="$(parent)Title" override="true" inherits="ZO_CollectibleTileDefaultLabel">
+                            <Dimensions y="54" />
+                            <Anchor point="BOTTOMLEFT"  offsetX="7" offsetY="-2" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-2" />
+                        </Label>
+
+                        <Texture name="$(parent)Status" inherits="ZO_MultiIcon" level="3">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                        </Texture>
+
+                        <Texture name="$(parent)CornerTag" level="3" textureFile="EsoUI/Art/Collections/collections_cornerTag_fromStore.dds" hidden="true">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Texture>
+
+                        <Texture name="$(parent)CooldownIconDesaturated" level="4" desaturation="1" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" hidden="true">
+                            
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" />
+                        </Texture>
+
+                        <Texture name="$(parent)CooldownIcon" level="5" hidden="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)CooldownIconDesaturated" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CooldownIconDesaturated" />
+                        </Texture>
+
+                        <Texture name="$(parent)CooldownEdge" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_QuickslotFill.dds" level="6" hidden="true">
+                            <Dimensions y="12" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CooldownIcon" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CooldownIcon" />
+                        </Texture>
+
+                        <Label name="$(parent)CooldownTime" inherits="ZO_CollectibleTileDefaultLabel" hidden="true">
+                            <Anchor point="TOPLEFT"  offsetX="4" offsetY="4" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

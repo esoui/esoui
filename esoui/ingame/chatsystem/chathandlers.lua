@@ -24,18 +24,6 @@ local function GetCustomerServiceIcon(isCustomerServiceAccount)
 end
 
 local ChatEventFormatters = {
-    [EVENT_SERVER_SHUTDOWN_INFO] = function(action, timeRemaining)
-        if action == SERVER_SHUTDOWN_CANCELED then
-            return GetString(SI_CHAT_SHUTDOWN_CANCEL)
-        elseif action == SERVER_SHUTDOWN_START then
-            return zo_strformat(SI_CHAT_SHUTDOWN_START, FormatShutdownTime(timeRemaining))
-        elseif action == SERVER_SHUTDOWN_RESCHEDULED then
-            return zo_strformat(SI_CHAT_SHUTDOWN_RESCHEDULE, FormatShutdownTime(timeRemaining))
-        elseif action == SERVER_SHUTDOWN_UPDATE then
-            return FormatShutdownTime(timeRemaining)
-        end
-    end,
-
     [EVENT_CHAT_MESSAGE_CHANNEL] = function(messageType, fromName, text, isFromCustomerService, fromDisplayName)
         local channelInfo = ChannelInfo[messageType]
 
@@ -132,24 +120,6 @@ local ChatEventFormatters = {
         end
     end,
 
-    [EVENT_STUCK_ERROR_ON_COOLDOWN] = function()
-        local cooldownText = ZO_FormatTime(GetStuckCooldown(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-        local cooldownRemainingText = ZO_FormatTimeMilliseconds(GetTimeUntilStuckAvailable(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-        return zo_strformat(SI_STUCK_ERROR_ON_COOLDOWN, cooldownText, cooldownRemainingText)
-    end,
-
-    [EVENT_STUCK_ERROR_ALREADY_IN_PROGRESS] = function()
-        return GetString(SI_STUCK_ERROR_ALREADY_IN_PROGRESS)
-    end,
-
-    [EVENT_STUCK_ERROR_IN_COMBAT] = function()
-        return GetString(SI_STUCK_ERROR_IN_COMBAT)
-    end,
-
-    [EVENT_STUCK_ERROR_INVALID_LOCATION] = function()
-        return GetString(SI_INVALID_STUCK_LOCATION)
-    end,
-
     [EVENT_TRIAL_FEATURE_RESTRICTED] = function(restrictionType)
         if ZO_ChatSystem_GetTrialEventMappings()[restrictionType] then
             return GetString("SI_TRIALACCOUNTRESTRICTIONTYPE", restrictionType)
@@ -160,6 +130,10 @@ local ChatEventFormatters = {
         if reason == GROUP_LEAVE_REASON_KICKED and isLocalPlayer and actionRequiredVote then
             return GetString(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
         end
+    end,
+
+    [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = function()
+        return GetString(SI_BATTLEGROUND_INACTIVITY_WARNING)
     end,
 }
 

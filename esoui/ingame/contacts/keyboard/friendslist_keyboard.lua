@@ -103,9 +103,9 @@ function ZO_KeyboardFriendsListManager:InitializeKeybindDescriptors()
             end,
 
             visible = function()
-                if(self.mouseOverRow) then
+                if IsGroupModificationAvailable() and self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if(data.hasCharacter and data.online) then                        
+                    if data.hasCharacter and data.online then
                         return true
                     end
                 end
@@ -215,6 +215,22 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
 
         local data = ZO_ScrollList_GetData(control)
         if data then
+            if(data.hasCharacter and data.online) then
+                if IsChatSystemAvailableForCurrentPlatform() then
+                    AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName) end)
+                end
+                if IsGroupModificationAvailable() then
+                    AddMenuItem(GetString(SI_SOCIAL_MENU_INVITE), function() 
+                        local NOT_SENT_FROM_CHAT = false
+                        local DISPLAY_INVITED_MESSAGE = true
+                        TryGroupInviteByName(data.characterName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) 
+                    end)
+                end
+                AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToFriend(data.displayName) end)
+            end
+
+            AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
+
             AddMenuItem(GetString(SI_SOCIAL_MENU_EDIT_NOTE),    function()
                                                                     ZO_Dialogs_ShowDialog("EDIT_NOTE", {displayName = data.displayName, note = data.note, changedCallback = FRIENDS_LIST_MANAGER:GetNoteEditedFunction()})
                                                                 end)
@@ -226,17 +242,7 @@ function ZO_KeyboardFriendsListManager:FriendsListRow_OnMouseUp(control, button,
                 end
             end
             AddMenuItem(GetString(SI_SOCIAL_MENU_SEND_MAIL), SendMailCallback)
-            if(data.hasCharacter and data.online) then
-                if IsChatSystemAvailableForCurrentPlatform() then
-                    AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName) end)
-                end
-                AddMenuItem(GetString(SI_SOCIAL_MENU_INVITE), function() 
-                    local NOT_SENT_FROM_CHAT = false
-                    local DISPLAY_INVITED_MESSAGE = true
-                    TryGroupInviteByName(data.characterName, NOT_SENT_FROM_CHAT, DISPLAY_INVITED_MESSAGE) 
-                end)
-                AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToFriend(data.displayName) end)
-            end
+            
             AddMenuItem(GetString(SI_FRIEND_MENU_REMOVE_FRIEND), function() ZO_Dialogs_ShowDialog("CONFIRM_REMOVE_FRIEND", {displayName = data.displayName}, {mainTextParams = {data.displayName}}) end)
             AddMenuItem(GetString(SI_FRIEND_MENU_IGNORE), function() AddIgnore(data.displayName) end)
         

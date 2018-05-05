@@ -249,8 +249,8 @@ function Compass:InitializeQuestPins()
 
     self:PerformFullAreaQuestUpdate()
 
-    QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", function(assisted, unassisted) self:PerformFullAreaQuestUpdate() end)
-    QUEST_TRACKER:RegisterCallback("QuestTrackerRefreshedMapPins", function() self.refreshingJournalIndex = true self:PerformFullAreaQuestUpdate() self.refreshingJournalIndex = false end)
+    C_MAP_HANDLERS:RegisterCallback("RefreshedSingleQuestPins", function(questIndex) self:PerformFullAreaQuestUpdate() end)
+    C_MAP_HANDLERS:RegisterCallback("RefreshedAllQuestPins", function() self.refreshingJournalIndex = true self:PerformFullAreaQuestUpdate() self.refreshingJournalIndex = false end)
 end
 
 function Compass:SetCardinalDirections(font)
@@ -315,7 +315,7 @@ end
 
 function Compass:TryPlayingAnimationOnSinglePoi(zoneIndex, poiIndex, pinType)
     local animation, key = self.poiAnimationPool:AcquireObject()
-    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP, CT_COMPASS, pinType, zoneIndex - 1, poiIndex - 1) then
+    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP_ONLY, CT_COMPASS, pinType, zoneIndex - 1, poiIndex - 1) then
         self.poiAnimationPool:ReleaseObject(key)
     else
         animation.key = key
@@ -331,7 +331,7 @@ local IGNORE_BREADCRUMBS = true
 function Compass:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, pinType)
     local animation, key = self.areaAnimationPool:AcquireObject()
     self.currentlyAnimatingAreaPinType = pinType
-    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP, CT_COMPASS, pinType, journalIndex - 1, stepIndex - 1, conditionIndex - 1, nil, IGNORE_BREADCRUMBS) then
+    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP_ONLY, CT_COMPASS, pinType, journalIndex - 1, stepIndex - 1, conditionIndex - 1, nil, IGNORE_BREADCRUMBS) then
         self.areaAnimationPool:ReleaseObject(key)
         self.currentlyAnimatingAreaPinType = nil
         return false
@@ -466,6 +466,8 @@ do
         [MAP_PIN_TYPE_POI_COMPLETE] = SI_COMPASS_LOCATION_NAME_FORMAT,
     }
 
+    ZO_SetCachedStrFormatterOnlyStoreOne(SI_COMPASS_LOCATION_NAME_FORMAT)
+
     local TIME_BETWEEN_LABEL_UPDATES_MS = 100
 
     local bestPinIndices = {}
@@ -523,7 +525,7 @@ do
                     bestPinDescription = ZO_FormatUserFacingCharacterOrDisplayName(bestPinDescription)
                 end
                 if(formatId) then
-                    self.centerOverPinLabel:SetText(zo_strformat(formatId, bestPinDescription))
+                    self.centerOverPinLabel:SetText(ZO_CachedStrFormat(formatId, bestPinDescription))
                 else
                     self.centerOverPinLabel:SetText(bestPinDescription)
                 end

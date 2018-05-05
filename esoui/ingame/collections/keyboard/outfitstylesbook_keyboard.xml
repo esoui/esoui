@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_OutfitStylesBook_Keyboard_TopLevel" inherits="ZO_RestyleCommonTemplate_Keyboard" hidden="true">
+            <OnInitialized>
+                ZO_OutfitStylesBook_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Search" override="true">
+                    <Controls>
+                        <EditBox name="$(parent)Box" override="true">
+                            <OnTextChanged>
+                                ZO_OutfitStylesBook_Keyboard_OnSearchTextChanged(self)
+                            </OnTextChanged>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)InfoBar" override="true" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

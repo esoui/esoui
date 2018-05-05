@@ -3,7 +3,7 @@
 --
 
 ZO_COLLECTIONS_SYSTEM_NAME = "collections"
-ZO_COLLECTIONS_CATEGORY_DLC_INDEX = 1
+ZO_COLLECTIONS_SEARCH_ROOT = "root"
 
 local CollectionsBook_Singleton = ZO_CallbackObject:Subclass()
 
@@ -14,166 +14,176 @@ function CollectionsBook_Singleton:New(...)
 end
 
 function CollectionsBook_Singleton:Initialize()
-    self.dlcIdToQuestIsPending = {}
+    self.ownedHouses = {}
+    self.searchString = ""
+    self.searchResults = {}
+    self.searchSpecializationFilters = {}
+    self.searchChecksHidden = false
 
+    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLES_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
-    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) self:OnCollectibleUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTION_UPDATED, function(eventId, ...) self:OnCollectionUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLES_UPDATED, function(eventId, ...) self:OnCollectiblesUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_NOTIFICATION_REMOVED, function(eventId, ...) self:OnCollectionNotificationRemoved(...) end)
-    EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_NEW_STATUS_CLEARED, function(eventId, ...) self:OnCollectibleNewStatusRemoved(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
 
-    self:RefreshDLCStates()
+    local function OnCollectionUpdated()
+        self:RefreshOwnedHouses()
+        -- When the data is getting rebuilt, the indicies can change so our old search results are no longer any good
+        if self:GetSearchResults() then
+            local currentSearch = self.searchString
+            ZO_ClearTable(self.searchResults)
+            self:SetSearchString("")
+            self:SetSearchString(currentSearch)
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+
+    self:RefreshOwnedHouses()
+end
+
+function CollectionsBook_Singleton:SetSearchString(searchString)
+    self.searchString = searchString or ""
+    StartCollectibleSearch(self.searchString)
+end
+
+function CollectionsBook_Singleton:SetSearchCategorySpecializationFilters(...)
+    local argCount = select("#", ...)
+    if argCount == NonContiguousCount(self.searchSpecializationFilters) then
+        local noChange = true
+        for i = 1, argCount do
+            local categorySpecialization = select(i, ...)
+            if not self.searchSpecializationFilters[categorySpecialization] then
+                noChange = false
+                break
+            end
+        end
+
+        if noChange then
+            return
+        end
+    end
+
+    ZO_ClearTable(self.searchSpecializationFilters)
+    for i = 1, argCount do
+        local categorySpecialization = select(i, ...)
+        self.searchSpecializationFilters[categorySpecialization] = true
+    end
+    self:UpdateSearchResults()
+end
+
+function CollectionsBook_Singleton:SetSearchChecksHidden(searchChecksHidden)
+    self.searchChecksHidden = searchChecksHidden
+end
+
+function CollectionsBook_Singleton:UpdateSearchResults()
+    ZO_ClearTable(self.searchResults)
+
+    local noSpecializationFilters = NonContiguousCount(self.searchSpecializationFilters) == 0
+    local searchResults = self.searchResults
+    local searchChecksHidden = self.searchChecksHidden
+    for i = 1, GetNumCollectiblesSearchResults() do
+        local categoryIndex, subcategoryIndex, collectibleIndex = GetCollectiblesSearchResult(i)
+        local categorySpecialization = GetCollectibleCategorySpecialization(categoryIndex)
+        if noSpecializationFilters or self.searchSpecializationFilters[categorySpecialization] then
+            local canShowCollectible = true
+            if searchChecksHidden then
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataByIndicies(categoryIndex, subcategoryIndex, collectibleIndex)
+                if collectibleData:IsHiddenFromCollection() then
+                    canShowCollectible = false
+                end
+            end
+
+            if canShowCollectible then
+                if not searchResults[categoryIndex] then
+                    searchResults[categoryIndex] = {}
+                end
+                local effectiveSubCategory = subcategoryIndex or ZO_COLLECTIONS_SEARCH_ROOT
+                if not searchResults[categoryIndex][effectiveSubCategory] then
+                    searchResults[categoryIndex][effectiveSubCategory] = {}
+                end
+
+                searchResults[categoryIndex][effectiveSubCategory][collectibleIndex] = true
+            end
+        end
+    end
+    self:FireCallbacks("UpdateSearchResults")
+end
+
+function CollectionsBook_Singleton:GetSearchResults()
+    if zo_strlen(self.searchString) > 1 then
+        return self.searchResults
+    end
+    return nil
 end
 
 function CollectionsBook_Singleton:BrowseToCollectible(...)
     SYSTEMS:GetObject(ZO_COLLECTIONS_SYSTEM_NAME):BrowseToCollectible(...)
 end
 
-function CollectionsBook_Singleton:RefreshDLCStateById(collectibleId)
-    local isActive, categoryType, _, isPlaceholder = select(7, GetCollectibleInfo(collectibleId))
-    if not isPlaceholder and categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
-        local unlockState = GetCollectibleUnlockStateById(collectibleId)
-        self.dlcIdToQuestIsPending[collectibleId] = (unlockState ~= COLLECTIBLE_UNLOCK_STATE_LOCKED and not isActive)
+local function IsHouseCollectible(categoryType)
+    return categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE
+end
+
+function CollectionsBook_Singleton:RefreshOwnedHouses()
+    ZO_ClearTable(self.ownedHouses)
+    local ownedHouses = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsHousingCategory }, { ZO_CollectibleData.IsUnlocked })
+    for _, collectibleData in ipairs(ownedHouses) do
+        self.ownedHouses[collectibleData:GetId()] = { houseId = collectibleData:GetReferenceId() }
     end
 end
 
-function CollectionsBook_Singleton:RefreshDLCStates()
-    ZO_ClearTable(self.dlcIdToQuestIsPending)
-    for i = 1, GetTotalCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) do
-        local collectibleId = GetCollectibleIdFromType(COLLECTIBLE_CATEGORY_TYPE_DLC, i)
-        self:RefreshDLCStateById(collectibleId)
+function CollectionsBook_Singleton:RefreshOwnedHouseById(collectibleId, lockStateChange)
+    if lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData:IsHouse() then
+            if lockStateChange == ZO_COLLECTIBLE_LOCK_STATE_CHANGE.LOCKED then
+                self.ownedHouses[collectibleId] = nil
+            else
+                self.ownedHouses[collectibleId] = 
+                {
+                    houseId = collectibleData:GetReferenceId(),
+                    showPermissionsDialogOnEnter = true,
+                }
+            end
+        end
     end
 end
 
-function CollectionsBook_Singleton:OnCollectibleUpdated(collectibleId, justUnlocked)
-    self:RefreshDLCStateById(collectibleId)
-    self:FireCallbacks("OnCollectibleUpdated", collectibleId, justUnlocked)
-end
-
-function CollectionsBook_Singleton:OnCollectionUpdated(...)
-    self:RefreshDLCStates()
-    self:FireCallbacks("OnCollectionUpdated", ...)
-end
-
-function CollectionsBook_Singleton:OnCollectiblesUpdated(...)
-    self:RefreshDLCStates()
-    self:FireCallbacks("OnCollectiblesUpdated", ...)
-end
-
-function CollectionsBook_Singleton:OnCollectionNotificationRemoved(...)
-    self:FireCallbacks("OnCollectionNotificationRemoved", ...)
-end
-
-function CollectionsBook_Singleton:OnCollectibleNewStatusRemoved(...)
-    self:FireCallbacks("OnCollectibleNewStatusRemoved", ...)
+function CollectionsBook_Singleton:OnCollectibleUpdated(collectibleId, lockStateChange)
+    self:RefreshOwnedHouseById(collectibleId, lockStateChange)
 end
 
 function CollectionsBook_Singleton:OnUpdateCooldowns(...)
     self:FireCallbacks("OnUpdateCooldowns", ...)
 end
 
-function CollectionsBook_Singleton:IsCategoryIndexDLC(categoryIndex)
-    return categoryIndex == ZO_COLLECTIONS_CATEGORY_DLC_INDEX
+function CollectionsBook_Singleton:GetOwnedHouses()
+    return self.ownedHouses
 end
 
-function CollectionsBook_Singleton:IsDLCIdQuestPending(dlcId)
-    return self.dlcIdToQuestIsPending[dlcId]
+function CollectionsBook_Singleton:DoesHousePermissionsDialogNeedToBeShownForCollectible(collectibleId)
+    return self.ownedHouses[collectibleId] and self.ownedHouses[collectibleId].showPermissionsDialogOnEnter
 end
 
-function CollectionsBook_Singleton:DoesAnyDLCHaveQuestPending()
-    for _, isPending in pairs(self.dlcIdToQuestIsPending) do
-        if isPending then
-            return true
-        end
+function CollectionsBook_Singleton:MarkHouseCollectiblePermissionLoadDialogShown(collectibleId)
+    if self.ownedHouses[collectibleId] then
+        self.ownedHouses[collectibleId].showPermissionsDialogOnEnter = false
     end
-    return false
 end
 
-function CollectionsBook_Singleton.DoesCollectibleListHaveVisibleCollectible(...)
-    for i = 1, select("#", ...) do
-        local id = select(i, ...)
-
-        if DoesCollectibleHaveVisibleAppearance(id) then
-            local isActive = select(7, GetCollectibleInfo(id))
-            if isActive and not WouldCollectibleBeHidden(id) then
-                return true
-            end
-        end
-    end
-
-    return false
-end
-
-function CollectionsBook_Singleton.DoesCollectibleListHaveNewCollectible(...)
-    for i = 1, select("#", ...) do
-        local id = select(i, ...)
-
-        if IsCollectibleNew(id) then
-            return true
-        end
-    end
-
-    return false
-end
-
-function CollectionsBook_Singleton.GetCategoryCollectibleIds(categoryIndex, subCategoryIndex, index, ...)
-    if index >= 1 then
-        local id = GetCollectibleId(categoryIndex, subCategoryIndex, index)
-        index = index - 1
-        return CollectionsBook_Singleton.GetCategoryCollectibleIds(categoryIndex, subCategoryIndex, index, id, ...)
-    end
-    return ...
-end
-
-function CollectionsBook_Singleton.DoesCategoryHaveAnyNewCollectibles(categoryIndex, subcategoryIndex, getCollectiblesFunction)
-    if getCollectiblesFunction == nil then
-        getCollectiblesFunction = CollectionsBook_Singleton.GetCategoryCollectibleIds
-    end
-
-    if subcategoryIndex == nil then
-        local numSubCategories, numCollectibles, unlockedCollectibles =  select(2, GetCollectibleCategoryInfo(categoryIndex))
-        local hasAnyNew = COLLECTIONS_BOOK_SINGLETON.DoesCollectibleListHaveNewCollectible(getCollectiblesFunction(categoryIndex, subcategoryIndex, numCollectibles))
-        if hasAnyNew then
-            return true
-        end
-        for i = 1, numSubCategories do
-            if CollectionsBook_Singleton.DoesCategoryHaveAnyNewCollectibles(categoryIndex, i, getCollectiblesFunction) then
-                return true
-            end
-        end
+function ZO_UpdateCollectibleEntryDataIconVisuals(entryData)
+    local locked = entryData:IsLocked()
+    if locked or entryData:IsBlocked() then
+        entryData:SetIconDesaturation(1)
     else
-        local numCollectibles = select(2, GetCollectibleSubCategoryInfo(categoryIndex, subcategoryIndex))
-        return COLLECTIONS_BOOK_SINGLETON.DoesCollectibleListHaveNewCollectible(getCollectiblesFunction(categoryIndex, subcategoryIndex, numCollectibles))
+        entryData:SetIconDesaturation(0)
     end
 
-    return false
-end
-
-do
-    local ANY_SUBCATEGORY = nil
-    function CollectionsBook_Singleton.HasAnyNewCollectibles(getCollectiblesFunction)
-        if getCollectiblesFunction == nil then
-            getCollectiblesFunction = CollectionsBook_Singleton.GetCategoryCollectibleIds
-        end
-        local numCategories = GetNumCollectibleCategories()
-
-        for categoryIndex = 1, numCategories do
-            if CollectionsBook_Singleton.DoesCategoryHaveAnyNewCollectibles(categoryIndex, ANY_SUBCATEGORY, getCollectiblesFunction) then
-                return true
-            end
-        end
-
-        return false
+    if locked then
+        entryData:SetIconSampleProcessingWeightTable(ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
+    else
+        entryData:SetIconSampleProcessingWeightTable(ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
     end
-end
-
-function ZO_GetCollectibleCategoryAndName(collectibleId)
-    local categoryIndex = GetCategoryInfoFromCollectibleId(collectibleId)
-    local categoryName = GetCollectibleCategoryInfo(categoryIndex)
-    local collectibleName = GetCollectibleName(collectibleId)
-    return categoryName, collectibleName
 end
 
 COLLECTIONS_BOOK_SINGLETON = CollectionsBook_Singleton:New()

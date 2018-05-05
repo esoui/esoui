@@ -108,7 +108,8 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
     if slotId == EQUIP_SLOT_POISON or slotId == EQUIP_SLOT_BACKUP_POISON then
         slotControl.stackCount = select(2, GetItemInfo(BAG_WORN, slotId))
         if (slotControl.stackCount > 1) then
-            stackCountLabel:SetText(ZO_AbbreviateNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES))
+            local USE_LOWERCASE_NUMBER_SUFFIXES = false
+            stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)))
         else
             stackCountLabel:SetText("")
         end
@@ -117,16 +118,18 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
         stackCountLabel:SetText("")
     end
 
-    if(not disabled and copyFromLinkedFn) then
-        iconControl:SetDesaturation(0)
-        iconControl:SetColor(1, 0, 0, .5)
-    else
-        iconControl:SetColor(1, 1, 1, 1)
-
-        if(not disabled and locked) then
-            iconControl:SetDesaturation(1)
-        else
+    if not g_isReadOnly then
+        if(not disabled and copyFromLinkedFn) then
             iconControl:SetDesaturation(0)
+            iconControl:SetColor(1, 0, 0, .5)
+        else
+            iconControl:SetColor(1, 1, 1, 1)
+
+            if(not disabled and locked) then
+                iconControl:SetDesaturation(1)
+            else
+                iconControl:SetDesaturation(0)
+            end
         end
     end
 end
@@ -262,7 +265,15 @@ end
 local function OnReadOnlyStateChanged(readOnly)
     for equipSlot, slotControl in pairs(slots) do
         RestoreMouseOverTexture(slotControl)
-        ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, nil, readOnly)
+
+        --Make sure slots with a condition on them meet that condition.
+        local linkData = heldSlotLinkage[equipSlot]
+        local meetsRequirements = nil
+        if linkData and linkData.pullFromConditionFn then
+            meetsRequirements = not linkData.pullFromConditionFn()
+        end
+
+        ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, meetsRequirements, readOnly)
     end
 end
 

@@ -1,0 +1,96 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ChapterUpgrade_Gamepad_RewardsEntryHeader" inherits="ZO_ChapterUpgrade_Shared_RewardsEntryHeader" virtual="true">
+            <Dimensions y="ZO_CHAPTER_UPGRADE_GAMEPAD_REWARD_ENTRY_HEADER_HEIGHT" />
+            
+            <Controls>
+                <Label name="$(parent)Descriptor" override="true" font="ZoFontGamepadBold22" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ChapterUpgrade_Gamepad_RewardsEditionEntryHeader" inherits="ZO_ChapterUpgrade_Shared_RewardsEditionEntryHeader" virtual="true">
+            <Dimensions y="ZO_CHAPTER_UPGRADE_GAMEPAD_REWARD_ENTRY_HEADER_HEIGHT" />
+            
+            <Controls>
+                <Label name="$(parent)Descriptor" override="true" font="ZoFontGamepadBold22" />
+                
+                <Label name="$(parent)CollectorsLabel" override="true" font="ZoFontGamepadBold22">
+                    <Dimensions x="150" />
+                </Label>
+
+                <Label name="$(parent)StandardLabel" override="true" font="ZoFontGamepadBold22">
+                    <Dimensions x="150" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ChapterUpgrade_Gamepad_RewardsEntry" inherits="ZO_ChapterUpgrade_Shared_RewardsEntry" virtual="true">
+            <Dimensions y="ZO_CHAPTER_UPGRADE_GAMEPAD_REWARD_ENTRY_HEIGHT" />
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="64" y="64" />
+                </Texture>
+
+                <Texture name="$(parent)CollectorsCheckMark" override="true">
+                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="-75" />
+                </Texture>
+
+                <Texture name="$(parent)StandardCheckMark" override="true" >
+                    <Anchor point="CENTER" relativeTo="$(parent)CollectorsCheckMark" offsetX="-160" />
+                </Texture>
+
+                <Label name="$(parent)DisplayName" override="true" font="ZoFontGamepad34">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)StandardCheckMark" relativePoint="CENTER" offsetX="-85" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_ChapterUpgrade_GamepadTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_ChapterUpgrade_Gamepad_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)Contents" inherits="ZO_ChapterUpgradePane_SharedTemplate ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Texture name="$(parent)Background" override="true">
+                                    <Dimensions y="256" />
+                                    <Controls>
+                                        <!-- Border on top of the OverlayGradient -->
+                                        <Backdrop name="$(parent)Border" override="true" inherits="ZO_GamepadGreyOutlineThin" level="3">
+                                            <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
+                                            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
+                                        </Backdrop>
+                                    </Controls>
+                                </Texture>
+
+                                <Label name="$(parent)Title" override="true" font="ZoFontGamepad42" />
+
+                                <Label name="$(parent)PurchaseState" override="true" font="ZoFontGamepadBold27" />
+
+                                <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad" font="ZoFontGamepad42" />
+
+                                <Control name="$(parent)Release" override="true">
+                                    <Controls>
+                                        <Label name="$(parent)Date" override="true" font="ZoFontGamepad34" />
+
+                                        <Label name="$(parent)Header" override="true" font="ZoFontGamepadBold25" />
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Anchor point="BOTTOMRIGHT" offsetY="-10" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

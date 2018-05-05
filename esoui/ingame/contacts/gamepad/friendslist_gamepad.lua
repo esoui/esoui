@@ -93,14 +93,16 @@ end
 
 function FriendsList_Gamepad:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption, ZO_SocialOptionsDialogGamepad.ShouldAddWhisperOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOptionAndIsSelectedDataLoggedIn)
 
     local function BuildTravelToFriendPlayerOption()
         return self:BuildTravelToPlayerOption(JumpToFriend)
     end
     self:AddOptionTemplate(groupId, BuildTravelToFriendPlayerOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
+
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildVisitPlayerHouseOption)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGameOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)

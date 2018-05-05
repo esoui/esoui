@@ -64,16 +64,16 @@
             <Anchor point="TOP" offsetY="40" />
 
             <Controls>
-                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Compass/compass.dds">
+                <Texture name="$(parent)Center" textureFile="$(COMPASS_PATH)compass.dds">
                     <TextureCoords left="0.78125" right="1" top="0" bottom="0.609375" />
                 </Texture>
 
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Compass/compass.dds">
+                <Texture name="$(parent)Left" textureFile="$(COMPASS_PATH)compass.dds">
                     <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
                     <TextureCoords left="0" right="0.28125" top="0" bottom="0.609375" />
                 </Texture>
 
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Compass/compass.dds">
+                <Texture name="$(parent)Right" textureFile="$(COMPASS_PATH)compass.dds">
                     <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
                     <TextureCoords left="0.28125" right="0" top="0" bottom="0.609375" />
                 </Texture>
@@ -85,16 +85,16 @@
             <Anchor point="TOP" offsetY="58" />
 
             <Controls>
-                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                <Texture name="$(parent)Center" textureFile="$(COMPASS_PATH)Gamepad/gp_compass.dds">
                     <TextureCoords left="0.78125" right="1" top="0" bottom="0.75" />
                 </Texture>
 
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                <Texture name="$(parent)Left" textureFile="$(COMPASS_PATH)Gamepad/gp_compass.dds">
                     <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
                     <TextureCoords left="0" right="0.4375" top="0" bottom="0.75" />
                 </Texture>
 
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                <Texture name="$(parent)Right" textureFile="$(COMPASS_PATH)Gamepad/gp_compass.dds">
                     <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
                     <TextureCoords left="0.4375" right="0" top="0" bottom="0.75" />
                 </Texture>

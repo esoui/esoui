@@ -45,7 +45,6 @@ function ZO_GamepadSocialListPanel:RefreshTooltip()
 
     if data and (zo_strlen(data.characterName) > 0) then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-        GAMEPAD_TOOLTIPS:SetBottomRailHidden(GAMEPAD_RIGHT_TOOLTIP, true)
         self:LayoutTooltip(GAMEPAD_TOOLTIPS, GAMEPAD_RIGHT_TOOLTIP, data)
         GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
     else
@@ -57,8 +56,8 @@ function ZO_GamepadSocialListPanel:LayoutTooltip(tooltipManager, tooltip, data)
     -- This function is meant to be overridden in subclasses to display the appropriate toolip information
 end
 
-function ZO_GamepadSocialListPanel:EntrySelectionCallback(oldData, newData)
-    ZO_GamepadInteractiveSortFilterList.EntrySelectionCallback(self, oldData, newData)
+function ZO_GamepadSocialListPanel:OnSelectionChanged(oldData, newData)
+    ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldData, newData)
     self:SetupOptions(newData)
     self:RefreshTooltip()
 end

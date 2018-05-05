@@ -14,7 +14,7 @@ function ZO_SocialList_ColorRow(control, data, displayNameTextColor, iconColor, 
     local displayName = GetControl(control, "DisplayName")
     displayName:SetColor(displayNameTextColor:UnpackRGBA())
 
-    if(data.hasCharacter) then
+    if data.hasCharacter then
         local character = GetControl(control, "CharacterName")
         if character then
             character:SetColor(otherTextColor:UnpackRGBA())

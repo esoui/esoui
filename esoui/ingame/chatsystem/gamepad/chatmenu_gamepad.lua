@@ -1,6 +1,6 @@
-ZO_ChatMenu_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_SocialOptionsDialogGamepad)
+ZO_ChatMenu_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_SocialOptionsDialogGamepad, ZO_GamepadMultiFocusArea_Manager)
 
-ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE = 10
+ZO_CHAT_MENU_GAMEPAD_LOG_MAX_SIZE = 200
 ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER = .7
 ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER = .1
 ZO_CHAT_MENU_GAMEPAD_LOG_LINE_WIDTH = ZO_GAMEPAD_QUADRANT_1_2_3_CONTAINER_WIDTH - (ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING * 2) --We squeeze in for the highlighting
@@ -21,6 +21,7 @@ function ZO_ChatMenu_Gamepad:Initialize(control)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, CHAT_MENU_GAMEPAD_SCENE)
     ZO_SocialOptionsDialogGamepad.Initialize(self)
+    ZO_GamepadMultiFocusArea_Manager.Initialize(self)
 
     self:InitializeFragment()
     self:InitializeControls()
@@ -48,6 +49,7 @@ function ZO_ChatMenu_Gamepad:InitializeControls()
     local list = self:GetMainList()
     list:SetSelectedItemOffsets(0, 0)
     list:SetAnchorOppositeSide(true)
+    list:SetValidateGradient(true)
     list:AddDataTemplate("ZO_ChatMenu_Gamepad_LogLine", function(...) self:SetupLogMessage(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, function(a, b) return a.data.id == b.data.id end)
 
     local CONSUME_INPUT = true
@@ -86,7 +88,6 @@ function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
     local channelControl = self.textInputControl:GetNamedChild("Channel")
     local channelDropdownControl = channelControl:GetNamedChild("Dropdown")
     local channelDropdown = ZO_ComboBox_ObjectFromContainer(channelDropdownControl)
-    channelDropdown = ZO_ComboBox_ObjectFromContainer(channelDropdownControl)
     channelDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
     channelDropdown:SetSortsItems(false)
     channelDropdown:SetDontSetSelectedTextOnSelection(true)
@@ -179,7 +180,7 @@ function ZO_ChatMenu_Gamepad:InitializePassiveFocus()
         DIRECTIONAL_INPUT:Deactivate(self)
     end
 
-    self.textInputAreaFocalArea = ZO_GamepadPassiveFocus:New(self, TextInputAreaActivateCallback, TextInputAreaDeactivateCallback)
+    self.textInputAreaFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, TextInputAreaActivateCallback, TextInputAreaDeactivateCallback)
 
     local function EnableChatDirectionalInputLater()
         if self.chatEntryPanelFocalArea:IsFocused() then
@@ -203,11 +204,11 @@ function ZO_ChatMenu_Gamepad:InitializePassiveFocus()
         self.list:SetSoundEnabled(false)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     end
-    self.chatEntryPanelFocalArea =  ZO_GamepadPassiveFocus:New(self, ChatEntryPanelActivateCallback, ChatEntryPanelDeactivateCallback)
+    self.chatEntryPanelFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, ChatEntryPanelActivateCallback, ChatEntryPanelDeactivateCallback)
 
     local NO_PREVIOUS, NO_NEXT
-    self.chatEntryPanelFocalArea:SetupSiblings(NO_PREVIOUS, self.textInputAreaFocalArea)
-    self.textInputAreaFocalArea:SetupSiblings(self.chatEntryPanelFocalArea, NO_NEXT)
+    self:AddNextFocusArea(self.chatEntryPanelFocalArea)
+    self:AddNextFocusArea(self.textInputAreaFocalArea)
 end
 
 function ZO_ChatMenu_Gamepad:RegisterForEvents()
@@ -243,6 +244,7 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_GUILD_SELF_LEFT_GUILD, RefreshChannelDropdown)
     self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
     self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, RefreshChannelDropdown)
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshChannelDropdown)
 end
 
 function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
@@ -294,6 +296,9 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Chat Previous Link",
+
             ethereal = true,
 
             keybind = "UI_SHORTCUT_INPUT_LEFT",
@@ -407,10 +412,7 @@ function ZO_ChatMenu_Gamepad:UpdateDirectionalInput()
     if self.list:GetNumEntries() > 0 then
         local result = self.textInputVerticalMovementController:CheckMovement()
         if result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-            local newFocus = self.textInputAreaFocalArea:MovePrevious()
-            if newFocus then
-                self.currentFocalArea = newFocus
-            end
+            self.textInputAreaFocalArea:HandleMovePrevious()
         end
     end
 end
@@ -447,11 +449,11 @@ do
             --Only chat channel messages will have raw text, because they're the only ones that could have links in them
             if rawMessageText then
                 for link in zo_strgmatch(rawMessageText, LINK_GMATCH_PATTERN) do
-                    if not links then
-                        links = {}
-                    end
                     local linkType = zo_strmatch(link, LINK_TYPE_MATCH_PATTERN)
-                    if  linkType == ACHIEVEMENT_LINK_TYPE or linkType == ITEM_LINK_TYPE or linkType == COLLECTIBLE_LINK_TYPE then
+                    if linkType == ACHIEVEMENT_LINK_TYPE or linkType == ITEM_LINK_TYPE or linkType == COLLECTIBLE_LINK_TYPE then
+                        if not links then
+                            links = {}
+                        end
                         table.insert(links, { linkType = linkType, link = link })
                     end
                 end
@@ -630,7 +632,7 @@ function ZO_ChatMenu_Gamepad:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, ZO_SocialOptionsDialogGamepad.ShouldAddSendMailOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsNotPlayer)
 end
 
