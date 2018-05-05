@@ -473,7 +473,7 @@ ESO_Dialogs["BAD_LOGIN"] =
         [1] =
         {
             text = SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE,
-            keybind = "DIALOG_HELP",
+            keybind = "DIALOG_TERTIARY",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.accountPageURL)
@@ -508,7 +508,7 @@ ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
         [1] =
         {
             text = SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE,
-            keybind = "DIALOG_HELP",
+            keybind = "DIALOG_TERTIARY",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.accountPageURL)
@@ -590,7 +590,7 @@ ESO_Dialogs["HANDLE_ERROR_WITH_HELP"] =
         [1] =
         {
             text = SI_ERROR_DIALOG_HELP,
-            keybind = "DIALOG_HELP",
+            keybind = "DIALOG_TERTIARY",
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.url)
                         end,
@@ -1214,6 +1214,92 @@ ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
 
         {
             text = SI_DIALOG_NO,
+            keybind = "DIALOG_NEGATIVE",
+            callback =  function(dialog)
+                            -- do nothing
+                        end,
+        },
+    }
+}
+
+ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    canQueue = true,
+
+    title =
+    {
+        text = SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_TITLE
+    },
+
+    mainText =
+    {
+        text = function()
+            local platformServiceType = GetPlatformServiceType()
+            local upgradeMethodsStringId = ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[platformServiceType] and SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_OR_CODE or SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_ONLY
+            local chapterUpgradeId = GetCurrentChapterUpgradeId()
+            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
+            local chapterCollectibleName = GetCollectibleName(chapterCollectibleId)
+            return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName(), chapterCollectibleName)
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function(dialog)
+                            if dialog.data then
+                                dialog.data.continue = true
+                            end
+                        end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+            callback = function(dialog)
+                            if dialog.data then
+                                dialog.data.continue = false
+                            end
+                        end,
+        },
+    },
+    finishedCallback = function(dialog)
+        if dialog.data and dialog.data.finishedCallback then
+            dialog.data.finishedCallback(dialog)
+        end
+    end,
+}
+
+ESO_Dialogs["LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE"] =
+{
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    mainText = 
+    {
+        text = SI_CONSOLE_LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE_DIALOG_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_CONSOLE_LEGAL_BUTTON_AGREE,
+            keybind = "DIALOG_PRIMARY",
+            callback =  function(dialog)
+                            PregameStateManager_AdvanceState()
+                        end,
+        },
+
+        {
+            text = SI_CONSOLE_LEGAL_BUTTON_DISAGREE,
             keybind = "DIALOG_NEGATIVE",
             callback =  function(dialog)
                             -- do nothing

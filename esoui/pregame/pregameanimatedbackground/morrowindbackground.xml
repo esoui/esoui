@@ -1,0 +1,35 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_MorrowindBackgroundShowAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_MORROWIND_BACKGROUND_FADE_DURATION_MS" startAlpha="0" endAlpha="1"/>
+                <CustomAnimation delay="ZO_MORROWIND_BACKGROUND_ZOOM_START_MS" duration="ZO_MORROWIND_BACKGROUND_ZOOM_DURATION_MS">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_MorrowindBackgroundCloud" virtual="true" blendMode="ADD" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/smoke_muted_02.dds" alpha="0.11" pixelRoundingEnabled="false" tier="LOW"/>
+        
+        <TopLevelControl name="ZO_MorrowindBackground" mouseEnabled="true" tier="LOW" layer="BACKGROUND" level="1" hidden="true">
+            <OnInitialized>
+                ZO_MorrowindBackground_OnInitialized(self)
+            </OnInitialized>
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)Canvas">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Ground" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/volcano.dds" pixelRoundingEnabled="false" tier="LOW"/>
+                        <Texture name="$(parent)Ground2" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/volcanoGlow.dds" pixelRoundingEnabled="false" tier="LOW" blendMode="COLOR_DODGE"/>
+                        <Texture name="$(parent)Smoke1" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/smoke_muted_02.dds" blendMode="ADD" pixelRoundingEnabled="false" tier="LOW" alpha="0.35"/>
+                        <Texture name="$(parent)Smoke2" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/smoke_muted_02.dds" blendMode="ADD" pixelRoundingEnabled="false" tier="LOW" alpha="0.35"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

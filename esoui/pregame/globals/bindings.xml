@@ -15,7 +15,11 @@
 
             <Action name="TOGGLE_FULLSCREEN" rebindable="false">
                 <Down>ToggleFullScreen()</Down>
-            </Action>        
+            </Action>
+
+            <Action name="TAKE_SCREENSHOT" rebindable="false">
+                <Up>TakeScreenshot()</Up>
+            </Action>
         </Category>
     </Layer>
     <Layer name="GamepadShortcuts">
@@ -110,14 +114,14 @@
             <Action name="DIALOG_SECONDARY">
                 <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
             </Action>
+            <Action name="DIALOG_TERTIARY">
+                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
+            </Action>
             <Action name="DIALOG_NEGATIVE">
                 <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
             </Action>
             <Action name="DIALOG_CLOSE">
                 <Down>ZO_Dialogs_CloseKeybindPressed()</Down>
-            </Action>
-            <Action name="DIALOG_HELP">
-                <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
             </Action>
             <Action name="DIALOG_RESET">
                 <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>

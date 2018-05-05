@@ -1,28 +1,6 @@
-local GAMEPAD_WAIT_FOR_PREGAME_FULLY_LOADED_SCENE = ZO_Scene:New("gamepadWaitForPregameFullyLoaded", SCENE_MANAGER)
 
 local consolePregameStates =
 {
-    ["WaitForPregameFullyLoaded"] =
-    {
-        ShouldAdvance = function()
-            return PregameIsFullyLoaded()
-        end,
-
-        OnEnter = function()
-            RegisterForLoadingUpdates()
-            PregameStateManager_UpdateRealmName()
-            SuppressWorldList()
-            Pregame_ShowScene("gamepadWaitForPregameFullyLoaded")
-        end,
-        
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "CharacterSelect"
-        end
-    },
-    
     ["CharacterSelect"] =
     {
         OnEnter = function()
@@ -77,9 +55,7 @@ local consolePregameStates =
     ["AccountLogin"] =
     {
         ShouldAdvance = function()
-            -- TODO: This may not be valid on console, however should be convenient for
-            --  developement.
-            return GetCVar("QuickLaunch") == "1"
+            return false
         end,
 
         OnEnter = function()
@@ -90,19 +66,44 @@ local consolePregameStates =
             ZO_PREGAME_CHARACTER_LIST_RECEIVED = false
             ZO_PREGAME_CHARACTER_COUNT = 0
 
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
-            WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-            WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+            --If we're quick launching, then just register a profile login event that sets the LastPlatform and advances the state.
+            if (GetCVar("QuickLaunch") == "1") then
+                EVENT_MANAGER:RegisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT, function(eventCode, isSuccess, profileError)
+                    EVENT_MANAGER:UnregisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT)
 
-            -- Reset screen overscan/gamma and audio settings
-            SetOverscanOffsets(0, 0, 0, 0)
-            SetCVar("GAMMA_ADJUSTMENT", 100)
-            ResetToDefaultSettings(SETTING_TYPE_AUDIO)
+                    if (isSuccess) then
+                        local lastPlat = GetCVar("LastPlatform")
+                        if lastPlat ~= nil then
+                            for platformIndex = 1, GetNumPlatforms() do
+                                local platformName = GetPlatformInfo(platformIndex)            
+                                if platformName == lastPlat then
+                                    SetSelectedPlatform(platformIndex)
+                                end
+                            end
+                        end
 
-            SetCurrentVideoPlaybackVolume(1.0, 4.0)
+                        SetCVar("IsServerSelected", "true")
+                        SetCVar("SelectedServer", CONSOLE_SERVER_NORTH_AMERICA)
+                        PregameStateManager_AdvanceState()
+                    end
+                end)
 
-            SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
+                PregameSelectProfile()
+            else
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
+                WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+
+                -- Reset screen overscan/gamma and audio settings
+                SetOverscanOffsets(0, 0, 0, 0)
+                SetCVar("GAMMA_ADJUSTMENT", 100)
+                ResetToDefaultSettings(SETTING_TYPE_AUDIO)
+
+                SetCurrentVideoPlaybackVolume(1.0, 4.0)
+
+                SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
+            end
         end,
 
         OnExit = function()
@@ -113,7 +114,7 @@ local consolePregameStates =
         end,
     },
 
-	["InitialGameStartup"] =
+    ["InitialGameStartup"] =
     {
         ShouldAdvance = function()
             return not IsConsoleUI() or GetCVar("IsServerSelected") == "1"
@@ -131,10 +132,10 @@ local consolePregameStates =
         end,
     },
 
-	["GameStartup"] =
+    ["GameStartup"] =
     {
         ShouldAdvance = function()
-            return false
+            return (GetCVar("QuickLaunch") == "1")
         end,
 
         OnEnter = function(mustPurchaseGame)
@@ -153,8 +154,7 @@ local consolePregameStates =
     ["ShowEULA"] =
     {
         ShouldAdvance = function()
-            -- TODO: Add checks for other legal agreements, if needed.
-            return ZO_HasAgreedToEULA()
+            return not ZO_ShouldShowEULAScreen()
         end,
 
         OnEnter = function()
@@ -195,14 +195,14 @@ local consolePregameStates =
         end,
 
         OnEnter = function()
-			local platform = GetUIPlatform()
-			
-			--Smoke video audio fade out to prevent audio clicking on console due to load time hitches
+            local platform = GetUIPlatform()
+            
+            --Smoke video audio fade out to prevent audio clicking on console due to load time hitches
             --4 seconds seems to be a good fade out time for here
-			if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
-				SetCurrentVideoPlaybackVolume(0.0, 4.0)
-			end
-			
+            if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
+                SetCurrentVideoPlaybackVolume(0.0, 4.0)
+            end
+            
             if(IsConsoleUI() and platform == UI_PLATFORM_PC) then
                 -- should only ever hit this on internal builds testing with PC
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_PCBypassConsoleLogin, GetString(SI_CONSOLE_PREGAME_LOADING))
@@ -293,7 +293,7 @@ local consolePregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "WaitForPregameFullyLoaded"
+            return "WaitForGameDataLoaded"
         end,
     },
 
@@ -465,28 +465,30 @@ PregameStateManager_AddStates(consolePregameStates)
 --This will probably need to be more robust (similar to non console PregameStates) as more pregame comes online
 local function OnVideoPlaybackComplete()
     EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE)
+    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR)
 
-    if(not ZO_PREGAME_HAD_GLOBAL_ERROR) then
-        if(ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING) then
-            ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = false
-            AttemptToAdvancePastCharacterCreateIntro()
-        elseif (ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING) then
+    if not ZO_PREGAME_HAD_GLOBAL_ERROR then
+        if ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING then
+            ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
+            AttemptToAdvancePastChapterOpeningCinematic()
+        elseif ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING then
             ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
             AttemptToAdvancePastCharacterSelectCinematic()
         else
-            if(not IsInCharacterCreateState()) then
+            if not IsInCharacterCreateState() then
                 PregameStateManager_AdvanceState()
             end
         end
     else
         -- error cases just reset the flags
-        ZO_PREGAME_IS_CHARACTER_CREATE_INTRO_PLAYING = false
+        ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
         ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
     end
 end
 
 function ZO_PlayVideoAndAdvance(...)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
+    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
     PlayVideo(...)
 end
 
@@ -517,7 +519,7 @@ function ZO_Gamepad_DisplayServerDisconnectedError()
         end
     end
 
-    if(errorString == "") then
+    if errorString == nil or errorString == "" then
         errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
     end
 
@@ -534,7 +536,7 @@ local function OnServerDisconnectError(eventCode)
 end
 
 local function OnProfileLoginResult(event, isSuccess, profileError)
-	--Don't return to IIS if we're on Server Select and NO_PROFILE was returned because they probably cancelled the selection
+    --Don't return to IIS if we're on Server Select and NO_PROFILE was returned because they probably cancelled the selection
     if isSuccess == false and not (profileError == PROFILE_LOGIN_ERROR_NO_PROFILE and SCENE_MANAGER:IsShowing("GameStartup"))  then
         local errorString
         local errorStringFormat = GetString("SI_PROFILELOGINERROR", profileError)
@@ -549,15 +551,9 @@ local function OnProfileLoginResult(event, isSuccess, profileError)
     end
 end
 
-local function OnPregameFullyLoaded()
-    PregameStateManager_AdvanceStateFromState("WaitForPregameFullyLoaded")
-end
-
 local function PregameStateManager_Initialize()
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnServerDisconnectError)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_PROFILE_LOGIN_RESULT, OnProfileLoginResult)
-
-    CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
 end
 
 PregameStateManager_Initialize()

@@ -1,5 +1,7 @@
 ; pregame UI files
-## DependsOn: ZO_PregameLocalization ZO_Common
+## DependsOn: ZO_PregameLocalization ZO_PregameAndIngame
+
+## SavedVariables: ZO_Pregame_SavedVariables
 
 EsoUI\Pregame\Globals\PregameGlobals.lua
 EsoUI\Pregame\Globals\PreGameDialogs.lua
@@ -18,8 +20,8 @@ EsoUI\Pregame\Tooltip\Tooltip.xml
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
-EsoUI\Pregame\PregameAnimatedBackground\PregameAnimatedBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\PregameAnimatedBackground.xml
+EsoUI\Pregame\PregameAnimatedBackground\Console\SummersetBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\Console\SummersetBackground.xml
 
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml
@@ -142,6 +144,17 @@ EsoUI\Pregame\StateManager\Console\PregameStates_Console.lua
 
 EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.lua
 EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.xml
+
+EsoUI\Pregame\RzChroma\PregameRzChroma_Manager.lua
+EsoUI\Pregame\RzChroma\PregameRzChroma_Effects.lua
+
+EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Manager.lua
+EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Shared.lua
+EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Shared.xml
+EsoUI\Pregame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.lua
+EsoUI\Pregame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.xml
+EsoUI\Pregame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.lua
+EsoUI\Pregame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.xml
 
 EsoUI\Pregame\Scenes\PregameFragments.lua
 EsoUI\Pregame\Scenes\Console\PregameFragments_Console.lua

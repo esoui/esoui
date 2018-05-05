@@ -7,10 +7,13 @@ GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Share
 
 ZO_MovieBackgroundFragment = ZO_SceneFragment:Subclass()
 
-function ZO_MovieBackgroundFragment:New(movieFile)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.movieFile = movieFile
-    return fragment
+function ZO_MovieBackgroundFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ZO_MovieBackgroundFragment:Initialize(movieFile)
+    ZO_SceneFragment.Initialize(self)
+    self.movieFile = movieFile
 end
 
 function ZO_MovieBackgroundFragment:Show()
@@ -46,11 +49,14 @@ LINK_ACCOUNT_BACKGROUND_FRAGMENT = PREGAME_ANIMATED_BACKGROUND_FRAGMENT
 
 ZO_PregameSceneStateAdvanceFromFragment = ZO_SceneFragment:Subclass()
 
-function ZO_PregameSceneStateAdvanceFromFragment:New(state)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:SetHideOnSceneHidden(true)
-    fragment.advanceFromState = state
-    return fragment
+function ZO_PregameSceneStateAdvanceFromFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ZO_PregameSceneStateAdvanceFromFragment:Initialize(state)
+    ZO_SceneFragment.Initialize(self)
+    self:SetHideOnSceneHidden(true)
+    self.advanceFromState = state
 end
 
 function ZO_PregameSceneStateAdvanceFromFragment:Show()
@@ -70,3 +76,19 @@ end
 
 PREGAME_GAMMA_ADJUST_INTRO_ADVANCE_FRAGMENT = ZO_PregameSceneStateAdvanceFromFragment:New("GammaAdjust")
 PREGAME_SCREEN_ADJUST_INTRO_ADVANCE_FRAGMENT = ZO_PregameSceneStateAdvanceFromFragment:New("ScreenAdjustIntro")
+
+-- Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
+
+GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_Background)
+ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
+GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_Background)
+ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
+GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_4_Background)
+ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_Background)
+ZO_BackgroundFragment:Mixin(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+GAMEPAD_NAV_QUADRANT_2_3_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_2_3_4_Background)
+GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_4_Background)
+GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedGamepadNavQuadrant_1_2_3_Background)
+
+-- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
