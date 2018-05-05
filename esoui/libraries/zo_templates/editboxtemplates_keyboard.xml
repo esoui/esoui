@@ -2,7 +2,7 @@
     <Controls>
         <Backdrop name="ZO_EditBackdrop" virtual="true">
             <Dimensions y="28"/>
-            <Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" virtual="true"/>
+            <Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" />
             <Center file="EsoUI/Art/ChatWindow/textEntry_center.dds" />
             <Insets left="8" top="8" right="-8" bottom="-8" />
         </Backdrop>

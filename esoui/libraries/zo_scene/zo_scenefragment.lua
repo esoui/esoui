@@ -5,11 +5,15 @@ SCENE_FRAGMENT_HIDDEN = "hidden"
 SCENE_FRAGMENT_SHOWING = "showing"
 SCENE_FRAGMENT_HIDING = "hiding"
 
-function ZO_SceneFragment:New()
+function ZO_SceneFragment:New(...)
     local fragment = ZO_CallbackObject.New(self)
-    fragment.state = SCENE_FRAGMENT_HIDDEN
-    fragment.allShowHideTimeUpdates = false
+    fragment:Initialize(...)
     return fragment
+end
+
+function ZO_SceneFragment:Initialize()
+    self.state = SCENE_FRAGMENT_HIDDEN
+    self.allowShowHideTimeUpdates = false
 end
 
 function ZO_SceneFragment:SetSceneManager(sceneManager)
@@ -23,6 +27,8 @@ end
 function ZO_SceneFragment:SetCategory(category)
     self.category = category
 end
+
+--Force Refresh causes a fragment to hide and show again even if it is part of the next scene.
 
 function ZO_SceneFragment:GetForceRefresh()
     return self.forceRefresh
@@ -66,11 +72,11 @@ end
 
 --Show and Hide will be called by the scene management system. They should not be called directly by code.
 function ZO_SceneFragment:Show()
-    
+    self:OnShown()
 end
 
 function ZO_SceneFragment:Hide()
-    
+    self:OnHidden()
 end
 
 function ZO_SceneFragment:GetState()
@@ -95,7 +101,7 @@ end
 
 --If true, Show and Hide will be called even if the fragment is already in the Showing or Hiding state.
 function ZO_SceneFragment:SetAllowShowHideTimeUpdates(allow)
-    self.allShowHideTimeUpdates = allow
+    self.allowShowHideTimeUpdates = allow
 end
 
 function ZO_SceneFragment:SetState(newState)
@@ -119,14 +125,14 @@ function ZO_SceneFragment:OnHidden()
 end
 
 function ZO_SceneFragment:ShouldBeShown(customShowParam)
-    if(self.state ~= SCENE_FRAGMENT_SHOWN and (self.allShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_SHOWING)) then
+    if(self.state ~= SCENE_FRAGMENT_SHOWN and (self.allowShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_SHOWING)) then
         self:SetState(SCENE_FRAGMENT_SHOWING)
         self:Show(customShowParam)
     end
 end
 
 function ZO_SceneFragment:ShouldBeHidden(customHideParam)
-    if(self.state ~= SCENE_FRAGMENT_HIDDEN and (self.allShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_HIDING)) then
+    if(self.state ~= SCENE_FRAGMENT_HIDDEN and (self.allowShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_HIDING)) then
         self:SetState(SCENE_FRAGMENT_HIDING)
         if(not self.hideOnSceneHidden) then
             self:Hide(customHideParam)
@@ -134,47 +140,61 @@ function ZO_SceneFragment:ShouldBeHidden(customHideParam)
     end
 end
 
-function ZO_SceneFragment:Refresh(customShowParam, customHideParam)
-    if(self.sceneManager) then
+function ZO_SceneFragment:ComputeIfFragmentShouldShow()
+    if self.sceneManager then
         local currentScene = self.sceneManager:GetCurrentScene()
         local nextScene = self.sceneManager:GetNextScene()
-        if(currentScene and currentScene:HasFragment(self)) then
-            if(self.conditional == nil or self.conditional()) then
+        if currentScene and currentScene:HasFragment(self) then
+            if self.conditional == nil or self.conditional() then
                 local currentSceneState = currentScene:GetState()
-                if(nextScene) then
-                    if(currentSceneState == SCENE_HIDING) then
-                        if(nextScene:HasFragment(self)) then
-                            if(self.forceRefresh) then
-                                self:ShouldBeHidden(customHideParam)
-                            elseif(self:HasDependencies()) then
-                                for dependencyFragmnent in pairs(self.dependencies) do
-                                    local currentHasDependency = currentScene:HasFragment(dependencyFragmnent)
-                                    local nextHasDependency = nextScene:HasFragment(dependencyFragmnent)
-                                    if(currentHasDependency ~= nextHasDependency) then
-                                        self:ShouldBeHidden(customHideParam)
-                                        return
+                if nextScene then
+                    if currentSceneState == SCENE_HIDING or currentSceneState == SCENE_HIDDEN then
+                        if nextScene:HasFragment(self) then
+                            if self.forceRefresh then
+                                -- always hide on a force refresh
+                                return false
+                            elseif self:HasDependencies() then
+                                for dependencyFragment in pairs(self.dependencies) do
+                                    local currentHasDependency = currentScene:HasFragment(dependencyFragment)
+                                    local nextHasDependency = nextScene:HasFragment(dependencyFragment)
+                                    if currentHasDependency ~= nextHasDependency then
+                                        return false
                                     end
                                 end
-                                self:ShouldBeShown(customShowParam)
+                                return true
                             else
-                                self:ShouldBeShown(customShowParam)
+                                -- next scene has this fragment so we should show
+                                return true
                             end
                         else
-                            self:ShouldBeHidden(customHideParam)
+                            -- next scene does not have this fragment, so we should hide
+                            return false
                         end
                     end
                 else
-                    if(currentSceneState == SCENE_SHOWING or currentSceneState == SCENE_SHOWN) then
-                        self:ShouldBeShown(customShowParam)
+                    if currentSceneState == SCENE_SHOWING or currentSceneState == SCENE_SHOWN then
+                        return true
                     end
                 end
             else
-                self:ShouldBeHidden(customHideParam)
+                -- the fragment failed its conditional, so we shouldn't show
+                return false
             end
         else
-            self:ShouldBeHidden(customHideParam)
+            -- Either we have no current scene or the current scene doesn't have this fragment, we shouldn't be showing
+            return false
         end
+    end
+
+    return false
+end
+
+function ZO_SceneFragment:Refresh(customShowParam, customHideParam, asAResultOfSceneStateChange, refreshedForScene)
+    local oldState = self.state
+    if self:ComputeIfFragmentShouldShow() then
+        self:ShouldBeShown(customShowParam)
     else
         self:ShouldBeHidden(customHideParam)
     end
+    self:FireCallbacks("Refreshed", oldState, self.state, asAResultOfSceneStateChange, refreshedForScene)
 end

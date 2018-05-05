@@ -7,8 +7,7 @@ ZO_SCALABLE_BACKGROUND_CENTER_TEXTURE_BOTTOM_COORD = (ZO_SCALABLE_BACKGROUND_HEI
 
 ZO_SCENE_MENU_HEIGHT = 45
 
-local DEFAULT_EDIT_BOX_ENABLED_COLOR = ZO_ColorDef:New(1,1,1,1)
-local DEFAULT_EDIT_BOX_DISABLED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED))
+ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET = 8
   
 function ZO_SelectionHighlight_SetColor(highlight, r, g, b)
     highlight:SetCenterColor(r, g, b, 1)
@@ -65,13 +64,6 @@ function ZO_PlaySparkleAnimation(slotControl)
     animData.translateTimeLine:PlayFromStart()
     animData.sparkleTimeLine:PlayFromStart()
     animData.sparkle:SetHidden(false)
-end
-
-function ZO_PanelBackgroundHorizontalDoRotations(control)
-    GetControl(control, "Top"):SetTextureCoordsRotation(-math.pi / 2)
-    GetControl(control, "Left"):SetTextureCoordsRotation(math.pi / 2)
-    GetControl(control, "Right"):SetTextureCoordsRotation(-math.pi / 2)
-    GetControl(control, "Bottom"):SetTextureCoordsRotation(math.pi / 2)
 end
 
 function ZO_SetupSelectableItemRadialMenuEntryTemplate(template, selected, itemCount)
@@ -326,44 +318,71 @@ end
 function ZO_SimpleControlScaleInterpolator:Initialize(minScale, maxScale)
     self.minScale = minScale
     self.maxScale = maxScale
-
-    self.controlsToTarget = {}
-
-    EVENT_MANAGER:RegisterForUpdate(tostring(self), 0, function() self:OnUpdate() end)
 end
 
 function ZO_SimpleControlScaleInterpolator:ScaleUp(control)
+    if not self.controlsToTarget then
+        self.controlsToTarget = {}
+    end
     self.controlsToTarget[control] = self.maxScale
+    self:RefreshUpdateHandlerRegistration()
 end
 
 function ZO_SimpleControlScaleInterpolator:ScaleDown(control)
+    if not self.controlsToTarget then
+        self.controlsToTarget = {}
+    end
     self.controlsToTarget[control] = self.minScale
+    self:RefreshUpdateHandlerRegistration()
 end
 
 function ZO_SimpleControlScaleInterpolator:ResetToMax(control)
-    self.controlsToTarget[control] = nil
     control:SetScale(self.maxScale)
+    if self.controlsToTarget then
+        self.controlsToTarget[control] = nil
+        self:RefreshUpdateHandlerRegistration()
+    end
 end
 
 function ZO_SimpleControlScaleInterpolator:ResetToMin(control)
-    self.controlsToTarget[control] = nil
     control:SetScale(self.minScale)
+    if self.controlsToTarget then
+        self.controlsToTarget[control] = nil
+        self:RefreshUpdateHandlerRegistration()
+    end
+end
+
+function ZO_SimpleControlScaleInterpolator:RefreshUpdateHandlerRegistration()
+    local shouldBeRegisteredForUpdate = self.controlsToTarget ~= nil and next(self.controlsToTarget) ~= nil
+    if self.registeredForUpdate ~= shouldBeRegisteredForUpdate then
+        self.registeredForUpdate = shouldBeRegisteredForUpdate
+        if shouldBeRegisteredForUpdate then
+            EVENT_MANAGER:RegisterForUpdate(tostring(self), 0, function() self:OnUpdate() end)
+        else
+            EVENT_MANAGER:UnregisterForUpdate(tostring(self))
+        end
+    end
 end
 
 function ZO_SimpleControlScaleInterpolator:ResetAll()
-    for control, target in pairs(self.controlsToTarget) do
-        self:ResetToMin(control)
+    if self.controlsToTarget then
+        for control, target in pairs(self.controlsToTarget) do
+            self:ResetToMin(control)
+        end
     end
 end
 
 function ZO_SimpleControlScaleInterpolator:OnUpdate()
-    for control, target in pairs(self.controlsToTarget) do
-        local delta = target - control:GetScale()
-        if zo_abs(delta) < .0025 then
-            control:SetScale(target)
-            self.controlsToTarget[control] = nil
-        else
-            control:SetScale(zo_deltaNormalizedLerp(control:GetScale(), target, .2))
+    if self.controlsToTarget then
+        for control, target in pairs(self.controlsToTarget) do
+            local delta = target - control:GetScale()
+            if zo_abs(delta) < .0025 then
+                control:SetScale(target)
+                self.controlsToTarget[control] = nil
+                self:RefreshUpdateHandlerRegistration()
+            else
+                control:SetScale(zo_deltaNormalizedLerp(control:GetScale(), target, .2))
+            end
         end
     end
 end

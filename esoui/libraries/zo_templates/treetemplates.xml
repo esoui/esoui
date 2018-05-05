@@ -14,6 +14,21 @@
             </OnMouseUp>
         </Label>
 
+        <Label name="ZO_TreeLabelSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true">
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <Label name="ZO_TreeStatusLabelSubCategory" inherits="ZO_TreeLabelSubCategory" virtual="true" >
+            <Controls>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
+                </Texture>
+            </Controls>
+        </Label>
+        
         <Control name="ZO_IconHeaderMouseArea" mouseEnabled="true" virtual="true">
             <OnMouseUp>
                 local parent = self:GetParent()
@@ -80,6 +95,27 @@
         </Control>
 
         <Control name="ZO_IconChildlessHeader" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+                self.SetSelected = ZO_IconHeader_Setup
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_StatusIconHeader" inherits="ZO_IconHeader" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
+                </Texture>
+
+                <Texture name="$(parent)Icon" override="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)StatusIcon" relativePoint="RIGHT" offsetX="16" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_StatusIconChildlessHeader" inherits="ZO_StatusIconHeader" virtual="true">
             <OnInitialized>
                 ZO_IconHeader_OnInitialized(self)
                 self.OnMouseUp = ZO_TreeEntry_OnMouseUp

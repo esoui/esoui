@@ -15,7 +15,11 @@ do
     
     function ZO_AnimationPool:New(templateName)
         local function AnimationFactory(pool)
-            return ANIMATION_MANAGER:CreateTimelineFromVirtual(templateName)
+            local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(templateName)
+            if pool.customFactoryBehavior then
+                pool.customFactoryBehavior(timeline)
+            end
+            return timeline
         end
 
         return ZO_ObjectPool.New(self, AnimationFactory, Reset)
@@ -24,6 +28,11 @@ end
 
 function ZO_AnimationPool:SetCustomResetBehavior(customResetBehavior)
     self.customResetBehavior = customResetBehavior
+end
+
+
+function ZO_AnimationPool:SetCustomFactoryBehavior(customFactoryBehavior)
+    self.customFactoryBehavior = customFactoryBehavior
 end
 
 --[[
@@ -77,17 +86,10 @@ function ZO_ControlPool:SetCustomResetBehavior(customResetBehavior)
     self.customResetBehavior = customResetBehavior
 end
 
-function ZO_ControlPool:SetCustomAcquireBehavior(customAcquireBehavior)
-    self.customAcquireBehavior = customAcquireBehavior
-end
-
 function ZO_ControlPool:AcquireObject(objectKey)
     local control, key = ZO_ObjectPool.AcquireObject(self, objectKey)
     if(control) then
         control:SetHidden(false)
-    end
-    if self.customAcquireBehavior then
-        self.customAcquireBehavior(control)
     end
     return control, key
 end
@@ -122,18 +124,34 @@ function ZO_MetaPool:GetActiveObjectCount()
     return NonContiguousCount(self.activeObjects)
 end
 
+function ZO_MetaPool:GetActiveObjects()
+    return self.activeObjects
+end
+
 function ZO_MetaPool:ReleaseAllObjects()
-    for key, _ in pairs(self.activeObjects) do
+    for key, object in pairs(self.activeObjects) do
+        if self.customResetBehavior then
+            self.customResetBehavior(object)
+        end
         self.sourcePool:ReleaseObject(key)
     end
-    self.activeObjects = {}
+
+    ZO_ClearTable(self.activeObjects) 
 end
 
 function ZO_MetaPool:ReleaseObject(objectKey)
+    local object = self.activeObjects[objectKey]
+    if self.customResetBehavior then
+        self.customResetBehavior(object)
+    end
     self.sourcePool:ReleaseObject(objectKey)
     self.activeObjects[objectKey] = nil
 end
 
 function ZO_MetaPool:SetCustomAcquireBehavior(customAcquireBehavior)
     self.customAcquireBehavior = customAcquireBehavior
+end
+
+function ZO_MetaPool:SetCustomResetBehavior(customeResetBehavior)
+    self.customResetBehavior = customeResetBehavior
 end

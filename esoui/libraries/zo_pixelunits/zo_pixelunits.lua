@@ -165,7 +165,7 @@ function ZO_PixelUnitControl:SetScale(scale)
 end
 
 function ZO_PixelUnitControl:IsDimensionConstrainedByAnchors(side1, side2, checkDirection1, checkDirection2)
-    if #self.anchors == MAX_ANCHORS and not control:GetResizeToFitDescendents() then
+    if #self.anchors == MAX_ANCHORS and not self.control:GetResizeToFitDescendents() then
         for i = 1, MAX_ANCHORS do
             local anchorPoint1 = self.anchors[i].point
             local anchorPoint2 = self.anchors[(i % MAX_ANCHORS) + 1].point
@@ -286,7 +286,7 @@ function ZO_PixelUnits:Remove(...)
 end
 
 function ZO_PixelUnits:AddControlAndAllChildren(control)
-    self:Add(control)
+    self:Add(control, PIXEL_SOURCE_PIXELS)
     for i = 1, control:GetNumChildren() do
         self:AddControlAndAllChildren(control:GetChild(i))
     end
@@ -338,6 +338,7 @@ PIXEL_UNITS = ZO_PixelUnits:New("ZO_PixelUnits", ZO_Object)
 
 --Global XML
 
-function ZO_PixelUnitsFromChildren_OnInitialized(self)
-    PIXEL_UNITS:AddControlAndAllChildren(self)
+function ZO_PixelUnitsControl_OnInitialized(self)
+    local pixelControl = PIXEL_UNITS:Add(self, PIXEL_SOURCE_PIXELS)
+    pixelControl:ScrapeFromXML()
 end

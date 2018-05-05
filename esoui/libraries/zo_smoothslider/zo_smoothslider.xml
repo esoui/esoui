@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Button name="ZO_SmoothSliderButton" virtual="true">
+        <Button name="ZO_SmoothSliderButton" pixelRoundingEnabled="false" virtual="true">
             <OnClicked>
                 ZO_SmoothSliderButton_OnClicked(self)
             </OnClicked>

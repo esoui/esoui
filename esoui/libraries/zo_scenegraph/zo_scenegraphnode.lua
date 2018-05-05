@@ -106,14 +106,17 @@ function ZO_SceneGraphNode:SetScale(scale)
     end
 end
 
-function ZO_SceneGraphNode:ComputeSizeForDepth(x, y, z)
+function ZO_SceneGraphNode:ComputeSizeForDepth(x, y, z, referenceCameraZ)
     local distanceFromCamera = self.translateZ + z
     local parent = self.parent
     while parent do
         distanceFromCamera = distanceFromCamera + parent.translateZ
         parent = parent.parent
     end
-    distanceFromCamera = distanceFromCamera - self.sceneGraph:GetCameraZ()
+    if referenceCameraZ == nil then
+        referenceCameraZ = self.sceneGraph:GetCameraZ()
+    end
+    distanceFromCamera = distanceFromCamera - referenceCameraZ
     local scale = 1
     if distanceFromCamera > 0 then
         scale = 1 / distanceFromCamera
@@ -297,7 +300,10 @@ end
 
 local function RemoveFromTables(index, ...)
     for i = 1, select("#", ...) do
-        table.remove(select(i, ...), index)
+        local tableToRemoveFrom = select(i, ...)
+        local numElements = #tableToRemoveFrom
+        tableToRemoveFrom[index] = tableToRemoveFrom[numElements]
+        tableToRemoveFrom[numElements] = nil
     end
 end
 
@@ -362,7 +368,7 @@ end
 
 function ZO_SceneGraphNode:SetControlUseRotation(control, useRotation)
     local index = self:GetControlIndex(control)
-    if self.controlAnchorPoint[index] ~= anchorPoint then
+    if self.controlUseRotation[index] ~= useRotation then
         self.controlUseRotation[index] = useRotation
         self:SetDirty(true)
     end

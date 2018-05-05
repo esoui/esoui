@@ -38,11 +38,17 @@ function ZO_SortFilterList:InitializeSortFilterList(control)
     ZO_ScrollList_AddResizeOnScreenResize(self.list)
 
     self.headersContainer = GetControl(control, "Headers")
-    if(self.headersContainer) then
+    if self.headersContainer then
         self.sortHeaderGroup = ZO_SortHeaderGroup:New(self.headersContainer, true)
         self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, function(key, order) self:OnSortHeaderClicked(key, order) end)
         self.sortHeaderGroup:AddHeadersFromContainer()
     end
+
+    self.automaticallyColorRows = true
+end
+
+function ZO_SortFilterList:GetListControl()
+    return self.list
 end
 
 function ZO_SortFilterList:ClearUpdateInterval()
@@ -70,8 +76,12 @@ function ZO_SortFilterList:SetAlternateRowBackgrounds(alternate)
 end
 
 function ZO_SortFilterList:SetEmptyText(emptyText)
-    self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow")
+    self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Keyboard")
     GetControl(self.emptyRow, "Message"):SetText(emptyText)
+end
+
+function ZO_SortFilterList:SetAutomaticallyColorRows(autoColorRows)
+    self.automaticallyColorRows = autoColorRows
 end
 
 function ZO_SortFilterList:ShowMenu(...)
@@ -207,7 +217,7 @@ function ZO_SortFilterList:SetHighlightedRow(row)
 end
 
 function ZO_SortFilterList:EnterRow(row)
-    if(not self.lockedForUpdates) then
+    if not self.lockedForUpdates then
         ZO_ScrollList_MouseEnter(self.list, row)
         local data = ZO_ScrollList_GetData(row)
         if(data) then
@@ -219,7 +229,7 @@ function ZO_SortFilterList:EnterRow(row)
 end
 
 function ZO_SortFilterList:ExitRow(row)
-    if(not self.lockedForUpdates) then
+    if not self.lockedForUpdates then
         ZO_ScrollList_MouseExit(self.list, row)
         local data = ZO_ScrollList_GetData(row)
         if(data) then
@@ -255,15 +265,19 @@ function ZO_SortFilterList:GetRowColors(data, mouseIsOver, control)
 end
 
 function ZO_SortFilterList:ColorRow(control, data, mouseIsOver)
-    for i = 1, control:GetNumChildren() do
-        local child = control:GetChild(i)
-        if not child.nonRecolorable then
-            local childType = child:GetType()
-            local textColor, iconColor = self:GetRowColors(data, mouseIsOver, child)
-            if(childType == CT_LABEL and textColor ~= nil) then
-                child:SetColor(textColor:UnpackRGBA())
-            elseif(childType == CT_TEXTURE and iconColor ~= nil) then
-                child:SetColor(iconColor:UnpackRGBA())
+    if self.automaticallyColorRows then
+        for i = 1, control:GetNumChildren() do
+            local child = control:GetChild(i)
+            if not child.nonRecolorable then
+                local childType = child:GetType()
+                local textColor, iconColor = self:GetRowColors(data, mouseIsOver, child)
+                if(childType == CT_LABEL and textColor ~= nil) then
+                    local r, g, b = textColor:UnpackRGB() 
+                    child:SetColor(r, g, b, child:GetControlAlpha())
+                elseif(childType == CT_TEXTURE and iconColor ~= nil) then
+                    local r, g, b = iconColor:UnpackRGB() 
+                    child:SetColor(r, g, b, child:GetControlAlpha())
+                end
             end
         end
     end
@@ -310,21 +324,25 @@ function ZO_SortFilterList:SetKeybindStripDescriptor(keybindStripDescriptor)
     self.keybindStripDescriptor = keybindStripDescriptor
 end
 
+function ZO_SortFilterList:SetKeybindStripId(keybindStripId)
+    self.keybindStripId = keybindStripId
+end
+
 function ZO_SortFilterList:AddKeybinds()
     if self.keybindStripDescriptor then
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor, self.keybindStripId)
     end
 end
 
 function ZO_SortFilterList:RemoveKeybinds()
     if self.keybindStripDescriptor then
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor, self.keybindStripId)
     end
 end
 
 function ZO_SortFilterList:UpdateKeybinds()
     if self.keybindStripDescriptor then
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor, self.keybindStripId)
     end
 end
 

@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Button name="ZO_ScrollUpButton" clickSound="Scroll_Up" virtual="true">
+        <Button name="ZO_ScrollUpButton" virtual="true">
             <Dimensions x="16" y="16" />
             <Anchor point="BOTTOM" relativePoint="TOP"/>
 
@@ -12,7 +12,7 @@
             />
         </Button>
 
-        <Button name="ZO_ScrollDownButton" clickSound="Scroll_Down" virtual="true">
+        <Button name="ZO_ScrollDownButton" virtual="true">
             <Dimensions x="16" y="16" />
             <Anchor point="TOP" relativePoint="BOTTOM"/>
 
@@ -24,7 +24,7 @@
             />
         </Button>
 
-        <Button name="ZO_ScrollEndButton" clickSound="Scroll_End" virtual="true">
+        <Button name="ZO_ScrollEndButton" virtual="true">
             <Textures
                 normal="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_up.dds"
                 pressed="EsoUI/Art/ChatWindow/chat_scrollbar_endArrow_down.dds"
@@ -64,6 +64,9 @@
                     <OnMouseExit>
                         ZO_VerticalScrollbarBase_OnMouseExit(self:GetParent())
                     </OnMouseExit>
+                    <OnClicked>
+                        ZO_VerticalScrollbarBase_OnScrollBarArrowClicked(self:GetParent())
+                    </OnClicked>
                 </Button>
 
                 <Button name="$(parent)Down" inherits="ZO_ScrollDownButton">
@@ -73,6 +76,9 @@
                     <OnMouseExit>
                         ZO_VerticalScrollbarBase_OnMouseExit(self:GetParent())
                     </OnMouseExit>
+                    <OnClicked>
+                        ZO_VerticalScrollbarBase_OnScrollBarArrowClicked(self:GetParent())
+                    </OnClicked>
                 </Button>
             </Controls>
 
@@ -125,7 +131,7 @@
 
                     <OnValueChanged>
                         ZO_ScrollList_MoveWindow(self:GetParent(), value)
-                    </OnValueChanged>                    
+                    </OnValueChanged>
                 </Slider>
             </Controls>
         </Control>
@@ -166,11 +172,12 @@
                 ZO_Scroll_Initialize(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)ScrollChild" resizeToFitDescendents="true">
-                    <OnInitialized>
-                        self:SetParent(self:GetParent():GetNamedChild("Scroll"))
-                        self:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
-                    </OnInitialized>
+                <Control name="$(parent)Scroll" override="true">
+                    <Controls>
+                        <Control name="$(parent)Child" resizeToFitDescendents="true">
+                            <Anchor point="TOPELFT"/>
+                        </Control>
+                    </Controls>
                 </Control>
             </Controls>
         </Control>

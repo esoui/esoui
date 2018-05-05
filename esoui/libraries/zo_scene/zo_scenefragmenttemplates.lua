@@ -2,10 +2,13 @@
 
 ZO_SimpleSceneFragment = ZO_SceneFragment:Subclass()
 
-function ZO_SimpleSceneFragment:New(control)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.control = control
-    return fragment
+function ZO_SimpleSceneFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ZO_SimpleSceneFragment:Initialize(control)
+    ZO_SceneFragment.Initialize(self)
+    self.control = control
 end
 
 function ZO_SimpleSceneFragment:Show()
@@ -38,12 +41,11 @@ end
 ZO_AnimatedSceneFragment = ZO_SceneFragment:Subclass()
 
 function ZO_AnimatedSceneFragment:New(...)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:Initialize(...)
-    return fragment
+    return ZO_SceneFragment.New(self, ...)
 end
 
 function ZO_AnimatedSceneFragment:Initialize(animationTemplate, control, alwaysAnimate, duration)
+    ZO_SceneFragment.Initialize(self)
     self.control = control
     self.alwaysAnimate = alwaysAnimate
     self.animationOnStop = function()
@@ -179,12 +181,11 @@ end
 ZO_ConveyorSceneFragment = ZO_SceneFragment:Subclass()
 
 function ZO_ConveyorSceneFragment:New(...)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:Initialize(...)
-    return fragment
+    return ZO_SceneFragment.New(self, ...)
 end
 
 function ZO_ConveyorSceneFragment:Initialize(control, alwaysAnimate, inAnimation, outAnimation)
+    ZO_SceneFragment.Initialize(self)
     self.control = control
     self.alwaysAnimate = alwaysAnimate
     self.inAnimation = inAnimation or "ConveyorInSceneAnimation"
@@ -203,7 +204,7 @@ function ZO_ConveyorSceneFragment:Initialize(control, alwaysAnimate, inAnimation
         if wasHiding then
             control:SetHidden(true)
         end
-                                                                    
+
         ReleaseAnimation(self.currentAnimationTemplate, self.animationKey)
         self.animation = nil
         self.animationKey = nil
@@ -246,14 +247,19 @@ do
         local outAnimation = g_reverseAnimationDirection and self.inAnimation or self.outAnimation
 
         local currentScene = self.sceneManager:GetCurrentScene()
+        local currentSceneName = currentScene:GetName()
         if self:GetState() == SCENE_FRAGMENT_SHOWING then
-            if self.sceneManager:WasSceneOnStack(currentScene:GetName()) then
+            -- If we are showing the scene after being hidden and the scene was showing before
+            -- then we want to animate the fragment back in by reversing how the fragment was hidden
+            if currentScene:GetState() == SCENE_SHOWING and self.sceneManager:WasSceneOnStack(currentSceneName) then
                 return outAnimation, backward
             end
             return inAnimation, forward
         else
-            if self.sceneManager:WasSceneOnTopOfStack(currentScene:GetName()) then
-                if not self.sceneManager:IsSceneOnStack(currentScene:GetName()) then
+            -- if the fragment is hiding and the current scene is also being hidden and removed from the stack
+            -- then animate the fragment out by reversing how the fragment was originally shown
+            if currentScene:GetState() == SCENE_HIDING and self.sceneManager:WasSceneOnTopOfStack(currentSceneName) then
+                if not self.sceneManager:IsSceneOnStack(currentSceneName) then
                     local nextScene = self.sceneManager:GetNextScene()
                     if not nextScene or nextScene ~= self.sceneManager:GetBaseScene() then
                         return inAnimation, backward
@@ -408,43 +414,71 @@ function ZO_ConveyorSceneFragment:Hide()
     self:ChooseAndPlayAnimation()
 end
 
+----------------------------
+-- Hidable Scene Fragment
+----------------------------
+
+ZO_HideableSceneFragment = ZO_SceneFragment:Subclass()
+
+function ZO_HideableSceneFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ZO_HideableSceneFragment:Initialize()
+    ZO_SceneFragment.Initialize(self)
+    self.hiddenReasons = ZO_HiddenReasons:New()
+
+    self:SetConditional(function()
+        return not self.hiddenReasons:IsHidden()
+    end)
+end
+
+function ZO_HideableSceneFragment:SetHiddenForReason(reason, hidden, customShowDuration, customHideDuration)
+    --Refresh here even if this reason didn't change the hidden state for the hiddenReasons object. If, for example, a reason came in
+    --that wanted to hide over 0 ms and the fragment was currently hiding over 200ms, we want to Refresh so we can Hide at the faster rate.
+    self.hiddenReasons:SetHiddenForReason(reason, hidden)
+    self:Refresh(customShowDuration, customHideDuration)
+end
+
+function ZO_HideableSceneFragment:IsHiddenForReason(reason)
+    return self.hiddenReasons:IsHiddenForReason(reason)
+end
+
 --HUD Fade Scene Fragment
 
 DEFAULT_HUD_DURATION = 250
-ZO_HUDFadeSceneFragment = ZO_SceneFragment:Subclass()
+ZO_HUDFadeSceneFragment = ZO_HideableSceneFragment:Subclass()
 
-function ZO_HUDFadeSceneFragment:New(control, showDuration, hideDuration)
+function ZO_HUDFadeSceneFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ZO_HUDFadeSceneFragment:Initialize(control, showDuration, hideDuration)
+    ZO_HideableSceneFragment.Initialize(self)
+
     showDuration = showDuration or DEFAULT_HUD_DURATION
     hideDuration = hideDuration or 0
 
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.hiddenReasons = ZO_HiddenReasons:New()
-    fragment.animationOnStop =  function(timeline, completed)
-                                if(completed) then
-                                    fragment:OnShown()
+    self.animationOnStop =  function(timeline, completed)
+                                if completed then
+                                    self:OnShown()
                                 end
                             end
-    fragment.animationReverseOnStop = function(timeline, completed)
-                                    if(completed) then
+    self.animationReverseOnStop = function(timeline, completed)
+                                    if completed then
                                         control:SetHidden(true)
                                         control:SetAlpha(1)
-                                        fragment:OnHidden()
+                                        self:OnHidden()
                                     end
                                 end
 
-    fragment.control = control
-    fragment.showDuration = showDuration
-    fragment.hideDuration = hideDuration
-
-    fragment:SetConditional(function()
-        return not fragment.hiddenReasons:IsHidden()
-    end)
+    self.control = control
+    self.showDuration = showDuration
+    self.hideDuration = hideDuration
 
     --Allow Show and Hide to be called even if we're already showing or hiding. Something may come along with a hide that
     --requests to be hidden faster than the hide already in progress.
-    fragment:SetAllowShowHideTimeUpdates(true)
-
-    return fragment
+    self:SetAllowShowHideTimeUpdates(true)
 end
 
 function ZO_HUDFadeSceneFragment:GetAnimation()
@@ -454,17 +488,6 @@ function ZO_HUDFadeSceneFragment:GetAnimation()
     end
 
     return self.animation
-end
-
-function ZO_HUDFadeSceneFragment:SetHiddenForReason(reason, hidden, customShowDuration, customHideDuration)
-    --Refresh here even if this reason didn't change the hidden state for the hiddenReasons object. If, for example, a reason came in
-    --that wanted to hide over 0 ms and the fragment was currently hiding over 200ms, we want to Refresh so we can Hide at the faster rate.
-    self.hiddenReasons:SetHiddenForReason(reason, hidden)
-    self:Refresh(customShowDuration, customHideDuration)
-end
-
-function ZO_HUDFadeSceneFragment:IsHiddenForReason(reason)
-    return self.hiddenReasons:IsHiddenForReason(reason)
 end
 
 function ZO_HUDFadeSceneFragment:Show(customShowDuration)
@@ -485,8 +508,8 @@ function ZO_HUDFadeSceneFragment:Show(customShowDuration)
         if(self.control:IsHidden()) then
             --play from start at show duration
             self.control:SetHidden(false)
-            animation:SetHandler("OnStop", self.animationOnStop)  
-            alphaAnimation:SetDuration(duration)     
+            animation:SetHandler("OnStop", self.animationOnStop)
+            alphaAnimation:SetDuration(duration)
             animation:PlayFromStart()
         end
     end
@@ -509,8 +532,8 @@ function ZO_HUDFadeSceneFragment:Hide(customHideDuration)
     else
         if(not self.control:IsHidden()) then
             --play from end at hide duration
-            animation:SetHandler("OnStop", self.animationReverseOnStop)  
-            alphaAnimation:SetDuration(duration)     
+            animation:SetHandler("OnStop", self.animationReverseOnStop)
+            alphaAnimation:SetDuration(duration)
             animation:PlayFromEnd()
         else
             self:OnHidden()
@@ -536,11 +559,14 @@ end
 
 ZO_AnchorSceneFragment = ZO_SceneFragment:Subclass()
 
-function ZO_AnchorSceneFragment:New(control, anchor)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.control = control
-    fragment.anchor = anchor
-    return fragment
+function ZO_AnchorSceneFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ZO_AnchorSceneFragment:Initialize(control, anchor)
+    ZO_SceneFragment.Initialize(self)
+    self.control = control
+    self.anchor = anchor
 end
 
 function ZO_AnchorSceneFragment:Show()
@@ -624,18 +650,28 @@ end
 --Action Layer Fragment
 -------------------------
 
-ZO_ActionLayerFragment = ZO_SceneFragment:Subclass()
+ZO_ActionLayerFragment = ZO_HideableSceneFragment:Subclass()
 
-function ZO_ActionLayerFragment:New(actionLayerName)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.actionLayerName = actionLayerName
+function ZO_ActionLayerFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
 
-    --ZO_ActionLayerFragments should always refresh so that in the case where a new scene
-    --is shown with a different combination of layers, the intended stack order for the layers
-    --won't be broken by leaving the previous ones pushed.
-    fragment:SetForceRefresh(true)
+function ZO_ActionLayerFragment:Initialize(actionLayerName)
+    ZO_HideableSceneFragment.Initialize(self)
+    self.actionLayerName = actionLayerName
 
-    return fragment
+    self:RegisterCallback("Refreshed", function(oldState, newState, asAResultOfSceneStateChange, refreshedForScene)
+        --If the fragments were refreshed and we were already showing then re-push this action layer so it falls into order. For example, if layers A and B are in the current and next scene,
+        --but the next scene has layer C that comes before the 2 shared layers we will need to re-push them after layer C is added so they are on the top of the stack instead of the bottom.
+        --We only do it for already shown fragments on the scene showing because fragments that went from hidden or showing to shown already added from the Show() function and we don't want to
+        --constantly be readding these because there is code that adds action layers manually after the scene starts showing that would be pushed to the bottom if we readded.
+        if asAResultOfSceneStateChange then
+            if refreshedForScene:GetState() == SCENE_SHOWING and oldState == SCENE_FRAGMENT_SHOWN and newState == SCENE_FRAGMENT_SHOWN then
+                RemoveActionLayerByName(self.actionLayerName)
+                PushActionLayerByName(self.actionLayerName)
+            end
+        end
+    end)
 end
 
 function ZO_ActionLayerFragment:Show()

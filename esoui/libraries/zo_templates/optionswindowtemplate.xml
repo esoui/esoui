@@ -217,6 +217,73 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_Options_Color" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" />
+                </Label>
+                <Control name="$(parent)ColorSection" mouseEnabled="true">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+
+                    <OnMouseEnter>
+                        ZO_Options_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+
+                    <OnMouseUp>
+                        ZO_Options_ColorOnMouseUp(self:GetParent(), upInside)
+                    </OnMouseUp>
+                </Control>
+                <Texture name="$(parent)Color">
+                    <Dimensions x="36" y="22" />
+                    <Anchor point="LEFT" relativeTo="$(parent)ColorSection" offsetX="4" />
+                </Texture>
+                <Texture name="$(parent)Border" textureFile="EsoUI/Art/ChatWindow/chatOptions_bgColSwatch_frame.dds">
+                    <TextureCoords left="0" right="0.625" top="0" bottom="0.8125"/>
+                    <Dimensions x="40" y="26" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Color" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_InvokeCallback" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Button name="$(parent)Button" inherits="ZO_DefaultButton" mouseEnabled="true">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+                    <OnMouseEnter>
+                        ZO_Options_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Button>
+            </Controls>
+        </Control>
+
         <Control name="ZO_Options_PanelHeader" hidden="true" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="ZO_OptionsWindowSettingsScrollChild" />
         </Control>

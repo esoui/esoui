@@ -188,7 +188,7 @@ function ZO_CheckButtonLabel_ColorText(label, over)
 end
 
 function ZO_CheckButtonLabel_SetTextColor(button, r, g, b)
-    label = button:GetNamedChild("Label")
+    local label = button:GetNamedChild("Label")
     label:SetColor(r, g, b)
 end
 
@@ -411,6 +411,8 @@ local function UpdateWeaponSwapButton(self)
 end
 
 function ZO_WeaponSwap_OnInitialized(self, hideWhenUnearned)
+    self.hideWhenUnearned = hideWhenUnearned
+    
     local function OnUnitCreated(_, unitTag)
         if(unitTag == "player") then
             self.unearned = GetUnitLevel("player") < GetWeaponSwapUnlockedLevel()
@@ -441,12 +443,18 @@ function ZO_WeaponSwap_OnInitialized(self, hideWhenUnearned)
     end
     self:RegisterForEvent(EVENT_LEVEL_UPDATE, OnLevelUpdate)
 
-    self.hideWhenUnearned = hideWhenUnearned
+    local function OnPlayerActivated()
+        self.unearned = GetUnitLevel("player") < GetWeaponSwapUnlockedLevel()
+        self.activeWeaponPair, self.disabled = GetActiveWeaponPairInfo()
+        UpdateWeaponSwapButton(self)
+    end
+    self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+
     self.lockIcon = GetControl(self, "Lock")
 
+    --Initialize these here since platform style depends on it
     self.unearned = GetUnitLevel("player") < GetWeaponSwapUnlockedLevel()
     self.activeWeaponPair, self.disabled = GetActiveWeaponPairInfo()
-    UpdateWeaponSwapButton(self)
 end
 
 function ZO_WeaponSwap_OnMouseEnter(self, anchorPoint, xOffset, yOffset)

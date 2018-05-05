@@ -72,11 +72,28 @@
           <!--NOTE: Instantiators of this radio button can choose to make a custom OnClicked handler -->
         </Button>
 
+        <Button name="ZO_LabeledRadioButton" inherits="ZO_RadioButton" virtual="true">
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGame" mouseEnabled="true">
+                    <OnMouseUp>
+                        local parent = self:GetParent()
+                        parent:GetHandler("OnClicked")(parent, button)
+                    </OnMouseUp>
+                    
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+            </Controls>
+        </Button>
+
         <Button name="ZO_CloseButton" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD" virtual="true">
             <Dimensions x="20" y="20" />
             <Anchor point="TOPRIGHT" offsetX="-5" offsetY="6" />
 
-			<TextureCoords left="0" top="0" right="0.625" bottom="0.625" />
+            <TextureCoords left="0" top="0" right="0.625" bottom="0.625" />
 
             <Textures
                 normal="EsoUI/Art/Buttons/closeButton_up.dds"
@@ -224,22 +241,6 @@
             </OnInitialized>
         </Button>
 
-        <Button name="ZO_BladeHeader" font="ZoFontGame" endCapWidth="22" verticalAlignment="CENTER" virtual="true">
-            <Dimensions x="200" y="28"/>
-            <PressedOffset x="2" y="2" />
-
-            <OnInitialized>
-                ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_BLADE)
-            </OnInitialized>
-            
-            <FontColors
-                normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
-                pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
-                mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
-                disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
-            />
-        </Button>
-
         <Button name="ZO_TreeButtonArrow" virtual="true">
             <Dimensions x="32" y="32"/>
             <OnInitialized>
@@ -264,16 +265,6 @@
                 pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
                 mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
                 disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
-            />
-        </Button>
-
-        <Button name="ZO_SwitchButton" virtual="true">
-            <Dimensions x="32" y="32"/>
-            <Textures
-                normal="EsoUI/Art/Buttons/switch_up.dds"
-                pressed="EsoUI/Art/Buttons/switch_down.dds"
-                mouseOver="EsoUI/Art/Buttons/generic32x32MouseOver.dds"
-                disabled="EsoUI/Art/Buttons/switch_disabled.dds"
             />
         </Button>
 
@@ -351,6 +342,19 @@
                 pressed="EsoUI/Art/Buttons/minus_down.dds"
                 mouseOver="EsoUI/Art/Buttons/minus_over.dds"
                 disabled="EsoUI/Art/Buttons/minus_disabled.dds"
+            />
+        </Button>
+
+        <Button name="ZO_ExtraLargeButton" inherits="ZO_DefaultButton" virtual="true">
+            <Dimensions x="256" y="78"/>
+            <!-- 256 X 128 texture cut to 256 x 78-->
+            <TextureCoords left="0" top="0" right="1" bottom="0.609375" />
+
+            <Textures
+                normal="EsoUI/Art/Buttons/button_xlarge_mouseUp.dds"
+                pressed="EsoUI/Art/Buttons/button_xlarge_mouseDown.dds"
+                mouseOver="EsoUI/Art/Buttons/button_xlarge_mouseOver.dds"
+                disabled="EsoUI/Art/Buttons/button_xlarge_mouseUp.dds"
             />
         </Button>
     </Controls>

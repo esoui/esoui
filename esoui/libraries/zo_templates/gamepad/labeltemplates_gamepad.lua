@@ -9,8 +9,6 @@ do
             return GetAllianceBannerIcon(2)
         elseif data == "alliance3" then
             return GetAllianceBannerIcon(3)
-        elseif data == "crowns" then
-            return "EsoUI/Art/currency/gamepad/gp_crowns.dds"
         elseif data == "timer" then
             return "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds"
         end

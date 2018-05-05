@@ -50,13 +50,13 @@
 
         <Texture name="ZO_GamepadWhiteFrameLeftLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" virtual="true">
             <Dimensions x="6" y="32" />
-            <TextureCoords left="0.65625" right="0.59375" top="0.265625" bottom="0.765625"/>
+            <TextureCoords left="0.65625" right="0.609375" top="0.265625" bottom="0.765625"/>
             <Anchor point="RIGHT" relativePoint="LEFT" />
         </Texture>
 
         <Texture name="ZO_GamepadWhiteFrameRightLarge" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_large_frame_white.dds" level="100" tier="HIGH" virtual="true">
             <Dimensions x="6" y="32" />
-            <TextureCoords left="0.59375" right="0.65625" top="0.265625" bottom="0.765625"/>
+            <TextureCoords left="0.609375" right="0.65625" top="0.265625" bottom="0.765625"/>
             <Anchor point="LEFT" relativePoint="RIGHT" />
         </Texture>
 
@@ -161,18 +161,6 @@
             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
         </Texture>
 
-        <!-- Keep this width in sync with the NORMAL_WIDTH constant in Lua. -->
-        <Control name="ZO_GamepadStatusBarContainerMedium" virtual="true">
-            <Dimensions x="237" y="22" />
-            <OnInitialized>
-                self.bgContainer = self:GetNamedChild("BgContainer")
-            </OnInitialized>
-        </Control>
-
-        <Control name="ZO_GamepadStatusBarBgContainerMedium" level="100" virtual="true">
-            <Dimensions x="237" y="18" />
-        </Control>
-
         <Control name="ZO_GamepadArrowStatusBarOverlayMedium" tier="HIGH" layer="OVERLAY" virtual="true">
             <AnchorFill />
             <Controls>
@@ -264,31 +252,6 @@
             </Controls>
         </StatusBar>
 
-        <StatusBar name="ZO_GamepadArrowStatusBarWithBGAndLabel" inherits="ZO_GamepadArrowStatusBarWithBGLarge" virtual="true">
-            <OnInitialized>
-                self.gloss = self:GetNamedChild("Gloss")
-                self.label = self:GetNamedChild("Label")
-            </OnInitialized>
-
-            <OnMinMaxValueChanged>
-                self.gloss:SetMinMax(min, max)
-                self.label:SetText(zo_strformat(SI_JOURNAL_PROGRESS_BAR_PROGRESS, self:GetValue(), max))
-            </OnMinMaxValueChanged>
-
-            <OnValueChanged>
-                self.gloss:SetValue(value)
-                local min, max = self:GetMinMax()
-                self.label:SetText(zo_strformat(SI_JOURNAL_PROGRESS_BAR_PROGRESS, value, max))
-            </OnValueChanged>
-
-            <Controls>
-                <Label name="$(parent)Label" font="ZoFontGamepad27" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" layer="OVERLAY">
-                    <Anchor point="LEFT" />
-                    <Anchor point="RIGHT" />
-                </Label>
-            </Controls>
-        </StatusBar>
-
         <!-- Short name because we were hitting the character limit inside of tooltips -->
         <Control name="ZO_ItemImproveBar_Gamepad" virtual="true" >
             <Dimensions x="245" y="22"/>
@@ -307,85 +270,5 @@
                 <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" />
             </Controls>
         </Control>
-  
-        <Control name="ZO_GamepadChampionFrame" tier="HIGH" layer="OVERLAY" level="0" virtual="true" >
-            <AnchorFill/>
-            <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_frame.dds">
-                    <Dimensions x="5" y="12"/>
-                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.75"/>
-                    <Anchor point="TOPLEFT" offsetX="-2" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-2" />
-                </Texture>
-
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_frame.dds">
-                    <Dimensions x="16" y="12"/>
-                    <TextureCoords left="0.6718" right="0.73047" top="0" bottom="0.75"/>
-                    <Anchor point="TOPRIGHT" offsetX="4"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="4"/>
-                </Texture>
-
-                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_frame.dds">
-                    <TextureCoords left="0.0234" right="0.66796875" top="0" bottom="0.75"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
-                </Texture>
-                
-            </Controls>
-        </Control>
-
-        <Control name="ZO_GamepadChampionBG" virtual="true" >
-            <AnchorFill/>
-            <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_BG.dds">
-                    <Dimensions x="5" y="12"/>
-                    <TextureCoords left="0" right="0.0195" top="0" bottom="0.75"/>
-                    <Anchor point="TOPLEFT" offsetX="-2" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-2" />
-                </Texture>
-
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_BG.dds">
-                    <Dimensions x="16" y="12"/>
-                    <TextureCoords left="0.6718" right="0.73047" top="0" bottom="0.75"/>
-                    <Anchor point="TOPRIGHT" offsetX="2"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="2"/>
-                </Texture>
-
-                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_BG.dds">
-                    <TextureCoords left="0.0234" right="0.66796875" top="0" bottom="0.75"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
-                </Texture>
-            </Controls>
-        </Control>
-
-        <StatusBar name="ZO_GamepadChampionBar" level="500" virtual="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_fill.dds">
-            <Dimensions y="12" />
-            <TextureCoords left="0" right="1"  top="0" bottom="0.75"/>
-
-            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_leadingEdge.dds" width="8" height="12"/>
-            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.75" />
-            <OnInitialized>
-                self.gloss = self:GetNamedChild("Gloss")
-            </OnInitialized>
-
-            <OnMinMaxValueChanged>
-                self.gloss:SetMinMax(min, max)
-            </OnMinMaxValueChanged>
-
-            <OnValueChanged>
-                self.gloss:SetValue(value)
-            </OnValueChanged>
-            <Controls>
-                <StatusBar name="$(parent)Gloss" inherits="ZO_GamepadChampionBarGloss" />
-            </Controls>
-        </StatusBar>
-
-        <StatusBar name="ZO_GamepadChampionBarGloss" level="550" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_fill_gloss.dds" virtual="true">
-            <AnchorFill />
-            <TextureCoords left="0" right="1" top="0" bottom="0.75"/>
-            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_championBar_leadingEdge_gloss.dds" width="5" height="12" />
-            <LeadingEdgeTextureCoords left="0.75" right="1" top="0" bottom="0.75"/>
-        </StatusBar>
     </Controls>
 </GuiXml>

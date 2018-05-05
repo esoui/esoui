@@ -1,0 +1,13 @@
+<GuiXml>
+    <Controls>
+        <Scroll name="ZO_TextureLayerRevealAnimationWindow" virtual="true">
+            <Anchor point="CENTER" relativePoint="TOPLEFT"/>
+            <Controls>
+                <Texture name="$(parent)Texture" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Anchor point="TOPLEFT" relativeTo="$(grandparent)"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)"/>
+                </Texture>
+            </Controls>
+        </Scroll>        
+    </Controls>
+</GuiXml>

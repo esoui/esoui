@@ -77,6 +77,9 @@ function ZO_InteractiveRadialMenuController:StartInteraction()
 end
 
 function ZO_InteractiveRadialMenuController:StopInteraction()
+    local wasShowingRadial = self.beginHold == nil
+    self.beginHold = nil
+
     if self.isInteracting then
         self.isInteracting = false
 
@@ -84,10 +87,9 @@ function ZO_InteractiveRadialMenuController:StopInteraction()
         RETICLE:RequestHidden(false)
 
         self.menu:SelectCurrentEntry()
-    elseif self.beginHold then
-        self:InteractionCanceled()
     end
-    self.beginHold = nil
+
+    return wasShowingRadial
 end
 
 function ZO_InteractiveRadialMenuController:OnUpdate()
@@ -125,9 +127,5 @@ function ZO_InteractiveRadialMenuController:OnSelectionChangedCallback(selectedE
 end
 
 function ZO_InteractiveRadialMenuController:PopulateMenu()
-    -- Should be Overridden
-end
-
-function ZO_InteractiveRadialMenuController:InteractionCanceled()
     -- Should be Overridden
 end

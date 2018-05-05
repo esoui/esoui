@@ -25,6 +25,8 @@ function ZO_GamepadEditBox_FocusGained(editControl)
 		},
 
 		{
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Edit Box Accept",
             ethereal = true,
 			keybind = "DIALOG_PRIMARY",
 			callback = function()
@@ -34,6 +36,8 @@ function ZO_GamepadEditBox_FocusGained(editControl)
 		},
 
 		{
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Edit Box Cancel",
 			ethereal = true,
 			keybind = "DIALOG_NEGATIVE",
 			callback = function()

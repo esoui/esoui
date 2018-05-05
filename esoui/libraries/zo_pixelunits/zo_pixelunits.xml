@@ -1,8 +1,8 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_PixelUnitsFromChildren" virtual="true">
+        <Control name="ZO_PixelUnitsControl" virtual="true">
             <OnInitialized>
-                ZO_PixelUnitsFromChildren_OnInitialized(self)
+                ZO_PixelUnitsControl_OnInitialized(self)
             </OnInitialized>
         </Control>
     </Controls>

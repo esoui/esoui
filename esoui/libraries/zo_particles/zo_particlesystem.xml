@@ -1,0 +1,8 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ParticleAnimationTimeline"/>
+    </Animations>
+    <Controls>
+        <Texture name="ZO_ParticleTexture" virtual="true" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true"/>
+    </Controls>
+</GuiXml>
