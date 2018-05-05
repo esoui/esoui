@@ -2,6 +2,9 @@ local QUEST_TEMPLATE = "ZO_QuestJournal_Gamepad_MenuEntryTemplate"
 local QUEST_HEADER_TEMPLATE = "ZO_GamepadMenuEntryHeaderTemplate"
 local SELECTED_QUEST_TEXTURE = "EsoUI/Art/Journal/Gamepad/gp_trackedQuestIcon.dds"
 
+local QUEST_LIST = "questList"
+local OPTIONS_LIST = "optionsList"
+
 ZO_QuestJournal_Gamepad = ZO_Object.MultiSubclass(ZO_QuestJournal_Shared, ZO_Gamepad_ParametricList_Screen)
 
 function ZO_QuestJournal_Gamepad:New(...)
@@ -11,25 +14,60 @@ function ZO_QuestJournal_Gamepad:New(...)
 end
 
 function ZO_QuestJournal_Gamepad:Initialize(control)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control)
+    self.sceneName = "gamepad_quest_journal"
+    GAMEPAD_QUEST_JOURNAL_ROOT_SCENE = ZO_Scene:New(self.sceneName, SCENE_MANAGER)
+    local DONT_ACTIVATE_ON_SHOW = false -- we'll manually set our list
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, GAMEPAD_QUEST_JOURNAL_ROOT_SCENE)
 
     self.control = control
-    self.sceneName = "gamepad_quest_journal"
-    self.optionsSceneName = "gamepad_quest_journal_options"
 
     self.questList = self:GetMainList()
     self.questList:SetNoItemText(GetString(SI_GAMEPAD_QUEST_JOURNAL_NO_QUESTS))
+
     self.optionsList = self:AddList("Options")
     self:SetupOptionsList(self.optionsList)
-    self.rightPane = control:GetNamedChild("RightPane")
-    self.middlePane = control:GetNamedChild("MiddlePane")
-    self.contentHeader = self.middlePane:GetNamedChild("Container").header
 
-    self.conditionTextLabel = control:GetNamedChild("ConditionTextLabel")
-    self.hintTextLabel = control:GetNamedChild("HintTextLabel")
-    self.hintTextBulletList = ZO_BulletList:New(control:GetNamedChild("HintTextBulletList"), "ZO_QuestJournal_HintBulletLabel_Gamepad")
-    self.conditionTextBulletList = ZO_BulletList:New(control:GetNamedChild("ConditionTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad", nil, "ZO_QuestJournal_CompletedTaskIcon_Gamepad")
-    self.optionalStepTextBulletList = ZO_BulletList:New(control:GetNamedChild("OptionalStepTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad")
+    -- Middle Pane
+    self.middlePane = control:GetNamedChild("MiddlePane")
+    local middlePaneContainer = self.middlePane:GetNamedChild("Container")
+    self.contentHeader = middlePaneContainer.header
+    local middlePaneContent = middlePaneContainer:GetNamedChild("Content")
+    self.questInfoContainer = middlePaneContent:GetNamedChild("QuestInfoContainer")
+    
+    local questInfoContainerScroll = self.questInfoContainer:GetNamedChild("Scroll")
+    local questInfoContainerScrollChild = self.questInfoContainer:GetNamedChild("ScrollChild")
+    self.bgText = middlePaneContent:GetNamedChild("BGText")
+    self.bgText:SetParent(questInfoContainerScrollChild)
+    self.bgText:ClearAnchors()
+    self.bgText:SetAnchor(TOPLEFT, questInfoContainerScrollChild, TOPLEFT)
+    self.bgText:SetAnchor(TOPRIGHT, questInfoContainerScroll, TOPRIGHT)
+
+    self.stepText = middlePaneContent:GetNamedChild("StepText")
+
+    self.middlePaneFragment = ZO_FadeSceneFragment:New(self.middlePane)
+
+    -- Right Pane
+    self.rightPane = control:GetNamedChild("RightPane")
+    local rightPaneContent = self.rightPane:GetNamedChild("ContainerContent")
+    self.questStepContainer = rightPaneContent:GetNamedChild("QuestStepContainer")
+
+    local questStepContainerScroll = self.questStepContainer:GetNamedChild("Scroll")
+    local questStepContainerScrollChild = self.questStepContainer:GetNamedChild("ScrollChild")
+    self.conditionTextLabel = rightPaneContent:GetNamedChild("ConditionTextLabel")
+    self.conditionTextLabel:SetParent(questStepContainerScrollChild)
+    self.conditionTextLabel:ClearAnchors()
+    self.conditionTextLabel:SetAnchor(TOPLEFT, questStepContainerScrollChild, TOPLEFT, 50)
+    self.conditionTextLabel:SetAnchor(RIGHT, questStepContainerScroll, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X)
+
+    self.conditionTextBulletList = ZO_BulletList:New(rightPaneContent:GetNamedChild("ConditionTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad", nil, "ZO_QuestJournal_CompletedTaskIcon_Gamepad")
+
+    self.optionalStepTextLabel = rightPaneContent:GetNamedChild("OptionalStepTextLabel")
+    self.optionalStepTextBulletList = ZO_BulletList:New(rightPaneContent:GetNamedChild("OptionalStepTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad")
+
+    self.hintTextLabel = rightPaneContent:GetNamedChild("HintTextLabel")
+    self.hintTextBulletList = ZO_BulletList:New(rightPaneContent:GetNamedChild("HintTextBulletList"), "ZO_QuestJournal_HintBulletLabel_Gamepad")
+
+    self.rightPaneFragment = ZO_FadeSceneFragment:New(self.rightPane)
 
     local LINE_PADDING_Y = 11
     self.hintTextBulletList:SetLinePaddingY(LINE_PADDING_Y)
@@ -40,8 +78,6 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
     self.hintTextBulletList:SetBulletPaddingX(BULLET_PADDING_X)
     self.conditionTextBulletList:SetBulletPaddingX(BULLET_PADDING_X)
     self.optionalStepTextBulletList:SetBulletPaddingX(BULLET_PADDING_X)
-
-    GAMEPAD_QUEST_JOURNAL_OPTIONS_FRAGMENT = self:GetListFragment(self.optionsList)
 
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE)
     self.headerData =
@@ -114,30 +150,101 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
     ZO_QuestJournal_Shared.Initialize(self, control)
 end
 
+function ZO_QuestJournal_Gamepad:OnDeferredInitialize()
+    -- this needs to be deferred because the background fragments don't exist yet
+    self.questInfoFragmentGroup =
+        {
+            GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT,
+            GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT,
+            self.middlePaneFragment,
+            self.rightPaneFragment,
+        }
+
+    self:SetListsUseTriggerKeybinds(true)
+end
+
+-- Scene state change callbacks overriden from ZO_Gamepad_ParametricList_Screen
+function ZO_QuestJournal_Gamepad:OnShowing()
+    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+
+    self:SwitchActiveList(QUEST_LIST)
+end
+
+function ZO_QuestJournal_Gamepad:OnHide()
+    self:Deactivate()
+
+    self:SwitchActiveList(nil)
+
+    self:SetKeybindButtonGroup(nil)
+end
+
+function ZO_QuestJournal_Gamepad:SwitchActiveList(listDescriptor)
+    if listDescriptor == self.currentListType then return end
+
+    self.previousListType = self.currentListType
+    self.currentListType = listDescriptor
+
+    -- if our scene isn't showing we shouldn't actually switch the lists
+    -- we'll rely on the scene showing to set the list
+    if self.scene:IsShowing() then
+        if listDescriptor == QUEST_LIST then
+            if self.listDirty then
+                self:RefreshQuestCount()
+                self:RefreshQuestMasterList()
+                self:RefreshQuestList()
+            end
+
+            if self.previousListType == nil then
+                self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
+            elseif self.previousListType == OPTIONS_LIST then
+                if self.questList:IsEmpty() then
+                    self:RefreshDetails()
+                end
+            end
+
+            self:SetCurrentList(self.questList)
+            ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+            ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
+
+            self:SetKeybindButtonGroup(self.mainKeybindStripDescriptor)
+        elseif listDescriptor == OPTIONS_LIST then
+            self:RefreshOptionsList()
+            self:SetCurrentList(self.optionsList)
+            self:SetKeybindButtonGroup(self.optionsKeybindStripDescriptor)
+        end
+    end
+end
+
 function ZO_QuestJournal_Gamepad:RegisterIcons()
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,    INSTANCE_DISPLAY_TYPE_SOLO,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_instance.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,    INSTANCE_DISPLAY_TYPE_DUNGEON,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDungeon.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,    INSTANCE_DISPLAY_TYPE_GROUP_DELVE,   "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDelve.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,    INSTANCE_DISPLAY_TYPE_GROUP_AREA,    "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupArea.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,    INSTANCE_DISPLAY_TYPE_RAID,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,    INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,"EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")   
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,      "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDelve.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupArea.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,             "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_delve.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_housing.dds")
 end
 
 function ZO_QuestJournal_Gamepad:RegisterTooltips()
     local ICON_SIZE = 48
-    local groupIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_group.dds", ICON_SIZE, ICON_SIZE)
+    local dungeonIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDungeon.dds", ICON_SIZE, ICON_SIZE)
     local raidIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_raid.dds", ICON_SIZE, ICON_SIZE)
     local soloIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_instance.dds", ICON_SIZE, ICON_SIZE)
     local publicDungeonIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds", ICON_SIZE, ICON_SIZE)
     local groupAreaIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupArea.dds", ICON_SIZE, ICON_SIZE)
     local groupDelveIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDelve.dds", ICON_SIZE, ICON_SIZE)
+    local delveIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_delve.dds", ICON_SIZE, ICON_SIZE)
+    local housingIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_housing.dds", ICON_SIZE, ICON_SIZE)
 
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,           zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,        zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, groupIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,           zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_RAID, raidIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,     zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupAreaIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,    zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupDelveIcon))
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON, zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_PUBLIC_DUNGEON, publicDungeonIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, dungeonIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_RAID, raidIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,       zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupAreaIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,      zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_GROUP_AREA, groupDelveIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_PUBLIC_DUNGEON, publicDungeonIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_DELVE, delveIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_HOUSING, housingIcon))
 end
 
 function ZO_QuestJournal_Gamepad:GetQuestDataString()
@@ -156,14 +263,6 @@ function ZO_QuestJournal_Gamepad:GetQuestDataString()
     end
 
     return repeatableText, instanceDisplayTypeText
-end
-
-function ZO_QuestJournal_Gamepad:PerformDeferredInitialization()
-    if self.initialized then return end
-
-    -- TODO.
-
-    self.initialized = true
 end
 
 function ZO_QuestJournal_Gamepad:OnTargetChanged(...)
@@ -212,10 +311,7 @@ function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
 
             visible = function()
                 local selectedQuestIndex = self:GetSelectedQuestIndex()
-                if selectedQuestIndex then
-                    return true
-                end
-                return false
+                return selectedQuestIndex ~= nil
             end
         },
 
@@ -233,10 +329,7 @@ function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
 
             visible = function()
                 local selectedQuestIndex = self:GetSelectedQuestIndex()
-                if selectedQuestIndex then
-                    return true
-                end
-                return false
+                return selectedQuestIndex ~= nil
             end
         },
 
@@ -246,8 +339,7 @@ function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_TERTIARY",
 
             callback = function()
-                self:DeactivateCurrentList()
-                SCENE_MANAGER:Push(self.optionsSceneName)
+                self:SwitchActiveList(OPTIONS_LIST)
             end,
 
             visible = function()
@@ -260,7 +352,6 @@ function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
         },
     }
 
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.mainKeybindStripDescriptor, self.questList)
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.mainKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 
     -- Options keybind strip
@@ -290,68 +381,10 @@ function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
         },
     }
 
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.optionsKeybindStripDescriptor, self.optionsList)
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.optionsKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
-end
-
-function ZO_QuestJournal_Gamepad:InitializeScenes()
-    local returningFromOptions = false
-    
-    GAMEPAD_QUEST_JOURNAL_ROOT_SCENE = ZO_Scene:New(self.sceneName, SCENE_MANAGER)
-    GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:PerformDeferredInitialization()
-            
-            if self.listDirty then
-                self:RefreshQuestCount()
-                self:RefreshQuestMasterList()
-                self:RefreshQuestList()
-            end
-            
-            self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
-
-            self:SetCurrentList(self.questList)
-            ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
-            ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
-
-            if not returningFromOptions then
-                local questListEmpty = self.questList:IsEmpty()
-
-                if questListEmpty then
-                    self:RefreshDetails()
-                elseif QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
-                    self:SelectFocusedQuest()
-                elseif not questListEmpty then
-                    self.questList:SetSelectedIndexWithoutAnimation(1)
-                end
-            else
-                returningFromOptions = false
-            end
-
-            self:SetKeybindButtonGroup(self.mainKeybindStripDescriptor)
-        elseif newState == SCENE_HIDDEN then
-            self.questList:Deactivate()
-
-            self:SetKeybindButtonGroup(nil)
-        end
-    end)
-
-    GAMEPAD_QUEST_JOURNAL_OPTIONS_SCENE = ZO_Scene:New(self.optionsSceneName, SCENE_MANAGER)
-    GAMEPAD_QUEST_JOURNAL_OPTIONS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:RefreshOptionsList()
-            self:SetCurrentList(self.optionsList)
-            self:SetKeybindButtonGroup(self.optionsKeybindStripDescriptor)
-        elseif newState == SCENE_HIDDEN then
-            if SCENE_MANAGER:IsShowingNext(self.sceneName) then
-                returningFromOptions = true
-            end
-
-            self.optionsList:Deactivate()
-
-            self:SetKeybindButtonGroup(nil)
-        end
-    end)
+    local function OptionsListBackFunction()
+        self:SwitchActiveList(QUEST_LIST)
+    end
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.optionsKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OptionsListBackFunction)
 end
 
 function ZO_QuestJournal_Gamepad:GetSceneName()
@@ -379,12 +412,6 @@ function ZO_QuestJournal_Gamepad:RefreshQuestCount()
     self:Update()
 end
 
-local function UpdateListAnchors(control, attachedTo)
-    control:ClearAnchors()
-    control:SetAnchor(TOPLEFT, attachedTo, BOTTOMLEFT, 50, yOffset)
-    control:SetAnchor(TOPRIGHT, attachedTo, BOTTOMRIGHT, 0, 21)
-end
-
 function ZO_QuestJournal_Gamepad:RefreshDetails()
     if not SCENE_MANAGER:IsShowing(self.sceneName) then
         self.listDirty = true
@@ -397,18 +424,10 @@ function ZO_QuestJournal_Gamepad:RefreshDetails()
 
     local hasQuestData = (questData ~= nil)
     if hasQuestData then
-        GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+        GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:AddFragmentGroup(self.questInfoFragmentGroup)
     else
-        GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-        GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+        GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:RemoveFragmentGroup(self.questInfoFragmentGroup)
     end
-
-    local hideWindows = not hasQuestData
-    self.rightPane:SetHidden(hideWindows)
-    self.middlePane:SetHidden(hideWindows)
-    self.questInfoContainer:SetHidden(hideWindows)
-    self.questStepContainer:SetHidden(hideWindows)
 
     if hasQuestData then
         local _, bgText, stepText, stepType, stepOverrideText, completed = GetJournalQuestInfo(questData.questIndex)
@@ -454,7 +473,9 @@ function ZO_QuestJournal_Gamepad:RefreshDetails()
             ZO_ClearNumericallyIndexedTable(questStrings)
 
             local anchorToControl = self.optionalStepTextLabel:IsControlHidden() and self.conditionTextBulletList.control or self.optionalStepTextBulletList.control
-            UpdateListAnchors(self.hintTextLabel, anchorToControl, 0)
+            self.hintTextLabel:ClearAnchors()
+            self.hintTextLabel:SetAnchor(TOPLEFT, anchorToControl, BOTTOMLEFT, 50, 21)
+            self.hintTextLabel:SetAnchor(TOPRIGHT, anchorToControl, BOTTOMRIGHT, 0, 21)
 
             self:BuildTextForStepVisibility(questIndex, QUEST_STEP_VISIBILITY_HINT)
             if self.hintTextLabel then
@@ -500,8 +521,8 @@ function ZO_QuestJournal_Gamepad:RefreshOptionsList()
                                 if selectedQuestIndex then
                                     local questName = GetJournalQuestInfo(selectedQuestIndex)
                                     self:SetKeybindButtonGroup(nil)
-                                    ZO_Help_Customer_Service_Gamepad_SetupQuestIssueTicket(questName)
-                                    SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+                                    HELP_QUEST_ASSISTANCE_GAMEPAD:InitWithDetails(questName)
+                                    SCENE_MANAGER:Push(HELP_QUEST_ASSISTANCE_GAMEPAD:GetSceneName())
                                 end
                             end
     table.insert(options, reportQuest)
@@ -517,8 +538,8 @@ end
 function ZO_QuestJournal_Gamepad:RefreshQuestMasterList()
     self.questMasterList = QUEST_JOURNAL_MANAGER:GetQuestListData()
 
-    -- If we're showing the options menu, make sure we still have the quest that we're viewing options for
-    if SCENE_MANAGER:IsShowing(self.optionsSceneName) then
+    -- If we're showing the options list, make sure we still have the quest that we're viewing options for
+    if self.currentListType == OPTIONS_LIST then
         local hasQuest = false
         for i, quest in ipairs(self.questMasterList) do
             if quest.questIndex == self:GetSelectedQuestIndex() then
@@ -527,8 +548,8 @@ function ZO_QuestJournal_Gamepad:RefreshQuestMasterList()
         end
 
         if not hasQuest then
-            -- Quest is no longer available...back out of the options menu
-            SCENE_MANAGER:HideCurrentScene()
+            -- Quest is no longer available...back out of the options list
+            self:SwitchActiveList(QUEST_LIST)
         end
     end
 end
@@ -554,6 +575,8 @@ function ZO_QuestJournal_Gamepad:RefreshQuestList()
     self.questList:Commit()
 
     self:RefreshDetails()
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 
 function ZO_QuestJournal_Gamepad:GetNextSortedQuestForQuestIndex(questIndex)
@@ -571,7 +594,7 @@ function ZO_QuestJournal_Gamepad:FocusQuestWithIndex(index)
     self:FireCallbacks("QuestSelected", index)
     -- The quest tracker performs focus logic on quest/remove/update, only force focus if the player has clicked on the quest through the journal UI
     if SCENE_MANAGER:IsShowing(self.sceneName) then
-        QUEST_TRACKER:ForceAssist(index)
+        FOCUSED_QUEST_TRACKER:ForceAssist(index)
     end
 
     self:RefreshQuestMasterList()

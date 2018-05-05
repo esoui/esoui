@@ -1,121 +1,14 @@
-ZO_LOOT_HISTORY_NAME = "ZO_LootHistory"
 LOOT_ENTRY_TYPE_EXPERIENCE = 1
-LOOT_ENTRY_TYPE_CROWN_GEMS = 2
-LOOT_ENTRY_TYPE_MONEY = 3
-LOOT_ENTRY_TYPE_ITEM = 4
-LOOT_ENTRY_TYPE_COLLECTIBLE = 5
+LOOT_ENTRY_TYPE_CURRENCY = 2
+LOOT_ENTRY_TYPE_ITEM = 3
+LOOT_ENTRY_TYPE_COLLECTIBLE = 4
+LOOT_ENTRY_TYPE_MEDAL = 5
+LOOT_ENTRY_TYPE_SCORE = 6
+LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 7
+LOOT_ENTRY_TYPE_CROWN_CRATE = 8
 
---
---[[ LootHistory_Singleton ]]--
---
-
-local LootHistory_Singleton = ZO_Object:Subclass()
-
-function LootHistory_Singleton:New(...)
-    local lootHistory = ZO_Object.New(self)
-    lootHistory:Initialize(...)
-    return lootHistory
-end
-
-local function CanAddLootEntry()
-    return tonumber(GetSetting(SETTING_TYPE_LOOT,LOOT_SETTING_LOOT_HISTORY)) == 1 
-end
-
-function LootHistory_Singleton:Initialize()
-    local function OnNewItemReceived(...)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnNewItemReceived(...)
-        end
-    end
-
-    local function OnNewCollectibleReceived(collectibleId)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnNewCollectibleReceived(collectibleId)
-        end
-    end
-
-    local function OnGoldUpdate(...)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnGoldUpdate(...)
-        end
-    end
-
-    local function OnGoldPickpocket(...)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnGoldPickpocket(...)
-        end
-    end
-
-    local function OnAlliancePointUpdate(...)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnAlliancePointUpdate(...)
-        end
-    end
-
-    local function OnTelvarStoneUpdate(...)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnTelvarStoneUpdate(...)
-        end
-    end
-
-    local function OnExperienceGainUpdate(...)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnExperienceGainUpdate(...)
-        end
-    end
-
-    local function OnCrownGemUpdate(...)
-        if CanAddLootEntry() then
-            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnCrownGemUpdate(...)
-        end
-    end
-
-    local function OnInventorySlotUpdate(bagId, slotId, isNewItem, itemSound, inventoryUpdateReason, stackCountChange)
-        -- This includes any inventory item update, only display if the item was new
-        if isNewItem and stackCountChange > 0 then
-            local itemLink = GetItemLink(bagId, slotId)
-
-            -- cover the case where we got an inventory item update but then the item got whisked away somewhere else
-            -- before we had a chance to get the info out of it
-            if itemLink ~= nil and itemLink ~= "" then
-                local lootType = LOOT_TYPE_ITEM
-                local itemId = GetItemInstanceId(bagId, slotId)
-                local isVirtual = bagId == BAG_VIRTUAL
-                OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, nil, itemId, isVirtual)
-            end
-        end
-    end
-
-    local IS_NOT_VIRTUAL = false
-
-    local function OnLootReceived(receivedBy, itemLinkOrName, stackCount, itemSound, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId)
-        -- This includes any loot event, only display if this was the player's loot and wasn't an inventory item
-        -- OnInventorySlotUpdate() must be used for Inventory Items so that we know what bag they went into
-        -- we also are going to handle quest items through the QuestToolUpdated event
-        if lootedBySelf and lootType ~= LOOT_TYPE_ITEM and lootType ~= LOOT_TYPE_QUEST_ITEM then
-            OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, IS_NOT_VIRTUAL)
-        end
-    end
-
-    local function OnQuestToolUpdate(questIndex, questName, countDelta, questItemIcon, questItemId, questItemName)
-        if countDelta > 0 then
-            OnNewItemReceived(questItemName, countDelta, nil, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL)
-        end
-    end
-    
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_LOOT_RECEIVED, function(eventId, ...) OnLootReceived(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MONEY_UPDATE, function(eventId, ...) OnGoldUpdate(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_JUSTICE_GOLD_PICKPOCKETED, function(eventId, ...) OnGoldPickpocket(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_ALLIANCE_POINT_UPDATE, function(eventId, ...) OnAlliancePointUpdate(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_TELVAR_STONE_UPDATE, function(eventId, ...) OnTelvarStoneUpdate(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_QUEST_TOOL_UPDATED, function(eventId, ...) OnQuestToolUpdate(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(eventId, ...) OnNewCollectibleReceived(...) end)
-    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CROWN_GEM_UPDATE, function(eventId, ...) OnCrownGemUpdate(...) end)
-end
-
-ZO_LOOT_HISTOY_SINGLETON = LootHistory_Singleton:New()
+LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
+LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
 
 --
 --[[ ZO_LootHistory_Shared ]]--
@@ -141,19 +34,43 @@ function ZO_LootHistory_Shared:Initialize(control)
 end
 
 do
+    local function SetupEntryText(control, data)
+        local text = data.text
+        if type(text) == "function" then
+            text = text(data)
+        end
+        control.label:SetText(text)
+    end
+
+    local function SetupIconOverlayText(control, data)
+        local overlayText = ZO_LootHistory_Shared.GetIconOverlayTextFromData(data)
+        control.iconOverlayText:SetText(overlayText)
+
+        local showOverlayText = ZO_LootHistory_Shared.GetShowIconOverlayTextFromData(data)
+        control.iconOverlayText:SetHidden(not showOverlayText)
+    end
+
     local function LootSetupFunction(control, data)
-        control.label:SetText(data.text)
+        SetupEntryText(control, data)
         control.label:SetColor(data.color:UnpackRGBA())
 
         control.icon:SetTexture(data.icon)
 
-        local USE_LOWERCASE_NUMBER_SUFFIXES = false
-        control.stackCountLabel:SetText(ZO_AbbreviateNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
-        control.stackCountLabel:SetHidden(data.stackCount <= 1)
+        SetupIconOverlayText(control, data)
 
-        local hideCraftBagIcons = not data.isCraftBagItem
-        control.craftBagIcon:SetHidden(hideCraftBagIcons)
-        control.craftBagHighlight:SetHidden(hideCraftBagIcons)
+        if data.statusIcon then
+            control.statusIcon:SetTexture(data.statusIcon)
+            control.statusIcon:SetHidden(false)
+        else
+            control.statusIcon:SetHidden(true)
+        end
+
+        if data.highlight then
+            control.backgroundHighlight:SetTexture(data.highlight)
+            control.backgroundHighlight:SetHidden(false)
+        else
+            control.backgroundHighlight:SetHidden(true)
+        end
     end
 
     local function AreEntriesEqual(entry1, entry2)
@@ -166,12 +83,20 @@ do
             return false
         end
 
-        if data1.entryType == LOOT_ENTRY_TYPE_MONEY then
-            return data1.moneyType == data2.moneyType
-        elseif data1.entryType == LOOT_ENTRY_TYPE_ITEM then
-            return data1.itemId == data2.itemId and data1.quality == data2.quality
-        elseif data1.entryType == LOOT_ENTRY_TYPE_COLLECTIBLE then
+        if data1EntryType == LOOT_ENTRY_TYPE_CURRENCY then
+            return data1.currencyType == data2.currencyType
+        elseif data1EntryType == LOOT_ENTRY_TYPE_ITEM then
+            return data1.itemId == data2.itemId and data1.quality == data2.quality and data1.isStolen == data2.isStolen
+        elseif data1EntryType == LOOT_ENTRY_TYPE_COLLECTIBLE then
             return data1.collectibleId == data2.collectibleId
+        elseif data1EntryType == LOOT_ENTRY_TYPE_MEDAL then
+            return false -- Medals are always on their own line
+        elseif data1EntryType == LOOT_ENTRY_TYPE_SCORE then
+            return false -- scores are always on their own line (also expecting to only be showing one of these at a time)
+        elseif data1EntryType == LOOT_ENTRY_TYPE_SKILL_EXPERIENCE then
+            return data1.skillType == data2.skillType and data1.skillIndex == data2.skillIndex
+        elseif data1EntryType == LOOT_ENTRY_TYPE_CROWN_CRATE then
+            return data1.lootCrateId == data2.lootCrateId
         else
             return true
         end
@@ -183,11 +108,14 @@ do
         local newEntryData = newEntry.lines[1]
         local control = currentEntryData.control
 
-        currentEntryData.stackCount = currentEntryData.stackCount + newEntryData.stackCount
-        if control and control.stackCountLabel then
-            control.stackCountLabel:SetText(ZO_AbbreviateNumber(currentEntryData.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
-            control.stackCountLabel:SetHidden(false) -- guaranteed to always show because we had at least 1 and we are adding at least 1
-            ZO_CraftingResults_Base_PlayPulse(control.stackCountLabel)
+        if currentEntryData.entryType ~= LOOT_ENTRY_TYPE_MEDAL and currentEntryData.entryType ~= LOOT_ENTRY_TYPE_SCORE then
+            currentEntryData.stackCount = currentEntryData.stackCount + newEntryData.stackCount
+            if control and control.iconOverlayText then
+                SetupEntryText(control, currentEntryData)
+                SetupIconOverlayText(control, currentEntryData)
+
+                ZO_CraftingResults_Base_PlayPulse(control.iconOverlayText)
+            end
         end
     end
 
@@ -263,58 +191,36 @@ end
 -- event handlers
 
 do
-    local MONEY_TEXT = {
-        [CURT_MONEY] = GetString(SI_CURRENCY_GOLD),
-        [CURT_ALLIANCE_POINTS] = GetString(SI_CURRENCY_ALLIANCE_POINTS),
-        [CURT_TELVAR_STONES] = GetString(SI_CURRENCY_TELVAR_STONES),
-    }
+    local FORMAT_EXTRA_OPTIONS =
+        {
+            showCap = true,
+        }
+    local IS_UPPER = false
 
-    local MONEY_ICONS = {
-        [CURT_MONEY] = LOOT_MONEY_ICON,
-        [CURT_ALLIANCE_POINTS] = LOOT_ALLIANCE_POINT_ICON,
-        [CURT_TELVAR_STONES] = LOOT_TELVAR_STONE_ICON,
-    }
+    function ZO_LootHistory_Shared:AddCurrencyEntry(currencyAdded, currencyType, currencyLocation)
+        local icon = IsInGamepadPreferredMode() and GetCurrencyLootGamepadIcon(currencyType) or GetCurrencyLootKeyboardIcon(currencyType)
 
-    local MONEY_BACKGROUND_COLORS = {
-        [CURT_MONEY] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_GOLD)),
-        [CURT_ALLIANCE_POINTS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_ALLIANCE_POINTS)),
-        [CURT_TELVAR_STONES] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_CURRENCY, CURRENCY_COLOR_TELVAR_STONES)),
-    }
+        local function GetCurrencyString(lootData)
+            local currencyAdded = lootData.stackCount
+            local formattedCurrencyString = GetCurrencyName(currencyType, IsCountSingularForm(currencyAdded), IS_UPPER)
+            if IsCurrencyCapped(currencyType, currencyLocation) then
+                FORMAT_EXTRA_OPTIONS.currencyLocation = currencyLocation
+                local currencyAmount = GetCurrencyAmount(currencyType, currencyLocation)
+                formattedCurrencyString = string.format("%s %s", formattedCurrencyString, ZO_Currency_FormatPlatform(currencyType, currencyAmount, ZO_CURRENCY_FORMAT_PARENTHETICAL_AMOUNT, FORMAT_EXTRA_OPTIONS))
+            end
 
-    function ZO_LootHistory_Shared:AddMoneyEntry(moneyAdded, moneyType)
+            return formattedCurrencyString
+        end
+
         local lootData = {
-                            text = MONEY_TEXT[moneyType],
-                            icon = MONEY_ICONS[moneyType],
-                            stackCount = moneyAdded,
+                            text = GetCurrencyString,
+                            icon = icon,
+                            stackCount = currencyAdded,
                             color = ZO_SELECTED_TEXT,
-                            moneyType = moneyType,
-                            entryType = LOOT_ENTRY_TYPE_MONEY
-                        }
-        local lootEntry = self:CreateLootEntry(lootData)
-        lootEntry.isPersistent = true
-        self:InsertOrQueue(lootEntry)
-    end
-
-    function ZO_LootHistory_Shared:AddXpEntry(xpAdded)
-        local lootData = {
-                            text = GetString(SI_LOOT_HISTORY_EXPERIENCE_GAIN),
-                            icon = LOOT_EXPERIENCE_ICON,
-                            stackCount = xpAdded,
-                            color = ZO_SELECTED_TEXT,
-                            entryType = LOOT_ENTRY_TYPE_EXPERIENCE
-                        }
-        local lootEntry = self:CreateLootEntry(lootData)
-        lootEntry.isPersistent = true
-        self:InsertOrQueue(lootEntry)
-    end
-
-    function ZO_LootHistory_Shared:AddGemEntry(gemsAdded)
-        local lootData = {
-                            text = GetString(SI_LOOT_HISTORY_CROWN_GEMS_GAIN),
-                            icon = LOOT_GEMS_ICON,
-                            stackCount = gemsAdded,
-                            color = ZO_SELECTED_TEXT,
-                            entryType = LOOT_ENTRY_TYPE_CROWN_GEMS
+                            currencyType = currencyType,
+                            entryType = LOOT_ENTRY_TYPE_CURRENCY,
+                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
                         }
         local lootEntry = self:CreateLootEntry(lootData)
         lootEntry.isPersistent = true
@@ -322,14 +228,96 @@ do
     end
 end
 
-function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual)
-    if not self.hidden or self:CanShowItemsInHistory() then
+function ZO_LootHistory_Shared:AddXpEntry(xpAdded)
+    local lootData = {
+                        text = GetString(SI_LOOT_HISTORY_EXPERIENCE_GAIN),
+                        icon = LOOT_EXPERIENCE_ICON,
+                        stackCount = xpAdded,
+                        color = ZO_SELECTED_TEXT,
+                        entryType = LOOT_ENTRY_TYPE_EXPERIENCE,
+                        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+                    }
+    local lootEntry = self:CreateLootEntry(lootData)
+    lootEntry.isPersistent = true
+    self:InsertOrQueue(lootEntry)
+end
+
+function ZO_LootHistory_Shared:AddMedalEntry(medalId, name, icon, value)
+    local lootData = {
+                        text = zo_strformat(SI_LOOT_HISTORY_MEDAL_NAME_FORMATTER, name),
+                        icon = icon,
+                        value = value,
+                        color = ZO_SELECTED_TEXT,
+                        entryType = LOOT_ENTRY_TYPE_MEDAL,
+                        iconOverlayText = ZO_LootHistory_Shared.GetMedalValueStringFromData,
+                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowMedalValueStringFromData
+                    }
+    local lootEntry = self:CreateLootEntry(lootData)
+    self:InsertOrQueue(lootEntry)
+end
+
+function ZO_LootHistory_Shared:AddScoreEntry(score)
+    local lootData = {
+                        text = GetString(SI_LOOT_HISTORY_LEADERBOARD_SCORE),
+                        icon = LOOT_LEADERBOARD_SCORE_ICON,
+                        value = score,
+                        color = ZO_SELECTED_TEXT,
+                        entryType = LOOT_ENTRY_TYPE_SCORE,
+                        iconOverlayText = ZO_LootHistory_Shared.GetValueStringFromData,
+                        showIconOverlayText = true
+                    }
+    local lootEntry = self:CreateLootEntry(lootData)
+    lootEntry.isPersistent = true
+    self:InsertOrQueue(lootEntry)
+end
+
+function ZO_LootHistory_Shared:AddSkillEntry(skillType, skillIndex, skillXpAdded)
+    local skillName = GetSkillLineInfo(skillType, skillIndex)
+    local announcementIcon = GetSkillLineAnnouncementIcon(skillType, skillIndex)
+    local lootData = {
+                        text = zo_strformat(SI_LOOT_HISTORY_SKILL_LINE_NAME_FORMATTER, skillName),
+                        icon = announcementIcon,
+                        stackCount = skillXpAdded,
+                        color = ZO_SELECTED_TEXT,
+                        skillType = skillType,
+                        skillIndex = skillIndex,
+                        entryType = LOOT_ENTRY_TYPE_SKILL_EXPERIENCE,
+                        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+                    }
+    local lootEntry = self:CreateLootEntry(lootData)
+    lootEntry.isPersistent = true
+    self:InsertOrQueue(lootEntry)
+end
+
+function ZO_LootHistory_Shared:AddCrownCrateEntry(lootCrateId, numCrates)
+    if self:CanShowItemsInHistory() then
+        local crownCrateName = GetCrownCrateName(lootCrateId)
+        local crateIcon = GetCrownCrateIcon(lootCrateId)
+        local lootData = {
+                            text = zo_strformat(SI_CROWN_CRATE_PACK_NAME, crownCrateName),
+                            icon = crateIcon,
+                            stackCount = numCrates,
+                            lootCrateId = lootCrateId,
+                            color = ZO_SELECTED_TEXT,
+                            entryType = LOOT_ENTRY_TYPE_CROWN_CRATE,
+                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+                        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        self:InsertOrQueue(lootEntry)
+    end
+end
+
+function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen)
+    if self:CanShowItemsInHistory() then
         local itemName
         local icon
         local color
         local quality
 
-        -- we already handle collectibles as collectibles, 
+        -- we already handle collectibles as collectibles,
         -- but if we get them as something like a quest reward, they need to be funneled properly
         if lootType == LOOT_TYPE_COLLECTIBLE then
             local collectibleId = GetCollectibleIdFromLink(itemLinkOrName)
@@ -348,6 +336,16 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
             color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
         end
 
+        local statusIcon
+        local highlight
+        if isVirtual then
+            statusIcon = self:GetCraftBagIcon()
+            highlight = self:GetCraftBagHighlight()
+        elseif isStolen then
+            statusIcon = self:GetStolenIcon()
+            highlight = self:GetStolenHighlight()
+        end
+
         local lootData = {
                             text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName),
                             icon = icon,
@@ -356,7 +354,12 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
                             itemId = itemId,
                             quality = quality,
                             isCraftBagItem = isVirtual,
+                            isStolen = isStolen,
+                            statusIcon = statusIcon,
+                            highlight = highlight,
                             entryType = LOOT_ENTRY_TYPE_ITEM,
+                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
                         }
 
         local lootEntry = self:CreateLootEntry(lootData)
@@ -365,17 +368,19 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
 end
 
 function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
-    if not self.hidden or self:CanShowItemsInHistory() then
-        local name, _, icon = GetCollectibleInfo(collectibleId)
+    if self:CanShowItemsInHistory() then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
 
         local QUALITY_NORMAL = 1
         local lootData = {
-                            text = zo_strformat(SI_TOOLTIP_ITEM_NAME, name),
-                            icon = icon,
+                            text = collectibleData:GetFormattedName(),
+                            icon = collectibleData:GetIcon(),
                             stackCount = 1,
                             color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, QUALITY_NORMAL)),
                             collectibleId = collectibleId,
-                            entryType = LOOT_ENTRY_TYPE_COLLECTIBLE
+                            entryType = LOOT_ENTRY_TYPE_COLLECTIBLE,
+                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
                         }
 
         local lootEntry = self:CreateLootEntry(lootData)
@@ -383,28 +388,10 @@ function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
     end
 end
 
-function ZO_LootHistory_Shared:OnGoldUpdate(newGold, oldGold, reason)
-    if reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_KILL or reason == CURRENCY_CHANGE_REASON_LOOT_STOLEN or reason == CURRENCY_CHANGE_REASON_QUESTREWARD then
-        local goldAdded = newGold - oldGold
-        self:AddMoneyEntry(goldAdded, CURT_MONEY)
-    end
-end
-
-function ZO_LootHistory_Shared:OnGoldPickpocket(goldAmount)
-    self:AddMoneyEntry(goldAmount, CURT_MONEY)
-end
-
-function ZO_LootHistory_Shared:OnAlliancePointUpdate(currentAlliancePoints, playSound, difference)
-    if difference > 0 then
-        self:AddMoneyEntry(difference, CURT_ALLIANCE_POINTS)
-    end
-end
-
-function ZO_LootHistory_Shared:OnTelvarStoneUpdate(newTelvarStones, oldTelvarStones, reason)
-    if reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER then
-        local tvStonesAdded = newTelvarStones - oldTelvarStones
-        if tvStonesAdded > 0 then
-            self:AddMoneyEntry(tvStonesAdded, CURT_TELVAR_STONES)
+function ZO_LootHistory_Shared:OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason)
+    if ShouldShowCurrencyInLootHistory(currencyType) then
+        if (currencyLocation == CURRENCY_LOCATION_CHARACTER or currencyLocation == CURRENCY_LOCATION_ACCOUNT) and reason ~= CURRENCY_CHANGE_REASON_PLAYER_INIT and newAmount > oldAmount then
+            self:AddCurrencyEntry(newAmount - oldAmount, currencyType, currencyLocation)
         end
     end
 end
@@ -414,10 +401,77 @@ function ZO_LootHistory_Shared:OnExperienceGainUpdate(reason, level, previousExp
     self:AddXpEntry(difference)
 end
 
-function ZO_LootHistory_Shared:OnCrownGemUpdate(totalGems, gemDifference)
-    if gemDifference > 0 then
-        self:AddGemEntry(gemDifference)
+function ZO_LootHistory_Shared:OnMedalAwarded(medalId, name, icon, value)
+    self:AddMedalEntry(medalId, name, icon, value)
+end
+
+function ZO_LootHistory_Shared:OnBattlegroundEnteredPostGame()
+    local playerIndex = GetScoreboardPlayerEntryIndex()
+    self:AddScoreEntry(GetScoreboardEntryScoreByType(playerIndex, SCORE_TRACKER_TYPE_SCORE))
+end
+
+do
+    local ALLOWED_SKILL_TYPES = 
+    {
+        [SKILL_TYPE_GUILD] = true
+    }
+
+    function ZO_LootHistory_Shared:OnSkillExperienceUpdated(skillType, skillIndex, reason, rank, previousXP, currentXP)
+        local delta = currentXP - previousXP
+        if delta > 0 and ALLOWED_SKILL_TYPES[skillType] then
+            self:AddSkillEntry(skillType, skillIndex, delta)
+        end
     end
+end
+
+function ZO_LootHistory_Shared:OnCrownCrateQuantityUpdated(lootCrateId, oldCount, newCount)
+    local delta = newCount - oldCount
+    if delta > 0 then
+        self:AddCrownCrateEntry(lootCrateId, delta)
+    end
+end
+
+do
+    local USE_LOWERCASE_NUMBER_SUFFIXES = false
+    function ZO_LootHistory_Shared.GetStackCountStringFromData(data)
+        return zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(data.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+    end
+
+    function ZO_LootHistory_Shared.GetValueStringFromData(data)
+        return zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(data.value, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+    end
+end
+
+function ZO_LootHistory_Shared.ShouldShowStackCountStringFromData(data)
+    if data.entryType == LOOT_ENTRY_TYPE_CURRENCY then
+        return data.stackCount > 0
+    else
+        return data.stackCount > 1
+    end
+end
+
+function ZO_LootHistory_Shared.GetMedalValueStringFromData(data)
+    return zo_strformat(SI_LOOT_HISTORY_MEDAL_VALUE_FORMATTER, data.value)
+end
+
+function ZO_LootHistory_Shared.ShouldShowMedalValueStringFromData(data)
+    return data.value > 0
+end
+
+function ZO_LootHistory_Shared.GetIconOverlayTextFromData(data)
+    local overlayText = data.iconOverlayText
+    if type(overlayText) == "function" then
+        overlayText = overlayText(data)
+    end
+    return overlayText
+end
+
+function ZO_LootHistory_Shared.GetShowIconOverlayTextFromData(data)
+    local showOverlayText = data.showIconOverlayText
+    if type(showOverlayText) == "function" then
+        showOverlayText = showOverlayText(data)
+    end
+    return showOverlayText
 end
 
 -- functions to be overridden
@@ -427,23 +481,40 @@ function ZO_LootHistory_Shared:SetEntryTemplate()
 end
 
 function ZO_LootHistory_Shared:InitializeFragment()
+    -- To be overridden
 end
 
 function ZO_LootHistory_Shared:InitializeFadingControlBuffer(control)
+    -- To be overridden
 end
 
 function ZO_LootHistory_Shared:CanShowItemsInHistory()
     return false -- default value
 end
 
+function ZO_LootHistory_Shared:GetCraftBagIcon()
+    -- To be overridden
+end
+
+function ZO_LootHistory_Shared:GetStolenIcon()
+    -- To be overridden
+end
+
+function ZO_LootHistory_Shared:GetCraftBagHighlight()
+    -- To be overridden
+end
+
+function ZO_LootHistory_Shared:GetStolenHighlight()
+    -- To be overridden
+end
 
 -- global functions
 
 function ZO_LootHistory_Shared_OnInitialized(control)
     control.icon = control:GetNamedChild("Icon")
-    control.stackCountLabel = control.icon:GetNamedChild("StackCount")
+    control.iconOverlayText = control.icon:GetNamedChild("OverlayText")
     control.label = control:GetNamedChild("Label")
     control.background = control:GetNamedChild("Bg")
-    control.craftBagIcon = control.icon:GetNamedChild("CraftBagIcon")
-    control.craftBagHighlight = control.background:GetNamedChild("CraftBagHighlight")
+    control.statusIcon = control.icon:GetNamedChild("StatusIcon")
+    control.backgroundHighlight = control.background:GetNamedChild("Highlight")
 end

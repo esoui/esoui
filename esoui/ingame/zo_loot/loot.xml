@@ -35,7 +35,7 @@
     </Animations>
     
     <Controls>
-        <Control name="ZO_LootItemSlot" inherits="ZO_ListInventorySlotBehavior" virtual="true">
+        <Control name="ZO_LootItemSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions x="250" y="52" />
             
             <OnMouseEnter>
@@ -53,16 +53,6 @@
             </OnMouseDoubleClick>
 
             <Controls>
-                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
-                </Texture>
-
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
-                </Texture>
-
                 <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" mouseEnabled="false">
                     <Dimensions x="40" y="40" />
                     <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />
@@ -130,14 +120,14 @@
                         <Control name="$(parent)Button1" inherits="ZO_DialogButton" tier="MEDIUM">
                             <Anchor point="BOTTOMRIGHT" offsetY="-12" />
                             <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "LOOT_ALL", ZO_LootActionButtonCallback_LootAll, GetString(SI_LOOT_TAKE_ALL))
+                                ZO_ChromaKeybindButtonTemplate_Setup(self, "LOOT_ALL", ZO_LootActionButtonCallback_LootAll, GetString(SI_LOOT_TAKE_ALL))
                             </OnInitialized>
                         </Control>
 
                         <Control name="$(parent)Button2" inherits="ZO_DialogButton" hidden="true" tier="MEDIUM">
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Button1" relativePoint="BOTTOMLEFT" offsetX="-10" />
                             <OnInitialized>
-                                ZO_KeybindButtonTemplate_Setup(self, "LOOT_ITEM", ZO_LootActionButtonCallback_LootItem, GetString(SI_LOOT_TAKE))
+                                ZO_ChromaKeybindButtonTemplate_Setup(self, "LOOT_ITEM", ZO_LootActionButtonCallback_LootItem, GetString(SI_LOOT_TAKE))
                             </OnInitialized>
                         </Control>
                     </Controls>

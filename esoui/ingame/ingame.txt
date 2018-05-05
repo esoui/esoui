@@ -1,5 +1,5 @@
 ; Ingame Script Files
-## DependsOn: ZO_IngameLocalization ZO_IngameShared ZO_AppAndInGame
+## DependsOn: ZO_IngameLocalization ZO_AppAndInGame ZO_PregameAndIngame ZO_PublicAllIngames
 
 ## SavedVariables: ZO_Ingame_SavedVariables
 
@@ -18,10 +18,11 @@ EsoUI\Ingame\Particles\Particles.lua
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
+EsoUI\Ingame\Tooltip\GiftTooltips.lua
+
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.xml
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.lua
 
-EsoUI\Ingame\Console\ZO_PlayerConsoleRequestsUtils.lua
 EsoUI\Ingame\Gamepad\GamepadGamercard.lua
 
 EsoUI\Ingame\Inventory\Gamepad\InventoryUtils_Gamepad.lua
@@ -32,17 +33,24 @@ EsoUI\Ingame\Scenes\InteractScene.lua
 
 EsoUI\Ingame\Utility\ZO_SlotUtil.lua
 
+EsoUI\Ingame\RzChroma\IngameRzChroma_Manager.lua
+EsoUI\Ingame\RzChroma\IngameRzChroma_Effects.lua
+
 EsoUI\Ingame\PlayerAttributeBars\PlayerAttributeBarTemplates.xml
 EsoUI\Ingame\PlayerProgressBar\Gamepad\ZO_PlayerProgressBar_Gamepad.lua
 EsoUI\Ingame\PlayerProgressBar\Gamepad\ZO_PlayerProgressBar_Gamepad.xml
 EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.lua
 EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.xml
 
+EsoUI\Ingame\Collections\CollectibleDataManager.lua
+
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
 
 EsoUI\Ingame\SpamWarning\SpamWarning.lua
+
+EsoUI\Ingame\Sounds\SoundEvents.lua
 
 EsoUI\Ingame\Guild\SelectGuildDialog.lua
 EsoUI\Ingame\Guild\SelectGuildDialog.xml
@@ -51,6 +59,19 @@ EsoUI\Ingame\Globals\bindings.xml
 EsoUI\Ingame\Keybindings\Keybindings_Manager.lua
 EsoUI\Ingame\Keybindings\Keyboard\Keybindings.lua
 EsoUI\Ingame\Keybindings\Keyboard\Keybindings.xml
+
+EsoUI\Ingame\Logout\DailyRewardsLogoutTile.lua
+EsoUI\Ingame\Logout\DailyRewardsLogoutTile.xml
+EsoUI\Ingame\Logout\Keyboard\DailyRewardsLogoutTile_Keyboard.lua
+EsoUI\Ingame\Logout\Keyboard\DailyRewardsLogoutTile_Keyboard.xml
+EsoUI\Ingame\Logout\Keyboard\LogoutDialog_Keyboard.lua
+EsoUI\Ingame\Logout\Keyboard\LogoutDialog_Keyboard.xml
+EsoUI\Ingame\Logout\Keyboard\QuitDialog_Keyboard.lua
+EsoUI\Ingame\Logout\Keyboard\QuitDialog_Keyboard.xml
+EsoUI\Ingame\Logout\Gamepad\DailyRewardsLogoutTile_Gamepad.lua
+EsoUI\Ingame\Logout\Gamepad\DailyRewardsLogoutTile_Gamepad.xml
+EsoUI\Ingame\Logout\Gamepad\LogoutDialog_Gamepad.lua
+EsoUI\Ingame\Logout\Gamepad\LogoutDialog_Gamepad.xml
 
 EsoUI\Ingame\Contacts\Gamepad\ZO_SocialOptionsDialog_Gamepad.lua
 EsoUI\Ingame\Contacts\SocialList_Shared.lua
@@ -65,6 +86,7 @@ EsoUI\Ingame\Contacts\SocialManager.lua
 
 EsoUI\Ingame\Group\ZO_GroupList_Manager.lua
 
+EsoUI\Ingame\LFG\ZO_ActivityFinderRoot_Classes.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderRoot_Manager.lua
 EsoUI\Ingame\Group\GroupUtils.lua
 EsoUI\Ingame\LFG\PreferredRoles.lua
@@ -92,13 +114,16 @@ EsoUI\Ingame\LFG\Keyboard\ZO_ActivityFinderTemplate_Keyboard.lua
 EsoUI\Ingame\LFG\Keyboard\ZO_ActivityFinderTemplate_Keyboard.xml
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderTemplate_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderTemplate_Gamepad.xml
-EsoUI\InGame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.lua
-EsoUI\InGame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.xml
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.lua
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.xml
 EsoUI\Ingame\LFG\ZO_DungeonFinder_Manager.lua
 EsoUI\Ingame\LFG\ZO_AvAFinder_Manager.lua
+EsoUI\Ingame\LFG\ZO_BattlegroundFinder_Manager.lua
 
 EsoUI\Ingame\LFG\SearchingForGroup.lua
 EsoUI\Ingame\LFG\SearchingForGroup.xml
+
+EsoUI\Ingame\MainMenu\Gamepad\ZO_Main_Menu_Helper_Panel_Gamepad.lua
 
 EsoUI\Ingame\MainMenu\ZO_MainMenu_Manager.lua
 EsoUI\Ingame\MainMenu\Keyboard\ZO_MainMenu_Keyboard.lua
@@ -108,8 +133,8 @@ EsoUI\Ingame\MainMenu\Gamepad\ZO_MainMenu_Gamepad.xml
 
 EsoUI\Ingame\SharedInformationArea\SharedInformationArea.lua
 
-EsoUI\Ingame\GameMenu_InGame\GameMenu_InGame.lua
-EsoUI\Ingame\GameMenu_InGame\GameMenu_InGame.xml
+EsoUI\Ingame\GameMenu_Ingame\GameMenu_Ingame.lua
+EsoUI\Ingame\GameMenu_Ingame\GameMenu_Ingame.xml
 
 EsoUI\Ingame\ChatSystem\ChatOptions.lua
 EsoUI\Ingame\ChatSystem\ChatOptions.xml
@@ -138,8 +163,10 @@ EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Interface_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Nameplates_Shared.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Nameplates_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Social_Shared.lua
-EsoUI\Common\OptionsPanels\Console\OptionsPanel_Social_Console.lua
+EsoUI\Ingame\OptionsPanels\Console\OptionsPanel_Social_Console.lua
 EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Social_Keyboard.xml
+EsoUI\Ingame\OptionsPanels\OptionsPanel_Combat_Shared.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Combat_Keyboard.xml
 
 EsoUI\Ingame\ZO_CurrencyInput\ZO_CurrencyInput.lua
 EsoUI\Ingame\ZO_CurrencyInput\ZO_CurrencyInput.xml
@@ -159,32 +186,27 @@ EsoUI\Ingame\Inventory\Keyboard\ItemTransferDialog_Keyboard.lua
 EsoUI\Ingame\Inventory\Keyboard\ItemTransferDialog_Keyboard.xml
 EsoUI\Ingame\Inventory\Gamepad\ItemTransferDialog_Gamepad.lua
 
-EsoUI\Ingame\Contacts\Notifications_Common.lua
-EsoUI\Ingame\Contacts\Keyboard\Notifications_Keyboard.lua
-EsoUI\Ingame\Contacts\Keyboard\Notifications_Keyboard.xml
-EsoUI\Ingame\Contacts\Gamepad\Notifications_Gamepad.lua
-EsoUI\Ingame\Contacts\Gamepad\Notifications_Gamepad.xml
-
-EsoUI\Ingame\JournalProgressSummary\JournalProgressSummaryTemplates.lua
-EsoUI\Ingame\JournalProgressSummary\JournalProgressSummaryTemplates.xml
+EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\CollectibleTile_Keyboard.xml
 
 EsoUI\Ingame\Collections\CollectionsBook_Manager.lua
-EsoUI\Ingame\Collections\CollectionsInventorySingleton.lua
 EsoUI\Ingame\Collections\Keyboard\CollectionsBook.lua
 EsoUI\Ingame\Collections\Keyboard\CollectionsBook.xml
-EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
-EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
+EsoUI\Ingame\Collections\Keyboard\SpecializedCollectionsBook_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\SpecializedCollectionsBook_Keyboard.xml
 EsoUI\Ingame\Collections\Keyboard\DLCBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\DLCBook_Keyboard.xml
+EsoUI\Ingame\Collections\Keyboard\HousingBook_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\HousingBook_Keyboard.xml
 
 EsoUI\Ingame\ZO_Quest\QuestTimer.lua
 EsoUI\Ingame\ZO_Quest\QuestTimer.xml
 EsoUI\Ingame\ZO_Quest\QuestTracker.lua
 EsoUI\Ingame\ZO_Quest\QuestTracker.xml
-EsoUI\Ingame\ZO_Quest\FocusedQuestTracker.lua
-EsoUI\Ingame\ZO_Quest\FocusedQuestTracker.xml
 EsoUI\Ingame\LFG\ActivityTracker.lua
 EsoUI\Ingame\LFG\ActivityTracker.xml
+EsoUI\Ingame\LFG\ReadyCheckTracker.lua
+EsoUI\Ingame\LFG\ReadyCheckTracker.xml
 EsoUI\Ingame\ZO_Quest\QuestJournal_Manager.lua
 EsoUI\Ingame\ZO_Quest\QuestJournal_Shared.lua
 EsoUI\Ingame\ZO_Quest\QuestJournal_Shared.xml
@@ -215,6 +237,12 @@ EsoUI\Ingame\Map\Keyboard\WorldMapQuests_Keyboard.lua
 EsoUI\Ingame\Map\Keyboard\WorldMapQuests_Keyboard.xml
 EsoUI\Ingame\Map\Gamepad\WorldMapQuests_Gamepad.lua
 EsoUI\Ingame\Map\Gamepad\WorldMapQuests_Gamepad.xml
+EsoUI\Ingame\Map\WorldMapHouses_Manager.lua
+EsoUI\Ingame\Map\WorldMapHouses_Shared.lua
+EsoUI\Ingame\Map\Keyboard\WorldMapHouses_Keyboard.lua
+EsoUI\Ingame\Map\Keyboard\WorldMapHouses_Keyboard.xml
+EsoUI\Ingame\Map\Gamepad\WorldMapHouses_Gamepad.lua
+EsoUI\Ingame\Map\Gamepad\WorldMapHouses_Gamepad.xml
 EsoUI\Ingame\Map\WorldMapKey_Shared.lua
 EsoUI\Ingame\Map\Keyboard\WorldMapKey_Keyboard.lua
 EsoUI\Ingame\Map\Keyboard\WorldMapKey_Keyboard.xml
@@ -240,6 +268,7 @@ EsoUI\Ingame\Map\Keyboard\WorldMapKeepUpgrade_Keyboard.lua
 EsoUI\Ingame\Map\Keyboard\WorldMapKeepUpgrade_Keyboard.xml
 EsoUI\Ingame\Map\Gamepad\WorldMapKeepUpgrade_Gamepad.lua
 EsoUI\Ingame\Map\Gamepad\WorldMapKeepUpgrade_Gamepad.xml
+EsoUI\Ingame\Map\Gamepad\WorldMapChoiceDialog_Gamepad.lua
 EsoUI\Ingame\Map\WorldMap.lua
 EsoUI\Ingame\Map\WorldMap.xml
 EsoUI\Ingame\Map\CMapHandlers.lua
@@ -256,6 +285,7 @@ EsoUI\Ingame\Reticle\Reticle.xml
 EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
 EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
 EsoUI\Ingame\SlashCommands\Console\SlashCommands_Console.lua
+EsoUI\Ingame\SlashCommands\SlashCommandAutoComplete.lua
 
 EsoUI\Ingame\SiegeBar\SiegeBar.lua
 
@@ -292,6 +322,7 @@ EsoUI\Ingame\InstanceKickWarning\InstanceKickWarning.xml
 EsoUI\Ingame\ResourceWarner\ResourceWarner.lua
 
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\UnitAttributeVisualizerModuleBase.lua
+EsoUI\Ingame\UnitAttributeVisualizer\UnitAttributeVisualizer.lua
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\ArrowRegeneration.lua
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\ArrowRegeneration.xml
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\ShrinkExpand.lua
@@ -304,7 +335,8 @@ EsoUI\Ingame\UnitAttributeVisualizer\Modules\Possession.lua
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\Possession.xml
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\PowerShield.lua
 EsoUI\Ingame\UnitAttributeVisualizer\Modules\PowerShield.xml
-EsoUI\Ingame\UnitAttributeVisualizer\UnitAttributeVisualizer.lua
+EsoUI\Ingame\UnitAttributeVisualizer\Modules\Trauma.lua
+EsoUI\Ingame\UnitAttributeVisualizer\Modules\Trauma.xml
 
 EsoUI\Ingame\Compass\CompassFrame.lua
 EsoUI\Ingame\Compass\CompassFrame.xml
@@ -325,7 +357,6 @@ EsoUI\Ingame\Stats\Keyboard\ZO_StatEntry_Keyboard.xml
 
 EsoUI\Ingame\Inventory\SharedInventory.lua
 
-EsoUI\Ingame\CharacterWindow\SharedCharacterWindow.lua
 EsoUI\Ingame\CharacterWindow\Keyboard\CharacterWindow_Keyboard.lua
 EsoUI\Ingame\CharacterWindow\Keyboard\CharacterWindow_Keyboard.xml
 
@@ -353,6 +384,7 @@ EsoUI\Ingame\ZO_Loot\Gamepad\LootPickup_Gamepad.xml
 EsoUI\Ingame\ZO_Loot\Gamepad\LootInventory_Gamepad.lua
 EsoUI\Ingame\ZO_Loot\Gamepad\LootInventory_Gamepad.xml
 
+EsoUI\Ingame\ZO_Loot\LootHistory_Manager.lua
 EsoUI\Ingame\ZO_Loot\LootHistory_Shared.lua
 EsoUI\Ingame\ZO_Loot\LootHistory_Shared.xml
 EsoUI\Ingame\ZO_Loot\Keyboard\LootHistory_Keyboard.lua
@@ -447,6 +479,12 @@ EsoUI\Ingame\Mail\Gamepad\MailSend_Gamepad.xml
 EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.lua
 EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.xml
 
+EsoUI\Ingame\Restyle\Restyle_Manager.lua
+EsoUI\Ingame\Restyle\Restyle_Shared.lua
+EsoUI\Ingame\Restyle\Restyle_Shared.xml
+
+EsoUI\Ingame\Outfits\Outfit_Manager.lua
+
 EsoUI\Ingame\Dyeing\DyeingToolBase.lua
 EsoUI\Ingame\Dyeing\DyeingToolDye.lua
 EsoUI\Ingame\Dyeing\DyeingToolFill.lua
@@ -463,15 +501,44 @@ EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Slots_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Slots_Gamepad.xml
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Saved_Gamepad.xml
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Swatches_Gamepad.lua
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.lua
-EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
 EsoUI\Ingame\Dyeing\DyeStamp_Confirmation_Shared.lua
 EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.lua
 EsoUI\Ingame\Dyeing\Keyboard\DyeStamp_Confirmation_Keyboard.xml
 EsoUI\Ingame\Dyeing\Gamepad\DyeStamp_Confirmation_Gamepad.lua
 EsoUI\Ingame\Dyeing\Gamepad\DyeStamp_Confirmation_Gamepad.xml
 
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheet_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheet_Keyboard.xml
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheetWindow_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleSheetWindow_Keyboard.xml
+EsoUI\Ingame\Restyle\Keyboard\RestyleCommon_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleCommon_Keyboard.xml
+EsoUI\Ingame\Restyle\Keyboard\RestyleStation_Keyboard.lua
+EsoUI\Ingame\Restyle\Keyboard\RestyleStation_Keyboard.xml
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Outfit_Selector_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Helper_Panel_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Outfit_Slots_Panel_Gamepad.lua
+EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.lua
+EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Staging_Equipment_Gamepad.lua
+EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.xml
+
+EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
+EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
+
+EsoUI\Ingame\Outfits\Keyboard\OutfitStylesPanel_Keyboard.lua
+EsoUI\Ingame\Outfits\Keyboard\OutfitStylesPanel_Keyboard.xml
+
+EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.xml
+
+EsoUI\Ingame\ChapterUpgrade\ChapterUpgradeUtils.lua
+EsoUI\Ingame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.lua
+EsoUI\Ingame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.xml
+
+EsoUI\Ingame\Achievements\Achievements_Manager.lua
 EsoUI\Ingame\Achievements\Achievements_Shared.lua
 EsoUI\Ingame\Achievements\Keyboard\Achievements.lua
 EsoUI\Ingame\Achievements\Keyboard\Achievements.xml
@@ -494,6 +561,20 @@ EsoUI\Ingame\LoreLibrary\Gamepad\Library_Gamepad.xml
 
 EsoUI\Ingame\ScriptedWorldEvents\ScriptedWorldEvents.lua
 
+EsoUI\Ingame\Tutorial\TutorialTriggerHandlers.lua
+EsoUI\Ingame\Tutorial\TutorialHandlerBase.lua
+EsoUI\Ingame\Tutorial\BriefHudTutorial.lua
+EsoUI\Ingame\Tutorial\BriefHudTutorial.xml
+EsoUI\Ingame\Tutorial\HudInfoTutorial.lua
+EsoUI\Ingame\Tutorial\HudInfoTutorial.xml
+EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.lua
+EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.xml
+EsoUI\Ingame\Tutorial\Keyboard\PointerBoxTutorial.lua
+EsoUI\Ingame\Tutorial\Keyboard\PointerBoxTutorial.xml
+EsoUI\Ingame\Tutorial\Tutorial.lua
+EsoUI\Ingame\Tutorial\Tutorial.xml
+
+EsoUI\Ingame\SkillsAdvisor\SkillsAdvisor_Manager.lua
 EsoUI\Ingame\Skills\SharedSkills.lua
 EsoUI\Ingame\Skills\SharedSkills.xml
 EsoUI\Ingame\Skills\NewSkillCalloutManager.lua
@@ -528,21 +609,13 @@ EsoUI\Ingame\ActiveCombatTips\ActiveCombatTips.xml
 EsoUI\Ingame\QuestToolMonitor\QuestToolMonitor.lua
 EsoUI\Ingame\QuestToolMonitor\QuestToolMonitor.xml
 
-EsoUI\Ingame\Tutorial\TutorialTriggerHandlers.lua
-EsoUI\Ingame\Tutorial\TutorialHandlerBase.lua
-EsoUI\Ingame\Tutorial\BriefHudTutorial.lua
-EsoUI\Ingame\Tutorial\BriefHudTutorial.xml
-EsoUI\Ingame\Tutorial\HudInfoTutorial.lua
-EsoUI\Ingame\Tutorial\HudInfoTutorial.xml
-EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.lua
-EsoUI\Ingame\Tutorial\UiInfoBoxTutorial.xml
-EsoUI\Ingame\Tutorial\Tutorial.lua
-EsoUI\Ingame\Tutorial\Tutorial.xml
+EsoUI\Ingame\TrialAccount\TrialAccount.lua
+EsoUI\Ingame\TrialAccount\TrialAccount.xml
 
-EsoUI\InGame\TrialAccount\TrialAccount.lua
-EsoUI\InGame\TrialAccount\TrialAccount.xml
-
-EsoUI\InGame\Help\Keyboard\HelpScreenTemplate_Keyboard.lua
+EsoUI\Ingame\Help\HelpMechanicAssistanceData.lua
+EsoUI\Ingame\Help\HelpSubmitTicketData.lua
+EsoUI\Ingame\Help\Help_GenericTicketSubmission_Manager.lua
+EsoUI\Ingame\Help\Keyboard\HelpScreenTemplate_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\Help_Keyboard.xml
 EsoUI\Ingame\Help\Keyboard\HelpCustomerService_Keyboard.lua
@@ -555,6 +628,12 @@ EsoUI\Ingame\Help\Keyboard\HelpSubmitFeedback_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\HelpSubmitFeedback_Keyboard.xml
 EsoUI\Ingame\Help\Keyboard\HelpAskForHelp_Keyboard.lua
 EsoUI\Ingame\Help\Keyboard\HelpAskForHelp_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpMechanicAssistanceTemplate_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpMechanicAssistanceTemplate_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpQuestAssistance_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpQuestAssistance_Keyboard.xml
+EsoUI\Ingame\Help\Keyboard\HelpItemAssistance_Keyboard.lua
+EsoUI\Ingame\Help\Keyboard\HelpItemAssistance_Keyboard.xml
 
 ESOUI\Ingame\Stuck\Stuck_Manager.lua
 EsoUI\Ingame\Stuck\Stuck_Base.lua
@@ -564,14 +643,23 @@ EsoUI\Ingame\Help\Gamepad\Help_Common_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Common_Gamepad.xml
 EsoUI\Ingame\Help\Gamepad\Help_Root_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Root_Gamepad.xml
+EsoUI\Ingame\Help\Gamepad\Help_GenericTicketSubmission_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Customer_Service_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Customer_Service_Gamepad.xml
+EsoUI\Ingame\Help\Gamepad\Help_MechanicAssistance_Gamepad.lua
+EsoUI\Ingame\Help\Gamepad\Help_MechanicAssistance_Gamepad.xml
+EsoUI\Ingame\Help\Gamepad\Help_QuestAssistance_Gamepad.lua
+EsoUI\Ingame\Help\Gamepad\Help_QuestAssistance_Gamepad.xml
+EsoUI\Ingame\Help\Gamepad\Help_ItemAssistance_Gamepad.lua
+EsoUI\Ingame\Help\Gamepad\Help_ItemAssistance_Gamepad.xml
 EsoUI\Ingame\Help\Gamepad\Help_Categories_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Categories_Gamepad.xml
 EsoUI\Ingame\Help\Gamepad\Help_Entries_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Entries_Gamepad.xml
 EsoUI\Ingame\Help\Gamepad\Help_Legal_Gamepad.lua
 EsoUI\Ingame\Help\Gamepad\Help_Legal_Gamepad.xml
+EsoUI\Ingame\Help\Gamepad\Help_SubmitFeedback_Gamepad.lua
+EsoUI\Ingame\Help\Gamepad\Help_SubmitFeedback_Gamepad.xml
 
 EsoUI\Ingame\Lockpick\Lockpick.lua
 EsoUI\Ingame\Lockpick\Lockpick.xml
@@ -586,8 +674,8 @@ EsoUI\Ingame\Crafting\CraftingEnchantExtractSlotAnimation.lua
 EsoUI\Ingame\Crafting\CraftingSmithingExtractSlotAnimation.lua
 
 EsoUI\Ingame\Crafting\SharedCraftingInventory.lua
-EsoUI\Ingame\Crafting\CraftingInventory.lua
-EsoUI\Ingame\Crafting\CraftingInventory.xml
+EsoUI\Ingame\Crafting\Keyboard\CraftingInventory.lua
+EsoUI\Ingame\Crafting\Keyboard\CraftingInventory.xml
 EsoUI\Ingame\Crafting\Gamepad\GamepadCraftingInventory.lua
 EsoUI\Ingame\Crafting\Gamepad\GamepadCraftingInventory.xml
 
@@ -604,6 +692,7 @@ EsoUI\Ingame\Crafting\Keyboard\Alchemy_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\Alchemy_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\Alchemy_Gamepad.xml
 
+EsoUI\Ingame\Crafting\Provisioner_Manager.lua
 EsoUI\Ingame\Crafting\SharedProvisioner.lua
 EsoUI\Ingame\Crafting\SharedProvisioner.xml
 
@@ -652,6 +741,19 @@ EsoUI\Ingame\Crafting\Keyboard\Smithing_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\Smithing_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\Smithing_Gamepad.xml
 
+EsoUI\Ingame\Retrait\ZO_RetraitStation_Manager.lua
+EsoUI\Ingame\Retrait\ZO_RetraitStation_Retrait_Base.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Retrait_Keyboard.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Retrait_Keyboard.xml
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Retrait_Gamepad.lua
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Retrait_Gamepad.xml
+
+EsoUI\Ingame\Retrait\ZO_RetraitStation_Base.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Keyboard.lua
+EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Keyboard.xml
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Gamepad.lua
+EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Gamepad.xml
+
 EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.xml
 EsoUI\Ingame\Inventory\Gamepad\BuyBagSpace_Gamepad.lua
@@ -668,9 +770,6 @@ EsoUI\Ingame\PlayerEmote\Gamepad\PlayerEmote_Gamepad.lua
 EsoUI\Ingame\PlayerEmote\Gamepad\PlayerEmote_Gamepad.xml
 EsoUI\Ingame\PlayerEmote\Keyboard\PlayerEmote_Keyboard.lua
 EsoUI\Ingame\PlayerEmote\Keyboard\PlayerEmote_Keyboard.xml
-
-EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.lua
-EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.xml
 
 EsoUI\Ingame\Fishing\Fishing.lua
 EsoUI\Ingame\Fishing\Keyboard\Fishing_Keyboard.lua
@@ -800,6 +899,7 @@ EsoUI\Ingame\TradingHouse\Gamepad\TradingHouse_Gamepad.lua
 EsoUI\Ingame\TradingHouse\Gamepad\TradingHouse_Gamepad.xml
 
 EsoUI\Ingame\TradingHouse\ArmorFilter_Shared.lua
+EsoUI\Ingame\TradingHouse\FurnishingsFilter_Shared.lua
 
 EsoUI\Ingame\TradingHouse\Keyboard\TraitFilters_Keyboard.lua
 EsoUI\Ingame\TradingHouse\Keyboard\EnchantmentFilters_Keyboard.lua
@@ -810,6 +910,8 @@ EsoUI\Ingame\TradingHouse\Keyboard\ConsumablesFilter_Keyboard.lua
 EsoUI\Ingame\TradingHouse\Keyboard\MiscellaneousFilter_Keyboard.lua
 EsoUI\Ingame\TradingHouse\Keyboard\CraftingFilter_Keyboard.lua
 EsoUI\Ingame\TradingHouse\Keyboard\GuildItemsFilter_Keyboard.lua
+EsoUI\Ingame\TradingHouse\Keyboard\FurnishingsFilter_Keyboard.lua
+EsoUI\Ingame\TradingHouse\Keyboard\FurnishingsFilter_Keyboard.xml
 
 EsoUI\Ingame\TradingHouse\Gamepad\TradingHouseFilter_Gamepad.lua
 EsoUI\Ingame\TradingHouse\Gamepad\TraitFilters_Gamepad.lua
@@ -821,6 +923,7 @@ EsoUI\Ingame\TradingHouse\Gamepad\ConsumablesFilter_Gamepad.lua
 EsoUI\Ingame\TradingHouse\Gamepad\MiscellaneousFilter_Gamepad.lua
 EsoUI\Ingame\TradingHouse\Gamepad\CraftingFilter_Gamepad.lua
 EsoUI\Ingame\TradingHouse\Gamepad\GuildItemsFilter_Gamepad.lua
+EsoUI\Ingame\TradingHouse\Gamepad\FurnishingsFilter_Gamepad.lua
 
 EsoUI\Ingame\Campaign\CampaignBrowser_Shared.lua
 EsoUI\Ingame\Campaign\CampaignScoring_Shared.lua
@@ -879,6 +982,11 @@ EsoUI\Ingame\Leaderboards\Keyboard\RaidLeaderboards_Keyboard.lua
 EsoUI\Ingame\Leaderboards\Keyboard\RaidLeaderboards_Keyboard.xml
 EsoUI\Ingame\Leaderboards\Gamepad\RaidLeaderboards_Gamepad.lua
 EsoUI\Ingame\Leaderboards\Gamepad\RaidLeaderboards_Gamepad.xml
+EsoUI\Ingame\Leaderboards\BattlegroundLeaderboards_Shared.lua
+EsoUI\Ingame\Leaderboards\Keyboard\BattlegroundLeaderboards_Keyboard.lua
+EsoUI\Ingame\Leaderboards\Keyboard\BattlegroundLeaderboards_Keyboard.xml
+EsoUI\Ingame\Leaderboards\Gamepad\BattlegroundLeaderboards_Gamepad.lua
+EsoUI\Ingame\Leaderboards\Gamepad\BattlegroundLeaderboards_Gamepad.xml
 
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Dialogs_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.lua
@@ -915,27 +1023,182 @@ EsoUI\Ingame\SCT\SCTAnimations.xml
 
 EsoUI\Ingame\ZO_GuildNameFooter\Gamepad\ZO_GuildNameFooter_Gamepad.xml
 
-EsoUI\Ingame\Subtitles\Subtitles.lua
-EsoUI\Ingame\Subtitles\Subtitles.xml
-
 EsoUI\Ingame\HousingEditor\HousingEditorHud.lua
 EsoUI\Ingame\HousingEditor\HousingEditorHud.xml
 EsoUI\Ingame\HousingEditor\FurnitureClasses_Shared.lua
 EsoUI\Ingame\HousingEditor\FurnitureManager_Shared.lua
+EsoUI\Ingame\HousingEditor\HouseSettings_Manager.lua
+EsoUI\Ingame\HousingEditor\HousingFurnitureSettings_Base.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureBrowser_Base.lua
-EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.lua
-EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.xml
+EsoUI\Ingame\HousingEditor\HouseInformation_Shared.lua
+EsoUI\Ingame\HousingEditor\Keyboard\FurnitureClasses_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Gamepad\FurnitureClasses_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\FurnitureClasses_Gamepad.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureTemplates_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureTemplates_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurniturePlacement_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurniturePlacement_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureProducts_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureProducts_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureRetrieval_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureRetrieval_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureSettings_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureSettings_Keyboard.xml
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HouseInformation_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HouseInformation_keyboard.xml
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurniturePlacement_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureProducts_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureRetrieval_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureSettings_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureSettings_Gamepad.xml
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.xml
+EsoUI\Ingame\HousingEditor\Gamepad\HouseInformation_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HouseInformation_Gamepad.xml
 
+EsoUI\Ingame\HousingEditor\HousingPreview_Manager.lua
+EsoUI\Ingame\HousingEditor\HousingPreview_Shared.lua
+EsoUI\Ingame\HousingEditor\HousingPreview_Shared.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingPreview_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingPreview_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Gamepad\HousingPreview_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingPreview_Gamepad.xml
+
+EsoUI\Ingame\CrownCrates\CrownGemification_Manager.lua
+EsoUI\Ingame\CrownCrates\CrownGemification_Shared.lua
+EsoUI\Ingame\CrownCrates\Keyboard\CrownGemification_Keyboard.lua
+EsoUI\Ingame\CrownCrates\Keyboard\CrownGemification_Keyboard.xml
+EsoUI\Ingame\CrownCrates\Gamepad\CrownGemification_Gamepad.lua
+EsoUI\Ingame\CrownCrates\Gamepad\CrownGemification_Gamepad.xml
 EsoUI\Ingame\CrownCrates\CrownCrateStateMachine.lua
 EsoUI\Ingame\CrownCrates\CrownCratesAnimatable.lua
 EsoUI\Ingame\CrownCrates\CrownCratesPackOpening.lua
+EsoUI\Ingame\CrownCrates\CrownCratesPackOpening.xml
 EsoUI\Ingame\CrownCrates\CrownCratesPackChoosing.lua
+EsoUI\Ingame\CrownCrates\CrownCratesPackChoosing.xml
+EsoUI\Ingame\CrownCrates\CrownGemificationSlot.lua
+EsoUI\Ingame\CrownCrates\CrownGemificationSlot.xml
 EsoUI\Ingame\CrownCrates\CrownCrates.lua
 EsoUI\Ingame\CrownCrates\CrownCrates.xml
-EsoUI\Ingame\CrownCrates\CrownCratePrototype.lua
-EsoUI\Ingame\CrownCrates\CrownCratePrototype.xml
+
+EsoUI\Ingame\CombatLogs\TargetDummyLog.lua
+
+EsoUI\Ingame\BuffDebuff\BuffDebuffStyles.lua
+EsoUI\Ingame\BuffDebuff\BuffDebuffStyles.xml
+EsoUI\Ingame\BuffDebuff\BuffDebuff.lua
+EsoUI\Ingame\BuffDebuff\BuffDebuff.xml
+
+EsoUI\Ingame\Battleground\BattlegroundObjectiveStateDisplay.lua
+EsoUI\Ingame\Battleground\BattlegroundObjectiveStateDisplay.xml
+EsoUI\Ingame\Battleground\BattlegroundScoreHud.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreHud.xml
+EsoUI\Ingame\Battleground\BattlegroundHud.lua
+EsoUI\Ingame\Battleground\BattlegroundHud.xml
+EsoUI\Ingame\Battleground\BattlegroundScoreboard.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreboardInGame.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreboard.xml
+EsoUI\Ingame\Battleground\BattlegroundScoreboardEndOfGame.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreboardEndOfGame.xml
+EsoUI\Ingame\Battleground\BattlegroundMedalInfo_Shared.lua
+EsoUI\Ingame\Battleground\BattlegroundMedalInfo_Shared.xml
+EsoUI\Ingame\Battleground\Keyboard\BattlegroundMedalInfo_Keyboard.lua
+EsoUI\Ingame\Battleground\Keyboard\BattlegroundMedalInfo_Keyboard.xml
+EsoUI\Ingame\Battleground\Gamepad\BattlegroundMedalInfo_Gamepad.lua
+EsoUI\Ingame\Battleground\Gamepad\BattlegroundMedalInfo_Gamepad.xml
+
+EsoUI\Ingame\Cutscene\Cutscene.lua
+EsoUI\Ingame\Cutscene\Cutscene.xml
+
+EsoUI\Ingame\Rewards\Ingame_Rewards_Manager.lua
+
+EsoUI\Ingame\LevelUpRewards\LevelUpRewards_Manager.lua
+EsoUI\Ingame\LevelUpRewards\LevelUpRewards_Base.lua
+EsoUI\Ingame\LevelUpRewards\LevelUpRewards_Base.xml
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewards_Keyboard.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewards_Keyboard.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewards_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewards_Gamepad.xml
+EsoUI\Ingame\LevelUpRewards\LevelUpRewardsClaim_Base.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsClaim_Keyboard.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsClaim_Keyboard.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsClaim_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsClaim_Gamepad.xml
+EsoUI\Ingame\LevelUpRewards\LevelUpRewardsUpcoming_Base.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsUpcoming_Keyboard.lua
+EsoUI\Ingame\LevelUpRewards\Keyboard\LevelUpRewardsUpcoming_Keyboard.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsUpcoming_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsUpcoming_Gamepad.xml
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsPostClaim_Gamepad.lua
+EsoUI\Ingame\LevelUpRewards\Gamepad\LevelUpRewardsPostClaim_Gamepad.xml
+
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Keyboard.lua
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Keyboard.xml
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_BuildSelection_Keyboard.lua
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_BuildSelection_Keyboard.xml
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Suggestions_Keyboard.lua
+EsoUI\Ingame\SkillsAdvisor\Keyboard\SkillsAdvisor_Suggestions_Keyboard.xml
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_BuildSelection_Gamepad.lua
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_BuildSelection_Gamepad.xml
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_Suggestions_Gamepad.lua
+EsoUI\Ingame\SkillsAdvisor\Gamepad\SkillsAdvisor_Suggestions_Gamepad.xml
+
+EsoUI\Ingame\DailyLoginRewards\DailyLoginRewards_Base.lua
+EsoUI\Ingame\DailyLoginRewards\DailyLoginRewards_Base.xml
+EsoUI\Ingame\DailyLoginRewards\Keyboard\DailyLoginRewards_Keyboard.lua
+EsoUI\Ingame\DailyLoginRewards\Keyboard\DailyLoginRewards_Keyboard.xml
+EsoUI\Ingame\DailyLoginRewards\Gamepad\DailyLoginRewards_Gamepad.lua
+EsoUI\Ingame\DailyLoginRewards\Gamepad\DailyLoginRewards_Gamepad.xml
+
+EsoUI\Ingame\GiftInventory\GiftInventory_Manager.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryDialogs_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryDialogs_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventory_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventory_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryCategory_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryCategory_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryReceived_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryReceived_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventorySent_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventorySent_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryThanked_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryThanked_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryReturned_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryReturned_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventoryDialogs_Gamepad.lua
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventoryCategory_Gamepad.lua
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventoryReceived_Gamepad.lua
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventorySent_Gamepad.lua
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventoryReturned_Gamepad.lua
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventory_Gamepad.lua
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventory_Gamepad.xml
+
+EsoUI\Ingame\GiftInventory\GiftInventoryView_Shared.lua
+EsoUI\Ingame\GiftInventory\GiftInventoryView_Shared.xml
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryView_Keyboard.lua
+EsoUI\Ingame\GiftInventory\Keyboard\GiftInventoryView_Keyboard.xml
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventoryView_Gamepad.lua
+EsoUI\Ingame\GiftInventory\Gamepad\GiftInventoryView_Gamepad.xml
+
+EsoUI\Ingame\ScreenshotMode\Gamepad\ScreenshotMode_Gamepad.lua
+EsoUI\Ingame\ScreenshotMode\Gamepad\ScreenshotMode_Gamepad.xml
+
+; Keeping these towards the bottom so that we can register to any callback objects we want
+EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.lua
+EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.xml
+
+EsoUI\Ingame\Contacts\Notifications_Common.lua
+EsoUI\Ingame\Contacts\Keyboard\Notifications_Keyboard.lua
+EsoUI\Ingame\Contacts\Keyboard\Notifications_Keyboard.xml
+EsoUI\Ingame\Contacts\Gamepad\Notifications_Gamepad.lua
+EsoUI\Ingame\Contacts\Gamepad\Notifications_Gamepad.xml
+
+; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
+EsoUI\Ingame\Subtitles\Subtitles.lua
+EsoUI\Ingame\Subtitles\Subtitles.xml
+
+EsoUI\Ingame\Profiler\ProfilerUtils.lua
 
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
 EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.lua
@@ -948,6 +1211,7 @@ EsoUI\Ingame\Scenes\Console\ConsoleIngameFragments.lua
 EsoUI\Ingame\Scenes\Gamepad\IngameFragments_Gamepad.lua
 
 EsoUI\Ingame\Scenes\IngameFragmentGroups.lua
+EsoUI\Ingame\Scenes\Keyboard\KeyboardIngameFragmentGroups.lua
 EsoUI\Ingame\Scenes\HUDScene.lua
 
 EsoUI\Ingame\Scenes\IngameScenes.lua

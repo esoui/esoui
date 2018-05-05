@@ -1,9 +1,3 @@
-LOOT_MONEY_ICON = "EsoUI/Art/Icons/Item_Generic_CoinBag.dds"
-LOOT_TELVAR_STONE_ICON = "EsoUI/Art/Icons/Icon_TelVarStone.dds"
-LOOT_ALLIANCE_POINT_ICON = "EsoUI/Art/Icons/Icon_AlliancePoints.dds"
-LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
-LOOT_GEMS_ICON = "EsoUI/Art/currency/currency_crown_gems.dds"
-
 ZO_LootScene = ZO_Scene:Subclass()
 
 function ZO_LootScene:New(...)
@@ -42,13 +36,13 @@ function ZO_Loot_Shared:Initialize(control)
     end
 
     local function OnLootReceived(eventCode, receivedBy, objectName, stackCount, soundCategory, lootType, lootedBySelf, questIcon)
-        if (not lootedBySelf) then 
-            return 
+        if not lootedBySelf then
+            return
         end
 
         -- Real item sound hooks are handled by the inventory.
-        if(lootType == LOOT_TYPE_QUEST_ITEM) then
-            if(soundCategory ~= ITEM_SOUND_CATEGORY_NONE) then
+        if lootType == LOOT_TYPE_QUEST_ITEM then
+            if soundCategory ~= ITEM_SOUND_CATEGORY_NONE then
                 PlayItemSound(soundCategory, ITEM_SOUND_ACTION_ACQUIRE)
             end
         end
@@ -61,7 +55,7 @@ function ZO_Loot_Shared:Initialize(control)
     end
 
     local function LootItemFailed(eventCode, reason, itemName)
-        if(reason == LOOT_ITEM_RESULT_INVENTORY_FULL or reason == LOOT_ITEM_RESULT_INVENTORY_FULL_LOOT_ALL) then
+        if reason == LOOT_ITEM_RESULT_INVENTORY_FULL or reason == LOOT_ITEM_RESULT_INVENTORY_FULL_LOOT_ALL then
             TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
         end
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
@@ -85,6 +79,23 @@ end
 
 function ZO_Loot_Shared:LootAllItems()
     LootAll(SYSTEMS:GetObject("loot"):AreNonStolenItemsPresent())
+end
+
+function ZO_Loot_Shared:GetLootCurrencyInformation()
+    local currencyInfo = {}
+    for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
+        if IsCurrencyValid(currencyType) then
+            local currencyAmount, stolenCurrencyAmount = GetLootCurrency(currencyType)
+            if currencyAmount + stolenCurrencyAmount > 0 then
+                currencyInfo[currencyType] =
+                    {
+                        currencyAmount = currencyAmount,
+                        stolenCurrencyAmount = stolenCurrencyAmount,
+                    }
+            end
+        end
+    end
+    return currencyInfo
 end
 
 --[[ Globals ]]--

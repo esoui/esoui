@@ -43,22 +43,40 @@ function ZO_LootHistory_Gamepad:SetEntryTemplate()
     self.entryTemplate = GAMEPAD_LOOT_HISTORY_ENTRY_TEMPLATE
 end
 
-function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
-    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-    return currentSceneName == "gamepadInteract" or currentSceneName == "gamepad_inventory_root" 
-           or currentSceneName == "crownCrateGamepad" or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
+do
+    local SUPPORTED_SCENES =
+    {
+        ["gamepadInteract"] = true,
+        ["gamepad_inventory_root"] = true,
+        ["crownCrateGamepad"] = true,
+        ["gamepadTrade"] = true,
+        ["gamepad_stats_root"] = true,
+        ["LevelUpRewardsClaimGamepad"] = true,
+        ["giftInventoryViewGamepad"] = true,
+        ["playerSubmenu"] = true, -- Need this for daily login since this is the scene it exists in
+        ["mailManagerGamepad"] = true,
+        ["gamepad_market_purchase"] = true,
+    }
+    function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
+        local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+        return not self.hidden or SUPPORTED_SCENES[currentSceneName] or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
+    end
 end
 
-function ZO_LootHistory_Gamepad:OnLootReceived(...)
-    ZO_LootHistory_Shared.OnLootReceived(self, ...)
+function ZO_LootHistory_Gamepad:GetCraftBagIcon()
+    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_craftBag.dds"
 end
 
-function ZO_LootHistory_Gamepad:OnGoldUpdate(...)
-    ZO_LootHistory_Shared.OnGoldUpdate(self, ...)
+function ZO_LootHistory_Gamepad:GetStolenIcon()
+    return "EsoUI/Art/Inventory/GamePad/gp_inventory_icon_stolenItem.dds"
 end
 
-function ZO_LootHistory_Gamepad:OnTelvarStoneUpdate(...)
-    ZO_LootHistory_Shared.OnTelvarStoneUpdate(self, ...)
+function ZO_LootHistory_Gamepad:GetCraftBagHighlight()
+    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds"
+end
+
+function ZO_LootHistory_Gamepad:GetStolenHighlight()
+    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight_stolen.dds"
 end
 
 function ZO_LootHistory_Gamepad_OnInitialized(control)

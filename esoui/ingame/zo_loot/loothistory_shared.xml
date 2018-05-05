@@ -38,25 +38,20 @@
                     <Dimensions x="40" y="40" />
                     <Anchor point="LEFT" offsetX="-5"/>
                     <Controls>
-                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
+                        <Label name="$(parent)OverlayText" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
                             <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1"/>
                         </Label>
 
-                        <Texture name="$(parent)CraftBagIcon" hidden="true">
+                        <Texture name="$(parent)StatusIcon" hidden="true">
                             <Dimensions x="40" y="40" />
                         </Texture>
                     </Controls>
                 </Texture>
-                
-                <Label name="$(parent)Label" verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="2">
-                    <Dimensions x="240"/>
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
-                </Label>
-              
+
                 <Texture name="$(parent)Bg">
                     <AnchorFill />
                     <Controls>
-                        <Texture name="$(parent)CraftBagHighlight" hidden="true" />
+                        <Texture name="$(parent)Highlight" hidden="true" />
                     </Controls>
                 </Texture>
             </Controls>

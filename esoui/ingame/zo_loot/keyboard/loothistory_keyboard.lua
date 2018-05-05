@@ -43,21 +43,39 @@ function ZO_LootHistory_Keyboard:SetEntryTemplate()
     self.entryTemplate = KEYBOARD_LOOT_HISTORY_ENTRY_TEMPLATE
 end
 
-function ZO_LootHistory_Shared:CanShowItemsInHistory()
-    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-    return currentSceneName == "inventory" or currentSceneName == "interact" or currentSceneName == "crownCrateKeyboard" or LOOT_WINDOW.returnScene == "inventory"
+do
+    local SUPPORTED_SCENES =
+    {
+        ["inventory"] = true,
+        ["interact"] = true,
+        ["crownCrateKeyboard"] = true,
+        ["trade"] = true,
+        ["stats"] = true,
+        ["giftInventoryViewKeyboard"] = true,
+        ["dailyLoginRewards"] = true,
+        ["mailInbox"] = true,
+        ["market"] = true,
+    }
+    function ZO_LootHistory_Keyboard:CanShowItemsInHistory()
+        local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+        return not self.hidden or SUPPORTED_SCENES[currentSceneName] or LOOT_WINDOW.returnScene == "inventory"
+    end
 end
 
-function ZO_LootHistory_Keyboard:OnLootReceived(...)
-    ZO_LootHistory_Shared.OnLootReceived(self, ...)
+function ZO_LootHistory_Keyboard:GetCraftBagIcon()
+    return "EsoUI/Art/HUD/lootHistory_icon_craftBag.dds"
 end
 
-function ZO_LootHistory_Keyboard:OnGoldUpdate(...)
-    ZO_LootHistory_Shared.OnGoldUpdate(self, ...)
+function ZO_LootHistory_Keyboard:GetStolenIcon()
+    return "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 end
 
-function ZO_LootHistory_Keyboard:OnTelvarStoneUpdate(...)
-    ZO_LootHistory_Shared.OnTelvarStoneUpdate(self, ...)
+function ZO_LootHistory_Keyboard:GetCraftBagHighlight()
+    return "EsoUI/Art/HUD/lootHistory_highlight.dds"
+end
+
+function ZO_LootHistory_Keyboard:GetStolenHighlight()
+    return "EsoUI/Art/HUD/lootHistory_highlight_stolen.dds"
 end
 
 function ZO_LootHistory_Keyboard_OnInitialized(control)

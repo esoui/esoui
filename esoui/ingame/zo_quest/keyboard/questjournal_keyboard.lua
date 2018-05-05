@@ -21,6 +21,12 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
     self.conditionTextBulletList = ZO_BulletList:New(control:GetNamedChild("ConditionTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel")
     self.optionalStepTextBulletList = ZO_BulletList:New(control:GetNamedChild("OptionalStepTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel")
 
+    self.bgText = control:GetNamedChild("BGText")
+    self.stepText = control:GetNamedChild("StepText")
+    self.optionalStepTextLabel = control:GetNamedChild("OptionalStepTextLabel")
+    self.questInfoContainer = control:GetNamedChild("QuestInfoContainer")
+    self.questStepContainer = control:GetNamedChild("QuestStepContainer")
+
     self:RefreshQuestMasterList()
 
     ZO_QuestJournal_Shared.Initialize(self, control)
@@ -30,22 +36,26 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
 end
 
 function ZO_QuestJournal_Keyboard:RegisterIcons()
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,           "EsoUI/Art/Journal/journal_Quest_Instance.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,        "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,    "EsoUI/Art/Journal/journal_Quest_Group_Delve.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,     "EsoUI/Art/Icons/icon_missing.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,           "EsoUI/Art/Journal/journal_Quest_Trial.dds")
-    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON, "EsoUI/Art/Journal/journal_Quest_Dungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             "EsoUI/Art/Journal/journal_Quest_Instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          "EsoUI/Art/Journal/journal_Quest_Group_Instance.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,      "EsoUI/Art/Journal/journal_Quest_Group_Delve.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,       "EsoUI/Art/Journal/journal_Quest_Group_Area.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,             "EsoUI/Art/Journal/journal_Quest_Trial.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   "EsoUI/Art/Journal/journal_Quest_Dungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            "EsoUI/Art/Journal/journal_Quest_Delve.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          "EsoUI/Art/Journal/journal_Quest_Housing.dds")
 end
 
 function ZO_QuestJournal_Keyboard:RegisterTooltips()
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,           SI_QUEST_JOURNAL_SOLO_TOOLTIP)
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,        SI_QUEST_JOURNAL_DUNGEON_TOOLTIP)
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,           SI_QUEST_JOURNAL_RAID_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             SI_QUEST_JOURNAL_SOLO_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          SI_QUEST_JOURNAL_DUNGEON_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,             SI_QUEST_JOURNAL_RAID_TOOLTIP)
     -- nothing should be marked as GROUP_DELVE, but just in case treat it like GROUP      
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,    SI_QUEST_JOURNAL_GROUP_TOOLTIP)
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,     SI_QUEST_JOURNAL_GROUP_TOOLTIP)
-    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON, SI_QUEST_JOURNAL_PUBLIC_DUNGEON_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_DELVE,      SI_QUEST_JOURNAL_GROUP_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_GROUP_AREA,       SI_QUEST_JOURNAL_GROUP_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   SI_QUEST_JOURNAL_PUBLIC_DUNGEON_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            SI_QUEST_JOURNAL_DELVE_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          SI_QUEST_JOURNAL_HOUSING_TOOLTIP)
 end
 
 function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected)
@@ -108,7 +118,7 @@ function ZO_QuestJournal_Keyboard:InitializeQuestList()
             self:RefreshDetails()
             -- The quest tracker performs focus logic on quest/remove/update, only force focus if the player has clicked on the quest through the journal UI
             if SCENE_MANAGER:IsShowing(self.sceneName) then
-                QUEST_TRACKER:ForceAssist(data.questIndex)
+                FOCUSED_QUEST_TRACKER:ForceAssist(data.questIndex)
             end
         end
 
@@ -136,7 +146,7 @@ function ZO_QuestJournal_Keyboard:InitializeKeybindStripDescriptors()
 
             callback = function()
                 local IGNORE_SCENE_RESTRICTION = true
-                QUEST_TRACKER:AssistNext(IGNORE_SCENE_RESTRICTION)
+                FOCUSED_QUEST_TRACKER:AssistNext(IGNORE_SCENE_RESTRICTION)
                 self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
             end,
 
@@ -270,6 +280,7 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
 
     local firstNode
     local lastNode
+    local assistedNode
     for i = 1, #quests do
         local questInfo = quests[i]
         local parent = categoryNodes[questInfo.categoryName]
@@ -285,10 +296,14 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
             questNode.nextNode = firstNode
         end
 
+        if assistedNode == nil and GetTrackedIsAssisted(TRACK_TYPE_QUEST, questInfo.questIndex) then
+            assistedNode = questNode
+        end
+
         lastNode = questNode
     end
 
-    self.navigationTree:Commit()
+    self.navigationTree:Commit(assistedNode)
 
     self:RefreshDetails()
 
@@ -467,8 +482,8 @@ function ZO_QuestJournalNavigationEntry_OnMouseUp(label, button, upInside)
             end
 
             AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function() 
-																	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT)
-																	HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:SetDetailsFromQuestName(node.data.name)
+																	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:GetFragment())
+																	HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:SetDetailsText(node.data.name)
 																end)
 
             ShowMenu(label)
