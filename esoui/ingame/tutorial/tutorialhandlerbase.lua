@@ -24,6 +24,10 @@ function ZO_TutorialHandlerBase:ShowHelp()
     return false
 end
 
+function ZO_TutorialHandlerBase:RegisterTriggerLayoutInfo()
+    -- Intended to be overriden, allows for specifying how/where the tutorial should show up
+end
+
 function ZO_TutorialHandlerBase:SetHidden(hide)
     -- Intended to be overriden, requests that the current tutorial window be hidden or shown
 end
@@ -78,6 +82,10 @@ end
 function ZO_TutorialHandlerBase:OnRemoveTutorial(tutorialIndex)
     -- Can to be overriden for custom behavior, occurs when a tutorial matching GetTutorialType() is requested to be removed
     self:RemoveTutorial(tutorialIndex)
+end
+
+function ZO_TutorialHandlerBase:RemoveTutorialByTrigger(tutorialTrigger)
+    --To be overriden, when you know you want to clear a particular trigger for a specific reason unrelated to tutorial interactions
 end
 
 function ZO_TutorialHandlerBase:SetCurrentlyDisplayedTutorialIndex(currentlyDisplayedTutorialIndex)

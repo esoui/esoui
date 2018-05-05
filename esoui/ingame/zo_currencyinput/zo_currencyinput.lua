@@ -43,16 +43,19 @@ end
 function ZO_CurrencyInputObject:SetMaxCurrency(maxCurrency)
     self:SetUsePlayerCurrencyAsMax(false)
     self.maxCurrency = maxCurrency
+    if self.maxCurrency and self:GetTotalCurrency() > self.maxCurrency then
+        self:SetCurrencyAmount(self.maxCurrency, "update")
+    end
 end
 
 function ZO_CurrencyInputObject:GetMaxCurrency()
     if(self:IsUsingPlayerCurrencyAsMax()) then
-        return GetCarriedCurrencyAmount(self.currencyType)
+        return GetCurrencyAmount(self.currencyType, CURRENCY_LOCATION_CHARACTER)
     elseif(self.maxCurrency) then
         return self.maxCurrency
     end
 
-    return MAX_PLAYER_MONEY --May need an enum for this if we pick a different max for other currency types.
+    return MAX_PLAYER_CURRENCY --May need an enum for this if we pick a different max for other currency types.
 end
 
 function ZO_CurrencyInputObject:GetTotalCurrency()
@@ -133,7 +136,7 @@ function ZO_CurrencyInputObject:OnKeyDown(key, ctrl, alt, shift)
             currency = (currency * 10) + keyValue
 
             -- Don't allow users to enter more currency than they have, just reset to what the control used to have
-            if (self.maxCurrency and self.maxCurrency < currency) or (self:IsUsingPlayerCurrencyAsMax() and GetCarriedCurrencyAmount(self.currencyType) < currency) then
+            if (self.maxCurrency and self.maxCurrency < currency) or (self:IsUsingPlayerCurrencyAsMax() and GetCurrencyAmount(self.currencyType, CURRENCY_LOCATION_CHARACTER) < currency) then
                 self.badInputTimeline:PlayFromStart()
                 currency = self.currencyAmount
             end
@@ -192,13 +195,7 @@ function ZO_CurrencyInputObject:Show(callback, playerCurrencyAsMaxOrMaxCurrency,
     end
 
     self.callback = callback
-
-    if(type(playerCurrencyAsMaxOrMaxCurrency) == "number") then
-        self:SetMaxCurrency(playerCurrencyAsMaxOrMaxCurrency)
-    else
-        self:SetUsePlayerCurrencyAsMax(playerCurrencyAsMaxOrMaxCurrency)
-    end
-
+    self:SetPlayerCurrencyAsMaxOrMaxCurrency(playerCurrencyAsMaxOrMaxCurrency)
     self:SetCurrencyAmount(initialCurrencyAmount or self:GetTotalCurrency(), "update")
     self.pulseTimeline:PlayFromStart()
 
@@ -208,12 +205,25 @@ function ZO_CurrencyInputObject:Show(callback, playerCurrencyAsMaxOrMaxCurrency,
     end
 end
 
+function ZO_CurrencyInputObject:SetPlayerCurrencyAsMaxOrMaxCurrency(playerCurrencyAsMaxOrMaxCurrency)
+    if(type(playerCurrencyAsMaxOrMaxCurrency) == "number") then
+        self:SetMaxCurrency(playerCurrencyAsMaxOrMaxCurrency)
+    else
+        self:SetUsePlayerCurrencyAsMax(playerCurrencyAsMaxOrMaxCurrency)
+    end
+end
+
+
 function ZO_CurrencyInputObject:SetContext(context)
     self.context = context
 end
 
 function ZO_CurrencyInputObject:GetContext()
     return self.context
+end
+
+function ZO_CurrencyInputObject:IsHidden()
+    return self.control:IsHidden()
 end
 
 function ZO_CurrencyInputObject:Hide()
@@ -259,33 +269,26 @@ local function ClampSetCurrency(self, currencyAmount)
     if(self.currencyMax) then
         max = self.currencyMax
     elseif(self.usePlayerCurrencyAsMax) then
-        max = GetCarriedCurrencyAmount(self.currencyType)
+        max = GetCurrencyAmount(self.currencyType, CURRENCY_LOCATION_CHARACTER)
     end
 
     return zo_clamp(currencyAmount, min, max)
 end
 
-local CURRENCY_TYPE_TO_UPDATE_EVENT =
-{
-    [CURT_MONEY] = EVENT_MONEY_UPDATE,
-    [CURT_ALLIANCE_POINTS] = EVENT_ALLIANCE_POINT_UPDATE,
-    [CURT_TELVAR_STONES] = EVENT_TELVAR_STONE_UPDATE,
-}
-
 function ZO_DefaultCurrencyInputField_Initialize(self, onCurrencyChanged, currencyType)
     self.currencyControl = GetControl(self, "Amount")
     self.usePlayerCurrencyAsMax = false
     self.currentCurrencyAmount = 0
-    
+
     --before updating currencyType unregister any potential currency update events
     currencyType = currencyType or CURT_MONEY -- gross check because currencyType defaults to money for backwards compat
     if self.currencyType and self.currencyType ~= currencyType then
         if(self.onCurrencyUpdate) then
-            self:UnregisterForEvent(CURRENCY_TYPE_TO_UPDATE_EVENT[self.currencyType], self.onCurrencyUpdate)
+            self:UnregisterForEvent(EVENT_CURRENCY_UPDATE)
         end
     end
-    self.currencyType = currencyType or CURT_MONEY
-    ZO_CurrencyControl_SetSimpleCurrency(self.currencyControl, self.currencyType, 0)
+    
+    ZO_DefaultCurrencyInputField_SetCurrencyType(self, currencyType)
 
     self.OnCurrencyChanged = function(currencyInput, currencyAmount, eventType)
         currencyAmount = ClampSetCurrency(self, currencyAmount)
@@ -312,7 +315,7 @@ function ZO_DefaultCurrencyInputField_Initialize(self, onCurrencyChanged, curren
 end
 
 local function RefreshCurrencyForPlayerLimit(self)
-    local playerCurrency = GetCarriedCurrencyAmount(self.currencyType)
+    local playerCurrency = GetCurrencyAmount(self.currencyType, CURRENCY_LOCATION_CHARACTER)
     if(self.currentCurrencyAmount > playerCurrency) then
         ZO_DefaultCurrencyInputField_SetCurrencyAmount(self, playerCurrency)
     end
@@ -327,10 +330,10 @@ function ZO_DefaultCurrencyInputField_SetUsePlayerCurrencyAsMax(self, usePlayerC
             if(self.onCurrencyUpdate == nil) then
                 self.onCurrencyUpdate = function() RefreshCurrencyForPlayerLimit(self) end
             end
-            self:RegisterForEvent(CURRENCY_TYPE_TO_UPDATE_EVENT[self.currencyType], self.onCurrencyUpdate)
+            self:RegisterForEvent(EVENT_CURRENCY_UPDATE, function(eventId, currencyType) if currencyType == self.currencyType then self.onCurrencyUpdate() end end) 
         else
             if(self.onCurrencyUpdate) then
-                self:UnregisterForEvent(CURRENCY_TYPE_TO_UPDATE_EVENT[self.currencyType], self.onCurrencyUpdate)
+                self:UnregisterForEvent(EVENT_CURRENCY_UPDATE)
             end
         end
     end
@@ -340,6 +343,9 @@ function ZO_DefaultCurrencyInputField_SetCurrencyMax(self, currencyMax)
     ZO_DefaultCurrencyInputField_SetUsePlayerCurrencyAsMax(self, false)
     self.currencyMax = currencyMax
     ZO_DefaultCurrencyInputField_SetCurrencyAmount(self, self.currentCurrencyAmount)
+    if not CURRENCY_INPUT:IsHidden() then
+        CURRENCY_INPUT:SetPlayerCurrencyAsMaxOrMaxCurrency(self.currencyMax)
+    end
 end
 
 function ZO_DefaultCurrencyInputField_SetCurrencyMin(self, currencyMin)
@@ -353,6 +359,11 @@ function ZO_DefaultCurrencyInputField_SetCurrencyAmount(self, currencyAmount)
     if currencyAmount ~= self.currentCurrencyAmount then
         self.OnCurrencyChanged(nil, currencyAmount, "confirm")
     end
+end
+
+function ZO_DefaultCurrencyInputField_SetCurrencyType(self, currencyType)
+    self.currencyType = currencyType or CURT_MONEY
+    ZO_CurrencyControl_SetSimpleCurrency(self.currencyControl, self.currencyType, 0)
 end
 
 function ZO_DefaultCurrencyInputField_GetCurrency(self)

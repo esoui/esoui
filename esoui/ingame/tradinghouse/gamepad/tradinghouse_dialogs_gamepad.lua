@@ -1,13 +1,5 @@
 local CHECKED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 
-local function GetCurrencyTextString(currencyType)
-    if currencyType == CURT_ALLIANCE_POINTS then
-        return SI_GAMEPAD_TRADING_HOUSE_ITEM_AMOUNT_ALLIANCE_POINTS
-    else
-        return SI_GAMEPAD_TRADING_HOUSE_ITEM_AMOUNT
-    end
-end
-
 function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(selectedData, dialogName, displayPrice)
 
     local listingIndex = ZO_Inventory_GetSlotIndex(selectedData)
@@ -20,7 +12,7 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(selectedData, 
     local price = displayPrice
     local nameColor = selectedData.selectedNameColor or ZO_SELECTED_TEXT
     local itemName = nameColor:Colorize(selectedData.name)
-    local currencyType = selectedData.currencyType
+    local currencyType = selectedData.currencyType or CURT_MONEY
     
     local itemIconAndName = itemName
     if iconFile then
@@ -28,8 +20,7 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(selectedData, 
         itemIconAndName = zo_strformat(SI_GAMEPAD_TRADING_HOUSE_ITEM_DESCRIPTION, iconText, itemName)
     end
 
-    costLabelStringId = GetCurrencyTextString(currencyType)
-    local priceText = zo_strformat(costLabelStringId, ZO_CurrencyControl_FormatCurrency(price))
+    local priceText = zo_strformat(SI_GAMEPAD_TRADING_HOUSE_ITEM_AMOUNT, ZO_CurrencyControl_FormatCurrency(price), ZO_Currency_GetGamepadFormattedCurrencyIcon(currencyType))
 
     ZO_Dialogs_ShowGamepadDialog(dialogName, {listingIndex = listingIndex, stackCount = stackCount, price = price}, {mainTextParams = {itemIconAndName, itemName, priceText}})
 end

@@ -1,6 +1,4 @@
 local SCROLL_LIST_ITEM_TEMPLATE_NAME = "ZO_TradingHouse_ItemListRow_Gamepad"
-local SCROLL_LIST_HEADER_OFFSET_VALUE = 0
-local SCROLL_LIST_SELECTED_OFFSET_VALUE = 20
 
 local HALF_ALPHA = 0.5
 local FULL_ALPHA = 1
@@ -16,8 +14,7 @@ local SORT_OPTIONS = {
 local ZO_GamepadTradingHouse_BrowseResults = ZO_GamepadTradingHouse_SortableItemList:Subclass()
 
 function ZO_GamepadTradingHouse_BrowseResults:New(...)
-    local browseStore = ZO_GamepadTradingHouse_SortableItemList.New(self, ...)
-    return browseStore
+    return ZO_GamepadTradingHouse_SortableItemList.New(self, ...)
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:Initialize(control)
@@ -34,40 +31,27 @@ function ZO_GamepadTradingHouse_BrowseResults:Initialize(control)
         pageNumberLabel = footerControl:GetNamedChild("PageNumberText"),
     }
 
-    GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
-    self:SetFragment(GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_FRAGMENT)
+    self:SetFragment(ZO_FadeSceneFragment:New(self.control))
 end
 
 local function SetupListing(control, data, selected, selectedDuringRebuild, enabled, activated)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 
-    local notEnoughMoney = data.purchasePrice > GetCarriedCurrencyAmount(CURT_MONEY)
+    local notEnoughMoney = data.purchasePrice > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
     ZO_CurrencyControl_SetSimpleCurrency(control.price, CURT_MONEY, data.purchasePrice, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, notEnoughMoney)
-
-    local sellerControl = control:GetNamedChild("SellerName")
-    sellerControl:SetText(ZO_FormatUserFacingDisplayName(data.sellerName))
-
-    local timeRemainingControl = control:GetNamedChild("TimeLeft")
-
-    if data.isGuildSpecificItem then
-        timeRemainingControl:SetHidden(true)
-    else
-        timeRemainingControl:SetHidden(false)
-        timeRemainingControl:SetText(zo_strformat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, ZO_FormatTime(data.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)))
-    end
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:InitializeList()
     ZO_GamepadTradingHouse_SortableItemList.InitializeList(self)
     local list = self:GetList()
-    list:AddDataTemplate("ZO_TradingHouse_ItemListRow_Gamepad", SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    local BROWSE_RESULTS_ITEM_HEIGHT = 65
-    list:SetAlignToScreenCenter(true, BROWSE_RESULTS_ITEM_HEIGHT)
+    list:AddDataTemplate(SCROLL_LIST_ITEM_TEMPLATE_NAME, SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:SetAlignToScreenCenter(true)
     list:SetNoItemText(GetString(SI_DISPLAY_GUILD_STORE_NO_ITEMS))
 
     list:SetOnSelectedDataChangedCallback(
         function(list, selectedData)
             self:LayoutTooltips(selectedData)
+            self:UpdatePreview(selectedData)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end
     )
@@ -91,19 +75,49 @@ function ZO_GamepadTradingHouse_BrowseResults:PreviousPageRequest()
     end
 end
 
+function ZO_GamepadTradingHouse_BrowseResults:UpdatePreview(selectedData)
+    if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+        if self:CanPreviewTradingHouseItem(selectedData) then
+            local tradingHouseIndex = ZO_Inventory_GetSlotIndex(selectedData)
+            ITEM_PREVIEW_GAMEPAD:PreviewTradingHouseSearchResultAsFurniture(tradingHouseIndex)
+        else
+            ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+        end
+    end
+end
+
+function ZO_GamepadTradingHouse_BrowseResults:TogglePreviewMode()
+    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+
+    local targetData = self:GetList():GetTargetData()
+    self:UpdatePreview(targetData)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadTradingHouse_BrowseResults:CanPreviewTradingHouseItem(data)
+
+    if data and not data.isGuildSpecificItem then
+        local tradingHouseIndex = ZO_Inventory_GetSlotIndex(data)
+        local itemLink = GetTradingHouseSearchResultItemLink(tradingHouseIndex)
+        return ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
+    end
+
+    return false
+end
+
 function ZO_GamepadTradingHouse_BrowseResults:UpdateRightTooltip(selectedData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
     local itemLink = selectedData and selectedData.itemLink
-	if not itemLink then
+    if not itemLink then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-		return
-	end
+        return
+    end
 
-	local equipType = GetItemLinkEquipType(itemLink)
-	local equipSlot = ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)
+    local equipType = GetItemLinkEquipType(itemLink)
+    local equipSlot = ZO_Character_GetEquipSlotForEquipType(equipType)
 
-    if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then 
+    if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then
         ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
@@ -118,8 +132,8 @@ function ZO_GamepadTradingHouse_BrowseResults:UpdateItemSelectedTooltip(selected
         else
             itemLink = selectedData.itemLink
         end
-        
-        GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount)
+
+        GAMEPAD_TOOLTIPS:LayoutGuildStoreSearchResult(GAMEPAD_LEFT_TOOLTIP, itemLink, selectedData.stackCount, selectedData.sellerName)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
@@ -210,7 +224,7 @@ end
 
 function ZO_GamepadTradingHouse_BrowseResults:InitializeEvents()
     local function OnResponseReceived(responseType, result)
-        if (responseType == TRADING_HOUSE_RESULT_PURCHASE_PENDING) and (result == TRADING_HOUSE_RESULT_SUCCESS) then
+        if responseType == TRADING_HOUSE_RESULT_PURCHASE_PENDING and result == TRADING_HOUSE_RESULT_SUCCESS then
             local RESELECT = false
             self:RefreshData(RESELECT)
         end
@@ -232,16 +246,17 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeEvents()
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:AddEntryToList(itemData)
-    if(itemData) then
+    if itemData then
         local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
         entry:InitializeTradingHouseVisualData(itemData)
+        entry:SetSubLabelTemplate("ZO_TradingHouse_ItemListSubLabelTemplate")
 
-        self:GetList():AddEntry("ZO_TradingHouse_ItemListRow_Gamepad", 
-                                entry, 
-                                SCROLL_LIST_HEADER_OFFSET_VALUE, 
-                                SCROLL_LIST_HEADER_OFFSET_VALUE, 
-                                SCROLL_LIST_SELECTED_OFFSET_VALUE, 
-                                SCROLL_LIST_SELECTED_OFFSET_VALUE)
+        if not itemData.isGuildSpecificItem then
+            local timeRemainingString = zo_strformat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, ZO_FormatTime(itemData.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING))
+            entry:AddSubLabel(timeRemainingString)
+        end
+
+        self:GetList():AddEntry(SCROLL_LIST_ITEM_TEMPLATE_NAME, entry)
     end
 end
 
@@ -275,6 +290,7 @@ function ZO_GamepadTradingHouse_BrowseResults:BuildList()
         if itemData then
             itemData.itemLink = GetTradingHouseSearchResultItemLink(itemData.slotIndex)
             self:FormatItemDataFields(itemData)
+            ZO_InventorySlot_SetType(itemData, SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT)
 
             if displayGuildItems then
                 -- Check the cached guild specific items to see if any items should be inserted between the current item and the last item added.
@@ -320,7 +336,7 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybindStripDescriptors(
 
     self.keybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-         {
+        {
             name = GetString(SI_GAMEPAD_SORT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -353,33 +369,52 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybindStripDescriptors(
         },
 
         {
-            name = GetString(SI_TRADING_HOUSE_GUILD_LABEL),
-            keybind = "UI_SHORTCUT_TERTIARY",
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            callback = function()
-                self:DisplayChangeGuildDialog()
-            end,
-            visible = function()
-                return GetSelectedTradingHouseGuildId() ~= nil and GetNumTradingHouseGuilds() > 1
-            end,
-            enabled = HasNoCoolDownAndNotAwaitingResponse
-        },
-
-        {
             name = function()
                 return zo_strformat(SI_GAMEPAD_TRADING_HOUSE_SORT_TIME_PRICE_TOGGLE, self:GetTextForToggleTimePriceKey())
             end,
-            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            keybind = "UI_SHORTCUT_LEFT_STICK",
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
             callback = function()
                 TRADING_HOUSE_GAMEPAD:SetSearchPageData(FIRST_PAGE, NO_MORE_PAGES) -- Reset pages for new sort option
                 self:ToggleSortOptions()
             end,
-            enabled = HasNoCoolDownAndNotAwaitingResponse
+            enabled = HasNoCoolDownAndNotAwaitingResponse,
         },
 
         {
+            name =  function()
+                        if not ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+                            return GetString(SI_CRAFTING_ENTER_PREVIEW_MODE)
+                        else
+                            return GetString(SI_CRAFTING_EXIT_PREVIEW_MODE)
+                        end
+                    end,
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+            callback = function()
+                self:TogglePreviewMode()
+            end,
+            visible = function()
+                -- if we are previewing something, we can end it regardless of our selection
+                local isCurrentlyPreviewing = ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled()
+                if isCurrentlyPreviewing then
+                    return true
+                end
+
+                local targetData = self:GetList():GetTargetData()
+                if targetData then
+                    return self:CanPreviewTradingHouseItem(targetData)
+                else
+                    return false
+                end
+            end,
+        },
+
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Trading House Previous Page",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
             callback = function()
@@ -388,6 +423,8 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybindStripDescriptors(
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Trading House Next Page",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
             callback = function()
@@ -422,7 +459,7 @@ function ZO_GamepadTradingHouse_BrowseResults:RequestListUpdate()
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:GetFragmentGroup()
-    return {GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_FRAGMENT}
+    return {self.fragment}
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:ResetPageData()
@@ -455,8 +492,19 @@ function ZO_GamepadTradingHouse_BrowseResults:UpdatePageData(numItemsOnPage, cur
     end
 end
 
+function ZO_GamepadTradingHouse_BrowseResults:OnShowing()
+    self:UpdatePreview(self:GetList():GetSelectedData())
+end
+
 function ZO_GamepadTradingHouse_BrowseResults:OnHiding()
     self:LayoutTooltips(nil)
+end
+
+function ZO_GamepadTradingHouse_BrowseResults:OnHidden()
+    self:UpdatePreview(nil)
+    if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
+        self:TogglePreviewMode()
+    end
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:ShowBrowseFilters()
@@ -495,7 +543,7 @@ end
 
 function ZO_GamepadTradingHouse_BrowseResults:UpdateListSortFunction()
     if self.currentSortOption then
-        TRADING_HOUSE_GAMEPAD:UpdateSortOption(self.sortOptions[self.sortKey], self.sortOrder)    
+        TRADING_HOUSE_GAMEPAD:UpdateSortOption(self.sortOptions[self.sortKey], self.sortOrder)
     end
 end
 

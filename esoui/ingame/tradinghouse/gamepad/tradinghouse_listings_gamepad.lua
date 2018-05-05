@@ -1,20 +1,16 @@
 local SCROLL_LIST_ITEM_TEMPLATE_NAME = "ZO_TradingHouse_ItemListRow_Gamepad"
-local SCROLL_LIST_HEADER_OFFSET_VALUE = 0
-local SCROLL_LIST_SELECTED_OFFSET_VALUE = 20
 
 local ZO_GamepadTradingHouse_Listings = ZO_GamepadTradingHouse_SortableItemList:Subclass()
 
 function ZO_GamepadTradingHouse_Listings:New(...)
-    local browseStore = ZO_GamepadTradingHouse_SortableItemList.New(self, ...)
-    return browseStore
+    return ZO_GamepadTradingHouse_SortableItemList.New(self, ...)
 end
 
 function ZO_GamepadTradingHouse_Listings:Initialize(control)
     local USE_HIGHLIGHT = true
     ZO_GamepadTradingHouse_SortableItemList.Initialize(self, control, ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_TIME, USE_HIGHLIGHT)
 
-    GAMEPAD_TRADING_HOUSE_LISTINGS_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
-	self:SetFragment(GAMEPAD_TRADING_HOUSE_LISTINGS_FRAGMENT)
+    self:SetFragment(ZO_FadeSceneFragment:New(self.control))
 end
 
 local function SetupListing(control, data, selected, selectedDuringRebuild, enabled, activated)
@@ -22,22 +18,17 @@ local function SetupListing(control, data, selected, selectedDuringRebuild, enab
 
     local PRICE_VALID = false
     ZO_CurrencyControl_SetSimpleCurrency(control.price, CURT_MONEY, data.purchasePrice, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, PRICE_VALID)
-
-    local sellerControl = control:GetNamedChild("SellerName")
-    sellerControl:SetText(ZO_FormatUserFacingDisplayName(data.sellerName))
-
-    local timeRemainingControl = control:GetNamedChild("TimeLeft")
-    timeRemainingControl:SetText(zo_strformat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, ZO_FormatTime(data.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)))
 end
 
 function ZO_GamepadTradingHouse_Listings:InitializeList()
     ZO_GamepadTradingHouse_SortableItemList.InitializeList(self)
-    self:GetList():AddDataTemplate("ZO_TradingHouse_ItemListRow_Gamepad", SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    local LISTINGS_ITEM_HEIGHT = 65
-    self:GetList():SetAlignToScreenCenter(true, LISTINGS_ITEM_HEIGHT)
-    self:GetList():SetNoItemText(GetString(SI_GAMEPAD_TRADING_HOUSE_NO_LISTINGS))
+    local list = self:GetList()
+    list:AddDataTemplate(SCROLL_LIST_ITEM_TEMPLATE_NAME, SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:SetAlignToScreenCenter(true)
+    list:SetValidateGradient(true)
+    list:SetNoItemText(GetString(SI_GAMEPAD_TRADING_HOUSE_NO_LISTINGS))
 
-    self:GetList():SetOnSelectedDataChangedCallback(
+    list:SetOnSelectedDataChangedCallback(
         function(list, selectedData)
             self:UpdateItemSelectedTooltip(selectedData)
         end
@@ -45,11 +36,10 @@ function ZO_GamepadTradingHouse_Listings:InitializeList()
 end
 
 function ZO_GamepadTradingHouse_Listings:UpdateForGuildChange()
-    self:ClearList()
     self:RefreshData()
 
     if not self.control:IsHidden() then
-        RequestTradingHouseListings()
+        self:RequestListUpdate()
     end
 end
 
@@ -81,25 +71,33 @@ function ZO_GamepadTradingHouse_Listings:InitializeEvents()
     end
 
     self:SetEventCallback(EVENT_TRADING_HOUSE_RESPONSE_RECEIVED, OnResponseReceived)
+
+    local function OnSearchCooldownUpdate(cooldownMilliseconds)
+        if self.requestListings then
+            self:RequestListUpdate()
+        end
+    end
+
+    self:SetEventCallback(EVENT_TRADING_HOUSE_SEARCH_COOLDOWN_UPDATE, OnSearchCooldownUpdate)
 end
 
 function ZO_GamepadTradingHouse_Listings:BuildList()
+    local list = self:GetList()
     for i = 1, GetNumTradingHouseListings() do
-	    local itemData = ZO_TradingHouse_CreateItemData(i, GetTradingHouseListingItemInfo)
-        if(itemData) then
+        local itemData = ZO_TradingHouse_CreateItemData(i, GetTradingHouseListingItemInfo)
+        if itemData then
             itemData.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemData.name)
             itemData.price = itemData.purchasePrice
             itemData.time = itemData.timeRemaining
 
             local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
             entry:InitializeTradingHouseVisualData(itemData)
+            entry:SetSubLabelTemplate("ZO_TradingHouse_ItemListSubLabelTemplate")
 
-            self:GetList():AddEntry("ZO_TradingHouse_ItemListRow_Gamepad", 
-                                    entry, 
-                                    SCROLL_LIST_HEADER_OFFSET_VALUE, 
-                                    SCROLL_LIST_HEADER_OFFSET_VALUE, 
-                                    SCROLL_LIST_SELECTED_OFFSET_VALUE, 
-                                    SCROLL_LIST_SELECTED_OFFSET_VALUE)
+            local timeRemainingString = zo_strformat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, ZO_FormatTime(itemData.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING))
+            entry:AddSubLabel(timeRemainingString)
+
+            list:AddEntry(SCROLL_LIST_ITEM_TEMPLATE_NAME, entry)
         end
     end
 end
@@ -177,20 +175,29 @@ function ZO_GamepadTradingHouse_Listings:InitializeKeybindStripDescriptors()
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
-	ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self:GetList())
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self:GetList())
 end
 
 local RESELECT = false
 function ZO_GamepadTradingHouse_Listings:RequestListUpdate()
     if GetNumTradingHouseListings() == 0 then
-        RequestTradingHouseListings()
+        if TRADING_HOUSE_GAMEPAD:CanRequestListing() then
+            self.requestListings = false
+            RequestTradingHouseListings()
+        else
+            -- only queue the request if we are not currently waiting for a listings response
+            if not TRADING_HOUSE_GAMEPAD:IsWaitingForResponseType(TRADING_HOUSE_RESULT_LISTINGS_PENDING) then
+                self.requestListings = true
+            end
+        end
     else
+        self.requestListings = false
         self:RefreshData(RESELECT)
     end
 end
 
 function ZO_GamepadTradingHouse_Listings:GetFragmentGroup()
-	return {GAMEPAD_TRADING_HOUSE_LISTINGS_FRAGMENT}
+    return {self.fragment}
 end
 
 function ZO_GamepadTradingHouse_Listings:OnHiding()

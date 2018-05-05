@@ -34,7 +34,7 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     ZO_GamepadGenericHeader_Initialize(self.m_header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
     local function UpdateGold(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCarriedCurrencyAmount(CURT_MONEY), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
 		return true
     end
 
@@ -43,6 +43,9 @@ function ZO_GamepadTradingHouse:InitializeHeader()
     end
 
     local function OnCategoryChanged(selectedData)
+		-- we don't want other scenes or fragments to be able to manipulate
+		-- our show/hide of objects  while we are changing the category
+		self.processCategoryChange = true
         self:SetCurrentMode(selectedData.mode)
 
         if SCENE_MANAGER:IsShowing(GAMEPAD_TRADING_HOUSE_SCENE_NAME) then
@@ -55,6 +58,7 @@ function ZO_GamepadTradingHouse:InitializeHeader()
         end
         
         self.m_currentObject = selectedData.object
+		self.processCategoryChange = false
     end
 
     local browseData = CreateModeData(SI_TRADING_HOUSE_MODE_BROWSE, ZO_TRADING_HOUSE_MODE_BROWSE, GAMEPAD_TRADING_HOUSE_BROWSE_MANAGER)
@@ -141,7 +145,8 @@ function ZO_GamepadTradingHouse:InitializeScene()
             self:RegisterForSceneEvents()
         elseif newState == SCENE_SHOWN then
             -- This is in SCENE_SHOWN because SCENE_GROUP_SHOWING fires after SCENE_SHOWING and OnInitialInteraction needs to be called before the curren object is shown
-            if self.m_currentObject then
+            -- also with edge case protection: don't try to show the current category if we are currently in the process of changing it
+			if self.m_currentObject and not self.processCategoryChange then
                 self.m_currentObject:Show()
             end
         elseif newState == SCENE_HIDDEN then

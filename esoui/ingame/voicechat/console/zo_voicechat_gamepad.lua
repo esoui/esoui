@@ -69,7 +69,7 @@ end
 
 function ZO_VoiceChatSocialOptions_Gamepad:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup()
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, function() return self.socialData.voiceChannelType ~= VOICE_CHANNEL_GROUP end)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, function() return IsGroupModificationAvailable() and self.socialData.voiceChannelType ~= VOICE_CHANNEL_GROUP end)
 
     local function BuildTravelToGuildPlayerOption()
         return self:BuildTravelToPlayerOption(JumpToGuildMember)
@@ -92,7 +92,7 @@ function ZO_VoiceChatSocialOptions_Gamepad:BuildOptionsList()
 
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, ZO_SocialOptionsDialogGamepad.ShouldAddSendMailOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)
 end
 

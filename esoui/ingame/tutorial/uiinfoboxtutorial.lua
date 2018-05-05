@@ -3,13 +3,19 @@ ZO_UiInfoBoxTutorial = ZO_TutorialHandlerBase:Subclass()
 local TUTORIAL_SEEN = true
 local TUTORIAL_NOT_SEEN = false
 
+--Allow extra space for icons and keybind backgrounds that can extend above and below the top and bottom lines.
+ZO_TUTORIAL_DIALOG_DESCRIPTION_EDGE_PADDING_Y = 6
+ZO_TUTORIAL_DIALOG_DESCRIPTION_TOTAL_PADDING_Y = ZO_TUTORIAL_DIALOG_DESCRIPTION_EDGE_PADDING_Y * 2
+ZO_TUTORIAL_DIALOG_SOFT_MAX_HEIGHT = 350
+ZO_TUTORIAL_DIALOG_HARD_MAX_HEIGHT = 360
+
 function ZO_UiInfoBoxTutorial:Initialize()
     self:ClearAll()
         
     local dialog = ZO_TutorialDialog
     self.dialogPane = dialog:GetNamedChild("Pane")
     self.dialogScrollChild = self.dialogPane:GetNamedChild("ScrollChild")
-    self.dialogDescription = self.dialogPane:GetNamedChild("Description")
+    self.dialogDescription = self.dialogScrollChild:GetNamedChild("Description")
     self.dialogInfo =
     {
         title = {},
@@ -60,6 +66,8 @@ function ZO_UiInfoBoxTutorial:Initialize()
             {
                 [1] =
                 {
+                    --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                    name = "Gamepad Tutorial Accept",
                     ethereal = true,
                     keybind =    "DIALOG_PRIMARY",
                     clickSound = SOUNDS.DIALOG_ACCEPT,
@@ -103,7 +111,6 @@ function ZO_UiInfoBoxTutorial:GetTutorialType()
 end
 
 --Additional spacing to account for the backdrop behind a key label if there's one in the last line or the first line
-local KEY_LABEL_SPACING = 6
 function ZO_UiInfoBoxTutorial:DisplayTutorial(tutorialIndex)
     self.title, self.description = GetTutorialInfo(tutorialIndex)
 
@@ -118,12 +125,17 @@ function ZO_UiInfoBoxTutorial:DisplayTutorial(tutorialIndex)
     else
         self.dialogInfo.title.text = self.title
         self.dialogDescription:SetText(self.description)
-        local descriptionWidth, descriptionHeight = self.dialogDescription:GetTextDimensions()
-        local contentHeight = descriptionHeight + KEY_LABEL_SPACING
-        self.dialogPane:SetHeight(contentHeight)
-        self.dialogScrollChild:SetHeight(contentHeight)
-        ZO_Scroll_ResetToTop(self.dialogPane)
-    
+        local descriptionHeight = self.dialogDescription:GetTextHeight() + ZO_TUTORIAL_DIALOG_DESCRIPTION_TOTAL_PADDING_Y
+        self.dialogScrollChild:SetHeight(descriptionHeight)
+
+        --To prevent having this pane scroll over a tiny amount of space we only force it to scroll if it hits the hard max height. This guarentees that it will scroll at least (hard - soft UI units).
+        local paneHeight = descriptionHeight
+        if paneHeight > ZO_TUTORIAL_DIALOG_HARD_MAX_HEIGHT then
+            paneHeight = ZO_TUTORIAL_DIALOG_SOFT_MAX_HEIGHT
+        end
+        self.dialogPane:SetHeight(paneHeight)
+
+        ZO_Scroll_ResetToTop(self.dialogPane)    
         ZO_Dialogs_ShowDialog("UI_TUTORIAL", { tutorialIndex = tutorialIndex, owner = self })
     end
 end
@@ -152,7 +164,7 @@ function ZO_UiInfoBoxTutorial:RemoveTutorial(tutorialIndex, seen)
         ZO_Dialogs_ReleaseDialog("UI_TUTORIAL")
         ZO_Dialogs_ReleaseDialog("UI_TUTORIAL_GAMEPAD")
     else
-        self:RemoveFromQueue(self.queue, queuedTutorialIndex)
+        self:RemoveFromQueue(self.queue, tutorialIndex)
     end
 end
 

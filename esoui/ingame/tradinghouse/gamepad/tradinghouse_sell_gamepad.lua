@@ -5,8 +5,7 @@
 local ZO_GamepadTradingHouse_Sell = ZO_GamepadTradingHouse_ItemList:Subclass()
 
 function ZO_GamepadTradingHouse_Sell:New(...)
-    local sellStore = ZO_GamepadTradingHouse_ItemList.New(self, ...)
-    return sellStore
+    return ZO_GamepadTradingHouse_ItemList.New(self, ...)
 end
 
 function ZO_GamepadTradingHouse_Sell:Initialize(control)
@@ -23,18 +22,8 @@ function ZO_GamepadTradingHouse_Sell:UpdateItemSelectedTooltip(selectedData)
     if selectedData then
         local bag, index = ZO_Inventory_GetBagAndIndex(selectedData)
         GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, bag, index)
-
-        local _, _, _, _, _, equipType = GetItemInfo(bag, index)
-        local equipSlot = ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)
-
-        if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then
-            ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)
-        else
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-        end
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     end
 end
 
@@ -69,8 +58,7 @@ local function SellItemSetupFunction(control, data, selected, selectedDuringRebu
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 
     local PRICE_INVALID = false
-    local priceControl = control:GetNamedChild("Price")
-    ZO_CurrencyControl_SetSimpleCurrency(priceControl, CURT_MONEY, data.stackSellPrice, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, PRICE_INVALID)
+    ZO_CurrencyControl_SetSimpleCurrency(control.price, CURT_MONEY, data.stackSellPrice, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, PRICE_INVALID)
 end
 
 function ZO_GamepadTradingHouse_Sell:OnSelectionChanged(list, selectedData, oldSelectedData)
@@ -91,10 +79,14 @@ function ZO_GamepadTradingHouse_Sell:InitializeList()
 
     self.messageControl = self.control:GetNamedChild("StatusMessage")
     self.itemList = ZO_GamepadInventoryList:New(self.listControl, BAG_BACKPACK, SLOT_TYPE_ITEM, OnSelectionChanged, ENTRY_SETUP_CALLBACK, 
-                                                    CATEGORIZATION_FUNCTION, SORT_FUNCTION, USE_TRIGGERS, "ZO_TradingHouse_Sell_Item_Gamepad", SellItemSetupFunction)
+                                                    CATEGORIZATION_FUNCTION, SORT_FUNCTION, USE_TRIGGERS, "ZO_TradingHouse_ItemListRow_Gamepad", SellItemSetupFunction)
 
-    self.itemList:SetItemFilterFunction(function(slot) return slot.quality ~= ITEM_QUALITY_TRASH and not slot.stolen and not slot.isPlayerLocked end)
-    self.itemList:GetParametricList():SetAlignToScreenCenter(true)
+    self.itemList:SetItemFilterFunction(function(slot) 
+                                            return  ZO_InventoryUtils_DoesNewItemMatchFilterType(slot, ITEMFILTERTYPE_TRADING_HOUSE)
+                                        end)
+    local parametricList = self.itemList:GetParametricList()
+    parametricList:SetAlignToScreenCenter(true)
+    parametricList:SetValidateGradient(true)
 end
 
 function ZO_GamepadTradingHouse_Sell:OnShowing()
@@ -116,7 +108,7 @@ function ZO_GamepadTradingHouse_Sell:InitializeKeybindStripDescriptors()
         {
             name = function()
                 local currentListings, maxListings = GetTradingHouseListingCounts()
-                if(currentListings < maxListings) then
+                if currentListings < maxListings then
                     return zo_strformat(SI_GAMEPAD_TRADING_HOUSE_LISTING_CREATE, currentListings, maxListings)
                 else
                     return zo_strformat(SI_GAMEPAD_TRADING_HOUSE_LISTING_CREATE_FULL, currentListings, maxListings)
@@ -160,12 +152,11 @@ function ZO_GamepadTradingHouse_Sell:InitializeKeybindStripDescriptors()
 end
 
 function ZO_GamepadTradingHouse_Sell:GetFragmentGroup()
-	return {GAMEPAD_TRADING_HOUSE_SELL_FRAGMENT}
+    return {GAMEPAD_TRADING_HOUSE_SELL_FRAGMENT}
 end
 
 function ZO_GamepadTradingHouse_Sell:OnHiding()
     self:UpdateItemSelectedTooltip(nil)
-    GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
 end
 
 function ZO_GamepadTradingHouse_Sell:DeactivateForResponse()

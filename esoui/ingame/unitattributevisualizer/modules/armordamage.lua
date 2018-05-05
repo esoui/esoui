@@ -177,14 +177,14 @@ do
     end
 end
 
-local function GetInitialStatValue(unitTag, stat, attribute, powerType)
-    return (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_INCREASED_STAT, stat, attribute, powerType) or 0)
-         + (GetUnitAttributeVisualizerEffectInfo(unitTag, ATTRIBUTE_VISUAL_DECREASED_STAT, stat, attribute, powerType) or 0)
+function ZO_UnitVisualizer_ArmorDamage:GetInitialStatValue(stat, attribute, powerType)
+    return self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_INCREASED_STAT, stat, attribute, powerType)
+         + self:GetInitialValueAndMarkMostRecent(ATTRIBUTE_VISUAL_DECREASED_STAT, stat, attribute, powerType)
 end
 
 function ZO_UnitVisualizer_ArmorDamage:CreateInfoTable(control, stat, attribute, power, playIncreaseAnimation, playDecreaseAnimation)
     if control then
-        local value = GetInitialStatValue(self:GetUnitTag(), stat, attribute, power)
+        local value = self:GetInitialStatValue(stat, attribute, power)
         return { value = value, lastValue = value, playIncreaseAnimation = playIncreaseAnimation, playDecreaseAnimation = playDecreaseAnimation, barSizeState = ATTRIBUTE_BAR_STATE_NORMAL }
     end
     return nil
@@ -227,8 +227,8 @@ function ZO_UnitVisualizer_ArmorDamage:InitializeBarValues()
             [STAT_POWER] = self:CreateInfoTable(healthBarControl, STAT_POWER, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH, self.PlayPowerIncreaseAnimation, self.PlayPowerDecreaseAnimation),
         }
     else
-        self.barInfo[STAT_ARMOR_RATING].value = GetInitialStatValue(self:GetUnitTag(), STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
-        self.barInfo[STAT_POWER].value = GetInitialStatValue(self:GetUnitTag(), STAT_POWER, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
+        self.barInfo[STAT_ARMOR_RATING].value = self:GetInitialStatValue(STAT_ARMOR_RATING, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
+        self.barInfo[STAT_POWER].value = self:GetInitialStatValue(STAT_POWER, ATTRIBUTE_HEALTH, POWERTYPE_HEALTH)
     end
 
     for stat, bar in pairs(self.barControls) do

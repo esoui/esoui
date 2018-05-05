@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_PointerBoxTutorialTip" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" virtual="true" />
+    </Controls>
+</GuiXml>

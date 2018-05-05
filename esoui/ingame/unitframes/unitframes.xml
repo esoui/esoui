@@ -175,7 +175,7 @@
                     </Controls>
                 </Control>
                 <Texture name="$(parent)Background2" hidden="true" />
-                <Texture name="$(parent)RoleIcon">
+                <Texture name="$(parent)AssignmentIcon">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="LEFT"/>
                 </Texture>
@@ -202,7 +202,7 @@
                     </Controls>
                 </Control>
                 <Texture name="$(parent)Background2" hidden="false" />
-                <Texture name="$(parent)RoleIcon">
+                <Texture name="$(parent)AssignmentIcon">
                     <Dimensions x="42" y="42"/>
                     <Anchor point="TOPLEFT" offsetX="-54" offsetY="8"/>
                 </Texture>
@@ -223,7 +223,7 @@
                     <Dimensions x="256" y="90" />
                     <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-9"/>
                 </Texture>
-                <Texture name="$(parent)RoleIcon" layer="OVERLAY" hidden="true"/>
+                <Texture name="$(parent)AssignmentIcon" layer="OVERLAY" hidden="true"/>
             </Controls>
         </Control>
 
@@ -324,8 +324,8 @@
             <Controls>
                 <Control name="$(parent)TextArea">
                     <Controls>
-                        <Label name="$(grandparent)Level" font="ZoFontGamepad42" />
-                        <Label name="$(grandparent)Name" font="ZoFontGamepad42" />
+                        <Label name="$(grandparent)Level" font="ZoFontGamepad36" />
+                        <Label name="$(grandparent)Name" font="ZoFontGamepad36" />
                     </Controls>
                 </Control>
 
@@ -416,10 +416,11 @@
                     </Controls>
                 </Control>
 
-                <Texture name="$(parent)LeftBracket" tier="MEDIUM" resizeToFitFile="true">
+                <Texture name="$(parent)LeftBracket" tier="MEDIUM">
+                    <Dimensions x="256" y="64" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)BgContainer" relativePoint="TOPLEFT" offsetX="26" offsetY="-20"/>
                     <Controls>
-                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_left.dds" inherits="ZO_DifficultyBracketGlow">
+                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_left.dds" inherits="ZO_DifficultyBracketGlow" hidden="true">
                             <Anchor point="RIGHT"/>
                         </Texture>
                         <Texture name="$(parent)Glow" inherits="ZO_DifficultyBracketGlow">
@@ -427,10 +428,11 @@
                         </Texture>
                     </Controls>
                 </Texture>
-                <Texture name="$(parent)RightBracket" tier="MEDIUM" resizeToFitFile="true">
+                <Texture name="$(parent)RightBracket" tier="MEDIUM">
+                    <Dimensions x="256" y="64" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BgContainer" relativePoint="TOPRIGHT" offsetX="-26" offsetY="-20"/>
                     <Controls>
-                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_right.dds" inherits="ZO_DifficultyBracketGlow">
+                        <Texture name="$(parent)Underlay" tier="LOW" textureFile="EsoUI/Art/UnitFrames/targetUnitFrame_glowUnderlay_level4_right.dds" inherits="ZO_DifficultyBracketGlow" hidden="true">
                             <Anchor point="RIGHT"/>
                         </Texture>
                         <Texture name="$(parent)Glow" inherits="ZO_DifficultyBracketGlow">

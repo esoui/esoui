@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TradingHouseFurnishingsFilter_Keyboard" hidden="true" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)ItemCategory" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <Controls>
+                <Control name="$(parent)FirstType" inherits="ZO_ComboBox">
+                    <Dimensions x="195"/>
+                    <Anchor point="TOPLEFT" />
+                </Control>
+
+                <Control name="$(parent)SecondType" inherits="ZO_ComboBox">
+                    <Dimensions x="195" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FirstType" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)ItemType" inherits="ZO_ComboBox">
+                    <Dimensions x="195" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FirstType" relativePoint="BOTTOMLEFT" offsetY="50" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

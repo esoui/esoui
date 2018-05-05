@@ -13,8 +13,10 @@ local TutorialTriggerHandlers = {
         end
     end,    
     
-    [EVENT_MISSING_LURE] = function()
-        return TUTORIAL_TRIGGER_ATTEMPTED_TO_FISH_WITHOUT_BAIT
+    [EVENT_CLIENT_INTERACT_RESULT] = function(result)
+        if result == CLIENT_INTERACT_RESULT_NO_LURE then
+            return TUTORIAL_TRIGGER_ATTEMPTED_TO_FISH_WITHOUT_BAIT
+        end
     end,
 
     [EVENT_LEVEL_UPDATE] = function(unit, level)
@@ -32,9 +34,8 @@ local TutorialTriggerHandlers = {
     end,
 
     [EVENT_POI_DISCOVERED] = function(zoneIndex, poiIndex)
-        if IsPOIGroupDungeon(zoneIndex, poiIndex) then
-            return TUTORIAL_TRIGGER_DISCOVERED_GROUP_DUNGEON
-        elseif IsPOIPublicDungeon(zoneIndex, poiIndex) then
+        local poiType = GetPOIType(zoneIndex, poiIndex)
+        if poiType == POI_TYPE_GROUP_DUNGEON or poiType == POI_TYPE_PUBLIC_DUNGEON then
             return TUTORIAL_TRIGGER_DISCOVERED_GROUP_DUNGEON
         end
     end,
@@ -93,10 +94,6 @@ local TutorialTriggerHandlers = {
         if IsInOutlawZone() then
             TriggerTutorial(TUTORIAL_TRIGGER_REFUGE_ENTERED)
         end
-    end,
-
-    [EVENT_JUSTICE_LIVESTOCK_SLAIN] = function()
-        return TUTORIAL_TRIGGER_LIVESTOCK_SLAIN
     end,
 
     [EVENT_MOUNTED_STATE_CHANGED] = function(isMounted)

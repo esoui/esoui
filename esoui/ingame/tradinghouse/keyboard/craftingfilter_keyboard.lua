@@ -11,7 +11,7 @@ function CraftingFilter:Initialize(parentControl)
     local function SetItemType(_, _, entry, selectionChanged)
 		TRADING_HOUSE:HandleSearchCriteriaChanged(selectionChanged)
 		
-        self.m_itemType = entry.minValue
+        self.m_specializedItemType = entry.minValue
         self.m_usesTraits = entry.maxValue ~= nil
 
         local traits = TRADING_HOUSE:GetTraitFilters()
@@ -32,7 +32,7 @@ function CraftingFilter:Initialize(parentControl)
 end
 
 function CraftingFilter:ApplyToSearch(search)
-    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, self.m_itemType)
+    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_SPECIALIZED_ITEM, self.m_specializedItemType)
 
     if(self.m_usesTraits) then
         TRADING_HOUSE:GetTraitFilters():ApplyToSearch(search)

@@ -1,5 +1,5 @@
 ﻿local DATA_CALLBACK_INDEX = 1
-local SUB_TYPE_INDEX = 2
+local EQUIP_TYPE_INDEX = 2
 
 local GamepadArmorFilter = ZO_Object.MultiSubclass(ZO_CategorySubtypeFilter, ZO_ArmorFilter_Shared)
 
@@ -9,7 +9,7 @@ end
 
 function GamepadArmorFilter:Initialize(name, traitType, enchantmentType)
     ZO_CategorySubtypeFilter.Initialize(self, name, nil, traitType, enchantmentType)
-    self.filterData = ZO_TradingHouseFilter_GenerateArmorTypeData(function(...) self:SetGenericArmorSearch(...) end)
+    self:GetFilterComboBoxData("Category"):SetData(ZO_TradingHouseFilter_GenerateArmorTypeData(function(...) self:SetGenericArmorSearch(...) end))
 end
 
 function GamepadArmorFilter:ApplyToSearch(search)
@@ -18,32 +18,30 @@ function GamepadArmorFilter:ApplyToSearch(search)
 end
 
 function GamepadArmorFilter:PopulateSubTypes(comboBox, entryName, entry)
-    local currentFilterCategoryIndex = comboBox:GetHighlightedIndex()
-    local selectionChanged = self.lastFilterCategoryName ~= entryName
-    local forceRepopulate = true
-    local filterData = self.filterData[currentFilterCategoryIndex]
-    local EQUIP_TYPE_INDEX = 2
-    local filterEquipTypeData = filterData[EQUIP_TYPE_INDEX]
-
-    if (not filterEquipTypeData) and self.filterComboBoxData[SUB_TYPE_INDEX].visible then
-        self.filterComboBoxData[SUB_TYPE_INDEX].visible = false
-    elseif filterEquipTypeData and not self.filterComboBoxData[SUB_TYPE_INDEX].visible then
-        self.filterComboBoxData[SUB_TYPE_INDEX].visible = true
+    local categoryComboBoxData = self:GetFilterComboBoxData("Category")
+    local subTypeComboBoxData = self:GetFilterComboBoxData("SubType")
+    local selectedEntryIndex = comboBox:GetHighlightedIndex()
+    --Grab this from the base data that populates the category combo box. It isn't on the combo box entry
+    local entryEquipTypeData = categoryComboBoxData:GetData()[selectedEntryIndex][EQUIP_TYPE_INDEX]
+    
+    local forceRepopulate = true    
+    if not entryEquipTypeData and subTypeComboBoxData:IsVisible() then
+        subTypeComboBoxData:SetVisible(false)
+    elseif entryEquipTypeData and not subTypeComboBoxData:IsVisible() then
+        subTypeComboBoxData:SetVisible(true)
     else
         forceRepopulate = false
     end
 
     if forceRepopulate then
         -- reset list to remove or add sub category combo box as needed
-        self.lastFilterCategoryName = entryName
-        self.lastFilterCategoryIndex = currentFilterCategoryIndex
-        self.lastFilterSubTypeName = nil
-        self.lastFilterSubTypeIndex = 1
+        local selectionChanged = categoryComboBoxData:UpdateSelectedEntryMemory(entryName, selectedEntryIndex)
+        subTypeComboBoxData:ClearSelectedEntryMemory()
         self:SetCategoryTypeAndSubData(entry)
         ZO_GamepadTradingHouse_Filter.SetComboBoxes(self, self:GetComboBoxData())
         ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
     else
-        ZO_CategorySubtypeFilter.PopulateSubTypes(self, comboBox, entryName, entry, selectionChanged)
+        ZO_CategorySubtypeFilter.PopulateSubTypes(self, comboBox, entryName, entry)
     end
 
     self:UpdateFilterData()
@@ -57,8 +55,9 @@ function GamepadArmorFilter:SetGenericArmorSearch(mode, traitType, enchantmentTy
 end
 
 function GamepadArmorFilter:UpdateFilterData()
-    local currentData = self.filterData[self.lastFilterCategoryIndex]
-    currentData[DATA_CALLBACK_INDEX]() -- Invoke callback in data container which will in turn call SetGenericArmorSearch
+    local categoryComboBoxData = self:GetFilterComboBoxData("Category")
+    local currentSelectedData =  categoryComboBoxData:GetSelectedEntryDataFromMemory()
+    currentSelectedData[DATA_CALLBACK_INDEX]() -- Invoke callback in data container which will in turn call SetGenericArmorSearch
 end
 
 function GamepadArmorFilter:SetHidden(hidden)

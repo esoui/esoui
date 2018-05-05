@@ -592,9 +592,9 @@ function UnitFrameBar:UpdateText(updateBarType, updateValue)
         end
     end
 
-	if self.resourceNumbersLabel then
-		self.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(self.currentValue, self.maxValue))
-	end
+    if self.resourceNumbersLabel then
+        self.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(self.currentValue, self.maxValue))
+    end
 end
 
 function UnitFrameBar:SetMouseInside(inside)
@@ -847,7 +847,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
 
     local DONT_COLOR_RANK_ICON = false
     newFrame.rankIcon = newFrame:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
-    newFrame.roleIcon = newFrame:AddFadeComponent("RoleIcon", DONT_COLOR_RANK_ICON)
+    newFrame.assignmentIcon = newFrame:AddFadeComponent("AssignmentIcon", DONT_COLOR_RANK_ICON)
     newFrame.championIcon = newFrame:AddFadeComponent("ChampionIcon")
     newFrame.leftBracket = newFrame:AddFadeComponent("LeftBracket")
     newFrame.leftBracketGlow = GetControl(newFrame.frame, "LeftBracketGlow")
@@ -1042,9 +1042,9 @@ function UnitFrame:RefreshControls()
 
             self:UpdateStatus(IsUnitDead(self.unitTag), IsUnitOnline(self.unitTag))
             self:UpdateRank()
-            self:UpdateRole()
+            self:UpdateAssignment()
             self:UpdateDifficulty()
-            self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(unitTag))
+            self:DoAlphaUpdate(IsUnitInGroupSupportRange(self.unitTag), IsUnitOnline(self.unitTag), IsUnitGroupLeader(self.unitTag))
         end
     end
 end
@@ -1089,10 +1089,14 @@ function UnitFrame:DoAlphaUpdate(isNearby, isOnline, isLeader)
     -- Don't fade out just the frame, because that needs to appear correctly (along with BG, etc...)
     -- Just make the status bars and any text on the frame fade out.
     local color
-    if IsInGamepadPreferredMode() then
-        color = (self.unitTag == "reticleover" and ZO_SELECTED_TEXT) or (not isLeader and isNearby and ZO_HIGHLIGHT_TEXT) or ZO_NORMAL_TEXT
+    if self.unitTag == "reticleover" then
+        color = ZO_SELECTED_TEXT
     else
-        color = (self.unitTag == "reticleover" and ZO_SELECTED_TEXT) or (not isLeader and ZO_HIGHLIGHT_TEXT) or ZO_NORMAL_TEXT
+        if isLeader then
+            color = ZO_HIGHLIGHT_TEXT
+        else
+            color = ZO_NORMAL_TEXT
+        end
     end
 
     local alphaValue = isNearby and FULL_ALPHA_VALUE or FADED_ALPHA_VALUE
@@ -1215,15 +1219,26 @@ function UnitFrame:UpdateRank()
     end
 end
 
-function UnitFrame:UpdateRole()
-    if self.roleIcon then
+function UnitFrame:UpdateAssignment()
+    if self.assignmentIcon then
         local unitTag = self:GetUnitTag()
-        local assignedRole = GetGroupMemberAssignedRole(unitTag)
-        local hasAssignedRole = assignedRole ~= LFG_ROLE_INVALID
-        if hasAssignedRole then
-            self.roleIcon:SetTexture(GetRoleIcon(assignedRole))
+        local assignmentTexture = nil
+        if IsActiveWorldBattleground() then
+            local battlegroundAlliance = GetUnitBattlegroundAlliance(unitTag)
+            if battlegroundAlliance ~= BATTLEGROUND_ALLIANCE_NONE then
+                assignmentTexture = GetBattlegroundTeamIcon(battlegroundAlliance)
+            end
+        else
+            local assignedRole = GetGroupMemberAssignedRole(unitTag)
+            if assignedRole ~= LFG_ROLE_INVALID then
+                assignmentTexture = GetRoleIcon(assignedRole)
+            end
         end
-        self.roleIcon:SetHidden(not hasAssignedRole)
+
+        if assignmentTexture then
+            self.assignmentIcon:SetTexture(assignmentTexture)
+        end
+        self.assignmentIcon:SetHidden(assignmentTexture == nil)
     end
 end
 
@@ -1280,31 +1295,29 @@ function UnitFrame:SetPlatformDifficultyTextures(difficulty)
 end
 
 function UnitFrame:UpdateDifficulty()
-    if(self.leftBracket) then
+    if self.leftBracket then
         local difficulty = GetUnitDifficulty(self:GetUnitTag())
 
         --show difficulty for neutral and hostile NPCs
-        local showsDifficulty = difficulty > MONSTER_DIFFICULTY_EASY
-        if(showsDifficulty) then
-            local unitReaction = GetUnitReaction(self:GetUnitTag())
-            if(unitReaction ~= UNIT_REACTION_NEUTRAL and unitReaction ~= UNIT_REACTION_HOSTILE) then
-                showsDifficulty = false
-            end
-        end
+        local unitReaction = GetUnitReaction(self:GetUnitTag())
+        local showsDifficulty = (difficulty > MONSTER_DIFFICULTY_EASY) and (unitReaction == UNIT_REACTION_NEUTRAL or unitReaction == UNIT_REACTION_HOSTILE)
 
         self.leftBracket:SetHidden(not showsDifficulty)
         self.rightBracket:SetHidden(not showsDifficulty)
         self.leftBracketUnderlay:SetHidden(true)
         self.rightBracketUnderlay:SetHidden(true)
 
-        if(showsDifficulty) then
+        if showsDifficulty then
             self:SetPlatformDifficultyTextures(difficulty)
 
-            if(difficulty == MONSTER_DIFFICULTY_DEADLY) then
+            if difficulty == MONSTER_DIFFICULTY_DEADLY and not IsInGamepadPreferredMode() then
                 self.leftBracketUnderlay:SetHidden(false)
                 self.rightBracketUnderlay:SetHidden(false)
             end
-			TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
+
+            if unitReaction == UNIT_REACTION_HOSTILE then
+                TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
+            end
         end
     end
 end
@@ -1312,16 +1325,11 @@ end
 function UnitFrame:UpdateUnitReaction()
     local unitTag = self:GetUnitTag()
 
-    if(self.nameLabel) then
-        if(ZO_Group_IsGroupUnitTag(unitTag)) then
+    if self.nameLabel then
+        if ZO_Group_IsGroupUnitTag(unitTag) then
             local currentNameAlpha = self.nameLabel:GetControlAlpha()
-            if IsUnitGroupLeader(unitTag) then
-                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CONTRAST)
-                self.nameLabel:SetColor(r, g, b, currentNameAlpha)
-            else
-                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT)
-                self.nameLabel:SetColor(r, g, b, currentNameAlpha)
-            end
+            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT)
+            self.nameLabel:SetColor(r, g, b, currentNameAlpha)
         end
     end
 end
@@ -1341,21 +1349,18 @@ end
 
 function UnitFrame:UpdateCaption()
     local captionLabel = self.captionLabel
-    if(captionLabel) then
+    if captionLabel then
         local caption
         local unitTag = self:GetUnitTag()
-        if(IsUnitPlayer(unitTag)) then
+        if IsUnitPlayer(unitTag) then
             caption = ZO_GetSecondaryPlayerNameWithTitleFromUnitTag(unitTag)
         else
             caption = zo_strformat(SI_TOOLTIP_UNIT_CAPTION, GetUnitCaption(unitTag))
         end
 
-        if(caption ~= "") then
-            captionLabel:SetHidden(false)
-            captionLabel:SetText(caption)
-        else
-            captionLabel:SetHidden(true)
-        end
+        local hideCaption = caption == ""
+        captionLabel:SetHidden(hideCaption)
+        captionLabel:SetText(caption) -- still set the caption text when empty so we collapse the label for anything anchoring off the bottom of it
     end
 end
 
@@ -1565,6 +1570,8 @@ local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
         [STAT_STATE_SHIELD_LOST]        = SOUNDS.UAV_DAMAGE_SHIELD_LOST_TARGET,
         [STAT_STATE_POSSESSION_APPLIED] = SOUNDS.UAV_POSSESSION_APPLIED_TARGET,
         [STAT_STATE_POSSESSION_REMOVED] = SOUNDS.UAV_POSSESSION_REMOVED_TARGET,
+        [STAT_STATE_TRAUMA_GAINED]      = SOUNDS.UAV_TRAUMA_ADDED_TARGET,
+        [STAT_STATE_TRAUMA_LOST]        = SOUNDS.UAV_TRAUMA_LOST_TARGET,
     },
 }
 
@@ -1633,7 +1640,7 @@ local function CreateTargetFrame()
     }
     visualizer:AddModule(ZO_UnitVisualizer_UnwaveringModule:New(VISUALIZER_ANGLE_UNWAVERING_LAYOUT_DATA))
 
-	VISUALIZER_ANGLE_POSSESSION_LAYOUT_DATA =
+    VISUALIZER_ANGLE_POSSESSION_LAYOUT_DATA =
     {
         type = "Angle",
         overlayContainerTemplate = "ZO_PossessionOverlayContainerAngle",
