@@ -35,24 +35,24 @@ function ZO_HUDInfamyMeter:New(...)
 end
 
 function ZO_HUDInfamyMeter:UpdateInfamyMeterState(infamy, bounty, isKOS, isTrespassing)
-    self.infamyMeterState["infamy"] = infamy or GetInfamy()
-    self.infamyMeterState["bounty"] = bounty or GetBounty()
+    self.infamyMeterState.infamy = infamy or GetInfamy()
+    self.infamyMeterState.bounty = bounty or GetBounty()
 
     if isKOS ~= nil then
-        self.infamyMeterState["isKOS"] = isKOS
+        self.infamyMeterState.isKOS = isKOS
     else
-        self.infamyMeterState["isKOS"] = IsKillOnSight()
+        self.infamyMeterState.isKOS = IsKillOnSight()
     end
 
     if isTrespassing ~= nil then
-        self.infamyMeterState["isTrespassing"] = isTrespassing
+        self.infamyMeterState.isTrespassing = isTrespassing
     else
-        self.infamyMeterState["isTrespassing"] = IsTrespassing()
+        self.infamyMeterState.isTrespassing = IsTrespassing()
     end
 end
 
 function ZO_HUDInfamyMeter:GetOldInfamyMeterState() 
-    return self.infamyMeterState["infamy"], self.infamyMeterState["bounty"], self.infamyMeterState["isKOS"], self.infamyMeterState["isTrespassing"]
+    return self.infamyMeterState.infamy, self.infamyMeterState.bounty, self.infamyMeterState.isKOS, self.infamyMeterState.isTrespassing
 end
 
 function ZO_HUDInfamyMeter:Initialize(control) 
@@ -71,7 +71,7 @@ function ZO_HUDInfamyMeter:Initialize(control)
         showTooltips = true,
         customTooltip = SI_STATS_BOUNTY_LABEL,
         font = self.isInGamepadMode and "ZoFontGamepadHeaderDataValue" or "ZoFontGameLargeBold",
-        overrideTexture = self.isInGamepadMode and "EsoUI/Art/currency/gamepad/gp_gold.dds" or nil,
+        overrideTexture = self.isInGamepadMode and ZO_Currency_GetGamepadCurrencyIcon(CURT_MONEY) or nil,
         iconSide = RIGHT,
         isGamepad = self.isInGamepadMode
     }   
@@ -93,11 +93,11 @@ function ZO_HUDInfamyMeter:Initialize(control)
     -- Initialize bar states and animations
     self.infamyBar.easeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_HUDInfamyMeterEasing")
     self.infamyBar.startPercent = 0
-    self.infamyBar.endPercent = self.infamyMeterState["infamy"] / self.meterTotal
+    self.infamyBar.endPercent = self.infamyMeterState.infamy / self.meterTotal
 
     self.bountyBar.easeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_HUDInfamyMeterEasing")
     self.bountyBar.startPercent = 0
-    self.bountyBar.endPercent = self.infamyMeterState["bounty"] / self.meterTotal
+    self.bountyBar.endPercent = self.infamyMeterState.bounty / self.meterTotal
 
     -- Initialize Center Icon and its animations
     self.centerIconCutoutInAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_HUDInfamyMeterCenterIconCutoutIn")
@@ -142,7 +142,7 @@ function ZO_HUDInfamyMeter:ShouldProcessUpdateEvent()
     local isTrespassing = IsTrespassing()
     return IsInJusticeEnabledZone() 
            and not self.hiddenExternalRequest 
-           and ((infamy ~= 0 and infamy ~= self.infamyMeterState["infamy"]) or isTrespassing ~= self.infamyMeterState["isTrespassing"])
+           and ((infamy ~= 0 and infamy ~= self.infamyMeterState.infamy) or isTrespassing ~= self.infamyMeterState.isTrespassing)
 end
 
 function ZO_HUDInfamyMeter:Update(time)
@@ -158,7 +158,7 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
 
     local gamepadModeSwitchUpdate = IsInGamepadPreferredMode() ~= self.isInGamepadMode
 
-    if oldInfamy ~= self.infamyMeterState["infamy"] or updateType == UPDATE_TYPE_EVENT or gamepadModeSwitchUpdate then
+    if oldInfamy ~= self.infamyMeterState.infamy or updateType == UPDATE_TYPE_EVENT or gamepadModeSwitchUpdate then
         -- Update frame and bars if we're switching between PC and console mode
         if IsInGamepadPreferredMode() and not self.isInGamepadMode then
             self.currencyOptions.font = "ZoFontGamepadHeaderDataValue"
@@ -174,7 +174,7 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
         end
 
         -- Hide or show meter
-        if self.infamyMeterState["infamy"] == 0 then
+        if self.infamyMeterState.infamy == 0 then
             self.fadeAnim:FadeOut(INFAMY_METER_SLOW_FADE_DELAY, INFAMY_METER_SLOW_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA, function() self.control:SetHidden(true) end)
         else
             self.control:SetHidden(false)
@@ -182,8 +182,8 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
         end
 
         -- Update bars
-        self:UpdateBar(self.infamyBar, self.infamyMeterState["infamy"], updateType)
-        self:UpdateBar(self.bountyBar, self.infamyMeterState["bounty"], updateType)
+        self:UpdateBar(self.infamyBar, self.infamyMeterState.infamy, updateType)
+        self:UpdateBar(self.bountyBar, self.infamyMeterState.bounty, updateType)
 
         -- Update trespassing/KOS icon
         self:AnimateCenterIcon(wasKOS, wasTrespassing)
@@ -192,43 +192,50 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
         ZO_CurrencyControl_SetSimpleCurrency(self.bountyLabel, CURT_MONEY, GetFullBountyPayoffAmount(), self.currencyOptions, CURRENCY_SHOW_ALL, true) 
 
         -- Fire center-screen announcement if we updated below a threshold
-        local infamyLevel = GetInfamyLevel(self.infamyMeterState["infamy"])
+        local infamyLevel = GetInfamyLevel(self.infamyMeterState.infamy)
         local oldInfamyLevel = GetInfamyLevel(oldInfamy)
+        local messageParams
 
         -- Fire CSA
         if self.infamyMeterState.isTrespassing ~= wasTrespassing then
             local sound, primaryMessage, secondaryMessage
+            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
             if wasTrespassing then
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS)
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
-                primaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_TRESPASSING_PRIMARY))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_TRESPASSING_SECONDARY))
+                primaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_TRESPASSING_PRIMARY)
+                secondaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_TRESPASSING_SECONDARY)
 
                 if self.infamyMeterState.bounty > 0 then
                     TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_EXITED_WITH_BOUNTY)
                 end
             else
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
             	TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_ENTERED)
                 sound = SOUNDS.JUSTICE_NOW_KOS
-                primaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_TRESPASSING_PRIMARY))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_TRESPASSING_SECONDARY))
+                primaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_PRIMARY)
+                secondaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_SECONDARY)
             end
 
-            CENTER_SCREEN_ANNOUNCE:AddMessage(EVENT_JUSTICE_INFAMY_UPDATED, CSA_EVENT_COMBINED_TEXT, sound, primaryMessage, secondaryMessage)
-
+            messageParams:SetText(primaryMessage, secondaryMessage)
         elseif infamyLevel ~= oldInfamyLevel then 
             local sound, primaryMessage, secondaryMessage, icon
+            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
             if oldInfamyLevel == INFAMY_THRESHOLD_FUGITIVE then
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS)
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_INFAMY_LEVEL_CHANGED, GetString("SI_INFAMYTHRESHOLDSTYPE", infamyLevel))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NO_LONGER_KOS))
+                secondaryMessage = zo_strformat(SI_JUSTICE_NO_LONGER_KOS)
                 icon = "EsoUI/Art/Stats/infamy_KOS_icon-Notification.dds"
             elseif infamyLevel == INFAMY_THRESHOLD_FUGITIVE then
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
                 TriggerTutorial(TUTORIAL_TRIGGER_FUGITIVE_REACHED)
                 sound = SOUNDS.JUSTICE_NOW_KOS
-                primaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_FUGITIVE))
-                secondaryMessage = zo_strformat(SI_JUSTICE_CSA, GetString(SI_JUSTICE_NOW_KOS))
+                primaryMessage = zo_strformat(SI_JUSTICE_NOW_FUGITIVE)
+                secondaryMessage = zo_strformat(SI_JUSTICE_NOW_KOS)
                 icon = "EsoUI/Art/Stats/infamy_KOS_icon-Notification.dds"
             else
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED)
                 if infamyLevel == INFAMY_THRESHOLD_DISREPUTABLE then
                     TriggerTutorial(TUTORIAL_TRIGGER_DISREPUTABLE_REACHED)
                 elseif infamyLevel == INFAMY_THRESHOLD_NOTORIOUS then
@@ -239,29 +246,26 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
                 sound = SOUNDS.JUSTICE_STATE_CHANGED
             end
 
-            CENTER_SCREEN_ANNOUNCE:AddMessage(
-                EVENT_JUSTICE_INFAMY_UPDATED, 
-                CSA_EVENT_COMBINED_TEXT, 
-                sound, 
-                primaryMessage, 
-                secondaryMessage,
-                icon,
-                nil, nil, nil, nil, -- Use defaults for these
-                CSA_OPTION_SUPPRESS_ICON_FRAME
-            )
+            messageParams:SetText(primaryMessage, secondaryMessage)
+            messageParams:SetIconData(icon)
+            messageParams:MarkSuppressIconFrame()
+        end
+
+        if messageParams then
+            CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
         end
     end
 end
 
 function ZO_HUDInfamyMeter:AnimateCenterIcon(wasKOS, wasTrespassing)
-    if self.infamyMeterState["isTrespassing"] then
+    if self.infamyMeterState.isTrespassing then
         if not wasTrespassing then
             self.centerIconAnimatingTexture:SetTexture(EYE_ICON_CUTOUT)
             self.centerIconPersistentTexture:SetTexture(RED_EYE_ICON)
             self.centerIconPersistentTexture:SetAlpha(0)
             self.centerIconCutoutInAnimation:PlayFromStart()
         end
-    elseif self.infamyMeterState["isKOS"] then
+    elseif self.infamyMeterState.isKOS then
         if wasTrespassing then
             self.centerIconAnimatingTexture:SetTexture(RED_EYE_ICON)
             self.centerIconPersistentTexture:SetTexture(RED_DAGGER_ICON)
@@ -299,13 +303,14 @@ end
 function ZO_HUDInfamyMeter:AnimateMeter(progress)
     local infamyFillPercentage = zo_min((progress * (self.infamyBar.endPercent - self.infamyBar.startPercent)) + self.infamyBar.startPercent, 1)
     local bountyFillPercentage = zo_min((progress * (self.bountyBar.endPercent - self.bountyBar.startPercent)) + self.bountyBar.startPercent, 1)
-    local infamyMinPercentage = self.infamyMeterState["infamy"] ~= 0 and MIN_BAR_PERCENTAGE or 0
-    local bountyMinPercentage = self.infamyMeterState["bounty"] ~= 0 and MIN_BAR_PERCENTAGE or 0
+    local infamyMinPercentage = self.infamyMeterState.infamy ~= 0 and MIN_BAR_PERCENTAGE or 0
+    local bountyMinPercentage = self.infamyMeterState.bounty ~= 0 and MIN_BAR_PERCENTAGE or 0
     self:SetBarValue(self.infamyBar, zo_max(infamyFillPercentage, infamyMinPercentage))
     self:SetBarValue(self.bountyBar, zo_max(bountyFillPercentage, bountyMinPercentage))
 end
 
 function ZO_HUDInfamyMeter:SetBarValue(bar, percentFilled)
+    local NO_LEADING_EDGE = false
     bar:StartFixedCooldown(percentFilled, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, NO_LEADING_EDGE) -- CD_TIME_TYPE_TIME_REMAINING causes clockwise scroll
 end
 
@@ -313,7 +318,7 @@ function ZO_HUDInfamyMeter:RequestHidden(hidden)
     if hidden ~= self.hiddenExternalRequest then
         if hidden then
             self.fadeAnim:FadeOut(0, INFAMY_METER_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA, function() self.control:SetHidden(true) end)
-        elseif IsInJusticeEnabledZone() and (GetInfamy() ~= 0 or self.infamyMeterState["infamy"] ~= 0) then
+        elseif IsInJusticeEnabledZone() and (GetInfamy() ~= 0 or self.infamyMeterState.infamy ~= 0) then
             self.control:SetHidden(false)
             self.fadeAnim:FadeIn(0, INFAMY_METER_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA)
         end

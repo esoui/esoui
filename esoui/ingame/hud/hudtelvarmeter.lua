@@ -103,7 +103,7 @@ function ZO_HUDTelvarMeter:OnTelvarStonesUpdated(event, newTelvarStones, oldTelv
     end
 
     if(DoesCurrentZoneHaveTelvarStoneBehavior()) then
-        ZO_CurrencyControl_SetSimpleCurrency(self.telvarDisplayControl, CURT_TELVAR_STONES, GetCarriedCurrencyAmount(CURT_TELVAR_STONES), IsInGamepadPreferredMode() and self.gamepadStyle.currencyOptions or self.keyboardStyle.currencyOptions, CURRENCY_SHOW_ALL) 
+        ZO_CurrencyControl_SetSimpleCurrency(self.telvarDisplayControl, CURT_TELVAR_STONES, GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER), IsInGamepadPreferredMode() and self.gamepadStyle.currencyOptions or self.keyboardStyle.currencyOptions, CURRENCY_SHOW_ALL) 
 
         self:UpdateMeterBar()
         self:UpdateMultiplier()
@@ -157,7 +157,7 @@ end
 
 function ZO_HUDTelvarMeter:UpdatePlatformStyle(styleTable)
     ApplyTemplateToControl(self.control, styleTable.template)
-    ZO_CurrencyControl_SetSimpleCurrency(self.telvarDisplayControl, CURT_TELVAR_STONES, GetCarriedCurrencyAmount(CURT_TELVAR_STONES), styleTable.currencyOptions, CURRENCY_SHOW_ALL) 
+    ZO_CurrencyControl_SetSimpleCurrency(self.telvarDisplayControl, CURT_TELVAR_STONES, GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER), styleTable.currencyOptions, CURRENCY_SHOW_ALL) 
 
     local isMaxThreshold = IsMaxTelvarStoneMultiplierThreshold(self.telvarStoneThreshold)
     self.meterBarControl:SetHidden(isMaxThreshold)
@@ -202,7 +202,7 @@ function ZO_HUDTelvarMeter:CalculateMeterFillPercentage()
     elseif self.telvarStoneThreshold then -- Protect against self.telvarStoneThreshold being nil.
         local currentThresholdAmount = GetTelvarStoneThresholdAmount(self.telvarStoneThreshold)
         local nextThresholdAmount = GetTelvarStoneThresholdAmount(self.telvarStoneThreshold + 1)
-        local result = (GetCarriedCurrencyAmount(CURT_TELVAR_STONES) - currentThresholdAmount) / (nextThresholdAmount - currentThresholdAmount)
+        local result = (GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER) - currentThresholdAmount) / (nextThresholdAmount - currentThresholdAmount)
         return zo_max(result, 0)    
     else
         return 0

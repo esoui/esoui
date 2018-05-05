@@ -6,6 +6,7 @@ end
 
 function HelpCharacterStuck_Keyboard:Initialize(control)
 	HELP_CUSTOMER_SERVICE_CHARACTER_STUCK_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
+	control:RegisterForEvent(EVENT_STUCK_COMPLETE, function() SCENE_MANAGER:Hide("helpCustomerSupport") end)
     HELP_CUSTOMER_SERVICE_CHARACTER_STUCK_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
 																if newState == SCENE_SHOWING then
 																	self:UpdateCost()
@@ -25,19 +26,19 @@ function HelpCharacterStuck_Keyboard:Initialize(control)
 end
 
 function HelpCharacterStuck_Keyboard:UpdateCost()
-	local cost = GetRecallCost()
-    local telvarLossPercentage = zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100)
-    local mainText = DoesCurrentZoneHaveTelvarStoneBehavior() and SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT_TELVAR or SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT
-    local playerMoney = GetCarriedCurrencyAmount(CURT_MONEY)
-                
-    if cost > playerMoney then
-        cost = playerMoney
-    end
-
-	local DONT_USE_SHORT_FORMAT = false
+	local cost = zo_min(GetRecallCost(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
+  	local DONT_USE_SHORT_FORMAT = false
 	local costText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(cost, DONT_USE_SHORT_FORMAT, CURT_MONEY)
 
-    local text = zo_strformat(mainText, costText, telvarLossPercentage)
+    local text
+    if DoesCurrentZoneHaveTelvarStoneBehavior() then
+        local telvarLossPercentage = zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100)
+        text = zo_strformat(SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT_TELVAR, costText, telvarLossPercentage)
+    elseif IsActiveWorldBattleground() then
+        text = GetString(SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT_IN_BATTLEGROUND)
+    else
+        text = zo_strformat(SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT, costText)
+    end
 
 	self.helpStuckCost:SetText(text)
 end

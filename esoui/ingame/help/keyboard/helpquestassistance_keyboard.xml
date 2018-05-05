@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>        
+        <TopLevelControl name="ZO_HelpQuestAssistance_Keyboard_Control" inherits="ZO_HelpMechanicAssistanceTemplate_Keyboard_Control">
+            <OnInitialized>
+                ZO_HelpQuestAssistance_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)DetailsContainer" override="true">
+                    <Controls>
+                        <Label name="$(grandparent)DetailsTitle" override="true" text="SI_CUSTOMER_SERVICE_QUEST_NAME" />
+
+                        <Label name="$(grandparent)DetailsTextLine" override="true" text="SI_CUSTOMER_SERVICE_QUEST_ASSISTANCE_NAME_INSTRUCTIONS" />
+                    </Controls>
+                </Control>
+                
+                <Button name="$(parent)SubmitButton" override="true">
+                    <OnClicked>
+                        ZO_HelpQuestAssistance_Keyboard_AttemptToSendTicket()
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

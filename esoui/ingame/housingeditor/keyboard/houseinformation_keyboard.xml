@@ -1,0 +1,100 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_HouseInformation_Keyboard_Row_Header" virtual="true" >
+            <Dimensions x="300" y="25"/>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT"/>
+                </Label>
+
+                <Label name="$(parent)Value" font="ZoFontHeader2" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="1" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="15" />
+                    <Anchor point="RIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HouseInformation_Keyboard_Row" virtual="true" >
+            <Dimensions x="300" y="20"/>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT"/>
+                </Label>
+
+                <Label name="$(parent)Value" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="RIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HouseInformation_KeyboardTopLevel" hidden="true" mouseEnabled="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-40" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-30" />
+            <Dimensions x="330"/>
+            
+            <OnInitialized>
+                ZO_HouseInformation_Keyboard_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_HOUSE_INFORMATION_TITLE">
+                    <Anchor point="TOPLEFT" offsetX="14" offsetY="26" />
+                </Label>
+                
+                <Texture name="$(parent)Divider" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSide_divider.dds">
+                    <Dimensions x="256" y="4" />
+                    <Anchor point="LEFT" />
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5" />
+                </Texture>
+
+                <Control name="$(parent)NameRow" inherits="ZO_HouseInformation_Keyboard_Row_Header" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_NAME_HEADER" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)LocationRow" inherits="ZO_HouseInformation_Keyboard_Row_Header" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameRow" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_LOCATION_HEADER" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoSection" resizeToFitDescendents="true" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LocationRow" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Controls>
+                        <Control name="$(parent)FurnishingLimits" resizToFitDescendents="true">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)PrimaryResidenceRow" inherits="ZO_HouseInformation_Keyboard_Row" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)InfoSection" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_PRIMARY_RESIDENCE_HEADER" />
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)CurrentVisitorsRow" inherits="ZO_HouseInformation_Keyboard_Row" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryResidenceRow" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" text="SI_HOUSING_CURRENT_RESIDENTS_HEADER" />
+                        <Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-5"/>
+                            <Dimensions x="32" y="32"/>
+                            <OnMouseEnter>
+                                ZO_HousingOverpopulationMessage_OnMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_HousingOverpopulationMessage_OnMouseExit(self)
+                            </OnMouseExit>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

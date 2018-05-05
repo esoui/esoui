@@ -6,37 +6,44 @@ function ZO_HousingFurnitureBrowser_Keyboard:New(...)
     return browser
 end
 
-local PLACEABLE_HOUSING_DATA_TYPE = 1
-local RECALLABLE_HOUSING_DATA_TYPE = 2
+HOUSING_FURNITURE_KEYBOARD_SCENE_NAME = "keyboard_housing_furniture_scene"
 
-function ZO_HousingFurnitureBrowser_Keyboard:Initialize()
-    ZO_HousingFurnitureBrowser_Base.Initialize(self)
+function ZO_HousingFurnitureBrowser_Keyboard:Initialize(control)
+    ZO_HousingFurnitureBrowser_Base.Initialize(self, control, HOUSING_FURNITURE_KEYBOARD_SCENE_NAME)
+    self.modeBar = control:GetNamedChild("Bar")
 
-    self.placeableList = ZO_HousingFurnitureBrowser_KeyboardPlaceableTopLevel:GetNamedChild("List")
-    self.recallableList = ZO_HousingFurnitureBrowser_KeyboardRecallableTopLevel:GetNamedChild("List")
+    local function OnListMostRecentlySelectedDataChanged(data)
+        -- selecting the list data will preview the furniture, so we will need to show/hide the house info as appropriate
+        if data then
+            SCENE_MANAGER:RemoveFragmentGroup(self.houseInfoFragmentGroup)
+        else
+            SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)
+        end
+    end
 
-    KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE = ZO_Scene:New("keyboard_housing_furniture_scene", SCENE_MANAGER)    
+    self.placeablePanel = ZO_HousingFurniturePlacement_Keyboard:New(ZO_HousingFurniturePlacementPanel_KeyboardTopLevel, self)
+    self.productsPanel = ZO_HousingFurnitureProducts_Keyboard:New(ZO_HousingFurnitureProductsPanel_KeyboardTopLevel, self)
+    self.retrievalPanel = ZO_HousingFurnitureRetrieval_Keyboard:New(ZO_HousingFurnitureRetrievalPanel_KeyboardTopLevel, self)
+    self.settingsPanel = ZO_HousingFurnitureSettings_Keyboard:New(ZO_HousingFurnitureSettingsPanel_KeyboardTopLevel, self)
+
+    self.placeablePanel:RegisterCallback("OnMostRecentlySelectedDataChanged", OnListMostRecentlySelectedDataChanged)
+    self.productsPanel:RegisterCallback("OnMostRecentlySelectedDataChanged", OnListMostRecentlySelectedDataChanged)
+    self.retrievalPanel:RegisterCallback("OnMostRecentlySelectedDataChanged", OnListMostRecentlySelectedDataChanged)
+
+    KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE = ZO_Scene:New(HOUSING_FURNITURE_KEYBOARD_SCENE_NAME, SCENE_MANAGER)
     KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:OnDeferredInitialization()
             self:OnShowing()
-            self.menuBarFragment:SelectFragment(SI_FURNITURE_PLACE)     
         elseif newState == SCENE_HIDING then
+            self:OnHiding()
+        elseif newState == SCENE_HIDDEN then
             self.menuBarFragment:Clear()
-            ZO_HousingFurnitureBrowser_Base.Hiding(self)
         end
     end)
 
     SYSTEMS:RegisterKeyboardRootScene("housing_furniture_browser", KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE)
-
-    local function RefreshLists()
-        if SCENE_MANAGER:IsShowing("keyboard_housing_furniture_scene") then
-            self:RefreshLists()
-        else
-            self.listsAreDirty = true
-        end
-    end
-    ZO_HousingFurnitureBrowser_Base.RegisterEvents(self, RefreshLists)
+    self.scene = KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE
 end
 
 function ZO_HousingFurnitureBrowser_Keyboard:OnDeferredInitialization()
@@ -44,137 +51,144 @@ function ZO_HousingFurnitureBrowser_Keyboard:OnDeferredInitialization()
         return
     end
 
-    self:InitializeKeybindStripDescriptors()
-    self:CreateListFragments()
+    self:CreateMenuBarTabs()
+    self.menuBarFragment:SetStartingFragment(SI_HOUSING_FURNITURE_TAB_PLACE)
 
-    ZO_ScrollList_Initialize(self.placeableList)
-    
-    local function SetupPlaceableRow(rowControl, placeableObject)
-        rowControl.name:SetText(placeableObject:GetName())
-        rowControl.icon:SetTexture(placeableObject:GetIcon())
-    end
-
-    local ENTRY_HEIGHT = 52
-    ZO_ScrollList_AddDataType(self.placeableList, PLACEABLE_HOUSING_DATA_TYPE, "ZO_PlayerFurnitureSlot", ENTRY_HEIGHT, SetupPlaceableRow)
-    ZO_ScrollList_AddResizeOnScreenResize(self.placeableList)
-
-    ZO_ScrollList_Initialize(self.recallableList)
-    
-    local function SetupRecallableRow(rowControl, data)
-        rowControl.name:SetText(data.name)
-        rowControl.icon:SetTexture(data.icon)
-    end
-
-    ZO_ScrollList_AddDataType(self.recallableList, RECALLABLE_HOUSING_DATA_TYPE, "ZO_PlayerFurnitureSlot", ENTRY_HEIGHT, SetupRecallableRow)
-    ZO_ScrollList_AddResizeOnScreenResize(self.recallableList)
+    self.houseInfoFragmentGroup = 
+    {
+        HOUSE_INFORMATION_FRAGMENT,
+        MEDIUM_SHORT_LEFT_PANEL_BG_FRAGMENT,
+    }
 
     self.isInitialized = true
 end
 
-function ZO_HousingFurnitureBrowser_Keyboard:InitializeKeybindStripDescriptors()
-    self.placeKeybindStripDescriptor =
-    {
-        alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+function ZO_HousingFurnitureBrowser_Keyboard:OnShowing()
+    ZO_HousingFurnitureBrowser_Base.OnShowing(self)
 
-        -- Primary
-        {
-            name =  "[debug] Select",
-            keybind = "UI_SHORTCUT_PRIMARY", 
-            callback =  function()
-                            if HousingEditorIsPreviewing() then
-                                SCENE_MANAGER:HideCurrentScene()
-                            end
-                        end,
-        },
-    }
+    self.settingsPanel:UpdateLists()
+    self.menuBarFragment:ShowLastFragment()
+
+    SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)
 end
 
-function ZO_HousingFurnitureBrowser_Keyboard:CreateListFragments()
+--Overridden
+function ZO_HousingFurnitureBrowser_Keyboard:UpdatePlaceablePanel()
+    self.placeablePanel:UpdateLists()
+end
 
-    HOUSING_FURNITURE_BROWSER_PLACEABLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingFurnitureBrowser_KeyboardPlaceableTopLevel)
-    HOUSING_FURNITURE_BROWSER_RECALLABLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingFurnitureBrowser_KeyboardRecallableTopLevel)
-    local function CreateButtonData(normal, pressed, highlight)
+--Overridden
+function ZO_HousingFurnitureBrowser_Keyboard:UpdateRetrievablePanel()
+    self.retrievalPanel:UpdateLists()
+end
+
+--Overridden
+function ZO_HousingFurnitureBrowser_Keyboard:UpdateRetrievablePanelDistancesAndHeadings()
+    self.retrievalPanel:UpdateContentsSort()
+end
+
+--Overridden
+function ZO_HousingFurnitureBrowser_Keyboard:UpdateRetrievablePanelHeadings()
+    self.retrievalPanel:UpdateContentsVisible()
+end
+
+--Overridden
+function ZO_HousingFurnitureBrowser_Keyboard:UpdateProductsPanel()
+    self.productsPanel:UpdateLists()
+end
+
+function ZO_HousingFurnitureBrowser_Keyboard.OnHideFurnitureRow(control, data)
+    local INSTANT = true
+    ZO_HousingFurnitureTemplates_Keyboard_SetListHighlightHidden(control, true, INSTANT)
+end
+
+function ZO_HousingFurnitureBrowser_Keyboard.SetupFurnitureRow(rowControl, furnitureObject, OnMouseClickCallback, OnMouseDoubleClickCallback)
+    rowControl.name:SetText(furnitureObject:GetFormattedName())
+    local quality = furnitureObject:GetQuality()
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+    rowControl.name:SetColor(r, g, b, 1)
+
+    rowControl.icon:SetTexture(furnitureObject:GetIcon())
+
+    local stackCountLabel = rowControl.stackCount
+    local stackCount = furnitureObject:GetStackCount()
+    local hasStack = stackCount > 1
+    if hasStack then
+        stackCountLabel:SetText(furnitureObject:GetFormattedStackCount())
+    end
+
+    stackCountLabel:SetHidden(not hasStack)
+
+    local statusControl = rowControl.statusIcon
+
+    statusControl:ClearIcons()
+
+
+    if furnitureObject:IsStolen() then
+        statusControl:AddIcon("EsoUI/Art/Inventory/inventory_stolenItem_icon.dds")
+    end
+    if furnitureObject:IsGemmable() then
+        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS))
+    end
+    if furnitureObject:IsFromCrownStore() then
+        statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS))
+    end
+
+    statusControl:Show()
+
+    rowControl.OnMouseClickCallback = OnMouseClickCallback
+    rowControl.OnMouseDoubleClickCallback = OnMouseDoubleClickCallback
+    rowControl.furnitureObject = furnitureObject
+end
+
+function ZO_HousingFurnitureBrowser_Keyboard:CreateMenuBarTabs()
+    local function CreateButtonData(normal, pressed, highlight, mode)
         return {
             normal = normal,
             pressed = pressed,
             highlight = highlight,
+            mode = mode,
+            callback = function() self:SetMode(mode) end
         }
     end
 
-    local menuBarFragment = ZO_SceneFragmentBar:New(ZO_HousingFurnitureBrowserMenu_KeyboardTopLevelBar)
+    local menuBarFragment = ZO_SceneFragmentBar:New(self.modeBar)
 
-    --place Button
+    --Placement Button
     local placeButtonData = CreateButtonData("EsoUI/Art/Housing/Keyboard/furniture_tabIcon_place_up.dds",
                                             "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_place_down.dds", 
-                                            "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_place_over.dds")
-    menuBarFragment:Add(SI_FURNITURE_PLACE, { HOUSING_FURNITURE_BROWSER_PLACEABLE_FRAGMENT }, placeButtonData, self.placeKeybindStripDescriptor)
+                                            "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_place_over.dds",
+                                            HOUSING_BROWSER_MODE.PLACEMENT)
+    menuBarFragment:Add(SI_HOUSING_FURNITURE_TAB_PLACE, { self.placeablePanel:GetFragment() }, placeButtonData)
 
-    --recall Button
-    local recallButtonData = CreateButtonData("EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_up.dds",
+    --Products Button
+    local productsButtonData = CreateButtonData("EsoUI/Art/Housing/Keyboard/furniture_tabIcon_crownFurnishings_up.dds",
+                                            "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_crownFurnishings_down.dds", 
+                                            "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_crownFurnishings_over.dds",
+                                            HOUSING_BROWSER_MODE.PRODUCTS)
+    menuBarFragment:Add(SI_HOUSING_FURNITURE_TAB_PURCHASE, { self.productsPanel:GetFragment(), MARKET_CURRENCY_KEYBOARD_FRAGMENT }, productsButtonData)
+
+    --Retrieval Button
+    local retrievalButtonData = CreateButtonData("EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_up.dds",
                                                "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_down.dds",
-                                               "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_over.dds")
-    menuBarFragment:Add(SI_FURNITURE_RECALL, { HOUSING_FURNITURE_BROWSER_RECALLABLE_FRAGMENT }, recallButtonData)
+                                               "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_recall_over.dds",
+                                               HOUSING_BROWSER_MODE.RETRIEVAL)
+    menuBarFragment:Add(SI_HOUSING_FURNITURE_TAB_RETRIEVAL, { self.retrievalPanel:GetFragment() }, retrievalButtonData)
+
+    --Settings Button
+    local settingsButtonData = CreateButtonData("EsoUI/Art/Housing/Keyboard/furniture_tabIcon_settings_up.dds",
+                                               "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_settings_down.dds",
+                                               "EsoUI/Art/Housing/Keyboard/furniture_tabIcon_settings_over.dds",
+                                               HOUSING_BROWSER_MODE.SETTINGS)
+    menuBarFragment:Add(SI_HOUSING_FURNITURE_TAB_SETTINGS, { self.settingsPanel:GetFragment() }, settingsButtonData)
     
     self.menuBarFragment = menuBarFragment
 end
 
-function ZO_HousingFurnitureBrowser_Keyboard:OnShowing()
-    if self.listsAreDirty then
-        self:RefreshLists()
-    end
-end
+--
+--[[ XML Functions ]] --
+--
 
-function ZO_HousingFurnitureBrowser_Keyboard:RefreshLists()
-    --Placeable Tab
-    local scrollData = ZO_ScrollList_GetDataList(self.placeableList)
-    ZO_ScrollList_Clear(self.placeableList)
-
-    local itemFurnitureCache = SHARED_FURNITURE:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_ITEM)
-    for bag, bagEntries in pairs(itemFurnitureCache) do
-        for _, placeableItem in pairs(bagEntries) do --pairs because slotIndex can be zero
-            scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(PLACEABLE_HOUSING_DATA_TYPE, placeableItem)
-        end
-    end
-
-    local collectibleFurnitureCache = SHARED_FURNITURE:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)
-    for id, collData in pairs(collectibleFurnitureCache) do
-        scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(PLACEABLE_HOUSING_DATA_TYPE, collData)
-    end
-    
-    ZO_ScrollList_Commit(self.placeableList)
-
-    --Recallable Tab
-    scrollData = ZO_ScrollList_GetDataList(self.recallableList)
-    ZO_ScrollList_Clear(self.recallableList)
-
-    local furnitureCache = SHARED_FURNITURE:GetRecallableFurnitureCache()
-    for _, placeableFurniture in pairs(furnitureCache) do --pairs because slotIndex can be zero
-        scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(RECALLABLE_HOUSING_DATA_TYPE, placeableFurniture)
-    end
-
-    ZO_ScrollList_Commit(self.recallableList)
-
-    self.listsAreDirty = false
-end
-
-function ZO_HousingFurnitureBrowser_Keyboard_OnMouseClick(self)
-    local data = ZO_ScrollList_GetData(self)
-    if data.dataEntry.typeId == PLACEABLE_HOUSING_DATA_TYPE then
-        ZO_HousingFurnitureBrowser_Base.PreviewFurniture(self, data)
-    end
-end
-
-function ZO_HousingFurnitureBrowser_Keyboard_OnMouseDoubleClick(self)
-    local data = ZO_ScrollList_GetData(self)
-    if data.dataEntry.typeId == PLACEABLE_HOUSING_DATA_TYPE then
-        ZO_HousingFurnitureBrowser_Keyboard_OnMouseClick(self)
-        SCENE_MANAGER:HideCurrentScene()
-    elseif data.dataEntry.typeId == RECALLABLE_HOUSING_DATA_TYPE then
-        ZO_HousingFurnitureBrowser_Base.RemoveFurniture(self, data)
-    end
-end
-
-function ZO_HousingFurnitureBrowser_Keyboard_OnInitialize()
-    local keyboardBrowser = ZO_HousingFurnitureBrowser_Keyboard:New()
-    SYSTEMS:RegisterKeyboardObject("housing_furniture_browser", keyboardBrowser)
+function ZO_HousingFurnitureBrowser_Keyboard_OnInitialize(control)
+    KEYBOARD_HOUSING_FURNITURE_BROWSER = ZO_HousingFurnitureBrowser_Keyboard:New(control)
 end

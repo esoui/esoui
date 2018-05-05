@@ -42,7 +42,7 @@
 
         <!-- Quest Reward Controls -->
         <Control name="ZO_QuestReward" mouseEnabled="true" virtual="true">
-            <Dimensions x="240" y="52"/>
+            <Dimensions x="ZO_REWARD_SIZE_X" y="ZO_REWARD_SIZE_Y"/>
             <Anchor point="TOPLEFT"/>
             <OnMouseEnter>
                 ZO_QuestReward_MouseEnter(self)
@@ -52,16 +52,22 @@
             </OnMouseExit>
             <Controls>
                 <Texture name="$(parent)Icon" level="2">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT" offsetX="4"/>
                     <Dimensions x="50" y="50"/>
                 </Texture>
                 <Label name="$(parent)StackSize" font="ZoFontConversationQuestReward" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" offsetX="2" offsetY="-2"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="-2" offsetY="-2"/>
                 </Label>
-                <Label name="$(parent)Name" font="ZoFontConversationQuestReward" verticalAlignment="CENTER" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="54" />
-                    <Anchor point="BOTTOMRIGHT" />
+                <Label name="$(parent)Name" mouseEnabled="true" font="ZoFontConversationQuestReward" verticalAlignment="CENTER" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" />
+                    <Anchor point="RIGHT" offsetX="-4" constrains="X"/>
+                    <OnMouseEnter>
+                        ZO_QuestRewardName_MouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_QuestRewardName_MouseExit(self)
+                    </OnMouseExit>
                 </Label>
             </Controls>
         </Control>
