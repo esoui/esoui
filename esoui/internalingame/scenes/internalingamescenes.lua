@@ -4,9 +4,11 @@
 
 local marketScene = SCENE_MANAGER:GetScene(ZO_KEYBOARD_MARKET_SCENE_NAME)
 if marketScene then
-    marketScene:AddFragment(RIGHT_BG_FRAGMENT)
+    -- the preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
+    -- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
     marketScene:AddFragment(MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
-    marketScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+    marketScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)
+
     marketScene:AddFragment(MARKET_FRAGMENT)
     marketScene:AddFragment(MARKET_TREE_UNDERLAY_FRAGMENT)
     marketScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
@@ -34,7 +36,6 @@ if ZO_GAMEPAD_MARKET_ANNOUNCEMENT then
 end
 announcementScene:AddFragment(MOUSE_UI_MODE_FRAGMENT)
 announcementScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
-announcementScene:AddFragment(GAMEPAD_ACTION_LAYER_FRAGMENT)
 announcementScene:AddFragment(ZO_ActionLayerFragment:New("MarketAnnouncement"))
 
 local remoteCrownCratesSceneKeyboard = ZO_RemoteScene:New("crownCrateKeyboard", SCENE_MANAGER)

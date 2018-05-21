@@ -1,0 +1,100 @@
+<GuiXml>
+    <Controls>
+		<Control name="ZO_DailyLoginRewards_GridEntry_Template_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD" y="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD" />
+
+            <OnInitialized>
+                self.completeMark = self:GetNamedChild("CompleteMark")
+                self.container = self:GetNamedChild("Container")
+                self.icon = self.container:GetNamedChild("Icon")
+                self.quantityLabel = self.container:GetNamedChild("Quantity")
+                self.isMilestoneTag = self.container:GetNamedChild("CornerTag")
+                self.timerLabel = self.container:GetNamedChild("Timer")
+                self.statusIcon = self.container:GetNamedChild("Status")
+                self.backdrop = self.container:GetNamedChild("Backdrop")
+            </OnInitialized>
+            
+            <OnMouseEnter>
+                ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+            
+            <OnMouseExit>
+                ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Dimensions x="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD" y="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD" />
+                    <Anchor point="TOPLEFT" />
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" inherits="ZO_CenterlessBackdrop" level="0"/>
+                
+                        <Texture name="$(parent)Icon" level="6" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions x="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_ICON_DIMENSIONS_KEYBOARD" y="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_ICON_DIMENSIONS_KEYBOARD"/>
+                            <Anchor point="CENTER" />
+                        </Texture>
+
+                        <Label name="$(parent)Quantity" font="ZoFontGameOutline" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
+                            <Dimensions x="80" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
+                        </Label>
+
+                        <Texture name="$(parent)CornerTag" level="3" textureFile="EsoUI/Art/DailyLoginRewards/dailyloginrewards_cornerTag_isMilestone.dds" hidden="true">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="TOPRIGHT" offsetX="-3" offsetY="1" />
+                        </Texture>
+
+                        <Texture name="$(parent)Status" level="3" hidden="true">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4" />
+                        </Texture>
+                        
+                        <Label name="$(parent)Timer" font="ZoFontGameOutline" horizontalAlignment="LEFT" verticalAlignment="TOP" inheritScale="false">
+                            <Dimensions x="80" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="LEFT" offsetX="6" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Texture name="$(parent)CompleteMark" textureFile="EsoUI/Art/DailyLoginRewards/dailyloginrewards_claimed_stamp.dds" layer="OVERLAY" level="1" mouseEnabled="false" hidden="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Container" relativePoint="CENTER"/>
+                </Texture>
+            </Controls>
+        </Control>
+	
+		<TopLevelControl name="ZO_Daily_Login_Rewards_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
+			 <OnInitialized>
+                ZO_DailyLoginRewards_Keyboard_OnInitialize(self)
+            </OnInitialized>
+			
+			<Controls>
+				<Label name="$(parent)CurrentMonth" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
+					<Anchor point="TOP" offsetY="10" />
+				</Label>
+                
+				<Label name="$(parent)ChangeTimer" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+					<Anchor point="TOP" relativeTo="$(parent)CurrentMonth" relativePoint="BOTTOM" offsetY="5" />
+				</Label>
+				
+				<Control name="$(parent)Rewards" inherits="ZO_GridScrollList_Keyboard">
+                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="90" />
+                    <Anchor point="BOTTOMLEFT" offsetX="20"/>
+                </Control>
+
+                <Label name="$(parent)LockedText" text="SI_DAILY_LOGIN_REWARDS_LOCKED" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rewards"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Rewards"/>
+                </Label>
+
+                <Control name="$(parent)RewardParticleGeneratorPosition" tier="MEDIUM">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rewards" />
+                </Control>
+			</Controls>
+		</TopLevelControl>
+	</Controls>
+</GuiXml>

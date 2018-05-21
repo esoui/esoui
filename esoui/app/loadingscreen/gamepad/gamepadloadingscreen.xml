@@ -9,9 +9,6 @@
         </AnimationTimeline>
 
         <AnimationTimeline name="GamepadLoadingCompleteAnimation">
-            <OnStop>
-                SharedLoadingCompleteAnimation_OnStop(self)
-            </OnStop>
             <Animations>
                 <!-- Art -->
                 <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
@@ -61,7 +58,7 @@
                             <Anchor point="BOTTOM" relativePoint="TOP" />
                         </Label>
 
-                        <Texture name="$(grandparent)DescriptionBg" override="true" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_Loading_Text_Background-1024x256.dds" alpha="0">
+                        <Texture name="$(grandparent)DescriptionBg" textureFile="EsoUI/Art/Screens_App/Gamepad/gp_Loading_Text_Background-1024x256.dds" alpha="0">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)ZoneDescription" relativePoint="TOPLEFT" offsetX="-300" offsetY="-100" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)ZoneDescription" relativePoint="BOTTOMRIGHT" offsetX="300" offsetY="100" />
                         </Texture>

@@ -353,6 +353,10 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_WHITE,
         fontSize = "$(GP_42)",
     },
+    notDeconstructable =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
 
     --Gamepad Stable Tooltip
     stableGamepadTooltip = {
@@ -1404,6 +1408,21 @@ ZO_TOOLTIP_STYLES =
     {
         fontSize = "$(GP_42)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
+    },
+    giftNameHeader =
+    {
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    dailyLoginRewardsTimerSection =
+    {
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        statValuePairSpacing = 10,
+        childSpacing = 10,
+        childSecondarySpacing = 3,
+        widthPercent = 100,
+        customSpacing = 25,
     },
 }
 

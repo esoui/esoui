@@ -6,16 +6,6 @@
                     <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
                 </Backdrop>
 
-                <Control name="$(parent)Highlight" hidden="true">
-                    <AnchorFill />
-                    <Controls>
-                        <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineThick" layer="OVERLAY">
-                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
-                        </Backdrop>
-                    </Controls>
-                </Control>
-
                 <Label name="$(parent)Title" override="true">
                     <Anchor point="TOPLEFT" offsetX="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y" />
                     <Anchor point="TOPRIGHT" offsetX="-ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y" />
@@ -38,9 +28,7 @@
                     <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)PreviousCost" offsetX="10"/>
                 </Label>
 
-                <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PURCHASED" modifyTextType="UPPERCASE" override="true">
-                    <Anchor point="BOTTOMLEFT" offsetX="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_X_INSET" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_BOTTOM_INSET_Y"/>
-                </Label>
+                <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PURCHASED" modifyTextType="UPPERCASE" override="true" />
 
                 <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad">
                     <Controls>

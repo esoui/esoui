@@ -287,21 +287,6 @@
 
             <Controls>
 
-                <Control name="$(parent)Header">
-                    <Dimensions x="1024" y="50" />
-                    <Anchor point="RIGHT" offsetX="30" offsetY="-370" />
-                    <Controls>
-                        <Label name="$(parent)Label" text="SI_MARKET_TITLE" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                            <Anchor point="LEFT" offsetX="50" />
-                        </Label>
-
-                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/centerscreen_topDivider.dds">
-                            <Dimensions x="1024" y="4" />
-                            <Anchor point="BOTTOM"/>
-                        </Texture>
-                    </Controls>
-                </Control>
-
                 <Control name="$(parent)Message">
                     <Anchor point="TOPLEFT" offsetY="5" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-5" />

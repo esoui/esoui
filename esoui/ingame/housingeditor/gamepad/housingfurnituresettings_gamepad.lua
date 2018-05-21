@@ -601,7 +601,7 @@ do
             setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                 local dropdown = control.dropdown
                 data.dialog.houseSelectorDropdown = dropdown
-                dropdown:SetSortsItems(false)
+                dropdown:SetSortsItems(false) -- sorted on setup
                 dropdown:ClearItems()
 
                 local function OnHouseSelected(_, entryText, entry)
@@ -639,10 +639,10 @@ do
                     targetData.callback(dialog)
                 end
             end,
-            enabled = function(control)
-                local targetData = control.dialog.entryList:GetTargetData()
+            enabled = function(dialog)
+                local targetData = dialog.entryList:GetTargetData()
                 if targetData.validInput then
-                    return targetData.validInput(control.dialog)
+                    return targetData.validInput(dialog)
                 end
 
                 return true
@@ -662,7 +662,7 @@ do
     local addFriendButtonData =
     {
         keybind = "DIALOG_SECONDARY",
-        text = SI_GAMEPAD_MAIL_CHOOSE_FRIEND,
+        text = SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND,
         callback =  function(dialog)
 			local data = dialog.entryList:GetTargetData()
 			local editbox = data.control.editBoxControl

@@ -46,15 +46,16 @@ end
 function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutReward(rewardControl, data)
     local name = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingRewardNameFromRewardData(data)
     rewardControl.nameControl:SetText(name)
-    if data.quality then
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+    local rewardType = data:GetRewardType()
+    if rewardType then
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemQuality())
         rewardControl.nameControl:SetColor(r, g, b, 1)
     else
         local r, g, b = ZO_NORMAL_TEXT:UnpackRGB()
         rewardControl.nameControl:SetColor(r, g, b, 1)
     end
 
-    local icon = ZO_LEVEL_UP_REWARDS_MANAGER:GetPlatformIconFromRewardData(data)
+    local icon = data:GetKeyboardIcon()
     if icon then
         rewardControl.iconControl:SetTexture(icon)
         rewardControl.iconControl:SetHidden(false)
@@ -65,8 +66,8 @@ function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutReward(rewardControl, data)
     rewardControl.data = data
 end
 
-function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutRewardsForLevel(level, rewardId, levelRewards, rewardContainer)
-    ZO_LevelUpRewardsUpcoming_Base.LayoutRewardsForLevel(self, level, rewardId, levelRewards, rewardContainer)
+function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutRewardsForLevel(level, levelRewards, rewardContainer)
+    ZO_LevelUpRewardsUpcoming_Base.LayoutRewardsForLevel(self, level, levelRewards, rewardContainer)
 
     local layout = self.rewardContainerToLayout[rewardContainer]
     if not layout then
@@ -78,7 +79,7 @@ function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutRewardsForLevel(level, rewardI
     layout:ResetAnchoring(ANCHOR_TO_PARENT)
     layout:StartSection()
 
-    local attributePoints = GetAttributePointsAwardedForReward(rewardId)
+    local attributePoints = GetAttributePointsAwardedForLevel(level)
     if attributePoints > 0 then
         local rewardControl = self:AcquireRewardControl()
         rewardControl:SetParent(rewardContainer.rewardsContainer)
@@ -87,7 +88,7 @@ function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutRewardsForLevel(level, rewardI
         layout:Anchor(rewardControl)
     end
 
-    local skillPoints = GetSkillPointsAwardedForReward(rewardId)
+    local skillPoints = GetSkillPointsAwardedForLevel(level)
     if skillPoints > 0 then
         local rewardControl = self:AcquireRewardControl()
         rewardControl:SetParent(rewardContainer.rewardsContainer)
@@ -97,7 +98,7 @@ function ZO_LevelUpRewardsUpcoming_Keyboard:LayoutRewardsForLevel(level, rewardI
     end
 
     for i, rewardData in ipairs(levelRewards) do
-        if ZO_LEVEL_UP_REWARDS_MANAGER:IsRewardDataValidForPlayer(rewardData) then
+        if rewardData:IsValidReward() then
             local rewardControl = self:AcquireRewardControl()
             rewardControl:SetParent(rewardContainer.rewardsContainer)
             self:LayoutReward(rewardControl, rewardData)

@@ -21,7 +21,6 @@ end
 
 function ZO_LargeSingleMarketProduct_Base:InitializeControls(control)
     ZO_MarketProductBase.InitializeControls(self, control)
-    self.normalBorder = self.control:GetNamedChild("HighlightNormal")
     self:SetTextCalloutYOffset(4)
 end
 
@@ -64,14 +63,15 @@ do
     local HIDE_VISUAL_LAYER_INFO = false
     local NO_COOLDOWN = nil
     local HIDE_BLOCK_REASON = false
+    local DONT_SHOW_PURCHASABLE = false -- Don't show "purchasable" when we're actually in the Crown Store, even if it is flagged
     function ZO_LargeSingleMarketProduct_Base:Show(...)
         ZO_MarketProductBase.Show(self, ...)
         self:UpdateProductStyle()
 
         local productType = self:GetProductType()
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-            local collectibleId, _, name, type, description, owned, isPlaceholder, isPurchasable, hint = GetMarketProductCollectibleInfo(self:GetId())
-            self.tooltipLayoutArgs = { collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, isPurchasable, description, hint, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON}
+            local collectibleId, _, name, type, description, owned, isPlaceholder, _, hint = GetMarketProductCollectibleInfo(self:GetId())
+            self.tooltipLayoutArgs = { collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, DONT_SHOW_PURCHASABLE, description, hint, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON}
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             self.itemLink = GetMarketProductItemLink(self:GetId())
         end
@@ -115,10 +115,10 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
 
     if isPurchaseLocked or self.isFree then
         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.purchaseLabelControl, isFocused, purchaseState)
-        self.normalBorder:SetEdgeColor(ZO_MARKET_PRODUCT_PURCHASED_COLOR:UnpackRGB())
-    else
+    end
+
+    if not isPurchaseLocked then
         ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.cost, isFocused, purchaseState)
-        self.normalBorder:SetEdgeColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
     end
 
     local textCalloutBackgroundColor

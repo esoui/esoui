@@ -28,36 +28,21 @@ function ZO_ActionBar_GetButton(slotNum)
     return g_actionBarButtons[remappedSlotNum]
 end
 
-local function CanUseActionSlots()
+function ZO_ActionBar_CanUseActionSlots()
     return ((not IsGameCameraActive() and not IsInteractionCameraActive()) or SCENE_MANAGER:IsShowing("hud")) and not IsUnitDead("player")
 end
 
-function ActionButtonDownAndUp(slotNum)
-    if CanUseActionSlots() then
-        local button = ZO_ActionBar_GetButton(slotNum)
-        if button then
-            button:HandlePressAndRelease()
-        end
-    end
-end
-
-function ActionButtonDown(slotNum)
-    if CanUseActionSlots() then
-        local button = ZO_ActionBar_GetButton(slotNum)
-        if button then
-            button:HandlePress()
-        end
-    end
-end
-
-function ActionButtonUp(slotNum)
+function ZO_ActionBar_OnActionButtonDown(slotNum)
     local button = ZO_ActionBar_GetButton(slotNum)
     if button then
-        if CanUseActionSlots() then
-            button:HandleRelease()
-        else
-            button:ResetVisualState() --in case CanUseActionSlots() returns false after ActionButtonDown already fired.
-        end
+        button:OnPress()
+    end
+end
+
+function ZO_ActionBar_OnActionButtonUp(slotNum)
+    local button = ZO_ActionBar_GetButton(slotNum)
+    if button then
+        button:OnRelease()
     end
 end
 

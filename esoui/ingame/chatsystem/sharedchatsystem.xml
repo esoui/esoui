@@ -9,8 +9,16 @@
         </AnimationTimeline>
         <AnimationTimeline name="NotificationPulse" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <ScaleAnimation duration="1000" startScale="1" endScale="3"/>
-                <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0"/>
+                <ScaleAnimation duration="1000" startScale="1" endScale="2.5">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+                <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
         <AnimationTimeline name="ChatMinMaxAnim">

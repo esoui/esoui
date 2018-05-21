@@ -1,8 +1,3 @@
-local COLOR_SWATCH_INDEX = 1
-local COLOR_FRAME_INDEX = 2
-local COLOR_MUNGE_INDEX = 3
-local COLOR_LOCK_INDEX = 4
-
 local STYLE_BACKGROUND_INDEX = 1
 local STYLE_SELECTED_INDEX = 2
 
@@ -163,7 +158,7 @@ function ZO_GuildHeraldryManager_Shared:InitializeSwatchPool(template, parent)
         swatch.UpdateHighlightedState = UpdateHighlightedState
         swatch.owner = self
 
-        swatch:SetSurfaceHidden(COLOR_LOCK_INDEX, true)
+        swatch:SetSurfaceHidden(ZO_DYEING_LOCK_INDEX, true)
     end
 
     local function OnSwatchReset(swatch)
@@ -280,13 +275,6 @@ function ZO_GuildHeraldryManager_Shared:InitializeStylePool(template)
     self.stylePool:SetCustomResetBehavior(OnStyleReset)
 end
 
-local CURRENCY_OPTIONS =
-{
-    showTooltips = false,
-    font = "ZoFontGameShadow",
-    iconSide = RIGHT,
-}
-
 function ZO_GuildHeraldryManager_Shared:OnCategorySelected(data)
     local oldData = self.activeData
     self.activeData = data
@@ -387,7 +375,7 @@ function ZO_GuildHeraldryManager_Shared:LayoutColors()
         local parentCategory = activeSwatches[hueCategory]
         local swatch = self.swatchPool:AcquireObject()
 
-        swatch:SetColor(COLOR_SWATCH_INDEX, r, g, b)
+        swatch:SetColor(ZO_DYEING_SWATCH_INDEX, r, g, b)
         swatch.sortKey = sortKey
         swatch.colorName = colorName
         swatch.colorIndex = i

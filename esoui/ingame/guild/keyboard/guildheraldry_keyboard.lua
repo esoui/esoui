@@ -206,7 +206,8 @@ function ZO_GuildHeraldryManager_Keyboard:InitializeKeybindStripDescriptors()
         -- Custom Exit
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            name = GetString(SI_EXIT_BUTTON),
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Guild Heraldry Exit",
             keybind = "UI_SHORTCUT_EXIT",
             ethereal = true,
             callback = function()

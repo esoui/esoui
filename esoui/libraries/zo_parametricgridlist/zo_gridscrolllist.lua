@@ -40,6 +40,7 @@ function ZO_GridScrollList:SetHeaderTemplate(templateName, height, setupFunc, on
     local IS_SELECTABLE = false
     local WIDTH = nil
     ZO_ScrollList_AddControlOperation(self.list, ZO_GRID_LIST_OPERATION_ADD_HEADER, templateName, WIDTH, height, resetControlFunc, setupFunc, onHideFunc, SPACING_XY, SPACING_XY, IS_SELECTABLE)
+    ZO_ScrollList_SetTypeCategoryHeader(self.list, ZO_GRID_LIST_OPERATION_ADD_HEADER, true)
 end
 
 function ZO_GridScrollList:SetGridEntryTemplate(templateName, width, height, setupFunc, onHideFunc, resetControlFunc, spacingX, spacingY, centerEntries)
@@ -119,6 +120,10 @@ function ZO_GridScrollList:GetData()
     return ZO_ScrollList_GetDataList(self.list)
 end
 
+function ZO_GridScrollList:GetControlFromData(data)
+    return ZO_ScrollList_GetDataControl(self.list, data)
+end
+
 do
     local ANIMATE_INSTANTLY = true
 
@@ -129,10 +134,58 @@ do
     end
 end
 
+function ZO_GridScrollList:ResetToTop()
+    ZO_Scroll_ResetToTop(self.list)
+end
+
 ----------------------
 -- Global functions --
 ----------------------
 
 function ZO_DefaultGridHeaderSetup(control, data, selected)
     control:SetText(data.header)
+end
+
+function ZO_DefaultGridEntrySetup(control, data, list)
+    if not control.icon then
+        control.icon = control:GetNamedChild("Icon")
+    end
+
+    local icon = control.icon
+
+    if data.iconDesaturation then
+        icon:SetDesaturation(data.iconDesaturation)
+    end
+
+    if data.textureSampleProcessingWeights then
+        for type, weight in pairs(data.textureSampleProcessingWeights) do
+            icon:SetTextureSampleProcessingWeight(type, weight)
+        end
+    end
+
+    local iconFile = data.iconFile or data.icon
+    if iconFile then
+        icon:SetTexture(iconFile)
+        icon:SetHidden(false)
+    else
+        icon:SetHidden(true)
+    end
+end
+
+do
+    local g_gridEntryScaleAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_GridEntry_IconSelectedAnimation")
+
+    function ZO_GridEntry_SetIconScaledUp(control, scaledUp, instant)
+        if control.icon then
+            if scaledUp then
+                g_gridEntryScaleAnimationProvider:PlayForward(control.icon, instant)
+            else
+                g_gridEntryScaleAnimationProvider:PlayBackward(control.icon, instant)
+            end                
+        end
+    end
+
+    function ZO_GridEntry_SetIconScaledUpInstantly(control, scaledUp)
+        ZO_GridEntry_SetIconScaledUp(control, scaledUp, true)
+    end
 end

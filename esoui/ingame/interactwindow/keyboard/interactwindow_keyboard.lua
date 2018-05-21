@@ -13,7 +13,6 @@ local ENABLED_PLAYER_OPTION_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_
 local SEEN_PLAYER_OPTION_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_DISABLED))
 local DISABLED_PLAYER_OPTION_COLOR = ZO_ERROR_COLOR
 local DISABLED_UNUSABLE_PLAYER_OPTION_COLOR = ZO_DISABLED_TEXT
-local HIGHLIGHT_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
 
 --Keyboard Interaction
 ---------------------
@@ -61,7 +60,6 @@ function ZO_Interaction:InitInteraction()
     self.optionControls = {}
 
     local currentAnchor = ZO_Anchor:New(TOPLEFT, ZO_InteractWindowPlayerAreaOptions, TOPLEFT, CHATTER_OPTION_INDENT, 0)
-    local previousOption
     for i = 1, MAX_CHATTER_OPTIONS do
         local currentOption = GetControl(self.chatterOptionName, i)
         self.optionControls[i] = currentOption
@@ -72,8 +70,6 @@ function ZO_Interaction:InitInteraction()
         currentAnchor:SetTarget(currentOption)
         currentAnchor:SetOffsets(0, 8)
         currentAnchor:SetRelativePoint(BOTTOMLEFT)
-
-        previousOption = currentOption
     end
 
     --create rewards
@@ -241,7 +237,6 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local ROOT_REWARD_ANCHOR = ZO_Anchor:New(TOPLEFT, self.control:GetNamedChild("RewardAreaHeader"), BOTTOMLEFT, 0, 0)
     local rewardCurrencyOptions = {showTooltips = true, font = "ZoFontConversationQuestReward", iconSize = 24, iconSide = LEFT }
 
-    g_numItemRewardsForQuest = 0
     local moneyAnchorControl = ZO_InteractWindowRewardAreaHeader
     local moneyControls = {}
 

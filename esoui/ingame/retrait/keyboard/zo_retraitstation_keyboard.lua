@@ -30,12 +30,14 @@ function ZO_RetraitStation_Keyboard:OnInteractSceneHiding()
     ZO_InventorySlot_RemoveMouseOverKeybinds()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 
-    self:HandleDirtyEvent()
-
     CRAFTING_RESULTS:SetCraftingTooltip(nil)
 end
 
 function ZO_RetraitStation_Keyboard:OnInteractSceneHidden()
+    -- this needs to be called on hidden or else the inventory will
+    -- attempt a full refresh instead of flagging itself as dirty
+    self:HandleDirtyEvent()
+
     self.retraitPanel:RemoveItemFromRetrait()
 end
 

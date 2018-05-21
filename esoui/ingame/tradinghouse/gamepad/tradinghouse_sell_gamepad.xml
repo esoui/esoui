@@ -4,12 +4,6 @@
             <OnInitialized>
                 ZO_TradingHouse_Sell_Gamepad_OnInitialize(self)
             </OnInitialized>
-            <Controls>
-                <Label name="$(parent)StatusMessage" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER" hidden="true">
-                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)ListListScreenCenterIsAlongTop"/>
-                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
-                </Label>
-            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

@@ -1,5 +1,3 @@
-ZO_RETRAIT_FILTER_TYPE_ARMOR = 1
-ZO_RETRAIT_FILTER_TYPE_WEAPONS = 2
 
 ZO_RetraitStation_Retrait_Base = ZO_Object:Subclass()
 
@@ -20,7 +18,7 @@ function ZO_RetraitStation_Retrait_Base:Initialize(control)
 end
 
 function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, selectedTrait)
-    if IsPerformingCraftProcess() then
+    if IsAwaitingCraftingProcessResponse() then
         return
     end
 
@@ -117,25 +115,8 @@ end
 -- Global functions
 -----
 
-function ZO_RetraitStation_GetPrimaryFilterType(...)
-    for i = 1, select("#", ...) do
-        local filterType = select(i, ...)
-        if filterType == ITEMFILTERTYPE_WEAPONS then
-            return ZO_RETRAIT_FILTER_TYPE_WEAPONS
-        elseif filterType == ITEMFILTERTYPE_ARMOR then
-            return ZO_RETRAIT_FILTER_TYPE_ARMOR
-        end
-    end
-    return nil
-end
-
 function ZO_RetraitStation_DoesItemPassFilter(bagId, slotIndex, filterType)
-    local itemFilterType = ZO_RetraitStation_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex))
-    if itemFilterType then
-        return itemFilterType == filterType
-    else
-        return false
-    end
+    return ZO_CraftingUtils_GetSmithingFilterFromItem(bagId, slotIndex) == filterType
 end
 
 function ZO_RetraitStation_CanItemBeRetraited(itemData)

@@ -457,6 +457,7 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES then
                     return true
                 end
+                return false
             end,
             callback = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.EFFECTS then
@@ -542,15 +543,7 @@ function ZO_GamepadStats:UpdateScreenVisibility()
         ZO_GAMEPAD_UPCOMING_LEVEL_UP_REWARDS:Show()
     else
         ZO_GAMEPAD_UPCOMING_LEVEL_UP_REWARDS:Hide()
-end
-end
-
-function ZO_GamepadStats:RefreshConfirmScreen()
-    self:RefreshCommitPointsConfirmList()
-
-    self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
-
-    self:UpdateScreenVisibility()
+    end
 end
 
 function ZO_GamepadStats:PerformUpdate()
@@ -559,7 +552,10 @@ function ZO_GamepadStats:PerformUpdate()
     self:RefreshMainList()
 
     local selectedData = self.mainList:GetTargetData()
-    if selectedData.displayMode ~= nil then
+
+    if self.outfitSelectorHeaderFocus:IsActive() then
+        self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
+    elseif selectedData.displayMode ~= nil then
         self.displayMode = selectedData.displayMode
     end
 
@@ -735,6 +731,8 @@ do
     end
 
     function ZO_GamepadStats:SetupList(list)
+        list:SetValidateGradient(true)
+
         list:AddDataTemplate("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
@@ -752,7 +750,9 @@ do
 end
 
 function ZO_GamepadStats:OnSelectionChanged(list, selectedData, oldSelectedData)
-    self.displayMode = selectedData.displayMode
+    if not self.outfitSelectorHeaderFocus:IsActive() then
+        self.displayMode = selectedData.displayMode
+    end
 
     self:UpdateScreenVisibility()
 

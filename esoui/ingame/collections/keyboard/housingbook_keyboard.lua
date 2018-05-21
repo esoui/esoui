@@ -37,33 +37,8 @@ end
 
 function HousingBook_Keyboard:InitializeEvents()
     ZO_SpecializedCollectionsBook_Keyboard.InitializeEvents(self)
-    self.control:RegisterForEvent(EVENT_HOUSING_PRIMARY_RESIDENCE_SET, function(_, ...) self:OnPrimaryResidenceSet(...) end)
-end
 
-function HousingBook_Keyboard:OnPrimaryResidenceSet(houseId)
-    self:RefreshList()
-end
-
-function HousingBook_Keyboard:SortCollectibleData(collectiblesData)
-    local primaryHouseId = GetHousingPrimaryHouse()
-    table.sort(collectiblesData, function(entry1, entry2)
-        if primaryHouseId ~= 0 then
-            local houseId1 = entry1:GetReferenceId()
-            local houseId2 = entry2:GetReferenceId()
-
-            if primaryHouseId == houseId1 then
-                return true
-            elseif primaryHouseId == houseId2 then
-                return false
-            end
-        end
-
-        if entry1:GetSortOrder() ~= entry2:GetSortOrder() then
-            return entry1:GetSortOrder() < entry2:GetSortOrder()
-        else
-            return entry1:GetName() < entry2:GetName()
-        end
-    end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("PrimaryResidenceSet", function() self:RefreshList() end)
 end
 
 function HousingBook_Keyboard:RefreshDetails()
@@ -114,6 +89,14 @@ function HousingBook_Keyboard:RequestJumpToCurrentHouse()
     end
 end
 
+function HousingBook_Keyboard:GetCategoryFilterFunctions()
+    return { ZO_CollectibleCategoryData.IsHousingCategory }
+end
+
+function HousingBook_Keyboard:IsCollectibleRelevant(collectibleData)
+    return collectibleData:IsHouse()
+end
+
 function ZO_HousingBook_Keyboard_OnRequestJumpToHouseClicked(control)
     HOUSING_BOOK_KEYBOARD:RequestJumpToCurrentHouse()
     SCENE_MANAGER:ShowBaseScene()
@@ -124,5 +107,5 @@ function ZO_HousingBook_Keyboard_OnChangNicknameClicked(control)
 end
 
 function ZO_HousingBook_Keyboard_OnInitialized(control)
-    HOUSING_BOOK_KEYBOARD = HousingBook_Keyboard:New(control, "housingBook", COLLECTIBLE_CATEGORY_TYPE_HOUSE)
+    HOUSING_BOOK_KEYBOARD = HousingBook_Keyboard:New(control, "housingBook", ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_UnlockState)
 end

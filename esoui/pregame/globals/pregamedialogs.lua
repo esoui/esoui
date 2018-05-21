@@ -1243,7 +1243,7 @@ ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] =
             local upgradeMethodsStringId = ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[platformServiceType] and SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_OR_CODE or SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_ONLY
             local chapterUpgradeId = GetCurrentChapterUpgradeId()
             local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
-            local chapterCollectibleName = GetCollectibleDisplayName(chapterCollectibleId)
+            local chapterCollectibleName = GetCollectibleName(chapterCollectibleId)
             return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), ZO_GetPlatformStoreName(), chapterCollectibleName)
         end,
     },
@@ -1275,4 +1275,35 @@ ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] =
             dialog.data.finishedCallback(dialog)
         end
     end,
+}
+
+ESO_Dialogs["LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE"] =
+{
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    mainText = 
+    {
+        text = SI_CONSOLE_LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE_DIALOG_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_CONSOLE_LEGAL_BUTTON_AGREE,
+            keybind = "DIALOG_PRIMARY",
+            callback =  function(dialog)
+                            PregameStateManager_AdvanceState()
+                        end,
+        },
+
+        {
+            text = SI_CONSOLE_LEGAL_BUTTON_DISAGREE,
+            keybind = "DIALOG_NEGATIVE",
+            callback =  function(dialog)
+                            -- do nothing
+                        end,
+        },
+    }
 }

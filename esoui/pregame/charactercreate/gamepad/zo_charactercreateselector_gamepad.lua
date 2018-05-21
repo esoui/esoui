@@ -443,6 +443,10 @@ function ZO_CharacterCreateRaceSelector_Gamepad:GetInformationTooltipStrings(but
             local restrictionReason, restrictingCollectible = GetRaceRestrictionReason(control.defId)
             description = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
             if description ~= "" then
+                if restrictingCollectible ~= 0 and IsCollectiblePurchasable(restrictingCollectible) then
+                    description = string.format("%s\n\n%s", description, GetString(SI_CHARACTER_CREATE_RESTRICTION_COLLECTIBLE_PURCHASABLE))
+                end
+
                 title = self:GetBannerText(control)
             end
         end
@@ -496,6 +500,10 @@ function ZO_CharacterCreateClassSelector_Gamepad:GetInformationTooltipStrings(bu
             local restrictionReason, restrictingCollectible = GetClassRestrictionReason(control.defId)
             description = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
             if description ~= "" then
+                if restrictingCollectible ~= 0 and IsCollectiblePurchasable(restrictingCollectible) then
+                    description = string.format("%s\n\n%s", description, GetString(SI_CHARACTER_CREATE_RESTRICTION_COLLECTIBLE_PURCHASABLE))
+                end
+
                 title = self:GetBannerText(control)
             end
         end

@@ -6,27 +6,18 @@ local gammaAdjustScene = ZO_Scene:New("gammaAdjust", SCENE_MANAGER)
 gammaAdjustScene:AddFragment(GAMMA_SCENE_FRAGMENT)
 
 -------------------
---Crown Store Scene
--------------------
-
-local marketScene = ZO_RemoteScene:New("market", SCENE_MANAGER)
-marketScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
-marketScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
-marketScene:AddFragment(MARKET_KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT)
-marketScene:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
-marketScene:AddFragment(FRAME_PLAYER_FRAGMENT)
-marketScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
-marketScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
-marketScene:AddFragment(MARKET_WINDOW_SOUNDS)
-marketScene:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
-marketScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
-
--------------------
 --Crown Store Announcement Scene
 -------------------
 
 local announcementScene = ZO_RemoteScene:New("marketAnnouncement", SCENE_MANAGER)
 announcementScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
+
+-------------------
+-- Show Market Scene
+-------------------
+
+local showMarketScene = ZO_RemoteScene:New("show_market", SCENE_MANAGER)
+showMarketScene:AddFragment(SHOW_MARKET_FRAGMENT)
 
 ----------------
 --Lockpick Scene

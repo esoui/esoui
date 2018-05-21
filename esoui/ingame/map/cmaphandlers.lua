@@ -1,7 +1,7 @@
-local CMapHandlers = ZO_Object:Subclass()
+local CMapHandlers = ZO_CallbackObject:Subclass()
 
 function CMapHandlers:New()
-    local object = ZO_Object.New(self)
+    local object = ZO_CallbackObject.New(self)
     object:Initialize()
     return object
 end
@@ -44,6 +44,40 @@ function CMapHandlers:InitializeEvents()
     EVENT_MANAGER:RegisterForUpdate("CMapHandler", 100, function()
         self.refresh:UpdateRefreshGroups()
     end)
+
+    local function RefreshSingleQuestPins(questIndex)
+        self:RefreshSingleQuestPins(questIndex)
+        self:FireCallbacks("RefreshedSingleQuestPins", questIndex)
+    end
+
+    local function RefreshAllQuestPins()
+        self:RefreshAllQuestPins()
+        self:FireCallbacks("RefreshedAllQuestPins")
+    end
+
+    local function OnQuestTrackerAssistStateChanged(unassistedData, assistedData)
+        if unassistedData then
+            local questIndex = unassistedData:GetJournalIndex()
+            if questIndex then
+                SetMapQuestPinsAssisted(questIndex, false)
+            end
+        end
+        if assistedData then
+            local questIndex = assistedData:GetJournalIndex()
+            if questIndex then
+                SetMapQuestPinsAssisted(questIndex, true)
+            end
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, questIndex) RefreshSingleQuestPins(questIndex) end)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADVANCED, function(_, questIndex) RefreshSingleQuestPins(questIndex) end)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADDED, RefreshAllQuestPins)   
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_REMOVED, RefreshAllQuestPins)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_LIST_UPDATED, RefreshAllQuestPins)
+    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", OnQuestTrackerAssistStateChanged)
+
+    self:RefreshAllQuestPins()
 end
 
 function CMapHandlers:AddKeep(keepId, bgContext)
@@ -101,6 +135,24 @@ function CMapHandlers:ValidatePvPPinAllowed(pinType)
         return false
     end
     return true
+end
+
+function CMapHandlers:RefreshSingleQuestPins(journalIndex)
+    -- Do not use GetMapQuestPinsAssisted to find whether or not the pin was assisted, it causes eso-56564.
+    local isAssisted = GetTrackedIsAssisted(TRACK_TYPE_QUEST, journalIndex)
+    
+    RemoveMapQuestPins(journalIndex)
+    AddMapQuestPins(journalIndex)
+    
+    if isAssisted then
+        SetMapQuestPinsAssisted(journalIndex, true)
+    end
+end
+
+function CMapHandlers:RefreshAllQuestPins()
+    for i = 1, MAX_JOURNAL_QUESTS do
+        self:RefreshSingleQuestPins(i)
+    end
 end
 
 C_MAP_HANDLERS = CMapHandlers:New()

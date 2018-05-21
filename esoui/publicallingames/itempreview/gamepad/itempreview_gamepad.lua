@@ -68,12 +68,10 @@ end
 
 function ZO_ItemPreview_Gamepad:Activate()
     DIRECTIONAL_INPUT:Activate(self, self.control)
-    BeginItemPreviewSpin()
 end
 
 function ZO_ItemPreview_Gamepad:Deactivate()
     DIRECTIONAL_INPUT:Deactivate(self)
-    EndItemPreviewSpin()
 end
 
 function ZO_ItemPreview_Gamepad:SetVariationControlsHidden(shouldHide)

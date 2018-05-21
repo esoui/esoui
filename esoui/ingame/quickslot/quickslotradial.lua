@@ -16,10 +16,6 @@ function ZO_QuickslotRadialManager:PrepareForInteraction()
     return true
 end
 
-function ZO_QuickslotRadialManager:InteractionCanceled()
-    ActionButtonUp(ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1)
-end
-
 function ZO_QuickslotRadialManager:SetupEntryControl(entryControl, slotNum)
     local selected = (slotNum == self.selectedSlotNum)
     local itemCount = GetSlotItemCount(slotNum)

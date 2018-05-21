@@ -8,27 +8,30 @@ end
 
 function ZO_LevelUpRewardsClaim_Base:Initialize()
     self.rewardLevel = nil
-    self.rewardId = nil
 
     ZO_LEVEL_UP_REWARDS_MANAGER:RegisterCallback("OnLevelUpRewardsChoiceUpdated", function() if self:IsShowing() then self:RefreshSelectedChoices() end end)
 end
 
 function ZO_LevelUpRewardsClaim_Base:ShowLevelUpRewards()
-    self.rewardLevel = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel()
-    self.rewardId = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardId()
+    local rewardLevel = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel()
+    if rewardLevel then
+        self.rewardLevel = rewardLevel
 
-    self:UpdateHeader()
+        self:UpdateHeader()
 
-    local rewardEntryInfo = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingLevelUpRewards()
-    self:AddRewards(rewardEntryInfo)
+        local rewardEntryInfo = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingLevelUpRewards()
+        self:AddRewards(rewardEntryInfo)
+    else
+        --It's possible in high latency that they player could claim their last available reward and then make it back to the claim menu entry before the server acknowledges that we claimed it. This can lead
+        --to the pending reward info being wiped out as we are changing scenes into claim. So if this happens, we just hide claim automatically.
+        self.rewardLevel = nil
+        self.rewardId = nil
+        self:Hide()
+    end
 end
 
 function ZO_LevelUpRewardsClaim_Base:GetRewardLevel()
     return self.rewardLevel
-end
-
-function ZO_LevelUpRewardsClaim_Base:GetRewardId()
-    return self.rewardId
 end
 
 function ZO_LevelUpRewardsClaim_Base:UpdateHeader()
@@ -56,7 +59,7 @@ function ZO_LevelUpRewardsClaim_Base:RefreshSelectedChoices()
 end
 
 function ZO_LevelUpRewardsClaim_Base:ClaimLevelUpRewards()
-    local numFreeInventorySlotsNeeded = GetNumInventorySlotsNeededForLevelUpReward(self.rewardId)
+    local numFreeInventorySlotsNeeded = GetNumInventorySlotsNeededForLevelUpReward(self.rewardLevel)
     if CheckInventorySpaceAndWarn(numFreeInventorySlotsNeeded) then
         ClaimPendingLevelUpReward()
         PlaySound(SOUNDS.LEVEL_UP_REWARD_CLAIM)

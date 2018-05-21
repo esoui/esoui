@@ -15,7 +15,6 @@ ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE =
 {
     SPECIFIC = 1,
     SET = 2,
-    RANDOM = 3,
 }
 
 ZO_ActivityFinderLocation_Base = ZO_Object:Subclass()
@@ -26,7 +25,7 @@ function ZO_ActivityFinderLocation_Base:New(...)
     return object
 end
 
-function ZO_ActivityFinderLocation_Base:Initialize(activityType, id, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad)
+function ZO_ActivityFinderLocation_Base:Initialize(activityType, id, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad, forceFullPanelKeyboard)
     self.activityType = activityType
     self.id = id
     self.rawName = rawName
@@ -41,6 +40,7 @@ function ZO_ActivityFinderLocation_Base:Initialize(activityType, id, rawName, de
     self.descriptionTextureSmallKeyboard = descriptionTextureSmallKeyboard
     self.descriptionTextureLargeKeyboard = descriptionTextureLargeKeyboard
     self.descriptionTextureGamepad = descriptionTextureGamepad
+    self.forceFullPanelKeyboard = forceFullPanelKeyboard
 
     self:InitializeFormattedNames()
 end
@@ -76,16 +76,25 @@ do
 end
 
 do
-    local ACTIVITY_QUEUE_COOLDOWN = { LFG_COOLDOWN_ACTIVITY_STARTED, }
-    local BATTLEGROUND_LEAVER_COOLDOWN = { LFG_COOLDOWN_BATTLEGROUND_DESERTED, }
+    local DUNGEON_COOLDOWNS = 
+    {
+        queueCooldownType = LFG_COOLDOWN_ACTIVITY_STARTED,
+        dailyRewardCooldownType = LFG_COOLDOWN_DUNGEON_REWARD_GRANTED,
+    }
+
+    local BATTLEGROUND_COOLDOWNS =
+    {
+        queueCooldownType = LFG_COOLDOWN_BATTLEGROUND_DESERTED,
+        dailyRewardCooldownType = LFG_COOLDOWN_BATTLEGROUND_REWARD_GRANTED,
+    }
 
     local ACTIVITY_TYPE_APPLICABLE_COOLDOWN_TYPES =
     {
-        [LFG_ACTIVITY_DUNGEON] = ACTIVITY_QUEUE_COOLDOWN,
-        [LFG_ACTIVITY_MASTER_DUNGEON] = ACTIVITY_QUEUE_COOLDOWN,
-        [LFG_ACTIVITY_BATTLE_GROUND_CHAMPION] = BATTLEGROUND_LEAVER_COOLDOWN,
-        [LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION] = BATTLEGROUND_LEAVER_COOLDOWN,
-        [LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL] = BATTLEGROUND_LEAVER_COOLDOWN,
+        [LFG_ACTIVITY_DUNGEON] = DUNGEON_COOLDOWNS,
+        [LFG_ACTIVITY_MASTER_DUNGEON] = DUNGEON_COOLDOWNS,
+        [LFG_ACTIVITY_BATTLE_GROUND_CHAMPION] = BATTLEGROUND_COOLDOWNS,
+        [LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION] = BATTLEGROUND_COOLDOWNS,
+        [LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL] = BATTLEGROUND_COOLDOWNS,
     }
 
     function ZO_ActivityFinderLocation_Base:GetApplicableCooldownTypes()
@@ -179,6 +188,10 @@ function ZO_ActivityFinderLocation_Base:GetDescriptionTextureGamepad()
     return self.descriptionTextureGamepad
 end
 
+function ZO_ActivityFinderLocation_Base:ShouldForceFullPanelKeyboard()
+    return self.forceFullPanelKeyboard
+end
+
 function ZO_ActivityFinderLocation_Base:IsLockedByCollectible()
     assert(false) -- Must be overrideen
 end
@@ -189,6 +202,14 @@ end
 
 function ZO_ActivityFinderLocation_Base:GetEntryType()
     assert(false) -- Must be overriden
+end
+
+function ZO_ActivityFinderLocation_Base:IsSpecificEntryType()
+    return self:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SPECIFIC
+end
+
+function ZO_ActivityFinderLocation_Base:IsSetEntryType()
+    return self:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SET
 end
 
 -- Dynamic Data --
@@ -229,14 +250,6 @@ function ZO_ActivityFinderLocation_Base:GetLockReasonTextOverride()
     return self.lockReasonTextOverride
 end
 
-function ZO_ActivityFinderLocation_Base:SetRandomLockReasonPriority(priority)
-    self.randomLockReasonPriority = priority
-end
-
-function ZO_ActivityFinderLocation_Base:GetRandomLockReasonPriority()
-    return self.randomLockReasonPriority
-end
-
 function ZO_ActivityFinderLocation_Base:SetCountsForAverageRoleTime(countsForAverageRoleTime)
     self.countsForAverageRoleTime = countsForAverageRoleTime
 end
@@ -270,8 +283,9 @@ function ZO_ActivityFinderLocation_Specific:Initialize(activityType, index)
     local descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard = GetActivityKeyboardDescriptionTextures(activityId)
     local descriptionTextureGamepad = GetActivityGamepadDescriptionTexture(activityId)
     self.requiredCollectible = GetRequiredActivityCollectibleId(activityId)
+    local forceFullPanelKeyboard = ShouldActivityForceFullPanelKeyboard(activityId)
 
-    ZO_ActivityFinderLocation_Base.Initialize(self, activityType, activityId, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad)
+    ZO_ActivityFinderLocation_Base.Initialize(self, activityType, activityId, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad, forceFullPanelKeyboard)
 end
 
 function ZO_ActivityFinderLocation_Specific:InitializeFormattedNames()
@@ -311,6 +325,10 @@ function ZO_ActivityFinderLocation_Specific:GetFirstLockingCollectible()
     return 0
 end
 
+function ZO_ActivityFinderLocation_Specific:HasRewardData()
+    return false -- Presently, specifics can't grant rewards
+end
+
 function ZO_ActivityFinderLocation_Specific:GetEntryType()
     return ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SPECIFIC
 end
@@ -328,6 +346,7 @@ end
 function ZO_ActivityFinderLocation_Set:Initialize(activityType, index)
     self.activities = {}
     self.requiredCollectibles = {}
+    local hasActivityWithNoCollectibleRestriction = false
 
     local activitySetId = GetActivitySetIdByTypeAndIndex(activityType, index)
 
@@ -365,9 +384,16 @@ function ZO_ActivityFinderLocation_Set:Initialize(activityType, index)
             championPointsMax = locationChampionPointsMax
         end
 
-        local collectibleId = GetRequiredActivityCollectibleId(activityId)
-        if collectibleId ~= 0 then
-            table.insert(self.requiredCollectibles, collectibleId)
+        -- We only care if everything in this set is locked by a collectible,
+        -- Otherwise collectbiles do not restrict the ability to queue for this set, just which activities you'll get matched for
+        if not hasActivityWithNoCollectibleRestriction then
+            local collectibleId = GetRequiredActivityCollectibleId(activityId)
+            if collectibleId ~= 0 then
+                table.insert(self.requiredCollectibles, collectibleId)
+            else
+                ZO_ClearNumericallyIndexedTable(self.requiredCollectibles)
+                hasActivityWithNoCollectibleRestriction = true
+            end
         end
 
         table.insert(self.activities, activityId)
@@ -376,9 +402,11 @@ function ZO_ActivityFinderLocation_Set:Initialize(activityType, index)
     local rawName, description, sortOrder = GetActivitySetInfo(activitySetId)
     local descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard = GetActivitySetKeyboardDescriptionTextures(activitySetId)
     local descriptionTextureGamepad = GetActivitySetGamepadDescriptionTexture(activitySetId)
+    local forceFullPanelKeyboard = ShouldActivitySetForceFullPanelKeyboard(activitySetId)
     self.icon = GetActivitySetIcon(activitySetId)
+    self.hasRewardData = DoesActivitySetHaveRewardData(activitySetId) 
 
-    ZO_ActivityFinderLocation_Base.Initialize(self, activityType, activitySetId, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad)
+    ZO_ActivityFinderLocation_Base.Initialize(self, activityType, activitySetId, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad, forceFullPanelKeyboard)
 end
 
 function ZO_ActivityFinderLocation_Set:InitializeFormattedNames()
@@ -444,6 +472,25 @@ function ZO_ActivityFinderLocation_Set:GetActivities()
     return self.activities
 end
 
+function ZO_ActivityFinderLocation_Set:HasRewardData()
+    return self.hasRewardData
+end
+
+function ZO_ActivityFinderLocation_Set:GetRewardData()
+    return GetActivitySetRewardData(self:GetId())
+end
+
+function ZO_ActivityFinderLocation_Set:IsEligibleForDailyReward()
+    if self.hasRewardData then
+        return IsActivityEligibleForDailyReward(self.activityType)
+    end
+    return false
+end
+
+function ZO_ActivityFinderLocation_Set:ShouldForceFullPanelKeyboard()
+    return self.forceFullPanelKeyboard or self.hasRewardData
+end
+
 do
     local g_battlegroundTypes = {}
     local g_battlegroundTypeNames = {}
@@ -490,36 +537,4 @@ do
         local builderFunction = ACTIVITY_SET_TYPES_LIST_BUILDERS[self:GetActivityType()]
         return builderFunction and builderFunction(self) or ""
     end
-end
-
----------------------
--- Random Activity --
----------------------
-
-ZO_ActivityFinderLocation_Random = ZO_ActivityFinderLocation_Base:Subclass()
-
-function ZO_ActivityFinderLocation_Random:New(...)
-    return ZO_ActivityFinderLocation_Base.New(self, ...)
-end
-
-do
-    local NO_ID = nil
-    local NO_LEVEL_INFO = nil
-    local SORT_ORDER = 0
-
-    function ZO_ActivityFinderLocation_Random:Initialize(activityType, randomInfo)
-        local rawName = zo_strformat(SI_ACTIVITY_FINDER_RANDOM_TITLE_FORMAT, GetString("SI_LFGACTIVITY", activityType), ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS[activityType])
-        local minGroupSize, maxGroupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupSizeRangeForActivityType(activityType)
-        ZO_ActivityFinderLocation_Base.Initialize(self, activityType, NO_ID, rawName, randomInfo.description, NO_LEVEL_INFO, NO_LEVEL_INFO, NO_LEVEL_INFO, NO_LEVEL_INFO, minGroupSize, maxGroupSize, SORT_ORDER, randomInfo.keyboardBackground, randomInfo.keyboardBackground, randomInfo.gamepadBackground)
-    end
-end
-
-function ZO_ActivityFinderLocation_Random:InitializeFormattedNames()
-    local rawName = self:GetRawName()
-    self:SetNameKeyboard(rawName)
-    self:SetNameGamepad(rawName)
-end
-
-function ZO_ActivityFinderLocation_Random:GetEntryType()
-    return ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.RANDOM
 end

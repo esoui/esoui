@@ -123,7 +123,8 @@ function ZO_PagedList:Initialize(control, movementController)
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- Previous
         {
-            name = GetString(SI_LORE_READER_PREVIOUS_PAGE),
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Paged List Previous Page",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             order = 100,
             callback = function()
@@ -135,7 +136,8 @@ function ZO_PagedList:Initialize(control, movementController)
 
         -- Next
         {
-            name = GetString(SI_LORE_READER_NEXT_PAGE),
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Paged List Next Page",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             order = 100,
             callback = function()

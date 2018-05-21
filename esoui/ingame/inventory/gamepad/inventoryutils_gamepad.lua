@@ -1,98 +1,95 @@
+local ITEM_TYPE_TO_CATEGORY_MAP = {
+    [ITEMTYPE_REAGENT] = GAMEPAD_ITEM_CATEGORY_ALCHEMY,
+    [ITEMTYPE_POTION_BASE] = GAMEPAD_ITEM_CATEGORY_ALCHEMY,
+    [ITEMTYPE_POISON_BASE] = GAMEPAD_ITEM_CATEGORY_ALCHEMY,
+
+    [ITEMTYPE_LURE] = GAMEPAD_ITEM_CATEGORY_BAIT,
+
+    [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = GAMEPAD_ITEM_CATEGORY_BLACKSMITH,
+    [ITEMTYPE_BLACKSMITHING_MATERIAL] = GAMEPAD_ITEM_CATEGORY_BLACKSMITH,
+    [ITEMTYPE_BLACKSMITHING_BOOSTER] = GAMEPAD_ITEM_CATEGORY_BLACKSMITH,
+
+    [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = GAMEPAD_ITEM_CATEGORY_CLOTHIER,
+    [ITEMTYPE_CLOTHIER_MATERIAL] = GAMEPAD_ITEM_CATEGORY_CLOTHIER,
+    [ITEMTYPE_CLOTHIER_BOOSTER] = GAMEPAD_ITEM_CATEGORY_CLOTHIER,
+
+    [ITEMTYPE_FOOD] = GAMEPAD_ITEM_CATEGORY_CONSUMABLE,
+    [ITEMTYPE_DRINK] = GAMEPAD_ITEM_CATEGORY_CONSUMABLE,
+    [ITEMTYPE_RECIPE] = GAMEPAD_ITEM_CATEGORY_CONSUMABLE,
+
+    [ITEMTYPE_COSTUME] = GAMEPAD_ITEM_CATEGORY_COSTUME,
+
+    [ITEMTYPE_ENCHANTING_RUNE_POTENCY] = GAMEPAD_ITEM_CATEGORY_ENCHANTING,
+    [ITEMTYPE_ENCHANTING_RUNE_ASPECT] = GAMEPAD_ITEM_CATEGORY_ENCHANTING,
+    [ITEMTYPE_ENCHANTING_RUNE_ESSENCE] = GAMEPAD_ITEM_CATEGORY_ENCHANTING,
+
+    [ITEMTYPE_GLYPH_WEAPON] = GAMEPAD_ITEM_CATEGORY_GLYPHS,
+    [ITEMTYPE_GLYPH_ARMOR] = GAMEPAD_ITEM_CATEGORY_GLYPHS,
+    [ITEMTYPE_GLYPH_JEWELRY] = GAMEPAD_ITEM_CATEGORY_GLYPHS,
+
+    [ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL] = GAMEPAD_ITEM_CATEGORY_JEWELRYCRAFTING,
+    [ITEMTYPE_JEWELRYCRAFTING_MATERIAL] = GAMEPAD_ITEM_CATEGORY_JEWELRYCRAFTING,
+    [ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER] = GAMEPAD_ITEM_CATEGORY_JEWELRYCRAFTING,
+    [ITEMTYPE_JEWELRYCRAFTING_BOOSTER] = GAMEPAD_ITEM_CATEGORY_JEWELRYCRAFTING,
+
+    [ITEMTYPE_POTION] = GAMEPAD_ITEM_CATEGORY_POTION,
+
+    [ITEMTYPE_INGREDIENT] = GAMEPAD_ITEM_CATEGORY_PROVISIONING,
+    [ITEMTYPE_ADDITIVE] = GAMEPAD_ITEM_CATEGORY_PROVISIONING,
+    [ITEMTYPE_SPICE] = GAMEPAD_ITEM_CATEGORY_PROVISIONING,
+    [ITEMTYPE_FLAVORING] = GAMEPAD_ITEM_CATEGORY_PROVISIONING,
+
+    [ITEMTYPE_SIEGE] = GAMEPAD_ITEM_CATEGORY_SIEGE,
+    [ITEMTYPE_AVA_REPAIR] = GAMEPAD_ITEM_CATEGORY_SIEGE,
+
+    [ITEMTYPE_SPELLCRAFTING_TABLET] = GAMEPAD_ITEM_CATEGORY_SPELLCRAFTING,
+
+    [ITEMTYPE_RACIAL_STYLE_MOTIF] = GAMEPAD_ITEM_CATEGORY_STYLE_MATERIAL,
+    [ITEMTYPE_STYLE_MATERIAL] = GAMEPAD_ITEM_CATEGORY_STYLE_MATERIAL,
+
+    [ITEMTYPE_SOUL_GEM] = GAMEPAD_ITEM_CATEGORY_SOUL_GEM,
+
+    [ITEMTYPE_LOCKPICK] = GAMEPAD_ITEM_CATEGORY_TOOL,
+    [ITEMTYPE_TOOL] = GAMEPAD_ITEM_CATEGORY_TOOL,
+
+    [ITEMTYPE_ARMOR_TRAIT] = GAMEPAD_ITEM_CATEGORY_TRAIT_ITEM,
+    [ITEMTYPE_WEAPON_TRAIT] = GAMEPAD_ITEM_CATEGORY_TRAIT_ITEM,
+    [ITEMTYPE_JEWELRY_RAW_TRAIT] = GAMEPAD_ITEM_CATEGORY_TRAIT_ITEM,
+    [ITEMTYPE_JEWELRY_TRAIT] = GAMEPAD_ITEM_CATEGORY_TRAIT_ITEM,
+
+    [ITEMTYPE_TROPHY] = GAMEPAD_ITEM_CATEGORY_TROPHY,
+
+    [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = GAMEPAD_ITEM_CATEGORY_WOODWORKING,
+    [ITEMTYPE_WOODWORKING_MATERIAL] = GAMEPAD_ITEM_CATEGORY_WOODWORKING,
+    [ITEMTYPE_WOODWORKING_BOOSTER] = GAMEPAD_ITEM_CATEGORY_WOODWORKING,
+}
+
 local function GetCategoryFromItemType(itemType)
-    -- Alchemy
-    if      ITEMTYPE_REAGENT == itemType or 
-            ITEMTYPE_POTION_BASE == itemType or
-            ITEMTYPE_POISON_BASE == itemType then
-        return GAMEPAD_ITEM_CATEGORY_ALCHEMY
-
-    -- Bait
-    elseif  ITEMTYPE_LURE == itemType then
-        return GAMEPAD_ITEM_CATEGORY_BAIT
-
-    -- Blacksmith
-    elseif  ITEMTYPE_BLACKSMITHING_RAW_MATERIAL == itemType or 
-            ITEMTYPE_BLACKSMITHING_MATERIAL == itemType or 
-            ITEMTYPE_BLACKSMITHING_BOOSTER == itemType then
-        return GAMEPAD_ITEM_CATEGORY_BLACKSMITH
-
-    -- Clothier
-    elseif  ITEMTYPE_CLOTHIER_RAW_MATERIAL == itemType or 
-            ITEMTYPE_CLOTHIER_MATERIAL == itemType or 
-            ITEMTYPE_CLOTHIER_BOOSTER == itemType then
-        return GAMEPAD_ITEM_CATEGORY_CLOTHIER
-
-    -- Consumable
-    elseif  ITEMTYPE_DRINK == itemType or 
-            ITEMTYPE_FOOD == itemType or 
-            ITEMTYPE_RECIPE == itemType then
-        return GAMEPAD_ITEM_CATEGORY_CONSUMABLE
-
-    -- Constume
-    elseif  ITEMTYPE_COSTUME == itemType then
-        return GAMEPAD_ITEM_CATEGORY_COSTUME
-
-    -- Enchanting
-    elseif  ITEMTYPE_ENCHANTING_RUNE_POTENCY == itemType or 
-            ITEMTYPE_ENCHANTING_RUNE_ASPECT == itemType or 
-            ITEMTYPE_ENCHANTING_RUNE_ESSENCE == itemType then
-        return GAMEPAD_ITEM_CATEGORY_ENCHANTING
-
-    -- Glyphs
-    elseif  ITEMTYPE_GLYPH_WEAPON == itemType or 
-            ITEMTYPE_GLYPH_ARMOR == itemType or 
-            ITEMTYPE_GLYPH_JEWELRY == itemType then
-        return GAMEPAD_ITEM_CATEGORY_GLYPHS
-
-    -- Potion
-    elseif  ITEMTYPE_POTION == itemType then
-        return GAMEPAD_ITEM_CATEGORY_POTION
-
-    -- Provisioning
-    elseif  ITEMTYPE_INGREDIENT == itemType or 
-            ITEMTYPE_ADDITIVE == itemType or 
-            ITEMTYPE_SPICE == itemType or 
-            ITEMTYPE_FLAVORING == itemType then
-        return GAMEPAD_ITEM_CATEGORY_PROVISIONING
-
-    -- Siege
-    elseif  ITEMTYPE_SIEGE == itemType or
-            ITEMTYPE_AVA_REPAIR == itemType then
-        return GAMEPAD_ITEM_CATEGORY_SIEGE
-
-    -- Spellcrafting
-    elseif  ITEMTYPE_SPELLCRAFTING_TABLET == itemType then
-        return GAMEPAD_ITEM_CATEGORY_SPELLCRAFTING
-
-    -- Style Material
-    elseif  ITEMTYPE_RACIAL_STYLE_MOTIF == itemType or
-            ITEMTYPE_STYLE_MATERIAL == itemType then
-        return GAMEPAD_ITEM_CATEGORY_STYLE_MATERIAL
-
-    -- Soul Gem
-    elseif  ITEMTYPE_SOUL_GEM == itemType then
-        return GAMEPAD_ITEM_CATEGORY_SOUL_GEM
-
-    -- Tool
-    elseif  ITEMTYPE_LOCKPICK == itemType or
-            ITEMTYPE_TOOL == itemType then
-        return GAMEPAD_ITEM_CATEGORY_TOOL
-    
-    -- Trait Gem
-    elseif  ITEMTYPE_ARMOR_TRAIT == itemType or 
-            ITEMTYPE_WEAPON_TRAIT == itemType then
-        return GAMEPAD_ITEM_CATEGORY_TRAIT_GEM
-
-    -- Trophy
-    elseif  ITEMTYPE_TROPHY == itemType then
-        return GAMEPAD_ITEM_CATEGORY_TROPHY
-
-    -- Woodworking
-    elseif  ITEMTYPE_WOODWORKING_RAW_MATERIAL == itemType or 
-            ITEMTYPE_WOODWORKING_MATERIAL == itemType or 
-            ITEMTYPE_WOODWORKING_BOOSTER == itemType then
-        return GAMEPAD_ITEM_CATEGORY_WOODWORKING
-    end
+    -- This is not an exhaustive map: when we don't have a category we'll just use the raw itemtype instead.
+    return ITEM_TYPE_TO_CATEGORY_MAP[itemType]
 end
+
+local WEAPON_TYPE_TO_CATEGORY_MAP = {
+    [WEAPONTYPE_AXE] = GAMEPAD_ITEM_CATEGORY_AXE,
+    [WEAPONTYPE_TWO_HANDED_AXE] = GAMEPAD_ITEM_CATEGORY_AXE,
+
+    [WEAPONTYPE_BOW] = GAMEPAD_ITEM_CATEGORY_BOW,
+
+    [WEAPONTYPE_DAGGER] = GAMEPAD_ITEM_CATEGORY_DAGGER,
+
+    [WEAPONTYPE_HAMMER] = GAMEPAD_ITEM_CATEGORY_HAMMER,
+    [WEAPONTYPE_TWO_HANDED_HAMMER] = GAMEPAD_ITEM_CATEGORY_HAMMER,
+
+    [WEAPONTYPE_SHIELD] = GAMEPAD_ITEM_CATEGORY_SHIELD,
+
+    [WEAPONTYPE_HEALING_STAFF] = GAMEPAD_ITEM_CATEGORY_STAFF,
+    [WEAPONTYPE_FIRE_STAFF] = GAMEPAD_ITEM_CATEGORY_STAFF,
+    [WEAPONTYPE_FROST_STAFF] = GAMEPAD_ITEM_CATEGORY_STAFF,
+    [WEAPONTYPE_LIGHTNING_STAFF] = GAMEPAD_ITEM_CATEGORY_STAFF,
+
+    [WEAPONTYPE_SWORD] = GAMEPAD_ITEM_CATEGORY_SWORD,
+    [WEAPONTYPE_TWO_HANDED_SWORD] = GAMEPAD_ITEM_CATEGORY_SWORD,
+}
 
 local function GetCategoryFromWeapon(itemData)
     local weaponType
@@ -102,80 +99,33 @@ local function GetCategoryFromWeapon(itemData)
         weaponType = GetItemLinkWeaponType(itemData.itemLink)
     end
 
-    -- Axe
-    if WEAPONTYPE_AXE == weaponType or WEAPONTYPE_TWO_HANDED_AXE == weaponType then
-        return GAMEPAD_ITEM_CATEGORY_AXE
-
-    -- Bow
-    elseif WEAPONTYPE_BOW == weaponType then
-        return GAMEPAD_ITEM_CATEGORY_BOW
-
-    -- Dagger
-    elseif WEAPONTYPE_DAGGER == weaponType then
-        return GAMEPAD_ITEM_CATEGORY_DAGGER
-
-    -- Hammer
-    elseif WEAPONTYPE_HAMMER == weaponType or WEAPONTYPE_TWO_HANDED_HAMMER == weaponType then
-        return GAMEPAD_ITEM_CATEGORY_HAMMER
-
-    -- Shield
-    elseif WEAPONTYPE_SHIELD == weaponType then
-        return GAMEPAD_ITEM_CATEGORY_SHIELD
-
-    -- Staff
-    elseif WEAPONTYPE_HEALING_STAFF == weaponType or WEAPONTYPE_FIRE_STAFF == weaponType or
-           WEAPONTYPE_FROST_STAFF == weaponType or WEAPONTYPE_LIGHTNING_STAFF == weaponType then
-        return GAMEPAD_ITEM_CATEGORY_STAFF
-
-    -- Sword
-    elseif weaponType == WEAPONTYPE_SWORD or weaponType == WEAPONTYPE_TWO_HANDED_SWORD then
-        return GAMEPAD_ITEM_CATEGORY_SWORD
-    end
+    local category = WEAPON_TYPE_TO_CATEGORY_MAP[weaponType]
+    internalassert(category)
+    return category
 end
 
+local ARMOR_EQUIP_TYPE_TO_CATEGORY_MAP = {
+    [EQUIP_TYPE_CHEST] = GAMEPAD_ITEM_CATEGORY_CHEST,
+    [EQUIP_TYPE_FEET] = GAMEPAD_ITEM_CATEGORY_FEET,
+    [EQUIP_TYPE_HAND] = GAMEPAD_ITEM_CATEGORY_HANDS,
+    [EQUIP_TYPE_HEAD] = GAMEPAD_ITEM_CATEGORY_HEAD,
+    [EQUIP_TYPE_LEGS] = GAMEPAD_ITEM_CATEGORY_LEGS,
+    [EQUIP_TYPE_NECK] = GAMEPAD_ITEM_CATEGORY_AMULET,
+    [EQUIP_TYPE_RING] = GAMEPAD_ITEM_CATEGORY_RING,
+    [EQUIP_TYPE_SHOULDERS] = GAMEPAD_ITEM_CATEGORY_SHOULDERS,
+    [EQUIP_TYPE_WAIST] = GAMEPAD_ITEM_CATEGORY_WAIST,
+}
+
 local function GetCategoryFromArmor(itemData)
-    local equipType = itemData.equipType
-
-    -- Chest
-    if      EQUIP_TYPE_CHEST == equipType then
-        return GAMEPAD_ITEM_CATEGORY_CHEST
-
-    -- Feet
-    elseif  EQUIP_TYPE_FEET == equipType then
-        return GAMEPAD_ITEM_CATEGORY_FEET
-
-    -- Hand
-    elseif  EQUIP_TYPE_HAND == equipType then
-        return GAMEPAD_ITEM_CATEGORY_HANDS
-
-    -- Head
-    elseif  EQUIP_TYPE_HEAD == equipType then
-        return GAMEPAD_ITEM_CATEGORY_HEAD
-
-    -- Legs
-    elseif  EQUIP_TYPE_LEGS == equipType then
-        return GAMEPAD_ITEM_CATEGORY_LEGS
-
-    -- Ring
-    elseif  EQUIP_TYPE_RING == equipType then
-        return GAMEPAD_ITEM_CATEGORY_RING
-
-    -- Shoulders
-    elseif  EQUIP_TYPE_SHOULDERS == equipType then
-        return GAMEPAD_ITEM_CATEGORY_SHOULDERS
-
-    -- Waist
-    elseif  EQUIP_TYPE_WAIST == equipType then
-        return GAMEPAD_ITEM_CATEGORY_WAIST
-    end
+    local category = ARMOR_EQUIP_TYPE_TO_CATEGORY_MAP[itemData.equipType]
+    internalassert(category)
+    return category
 end
 
 function ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
     local category = nil 
 
-    if itemData.equipType == EQUIP_TYPE_RING then
-        category = GAMEPAD_ITEM_CATEGORY_RING
-    elseif itemData.itemType == ITEMTYPE_WEAPON then
+    if itemData.itemType == ITEMTYPE_WEAPON then
         category = GetCategoryFromWeapon(itemData)
     elseif itemData.itemType == ITEMTYPE_ARMOR then
         category = GetCategoryFromArmor(itemData)
@@ -244,20 +194,4 @@ function ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, equip
 	else
 		GAMEPAD_TOOLTIPS:SetStatusLabelText(tooltipType, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), equipSlotText)
 	end
-end
-
-function ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)
-    local equipSlot = nil
-
-    for i, testSlot in ZO_Character_EnumerateOrderedEquipSlots() do
-        local locked = IsLockedWeaponSlot(testSlot)
-        local isEquipped = HasItemInSlot(BAG_WORN, testSlot)
-	    local isCorrectSlot = ZO_Character_DoesEquipSlotUseEquipType(testSlot, equipType)
-        if not locked and isEquipped and isCorrectSlot then
-		    equipSlot = testSlot
-		    break
-	    end
-    end
-
-    return equipSlot
 end

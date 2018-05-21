@@ -2,11 +2,12 @@
     <Controls>
         <!-- Bar -->
 
-        <StatusBar name="ZO_PowerShieldBar" level="2000" virtual="true">
+        <StatusBar name="ZO_PowerShieldBar" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_LEVEL" virtual="true">
             <Dimensions y="17" />
 
             <OnInitialized>
-                self.chunk = self:GetNamedChild("Chunk")
+                self.fakeHealthBar = self:GetNamedChild("FakeHealth")
+                self.traumaBar = self:GetNamedChild("Trauma")
                 self.gloss = self:GetNamedChild("Gloss")
             </OnInitialized>
 
@@ -27,15 +28,25 @@
         <StatusBar name="ZO_PowerShieldBarAngle_Keyboard_Template" inherits="ZO_PowerShieldBar ZO_TargetAttributeStatusBar_Keyboard_Template" virtual="true" />
         <StatusBar name="ZO_PowerShieldBarAngle_Gamepad_Template" inherits="ZO_PowerShieldBar ZO_TargetAttributeStatusBar_Gamepad_Template" virtual="true" />
 
-        <!-- Chunk Bar -->
+        <!-- Fake health bar. Since health effects and health take up the same space, sometimes we need to shrink the percieved health value to make room. -->
         
-        <StatusBar name="ZO_PowerShieldChunkBarArrow" inherits="ZO_PlayerAttributeStatusBar" level="3000" virtual="true" />
-        <StatusBar name="ZO_PowerShieldChunkBarArrow_Keyboard_Template" inherits="ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true" />
-        <StatusBar name="ZO_PowerShieldChunkBarArrow_Gamepad_Template" inherits="ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldFakeHealthBarArrow" inherits="ZO_PlayerAttributeStatusBar" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_LEVEL" virtual="true" />
+        <StatusBar name="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template" inherits="ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template" inherits="ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true" />
 
-        <StatusBar name="ZO_PowerShieldChunkBarAngle" inherits="ZO_TargetAttributeStatusBar" level="3000" virtual="true" />
-        <StatusBar name="ZO_PowerShieldChunkBarAngle_Keyboard_Template" inherits="ZO_TargetAttributeStatusBar_Keyboard_Template" virtual="true" />
-        <StatusBar name="ZO_PowerShieldChunkBarAngle_Gamepad_Template" inherits="ZO_TargetAttributeStatusBar_Gamepad_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldFakeHealthBarAngle" inherits="ZO_TargetAttributeStatusBar" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_LEVEL" virtual="true" />
+        <StatusBar name="ZO_PowerShieldFakeHealthBarAngle_Keyboard_Template" inherits="ZO_TargetAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldFakeHealthBarAngle_Gamepad_Template" inherits="ZO_TargetAttributeStatusBar_Gamepad_Template" virtual="true" />
+
+        <!-- Trauma Bar -->
+        
+        <StatusBar name="ZO_PowerShieldTraumaBarArrow" inherits="ZO_PlayerAttributeStatusBar" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_LEVEL" virtual="true" />
+        <StatusBar name="ZO_PowerShieldTraumaBarArrow_Keyboard_Template" inherits="ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldTraumaBarArrow_Gamepad_Template" inherits="ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true" />
+
+        <StatusBar name="ZO_PowerShieldTraumaBarAngle" inherits="ZO_TargetAttributeStatusBar" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_LEVEL" virtual="true" />
+        <StatusBar name="ZO_PowerShieldTraumaBarAngle_Keyboard_Template" inherits="ZO_TargetAttributeStatusBar_Keyboard_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldTraumaBarAngle_Gamepad_Template" inherits="ZO_TargetAttributeStatusBar_Gamepad_Template" virtual="true" />
 
         <!-- Overlay -->
 
@@ -43,10 +54,17 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" barAlignment="REVERSE"/>
                 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow" barAlignment="REVERSE">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow" barAlignment="REVERSE">
                     <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-11" />
                     <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="3001" barAlignment="REVERSE" />
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_GLOSS_LEVEL" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow" barAlignment="REVERSE">
+                    <Anchor point="LEFT" relativeTo="$(parent)Trauma" relativePoint="RIGHT" offsetX="-11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_GLOSS_LEVEL" barAlignment="REVERSE" />
                     </Controls>
                 </StatusBar>
             </Controls>
@@ -56,7 +74,13 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template"/>
                 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Keyboard_Template">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
                     </Controls>
@@ -67,8 +91,14 @@
         <StatusBar name="ZO_PowerShieldBarLeftOverlayArrow_Gamepad_Template" inherits="ZO_PowerShieldBarArrow_Gamepad_Template"  virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
+
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
                 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Gamepad_Template">
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
                     </Controls>
@@ -79,11 +109,18 @@
         <StatusBar name="ZO_PowerShieldBarRightOverlayArrow" inherits="ZO_PowerShieldBarArrow" virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss"/>
-                
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow">
+
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow">
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="11" />
                     <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="3001" />
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_GLOSS_LEVEL" />
+                    </Controls>
+                </StatusBar>
+                
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_GLOSS_LEVEL" />
                     </Controls>
                 </StatusBar>
             </Controls>
@@ -92,8 +129,14 @@
         <StatusBar name="ZO_PowerShieldBarRightOverlayArrow_Keyboard_Template" inherits="ZO_PowerShieldBarArrow_Keyboard_Template" virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template"/>
+
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
                 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Keyboard_Template">
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
                     </Controls>
@@ -104,8 +147,14 @@
         <StatusBar name="ZO_PowerShieldBarRightOverlayArrow_Gamepad_Template" inherits="ZO_PowerShieldBarArrow_Gamepad_Template" virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template"/>
+
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
                 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarArrow_Gamepad_Template">
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
                     </Controls>
@@ -117,9 +166,15 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" barAlignment="REVERSE"/>
 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle" barAlignment="REVERSE">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarAngle" barAlignment="REVERSE">
                     <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="3001" barAlignment="REVERSE" />
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_GLOSS_LEVEL" barAlignment="REVERSE" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarAngle" barAlignment="REVERSE">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_GLOSS_LEVEL" barAlignment="REVERSE" />
                     </Controls>
                 </StatusBar>
             </Controls>
@@ -129,7 +184,14 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Keyboard_Template">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarAngle_Keyboard_Template">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarAngle_Keyboard_Template">
                     <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-11" />
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
@@ -142,7 +204,14 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Gamepad_Template">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarAngle_Gamepad_Template">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-15" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarAngle_Gamepad_Template">
                     <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-15" />
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
@@ -155,9 +224,15 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss"/>
 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarAngle">
                     <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="3001" />
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_GLOSS_LEVEL" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarAngle">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_GLOSS_LEVEL" />
                     </Controls>
                 </StatusBar>
             </Controls>
@@ -167,7 +242,14 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template"/>
 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Keyboard_Template">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarAngle_Keyboard_Template">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarAngle_Keyboard_Template">
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="11" />
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
@@ -180,7 +262,14 @@
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template"/>
 
-                <StatusBar name="$(parent)Chunk" inherits="ZO_PowerShieldChunkBarAngle_Gamepad_Template">
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarAngle_Gamepad_Template">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="15" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarAngle_Gamepad_Template">
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="15" />
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />

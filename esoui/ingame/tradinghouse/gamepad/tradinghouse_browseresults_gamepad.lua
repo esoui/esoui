@@ -115,7 +115,7 @@ function ZO_GamepadTradingHouse_BrowseResults:UpdateRightTooltip(selectedData)
     end
 
     local equipType = GetItemLinkEquipType(itemLink)
-    local equipSlot = ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)
+    local equipSlot = ZO_Character_GetEquipSlotForEquipType(equipType)
 
     if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then
         ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)
@@ -413,6 +413,8 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybindStripDescriptors(
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Trading House Previous Page",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
             callback = function()
@@ -421,6 +423,8 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializeKeybindStripDescriptors(
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Trading House Next Page",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
             callback = function()

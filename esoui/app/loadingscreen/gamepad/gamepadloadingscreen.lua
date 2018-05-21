@@ -11,6 +11,7 @@ function LoadingScreen_Gamepad:InitializeAnimations()
     self.animations:GetAnimation(5):SetAnimatedControl(GamepadLoadingScreenZoneDescription)
     self.animations:GetAnimation(6):SetAnimatedControl(GamepadLoadingScreenDescriptionBg)
     self.animations.control = self
+    self.animations:SetHandler("OnStop", function(timeline) self:LoadingCompleteAnimation_OnStop(timeline) end)
 
     self.longLoadAnimation = GetAnimationManager():CreateTimelineFromVirtual("LongLoadingAnimation")
     self.longLoadAnimation:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenTopMungeLongLoadMessage)

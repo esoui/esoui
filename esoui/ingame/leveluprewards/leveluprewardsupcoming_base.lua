@@ -21,9 +21,8 @@ function ZO_LevelUpRewardsUpcoming_Base:LayoutUpcomingRewards()
     self:ReleaseAllRewardControls()
 
     local nextRewardLevel = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingRewardLevel()
-    local nextRewardId = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingRewardId()
     local nextRewards = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingLevelUpRewards()
-    self:LayoutRewardsForLevel(nextRewardLevel, nextRewardId, nextRewards, self.nextLevelContainer)
+    self:LayoutRewardsForLevel(nextRewardLevel, nextRewards, self.nextLevelContainer)
 
     -- if the next level is also the next milestone then we need the nextLevelContainer display
     -- as a milestone like nextMilestoneContainer. This avoids having to reanchor both containers
@@ -40,9 +39,8 @@ function ZO_LevelUpRewardsUpcoming_Base:LayoutUpcomingRewards()
         self.nextMilestoneContainer:SetHidden(false)
         self.nextMilestoneContainer.titleControl:SetText(zo_strformat(SI_LEVEL_UP_REWARDS_NEXT_MILESTONE_REWARD_HEADER, nextMilestoneRewardLevel))
 
-        local nextMilestoneRewardId = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingMilestoneRewardId()
         local nextMilestoneRewards = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingMilestoneLevelUpRewards()
-        self:LayoutRewardsForLevel(nextMilestoneRewardLevel, nextMilestoneRewardId, nextMilestoneRewards, self.nextMilestoneContainer)
+        self:LayoutRewardsForLevel(nextMilestoneRewardLevel, nextMilestoneRewards, self.nextMilestoneContainer)
     else
         self.nextMilestoneContainer:SetHidden(true)
     end
@@ -56,6 +54,6 @@ function ZO_LevelUpRewardsUpcoming_Base:ReleaseAllRewardControls()
     self.rewardPool:ReleaseAllObjects()
 end
 
-function ZO_LevelUpRewardsUpcoming_Base:LayoutRewardsForLevel(level, rewardId, levelRewards, rewardContainer)
+function ZO_LevelUpRewardsUpcoming_Base:LayoutRewardsForLevel(level, levelRewards, rewardContainer)
     ZO_LevelUpRewardsArtTile_SetupTileForLevel(rewardContainer, level)
 end

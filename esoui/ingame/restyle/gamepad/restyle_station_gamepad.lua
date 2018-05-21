@@ -122,7 +122,6 @@ function ZO_Restyle_Station_Gamepad:OnFragmentShowing()
 
     if self.currentOutfitManipulator then
         if self.currentOutfitManipulator:IsMarkedForPreservation() then
-            self.currentOutfitManipulator:SetMarkedForPreservation(false)
             self.currentOutfitManipulator:RestorePreservedDyeData()
             self.currentOutfitManipulator:UpdatePreviews()
         else
@@ -294,7 +293,8 @@ end
 function ZO_Restyle_Station_Gamepad:CreateSpecialExitKeybind()
     return
     {
-        name = GetString(SI_EXIT_BUTTON),
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Gamepad Restyle Exit",
         keybind = "UI_SHORTCUT_EXIT",
         ethereal = true,
         callback = function() self:AttemptExit() end,
@@ -737,7 +737,16 @@ function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
                     ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RESTYLE_STATION_OPTIONS")
                 end,
             },     
-        } 
+        },
+        noChoiceCallback = function(dialog)
+            local parametricList = dialog.info.parametricList
+            for i, entry in ipairs(parametricList) do
+                if entry.entryData.action.isDropdown then
+                    local control = dialog.entryList:GetControlFromData(entry.entryData)
+                    control.dropdown:Deactivate()
+                end
+            end
+        end
     })
 end
 
@@ -809,10 +818,10 @@ do
                     self:UpdateDyeSortingDropdownOptions(control.dropdown)
                 end,
                 callback = function(dialog)
-                    local targetData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
                     targetControl.dropdown:Activate()
                 end,
+                isDropdown = true,
             }
         end
 
@@ -1671,8 +1680,8 @@ function ZO_Restyle_Station_Gamepad:InitializeConfirmationDialog()
                     end
                     ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY")
                 end,
-                enabled = function(keybind)
-                                local targetData = keybind.dialog.entryList:GetTargetData()
+                enabled = function(dialog)
+                                local targetData = dialog.entryList:GetTargetData()
                                 if targetData then
                                     local slotCosts, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
                                     local costToUse = targetData.currencyType == CURT_MONEY and slotCosts or flatCost

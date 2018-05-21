@@ -130,8 +130,6 @@ do
         self.subText:SetFont(style.subFont)
         ApplyTemplateToControl(self.confirmGamma, style.confirmTemplate)
         ApplyTemplateToControl(self.declineGamma, style.declineTemplate)
-        ZO_SharedDialogButton_OnInitialized(self.confirmGamma)
-        ZO_SharedDialogButton_OnInitialized(self.declineGamma)
         ZO_SelectableLabel_SetNormalColor(self.confirmGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
         ZO_SelectableLabel_SetNormalColor(self.declineGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
 
@@ -153,10 +151,30 @@ do
     end
 end
 
-function ZO_GammaAdjust_Initialize(self)
-    if(not self.initialized) then
-        self.initialized = true
-        CreateGammaSceneFragment(self)
+do
+    local function ZO_GammaAdjustSlider_OnInitialized(slider)
+        slider:SetMinMax(75, 150)
+        slider:SetValue(75)
+        ZO_GammaAdjust_ColorTexturesWithGamma(75)
+        slider:SetHandler("OnValueChanged", ZO_GammaAdjust_SetGamma)
+        GAMMA_SCENE_FRAGMENT:UpdateVisibility()
+    end
+
+    function ZO_GammaAdjust_Initialize(self)
+        if not self.initialized then
+            self.initialized = true
+            CreateGammaSceneFragment(self)
+
+            local gamepadSlider = self:GetNamedChild("GamepadSlider")
+            GAMMA_SCENE_FRAGMENT.gamepadSlider = gamepadSlider
+            ZO_GammaAdjustSlider_OnInitialized(gamepadSlider)
+
+            local keyboardSlider = self:GetNamedChild("Slider")
+            GAMMA_SCENE_FRAGMENT.keyboardSlider = keyboardSlider
+            GAMMA_SCENE_FRAGMENT.rightArrow = keyboardSlider:GetNamedChild("Increment")
+            GAMMA_SCENE_FRAGMENT.leftArrow = keyboardSlider:GetNamedChild("Decrement")
+            ZO_GammaAdjustSlider_OnInitialized(keyboardSlider)
+        end
     end
 end
 
@@ -206,24 +224,4 @@ end
 
 function ZO_GammaAdjust_NeedsFirstSetup()
     return GetCVar("PregameGammaCheckEnabled") == "1"
-end
-
-local function ZO_GammaAdjustSlider_OnInitialized(slider)
-    slider:SetMinMax(75, 150)
-    slider:SetValue(75)
-    ZO_GammaAdjust_ColorTexturesWithGamma(75)
-    slider:SetHandler("OnValueChanged", ZO_GammaAdjust_SetGamma)
-    GAMMA_SCENE_FRAGMENT:UpdateVisibility()
-end
-
-function ZO_GammaAdjustSlider_Gamepad_OnInitialized(slider)
-    GAMMA_SCENE_FRAGMENT.gamepadSlider = slider
-    ZO_GammaAdjustSlider_OnInitialized(slider)
-end
-
-function ZO_GammaAdjustSlider_Keyboard_OnInitialized(slider)
-    GAMMA_SCENE_FRAGMENT.keyboardSlider = slider
-    GAMMA_SCENE_FRAGMENT.rightArrow = slider:GetNamedChild("Increment")
-    GAMMA_SCENE_FRAGMENT.leftArrow = slider:GetNamedChild("Decrement")
-    ZO_GammaAdjustSlider_OnInitialized(slider)
 end

@@ -37,15 +37,53 @@
                     <Anchor point="TOP" relativeTo="$(parent)SubText" relativePoint="BOTTOM" offsetY="86" />
 
                     <Controls>
-                        <Control name="$(parent)ConfirmGamma">
+                        <Control name="$(parent)ConfirmGamma" inherits="ZO_SharedDialogButton">
                             <Anchor point="TOPLEFT"/>
                         </Control>                        
                     
-                        <Control name="$(parent)DeclineGamma">
+                        <Control name="$(parent)DeclineGamma" inherits="ZO_SharedDialogButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmGamma" relativePoint="TOPRIGHT" offsetX="40"/>
                         </Control>
                     </Controls>
                 </Control>
+
+                <Slider name="$(parent)Slider" inherits="ZO_Slider" hidden="true">
+                    <Dimensions x="230" y="16" />
+                    <Anchor point="TOP" relativeTo="$(parent)SubText" relativePoint="BOTTOM" offsetY="10" />
+                    <Limits min="0" max="1" />
+
+                    <Controls>
+                        <Button name="$(parent)Decrement" inherits="ZO_PreviousArrowButton" hidden="true">
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-4" />
+
+                            <OnClicked>
+                                ZO_GammaAdjust_ChangeGamma(-10)
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)Increment" inherits="ZO_NextArrowButton" hidden="true">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="4" />
+
+                            <OnClicked>
+                                ZO_GammaAdjust_ChangeGamma(10)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Slider>
+
+                <Slider name="$(parent)GamepadSlider" inherits="ZO_GamepadSlider" step="1" hidden="true">
+                    <Dimensions x="230" y="16" />
+                    <Anchor point="TOP" relativeTo="$(parent)SubText" relativePoint="BOTTOM" offsetY="10" />
+                    <OnInitialized>
+                        ZO_GamepadSlider_OnInitialized(self)
+                    </OnInitialized>
+
+                    <Controls>
+                        <Texture name="$(parent)Left" inherits="ZO_GamepadWhiteFrameLeftArrowMedium" tier="HIGH" override="true" />
+                        <Texture name="$(parent)Right" inherits="ZO_GamepadWhiteFrameRightArrowMedium" tier="HIGH" override="true" />
+                        <Texture name="$(parent)Center" inherits="ZO_GamepadWhiteFrameCenterMedium" tier="HIGH" override="true" />
+                    </Controls>
+                </Slider>
             </Controls>
         </TopLevelControl>
     </Controls>

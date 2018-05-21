@@ -5,6 +5,7 @@ LOOT_ENTRY_TYPE_COLLECTIBLE = 4
 LOOT_ENTRY_TYPE_MEDAL = 5
 LOOT_ENTRY_TYPE_SCORE = 6
 LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 7
+LOOT_ENTRY_TYPE_CROWN_CRATE = 8
 
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
@@ -94,6 +95,8 @@ do
             return false -- scores are always on their own line (also expecting to only be showing one of these at a time)
         elseif data1EntryType == LOOT_ENTRY_TYPE_SKILL_EXPERIENCE then
             return data1.skillType == data2.skillType and data1.skillIndex == data2.skillIndex
+        elseif data1EntryType == LOOT_ENTRY_TYPE_CROWN_CRATE then
+            return data1.lootCrateId == data2.lootCrateId
         else
             return true
         end
@@ -273,7 +276,7 @@ function ZO_LootHistory_Shared:AddSkillEntry(skillType, skillIndex, skillXpAdded
     local skillName = GetSkillLineInfo(skillType, skillIndex)
     local announcementIcon = GetSkillLineAnnouncementIcon(skillType, skillIndex)
     local lootData = {
-                        text = skillName,
+                        text = zo_strformat(SI_LOOT_HISTORY_SKILL_LINE_NAME_FORMATTER, skillName),
                         icon = announcementIcon,
                         stackCount = skillXpAdded,
                         color = ZO_SELECTED_TEXT,
@@ -288,8 +291,27 @@ function ZO_LootHistory_Shared:AddSkillEntry(skillType, skillIndex, skillXpAdded
     self:InsertOrQueue(lootEntry)
 end
 
+function ZO_LootHistory_Shared:AddCrownCrateEntry(lootCrateId, numCrates)
+    if self:CanShowItemsInHistory() then
+        local crownCrateName = GetCrownCrateName(lootCrateId)
+        local crateIcon = GetCrownCrateIcon(lootCrateId)
+        local lootData = {
+                            text = zo_strformat(SI_CROWN_CRATE_PACK_NAME, crownCrateName),
+                            icon = crateIcon,
+                            stackCount = numCrates,
+                            lootCrateId = lootCrateId,
+                            color = ZO_SELECTED_TEXT,
+                            entryType = LOOT_ENTRY_TYPE_CROWN_CRATE,
+                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+                        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        self:InsertOrQueue(lootEntry)
+    end
+end
+
 function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen)
-    if not self.hidden or self:CanShowItemsInHistory() then
+    if self:CanShowItemsInHistory() then
         local itemName
         local icon
         local color
@@ -346,7 +368,7 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
 end
 
 function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
-    if not self.hidden or self:CanShowItemsInHistory() then
+    if self:CanShowItemsInHistory() then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
 
         local QUALITY_NORMAL = 1
@@ -399,6 +421,13 @@ do
         if delta > 0 and ALLOWED_SKILL_TYPES[skillType] then
             self:AddSkillEntry(skillType, skillIndex, delta)
         end
+    end
+end
+
+function ZO_LootHistory_Shared:OnCrownCrateQuantityUpdated(lootCrateId, oldCount, newCount)
+    local delta = newCount - oldCount
+    if delta > 0 then
+        self:AddCrownCrateEntry(lootCrateId, delta)
     end
 end
 

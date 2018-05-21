@@ -105,20 +105,30 @@ function ZO_HouseSettings_Manager:GetHousingPermissionsFromDefaultAccess(default
     return canAccess, preset
 end
 
+local function ZO_HouseSettings_HouseEntrySort(left, right)
+    return ZO_TableOrderingFunction(left, right, "name", ZO_SORT_BY_NAME, ZO_SORT_ORDER_UP)
+end
+
 function ZO_HouseSettings_Manager:SetupCopyPermissionsCombobox(dropdown, currentHouse, callback)
     dropdown:SetSelectedItemText(GetString(SI_DIALOG_COPY_HOUSING_PERMISSION_DEFAULT_CHOICE))
 
-    local currentIndex = 1
     local allHouses = COLLECTIONS_BOOK_SINGLETON:GetOwnedHouses()
+    local houseEntries = {}
+
     for collectibleId, houseData in pairs(allHouses) do
         if houseData.houseId ~= currentHouse then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
             local newEntry = dropdown:CreateItemEntry(zo_strformat(SI_COLLECTIONS_HOUSING_DISPLAY_NAME_FORMAT, collectibleData:GetName(), collectibleData:GetNickname()), callback)
             newEntry.houseId = houseData.houseId
-            newEntry.houseIndex = currentIndex
-            dropdown:AddItem(newEntry)
-            currentIndex = currentIndex + 1
+            table.insert(houseEntries, newEntry)
         end
+    end
+
+    table.sort(houseEntries, ZO_HouseSettings_HouseEntrySort)
+
+    for index, houseEntry in ipairs(houseEntries) do
+        houseEntry.houseIndex = index
+        dropdown:AddItem(houseEntry)
     end
 end
 

@@ -1,8 +1,5 @@
 ZO_SharedSmithingResearch = ZO_Object:Subclass()
 
-ZO_SMITHING_RESEARCH_FILTER_TYPE_WEAPONS = 1
-ZO_SMITHING_RESEARCH_FILTER_TYPE_ARMOR = 2
-
 function ZO_SharedSmithingResearch:New(...)
     local smithingResearch = ZO_Object.New(self)
     smithingResearch:Initialize(...)
@@ -53,9 +50,9 @@ end
 
 local MIN_SCALE = .6
 local MAX_SCALE = 1.0
-local BASE_NUM_ITEMS_IN_LIST = 7
+local BASE_NUM_ITEMS_IN_LIST = 5
 
-function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl, listSlotContainerName)
+function ZO_SharedSmithingResearch:InitializeResearchLineList(scollListClass, listSlotContainerName)
     local listContainer = self.control:GetNamedChild("ResearchLineList")
     listContainer.titleLabel:SetText(GetString(SI_SMITHING_RESEARCH_LINE_HEADER))
     listContainer.selectedLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
@@ -114,7 +111,7 @@ function ZO_SharedSmithingResearch:InitializeResearchLineList(scrollListControl,
         return leftData.craftingType == rightData.craftingType and leftData.researchLineIndex == rightData.researchLineIndex
     end
 
-    self.researchLineList = scrollListControl:New(listContainer.listControl, listSlotContainerName, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction)
+    self.researchLineList = scollListClass:New(listContainer.listControl, listSlotContainerName, BASE_NUM_ITEMS_IN_LIST, SetupFunction, EqualityFunction)
     listContainer:RegisterForEvent(EVENT_SMITHING_TRAIT_RESEARCH_TIMES_UPDATED, function() self.researchLineList:RefreshVisible() end)
 
     local highlightTexture = listContainer.highlightTexture
@@ -134,15 +131,6 @@ function ZO_SharedSmithingResearch:HandleDirtyEvent()
         self.dirty = true
     else
         self:Refresh()
-    end
-end
-
-local function DetermineResearchLineFilterType(craftingType, researchLineIndex)
-    local traitType = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, 1)
-    if ZO_CraftingUtils_IsTraitAppliedToWeapons(traitType) then
-        return ZO_SMITHING_RESEARCH_FILTER_TYPE_WEAPONS
-    elseif ZO_CraftingUtils_IsTraitAppliedToArmor(traitType) then
-        return ZO_SMITHING_RESEARCH_FILTER_TYPE_ARMOR
     end
 end
 
@@ -215,7 +203,8 @@ do
                     numCurrentlyResearching = numCurrentlyResearching + 1
                 end
 
-                if DetermineResearchLineFilterType(craftingType, researchLineIndex) == self.typeFilter then
+                local expectedTypeFilter = ZO_CraftingUtils_GetSmithingFilterFromTrait(GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, 1))
+                if expectedTypeFilter == self.typeFilter then
                     local itemTraitCounts = self:GenerateResearchTraitCounts(virtualInventoryList, craftingType, researchLineIndex, numTraits)
                     local data = { craftingType = craftingType, researchLineIndex = researchLineIndex, name = name, icon = icon, numTraits = numTraits, timeRequiredForNextResearchSecs = timeRequiredForNextResearchSecs, researchingTraitIndex = researchingTraitIndex, areAllTraitsKnown = areAllTraitsKnown, itemTraitCounts = itemTraitCounts }
                     self.researchLineList:AddEntry(data)

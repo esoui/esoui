@@ -89,6 +89,10 @@ function Market_Singleton:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowEsoPlusPage()
     end
 
+    local function OnShowChapterUpgrade(eventId, ...)
+        SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowChapterUpgrade(...)
+    end
+
     local function OnEsoPlusSubscriptionStatusChanged(eventId)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnEsoPlusSubscriptionStatusChanged()
     end
@@ -115,6 +119,7 @@ function Market_Singleton:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_BUY_CROWNS_DIALOG, OnShowBuyCrownsDialog)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_ESO_PLUS_PAGE, OnShowEsoPlusPage)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_CHAPTER_UPGRADE, OnShowChapterUpgrade)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, OnEsoPlusSubscriptionStatusChanged)
     ZO_CHAPTER_UPGRADE_MANAGER:RegisterCallback("ChapterUpgradeDataUpdated", OnChapterUpgradeDataUpdated)
 end
@@ -142,54 +147,90 @@ function Market_Singleton:InitializePlatformErrors()
     end
 end
 
-function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId, presentationIndex)
-    local expectedPurchaseResult = CouldPurchaseMarketProduct(marketProductId, presentationIndex)
-
-    local name = GetMarketProductDisplayName(marketProductId)
-    local mainText = ""
-    local errorStrings = {}
-    local promptBuyCrowns = false
-    local allowContinue = true
-
+function Market_Singleton:AddMarketProductPurchaseWarningStringsToTable(marketProductId, presentationIndex, stringTable)
     if DoesMarketProductHaveSubscriptionUnlockedAttachments(marketProductId) then
-        table.insert(errorStrings, zo_strformat(SI_MARKET_BUNDLE_PARTS_UNLOCKED_TEXT, name))
+        local displayName = GetMarketProductDisplayName(marketProductId)
+        table.insert(stringTable, zo_strformat(SI_MARKET_BUNDLE_PARTS_UNLOCKED_TEXT, displayName))
     end
 
     if IsMarketProductPartiallyPurchased(marketProductId) then
-        table.insert(errorStrings, GetString(SI_MARKET_BUNDLE_PARTS_OWNED_TEXT))
+        table.insert(stringTable, GetString(SI_MARKET_BUNDLE_PARTS_OWNED_TEXT))
     end
+end
+
+function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId, presentationIndex)
+    local expectedPurchaseResult = CouldPurchaseMarketProduct(marketProductId, presentationIndex)
+
+    local displayName = GetMarketProductDisplayName(marketProductId)
+    local titleString = displayName
+    local errorStrings = {}
+    local allowContinue = true
+
+    self:AddMarketProductPurchaseWarningStringsToTable(marketProductId, presentationIndex, errorStrings)
 
     if expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK then
         allowContinue = false
         table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
         allowContinue = false
-        promptBuyCrowns = true
         table.insert(errorStrings, self.insufficientFundsMainText)
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_CROWN_GEMS then
         allowContinue = false
         table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
-        local slotsRequired = GetSpaceNeededToPurchaseMarketProduct(marketProductId)
+        local slotsRequired = GetSpaceNeededToAcquireMarketProduct(marketProductId)
         allowContinue = false
         table.insert(errorStrings, zo_strformat(SI_MARKET_INVENTORY_FULL_TEXT, slotsRequired))
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
+        allowContinue = false
+        table.insert(errorStrings, zo_strformat(SI_MARKET_PURCHASE_ALREADY_HAVE_GIFT_TEXT, ZO_SELECTED_TEXT:Colorize(displayName)))
     end
 
-    for i = 1, #errorStrings do
-        if i == 1 then
-            mainText = errorStrings[i]
-        else
-            mainText = mainText .. "\n\n" .. errorStrings[i]
-        end
-    end
+    local mainText = table.concat(errorStrings, "\n\n")
 
-    local dialogParams = { 
-                            titleParams = { name }, 
+    local dialogParams = {
+                            titleParams = { titleString },
                             mainTextParams = { mainText }
                          }
     local hasErrors = #errorStrings > 0
 
-    return hasErrors, dialogParams, promptBuyCrowns, allowContinue
+    return hasErrors, dialogParams, allowContinue, expectedPurchaseResult
+end
+
+function Market_Singleton:GetMarketProductGiftErrorInfo(marketProductId, presentationIndex)
+    local expectedPurchaseResult = CouldGiftMarketProduct(marketProductId, presentationIndex)
+
+    local displayName = GetMarketProductDisplayName(marketProductId)
+    local titleString = displayName
+    local errorStrings = {}
+    local allowContinue = true
+
+    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
+        allowContinue = false
+        table.insert(errorStrings, self.insufficientFundsMainText)
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_CROWN_GEMS then
+        allowContinue = false
+        table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_NOT_ALLOWED then
+        allowContinue = false
+        titleString = GetString(SI_MARKET_GIFTING_LOCKED_TITLE)
+        table.insert(errorStrings, GetString(SI_MARKET_GIFTING_ACCOUNT_LOCKED_TEXT))
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_LOCKED then
+        allowContinue = false
+        titleString = GetString(SI_MARKET_GIFTING_LOCKED_TITLE)
+        table.insert(errorStrings, GetString(SI_MARKET_GIFTING_SERVER_LOCKED_TEXT))
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
+        allowContinue = false
+        table.insert(errorStrings, zo_strformat(SI_MARKET_GIFTING_ALREADY_HAVE_GIFT_TEXT, ZO_SELECTED_TEXT:Colorize(displayName)))
+    end
+
+    local dialogParams = {
+                            titleParams = { titleString },
+                            mainTextParams = { table.concat(errorStrings, "\n\n") }
+                         }
+    local hasErrors = #errorStrings > 0
+
+    return hasErrors, dialogParams, allowContinue, expectedPurchaseResult
 end
 
 ZO_MARKET_SINGLETON = Market_Singleton:New()
@@ -217,6 +258,8 @@ function ZO_Market_Shared:Initialize()
 
     self.searchResults = {}
     self.searchString = ""
+    self.isSearching = false
+
     self:CreateMarketScene()
     self:RegisterSceneStateChangeCallback()
     self:InitializeCategories()
@@ -291,6 +334,7 @@ end
 function ZO_Market_Shared:OnMarketSearchResultsReady()
     self:UpdateSearchResults()
     self:UpdateMarket()
+    self.isSearching = false
 end
 
 function ZO_Market_Shared:UpdateCurrentCategory()
@@ -325,8 +369,12 @@ function ZO_Market_Shared:OnShowMarketAndSearch(marketProductSearchString)
     self:RequestShowMarketWithSearchString(marketProductSearchString)
 end
 
-function ZO_Market_Shared:OnRequestPurchaseMarketProduct(marketProductId, presentationIndex)
-    self:PurchaseMarketProduct(marketProductId, presentationIndex)
+function ZO_Market_Shared:OnRequestPurchaseMarketProduct(marketProductId, presentationIndex, isGift)
+    if isGift then
+        self:GiftMarketProduct(marketProductId, presentationIndex)
+    else
+        self:PurchaseMarketProduct(marketProductId, presentationIndex)
+    end
 end
 
 function ZO_Market_Shared:OnShowFeaturedCategory()
@@ -833,12 +881,41 @@ do
 end
 
 function ZO_Market_Shared:ShowMarket(show)
-    if self.queuedMarketProductId then
-        self:RequestShowMarketProduct(self.queuedMarketProductId)
-    end
+    self:ProcessQueuedNavigation()
 
     if self.queuedSearchString then
         self:DisplayQueuedMarketProductsBySearchString()
+    end
+end
+
+function ZO_Market_Shared:SetQueuedMarketProductId(marketProductId)
+    self.queuedMarketProductId = marketProductId
+end
+
+function ZO_Market_Shared:ClearQueuedMarketProductId()
+    self:SetQueuedMarketProductId(nil)
+end
+
+function ZO_Market_Shared:GetQueuedMarketProductId()
+    return self.queuedMarketProductId
+end
+
+function ZO_Market_Shared:SetQueuedCategoryIndices(categoryIndex, subcategoryIndex)
+    self.queuedCategoryIndex = categoryIndex
+    self.queuedSubcategoryIndex = subcategoryIndex
+end
+
+function ZO_Market_Shared:ClearQueuedCategoryIndices()
+    self:SetQueuedCategoryIndices(nil, nil)
+end
+
+function ZO_Market_Shared:ProcessQueuedNavigation()
+    if self.queuedCategoryIndex then
+        self:RequestShowCategory(self.queuedCategoryIndex, self.queuedSubcategoryIndex)
+        -- A request to go to a specific category overrides a request to go to a specific Market Product
+        self:ClearQueuedMarketProductId()
+    elseif self.queuedMarketProductId then
+        self:RequestShowMarketProduct(self.queuedMarketProductId)
     end
 end
 
@@ -992,6 +1069,9 @@ end
 function ZO_Market_Shared:PurchaseMarketProduct(marketProductId, presentationIndex)
 end
 
+function ZO_Market_Shared:GiftMarketProduct(marketProductId, presentationIndex)
+end
+
 function ZO_Market_Shared:RefreshEsoPlusPage()
 end
 
@@ -1031,12 +1111,17 @@ end
 function ZO_Market_Shared:SearchStart(searchString)
     if searchString ~= self.searchString then
         self.searchString = searchString
+        self.isSearching = true
         StartMarketProductSearch(MARKET_DISPLAY_GROUP_CROWN_STORE, searchString)
     end
 end
 
 function ZO_Market_Shared:HasValidSearchString()
     return zo_strlen(self.searchString) > 1
+end
+
+function ZO_Market_Shared:IsSearching()
+    return self.isSearching
 end
 
 function ZO_Market_Shared:UpdateSearchResults()

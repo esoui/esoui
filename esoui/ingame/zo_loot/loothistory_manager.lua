@@ -83,15 +83,6 @@ do
 
         local IS_NOT_VIRTUAL = false
 
-        local function OnLootReceived(receivedBy, itemLinkOrName, stackCount, itemSound, lootType, lootedBySelf, isPickpocketLoot, questItemIcon, itemId, isStolen)
-            -- This includes any loot event, only display if this was the player's loot and wasn't an inventory item
-            -- OnInventorySlotUpdate() must be used for Inventory Items so that we know what bag they went into
-            -- we also are going to handle quest items through the QuestToolUpdated event
-            if lootedBySelf and not IGNORED_LOOT_TYPES[lootType] then
-                OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, IS_NOT_VIRTUAL, isStolen)
-            end
-        end
-
         local IS_NOT_STOLEN = false
         local function OnQuestToolUpdate(questIndex, questName, countDelta, questItemIcon, questItemId, questItemName)
             if countDelta > 0 then
@@ -105,14 +96,20 @@ do
             end
         end
 
+        local function OnCrownCrateQuantityUpdate(lootCrateId, newCount, oldCount)
+            if CanAddLootEntry() then
+                SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnCrownCrateQuantityUpdated(lootCrateId, oldCount, newCount)
+            end
+        end
+
 
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
-        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_LOOT_RECEIVED, function(eventId, ...) OnLootReceived(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CURRENCY_UPDATE, function(eventId, ...) OnCurrencyUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_QUEST_TOOL_UPDATED, function(eventId, ...) OnQuestToolUpdate(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MEDAL_AWARDED, function(eventId, ...) OnMedalAwarded(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_BATTLEGROUND_STATE_CHANGED, function(eventId, ...) OnBattlegroundStateChanged(...) end)
+        EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CROWN_CRATE_QUANTITY_UPDATE, function(eventId, ...) OnCrownCrateQuantityUpdate(...) end)
         ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function(...) OnNewCollectibleReceived(...) end)
         EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_SKILL_XP_UPDATE, function(eventId, ...) OnSkillExperienceUpdated(...) end)
     end

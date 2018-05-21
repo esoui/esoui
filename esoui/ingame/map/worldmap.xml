@@ -462,31 +462,5 @@
                 </Label>
             </Controls>
         </TopLevelControl>
-
-        <TopLevelControl name="ZO_WorldMapChoice_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
-            <OnInitialized>
-                ZO_WorldMapChoice_Gamepad_Initialize(self)
-            </OnInitialized>
-
-            <Controls>
-                <!-- This uses non-standard positioning to fit with the worldmap -->
-                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template"/>
-
-                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
-                    <Controls>
-                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
-                            <Anchor point="TOPLEFT"/>
-                            <Anchor point="TOPRIGHT"/>
-                        </Control>
-
-                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" />
-                            <Anchor point="BOTTOMRIGHT"/>
-                        </Control>
-                    </Controls>
-                </Control>
-            </Controls>
-        </TopLevelControl>
-
     </Controls>
 </GuiXml>

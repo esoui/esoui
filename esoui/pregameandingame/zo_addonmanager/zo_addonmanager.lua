@@ -22,6 +22,7 @@ function ZO_AddOnManager:Initialize(control, allowReload)
     ZO_ScrollList_AddDataType(self.list, ADDON_DATA, "ZO_AddOnRow", ROW_HEIGHT, self:GetRowSetupFunction())
 
     self.characterDropdown = ZO_ComboBox:New(GetControl(self.control, "CharacterSelectDropdown"))
+    self.characterDropdown:SetSortsItems(false)
 
     local function OnLoadOutOfDateAddonsClicked(checkButton, isChecked)
         AddOnManager:SetLoadOutOfDateAddOns(isChecked)
@@ -67,8 +68,15 @@ local function GetCharacterNameFromDatum(datum)
     return zo_strformat(SI_UNIT_NAME, datum.name)
 end
 
+local g_uniqueNamesByCharacterName = {}
+
 local function CreateAddOnFilter(characterName)
-    return GetUniqueNameForCharacter(characterName)
+    local uniqueName = g_uniqueNamesByCharacterName[characterName]
+    if not uniqueName then
+        uniqueName = GetUniqueNameForCharacter(characterName)
+        g_uniqueNamesByCharacterName[characterName] = uniqueName
+    end
+    return uniqueName
 end
 
 local COMBINED_STATE_RESULT_NO_DEP_ERRORS = 1
@@ -141,19 +149,14 @@ function ZO_AddOnManager:GetRowSetupFunction()
         authorControl:SetColor(color:UnpackRGBA())
 
         nameControl:SetText(stripColorMarkup and data.strippedAddOnName or data.addOnName)
-        local author = stripColorMarkup and data.strippedAddOnAuthor or data.addOnAuthor
-        if author ~= "" then
-            authorControl:SetText(zo_strformat(SI_ADD_ON_AUTHOR_LINE, author))
-        else
-            authorControl:SetText("")
-        end
+        local authorByLine = stripColorMarkup and data.strippedAddOnAuthorByLine or data.addOnAuthorByLine
+        authorControl:SetText(authorByLine)
     end
 
     return function(control, data)
         control.owner = self
         control.data = data
         local name = control:GetNamedChild("Name")
-        local author = control:GetNamedChild("Author")
         local enabledControl = control:GetNamedChild("Enabled") 
         local state = control:GetNamedChild("State") 
         local description = control:GetNamedChild("Description") 
@@ -301,8 +304,8 @@ do
     end
 end
 
-function ZO_AddOnManager:OnCharacterChanged(name)
-    self.selectedCharacter = name
+function ZO_AddOnManager:OnCharacterChanged(name, entry)
+    self.selectedCharacterEntry = entry
     self:RefreshData()
 end
 
@@ -310,29 +313,34 @@ function ZO_AddOnManager:BuildCharacterDropdown()
     self.characterDropdown:ClearItems()
 
     local function OnCharacterChanged(comboBox, name, entry)
-        self:OnCharacterChanged(name)
+        self:OnCharacterChanged(name, entry)
     end
 
     if self.characterData then
         self.characterDropdown:GetContainer():SetHidden(false)
 
-        local all = GetString(SI_ADDON_MANAGER_CHARACTER_SELECT_ALL)
-        local entry = self.characterDropdown:CreateItemEntry(all, OnCharacterChanged)
-        self.characterDropdown:AddItem(entry)
-        self.characterDropdown:SetSelectedItemText(all)
+        local allCharactersEntry = self.characterDropdown:CreateItemEntry(GetString(SI_ADDON_MANAGER_CHARACTER_SELECT_ALL), OnCharacterChanged)
+        allCharactersEntry.allCharacters = true
+        self.characterDropdown:AddItem(allCharactersEntry)
 
-        self.selectedCharacter = nil
-        self.isAllFilterSelected = true
-
+        local characterNames = {}
         for i=1, self:GetNumCharacters() do
-            local entry = self.characterDropdown:CreateItemEntry(self:GetCharacterInfo(i), OnCharacterChanged)
+            local name = self:GetCharacterInfo(i)
+            table.insert(characterNames, name)
+        end
+        table.sort(characterNames)
+        for _, characterName in ipairs(characterNames) do
+            local entry = self.characterDropdown:CreateItemEntry(characterName, OnCharacterChanged)
+            entry.allCharacters = false
             self.characterDropdown:AddItem(entry)
         end
+
+        self.characterDropdown:SelectFirstItem()
     else
         self.characterDropdown:GetContainer():SetHidden(true)
 
         local playerName = GetUnitName("player")
-        self.selectedCharacter = playerName ~= "" and playerName or nil
+        self.selectedCharacterEntry = { name = playerName ~= "" and playerName or nil, allCharacters = false }
         self.isAllFilterSelected = false
     end
 end
@@ -398,12 +406,12 @@ function ZO_AddOnManager:BuildMasterList()
 
     self:ResetDataTypes()
 
-    if not self.selectedCharacter or self.selectedCharacter == GetString(SI_ADDON_MANAGER_CHARACTER_SELECT_ALL) then
+    if self.selectedCharacterEntry and not self.selectedCharacterEntry.allCharacters then
+        self.isAllFilterSelected = false
+        AddOnManager:SetAddOnFilter(CreateAddOnFilter(self.selectedCharacterEntry.name))
+    else
         self.isAllFilterSelected = true
         AddOnManager:RemoveAddOnFilter()
-    else
-        AddOnManager:SetAddOnFilter(CreateAddOnFilter(self.selectedCharacter))
-        self.isAllFilterSelected = false
     end
 
     for i = 1, AddOnManager:GetNumAddOns() do
@@ -413,13 +421,20 @@ function ZO_AddOnManager:BuildMasterList()
             addOnFileName = name,
             addOnName = title,
             strippedAddOnName = StripText(title),
-            addOnAuthor = author,
-            strippedAddOnAuthor = StripText(author),
             addOnDescription = description,
             addOnEnabled = enabled,
             addOnState = state,
             isOutOfDate = isOutOfDate
         }
+
+        if author ~= "" then
+            local strippedAuthor = StripText(author)
+            entryData.addOnAuthorByLine = zo_strformat(SI_ADD_ON_AUTHOR_LINE, author)
+            entryData.strippedAddOnAuthorByLine = zo_strformat(SI_ADD_ON_AUTHOR_LINE, strippedAuthor)
+        else
+            entryData.addOnAuthorByLine = ""
+            entryData.strippedAddOnAuthorByLine = ""
+        end
 
         local dependencyText = ""
         for j = 1, AddOnManager:GetAddOnNumDependencies(i) do

@@ -62,7 +62,7 @@ function WorldMapQuests_Gamepad:LayoutList()
 
         entryData.questInfo = srcData
 
-        local isAssisted = ZO_QuestTracker.tracker:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
+        local isAssisted = FOCUSED_QUEST_TRACKER:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
         entryData.isAssisted = isAssisted
         if isAssisted then
             self.assistedEntryData = entryData
@@ -102,7 +102,7 @@ function WorldMapQuests_Gamepad:SetupQuestDetails()
     local questName = targetData.questInfo.name
     local questIndex = targetData.questInfo.questIndex
 
-    local isAssisted = ZO_QuestTracker.tracker:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
+    local isAssisted = FOCUSED_QUEST_TRACKER:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
 
     local questLevel = GetJournalQuestLevel(questIndex)
     local questColor = GetColorDefForCon(GetCon(questLevel))
@@ -164,7 +164,7 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
                 end
 
                 ZO_WorldMap_PanToQuest(questIndex)
-                QUEST_TRACKER:ForceAssist(questIndex)
+                FOCUSED_QUEST_TRACKER:ForceAssist(questIndex)
                 self.questList:RefreshVisible()
                 self:SetupQuestDetails()
                 PlaySound(SOUNDS.MAP_LOCATION_CLICKED)

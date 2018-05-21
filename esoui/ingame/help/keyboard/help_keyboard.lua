@@ -1,8 +1,5 @@
 HELP = nil
 
-local LIST_TREE_INDENT = 10
-local LIST_TREE_SPACING = 3
-
 ZO_HelpManager = ZO_Object:Subclass()
 
 function ZO_HelpManager:New(...)
@@ -65,10 +62,17 @@ function ZO_HelpManager:Initialize(control)
         UpdateHelp()
     end
 
+    local function OnShowSpecificPage(eventId, helpCategoryIndex, helpIndex)
+        if not IsInGamepadPreferredMode() then
+            self:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+        end
+    end
+
     control:RegisterForEvent(EVENT_HELP_INITIALIZED, UpdateHelp)
     control:RegisterForEvent(EVENT_HELP_SEARCH_RESULTS_READY, OnSearchResultsReady)
+    control:RegisterForEvent(EVENT_HELP_SHOW_SPECIFIC_PAGE, OnShowSpecificPage)
 
-	UpdateHelp()
+    UpdateHelp()
 end
 
 function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)
@@ -94,8 +98,8 @@ end
 
 function ZO_HelpManager:OnHide()
     if self.searchBox:GetText() ~= "" then
-		self.searchBox:SetText("")
-	end
+        self.searchBox:SetText("")
+    end
 end
 
 function ZO_HelpManager:InitializeTree()
@@ -138,7 +142,8 @@ function ZO_HelpManager:SelectHelp(helpCategoryIndex, helpIndex)
     if self.helpControls and self.helpControls[helpCategoryIndex] then
         local helpControl = self.helpControls[helpCategoryIndex][helpIndex]
         if helpControl then
-            ZO_TreeEntry_OnMouseUp(helpControl, true)
+            local treeNode = ZO_TreeControl_GetNode(helpControl)
+            treeNode:GetTree():SelectNode(treeNode)
         end
     end
 end
@@ -188,14 +193,14 @@ function ZO_HelpManager:AddTrialEntry()
         local parent
         self.trialIndex = GetNumHelpCategories() + 1
         self.trialDescription = description
-        if not self.categoryControls[trialIndex] then
+        if not self.categoryControls[self.trialIndex] then
             self.helpControls[self.trialIndex] = {}
             local categoryData =    {
                                         name = GetString(SI_TRIAL_ACCOUNT_HELP_CATEGORY),
                                         upIcon = "EsoUI/Art/Help/help_tabIcon_trial_up.dds",
                                         downIcon = "EsoUI/Art/Help/help_tabIcon_trial_down.dds",
                                         overIcon = "EsoUI/Art/Help/help_tabIcon_trial_over.dds",
-                                        helpCategoryIndex = trialIndex,
+                                        helpCategoryIndex = self.trialIndex,
                                     }
             parent = self.navigationTree:AddNode("ZO_Help_Header", categoryData, nil, SOUNDS.HELP_BLADE_SELECTED)
             self.categoryControls[self.trialIndex] = parent
@@ -223,7 +228,7 @@ function ZO_HelpManager:RefreshList()
     self.categoryControls = {}
     self.activeHelpCount = 0
     self.trialIndex = nil
-    self.trialDescription= nil
+    self.trialDescription = nil
 
     if self.searchString ~= "" then
         for i = 1, #self.searchResults do
@@ -256,12 +261,11 @@ function ZO_HelpManager:RefreshDetails()
     local selectedData = self.navigationTree:GetSelectedData()
 
     if selectedData and selectedData.helpCategoryIndex and selectedData.helpIndex then
-        local _, name, description, description2, image
-        local success = true
+        local _, name, description, description2, image, showOption
         if selectedData.helpCategoryIndex == self.trialIndex then
-            _, name, description = GetTrialInfo();
+            _, name, description = GetTrialInfo()
         else
-            name, description, description2, image, _,_, showOption = GetHelpInfo(selectedData.helpCategoryIndex, selectedData.helpIndex)
+            name, description, description2, image, _, _, showOption = GetHelpInfo(selectedData.helpCategoryIndex, selectedData.helpIndex)
         end
 
         if IsKeyboardHelpOption(showOption) then
@@ -310,7 +314,10 @@ end
 
 local HELP_MAX_IMAGE_WIDTH = 490
 function ZO_Tutorials_Entries_OnTextureLoaded(control)
-    ZO_ResizeTextureWidthAndMaintainAspectRatio(control, HELP_MAX_IMAGE_WIDTH)
+    -- when hidden we directly manipulate the height, so don't apply constraints in those cases
+    if not control:IsHidden() then
+        ZO_ResizeTextureWidthAndMaintainAspectRatio(control, HELP_MAX_IMAGE_WIDTH)
+    end
 end
 
 function ZO_Help_Initialize(control)

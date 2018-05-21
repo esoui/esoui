@@ -78,6 +78,11 @@ GAMEPAD_SETTINGS_DATA =
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
         },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE,
+        },        
     },
     [SETTING_PANEL_CAMERA] =
     {

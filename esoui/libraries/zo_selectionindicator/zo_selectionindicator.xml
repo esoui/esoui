@@ -1,0 +1,18 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_SelectionIndicator_Button_Control" textureFile="EsoUI/Art/Buttons/featureDot_inactive.dds" layer="CONTROLS" level="3" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Controls>
+                <Texture name="$(parent)IndicatorButtonTexture" textureFile="EsoUI/Art/Buttons/featureDot_inactive.dds" layer="CONTROLS" level="3">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Control name="ZO_SelectionIndicator_Control" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_SelectionIndicator_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

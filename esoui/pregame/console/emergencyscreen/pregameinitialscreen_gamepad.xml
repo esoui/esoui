@@ -20,20 +20,22 @@
 
             <Controls>
                 <Control name="$(parent)Logo" alpha="0" resizeToFitDescendents="true">
-                    <Anchor point="TOP" />
                     <Controls>
-                        <Texture name="$(parent)Title" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo_Morrowind.dds">
-                            <Anchor point="TOP" offsetY="64" />
+                        <Texture name="$(parent)Title" textureFile="EsoUI/Art/Login/Gamepad/consoleLogoSummerset.dds">
+                            <Dimensions x="512" y="170"/>
+                            <TextureCoords left="0" right="1" top="0" bottom="0.664"/>
+                            <Anchor point="TOPLEFT"/>
                         </Texture>
-                
-                        <Texture name="$(parent)Ouroboros" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-HandOfVivec.dds">
-                            <Anchor point="CENTER" relativeTo="GuiRoot"/>
+                        <Texture name="$(parent)Ouroboros" textureFile="EsoUI/Art/Login/Gamepad/consoleOuroborosSummerset.dds">
+                            <Dimensions x="512" y="512"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="-30"/>
                         </Texture>
                     </Controls>
+                    <Anchor point="CENTER" offsetY="-30" />
                 </Control>
 
                 <Label name="$(parent)PressText" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
-                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-80" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-180" />
                 </Label>
 
                 <Control name="$(parent)ErrorBox" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">

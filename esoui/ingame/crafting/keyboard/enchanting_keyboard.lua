@@ -55,7 +55,7 @@ function ZO_Enchanting:InitializeEnchantingScenes()
 
     self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
         if craftingType == CRAFTING_TYPE_ENCHANTING then
-            SCENE_MANAGER:ShowBaseScene()
+            SCENE_MANAGER:Hide("enchanting")
         end
     end)
 end
@@ -115,7 +115,6 @@ function ZO_Enchanting:InitializeExtractionSlots()
 
     self.extractionSlot = ZO_SharedEnchantExtractionSlot:New(self, self.extractionSlotContainer:GetNamedChild("ExtractionSlot"), self.inventory)
 
-    -- TODO: replace with extraction assets when they're made
     self.extractionSlotAnimation = ZO_CraftingEnchantExtractSlotAnimation:New("enchanting", function() return self.enchantingMode == ENCHANTING_MODE_EXTRACTION end)
     self.extractionSlotAnimation:AddSlot(self.extractionSlot)
 end

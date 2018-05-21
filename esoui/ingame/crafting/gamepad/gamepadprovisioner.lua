@@ -220,6 +220,8 @@ end
 function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
     -- back descriptors for screen / options screen
     local startButton = {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Gamepad Provisioner Default Exit",
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         keybind = "UI_SHORTCUT_EXIT",
         order = -10000,

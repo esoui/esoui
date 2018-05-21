@@ -54,6 +54,13 @@ function ZO_GamepadEnchanting:InitializeModes()
     self.modeList:Commit()
 end
 
+local GAMEPAD_CRAFTING_ENCHANTING_ITEM_SORT =
+{
+    customSortData = { tiebreaker = "bestItemCategoryName" },
+    bestItemCategoryName = { tiebreaker = "text" },
+    text = {},
+}
+
 function ZO_GamepadEnchanting:InitializeInventory()
     local inventory = self.containerControl:GetNamedChild("Inventory")
 
@@ -109,6 +116,10 @@ function ZO_GamepadEnchanting:InitializeInventory()
             end
         end
     )
+
+    self.inventory:SetOverrideItemSort(function(left, right)
+        return ZO_TableOrderingFunction(left, right, "customSortData", GAMEPAD_CRAFTING_ENCHANTING_ITEM_SORT, ZO_SORT_ORDER_UP)
+    end)
 end
 
 function ZO_GamepadEnchanting:InitializeEnchantingScenes()
@@ -199,7 +210,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
 
     self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
         if craftingType == CRAFTING_TYPE_ENCHANTING then
-            SCENE_MANAGER:ShowBaseScene()
+            SCENE_MANAGER:Hide("gamepad_enchanting_mode")
         end
     end)
 end
@@ -609,11 +620,12 @@ end
 function ZO_GamepadEnchantingInventory:Refresh(data)
     local filterType
     local titleString = nil
+    local enchantingMode = self.owner:GetEnchantingMode()
 
-    if self.owner:GetEnchantingMode() == ENCHANTING_MODE_CREATION then
+    if enchantingMode == ENCHANTING_MODE_CREATION then
         filterType = self.filterType
         titleString = GetString(SI_ENCHANTING_CREATION)
-    elseif self.owner:GetEnchantingMode() == ENCHANTING_MODE_EXTRACTION then
+    elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
         filterType = EXTRACTION_FILTER
         titleString = GetString(SI_ENCHANTING_EXTRACTION)
     end

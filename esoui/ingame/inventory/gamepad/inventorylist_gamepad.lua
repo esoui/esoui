@@ -94,18 +94,23 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
     local function OnSingleSlotInventoryUpdate(bagId, slotIndex)
         for k, inventoryType in ipairs(self.inventoryTypes) do
             if bagId == inventoryType then
-                local entry = self.dataByBagAndSlotIndex[bagId][slotIndex]
-                if entry then
-                    local itemData = SHARED_INVENTORY:GenerateSingleSlotData(inventoryType, slotIndex)
-                    if itemData then
-                        itemData.bestGamepadItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
-                        self:SetupItemEntry(entry, itemData)
-                        self.list:RefreshVisible()
-                    else -- The item was removed.
+                local bag = self.dataByBagAndSlotIndex[bagId]
+                --we should always have a bag table to match all entries in self.inventoryTypes but this will catch any issue with that
+                internalassert(bag ~= nil)
+                if bag then
+                    local entry = bag[slotIndex]
+                    if entry then
+                        local itemData = SHARED_INVENTORY:GenerateSingleSlotData(inventoryType, slotIndex)
+                        if itemData then
+                            itemData.bestGamepadItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
+                            self:SetupItemEntry(entry, itemData)
+                            self.list:RefreshVisible()
+                        else -- The item was removed.
+                            self:RefreshList()
+                        end
+                    else -- The item is new.
                         self:RefreshList()
                     end
-                else -- The item is new.
-                    self:RefreshList()
                 end
             end
         end
@@ -143,9 +148,19 @@ function ZO_GamepadInventoryList:SetInventoryTypes(inventoryTypes)
         end
         if not sameBags then
             self.inventoryTypes = newInventoryTypes
+            --Refresh list will also regenerate these tables for each bag, but if the inventory list is hidden it will set a dirty flag instead and do it when it is effectively shown. This is a problem
+            --when a single slot update occurs because it checks self.inventoryTypes to know if we have a bag table in dataByBagAndSlotIndex to work with but we haven't rebuilt dataByBagAndSlotIndex yet
+            -- so we end up with an index on a bag table that doesn't exist. So we rebuild dataByBagAndSlotIndex immediately here.
+            self.dataByBagAndSlotIndex = {}
+            for i, bagId in ipairs(self.inventoryTypes) do
+                self.dataByBagAndSlotIndex[bagId] = {}
+            end
             self:RefreshList()
+            return true
         end
     end
+
+    return false
 end
 
 function ZO_GamepadInventoryList:AddInventoryType(inventoryType)

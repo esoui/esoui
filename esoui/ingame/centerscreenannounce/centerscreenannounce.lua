@@ -68,9 +68,10 @@ function CenterScreenPlayerProgressBarParams:Reset()
     self.stop = nil
     self.sound = nil
     self.showNoGain = false
+    self.triggeringEvent = nil
 end
 
-function CenterScreenPlayerProgressBarParams:Set(barType, startLevel, start, stop, sound)
+function CenterScreenPlayerProgressBarParams:Set(barType, startLevel, start, stop, sound, triggeringEvent)
     self.type = barType
     self.startLevel = startLevel
     self.start = start
@@ -79,7 +80,7 @@ function CenterScreenPlayerProgressBarParams:Set(barType, startLevel, start, sto
 end
 
 function CenterScreenPlayerProgressBarParams:GetParams()
-    return self.type, self.startLevel, self.start, self.stop, self.sound
+    return self.type, self.startLevel, self.start, self.stop, self.sound, self.triggeringEvent
 end
 
 function CenterScreenPlayerProgressBarParams:SetShowNoGain(showNoGain)
@@ -88,6 +89,14 @@ end
 
 function CenterScreenPlayerProgressBarParams:SetSound(sound)
     self.sound = sound
+end
+
+function CenterScreenPlayerProgressBarParams:SetTriggeringEvent(triggeringEvent)
+    self.triggeringEvent = triggeringEvent
+end
+
+function CenterScreenPlayerProgressBarParams:GetTriggeringEvent()
+    return self.triggeringEvent
 end
 
 ---------------------------------------------
@@ -778,25 +787,17 @@ function CenterScreenAnnounce:New(...)
 end
 
 do
-    local handlers = ZO_CenterScreenAnnounce_GetHandlers()
-    local queueableHandlers = ZO_CenterScreenAnnounce_GetQueueableHandlers()
-
-    local function GetCallbackFunction(eventId)
-        local data = handlers[eventId]
-        if type(data) == "function" then
-            return data
-        else
-            return data.callbackFunction
-        end
-    end
+    local eventHandlers = ZO_CenterScreenAnnounce_GetEventHandlers()
+    local queueableEventHandlers = ZO_CenterScreenAnnounce_GetQueueableEventHandlers()
+    local callbackHandlers = ZO_CenterScreenAnnounce_GetCallbackHandlers()
 
     function CenterScreenAnnounce:OnCenterScreenEvent(eventId, ...)
-        if handlers[eventId] then
-            if queueableHandlers[eventId] then
+        if eventHandlers[eventId] then
+            if queueableEventHandlers[eventId] then
                 local timeNowSeconds = GetFrameTimeMilliseconds() / 1000 
                 local waitingQueueData = CENTER_SCREEN_ANNOUNCE:GetWaitingQueueEventData(eventId)
                 if waitingQueueData then
-                    local conditions = queueableHandlers[eventId].conditionParameters or {}
+                    local conditions = queueableEventHandlers[eventId].conditionParameters or {}
                     local passConditions = true
                     for k,condition in ipairs(conditions) do
                         if waitingQueueData.eventData[condition] ~= select(condition, ...) then
@@ -805,13 +806,13 @@ do
                         end
                     end
                     if passConditions then
-                        local updateParametersTable = queueableHandlers[eventId].updateParameters
+                        local updateParametersTable = queueableEventHandlers[eventId].updateParameters
                         if updateParametersTable then
                             for i,entry in pairs(updateParametersTable) do
                                 waitingQueueData.eventData[entry] = select(entry, ...)
                             end
                         end
-                        waitingQueueData.nextUpdateTimeSeconds = timeNowSeconds + queueableHandlers[eventId].updateTimeDelaySeconds
+                        waitingQueueData.nextUpdateTimeSeconds = timeNowSeconds + queueableEventHandlers[eventId].updateTimeDelaySeconds
                         return
                     end
                 end
@@ -820,11 +821,12 @@ do
                 {
                     eventId = eventId,
                     eventData = { ... },
-                    nextUpdateTimeSeconds = timeNowSeconds + queueableHandlers[eventId].updateTimeDelaySeconds
+                    nextUpdateTimeSeconds = timeNowSeconds + queueableEventHandlers[eventId].updateTimeDelaySeconds
                 }
                 table.insert(self.waitingQueue, data)
             else
-                self:AddMessageWithParams(GetCallbackFunction(eventId)(...))
+                local eventHandler = eventHandlers[eventId]
+                self:AddMessageWithParams(eventHandler(...))
             end
         end
     end
@@ -874,7 +876,8 @@ do
                 if timeNow > entry.nextUpdateTimeSeconds then
                     local eventId = entry.eventId
                     table.remove(self.waitingQueue, i)
-                    self:AddMessageWithParams(GetCallbackFunction(eventId)(unpack(entry.eventData)))
+                    local handler = eventHandlers[eventId]
+                    self:AddMessageWithParams(handler(unpack(entry.eventData)))
                 end
             end
         end
@@ -883,16 +886,18 @@ do
 
         self.platformStyle = ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
 
+        -- Events
         local function OnCenterScreenEvent(eventId, ...)
             self:OnCenterScreenEvent(eventId, ...)
         end
 
-        for event, data in pairs(handlers) do
-            if type(data) == "function" then
-                control:RegisterForEvent(event, OnCenterScreenEvent)
-            else
-                data.callbackManager:RegisterCallback(data.callbackRegistration, function(...) self:OnCenterScreenEvent(event, ...) end)
-            end
+        for event, data in pairs(eventHandlers) do
+            control:RegisterForEvent(event, OnCenterScreenEvent)
+        end
+
+        -- Calbbacks
+        for _, data in ipairs(callbackHandlers) do
+            data.callbackManager:RegisterCallback(data.callbackRegistration, function(...) self:AddMessageWithParams(data.callbackFunction(...)) end)
         end
 
         self:InitializeMessagePools()
@@ -1584,6 +1589,10 @@ function CenterScreenAnnounce:DisplayMessage(messageParams)
                 if stop - start > 0 or barParams.showNoGain then
                     self.hasActiveLevelBar = true
                     PLAYER_PROGRESS_BAR:ShowIncrease(barType, startLevel, start, stop, sound, category == CSA_CATEGORY_NO_TEXT and BAR_PARAMS_NO_WAIT_INTERVAL_MS or BAR_PARAMS_WAIT_INTERVAL_MS, self)
+                    if not (barType and PLAYER_PROGRESS_BAR:GetBarTypeInfoByBarType(barType)) then
+                        local INVALID_VALUE = -1
+                        internalassert(false, string.format("CSA Bad Bar Params; barType: %d. Triggering Event: %d", barType or INVALID_VALUE, barParams:GetTriggeringEvent() or INVALID_VALUE))
+                    end
                 end
             end
         end

@@ -408,8 +408,6 @@ end
 
 --Reward Creator
 
-local g_numItemRewardsForQuest = 0
-
 local function SetupBasicReward(control, name, stackSize, icon, meetsUsageRequirement, r, g, b)
     local nameControl = GetControl(control, "Name")
     local iconControl = GetControl(control, "Icon")
@@ -496,7 +494,6 @@ local REWARD_CREATORS =
                 local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemQuality)
                 SetupBasicReward(control, name, amount, icon, meetsUsageRequirement, r, g, b)
             end
-            g_numItemRewardsForQuest = g_numItemRewardsForQuest + 1
         end,
     [REWARD_TYPE_INSPIRATION] =
         function(control, name, amount, icon)
@@ -519,7 +516,7 @@ local REWARD_CREATORS =
         function(control, name, amount)
             SetupPartialSkillPointReward(control, amount)
         end,
-	[REWARD_TYPE_WRIT_VOUCHERS] =
+    [REWARD_TYPE_WRIT_VOUCHERS] =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_WRIT_VOUCHERS, amount, currencyOptions)
         end,
@@ -534,7 +531,7 @@ local currencyRewards =
     [REWARD_TYPE_MONEY] = true,
     [REWARD_TYPE_ALLIANCE_POINTS] = true,
     [REWARD_TYPE_TELVAR_STONES] = true,
-	[REWARD_TYPE_WRIT_VOUCHERS] = true,
+    [REWARD_TYPE_WRIT_VOUCHERS] = true,
 }
 
 function ZO_SharedInteraction:IsCurrencyReward(rewardType)
@@ -546,7 +543,7 @@ local currencyRewardToCurrencyType =
     [REWARD_TYPE_MONEY] = CURT_MONEY,
     [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
     [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
-	[REWARD_TYPE_WRIT_VOUCHERS] = CURT_WRIT_VOUCHERS,
+    [REWARD_TYPE_WRIT_VOUCHERS] = CURT_WRIT_VOUCHERS,
 }
 
 function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)

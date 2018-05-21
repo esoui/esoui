@@ -18,6 +18,7 @@
 
             <OnInitialized>
                 ZO_Subtitles_OnInitialize(self)
+                internalassert(ZO_PlayerToPlayerAreaPromptContainerTarget ~= nil, "Subtitles must be anchored to a valid control. ZO_PlayerToPlayerAreaPromptContainerTarget does not exist.")
             </OnInitialized>
             
             <Controls>

@@ -139,12 +139,52 @@ function ZO_KeybindButtonMixin:SetCallback(callback)
     self.callback = callback
 end
 
-function ZO_KeybindButtonMixin:OnClicked()
-    if(self.enabled) then
-        if(self.clickSound) then
-            PlaySound(self.clickSound)
+function ZO_KeybindButtonMixin:GetKeybindButtonDescriptorReference()
+    return self.keybindDescriptorReference
+end
+
+function ZO_KeybindButtonMixin:SetKeybindButtonDescriptor(keybindDescriptor)
+    self.keybindDescriptorReference = keybindDescriptor
+
+    if keybindDescriptor.name then
+        local name = keybindDescriptor.name
+        if type(keybindDescriptor.name) == "function" then
+            name = keybindDescriptor.name()
         end
-        if(self.callback) then
+       self:SetText(name)
+    end
+    
+    if keybindDescriptor.keybind then
+        self:SetKeybind(keybindDescriptor.keybind)
+    end
+
+    if keybindDescriptor.callback then
+        self:SetCallback(keybindDescriptor.callback)
+    end
+
+    if keybindDescriptor.sound then
+        self:SetClickSound(keybindDescriptor.sound)
+    end
+
+    if keybindDescriptor.customKeyText then
+        self:SetCustomKeyText(keybindDescriptor.customKeyText)
+    end
+
+    if keybindDescriptor.customKeyIcon then
+        self:SetCustomKeyIcon(keybindDescriptor.customKeyIcon)
+    end
+end
+
+function ZO_KeybindButtonMixin:OnClicked()
+    if self.enabled then
+        if self.clickSound then
+            if type(self.clickSound) == "function" then
+                PlaySound(self.clickSound())
+            else
+                PlaySound(self.clickSound)
+            end
+        end
+        if self.callback then
             self.callback(self)
         end
     else

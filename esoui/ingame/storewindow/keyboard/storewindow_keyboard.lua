@@ -117,7 +117,6 @@ function ZO_StoreManager:Initialize(control)
     local typicalHiddenColumns =
     {
         ["statusSortOrder"] = true,
-        ["traitInformationSortOrder"] = true,
     }
 
     local gearHiddenColumns =
@@ -153,6 +152,7 @@ function ZO_StoreManager:Initialize(control)
         CreateNewTabFilterData(ITEMFILTERTYPE_FURNISHING, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CRAFTING, "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", typicalHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_CONSUMABLE, "EsoUI/Art/Inventory/inventory_tabIcon_consumables_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_consumables_over.dds", typicalHiddenColumns),
+        CreateNewTabFilterData(ITEMFILTERTYPE_JEWELRY, "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", gearHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_ARMOR, "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", gearHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_WEAPONS, "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", gearHiddenColumns),
         CreateNewTabFilterData(ITEMFILTERTYPE_COLLECTIBLE, "EsoUI/Art/MainMenu/menuBar_collections_up.dds", "EsoUI/Art/MainMenu/menuBar_collections_down.dds", "EsoUI/Art/MainMenu/menuBar_collections_over.dds", typicalHiddenColumns),
@@ -232,6 +232,7 @@ function ZO_StoreManager:Initialize(control)
     storeScene:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_SHOWING then
                                                         self:InitializeStore()
+                                                        ZO_StoreManager_InternalValidateItems(self.items, {("Window mode: %s"):format(tostring(self.windowMode))})
                                                         PLAYER_INVENTORY:SelectAndChangeSort("traitInformationSortOrder", INVENTORY_BACKPACK, ZO_SORT_ORDER_DOWN)
                                                     elseif newState == SCENE_HIDDEN then
                                                         ZO_InventorySlot_RemoveMouseOverKeybinds()
@@ -610,6 +611,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
         nameControl:SetColor(MEET_BUY_REQS_FAIL_COLOR:UnpackRGBA())
     end
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, isLocked)
+    ZO_UpdateTraitInformationControlIcon(control, data)
 
     ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS)
 

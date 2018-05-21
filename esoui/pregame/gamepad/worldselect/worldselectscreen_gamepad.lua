@@ -45,7 +45,7 @@ function ZO_WorldSelect_Gamepad:Initialize(control)
                 if newState == SCENE_SHOWING then
                     self:PerformDeferredInitialize()
 
-                    self.selectLastRealm = true
+                    self.firstWorldListRefresh = true
 
                     KEYBIND_STRIP:RemoveDefaultExit()
                     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -146,7 +146,7 @@ function ZO_WorldSelect_Gamepad:RefreshWorldList()
     self:RefreshWorldList_Internal()
 end
 
-function ZO_WorldSelect_Gamepad:AddServerEntry(worldIndex, worldName, worldStatus)
+function ZO_WorldSelect_Gamepad:AddServerEntry(worldIndex, worldName, worldStatus, hasHeader)
     local selectedColor = SERVER_STATUS_SELECTED_COLORS[worldStatus]
     local unselectedColor = SERVER_STATUS_UNSELECTED_COLORS[worldStatus]
 
@@ -160,7 +160,7 @@ function ZO_WorldSelect_Gamepad:AddServerEntry(worldIndex, worldName, worldStatu
     option.selectedCallback = function() self:WorldSelected() end
 
     local template
-    if worldIndex == 0 then
+    if hasHeader then
         option:SetHeader(GetString(SI_SELECT_SERVER))
         template = "ZO_GamepadMenuEntryTemplateWithHeader"
     else
@@ -176,29 +176,38 @@ function ZO_WorldSelect_Gamepad:RefreshWorldList_Internal()
 
     local lastRealmName = GetCVar("LastRealm")
     local selectedIndex
-    -- TODO: Should we sort the entries?
     local numWorlds = GetNumWorlds()
+    local worlds = {}
     for worldIndex = 0, numWorlds - 1 do
         local worldName, worldStatus = GetWorldInfo(worldIndex)
-        self:AddServerEntry(worldIndex, worldName, worldStatus)
+        table.insert(worlds, { worldIndex = worldIndex, worldName = worldName, worldStatus = worldStatus })
+    end
 
-        if worldName == lastRealmName then
-            selectedIndex = worldIndex + 1 -- worldIndex is 0-based, lua wants 1-based.
+    table.sort(worlds, function(a, b) return a.worldName < b.worldName end)
+
+    for i, world in ipairs(worlds) do
+        self:AddServerEntry(world.worldIndex, world.worldName, world.worldStatus, i == 1)
+        if world.worldName == lastRealmName then
+            selectedIndex = i
         end
     end
 
     self.optionsList:Commit()
 
-    -- Select the last realm, and enter a quick launch, if configured.
-    if self.selectLastRealm and selectedIndex then
-        self.selectLastRealm = false
+    --Only auto select the first time we refresh the list after showing it. Otherwise it will keep setting the list back to the last select or first entry everytime it refreshes on the timer
+    if self.firstWorldListRefresh then
+        self.firstWorldListRefresh = false
+        -- Select the last realm, and enter a quick launch, if configured.
+        if selectedIndex then
+            local ALLOW_IF_DISABLED = true
+            self.optionsList:SetSelectedIndex(selectedIndex, ALLOW_IF_DISABLED)
+            self.optionsList:RefreshVisible() -- Force the previous selection to take place immediately.
 
-        local ALLOW_IF_DISABLED = true
-        self.optionsList:SetSelectedIndex(selectedIndex, ALLOW_IF_DISABLED)
-        self.optionsList:RefreshVisible() -- Force the previous selection to take place immediately.
-
-        if (GetCVar("QuickLaunch") == "1") then
-            self:OnWorldSelected()
+            if (GetCVar("QuickLaunch") == "1") then
+                self:OnWorldSelected()
+            end
+        else
+            self.optionsList:SetSelectedIndex(1)
         end
     end
 end
@@ -209,7 +218,7 @@ function ZO_WorldSelect_Gamepad:SetupOptionsList()
     self.optionsList = ZO_GamepadVerticalParametricScrollList:New(self.optionsControl:GetNamedChild("List"))
     self.optionsList:SetOnSelectedDataChangedCallback(function() self:RefreshKeybindStrip() end)
 
-    self.optionsList:SetFixedCenterOffset(-165)
+    self.optionsList:SetAlignToScreenCenter(true)
 
     self.optionsList:AddDataTemplate("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.optionsList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")

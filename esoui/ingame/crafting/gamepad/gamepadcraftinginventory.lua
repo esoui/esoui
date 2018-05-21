@@ -65,6 +65,7 @@ function ZO_GamepadCraftingInventory:PerformFullRefresh()
     end
 end
 
+-- This sort is appropriate for gear, like armor and weapons
 local DEFAULT_GAMEPAD_CRAFTING_ITEM_SORT =
 {
     customSortData = { tiebreaker = "bestItemCategoryName" },
@@ -116,7 +117,9 @@ function ZO_GamepadCraftingInventory:GenerateCraftingInventoryEntryData(bagId, s
 end
 
 function ZO_GamepadCraftingInventory:AddFilteredDataToList(filteredDataTable)
-    table.sort(filteredDataTable, ZO_GamepadCraftingInventory_DefaultItemSortComparator)
+    local sortFunction = self.sortFunction or ZO_GamepadCraftingInventory_DefaultItemSortComparator
+
+    table.sort(filteredDataTable, sortFunction)
 
     local lastBestItemCategoryName
     for i, itemData in ipairs(filteredDataTable) do

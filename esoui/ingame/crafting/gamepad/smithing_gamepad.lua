@@ -10,7 +10,7 @@ GAMEPAD_SMITHING_CREATION_OPTIONS_SCENE_NAME = "gamepad_smithing_creation_option
 local g_modeToSceneName =
 {
     [SMITHING_MODE_ROOT] = GAMEPAD_SMITHING_ROOT_SCENE_NAME,
-    [SMITHING_MODE_REFINMENT] = GAMEPAD_SMITHING_REFINE_SCENE_NAME,
+    [SMITHING_MODE_REFINEMENT] = GAMEPAD_SMITHING_REFINE_SCENE_NAME,
     [SMITHING_MODE_CREATION] = GAMEPAD_SMITHING_CREATION_SCENE_NAME,
     [SMITHING_MODE_DECONSTRUCTION] = GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME,
     [SMITHING_MODE_IMPROVEMENT] = GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME,
@@ -41,7 +41,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
     end
 
     GAMEPAD_SMITHING_ROOT_SCENE = MakeScene(GAMEPAD_SMITHING_ROOT_SCENE_NAME, SMITHING_MODE_ROOT)
-    GAMEPAD_SMITHING_REFINE_SCENE = MakeScene(GAMEPAD_SMITHING_REFINE_SCENE_NAME, SMITHING_MODE_REFINMENT)
+    GAMEPAD_SMITHING_REFINE_SCENE = MakeScene(GAMEPAD_SMITHING_REFINE_SCENE_NAME, SMITHING_MODE_REFINEMENT)
     GAMEPAD_SMITHING_CREATION_SCENE = MakeScene(GAMEPAD_SMITHING_CREATION_SCENE_NAME, SMITHING_MODE_CREATION)
     GAMEPAD_SMITHING_DECONSTRUCT_SCENE = MakeScene(GAMEPAD_SMITHING_DECONSTRUCT_SCENE_NAME, SMITHING_MODE_DECONSTRUCTION)
     GAMEPAD_SMITHING_IMPROVEMENT_SCENE = MakeScene(GAMEPAD_SMITHING_IMPROVEMENT_SCENE_NAME, SMITHING_MODE_IMPROVEMENT)
@@ -100,7 +100,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
 
             self:ResetMode()
             if self.resetUIs then
-                self.modeList:SetSelectedIndexWithoutAnimation(SMITHING_MODE_REFINMENT)
+                self.modeList:SetSelectedIndexWithoutAnimation(SMITHING_MODE_REFINEMENT)
             end
 
             self:SetEnableSkillBar(true)
@@ -201,7 +201,7 @@ function ZO_Smithing_Gamepad:InitializeModeList()
     self.modeList:SetAlignToScreenCenter(true)
     self.modeList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
-    self.refinementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_REFINMENT, SMITHING_MODE_REFINMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_refine.dds")
+    self.refinementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_REFINEMENT, SMITHING_MODE_REFINEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_refine.dds")
     self.creationModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_create.dds")
     self.deconstructionModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_DECONSTRUCTION, SMITHING_MODE_DECONSTRUCTION, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_deconstruct.dds")
     self.improvementModeEntry = self:CreateModeEntry(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_improve.dds")

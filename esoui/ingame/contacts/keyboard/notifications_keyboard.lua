@@ -20,6 +20,11 @@ local KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/notificationIcon_ESO+.dds",
+    [NOTIFICATION_TYPE_GIFTING_UNLOCKED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_GIFT_RETURNED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_NEW_DAILY_LOGIN_REWARD] = "EsoUI/Art/Notifications/notificationIcon_dailyLoginRewards.dds",
 }
 
 -- Provider Overrides
@@ -227,6 +232,21 @@ function ZO_KeyboardEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
     end
 end
 
+-- ZO_KeyboardGiftingUnlockedProvider
+-------------------------
+
+local ZO_KeyboardGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
+
+function ZO_KeyboardGiftingUnlockedProvider:New(notificationManager)
+    return ZO_GiftingUnlockedProvider.New(self, notificationManager)
+end
+
+function ZO_KeyboardGiftingUnlockedProvider:ShowMoreInfo(entryData)
+    if entryData.moreInfo then
+        HELP:ShowSpecificHelp(entryData.helpCategoryIndex, entryData.helpIndex)
+    end
+end
+
 --Notification Manager
 -------------------------
 
@@ -251,6 +271,11 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_READY_CHECK_DATA, "ZO_NotificationsLFGReadyCheckRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA, "ZO_NotificationsLFGFindReplacementRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA, "ZO_NotificationsEsoPlusSubscriptionRow", 50, function(control, data) self:SetupEsoPlusSubscriptionRow(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RECEIVED_DATA, "ZO_NotificationsGiftReceivedRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RETURNED_DATA, "ZO_NotificationsGiftReturnedRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_CLAIMED_DATA, "ZO_NotificationsGiftClaimedRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_UNLOCKED_DATA, "ZO_NotificationsGiftingUnlockedRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", 50, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -277,6 +302,9 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_DuelInviteProvider:New(self),
         ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(self),
+        ZO_GiftInventoryProvider:New(self),
+        ZO_KeyboardGiftingUnlockedProvider:New(self),
+        ZO_DailyLoginRewardsClaimProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))
@@ -502,7 +530,7 @@ end
 function ZO_KeyboardNotificationManager:Decline_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
     if data then
-        self:DeclineRequest(data, button, MENU_OPENED_FROM_MOUSE)
+        self:DeclineRequest(data, control, MENU_OPENED_FROM_MOUSE)
     end
 end
 

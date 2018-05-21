@@ -8,6 +8,10 @@
                     <!-- 1024x256 image cropped to 768x256 -->
                     <TextureCoords left="0" right="0.75" top="0" bottom="1"/>
                     <Controls>
+                        <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="2">
+                            <AnchorFill />
+                        </Texture>
+
                         <Backdrop name="$(parent)Border" />
                     </Controls>
                 </Texture>

@@ -14,6 +14,8 @@ local function GetCurrentCraftingLevel()
         return GetNonCombatBonus(NON_COMBAT_BONUS_CLOTHIER_LEVEL)
     elseif craftingType == CRAFTING_TYPE_WOODWORKING then
         return GetNonCombatBonus(NON_COMBAT_BONUS_WOODWORKING_LEVEL)
+    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+        return GetNonCombatBonus(NON_COMBAT_BONUS_JEWELRYCRAFTING_LEVEL)
     end
 end
 
@@ -59,7 +61,8 @@ local CRAFTING_TYPE_TO_TOOLTIP_SOUND =
 {
     [CRAFTING_TYPE_BLACKSMITHING] = SOUNDS.BLACKSMITH_CREATE_TOOLTIP_GLOW,
     [CRAFTING_TYPE_CLOTHIER] = SOUNDS.CLOTHIER_CREATE_TOOLTIP_GLOW,
-    [CRAFTING_TYPE_WOODWORKING] = SOUNDS.WOODWORKER_CREATE_TOOLTIP_GLOW
+    [CRAFTING_TYPE_WOODWORKING] = SOUNDS.WOODWORKER_CREATE_TOOLTIP_GLOW,
+    [CRAFTING_TYPE_JEWELRYCRAFTING] = SOUNDS.JEWELRYCRAFTER_CREATE_TOOLTIP_GLOW,
 }
 
 function ZO_SharedSmithingCreation:GetCreateTooltipSound()
@@ -93,7 +96,8 @@ function ZO_SharedSmithingCreation:RefreshAllLists()
 
     -- Special case on full refreshes, the style list depends on the pattern list, but the pattern list is also dependent on knowing if there's any valid styles.
     -- If there are no valid styles then none of the patterns can be selected, so clear it out.
-    if not self.styleList:GetSelectedData() then
+    -- As a extra special case, when we aren't using style items generally, then the above is not true and we should skip this.
+    if not self.styleList:GetSelectedData() and not self:ShouldIgnoreStyleItems() then
         self.patternList:Clear()
         self.patternList:Commit()
     end
@@ -145,14 +149,20 @@ function ZO_SharedSmithingCreation:GetIsUsingUniversalStyleItem()
     return self.savedVars.useUniversalStyleItemChecked
 end
 
+function ZO_SharedSmithingCreation:ShouldIgnoreStyleItems()
+    return DoesSmithingTypeIgnoreStyleItems(GetCraftingInteractionType())
+end
+
+-- Returns all parameters, including parameters that don't have an effect on the resulting item, but affect the crafting process
 function ZO_SharedSmithingCreation:GetAllCraftingParameters()
     return self:GetSelectedPatternIndex(), self:GetSelectedMaterialIndex(), 
            self:GetSelectedMaterialQuantity(), self:GetSelectedItemStyleId(), self:GetSelectedTraitIndex(), self:GetIsUsingUniversalStyleItem()
 end
 
-function ZO_SharedSmithingCreation:GetAllNonTraitCraftingParameters()
+-- Returns parameters necessary to correctly predict the resulting item
+function ZO_SharedSmithingCreation:GetResultCraftingParameters()
     return self:GetSelectedPatternIndex(), self:GetSelectedMaterialIndex(), 
-           self:GetSelectedMaterialQuantity(), self:GetSelectedItemStyleId()
+           self:GetSelectedMaterialQuantity(), self:GetSelectedItemStyleId(), self:GetSelectedTraitIndex()
 end
 
 function ZO_SharedSmithingCreation:OnSelectedPatternChanged(patternData, selectedDuringRebuild)
@@ -226,18 +236,13 @@ function ZO_SharedSmithingCreation:OnFilterChanged(haveMaterialsChecked, haveKno
     end
 end
 
-ZO_SMITHING_CREATION_FILTER_TYPE_WEAPONS = 1
-ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR = 2
-ZO_SMITHING_CREATION_FILTER_TYPE_SET_WEAPONS = 3
-ZO_SMITHING_CREATION_FILTER_TYPE_SET_ARMOR = 4
-
 function ZO_SharedSmithingCreation:ChangeTypeFilter(filterData)
     self.typeFilter = filterData.descriptor
     self:HandleDirtyEvent()
 end
 
-local MIN_SCALE = .6
-local MAX_SCALE = 1.0
+local MIN_SCALE = .6 
+local MAX_SCALE = 1.1
 local BASE_NUM_ITEMS_IN_LIST = 5
 
 local function CustomTooltipAnchor(tooltip, button)
@@ -308,16 +313,10 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListClass, listSl
         local patternIndex = data.patternIndex
         local materialOverride = self:GetSelectedMaterialIndex()
         local materialQuantityOverride = select(3, GetSmithingPatternMaterialItemInfo(patternIndex, materialOverride))
-        local styleOverride = self.styleList:GetSelectedData() and self.styleList:GetSelectedData().itemStyleId
+        local styleOverride = self:GetSelectedItemStyleId()
         local traitOverride = self.traitList:GetSelectedData() and self.traitList:GetSelectedData().traitType
 
         local _, _, icon, _, _, _, _ = GetSmithingPatternInfo(patternIndex, materialOverride, materialQuantityOverride, styleOverride, traitOverride)
-		local itemStyleId = self:GetSelectedItemStyleId()
-		if not itemStyleId then 
-            local FIRST_VALID_STYLE_ID = 1
-            itemStyleId = FIRST_VALID_STYLE_ID
-        end
-        local isStyleKnown = IsSmithingStyleKnown(itemStyleId, patternIndex)
         local meetsTraitRequirement = data.numTraitsRequired <= data.numTraitsKnown 
 
         ZO_ItemSlot_SetupSlot(control, 1, icon, meetsTraitRequirement, not enabled)
@@ -356,17 +355,6 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListClass, listSl
     self.patternList:SetScaleExtents(MIN_SCALE, MAX_SCALE)
 
     ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(self.patternList)
-end
-
-local function GetRankTooLowString()
-    local craftingType = GetCraftingInteractionType()
-    if craftingType == CRAFTING_TYPE_BLACKSMITHING then
-        return SI_SMITHING_RANK_TOO_LOW_BLACKSMITHING
-    elseif craftingType == CRAFTING_TYPE_CLOTHIER then
-        return SI_SMITHING_RANK_TOO_LOW_CLOTHIER
-    elseif craftingType == CRAFTING_TYPE_WOODWORKING then
-        return SI_SMITHING_RANK_TOO_LOW_WOODWORKING
-    end
 end
 
 function ZO_SharedSmithingCreation:GetMaterialInformation(data)
@@ -417,14 +405,17 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
     local function MaterialQuantitySpinner_OnValueChanged(value)
         local materialData = self.materialList:GetSelectedData()
 
-		--Store the last selected combination index (level) for this material
+        --Store the last selected combination index (level) for this material
         self:SetLastListSelection(self:GetMaterialListMemoryKey(materialData.materialIndex), value)
 
-		local stackCount, currentSelectedQuality, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(materialData)
+        local stackCount, currentSelectedQuality, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(materialData)
         local combination = materialData.combinations[value]
 
         if not meetsRankRequirement then
-            listContainer.extraInfoLabel:SetText(zo_strformat(GetRankTooLowString(), materialData.rankRequirement))
+            local craftingRankAbilityId = GetTradeskillLevelPassiveAbilityId(GetCraftingInteractionType())
+            local craftingRankAbilityName = GetAbilityName(craftingRankAbilityId)
+
+            listContainer.extraInfoLabel:SetText(zo_strformat(SI_SMITHING_RANK_TOO_LOW, craftingRankAbilityName, materialData.rankRequirement))
             listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
         else
             local text
@@ -505,7 +496,7 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
         control.patternIndex = data.patternIndex
         control.materialIndex = data.materialIndex
 
-   		local stackCount, currentSelectedQuantity, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
+        local stackCount, currentSelectedQuantity, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
         ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, meetsRankRequirement, not enabled)
         ZO_ItemSlot_SetAlwaysShowStackCount(control, true)
 
@@ -620,7 +611,6 @@ function ZO_SharedSmithingCreation:InitializeStyleList(scrollListClass, styleUnk
                 extraInfoLabel:SetText(text)
             end
 
-            local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
             self.isStyleUsable = usable and USABILITY_TYPE_USABLE or USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
 
             if not data.localizedName then
@@ -687,7 +677,7 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListClass, traitUnk
         local hasEnoughInInventory = stackCount > 0
         local isTraitKnown = false
         if self:IsCraftableWithoutTrait() then
-            local patternIndex, materialIndex, materialQty, itemStyleId = self:GetAllNonTraitCraftingParameters()
+            local patternIndex, materialIndex, materialQty, itemStyleId = self:GetResultCraftingParameters()
             isTraitKnown = IsSmithingTraitKnownForResult(patternIndex, materialIndex, materialQty, itemStyleId, data.traitIndex)
         end
         ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, isTraitKnown, not enabled)
@@ -757,29 +747,23 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListClass, traitUnk
     ZO_CraftingUtils_ConnectHorizontalScrollListToCraftingProcess(self.traitList)
 end
 
+local function IsSetPattern(patternData)
+    return patternData.numTraitsRequired ~= 0
+end
+
 function ZO_SharedSmithingCreation:DoesPatternPassFilter(patternData)
-    if patternData.resultingItemFilterType == ITEMFILTERTYPE_WEAPONS then
-        if self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_WEAPONS then
-            if patternData.numTraitsRequired ~= 0 then
-                return false
-            end
-        elseif self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_SET_WEAPONS then
-            if patternData.numTraitsRequired == 0 then
-                return false
-            end
-        else
+    -- pattern filter needs to match current filter
+    if ZO_CraftingUtils_GetItemFilterFromSmithingFilter(self.typeFilter) ~= patternData.resultingItemFilterType then
+        return false
+    end
+
+    -- filter out set patterns
+    if ZO_CraftingUtils_IsBaseSmithingFilter(self.typeFilter) then
+        if IsSetPattern(patternData) then
             return false
         end
-    elseif patternData.resultingItemFilterType == ITEMFILTERTYPE_ARMOR then
-        if self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR  then
-            if patternData.numTraitsRequired ~= 0 then
-                return false
-            end
-        elseif self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_SET_ARMOR then
-            if patternData.numTraitsRequired == 0 then
-                return false
-            end
-        else
+    else
+        if not IsSetPattern(patternData) then
             return false
         end
     end
@@ -788,15 +772,9 @@ function ZO_SharedSmithingCreation:DoesPatternPassFilter(patternData)
         if patternData.numTraitsKnown < patternData.numTraitsRequired then
             return false
         end
-
-        patternData.materialData = patternData.materialData or self:GenerateMaterialDataForPattern(patternData.patternIndex)
-
-        if #patternData.materialData == 0 then
-            return false
-        end
     end
 
-    if self.savedVars.haveMaterialChecked then
+    if self.savedVars.haveKnowledgeChecked or self.savedVars.haveMaterialChecked then
         patternData.materialData = patternData.materialData or self:GenerateMaterialDataForPattern(patternData.patternIndex)
 
         if #patternData.materialData == 0 then
@@ -827,11 +805,7 @@ end
 function ZO_SharedSmithingCreation:RefreshPatternList()
     self:CreatePatternList()
 
-    if self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_WEAPONS or self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_SET_WEAPONS then
-        self.patternList:SetNoItemText(GetString(SI_SMITHING_NO_WEAPONS_FOUND))
-    elseif self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR or self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_SET_ARMOR then
-        self.patternList:SetNoItemText(GetString(SI_SMITHING_NO_ARMOR_FOUND))
-    end
+    self.patternList:SetNoItemText(GetString("SI_SMITHINGFILTERTYPE_CREATENOPATTERNS", self.typeFilter))
 end
 
 function ZO_SharedSmithingCreation:DoesMaterialPassFilter(data)
@@ -938,6 +912,11 @@ function ZO_SharedSmithingCreation:RefreshMaterialList(patternData)
 end
 
 function ZO_SharedSmithingCreation:DoesStylePassFilter(itemStyleId, alwaysHideIfLocked)
+    if self:ShouldIgnoreStyleItems() then
+        internalassert(false)
+        return false -- always fail, if you don't have use style items you shouldn't be running this code
+    end
+
     if self.savedVars.haveKnowledgeChecked or alwaysHideIfLocked then
         if not IsSmithingStyleKnown(itemStyleId, self:GetSelectedPatternIndex()) then
             return false
@@ -977,6 +956,11 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
     local lastItemStyleId = self:GetLastListSelection(MEMORY_TYPE_STYLE)
 
     self.styleList:Clear()
+
+    if self:ShouldIgnoreStyleItems() then
+        -- don't continue: if we do we introduce vestigal state that thinks style items matter when they don't
+        return
+    end
 
     local craftingInteractionType = GetCraftingInteractionType()
     for itemStyleIndex = 1, GetNumValidItemStyles() do
@@ -1024,16 +1008,10 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
     end
 end
 
-function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType)
+function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType, craftingType)
     assert(self.typeFilter)
-    if ZO_CraftingUtils_IsTraitAppliedToWeapons(traitType) then
-        if self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR or self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_SET_ARMOR then
-            return false
-        end
-    elseif ZO_CraftingUtils_IsTraitAppliedToArmor(traitType) then
-        if self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_WEAPONS or self.typeFilter == ZO_SMITHING_CREATION_FILTER_TYPE_SET_WEAPONS then
-            return false
-        end
+    if ZO_CraftingUtils_GetSmithingFilterFromTrait(traitType) ~= ZO_CraftingUtils_GetBaseSmithingFilter(self.typeFilter) then
+        return false
     end
 
     if self.savedVars.haveKnowledgeChecked then
@@ -1041,7 +1019,7 @@ function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType)
             return false
         end
 
-        local patternIndex, materialIndex, materialQty, itemStyleId = self:GetAllNonTraitCraftingParameters()
+        local patternIndex, materialIndex, materialQty, itemStyleId = self:GetResultCraftingParameters()
         if not IsSmithingTraitKnownForResult(patternIndex, materialIndex, materialQty, itemStyleId, traitIndex) then
             return false
         end
@@ -1059,14 +1037,25 @@ end
 function ZO_SharedSmithingCreation:RefreshTraitList()
     self.traitList:Clear()
 
-    for traitIndex = 1, GetNumSmithingTraitItems() do
-        local traitType, name, icon, sellPrice, meetsUsageRequirement, itemStyle, quality = GetSmithingTraitItemInfo(traitIndex)
-        if traitType then
-            if traitType == ITEM_TRAIT_TYPE_NONE then
-                self.traitList:AddEntry({ craftingType = GetCraftingInteractionType(), traitIndex = traitIndex, traitType = traitType, icon = "EsoUI/Art/Crafting/crafting_smithing_noTrait.dds" })
-            elseif self:DoesTraitPassFilter(traitIndex, traitType) then
-                self.traitList:AddEntry({ craftingType = GetCraftingInteractionType(), traitIndex = traitIndex, name = name, traitType = traitType, icon = icon, quality = quality })
-            end
+    local traitItems = ZO_CraftingUtils_GetSmithingTraitItemInfo()
+    for _, traitItemInfo in ipairs(traitItems) do
+        local craftingType = GetCraftingInteractionType()
+        if traitItemInfo.type == ITEM_TRAIT_TYPE_NONE then
+            self.traitList:AddEntry({
+                craftingType = craftingType,
+                traitIndex = traitItemInfo.index,
+                traitType = traitItemInfo.type,
+                icon = "EsoUI/Art/Crafting/crafting_smithing_noTrait.dds",
+            })
+        elseif self:DoesTraitPassFilter(traitItemInfo.index, traitItemInfo.type, craftingType) then
+            self.traitList:AddEntry({
+                craftingType = craftingType,
+                traitIndex = traitItemInfo.index,
+                traitType = traitItemInfo.type,
+                icon = traitItemInfo.icon,
+                name = traitItemInfo.name,
+                quality = traitItemInfo.quality,
+            })
         end
     end
 
@@ -1081,35 +1070,70 @@ function ZO_SharedSmithingCreation:UpdateTooltipInternal()
     if self:AreSelectionsValid() then
         self.resultTooltip:SetHidden(false)
         self.resultTooltip:ClearLines()
-        self:SetupResultTooltip(self:GetAllCraftingParameters())
+        self:SetupResultTooltip(self:GetResultCraftingParameters())
     else
         self.resultTooltip:SetHidden(true)
     end
 end
 
-function ZO_SharedSmithingCreation:AreSelectionsValid()
-    if self:GetSelectedPatternIndex() and self:GetSelectedMaterialIndex() and self:GetSelectedMaterialQuantity() > 0 and self:GetSelectedItemStyleId() and self:GetSelectedTraitIndex() then
-        return self.isPatternUsable ~= USABILITY_TYPE_INVALID and self.isMaterialUsable ~= USABILITY_TYPE_INVALID and self.isStyleUsable ~= USABILITY_TYPE_INVALID and self.isTraitUsable ~= USABILITY_TYPE_INVALID
+function ZO_SharedSmithingCreation:GetPatternUsability()
+    if self:GetSelectedPatternIndex() then
+        return self.isPatternUsable
     end
-    return false
+    return USABILITY_TYPE_INVALID
+end
+
+function ZO_SharedSmithingCreation:GetMaterialUsability()
+    if self:GetSelectedMaterialIndex() and self:GetSelectedMaterialQuantity() > 0 then
+        return self.isMaterialUsable
+    end
+    return USABILITY_TYPE_INVALID
+end
+
+function ZO_SharedSmithingCreation:GetStyleUsability()
+    if self:ShouldIgnoreStyleItems() then
+        return USABILITY_TYPE_USABLE
+    end
+    if self:GetSelectedItemStyleId() then
+        return self.isStyleUsable
+    end
+    return USABILITY_TYPE_INVALID
+end
+
+function ZO_SharedSmithingCreation:GetTraitUsability()
+    if self:GetSelectedTraitIndex() then
+        return self.isTraitUsable
+    end
+    return USABILITY_TYPE_INVALID
+end
+
+function ZO_SharedSmithingCreation:AreSelectionsValid()
+    return self:GetPatternUsability() ~= USABILITY_TYPE_INVALID and self:GetMaterialUsability() ~= USABILITY_TYPE_INVALID and self:GetStyleUsability() ~= USABILITY_TYPE_INVALID and self:GetTraitUsability() ~= USABILITY_TYPE_INVALID
 end
 
 function ZO_SharedSmithingCreation:IsCraftable()
-    if self:GetSelectedPatternIndex() and self:GetSelectedMaterialIndex() and self:GetSelectedMaterialQuantity() > 0 and self:GetSelectedItemStyleId() and self:GetSelectedTraitIndex() then
-        return self.isPatternUsable and self.isMaterialUsable and self.isStyleUsable and self.isTraitUsable
-    end
-    return false
+    return self:GetPatternUsability() == USABILITY_TYPE_USABLE and self:GetMaterialUsability() == USABILITY_TYPE_USABLE and self:GetStyleUsability() and self:GetTraitUsability() == USABILITY_TYPE_USABLE
 end
 
 function ZO_SharedSmithingCreation:IsCraftableWithoutTrait()
-    if self:GetSelectedPatternIndex() and self:GetSelectedMaterialIndex() and self:GetSelectedMaterialQuantity() > 0 and self:GetSelectedItemStyleId() then
-        return self.isStyleUsable ~= USABILITY_TYPE_INVALID
+    if self:GetSelectedPatternIndex() and self:GetSelectedMaterialIndex() and self:GetSelectedMaterialQuantity() > 0 then
+        return self:GetStyleUsability() ~= USABILITY_TYPE_INVALID
     end
     return false
 end
 
+function ZO_SharedSmithingCreation:IsCraftingNonSetItemAtSetStation()
+    return CanSmithingSetPatternsBeCraftedHere() and not IsSetPattern(self.patternList:GetSelectedData())
+end
+
 function ZO_SharedSmithingCreation:Create()
-    CraftSmithingItem(self:GetAllCraftingParameters())
+    if self:IsCraftingNonSetItemAtSetStation() then
+        local craftingParams = {self:GetAllCraftingParameters()}
+        local resultItemLink = GetSmithingPatternResultLink(self:GetResultCraftingParameters())
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_CREATE_NONSET_ITEM", {craftingParams = craftingParams}, {mainTextParams = {resultItemLink}})
+    else
+        CraftSmithingItem(self:GetAllCraftingParameters())
+    end
 end
 
 function ZO_SharedSmithingCreation:GetUniversalStyleItemLink()
@@ -1117,6 +1141,9 @@ function ZO_SharedSmithingCreation:GetUniversalStyleItemLink()
 end
 
 function ZO_SharedSmithingCreation:TriggerUSITutorial()
+    if self:ShouldIgnoreStyleItems() then
+        return
+    end
     local universalStyleItemCount = GetCurrentSmithingStyleItemCount(GetUniversalStyleId())
     if universalStyleItemCount > 0 then
         TriggerTutorial(TUTORIAL_TRIGGER_UNIVERSAL_STYLE_ITEM)

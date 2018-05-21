@@ -81,15 +81,16 @@ end
 function ZO_LevelUpRewardsClaim_Keyboard:SetupRewardRow(rowControl, data)
     local name = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardNameFromRewardData(data)
     rowControl.nameControl:SetText(name)
-    if data.quality then
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+    local rewardType = data:GetRewardType()
+    if rewardType then
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemQuality())
         rowControl.nameControl:SetColor(r, g, b, 1)
     else
         local r, g, b = ZO_NORMAL_TEXT:UnpackRGB()
         rowControl.nameControl:SetColor(r, g, b, 1)
     end
 
-    local icon = ZO_LEVEL_UP_REWARDS_MANAGER:GetPlatformIconFromRewardData(data)
+    local icon = data:GetKeyboardIcon()
     if icon then
         rowControl.iconControl:SetTexture(icon)
     end
@@ -98,7 +99,7 @@ function ZO_LevelUpRewardsClaim_Keyboard:SetupRewardRow(rowControl, data)
     rowControl.data = data
 
     if rowControl.stackCountControl then
-        local stackCount = data.stackCount
+        local stackCount = data:GetQuantity()
         if data.rewardType and data.rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
             stackCount = 1 -- not showing stack count for currency
         end
@@ -224,8 +225,8 @@ function ZO_LevelUpRewardsClaim_Keyboard:AddRewards(rewards)
         self.layout:Anchor(tipLabel)
     end
 
-    local attributePoints = GetAttributePointsAwardedForReward(self.rewardId)
-    local skillPoints = GetSkillPointsAwardedForReward(self.rewardId)
+    local attributePoints = GetAttributePointsAwardedForLevel(self.rewardLevel)
+    local skillPoints = GetSkillPointsAwardedForLevel(self.rewardLevel)
 
     if attributePoints > 0 or skillPoints > 0 then
         self.layout:AddOffsetY(ZO_CLAIM_LEVEL_UP_REWARDS_KEYBOARD_GROUPING_SPACING)
@@ -252,7 +253,7 @@ function ZO_LevelUpRewardsClaim_Keyboard:AddRewards(rewards)
     end
 
     for i, reward in ipairs(rewards) do
-        if ZO_LEVEL_UP_REWARDS_MANAGER:IsRewardDataValidForPlayer(reward) then
+        if reward:IsValidReward() then
             if reward.choices == nil then
                 self.layout:StartSection()
                 local rewardControl = self.rewardPool:AcquireObject()
@@ -266,7 +267,7 @@ function ZO_LevelUpRewardsClaim_Keyboard:AddRewards(rewards)
                 self.layout:Anchor(rewardHeaderControl)
 
                 for choiceIndex, choiceReward in ipairs(reward.choices) do
-                    if ZO_LEVEL_UP_REWARDS_MANAGER:IsRewardDataValidForPlayer(choiceReward) then
+                    if choiceReward:IsValidReward() then
                         local rewardControl = self.choiceRewardPool:AcquireObject()
                         self:SetupRewardRow(rewardControl, choiceReward)
                         self.layout:Anchor(rewardControl)
@@ -284,11 +285,14 @@ end
 
 function ZO_LevelUpRewardsClaim_Keyboard:OnRewardRowClicked(control)
     local rewardData = control.data
-    if rewardData and rewardData.parentChoice then
-        local parentEntryIndex = rewardData.parentChoice.entryIndex
-        local choiceIndex = rewardData.entryIndex
-        MakeLevelUpRewardChoice(parentEntryIndex, choiceIndex)
-        PlaySound(SOUNDS.DEFAULT_CLICK)
+    if rewardData then
+        local parentChoice = rewardData:GetParentChoice()
+        if parentChoice then
+            local parentRewardId = parentChoice:GetRewardId()
+            local choiceRewardId = rewardData:GetRewardId()
+            MakeLevelUpRewardChoice(parentRewardId, choiceRewardId)
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
     end
 end
 
@@ -346,25 +350,16 @@ do
     end
 
     function ZO_LevelUpRewards_RewardRow_OnMouseEnter(control)
-        local controlData = control.data
-        if controlData then
-            if controlData.rewardType and controlData.rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
-                local rewardId = controlData.rewardId
-                local entryIndex = controlData.entryIndex
-                InitializeTooltip(ItemTooltip, control, LEFT, 0, 0, RIGHT)
-                ItemTooltip:SetRewardEntry(rewardId, entryIndex)
-                if controlData.rewardType == REWARD_ENTRY_TYPE_ITEM then
-                    ItemTooltip:ShowComparativeTooltips()
-                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
-                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
-                    ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2)
-                end
-            elseif controlData.isAdditionalUnlock then
-                local displayName = ZO_LEVEL_UP_REWARDS_MANAGER:GetPlatformFormattedNameFromRewardData(controlData)
-                LayoutBasicTooltip(ItemTooltip, control, displayName, controlData.description)
-            elseif controlData.isSkillPoint then
+        local rewardData = control.data
+        if rewardData then
+            local rewardType = rewardData:GetRewardType()
+            if rewardType then
+                ZO_Rewards_Shared_OnMouseEnter(control)
+            elseif rewardData:IsAdditionalUnlock() then
+                LayoutBasicTooltip(ItemTooltip, control, rewardData:GetFormattedName(), rewardData:GetDescription())
+            elseif rewardData:IsSkillPoint() then
                 LayoutBasicTooltip(ItemTooltip, control, GetString(SI_LEVEL_UP_REWARDS_SKILL_POINT_TOOLTIP_HEADER), GetString(SI_LEVEL_UP_REWARDS_SKILL_POINT_TOOLTIP_BODY))
-            elseif controlData.isAttributePoint then
+            elseif rewardData:IsAttributePoint() then
                 LayoutBasicTooltip(ItemTooltip, control, GetString(SI_LEVEL_UP_REWARDS_ATTRIBUTE_POINT_TOOLTIP_HEADER), GetString(SI_LEVEL_UP_REWARDS_ATTRIBUTE_POINT_TOOLTIP_BODY))
             end
         end
@@ -372,8 +367,7 @@ do
 end
 
 function ZO_LevelUpRewards_RewardRow_OnMouseExit(control)
-    ClearTooltip(ItemTooltip)
-    ItemTooltip:HideComparativeTooltips()
+    ZO_Rewards_Shared_OnMouseExit(control)
 end
 
 function ZO_LevelUpRewards_ChoiceRewardRow_OnMouseEnter(control)

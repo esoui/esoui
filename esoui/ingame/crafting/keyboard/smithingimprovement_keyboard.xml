@@ -5,8 +5,16 @@
         <Texture name="ZO_SmithingImprovementBoosterTexture" virtual="true">
             <Dimensions x="128" y="64" />
             <Controls>
-                <Texture name="$(parent)Icon" inherits="ZO_GamepadSmithingImprovementIcon">
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="CENTER" offsetY="-10"/>
+
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontWinH3">
+                            <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                        </Label>
+                    </Controls>
                 </Texture>
             </Controls>
         </Texture>

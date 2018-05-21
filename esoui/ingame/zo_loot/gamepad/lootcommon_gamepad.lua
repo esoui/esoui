@@ -13,7 +13,8 @@ function ZO_Loot_Gamepad_Base:InitializeKeybindStripDescriptorsMixin(areEthereal
     self.keybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         { -- Exit Button
-            name = GetString(SI_EXIT_BUTTON),
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Loot Exit",
             keybind = "UI_SHORTCUT_EXIT",
             callback =  function()
                 EndLooting()

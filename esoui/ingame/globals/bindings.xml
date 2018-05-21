@@ -44,8 +44,27 @@
             </Action>
 
             <Action name="GAMEPAD_JUMP_OR_INTERACT" hideAction="true">
-                <Down>ZO_ActionHandler_JumpOrInteractDown()</Down>
-                <Up>ZO_ActionHandler_JumpOrInteractUp()</Up>
+                <Down>
+                    ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_NOTHING)
+                    local interactPromptVisible = RETICLE:GetInteractPromptVisible()
+                    if not IsBlockActive() then  --don't allow Interactions or Jumps while blocking on Gamepad as it will trigger a roll anyway.
+                        if interactPromptVisible then
+                            ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_INTERACT)
+                            if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end
+                        else
+                            ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_JUMP)
+                            JumpAscendStart()
+                        end
+                    end
+                </Down>
+                <Up>
+                    local downAction = ZO_GetJumpOrInteractDownAction()
+                    if downAction == ZO_JUMP_OR_INTERACT_DID_INTERACT then
+                        if not FISHING_MANAGER:StopInteraction() then GameCameraInteractStart() end
+                    elseif downAction == ZO_JUMP_OR_INTERACT_DID_JUMP then
+                        AscendStop()
+                    end
+                </Up>
             </Action>
         </Category>
 
@@ -92,28 +111,88 @@
             </Action>
 
             <Action name="ACTION_BUTTON_3">
-                <Down>ActionButtonDown(3)</Down>
-                <Up>ActionButtonUp(3)</Up>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(3)                
+                        ZO_ActionBar_OnActionButtonDown(3)
+                    end
+                </Down>
+                <Up>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotUp(3)                
+                        ZO_ActionBar_OnActionButtonUp(3)
+                    end
+                </Up>
             </Action>
             <Action name="ACTION_BUTTON_4">
-                <Down>ActionButtonDown(4)</Down>
-                <Up>ActionButtonUp(4)</Up>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(4)                
+                        ZO_ActionBar_OnActionButtonDown(4)
+                    end
+                </Down>
+                <Up>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotUp(4)                
+                        ZO_ActionBar_OnActionButtonUp(4)
+                    end
+                </Up>
             </Action>
             <Action name="ACTION_BUTTON_5">
-                <Down>ActionButtonDown(5)</Down>
-                <Up>ActionButtonUp(5)</Up>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(5)                
+                        ZO_ActionBar_OnActionButtonDown(5)
+                    end
+                </Down>                
+                <Up>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotUp(5)                
+                        ZO_ActionBar_OnActionButtonUp(5)
+                    end
+                </Up>
             </Action>
             <Action name="ACTION_BUTTON_6">
-                <Down>ActionButtonDown(6)</Down>
-                <Up>ActionButtonUp(6)</Up>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(6)                
+                        ZO_ActionBar_OnActionButtonDown(6)
+                    end
+                </Down>                
+                <Up>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotUp(6)                
+                        ZO_ActionBar_OnActionButtonUp(6)
+                    end
+                </Up>
             </Action>
             <Action name="ACTION_BUTTON_7">
-                <Down>ActionButtonDown(7)</Down>
-                <Up>ActionButtonUp(7)</Up>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(7)                
+                        ZO_ActionBar_OnActionButtonDown(7)
+                    end
+                </Down>                
+                <Up>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotUp(7)                
+                        ZO_ActionBar_OnActionButtonUp(7)
+                    end
+                </Up>
             </Action>
             <Action name="ACTION_BUTTON_8">
-                <Down>ActionButtonDown(8)</Down>
-                <Up>ActionButtonUp(8)</Up>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDown(8)                
+                        ZO_ActionBar_OnActionButtonDown(8)
+                    end
+                </Down>                
+                <Up>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotUp(8)                
+                        ZO_ActionBar_OnActionButtonUp(8)
+                    end
+                </Up>
             </Action>
             
             <!--These actions exist because they're on a Button that is also chorded for another action,
@@ -129,26 +208,57 @@
             </Action>
 
             <Action name="GAMEPAD_ACTION_BUTTON_3" hideAction="true">
-                <Down>ActionButtonDownAndUp(3)</Down>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDownAndUp(3)
+                    end
+                </Down>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_4" hideAction="true">
-                <Down>ActionButtonDownAndUp(4)</Down>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDownAndUp(4)
+                    end
+                </Down>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_5" hideAction="true">
-                <Down>ActionButtonDownAndUp(5)</Down>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDownAndUp(5)
+                    end
+                </Down>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_6" hideAction="true">
-                <Down>ActionButtonDownAndUp(6)</Down>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDownAndUp(6)
+                    end
+                </Down>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_7" hideAction="true">
-                <Down>ActionButtonDownAndUp(7)</Down>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDownAndUp(7)
+                    end
+                </Down>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_8" hideAction="true">
-                <Down>ActionButtonDownAndUp(8)</Down>
+                <Down>
+                    if ZO_ActionBar_CanUseActionSlots() then
+                        OnSlotDownAndUp(8)
+                    end
+                </Down>
             </Action>
             <Action name="ACTION_BUTTON_9">
                 <Down>QUICKSLOT_RADIAL_MANAGER:StartInteraction()</Down>
-                <Up>QUICKSLOT_RADIAL_MANAGER:StopInteraction()</Up>
+                <Up>
+                    if not QUICKSLOT_RADIAL_MANAGER:StopInteraction() then
+                        if ZO_ActionBar_CanUseActionSlots() then
+                            OnSlotUp(GetCurrentQuickslot())
+                            ZO_ActionBar_OnActionButtonUp(9)
+                        end
+                    end
+                </Up>
             </Action>
 
             <Action name="UI_SHORTCUT_EMOTES_QUICK_SLOTS">
@@ -169,6 +279,9 @@
         <Category name="SI_KEYBINDINGS_CATEGORY_TARGETING">
             <Action name="CYCLE_PREFERRED_ENEMY_TARGET">
                 <Down>CycleGameCameraPreferredEnemyTarget()</Down>
+            </Action>
+            <Action name="CLEAR_PREFERRED_ENEMY_TARGET">
+                <Down>ClearGameCameraPreferredTarget()</Down>
             </Action>
         </Category>
         
@@ -195,7 +308,7 @@
         <Category name="SI_KEYBINDINGS_CATEGORY_INTERACTION">
             <Action name="GAME_CAMERA_INTERACT">
                 <Down>if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end</Down>
-                <Up>FISHING_MANAGER:StopInteraction()</Up>
+                <Up>if not FISHING_MANAGER:StopInteraction() then GameCameraInteractStart() end</Up>
             </Action>
 
             <Action name="PLAYER_TO_PLAYER_INTERACT">
@@ -313,7 +426,7 @@
             </Action>
 
             <Action name="ASSIST_NEXT_TRACKED_QUEST">
-                <Down>QUEST_TRACKER:AssistNext()</Down>
+                <Down>FOCUSED_QUEST_TRACKER:AssistNext()</Down>
             </Action>
 
             <Action name="TOGGLE_FIRST_PERSON">
@@ -930,6 +1043,30 @@
         </Category>
     </Layer>
 
+    <Layer name="ScreenshotMode" allowFallthrough="false">
+        <Category>
+            <AllowAction name="GAMEPAD_JUMP_OR_INTERACT" />
+            <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM" />
+
+            <Action name="SCREENSHOT_MODE_EXIT" hideAction="true" rebindable="false">
+                <Down>
+                    SCREENSHOT_MODE_GAMEPAD:ExitKeybind()
+                </Down>
+            </Action>
+            <!-- These two binds are meant to cover what a player might mash to try to get out of this mode.-->
+            <Action name="SCREENSHOT_MODE_SHOW_UI_1" hideAction="true" rebindable="false">
+                <Down>
+                    SCREENSHOT_MODE_GAMEPAD:ShowUIKeybind()
+                </Down>
+            </Action>
+            <Action name="SCREENSHOT_MODE_SHOW_UI_2" hideAction="true" rebindable="false">
+                <Down>
+                    SCREENSHOT_MODE_GAMEPAD:ShowUIKeybind()
+                </Down>
+            </Action>
+        </Category>
+    </Layer>
+    
     <Layer name="SI_KEYBINDINGS_LAYER_HOUSING_EDITOR" allowFallthrough="false">
         <Category>
             <!--Movement-->

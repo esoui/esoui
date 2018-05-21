@@ -222,9 +222,14 @@ do
         ["gamepad_inventory_root"] = true,
         ["collectionsBook"] = true,
         ["gamepadCollectionsBook"] = true,
-		["stats"] = true,
-		["outfitStylesBook"] = true,
-		["gamepad_outfits_selection"] = true,
+        ["stats"] = true,
+        ["outfitStylesBook"] = true,
+        ["gamepad_outfits_selection"] = true,
+        ["chapterUpgradePreviewGamepad"] = true,
+        ["giftInventoryViewGamepad"] = true,
+        ["giftInventoryViewKeyboard"] = true,
+        ["dailyLoginRewardsPreview_Gamepad"] = true,
+        ["dailyLoginRewards"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()

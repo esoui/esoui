@@ -444,6 +444,8 @@ local PLAYER_ATTRIBUTE_VISUALIZER_SOUNDS =
         [STAT_STATE_SHIELD_LOST]        = SOUNDS.UAV_DAMAGE_SHIELD_LOST,
         [STAT_STATE_POSSESSION_APPLIED] = SOUNDS.UAV_POSSESSION_APPLIED,
         [STAT_STATE_POSSESSION_REMOVED] = SOUNDS.UAV_POSSESSION_REMOVED,
+        [STAT_STATE_TRAUMA_GAINED]      = SOUNDS.UAV_TRAUMA_ADDED,
+        [STAT_STATE_TRAUMA_LOST]        = SOUNDS.UAV_TRAUMA_LOST,
     },
 }
 
@@ -596,7 +598,7 @@ function ZO_PlayerAttributeBars:New(control)
         barRightOverlayTemplate = "ZO_PowerShieldBarRightOverlayArrow",
     }
     barGroup.attributeVisualizer:AddModule(ZO_UnitVisualizer_PowerShieldModule:New(powerShieldLayoutInfo))
-    
+
     barGroup:ResizeToFitScreen()
 
     PLAYER_ATTRIBUTE_BARS_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)

@@ -208,16 +208,22 @@ function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingCham
 
         self:AddSectionEvenIfEmpty(headerSection)
 
+        self:LayoutHeaderlessAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects)
+    end
+end
+
+function ZO_Tooltip:LayoutHeaderlessAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects)
+    if DoesAbilityExist(abilityId) then
         local hasProgression, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph = GetAbilityProgressionXPInfoFromAbilityId(abilityId)
 
         self:AddAbilityName(abilityId, hideRank, overrideRank)
-        if(hasProgression) then
+        if hasProgression then
             self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP, atMorph)
         end
-        if(not IsAbilityPassive(abilityId)) then
+        if not IsAbilityPassive(abilityId) then
             self:AddAbilityStats(abilityId)
         end
-        if(addNewEffects) then
+        if addNewEffects then
             self:AddAbilityNewEffects(GetAbilityNewEffectLines(abilityId))
         end
         self:AddAbilityDescription(abilityId, pendingChampionPoints)
@@ -330,8 +336,7 @@ function ZO_Tooltip:LayoutAbilityMorph(progressionIndex, morphIndex, skillType, 
         else
             headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
         end
-        self:AddSection(headerSection)
-    end    
+    end
     
 
     local ADD_NEW_EFFECTS = true
@@ -354,7 +359,7 @@ function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pend
     
     local HIDE_RANK = true
     local OVERRIDE_RANK = nil
-    self:LayoutAbility(abilityId, HIDE_RANK, OVERRIDE_RANK, pendingPoints)
+    self:LayoutHeaderlessAbility(abilityId, HIDE_RANK, OVERRIDE_RANK, pendingPoints)
 
     local unlockLevel = GetChampionSkillUnlockLevel(disciplineIndex, skillIndex)
     if unlockLevel ~= nil then

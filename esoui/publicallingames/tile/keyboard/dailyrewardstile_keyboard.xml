@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DailyRewardsTile_Keyboard_Control" inherits="ZO_DailyRewardsTile_Control ZO_ClaimTile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_DailyRewardsTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Highlight" centerColor="00000000" alpha="0" layer="0" level="2" blendMode="ADD">
+                            <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                            <Anchor point="TOPLEFT" offsetX="5" offsetY="5"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5"/>
+                        </Backdrop>
+
+                        <Button name="$(parent)ActionButton" override="true" mouseOverBlendMode="ALPHA" level="5" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

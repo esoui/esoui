@@ -155,7 +155,6 @@ do
     GetLFGOption = function(...) return BasicTypeIndexToIdTemplate(GetActivityInfo, ...) end
     GetLFGOptionKeyboardDescriptionTextures = function(...) return BasicTypeIndexToIdTemplate(GetActivityKeyboardDescriptionTextures, ...) end
     GetLFGOptionGamepadDescriptionTexture = function(...) return BasicTypeIndexToIdTemplate(GetActivityGamepadDescriptionTexture, ...) end
-    GetLFGDisplayLevels = function(...) return BasicTypeIndexToIdTemplate(GetActivityDisplayLevels, ...) end
     GetLFGOptionGroupType = function(...) return BasicTypeIndexToIdTemplate(GetActivityGroupType, ...) end
     DoesPlayerMeetLFGLevelRequirements = function(...) return BasicTypeIndexToIdTemplate(DoesPlayerMeetActivityLevelRequirements, ...) end
     DoesGroupMeetLFGLevelRequirements = function(...) return BasicTypeIndexToIdTemplate(DoesGroupMeetActivityLevelRequirements, ...) end
@@ -166,8 +165,6 @@ function AddGroupFinderSearchEntry(activityType, index)
     if index then
         local activityId = GetActivityIdByTypeAndIndex(activityType, index)
         AddActivityFinderSpecificSearchEntry(activityId)
-    else
-        AddActivityFinderRandomSearchEntry(activityType)
     end
 end
 
@@ -188,11 +185,31 @@ function GetLFGAverageRoleTimeByActivity(activityType, index, role)
     return GetActivityAverageRoleTime(activityId, role)
 end
 
+-- Queueing by activity type is no longer supported, replaced by LFGSets
+function AddActivityFinderRandomSearchEntry()
+    -- Do nothing
+end
+
+function DoesLFGActivityHasAllOption()
+    return false
+end
+
+function GetLFGActivityRewardData()
+    local REWARD_UI_DATA_ID = 0
+    local XP_REWARD = 0
+    return REWARD_UI_DATA_ID, XP_REWARD
+end
+
 GetNumLFGOptions = GetNumActivitiesByType
 GetNumLFGRequests = GetNumActivityRequests
 HasLFGFindReplacementNotification = HasActivityFindReplacementNotification
 AcceptLFGFindReplacementNotification = AcceptActivityFindReplacementNotification
 DeclineLFGFindReplacementNotification = DeclineActivityFindReplacementNotification
+
+--Used to be dungeon only.  Now there's also battlegrounds.  Should use GetLFGCooldownTimeRemainingSeconds now.
+function IsEligibleForDailyActivityReward()
+    return IsActivityEligibleForDailyReward(LFG_ACTIVITY_DUNGEON)
+end
 
 --Renamed the objective functions to indicate that they aren't specific to AvA anymore
 GetNumAvAObjectives = GetNumObjectives
@@ -419,6 +436,25 @@ function ZO_Currency_GetPlatformFormattedGoldIcon()
     return ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_MONEY)
 end
 
+-- The concept of "abilities earned at a level" went away when we added Skill Lines, so we finally removed API for it
+function GetNumAbilitiesLearnedForLevel(level, isProgression)
+    if level == 0 then
+        return GetNumAbilities()
+    else
+        return 0
+    end
+end
+
+-- The concept of "abilities earned at a level" went away when we added Skill Lines, so we finally removed API for it
+function GetLearnedAbilityInfoForLevel(level, learnedIndex, isProgression)
+    if level == 0 then
+        local name, textureFile, _, _, _, _ = GetAbilityInfoByIndex(learnedIndex)
+        return name, textureFile, learnedIndex, 0
+    else
+        return "", "", 0, 0
+    end
+end
+
 -- Battleground pin enum fixup
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_NEUTRAL = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_NEUTRAL
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_FIRE_DRAKES
@@ -438,3 +474,48 @@ MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_PIT_DAEMONS = MAP_PIN_TYPE_BGPIN_CAPTURE
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_STORM_LORDS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_STORM_LORDS
 
 VISUAL_LAYER_HEADWEAR = VISUAL_LAYER_HAT
+
+-- Unifying smithing filters
+ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR = SMITHING_FILTER_TYPE_ARMOR
+ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS = SMITHING_FILTER_TYPE_WEAPONS
+
+ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR = SMITHING_FILTER_TYPE_ARMOR
+ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS = SMITHING_FILTER_TYPE_WEAPONS
+ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS = SMITHING_FILTER_TYPE_RAW_MATERIALS
+
+ZO_SMITHING_CREATION_FILTER_TYPE_WEAPONS = SMITHING_FILTER_TYPE_WEAPONS
+ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR = SMITHING_FILTER_TYPE_ARMOR
+ZO_SMITHING_CREATION_FILTER_TYPE_SET_WEAPONS = SMITHING_FILTER_TYPE_SET_WEAPONS
+ZO_SMITHING_CREATION_FILTER_TYPE_SET_ARMOR = SMITHING_FILTER_TYPE_SET_ARMOR
+
+ZO_SMITHING_RESEARCH_FILTER_TYPE_WEAPONS = SMITHING_FILTER_TYPE_WEAPONS
+ZO_SMITHING_RESEARCH_FILTER_TYPE_ARMOR = SMITHING_FILTER_TYPE_ARMOR
+
+ZO_RETRAIT_FILTER_TYPE_ARMOR = SMITHING_FILTER_TYPE_ARMOR
+ZO_RETRAIT_FILTER_TYPE_WEAPONS = SMITHING_FILTER_TYPE_WEAPONS
+
+SMITHING_MODE_REFINMENT = SMITHING_MODE_REFINEMENT
+
+-- Rewards Refactor
+EVENT_CLAIM_LEVEL_UP_REWARD_RESULT = EVENT_CLAIM_REWARD_RESULT
+
+-- Collectible entitlement restrictions are now handled on the acquisition end only
+function DoesCollectibleRequireEntitlement(collectibleId)
+    return false
+end
+
+-- Crafting animation bugfix. Please also consider ZO_CraftingUtils_IsPerformingCraftProcess()
+IsPerformingCraftProcess = IsAwaitingCraftingProcessResponse
+
+--Collectible hide mode rework
+function IsCollectibleHiddenWhenLockedDynamic(collectibleId)
+    return GetCollectibleHideMode(collectibleId) == COLLECTIBLE_HIDE_MODE_WHEN_LOCKED_REQUIREMENT
+end
+
+function IsCollectibleHiddenWhenLocked(collectibleId)
+    if IsCollectibleHiddenWhenLockedDynamic(collectibleId) then
+        return IsCollectibleDynamicallyHidden(collectibleId)
+    else
+        return GetCollectibleHideMode(collectibleId) == COLLECTIBLE_HIDE_MODE_WHEN_LOCKED
+    end
+end

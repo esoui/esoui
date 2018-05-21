@@ -15,7 +15,11 @@ do
     
     function ZO_AnimationPool:New(templateName)
         local function AnimationFactory(pool)
-            return ANIMATION_MANAGER:CreateTimelineFromVirtual(templateName)
+            local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(templateName)
+            if pool.customFactoryBehavior then
+                pool.customFactoryBehavior(timeline)
+            end
+            return timeline
         end
 
         return ZO_ObjectPool.New(self, AnimationFactory, Reset)
@@ -24,6 +28,11 @@ end
 
 function ZO_AnimationPool:SetCustomResetBehavior(customResetBehavior)
     self.customResetBehavior = customResetBehavior
+end
+
+
+function ZO_AnimationPool:SetCustomFactoryBehavior(customFactoryBehavior)
+    self.customFactoryBehavior = customFactoryBehavior
 end
 
 --[[
@@ -126,7 +135,8 @@ function ZO_MetaPool:ReleaseAllObjects()
         end
         self.sourcePool:ReleaseObject(key)
     end
-    self.activeObjects = {}
+
+    ZO_ClearTable(self.activeObjects) 
 end
 
 function ZO_MetaPool:ReleaseObject(objectKey)

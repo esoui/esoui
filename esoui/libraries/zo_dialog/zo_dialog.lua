@@ -276,7 +276,7 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
     if isGamepadDialog then
         local title = GetFormattedText(dialog, dialogInfo.title, textParams.titleParams)
         mainText = GetFormattedText(dialog, dialogInfo.mainText, textParams.mainTextParams)
-        local warningText = GetFormattedText(dialog, dialogInfo.warning, textParams.warningTextParams)
+        local warningText = GetFormattedText(dialog, dialogInfo.warning, textParams.warningParams)
         ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText)
     else
         textControl = dialog:GetNamedChild("Text")

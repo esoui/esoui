@@ -165,9 +165,9 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
             text = SI_DIALOG_LOG_OUT_UPGRADE,
             callback = function(dialog)
                 if IsConsoleUI() then
-                    ShowConsoleESOChapterUpgradeUI(dialog.data.chapterId, dialog.data.isCollectorsEdition)
+                    ShowConsoleESOChapterUpgradeUI(dialog.data.chapterId, dialog.data.isCollectorsEdition, dialog.data.chapterUpgradeSource)
                 else
-                    OpenChapterUpgradeURL(dialog.data.chapterId, dialog.data.isCollectorsEdition)
+                    OpenChapterUpgradeURL(dialog.data.chapterId, dialog.data.isCollectorsEdition, dialog.data.chapterUpgradeSource)
                 end
                 ZO_Disconnect()
             end,
@@ -180,13 +180,13 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     },
 }
 
-function ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition)
-    local data = { chapterId = GetCurrentChapterUpgradeId(), isPreRelease = false, isCollectorsEdition = isCollectorsEdition, }
+function ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition, chapterUpgradeSource)
+    local data = { chapterId = GetCurrentChapterUpgradeId(), isPreRelease = false, isCollectorsEdition = isCollectorsEdition, chapterUpgradeSource = chapterUpgradeSource }
     ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE", data)
 end
 
-function ZO_ShowChapterPrepurchasePlatformDialog(chapterId, isCollectorsEdition)
-    local data = { chapterId = chapterId, isPreRelease = true, isCollectorsEdition = isCollectorsEdition, }
+function ZO_ShowChapterPrepurchasePlatformDialog(chapterId, isCollectorsEdition, chapterUpgradeSource)
+    local data = { chapterId = chapterId, isPreRelease = true, isCollectorsEdition = isCollectorsEdition, chapterUpgradeSource = chapterUpgradeSource}
     ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE", data)
 end
 

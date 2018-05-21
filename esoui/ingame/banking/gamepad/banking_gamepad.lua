@@ -23,6 +23,25 @@ function ZO_GamepadBankInventoryList:Initialize(...)
     self.currenciesTransferEntry = entryData
 end
 
+function ZO_GamepadBankInventoryList:RefreshCurrencyTransferEntryInList()
+    if self.isDirty then
+        --it will be handled when the full list is rebuilt on show
+        return
+    end
+
+    local currencyEntryIndex = self.list:GetIndexForData("ZO_GamepadMenuEntryTemplate", self.currenciesTransferEntry)
+    local hasCurrencyEntry = currencyEntryIndex ~= nil
+    local shouldHaveCurrencyEntry = DoesBankHoldCurrency(GetBankingBag())
+    if hasCurrencyEntry ~= shouldHaveCurrencyEntry then
+        if shouldHaveCurrencyEntry then
+            self.list:AddEntryAtIndex(1, "ZO_GamepadMenuEntryTemplate", self.currenciesTransferEntry)
+        else
+            self.list:RemoveEntry("ZO_GamepadMenuEntryTemplate", self.currenciesTransferEntry)
+        end
+        self.list:Commit()
+    end
+end
+
 function ZO_GamepadBankInventoryList:RefreshList()
     --Getting the slot data can trigger a full inventory update callback which will try to refresh the list in the middle of refreshing the list which duplicates the entries. isRebuildingList protects against this.
     if not self.isRebuildingList then
@@ -102,7 +121,12 @@ function ZO_GamepadBanking:OnOpenBank(bankBag)
         --If we have already initialized then we've built the withdraw list already and need to update its backing bags.
         --If we haven't initialized we will build the withdraw list after this and it will pickup the new banked bags.
         if self.initialized then
-            self.withdrawList:SetInventoryTypes(self.bankedBags)
+            local refreshedListAsAResultOfBankedBagsChanging = self.withdrawList:SetInventoryTypes(self.bankedBags)
+            --We also need to update both of the lists because they include the deposit/withdraw entries which only appear on banks and not home storage
+            if not refreshedListAsAResultOfBankedBagsChanging then
+                self.withdrawList:RefreshCurrencyTransferEntryInList()
+            end
+            self.depositList:RefreshCurrencyTransferEntryInList()
         end
 
         SCENE_MANAGER:Show(GAMEPAD_BANKING_SCENE_NAME)
@@ -115,7 +139,7 @@ function ZO_GamepadBanking:OnCloseBank()
     end
 end
 
-function ZO_GamepadBanking:OnCollectibleUpdated(collectibleId, justUnlocked)
+function ZO_GamepadBanking:OnCollectibleUpdated(collectibleId, lockStateChange)
     if IsBankOpen() and IsHouseBankBag(GetBankingBag()) then
         if GetCollectibleCategoryType(collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE_BANK then
             self:RefreshWithdrawNoItemText()
@@ -136,7 +160,7 @@ end
 function ZO_GamepadBanking:OnDeferredInitialization()
     self.spinner = self.control:GetNamedChild("SpinnerContainer")
     self.spinner:InitializeSpinner()
-    self.control:RegisterForEvent(EVENT_COLLECTIBLE_UPDATED, function(_, ...) self:OnCollectibleUpdated(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
 end
 
 function ZO_GamepadBanking:OnSceneShowing()
@@ -576,16 +600,9 @@ function ZO_GamepadBanking:PerformWithdrawDepositFunds()
 end
 
 function ZO_GamepadBanking:ShowActions()
-    self:RemoveKeybinds()
-
-    local function OnActionsFinishedCallback()
-        self:AddKeybinds()
-    end
-
     local dialogData = 
     {
         targetData = self:GetTargetData(),
-        finishedCallback = OnActionsFinishedCallback,
         itemActions = self.itemActions,
     }
 

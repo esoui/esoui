@@ -529,9 +529,9 @@ function ZO_MailSend_Gamepad:PopulateMainList()
             self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, userListCallback)
         elseif platform == UI_PLATFORM_XBOX then
             if(GetNumberConsoleFriends() > 0) then
-                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_MAIL_CHOOSE_FRIEND), userListCallback)
+                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), userListCallback)
             else
-                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_MAIL_CHOOSE_FRIEND), nil)
+                self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), nil)
             end
         else
             self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback)

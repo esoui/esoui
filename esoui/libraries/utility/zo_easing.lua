@@ -56,6 +56,10 @@ function ZO_EaseInOutQuintic(progress)
     return EaseOutIn(progress, 5)
 end
 
+function ZO_EaseInOutZeroToOneToZero(progress)
+    return math.sin(math.pi * progress)
+end
+
 function ZO_GenerateCubicBezierEase(x1, y1, x2, y2)
     if x1 == y1 and x2 == y2 then
         return ZO_LinearEase

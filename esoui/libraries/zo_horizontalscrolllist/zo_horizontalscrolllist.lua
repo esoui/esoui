@@ -87,6 +87,9 @@ function ZO_HorizontalScrollList:Initialize(control, templateName, numVisibleEnt
             OnDragStop()
         elseif button == MOUSE_BUTTON_INDEX_LEFT and upInside and self.enabled then
             self:SelectControl(clickedControl)
+            if self.onControlClicked then
+                self.onControlClicked(clickedControl, button, upInside)
+            end
         end
     end
 
@@ -101,7 +104,7 @@ function ZO_HorizontalScrollList:Initialize(control, templateName, numVisibleEnt
         self.controls[i] = entryControl
     end
 
-    self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+    self.control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
 
     self.noItemsLabel = self.control:GetNamedChild("NoItemsLabel")
 
@@ -176,16 +179,19 @@ function ZO_HorizontalScrollList:AddEntry(data)
     self.list[#self.list + 1] = data
 end
 
-function ZO_HorizontalScrollList:MoveLeft()
-    self:SetSelectedIndex((self.selectedIndex or 0) - 1)
+function ZO_HorizontalScrollList:MoveLeft(isAutoScrollEvent)
+    self:SetSelectedIndex((self.selectedIndex or 0) - 1, nil, nil, nil, isAutoScrollEvent)
 end
 
-function ZO_HorizontalScrollList:MoveRight()
-    self:SetSelectedIndex((self.selectedIndex or 0) + 1)
+function ZO_HorizontalScrollList:MoveRight(isAutoScrollEvent)
+    self:SetSelectedIndex((self.selectedIndex or 0) + 1, nil, nil, nil, isAutoScrollEvent)
 end
 
-function ZO_HorizontalScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, withoutAnimation, reselectingDuringRebuild)
+function ZO_HorizontalScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, withoutAnimation, reselectingDuringRebuild, isAutoScrollEvent)
     if self.enabled or allowEvenIfDisabled then
+        self.lastScrollTime = GetFrameTimeSeconds()
+        self.lastInteractionAutomatic = isAutoScrollEvent
+
         if selectedIndex and not self.allowWrapping then
             selectedIndex = zo_clamp(selectedIndex, 1 - #self.list, 0)
         end
@@ -310,12 +316,18 @@ function ZO_HorizontalScrollList:ApplyTemplateToControls(template)
 end
 
 function ZO_HorizontalScrollList:SetMouseEnabled(mouseEnabled)
-	self.control:SetMouseEnabled(mouseEnabled)
+    self.control:SetMouseEnabled(mouseEnabled)
+end
+
+function ZO_HorizontalScrollList:SetAutoScroll(movementType, autoScrollDuration, postInteractionDuration)
+    self.autoScrollMovementType = movementType
+    self.autoScrollDuration = autoScrollDuration
+    self.autoScrollPostInteractionDuration = postInteractionDuration or autoScrollDuration
 end
 
 --[[ Private API ]]--
 
-function ZO_HorizontalScrollList:OnUpdate()
+function ZO_HorizontalScrollList:OnUpdate(currentFrameTimeSeconds)
     if #self.list > 0 and self.lastPrimaryControlOffsetX then
         local targetOffsetX = self:CalculateSelectedIndexOffsetWithDrag()
         if self.dragging then
@@ -328,6 +340,16 @@ function ZO_HorizontalScrollList:OnUpdate()
         elseif self.isMoving then
             self:SetMoving(false)
             self:UpdateAnchors(targetOffsetX)
+        elseif self.autoScrollMovementType then
+            local currentDuration = self.lastInteractionAutomatic and self.autoScrollDuration or self.autoScrollPostInteractionDuration
+            if currentFrameTimeSeconds > self.lastScrollTime + currentDuration then
+                local IS_AUTO_EVENT = true
+                if self.autoScrollMovementType == ZO_HORIZONTALSCROLLLIST_MOVEMENT_TYPES.MOVE_LEFT then
+                    self:MoveLeft(IS_AUTO_EVENT)
+                elseif self.autoScrollMovementType == ZO_HORIZONTALSCROLLLIST_MOVEMENT_TYPES.MOVE_RIGHT then
+                    self:MoveRight(IS_AUTO_EVENT)
+                end
+            end
         end
     end
 end
@@ -449,6 +471,10 @@ function ZO_HorizontalScrollList:AnchorEntryAtFixedOffset(control, offsetX, inde
     else
         self:SetDefaultEntryAnchor(control, offsetX)
     end
+end
+
+function ZO_HorizontalScrollList:SetOnControlClicked(onControlClicked)
+    self.onControlClicked = onControlClicked
 end
 
 function ZO_HorizontalScrollList:SelectControl(controlToSelect)

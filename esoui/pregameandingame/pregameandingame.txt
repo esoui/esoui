@@ -13,8 +13,6 @@ EsoUI\PregameAndIngame\Gamepad\ControllerDisconnect\ControllerDisconnect.xml
 
 EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.lua
 EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.xml
-EsoUI\PregameAndIngame\GammaAdjust\Keyboard\GammaAdjust_Keyboard.xml
-EsoUI\PregameAndIngame\GammaAdjust\Gamepad\GammaAdjust_Gamepad.xml
 
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Camera_Shared.lua

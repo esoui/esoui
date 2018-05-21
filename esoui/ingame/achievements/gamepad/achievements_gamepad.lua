@@ -232,6 +232,10 @@ function ZO_Achievements_Gamepad:OnLeaveHeader()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
+function ZO_Achievements_Gamepad:CanEnterHeader()
+    return not self.recentAchievementContainer:IsControlHidden()
+end
+
 function ZO_Achievements_Gamepad:AchievementListSelectionChanged(list, entry)
     if entry then
         local recentAchievementId = entry.control.achievementId

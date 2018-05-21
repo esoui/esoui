@@ -113,11 +113,8 @@ end
 
 function ZO_RetraitStation_Retrait_Keyboard:OnFilterChanged(filterType)
     self.filterType = filterType
-    if filterType == ZO_RETRAIT_FILTER_TYPE_ARMOR then
-        self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_ARMOR))
-    elseif filterType == ZO_RETRAIT_FILTER_TYPE_WEAPONS then
-        self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_WEAPON))
-    end
+    self.awaitingLabel:SetText(GetString("SI_SMITHINGFILTERTYPE_IMPROVEAWAITING", filterType))
+
 
     self.retraitSlot:OnFilterChanged(filterType)
     self:SetRetraitSlotItem()
@@ -206,15 +203,6 @@ function ZO_RetraitStation_Retrait_Keyboard:RemoveKeybinds()
 end
 
 function ZO_RetraitStation_Retrait_Keyboard:RefreshTraitList()
-    local traitData
-
-    if self.filterType == ZO_RETRAIT_FILTER_TYPE_ARMOR then
-        traitData = ZO_RETRAIT_STATION_MANAGER:GetTraitInfoForCategory(ITEM_TRAIT_TYPE_CATEGORY_ARMOR)
-    elseif self.filterType == ZO_RETRAIT_FILTER_TYPE_WEAPONS then
-        traitData = ZO_RETRAIT_STATION_MANAGER:GetTraitInfoForCategory(ITEM_TRAIT_TYPE_CATEGORY_WEAPON)
-    else
-        traitData = {} -- We have an invalid filter and we shouldn't be here
-    end
 
     ZO_ScrollList_Clear(self.traitList)
     ZO_ScrollList_ResetToTop(self.traitList)
@@ -225,6 +213,8 @@ function ZO_RetraitStation_Retrait_Keyboard:RefreshTraitList()
         local bag, slot = self.retraitSlot:GetBagAndSlot()
 
         local slottedItemTrait = GetItemTrait(bag, slot)
+        local traitData = ZO_RETRAIT_STATION_MANAGER:GetTraitInfoForCategory(GetItemTraitCategory(bag, slot))
+        internalassert(traitData)
 
         for index, traitRowData in ipairs(traitData) do
             local trait = traitRowData.traitType
@@ -421,8 +411,9 @@ do
         self.filterType = ZO_RETRAIT_FILTER_TYPE_WEAPONS
 
         self:SetFilters({
-            self:CreateNewTabFilterData(ZO_RETRAIT_FILTER_TYPE_ARMOR, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds"),
-            self:CreateNewTabFilterData(ZO_RETRAIT_FILTER_TYPE_WEAPONS, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds"),
+            self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_JEWELRY), "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_jewelry_disabled.dds"),
+            self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds"),
+            self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds"),
         })
     end
 end
@@ -432,11 +423,8 @@ function ZO_Retrait_Inventory_Keyboard:ChangeFilter(filterData)
 
     self.filterType = filterData.descriptor
 
-    if self.filterType == ZO_RETRAIT_FILTER_TYPE_ARMOR then
-        self:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_ARMOR))
-    elseif self.filterType == ZO_RETRAIT_FILTER_TYPE_WEAPONS then
-        self:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_WEAPONS))
-    end
+    self:SetNoItemLabelText(GetString("SI_SMITHINGFILTERTYPE_IMPROVENONE", self.filterType))
+
 
     self.owner:OnFilterChanged(self.filterType)
     self:HandleDirtyEvent()
@@ -508,11 +496,7 @@ function ZO_RetraitStationRetraitSlot:SetItem(bagId, slotIndex)
 end
 
 function ZO_RetraitStationRetraitSlot:OnFilterChanged(filterType)
-    if filterType == ZO_RETRAIT_FILTER_TYPE_ARMOR then
-        self:SetEmptyTexture("EsoUI/Art/Crafting/smithing_armorSlot.dds")
-    elseif filterType == ZO_RETRAIT_FILTER_TYPE_WEAPONS then
-        self:SetEmptyTexture("EsoUI/Art/Crafting/smithing_weaponSlot.dds")
-    end
+    self:SetEmptyTexture(ZO_CraftingUtils_GetItemSlotTextureFromSmithingFilter(filterType))
 end
 
 function ZO_RetraitStationRetraitSlot:ShowDropCallout()

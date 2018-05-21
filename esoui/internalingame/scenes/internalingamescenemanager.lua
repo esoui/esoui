@@ -23,6 +23,14 @@ function ZO_InternalIngameSceneManager:RegisterTopLevel(topLevel, locksUIMode)
     self.topLevelWindows[topLevel] = true
 end
 
+function ZO_InternalIngameSceneManager:IsInUIMode()
+    if IsGameCameraActive() then
+        return IsGameCameraUIModeActive()
+    end
+
+    return false
+end
+
 function ZO_InternalIngameSceneManager:HideTopLevel(topLevel)
     if not topLevel:IsControlHidden() and self.topLevelWindows[topLevel] == true then
         topLevel:SetHidden(true)

@@ -267,7 +267,7 @@ function MailInbox:FilterScrollList()
     end
 
     for i = 1, self.numEmptyRows do
-        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(EMPTY_MAIL_DATA, { priority = 3 }))
+        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(EMPTY_MAIL_DATA, { priority = 3, secsSinceReceived = 0, mailId = 0 }))
     end
 end
 

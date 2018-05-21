@@ -204,7 +204,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeDyesGrid()
     local HIDE_CALLBACK = nil
     local SPACING_XY = 0
     local CENTER_ENTRIES = true
-    -- the values sent for control dimensions are the scaled up size so that when the control is scaled up, they do not click with the scroll mask
+    -- the values sent for control dimensions are the scaled up size so that when the control is scaled up, they do not clip with the scroll mask
     self.dyeGridList:SetGridEntryTemplate("ZO_DyeingSwatch_Gamepad", DYE_SWATCH_DIMENSIONS, DYE_SWATCH_DIMENSIONS, DyeSwatchGridEntrySetup, HIDE_CALLBACK, DyeSwatchGridEntryReset, SPACING_XY, SPACING_XY, CENTER_ENTRIES)
     self.dyeGridList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.dyeGridList:SetLineBreakAmount(DYE_SWATCH_DIMENSIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD * 2)

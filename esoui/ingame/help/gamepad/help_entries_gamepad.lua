@@ -25,6 +25,18 @@ function HelpTutorialsEntriesGamepad:Initialize(control)
     self.image = messageContainer:GetNamedChild("DetailsImage")
 end
 
+function HelpTutorialsEntriesGamepad:InitializeEvents()
+    ZO_HelpTutorialsGamepad.InitializeEvents(self)
+
+    local function OnShowSpecificPage(eventId, helpCategoryIndex, helpIndex)
+        if IsInGamepadPreferredMode() then
+            self:Push(helpCategoryIndex, helpIndex)
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_HELP_SHOW_SPECIFIC_PAGE, OnShowSpecificPage)
+end
+
 function HelpTutorialsEntriesGamepad:Push(categoryIndex, helpIndex)
     if self.categoryIndex ~= categoryIndex then
         self.dirty = true
@@ -34,7 +46,7 @@ function HelpTutorialsEntriesGamepad:Push(categoryIndex, helpIndex)
     end
 
     self.categoryIndex = categoryIndex
-	SCENE_MANAGER:Push("helpTutorialsEntriesGamepad")
+    SCENE_MANAGER:Push("helpTutorialsEntriesGamepad")
 end
 
 function HelpTutorialsEntriesGamepad:InitializeKeybindStripDescriptors()
@@ -76,7 +88,7 @@ function HelpTutorialsEntriesGamepad:PerformUpdate()
         end
     end
 
-	self.itemList:SetKeyForNextCommit(self.categoryIndex)
+    self.itemList:SetKeyForNextCommit(self.categoryIndex)
     self.itemList:Commit()
 
     -- Update the key bindings.
@@ -112,8 +124,8 @@ function HelpTutorialsEntriesGamepad:OnSelectionChanged(list, selectedData, oldS
 
     self.scrollContainer:ResetToTop()
 
-	local _, keyboardDescription1, keyboardDescription2, image, gamepadDescription1, gamepadDescription2 = GetHelpInfo(self.categoryIndex, selectedData.helpIndex)
-	local description1 = gamepadDescription1 ~= "" and gamepadDescription1 or keyboardDescription1
+    local _, keyboardDescription1, keyboardDescription2, image, gamepadDescription1, gamepadDescription2 = GetHelpInfo(self.categoryIndex, selectedData.helpIndex)
+    local description1 = gamepadDescription1 ~= "" and gamepadDescription1 or keyboardDescription1
     local description2 = gamepadDescription2 ~= "" and gamepadDescription2 or keyboardDescription2
 
     self.description1:SetText(description1)
@@ -135,7 +147,10 @@ end
 
 local GAMEPAD_HELP_MAX_IMAGE_WIDTH = 767
 function ZO_Gamepad_Tutorials_Entries_OnTextureLoaded(control)
-    ZO_ResizeTextureWidthAndMaintainAspectRatio(control, GAMEPAD_HELP_MAX_IMAGE_WIDTH)
+    -- when hidden we directly manipulate the height, so don't apply constraints in those cases
+    if not control:IsHidden() then
+        ZO_ResizeTextureWidthAndMaintainAspectRatio(control, GAMEPAD_HELP_MAX_IMAGE_WIDTH)
+    end
 end
 
 function ZO_Gamepad_Tutorials_Entries_OnInitialize(control)

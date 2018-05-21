@@ -232,7 +232,8 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalRe
 end
 
 function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed, isExceptionalResult)
-    if not (self.enchantSoundPlayer:IsPlaying() or self.craftingProcessCompleted) then
+    self.enchantSoundPlayer:ForceStop()
+    if not self.craftingProcessCompleted then
         self.craftingProcessCompleted = true
 
         if self.playStopTooltipAnimation then
@@ -277,6 +278,8 @@ local function GetBoosterItemTypeForCraftingType()
         return ITEMTYPE_CLOTHIER_BOOSTER
     elseif craftingType == CRAFTING_TYPE_WOODWORKING then
         return ITEMTYPE_WOODWORKING_BOOSTER
+    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+        return ITEMTYPE_JEWELRYCRAFTING_BOOSTER
     end
 end
 
@@ -288,18 +291,23 @@ local function GetBoosterFoundSoundForCraftingType()
         return SOUNDS.CLOTHIER_EXTRACTED_BOOSTER
     elseif craftingType == CRAFTING_TYPE_WOODWORKING then
         return SOUNDS.WOODWORKER_EXTRACTED_BOOSTER
+    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+        return SOUNDS.JEWELRYCRAFTER_EXTRACTED_BOOSTER
     end
 end
 
+local SMITHING_TYPE_TO_FAILED_EXTRACTION_SOUND =
+{
+    [CRAFTING_TYPE_BLACKSMITHING] = SOUNDS.BLACKSMITH_FAILED_EXTRACTION,
+    [CRAFTING_TYPE_CLOTHIER] = SOUNDS.CLOTHIER_FAILED_EXTRACTION,
+    [CRAFTING_TYPE_WOODWORKING] = SOUNDS.WOODWORKER_FAILED_EXTRACTION,
+    [CRAFTING_TYPE_JEWELRYCRAFTING] = SOUNDS.JEWELRYCRAFTER_FAILED_EXTRACTION,
+}
 local function GetFailedSmithingExtractionResultInfo()
     local craftingType = GetCraftingInteractionType()
-    if craftingType == CRAFTING_TYPE_BLACKSMITHING then
-        return SI_SMITHING_BLACKSMITH_EXTRACTION_FAILED, SOUNDS.BLACKSMITH_FAILED_EXTRACTION
-    elseif craftingType == CRAFTING_TYPE_CLOTHIER then
-        return SI_SMITHING_CLOTHIER_EXTRACTION_FAILED, SOUNDS.CLOTHIER_FAILED_EXTRACTION
-    elseif craftingType == CRAFTING_TYPE_WOODWORKING then
-        return SI_SMITHING_WOODWORKING_EXTRACTION_FAILED, SOUNDS.WOODWORKER_FAILED_EXTRACTION
-    end
+    local failedExtractionSound = internalassert(SMITHING_TYPE_TO_FAILED_EXTRACTION_SOUND[craftingType])
+
+    return SI_SMITHING_EXTRACTION_FAILED, failedExtractionSound
 end
 
 local function DidLastCraftGainBooster(numItemsGained)

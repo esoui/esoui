@@ -1,72 +1,120 @@
---
--- MarketProductCarousel_Gamepad
---
+----
+-- ZO_MarketAnnouncement_Gamepad
+----
+local VERTICAL_FOCUS_INDEX =
+{
+    CAROUSEL = 1,
+    ACTION_TILES = 2
+}
 
-local MarketProductCarousel_Gamepad = ZO_MarketProductCarousel:Subclass()
 
-function MarketProductCarousel_Gamepad:New(...)
-    return ZO_MarketProductCarousel.New(self, ...)
+local ZO_MarketAnnouncement_Gamepad = ZO_MarketAnnouncement_Shared:Subclass()
+
+function ZO_MarketAnnouncement_Gamepad:New(...)
+    return ZO_MarketAnnouncement_Shared.New(self, ...)
 end
 
-function MarketProductCarousel_Gamepad:Initialize(...)
-    ZO_MarketProductCarousel.Initialize(self, ...)
-    self.leftArrow.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowScaleAnimation_Gamepad", self.leftArrow)
-    self.rightArrow.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowScaleAnimation_Gamepad", self.rightArrow)
+function ZO_MarketAnnouncement_Gamepad:Initialize(control)
+    -- This data must be setup before parent initialize is called
+    self.actionTileControlByType = 
+    {
+        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Gamepad_Control"
+    }
 
-    self.leftArrow.downAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowDownScaleAnimation_Gamepad", self.leftArrow)
-    self.rightArrow.downAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowDownScaleAnimation_Gamepad", self.rightArrow)
+    ZO_MarketAnnouncement_Shared.Initialize(self, control, IsInGamepadPreferredMode)
+    self.carousel = ZO_MarketProductCarousel_Gamepad:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Gamepad_Control")
+    self.carousel:SetSelectKeybindButton(self.selectButton)
+    self.carousel:SetScrollKeybindButton(self.scrollButton)
+
+    -- Action Tile Focus object must be setup before vertical navigation
+    self.actionTileListFocus = ZO_GamepadFocus:New(self.actionTileListControl, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
+
+    self:SetupVerticalNavigation()
 end
 
--- overrides to handle gamepad arrow animations
-do
-    local function EndArrowAnimationIfDisabled(control)
-        local currentState = control:GetState()
-        if currentState == BSTATE_DISABLED or currentState == BSTATE_DISABLED_PRESSED then
-            if control.animation then
-                control.animation:PlayInstantlyToStart()
-            end
+function ZO_MarketAnnouncement_Gamepad:CreateActionTile(tileType, objectPool)
+    local tile = ZO_MarketAnnouncement_Shared.CreateActionTile(self, tileType, objectPool)
+    tile:SetKeybindButton(self.selectButton)
+    return tile
+end
+
+function ZO_MarketAnnouncement_Gamepad:SetupVerticalNavigation()
+    self.verticalFocus = ZO_GamepadFocus:New(self.control, nil, MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
+
+    self.actionTileListFocusData = 
+    {
+        activate = function()
+            self.actionTileListFocus:SetActive(true)
+        end,
+        deactivate = function()
+            self.actionTileListFocus:SetActive(false)
         end
+    }
+
+    self:UpdateVerticalNavigation()
+end
+
+function ZO_MarketAnnouncement_Gamepad:UpdateVerticalNavigation()
+    self.verticalFocus:RemoveAllEntries()
+
+    if not GetMarketAnnouncementCrownStoreLocked() then
+        self.verticalFocus:AddEntry(self.carousel:GetFocusEntryData())
+    else
+        self.carousel:UpdateScrollKeybind()
     end
 
-    function MarketProductCarousel_Gamepad:UpdateArrows()
-        ZO_HorizontalScrollList_Gamepad.UpdateArrows(self)
-
-        EndArrowAnimationIfDisabled(self.leftArrow)
-        EndArrowAnimationIfDisabled(self.rightArrow)
-    end
-
-    function MarketProductCarousel_Gamepad:UpdateAnchors(...)
-        ZO_HorizontalScrollList.UpdateAnchors(self, ...)
-
-        EndArrowAnimationIfDisabled(self.leftArrow)
-        EndArrowAnimationIfDisabled(self.rightArrow)
+    if self.actionTileListFocus:GetItemCount() >= 1 then
+        self.verticalFocus:AddEntry(self.actionTileListFocusData)
     end
 end
 
-----
--- MarketAnnouncement_Gamepad
-----
+function ZO_MarketAnnouncement_Gamepad:OnShowing()
+    ZO_MarketAnnouncement_Shared.OnShowing(self)
 
-local MarketAnnouncement_Gamepad = ZO_MarketAnnouncement_Base:Subclass()
-
-function MarketAnnouncement_Gamepad:New(...)
-    return ZO_MarketAnnouncement_Base.New(self, ...)
+    self:UpdateVerticalNavigation()
 end
 
-function MarketAnnouncement_Gamepad:Initialize(control)
-    ZO_MarketAnnouncement_Base.Initialize(self, control, IsInGamepadPreferredMode)
-    self.carousel = MarketProductCarousel_Gamepad:New(self.carouselControl, "ZO_MarketAnnouncement_MarketProductTemplate_Gamepad")
+function ZO_MarketAnnouncement_Gamepad:OnShown()
+    self.verticalFocus:Activate()
 end
 
-function MarketAnnouncement_Gamepad:InitializeKeybindButtons()
-    ZO_MarketAnnouncement_Base.InitializeKeybindButtons(self)
+function ZO_MarketAnnouncement_Gamepad:OnHidden()
+    self.verticalFocus:Deactivate()
+end
 
-    self.crownStoreButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+function ZO_MarketAnnouncement_Gamepad:InitializeKeybindButtons()
+    ZO_MarketAnnouncement_Shared.InitializeKeybindButtons(self)
+
+    self.selectButton = self.controlContainer:GetNamedChild("PrimaryAction")
+    self.selectButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+    self.scrollButton = self.controlContainer:GetNamedChild("TertiaryAction")
+    self.scrollButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+    local WIDE_SPACING = false
+    self.scrollButton:SetCustomKeyIcon(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+    self.scrollButton:AdjustBindingAnchors(WIDE_SPACING)
     self.closeButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
 end
 
-function MarketAnnouncement_Gamepad:CreateMarketProduct(productId)
-    local marketProduct = ZO_MarketAnnouncementMarketProduct_Base:New()
+function ZO_MarketAnnouncement_Gamepad:OnSelectionClicked()
+    self.selectButton:OnClicked()
+end
+
+function ZO_MarketAnnouncement_Gamepad:UpdateActionTileNavigation()
+    self.actionTileListFocus:RemoveAllEntries()
+    for _, data in ipairs(self.actionTileList) do
+        local entryData = data:GetFocusEntryData()
+        self.actionTileListFocus:AddEntry(entryData)
+    end
+end
+
+function ZO_MarketAnnouncement_Gamepad:LayoutActionTiles()
+    ZO_MarketAnnouncement_Shared.LayoutActionTiles(self)
+
+    self:UpdateActionTileNavigation()
+end
+
+function ZO_MarketAnnouncement_Gamepad:CreateMarketProduct(productId)
+    local marketProduct = ZO_MarketAnnouncementMarketProduct_Gamepad:New()
     marketProduct:SetId(productId)
     return marketProduct
 end
@@ -74,7 +122,7 @@ end
 --global XML functions
 
 function ZO_MarketAnnouncement_Gamepad_OnInitialize(control)
-    ZO_GAMEPAD_MARKET_ANNOUNCEMENT = MarketAnnouncement_Gamepad:New(control)
+    ZO_GAMEPAD_MARKET_ANNOUNCEMENT = ZO_MarketAnnouncement_Gamepad:New(control)
     SYSTEMS:RegisterGamepadObject("marketAnnouncement", ZO_GAMEPAD_MARKET_ANNOUNCEMENT)
 end
 

@@ -648,8 +648,8 @@ function ZO_HousingSettingsList_Gamepad:InitializeDropdownFilter()
     filterControl:SetHidden(true)
 end
 
-function ZO_HousingSettingsList_Gamepad:EntrySelectionCallback(oldData, newData)
-    ZO_GamepadInteractiveSortFilterList.EntrySelectionCallback(self, oldData, newData)
+function ZO_HousingSettingsList_Gamepad:OnSelectionChanged(oldData, newData)
+    ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldData, newData)
     self:SetupOptions(newData)
 end
 

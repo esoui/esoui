@@ -654,6 +654,7 @@ function ZO_GamepadTradingHouse_Browse:InitializeList()
     
     self.itemList:SetOnTargetDataChangedCallback(OnTargetChanged)
     self.itemList:SetAlignToScreenCenter(true)
+    self.itemList:SetValidateGradient(true)
     self.itemList:AddDataTemplateWithHeader("ZO_GamepadGuildStoreBrowseComboboxTemplate", function(...) self:SetupDropDown(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadGuildStoreBrowseHeaderTemplate")
     self.itemList:AddDataTemplate("ZO_Gamepad_Dropdown_Item_FullWidth", function(...) self:SetupFilterDropDown(...) end)
     self.itemList:AddDataTemplateWithHeader("ZO_GamepadPriceSelectorTemplate", function(...) self:SetupPriceSelector(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadGuildStoreBrowseHeaderTemplate")

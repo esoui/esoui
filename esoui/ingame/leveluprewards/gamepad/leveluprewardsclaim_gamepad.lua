@@ -76,7 +76,7 @@ function ZO_LevelUpRewardsClaim_Gamepad:InitializeKeybindStripDescriptors()
                 if targetData.isClaimEntry then
                     local hasMadeAllSelections = DoAllValidLevelUpRewardChoicesHaveSelections()
                     if not hasMadeAllSelections then
-                        return false, GetString("SI_CLAIMLEVELUPREWARDRESULT", LEVEL_UP_REWARD_CLAIM_RESULT_CHOICE_MISSING)
+                        return false, GetString("SI_CLAIMREWARDRESULT", CLAIM_REWARD_RESULT_CHOICE_MISSING)
                     else
                         return true
                     end
@@ -87,10 +87,14 @@ function ZO_LevelUpRewardsClaim_Gamepad:InitializeKeybindStripDescriptors()
                 local targetData = self.list:GetTargetData()
                 if targetData.isClaimEntry then
                     self:ClaimLevelUpRewards()
-                elseif targetData.parentChoice ~= nil then
-                    local parentEntryIndex = targetData.parentChoice.entryIndex
-                    local choiceIndex = targetData.entryIndex
-                    MakeLevelUpRewardChoice(parentEntryIndex, choiceIndex)
+                    return
+                end
+                
+                local parentChoice = targetData:GetParentChoice()
+                if parentChoice ~= nil then
+                    local parentRewardId = parentChoice:GetRewardId()
+                    local choiceRewardId = targetData:GetRewardId()
+                    MakeLevelUpRewardChoice(parentRewardId, choiceRewardId)
                 end
             end,
         },
@@ -151,8 +155,8 @@ function ZO_LevelUpRewardsClaim_Gamepad:OnHide()
 end
 
 function ZO_LevelUpRewardsClaim_Gamepad:UpdateHeader()
-    local attributePoints = GetAttributePointsAwardedForReward(self.rewardId)
-    local skillPoints = GetSkillPointsAwardedForReward(self.rewardId)
+    local attributePoints = GetAttributePointsAwardedForLevel(self.rewardLevel)
+    local skillPoints = GetSkillPointsAwardedForLevel(self.rewardLevel)
 
     local headerData = self.headerData
     headerData.titleText = zo_strformat(SI_LEVEL_UP_REWARDS_HEADER, self.rewardLevel)
@@ -167,17 +171,23 @@ function ZO_LevelUpRewardsClaim_Gamepad:OnSelectionChanged(list, selectedData, o
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     GAMEPAD_TOOLTIPS:ClearStatusLabel(GAMEPAD_RIGHT_TOOLTIP)
     if selectedData then
-        if selectedData.rewardType and selectedData.rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
-            GAMEPAD_TOOLTIPS:LayoutRewardEntry(GAMEPAD_LEFT_TOOLTIP, selectedData.rewardId, selectedData.entryIndex)
-            if selectedData.rewardType == REWARD_ENTRY_TYPE_ITEM then                
-                if GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, selectedData.equipSlot) then
-                    ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, selectedData.equipSlot)
-                end
-            end
-        elseif selectedData.isAdditionalUnlock then
-            GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, ZO_LEVEL_UP_REWARDS_MANAGER:GetPlatformFormattedNameFromRewardData(selectedData), selectedData.description)
-        elseif selectedData.isTip then
+        if selectedData.isTip then
             GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetGamepadLevelUpTipOverview(self.rewardLevel), GetGamepadLevelUpTipDescription(self.rewardLevel))
+        elseif not selectedData.isClaimEntry then
+            local rewardType = selectedData:GetRewardType()
+            if rewardType then
+                GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_LEFT_TOOLTIP, selectedData)
+                if rewardType == REWARD_ENTRY_TYPE_ITEM then
+                    local equipSlot = selectedData:GetEquipSlot()
+                    if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then
+                        ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)
+                    end
+                end
+            elseif selectedData:IsAdditionalUnlock() then
+                GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, selectedData:GetFormattedName(), selectedData:GetDescription())
+            else
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            end
         else
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         end
@@ -188,12 +198,10 @@ end
 
 function ZO_LevelUpRewardsClaim_Gamepad:CreateRewardEntry(rewardEntryData)
     local name = ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardNameFromRewardData(rewardEntryData)
-    local icon = ZO_LEVEL_UP_REWARDS_MANAGER:GetPlatformIconFromRewardData(rewardEntryData)
+    local icon = rewardEntryData:GetGamepadIcon()
     local entryData = ZO_GamepadEntryData:New(name, icon)
-    entryData:SetStackCount(rewardEntryData.stackCount)
-    if rewardEntryData.quality then
-        entryData:SetNameColors(entryData:GetColorsBasedOnQuality(rewardEntryData.quality))
-    end
+    entryData:SetStackCount(rewardEntryData:GetQuantity())
+    entryData:SetNameColors(entryData:GetColorsBasedOnQuality(rewardEntryData:GetItemQuality()))
     entryData:SetDataSource(rewardEntryData)
 
     return entryData
@@ -214,11 +222,12 @@ function ZO_LevelUpRewardsClaim_Gamepad:AddRewards(rewards)
     local numNonChoiceRewards = 0
     local firstNonChoiceEntryData
     for i, reward in ipairs(rewards) do
-        if ZO_LEVEL_UP_REWARDS_MANAGER:IsRewardDataValidForPlayer(reward) then
-            if reward.choices then
+        if reward:IsValidReward() then
+            local rewardChoices = reward:GetChoices()
+            if rewardChoices then
                 local numVisibleChoices = 0
-                for choiceIndex, choiceReward in ipairs(reward.choices) do
-                    if ZO_LEVEL_UP_REWARDS_MANAGER:IsRewardDataValidForPlayer(choiceReward) then
+                for choiceIndex, choiceReward in ipairs(rewardChoices) do
+                    if choiceReward:IsValidReward() then
                         numVisibleChoices = numVisibleChoices + 1
                         local entryData = self:CreateRewardEntry(choiceReward)
                         entryData:SetSelected(entryData.isSelectedChoice)

@@ -409,6 +409,13 @@ do
             over = "EsoUI/Art/Crafting/blueprints_tabIcon_over.dds",
             disabled = "EsoUI/Art/Crafting/blueprints_tabIcon_disabled.dds",
         },
+        [RECIPE_CRAFTING_SYSTEM_JEWELRYCRAFTING_SKETCHES] =
+        {
+            up = "EsoUI/Art/Crafting/sketches_tabIcon_up.dds",
+            down = "EsoUI/Art/Crafting/sketches_tabIcon_down.dds",
+            over = "EsoUI/Art/Crafting/sketches_tabIcon_over.dds",
+            disabled = "EsoUI/Art/Crafting/sketches_tabIcon_disabled.dds",
+        },
     }
 
     function GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem)
@@ -428,6 +435,7 @@ do
         [RECIPE_CRAFTING_SYSTEM_ALCHEMY_FORMULAE] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_formulae.dds",
         [RECIPE_CRAFTING_SYSTEM_PROVISIONING_DESIGNS] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_designs.dds",
         [RECIPE_CRAFTING_SYSTEM_WOODWORKING_BLUEPRINTS] = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_blueprints.dds",
+        [RECIPE_CRAFTING_SYSTEM_JEWELRYCRAFTING_SKETCHES] = "EsoUI/Art/Crafting/Gamepad/gp_tabIcon_JewelryCraft_sketches.dds",
     }
 
     function GetGamepadRecipeCraftingSystemMenuTextures(recipeCraftingSystem)
@@ -474,3 +482,4 @@ ZO_TIMER_ICON_64 = "EsoUI/Art/Miscellaneous/timer_64.dds"
 ZO_KEYBOARD_LOCKED_ICON = "EsoUI/Art/Miscellaneous/status_locked.dds"
 ZO_GAMEPAD_LOCKED_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
 ZO_KEYBOARD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/inventory_icon_equipped.dds"
+ZO_CHECK_ICON = "EsoUI/Art/Miscellaneous/check_icon_32.dds"

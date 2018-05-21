@@ -17,22 +17,40 @@ function ZO_ItemPreviewOptionsFragment:Show()
     local options = self.options
     if options.forcePreparePreview ~= nil then
         itemPreviewObject:SetForcePreparePreview(options.forcePreparePreview)
+    else
+        itemPreviewObject:SetForcePreparePreview(true)
     end
+
     if options.paddingLeft ~= nil and options.paddingRight ~= nil then
         itemPreviewObject:SetHorizontalPaddings(options.paddingLeft, options.paddingRight)
+    else
+        itemPreviewObject:SetHorizontalPaddings(0, 0)
     end
+
     if options.previewBufferMS ~= nil then
         itemPreviewObject:SetPreviewBufferMS(options.previewBufferMS)
+    else
+        itemPreviewObject:SetPreviewBufferMS(nil)
     end
+
     if options.dynamicFramingConsumedWidth ~= nil and options.dynamicFramingConsumedHeight ~= nil then
         itemPreviewObject:SetDynamicFramingConsumedSpace(options.dynamicFramingConsumedWidth, options.dynamicFramingConsumedHeight)
+    else
+        itemPreviewObject:SetDynamicFramingConsumedSpace(0, 0)
     end
+
     if options.previewInEmptyWorld ~= nil then
         itemPreviewObject:SetPreviewInEmptyWorld(options.previewInEmptyWorld)
+    else
+        itemPreviewObject:SetPreviewInEmptyWorld(false)
     end
+
     if options.maintainsPreviewCollection ~= nil then
         itemPreviewObject:SetMaintainsPreviewCollection(options.maintainsPreviewCollection)
+    else
+        itemPreviewObject:SetMaintainsPreviewCollection(false)
     end
+
     if itemPreviewObject:GetFragment():IsShowing() then
         itemPreviewObject:RefreshState()
     end
@@ -294,7 +312,7 @@ function ZO_ItemPreviewType_StoreEntryAsFurniture:GetVariationName(variationInde
     return GetStoreEntryAsFurniturePreviewVariationDisplayName(self.storeEntryIndex, variationIndex)
 end
 
---Outfit
+-- Outfit
 
 ZO_ItemPreviewType_Outfit = ZO_ItemPreviewType:Subclass()
 
@@ -321,6 +339,34 @@ function ZO_ItemPreviewType_Outfit:Apply()
     RefreshPreviewCollectionShown()
 end
 
+-- Reward
+
+ZO_ItemPreviewType_Reward = ZO_ItemPreviewType:Subclass()
+
+function ZO_ItemPreviewType_Reward:SetStaticParameters(rewardId)
+    self.rewardId = rewardId
+end
+
+function ZO_ItemPreviewType_Reward:ResetStaticParameters()
+    self.rewardId = 0
+end
+
+function ZO_ItemPreviewType_Reward:HasStaticParameters(rewardId)
+    return self.rewardId == rewardId
+end
+
+function ZO_ItemPreviewType_Reward:GetNumVariations()
+    return GetNumRewardPreviewVariations(self.rewardId)
+end
+
+function ZO_ItemPreviewType_Reward:GetVariationName(variationIndex)
+    return GetRewardPreviewVariationDisplayName(self.rewardId, variationIndex)
+end
+
+function ZO_ItemPreviewType_Reward:Apply(variationIndex)
+    PreviewReward(self.rewardId)
+end
+
 --
 --[[ Item Preview]]--
 --
@@ -334,6 +380,7 @@ ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT = 6
 ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE = 7
 ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE = 8
 ZO_ITEM_PREVIEW_OUTFIT = 9
+ZO_ITEM_PREVIEW_REWARD = 10
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
@@ -367,6 +414,7 @@ function ZO_ItemPreview_Shared:Initialize(control)
         [ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE] = ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:New(),
         [ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE] = ZO_ItemPreviewType_StoreEntryAsFurniture:New(),
         [ZO_ITEM_PREVIEW_OUTFIT] = ZO_ItemPreviewType_Outfit:New(),
+        [ZO_ITEM_PREVIEW_REWARD] = ZO_ItemPreviewType_Reward:New(),
     }
 
     self.forcePreparePreview = true
@@ -509,6 +557,8 @@ function ZO_ItemPreview_Shared:EndCurrentPreview()
     self:ResetCurrentPreviewObject()
 
     EndCurrentItemPreview()
+
+    self:FireCallbacks("EndCurrentPreview")
 end
 
 function ZO_ItemPreview_Shared:RefreshState()
@@ -631,6 +681,10 @@ function ZO_ItemPreview_Shared:ResetOutfitPreview()
         self:ResetCurrentPreviewObject()
         ClearPreviewingOutfitIndexInPreviewCollection(self.previewCollectionId)
     end
+end
+
+function ZO_ItemPreview_Shared:PreviewReward(rewardId)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_REWARD, rewardId)
 end
 
 function ZO_ItemPreview_Shared:ApplyOrBuffer()

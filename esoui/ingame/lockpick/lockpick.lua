@@ -535,15 +535,22 @@ function ZO_Lockpick:FindClosestChamberIndexToLockpick()
 end
 
 function ZO_Lockpick:OnLockpickBroke(inactivityDuration)
-    if inactivityDuration > 0 and self.settingChamberIndex then
-        self.lockpick:SetHidden(true)
-        self.breakingChamberIndex = self.settingChamberIndex
-        self.lockpickBreakLeft:SetHidden(false)
-        self.lockpickBreakRight:SetHidden(false)
-        self.inactivityDuration = inactivityDuration
-        self.inactivityStart = GetFrameTimeMilliseconds()
+    if self.settingChamberIndex then
+        --A broken pick clears out the setting chamber on the client so stop depressing it here too. Store off settingChamberIndex since that's the champer we broke the pick on and it's cleared by EndDepressingPin.
+        local activeChamberIndex = self.settingChamberIndex
+        self:EndDepressingPin()
 
-        self:UpdatePinAlpha(PARTIAL_PIN_ALPHA)
+        --If there is a time we have to wait before we can try to pick the lock again then run the break animation
+        if inactivityDuration > 0 then
+            self.lockpick:SetHidden(true)
+            self.breakingChamberIndex = activeChamberIndex
+            self.lockpickBreakLeft:SetHidden(false)
+            self.lockpickBreakRight:SetHidden(false)
+            self.inactivityDuration = inactivityDuration
+            self.inactivityStart = GetFrameTimeMilliseconds()
+
+            self:UpdatePinAlpha(PARTIAL_PIN_ALPHA)
+        end
     end
 end
 

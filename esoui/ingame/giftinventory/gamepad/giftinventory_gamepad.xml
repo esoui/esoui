@@ -1,0 +1,21 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GiftInventory_GamepadTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_GiftInventory_Gamepad_Initialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+
+        <Control name="ZO_GamepadGiftWithNoteEntryTemplate" inherits="ZO_GamepadNewMenuEntryTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" override="true">
+                    <Dimensions x="240"/>
+                </Label>
+                <Texture name="$(parent)NoteTexture" textureFile="/EsoUI/Art/Contacts/Gamepad/gp_social_note.dds" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="RIGHT" offsetX="-16" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -25,10 +25,6 @@ function ZO_Fishing:SetupEntryControl(entryControl, lureIndex)
     ZO_SetupSelectableItemRadialMenuEntryTemplate(entryControl, selected, stackCount > 0 and stackCount or nil)
 end
 
-function ZO_Fishing:InteractionCanceled()
-    GameCameraInteractStart()
-end
-
 function ZO_Fishing:PopulateMenu()
     for i=1, GetNumFishingLures() do
         local name, icon, stack = GetFishingLureInfo(i)

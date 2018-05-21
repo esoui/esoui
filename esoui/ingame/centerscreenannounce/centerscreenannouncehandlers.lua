@@ -160,27 +160,39 @@ end
 -- NOTE: If a later optional return is used, the previous optional returns must be used as well (even if they return nil)
 -- If Category or Message is nil, then nothing will be shown. Simply not returning anything tells the system to not do anything.
 
-local CSH = { }
+local CENTER_SCREEN_EVENT_HANDLERS = { }
 
-local function GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
+-- TODO: Remove progress bar validation logic
+-- We're trying to track down info for ESO-558876
+
+local function ValidateProgressBarParams(barParams)
+    local barType = barParams:GetParams()
+    if not (barType and PLAYER_PROGRESS_BAR:GetBarTypeInfoByBarType(barType)) then
+        local INVALID_VALUE = -1
+        internalassert(false, string.format("CSAH Bad Bar Params; barType: %d. Triggering Event: %d.", barType or INVALID_VALUE, barParams:GetTriggeringEvent() or INVALID_VALUE))
+    end
+end
+
+local function GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, triggeringEvent)
     local championXpToNextPoint
     if CanUnitGainChampionPoints("player") then
         championXpToNextPoint = GetNumChampionXPInChampionPoint(championPoints)
     end  
     if(championXpToNextPoint ~= nil and currentExperience > previousExperience) then
-        return CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, previousExperience, currentExperience)
+        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, previousExperience, currentExperience)
+        barParams:SetTriggeringEvent(triggeringEvent)
+        return barParams
     else
-        local levelSize
-        if(level) then
-            levelSize = GetNumExperiencePointsInLevel(level)
-        end
+        local levelSize = GetNumExperiencePointsInLevel(level)
         if(levelSize ~= nil and currentExperience >  previousExperience) then
-            return CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_XP, level, previousExperience, currentExperience)
+            local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_XP, level, previousExperience, currentExperience)
+            barParams:SetTriggeringEvent(triggeringEvent)
+            return barParams
         end
     end
 end
 
-CSH[EVENT_QUEST_ADDED] = function(journalIndex, questName, objectiveName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_ADDED] = function(journalIndex, questName, objectiveName)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ACCEPTED)
     local questType = GetJournalQuestType(journalIndex)
     local instanceDisplayType = GetJournalInstanceDisplayType(journalIndex)
@@ -195,7 +207,7 @@ CSH[EVENT_QUEST_ADDED] = function(journalIndex, questName, objectiveName)
     return messageParams
 end
 
-CSH[EVENT_QUEST_COMPLETE] = function(questName, level, previousExperience, currentExperience, championPoints, questType, instanceDisplayType)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_COMPLETE] = function(questName, level, previousExperience, currentExperience, championPoints, questType, instanceDisplayType)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_COMPLETED)
 
     local questJournalObject = SYSTEMS:GetObject("questJournal")
@@ -205,21 +217,21 @@ CSH[EVENT_QUEST_COMPLETE] = function(questName, level, previousExperience, curre
     else
         messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_QUEST_COMPLETE, questName))
     end
-    messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints))
+    messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_QUEST_COMPLETE))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETE)
     return messageParams
 end
 
-CSH[EVENT_OBJECTIVE_COMPLETED] = function(zoneIndex, poiIndex, level, previousExperience, currentExperience, championPoints) 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_OBJECTIVE_COMPLETED] = function(zoneIndex, poiIndex, level, previousExperience, currentExperience, championPoints) 
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_COMPLETED)
     local name, _, _, finishedDescription = GetPOIInfo(zoneIndex, poiIndex)
-    messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints))
+    messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_OBJECTIVE_COMPLETED))
     messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_COMPLETE, name), finishedDescription)
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED)
     return messageParams
 end
 
-CSH[EVENT_QUEST_CONDITION_COUNTER_CHANGED] = function(journalIndex, questName, conditionText, conditionType, currConditionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isComplete, isConditionComplete, isStepHidden)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_CONDITION_COUNTER_CHANGED] = function(journalIndex, questName, conditionText, conditionType, currConditionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isComplete, isConditionComplete, isStepHidden)
     if isStepHidden or (isPushed and isComplete) or (currConditionVal >= newConditionVal) then
         return
     end
@@ -256,7 +268,7 @@ CSH[EVENT_QUEST_CONDITION_COUNTER_CHANGED] = function(journalIndex, questName, c
     return messageParams
 end
 
-CSH[EVENT_QUEST_OPTIONAL_STEP_ADVANCED] = function(text)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_OPTIONAL_STEP_ADVANCED] = function(text)
     if text ~= "" then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.QUEST_OBJECTIVE_COMPLETE)
         messageParams:SetText(zo_strformat(SI_ALERTTEXT_QUEST_CONDITION_UPDATE_NO_COUNT, text))
@@ -265,7 +277,7 @@ CSH[EVENT_QUEST_OPTIONAL_STEP_ADVANCED] = function(text)
     end
 end
 
-CSH[EVENT_ACHIEVEMENT_AWARDED] = function(name, points, id)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ACHIEVEMENT_AWARDED] = function(name, points, id)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ACHIEVEMENT_AWARDED)
     local icon = select(4, GetAchievementInfo(id))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
@@ -274,18 +286,18 @@ CSH[EVENT_ACHIEVEMENT_AWARDED] = function(name, points, id)
     return messageParams
 end
 
-CSH[EVENT_BROADCAST] = function(message)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_BROADCAST] = function(message)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.MESSAGE_BROADCAST)
     messageParams:SetText(string.format("|cffff00%s|r", message))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
     return messageParams
 end
 
-CSH[EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperience, currentExperience, championPoints)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperience, currentExperience, championPoints)
     if not INTERACT_WINDOW:IsShowingInteraction() then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_DISCOVERED)
         if currentExperience > previousExperience then
-            messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints))
+            messageParams:SetBarParams(GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_DISCOVERY_EXPERIENCE))
         end
         messageParams:SetText(zo_strformat(SI_SUBZONE_NOTIFICATION_DISCOVER, subzoneName))
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISCOVERY_EXPERIENCE)
@@ -293,7 +305,7 @@ CSH[EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperienc
     end
 end
 
-CSH[EVENT_POI_DISCOVERED] = function(zoneIndex, poiIndex)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_POI_DISCOVERED] = function(zoneIndex, poiIndex)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_ACCEPTED)
     local name, _, startDescription = GetPOIInfo(zoneIndex, poiIndex)
     messageParams:SetText(zo_strformat(SI_NOTIFYTEXT_OBJECTIVE_DISCOVERED, name), startDescription)
@@ -317,13 +329,14 @@ local XP_GAIN_SHOW_SOUNDS =
     [PROGRESS_REASON_LOCK_PICK] = SOUNDS.LOCKPICKING_SUCCESS_CELEBRATION,
 }
 
-CSH[EVENT_EXPERIENCE_GAIN] = function(reason, level, previousExperience, currentExperience, championPoints)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_EXPERIENCE_GAIN] = function(reason, level, previousExperience, currentExperience, championPoints)
     if XP_GAIN_SHOW_REASONS[reason] then
-        local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints)
+        local barParams = GetRelevantBarParams(level, previousExperience, currentExperience, championPoints, EVENT_EXPERIENCE_GAIN)
         if barParams then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT)
             local sound = XP_GAIN_SHOW_SOUNDS[reason]
             barParams:SetSound(sound)
+            ValidateProgressBarParams(barParams)
             messageParams:SetBarParams(barParams)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_EXPERIENCE_GAIN)
             return messageParams
@@ -335,40 +348,46 @@ CSH[EVENT_EXPERIENCE_GAIN] = function(reason, level, previousExperience, current
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LEVEL_UP)
         local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_XP, level + 1, currentExperience - levelSize, currentExperience - levelSize)
         barParams:SetShowNoGain(true)
+        barParams:SetTriggeringEvent(EVENT_EXPERIENCE_GAIN)
         messageParams:SetText(GetString(SI_LEVEL_UP_NOTIFICATION))
+        ValidateProgressBarParams(barParams)
         messageParams:SetBarParams(barParams)
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LEVEL_GAIN)
         return messageParams
     end
 end
 
-local function GetCurrentChampionPointsBarParams()
+local function GetCurrentChampionPointsBarParams(triggeringEvent)
     local championPoints = GetPlayerChampionPointsEarned()
     local currentChampionXP = GetPlayerChampionXP()
     local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, currentChampionXP, currentChampionXP)
     barParams:SetShowNoGain(true)
+    barParams:SetTriggeringEvent(triggeringEvent)
     return barParams
 end
 
-local function GetEnlightenedGainedAnnouncement()
+local function GetEnlightenedGainedAnnouncement(triggeringEvent)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENLIGHTENED_STATE_GAINED)
-    local barParams = GetCurrentChampionPointsBarParams()
+    local barParams = GetCurrentChampionPointsBarParams(triggeringEvent)
     messageParams:SetText(zo_strformat(SI_ENLIGHTENED_STATE_GAINED_HEADER), zo_strformat(SI_ENLIGHTENED_STATE_GAINED_DESCRIPTION))
+    ValidateProgressBarParams(barParams)
     messageParams:SetBarParams(barParams)
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENLIGHTENMENT_GAINED)
     return messageParams
 end
 
-CSH[EVENT_ENLIGHTENED_STATE_GAINED] = function()
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ENLIGHTENED_STATE_GAINED] = function()
     if IsEnlightenedAvailableForCharacter() then
-        return GetEnlightenedGainedAnnouncement()
+        return GetEnlightenedGainedAnnouncement(EVENT_ENLIGHTENED_STATE_GAINED)
     end
 end
 
-CSH[EVENT_ENLIGHTENED_STATE_LOST] = function()
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ENLIGHTENED_STATE_LOST] = function()
     if IsEnlightenedAvailableForCharacter() then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENLIGHTENED_STATE_LOST)
-        messageParams:SetBarParams(GetCurrentChampionPointsBarParams())
+        local barParams = GetCurrentChampionPointsBarParams(EVENT_ENLIGHTENED_STATE_LOST)
+        ValidateProgressBarParams(barParams)
+        messageParams:SetBarParams(barParams)
         messageParams:SetText(zo_strformat(SI_ENLIGHTENED_STATE_LOST_HEADER))
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ENLIGHTENMENT_LOST)
         return messageParams
@@ -376,17 +395,17 @@ CSH[EVENT_ENLIGHTENED_STATE_LOST] = function()
 end
 
 local firstActivation = true
-CSH[EVENT_PLAYER_ACTIVATED] = function()
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_PLAYER_ACTIVATED] = function()
     if firstActivation then
         firstActivation = false
 
         if IsEnlightenedAvailableForCharacter() and GetEnlightenedPool() > 0 then
-            return GetEnlightenedGainedAnnouncement()
+            return GetEnlightenedGainedAnnouncement(EVENT_PLAYER_ACTIVATED)
         end
     end
 end
 
-CSH[EVENT_SKILL_RANK_UPDATE] = function(skillType, lineIndex, rank)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_RANK_UPDATE] = function(skillType, lineIndex, rank)
     -- crafting skill updates get deferred if they're increased while crafting animations are in progress
     -- ZO_Skills_TieSkillInfoHeaderToCraftingSkill handles triggering the deferred center screen announce in that case
     if skillType ~= SKILL_TYPE_RACIAL and (skillType ~= SKILL_TYPE_TRADESKILL or not ZO_CraftingUtils_IsPerformingCraftProcess()) then
@@ -414,19 +433,22 @@ local GUILD_SKILL_SHOW_SOUNDS =
     [PROGRESS_REASON_BOSS_KILL] = SOUNDS.SKILL_XP_BOSS_KILLED,
 }
 
-CSH[EVENT_SKILL_XP_UPDATE] = function(skillType, skillIndex, reason, rank, previousXP, currentXP)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_XP_UPDATE] = function(skillType, skillIndex, reason, rank, previousXP, currentXP)
     if (skillType == SKILL_TYPE_GUILD and GUILD_SKILL_SHOW_REASONS[reason]) or reason == PROGRESS_REASON_JUSTICE_SKILL_EVENT then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT)
         local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
         local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
         local sound = GUILD_SKILL_SHOW_SOUNDS[reason]
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE)
-        messageParams:SetBarParams(CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP, sound))
+        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
+        barParams:SetTriggeringEvent(EVENT_SKILL_XP_UPDATE)
+        ValidateProgressBarParams(barParams)
+        messageParams:SetBarParams(barParams)
         return messageParams
     end
 end
 
-CSH[EVENT_ABILITY_PROGRESSION_RANK_UPDATE] = function(progressionIndex, rank, maxRank, morph)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ABILITY_PROGRESSION_RANK_UPDATE] = function(progressionIndex, rank, maxRank, morph)
     local _, _, _, atMorph = GetAbilityProgressionXPInfo(progressionIndex)
     local name = GetAbilityProgressionAbilityInfo(progressionIndex, morph, rank)
 
@@ -443,7 +465,7 @@ CSH[EVENT_ABILITY_PROGRESSION_RANK_UPDATE] = function(progressionIndex, rank, ma
     end
 end
 
-CSH[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoints, newPartialPoints)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoints, newPartialPoints)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
     if oldPartialPoints ~= newPartialPoints then
         messageParams:SetSound(SOUNDS.SKYSHARD_GAINED)
@@ -468,7 +490,7 @@ CSH[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoint
     end
 end
 
-CSH[EVENT_SKILL_LINE_ADDED] = function(skillType, lineIndex)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_LINE_ADDED] = function(skillType, lineIndex)
     local lineName, _, available = GetSkillLineInfo(skillType, lineIndex)
     if available then
         local discoverIcon = zo_iconFormat(select(4, ZO_Skills_GetIconsForSkillType(skillType)), 32, 32)
@@ -480,19 +502,22 @@ CSH[EVENT_SKILL_LINE_ADDED] = function(skillType, lineIndex)
     return nil
 end
 
-CSH[EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
     if guildReputationIndex > 0 then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_ACQUIRED)
         local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
         local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
-        messageParams:SetBarParams(CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP))
+        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
+        barParams:SetTriggeringEvent(EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE)
+        ValidateProgressBarParams(barParams)
+        messageParams:SetBarParams(barParams)
         messageParams:SetText(GetString(SI_LORE_LIBRARY_ANNOUNCE_BOOK_LEARNED))
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_BOOK_LEARNED_SKILL_EXPERIENCE)
         return messageParams
     end
 end
 
-CSH[EVENT_LORE_COLLECTION_COMPLETED] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, isMaxRank)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_COLLECTION_COMPLETED] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, isMaxRank)
     if guildReputationIndex == 0 or isMaxRank then
         -- Only fire this message if we're not part of the guild or at max level within the guild.
         local collectionName, description, numKnownBooks, totalBooks, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
@@ -505,14 +530,17 @@ CSH[EVENT_LORE_COLLECTION_COMPLETED] = function(categoryIndex, collectionIndex, 
     end
 end
 
-CSH[EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
     if guildReputationIndex > 0 then
         local collectionName, description, numKnownBooks, totalBooks, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
         if not hidden then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_COLLECTION_COMPLETED)
             local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
             local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
-            messageParams:SetBarParams(CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP))
+            local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
+            barParams:SetTriggeringEvent(EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE)
+            ValidateProgressBarParams(barParams)
+            messageParams:SetBarParams(barParams)
             messageParams:SetText(GetString(SI_LORE_LIBRARY_COLLECTION_COMPLETED_LARGE), zo_strformat(SI_LORE_LIBRARY_COLLECTION_COMPLETED_SMALL, collectionName))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE)
             return messageParams
@@ -520,7 +548,7 @@ CSH[EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE] = function(categoryIndex, 
     end
 end
 
-CSH[EVENT_PLEDGE_OF_MARA_RESULT] = function(result, characterName, displayName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_PLEDGE_OF_MARA_RESULT] = function(result, characterName, displayName)
     if result == PLEDGE_OF_MARA_RESULT_PLEDGED then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_PLEDGE_OF_MARA_RESULT)
@@ -545,38 +573,38 @@ local function CreateAvAMessageParams(sound, description, CSAType, lifespan)
     return messageParams
 end
 
-CSH[EVENT_ARTIFACT_CONTROL_STATE] = function(artifactName, keepId, characterName, playerAlliance, controlEvent, controlState, campaignId, displayName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ARTIFACT_CONTROL_STATE] = function(artifactName, keepId, characterName, playerAlliance, controlEvent, controlState, campaignId, displayName)
     local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or characterName
     local description, soundId = GetAvAArtifactEventDescription(artifactName, keepId, nameToShow, playerAlliance, controlEvent, campaignId)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
 end
 
-CSH[EVENT_KEEP_GATE_STATE_CHANGED] = function(keepId, open)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_KEEP_GATE_STATE_CHANGED] = function(keepId, open)
     local description, soundId = GetGateStateChangedDescription(keepId, open)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_KEEP_GATE_CHANGED)
 end
 
-CSH[EVENT_CORONATE_EMPEROR_NOTIFICATION] = function(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_CORONATE_EMPEROR_NOTIFICATION] = function(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
     local description, soundId = GetCoronateEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, playerDisplayName)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_CORONATE_EMPEROR, 5000)
 end
 
-CSH[EVENT_DEPOSE_EMPEROR_NOTIFICATION] = function(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DEPOSE_EMPEROR_NOTIFICATION] = function(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
     local description, soundId = GetDeposeEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR, 5000)
 end
 
-CSH[EVENT_IMPERIAL_CITY_ACCESS_GAINED_NOTIFICATION] = function(campaignId, alliance)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_IMPERIAL_CITY_ACCESS_GAINED_NOTIFICATION] = function(campaignId, alliance)
     local description, soundId = GetImperialCityAccessGainedEventDescription(campaignId, alliance)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_GAINED)
 end
 
-CSH[EVENT_IMPERIAL_CITY_ACCESS_LOST_NOTIFICATION] = function(campaignId, alliance)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_IMPERIAL_CITY_ACCESS_LOST_NOTIFICATION] = function(campaignId, alliance)
     local description, soundId = GetImperialCityAccessLostEventDescription(campaignId, alliance)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_LOST)
 end
 
-CSH[EVENT_REVENGE_KILL] = function(killedCharacterName, killedDisplayName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_REVENGE_KILL] = function(killedCharacterName, killedDisplayName)
     if IsPlayerInAvAWorld() then
         local killedName = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(killedDisplayName) or killedCharacterName
         local description = zo_strformat(SI_REVENGE_KILL, killedName)
@@ -585,7 +613,7 @@ CSH[EVENT_REVENGE_KILL] = function(killedCharacterName, killedDisplayName)
     end
 end
 
-CSH[EVENT_AVENGE_KILL] = function(avengedCharacterName, killedCharacterName, avengedDisplayName, killedDisplayName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_AVENGE_KILL] = function(avengedCharacterName, killedCharacterName, avengedDisplayName, killedDisplayName)
     if IsPlayerInAvAWorld() then
         local avengedName = avengedCharacterName
         local killedName = killedCharacterName
@@ -605,7 +633,7 @@ local function ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, 
     return IsBattlegroundObjective(objectiveKeepId, objectiveId, battlegroundContext) and GetCurrentBattlegroundState() == BATTLEGROUND_STATE_RUNNING
 end
 
-CSH[EVENT_CAPTURE_AREA_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, owningAlliance, pinType)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_CAPTURE_AREA_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, owningAlliance, pinType)
     if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL)  then
         if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_CAPTURED then
             local text, soundId
@@ -623,7 +651,7 @@ CSH[EVENT_CAPTURE_AREA_STATE_CHANGED] = function(objectiveKeepId, objectiveId, b
     end
 end
 
-CSH[EVENT_CAPTURE_AREA_SPAWNED] = function(objectiveKeepId, objectiveId, battlegroundContext, pinType, hasMoved)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_CAPTURE_AREA_SPAWNED] = function(objectiveKeepId, objectiveId, battlegroundContext, pinType, hasMoved)
     if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL)  then
         local text, soundId
         --150% because the icon textures contain a good bit of empty space
@@ -639,7 +667,7 @@ CSH[EVENT_CAPTURE_AREA_SPAWNED] = function(objectiveKeepId, objectiveId, battleg
     end
 end
 
-CSH[EVENT_CAPTURE_FLAG_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, originalOwnerAlliance, holderAlliance, lastHolderAlliance, pinType)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_CAPTURE_FLAG_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, originalOwnerAlliance, holderAlliance, lastHolderAlliance, pinType)
     if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
         --150% because the icon textures contain a good bit of empty space
         local flagIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
@@ -679,7 +707,7 @@ CSH[EVENT_CAPTURE_FLAG_STATE_CHANGED] = function(objectiveKeepId, objectiveId, b
     end
 end
 
-CSH[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, holderRawCharacterName, holderDisplayName, lastHolderRawCharacterName, lastHolderDisplayName, pinType)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiveKeepId, objectiveId, battlegroundContext, objectiveName, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, holderRawCharacterName, holderDisplayName, lastHolderRawCharacterName, lastHolderDisplayName, pinType)
     if ShouldShowBattlegroundObjectiveCSA(objectiveKeepId, objectiveId, BGQUERY_LOCAL) then
         --150% because the icon textures contain a good bit of empty space
         local murderballIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
@@ -709,7 +737,7 @@ CSH[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiveKeepId, objectiveId, bat
     end
 end
 
-CSH[EVENT_BATTLEGROUND_KILL] = function(killedPlayerCharacterName, killedPlayerDisplayName, killedPlayerBattlegroundAlliance, killingPlayerCharacterName, killingPlayerDisplayName, killingPlayerBattlegroundAlliance,  battlegroundKillType)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_BATTLEGROUND_KILL] = function(killedPlayerCharacterName, killedPlayerDisplayName, killedPlayerBattlegroundAlliance, killingPlayerCharacterName, killingPlayerDisplayName, killingPlayerBattlegroundAlliance,  battlegroundKillType)
     local battlegroundId = GetCurrentBattlegroundId()
     if battlegroundId ~= 0 then
         local gameType = GetBattlegroundGameType(battlegroundId)
@@ -738,7 +766,7 @@ end
 
 -- End Battleground Event Handlers --
 
-CSH[EVENT_DISPLAY_ANNOUNCEMENT] = function(title, description)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISPLAY_ANNOUNCEMENT] = function(title, description)
     local messageParams
     if title ~= "" and description ~= "" then
         messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DISPLAY_ANNOUNCEMENT)
@@ -755,7 +783,7 @@ CSH[EVENT_DISPLAY_ANNOUNCEMENT] = function(title, description)
     return messageParams
 end
 
-CSH[EVENT_RAID_TRIAL_STARTED] = function(raidName, isWeekly)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RAID_TRIAL_STARTED] = function(raidName, isWeekly)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_STARTED)
     messageParams:SetText(zo_strformat(SI_TRIAL_STARTED, raidName))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
@@ -764,7 +792,7 @@ end
 
 do
     local TRIAL_COMPLETE_LIFESPAN_MS = 10000
-    CSH[EVENT_RAID_TRIAL_COMPLETE] = function(raidName, score, totalTime)
+    CENTER_SCREEN_EVENT_HANDLERS[EVENT_RAID_TRIAL_COMPLETE] = function(raidName, score, totalTime)
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_RAID_COMPLETE_TEXT, SOUNDS.RAID_TRIAL_COMPLETED)
         local wasUnderTargetTime = GetRaidDuration() <= GetRaidTargetTime()
         local formattedTime = ZO_FormatTimeMilliseconds(totalTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS)
@@ -780,21 +808,21 @@ do
     end
 end
 
-CSH[EVENT_RAID_TRIAL_FAILED] = function(raidName, score)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RAID_TRIAL_FAILED] = function(raidName, score)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RAID_TRIAL_FAILED)
     messageParams:SetText(zo_strformat(SI_TRIAL_FAILED, raidName))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
     return messageParams
 end
 
-CSH[EVENT_RAID_TRIAL_NEW_BEST_SCORE] = function(raidName, score, isWeekly)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RAID_TRIAL_NEW_BEST_SCORE] = function(raidName, score, isWeekly)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.RAID_TRIAL_NEW_BEST)
     messageParams:SetText(zo_strformat(isWeekly and SI_TRIAL_NEW_BEST_SCORE_WEEKLY or SI_TRIAL_NEW_BEST_SCORE_LIFETIME, raidName))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RAID_TRIAL)
     return messageParams
 end
 
-CSH[EVENT_RAID_REVIVE_COUNTER_UPDATE] = function(currentCount, countDelta)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RAID_REVIVE_COUNTER_UPDATE] = function(currentCount, countDelta)
 -- TODO: revisit this once there is a way to properly handle this in client/server code
     if not IsRaidInProgress() then
         return
@@ -806,48 +834,6 @@ CSH[EVENT_RAID_REVIVE_COUNTER_UPDATE] = function(currentCount, countDelta)
         return messageParams
     end
 end
-
-do
-    local COLLECTIBLE_EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
-
-    CSH[EVENT_COLLECTIBLE_UPDATED] = 
-    {
-        callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
-        callbackRegistration = "OnCollectibleUpdated",
-        callbackFunction = function(collectibleId, justUnlocked)
-            if justUnlocked then
-                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-
-                if not collectibleData:IsPlaceholder() then
-                    local collectibleName = collectibleData:GetName()
-                    local icon = collectibleData:GetIcon()
-                    local categoryData = collectibleData:GetCategoryData()
-                    local categoryName = categoryData:GetName()
-
-                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
-                    messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName))
-                    messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
-                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
-                    return messageParams
-                end
-            end
-        end,
-    }
-end
-
-CSH[EVENT_COLLECTIBLES_UPDATED] =
-{
-    callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
-    callbackRegistration = "OnCollectionUpdated",
-    callbackFunction = function(numJustUnlocked)
-        if numJustUnlocked > 0 then
-            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
-            messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, numJustUnlocked))
-            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
-            return messageParams
-        end
-    end,
-}
 
 do
     local TRIAL_SCORE_REASON_TO_ASSETS =
@@ -866,7 +852,7 @@ do
         [RAID_POINT_REASON_SOLO_ARENA_COMPLETE]     = { icon = "EsoUI/Art/Trials/trialPoints_veryHigh.dds", soundId = SOUNDS.RAID_TRIAL_SCORE_ADDED_VERY_HIGH },
     }
 
-    CSH[EVENT_RAID_TRIAL_SCORE_UPDATE] = function(scoreUpdateReason, scoreAmount, totalScore)
+    CENTER_SCREEN_EVENT_HANDLERS[EVENT_RAID_TRIAL_SCORE_UPDATE] = function(scoreUpdateReason, scoreAmount, totalScore)
         local reasonAssets = TRIAL_SCORE_REASON_TO_ASSETS[scoreUpdateReason]
         if reasonAssets then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, reasonAssets.soundId)
@@ -879,7 +865,7 @@ end
 
 do
     local CHAMPION_UNLOCKED_LIFESPAN_MS = 12000
-    CSH[EVENT_CHAMPION_LEVEL_ACHIEVED] = function(wasChampionSystemUnlocked)
+    CENTER_SCREEN_EVENT_HANDLERS[EVENT_CHAMPION_LEVEL_ACHIEVED] = function(wasChampionSystemUnlocked)
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CHAMPION_POINT_GAINED)
         local formattedIcon = zo_iconFormat(GetChampionPointsIcon(), "100%", "100%")
         messageParams:SetText(zo_strformat(SI_CHAMPION_ANNOUNCEMENT_UNLOCKED, formattedIcon))
@@ -887,7 +873,9 @@ do
             local championPoints = GetPlayerChampionPointsEarned()
             local currentChampionXP = GetPlayerChampionXP()
             local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, championPoints, currentChampionXP, currentChampionXP)
+            barParams:SetTriggeringEvent(EVENT_CHAMPION_LEVEL_ACHIEVED)
             barParams:SetShowNoGain(true)
+            ValidateProgressBarParams(barParams)
             messageParams:SetBarParams(barParams)
         else
             local totalChampionPoints = GetPlayerChampionPointsEarned()
@@ -895,7 +883,10 @@ do
             for i = 0, (totalChampionPoints - 1) do
                 championXPGained = championXPGained + GetNumChampionXPInChampionPoint(i)
             end
-            messageParams:SetBarParams(CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, 0, 0, championXPGained))
+            local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(PPB_CP, 0, 0, championXPGained)
+            barParams:SetTriggeringEvent(EVENT_CHAMPION_LEVEL_ACHIEVED)
+            ValidateProgressBarParams(barParams)
+            messageParams:SetBarParams(barParams)
             messageParams:SetLifespanMS(CHAMPION_UNLOCKED_LIFESPAN_MS)
         end
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CHAMPION_LEVEL_ACHIEVED)
@@ -903,7 +894,7 @@ do
     end
 end
 
-CSH[EVENT_CHAMPION_POINT_GAINED] = function(pointDelta)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_CHAMPION_POINT_GAINED] = function(pointDelta)
     -- adding one so that we are starting from the first gained point instead of the starting champion points
     local endingPoints = GetPlayerChampionPointsEarned()
     local startingPoints = endingPoints - pointDelta + 1
@@ -931,7 +922,7 @@ CSH[EVENT_CHAMPION_POINT_GAINED] = function(pointDelta)
     return messageParams
 end
 
-CSH[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
     if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         messageParams:SetText(GetString(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BAG_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
@@ -940,7 +931,7 @@ CSH[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] = function(previousCapacity, currentCa
     end
 end
 
-CSH[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] = function(previousCapacity, currentCapacity, previousUpgrade, currentUpgrade)
     if previousCapacity > 0 and previousCapacity ~= currentCapacity and previousUpgrade ~= currentUpgrade then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
         messageParams:SetText(GetString(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_TITLE), zo_strformat(SI_INVENTORY_BANK_UPGRADE_ANOUNCEMENT_DESCRIPTION, previousCapacity, currentCapacity))
@@ -949,28 +940,28 @@ CSH[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] = function(previousCapacity, currentC
     end
 end
 
-CSH[EVENT_ATTRIBUTE_FORCE_RESPEC] = function(note)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ATTRIBUTE_FORCE_RESPEC] = function(note)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
     messageParams:SetText(GetString(SI_ATTRIBUTE_FORCE_RESPEC_TITLE), zo_strformat(SI_ATTRIBUTE_FORCE_RESPEC_PROMPT, note))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
     return messageParams
 end
 
-CSH[EVENT_SKILL_FORCE_RESPEC] = function(note)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_FORCE_RESPEC] = function(note)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
     messageParams:SetText(GetString(SI_SKILLS_FORCE_RESPEC_TITLE), zo_strformat(SI_SKILLS_FORCE_RESPEC_PROMPT, note))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
     return messageParams
 end
 
-CSH[EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE] = function()
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE] = function()
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.LFG_COMPLETE_ANNOUNCEMENT)
     messageParams:SetText(GetString(SI_ACTIVITY_FINDER_ACTIVITY_COMPLETE_ANNOUNCEMENT_TEXT))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACTIVITY_COMPLETE)
     return messageParams
 end
 
-CSH[EVENT_DUEL_COUNTDOWN] = function(startTimeMS)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DUEL_COUNTDOWN] = function(startTimeMS)
     local displayTime = startTimeMS - GetFrameTimeMilliseconds()
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_COUNTDOWN_TEXT, SOUNDS.DUEL_START)
     messageParams:SetLifespanMS(displayTime)
@@ -993,7 +984,7 @@ do
         end
     end
 
-    CSH[EVENT_DUEL_NEAR_BOUNDARY] = function(isInWarningArea)
+    CENTER_SCREEN_EVENT_HANDLERS[EVENT_DUEL_NEAR_BOUNDARY] = function(isInWarningArea)
         if isInWarningArea then
             local nowEventTime = GetFrameTimeMilliseconds()
             EVENT_MANAGER:RegisterForUpdate("EVENT_DUEL_NEAR_BOUNDARY", DUEL_BOUNDARY_WARNING_UPDATE_TIME_MS, CheckBoundary)
@@ -1007,7 +998,7 @@ do
     end
 end
 
-CSH[EVENT_DUEL_FINISHED] = function(result, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DUEL_FINISHED] = function(result, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName)
     local resultString = GetString("SI_DUELRESULT", result)
     local userFacingName
     if wasLocalPlayersResult then
@@ -1038,14 +1029,14 @@ CSH[EVENT_DUEL_FINISHED] = function(result, wasLocalPlayersResult, opponentChara
     return messageParams
 end
 
-CSH[EVENT_RIDING_SKILL_IMPROVEMENT] = function(ridingSkill, previous, current, source)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RIDING_SKILL_IMPROVEMENT] = function(ridingSkill, previous, current, source)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
     messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
     return messageParams
 end
 
-CSH[EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED] = function(hasFreeTrial)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED] = function(hasFreeTrial)
     local text
     local soundId
     if hasFreeTrial then
@@ -1061,7 +1052,7 @@ CSH[EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED] = function(hasFreeTrial)
     return messageParams
 end
 
-CSH[EVENT_OUTFIT_CHANGE_RESPONSE] = function(result, outfitIndex)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_OUTFIT_CHANGE_RESPONSE] = function(result, outfitIndex)
     if result == APPLY_OUTFIT_CHANGES_RESULT_SUCCESS then
         local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(outfitIndex)
         if outfitManipulator then
@@ -1074,12 +1065,23 @@ CSH[EVENT_OUTFIT_CHANGE_RESPONSE] = function(result, outfitIndex)
     end
 end
 
-function ZO_CenterScreenAnnounce_GetHandlers()
-    return CSH
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAILY_LOGIN_REWARDS_CLAIMED] = function()
+    local rewardId, quantity = GetDailyLoginRewardInfoForCurrentMonth(GetDailyLoginNumRewardsClaimedInMonth())
+    local claimedDailyLoginReward = REWARDS_MANAGER:GetInfoForDailyLoginReward(rewardId, quantity)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT)
+    local secondaryText = claimedDailyLoginReward:GetQuantity() > 1 and claimedDailyLoginReward:GetFormattedNameWithStack() or claimedDailyLoginReward:GetFormattedName()
+    messageParams:SetText(GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_ANNOUNCEMENT), secondaryText)
+    messageParams:SetIconData(claimedDailyLoginReward:GetKeyboardIcon())
+    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAILY_LOGIN_REWARD_CLAIMED)
+    return messageParams
 end
 
-function ZO_CenterScreenAnnounce_GetHandler(eventId)
-    return CSH[eventId]
+function ZO_CenterScreenAnnounce_GetEventHandlers()
+    return CENTER_SCREEN_EVENT_HANDLERS
+end
+
+function ZO_CenterScreenAnnounce_GetEventHandler(eventId)
+    return CENTER_SCREEN_EVENT_HANDLERS[eventId]
 end
 
 function ZO_CenterScreenAnnounce_InitializePriorities()
@@ -1186,19 +1188,18 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     EVENT_MANAGER:RegisterForEvent("CSA_MiscellaneousHandlers", EVENT_QUEST_ADDED, OnQuestAdded)
 end
 
-
 -- Center Screen Queueable Handlers
 -- Usage: Whenever there is an event type that occurs multiple times within a short timeframe
 -- add another table entry with data to help facilitate the combining of the multiple events into a single call
 --      updateTimeDelaySeconds: The time delay from when an event that is marked as queueable is recieved to when the event enters into the regular event queue.
 --                              The system will restart the time after each new event is recieved
 --      updateParameters:       A table of parameter positions that should be overwritten with the latest data from the newest event recieved.
---                              The position is derived from the parameters in the event callback function defined in the CSH table for the same event. 
+--                              The position is derived from the parameters in the event callback function defined in the CENTER_SCREEN_EVENT_HANDLERS table for the same event. 
 --      conditionParameters:    A table of parameter positions that should be unique amoung any given number of eventIds. For example, if you kill a monster that gives
 --                              exp and guild rep, they will both come down as skill xp update events, but their skilltype and skillindex values are different, so they should be added the to system independently
 --                              and not added together for updating
 
-local CSQH = {}
+local CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS = {}
 
 do
     local PARAMETER_RIDING_SKILL_TYPE       = 1
@@ -1216,31 +1217,31 @@ do
     local LONG_UPDATE_INTERVAL_SECONDS = 2.5
     local EXTRA_LONG_UPDATE_INTERVAL_SECONDS = 3.1
 
-    CSQH[EVENT_SKILL_XP_UPDATE] =
+    CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS[EVENT_SKILL_XP_UPDATE] =
     {
         updateTimeDelaySeconds = LONG_UPDATE_INTERVAL_SECONDS,
         updateParameters = { PARAMETER_CURRENT_XP },
         conditionParameters = { PARAMETER_SKILL_TYPE, PARAMETER_SKILL_INDEX }
     }
 
-    CSQH[EVENT_RAID_REVIVE_COUNTER_UPDATE] =
+    CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS[EVENT_RAID_REVIVE_COUNTER_UPDATE] =
     {
         updateTimeDelaySeconds = LONG_UPDATE_INTERVAL_SECONDS,
     }
 
-    CSQH[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] =
+    CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS[EVENT_INVENTORY_BAG_CAPACITY_CHANGED] =
     {
         updateTimeDelaySeconds = EXTRA_LONG_UPDATE_INTERVAL_SECONDS,
         updateParameters = { PARAMETER_CURRENT_CAPACITY, PARAMETER_CURRENT_UPGRADE }
     }
 
-    CSQH[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] =
+    CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS[EVENT_INVENTORY_BANK_CAPACITY_CHANGED] =
     {
         updateTimeDelaySeconds = EXTRA_LONG_UPDATE_INTERVAL_SECONDS,
         updateParameters = { PARAMETER_CURRENT_CAPACITY, PARAMETER_CURRENT_UPGRADE }
     }
 
-    CSQH[EVENT_RIDING_SKILL_IMPROVEMENT] =
+    CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS[EVENT_RIDING_SKILL_IMPROVEMENT] =
     {
         updateTimeDelaySeconds = MEDIUM_UPDATE_INTERVAL_SECONDS,
         updateParameters = { PARAMETER_CURRENT_RIDING_SKILL },
@@ -1248,10 +1249,59 @@ do
     }
 end
 
-function ZO_CenterScreenAnnounce_GetQueueableHandlers()
-    return CSQH
+function ZO_CenterScreenAnnounce_GetQueueableEventHandlers()
+    return CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS
 end
 
 function ZO_CenterScreenAnnounce_GetQueueableHandler(eventId)
-    return CSQH[eventId]
+    return CENTER_SCREEN_QUEUEABLE_EVENT_HANDLERS[eventId]
+end
+
+-- Center Screen Callback Handlers
+-- Usage: When we want to register with a callback object instead of an event
+
+local COLLECTIBLE_EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
+
+local CENTER_SCREEN_CALLBACK_HANDLERS = 
+{
+    {
+        event = EVENT_COLLECTIBLE_UPDATED,
+        callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
+        callbackRegistration = "OnCollectibleUpdated",
+        callbackFunction = function(collectibleId, lockStateChange)
+            if lockStateChange == ZO_COLLECTIBLE_LOCK_STATE_CHANGE.UNLOCKED then
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                if not collectibleData:IsPlaceholder() then
+                    local collectibleName = collectibleData:GetName()
+                    local icon = collectibleData:GetIcon()
+                    local categoryData = collectibleData:GetCategoryData()
+                    local categoryName = categoryData:GetName()
+
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                    messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName))
+                    messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+                    return messageParams
+                end
+            end
+        end,
+    },
+
+    {
+        event = EVENT_COLLECTIBLES_UPDATED,
+        callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
+        callbackRegistration = "OnCollectionUpdated",
+        callbackFunction = function(numJustUnlocked)
+            if numJustUnlocked > 0 then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, numJustUnlocked))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
+                return messageParams
+            end
+        end,
+    }
+}
+
+function ZO_CenterScreenAnnounce_GetCallbackHandlers()
+    return CENTER_SCREEN_CALLBACK_HANDLERS
 end

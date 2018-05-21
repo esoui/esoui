@@ -109,20 +109,16 @@ function ZO_GamepadInventory:OnDeferredInitialize()
         local currentList = self:GetCurrentList()
         if self.scene:IsShowing() then
             -- we only want to update immediately if we are in the gamepad inventory scene
-            if ZO_Dialogs_IsShowing(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) then
-                self:OnUpdate() --don't wait for next update loop in case item was destroyed and scene/keybinds need immediate update
-            else
-                if currentList == self.categoryList then
-                    self:RefreshCategoryList()
-                elseif currentList == self.itemList then
-                    if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
-                        KEYBIND_STRIP:UpdateKeybindButton(self.quickslotKeybindStripDescriptor)
-                    elseif self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
-                        KEYBIND_STRIP:UpdateKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
-                    end
+            if currentList == self.categoryList then
+                self:RefreshCategoryList()
+            elseif currentList == self.itemList then
+                if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
+                    KEYBIND_STRIP:UpdateKeybindButton(self.quickslotKeybindStripDescriptor)
+                elseif self.selectedItemFilterType == ITEMFILTERTYPE_JEWELRY or self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
+                    KEYBIND_STRIP:UpdateKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
                 end
-                RefreshSelectedData() --dialog will refresh selected when it hides, so only do it if it's not showing
             end
+            RefreshSelectedData() --dialog will refresh selected when it hides, so only do it if it's not showing
             self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
         end
     end
@@ -272,7 +268,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor)
             if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
                 KEYBIND_STRIP:AddKeybindButton(self.quickslotKeybindStripDescriptor)
                 TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_QUICKSLOTS_AVAILABLE)
-            elseif self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
+            elseif self.selectedItemFilterType == ITEMFILTERTYPE_JEWELRY or self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
                 KEYBIND_STRIP:AddKeybindButton(self.toggleCompareModeKeybindStripDescriptor)
             end
 
@@ -867,7 +863,7 @@ function ZO_GamepadInventory:RefreshCategoryList()
             local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
             data:SetMaxIconAlpha(offhandTransparency)
             data.equipSlot = equipSlot
-            data.filterType = weaponCategoryType ~= nil and ITEMFILTERTYPE_WEAPONS or ITEMFILTERTYPE_ARMOR
+            data.filterType = (GetItemFilterTypeInfo(BAG_WORN, equipSlot)) -- first filter only
 
             if (equipSlot == EQUIP_SLOT_POISON or equipSlot == EQUIP_SLOT_BACKUP_POISON) then
                 data.stackCount = select(2, GetItemInfo(BAG_WORN, equipSlot))
@@ -953,22 +949,24 @@ function ZO_GamepadInventory_DefaultItemSortComparator(left, right)
     return ZO_TableOrderingFunction(left, right, "bestItemCategoryName", DEFAULT_GAMEPAD_ITEM_SORT, ZO_SORT_ORDER_UP)
 end
 
+local GAMEPAD_QUEST_ITEM_SORT = ZO_SORT_BY_NAME
+
+function ZO_GamepadInventory_QuestItemSortComparator(left, right)
+    return ZO_TableOrderingFunction(left, right, "name", GAMEPAD_QUEST_ITEM_SORT, ZO_SORT_ORDER_UP)
+end
+
 local function GetBestItemCategoryDescription(itemData)
-    if itemData.equipType == EQUIP_TYPE_INVALID then
-        if itemData.itemType == ITEMTYPE_FURNISHING then
-            local furnitureDataId = GetItemFurnitureDataId(itemData.bagId, itemData.slotIndex)
-            if furnitureDataId ~= 0 then
-                local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
-                if categoryId then
-                    local categoryName = GetFurnitureCategoryInfo(categoryId)
-                    if categoryName ~= "" then
-                        return categoryName
-                    end
+    if itemData.itemType == ITEMTYPE_FURNISHING then
+        local furnitureDataId = GetItemFurnitureDataId(itemData.bagId, itemData.slotIndex)
+        if furnitureDataId ~= 0 then
+            local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
+            if categoryId then
+                local categoryName = GetFurnitureCategoryInfo(categoryId)
+                if categoryName ~= "" then
+                    return categoryName
                 end
             end
         end
-
-        return GetString("SI_ITEMTYPE", itemData.itemType)
     end
 
     local categoryType = GetCategoryTypeFromWeaponType(itemData.bagId, itemData.slotIndex)
@@ -984,7 +982,7 @@ local function GetBestItemCategoryDescription(itemData)
         return GetString("SI_ARMORTYPE", armorType)
     end
 
-    return GetString("SI_ITEMTYPE", itemData.itemType)
+    return ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
 end
 
 local function GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
@@ -1029,6 +1027,7 @@ function ZO_GamepadInventory:RefreshItemList()
                 table.insert(filteredDataTable, questItem)
             end
         end
+        table.sort(filteredDataTable, ZO_GamepadInventory_QuestItemSortComparator)
     else
         local comparator = GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
 
@@ -1036,9 +1035,8 @@ function ZO_GamepadInventory:RefreshItemList()
         for _, itemData in pairs(filteredDataTable) do
             itemData.bestItemCategoryName = zo_strformat(SI_INVENTORY_HEADER, GetBestItemCategoryDescription(itemData))
         end
+        table.sort(filteredDataTable, ZO_GamepadInventory_DefaultItemSortComparator)
     end
-
-    table.sort(filteredDataTable, ZO_GamepadInventory_DefaultItemSortComparator)
 
     local lastBestItemCategoryName
     for i, itemData in ipairs(filteredDataTable) do

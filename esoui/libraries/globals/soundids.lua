@@ -636,6 +636,12 @@ SOUNDS = {
     UAV_POSSESSION_APPLIED_TARGET           = "Possession_Effect_Applied_Target",
     UAV_POSSESSION_REMOVED_TARGET           = "Possession_Effect_Removed_Target",
 
+    UAV_TRAUMA_ADDED                        = "Trauma_Effect_Added",
+    UAV_TRAUMA_LOST                         = "Trauma_Effect_Lost",
+
+    UAV_TRAUMA_ADDED_TARGET                 = "Trauma_Effect_Added_Target",
+    UAV_TRAUMA_LOST_TARGET                  = "Trauma_Effect_Lost_Target",
+
     -- Provisioning
     PROVISIONING_OPENED                     = "Provisioning_Opened",
     PROVISIONING_CLOSED                     = "Provisioning_Closed",
@@ -696,26 +702,32 @@ SOUNDS = {
     BLACKSMITH_CREATE_TOOLTIP_GLOW          = "Blacksmith_Create_Tooltip_Glow",
     WOODWORKER_CREATE_TOOLTIP_GLOW          = "Woodworker_Create_Tooltip_Glow",
     CLOTHIER_CREATE_TOOLTIP_GLOW            = "Clothier_Create_Tooltip_Glow",
+    JEWELRYCRAFTER_CREATE_TOOLTIP_GLOW      = "JewelryCrafter_Create_Tooltip_Glow",
 
     BLACKSMITH_IMPROVE_TOOLTIP_GLOW_SUCCESS = "Blacksmith_Improve_Tooltip_Glow_Success",
     WOODWORKER_IMPROVE_TOOLTIP_GLOW_SUCCESS = "Woodworker_Improve_Tooltip_Glow_Success",
     CLOTHIER_IMPROVE_TOOLTIP_GLOW_SUCCESS   = "Clothier_Improve_Tooltip_Glow_Success",
+    JEWELRYCRAFTER_IMPROVE_TOOLTIP_GLOW_SUCCESS = "JewelryCrafter_Improve_Tooltip_Glow_Success",
 
     BLACKSMITH_IMPROVE_TOOLTIP_GLOW_FAIL    = "Blacksmith_Improve_Tooltip_Glow_Fail",
     WOODWORKER_IMPROVE_TOOLTIP_GLOW_FAIL    = "Woodworker_Improve_Tooltip_Glow_Fail",
     CLOTHIER_IMPROVE_TOOLTIP_GLOW_FAIL      = "Clothier_Improve_Tooltip_Glow_Fail",
+    JEWELRYCRAFTER_IMPROVE_TOOLTIP_GLOW_FAIL = "JewelryCrafter_Improve_Tooltip_Glow_Fail",
 
     BLACKSMITH_EXTRACTED_BOOSTER            = "Blacksmith_Extracted_Booster",
     WOODWORKER_EXTRACTED_BOOSTER            = "Woodworker_Extracted_Booster",
     CLOTHIER_EXTRACTED_BOOSTER              = "Clothier_Extracted_Booster",
+    JEWELRYCRAFTER_EXTRACTED_BOOSTER        = "JewelryCrafter_Extracted_Booster",
 
     BLACKSMITH_FAILED_EXTRACTION            = "Blacksmith_Failed_Extraction",
     WOODWORKER_FAILED_EXTRACTION            = "Woodworker_Failed_Extraction",
     CLOTHIER_FAILED_EXTRACTION              = "Clothier_Failed_Extraction",
+    JEWELRYCRAFTER_FAILED_EXTRACTION        = "JewelryCrafter_Failed_Extraction",
 
     BLACKSMITH_EXTRACT_START_ANIM           = "Blacksmith_Extract_Start_Anim",
     WOODWORKER_EXTRACT_START_ANIM           = "Woodworker_Extract_Start_Anim",
     CLOTHIER_EXTRACT_START_ANIM             = "Clothier_Extract_Start_Anim",
+    JEWELRYCRAFTER_EXTRACT_START_ANIM       = "JewelryCrafter_Extract_Start_Anim",
 
     -- Crafting
     CRAFTING_GAINED_INSPIRATION             = "Crafting_Gained_Inspiration",
@@ -849,6 +861,7 @@ SOUNDS = {
     MARKET_SUB_CATEGORY_SELECTED        = "Market_SubCategorySelected",
     MARKET_PURCHASE_SELECTED            = "Market_PurchaseSelected",
     MARKET_PREVIEW_SELECTED             = "Market_PreviewSelected",
+    MARKET_GIFT_SELECTED                = "Market_GiftSelected",
     MARKET_CROWNS_SPENT                 = "Market_CrownsSpent",
     MARKET_CROWN_GEMS_SPENT             = "Market_CrownGemsSpent",
 
@@ -913,4 +926,16 @@ SOUNDS = {
     LEVEL_UP_REWARD_SECTION_APPEAR          = "LevelUpReward_SectionAppear",
     LEVEL_UP_REWARD_CLAIM_APPEAR            = "LevelUpReward_ClaimAppear",
     LEVEL_UP_REWARD_CLAIM                   = "LevelUpReward_Claim",
+
+    --Daily Login Rewards
+    DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT  = "DailyLoginRewards_ClaimAnnouncement",
+	DAILY_LOGIN_REWARDS_CLAIM_FANFARE       = "DailyLoginRewards_ClaimFanfare",
+    DAILY_LOGIN_REWARDS_ACTION_CLAIM        = "DailyLoginRewards_ActionClaim",
+    DAILY_LOGIN_REWARDS_MONTH_CHANGE        = "DailyLoginRewards_MonthChange",
+
+    --Gifting
+    GIFT_INVENTORY_VIEW_FANFARE_BLAST       = "GiftInventoryView_FanfareBlast",
+    GIFT_INVENTORY_VIEW_FANFARE_SPARKS      = "GiftInventoryView_FanfareSparks",
+    GIFT_INVENTORY_VIEW_FANFARE_STARBURST   = "GiftInventoryView_FanfareStarburst",
+    GIFT_INVENTORY_ACTION_CLAIM             = "GiftInventory_ActionClaim",
 }

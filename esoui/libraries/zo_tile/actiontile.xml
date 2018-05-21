@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ActionTile_Control" inherits="ZO_Tile_Control" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="10">
+                            <AnchorFill />
+                            <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+                        </Backdrop>
+
+                        <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)OverlayBorder" relativePoint="TOPLEFT" offsetX="15" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)OverlayBorder" relativePoint="TOPRIGHT" offsetX="-10" offsetY="10"/>
+                        </Label>
+
+                        <Label name="$(parent)Title">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

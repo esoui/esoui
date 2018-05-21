@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DailyRewardsTile_Gamepad_Control" inherits="ZO_DailyRewardsTile_Control ZO_ClaimTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_DailyRewardsTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

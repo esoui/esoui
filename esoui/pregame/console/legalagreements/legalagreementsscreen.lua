@@ -186,7 +186,12 @@ function LegalAgreementScreen_Console:InitKeybindingDescriptor()
                 currentData.acceptFunction()
 
                 if self.activeIndex == #self.data then
-                    PregameStateManager_AdvanceState()
+                    if self.showFetchedDocs then
+                        -- Services legal docs require an extra confirmation step before we consider them to be accepted
+                        ZO_Dialogs_ShowGamepadDialog("LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE")
+                    else
+                        PregameStateManager_AdvanceState()
+                    end
                 else
                     self.activeIndex = self.activeIndex + 1
                     self:UpdateCurrentText()

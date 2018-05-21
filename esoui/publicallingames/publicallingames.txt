@@ -3,8 +3,11 @@
 
 EsoUI\PublicAllIngames\Globals\Globals.lua
 EsoUI\PublicAllIngames\Globals\SharedTextures.lua
+EsoUI\PublicAllIngames\Globals\AutoComplete.lua
 EsoUI\PublicAllIngames\Currency\Keyboard\CurrencyOptionsTable_Keyboard.lua
 EsoUI\PublicAllIngames\Currency\Gamepad\CurrencyOptionsTable_Gamepad.lua
+
+EsoUI\PublicAllIngames\Character\Character_Utils.lua
 
 EsoUI\PublicAllIngames\Currency\Currency.lua
 EsoUI\PublicAllIngames\Currency\Currency.xml
@@ -39,6 +42,12 @@ EsoUI\PublicAllIngames\ItemPreview\Keyboard\ItemPreview_Keyboard.xml
 EsoUI\PublicAllIngames\ItemPreview\Gamepad\ItemPreview_Gamepad.lua
 EsoUI\PublicAllIngames\ItemPreview\Gamepad\ItemPreview_Gamepad.xml
 
+EsoUI\PublicAllIngames\ItemPreview\ItemPreviewListHelper_Shared.lua
+EsoUI\PublicAllIngames\ItemPreview\Keyboard\ItemPreviewListHelper_Keyboard.lua
+EsoUI\PublicAllIngames\ItemPreview\Keyboard\ItemPreviewListHelper_Keyboard.xml
+EsoUI\PublicAllIngames\ItemPreview\Gamepad\ItemPreviewListHelper_Gamepad.lua
+EsoUI\PublicAllIngames\ItemPreview\Gamepad\ItemPreviewListHelper_Gamepad.xml
+
 EsoUI\PublicAllIngames\MarketCurrency\MarketCurrency_Shared.lua
 EsoUI\PublicAllIngames\MarketCurrency\Keyboard\MarketCurrency_Keyboard.lua
 EsoUI\PublicAllIngames\MarketCurrency\Keyboard\MarketCurrency_Keyboard.xml
@@ -47,4 +56,18 @@ EsoUI\PublicAllIngames\MarketCurrency\Gamepad\MarketCurrency_Gamepad.xml
 
 EsoUI\PublicAllIngames\TrialAccount\TrialAccount_IngameShared.lua
 
-EsoUI\PublicAllIngames\Collections\ChapterUpgrade_Manager.lua
+EsoUI\PublicAllIngames\ChapterUpgrade\ChapterUpgrade_Manager.lua
+
+EsoUI\PublicAllIngames\Scenes\Keyboard\KeyboardPublicAllIngameFragmentGroups.lua
+EsoUI\PublicAllIngames\Scenes\Gamepad\GamepadPublicAllIngameFragmentGroups.lua
+
+EsoUI\PublicAllIngames\Rewards\Rewards_Manager.lua
+
+EsoUI\PublicAllIngames\DailyLoginRewards\DailyLoginRewards_Manager.lua
+EsoUI\PublicAllIngames\Tile\DailyRewards_TileInfo.lua
+EsoUI\PublicAllIngames\Tile\DailyRewardsTile.lua
+EsoUI\PublicAllIngames\Tile\DailyRewardsTile.xml
+EsoUI\PublicAllIngames\Tile\Keyboard\DailyRewardsTile_Keyboard.lua
+EsoUI\PublicAllIngames\Tile\Keyboard\DailyRewardsTile_Keyboard.xml
+EsoUI\PublicAllIngames\Tile\Gamepad\DailyRewardsTile_Gamepad.lua
+EsoUI\PublicAllIngames\Tile\Gamepad\DailyRewardsTile_Gamepad.xml

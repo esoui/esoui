@@ -1,6 +1,9 @@
 ; pregame UI files
 ## DependsOn: ZO_PregameLocalization ZO_PregameAndIngame
 
+## SavedVariables: ZO_Pregame_SavedVariables
+## ValidateSavedVariables: 1
+
 EsoUI\Pregame\Globals\PregameGlobals.lua
 EsoUI\Pregame\Globals\PreGameDialogs.lua
 EsoUI\Pregame\Globals\OverflowDialog.lua
@@ -18,8 +21,8 @@ EsoUI\Pregame\Tooltip\Tooltip.xml
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
-EsoUI\Pregame\PregameAnimatedBackground\MorrowindBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\MorrowindBackground.xml
+EsoUI\Pregame\PregameAnimatedBackground\Console\SummersetBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\Console\SummersetBackground.xml
 
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml
@@ -146,6 +149,7 @@ EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.xml
 EsoUI\Pregame\RzChroma\PregameRzChroma_Manager.lua
 EsoUI\Pregame\RzChroma\PregameRzChroma_Effects.lua
 
+EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Manager.lua
 EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Shared.lua
 EsoUI\Pregame\ChapterUpgrade\ChapterUpgrade_Shared.xml
 EsoUI\Pregame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.lua

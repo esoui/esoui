@@ -30,16 +30,19 @@ function RetraitStationManager:InitializeTraitData()
     self.traitInfo = {
         [ITEM_TRAIT_TYPE_CATEGORY_WEAPON] = {},
         [ITEM_TRAIT_TYPE_CATEGORY_ARMOR] = {},
+        [ITEM_TRAIT_TYPE_CATEGORY_JEWELRY] = {},
     }
 
-    for traitIndex = 1, GetNumSmithingTraitItems() do
-        local traitType, traitItemName, traitItemIcon, sellPrice, meetsUsageRequirement, itemStyle, quality = GetSmithingTraitItemInfo(traitIndex)
-        if traitType then
-            local traitCategory = GetItemTraitTypeCategory(traitType)
-            local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
-            if self.traitInfo[traitCategory] then
-                table.insert(self.traitInfo[traitCategory], {traitType = traitType, traitItemIcon = traitItemIcon, traitName = zo_strformat(SI_SMITHING_RESEARCH_TRAIT_NAME_FORMAT, traitName)})
-            end
+    local traitItems = ZO_CraftingUtils_GetSmithingTraitItemInfo()
+    for _, traitItemInfo in ipairs(traitItems) do
+        local traitCategory = GetItemTraitTypeCategory(traitItemInfo.type)
+        local traitName = GetString("SI_ITEMTRAITTYPE", traitItemInfo.type)
+        if self.traitInfo[traitCategory] then
+            table.insert(self.traitInfo[traitCategory], {
+                traitType = traitItemInfo.type,
+                traitItemIcon = traitItemInfo.icon,
+                traitName = zo_strformat(SI_SMITHING_RESEARCH_TRAIT_NAME_FORMAT, traitName)
+            })
         end
     end
 end

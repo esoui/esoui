@@ -94,8 +94,26 @@ do
     end
 end
 
+function ZO_ChapterUpgradePane_Shared:PreviewSelection()
+    local marketProductId = self:GetSelectedProductId()
+    self:GetItemPreviewListHelper():PreviewMarketProduct(marketProductId)
+end
+
+function ZO_ChapterUpgradePane_Shared:CanPreviewSelection()
+    local marketProductId = self:GetSelectedProductId()
+    return self:GetItemPreviewListHelper():CanPreviewMarketProduct(marketProductId)
+end
+
 function ZO_ChapterUpgradePane_Shared:GetChapterUpgradeData()
     return self.chapterUpgradeData
+end
+
+function ZO_ChapterUpgradePane_Shared:GetSelectedProductId()
+    assert(false) -- Must be overriden
+end
+
+function ZO_ChapterUpgradePane_Shared:GetItemPreviewListHelper()
+    assert(false) -- Must be overriden
 end
 
 function ZO_ChapterUpgradeRewardEntry_Shared_OnInitialized(control)

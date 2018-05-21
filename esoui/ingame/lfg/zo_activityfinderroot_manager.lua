@@ -23,22 +23,6 @@ local function LFGSort(entry1, entry2)
     end
 end
 
-local function GetLFGEntryStringKeyboard(rawName, activityType)
-    if activityType == LFG_ACTIVITY_MASTER_DUNGEON then
-        return zo_iconTextFormat(GetVeteranIcon(), "100%", "100%", rawName)
-    else
-        return zo_strformat(SI_LFG_ACTIVITY_NAME, rawName)
-    end
-end
-
-local function GetLFGEntryStringGamepad(rawName, activityType)
-    if activityType == LFG_ACTIVITY_MASTER_DUNGEON then
-        return zo_strformat(GetString(SI_GAMEPAD_ACTIVITY_FINDER_VETERAN_LOCATION_FORMAT), rawName)
-    else
-        return zo_strformat(SI_LFG_ACTIVITY_NAME, rawName)
-    end
-end
-
 local function GetLevelOrChampionPointsRequirementText(levelMin, levelMax, pointsMin, pointsMax)
     local playerChampionPoints = GetUnitChampionPoints("player")
     
@@ -196,7 +180,6 @@ function ActivityFinderRoot_Manager:InitializeLocationData()
     local specificLocationsLookupData = {}
     local locationSetsLookupData = {}
     local sortedLocationsData = {}
-    local randomActivityTypeGroupSizeRanges = {}
 
     for activityType = LFG_ACTIVITY_ITERATION_BEGIN, LFG_ACTIVITY_ITERATION_END do
         local numActivities = GetNumActivitiesByType(activityType)
@@ -227,7 +210,6 @@ function ActivityFinderRoot_Manager:InitializeLocationData()
         end
 
         specificLocationsLookupData[activityType] = specificLookupActivityData
-        randomActivityTypeGroupSizeRanges[activityType] = { min = minGroupSize, max = maxGroupSize }
 
         --Activity sets
         for activitySetIndex = 1, numActivitySets do
@@ -253,10 +235,7 @@ function ActivityFinderRoot_Manager:InitializeLocationData()
     self.sortedLocationsData = sortedLocationsData
     self.specificLocationsLookupData = specificLocationsLookupData
     self.locationSetsLookupData = locationSetsLookupData
-    self.randomActivityTypeGroupSizeRanges = randomActivityTypeGroupSizeRanges
     self.numSelected = 0
-    self.randomActivityTypeLockReasons = {}
-    self.randomActivitySelections = {}
 end
 
 -----------
@@ -290,13 +269,6 @@ function ActivityFinderRoot_Manager:GetGroupStatus()
     return self.playerIsGrouped, self.playerIsLeader, self.groupSize
 end
 
-local RANDOM_LOCK_REASON_PRIORITY =
-{
-    SELF_LEVEL = 10,
-    GROUP_LEVEL = 20,
-    NOT_LEADER = 30,
-}
-
 function ActivityFinderRoot_Manager:UpdateLocationData()
     --Determine lock status for each location
     local inAGroup = IsUnitGrouped("player")
@@ -304,8 +276,6 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
     -- UI will only check local player roles.  Client and server will validate group member roles.
     -- This prevents group members disabling the leaders selections while they're trying to set up an activity and group member roles are being changed
     local isRoleDataValid = IsPreferredRoleSelected()
-
-    ZO_ClearTable(self.randomActivityTypeLockReasons)
 
     for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
         local isActivityAvA = ZO_IsActivityTypeAvA(activityType)
@@ -317,23 +287,16 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
         local isGroupRelevant = inAGroup and not isActivityHomeShow
         local isPlayerInAvAWorld = IsPlayerInAvAWorld()
         local activityAvailableFromAvAWorld = isActivityAvA or isActivityBattleground
-        local anyEligible = false
-        local anyLockReasonData = {}
         local CONCISE_COOLDOWN_TEXT = false
 
-        for index, location in ipairs(locationsByActivity) do
+        for _, location in ipairs(locationsByActivity) do
             location:SetLocked(true)
             location:SetCountsForAverageRoleTime(activityRequiresRoles)
             
             local cooldownText
             local applicableCooldowns = location:GetApplicableCooldownTypes()
-            if applicableCooldowns then
-                for _, cooldownType in ipairs(applicableCooldowns) do
-                    cooldownText = self:GetLFGCooldownLockText(cooldownType, CONCISE_COOLDOWN_TEXT)
-                    if cooldownText then
-                        break
-                    end
-                end
+            if applicableCooldowns and applicableCooldowns.queueCooldownType then
+                cooldownText = self:GetLFGCooldownLockText(applicableCooldowns.queueCooldownType, CONCISE_COOLDOWN_TEXT)
             end
 
             if cooldownText then
@@ -347,12 +310,15 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
             elseif location:IsLockedByCollectible() then
                 local collectibleId = location:GetFirstLockingCollectible()
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                local lockReasonText
+                local lockReasonStringId = nil
                 if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    lockReasonText = GetString(SI_LFG_LOCK_REASON_CHAPTER_NOT_UNLOCKED)
+                    lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_UPGRADE
+                elseif collectibleData:IsPurchasable() then
+                    lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_CROWN_STORE
                 else
-                    lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_DLC_NOT_UNLOCKED, collectibleData:GetName())
+                    lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED
                 end
+                local lockReasonText = zo_strformat(lockReasonStringId, collectibleData:GetName(), collectibleData:GetCategoryData():GetName())
                 location:SetLockReasonText(lockReasonText)
                 location:SetCountsForAverageRoleTime(false)
             elseif activityRequiresRoles and not isRoleDataValid then
@@ -366,37 +332,20 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     local levelMin, levelMax = location:GetLevelRange()
                     local championPointsMin, championPointsMax = location:GetChampionPointsRange()
                     location:SetLockReasonText(GetLevelOrChampionPointsRequirementText(levelMin, levelMax, championPointsMin, championPointsMax))
-                    location:SetRandomLockReasonPriority(RANDOM_LOCK_REASON_PRIORITY.SELF_LEVEL)
                     location:SetCountsForAverageRoleTime(false)
                 elseif isGroupRelevant and not location:DoesGroupMeetLevelRequirements() then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_GROUP_LOCATION_LEVEL_REQUIREMENTS)
-                    location:SetRandomLockReasonPriority(RANDOM_LOCK_REASON_PRIORITY.GROUP_LEVEL)
                 elseif isGroupRelevant and not isLeader then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_NOT_LEADER)
-                    location:SetRandomLockReasonPriority(RANDOM_LOCK_REASON_PRIORITY.NOT_LEADER)
                 else
                     location:SetLocked(false)
                     location:SetLockReasonText("")
-                    anyEligible = true
                 end
             end
 
             if location:IsLocked() then
-                -- ESO-538378: We do this because when there are more than one reason why random is unavailable, the broadest reason is usually the most accurate to show
-                local locationPriority = location:GetRandomLockReasonPriority()
-                local locationHasHigherPriority = locationPriority and (not anyLockReasonData.priority or anyLockReasonData.priority < locationPriority)
-                if not anyLockReasonData.text or locationHasHigherPriority then
-                    anyLockReasonData.text = location:GetLockReasonText()
-                    anyLockReasonData.priority = locationPriority
-                end
                 self:SetLocationSelected(location, false)
             end
-        end
-
-        if anyEligible then
-            self.randomActivityTypeLockReasons[activityType] = nil
-        else
-            self.randomActivityTypeLockReasons[activityType] = anyLockReasonData.text
         end
     end
 
@@ -404,10 +353,8 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
 end
 
 function ActivityFinderRoot_Manager:ClearSelections()
-    for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
-        self.randomActivitySelections[activityType] = false
-
-        for index, location in ipairs(locationsByActivity) do
+    for _, locationsByActivity in pairs(self.sortedLocationsData) do
+        for _, location in ipairs(locationsByActivity) do
             location:SetSelected(false)
         end
     end
@@ -474,7 +421,7 @@ function ActivityFinderRoot_Manager:GetLocationsData(activityType)
 end
 
 function ActivityFinderRoot_Manager:GetSpecificLocation(activityId)
-    for activityType, locationsByActivity in pairs(self.specificLocationsLookupData) do
+    for _, locationsByActivity in pairs(self.specificLocationsLookupData) do
         if locationsByActivity then
             local location = locationsByActivity[activityId]
             if location then
@@ -487,8 +434,8 @@ end
 
 function ActivityFinderRoot_Manager:GetAverageRoleTime(role)
     local lowestAverage
-    for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
-        for index, location in ipairs(locationsByActivity) do
+    for _, locationsByActivity in pairs(self.sortedLocationsData) do
+        for _, location in ipairs(locationsByActivity) do
             if location:CountsForAverageRoleTime() then
                 local dataFound, averageForLocation = GetActivityAverageRoleTime(location:GetId(), role)
                 if dataFound then
@@ -524,33 +471,14 @@ function ActivityFinderRoot_Manager:SetLocationSelected(location, selected)
     self:FireCallbacks("OnSelectionsChanged")
 end
 
-function ActivityFinderRoot_Manager:ToggleActivityTypeSelected(activityType)
-    self:SetActivityTypeSelected(activityType, not self.randomActivitySelections[activityType])
-end
-
-function ActivityFinderRoot_Manager:SetActivityTypeSelected(activityType, selected)
-    if not self:CanChooseRandomForActivityType(activityType) or IsCurrentlySearchingForGroup() or self.randomActivitySelections[activityType] == selected then
-        return
-    end
-
-    self.randomActivitySelections[activityType] = selected
-    local delta = selected and 1 or -1
-    self.numSelected = self.numSelected + delta
-    self:FireCallbacks("OnSelectionsChanged")
-end
-
-function ActivityFinderRoot_Manager:IsActivityTypeSelected(activityType, includeSpecificLocations)
-    local anySelected = self.randomActivitySelections[activityType]
-    if not anySelected and includeSpecificLocations then
-        local locationsByActivity = self.sortedLocationsData[activityType]
-        for index, location in ipairs(locationsByActivity) do
-            if location:IsSelected() then
-                anySelected = true
-                break
-            end
+function ActivityFinderRoot_Manager:IsActivityTypeSelected(activityType)
+    local locationsByActivity = self.sortedLocationsData[activityType]
+    for _, location in ipairs(locationsByActivity) do
+        if location:IsSelected() then
+            return true
         end
     end
-    return anySelected
+    return false
 end
 
 function ActivityFinderRoot_Manager:IsAnyLocationSelected()
@@ -579,24 +507,10 @@ function ActivityFinderRoot_Manager:GetNumLocationsByActivity(activityType, visi
     return 0
 end
 
-function ActivityFinderRoot_Manager:CanChooseRandomForActivityType(activityType)
-    return self.randomActivityTypeLockReasons[activityType] == nil
-end
-
-function ActivityFinderRoot_Manager:GetLockReasonForActivityType(activityType)
-    return self.randomActivityTypeLockReasons[activityType]
-end
-
-function ActivityFinderRoot_Manager:GetGroupSizeRangeForActivityType(activityType)
-    local groupSizeRangeTable = self.randomActivityTypeGroupSizeRanges[activityType]
-    return groupSizeRangeTable.min, groupSizeRangeTable.max
-end
-
 function ActivityFinderRoot_Manager:IsLockedByNotLeader()
     if self.playerIsGrouped and not self.playerIsLeader then
         --Home Show ignores the group
-        local INCLUDE_SPECIFICS = true
-        if ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityTypeSelected(LFG_ACTIVITY_HOME_SHOW, INCLUDE_SPECIFICS) then
+        if ZO_ACTIVITY_FINDER_ROOT_MANAGER:IsActivityTypeSelected(LFG_ACTIVITY_HOME_SHOW) then
             return false
         end
         return true
@@ -644,12 +558,8 @@ function ActivityFinderRoot_Manager:StartSearch()
     ClearGroupFinderSearch()
 
     --Add locations
-    for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
-        if self.randomActivitySelections[activityType] then
-            AddActivityFinderRandomSearchEntry(activityType)
-        end
-
-        for index, location in ipairs(locationsByActivity) do
+    for _, locationsByActivity in pairs(self.sortedLocationsData) do
+        for _, location in ipairs(locationsByActivity) do
             if location:IsSelected() then
                 location:AddActivitySearchEntry()
             end

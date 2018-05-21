@@ -95,8 +95,8 @@ function ZO_ActivityFinderTemplate_Shared:OnCooldownsUpdate()
 end
 
 do
-    local DAILY_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_DAILY_REWARD_HEADER)
-    local STANDARD_HEADER = GetString(SI_ACTIVITY_FINDER_RANDOM_STANDARD_REWARD_HEADER)
+    local DAILY_HEADER = GetString(SI_ACTIVITY_FINDER_DAILY_REWARD_HEADER)
+    local STANDARD_HEADER = GetString(SI_ACTIVITY_FINDER_STANDARD_REWARD_HEADER)
 
     local g_previousControl = nil
     local g_nextControlOnSameLine = false
@@ -122,11 +122,11 @@ do
     local g_rewardControlsToAnchor = {}
 
     function ZO_ActivityFinderTemplate_Shared:RefreshRewards(location)
-        local currentSelectionIsRandom = location:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.RANDOM
-        local activityType = location:GetActivityType()
+        local currentSelectionHasRewardsData = location:HasRewardData()
         local hideRewards = true
-        if currentSelectionIsRandom then
-            local rewardUIDataId, xpReward = GetLFGActivityRewardData(activityType)
+        local description = ""
+        if currentSelectionHasRewardsData then
+            local rewardUIDataId, xpReward = location:GetRewardData()
             ZO_ClearNumericallyIndexedTable(g_rewardControlsToAnchor)
 
             local numShownItemRewardNodes = 0
@@ -146,6 +146,8 @@ do
                     table.insert(g_rewardControlsToAnchor, itemRewardControl)
                     hideRewards = false
                 end
+
+                description = GetLFGActivityRewardDescriptionOverride(rewardUIDataId)
             end
 
             for nodeIndex = numShownItemRewardNodes + 1, MAX_ITEM_REWARDS do
@@ -153,7 +155,7 @@ do
             end
 
             if xpReward > 0 then
-                self.xpRewardLabel:SetText(zo_strformat(SI_ACTIVITY_FINDER_RANDOM_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(xpReward)))
+                self.xpRewardLabel:SetText(zo_strformat(SI_ACTIVITY_FINDER_REWARD_XP_FORMAT, ZO_CommaDelimitNumber(xpReward)))
                 self.xpRewardControl:SetHidden(false)
                 local xpIndex = #g_rewardControlsToAnchor > 0 and 2 or 1 -- Design always wants XP to be the second thing in the left-to right/top to bottom grid (unless it's the only thing)
                 table.insert(g_rewardControlsToAnchor, xpIndex, self.xpRewardControl)
@@ -169,10 +171,16 @@ do
             end
         end
 
+        if description == "" then
+            description = location:GetDescription()
+        end
+
+        self.descriptionLabel:SetText(description)
+
         if hideRewards then
             self.rewardsSection:SetHidden(true)
         else
-            self.rewardsHeader:SetText(IsEligibleForDailyActivityReward() and DAILY_HEADER or STANDARD_HEADER)
+            self.rewardsHeader:SetText(location:IsEligibleForDailyReward() and DAILY_HEADER or STANDARD_HEADER)
             self.rewardsSection:SetHidden(false)
         end
     end
@@ -291,7 +299,7 @@ function ZO_ActivityFinderTemplate_Shared:GetGlobalLockInfo()
         isActiveWorldBattleground = IsActiveWorldBattleground(),
     }
 
-    for i, reason in pairs(globalLockReasons) do
+    for _, reason in pairs(globalLockReasons) do
         if reason == true then
             isGloballyLocked = true
             break
@@ -342,7 +350,7 @@ function ZO_ActivityFinderTemplate_Shared.AppendSetDataToTooltip(setTypesSection
     local setTypesHeader = setTypesSectionControl:GetNamedChild("Header")
     local setTypesList = setTypesSectionControl:GetNamedChild("List")
 
-    if setData.GetEntryType and setData:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SET then
+    if setData:IsSetEntryType() then
         local setTypesHeaderText = setData:GetSetTypesHeaderText()
         local setTypesListText = setData:GetSetTypesListText()
         if setTypesHeaderText ~= "" and setTypesListText ~= "" then

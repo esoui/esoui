@@ -107,32 +107,31 @@ end
 
 function ZO_GamepadSmithingResearch:GenerateTabBarEntries()
     local tabBarEntries = {}
-
-    local function AddEntry(name, mode, allowed)
-        if allowed then
+    local function AddTabEntry(filterType)
+        if ZO_CraftingUtils_CanSmithingFilterBeCraftedHere(filterType) then
             local entry = {}
-            entry.text = name
+            entry.text = GetString("SI_SMITHINGFILTERTYPE", filterType)
             entry.callback = function()
-                self.typeFilter = mode
+                self.typeFilter = filterType
                 self:HandleDirtyEvent()
             end
-            entry.mode = mode
+            entry.mode = filterType
 
             table.insert(tabBarEntries, entry)
         end
     end
 
-    local weaponsAllowed = CanSmithingWeaponPatternsBeCraftedHere()
-    local apparelAllowed = CanSmithingApparelPatternsBeCraftedHere()
-    AddEntry(GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS), ZO_SMITHING_RESEARCH_FILTER_TYPE_WEAPONS, weaponsAllowed)
-    AddEntry(GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR), ZO_SMITHING_RESEARCH_FILTER_TYPE_ARMOR, apparelAllowed)
+
+    AddTabEntry(SMITHING_FILTER_TYPE_WEAPONS)
+    AddTabEntry(SMITHING_FILTER_TYPE_ARMOR)
+    AddTabEntry(SMITHING_FILTER_TYPE_JEWELRY)
 
     return tabBarEntries
 end
 
 function ZO_GamepadSmithingResearch:SetupTabBar(tabBarEntries, savedFilter)
     if #tabBarEntries == 1 then
-        self.typeFilter = ZO_SMITHING_RESEARCH_FILTER_TYPE_ARMOR
+        self.typeFilter = tabBarEntries[1].mode
     else
         ZO_GamepadGenericHeader_Activate(self.owner.header)
 

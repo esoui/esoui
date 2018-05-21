@@ -67,7 +67,7 @@ do
         self:SetHandler("OnEffectivelyShown", function() self:OnEffectivelyShown() end)
         self:SetHandler("OnEffectivelyHidden", function() self:OnEffectivelyHidden() end)
         self.scroll:SetHandler("OnScrollExtentsChanged", function(...) self:OnScrollExtentsChanged(...) end)
-        self:SetHandler("OnUpdate", function() self:OnUpdate() end)
+        self:EnableUpdateHandler()
 
         self.scrollIndicator = GetControl(self, "ScrollIndicator")
         self.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
@@ -88,14 +88,23 @@ do
     end
 end
 
+function ZO_ScrollContainer_Gamepad:EnableUpdateHandler()
+    self:SetHandler("OnUpdate", function() self:OnUpdate() end)
+end
+
 function ZO_ScrollContainer_Gamepad:DisableUpdateHandler()
     self:SetHandler("OnUpdate", nil)
+end
+
+function ZO_ScrollContainer_Gamepad:SetDisabled(disabled)
+    self.disabled = disabled
+    self:RefreshDirectionalInputActivation()
 end
 
 function ZO_ScrollContainer_Gamepad:RefreshDirectionalInputActivation()
     local _, verticalExtents = self.scroll:GetScrollExtents()
     local canScroll = verticalExtents > 0
-    if not self:IsHidden() and canScroll then
+    if not self.disabled and not self:IsHidden() and canScroll then
         if not self.directionalInputActivated then
             self.directionalInputActivated = true
             ZO_SCROLL_SHARED_INPUT:Activate(self, self)
@@ -132,6 +141,9 @@ do
         local scrollInput = ZO_SCROLL_SHARED_INPUT:GetY()
         if scrollInput ~= 0 then
             ZO_ScrollRelative(self, -scrollInput * INPUT_VERTICAL_DELTA_MULTIPLIER)
+            if self.onInteractWithScrollbarCallback then
+                self.onInteractWithScrollbarCallback()
+            end
         end
     end
 end

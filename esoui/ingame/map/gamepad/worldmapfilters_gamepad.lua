@@ -271,6 +271,8 @@ function WorldMapFilters_Gamepad:InitializeKeybindDescriptor()
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Filters Select",
             keybind = "UI_SHORTCUT_PRIMARY",
             ethereal = true,
 

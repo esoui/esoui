@@ -10,7 +10,6 @@ end
 
 function ZO_ActivityFinderFilterModeData:Initialize(...)
     self.activityTypes = { ... }
-    self.randomInfo = {}
     self.areSpecificsInSubmenu = false
     self:SetVisibleEntryTypes(ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SPECIFIC, ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SET)
 end
@@ -19,33 +18,9 @@ function ZO_ActivityFinderFilterModeData:GetActivityTypes()
     return self.activityTypes
 end
 
---Describes how to populate the singular panel for a random (any) entry for the specified activity type.
---Will only generate a "random" entry if the activity type is both in randomInfo and activityTypes, and if DoesLFGActivityHasAllOption returns true for the activitiyType
-function ZO_ActivityFinderFilterModeData:AddRandomInfo(activityType, description, keyboardBackground, gamepadBackground)
-    self.randomInfo[activityType] =
-    {
-        description = description,
-        keyboardBackground = keyboardBackground,
-        gamepadBackground = gamepadBackground,
-    }
-end
-
-function ZO_ActivityFinderFilterModeData:GetRandomInfo(activityType)
-    return self.randomInfo[activityType]
-end
-
 function ZO_ActivityFinderFilterModeData:SetSubmenuFilterNames(specificFilterName, randomFilterName)
     self.specificFilterName = specificFilterName
     self.randomFilterName = randomFilterName
-end
-
---If true, put specific activites into a list form and add a single entry to the filters to show this list.  Currently gamepad does this automatically, but that could change in the future
-function ZO_ActivityFinderFilterModeData:SetEntriesInSubmenu(areEntriesInSubmenu)
-    self.areEntriesInSubmenu = areEntriesInSubmenu
-end
-
-function ZO_ActivityFinderFilterModeData:AreEntriesInSubmenu()
-    return self.areEntriesInSubmenu
 end
 
 function ZO_ActivityFinderFilterModeData:GetSpecificFilterName()
@@ -145,7 +120,7 @@ function ZO_ActivityFinderTemplate_Manager:GetManagerLockInfo()
         isLockedByCooldown = self:IsLockedByCooldown()
     }
 
-    for i, reason in pairs(managerLockReasons) do
+    for _, reason in pairs(managerLockReasons) do
         if reason == true then
             isManagerLocked = true
             break

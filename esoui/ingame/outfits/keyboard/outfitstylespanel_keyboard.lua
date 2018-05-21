@@ -137,11 +137,9 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
 
         if control.highlightAnimation then
             control.highlightAnimation:PlayInstantlyToStart()
-		end
-
-        if control.iconAnimation then
-            control.iconAnimation:PlayInstantlyToStart()
         end
+
+        ZO_GridEntry_SetIconScaledUpInstantly(control, false)
     end
 
     self.gridListPanelList:SetGridEntryTemplate("ZO_OutfitStyle_GridEntry_Template_Keyboard", ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD, OutfitStyleGridEntrySetup, HIDE_CALLBACK, OutfitStyleGridEntryReset, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD)
@@ -252,7 +250,7 @@ do
         if self.collectibleCategoryData then
             local unlockedCount = 0
             local totalCount = 0
-            for collectibleIndex, collectibleData in self.collectibleCategoryData:CollectibleIterator(ZO_CollectibleData.IsShownInCollection) do
+            for _, collectibleData in self.collectibleCategoryData:CollectibleIterator({ ZO_CollectibleData.IsShownInCollection }) do
                 if collectibleData:IsArmorStyle() then
                     FOUND_VISUAL_ARMOR_TYPES[collectibleData:GetVisualArmorType()] = true
                 elseif collectibleData:IsWeaponStyle() then
@@ -605,7 +603,7 @@ end
 
 do
     local SHOW_NICKNAME = true
-    local SHOW_HINT = true
+    local SHOW_PURCHASABLE_HINT = true
     local SHOW_BLOCK_REASON = true
 
     function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryMouseEnter(control)
@@ -615,11 +613,7 @@ do
 
         control.highlightAnimation:PlayForward()
 
-        if not control.iconAnimation then
-            control.iconAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_OutfitStyle_GridEntry_IconAnimation", control.icon)
-        end
-
-        control.iconAnimation:PlayForward()
+        ZO_GridEntry_SetIconScaledUp(control, true)
         
         local collectibleData = control.dataEntry.data
         if not collectibleData.isEmptyCell then
@@ -636,7 +630,7 @@ do
                 local formattedApplyCost = zo_strformat(SI_TOOLTIP_COLLECTIBLE_OUTFIT_STYLE_APPLICATION_COST_KEYBOARD_NO_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, applyCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
                 ItemTooltip:AddLine(formattedApplyCost, "ZoFontWinH4", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
             else
-                ItemTooltip:SetCollectible(collectibleData.collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
+                ItemTooltip:SetCollectible(collectibleData.collectibleId, SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON)
             end
             self.mouseOverEntryData = control.dataEntry
         end
@@ -651,7 +645,7 @@ end
 
 function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryMouseExit(control)
     control.highlightAnimation:PlayBackward()
-    control.iconAnimation:PlayBackward()
+    ZO_GridEntry_SetIconScaledUp(control, false)
     ClearTooltip(ItemTooltip)
     self.mouseOverEntryData = nil
     --The exit can fire after the control has already been cleaned out of the entry list, meaning it won't have data anymore

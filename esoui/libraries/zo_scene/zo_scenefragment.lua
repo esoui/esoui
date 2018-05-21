@@ -13,7 +13,7 @@ end
 
 function ZO_SceneFragment:Initialize()
     self.state = SCENE_FRAGMENT_HIDDEN
-    self.allShowHideTimeUpdates = false
+    self.allowShowHideTimeUpdates = false
 end
 
 function ZO_SceneFragment:SetSceneManager(sceneManager)
@@ -101,7 +101,7 @@ end
 
 --If true, Show and Hide will be called even if the fragment is already in the Showing or Hiding state.
 function ZO_SceneFragment:SetAllowShowHideTimeUpdates(allow)
-    self.allShowHideTimeUpdates = allow
+    self.allowShowHideTimeUpdates = allow
 end
 
 function ZO_SceneFragment:SetState(newState)
@@ -125,14 +125,14 @@ function ZO_SceneFragment:OnHidden()
 end
 
 function ZO_SceneFragment:ShouldBeShown(customShowParam)
-    if(self.state ~= SCENE_FRAGMENT_SHOWN and (self.allShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_SHOWING)) then
+    if(self.state ~= SCENE_FRAGMENT_SHOWN and (self.allowShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_SHOWING)) then
         self:SetState(SCENE_FRAGMENT_SHOWING)
         self:Show(customShowParam)
     end
 end
 
 function ZO_SceneFragment:ShouldBeHidden(customHideParam)
-    if(self.state ~= SCENE_FRAGMENT_HIDDEN and (self.allShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_HIDING)) then
+    if(self.state ~= SCENE_FRAGMENT_HIDDEN and (self.allowShowHideTimeUpdates == true or self.state ~= SCENE_FRAGMENT_HIDING)) then
         self:SetState(SCENE_FRAGMENT_HIDING)
         if(not self.hideOnSceneHidden) then
             self:Hide(customHideParam)

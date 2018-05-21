@@ -18,15 +18,16 @@ function CollectionsBook_Singleton:Initialize()
     self.searchString = ""
     self.searchResults = {}
     self.searchSpecializationFilters = {}
-    self.searchChecksHideWhenLocked = false
+    self.searchChecksHidden = false
 
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLES_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
 
-    -- When the data is getting rebuilt, the indicies can change so our old search results are no longer any good
-    local function ReevaluateSearch()
+    local function OnCollectionUpdated()
+        self:RefreshOwnedHouses()
+        -- When the data is getting rebuilt, the indicies can change so our old search results are no longer any good
         if self:GetSearchResults() then
             local currentSearch = self.searchString
             ZO_ClearTable(self.searchResults)
@@ -35,14 +36,14 @@ function CollectionsBook_Singleton:Initialize()
         end
     end
 
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", ReevaluateSearch)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 
     self:RefreshOwnedHouses()
 end
 
 function CollectionsBook_Singleton:SetSearchString(searchString)
     self.searchString = searchString or ""
-    StartCollectibleSearch(searchString)
+    StartCollectibleSearch(self.searchString)
 end
 
 function CollectionsBook_Singleton:SetSearchCategorySpecializationFilters(...)
@@ -70,10 +71,8 @@ function CollectionsBook_Singleton:SetSearchCategorySpecializationFilters(...)
     self:UpdateSearchResults()
 end
 
-function CollectionsBook_Singleton:SetSearchChecksHideWhenLocked(checksHideWhenLocked)
-    if self.searchChecksHideWhenLocked ~= checksHideWhenLocked then
-        self.searchChecksHideWhenLocked = checksHideWhenLocked
-    end
+function CollectionsBook_Singleton:SetSearchChecksHidden(searchChecksHidden)
+    self.searchChecksHidden = searchChecksHidden
 end
 
 function CollectionsBook_Singleton:UpdateSearchResults()
@@ -81,15 +80,15 @@ function CollectionsBook_Singleton:UpdateSearchResults()
 
     local noSpecializationFilters = NonContiguousCount(self.searchSpecializationFilters) == 0
     local searchResults = self.searchResults
-    local searchChecksHideWhenLocked = self.searchChecksHideWhenLocked
+    local searchChecksHidden = self.searchChecksHidden
     for i = 1, GetNumCollectiblesSearchResults() do
         local categoryIndex, subcategoryIndex, collectibleIndex = GetCollectiblesSearchResult(i)
         local categorySpecialization = GetCollectibleCategorySpecialization(categoryIndex)
         if noSpecializationFilters or self.searchSpecializationFilters[categorySpecialization] then
             local canShowCollectible = true
-            if searchChecksHideWhenLocked then
+            if searchChecksHidden then
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataByIndicies(categoryIndex, subcategoryIndex, collectibleIndex)
-                if collectibleData:IsLocked() and collectibleData:IsHiddenFromCollectionWhenLocked() then
+                if collectibleData:IsHiddenFromCollection() then
                     canShowCollectible = false
                 end
             end
@@ -127,24 +126,31 @@ end
 
 function CollectionsBook_Singleton:RefreshOwnedHouses()
     ZO_ClearTable(self.ownedHouses)
-    local ownedHouses = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsHouse)
+    local ownedHouses = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsHousingCategory }, { ZO_CollectibleData.IsUnlocked })
     for _, collectibleData in ipairs(ownedHouses) do
         self.ownedHouses[collectibleData:GetId()] = { houseId = collectibleData:GetReferenceId() }
     end
 end
 
-function CollectionsBook_Singleton:RefreshOwnedHouseById(collectibleId, justUnlocked)
-    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-    if collectibleData:IsHouse() and collectibleData:IsUnlocked() then
-        if justUnlocked then
-            self.ownedHouses[collectibleId] = { showPermissionsDialogOnEnter = true }
+function CollectionsBook_Singleton:RefreshOwnedHouseById(collectibleId, lockStateChange)
+    if lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData:IsHouse() then
+            if lockStateChange == ZO_COLLECTIBLE_LOCK_STATE_CHANGE.LOCKED then
+                self.ownedHouses[collectibleId] = nil
+            else
+                self.ownedHouses[collectibleId] = 
+                {
+                    houseId = collectibleData:GetReferenceId(),
+                    showPermissionsDialogOnEnter = true,
+                }
+            end
         end
-        self.ownedHouses[collectibleId].houseId = collectibleData:GetReferenceId()
     end
 end
 
-function CollectionsBook_Singleton:OnCollectibleUpdated(collectibleId, justUnlocked)
-    self:RefreshOwnedHouseById(collectibleId, justUnlocked)
+function CollectionsBook_Singleton:OnCollectibleUpdated(collectibleId, lockStateChange)
+    self:RefreshOwnedHouseById(collectibleId, lockStateChange)
 end
 
 function CollectionsBook_Singleton:OnUpdateCooldowns(...)

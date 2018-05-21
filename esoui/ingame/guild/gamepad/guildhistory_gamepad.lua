@@ -228,6 +228,8 @@ function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
     -- The keybind descriptor for when focus is on the activity log list.
     self.logKeybindStripDescriptor = {
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Guild History Previous Page",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
             sound = SOUNDS.GAMEPAD_PAGE_BACK,
@@ -243,6 +245,8 @@ function ZO_GuildHistory_Gamepad:InitializeKeybindStripDescriptors()
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Guild History Next Page",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
             sound = SOUNDS.GAMEPAD_PAGE_FORWARD,

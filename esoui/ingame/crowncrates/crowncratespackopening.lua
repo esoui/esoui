@@ -1244,6 +1244,8 @@ function ZO_CrownCratesPackOpening:InitializeKeybinds()
     -- Keyboard --
     local activateCollectibleKeybind =
     {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Crown Crates Card Use Collectible",
         keybind = "UI_SHORTCUT_TERTIARY",
         callback = function()
             local card = self:GetSelectedCard()
@@ -1292,6 +1294,8 @@ function ZO_CrownCratesPackOpening:InitializeKeybinds()
     -- Gamepad --
     local function CreateRevealedSelectedKeybindDescriptor(keybind)     
         local descriptor = {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Crown Crates Select Revealed Card",
             keybind = keybind,
             ethereal = true,
             callback = function()

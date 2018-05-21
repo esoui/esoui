@@ -50,14 +50,8 @@ function ZO_CampaignBrowser_Shared:CanQueue(data)
     return canQueueIndividual, canQueueGroup
 end
 
-function ZO_CampaignBrowser_Shared:CanLeave(data)
-    if data then
-        if(data.type == CAMPAIGN_QUEUE_DATA) then
-            if(IsQueuedForCampaign(data.id, data.isGroup)) then
-                return true
-            end
-        end
-    end
+function ZO_CampaignBrowser_Shared:CanLeave(campaignId, isGroup)
+    return CanLeaveCampaignQueue(campaignId, isGroup) == LEAVE_CAMPAIGN_QUEUE_ERROR_NONE
 end
 
 function ZO_CampaignBrowser_Shared:DoQueue(data)

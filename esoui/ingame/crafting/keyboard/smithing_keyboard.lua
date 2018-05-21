@@ -89,7 +89,7 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                 if self.mode == SMITHING_MODE_CREATION then
                     local cost = GetCostToCraftSmithingItem(self.creationPanel:GetAllCraftingParameters())
                     return ZO_CraftingUtils_GetCostToCraftString(cost)
-                elseif self.mode == SMITHING_MODE_REFINMENT then
+                elseif self.mode == SMITHING_MODE_REFINEMENT then
                     return GetString(SI_SMITHING_REFINE)
                 elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
                     return GetString(SI_SMITHING_DECONSTRUCT)
@@ -102,7 +102,7 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
         
             callback = function()
-                if self.mode == SMITHING_MODE_REFINMENT then
+                if self.mode == SMITHING_MODE_REFINEMENT then
                     self.refinementPanel:Extract()
                 elseif self.mode == SMITHING_MODE_CREATION then
                     self.creationPanel:Create()
@@ -116,18 +116,19 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
             end,
 
             enabled = function()
-                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    if self.mode == SMITHING_MODE_REFINMENT then
-                        return self.refinementPanel:IsExtractable()
-                    elseif self.mode == SMITHING_MODE_CREATION then
-                        return self.creationPanel:IsCraftable()
-                    elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
-                        return self.deconstructionPanel:IsExtractable()
-                    elseif self.mode == SMITHING_MODE_IMPROVEMENT then
-                        return self.improvementPanel:IsImprovable()
-                    elseif self.mode == SMITHING_MODE_RESEARCH then
-                        return self.researchPanel:IsResearchable()
-                    end
+                if ZO_CraftingUtils_IsPerformingCraftProcess() then
+                    return false
+                end
+                if self.mode == SMITHING_MODE_REFINEMENT then
+                    return self.refinementPanel:IsExtractable()
+                elseif self.mode == SMITHING_MODE_CREATION then
+                    return self.creationPanel:IsCraftable()
+                elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
+                    return self.deconstructionPanel:IsExtractable()
+                elseif self.mode == SMITHING_MODE_IMPROVEMENT then
+                    return self.improvementPanel:IsImprovable()
+                elseif self.mode == SMITHING_MODE_RESEARCH then
+                    return self.researchPanel:IsResearchable()
                 end
             end,
         },
@@ -144,7 +145,7 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_NEGATIVE",
         
             callback = function()
-                if self.mode == SMITHING_MODE_REFINMENT then
+                if self.mode == SMITHING_MODE_REFINEMENT then
                     self.refinementPanel:ClearSelections()
                 elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
                     self.deconstructionPanel:ClearSelections()
@@ -153,12 +154,11 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                 elseif self.mode == SMITHING_MODE_RESEARCH then
                     return self.researchPanel:CancelResearch()
                 end 
-                
             end,
 
             visible = function()
                 if not ZO_CraftingUtils_IsPerformingCraftProcess() then 
-                    if self.mode == SMITHING_MODE_REFINMENT then
+                    if self.mode == SMITHING_MODE_REFINEMENT then
                         return self.refinementPanel:HasSelections() 
                     elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
                         return self.deconstructionPanel:HasSelections() 
@@ -189,7 +189,10 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
 
             visible = function()
                 if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    return self.mode == SMITHING_MODE_CREATION
+                    if self.mode == SMITHING_MODE_CREATION and not self.creationPanel:ShouldIgnoreStyleItems() then
+                        return true
+                    end
+                    return false
                 end
             end,
         },
@@ -218,7 +221,7 @@ function ZO_Smithing:InitializeModeBar()
         }
     end
 
-    self.refinementTab = CreateModeData(SI_SMITHING_TAB_REFINMENT, SMITHING_MODE_REFINMENT, "EsoUI/Art/Crafting/smithing_tabIcon_refine_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_disabled.dds")
+    self.refinementTab = CreateModeData(SI_SMITHING_TAB_REFINEMENT, SMITHING_MODE_REFINEMENT, "EsoUI/Art/Crafting/smithing_tabIcon_refine_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_refine_disabled.dds")
     self.creationTab = CreateModeData(SI_SMITHING_TAB_CREATION, SMITHING_MODE_CREATION, "EsoUI/Art/Crafting/smithing_tabIcon_creation_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_creation_disabled.dds")
     self.deconstructionTab = CreateModeData(SI_SMITHING_TAB_DECONSTRUCTION, SMITHING_MODE_DECONSTRUCTION, "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_up.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_down.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_over.dds", "EsoUI/Art/Crafting/enchantment_tabIcon_deconstruction_disabled.dds")
     self.improvementTab = CreateModeData(SI_SMITHING_TAB_IMPROVEMENT, SMITHING_MODE_IMPROVEMENT, "EsoUI/Art/Crafting/smithing_tabIcon_improve_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_improve_disabled.dds")
@@ -260,14 +263,14 @@ function ZO_Smithing:AddTabsToMenuBar(craftingType, isCraftingTypeDifferent)
     ZO_MenuBar_AddButton(self.modeBar, self.recipeTab)
 
     if isCraftingTypeDifferent or not oldMode then
-        ZO_MenuBar_SelectDescriptor(self.modeBar, SMITHING_MODE_REFINMENT)
+        ZO_MenuBar_SelectDescriptor(self.modeBar, SMITHING_MODE_REFINEMENT)
     else
         ZO_MenuBar_SelectDescriptor(self.modeBar, oldMode)
     end   
 end
 
 function ZO_Smithing:OnItemReceiveDrag(slotControl, bagId, slotIndex)
-    if self.mode == SMITHING_MODE_REFINMENT then
+    if self.mode == SMITHING_MODE_REFINEMENT then
         self.refinementPanel:OnItemReceiveDrag(slotControl, bagId, slotIndex)
     elseif self.mode == SMITHING_MODE_IMPROVEMENT then
         self.improvementPanel:OnItemReceiveDrag(slotControl, bagId, slotIndex)
@@ -295,7 +298,7 @@ function ZO_Smithing:SetMode(mode)
             TriggerTutorial(self.GetTutorialTrigger(self, GetCraftingInteractionType(), mode))
         end
 
-        self.refinementPanel:SetHidden(mode ~= SMITHING_MODE_REFINMENT)
+        self.refinementPanel:SetHidden(mode ~= SMITHING_MODE_REFINEMENT)
         self.creationPanel:SetHidden(mode ~= SMITHING_MODE_CREATION)
         self.improvementPanel:SetHidden(mode ~= SMITHING_MODE_IMPROVEMENT)
         self.deconstructionPanel:SetHidden(mode ~= SMITHING_MODE_DECONSTRUCTION)

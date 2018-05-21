@@ -9,12 +9,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
-        <AnimationTimeline name="ZO_OutfitStyle_GridEntry_IconAnimation">
-            <Animations>
-                <ScaleAnimation duration="125" startScale="1" endScale="1.2"/>
-            </Animations>
-        </AnimationTimeline>
     </Animations>
     
     <Controls>

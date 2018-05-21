@@ -57,7 +57,7 @@ function ZO_QuestJournal_Gamepad:Initialize(control)
     self.conditionTextLabel:SetParent(questStepContainerScrollChild)
     self.conditionTextLabel:ClearAnchors()
     self.conditionTextLabel:SetAnchor(TOPLEFT, questStepContainerScrollChild, TOPLEFT, 50)
-    self.conditionTextLabel:SetAnchor(TOPRIGHT, questStepContainerScroll, TOPRIGHT)
+    self.conditionTextLabel:SetAnchor(RIGHT, questStepContainerScroll, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X)
 
     self.conditionTextBulletList = ZO_BulletList:New(rightPaneContent:GetNamedChild("ConditionTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad", nil, "ZO_QuestJournal_CompletedTaskIcon_Gamepad")
 
@@ -594,7 +594,7 @@ function ZO_QuestJournal_Gamepad:FocusQuestWithIndex(index)
     self:FireCallbacks("QuestSelected", index)
     -- The quest tracker performs focus logic on quest/remove/update, only force focus if the player has clicked on the quest through the journal UI
     if SCENE_MANAGER:IsShowing(self.sceneName) then
-        QUEST_TRACKER:ForceAssist(index)
+        FOCUSED_QUEST_TRACKER:ForceAssist(index)
     end
 
     self:RefreshQuestMasterList()

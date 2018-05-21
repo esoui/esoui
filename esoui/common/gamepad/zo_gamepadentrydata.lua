@@ -124,6 +124,10 @@ function ZO_GamepadEntryData:SetHeader(header)
     self.header = header
 end
 
+function ZO_GamepadEntryData:GetHeader()
+    return self.header
+end
+
 function ZO_GamepadEntryData:SetNew(isNew)
     self.brandNew = isNew
 end

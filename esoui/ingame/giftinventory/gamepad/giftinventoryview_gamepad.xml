@@ -1,0 +1,68 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GiftInventoryView_Gamepad_TopLevel" inherits="ZO_GiftInventoryView_Shared_TopLevel">
+            <ResizeToFitPadding width="40" height="20" />
+            <Anchor point="LEFT" constrains="Y" />
+            <Anchor point="CENTER" relativeTo="ZO_SharedGamepadNavQuadrant_1_2_Background" constrains="X" />
+            
+            <OnInitialized>
+                ZO_GiftInventoryView_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop_Gamepad" level="1" excludeFromResizeToFitExtents="true" />
+
+                <Texture name="$(parent)OverlayGlow" layer="OVERLAY" tier="HIGH" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER" />
+                </Texture>
+                
+                <Control name="$(parent)Header" inherits="ZO_GamepadHeaderHorizontalDividerWithAccent">
+                    <Dimensions x="560" />
+                    <Anchor point="TOP" offsetY="20" />
+                    
+                    <Controls>
+                        <Texture name="$(parent)Accent" override="true" textureFile="EsoUI/Art/Market/Gamepad/gp_giftClaimHeaderIcon.dds" tier="HIGH">
+                            <Dimensions x="64" y="64" />
+                        </Texture>
+                    </Controls>
+                </Control>
+                
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad42">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+
+                <Control name="$(parent)NoteContainer" override="true" inherits="ZO_ScrollContainer_Gamepad">
+                    <Dimensions y="200" />
+                    <DimensionConstraints minY="200" maxY="300" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Control>
+                    
+                <Control name="$(parent)GiftContainer" override="true" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NoteContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NoteContainer" relativePoint="BOTTOMRIGHT" />
+                    
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" font="ZoFontGamepad36" horizontalAlignment="CENTER">
+                            <Anchor point="BOTTOMLEFT" offsetX="30" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-30" />
+                        </Label>
+                        
+                        <Texture name="$(parent)Icon" override="true">
+                            <Dimensions x="64" y="64" />
+                            <Anchor point="BOTTOM" relativeTo="$(parent)Name" relativePoint="TOP" offsetY="-10" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)BottomDivider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GiftContainer" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GiftContainer" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Control>
+
+                <Label name="$(parent)Note" override="true" font="ZoFontGamepadCondensed42" />
+            </Controls>
+    </TopLevelControl>
+    </Controls>
+</GuiXml>

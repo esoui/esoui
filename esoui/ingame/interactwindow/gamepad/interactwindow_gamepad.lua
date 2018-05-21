@@ -111,6 +111,7 @@ function ZO_GamepadInteraction:InitInteraction()
     self.itemList:SetFixedCenterOffset(ZO_INTERACT_CENTER_OFFSET)
     self.itemList:SetSelectedItemOffsets(0,10)
     self.itemList:SetAlignToScreenCenter(true)
+    self.itemList:SetValidateGradient(true)
     self.itemList:SetDrawScrollArrows(true)
 
     self.itemList:SetOnSelectedDataChangedCallback(function(list, selectedData)

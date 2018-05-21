@@ -18,7 +18,7 @@ end
 
 function ChapterUpgrade_Keyboard:UpgradeButtonClicked()
     local IS_STANDARD_EDITION = false
-    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION)
+    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_PREGAME)
 end
 
 local ACCOUNT_PAGE_TEXT_PARAMS = { mainTextParams = { GetString(SI_ESO_ACCOUNT_PAGE_LINK_TEXT) }}

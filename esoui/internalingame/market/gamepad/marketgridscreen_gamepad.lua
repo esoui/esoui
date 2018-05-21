@@ -304,6 +304,8 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptors = 
     {
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gampad Market Tab Bar Back",
             keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             ethereal = true,
             enabled = function() return self:GetNumItems() > 0 end,
@@ -314,6 +316,8 @@ function GamepadMarket_TabBarScrollList:InitializeKeybindStripDescriptors()
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Market Tab Bar Forward",
             keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             ethereal = true,
             enabled = function() return self:GetNumItems() > 0 end,

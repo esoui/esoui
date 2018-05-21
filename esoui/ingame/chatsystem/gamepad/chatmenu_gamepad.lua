@@ -49,6 +49,7 @@ function ZO_ChatMenu_Gamepad:InitializeControls()
     local list = self:GetMainList()
     list:SetSelectedItemOffsets(0, 0)
     list:SetAnchorOppositeSide(true)
+    list:SetValidateGradient(true)
     list:AddDataTemplate("ZO_ChatMenu_Gamepad_LogLine", function(...) self:SetupLogMessage(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, function(a, b) return a.data.id == b.data.id end)
 
     local CONSUME_INPUT = true
@@ -295,6 +296,9 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Chat Previous Link",
+
             ethereal = true,
 
             keybind = "UI_SHORTCUT_INPUT_LEFT",

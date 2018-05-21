@@ -214,7 +214,7 @@ function ZO_OutfitSlotManipulator:RandomizeSlotData(suppressCallbacks)
             return not (isArmorSlot or isWeaponSlot)
         end
 
-        local unlockedCollectibles = categoryData:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, MatchesSlotType)
+        local unlockedCollectibles = categoryData:GetAllCollectibleDataObjects({ ZO_CollectibleData.IsUnlocked, MatchesSlotType })
         local eligibleCollectibleData
         while eligibleCollectibleData == nil and #unlockedCollectibles > 0 do
             local collectibleData = table.remove(unlockedCollectibles, math.random(#unlockedCollectibles))
@@ -284,6 +284,10 @@ function ZO_OutfitSlotManipulator:PreserveDyeData()
     {
         self:GetPendingDyeData()
     }
+end
+
+function ZO_OutfitSlotManipulator:ClearPreservedDyeData()
+    self.preservedDyeData = nil
 end
 
 function ZO_OutfitSlotManipulator:RestorePreservedDyeData()
@@ -559,9 +563,11 @@ function ZO_OutfitManipulator:SetMarkedForPreservation(preservePendingChanges)
     if self.preservePendingChanges ~= preservePendingChanges then
         self.preservePendingChanges = preservePendingChanges
 
-        if preservePendingChanges then
-            for outfitSlotIndex, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
+        for outfitSlotIndex, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
+            if preservePendingChanges then
                 outfitSlotManipulator:PreserveDyeData()
+            else
+                outfitSlotManipulator:ClearPreservedDyeData()
             end
         end
     end
@@ -571,6 +577,8 @@ function ZO_OutfitManipulator:RestorePreservedDyeData()
     for outfitSlotIndex, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
         outfitSlotManipulator:RestorePreservedDyeData()
     end
+
+    self:SetMarkedForPreservation(false)
 end
 
 function ZO_OutfitManipulator:IsMarkedForPreservation()

@@ -344,12 +344,12 @@ function ZO_RadialMenu:Clear(entrySelected)
         else
             PlaySound(SOUNDS.RADIAL_MENU_CLOSE)
         end
-    end
 
-    if self.animation then
-        self.animation:PlayBackward()
-    else
-        self:FinalizeClear()
+        if self.animation then
+            self.animation:PlayBackward()
+        else
+            self:FinalizeClear()
+        end
     end
 end
 

@@ -67,6 +67,9 @@ end
 
 function ZO_HorizontalScrollList_Gamepad:Activate()
     self:SetActive(true)
+
+    self.lastScrollTime = GetFrameTimeSeconds()
+    self.lastInteractionAutomatic = true
 end
 
 function ZO_HorizontalScrollList_Gamepad:Deactivate()
@@ -74,15 +77,15 @@ function ZO_HorizontalScrollList_Gamepad:Deactivate()
 end
 
 function ZO_HorizontalScrollList_Gamepad:UpdateDirectionalInput()
-	self.hasReleasedStick = self.result == 0
+    self.hasReleasedStick = self.result == 0
     self.result = DIRECTIONAL_INPUT:GetX(ZO_DI_LEFT_STICK, ZO_DI_DPAD) 
     if self.hasReleasedStick then
         if self.result > 0 then
             self:MoveLeft()
-			self.hasReleasedStick = false
+            self.hasReleasedStick = false
         elseif self.result < 0 then
             self:MoveRight()
-			self.hasReleasedStick = false
+            self.hasReleasedStick = false
         end
     end
 end

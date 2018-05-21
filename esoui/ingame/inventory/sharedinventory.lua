@@ -773,7 +773,7 @@ end
 
 do
     -- if this triggers, need to add new trait information to this arbitrary sort order
-    assert(ITEM_TRAIT_INFORMATION_MAX_VALUE == 4)
+    internalassert(ITEM_TRAIT_INFORMATION_MAX_VALUE == 4)
 
     local ITEM_TRAIT_INFORMATION_SORT_ORDER =
     {

@@ -31,10 +31,10 @@ local function PrimaryButtonCallback(dialog)
     end
 end
 
-local function IsButtonEnabled(control, localizedString, textEntryValue)
+local function IsButtonEnabled(dialog, localizedString, textEntryValue)
     local isEnabled = true
 
-    local targetData = control.dialog.entryList:GetTargetData()
+    local targetData = dialog.entryList:GetTargetData()
     if targetData.text == GetString(localizedString) then
         isEnabled = IsValidInput(textEntryValue)
     end
@@ -353,8 +353,8 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
                 callback = function(dialog)
                     PrimaryButtonCallback(dialog)
                 end,
-                enabled = function(control)
-                    return IsButtonEnabled(control, SI_GAMEPAD_REQUEST_OPTION, nameText)
+                enabled = function(dialog)
+                    return IsButtonEnabled(dialog, SI_GAMEPAD_REQUEST_OPTION, nameText)
                 end,
             },
 
@@ -453,8 +453,8 @@ function ZO_GamepadSocialDialogs:InitializeAddIgnoreDialog()
                 callback = function(dialog)
                     PrimaryButtonCallback(dialog)
                 end,
-                enabled = function(control)
-                    return IsButtonEnabled(control, SI_FRIEND_MENU_IGNORE, nameText)
+                enabled = function(dialog)
+                    return IsButtonEnabled(dialog, SI_FRIEND_MENU_IGNORE, nameText)
                 end,
             },
 
@@ -548,8 +548,8 @@ function ZO_GamepadSocialDialogs:InitializeInviteMemberDialog()
                 callback = function(dialog)
                     PrimaryButtonCallback(dialog)
                 end,
-                enabled = function(control)
-                    return IsButtonEnabled(control, SI_GAMEPAD_REQUEST_OPTION, nameText)
+                enabled = function(dialog)
+                    return IsButtonEnabled(dialog, SI_GAMEPAD_REQUEST_OPTION, nameText)
                 end,
             },
 
@@ -644,8 +644,8 @@ function ZO_GamepadSocialDialogs:InitializeGroupInviteDialog()
                 callback = function(dialog)
                     PrimaryButtonCallback(dialog)
                 end,
-                enabled = function(control)
-                    return IsButtonEnabled(control, SI_GAMEPAD_REQUEST_OPTION, nameText)
+                enabled = function(dialog)
+                    return IsButtonEnabled(dialog, SI_GAMEPAD_REQUEST_OPTION, nameText)
                 end,
             },
 

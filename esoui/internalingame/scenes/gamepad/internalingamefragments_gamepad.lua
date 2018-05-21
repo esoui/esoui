@@ -72,7 +72,6 @@ GAMEPAD_MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New
 --Gamepad Market
 -------------------------
 
-GAMEPAD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("GamepadActions")
 GAMEPAD_MARKET_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket)
 GAMEPAD_MARKET_PREVIEW_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_Preview)
 GAMEPAD_MARKET_BUNDLE_CONTENTS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_BundleContents)
@@ -81,7 +80,6 @@ GAMEPAD_MARKET_PRE_SCENE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_Pr
 
 ZO_GAMEPAD_INTERNAL_INGAME_FRAGMENT_GROUP =
 {
-    GAMEPAD_ACTION_LAYER_FRAGMENT,
     GENERAL_ACTION_LAYER_FRAGMENT,
     KEYBIND_STRIP_GAMEPAD_MARKET_FRAGMENT,
 }

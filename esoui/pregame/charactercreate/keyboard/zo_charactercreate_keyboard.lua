@@ -1066,19 +1066,20 @@ function ZO_CharacterCreate_MouseEnterNamedSelector(button)
             end
         end
 
-        -- Check for race specific disable reasons
-        if button.selectorType == CHARACTER_CREATE_SELECTOR_RACE then
-            local restrictionReason, restrictingCollectible = GetRaceRestrictionReason(button.defId)
+        local raceSelector = button.selectorType == CHARACTER_CREATE_SELECTOR_RACE
+        local classSelector = button.selectorType == CHARACTER_CREATE_SELECTOR_CLASS
+
+        -- Check for race/class specific disable reasons
+        if raceSelector or classSelector then
+            local restrictionReasonFunction = raceSelector and GetRaceRestrictionReason or GetClassRestrictionReason
+            local restrictionReason, restrictingCollectible = restrictionReasonFunction(button.defId)
             local restrictionString = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
             if restrictionString ~= "" then
                 InformationTooltip:AddLine(restrictionString, "", ZO_NORMAL_TEXT:UnpackRGB())
-            end
-        -- Check for class specific disable reasons
-        elseif button.selectorType == CHARACTER_CREATE_SELECTOR_CLASS then
-            local restrictionReason, restrictingCollectible = GetClassRestrictionReason(button.defId)
-            local restrictionString = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
-            if restrictionString ~= "" then
-                InformationTooltip:AddLine(restrictionString, "", ZO_NORMAL_TEXT:UnpackRGB())
+
+                if restrictingCollectible ~= 0 and IsCollectiblePurchasable(restrictingCollectible) then
+                    InformationTooltip:AddLine(GetString(SI_CHARACTER_CREATE_RESTRICTION_COLLECTIBLE_PURCHASABLE), "", ZO_NORMAL_TEXT:UnpackRGB())
+                end
             end
         end
     end
@@ -1108,4 +1109,11 @@ end
 function ZO_CharacterCreate_PreviewClicked(previewButton)
     local slider = previewButton:GetParent()
     slider.sliderObject:Preview()
+end
+
+function ZO_PaperdollManipulation_OnInitialized(self)
+    --While we need a mouse down over the paper doll area to start spinning, the mouse up may not be delivered to this same control. If we press mouse left to start spinning (which starts
+    --mouse tracking) then press mouse right this will release mouse left but it won't stop mouse tracking because tracking is locked when the up is delivered. So we catch it on the event instead
+    --when tracking isn't locked. ESO-546877
+    EVENT_MANAGER:RegisterForEvent("PaperDollManipulation", EVENT_GLOBAL_MOUSE_UP, function() CharacterCreateStopMouseSpin() end)
 end

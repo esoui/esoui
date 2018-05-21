@@ -489,7 +489,7 @@ function ZO_GamepadStoreManager:UpdateRightTooltip(list, mode)
     end
 
     local equipType = GetItemLinkEquipType(itemLink)
-    local equipSlot = ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)
+    local equipSlot = ZO_Character_GetEquipSlotForEquipType(equipType)
 
     if equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, equipSlot) then 
         ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, equipSlot)

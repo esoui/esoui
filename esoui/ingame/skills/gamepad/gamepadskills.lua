@@ -625,18 +625,14 @@ function ZO_GamepadSkills:InitializeCategoryList()
         end
     end
 
-    local function ActionBarSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-        self:SelectableActionBarSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-        self.skillInfo:SetHidden(selected)
-    end
-
-	local function SetupCategoryList(list)
+    local function SetupCategoryList(list)
         list:SetAdditionalBottomSelectedItemOffsets(0, 20)
+        list:SetValidateGradient(true)
 
         list:AddDataTemplate("ZO_GamepadSkillLineEntryTemplate", MenuEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsEqual)
         list:AddDataTemplateWithHeader("ZO_GamepadSkillLineEntryTemplate", MenuEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsEqual, "ZO_GamepadMenuEntryHeaderTemplate")
         list:AddDataTemplate("ZO_GamepadMenuEntryTemplate", SkillsAdvisorEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-	end
+    end
 
     self.categoryList = self:AddList("Category", SetupCategoryList)
 
@@ -656,11 +652,8 @@ local function IsSkillEqual(left, right)
 end
 
 function ZO_GamepadSkills:InitializeLineFilterList()
-    local function ActionBarSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-        self:SelectableActionBarSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    end
-
     local function SetupLineFilterList(list)
+        list:SetValidateGradient(true)
         list:AddDataTemplate("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual)
         list:AddDataTemplateWithHeader("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual, "ZO_GamepadMenuEntryHeaderTemplate")
     end
@@ -671,6 +664,10 @@ function ZO_GamepadSkills:InitializeLineFilterList()
     lineFilterPreviewList:SetUniversalPostPadding(GAMEPAD_DEFAULT_POST_PADDING)
     lineFilterPreviewList:SetSelectedItemOffsets(0, 0)
     lineFilterPreviewList:SetAlignToScreenCenter(true)
+    lineFilterPreviewList:SetValidateGradient(true)
+    -- this isn't a list that we will interact with and selecting entries on it
+    -- causes sounds effects to play (and we select entries in the list in RefreshLineFilterList)
+    lineFilterPreviewList:SetSoundEnabled(false)
 
     lineFilterPreviewList:AddDataTemplate("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, nil, IsSkillEqual)
     lineFilterPreviewList:AddDataTemplateWithHeader("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, nil, IsSkillEqual, "ZO_GamepadMenuEntryHeaderTemplate")
@@ -695,6 +692,8 @@ function ZO_GamepadSkills:InitializeBuildPlanner()
 
     self.buildPlannerList = ZO_GamepadVerticalParametricScrollList:New(buildPlannerControl)
     self.buildPlannerList:SetAlignToScreenCenter(true)
+    self.buildPlannerList:SetValidateGradient(true)
+
     self.buildPlannerList:SetNoItemText(GetString(SI_GAMEPAD_SKILLS_NO_ABILITIES))
 
     self.buildPlannerList:AddDataTemplate("ZO_GamepadSimpleAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual)
@@ -717,7 +716,6 @@ function ZO_GamepadSkills:OnUpdate(currentFrameTimeSeconds)
     if self.nextUpdateTimeSeconds and (currentFrameTimeSeconds >= self.nextUpdateTimeSeconds) then
         self:RefreshCategoryList()
         self:RefreshPointsDisplay()
-        local categoryData = self.categoryList:GetTargetData()
         if not self.assignableActionBar:IsActive() then
             self.dontReselect = false
             self:RefreshLineFilterList()
@@ -726,8 +724,8 @@ function ZO_GamepadSkills:OnUpdate(currentFrameTimeSeconds)
         self.nextUpdateTimeSeconds = nil
     end
 
-	if self.nextUpdateRefreshVisible then
-		if not self.control:IsHidden() then
+    if self.nextUpdateRefreshVisible then
+        if not self.control:IsHidden() then
             if self.mode == ZO_GAMEPAD_SKILLS_BUILD_PLANNER_ASSIGN_MODE then
                 self.buildPlannerList:RefreshVisible()
                 self.lineFilterList:RefreshVisible()
@@ -738,8 +736,8 @@ function ZO_GamepadSkills:OnUpdate(currentFrameTimeSeconds)
                 self.lineFilterPreviewList:RefreshVisible()
             end
         end
-		self.nextUpdateRefreshVisible = false
-	end
+        self.nextUpdateRefreshVisible = false
+    end
 end
 
 do
@@ -753,7 +751,7 @@ do
 end
 
 function ZO_GamepadSkills:MarkForRefreshVisible()
-	self.nextUpdateRefreshVisible = true
+    self.nextUpdateRefreshVisible = true
 end
 
 
@@ -762,9 +760,9 @@ function ZO_GamepadSkills:InitializeEvents()
         self:MarkDirty()
     end
 
-	local function MarkForRefreshVisible()
-		self:MarkForRefreshVisible()
-	end
+    local function MarkForRefreshVisible()
+        self:MarkForRefreshVisible()
+    end
 
     local function OnWeaponPairLockChanged()
         if not self.control:IsHidden() then
@@ -886,9 +884,7 @@ function ZO_GamepadSkills:RefreshCategoryList()
     end
 end
 
-
 function ZO_GamepadSkills:RefreshLineFilterList(refreshPreviewList)
-
     local list = refreshPreviewList and self.lineFilterPreviewList or self.lineFilterList
     list:Clear()
 
@@ -964,6 +960,7 @@ function ZO_GamepadSkills:RefreshLineFilterList(refreshPreviewList)
     self.dontReselect = true -- by default we want to always select the second thing in the list, but on visible rebuilds we don't
 
     if refreshPreviewList then
+        -- attempt to vertically center the preview list so that all abilities in the skill line should be visible
         list:SetSelectedIndexWithoutAnimation(zo_floor(#list.dataList / 2) + 1)
     end
 end
@@ -971,38 +968,39 @@ end
 function ZO_GamepadSkills:RefreshBuildPlannerList()
     self.buildPlannerList:Clear()
 
-    local abilityList = {}
-
     for skillType = 1, GetNumSkillTypes() do
         for skillLineIndex = 1, GetNumSkillLines(skillType) do
-            local newSkillLine = true
-            for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do
-                local name, icon, _, passive, ultimate, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-                local currentUpgradeLevel, maxUpgradeLevel = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
-                local formattedName = ZO_Skills_GenerateAbilityName(SI_GAMEPAD_ABILITY_NAME_AND_UPGRADE_LEVELS, name, currentUpgradeLevel, maxUpgradeLevel, progressionIndex)
+            local _, _, available = GetSkillLineInfo(skillType, skillLineIndex)
+            if available then
+                local newSkillLine = true
+                for abilityIndex = 1, GetNumSkillAbilities(skillType, skillLineIndex) do
+                    local name, icon, _, passive, ultimate, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
+                    local currentUpgradeLevel, maxUpgradeLevel = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
+                    local formattedName = ZO_Skills_GenerateAbilityName(SI_GAMEPAD_ABILITY_NAME_AND_UPGRADE_LEVELS, name, currentUpgradeLevel, maxUpgradeLevel, progressionIndex)
 
-                if purchased and not passive then
-                    if self.assignableActionBar:IsUltimateSelected() == ultimate then
-                        local data = ZO_GamepadEntryData:New(formattedName, icon)
-                        data:SetFontScaleOnSelection(false)
-                        data.skillType = skillType
-                        data.skillLineIndex = skillLineIndex
-                        data.abilityIndex = abilityIndex
-                        data.isActive = not passive
-                        data.passive = passive
-                        data.isUltimate = not passive and ultimate
-                        data.purchased = purchased                    
+                    if purchased and not passive then
+                        if self.assignableActionBar:IsUltimateSelected() == ultimate then
+                            local data = ZO_GamepadEntryData:New(formattedName, icon)
+                            data:SetFontScaleOnSelection(false)
+                            data.skillType = skillType
+                            data.skillLineIndex = skillLineIndex
+                            data.abilityIndex = abilityIndex
+                            data.isActive = not passive
+                            data.passive = passive
+                            data.isUltimate = not passive and ultimate
+                            data.purchased = purchased                    
 
-                        if newSkillLine then
-                            local header, lineRank = GetSkillLineInfo(data.skillType, data.skillLineIndex)
-                            data:SetHeader(zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, header))
-                            data.lineRank = lineRank
-                            self.buildPlannerList:AddEntry("ZO_GamepadSimpleAbilityEntryTemplateWithHeader", data)
-                        else
-                            self.buildPlannerList:AddEntry("ZO_GamepadSimpleAbilityEntryTemplate", data)
+                            if newSkillLine then
+                                local header, lineRank = GetSkillLineInfo(data.skillType, data.skillLineIndex)
+                                data:SetHeader(zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, header))
+                                data.lineRank = lineRank
+                                self.buildPlannerList:AddEntry("ZO_GamepadSimpleAbilityEntryTemplateWithHeader", data)
+                            else
+                                self.buildPlannerList:AddEntry("ZO_GamepadSimpleAbilityEntryTemplate", data)
+                            end
+
+                            newSkillLine = false
                         end
-
-                        newSkillLine = false
                     end
                 end
             end
@@ -1142,7 +1140,7 @@ do
             abilityIndex = parametricDialog.data.abilityIndex,
             skillBuildMorphChoice = data.choiceIndex,
         }
-        ZO_GamepadAbilityEntryTemplate_Setup(control, entryData, selected, activated, ZO_SKILL_ABILITY_DISPLAY_VIEW)
+        ZO_GamepadAbilityEntryTemplate_Setup(control, entryData, selected, active, ZO_SKILL_ABILITY_DISPLAY_VIEW)
     end
 
     local function MorphConfirmCallback(dialog)
@@ -1654,15 +1652,14 @@ local function SetupAbilityXpBar(control, skillType, skillLineIndex, abilityInde
             control.barContainer:SetHidden(true)
         end
     end
-end        
+end
 
 function ZO_GamepadAbilityEntryTemplate_Setup(control, abilityData, selected, activated, displayView)
     local skillType, skillLineIndex, abilityIndex = abilityData.skillType, abilityData.skillLineIndex or abilityData.lineIndex, abilityData.abilityIndex
 
     local name, _, _, passive, _, purchased = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-    local earnedRankIndex = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
 
-    local isInSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, abilityData.skillBuildMorphChoice, skillBuildRankIndex)
+    local isInSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, abilityData.skillBuildMorphChoice, abilityData.skillBuildRankIndex)
     if control.circleFrame then
         if isInSkillBuild then
             control.circleFrame:SetTexture("EsoUI/Art/SkillsAdvisor/gamepad/gp_passiveDoubleFrame_64.dds")

@@ -1,0 +1,33 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ItemPreviewListHelper_KeyboardTopLevel" tier="LOW" layer="BACKGROUND" hidden="true">
+            <OnInitialized>
+                ZO_ItemPreviewListHelper_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Button name="$(parent)PreviewPreviousArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="RIGHT" relativeTo="ZO_ItemPreview_KeyboardTopLevelPreviewVariationLeftArrow" relativePoint="LEFT" offsetX="-16" />
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_leftDoubleArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_leftDoubleArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_leftDoubleArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_leftDoubleArrow_disabled.dds"
+                    />
+                </Button>
+
+                <Button name="$(parent)PreviewNextArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="LEFT" relativeTo="ZO_ItemPreview_KeyboardTopLevelPreviewVariationRightArrow" relativePoint="RIGHT" offsetX="16" />
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_rightDoubleArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_rightDoubleArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_rightDoubleArrow_over.dds"
+                        disabled="EsoUI/Art/Buttons/large_rightDoubleArrow_disabled.dds"
+                    />
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

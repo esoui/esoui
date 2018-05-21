@@ -54,17 +54,19 @@ function GenericFooter:Initialize(control)
 end
 
 local function ProcessData(control, textData, anchorToBaselineControl, anchorToBaselineOffsetX, overrideColor)
-    if(control == nil) then
+    if control == nil then
         return false
     end
 
     if type(textData) == "function" then
         textData = textData(control)
-    elseif type(textData) == "string" or type(textData) == "number" then
-        control:SetText(textData)
-    else
-        control:SetText("")
     end
+
+    if type(textData) == "string" or type(textData) == "number" then
+        control:SetText(textData)
+    end
+
+    control:SetHidden(not textData)
 
     if overrideColor then
         control:SetColor(overrideColor:UnpackRGBA())

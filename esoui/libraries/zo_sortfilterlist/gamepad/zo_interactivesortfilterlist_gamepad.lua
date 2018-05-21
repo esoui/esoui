@@ -265,6 +265,9 @@ function ZO_GamepadInteractiveSortFilterList:InitializeKeybinds()
 
     --Triggers let you go straight to top or bottom of the list
     self.keybindStripDescriptor[#self.keybindStripDescriptor + 1] = {
+         --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Gamepad Interactive Sort Filter List Select First",
+
         keybind = "UI_SHORTCUT_LEFT_TRIGGER",
 
         ethereal = true,
@@ -275,6 +278,9 @@ function ZO_GamepadInteractiveSortFilterList:InitializeKeybinds()
     }
 
     self.keybindStripDescriptor[#self.keybindStripDescriptor + 1] = {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Gamepad Interactive Sort Filter List Select Last",
+
         keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
 
         ethereal = true,

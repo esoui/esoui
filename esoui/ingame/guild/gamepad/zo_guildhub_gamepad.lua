@@ -67,7 +67,6 @@ function ZO_GamepadGuildHub:Initialize(control)
             self:Update()
 
             local OnRefreshMatchGuildId = function(_, guildId)
-                local selectedData = self.guildList:GetTargetData()
                 if self.optionsGuildId == guildId then
                     self:Update()
                 end
@@ -487,40 +486,28 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
             -- alliance icon selector entry
             {
                 header = GetString(SI_GAMEPAD_GUILD_CREATE_DIALOG_ALLIANCE_SELECTOR_HEADER),
-                headerTemplate = "ZO_GamepadMenuEntryFullWidthHeaderTemplate",
-                template = "ZO_Gamepad_Dropdown_Item_FullWidth",
+                template = "ZO_GamepadDropdownItem",
 
                 templateData = {
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                        local dropDown = ZO_ComboBox_ObjectFromContainer(control:GetNamedChild("Dropdown"))
+                        local dropDown = control.dropdown
                         self.allianceDropDown = dropDown
 
-                        if not dropDown.alliancesInitialized then
-                            dropDown:SetSortsItems(false)
-                            dropDown:ClearItems()
+                        dropDown:SetSortsItems(false)
+                        dropDown:ClearItems()
 
-                            for i = 1, NUM_ALLIANCES do
-                                local allianceText = zo_iconTextFormat(GetLargeAllianceSymbolIcon(i), 32, 32, GetAllianceName(i))
-                                local entry = dropDown:CreateItemEntry(allianceText, OnAllianceSelected)
-                                entry.allianceIndex = i
-                                dropDown:AddItem(entry)
-                            end
-
-                            dropDown.alliancesInitialized = true
+                        for i = 1, NUM_ALLIANCES do
+                            local allianceText = zo_iconTextFormat(GetLargeAllianceSymbolIcon(i), 32, 32, GetAllianceName(i))
+                            local entry = dropDown:CreateItemEntry(allianceText, OnAllianceSelected)
+                            entry.allianceIndex = i
+                            dropDown:AddItem(entry)
                         end
-
-                        local function OnDropdownDeactivated()
-                            KEYBIND_STRIP:PopKeybindGroupState()
-                        end
-
-                        dropDown:SetDeactivatedCallback(OnDropdownDeactivated)
 
                         dropDown:SelectItemByIndex(self.selectedAllianceIndex)
                         dropDown:SetHighlightedItem(self.selectedAllianceIndex)
                     end,
                     
                     callback = function()
-                        KEYBIND_STRIP:PushKeybindGroupState() -- This is just to hide the keybinds (don't need to store the state)
                         self.allianceDropDown:Activate()
                         self.allianceDropDown:SetHighlightedItem(self.selectedAllianceIndex)
                     end
@@ -606,6 +593,14 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
+                enabled = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    if targetData and targetData.validInput then
+                        return targetData.validInput()
+                    end
+
+                    return true
+                end,
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     if targetData and targetData.callback then
@@ -778,10 +773,7 @@ do
     local ICON_LEAVE = "EsoUI/Art/Guild/Gamepad/gp_guild_menuIcon_leaveGuild.dds"
 
     function ZO_GamepadGuildHub:AddOptionsToSingleGuildList()
-        local data = nil
-    
         local firstEntry = true
-    
         local function AddEntry(data)
             if firstEntry then
                 data:SetHeader(GetString(SI_GAMEPAD_GUILD_OPTIONS_LIST_HEADER))
@@ -793,6 +785,7 @@ do
             data:SetIconTintOnSelection(true)
         end
 
+        local data
         -- Options
         local platform = GetUIPlatform()
         if DoesPlayerHaveGuildPermission(self.optionsGuildId, GUILD_PERMISSION_INVITE) then
@@ -875,11 +868,7 @@ end
 function ZO_GamepadGuildHub:RefreshSingleGuildList()
     self.singleGuildList:Clear()
 
-    local data
-    local title
     local guildId = self.optionsGuildId
-    local showEditRankHeaderTitle = GAMEPAD_GUILD_HOME:ShouldShowEditRankHeaderTitle()
-
     local function GenerateShowGuildSubmenuCallback(callback, title)
         return function()
             GAMEPAD_GUILD_HOME:SetGuildId(guildId)
@@ -889,9 +878,10 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
     end
 
     -- Guild Submenus
+    local showEditRankHeaderTitle = GAMEPAD_GUILD_HOME:ShouldShowEditRankHeaderTitle()
     if not showEditRankHeaderTitle then
-        title = GetString(SI_WINDOW_TITLE_GUILD_ROSTER)
-        data = ZO_GamepadEntryData:New(title)
+        local title = GetString(SI_WINDOW_TITLE_GUILD_ROSTER)
+        local data = ZO_GamepadEntryData:New(title)
         data:SetIconTintOnSelection(true)
         data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.ROSTER
         data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRoster() end)
@@ -903,7 +893,7 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
         title = SI_GAMEPAD_GUILD_RANK_EDIT
     end
     title = GetString(title)
-    data = ZO_GamepadEntryData:New(title)
+    local data = ZO_GamepadEntryData:New(title)
     data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.RANK
     data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRanks() end, title)
     self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
@@ -971,8 +961,6 @@ end
 
 function ZO_GamepadGuildHub:RefreshGuildList()
     self.guildList:Clear()
-
-    local data = nil
 
     -- Entries
     local numGuilds = GetNumGuilds()

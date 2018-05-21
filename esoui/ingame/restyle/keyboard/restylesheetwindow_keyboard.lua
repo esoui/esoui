@@ -317,11 +317,11 @@ function ZO_RestyleSheetWindow_Keyboard:DisplaySheet(newSheet)
 
         if self.pendingEquipOutfitManipulator and self.pendingEquipOutfitManipulator:IsMarkedForPreservation() then
             local interactType = GetInteractionType()
-            self.pendingEquipOutfitManipulator:SetMarkedForPreservation(false)
             if interactType == INTERACTION_DYE_STATION then
                 self.pendingEquipOutfitManipulator:RestorePreservedDyeData()
                 self.pendingEquipOutfitManipulator:UpdatePreviews()
             else
+                self.pendingEquipOutfitManipulator:SetMarkedForPreservation(false)
                 self.pendingEquipOutfitManipulator:ClearPendingChanges(true)
             end
         end

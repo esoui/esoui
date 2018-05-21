@@ -48,6 +48,10 @@ end
 function ZO_Outfit_Slots_Panel_Gamepad:Deactivate()
     ZO_Restyle_Station_Helper_Panel_Gamepad.Deactivate(self)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_QUAD1_TOOLTIP)
+    -- make sure we leave the preview as it was no matter how we leave this panel
+    if self.slotManipulator then
+        self.slotManipulator:UpdatePreview(REFRESH_PREVIEW_INSTANTLY)
+    end
     self:DeactivateCurrentFocus()
     DIRECTIONAL_INPUT:Deactivate(self)
 end
@@ -55,7 +59,7 @@ end
 function ZO_Outfit_Slots_Panel_Gamepad:OnShowing()
     COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.searchEdit:GetText())
     COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES)
-    COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHideWhenLocked(true)
+    COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("UpdateSearchResults", self.onUpdateCollectionsSearchResultsCallback)
     self:UpdateCurrentOutfitIndex()
 end

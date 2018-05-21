@@ -25,9 +25,7 @@ function ZO_Smithing_GetActiveObject()
 end
 
 function ZO_Smithing_IsSmithingStation(craftingType)
-    return craftingType == CRAFTING_TYPE_BLACKSMITHING 
-        or craftingType == CRAFTING_TYPE_CLOTHIER
-        or craftingType == CRAFTING_TYPE_WOODWORKING
+    return IsSmithingCraftingType(craftingType)
 end
 
 --
@@ -61,6 +59,12 @@ SMITHING_BONUSES =
     [NON_COMBAT_BONUS_WOODWORKING_EXTRACT_LEVEL] = true,
     [NON_COMBAT_BONUS_WOODWORKING_CRAFT_PERCENT_DISCOUNT] = true,
     [NON_COMBAT_BONUS_WOODWORKING_RESEARCH_LEVEL] = true,
+
+    [NON_COMBAT_BONUS_JEWELRYCRAFTING_LEVEL] = true,
+    [NON_COMBAT_BONUS_JEWELRYCRAFTING_BOOSTER_BONUS] = true,
+    [NON_COMBAT_BONUS_JEWELRYCRAFTING_EXTRACT_LEVEL] = true,
+    [NON_COMBAT_BONUS_JEWELRYCRAFTING_CRAFT_PERCENT_DISCOUNT] = true,
+    [NON_COMBAT_BONUS_JEWELRYCRAFTING_RESEARCH_LEVEL] = true,
 }
 
 function ZO_Smithing_Common:Initialize(control)
@@ -80,7 +84,7 @@ function ZO_Smithing_Common:CreateInteractScene(sceneName)
 end
 
 SMITHING_MODE_ROOT = 0
-SMITHING_MODE_REFINMENT = 1
+SMITHING_MODE_REFINEMENT = 1
 SMITHING_MODE_CREATION = 2
 SMITHING_MODE_DECONSTRUCTION = 3
 SMITHING_MODE_IMPROVEMENT = 4
@@ -89,7 +93,7 @@ SMITHING_MODE_RECIPES = 6
 
 function ZO_Smithing_Common:GetTutorialTrigger(craftingType, mode)
     if craftingType == CRAFTING_TYPE_BLACKSMITHING then
-        if mode == SMITHING_MODE_REFINMENT then
+        if mode == SMITHING_MODE_REFINEMENT then
             return TUTORIAL_TRIGGER_BLACKSMITHING_REFINEMENT_OPENED
         elseif mode == SMITHING_MODE_CREATION then
             return TUTORIAL_TRIGGER_BLACKSMITHING_CREATION_OPENED
@@ -101,7 +105,7 @@ function ZO_Smithing_Common:GetTutorialTrigger(craftingType, mode)
             return TUTORIAL_TRIGGER_BLACKSMITHING_RESEARCH_OPENED
         end
     elseif craftingType == CRAFTING_TYPE_CLOTHIER then
-        if mode == SMITHING_MODE_REFINMENT then
+        if mode == SMITHING_MODE_REFINEMENT then
             return TUTORIAL_TRIGGER_CLOTHIER_REFINEMENT_OPENED
         elseif mode == SMITHING_MODE_CREATION then
             return TUTORIAL_TRIGGER_CLOTHIER_CREATION_OPENED
@@ -113,7 +117,7 @@ function ZO_Smithing_Common:GetTutorialTrigger(craftingType, mode)
             return TUTORIAL_TRIGGER_CLOTHIER_RESEARCH_OPENED
         end
     elseif craftingType == CRAFTING_TYPE_WOODWORKING then
-        if mode == SMITHING_MODE_REFINMENT then
+        if mode == SMITHING_MODE_REFINEMENT then
             return TUTORIAL_TRIGGER_WOODWORKING_REFINEMENT_OPENED
         elseif mode == SMITHING_MODE_CREATION then
             return TUTORIAL_TRIGGER_WOODWORKING_CREATION_OPENED
@@ -123,6 +127,18 @@ function ZO_Smithing_Common:GetTutorialTrigger(craftingType, mode)
             return TUTORIAL_TRIGGER_WOODWORKING_IMPROVEMENT_OPENED
         elseif mode == SMITHING_MODE_RESEARCH then
             return TUTORIAL_TRIGGER_WOODWORKING_RESEARCH_OPENED
+        end
+    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+        if mode == SMITHING_MODE_REFINEMENT then
+            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_REFINEMENT_OPENED
+        elseif mode == SMITHING_MODE_CREATION then
+            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_CREATION_OPENED
+        elseif mode == SMITHING_MODE_DECONSTRUCTION then
+            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_DECONSTRUCTION_OPENED
+        elseif mode == SMITHING_MODE_IMPROVEMENT then
+            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_IMPROVEMENT_OPENED
+        elseif mode == SMITHING_MODE_RESEARCH then
+            return TUTORIAL_TRIGGER_JEWELRYCRAFTING_RESEARCH_OPENED
         end
     end
 end
@@ -134,7 +150,7 @@ function ZO_Smithing_Common:DirtyAllPanels()
 end
 
 function ZO_Smithing_Common:IsItemAlreadySlottedToCraft(bagId, slotIndex)
-    if self.mode == SMITHING_MODE_REFINMENT then
+    if self.mode == SMITHING_MODE_REFINEMENT then
         return self.refinementPanel:IsItemAlreadySlottedToCraft(bagId, slotIndex)
     elseif self.mode == SMITHING_MODE_IMPROVEMENT then
         return self.improvementPanel:IsItemAlreadySlottedToCraft(bagId, slotIndex)
@@ -144,7 +160,7 @@ function ZO_Smithing_Common:IsItemAlreadySlottedToCraft(bagId, slotIndex)
 end
 
 function ZO_Smithing_Common:CanItemBeAddedToCraft(bagId, slotIndex)
-    if self.mode == SMITHING_MODE_REFINMENT then
+    if self.mode == SMITHING_MODE_REFINEMENT then
         return self.refinementPanel:CanItemBeAddedToCraft(bagId, slotIndex)
     elseif self.mode == SMITHING_MODE_IMPROVEMENT then
         return self.improvementPanel:CanItemBeAddedToCraft(bagId, slotIndex)
@@ -154,7 +170,7 @@ function ZO_Smithing_Common:CanItemBeAddedToCraft(bagId, slotIndex)
 end
 
 function ZO_Smithing_Common:AddItemToCraft(bagId, slotIndex)
-    if self.mode == SMITHING_MODE_REFINMENT then
+    if self.mode == SMITHING_MODE_REFINEMENT then
         self.refinementPanel:AddItemToCraft(bagId, slotIndex)
     elseif self.mode == SMITHING_MODE_IMPROVEMENT then
         self.improvementPanel:AddItemToCraft(bagId, slotIndex)
@@ -164,7 +180,7 @@ function ZO_Smithing_Common:AddItemToCraft(bagId, slotIndex)
 end
 
 function ZO_Smithing_Common:RemoveItemFromCraft(bagId, slotIndex)
-    if self.mode == SMITHING_MODE_REFINMENT then
+    if self.mode == SMITHING_MODE_REFINEMENT then
         self.refinementPanel:RemoveItemFromCraft(bagId, slotIndex)
     elseif self.mode == SMITHING_MODE_IMPROVEMENT then
         self.improvementPanel:RemoveItemFromCraft(bagId, slotIndex)
@@ -174,7 +190,7 @@ function ZO_Smithing_Common:RemoveItemFromCraft(bagId, slotIndex)
 end
 
 function ZO_Smithing_Common:DoesCurrentModeHaveSlotAnimations()
-    return self.mode == SMITHING_MODE_IMPROVEMENT or self.mode == SMITHING_MODE_REFINMENT or self.mode == SMITHING_MODE_DECONSTRUCTION
+    return self.mode == SMITHING_MODE_IMPROVEMENT or self.mode == SMITHING_MODE_REFINEMENT or self.mode == SMITHING_MODE_DECONSTRUCTION
 end
 
 function ZO_Smithing_Common:IsImproving()
@@ -182,7 +198,7 @@ function ZO_Smithing_Common:IsImproving()
 end
 
 function ZO_Smithing_Common:IsExtracting()
-    return self.mode == SMITHING_MODE_REFINMENT or self.mode == SMITHING_MODE_DECONSTRUCTION
+    return self.mode == SMITHING_MODE_REFINEMENT or self.mode == SMITHING_MODE_DECONSTRUCTION
 end
 
 function ZO_Smithing_Common:IsDeconstructing()

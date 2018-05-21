@@ -1,14 +1,16 @@
 ZO_RadioButtonGroup = ZO_Object:Subclass()
 
-function ZO_RadioButtonGroup:New()
+function ZO_RadioButtonGroup:New(...)
     local group = ZO_Object.New(self)
-    
-    group.m_buttons = {}
-    group.m_enabled = true
+    group:Initialize(...)
+    return group
+end
+
+function ZO_RadioButtonGroup:Initialize()
+    self.m_buttons = {}
+    self.m_enabled = true
     
     self:SetLabelColors(ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
-
-    return group
 end
 
 function ZO_RadioButtonGroup:SetLabelColors(enabledColor, disabledColor)
@@ -42,6 +44,12 @@ end
 
 function ZO_RadioButtonGroup:HandleClick(control, buttonId)
     if not self.m_enabled or self.m_clickedButton == control then
+        return
+    end
+
+    -- Can't click disabled buttons
+    local controlData = self.m_buttons[control]
+    if controlData and not controlData.isValidOption then
         return
     end
 

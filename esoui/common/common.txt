@@ -24,6 +24,7 @@ EsoUI\Common\Console\AutoSaving_Console.lua
 EsoUI\Common\Console\AutoSaving_Console.xml
 
 EsoUI\Common\Console\ZO_PlayerConsoleInfoRequestManager.lua
+EsoUI\Common\Console\ZO_PlayerConsoleRequestsUtils.lua
 
 EsoUI\Common\Gamepad\GenericHeaders\GenericHeaders.lua
 EsoUI\Common\Gamepad\GenericHeaders\GenericHeaders.xml
@@ -83,6 +84,9 @@ EsoUI\Common\Tooltip\CommonTooltips.lua
 
 EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua
 EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.xml
+
+EsoUI\Common\ZO_IMECandidates\ZO_IMECandidates.lua
+EsoUI\Common\ZO_IMECandidates\ZO_IMECandidates.xml
 
 EsoUI\Common\MarketTemplates\MarketTemplates_Shared.xml
 EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.lua

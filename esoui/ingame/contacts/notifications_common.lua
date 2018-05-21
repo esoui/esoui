@@ -7,6 +7,11 @@ NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA = 6
 NOTIFICATIONS_YES_NO_DATA = 7
 NOTIFICATIONS_LFG_READY_CHECK_DATA = 8
 NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA = 9
+NOTIFICATIONS_GIFT_RECEIVED_DATA = 10
+NOTIFICATIONS_GIFT_RETURNED_DATA = 11
+NOTIFICATIONS_GIFT_CLAIMED_DATA = 12
+NOTIFICATIONS_GIFTING_UNLOCKED_DATA = 13
+NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 14
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -41,7 +46,7 @@ function ZO_NotificationProvider:GetNumNotifications()
     return #self.list
 end
 
-function ZO_NotificationProvider:AddDataEntry(list, i, isHeader)
+function ZO_NotificationProvider:AddDataEntry(i, isHeader)
     self.list[i].provider = self
     self.notificationManager:AddDataEntry(self.list[i].dataType, self.list[i], isHeader)
 end
@@ -919,7 +924,9 @@ end
 function ZO_CollectionsUpdateProvider:CreateCollectibleNotificationData(notificationId, collectibleId)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
 
-    if not collectibleData:IsPlaceholder() then
+    -- This can be nil if we unlock a collectible without a category, which is a data bug and will assert in the data manager.
+    -- However, this will still try to load the data for the bad id, so skip it.
+    if collectibleData and not collectibleData:IsPlaceholder() then
         return collectibleData
     end
 end
@@ -1222,12 +1229,172 @@ function ZO_EsoPlusSubscriptionStatusProvider:Decline()
     ClearEsoPlusFreeTrialNotification()
 end
 
+-- Gift Inventory Provider
+-------------------------
+
+ZO_GiftInventoryProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_GiftInventoryProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_GIFTS_UPDATED)
+
+    provider:BuildNotificationList()
+
+    return provider
+end
+
+function ZO_GiftInventoryProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    local function AddGiftNotifications(giftState, notificationType, messageStringFormatterId, dataType)
+        local giftList = GIFT_INVENTORY_MANAGER:GetGiftList(giftState)
+        for _, gift in ipairs(giftList) do
+            if not gift:HasBeenSeen() then
+                local message = zo_strformat(messageStringFormatterId, ZO_SELECTED_TEXT:Colorize(gift:GetUserFacingPlayerName()))
+                self:AddGiftNotification(gift, notificationType, dataType, message)
+            end
+        end
+    end
+
+    AddGiftNotifications(GIFT_STATE_RECEIVED, NOTIFICATION_TYPE_GIFT_RECEIVED, SI_NOTIFICATIONS_GIFT_RECEIVED, NOTIFICATIONS_GIFT_RECEIVED_DATA)
+    AddGiftNotifications(GIFT_STATE_RETURNED, NOTIFICATION_TYPE_GIFT_RETURNED, SI_NOTIFICATIONS_GIFT_RETURNED, NOTIFICATIONS_GIFT_RETURNED_DATA)
+    AddGiftNotifications(GIFT_STATE_THANKED, NOTIFICATION_TYPE_GIFT_CLAIMED, SI_NOTIFICATIONS_GIFT_CLAIMED, NOTIFICATIONS_GIFT_CLAIMED_DATA)
+end
+
+function ZO_GiftInventoryProvider:AddGiftNotification(gift, notificationType, dataType, message)
+    local newListEntry = {
+        notificationType = notificationType,
+        dataType = dataType,
+        shortDisplayText = GetString("SI_NOTIFICATIONTYPE", notificationType),
+        message = message,
+
+        gift = gift,
+
+        --For sorting
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_GiftInventoryProvider:Accept(entryData)
+    local gift = entryData.gift
+    if gift:IsState(GIFT_STATE_RETURNED) or (gift:IsState(GIFT_STATE_THANKED) and gift:GetNote() == "") then
+        gift:View()
+        GIFT_INVENTORY_MANAGER.ShowGiftInventory(gift:GetState())
+    else
+        local giftInventoryView = SYSTEMS:GetObject("giftInventoryView")
+        giftInventoryView:SetupAndShowGift(gift)
+    end
+end
+
+function ZO_GiftInventoryProvider:Decline(entryData)
+    entryData.gift:View()
+end
+
+-- Gifting Unlocked Provider
+-------------------------
+
+ZO_GiftingUnlockedProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_GiftingUnlockedProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_GIFTING_UNLOCKED_STATUS_CHANGED)
+    provider:RegisterUpdateEvent(EVENT_GIFTING_UNLOCKED_NOTIFICATION_CLEARED)
+
+    return provider
+end
+
+function ZO_GiftingUnlockedProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if HasGiftingUnlockedNotification() then
+        self:AddNotification()
+    end
+end
+
+function ZO_GiftingUnlockedProvider:AddNotification(gift)
+    local helpCategoryIndex, helpIndex = GetGiftingUnlockedHelpIndices()
+    local hasMoreInfo = helpCategoryIndex ~= nil
+    local newListEntry = {
+        notificationType = NOTIFICATION_TYPE_GIFTING_UNLOCKED,
+        dataType = NOTIFICATIONS_GIFTING_UNLOCKED_DATA,
+        shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_GIFTING_UNLOCKED),
+        message = GetString(SI_NOTIFICATIONS_GIFTING_UNLOCKED_MESSAGE),
+
+        moreInfo = hasMoreInfo,
+        helpCategoryIndex = helpCategoryIndex,
+        helpIndex = helpIndex,
+
+        --For sorting
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_GiftingUnlockedProvider:Accept(entryData)
+    ShowMarketAndSearch("", MARKET_OPEN_OPERATION_NOTIFICATION)
+    ClearGiftingUnlockedNotification()
+end
+
+function ZO_GiftingUnlockedProvider:Decline(entryData)
+    ClearGiftingUnlockedNotification()
+end
+
+-- Daily Login Rewards Claim Provider
+--------------------------------------
+
+ZO_DailyLoginRewardsClaimProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_DailyLoginRewardsClaimProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE)
+    provider:RegisterUpdateEvent(EVENT_DAILY_LOGIN_REWARDS_CLAIMED)
+
+    return provider
+end
+
+function ZO_DailyLoginRewardsClaimProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if GetDailyLoginClaimableRewardIndex() then
+        self:AddNotification()
+    end
+end
+
+function ZO_DailyLoginRewardsClaimProvider:AddNotification(gift)
+    local notificationTypeString = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_NEW_DAILY_LOGIN_REWARD)
+
+    local newListEntry =
+    {
+        notificationType = NOTIFICATION_TYPE_NEW_DAILY_LOGIN_REWARD,
+        dataType = NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA,
+        shortDisplayText = GetString(SI_NOTIFICATIONS_NEW_DAILY_LOGIN_REWARDS),
+        message = GetString(SI_NOTIFICATIONS_NEW_DAILY_LOGIN_REWARDS_MESSAGE),
+
+        --For sorting
+        displayName = notificationTypeString,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_DailyLoginRewardsClaimProvider:Accept(entryData)
+    ZO_DAILYLOGINREWARDS_MANAGER:ShowDailyLoginRewardsScene()
+end
+
+function ZO_DailyLoginRewardsClaimProvider:Decline(entryData)
+    
+end
+
 -- Sort List
 -------------------------
 local ENTRY_SORT_KEYS =
 {
-    ["displayName"] = { },
-    ["secsSinceRequest"] = { isNumeric = true, tiebreaker = "displayName" },
+    ["secsSinceRequest"] = { isNumeric = true, tiebreaker = "dataType" },
+    ["dataType"] = { isNumeric = true },
 }
 
 ZO_NotificationList = ZO_SortFilterList:Subclass()
@@ -1311,9 +1478,11 @@ function ZO_NotificationManager:BuildNotificationList()
 
         self.allowUpdate = hasTimer
 
+        local lastNotificationType = nil
         for listIndex = 1, numNotifications do
-            local isHeader = listIndex == 1
-            provider:AddDataEntry(self.list, listIndex, isHeader)
+            local isHeader = provider.list[listIndex].notificationType ~= lastNotificationType
+            provider:AddDataEntry(listIndex, isHeader)
+            lastNotificationType = provider.list[listIndex].notificationType
         end
     end
 

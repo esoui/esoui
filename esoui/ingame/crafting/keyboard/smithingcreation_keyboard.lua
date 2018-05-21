@@ -5,7 +5,6 @@ function ZO_SmithingCreation:New(...)
 end
 
 function ZO_SmithingCreation:Initialize(control, owner)
-    local infoBar = control:GetNamedChild("InfoBar")
     ZO_SharedSmithingCreation.Initialize(self, control, owner)
 
     local function OnAddOnLoaded(event, name)
@@ -114,6 +113,10 @@ function ZO_SmithingCreation:InitializeFilterTypeBar()
         return CanSmithingApparelPatternsBeCraftedHere()
     end
 
+    local function CanCraftJewelry()
+        return CanSmithingJewelryPatternsBeCraftedHere()
+    end
+
     local function CanCraftSetWeapons()
         return CanCraftWeapons() and CanSmithingSetPatternsBeCraftedHere()
     end
@@ -121,11 +124,16 @@ function ZO_SmithingCreation:InitializeFilterTypeBar()
     local function CanCraftSetArmor()
         return CanCraftArmor() and CanSmithingSetPatternsBeCraftedHere()
     end
-    
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanCraftArmor))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(ZO_SMITHING_CREATION_FILTER_TYPE_WEAPONS, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanCraftWeapons))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(ZO_SMITHING_CREATION_FILTER_TYPE_SET_ARMOR, GetString(SI_SMITHING_CREATION_FILTER_SET_ARMOR), "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_disabled.dds", CanCraftSetArmor))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(ZO_SMITHING_CREATION_FILTER_TYPE_SET_WEAPONS, GetString(SI_SMITHING_CREATION_FILTER_SET_WEAPONS), "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_disabled.dds", CanCraftSetWeapons))
+
+    local function CanCraftSetJewelry()
+        return CanCraftJewelry() and CanSmithingSetPatternsBeCraftedHere()
+    end
+    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_JEWELRY), "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_jewelry_disabled.dds", CanCraftJewelry))
+    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanCraftArmor))
+    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanCraftWeapons))
+    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_JEWELRY), "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_over.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_disabled.dds", CanCraftSetJewelry))
+    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_ARMOR), "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_disabled.dds", CanCraftSetArmor))
+    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_WEAPONS), "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_disabled.dds", CanCraftSetWeapons))
 
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.tabs)
 end
@@ -196,9 +204,21 @@ function ZO_SmithingCreation:SetupResultTooltip(...)
 end
 
 function ZO_SmithingCreation:OnRefreshAllLists()
-	-- Need to do this on PC, as the first selection can be garbage otherwise with the style<->pattern cyclic dependencies.
-	-- On gamepad, the list auto-scrolls to an item and refreshes twice on its own, so this isn't necessary.
-	self:CreatePatternList()
+    local traitListControl = self.control:GetNamedChild("TraitList")
+    local styleListControl = self.control:GetNamedChild("StyleList")
+    traitListControl:ClearAnchors()
+    if self:ShouldIgnoreStyleItems() then
+        local materialListControl = self.control:GetNamedChild("MaterialList")
+        traitListControl:SetAnchor(TOP, materialListControl, BOTTOM, 0, 30)
+        styleListControl:SetHidden(true)
+    else
+        traitListControl:SetAnchor(TOP, styleListControl, BOTTOM, 0, 25)
+        styleListControl:SetHidden(false)
+    end
+
+    -- Need to do this on PC, as the first selection can be garbage otherwise with the style<->pattern cyclic dependencies.
+    -- On gamepad, the list auto-scrolls to an item and refreshes twice on its own, so this isn't necessary.
+    self:CreatePatternList()
 end
 
 function ZO_SmithingCreation:InitializeMaterialList(...)

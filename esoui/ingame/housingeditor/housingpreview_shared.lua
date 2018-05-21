@@ -57,7 +57,7 @@ function ZO_HousingPreviewDialog_Shared:Initialize(control, dialogName)
 
     self:RegisterForCallbacks()
 
-	self.control:RegisterForEvent(EVENT_PENDING_INTERACTION_CANCELLED, function() if not self.control:IsHidden() then self:ReleaseDialog() end end)
+    self.control:RegisterForEvent(EVENT_PENDING_INTERACTION_CANCELLED, function() if not self.control:IsHidden() then self:ReleaseDialog() end end)
 end
 
 function ZO_HousingPreviewDialog_Shared:InitializeTemplateComboBox()
@@ -308,5 +308,6 @@ end
 
 function ZO_HousingPreviewDialog_Shared:BuyFromMarket(control)
     self:ReleaseDialog()
-    RequestPurchaseMarketProduct(control.purchaseData.marketProductId, control.purchaseData.presentationIndex)
+    local IS_PURCHASE = false
+    RequestPurchaseMarketProduct(control.purchaseData.marketProductId, control.purchaseData.presentationIndex, IS_PURCHASE)
 end

@@ -1,5 +1,3 @@
-local SHOW_LOGO_DELAY_TIME_MS = 1000
-
 local LOGO_FADE_IN = "logo_fade_in"
 local LOGO_WAIT_FOR_BUTTON = "logo_wait_for_button"
 local LOGO_FADING_OUT = "logo_fading_out"
@@ -36,7 +34,6 @@ end
 
 function PregameInitialScreen_Console:Initialize(control)
     self.control = control
-    self.playIntroAnimation = true
     self.verificationState = VERIFICATION_STATE.NONE
 
     local pregameInitialScreen_Console_Fragment = ZO_FadeSceneFragment:New(control)
@@ -53,12 +50,7 @@ function PregameInitialScreen_Console:Initialize(control)
                         elseif newState == SCENE_SHOWN then
                             DisableShareFeatures()
                             self.fadeMode = LOGO_FADE_IN
-                            if self.playIntroAnimation then
-                                zo_callLater(function() self.esoLogoAnimation:PlayFromStart() end, SHOW_LOGO_DELAY_TIME_MS)
-                                self.playIntroAnimation = false
-                            else
-                                self.esoLogoAnimation:PlayInstantlyToEnd()
-                            end
+                            self.esoLogoAnimation:PlayFromStart()
 
                             if IsErrorQueuedFromIngame() then
                                 ZO_Gamepad_DisplayServerDisconnectedError()
@@ -183,6 +175,8 @@ function PregameInitialScreen_Console:SetupStartupButtons()
     for i, button in ipairs(STARTUP_BUTTONS) do
         local descriptor = 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Initial Screen Startup Button",
             keybind = button,
             callback = function() self:ContinueFunction() end,
             ethereal = true,

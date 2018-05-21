@@ -19,6 +19,8 @@ function CreditsScreen_Gamepad:Initialize(control)
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Game Credits Faster",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
             callback = function()
@@ -29,6 +31,8 @@ function CreditsScreen_Gamepad:Initialize(control)
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Game Credits Slower",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
             callback = function()

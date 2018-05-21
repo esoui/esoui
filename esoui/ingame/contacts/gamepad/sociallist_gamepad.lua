@@ -56,8 +56,8 @@ function ZO_GamepadSocialListPanel:LayoutTooltip(tooltipManager, tooltip, data)
     -- This function is meant to be overridden in subclasses to display the appropriate toolip information
 end
 
-function ZO_GamepadSocialListPanel:EntrySelectionCallback(oldData, newData)
-    ZO_GamepadInteractiveSortFilterList.EntrySelectionCallback(self, oldData, newData)
+function ZO_GamepadSocialListPanel:OnSelectionChanged(oldData, newData)
+    ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldData, newData)
     self:SetupOptions(newData)
     self:RefreshTooltip()
 end

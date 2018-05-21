@@ -11,12 +11,12 @@ function QuickslotActionButton:GetSlot()
     return slotNum
 end
 
-function QuickslotActionButton:HandleRelease()
-    if(self.itemQtyFailure) then
+function QuickslotActionButton:OnRelease()
+    if self.itemQtyFailure then
         PlaySound(SOUNDS.QUICKSLOT_USE_EMPTY)
     end
 
-    ActionButton.HandleRelease(self)
+    ActionButton.OnRelease(self)
 end
 
 function QuickslotActionButton:ApplyStyle(template)

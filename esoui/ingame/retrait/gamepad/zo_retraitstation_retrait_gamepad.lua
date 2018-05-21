@@ -20,7 +20,7 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
 
     self:InitializeHeader()
 
-    self.currentFilter = ZO_RETRAIT_FILTER_TYPE_WEAPONS
+    self.currentFilter = SMITHING_FILTER_TYPE_WEAPONS
     self:InitializeTraitList()
 
     self.sourceTooltip = self.control:GetNamedChild("SourceTooltip")
@@ -65,6 +65,8 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeKeybindStripDescriptors()
 
         -- need to have special exits for this scene
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Retrait Exit",
             keybind = "UI_SHORTCUT_EXIT",
             callback = function()
                 SCENE_MANAGER:ShowBaseScene()
@@ -183,21 +185,20 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeHeader()
 
     self.control:RegisterForEvent(EVENT_CURRENCY_UPDATE, OnCurrencyUpdate)
 
+    local function CreateTabEntryForFilter(smithingFilter)
+        return {
+            text = GetString("SI_SMITHINGFILTERTYPE", smithingFilter),
+            callback =  function()
+                            self:OnFilterChanged(smithingFilter)
+                        end,
+            mode = smithingFilter,
+        }
+    end
+
     local tabBarEntries = {
-        {
-            text = GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS),
-            callback =  function()
-                            self:OnFilterChanged(ZO_RETRAIT_FILTER_TYPE_WEAPONS)
-                        end,
-            mode = ZO_RETRAIT_FILTER_TYPE_WEAPONS,
-        },
-        {
-            text = GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL),
-            callback =  function()
-                            self:OnFilterChanged(ZO_RETRAIT_FILTER_TYPE_ARMOR)
-                        end,
-            mode = ZO_RETRAIT_FILTER_TYPE_ARMOR,
-        },
+        CreateTabEntryForFilter(SMITHING_FILTER_TYPE_WEAPONS),
+        CreateTabEntryForFilter(SMITHING_FILTER_TYPE_ARMOR),
+        CreateTabEntryForFilter(SMITHING_FILTER_TYPE_JEWELRY),
     }
 
     local function GetCapacity()
@@ -278,18 +279,9 @@ function ZO_RetraitStation_Retrait_Gamepad:Refresh()
 end
 
 function ZO_RetraitStation_Retrait_Gamepad:ShowItemActions()
-    self:RemoveKeybinds()
-
-    local function OnActionsFinishedCallback()
-        if self:IsShowing() then
-            self:AddKeybinds()
-        end
-    end
-
     local dialogData = 
     {
         targetData = self.inventory:CurrentSelection(),
-        finishedCallback = OnActionsFinishedCallback,
         itemActions = self.itemActions,
     }
 
@@ -327,20 +319,12 @@ function ZO_RetraitStation_Retrait_Gamepad:SetInventoryActive(active)
 end
 
 function ZO_RetraitStation_Retrait_Gamepad:RefreshTraitList()
-    local traitData
-
-    if self.filterType == ZO_RETRAIT_FILTER_TYPE_ARMOR then
-        traitData = ZO_RETRAIT_STATION_MANAGER:GetTraitInfoForCategory(ITEM_TRAIT_TYPE_CATEGORY_ARMOR)
-    elseif self.filterType == ZO_RETRAIT_FILTER_TYPE_WEAPONS then
-        traitData = ZO_RETRAIT_STATION_MANAGER:GetTraitInfoForCategory(ITEM_TRAIT_TYPE_CATEGORY_WEAPON)
-    else
-        traitData = {} -- We have an invalid filter and we shouldn't be here
-    end
-
     self.traitList:Clear()
 
     local bag, slot = self.inventory:CurrentSelectionBagAndSlot()
     local selectedItemTrait = GetItemTrait(bag, slot)
+    local traitData = ZO_RETRAIT_STATION_MANAGER:GetTraitInfoForCategory(GetItemTraitCategory(bag, slot))
+    internalassert(traitData)
 
     for index, traitRowData in ipairs(traitData) do
         if selectedItemTrait ~= traitRowData.traitType then
@@ -527,7 +511,7 @@ function ZO_Retrait_Inventory_Gamepad:Initialize(owner, control, ...)
     ZO_GamepadCraftingInventory.Initialize(self, control, ...)
 
     self.owner = owner
-    self.filterType = ZO_RETRAIT_FILTER_TYPE_WEAPONS
+    self.filterType = SMITHING_FILTER_TYPE_WEAPONS
     self:SetCustomSort( function(bagId, slotIndex)
                             -- sort equipped items to the top of the list
                             -- but items from other bags will be equal so they sort by category name
@@ -538,9 +522,12 @@ function ZO_Retrait_Inventory_Gamepad:Initialize(owner, control, ...)
                             end
                         end)
     self:SetCustomBestItemCategoryNameFunction(function(slotData)
-                                                    slotData.bestItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(slotData)
                                                     if slotData.bagId == BAG_WORN then
-                                                        slotData.bestItemCategoryName = zo_strformat(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM, GetString("SI_ITEMTYPE", slotData.itemType))
+                                                        local equipSlot = ZO_Character_GetEquipSlotForEquipType(slotData.equipType)
+                                                        local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
+                                                        slotData.bestItemCategoryName = zo_strformat(SI_GAMEPAD_SECTION_HEADER_EQUIPPED_ITEM, GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
+                                                    else
+                                                        slotData.bestItemCategoryName = ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(slotData)
                                                     end
                                                end)
     self:SetCustomExtraData(function(bagId, slotIndex, data)
@@ -560,11 +547,7 @@ end
 function ZO_Retrait_Inventory_Gamepad:SetFilter(filterType)
     self.filterType = filterType
 
-    if self.filterType == ZO_RETRAIT_FILTER_TYPE_ARMOR then
-        self:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_ARMOR))
-    elseif self.filterType == ZO_RETRAIT_FILTER_TYPE_WEAPONS then
-        self:SetNoItemLabelText(GetString(SI_SMITHING_IMPROVE_NO_WEAPONS))
-    end
+    self:SetNoItemLabelText(GetString("SI_SMITHINGFILTERTYPE_IMPROVENONE", self.filterType))
 
     self:HandleDirtyEvent()
 end

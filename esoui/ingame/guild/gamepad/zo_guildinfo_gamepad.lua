@@ -1,7 +1,3 @@
-local ICON_BANK = "EsoUI/Art/Guild/Gamepad/gp_guild_bankAccess.dds"
-local ICON_HERALDRY = "EsoUI/Art/Guild/Gamepad/gp_guild_heraldryAccess.dds"
-local ICON_TRADING_HOUSE = "EsoUI/Art/Guild/Gamepad/gp_guild_tradingHouseAccess.dds"
-
 local ICON_KEEP = "EsoUI/Art/Guild/Gamepad/gp_ownership_icon_keep.dds"
 local ICON_TRADER = "EsoUI/Art/Guild/Gamepad/gp_ownership_icon_guildTrader.dds"
 local GUILD_RESOURCE_ICONS =
@@ -10,7 +6,6 @@ local GUILD_RESOURCE_ICONS =
     [RESOURCETYPE_ORE] = "EsoUI/Art/Guild/Gamepad/gp_ownership_icon_mine.dds",
     [RESOURCETYPE_FOOD] = "EsoUI/Art/Guild/Gamepad/gp_ownership_icon_farm.dds",
 }
-
 
 ZO_GamepadGuildInfo = ZO_Object:Subclass()
 
@@ -23,7 +18,7 @@ end
 function ZO_GamepadGuildInfo:Initialize(control)
     if not self.initialized then
         self.initialized = true
-        
+
         self.control = control
 
         GUILD_INFO_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, true)
@@ -60,7 +55,8 @@ function ZO_GamepadGuildInfo:PerformDeferredInitialization()
 
     self.headerData = {}
 
-    local scrollChild = container:GetNamedChild("TextScrollContainer"):GetNamedChild("ScrollChild")
+    self.scrollControl = container:GetNamedChild("TextScrollContainer")
+    local scrollChild = self.scrollControl:GetNamedChild("ScrollChild")
 
     local keep = scrollChild:GetNamedChild("Keep")
     self.keepTitle = keep:GetNamedChild("Title")
@@ -93,11 +89,12 @@ function ZO_GamepadGuildInfo:PerformDeferredInitialization()
     self.privilegeBankControl = privilegesControl:GetNamedChild("Bank")
     self.privilegeHeraldryControl = privilegesControl:GetNamedChild("Heraldry")
     self.privilegeTradingHouseControl = privilegesControl:GetNamedChild("TradingHouse")
-    
+
     self:InitializeFooter()
 end
 
 function ZO_GamepadGuildInfo:RefreshScreen()
+    self.scrollControl:ResetToTop()
     self:RefreshKeepOwnership()
     self:RefreshTraderOwnership()
     self:RefreshGuildMaster()
@@ -115,7 +112,7 @@ end
 local function RefreshPrivilege(privilegeControl, enabled)
     local label = privilegeControl:GetNamedChild("Name")
     local icon = privilegeControl:GetNamedChild("Icon")
-    
+
     local color = enabled and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
     local r, g, b = color:UnpackRGB()
 
@@ -165,7 +162,7 @@ end
 function ZO_GamepadGuildInfo:RefreshMOTD()
     local text = GetGuildMotD(self.guildId)
 
-    if(text == "") then
+    if text == "" then
         text = GetString(SI_GUILD_MOTD_EMPTY_TEXT)
     end
 
@@ -175,7 +172,7 @@ end
 function ZO_GamepadGuildInfo:RefreshDescription()
     local text = GetGuildDescription(self.guildId)
 
-    if(text == "") then
+    if text == "" then
         text = GetString(SI_GUILD_DESCRIPTION_EMPTY_TEXT)
     end
 
@@ -189,7 +186,7 @@ end
 function ZO_GamepadGuildInfo:RefreshKeepOwnership()
     local text = GetString(SI_GUILD_NO_CLAIMED_KEEP)
     local headerText = GetString(SI_GAMEPAD_GUILD_KEEP_OWNERSHIP_HEADER)
-    if(DoesGuildHaveClaimedKeep(self.guildId)) then    
+    if(DoesGuildHaveClaimedKeep(self.guildId)) then
         local keepId, campaignId = GetGuildClaimedKeep(self.guildId)
         local keepType = GetKeepType(keepId)
 
@@ -234,7 +231,7 @@ function ZO_GamepadGuildInfo:RefreshTraderOwnership()
     self.traderName:SetText(traderText)
     self.traderTitle:SetText(headerText)
 end
-                         
+
 --------------------
 
 function ZO_GuildInfo_Gamepad_Initialize(control)

@@ -239,36 +239,38 @@ function ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
     return buttonPart, listPart, multiIconPart
 end
 
-function ZO_InventorySlot_SetHighlightHidden(listPart, hidden)
+local g_highlightAnimationProvider = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
+local g_controlScaleAnimationProvider = ZO_ReversibleAnimationProvider:New("IconSlotMouseOverAnimation")
+
+function ZO_InventorySlot_SetHighlightHidden(listPart, hidden, instant)
     if listPart then
         local highlight = listPart:GetNamedChild("Highlight")
-        if highlight and (highlight:GetType() == CT_TEXTURE) then
-            if not highlight.animation then
-                highlight.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", highlight)
-            end
+        if highlight and highlight:GetType() == CT_TEXTURE then
             if hidden then
-                highlight.animation:PlayBackward()
+                g_highlightAnimationProvider:PlayBackward(highlight, instant)
             else
-                highlight.animation:PlayForward()
+                g_highlightAnimationProvider:PlayForward(highlight, instant)
             end
         end
     end
 end
 
-function ZO_InventorySlot_OnPoolReset(inventorySlot)
-    local buttonPart, listPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
-    if listPart then
-        local highlight = listPart:GetNamedChild("Highlight")
-        if highlight and highlight.animation then
-            highlight.animation:PlayFromEnd(highlight.animation:GetDuration())
-        end
+function ZO_InventorySlot_SetControlScaledUp(control, scaledUp, instant)
+    if control then
+        if scaledUp then
+            g_controlScaleAnimationProvider:PlayForward(control, instant)
+        else
+            g_controlScaleAnimationProvider:PlayBackward(control, instant)
+        end                
     end
-    if buttonPart then
-        if buttonPart and buttonPart.animation then
-            buttonPart.animation:PlayInstantlyToStart()
-        end
-    end
+end
 
+function ZO_InventorySlot_OnPoolReset(inventorySlot)
+    local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
+    local INSTANT = true
+    ZO_InventorySlot_SetHighlightHidden(listPart, true, INSTANT)
+    ZO_InventorySlot_SetControlScaledUp(buttonPart, false, INSTANT)
+    ZO_InventorySlot_SetControlScaledUp(multiIconPart, false, INSTANT)
     ZO_ObjectPool_DefaultResetControl(inventorySlot)
 end
 
@@ -388,9 +390,17 @@ local function TryUseQuestItem(inventorySlot)
     end
 end
 
-function ZO_InventorySlot_CanSplitItemStack(inventorySlot)    
-    if FindFirstEmptySlotInBag(inventorySlot.bagId) ~= nil then
-        return ZO_InventorySlot_GetStackCount(inventorySlot) > 1
+function ZO_InventorySlot_CanSplitItemStack(inventorySlot)
+    if ZO_InventorySlot_GetStackCount(inventorySlot) > 1 then
+        local hasFreeSlot = FindFirstEmptySlotInBag(inventorySlot.bagId) ~= nil
+        if not hasFreeSlot then
+            if inventorySlot.bagId == BAG_BANK then
+                hasFreeSlot = FindFirstEmptySlotInBag(BAG_SUBSCRIBER_BANK)
+            elseif inventorySlot.bagId == BAG_SUBSCRIBER_BANK then
+                hasFreeSlot = FindFirstEmptySlotInBag(BAG_BANK)
+            end
+        end
+        return hasFreeSlot        
     end
 end
 
@@ -510,17 +520,14 @@ local function PlaceInventoryItem(inventorySlot)
     if cursorType ~= MOUSE_CONTENT_EMPTY then
         local sourceBag = GetCursorBagId()
         local sourceSlot = GetCursorSlotIndex()
-        local PlaceInInventoryAfterConfirmation = function()
-            local destBag, destSlot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-            PlaceInInventory(destBag, destSlot)
-        end
-
+        local destBag, destSlot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        ClearCursor()
         if ZO_InventorySlot_WillItemBecomeBoundOnEquip(sourceBag, sourceSlot) then
             local itemQuality = select(8, GetItemInfo(sourceBag, sourceSlot))
             local itemQualityColor = GetItemQualityColor(itemQuality)
-            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = PlaceInInventoryAfterConfirmation}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(sourceBag, sourceSlot))}})
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = function() RequestMoveItem(sourceBag, sourceSlot, destBag, destSlot) end}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(sourceBag, sourceSlot))}})
         else
-            PlaceInInventoryAfterConfirmation()
+            RequestMoveItem(sourceBag, sourceSlot, destBag, destSlot)
         end
         return true
     end
@@ -719,8 +726,11 @@ local function TryBankItem(inventorySlot)
     end
 end
 
-local function TryMoveToCraftBag(inventorySlot)
-    local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+local function CanMoveToCraftBag(bagId, slotIndex)
+    return HasCraftBagAccess() and CanItemBeVirtual(bagId, slotIndex) and not IsItemStolen(bagId, slotIndex)
+end
+
+local function TryMoveToCraftBag(bagId, slotIndex)
     local slotData = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
     if slotData then
         if slotData.isGemmable then
@@ -1727,9 +1737,9 @@ local actionHandlers =
                                 slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_ITEMS_FROM_CRAFT_BAG, function() TryMoveToInventory(inventorySlot) end, "primary")
                             end,
     ["move_to_craft_bag"] = function(inventorySlot, slotActions)
-                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                                if HasCraftBagAccess() and CanItemBeVirtual(bag, slot) and not IsItemStolen(bag, slot) then
-                                    slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(inventorySlot) end, "secondary")
+                                local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                if CanMoveToCraftBag(bagId, slotIndex) then
+                                    slotActions:AddSlotAction(SI_ITEM_ACTION_ADD_ITEMS_TO_CRAFT_BAG, function() TryMoveToCraftBag(bagId, slotIndex) end, "secondary")
                                 end
                             end,
     ["preview_dye_stamp"] = function(inventorySlot, slotActions)
@@ -1859,7 +1869,7 @@ end
 --
 -- Mouse Over
 --
-local SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON = true, true, true
+local SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_PURCHASABLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON = true, true, true
 
 local InventoryEnter =
 {
@@ -2151,7 +2161,7 @@ local InventoryEnter =
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =
     {
         function(inventorySlot)
-            ItemTooltip:SetCollectible(inventorySlot.collectibleId, SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON)
+            ItemTooltip:SetCollectible(inventorySlot.collectibleId, SHOW_COLLECTIBLE_NICKNAME, SHOW_COLLECTIBLE_PURCHASABLE_HINT, SHOW_COLLECTIBLE_BLOCK_REASON)
             return true, ItemTooltip
         end
     },
@@ -2229,20 +2239,9 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
     local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
 
     if inventorySlot.slotControlType == "listSlot" then
-        if (ZO_InventorySlot_GetStackCount(buttonPart) > 0) or (ZO_InventorySlot_GetStackCount(listPart) > 0) then
-            if not buttonPart.animation then
-                buttonPart.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", buttonPart)
-            end
-
-            buttonPart.animation:PlayForward()
-
-            if multiIconPart then
-                if not multiIconPart.animation then
-                    multiIconPart.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("IconSlotMouseOverAnimation", multiIconPart)
-                end
-
-                multiIconPart.animation:PlayForward()
-            end
+        if ZO_InventorySlot_GetStackCount(buttonPart) > 0 or ZO_InventorySlot_GetStackCount(listPart) > 0 then
+            ZO_InventorySlot_SetControlScaledUp(buttonPart, true)
+            ZO_InventorySlot_SetControlScaledUp(multiIconPart, true)
         end
     end
 
@@ -2358,13 +2357,8 @@ function ZO_InventorySlot_OnMouseExit(inventorySlot)
 
     ZO_CharacterWindowStats_HideComparisonValues()
 
-    if buttonPart.animation then
-        buttonPart.animation:PlayBackward()
-    end
-
-    if multiIconPart and multiIconPart.animation then
-        multiIconPart.animation:PlayBackward()
-    end
+    ZO_InventorySlot_SetControlScaledUp(buttonPart, false)
+    ZO_InventorySlot_SetControlScaledUp(multiIconPart, false)
 
     UpdateMouseoverCommand(nil)
 
@@ -2654,7 +2648,11 @@ local InventoryReceiveDrag =
     [SLOT_TYPE_CRAFT_BAG_ITEM] =
     {
         function(inventorySlot)
-            return PlaceInventoryItemInStorage(inventorySlot)
+            local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
+            if CanMoveToCraftBag(bagId, slotIndex) then
+                ClearCursor()
+                return TryMoveToCraftBag(bagId, slotIndex)
+            end
         end
     },
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] =
@@ -2690,10 +2688,10 @@ function ZO_InventorySlot_RemoveMouseOverKeybinds()
 end
 
 function ZO_InventorySlot_WillItemBecomeBoundOnEquip(bagId, slotIndex)
-    local itemQuality = select(8, GetItemInfo(bagId, slotIndex))
-    local notAlreadyBound = not IsItemBound(bagId, slotIndex) and GetItemBindType(bagId, slotIndex) == BIND_TYPE_ON_EQUIP
-    local hasSufficientQuality = itemQuality >= ITEM_QUALITY_ARCANE
-    return (notAlreadyBound and hasSufficientQuality) or IsItemBoPAndTradeable(bagId, slotIndex)
+    if GetItemBindType(bagId, slotIndex) == BIND_TYPE_ON_EQUIP or IsItemBoPAndTradeable(bagId, slotIndex) then
+        return not IsItemBound(bagId, slotIndex)
+    end
+    return false
 end
 
 function ZO_InventorySlot_TraitInfo_OnMouseEnter(control)

@@ -195,12 +195,12 @@ function PlayerInventoryMenuBar:Initialize(control)
 
     -- Quickslot toggle button
     local quickslotToggleKeybind = {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Toggle Quickslots",
         keybind = "UI_SHORTCUT_QUICK_SLOTS",
-
         callback =  function()
                         self:ToggleQuickslotsTab()
                     end,
-
         ethereal = true,
     }
 
@@ -283,6 +283,10 @@ function PlayerInventoryMenuBar:OnFragmentShown()
 
     if AreAnyItemsStolen(INVENTORY_BACKPACK) then
         TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_STOLEN_ITEMS_PRESENT)
+    end
+
+    if HasPoisonInBag(INVENTORY_BACKPACK) then
+        TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_POISONS_PRESENT)
     end
 end
 

@@ -28,6 +28,12 @@ function ZO_SmithingExtraction:SetHidden(hidden)
     self.inventory:HandleDirtyEvent()
 end
 
+function ZO_SmithingExtraction:OnFilterChanged()
+    ZO_SharedSmithingExtraction.OnFilterChanged(self)
+
+    self.extractionSlot:SetEmptyTexture(ZO_CraftingUtils_GetItemSlotTextureFromSmithingFilter(self:GetFilterType()))
+end
+
 ZO_SmithingExtractionInventory = ZO_CraftingInventory:Subclass()
 
 function ZO_SmithingExtractionInventory:New(...)
@@ -41,7 +47,7 @@ function ZO_SmithingExtractionInventory:Initialize(owner, control, refinementOnl
 
     if refinementOnly then
         self:SetFilters{
-            self:CreateNewTabFilterData(ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS, GetString(SI_SMITHING_EXTRACTION_RAW_MATERIALS_TAB), "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_disabled.dds"),
+            self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_RAW_MATERIALS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_RAW_MATERIALS), "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_disabled.dds"),
         }
 
         self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true }, true)
@@ -50,8 +56,9 @@ function ZO_SmithingExtractionInventory:Initialize(owner, control, refinementOnl
         self.sortKey = "name"
     else
         self:SetFilters{
-            self:CreateNewTabFilterData(ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanSmithingApparelPatternsBeCraftedHere),
-            self:CreateNewTabFilterData(ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanSmithingWeaponPatternsBeCraftedHere),
+            self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_JEWELRY), "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_jewelry_disabled.dds", CanSmithingJewelryPatternsBeCraftedHere),
+            self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanSmithingApparelPatternsBeCraftedHere),
+            self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanSmithingWeaponPatternsBeCraftedHere),
         }
 
         self.sortOrder = ZO_SORT_ORDER_UP
@@ -66,11 +73,11 @@ function ZO_SmithingExtractionInventory:AddListDataTypes()
 
     local function RowSetup(rowControl, data)
         local inventorySlot = rowControl:GetNamedChild("Button")
-        ZO_ItemSlot_SetAlwaysShowStackCount(inventorySlot, false, self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS and GetRequiredSmithingRefinementStackSize())
+        ZO_ItemSlot_SetAlwaysShowStackCount(inventorySlot, false, self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS and GetRequiredSmithingRefinementStackSize())
 
         defaultSetup(rowControl, data)
 
-        if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+        if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
             ZO_ItemSlot_SetupUsableAndLockedColor(inventorySlot, data.stackCount >= GetRequiredSmithingRefinementStackSize())
         end
     end
@@ -87,13 +94,7 @@ function ZO_SmithingExtractionInventory:ChangeFilter(filterData)
 
     self.filterType = filterData.descriptor
 
-    if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR then
-        self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_ARMOR))
-    elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS then
-        self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_WEAPONS))
-    elseif self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
-        self:SetNoItemLabelText(GetString(SI_SMITHING_EXTRACTION_NO_MATERIALS))
-    end
+    self:SetNoItemLabelText(GetString("SI_SMITHINGFILTERTYPE_EXTRACTNONE", self.filterType))
 
     self.owner:OnFilterChanged()
     self:HandleDirtyEvent()
@@ -105,7 +106,7 @@ end
 
 function ZO_SmithingExtractionInventory:Refresh(data)
     local validItems
-    if self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+    if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
         validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
     else
         validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)

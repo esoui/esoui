@@ -113,6 +113,10 @@
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="328"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-430"/>
 
+            <OnInitialized>
+                ZO_PaperdollManipulation_OnInitialized(self)
+            </OnInitialized>
+
             <OnMouseEnter>
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
             </OnMouseEnter>
@@ -122,14 +126,8 @@
             </OnMouseExit>
 
             <OnMouseDown>
-                if(button == MOUSE_BUTTON_INDEX_LEFT) then
-                    CharacterCreateStartMouseSpin()
-                end
+                CharacterCreateStartMouseSpin()
             </OnMouseDown>
-
-            <OnMouseUp>
-                CharacterCreateStopMouseSpin()
-            </OnMouseUp>
 
             <OnMouseWheel>
                 MoveCharacterCameraZoomAmount(delta / zo_abs(delta))

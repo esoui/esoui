@@ -74,7 +74,7 @@ function ZO_WeightedChoiceGenerator:GetValue(i)
     local currentWeightTotal = 0
     local choiceIndex = 0
     local numChoices = #self.choices
-    while currentWeightTotal < self.randomValue and choiceIndex < numChoices do
+    while currentWeightTotal <= self.randomValue and choiceIndex < numChoices do
         choiceIndex = choiceIndex + 1
         currentWeightTotal = currentWeightTotal + self.weights[choiceIndex]
     end

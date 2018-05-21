@@ -486,9 +486,9 @@ function ZO_QuickslotManager:AppendCollectiblesData(scrollData, collectibleCateg
     local dataObjects
     if collectibleCategoryData then
         local categoryIndex = collectibleCategoryData:GetCategoryIndicies()
-        dataObjects = collectibleCategoryData:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable)
+        dataObjects = collectibleCategoryData:GetAllCollectibleDataObjects({ ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
     else
-        dataObjects = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable)
+        dataObjects = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsStandardCategory }, { ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
     end
 
     for i, collectibleData in ipairs(dataObjects) do

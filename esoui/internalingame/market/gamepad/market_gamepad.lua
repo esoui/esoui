@@ -162,25 +162,7 @@ function GamepadMarket:OnShown()
         self:RefreshKeybinds()
         CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
 
-        if self.queuedCategoryIndex then
-            local categoryData = self:GetCategoryData(self.queuedCategoryIndex)
-
-            if categoryData then
-                local targetIndex = categoryData.tabIndex
-                if self.header.tabBar:GetSelectedIndex() ~= targetIndex then
-                    self.header.tabBar:SetSelectedDataIndex(targetIndex)
-                end
-            end
-
-            self.queuedCategoryIndex = nil
-            -- A request to go to a specific category overrides a request to go to a specific Market Product
-            self.queuedMarketProductId = nil
-        end
-
-        if self.queuedMarketProductId then
-            self:ShowMarketProduct(self.queuedMarketProductId)
-            self.queuedMarketProductId = nil
-        end
+        self:ProcessQueuedNavigation()
     else
         self:OnMarketLocked()
     end
@@ -252,9 +234,31 @@ function GamepadMarket:InitializeKeybindDescriptors()
                 self:Deactivate()
             end,
         },
+        -- Gift Keybind
+        {
+             name =  function()
+                        if self.selectedMarketProduct:IsBundle() then
+                            return GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT)
+                        else
+                            return GetString(SI_MARKET_GIFT_KEYBIND_TEXT)
+                        end
+                    end,
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            visible = function()
+                            if self.selectedMarketProduct then
+                                return self.selectedMarketProduct:IsGiftable()
+                            end
+                            return false
+                        end,
+            enabled = function() return not self:HasQueuedTutorial() end,
+            callback = function()
+                self.isLockedForCategoryRefresh = true
+                self:GiftMarketProductInternal(self.selectedMarketProduct:GetId(), self.selectedMarketProduct:GetPresentationIndex(), RefreshOnPurchase, OnPurchaseEnd)
+                self:Deactivate()
+            end,
+        },
         -- "Preview" Keybind
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
             name =  function()
                         local previewType = self.GetMarketProductPreviewType(self.selectedMarketProduct)
                         if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
@@ -394,6 +398,11 @@ function GamepadMarket:OnCategorySelected(data)
             end
 
             OnMarketCategorySelected(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subCategoryIndex)
+        end
+
+        local queuedMarketProductId = self:GetQueuedMarketProductId()
+        if queuedMarketProductId then
+            self:ScrollToMarketProduct(queuedMarketProductId) -- can't scroll instantly here, cause we just built the scroll
         end
     end
 end
@@ -990,11 +999,36 @@ do
     function GamepadMarket:OnShowBuyCrownsDialogInternal()
         PURCHASE_MANAGER:ShowBuyCrownsDialog(FROM_CROWN_STORE)
     end
+
+    function GamepadMarket:GiftMarketProduct(marketProductId, presentationIndex)
+        PURCHASE_MANAGER:BeginGiftPurchase(marketProductId, presentationIndex, FROM_INGAME)
+    end
+
+    function GamepadMarket:GiftMarketProductInternal(marketProductId, presentationIndex, onPurchaseSuccessCallback, onPurchaseEndCallback)
+        PURCHASE_MANAGER:BeginGiftPurchase(marketProductId, presentationIndex, FROM_CROWN_STORE, onPurchaseSuccessCallback, onPurchaseEndCallback)
+    end
 end
 
-function GamepadMarket:RequestShowCategory(categoryIndex, subcategoryIndex)
-    self.queuedCategoryIndex = categoryIndex
-    -- subcategories are displayed as part of the parent category, so for now we'll just show the whole category
+do
+    local DONT_ALLOW_IF_DISABLED = false
+    local SCROLL_INSTANTLY = true
+    function GamepadMarket:RequestShowCategory(categoryIndex, subcategoryIndex)
+        if self.isInitialized and self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
+            -- subcategories are displayed as part of the parent category, so for now we'll just show the whole category
+            local categoryData = self:GetCategoryData(categoryIndex)
+
+            if categoryData then
+                local targetIndex = categoryData.tabIndex
+                if self.header.tabBar:GetSelectedIndex() ~= targetIndex then
+                    self.header.tabBar:SetSelectedDataIndex(targetIndex, DONT_ALLOW_IF_DISABLED, SCROLL_INSTANTLY)
+                end
+            end
+
+            self:ClearQueuedCategoryIndices()
+        else
+            self:SetQueuedCategoryIndices(categoryIndex, subcategoryIndex)
+        end
+    end
 end
 
 function GamepadMarket:ShowBundleContents(bundleMarketProduct)
@@ -1086,24 +1120,39 @@ function GamepadMarket:GetCurrentCategoryMarketProductInfoById(productId)
     end
 end
 
-function GamepadMarket:RequestShowMarketProduct(id)
-    self.queuedMarketProductId = id
+function GamepadMarket:RequestShowMarketProduct(marketProductId)
+    if self.isInitialized and self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
+        self:ShowMarketProduct(marketProductId)
+    else
+        self:SetQueuedMarketProductId(marketProductId)
+    end
 end
 
-function GamepadMarket:ShowMarketProduct(id)
-    local data = self:GetCategoryDataForMarketProduct(id)
-    if data then
-        local targetIndex = data.tabIndex
-        if self.header.tabBar:GetSelectedIndex() ~= targetIndex then
-            self.header.tabBar:SetSelectedDataIndex(targetIndex)
+do
+    local DONT_ALLOW_IF_DISABLED = false
+    local SCROLL_INSTANTLY = true
+    function GamepadMarket:ShowMarketProduct(marketProductId)
+        local data = self:GetCategoryDataForMarketProduct(marketProductId)
+        if data then
+            -- check if we are already showing the correct category for the market product
+            -- if we aren't, we need to select it before we can scroll to the product
+            local targetIndex = data.tabIndex
+            if self.header.tabBar:GetSelectedIndex() ~= targetIndex then
+                self.header.tabBar:SetSelectedDataIndex(targetIndex, DONT_ALLOW_IF_DISABLED, SCROLL_INSTANTLY)
+            else
+                self:ScrollToMarketProduct(marketProductId, SCROLL_INSTANTLY)
+            end
         end
+    end
+end
 
-        local targetMarketProduct = self:GetCurrentCategoryMarketProductInfoById(id)
-        if targetMarketProduct then
-            self:ScrollToGridEntry(targetMarketProduct.product:GetFocusData(), true)
-            local listIndex = targetMarketProduct.product:GetListIndex()
-            self.focusList:SetFocusByIndex(listIndex)
-        end
+function GamepadMarket:ScrollToMarketProduct(marketProductId, scrollInstantly)
+    local targetMarketProduct = self:GetCurrentCategoryMarketProductInfoById(marketProductId)
+    if targetMarketProduct then
+        self:ScrollToGridEntry(targetMarketProduct.product:GetFocusData(), scrollInstantly)
+        local listIndex = targetMarketProduct.product:GetListIndex()
+        self.focusList:SetFocusByIndex(listIndex)
+        self:ClearQueuedMarketProductId()
     end
 end
 
@@ -1217,6 +1266,7 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
         self.keybindStripDescriptors =
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            -- Purchase Keybind
             {
                 name = GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_PRIMARY",
@@ -1229,8 +1279,21 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                     ZO_GAMEPAD_MARKET:PurchaseMarketProductInternal(self.marketProductId, self.presentationIndex, RefreshOnPurchase, QueueTutorial)
                 end,
             },
+            -- Gift Keybind
             {
-                alignment = KEYBIND_STRIP_ALIGN_CENTER,
+                 name = GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT),
+                keybind = "UI_SHORTCUT_RIGHT_STICK",
+                visible = function()
+                                return IsMarketProductGiftable(self.marketProductId, self.presentationIndex)
+                            end,
+                enabled = function() return not self:HasQueuedTutorial() end,
+                callback = function()
+                    self.prePurchaseSelectedIndex = self.focusList:GetSelectedIndex()
+                    ZO_GAMEPAD_MARKET:GiftMarketProductInternal(self.marketProductId, self.presentationIndex, RefreshOnPurchase, QueueTutorial)
+                end,
+            },
+            -- Preview keybind
+            {
                 name =  GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_SECONDARY",
                 visible = function()

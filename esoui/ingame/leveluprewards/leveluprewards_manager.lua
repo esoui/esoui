@@ -1,3 +1,42 @@
+local LevelUpRewardData = ZO_RewardData:Subclass()
+
+function LevelUpRewardData:New(...)
+    return ZO_RewardData.New(self, ...)
+end
+
+function LevelUpRewardData:SetIsAttributePoint()
+    self.isAttributePoint = true
+end
+
+function LevelUpRewardData:SetIsSkillPoint()
+    self.isSkillPoint = true
+end
+
+function LevelUpRewardData:SetIsAdditionalUnlock(description)
+    self.isAdditionalUnlock = true
+    self.description = description
+end
+
+function LevelUpRewardData:IsAttributePoint()
+    return self.isAttributePoint
+end
+
+function LevelUpRewardData:IsSkillPoint()
+    return self.isSkillPoint
+end
+
+function LevelUpRewardData:IsAdditionalUnlock()
+    return self.isAdditionalUnlock
+end
+
+function LevelUpRewardData:GetDescription()
+    return self.description
+end
+
+-----------------------------
+-- Level Up Rewards Manager
+-----------------------------
+
 local LevelUpRewardsManager = ZO_CallbackObject:Subclass()
 
 function LevelUpRewardsManager:New(...)
@@ -29,7 +68,7 @@ function LevelUpRewardsManager:OnLevelUpRewardsChoiceUpdated()
     for index, entryInfo in ipairs(self.pendingLevelUpRewards) do
         if entryInfo.choices then
             for choiceIndex, choiceEntryInfo in ipairs(entryInfo.choices) do
-                choiceEntryInfo.isSelectedChoice = IsLevelUpRewardChoiceSelected(entryInfo.entryIndex, choiceIndex)
+                choiceEntryInfo.isSelectedChoice = IsLevelUpRewardChoiceSelected(entryInfo.rewardId, choiceEntryInfo.rewardId)
             end
         end
     end
@@ -38,48 +77,57 @@ function LevelUpRewardsManager:OnLevelUpRewardsChoiceUpdated()
 end
 
 function LevelUpRewardsManager:UpdatePendingLevelUpRewards()
+    local NO_PARENT_CHOICE = nil
     self.pendingRewardLevel = GetPendingLevelUpRewardLevel()
     if self.pendingRewardLevel then
-        self.pendingRewardId = GetLevelUpRewardId(self.pendingRewardLevel)
-        self.pendingLevelUpRewards = self:GetRewardEntryInfoForReward(self.pendingRewardId)
+        local numRewards = GetNumRewardsForLevel(self.pendingRewardLevel)
+        self.pendingLevelUpRewards = {}
+        for rewardIndex = 1, numRewards do
+            local rewardId, quantity = GetRewardInfoForLevel(self.pendingRewardLevel, rewardIndex)
+            local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, quantity, NO_PARENT_CHOICE, IsLevelUpRewardValidForPlayer, IsLevelUpRewardChoiceSelected)
+            table.insert(self.pendingLevelUpRewards, rewardData)
+        end
         self:GetAdditionalUnlocksForLevel(self.pendingRewardLevel, self.pendingLevelUpRewards)
-        table.sort(self.pendingLevelUpRewards, function(...) return self:SortRewardEntries(...) end)
+        table.sort(self.pendingLevelUpRewards, function(...) return self:SortRewardAndAdditionalUnlockEntries(...) end)
     else
-        self.pendingRewardId = nil
         self.pendingLevelUpRewards = nil
     end
 
     self.upcomingRewardLevel = GetUpcomingLevelUpRewardLevel()
     if self.upcomingRewardLevel then
-        self.upcomingRewardId = GetLevelUpRewardId(self.upcomingRewardLevel)
-        self.upcomingLevelUpRewards = self:GetRewardEntryInfoForReward(self.upcomingRewardId)
+        local numRewards = GetNumRewardsForLevel(self.upcomingRewardLevel)
+        self.upcomingLevelUpRewards = {}
+        for rewardIndex = 1, numRewards do
+            local rewardId, quantity = GetRewardInfoForLevel(self.upcomingRewardLevel, rewardIndex)
+            local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, quantity, NO_PARENT_CHOICE, IsLevelUpRewardValidForPlayer, IsLevelUpRewardChoiceSelected)
+            table.insert(self.upcomingLevelUpRewards, rewardData)
+        end
         self:GetAdditionalUnlocksForLevel(self.upcomingRewardLevel, self.upcomingLevelUpRewards)
-        table.sort(self.upcomingLevelUpRewards, function(...) return self:SortRewardEntries(...) end)
+        table.sort(self.upcomingLevelUpRewards, function(...) return self:SortRewardAndAdditionalUnlockEntries(...) end)
     else
-        self.upcomingRewardId = nil
         self.upcomingLevelUpRewards = nil
     end
 
     local nextMilestoneRewardLevel = GetNextLevelUpRewardMilestoneLevel()
     if nextMilestoneRewardLevel and nextMilestoneRewardLevel ~= self.upcomingRewardLevel then
         self.upcomingMilestoneRewardLevel = nextMilestoneRewardLevel
-        self.upcomingMilestoneRewardId = GetLevelUpRewardId(self.upcomingMilestoneRewardLevel)
-        self.upcomingMilestoneLevelUpRewards = self:GetRewardEntryInfoForReward(self.upcomingMilestoneRewardId)
+        local numRewards = GetNumRewardsForLevel(self.upcomingMilestoneRewardLevel)
+        self.upcomingMilestoneLevelUpRewards = {}
+        for rewardIndex = 1, numRewards do
+            local rewardId, quantity = GetRewardInfoForLevel(self.upcomingMilestoneRewardLevel, rewardIndex)
+            local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, quantity, NO_PARENT_CHOICE, IsLevelUpRewardValidForPlayer, IsLevelUpRewardChoiceSelected)
+            table.insert(self.upcomingMilestoneLevelUpRewards, rewardData)
+        end
         self:GetAdditionalUnlocksForLevel(self.upcomingMilestoneRewardLevel, self.upcomingMilestoneLevelUpRewards)
-        table.sort(self.upcomingMilestoneLevelUpRewards, function(...) return self:SortRewardEntries(...) end)
+        table.sort(self.upcomingMilestoneLevelUpRewards, function(...) return self:SortRewardAndAdditionalUnlockEntries(...) end)
     else
         self.upcomingMilestoneRewardLevel = nil
-        self.upcomingMilestoneRewardId = nil
         self.upcomingMilestoneLevelUpRewards = nil
     end
 end
 
 function LevelUpRewardsManager:GetPendingRewardLevel()
     return self.pendingRewardLevel
-end
-
-function LevelUpRewardsManager:GetPendingRewardId()
-    return self.pendingRewardId
 end
 
 function LevelUpRewardsManager:GetPendingLevelUpRewards()
@@ -90,10 +138,6 @@ function LevelUpRewardsManager:GetUpcomingRewardLevel()
     return self.upcomingRewardLevel
 end
 
-function LevelUpRewardsManager:GetUpcomingRewardId()
-    return self.upcomingRewardId
-end
-
 function LevelUpRewardsManager:GetUpcomingLevelUpRewards()
     return self.upcomingLevelUpRewards
 end
@@ -102,174 +146,80 @@ function LevelUpRewardsManager:GetUpcomingMilestoneRewardLevel()
     return self.upcomingMilestoneRewardLevel
 end
 
-function LevelUpRewardsManager:GetUpcomingMilestoneRewardId()
-    return self.upcomingMilestoneRewardId
-end
-
 function LevelUpRewardsManager:GetUpcomingMilestoneLevelUpRewards()
     return self.upcomingMilestoneLevelUpRewards
 end
 
-function LevelUpRewardsManager:GetRewardEntryInfoForReward(rewardId, parentChoice)
-    local rewardEntryInfo = {}
-    local numRewardEntries = GetNumRewardEntries(rewardId)
+function LevelUpRewardsManager:GetAdditionalUnlocksForLevel(level, rewardInfoTable)
+    local additionalUnlocks = rewardInfoTable or {}
+    local numAdditionalUnlocks = GetNumAdditionalLevelUpUnlocks(level)
 
-    for entryIndex = 1, numRewardEntries do
-        local entryType = GetRewardEntryType(rewardId, entryIndex)
-        local entryInfo
-        if entryType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
-            entryInfo = self:GetCurrencyEntryInfo(rewardId, entryIndex, parentChoice)
-        elseif entryType == REWARD_ENTRY_TYPE_COLLECTIBLE then
-            entryInfo = self:GetCollectibleEntryInfo(rewardId, entryIndex, parentChoice)
-        elseif entryType == REWARD_ENTRY_TYPE_ITEM then
-            entryInfo = self:GetItemEntryInfo(rewardId, entryIndex, parentChoice)
-        elseif entryType == REWARD_ENTRY_TYPE_LOOT_CRATE then
-            entryInfo = self:GetCrownCrateEntryInfo(rewardId, entryIndex, parentChoice)
-        elseif entryType == REWARD_ENTRY_TYPE_CHOICE then
-            entryInfo = self:GetChoiceEntryInfo(rewardId, entryIndex, parentChoice)
-        elseif entryType == REWARD_ENTRY_TYPE_INSTANT_UNLOCK then
-            entryInfo = self:GetInstantUnlockEntryInfo(rewardId, entryIndex, parentChoice)
-        end
-
-        if entryInfo then
-            entryInfo.rewardType = entryType
-            entryInfo.validationFunction = function() return IsLevelUpRewardValidForPlayer(rewardId, entryIndex) end
-            if parentChoice then
-                entryInfo.isSelectedChoice = IsLevelUpRewardChoiceSelected(parentChoice.entryIndex, entryIndex)
-            end
-            table.insert(rewardEntryInfo, entryInfo)
-        end
-    end
-    return rewardEntryInfo
-end
-
-function LevelUpRewardsManager:GetCurrencyEntryInfo(rewardId, entryIndex, parentChoice)
-    local currencyType, amount = GetAddCurrencyRewardEntryInfo(rewardId, entryIndex)
-    local IS_PLURAL = false
-    local IS_UPPER = false
-    local formattedName = GetCurrencyName(currencyType, IS_PLURAL, IS_LOWER)
-    local formattedNameWithStackKeyboard = zo_strformat(SI_LOOT_CURRENCY_FORMAT, ZO_Currency_FormatKeyboard(currencyType, amount, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
-    local formattedNameWithStackGamepad = zo_strformat(SI_LOOT_CURRENCY_FORMAT, ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
-    local icon = IsInGamepadPreferredMode() and GetCurrencyLootGamepadIcon(currencyType) or GetCurrencyLootKeyboardIcon(currencyType)
-    local currencyInfo =
-    {
-        rewardId = rewardId,
-        entryIndex = entryIndex,
-        parentChoice = parentChoice,
-        formattedName = formattedName,
-        formattedNameWithStackKeyboard = formattedNameWithStackKeyboard,
-        formattedNameWithStackGamepad = formattedNameWithStackGamepad,
-        stackCount = amount,
-        quality = ITEM_QUALITY_NORMAL,
-        icon = icon,
-        currencyType = currencyType,
-    }
-    return currencyInfo
-end
-
-function LevelUpRewardsManager:GetCollectibleEntryInfo(rewardId, entryIndex, parentChoice)
-    local collectibleId = GetCollectibleRewardEntryCollectibleId(rewardId, entryIndex)
-    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-    if collectibleData then
-        local collectibleInfo =
-        {
-            rewardId = rewardId,
-            entryIndex = entryIndex,
-            parentChoice = parentChoice,
-            formattedName = collectibleData:GetFormattedName(),
-            stackCount = 1,
-            quality = ITEM_QUALITY_NORMAL,
-            icon = collectibleData:GetIcon(),
-        }
-        return collectibleInfo
+    for index = 1, numAdditionalUnlocks do
+        local formattedDisplayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetAdditionalLevelUpUnlockDisplayName(level, index))
+        local additionalReward = LevelUpRewardData:New()
+        additionalReward:SetFormattedName(formattedDisplayName)
+        additionalReward:SetIcon(GetAdditionalLevelUpUnlockKeyboardIcon(level, index), GetAdditionalLevelUpUnlockGamepadIcon(level, index))
+        additionalReward:SetIsAdditionalUnlock(GetAdditionalLevelUpUnlockDescription(level, index))
+        table.insert(additionalUnlocks, additionalReward)
     end
 
-    return nil
+    return additionalUnlocks
 end
 
-function LevelUpRewardsManager:GetItemEntryInfo(rewardId, entryIndex, parentChoice)
-    local itemLink = GetItemRewardEntryItemLink(rewardId, entryIndex)
-    local displayName = GetItemLinkName(itemLink)
-    local itemQuality = GetItemLinkQuality(itemLink)
-    local icon = GetItemLinkIcon(itemLink)
-    local stackCount = GetItemRewardEntryStackCount(rewardId, entryIndex)
-    local equipType = GetItemLinkEquipType(itemLink)
-    local equipSlot = ZO_InventoryUtils_GetEquipSlotForEquipType(equipType)
+function LevelUpRewardsManager:GetPlatformAttributePointIcon()
+        return "EsoUI/Art/LevelUpRewards/levelup_attribute_64.dds"
+    end
 
-    local itemInfo =
-    {
-        rewardId = rewardId,
-        entryIndex = entryIndex,
-        parentChoice = parentChoice,
-        formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName),
-        formattedNameWithStack = zo_strformat(SI_LEVEL_UP_REWARDS_FORMAT_REWARD_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(stackCount)),
-        stackCount = stackCount,
-        quality = itemQuality,
-        icon = icon,
-        equipSlot = equipSlot,
-    }
-    return itemInfo
+function LevelUpRewardsManager:GetPlatformSkillPointIcon()
+        return "EsoUI/Art/LevelUpRewards/levelup_skillpt_64.dds"
+    end
+
+function LevelUpRewardsManager:GetAttributePointEntryInfo(attributePoints)
+    local attributeReward = LevelUpRewardData:New()
+    attributeReward:SetFormattedName(zo_strformat(SI_LEVEL_UP_REWARDS_ATTRIBUTE_POINTS_ENTRY_FORMATTER, ZO_SELECTED_TEXT:Colorize(attributePoints)))
+    attributeReward:SetIcon(self:GetPlatformAttributePointIcon())
+    attributeReward:SetIsAttributePoint()
+
+    return attributeReward
 end
 
-function LevelUpRewardsManager:GetCrownCrateEntryInfo(rewardId, entryIndex, parentChoice)
-    local crateId = GetCrownCrateRewardEntryCrateId(rewardId, entryIndex)
-    local quantity = GetCrownCrateRewardEntryAmount(rewardId, entryIndex)
-    local icon = GetCrownCrateIcon(crateId)
+function LevelUpRewardsManager:GetSkillPointEntryInfo(skillPoints)
+    local skillPointReward = LevelUpRewardData:New()
+    skillPointReward:SetFormattedName(zo_strformat(SI_LEVEL_UP_REWARDS_SKILL_POINTS_ENTRY_FORMATTER, ZO_SELECTED_TEXT:Colorize(skillPoints)))
+    skillPointReward:SetIcon(self:GetPlatformSkillPointIcon())
+    skillPointReward:SetIsSkillPoint()
 
-    local displayName = GetCrownCrateName(crateId)
-    local formattedDisplayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
-    local formattedNameWithStack = zo_strformat(SI_LEVEL_UP_REWARDS_FORMAT_REWARD_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(quantity))
-    local crateInfo =
-    {
-        rewardId = rewardId,
-        entryIndex = entryIndex,
-        parentChoice = parentChoice,
-        formattedName = formattedDisplayName,
-        formattedNameWithStack = formattedNameWithStack,
-        stackCount = quantity,
-        quality = ITEM_QUALITY_NORMAL,
-        icon = icon,
-    }
-    return crateInfo
+    return skillPointReward
 end
 
-function LevelUpRewardsManager:GetChoiceEntryInfo(rewardId, entryIndex, parentChoice)
-    local choiceRewardId = GetChoiceRewardEntryLinkedRewardId(rewardId, entryIndex)
-
-    local choiceInfo =
-    {
-        rewardId = rewardId,
-        entryIndex = entryIndex,
-        parentChoice = parentChoice,
-        formattedName = GetChoiceRewardEntryDisplayName(rewardId, entryIndex),
-        icon = GetChoiceRewardEntryIcon(rewardId, entryIndex),
-    }
-
-    local choices = self:GetRewardEntryInfoForReward(choiceRewardId, choiceInfo)
-    table.sort(choices, function(...) return self:SortRewardEntries(...) end)
-    choiceInfo.choices = choices
-
-    return choiceInfo
+function LevelUpRewardsManager:GetPlatformFormattedStackNameFromRewardData(rewardData)
+    if IsInGamepadPreferredMode() then
+        return rewardData:GetFormattedNameWithStackGamepad()
+    else
+        return rewardData:GetFormattedNameWithStack()
+    end
 end
 
-function LevelUpRewardsManager:GetInstantUnlockEntryInfo(rewardId, entryIndex, parentChoice)
-    local instantUnlockId = GetInstantUnlockRewardEntryInstantUnlockId(rewardId, entryIndex)
-    local icon = GetInstantUnlockRewardIcon(instantUnlockId)
-    local displayName = GetInstantUnlockRewardDisplayName(instantUnlockId)
-    local instantUnlockInfo =
-    {
-        rewardId = rewardId,
-        entryIndex = entryIndex,
-        parentChoice = parentChoice,
-        formattedName = displayName,
-        stackCount = 1,
-        quality = ITEM_QUALITY_NORMAL,
-        icon = icon,
-    }
-    return instantUnlockInfo
+function LevelUpRewardsManager:GetPendingRewardNameFromRewardData(rewardData)
+    local name = rewardData:GetFormattedName()
+    if not IsInGamepadPreferredMode() then
+        if rewardData.rewardType and rewardData.rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+            name = self:GetPlatformFormattedStackNameFromRewardData(rewardData)
+        end
+    end
+    return name
 end
 
-function LevelUpRewardsManager:SortRewardEntries(data1, data2)
+function LevelUpRewardsManager:GetUpcomingRewardNameFromRewardData(rewardData)
+    local name = self:GetPlatformFormattedStackNameFromRewardData(rewardData)
+
+    if name == nil then
+        name = rewardData:GetFormattedName()
+    end
+    return name
+end
+
+function LevelUpRewardsManager:SortRewardAndAdditionalUnlockEntries(data1, data2)
     -- entries with choices sort to the end
     local data1Choices = data1.choices
     local data2Choices = data2.choices
@@ -288,123 +238,7 @@ function LevelUpRewardsManager:SortRewardEntries(data1, data2)
         return data1.formattedName < data2.formattedName
     end
 
-    return data1.entryIndex < data2.entryIndex
-end
-
-function LevelUpRewardsManager:GetAdditionalUnlocksForLevel(level, rewardInfoTable)
-    local additionalUnlocks = rewardInfoTable or {}
-    local numAdditionalUnlocks = GetNumAdditionalLevelUpUnlocks(level)
-
-    for index = 1, numAdditionalUnlocks do
-        local formattedDisplayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetAdditionalLevelUpUnlockDisplayName(level, index))
-        local unlockInfo =
-        {
-            formattedName = formattedDisplayName,
-            gamepadIcon = GetAdditionalLevelUpUnlockGamepadIcon(level, index),
-            keyboardIcon = GetAdditionalLevelUpUnlockKeyboardIcon(level, index),
-            description = GetAdditionalLevelUpUnlockDescription(level, index),
-            isAdditionalUnlock = true,
-        }
-        table.insert(additionalUnlocks, unlockInfo)
-    end
-
-    return additionalUnlocks
-end
-
-function LevelUpRewardsManager:GetPlatformAttributePointIcon()
-    if IsInGamepadPreferredMode() then
-        return "EsoUI/Art/LevelUpRewards/gamepad/levelup_gp_attribute_32.dds"
-    else
-        return "EsoUI/Art/LevelUpRewards/levelup_attribute_64.dds"
-    end
-end
-
-function LevelUpRewardsManager:GetPlatformSkillPointIcon()
-    if IsInGamepadPreferredMode() then
-        return "EsoUI/Art/LevelUpRewards/gamepad/levelup_gp_skillpt_32.dds"
-    else
-        return "EsoUI/Art/LevelUpRewards/levelup_skillpt_64.dds"
-    end
-end
-
-function LevelUpRewardsManager:GetAttributePointEntryInfo(attributePoints)
-    local attributePointInfo =
-    {
-        formattedName = zo_strformat(SI_LEVEL_UP_REWARDS_ATTRIBUTE_POINTS_ENTRY_FORMATTER, ZO_SELECTED_TEXT:Colorize(attributePoints)),
-        icon = self:GetPlatformAttributePointIcon(),
-        isAttributePoint = true,
-    }
-
-    return attributePointInfo
-end
-
-function LevelUpRewardsManager:GetSkillPointEntryInfo(skillPoints)
-    local skillPointInfo =
-    {
-        formattedName = zo_strformat(SI_LEVEL_UP_REWARDS_SKILL_POINTS_ENTRY_FORMATTER, ZO_SELECTED_TEXT:Colorize(skillPoints)),
-        icon = self:GetPlatformSkillPointIcon(),
-        isSkillPoint = true,
-    }
-
-    return skillPointInfo
-end
-
-function LevelUpRewardsManager:GetPlatformIconFromRewardData(rewardData)
-    local icon = rewardData.icon
-    if icon == nil then
-        if IsInGamepadPreferredMode() then
-            icon = rewardData.gamepadIcon
-        else
-            icon = rewardData.keyboardIcon
-        end
-    end
-
-    return icon
-end
-
-function LevelUpRewardsManager:GetPlatformFormattedNameFromRewardData(rewardData)
-    local name = rewardData.formattedName
-    if name == nil then
-        if IsInGamepadPreferredMode() then
-            name = rewardData.formattedNameGamepad
-        else
-            name = rewardData.formattedNameKeyboard
-        end
-    end
-
-    return name
-end
-
-function LevelUpRewardsManager:GetPlatformFormattedStackNameFromRewardData(rewardData)
-    local name = rewardData.formattedNameWithStack
-    if name == nil then
-        if IsInGamepadPreferredMode() then
-            name = rewardData.formattedNameWithStackGamepad
-        else
-            name = rewardData.formattedNameWithStackKeyboard
-        end
-    end
-
-    return name
-end
-
-function LevelUpRewardsManager:GetPendingRewardNameFromRewardData(rewardData)
-    local name = self:GetPlatformFormattedNameFromRewardData(rewardData)
-    if not IsInGamepadPreferredMode() then
-        if rewardData.rewardType and rewardData.rewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
-            name = self:GetPlatformFormattedStackNameFromRewardData(rewardData)
-        end
-    end
-    return name
-end
-
-function LevelUpRewardsManager:GetUpcomingRewardNameFromRewardData(rewardData)
-    local name = self:GetPlatformFormattedStackNameFromRewardData(rewardData)
-
-    if name == nil then
-        name = self:GetPlatformFormattedNameFromRewardData(rewardData)
-    end
-    return name
+    return data1.rewardId < data2.rewardId
 end
 
 do
@@ -444,14 +278,6 @@ do
         particleSystem:SetParticleParameter("EndOffsetY", halfArtHeight)
         particleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)
         return particleSystem
-    end
-end
-
-function LevelUpRewardsManager:IsRewardDataValidForPlayer(rewardData)
-    if rewardData.validationFunction then
-        return rewardData.validationFunction() == true
-    else
-        return true
     end
 end
 

@@ -43,8 +43,13 @@ do
 
         if selectedData then
             if not selectedData.currencyType then 
-                local itemLink = GetLootItemLink(selectedData.lootId)
-                GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_LEFT_TOOLTIP, itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, selectedData.stackCount, EQUIP_SLOT_NONE)
+                local lootLink = GetLootItemLink(selectedData.lootId)
+                local lootType = selectedData.itemType
+                if lootType == LOOT_TYPE_COLLECTIBLE then
+                    GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(GAMEPAD_LEFT_TOOLTIP, lootLink)
+                else
+                    GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_LEFT_TOOLTIP, lootLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, selectedData.stackCount, EQUIP_SLOT_NONE)
+                end
             end
 
             self:UpdateButtonTextOnSelection(selectedData)

@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_IMECandidateRow" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGame">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_IMECandidates_TopLevel" topmost="true" clampedToScreen="true" hidden="true">
+            <Anchor point="CENTER"/>
+            <ClampedToScreenInsets top="-8" left="-8" bottom="8" right="8"/>
+            <OnInitialized>
+                ZO_IMECandidates_TopLevel_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true"/>
+                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)Scroll" override="true">
+                            <Controls>
+                                <Control name="$(parent)Child" override="true">
+                                    <Controls>
+                                        <Backdrop name="$(parent)Highlight" inherits="ZO_SelectionHighlight" excludeFromResizeToFitExtents="true"/>
+                                        <Control name="$(parent)MoreCandidates" hidden="true">
+                                            <Anchor point="TOPLEFT"/>
+                                            <Controls>
+                                                <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Miscellaneous/list_sortDown.dds">
+                                                    <Anchor point="CENTER"/>
+                                                    <Dimensions x="16" y="16"/>
+                                                </Texture>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>                                    
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>                
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

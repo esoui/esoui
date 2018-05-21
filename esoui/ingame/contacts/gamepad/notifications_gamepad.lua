@@ -21,6 +21,11 @@ local GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/Gamepad/gp_notification_ESO+.dds",
+    [NOTIFICATION_TYPE_GIFTING_UNLOCKED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_GIFT_RETURNED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
+    [NOTIFICATION_TYPE_NEW_DAILY_LOGIN_REWARD] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_dailyLoginRewards.dds",
 }
 
 local DATA_TYPE_TO_TEMPLATE = 
@@ -34,6 +39,11 @@ local DATA_TYPE_TO_TEMPLATE =
     [NOTIFICATIONS_LFG_READY_CHECK_DATA] = "ZO_GamepadNotificationsLFGReadyCheckRow",
     [NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA] = "ZO_GamepadNotificationsLFGFindReplacementRow",
     [NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA] = "ZO_GamepadNotificationsEsoPlusSubscriptionRow",
+    [NOTIFICATIONS_GIFT_RECEIVED_DATA] = "ZO_GamepadNotificationsGiftReceivedRow",
+    [NOTIFICATIONS_GIFT_RETURNED_DATA] = "ZO_GamepadNotificationsGiftReturnedRow",
+    [NOTIFICATIONS_GIFT_CLAIMED_DATA] = "ZO_GamepadNotificationsGiftClaimedRow",
+    [NOTIFICATIONS_GIFTING_UNLOCKED_DATA] = "ZO_GamepadNotificationsGiftingUnlockedRow",
+    [NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA] = "ZO_GamepadNotificationsNewDailyLoginRewardRow",
 }
 
 -- Provider Overrides
@@ -366,6 +376,21 @@ function ZO_GamepadEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
     end
 end
 
+-- ZO_GamepadGiftingUnlockedProvider
+-------------------------
+
+local ZO_GamepadGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
+
+function ZO_GamepadGiftingUnlockedProvider:New(notificationManager)
+    return ZO_GiftingUnlockedProvider.New(self, notificationManager)
+end
+
+function ZO_GamepadGiftingUnlockedProvider:ShowMoreInfo(entryData)
+    if entryData.moreInfo then
+        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(entryData.helpCategoryIndex, entryData.helpIndex)
+    end
+end
+
 --Notification Manager
 -------------------------
 
@@ -422,6 +447,11 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsLFGFindReplacementRow"] = SetupRequest,
         ["ZO_GamepadNotificationsYesNoRow"] = SetupRequest,
         ["ZO_GamepadNotificationsEsoPlusSubscriptionRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsGiftReceivedRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsGiftReturnedRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsGiftClaimedRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsGiftingUnlockedRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsNewDailyLoginRewardRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do
@@ -459,6 +489,9 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_GamepadDuelInviteProvider:New(self),
         ZO_GamepadEsoPlusSubscriptionStatusProvider:New(self),
+        ZO_GiftInventoryProvider:New(self),
+        ZO_GamepadGiftingUnlockedProvider:New(self),
+        ZO_DailyLoginRewardsClaimProvider:New(self),
     }
 end
 

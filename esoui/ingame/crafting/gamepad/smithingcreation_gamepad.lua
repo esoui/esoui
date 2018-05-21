@@ -84,8 +84,6 @@ function ZO_GamepadSmithingCreation:Initialize(panelControl, floatingControl, ow
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
             GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(self:GetCreateTooltipSound())
 
-            self:RefreshScrollPanel()
-
             self:TriggerUSITutorial()
         elseif newState == SCENE_HIDDEN then
             GAMEPAD_CRAFTING_RESULTS:SetCraftingTooltip(nil)
@@ -177,7 +175,7 @@ function ZO_GamepadSmithingCreation:PerformDeferredInitialization()
 
     self:SetupListActivationFunctions()
 
-    self:SetupScrollPanel()
+    self:InitializeScrollPanel()
     self:InitializeFocusItems()
 
     self.styleList:SetToggleType(GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE)
@@ -210,39 +208,33 @@ end
 
 function ZO_GamepadSmithingCreation:GenerateTabBarEntries()
     local tabBarEntries = {}
-
-    local function AddEntry(name, mode, allowed)
-        if allowed then
+    local function AddTabEntry(filterType)
+        if ZO_CraftingUtils_CanSmithingFilterBeCraftedHere(filterType) then
             local entry = {}
-            entry.text = name
+            entry.text = GetString("SI_SMITHINGFILTERTYPE", filterType)
             entry.callback = function()
-                self.typeFilter = mode
+                self.typeFilter = filterType
                 self:HandleDirtyEvent()
             end
-            entry.mode = mode
+            entry.mode = filterType
 
             table.insert(tabBarEntries, entry)
         end
     end
 
-    local weaponsAllowed = CanSmithingWeaponPatternsBeCraftedHere()
-    local apparelAllowed = CanSmithingApparelPatternsBeCraftedHere()
-
-	local setsAllowed = CanSmithingSetPatternsBeCraftedHere()
-	local setWeaponsAllowed = weaponsAllowed and setsAllowed
-	local setApparelAllowed = apparelAllowed and setsAllowed
-
-    AddEntry(GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS), ZO_SMITHING_CREATION_FILTER_TYPE_WEAPONS, weaponsAllowed)
-    AddEntry(GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR), ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR, apparelAllowed)
-    AddEntry(GetString(SI_SMITHING_CREATION_FILTER_SET_WEAPONS), ZO_SMITHING_CREATION_FILTER_TYPE_SET_WEAPONS, setWeaponsAllowed)
-    AddEntry(GetString(SI_SMITHING_CREATION_FILTER_SET_ARMOR), ZO_SMITHING_CREATION_FILTER_TYPE_SET_ARMOR, setApparelAllowed)
+    AddTabEntry(SMITHING_FILTER_TYPE_SET_WEAPONS)
+    AddTabEntry(SMITHING_FILTER_TYPE_SET_ARMOR)
+    AddTabEntry(SMITHING_FILTER_TYPE_SET_JEWELRY)
+    AddTabEntry(SMITHING_FILTER_TYPE_WEAPONS)
+    AddTabEntry(SMITHING_FILTER_TYPE_ARMOR)
+    AddTabEntry(SMITHING_FILTER_TYPE_JEWELRY)
 
     return tabBarEntries
 end
 
 function ZO_GamepadSmithingCreation:SetupTabBar(tabBarEntries, savedFilter)
     if #tabBarEntries == 1 then
-        self.typeFilter = ZO_SMITHING_CREATION_FILTER_TYPE_ARMOR
+        self.typeFilter = tabBarEntries[1].mode
         self.shouldActivateTabBar = false
     else
         ZO_GamepadGenericHeader_Activate(self.owner.header)
@@ -273,6 +265,8 @@ end
 function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
     -- back descriptors for screen / options screen
     local startButton = {
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Gamepad Smithing Creation Default Exit",
 		alignment = KEYBIND_STRIP_ALIGN_LEFT,
 		keybind = "UI_SHORTCUT_EXIT",
 		order = -10000,
@@ -434,7 +428,9 @@ do
     local ACTIVE = true
 
     function ZO_GamepadSmithingCreation:InitializeFocusItems()
-        self.activateFn = function(focus, data)
+        self.focus = ZO_GamepadFocus:New(self.control)
+
+        self.activateFocusFunction = function(focus, data)
             self.selectedList = focus
             focus:Activate()
             self:UpdateScrollPanel(focus)
@@ -443,50 +439,59 @@ do
             self:RefreshTooltips()
         end
 
-        self.deactivateFn = function(focus, data)
+        self.deactivateFocusFunction = function(focus, data)
             focus:Deactivate()
             self:UpdateBorderHighlight(focus, not ACTIVE)
         end
 
-        local entries =
-        {
-            {
-                control = self.patternList,
-            },
-            {
-                control = self.materialList,
-            },
-            {
-                control = self.materialQuantitySpinner,
-                canFocus = function(item) return not item:GetControl():IsHidden() end,
-                activate = function(focus, data)
-                    self.selectedList = nil
-                    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-                    self:ActivateMaterialQuantitySpinner()
-                    self:UpdateScrollPanel(focus)
-                    self:UpdateBorderHighlight(focus, ACTIVE)
-                    self:RefreshTooltips()
-                end,
-            },
-            {
-                control = self.styleList,
-            },
-            {
-                control = self.traitList,
-            },
+        local patternEntry = {control = self.patternList}
+        local materialEntry = {control = self.materialList}
+        local materialQuantityEntry = {
+            control = self.materialQuantitySpinner,
+            canFocus = function(item) return not item:GetControl():IsHidden() end,
+            activate = function(focus, data)
+                self.selectedList = nil
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+                self:ActivateMaterialQuantitySpinner()
+                self:UpdateScrollPanel(focus)
+                self:UpdateBorderHighlight(focus, ACTIVE)
+                self:RefreshTooltips()
+            end,
         }
+        local styleEntry = {control = self.styleList}
+        local traitEntry = {control = self.traitList}
 
-        self.focus = ZO_GamepadFocus:New(self.control)
+        self.focusEntryData = {patternEntry, materialEntry, materialQuantityEntry, styleEntry, traitEntry}
+        for _, v in pairs(self.focusEntryData) do
+            v.activate = v.activate or self.activateFocusFunction
+            v.deactivate = self.deactivateFocusFunction
+        end
+        self.focusEntryDataWithoutStyle = {patternEntry, materialEntry, materialQuantityEntry, traitEntry}
+
+        self:RefreshFocusItems()
+    end
+
+    function ZO_GamepadSmithingCreation:RefreshFocusItems(focusIndex)
+        local entries
+        if self:ShouldIgnoreStyleItems() then
+            entries = self.focusEntryDataWithoutStyle
+        else
+            entries = self.focusEntryData
+        end
+
+        self.focus:RemoveAllEntries()
         for _, v in pairs(entries) do
-            if not v.activate then
-                v.activate = self.activateFn
-            end
-            v.deactivate = self.deactivateFn
             self.focus:AddEntry(v)
+        end
+
+        if focusIndex then
+            self.focus:SetFocusByIndex(focusIndex)
+        else
+            self.focus:SetFocusByIndex(1)
         end
     end
 
-    function ZO_GamepadSmithingCreation:SetupScrollPanel()
+    function ZO_GamepadSmithingCreation:InitializeScrollPanel()
         local create = self.panelControl:GetNamedChild("Create")
         create:SetParent(self.scrollChild)
         create:ClearAnchors()
@@ -495,11 +500,41 @@ do
 
         self.panelControl:GetNamedChild("ScrollContainerScroll"):SetHandler("OnScrollExtentsChanged", function(...) self:OnScrollExtentsChanged(...) end)
 
-        local lists = {self.patternList, self.materialList, self.styleList, self.traitList}
+        self:RefreshScrollPanel()
+    end
+
+    function ZO_GamepadSmithingCreation:RefreshScrollPanel()
+        local lists
+        if self:ShouldIgnoreStyleItems() then
+            lists = {self.patternList, self.materialList, self.traitList}
+        else
+            lists = {self.patternList, self.materialList, self.styleList, self.traitList}
+        end
 
         for _, entry in pairs(lists) do
             self:UpdateBorderHighlight(entry, not ACTIVE)
         end
+    end
+
+    function ZO_GamepadSmithingCreation:OnRefreshAllLists()
+        local traitListControl = self.control:GetNamedChild("TraitList")
+        local styleListControl = self.control:GetNamedChild("StyleList")
+        traitListControl:ClearAnchors()
+        if self:ShouldIgnoreStyleItems() then
+            local matListControl = self.control:GetNamedChild("MaterialList")
+            traitListControl:SetAnchor(TOPLEFT, matListControl, BOTTOMLEFT, 0, ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y)
+            traitListControl:SetAnchor(TOPRIGHT, matListControl, BOTTOMRIGHT, 0, ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y)
+            styleListControl:SetHidden(true)
+        else
+            traitListControl:SetAnchor(TOPLEFT, styleListControl, BOTTOMLEFT, 0, ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y)
+            traitListControl:SetAnchor(TOPRIGHT, styleListControl, BOTTOMRIGHT, 0, ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y)
+            styleListControl:SetHidden(false)
+        end
+
+        self:RefreshScrollPanel()
+
+        local focusIndex = self.focus:GetFocus()
+        self:RefreshFocusItems(focusIndex)
     end
 end
 
@@ -508,11 +543,6 @@ function ZO_GamepadSmithingCreation:OnScrollExtentsChanged(scroll, horizontalExt
     if verticalExtents > 0 then
         self:UpdateScrollPanel(self.currentFocus)
     end
-end
-
-function ZO_GamepadSmithingCreation:RefreshScrollPanel()
-    -- fix list icons
-    self:RefreshAllLists()
 end
 
 do
@@ -595,9 +625,9 @@ function ZO_GamepadSmithingCreation:SetupSavedVars()
     self:AddCheckedStateToOption(GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS, self.savedVars.haveMaterialChecked)
     self:AddCheckedStateToOption(GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE, self.savedVars.haveKnowledgeChecked)
 
-   	if self.savedVars.haveKnowledgeChecked then
-		self:SelectValidKnowledgeIndices()
-	end
+    if self.savedVars.haveKnowledgeChecked then
+        self:SelectValidKnowledgeIndices()
+    end
     self:HandleDirtyEvent()
 end
 
@@ -623,7 +653,6 @@ function ZO_GamepadSmithingCreation:SetupOptionData()
         end
 
         local newOptionData = ZO_GamepadEntryData:New(optionInfo.optionName)
-        local savedVarTarget = optionInfo.toggleFunctionTarget
         newOptionData.setChecked = function(control,checked) 
                                         self.optionDataList[key].checked = checked
                                    end

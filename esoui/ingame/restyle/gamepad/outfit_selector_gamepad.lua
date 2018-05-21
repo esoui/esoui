@@ -144,7 +144,7 @@ function ZO_Outfit_Selector_Gamepad:PerformDeferredInitialization()
     { 
         titleText = GetString(SI_GAMEPAD_OUTFITS_SELECTOR_HEADER),
 
-        data1HeaderText = GetCurrencyName(CURT_STYLE_STONES, IS_PLURAL, IS_UPPER),
+        data1HeaderText = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(CURT_STYLE_STONES, IS_PLURAL, IS_UPPER)),
         data1Text = UpdateCarriedCurrencyControl,
     }
 end

@@ -6,10 +6,11 @@ ZO_GAMEPAD_COMBO_BOX_PADDING = 16
 -- ZO_ComboBox_Gamepad
 -------------------------------------------------------------------------------
 
-ZO_ComboBox_Gamepad = ZO_ComboBox_Base:Subclass()
+ZO_ComboBox_Gamepad = ZO_Object.MultiSubclass(ZO_ComboBox_Base, ZO_CallbackObject)
 
 function ZO_ComboBox_Gamepad:New(...)
-    local object = ZO_ComboBox_Base.New(self, ...)
+    local object = ZO_CallbackObject.New(self)
+    object:Initialize(...)
     return object
 end
 
@@ -59,6 +60,7 @@ end
 
 function ZO_ComboBox_Gamepad:OnClearItems()
     self.m_highlightedIndex = nil
+    self.m_currentData = nil
 end
 
 function ZO_ComboBox_Gamepad:OnItemAdded()
@@ -124,12 +126,18 @@ end
 function ZO_ComboBox_Gamepad:OnItemSelected(control, data)
     control.nameControl:SetColor(self:GetHighlightColor(data):UnpackRGBA())
     control.nameControl:SetFont(self.m_highlightFont)
-    self:UpdateAnchors(control) 
+    self:UpdateAnchors(control)
+
+    self.m_currentData = data
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor, self.m_keybindState)
+    self:FireCallbacks("OnItemSelected", control, data)
 end
 
 function ZO_ComboBox_Gamepad:OnItemDeselected(control, data)
     control.nameControl:SetColor(self:GetNormalColor(data):UnpackRGBA())
     control.nameControl:SetFont(self.m_font)
+
+    self:FireCallbacks("OnItemDeselected", control, data)
 end
 
 function ZO_ComboBox_Gamepad:ClearMenuItems()
@@ -176,6 +184,13 @@ function ZO_ComboBox_Gamepad:SelectHighlightedItem()
     self:Deactivate()
 end
 
+function ZO_ComboBox_Gamepad:IsHighlightedItemEnabled()
+    if self.m_currentData then
+        return self.m_currentData.enabled ~= false
+    end
+    return true
+end
+
 function ZO_ComboBox_Gamepad:SelectItemByIndex(index, ignoreCallback)
     self.m_highlightedIndex = index
     ZO_ComboBox_Base.SelectItemByIndex(self, index, ignoreCallback)
@@ -185,10 +200,10 @@ function ZO_ComboBox_Gamepad:SetHighlightedItem(highlightIndex, reselectIndex)
     self.m_focus:SetFocusByIndex(highlightIndex, reselectIndex)
 end
 
-function ZO_ComboBox_Gamepad:TrySelectItemByData(itemData)
+function ZO_ComboBox_Gamepad:TrySelectItemByData(itemData, ignoreCallback)
     for i, data in ipairs(self.m_sortedItems) do
         if data.name == itemData.name then
-            self:SelectItemByIndex(i)
+            self:SelectItemByIndex(i, ignoreCallback)
             return true
         end
     end
@@ -241,7 +256,7 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                self:Deactivate()
             end,
-            visible = function() return not ZO_Dialogs_IsShowingDialog() end
+            visible = function() return not ZO_Dialogs_IsShowingDialog() end,
         },
 
         {
@@ -250,7 +265,7 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                self:Deactivate()
             end,
-            visible = ZO_Dialogs_IsShowingDialog
+            visible = ZO_Dialogs_IsShowingDialog,
         },
 
         {
@@ -259,7 +274,10 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 self:SelectHighlightedItem()
             end,
-            visible = function() return not ZO_Dialogs_IsShowingDialog() end
+            enabled = function()
+                return self:IsHighlightedItemEnabled()
+            end,
+            visible = function() return not ZO_Dialogs_IsShowingDialog() end,
         },
 
         {
@@ -268,7 +286,10 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 self:SelectHighlightedItem()
             end,
-            visible = ZO_Dialogs_IsShowingDialog
+            enabled = function()
+                return self:IsHighlightedItemEnabled()
+            end,
+            visible = ZO_Dialogs_IsShowingDialog,
         },
     }
 end

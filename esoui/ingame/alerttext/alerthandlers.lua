@@ -88,6 +88,19 @@ ZO_GroupElectionDescriptorToRequestAlertText =
 
 --If Category or Message is nil, then nothing will be shown. Simply not returning anything tells the system to not do anything.
 
+local function RequirementFailedAlertHandler(errorStringId)
+        local message = GetErrorString(errorStringId)
+        local collectibleId = GetErrorStringLockedByCollectibleId(errorStringId)
+        if collectibleId ~= 0 then
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            local collectibleName = collectibleData:GetName()
+            local categoryName = collectibleData:GetCategoryData():GetName()
+            ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData }, { mainTextParams = { message, collectibleName, categoryName } })
+        elseif message ~= "" then
+            return ERROR, message, SOUNDS.ABILITY_FAILED_REQUIREMENTS
+        end
+end
+
 local AlertHandlers = {
     [EVENT_COMBAT_EVENT] = function(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log)
         if playerName == sourceName then
@@ -115,17 +128,11 @@ local AlertHandlers = {
     end,
 
     [EVENT_REQUIREMENTS_FAIL] = function(errorStringId)
-        local message = GetErrorString(errorStringId)
-        if(message ~= "") then
-            return ERROR, message, SOUNDS.GENERAL_FAILED_REQUIREMENTS
-        end
+        return RequirementFailedAlertHandler(errorStringId)
     end,
 
     [EVENT_ABILITY_REQUIREMENTS_FAIL] = function(errorStringId)
-        local message = GetErrorString(errorStringId)
-        if(message ~= "") then
-            return ERROR, message, SOUNDS.ABILITY_FAILED_REQUIREMENTS
-        end
+        return RequirementFailedAlertHandler(errorStringId)
     end,
 
     [EVENT_UI_ERROR] = function(stringId)
@@ -889,9 +896,24 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_CLAIM_LEVEL_UP_REWARD_RESULT] = function(result)
-        if result ~= LEVEL_UP_REWARD_CLAIM_RESULT_SUCCESS then
-            return UI_ALERT_CATEGORY_ERROR, GetString("SI_CLAIMLEVELUPREWARDRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+    [EVENT_CLAIM_REWARD_RESULT] = function(result)
+        if result ~= CLAIM_REWARD_RESULT_SUCCESS then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_CLAIMREWARDRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_REQUEST_ALERT] = function(alertCategory, soundId, message)
+        if soundId == "" then
+            --only because events can't send nil. empty string is not a valid sound ever
+            soundId = nil
+        end
+        return alertCategory, message, soundId
+    end,
+
+    [EVENT_LEAVE_CAMPAIGN_QUEUE_RESPONSE] = function(result)
+        local message = GetString("SI_LEAVECAMPAIGNQUEUERESPONSETYPE", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
         end
     end
 }

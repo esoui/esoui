@@ -370,12 +370,15 @@ function ZO_TooltipSection:Initialize(parent)
     ZO_TooltipStyledObject.Initialize(self, parent)
     self.contentsControl = self:GetNamedChild("Contents")
 
-    self.labelPool = self:CreateMetaControlPool(ZO_TooltipSection.labelPool)
-    self.texturePool = self:CreateMetaControlPool(ZO_TooltipSection.texturePool)
-    self.colorPool = self:CreateMetaControlPool(ZO_TooltipSection.colorPool)
-    self.statValuePairPool = self:CreateMetaControlPool(ZO_TooltipSection.statValuePairPool)
-    self.statValueSliderPool = self:CreateMetaControlPool(ZO_TooltipSection.statValueSliderPool)
-    self.sectionPool = self:CreateMetaControlPool(ZO_TooltipSection.sectionPool)
+    if not self.hasInitialized then
+        self.labelPool = self:CreateMetaControlPool(ZO_TooltipSection.labelPool)
+        self.texturePool = self:CreateMetaControlPool(ZO_TooltipSection.texturePool)
+        self.colorPool = self:CreateMetaControlPool(ZO_TooltipSection.colorPool)
+        self.statValuePairPool = self:CreateMetaControlPool(ZO_TooltipSection.statValuePairPool)
+        self.statValueSliderPool = self:CreateMetaControlPool(ZO_TooltipSection.statValueSliderPool)
+        self.sectionPool = self:CreateMetaControlPool(ZO_TooltipSection.sectionPool)
+        self.hasInitialized = true
+    end
 
     self.statusBarPools = {}
 end

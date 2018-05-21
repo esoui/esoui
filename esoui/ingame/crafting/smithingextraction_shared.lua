@@ -1,6 +1,4 @@
-ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR = 1
-ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS = 2
-ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS = 3
+
 
 ZO_SmithingExtractionSlot = ZO_CraftingSlotBase:Subclass()
 
@@ -33,9 +31,9 @@ end
 
 function ZO_SmithingExtractionSlot:WouldBagAndSlotBeInRawMaterialMode(bagId, slotIndex)
     if bagId and slotIndex then
-        return ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex) == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS
+        return ZO_CraftingUtils_GetSmithingFilterFromItem(bagId, slotIndex) == SMITHING_FILTER_TYPE_RAW_MATERIALS
     end
-    return self.filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS
+    return self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS
 end
 
 function ZO_SmithingExtractionSlot:SetupItem(bagId, slotIndex)
@@ -76,21 +74,8 @@ function ZO_SmithingExtractionSlot:SetupItem(bagId, slotIndex)
     end
 end
 
-function ZO_SmithingExtractionSlot:OnFilterChanged(filterType, inventoryFilerType)
+function ZO_SmithingExtractionSlot:OnFilterChanged(filterType)
     self.filterType = filterType
-    self.inventoryFilerType = inventoryFilerType
-
-    if filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR then
-        self:SetEmptyTexture("EsoUI/Art/Crafting/smithing_armorSlot.dds")
-    elseif filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS then
-        self:SetEmptyTexture("EsoUI/Art/Crafting/smithing_weaponSlot.dds")
-    elseif filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
-        self:SetEmptyTexture("EsoUI/Art/Crafting/smithing_refine_emptySlot.dds")
-    end
-
-    if self:HasItem() then
-        self:SetItem(self:GetBagAndSlot())
-    end
 end
 
 function ZO_SmithingExtractionSlot:ShowDropCallout()
@@ -118,38 +103,11 @@ function ZO_SharedSmithingExtraction:InitExtractionSlot(sceneName)
     self.slotAnimation:AddSlot(self.extractionSlot)
 end
 
-function ZO_SharedSmithingExtraction_GetRawMaterialItemTypeForCraftingType(craftingType)
-    if craftingType == CRAFTING_TYPE_BLACKSMITHING then
-        return ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
-    elseif craftingType == CRAFTING_TYPE_CLOTHIER then
-        return ITEMTYPE_CLOTHIER_RAW_MATERIAL
-    elseif craftingType == CRAFTING_TYPE_WOODWORKING then
-        return ITEMTYPE_WOODWORKING_RAW_MATERIAL
-    end
-end
-
 function ZO_SharedSmithingExtraction_DoesItemMeetRefinementStackRequirement(bagId, slotIndex, stackCount)
-    local _, itemType = GetItemCraftingInfo(bagId, slotIndex)
-    if itemType == ZO_SharedSmithingExtraction_GetRawMaterialItemTypeForCraftingType(GetCraftingInteractionType()) then
+    if ZO_CraftingUtils_GetSmithingFilterFromItem(bagId, slotIndex) == SMITHING_FILTER_TYPE_RAW_MATERIALS then
         return stackCount >= GetRequiredSmithingRefinementStackSize()
     end
     return true
-end
-
-function ZO_SharedSmithingExtraction_GetPrimaryFilterType(...)
-    for i = 1, select("#", ...) do
-        local filterType = select(i, ...)
-        if filterType == ITEMFILTERTYPE_WEAPONS then
-            return ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS
-        elseif filterType == ITEMFILTERTYPE_ARMOR then 
-            return ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR
-        end
-    end
-    return ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS
-end
-
-function ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex)
-    return ZO_SharedSmithingExtraction_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex))
 end
 
 function ZO_SharedSmithingExtraction_IsExtractableItem(itemData)
@@ -165,13 +123,13 @@ function ZO_SharedSmithingExtraction_IsExtractableOrRefinableItem(bagId, slotInd
 end
 
 function ZO_SharedSmithingExtraction_DoesItemPassFilter(bagId, slotIndex, filterType)
-    return ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex) == filterType
+    return ZO_CraftingUtils_GetSmithingFilterFromItem(bagId, slotIndex) == filterType
 end
 
 function ZO_SharedSmithingExtraction:OnInventoryUpdate(validItems, filterType)
     -- since we use this class for both refinement and extraction, but the lists for each are generated in different ways
     -- we need to branch our logic when dealing with those lists so that they can be handled properly
-    if filterType == ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS then
+    if filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
         self.extractionSlot:ValidateItemId(validItems)
     else
         self.extractionSlot:ValidateSlottedItem(validItems)
@@ -196,7 +154,7 @@ function ZO_SharedSmithingExtraction:OnSlotChanged()
 
         self.canExtract = meetsStackRequirement
 
-        self.overrideFilterType = ZO_SharedSmithingExtraction_GetFilterTypeFromItem(bagId, slotIndex)
+        self.overrideFilterType = ZO_CraftingUtils_GetSmithingFilterFromItem(bagId, slotIndex)
     else
         self.canExtract = false
     end
@@ -259,20 +217,12 @@ function ZO_SharedSmithingExtraction:GetFilterType()
     return self.overrideFilterType or self.inventory:GetCurrentFilterType()
 end
 
-do
-    local FILTER_TO_TEXT_MAP = {
-        [ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_ARMOR] = GetString(SI_SMITHING_EXTRACTION_DECONSTRUCT_ARMOR_HEADER),
-        [ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_WEAPONS] = GetString(SI_SMITHING_EXTRACTION_DECONSTRUCT_WEAPON_HEADER),
-        [ZO_SMITHING_EXTRACTION_SHARED_FILTER_TYPE_RAW_MATERIALS] = GetString(SI_SMITHING_EXTRACTION_REFINE_HEADER),
-    }
+function ZO_SharedSmithingExtraction:OnFilterChanged()
+    local filterType = self:GetFilterType()
 
-    function ZO_SharedSmithingExtraction:OnFilterChanged()
-        local filterType = self:GetFilterType()
-
-        if self.extractLabel then
-             self.extractLabel:SetText(FILTER_TO_TEXT_MAP[filterType])
-        end
-
-        self.extractionSlot:OnFilterChanged(filterType, self.inventory:GetCurrentFilterType())
+    if self.extractLabel then
+         self.extractLabel:SetText(GetString("SI_SMITHINGFILTERTYPE_EXTRACTHEADER", filterType))
     end
+
+    self.extractionSlot:OnFilterChanged(filterType)
 end

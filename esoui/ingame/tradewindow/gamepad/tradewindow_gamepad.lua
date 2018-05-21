@@ -554,6 +554,9 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- Review My Offer
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Trade Review My Offer",
+
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
 
             callback = function()
@@ -625,6 +628,9 @@ function ZO_GamepadTradeWindow:InitializeKeybindDescriptor()
         },
         -- Review Their Offer
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Trade Review Their Offer",
+
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
 
             callback = function()

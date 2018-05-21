@@ -4,9 +4,9 @@ This is the source code for "The Elder Scrolls Online" user interface and it's p
 
 If you're a Zenimax Media Inc. representative and have any objection to any of the contents in this repository please let me know.
 
-This repo is also available on http://www.esoui.com/downloads/info1213-ESOUI-TheElderScrollsOnlinesourcecode.html
+This repo is also available on 21 May 2018.html
 
-**Last update: 3.0.10 (API 100019) on 01 Jul 2017.**
+**Last update: 4.0.50 (API 100023) on 21 May 2018.**
 
 *Join ESOUI Dev Community on Gitter :*
 

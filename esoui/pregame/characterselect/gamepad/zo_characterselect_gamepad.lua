@@ -165,6 +165,8 @@ function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
                 end,
             },
             {
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Character Select Delete Left Shoulder",
                 keybind = "DIALOG_LEFT_SHOULDER",
                 handlesKeyUp = true,
                 ethereal = true,
@@ -173,6 +175,8 @@ function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
                 end,
             },
             {
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Character Select Delete Right Shoulder",
                 keybind = "DIALOG_RIGHT_SHOULDER",
                 handlesKeyUp = true,
                 ethereal = true,
@@ -181,6 +185,8 @@ function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
                 end,
             },
             {
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Character Select Delete Left Trigger",
                 keybind = "DIALOG_LEFT_TRIGGER",
                 handlesKeyUp = true,
                 ethereal = true,
@@ -189,6 +195,8 @@ function ZO_CharacterSelect_Gamepad_InitConfirmDeleteCustomDialog()
                 end,
             },
             {
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Character Select Delete Right Trigger",
                 keybind = "DIALOG_RIGHT_TRIGGER",
                 handlesKeyUp = true,
                 ethereal = true,
@@ -686,7 +694,7 @@ local function CreateList(self)
             type = ENTRY_TYPE_CHAPTER,
             header = GetString(SI_CHARACTER_SELECT_GAMEPAD_CHAPTER_HEADER),
             icon = GetCurrentChapterSmallLogoFileIndex(),
-            text = zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleDisplayName(chapterCollectibleId))
+            text = zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId))
         }
         AddCharacterListEntry("ZO_GamepadMenuEntryTemplateWithHeader", data, self.characterList)
         slot = slot + 1
@@ -1103,6 +1111,7 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     self.characterList:AddDataTemplate("ZO_GamepadMenuEntryTemplateLowercase34", CharacterListEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.characterList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplateLowercase34", CharacterListEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadCharacterSelectMenuEntryHeaderTemplate", GamepadCharacterSelectMenuEntryHeader_Setup)
     self.characterList:SetAlignToScreenCenter(true)
+    self.characterList:SetValidateGradient(true)
 
     self.UpdateDirectionalInput = ZO_CharacterSelect_Gamepad_UpdateDirectionalInput
     self.characterList:SetDirectionalInputEnabled(false)

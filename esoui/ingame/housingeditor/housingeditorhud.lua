@@ -605,7 +605,8 @@ do
 
             --Roll Right
             {
-                name = GetString(SI_HOUSING_EDITOR_YAW_RIGHT),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Yaw Right",
                 keybind = "HOUSING_EDITOR_YAW_RIGHT",
                 ethereal = true,
                 enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
@@ -617,7 +618,8 @@ do
 
             --Roll Left
             {
-                name = GetString(SI_HOUSING_EDITOR_YAW_LEFT),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Yaw Left",
                 keybind = "HOUSING_EDITOR_YAW_LEFT",
                 ethereal = true,
                 enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
@@ -629,7 +631,8 @@ do
 
             --Pitch Right
             {
-                name = GetString(SI_HOUSING_EDITOR_PITCH_FORWARD),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Pitch Forward",
                 keybind = "HOUSING_EDITOR_PITCH_FORWARD",
                 ethereal = true,
                 enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
@@ -641,7 +644,8 @@ do
 
             --Pitch Left
             {
-                name = GetString(SI_HOUSING_EDITOR_PITCH_BACKWARD),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Pitch Backward",
                 keybind = "HOUSING_EDITOR_PITCH_BACKWARD",
                 ethereal = true,
                 enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
@@ -653,7 +657,8 @@ do
 
             --Roll Right
             {
-                name = GetString(SI_HOUSING_EDITOR_ROLL_RIGHT),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Roll Right",
                 keybind = "HOUSING_EDITOR_ROLL_RIGHT",
                 ethereal = true,
                 enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
@@ -665,7 +670,8 @@ do
 
             --Roll Left
             {
-                name = GetString(SI_HOUSING_EDITOR_ROLL_LEFT),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Roll Left",
                 keybind = "HOUSING_EDITOR_ROLL_LEFT",
                 ethereal = true,
                 enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
@@ -703,6 +709,8 @@ do
         self.UIModeKeybindStripDescriptor =
         {
             {
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Housing Editor Exit UI Mode",
                 keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
                 ethereal = true,
                 callback = function()
@@ -753,7 +761,8 @@ do
         self.pushAndPullEtherealKeybindGroup =
         {
             {
-                name = GetString(SI_HOUSING_EDITOR_PUSH_FORWARD),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Push Forward",
                 keybind = "HOUSING_EDITOR_PUSH_FORWARD",
                 ethereal = true,
                 handlesKeyUp = true,
@@ -766,7 +775,8 @@ do
                             end,
             },
             {
-                name = GetString(SI_HOUSING_EDITOR_PUSH_BACKWARD),
+                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                name = "Furniture Pull Backward",
                 keybind = "HOUSING_EDITOR_PULL_BACKWARD",
                 ethereal = true,
                 handlesKeyUp = true,

@@ -1,0 +1,141 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DailyLoginRewards_GridEntry_Template_Gamepad" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_GAMEPAD" y="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_GAMEPAD" />
+
+            <OnInitialized>
+                self.completeMark = self:GetNamedChild("CompleteMark")
+                self.container = self:GetNamedChild("Container")
+                self.icon = self.container:GetNamedChild("Icon")
+                self.quantityLabel = self.container:GetNamedChild("Quantity")
+                self.borderBackground = self.container:GetNamedChild("BorderedBackground")
+                self.isMilestoneTag = self.container:GetNamedChild("CornerTag")
+                self.timerLabel = self.container:GetNamedChild("Timer")
+                self.statusIcon = self.container:GetNamedChild("Status")
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Dimensions x="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_GAMEPAD" y="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_GAMEPAD" />
+                    <Anchor point="TOPLEFT" />
+                    <Controls>
+                        <Texture name="$(parent)Icon" level="6" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions x="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_ICON_DIMENSIONS_GAMEPAD" y="ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_ICON_DIMENSIONS_GAMEPAD"/>
+                            <Anchor point="CENTER" />
+                        </Texture>
+
+                        <Label name="$(parent)Quantity" inherits="ZO_GamepadMenuEntryStackCountTemplate">
+                            <Dimensions x="80" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
+                        </Label>
+
+                        <Texture name="$(parent)CornerTag" level="3" textureFile="EsoUI/Art/DailyLoginRewards/Gamepad/gp_dailyloginrewards_cornerTag_isMilestone.dds" hidden="true">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="TOPRIGHT" offsetX="-1" offsetY="1"/>
+                        </Texture>
+
+                        <Texture name="$(parent)Status" level="3" hidden="true">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4" />
+                        </Texture>
+
+                        <Label name="$(parent)Timer" font="ZoFontGamepad27" horizontalAlignment="LEFT" verticalAlignment="TOP" inheritScale="false">
+                            <Dimensions x="80" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="LEFT" offsetX="6" />
+                        </Label>
+				
+				        <Backdrop name="$(parent)BorderedBackground" centerColor="FFFFFF">
+                            <AnchorFill />
+                            <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                            <Insets left="16" top="16" right="-16" bottom="-16" />
+                        </Backdrop>
+                    </Controls>    
+                </Control>
+                
+                <Texture name="$(parent)CompleteMark" textureFile="EsoUI/Art/DailyLoginRewards/dailyloginrewards_claimed_stamp.dds" layer="OVERLAY" level="1" mouseEnabled="false" hidden="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Container" relativePoint="CENTER"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Daily_Login_Reward_Info_Text" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                    <Dimensions y="32" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)Value" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="4" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Backdrop name="ZO_Daily_Login_Reward_Highlight_Gamepad" inherits="ZO_GamepadInteractiveSortFilterDefaultHighlight"  virtual="true">
+            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+        </Backdrop>
+
+        <TopLevelControl name="ZO_Daily_Login_Rewards_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_DailyLoginRewards_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ContentHeader" resizeToFitDescendents="true" >
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="50"/>
+
+                    <Controls>
+                        <Label name="$(parent)CurrentMonth" font="ZoFontGamepadBold54" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                            <Dimensions y="64" />
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                            <OnInitialized>
+                                local fonts =
+                                {
+                                    {
+                                        font = "ZoFontGamepadBold54",
+                                        lineLimit = 1,
+                                    },
+                                    {
+                                        font = "ZoFontGamepadBold48",
+                                        lineLimit = 1,
+                                    },
+                                    {
+                                        font = "ZoFontGamepadBold34",
+                                        lineLimit = 1,
+                                        dontUseForAdjusting = true,
+                                    },
+                                }
+                                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                            </OnInitialized>
+                        </Label>
+
+                        <Control name="$(parent)ChangeTimer" inherits="ZO_Daily_Login_Reward_Info_Text">
+                            <Anchor point="TOP" relativeTo="$(parent)CurrentMonth" relativePoint="BOTTOM" offsetY="30" />
+                            <Controls>
+                                <Label name="$(parent)Header" text="SI_GAMEPAD_DAILY_LOGIN_REWARDS_MONTH_CHANGE_TITLE" override="true" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Rewards" inherits="ZO_GridScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="30" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedGamepadNavQuadrant_2_3_Background" />
+                </Control>
+
+                <Label name="$(parent)LockedText" inherits="ZO_GamepadScreenHeaderMessageTextTemplate" text="SI_DAILY_LOGIN_REWARDS_LOCKED"  horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rewards"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Rewards" offsetY="35"/>
+                </Label>
+
+                <Control name="$(parent)RewardParticleGeneratorPosition" tier="MEDIUM">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rewards" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

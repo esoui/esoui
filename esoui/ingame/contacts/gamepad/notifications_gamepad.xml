@@ -37,7 +37,7 @@
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
         </Control>
-      
+
         <Control name="ZO_GamepadNotificationsLFGReadyCheckRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -83,7 +83,51 @@
             </OnInitialized>
         </Control>
 
-        <TopLevelControl name="ZO_GamepadNotifications" hidden="true"  inherits="ZO_Gamepad_ParametricList_Screen">
+        <Control name="ZO_GamepadNotificationsGiftReceivedRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_GIFT_INVENTORY_OPEN_CLAIM_SCREEN_TEXT)
+                self.declineText = GetString(SI_GIFT_INVENTORY_DISMISS_NOTIFICATION)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_GamepadNotificationsGiftReturnedRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_GIFT_INVENTORY_OPEN_GIFT_SCREEN_TEXT)
+                self.declineText = GetString(SI_GIFT_INVENTORY_DISMISS_NOTIFICATION)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="ZO_GamepadNotificationsGiftClaimedRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_NOTIFICATIONS_GIFT_CLAIMED_VIEW_GIFT)
+                self.declineText = GetString(SI_GIFT_INVENTORY_DISMISS_NOTIFICATION)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_GamepadNotificationsGiftingUnlockedRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_NOTIFICATIONS_GIFTING_UNLOCKED_OPEN_CROWN_STORE)
+                self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="ZO_GamepadNotificationsNewDailyLoginRewardRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_NOTIFICATIONS_NEW_DAILY_LOGIN_REWARDS_OPEN_REWARDS)
+            </OnInitialized>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadNotifications" hidden="true" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_GamepadNotifications_OnInitialized(self)
             </OnInitialized>

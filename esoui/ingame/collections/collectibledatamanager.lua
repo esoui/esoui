@@ -6,6 +6,13 @@ ZO_COLLECTIBLE_DATA_FILTERS =
     EXCLUDE_INVALID_FOR_PLAYER = false,
 }
 
+ZO_COLLECTIBLE_LOCK_STATE_CHANGE =
+{
+    NONE = 0,
+    UNLOCKED = 1,
+    LOCKED = 2,
+}
+
 ----------------------
 -- Collectible Data --
 ----------------------
@@ -43,7 +50,7 @@ do
         self.sortOrder = GetCollectibleSortOrder(collectibleId)
         self.hasVisualAppearence = DoesCollectibleHaveVisibleAppearance(collectibleId)
         self.categoryTypeDisplayName = GetString("SI_COLLECTIBLECATEGORYTYPE", self.categoryType)
-        self.isHiddenFromCollectionWhenLocked = IsCollectibleHiddenWhenLocked(collectibleId)
+        self.hideMode = GetCollectibleHideMode(collectibleId)
         self.isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
 
         self:SetStoriesData()
@@ -60,11 +67,9 @@ end
 function ZO_CollectibleData:SetStoriesData()
     if self:IsStory() then
         self.unlockedViaSubscription = DoesESOPlusUnlockCollectible(self.collectibleId)
-        self.requiresEntitlement = DoesCollectibleRequireEntitlement(self.collectibleId)
         self.questName, self.questDescription = GetCollectibleQuestPreviewInfo(self.collectibleId)
     else
         self.unlockedViaSubscription = false
-        self.requiresEntitlement = false
         self.questName = nil
         self.questDescription = nil
     end
@@ -136,14 +141,32 @@ function ZO_CollectibleData:Refresh()
     self.isActive = IsCollectibleActive(collectibleId)
     self.nickname = GetCollectibleNickname(collectibleId)
     self.unlockState = GetCollectibleUnlockStateById(collectibleId)
-    self.isNew = IsCollectibleNew(collectibleId)
+    self:SetNew(IsCollectibleNew(collectibleId))
     self.isRenameable = IsCollectibleRenameable(collectibleId)
     self.isSlottable = IsCollectibleSlottable(collectibleId)
     self.cachedNameWithNickname = nil
 
     local categoryData = self:GetCategoryData()
     if categoryData then
-        categoryData:UpdateSpecializedSortOrderOnCollectibleUpdate(self, previousUnlockState ~= self.unlockState)
+        local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
+        if previousUnlockState ~= self.unlockState then
+            specializedSortedCollectibles:HandleLockStatusChanged(self)
+        end
+    end
+end
+
+function ZO_CollectibleData:RefreshHousingData()
+    if self:IsHouse() then
+        local wasPrimaryResidence = self.isPrimaryResidence
+        self.isPrimaryResidence = IsPrimaryHouse(self.referenceId)
+
+        local categoryData = self:GetCategoryData()
+        if categoryData then
+            local specializedSortedCollectibles = categoryData:GetSpecializedSortedCollectiblesObject()
+            if wasPrimaryResidence ~= self.isPrimaryResidence then
+                specializedSortedCollectibles:HandlePrimaryResidenceChanged(self)
+            end
+        end
     end
 end
 
@@ -273,8 +296,14 @@ function ZO_CollectibleData:IsNew()
     return self.isNew
 end
 
-function ZO_CollectibleData:ClearNew()
-    self.isNew = false
+function ZO_CollectibleData:SetNew(isNew)
+    if self.isNew ~= isNew then
+        self.isNew = isNew
+        local categoryData = self:GetCategoryData()
+        if categoryData then
+            categoryData:UpdateNewCache(self)
+        end
+    end
 end
 
 function ZO_CollectibleData:GetReferenceId()
@@ -291,10 +320,6 @@ end
 
 function ZO_CollectibleData:IsUnlockedViaSubscription()
     return self.unlockedViaSubscription
-end
-
-function ZO_CollectibleData:RequiresEntitlement()
-    return self.requiresEntitlement
 end
 
 function ZO_CollectibleData:GetQuestName()
@@ -414,12 +439,18 @@ function ZO_CollectibleData:SetNotificationId(notificationId)
     self.notificationId = notificationId
 end
 
-function ZO_CollectibleData:IsHiddenFromCollectionWhenLocked()
-    return self.isHiddenFromCollectionWhenLocked
-end
-
 function ZO_CollectibleData:IsHiddenFromCollection()
-    return self:IsLocked() and self.isHiddenFromCollectionWhenLocked
+    local hideMode = self.hideMode
+    if hideMode == COLLECTIBLE_HIDE_MODE_NONE then
+        return false
+    elseif hideMode == COLLECTIBLE_HIDE_MODE_ALWAYS then
+        return true
+    elseif hideMode == COLLECTIBLE_HIDE_MODE_WHEN_LOCKED then
+        return self:IsLocked()
+    elseif hideMode == COLLECTIBLE_HIDE_MODE_WHEN_LOCKED_REQUIREMENT then
+        return self:IsLocked() and IsCollectibleDynamicallyHidden(self.collectibleId)
+    end
+    return false
 end
 
 function ZO_CollectibleData:IsShownInCollection()
@@ -491,12 +522,93 @@ function ZO_SpecializedSortedCollectibles:OnInsertFinished()
     assert(false) -- override in derived classes
 end
 
-function ZO_SpecializedSortedCollectibles:OnCollectibleUpdated(collectibleData, lockStatusChanged)
+function ZO_SpecializedSortedCollectibles:RefreshSort()
     assert(false) -- override in derived classes
 end
 
-function ZO_SpecializedSortedCollectibles:RefreshSort()
-    assert(false) -- override in derived classes
+function ZO_SpecializedSortedCollectibles:CanIterateCollectibles()
+    return true
+end
+
+function ZO_SpecializedSortedCollectibles:HandleLockStatusChanged(collectibleData)
+    -- By default, do nothing
+end
+
+function ZO_SpecializedSortedCollectibles:HandlePrimaryResidenceChanged(collectibleData)
+    -- By default, do nothing
+end
+
+-----------------------------
+-- Default Sorted Collectible
+-----------------------------
+
+ZO_DefaultSortedCollectibles = ZO_SpecializedSortedCollectibles:Subclass()
+
+function ZO_DefaultSortedCollectibles:New(...)
+    return ZO_SpecializedSortedCollectibles.New(self, ...)
+end
+
+function ZO_DefaultSortedCollectibles:Initialize(owner)
+    ZO_SpecializedSortedCollectibles.Initialize(self)
+    self.owner = owner
+
+    self.collectibleNameLookupTable = {}
+end
+
+
+function ZO_DefaultSortedCollectibles:InsertCollectible(collectibleData)
+    table.insert(self.sortedCollectibles, collectibleData)
+
+    local collectibleId = collectibleData:GetId()
+    if not self.collectibleNameLookupTable[collectibleId] then
+        self.collectibleNameLookupTable[collectibleId] =
+        {
+            name = collectibleData:GetName(),
+            id = collectibleId
+        }
+    end
+
+    self.dirty = true
+end
+
+function ZO_DefaultSortedCollectibles:HandleLockStatusChanged(collectibleData)
+    self.dirty = true
+end
+
+function ZO_DefaultSortedCollectibles:RefreshSort()
+    if self.dirty then
+        local collectibleNameLookupTable = self.collectibleNameLookupTable
+        table.sort(self.sortedCollectibles, function(left, right) 
+            if left:IsUnlocked() ~= right:IsUnlocked() then
+                return left:IsUnlocked()
+            elseif left:GetSortOrder() ~= right:GetSortOrder() then
+                return left:GetSortOrder() < right:GetSortOrder()
+            elseif left:IsValidForPlayer() ~= right:IsValidForPlayer() then
+                return left:IsValidForPlayer()
+            else
+                return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
+            end
+        end)
+    end
+
+    self.dirty = false
+end
+
+function ZO_DefaultSortedCollectibles:OnInsertFinished()
+    local tempTable = {}
+    for _, collectibleNameData in pairs(self.collectibleNameLookupTable) do
+        table.insert(tempTable, collectibleNameData)
+    end
+
+    table.sort(tempTable, function(left, right)
+        return left.name < right.name
+    end)
+
+    self.collectibleNameLookupTable = {}
+    
+    for position, collectibleNameData in ipairs(tempTable) do
+        self.collectibleNameLookupTable[collectibleNameData.id] = position
+    end
 end
 
 -------------------------------------------------------
@@ -538,13 +650,11 @@ function ZO_SpecializedSortedOutfitStyleTypes:InsertCollectible(collectibleData)
     end
 end
 
-function ZO_SpecializedSortedOutfitStyleTypes:OnCollectibleUpdated(collectibleData, lockStatusChanged)
-    if lockStatusChanged then
-        local type = collectibleData:GetOutfitGearType()
-        if type and self.sortedCollectibles[type] then
-            self.sortedCollectibles[type]:OnCollectibleUpdated(collectibleData, lockStatusChanged)
-            self.dirty = true
-        end
+function ZO_SpecializedSortedOutfitStyleTypes:HandleLockStatusChanged(collectibleData)
+    local type = collectibleData:GetOutfitGearType()
+    if type and self.sortedCollectibles[type] then
+        self.sortedCollectibles[type]:HandleLockStatusChanged(collectibleData)
+        self.dirty = true
     end
 end
 
@@ -579,49 +689,25 @@ function ZO_SpecializedSortedOutfitStyleTypes:OnInsertFinished()
     self:RefreshSort()
 end
 
+function ZO_SpecializedSortedOutfitStyleTypes:CanIterateCollectibles()
+    -- Outfit styles are sorted with a custom structure that requires manual looping
+    return false
+end
+
 --------------------------------------------------
 -- Specialized Sorted Collectibles Outfit Styles
 --------------------------------------------------
 
-ZO_SpecializedSortedOutfitStyles = ZO_SpecializedSortedCollectibles:Subclass()
+ZO_SpecializedSortedOutfitStyles = ZO_DefaultSortedCollectibles:Subclass()
 
 function ZO_SpecializedSortedOutfitStyles:New(...)
-    return ZO_SpecializedSortedCollectibles.New(self, ...)
-end
-
-function ZO_SpecializedSortedOutfitStyles:Initialize(owner)
-    ZO_SpecializedSortedCollectibles.Initialize(self)
-    self.owner = owner
-
-    self.outfitStyleNameLookupTable = {}
-end
-
-
-function ZO_SpecializedSortedOutfitStyles:InsertCollectible(collectibleData)
-    table.insert(self.sortedCollectibles, collectibleData)
-
-    local collectibleId = collectibleData:GetId()
-    if not self.outfitStyleNameLookupTable[collectibleId] then
-        self.outfitStyleNameLookupTable[collectibleId] =
-        {
-            name = collectibleData:GetName(),
-            id = collectibleId
-        }
-    end
-
-    self.dirty = true
-end
-
-function ZO_SpecializedSortedOutfitStyles:OnCollectibleUpdated(collectibleData, lockStatusChanged)
-    if lockStatusChanged then
-        self.dirty = true
-    end
+    return ZO_DefaultSortedCollectibles.New(self, ...)
 end
 
 function ZO_SpecializedSortedOutfitStyles:RefreshSort()
     if self.dirty then
         local itemStyleNameLookupTable = self.owner.itemStyleNameLookupTable
-        local outfitStyleNameLookupTable = self.outfitStyleNameLookupTable
+        local collectibleNameLookupTable = self.collectibleNameLookupTable
         table.sort(self.sortedCollectibles, function(left, right) 
             if left:IsUnlocked() ~= right:IsUnlocked() then
                 return left:IsUnlocked()
@@ -630,7 +716,7 @@ function ZO_SpecializedSortedOutfitStyles:RefreshSort()
             elseif left:GetSortOrder() ~= right:GetSortOrder() then
                 return left:GetSortOrder() < right:GetSortOrder()
             else
-                return outfitStyleNameLookupTable[left:GetId()] < outfitStyleNameLookupTable[right:GetId()]
+                return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
             end
         end)
     end
@@ -638,23 +724,67 @@ function ZO_SpecializedSortedOutfitStyles:RefreshSort()
     self.dirty = false
 end
 
-function ZO_SpecializedSortedOutfitStyles:OnInsertFinished()
-    local tempTable = {}
-    for _, outfitStyleNameData in pairs(self.outfitStyleNameLookupTable) do
-        table.insert(tempTable, outfitStyleNameData)
-    end
+-----------------------------------------
+-- Specialized Sorted Collectibles Houses
+-----------------------------------------
 
-    table.sort(tempTable, function(left, right)
-        return left.name < right.name
-    end)
+ZO_SpecializedSortedHouses = ZO_DefaultSortedCollectibles:Subclass()
 
-    self.outfitStyleNameLookupTable = {}
-    
-    for position, outfitStyleNameData in ipairs(tempTable) do
-        self.outfitStyleNameLookupTable[outfitStyleNameData.id] = position
-    end
+function ZO_SpecializedSortedHouses:New(...)
+    return ZO_DefaultSortedCollectibles.New(self, ...)
 end
 
+function ZO_SpecializedSortedHouses:HandlePrimaryResidenceChanged(collectibleData)
+    self.dirty = true
+end
+
+function ZO_SpecializedSortedHouses:RefreshSort()
+    if self.dirty then
+        local collectibleNameLookupTable = self.collectibleNameLookupTable
+        table.sort(self.sortedCollectibles, function(left, right)
+            if left:IsPrimaryResidence() ~= right:IsPrimaryResidence() then
+                return left:IsPrimaryResidence()
+            elseif left:IsUnlocked() ~= right:IsUnlocked() then
+                return left:IsUnlocked()
+            elseif left:GetSortOrder() ~= right:GetSortOrder() then
+                return left:GetSortOrder() < right:GetSortOrder()
+            else
+                return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
+            end
+        end)
+    end
+
+    self.dirty = false
+end
+
+------------------------------------------
+-- Specialized Sorted Collectibles Stories
+------------------------------------------
+
+ZO_SpecializedSortedStories = ZO_DefaultSortedCollectibles:Subclass()
+
+function ZO_SpecializedSortedStories:New(...)
+    return ZO_DefaultSortedCollectibles.New(self, ...)
+end
+
+function ZO_SpecializedSortedStories:HandleLockStatusChanged(collectibleData)
+    -- Do nothing, stories don't re-sort, their order is based on release date
+end
+
+function ZO_SpecializedSortedStories:RefreshSort()
+    if self.dirty then
+        local collectibleNameLookupTable = self.collectibleNameLookupTable
+        table.sort(self.sortedCollectibles, function(left, right)
+            if left:GetSortOrder() ~= right:GetSortOrder() then
+                return left:GetSortOrder() < right:GetSortOrder()
+            else
+                return collectibleNameLookupTable[left:GetId()] < collectibleNameLookupTable[right:GetId()]
+            end
+        end)
+    end
+
+    self.dirty = false
+end
 -------------------
 -- Category Base --
 -------------------
@@ -668,7 +798,9 @@ function ZO_CollectibleCategoryData:New(...)
 end
 
 function ZO_CollectibleCategoryData:Initialize(masterCollectibleObjectPool, masterSubcategoryObjectPool)
+    -- orderedCollectibles is the order they came from C in.  specializedSortedCollectibles is the sorted list, based on criterea set for the category type
     self.orderedCollectibles = {}
+    self.newCollectibleIdsCache = {}
     self.collectibleObjectPool = ZO_MetaPool:New(masterCollectibleObjectPool)
     
     if masterSubcategoryObjectPool then
@@ -682,6 +814,7 @@ end
 
 function ZO_CollectibleCategoryData:Reset()
     ZO_ClearNumericallyIndexedTable(self.orderedCollectibles)
+    ZO_ClearTable(self.newCollectibleIdsCache)
     self.collectibleObjectPool:ReleaseAllObjects()
 
     if self.isTopLevelCategory then
@@ -740,11 +873,12 @@ end
 function ZO_CollectibleCategoryData:BuildData(categoryIndex, subcategoryIndex)
     self.categoryIndex, self.subcategoryIndex = categoryIndex, subcategoryIndex
     self.categoryId = GetCollectibleCategoryId(categoryIndex, subcategoryIndex)
+    
+    self.keyboardNormalIcon, self.keyboardPressedIcon, self.keyboardMousedOverIcon, self.disabledIcon = GetCollectibleCategoryKeyboardIcons(categoryIndex, subcategoryIndex)
+    self.gamepadIcon = GetCollectibleCategoryGamepadIcon(categoryIndex, subcategoryIndex)
 
     if self.isTopLevelCategory then
         self.name, self.numSubcategories, self.numCollectibles = GetCollectibleCategoryInfo(categoryIndex)
-        self.keyboardNormalIcon, self.keyboardPressedIcon, self.keyboardMousedOverIcon, self.disabledIcon = GetCollectibleCategoryKeyboardIcons(categoryIndex)
-        self.gamepadIcon = GetCollectibleCategoryGamepadIcon(categoryIndex)
 
         for subcategoryIndex = 1, self:GetNumSubcategories() do
             local subcategoryData = self.subcategoryObjectPool:AcquireObject()
@@ -763,24 +897,24 @@ function ZO_CollectibleCategoryData:BuildData(categoryIndex, subcategoryIndex)
         local collectibleData = self.collectibleObjectPool:AcquireObject()
         collectibleData:BuildData(self, collectibleIndex)
         table.insert(self.orderedCollectibles, collectibleData)
-        if self.specializedSortedCollectibles then
-            self.specializedSortedCollectibles:InsertCollectible(collectibleData)
-        end
+        self.specializedSortedCollectibles:InsertCollectible(collectibleData)
     end
 
-    if self.specializedSortedCollectibles then
-        self.specializedSortedCollectibles:OnInsertFinished()
-    end
+    self.specializedSortedCollectibles:OnInsertFinished()
 
     ZO_COLLECTIBLE_DATA_MANAGER:MapCategoryData(self)
 end
 
 function ZO_CollectibleCategoryData:CreateSpecializedSortedCollectiblesTable()
-    if self.categorySpecialization == COLLECTIBLE_CATEGORY_SPECIALIZATION_OUTFIT_STYLES then
+    if self:IsOutfitStylesCategory() then
         return ZO_SpecializedSortedOutfitStyleTypes:New()
+    elseif self:IsHousingCategory() then
+        return ZO_SpecializedSortedHouses:New()
+    elseif self:IsDLCCategory() then
+        return ZO_SpecializedSortedStories:New()
+    else
+        return ZO_DefaultSortedCollectibles:New()
     end
-
-    return nil
 end
 
 function ZO_CollectibleCategoryData:GetName()
@@ -810,17 +944,17 @@ function ZO_CollectibleCategoryData:GetSubcategoryData(subcategoryIndex)
     return nil
 end
 
-function ZO_CollectibleCategoryData:SubcategoryIterator(...) -- ... Are filter functions that take categoryData as a param
+function ZO_CollectibleCategoryData:SubcategoryIterator(subcategoryFilterFunctions) -- ... Are filter functions that take categoryData as a param
     local index = 0
     local count = self.numSubcategories
-    local filterFunctions = {...}
+    local numFilters = subcategoryFilterFunctions and #subcategoryFilterFunctions or 0
     return function()
         index = index + 1
         while index <= count do
             local passesFilter = true
             local categoryData = self.orderedSubcategories[index]
-            for filterIndex, filterFunction in ipairs(filterFunctions) do
-                if not filterFunction(categoryData) then
+            for filterIndex = 1, numFilters do
+                if not subcategoryFilterFunctions[filterIndex](categoryData) then
                     passesFilter = false
                     break
                 end
@@ -844,30 +978,33 @@ function ZO_CollectibleCategoryData:GetCollectibleDataByIndex(collectibleIndex)
 end
 
 function ZO_CollectibleCategoryData:GetCollectibleDataBySpecializedSort()
-    if self.specializedSortedCollectibles then
-        return self.specializedSortedCollectibles:GetCollectibles()
-    end
-
-    return nil
+    return self.specializedSortedCollectibles:GetCollectibles()
 end
 
-function ZO_CollectibleCategoryData:UpdateSpecializedSortOrderOnCollectibleUpdate(collectibleData, lockStatusChanged)
-    if self.specializedSortedCollectibles then
-        self.specializedSortedCollectibles:OnCollectibleUpdated(collectibleData, lockStatusChanged)
-    end
+function ZO_CollectibleCategoryData:GetSpecializedSortedCollectiblesObject()
+    return self.specializedSortedCollectibles
 end
 
-function ZO_CollectibleCategoryData:CollectibleIterator(...)  -- ... Are filter functions that take collectibleData as a param
+function ZO_CollectibleCategoryData:SortedCollectibleIterator(collectibleFilterFunctions)
+    local collectiblesTable = self.specializedSortedCollectibles:CanIterateCollectibles() and self.specializedSortedCollectibles:GetCollectibles() or self.orderedCollectibles
+    return self:CollectibleIteratorInternal(collectiblesTable, collectibleFilterFunctions)
+end
+
+function ZO_CollectibleCategoryData:CollectibleIterator(collectibleFilterFunctions)
+    return self:CollectibleIteratorInternal(self.orderedCollectibles, collectibleFilterFunctions)
+end
+
+function ZO_CollectibleCategoryData:CollectibleIteratorInternal(collectiblesTable, collectibleFilterFunctions)
     local index = 0
-    local count = #self.orderedCollectibles
-    local filterFunctions = {...}
+    local count = #collectiblesTable
+    local numFilters = collectibleFilterFunctions and #collectibleFilterFunctions or 0
     return function()
         index = index + 1
         while index <= count do
             local passesFilter = true
-            local collectibleData = self.orderedCollectibles[index]
-            for filterIndex, filterFunction in ipairs(filterFunctions) do
-                if not filterFunction(collectibleData) then
+            local collectibleData = collectiblesTable[index]
+            for filterIndex = 1, numFilters do
+                if not collectibleFilterFunctions[filterIndex](collectibleData) then
                     passesFilter = false
                     break
                 end
@@ -882,19 +1019,21 @@ function ZO_CollectibleCategoryData:CollectibleIterator(...)  -- ... Are filter 
     end
 end
 
-function ZO_CollectibleCategoryData:GetAllCollectibleDataObjects(...) -- ... Are filter functions that take collectibleData as a param
+function ZO_CollectibleCategoryData:GetAllCollectibleDataObjects(collectibleFilterFunctions, sorted) 
     local foundCollectibleDataObjects = {}
-    return self:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, ...)
+    return self:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, collectibleFilterFunctions, sorted)
 end
 
-function ZO_CollectibleCategoryData:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, ...)  -- ... Are filter functions that take collectibleData as a param
-    for collectibleIndex, collectibleData in self:CollectibleIterator(...) do
+function ZO_CollectibleCategoryData:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, collectibleFilterFunctions, sorted)
+    local iterator = sorted and ZO_CollectibleCategoryData.SortedCollectibleIterator or ZO_CollectibleCategoryData.CollectibleIterator
+
+    for _, collectibleData in iterator(self, collectibleFilterFunctions) do
         table.insert(foundCollectibleDataObjects, collectibleData)
     end
 
     if self.isTopLevelCategory then
         for subcategoryIndex, subcategoryData in ipairs(self.orderedSubcategories) do
-            subcategoryData:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, ...)
+            subcategoryData:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, collectibleFilterFunctions, sorted)
         end
     end
 
@@ -902,10 +1041,8 @@ function ZO_CollectibleCategoryData:AppendAllCollectibleDataObjects(foundCollect
 end
 
 function ZO_CollectibleCategoryData:HasAnyNewCollectibles()
-    for collectibleIndex, collectibleData in ipairs(self.orderedCollectibles) do
-        if collectibleData:IsNew() then
-            return true
-        end
+    if NonContiguousCount(self.newCollectibleIdsCache) > 0 then
+        return true
     end
 
     if self.isTopLevelCategory then
@@ -917,6 +1054,12 @@ function ZO_CollectibleCategoryData:HasAnyNewCollectibles()
     end
 
     return false
+end
+
+function ZO_CollectibleCategoryData:UpdateNewCache(collectibleData)
+    local collectibleId = collectibleData:GetId()
+    local isNew = collectibleData:IsNew()
+    self.newCollectibleIdsCache[collectibleId] = isNew or nil
 end
 
 function ZO_CollectibleCategoryData:HasAnyUnlockedCollectibles()
@@ -996,11 +1139,12 @@ function ZO_CollectibleDataManager:Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_UPDATED, function(eventId, ...) self:OnCollectibleUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTION_UPDATED, function(eventId, ...) self:OnCollectionUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLES_UPDATED, function(eventId, ...) self:OnCollectionUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, function(eventId, ...) self:OnCollectionUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, function(eventId, ...) self:OnCollectionUpdated() end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NEW_STATUS_CLEARED, function(eventId, ...) self:OnCollectibleNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_CATEGORY_NEW_STATUS_CLEARED, function(eventId, ...) self:OnCollectibleCategoryNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(eventId, ...) self:OnCollectibleNotificationNew(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NOTIFICATION_REMOVED, function(eventId, ...) self:OnCollectibleNotificationRemoved(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_HOUSING_PRIMARY_RESIDENCE_SET, function(_, ...) self:OnPrimaryResidenceSet(...) end)
 
     self:RebuildCollection()
 end
@@ -1009,19 +1153,29 @@ function ZO_CollectibleDataManager:OnCollectibleUpdated(collectibleId, justUnloc
     local collectibleData = self.collectibleIdToDataMap[collectibleId]
     if collectibleData then
         collectibleData:Refresh()
-    end
 
-    if justUnlocked then
-        TriggerTutorial(TUTORIAL_TRIGGER_ACQUIRED_COLLECTIBLE)
+        local lockStateChange = ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE
+        if justUnlocked then
+            TriggerTutorial(TUTORIAL_TRIGGER_ACQUIRED_COLLECTIBLE)
+            lockStateChange = ZO_COLLECTIBLE_LOCK_STATE_CHANGE.UNLOCKED
+        elseif collectibleData:IsLocked() then
+            lockStateChange = ZO_COLLECTIBLE_LOCK_STATE_CHANGE.LOCKED
+        end
+        self:FireCallbacks("OnCollectibleUpdated", collectibleId, lockStateChange)
+    else
+        local errorString = string.format("EVENT_COLLECTIBLE_UPDATED fired with invalid collectible id (%d)", collectibleId)
+        internalassert(false, errorString)
     end
-
-    self:FireCallbacks("OnCollectibleUpdated", collectibleId, justUnlocked)
 end
 
 function ZO_CollectibleDataManager:OnCollectionUpdated(numJustUnlocked)
-    self:RefreshCollection()
-
     numJustUnlocked = numJustUnlocked or FULL_COLLECTION_UPDATE
+    if numJustUnlocked > 0 then
+         self:RefreshCollectionOnlyDirtyCollectibles()
+    else
+        self:RefreshCollection()
+    end
+    
     if numJustUnlocked > 0 or self:HasAnyUnlockedCollectibles() then
         TriggerTutorial(TUTORIAL_TRIGGER_ACQUIRED_COLLECTIBLE)
     end
@@ -1032,16 +1186,19 @@ end
 function ZO_CollectibleDataManager:OnCollectibleNewStatusCleared(collectibleId)
     local collectibleData = self.collectibleIdToDataMap[collectibleId]
     if collectibleData then
-        collectibleData:ClearNew()
+        collectibleData:SetNew(false)
         self:FireCallbacks("OnCollectibleNewStatusCleared", collectibleId)
+    else
+        local errorString = string.format("EVENT_COLLECTIBLE_NEW_STATUS_CLEARED fired with invalid collectible id (%d)", collectibleId)
+        internalassert(false, errorString)
     end
 end
 
 function ZO_CollectibleDataManager:OnCollectibleCategoryNewStatusCleared(categoryId)
     local categoryData = self.collectibleCategoryIdToDataMap[categoryId]
     if categoryData then
-        for _, collectibleData in categoryData:CollectibleIterator(ZO_CollectibleData.IsNew) do
-            collectibleData:ClearNew()
+        for _, collectibleData in categoryData:CollectibleIterator({ ZO_CollectibleData.IsNew }) do
+            collectibleData:SetNew(false)
         end
         self:FireCallbacks("OnCollectibleCategoryNewStatusCleared", categoryId)
     end
@@ -1050,14 +1207,39 @@ end
 
 function ZO_CollectibleDataManager:OnCollectibleNotificationNew(collectibleId, notificationId)
     local collectibleData = self.collectibleIdToDataMap[collectibleId]
-    collectibleData:SetNotificationId(notificationId)
-    self:FireCallbacks("OnCollectibleNotificationNew", notificationId, collectibleId)
+    if collectibleData then
+        collectibleData:SetNotificationId(notificationId)
+        self:FireCallbacks("OnCollectibleNotificationNew", notificationId, collectibleId)
+    else
+        local errorString = string.format("EVENT_COLLECTIBLE_NOTIFICATION_NEW fired with invalid collectible id (%d)", collectibleId)
+        internalassert(false, errorString)
+    end
 end
 
 function ZO_CollectibleDataManager:OnCollectibleNotificationRemoved(notificationId, collectibleId)
     local collectibleData = self.collectibleIdToDataMap[collectibleId]
-    collectibleData:SetNotificationId(nil)
-    self:FireCallbacks("OnCollectibleNotificationRemoved", notificationId, collectibleId)
+    if collectibleData then
+        collectibleData:SetNotificationId(nil)
+        self:FireCallbacks("OnCollectibleNotificationRemoved", notificationId, collectibleId)
+    else
+        local errorString = string.format("EVENT_COLLECTIBLE_NOTIFICATION_REMOVED fired with invalid collectible id (%d)", collectibleId)
+        internalassert(false, errorString)
+    end
+end
+
+function ZO_CollectibleDataManager:OnPrimaryResidenceSet(houseId)
+    local oldPrimaryResidenceResults = self:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsHousingCategory }, { ZO_CollectibleData.IsPrimaryResidence })
+    for _, collectibleData in ipairs(oldPrimaryResidenceResults) do
+        collectibleData:RefreshHousingData()
+    end
+
+    if houseId ~= 0 then
+        local newPrimaryResidenceCollectibleId = GetCollectibleIdForHouse(houseId)
+        local newPrimaryResidenceCollectibleData = self:GetCollectibleDataById(newPrimaryResidenceCollectibleId)
+        newPrimaryResidenceCollectibleData:RefreshHousingData()
+    end
+
+    self:FireCallbacks("PrimaryResidenceSet", houseId)
 end
 
 function ZO_CollectibleDataManager:RefreshCollection()
@@ -1067,6 +1249,29 @@ function ZO_CollectibleDataManager:RefreshCollection()
     end
 
     self:MapNotifications()
+end
+
+do
+    local function ZO_GetNextDirtyCollectibeIdIter(state, lastCollectibleId)
+        return GetNextCollectiblesUpdatedEventCollectibleId(lastCollectibleId)
+    end
+
+    function ZO_CollectibleDataManager:RefreshCollectionOnlyDirtyCollectibles()
+        local numCollectiblesUpdated = GetNumCollectiblesUpdatedEventCollectibleIds()
+        for index = 1, numCollectiblesUpdated do
+            local collectibleId = GetCollectiblesUpdatedEventCollectibleId(index)
+            local collectibleData = self.collectibleIdToDataMap[collectibleId]
+            if collectibleData then
+                collectibleData:Refresh()
+                collectibleData:SetNotificationId(nil)
+            else
+                local errorString = string.format("EVENT_COLLECTIBLES_UPDATED fired with invalid dirty collectible id (%d)", collectibleId)
+                internalassert(false, errorString)
+            end
+        end
+
+        self:MapNotifications()
+    end
 end
 
 function ZO_CollectibleDataManager:RebuildCollection()
@@ -1089,7 +1294,12 @@ function ZO_CollectibleDataManager:MapNotifications()
     for index = 1, GetNumCollectibleNotifications() do
         local notificationId, collectibleId = GetCollectibleNotificationInfo(index)
         local collectibleData = self.collectibleIdToDataMap[collectibleId]
-        collectibleData:SetNotificationId(notificationId)
+        if collectibleData then
+            collectibleData:SetNotificationId(notificationId)
+        else
+            local errorString = string.format("GetNumCollectibleNotifications returned a bad collectible id (%d)", collectibleId)
+            internalassert(false, errorString)
+        end
     end
 end
 
@@ -1130,17 +1340,17 @@ function ZO_CollectibleDataManager:GetNumCategories()
 end
 
 
-function ZO_CollectibleDataManager:CategoryIterator(...) -- ... Are filter functions that take categoryData as a param
+function ZO_CollectibleDataManager:CategoryIterator(categoryFilterFunctions)
     local index = 0
     local count = self.categoryObjectPool:GetActiveObjectCount()
-    local filterFunctions = {...}
+    local numFilters = categoryFilterFunctions and #categoryFilterFunctions or 0
     return function()
         index = index + 1
         while index <= count do
             local passesFilter = true
             local categoryData = self.categoryObjectPool:GetExistingObject(index)
-            for filterIndex, filterFunction in ipairs(filterFunctions) do
-                if not filterFunction(categoryData) then
+            for filterIndex = 1, numFilters do
+                if not categoryFilterFunctions[filterIndex](categoryData) then
                     passesFilter = false
                     break
                 end
@@ -1155,10 +1365,10 @@ function ZO_CollectibleDataManager:CategoryIterator(...) -- ... Are filter funct
     end
 end
 
-function ZO_CollectibleDataManager:GetAllCollectibleDataObjects(...) -- ... Are filter functions that take collectibleData as a param
+function ZO_CollectibleDataManager:GetAllCollectibleDataObjects(categoryFilterFunctions, collectibleFilterFunctions, sorted)
     local foundCollectibleDataObjects = {}
-    for categoryIndex, categoryData in self:CategoryIterator() do
-        categoryData:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, ...)
+    for categoryIndex, categoryData in self:CategoryIterator(categoryFilterFunctions) do
+        categoryData:AppendAllCollectibleDataObjects(foundCollectibleDataObjects, collectibleFilterFunctions, sorted)
     end
     return foundCollectibleDataObjects
 end

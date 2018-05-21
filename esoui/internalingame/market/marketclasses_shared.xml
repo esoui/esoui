@@ -2,7 +2,7 @@
     <Animations>
         <AnimationTimeline name="MarketProductHighlightAnimation">
             <Animations>
-                <AlphaAnimation duration="255" startAlpha="0" endAlpha=".7">
+                <AlphaAnimation duration="ZO_MARKET_PRODUCT_HIGHLIGHT_ANIMATION_DURATION_MS" startAlpha="0" endAlpha=".7">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
@@ -44,10 +44,6 @@
 
                 <Label name="$(parent)Cost" level="ZO_MARKET_TILE_TEXT_LEVEL" />
 
-                <Label name="$(parent)Purchased" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
-                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
-                </Label>
-
                 <Label name="$(parent)TextCallout" />
 
                 <Label name="$(parent)BundledProducts" level="ZO_MARKET_TILE_TEXT_LEVEL" hidden="true">
@@ -62,6 +58,9 @@
                     <Dimensions x="128" y="128" />
                     <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
+
+                <!-- anchored programmatically -->
+                <Label name="$(parent)Purchased" level="ZO_MARKET_TILE_TEXT_LEVEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" horizontalAlignment="RIGHT" maxLineCount="2" wrapMode="ELLIPSIS" />
             </Controls>
         </Control>
     </Controls>

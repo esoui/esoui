@@ -84,8 +84,8 @@ function LoadingScreen_Base:Initialize()
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_AREA_LOAD_STARTED, function(...) self:OnAreaLoadStarted(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_SCREEN_RESIZED, function(...) self:SizeLoadingTexture(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_PREPARE_FOR_JUMP, function(...) self:OnPrepareForJump(...) end)
-    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_JUMP_FAILED, function(...) self:HideLoadingScreen(...) end)
-    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_DISCONNECTED_FROM_SERVER, function(...) self:HideLoadingScreen(...) end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_JUMP_FAILED, function(...) self:OnJumpFailed(...) end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_DISCONNECTED_FROM_SERVER, function(...) self:OnDisconnectedFromServer(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_RESUME_FROM_SUSPEND, function(...) self:OnResumeFromSuspend(...) end)
 
     local function OnSubsystemLoadComplete(eventCode, system)
@@ -140,8 +140,19 @@ function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loa
     self:Show(zoneName, zoneDescription, loadingTexture, instanceDisplayType)
 end
 
-function LoadingScreen_Base:HideLoadingScreen()
+function LoadingScreen_Base:OnJumpFailed()
+    self:Log("Load Screen - OnJumpFailed")
     self:Hide()
+end
+
+function LoadingScreen_Base:OnDisconnectedFromServer()
+    self:Log("Load Screen - OnDisconnectedFromServer")
+    self:Hide()
+
+    --Hack to run to code that would execute on the hide animation complete immediately
+    self.animations.control:SetHidden(true)
+    SetGuiHidden("app", true)
+    RemoveActionLayerByNameApp("LoadingScreen")
 end
 
 function LoadingScreen_Base:OnResumeFromSuspend(evt)
@@ -367,9 +378,11 @@ function LoadingScreen_Base:ClearBattlegroundId()
     self.battlegroundId = 0
 end
 
-function SharedLoadingCompleteAnimation_OnStop(timeline)
+function LoadingScreen_Base:LoadingCompleteAnimation_OnStop(timeline)
     --We finally get rid of the load screen entirely when it is animated out
+    self:Log("Load Screen - Show/Hide - Animation Complete")
     if timeline:IsPlayingBackward() then
+        self:Log("Load Screen - Hide - Animation Complete")
         timeline.control:SetHidden(true)
         SetGuiHidden("app", true)
         RemoveActionLayerByNameApp("LoadingScreen")

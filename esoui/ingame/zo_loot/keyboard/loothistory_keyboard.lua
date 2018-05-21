@@ -43,10 +43,23 @@ function ZO_LootHistory_Keyboard:SetEntryTemplate()
     self.entryTemplate = KEYBOARD_LOOT_HISTORY_ENTRY_TEMPLATE
 end
 
-function ZO_LootHistory_Keyboard:CanShowItemsInHistory()
-    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-    return currentSceneName == "inventory" or currentSceneName == "interact" or currentSceneName == "crownCrateKeyboard" 
-           or currentSceneName == "trade" or LOOT_WINDOW.returnScene == "inventory" or currentSceneName == "stats"
+do
+    local SUPPORTED_SCENES =
+    {
+        ["inventory"] = true,
+        ["interact"] = true,
+        ["crownCrateKeyboard"] = true,
+        ["trade"] = true,
+        ["stats"] = true,
+        ["giftInventoryViewKeyboard"] = true,
+        ["dailyLoginRewards"] = true,
+        ["mailInbox"] = true,
+        ["market"] = true,
+    }
+    function ZO_LootHistory_Keyboard:CanShowItemsInHistory()
+        local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+        return not self.hidden or SUPPORTED_SCENES[currentSceneName] or LOOT_WINDOW.returnScene == "inventory"
+    end
 end
 
 function ZO_LootHistory_Keyboard:GetCraftBagIcon()

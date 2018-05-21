@@ -25,64 +25,17 @@ function DLCBook_Keyboard:InitializeControls()
     self.subscribeButton = contents:GetNamedChild("SubscribeButton")
 end
 
+function DLCBook_Keyboard:GetCategoryFilterFunctions()
+    return { ZO_CollectibleCategoryData.IsDLCCategory }
+end
+
+function DLCBook_Keyboard:IsCollectibleRelevant(collectibleData)
+    return collectibleData:IsStory()
+end
+
 ---------------
 --Interaction--
 ---------------
-
-do
-    local function StorySort(entry1, entry2)
-        local category1Data = entry1:GetCategoryData()
-        local category2Data = entry2:GetCategoryData()
-
-        if category1Data ~= category2Data then
-            local categoryIndex1, subcategoryIndex1 = category1Data:GetCategoryIndicies()
-            local categoryIndex2, subcategoryIndex2 = category2Data:GetCategoryIndicies()
-
-            if categoryIndex1 ~= categoryIndex2 then
-                return categoryIndex1 < categoryIndex2
-            else
-                return subcategoryIndex1 < subcategoryIndex2
-            end
-        elseif entry1:GetSortOrder() ~= entry2:GetSortOrder() then
-            return entry1:GetSortOrder() < entry2:GetSortOrder()
-        else
-            return entry1:GetName() < entry2:GetName()
-        end
-    end
-
-    function DLCBook_Keyboard:SortCollectibleData(collectibleData)
-        table.sort(collectibleData, StorySort)
-    end
-end
-
-function DLCBook_Keyboard:GetCategorizedLists()
-    local collectiblesData = self:GetRelevantCollectibles()
-
-    local categoryMapping = {}
-
-    local lists = {}
-    local currentCategoryData
-    local currentList
-
-    --We presorted by category above to make this part easier
-    for _, data in ipairs(collectiblesData) do
-        -- Everything should be put into a subcategory, since we don't handle categories and subcategories elegantly in this scene
-        local categoryData = data:GetCategoryData()
-        if currentCategoryData ~= categoryData then
-            currentCategoryData = categoryData
-            currentList = {}
-            table.insert(lists, 
-            { 
-                name = categoryData:GetName(),
-                collectibles = currentList,
-            })
-        end
-
-        table.insert(currentList, data)
-    end
-
-    return lists
-end
 
 function DLCBook_Keyboard:RefreshDetails()
     ZO_SpecializedCollectionsBook_Keyboard.RefreshDetails(self)
@@ -105,7 +58,7 @@ function DLCBook_Keyboard:RefreshDetails()
         local questDescriptionControl = self.questDescriptionControl
         local canUnlockOnStore = isNotOwned and collectibleData:IsPurchasable()
         local canUnlockWithSubscription = not IsESOPlusSubscriber() and collectibleData:IsUnlockedViaSubscription()
-        local canUpgrade = isNotOwned and collectibleData:RequiresEntitlement()
+        local isChapter = collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
         if showsQuest then
             questAvailableControl:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE))
             questAvailableControl:SetHidden(false)
@@ -113,8 +66,8 @@ function DLCBook_Keyboard:RefreshDetails()
             questDescriptionControl:SetText(collectibleData:GetQuestDescription())
             questDescriptionControl:SetHidden(false)
         elseif isLocked then
-            if canUnlockOnStore or canUnlockWithSubscription or canUpgrade then
-                local acquireText = canUpgrade and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
+            if canUnlockOnStore or canUnlockWithSubscription or isChapter then
+                local acquireText = isChapter and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
                 questAvailableControl:SetText(acquireText)
                 questAvailableControl:SetHidden(false)
             else
@@ -131,7 +84,7 @@ function DLCBook_Keyboard:RefreshDetails()
         self.questAcceptButton:SetEnabled(not (isLocked or isActive))
         self.unlockPermanentlyButton:SetHidden(not canUnlockOnStore)
         self.subscribeButton:SetHidden(not canUnlockWithSubscription)
-        self.chapterUpgrade:SetHidden(not canUpgrade)
+        self.chapterUpgrade:SetHidden(not (isChapter and isNotOwned))
     end
 end
 
@@ -170,9 +123,10 @@ function ZO_DLCBook_Keyboard_OnSubscribeClicked(control)
 end
 
 function ZO_DLCBook_Keyboard_OnChapterUpgradeClicked(control)
-    ZO_ShowChapterUpgradePlatformDialog()
+    local IS_STANDARD_EDITION = false
+    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_IN_GAME)
 end
 
 function ZO_DLCBook_Keyboard_OnInitialize(control)
-    DLC_BOOK_KEYBOARD = DLCBook_Keyboard:New(control, "dlcBook", COLLECTIBLE_CATEGORY_TYPE_CHAPTER, COLLECTIBLE_CATEGORY_TYPE_DLC)
+    DLC_BOOK_KEYBOARD = DLCBook_Keyboard:New(control, "dlcBook", ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Subcategories)
 end

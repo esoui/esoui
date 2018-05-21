@@ -34,7 +34,22 @@
             </Controls>
         </Button>
 
-        <Button name="ZO_GamepadSmithingResearchListSlot" inherits="ZO_GamepadSmithingListSlot" virtual="true">
+        <Control name="ZO_GamepadSmithingListSlot" virtual="true">
+            <Dimensions x="64" y="64" />
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="2">
+                    <AnchorFill/>
+                </Texture>
+
+                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGamepad27" inheritScale="false">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="1" />
+                    <!-- Allow extra space for large stack counts like 898.8k -->
+                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GamepadSmithingResearchListSlot" inherits="ZO_GamepadSmithingListSlot" virtual="true">
             <OnInitialized>
                 self.timerIcon = self:GetNamedChild("TimerIcon")
             </OnInitialized>
@@ -45,7 +60,7 @@
                     <Anchor point="CENTER" relativePoint="BOTTOMRIGHT"/>
                 </Texture>
             </Controls>
-        </Button>
+        </Control>
 
         <Control name="ZO_GamepadSmithingResearchPanelContent" inherits="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
             <Controls>

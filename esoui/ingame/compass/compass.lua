@@ -249,8 +249,8 @@ function Compass:InitializeQuestPins()
 
     self:PerformFullAreaQuestUpdate()
 
-    QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", function(assisted, unassisted) self:PerformFullAreaQuestUpdate() end)
-    QUEST_TRACKER:RegisterCallback("QuestTrackerRefreshedMapPins", function() self.refreshingJournalIndex = true self:PerformFullAreaQuestUpdate() self.refreshingJournalIndex = false end)
+    C_MAP_HANDLERS:RegisterCallback("RefreshedSingleQuestPins", function(questIndex) self:PerformFullAreaQuestUpdate() end)
+    C_MAP_HANDLERS:RegisterCallback("RefreshedAllQuestPins", function() self.refreshingJournalIndex = true self:PerformFullAreaQuestUpdate() self.refreshingJournalIndex = false end)
 end
 
 function Compass:SetCardinalDirections(font)
@@ -466,6 +466,8 @@ do
         [MAP_PIN_TYPE_POI_COMPLETE] = SI_COMPASS_LOCATION_NAME_FORMAT,
     }
 
+    ZO_SetCachedStrFormatterOnlyStoreOne(SI_COMPASS_LOCATION_NAME_FORMAT)
+
     local TIME_BETWEEN_LABEL_UPDATES_MS = 100
 
     local bestPinIndices = {}
@@ -523,7 +525,7 @@ do
                     bestPinDescription = ZO_FormatUserFacingCharacterOrDisplayName(bestPinDescription)
                 end
                 if(formatId) then
-                    self.centerOverPinLabel:SetText(zo_strformat(formatId, bestPinDescription))
+                    self.centerOverPinLabel:SetText(ZO_CachedStrFormat(formatId, bestPinDescription))
                 else
                     self.centerOverPinLabel:SetText(bestPinDescription)
                 end

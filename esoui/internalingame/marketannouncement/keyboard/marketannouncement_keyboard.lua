@@ -1,45 +1,38 @@
 ----
--- MarketAnnouncementMarketProduct_Keyboard
+-- ZO_MarketAnnouncement_Keyboard
 ----
 
-local MarketAnnouncementMarketProduct_Keyboard = ZO_MarketAnnouncementMarketProduct_Base:Subclass()
+local ZO_MarketAnnouncement_Keyboard = ZO_MarketAnnouncement_Shared:Subclass()
 
-function MarketAnnouncementMarketProduct_Keyboard:New(...)
-    return ZO_MarketAnnouncementMarketProduct_Base.New(self, ...)
+function ZO_MarketAnnouncement_Keyboard:New(...)
+    return ZO_MarketAnnouncement_Shared.New(self, ...)
 end
 
-local KEYBOARD_CURRENCY_ICON_SIZE = 24
-function MarketAnnouncementMarketProduct_Keyboard:Initialize(...)
-    ZO_MarketAnnouncementMarketProduct_Base.Initialize(self, ...)
-    self:SetTextCalloutYOffset(0)
-end
+function ZO_MarketAnnouncement_Keyboard:Initialize(control)
+    -- This data must be setup before parent initialize is called
+    self.actionTileControlByType =
+    {
+        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Keyboard_Control"
+    }
 
-----
--- MarketAnnouncement_Keyboard
-----
-
-local MarketAnnouncement_Keyboard = ZO_MarketAnnouncement_Base:Subclass()
-
-function MarketAnnouncement_Keyboard:New(...)
-    return ZO_MarketAnnouncement_Base.New(self, ...)
-end
-
-function MarketAnnouncement_Keyboard:Initialize(control)
     local conditionFunction = function() return not IsInGamepadPreferredMode() end
-    ZO_MarketAnnouncement_Base.Initialize(self, control, conditionFunction)
-    self.carousel = ZO_MarketProductCarousel:New(self.carouselControl, "ZO_MarketAnnouncement_MarketProductTemplate_Keyboard")
+    ZO_MarketAnnouncement_Shared.Initialize(self, control, conditionFunction)
+    self.carousel = ZO_MarketProductCarousel_Keyboard:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Keyboard_Control")
     self.productDescriptionBackground = self.controlContainer:GetNamedChild("ProductBG")
 end
 
-function MarketAnnouncement_Keyboard:InitializeKeybindButtons()
-    ZO_MarketAnnouncement_Base.InitializeKeybindButtons(self)
+function ZO_MarketAnnouncement_Keyboard:InitializeKeybindButtons()
+    ZO_MarketAnnouncement_Shared.InitializeKeybindButtons(self)
 
-    self.crownStoreButton:SetupStyle(KEYBIND_STRIP_STANDARD_STYLE)
     self.closeButton:SetupStyle(KEYBIND_STRIP_STANDARD_STYLE)
 end
 
-function MarketAnnouncement_Keyboard:CreateMarketProduct(productId)
-    local marketProduct = MarketAnnouncementMarketProduct_Keyboard:New()
+function ZO_MarketAnnouncement_Keyboard:OnShowing()
+    ZO_MarketAnnouncement_Shared.OnShowing(self)
+end
+
+function ZO_MarketAnnouncement_Keyboard:CreateMarketProduct(productId)
+    local marketProduct = ZO_MarketAnnouncementMarketProduct_Keyboard:New()
     marketProduct:SetId(productId)
     return marketProduct
 end
@@ -47,6 +40,10 @@ end
 --global XML functions
 
 function ZO_MarketAnnouncement_Keyboard_OnInitialize(control)
-    ZO_KEYBOARD_MARKET_ANNOUNCEMENT = MarketAnnouncement_Keyboard:New(control)
+    ZO_KEYBOARD_MARKET_ANNOUNCEMENT = ZO_MarketAnnouncement_Keyboard:New(control)
     SYSTEMS:RegisterKeyboardObject("marketAnnouncement", ZO_KEYBOARD_MARKET_ANNOUNCEMENT)
+end
+
+function ZO_MarketAnnouncement_Keyboard_OnOpenCrownStore()    
+    ZO_KEYBOARD_MARKET_ANNOUNCEMENT:OnMarketAnnouncementViewCrownStoreKeybind()
 end

@@ -336,14 +336,159 @@ function ZO_CraftingUtils_ConnectTreeToCraftingProcess(tree)
     ConnectStandardObjectToCraftingProcess(tree)
 end
 
-function ZO_CraftingUtils_IsTraitAppliedToWeapons(traitType)
-    local traitCategory = GetItemTraitTypeCategory(traitType)
-    return traitCategory == ITEM_TRAIT_TYPE_CATEGORY_WEAPON
+do
+    internalassert(GetNumSmithingTraitItems() == 34, "Update when a new craftable trait type is made")
+    local CRAFTABLE_TRAIT_TYPES = 
+    {
+        ITEM_TRAIT_TYPE_NONE,
+
+        ITEM_TRAIT_TYPE_WEAPON_POWERED,
+        ITEM_TRAIT_TYPE_WEAPON_CHARGED,
+        ITEM_TRAIT_TYPE_WEAPON_PRECISE,
+        ITEM_TRAIT_TYPE_WEAPON_INFUSED,
+        ITEM_TRAIT_TYPE_WEAPON_DEFENDING,
+        ITEM_TRAIT_TYPE_WEAPON_TRAINING,
+        ITEM_TRAIT_TYPE_WEAPON_SHARPENED,
+        ITEM_TRAIT_TYPE_WEAPON_DECISIVE,
+        ITEM_TRAIT_TYPE_WEAPON_NIRNHONED,
+
+        ITEM_TRAIT_TYPE_ARMOR_STURDY,
+        ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE,
+        ITEM_TRAIT_TYPE_ARMOR_REINFORCED,
+        ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED,
+        ITEM_TRAIT_TYPE_ARMOR_TRAINING,
+        ITEM_TRAIT_TYPE_ARMOR_INFUSED,
+        ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS,
+        ITEM_TRAIT_TYPE_ARMOR_DIVINES,
+        ITEM_TRAIT_TYPE_ARMOR_NIRNHONED,
+
+        ITEM_TRAIT_TYPE_JEWELRY_ARCANE,
+        ITEM_TRAIT_TYPE_JEWELRY_HEALTHY,
+        ITEM_TRAIT_TYPE_JEWELRY_ROBUST,
+        ITEM_TRAIT_TYPE_JEWELRY_TRIUNE,
+        ITEM_TRAIT_TYPE_JEWELRY_INFUSED,
+        ITEM_TRAIT_TYPE_JEWELRY_PROTECTIVE,
+        ITEM_TRAIT_TYPE_JEWELRY_SWIFT,
+        ITEM_TRAIT_TYPE_JEWELRY_HARMONY,
+        ITEM_TRAIT_TYPE_JEWELRY_BLOODTHIRSTY,
+    }
+
+    function ZO_CraftingUtils_GetSmithingTraitItemInfo()
+        local traits = {}
+        for _, traitType in ipairs(CRAFTABLE_TRAIT_TYPES) do
+            local traitIndex = traitType + 1
+            local _, name, icon, sellPrice, meetsUsageRequirement, itemStyle, quality = GetSmithingTraitItemInfo(traitIndex)
+            table.insert(traits, {
+                type = traitType,
+                index = traitIndex,
+                name = name,
+                icon = icon,
+                sellPrice = sellPrice,
+                meetsUsageRequirement = meetsUsageRequirement,
+                itemStyle = itemStyle,
+                quality = quality,
+            })
+        end
+        return traits
+    end
 end
 
-function ZO_CraftingUtils_IsTraitAppliedToArmor(traitType)
-    local traitCategory = GetItemTraitTypeCategory(traitType)
-    return traitCategory == ITEM_TRAIT_TYPE_CATEGORY_ARMOR
+do
+    internalassert(SMITHING_FILTER_TYPE_MAX_VALUE == 7, "Update for new smithing filters")
+
+    local ITEM_FILTER_TO_SMITHING_FILTER =
+    {
+       [ITEMFILTERTYPE_WEAPONS] = SMITHING_FILTER_TYPE_WEAPONS,
+       [ITEMFILTERTYPE_ARMOR] = SMITHING_FILTER_TYPE_ARMOR,
+       [ITEMFILTERTYPE_JEWELRY] = SMITHING_FILTER_TYPE_JEWELRY,
+    }
+
+    function ZO_CraftingUtils_GetSmithingFilterFromItem(bagId, slotIndex)
+        local itemFilters = {GetItemFilterTypeInfo(bagId, slotIndex)}
+        for _, itemFilter in ipairs(itemFilters) do
+            local smithingFilter = ITEM_FILTER_TO_SMITHING_FILTER[itemFilter] 
+            if smithingFilter then
+                return smithingFilter
+            end
+        end
+        return SMITHING_FILTER_TYPE_RAW_MATERIALS
+    end
+
+    function ZO_CraftingUtils_GetSmithingFilterFromItemFilter(itemFilter)
+        return ITEM_FILTER_TO_SMITHING_FILTER[itemFilter] 
+    end
+
+    local SMITHING_FILTER_TO_ITEM_FILTER =
+    {
+        [SMITHING_FILTER_TYPE_WEAPONS] = ITEMFILTERTYPE_WEAPONS,
+        [SMITHING_FILTER_TYPE_SET_WEAPONS] = ITEMFILTERTYPE_WEAPONS,
+        [SMITHING_FILTER_TYPE_ARMOR] = ITEMFILTERTYPE_ARMOR,
+        [SMITHING_FILTER_TYPE_SET_ARMOR] = ITEMFILTERTYPE_ARMOR,
+        [SMITHING_FILTER_TYPE_JEWELRY] = ITEMFILTERTYPE_JEWELRY,
+        [SMITHING_FILTER_TYPE_SET_JEWELRY] = ITEMFILTERTYPE_JEWELRY,
+    }
+
+    function ZO_CraftingUtils_GetItemFilterFromSmithingFilter(smithingFilter)
+        return SMITHING_FILTER_TO_ITEM_FILTER[smithingFilter]
+    end
+
+    local SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE =
+    {
+       [SMITHING_FILTER_TYPE_RAW_MATERIALS] = "EsoUI/Art/Crafting/smithing_refine_emptySlot.dds",
+       [SMITHING_FILTER_TYPE_WEAPONS] = "EsoUI/Art/Crafting/smithing_weaponSlot.dds",
+       [SMITHING_FILTER_TYPE_ARMOR] = "EsoUI/Art/Crafting/smithing_armorSlot.dds",
+       [SMITHING_FILTER_TYPE_JEWELRY] = "EsoUI/Art/Crafting/smithing_jewelrySlot.dds",
+    }
+
+    function ZO_CraftingUtils_GetItemSlotTextureFromSmithingFilter(smithingFilter)
+        return internalassert(SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE[smithingFilter])
+    end
+
+    local TRAIT_CATEGORY_TO_SMITHING_FILTER =
+    {
+       [ITEM_TRAIT_TYPE_CATEGORY_WEAPON] = SMITHING_FILTER_TYPE_WEAPONS,
+       [ITEM_TRAIT_TYPE_CATEGORY_ARMOR] = SMITHING_FILTER_TYPE_ARMOR,
+       [ITEM_TRAIT_TYPE_CATEGORY_JEWELRY] = SMITHING_FILTER_TYPE_JEWELRY,
+    }
+
+    function ZO_CraftingUtils_GetSmithingFilterFromTrait(traitType)
+        return TRAIT_CATEGORY_TO_SMITHING_FILTER[GetItemTraitTypeCategory(traitType)]
+    end
+
+    local SMITHING_FILTER_TO_BASE_FILTER =
+    {
+        [SMITHING_FILTER_TYPE_WEAPONS] = SMITHING_FILTER_TYPE_WEAPONS,
+        [SMITHING_FILTER_TYPE_SET_WEAPONS] = SMITHING_FILTER_TYPE_WEAPONS,
+        [SMITHING_FILTER_TYPE_ARMOR] = SMITHING_FILTER_TYPE_ARMOR,
+        [SMITHING_FILTER_TYPE_SET_ARMOR] = SMITHING_FILTER_TYPE_ARMOR,
+        [SMITHING_FILTER_TYPE_JEWELRY] = SMITHING_FILTER_TYPE_JEWELRY,
+        [SMITHING_FILTER_TYPE_SET_JEWELRY] = SMITHING_FILTER_TYPE_JEWELRY,
+    }
+
+    function ZO_CraftingUtils_GetBaseSmithingFilter(smithingFilter)
+        return SMITHING_FILTER_TO_BASE_FILTER[smithingFilter]
+    end
+
+    function ZO_CraftingUtils_IsBaseSmithingFilter(smithingFilter)
+        if SMITHING_FILTER_TO_BASE_FILTER[smithingFilter] == nil then
+            return true
+        end
+        return SMITHING_FILTER_TO_BASE_FILTER[smithingFilter] == smithingFilter
+    end
+
+    function ZO_CraftingUtils_CanSmithingFilterBeCraftedHere(smithingFilter)
+        local baseFilter = ZO_CraftingUtils_GetBaseSmithingFilter(smithingFilter)
+        if smithingFilter ~= baseFilter and not CanSmithingSetPatternsBeCraftedHere() then
+            return false
+        end
+        if baseFilter == SMITHING_FILTER_TYPE_WEAPONS then
+            return CanSmithingWeaponPatternsBeCraftedHere()
+        elseif baseFilter == SMITHING_FILTER_TYPE_ARMOR then
+            return CanSmithingApparelPatternsBeCraftedHere()
+        elseif baseFilter == SMITHING_FILTER_TYPE_JEWELRY then
+            return CanSmithingJewelryPatternsBeCraftedHere()
+        end
+    end
 end
 
 do
@@ -357,7 +502,7 @@ do
     end)
 
     function ZO_CraftingUtils_IsPerformingCraftProcess()
-        return g_isCrafting
+        return g_isCrafting or IsAwaitingCraftingProcessResponse()
     end
 end
 

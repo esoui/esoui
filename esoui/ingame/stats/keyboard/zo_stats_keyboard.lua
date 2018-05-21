@@ -24,7 +24,7 @@ local SHOW_HIDE_ANIMATED = 2
 ZO_Stats = ZO_Stats_Common:Subclass()
 
 function ZO_Stats:New(...)
-    local stats = ZO_Object.New(self)
+    local stats = ZO_Stats_Common.New(self)
     stats:Initialize(...)
     return stats
 end
@@ -71,8 +71,14 @@ function ZO_Stats:OnShowing()
 
         self:InitializeKeybindButtons()
 
+        local function OnPlayerActivated()
+            self.resetAddedPoints = true 
+            self:UpdateSpendablePoints() 
+            self:RefreshTitleSection()
+        end
+
         self.control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, function() self:UpdateSpendablePoints() end)
-        self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:RefreshTitleSection() end)
+        self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
         local function UpdateLevelUpRewards()
             self:UpdateLevelUpRewards()
@@ -131,7 +137,7 @@ function ZO_Stats:InitializeKeybindButtons()
             name = GetString(SI_STATS_COMMIT_ATTRIBUTES_BUTTON),
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function()
-                            return self:GetAddedPoints() > 0
+                            return self:GetTotalAddedPoints() > 0
                        end,
             callback = function()
                             self:PurchaseAttributes()
@@ -392,10 +398,19 @@ function ZO_Stats:UpdateSpendablePoints()
     self:UpdateSpendAttributePointsTip(SHOW_HIDE_ANIMATED)
 
     local totalSpendablePoints = self:GetTotalSpendablePoints()
+    self:SetAvailablePoints(totalSpendablePoints)
 
-    self:ResetAllAttributes()
+    if self.resetAddedPoints then
+        for i, attributeControl in ipairs(self.attributeControls) do
+            attributeControl.pointLimitedSpinner:ResetAddedPoints()
+        end
+        self.resetAddedPoints = false
+    end
+
     for i, attributeControl in ipairs(self.attributeControls) do
-        attributeControl.pointLimitedSpinner:RefreshPoints()
+        local addedPoints = attributeControl.pointLimitedSpinner:GetAllocatedPoints()
+        attributeControl.pointLimitedSpinner:Reinitialize(attributeControl.attributeType, addedPoints)
+        self:SetAvailablePoints(self:GetAvailablePoints() - addedPoints)
         attributeControl.pointLimitedSpinner:SetButtonsHidden(totalSpendablePoints == 0)
         attributeControl.increaseHighlight:SetHidden(totalSpendablePoints == 0)
     end
@@ -446,19 +461,10 @@ function ZO_Stats:UpdateSpendAttributePointsTip(showHideMethod)
     end
 end
 
-function ZO_Stats:ResetAllAttributes()
-    for i, attributeControl in ipairs(self.attributeControls) do
-        attributeControl.pointLimitedSpinner:ResetAddedPoints()
-        self:UpdatePendingStatBonuses(attributeControl.statType, 0)
-    end
-    
-    self:SetAvailablePoints(self:GetTotalSpendablePoints())
-end
-
-function ZO_Stats:GetAddedPoints()
+function ZO_Stats:GetTotalAddedPoints()
     local points = 0
     for i, attributeControl in ipairs(self.attributeControls) do
-        points = points + attributeControl.pointLimitedSpinner.addedPoints
+        points = points + attributeControl.pointLimitedSpinner:GetAllocatedPoints()
     end
     return points
 end
@@ -466,6 +472,7 @@ end
 function ZO_Stats:PurchaseAttributes()
     PlaySound(SOUNDS.STATS_PURCHASE)
     PurchaseAttributes(self.attributeControls[ATTRIBUTE_HEALTH].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_MAGICKA].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_STAMINA].pointLimitedSpinner.addedPoints)
+    self.resetAddedPoints = true
     zo_callLater(function()
         if SCENE_MANAGER:IsShowing("stats") and self:GetTotalSpendablePoints() == 0 then
             MAIN_MENU_KEYBOARD:ShowScene("skills")

@@ -1,8 +1,3 @@
--- Shared globals
-
-ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR = 1
-ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS = 2
-
 -- Shared object class
 
 ZO_SharedSmithingImprovement = ZO_Object:Subclass()
@@ -21,12 +16,12 @@ function ZO_SharedSmithingImprovement:Initialize(listControl, boosterContainerCo
     self.boosterContainer = boosterContainerControl
 
     self:InitializeSlots()
-    self:InitializeRows()
+    self:InitializeBoosterRows()
 
     self:HandleDirtyEvent()
 end
 
-function ZO_SharedSmithingImprovement:InitializeRows()
+function ZO_SharedSmithingImprovement:InitializeBoosterRows()
     self.rows = {}
 
     self.boosterHeaderLabel = self.boosterContainer:GetNamedChild("Header")
@@ -68,6 +63,24 @@ function ZO_SharedSmithingImprovement:InitializeRows()
     InitializeQualityLabel(self.boosterContainer:GetNamedChild("Legendary"), ITEM_QUALITY_LEGENDARY)
 end
 
+function ZO_SharedSmithingImprovement:RefreshBoosterRows()
+    for i, row in ipairs(self.rows) do
+        local reagentName, icon, stack, _, _, _, _, quality = GetSmithingImprovementItemInfo(GetCraftingInteractionType(), i)
+        row.reagentName = reagentName
+        row.currentStack = stack
+        row.quality = quality
+        row.icon = icon
+
+        row.stackLabel:SetText(stack)
+        if stack == 0 then
+            row.stackLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        else
+            row.stackLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        end
+        row.iconTexture:SetTexture(icon)
+    end
+end
+
 function ZO_SharedSmithingImprovement:HandleDirtyEvent()
     if self.listControl:IsHidden() then
         self.dirty = true
@@ -87,22 +100,55 @@ function ZO_SharedSmithingImprovement:SetCraftingType(craftingType, oldCraftingT
 end
 
 function ZO_SharedSmithingImprovement:Refresh()
+    if ZO_CraftingUtils_IsPerformingCraftProcess() then
+        -- Don't update improvement panel until the animation is complete: ESO-556307
+        return
+    end
     self.dirty = false
 
-    for i, row in ipairs(self.rows) do
-        local reagentName, icon, stack, _, _, _, _, quality = GetSmithingImprovementItemInfo(GetCraftingInteractionType(), i)
-        row.reagentName = reagentName
-        row.currentStack = stack
-        row.quality = quality
-        row.icon = icon
+    self:OnSlotChanged()
+end
 
-        row.stackLabel:SetText(stack)
-        if stack == 0 then
-            row.stackLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+function ZO_SharedSmithingImprovement:OnSlotChanged()
+    self:RefreshBoosterRows(self)
+    self.currentQuality = nil
+
+    local hasItem = self.improvementSlot:HasItem()
+    if hasItem then
+        local row = self:GetRowForSelection()
+        if row then
+            local maxBoosters = self:FindMaxBoostersToApply()
+            self.spinner:SetMinMax(1, maxBoosters)
+            self.spinner:SetValue(maxBoosters)
+            self.spinner:SetSoftMax(row.currentStack)
+
+            self.currentQuality = row.quality - 1 -- need the "from" quality
+
+            self.boosterSlot.craftingType = GetCraftingInteractionType()
+            self.boosterSlot.index = row.index
+
+            ZO_ItemSlot_SetupSlot(self.boosterSlot, row.currentStack, row.icon)
+            self:RefreshImprovementChance()
         else
-            row.stackLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+            self:ClearSelections()
+            return
         end
-        row.iconTexture:SetTexture(icon)
+    else
+        self.canImprove = false
+
+        self.improvementChanceLabel:SetText(GetString(SI_SMITHING_IMPROVE_CHANCE_HEADER))
+        self:ClearBoosterRowHighlight()
+
+        self.owner:OnImprovementSlotChanged()
+    end
+
+    self.boosterSlot:SetHidden(not hasItem)
+
+    if hasItem then
+        self.resultTooltip:SetHidden(false)
+        self:SetupResultTooltip(self:GetCurrentImprovementParams())
+    else
+        self.resultTooltip:SetHidden(true)
     end
 end
 
@@ -198,14 +244,8 @@ end
 
 function ZO_SharedSmithingImprovement:OnFilterChanged(filterType)
     if self.awaitingLabel then
-        if filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR then
-            self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_ARMOR))
-        elseif filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS then
-            self.awaitingLabel:SetText(GetString(SI_SMITHING_IMPROVE_AWAITING_WEAPON))
-        end
+        self.awaitingLabel:SetText(GetString("SI_SMITHINGFILTERTYPE_IMPROVEAWAITING", filterType))
     end
-
-    self.improvementSlot:OnFilterChanged(filterType)
 end
 
 function ZO_SharedSmithingImprovement:IsImprovable()
@@ -225,7 +265,7 @@ function ZO_SharedSmithingImprovement:IsSlotted(bagId, slotIndex)
 end
 
 function ZO_SharedSmithingImprovement:Improve()
-    if IsPerformingCraftProcess() then
+    if ZO_CraftingUtils_IsPerformingCraftProcess() then
         -- Handle edge case where player hits R and E at the same time.
         return
     end
@@ -284,7 +324,6 @@ function ZO_SmithingImprovementSlot:SetItem(bagId, slotIndex)
 
     if self:HasItem() then
         if oldItemInstanceId ~= self:GetItemId() then
-            self.owner.spinner:SetValue(1)
             PlaySound(SOUNDS.SMITHING_ITEM_TO_IMPROVE_PLACED)
         end
     elseif hadItem then
@@ -308,14 +347,6 @@ function ZO_SmithingImprovementSlot:RefreshName()
     end
 end
 
-function ZO_SmithingImprovementSlot:OnFilterChanged(filterType)
-    if filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR then
-        self:SetEmptyTexture("EsoUI/Art/Crafting/smithing_armorSlot.dds")
-    elseif filterType == ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS then
-        self:SetEmptyTexture("EsoUI/Art/Crafting/smithing_weaponSlot.dds")
-    end
-end
-
 function ZO_SmithingImprovementSlot:ShowDropCallout()
     self.dropCallout:SetHidden(false)
     self.dropCallout:SetTexture("EsoUI/Art/Crafting/crafting_alchemy_goodSlot.dds")
@@ -330,6 +361,8 @@ function ZO_SharedSmithingImprovement_GetBoosterChartStringForCraftingType(craft
         return GetString(SI_SMITHING_CLOTHIER_BOOSTER_CHART)
     elseif craftingType == CRAFTING_TYPE_WOODWORKING then
         return GetString(SI_SMITHING_WOODWORKING_BOOSTER_CHART)
+    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+        return GetString(SI_SMITHING_JEWELRYCRAFTING_BOOSTER_CHART)
     end
 end
 
@@ -341,6 +374,8 @@ function ZO_SharedSmithingImprovement_GetImprovementTooltipSounds()
         return SOUNDS.CLOTHIER_IMPROVE_TOOLTIP_GLOW_SUCCESS, SOUNDS.CLOTHIER_IMPROVE_TOOLTIP_GLOW_FAIL
     elseif craftingType == CRAFTING_TYPE_WOODWORKING then
         return SOUNDS.WOODWORKER_IMPROVE_TOOLTIP_GLOW_SUCCESS, SOUNDS.WOODWORKER_IMPROVE_TOOLTIP_GLOW_FAIL
+    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
+        return SOUNDS.JEWELRYCRAFTER_IMPROVE_TOOLTIP_GLOW_SUCCESS, SOUNDS.JEWELRYCRAFTER_IMPROVE_TOOLTIP_GLOW_FAIL
     end
 end
 
@@ -348,17 +383,6 @@ function ZO_SharedSmithingImprovement_CanItemBeImproved(itemData)
     return CanItemBeSmithingImproved(itemData.bagId, itemData.slotIndex, GetCraftingInteractionType())
 end
 
-function ZO_SharedSmithingImprovement_GetPrimaryFilterType(...)
-    for i = 1, select("#", ...) do
-        local filterType = select(i, ...)
-        if filterType == ITEMFILTERTYPE_WEAPONS then
-            return ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_WEAPONS
-        elseif filterType == ITEMFILTERTYPE_ARMOR then 
-            return ZO_SMITHING_IMPROVEMENT_SHARED_FILTER_TYPE_ARMOR
-        end
-    end
-end
-
 function ZO_SharedSmithingImprovement_DoesItemPassFilter(bagId, slotIndex, filterType)
-    return ZO_SharedSmithingImprovement_GetPrimaryFilterType(GetItemFilterTypeInfo(bagId, slotIndex)) == filterType
+    return ZO_CraftingUtils_GetSmithingFilterFromItem(bagId, slotIndex) == filterType
 end

@@ -38,6 +38,9 @@ function ZO_Help_Root_Gamepad:Initialize(control)
     websiteAnchor:AddToControl(websiteText)
     
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+
+    local list = self:GetMainList()
+    list:SetValidateGradient(true)
 end
 
 function ZO_Help_Root_Gamepad:InitializeKeybindStripDescriptors()

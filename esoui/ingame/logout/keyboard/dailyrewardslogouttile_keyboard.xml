@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DailyRewardsLogoutTile_Keyboard_Control" inherits="ZO_DailyRewardsLogoutTile_Control ZO_ActionTile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_DailyRewardsLogoutTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

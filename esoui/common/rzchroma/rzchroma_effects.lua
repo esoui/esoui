@@ -102,7 +102,7 @@ function ZO_RzChroma_Effects:AddKeybindActionEffect(actionName)
     local row, column = ZO_ChromaGetCustomEffectCoordinatesForAction(actionName)
     if row and column then
         local visualData = self.keybindActionVisualData[actionName] or FALLBACK_KEYBIND_VISUAL_DATA
-        local effect = ZO_ChromaCStyleCustomSingleColorFadingEffect:New(CHROMA_DEVICE_TYPE_KEYBOARD, visualData.level, CHROMA_CUSTOM_EFFECT_GRID_STYLE_STATIC, visualData.animationTimerData, visualData.color, visualData.blendMode)
+        local effect = ZO_ChromaCStyleCustomSingleColorFadingEffect:New(CHROMA_DEVICE_TYPE_KEYBOARD, visualData.level, CHROMA_CUSTOM_EFFECT_GRID_STYLE_STATIC_CELLS, visualData.animationTimerData, visualData.color, visualData.blendMode)
         effect:SetCellActive(row, column, true)
         effect:SetDeleteEffectCallback(function() self:RemoveKeybindActionEffect(actionName) end)
         self.keybindActionEffects[actionName] = effect

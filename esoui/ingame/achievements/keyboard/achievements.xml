@@ -1,7 +1,30 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="AchievementHighlightAnimation_Keyboard">
+            <Animations>
+                <AlphaAnimation duration="255" startAlpha="0" endAlpha=".7">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
     <Controls>
-        <StatusBar name="ZO_AchievementsAchievementStatusBar" inherits="ZO_JournalProgressStatusBar" virtual="true">
-            <Dimensions x="345" />
+        <Label name="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+        <Label name="ZO_AchievementsLargeLabel_Keyboard" inherits="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true" />
+
+        <StatusBar name="ZO_AchievementsStatusBar" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH4">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-4" />
+                </Label>
+                <Label name="$(parent)Progress" inherits="ZO_AchievementsDefaultLabel_Keyboard" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY" level="2">
+                    <Anchor point="TOPLEFT" offsetY="-1" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
         </StatusBar>
 
         <Button name="ZO_IconAchievement" mouseOverBlendMode="ADD" virtual="true">
@@ -66,12 +89,12 @@
                     </Controls>
                 </Texture>
                 
-                <Label name="$(parent)Title" inherits="ZO_JournalProgressDefaultLabel" font="ZoFontWindowSubtitle" >
+                <Label name="$(parent)Title" inherits="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWindowSubtitle" >
                     <Dimensions x="274" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="6" />
                 </Label>
                 
-                <Label name="$(parent)Description" inherits="ZO_JournalProgressDefaultLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                <Label name="$(parent)Description" inherits="ZO_AchievementsDefaultLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
                 </Label>
 
@@ -115,14 +138,14 @@
         
         <Texture name="ZO_AchievementCheckbox" textureFile="EsoUI/Art/Cadwell/check.dds" resizeToFitFile="true" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_JournalProgressDefaultLabel" inheritAlpha="false">
+                <Label name="$(parent)Label" inherits="ZO_AchievementsDefaultLabel_Keyboard" inheritAlpha="false">
                     <Dimensions x="360" />
                     <Anchor point="TOPLEFT" offsetX="20" />
                 </Label>
             </Controls>
         </Texture>
         
-        <Label name="ZO_AchievementRewardLabel" inherits="ZO_JournalProgressDefaultLabel" virtual="true">
+        <Label name="ZO_AchievementRewardLabel" inherits="ZO_AchievementsDefaultLabel_Keyboard" virtual="true">
             <Dimensions x="230" y="20"/>
         </Label>
         
@@ -199,7 +222,7 @@
                         </Texture>
                     </Controls>
                 </Texture>
-                <Label name="$(parent)Label" inherits="ZO_JournalProgressDefaultLabel">
+                <Label name="$(parent)Label" inherits="ZO_AchievementsDefaultLabel_Keyboard">
                     <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="2" />
                 </Label>
             </Controls>
@@ -226,24 +249,114 @@
             </Controls>
         </TopLevelControl>
         
-        <TopLevelControl name="ZO_Achievements" inherits="ZO_JournalProgressBook" hidden="true">
+        <TopLevelControl name="ZO_Achievements" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_Achievements_OnInitialize(self)
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)Contents" override="true">
+                <Control name="$(parent)Contents">
+                    <Anchor point="TOPLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+                    
                     <Controls>
-                        <Label name="$(parent)Points" inherits="ZO_JournalProgressLargeLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPLEFT" offsetX="9" offsetY="6" />
-                        </Label>
+                        <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                            <Dimensions x="335" />
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                        </Control>
 
-                        <Control name="$(parent)SummaryInset" override="true">
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
+                            <Dimensions x="240"/>
                             <Controls>
-                                <Texture name="$(parent)Divider" override="true" hidden="false" />
-                                <Label name="$(parent)RecentTitle" override="true" hidden="false" text="SI_ACHIEVEMENTS_RECENT" />
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_ACHIEVEMENT_SEARCH_EDIT_DEFAULT))
+                                    </OnInitialized> 
+                                    <OnTextChanged>
+                                        ZO_Achievements_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
+                        </Label>
+                        
+                        <Control name="$(parent)ContentList" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetY="5" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12" />
+                        </Control>
+                        
+                        <Control name="$(parent)SummaryInset">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="37"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12" />
+                            
+                            <Controls>
+                                <Control name="$(parent)Recent">
+                                    <Dimensions y="140" />
+                                    <Anchor point="BOTTOMLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+
+                                    <Controls>
+                                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Quest/questjournal_divider.dds" resizeToFitFile="true">
+                                            <Anchor point="TOPLEFT" />
+                                        </Texture>
+
+                                        <Label name="$(parent)Title" inherits="ZO_AchievementsLargeLabel_Keyboard" text="SI_ACHIEVEMENTS_RECENT">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="7" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+
+                                <Label name="$(parent)Points" inherits="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPRIGHT" offsetY="-65" />
+                                </Label>
+
+                                <Control name="$(parent)ProgressBars" inherits="ZO_ScrollContainer">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Recent" relativePoint="TOPRIGHT" offsetY="-5" />
+
+                                    <Controls>
+                                        <Control name="$(parent)ScrollChild" override="true">
+                                            <Controls>
+                                                <StatusBar name="$(parent)Total" inherits="ZO_AchievementsStatusBar">
+                                                    <Anchor point="TOPLEFT" offsetX="4" offsetY="24" />
+                                                    <Anchor point="RIGHT" relativeTo="$(grandparent)" constrains="X" offsetX="-25" />
+                                                    
+                                                    <Controls>
+                                                        <Label name="$(parent)Label" override="true" modifyTextType="UPPERCASE" text="SI_ACHIEVEMENTS_OVERALL" />
+                                                    </Controls>
+                                                </StatusBar>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
                             </Controls>
                         </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Category">
+                    <Anchor point="TOPRIGHT" offsetX="-5" offsetY="11" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ContentsCategories" relativePoint="TOPRIGHT" offsetX="37" />
+
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_AchievementsLargeLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Control name="$(parent)Filter" inherits="ZO_ComboBox">
+                            <Dimensions x="222" y="32" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-5" />
+                        </Control>
+
+                        <StatusBar name="$(parent)Progress" inherits="ZO_AchievementsStatusBar">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Filter" relativePoint="LEFT" offsetX="-20" />
+                            <Anchor point="LEFT" constrains="X" />
+                        </StatusBar>
                     </Controls>
                 </Control>
             </Controls>

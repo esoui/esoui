@@ -133,13 +133,13 @@ function ZO_RestyleSlot_Collectible:New(...)
 end
 
 do
-    local SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON = true, true, true
+    local SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON = true, true, true
 
     function ZO_RestyleSlot_Collectible:OnIconMouseEnter()
         local collectibleId = self.restyleSlotData:GetId()
         if collectibleId > 0 then
             InitializeTooltip(ItemTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
-            ItemTooltip:SetCollectible(collectibleId, SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
+            ItemTooltip:SetCollectible(collectibleId, SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON)
         else
             InitializeTooltip(InformationTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
             SetTooltipText(InformationTooltip, zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_COLLECTIBLECATEGORYTYPE", self.restyleSlotData:GetRestyleSlotType())))
@@ -188,13 +188,13 @@ function ZO_RestyleSlot_OutfitStyle:GetControlTemplate()
 end
 
 do
-    local SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON = true, true, true
+    local SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON = true, true, true
 
     function ZO_RestyleSlot_OutfitStyle:OnIconMouseEnter()
         local collectibleData = self.restyleSlotData:GetPendingCollectibleData()
         if collectibleData then
             InitializeTooltip(ItemTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
-            ItemTooltip:SetCollectible(collectibleData:GetId(), SHOW_NICKNAME, SHOW_HINT, SHOW_BLOCK_REASON)
+            ItemTooltip:SetCollectible(collectibleData:GetId(), SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON)
         else
             InitializeTooltip(InformationTooltip, self.itemSlotControl, LEFT, 5, 0, RIGHT)
             SetTooltipText(InformationTooltip, zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_OUTFITSLOT", self.restyleSlotData:GetRestyleSlotType())))
@@ -700,7 +700,11 @@ function ZO_RestyleCollectibleSlotsSheet:RegisterForEvents()
         end
     end
 
+    local function MarkViewDirty()
+        self:MarkViewDirty()
+    end
 
+    self.control:RegisterForEvent(EVENT_COLLECTIBLE_DYE_DATA_UPDATED, MarkViewDirty)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:MarkViewDirty() end)
 end

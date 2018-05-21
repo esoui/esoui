@@ -65,6 +65,8 @@ function TrialAccountSplashDialog:Initialize(control)
             {
                 [1] =
                 {
+                    --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                    name = "Free Trial Close Dialog 1",
                     ethereal = true,
                     keybind = "DIALOG_PRIMARY",
                     clickSound = SOUNDS.DIALOG_ACCEPT,
@@ -72,6 +74,8 @@ function TrialAccountSplashDialog:Initialize(control)
                 },
                 [2] =
                 {
+                    --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+                    name = "Free Trial Close Dialog 2",
                     ethereal = true,
                     keybind = "DIALOG_NEGATIVE",
                     clickSound = SOUNDS.DIALOG_ACCEPT,

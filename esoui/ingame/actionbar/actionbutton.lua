@@ -104,20 +104,14 @@ function ActionButton:HasAction()
     return self.hasAction
 end
 
-function ActionButton:HandlePressAndRelease()
-    OnSlotDownAndUp(self:GetSlot())
-end
-
-function ActionButton:HandlePress()
+function ActionButton:OnPress()
     if self.usable then
         self.button:SetState(BSTATE_PRESSED, false)
     end
-    OnSlotDown(self:GetSlot())
 end
 
-function ActionButton:HandleRelease()
+function ActionButton:OnRelease()
     self:ResetVisualState()
-    OnSlotUp(self:GetSlot())
 end
 
 function ActionButton:ResetVisualState()
@@ -314,7 +308,8 @@ function ActionButton:UpdateUseFailure()
                            HasSwimmingFailure(slotnum) or
                            HasMountedFailure(slotnum) or
                            HasReincarnatingFailure(slotnum) or
-                           HasRangeFailure(slotnum)
+                           HasRangeFailure(slotnum) or
+                           HasLeapKeepTargetFailure(slotnum)
 
     self.costFailureOnly = costFailure and not nonCostFailure
     self.useFailure = costFailure or nonCostFailure

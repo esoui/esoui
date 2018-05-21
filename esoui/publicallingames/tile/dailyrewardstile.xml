@@ -1,0 +1,21 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DailyRewardsTile_Control" inherits="ZO_ClaimTile_Control" level="1" virtual="true" >
+            <Dimensions x="DAILY_REWARDS_TILE_DIMENSIONS_X" y="DAILY_REWARDS_TILE_DIMENSIONS_Y" />
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Background" override="true">
+                            <!-- display portion of the texture is 300x200 in a total texture size of 512x256 -->
+                            <TextureCoords left="0" right="0.586" top="0" bottom="0.781" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ParticleContainer">
+                    <Anchor point="CENTER" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

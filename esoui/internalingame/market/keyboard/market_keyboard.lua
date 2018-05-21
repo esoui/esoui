@@ -93,15 +93,21 @@ function MarketContentFragment:RefreshProducts()
     end
 end
 
-function MarketContentFragment:Purchase()
-    if self.marketProduct then
-        self.marketProduct:Purchase()
-    end
+function MarketContentFragment:GetMarketProduct()
+    return self.marketProduct
 end
 
 function MarketContentFragment:CanPurchase()
     if self.marketProduct then
         return self.marketProduct:CanBePurchased()
+    else
+        return false
+    end
+end
+
+function MarketContentFragment:CanGift()
+    if self.marketProduct then
+        return self.marketProduct:IsGiftable()
     else
         return false
     end
@@ -479,9 +485,9 @@ function Market:InitializeChapterUpgrade()
         local chapterUpgradeData = self.chapterUpgradePaneObject:GetChapterUpgradeData()
         if chapterUpgradeData then
             if chapterUpgradeData:IsPreRelease() then
-                ZO_ShowChapterPrepurchasePlatformDialog(chapterUpgradeData:GetChapterUpgradeId(), isCollectorsEdition)
+                ZO_ShowChapterPrepurchasePlatformDialog(chapterUpgradeData:GetChapterUpgradeId(), isCollectorsEdition, CHAPTER_UPGRADE_SOURCE_IN_GAME)
             else
-                ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition)
+                ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition, CHAPTER_UPGRADE_SOURCE_IN_GAME)
             end
         end
     end
@@ -543,8 +549,45 @@ function Market:InitializeKeybindDescriptors()
                         end,
         },
 
+        -- Order the keybinds from left to right: Purchase, Preview, Gift
+
+        -- Purchase Keybind
+        {
+            order = 3,
+            name =  function()
+                        if self.bundleContentFragment:IsShowing() then
+                            return GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT)
+                        else
+                            if self.selectedMarketProduct:IsBundle() then
+                                return GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT)
+                            else
+                                return GetString(SI_MARKET_PURCHASE_KEYBIND_TEXT)
+                            end
+                        end
+                    end,
+            keybind = "UI_SHORTCUT_PRIMARY",
+            visible =   function()
+                            if self.bundleContentFragment:IsShowing() then
+                                return self.bundleContentFragment:CanPurchase()
+                            else
+                                return self.selectedMarketProduct ~= nil and self.selectedMarketProduct:CanBePurchased()
+                            end
+                        end,
+            callback =  function()
+                            local marketProduct
+                            if self.bundleContentFragment:IsShowing() then
+                                marketProduct = self.bundleContentFragment:GetMarketProduct()
+                            else
+                                marketProduct = self.selectedMarketProduct
+                            end
+
+                            self:PurchaseMarketProduct(marketProduct:GetId(), marketProduct:GetPresentationIndex())
+                        end,
+        },
+
         -- "Preview" Keybind
         {
+            order = 2,
             name =      function()
                             if self.productListFragment:IsShowing() or not self.chapterUpgradePage:IsHidden() then
                                 return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
@@ -576,7 +619,7 @@ function Market:InitializeKeybindDescriptors()
                             if self.productListFragment:IsShowing() then
                                 self:PreviewMarketProduct(self.productListFragment:GetSelectedProductId())
                             elseif not self.chapterUpgradePage:IsHidden() then
-                                self:PreviewMarketProduct(self.chapterUpgradePaneObject:GetSelectedProductId())
+                                self.chapterUpgradePaneObject:PreviewSelection()
                             else
                                 local marketProduct = self.selectedMarketProduct
 
@@ -604,33 +647,37 @@ function Market:InitializeKeybindDescriptors()
                         end,
         },
 
-        -- Purchase Keybind
+        -- Gift Keybind
         {
+            order = 1,
             name =  function()
                         if self.bundleContentFragment:IsShowing() then
-                            return GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT)
+                            return GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT)
                         else
                             if self.selectedMarketProduct:IsBundle() then
-                                return GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT)
+                                return GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT)
                             else
-                                return GetString(SI_MARKET_PURCHASE_KEYBIND_TEXT)
+                                return GetString(SI_MARKET_GIFT_KEYBIND_TEXT)
                             end
                         end
                     end,
-            keybind = "UI_SHORTCUT_PRIMARY",
+            keybind = "UI_SHORTCUT_TERTIARY",
             visible =   function()
                             if self.bundleContentFragment:IsShowing() then
-                                return self.bundleContentFragment:CanPurchase()
+                                return self.bundleContentFragment:CanGift()
                             else
-                                return self.selectedMarketProduct ~= nil and self.selectedMarketProduct:CanBePurchased()
+                                return self.selectedMarketProduct ~= nil and self.selectedMarketProduct:IsGiftable()
                             end
                         end,
             callback =  function()
+                            local marketProduct
                             if self.bundleContentFragment:IsShowing() then
-                                self.bundleContentFragment:Purchase()
+                                marketProduct = self.bundleContentFragment:GetMarketProduct()
                             else
-                                self.selectedMarketProduct:Purchase()
+                                marketProduct = self.selectedMarketProduct
                             end
+
+                            self:GiftMarketProduct(marketProduct:GetId(), marketProduct:GetPresentationIndex())
                         end,
         },
     }
@@ -736,7 +783,9 @@ function Market:InitializeCategories()
                 end
             end
 
-            OnMarketCategorySelected(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subCategoryIndex)
+            if not self:IsSearching() then
+                OnMarketCategorySelected(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subCategoryIndex)
+            end
         end
     end
 
@@ -965,21 +1014,20 @@ function Market:GetMarketProductInfo(productId)
     end
 end
 
-function Market:RequestShowMarketProduct(id)
-    if self.marketState ~= MARKET_STATE_OPEN then
-        self.queuedMarketProductId = id
-        return
-    end
-
-    local targetNode = self:GetCategoryDataForMarketProduct(id)
-    if targetNode then
-        if self.categoryTree:GetSelectedNode() == targetNode then
-            local preview = self:ShouldAutomaticallyPreviewMarketProduct(id)
-            self:ScrollToMarketProduct(id, preview)
-        else
-            self.categoryTree:SelectNode(targetNode)
-            self.queuedMarketProductId = id -- order of operations is important here
+function Market:RequestShowMarketProduct(marketProductId)
+    if self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
+        local targetNode = self:GetCategoryDataForMarketProduct(marketProductId)
+        if targetNode then
+            if self.categoryTree:GetSelectedNode() == targetNode then
+                local preview = self:ShouldAutomaticallyPreviewMarketProduct(marketProductId)
+                self:ScrollToMarketProduct(marketProductId, preview)
+            else
+                self.categoryTree:SelectNode(targetNode)
+                self:SetQueuedMarketProductId(marketProductId) -- order of operations is important here
+            end
         end
+    else
+        self:SetQueuedMarketProductId(marketProductId)
     end
 end
 
@@ -1021,9 +1069,10 @@ do
 end
 
 function Market:ScrollToQueuedMarketProduct()
-    local preview = self:ShouldAutomaticallyPreviewMarketProduct(self.queuedMarketProductId)
-    self:ScrollToMarketProduct(self.queuedMarketProductId, preview)
-    self.queuedMarketProductId = nil
+    local queuedMarketProductId = self:GetQueuedMarketProductId()
+    local preview = self:ShouldAutomaticallyPreviewMarketProduct(queuedMarketProductId)
+    self:ScrollToMarketProduct(queuedMarketProductId, preview)
+    self:ClearQueuedMarketProductId()
 end
 
 function Market:RequestShowMarketWithSearchString(searchString)
@@ -1501,20 +1550,47 @@ function Market:OnMarketLoading()
     self:ShowMarket(false)
 end
 
-function Market:PurchaseMarketProduct(marketProductId, presentationIndex)
-    PlaySound(SOUNDS.MARKET_PURCHASE_SELECTED)
+do
+    local function GetPurchaseErrorInfo(...)
+        return ZO_MARKET_SINGLETON:GetMarketProductPurchaseErrorInfo(...)
+    end
+    local IS_PURCHASE = false
+    function Market:PurchaseMarketProduct(marketProductId, presentationIndex)
+        self:StartPurchaseFlow(marketProductId, presentationIndex, GetPurchaseErrorInfo, IS_PURCHASE)
+    end
+end
 
-    local hasErrors, dialogParams, promptBuyCrowns, allowContinue = ZO_MARKET_SINGLETON:GetMarketProductPurchaseErrorInfo(marketProductId, presentationIndex)
+do
+    local function GetGiftErrorInfo(...)
+        return ZO_MARKET_SINGLETON:GetMarketProductGiftErrorInfo(...)
+    end
+    local IS_GIFTING = true
+    function Market:GiftMarketProduct(marketProductId, presentationIndex)
+        self:StartPurchaseFlow(marketProductId, presentationIndex, GetGiftErrorInfo, IS_GIFTING)
+    end
+end
 
-    if promptBuyCrowns then
+function Market:StartPurchaseFlow(marketProductId, presentationIndex, errorInfoFunction, isGift)
+    local selectionSound = isGift and SOUNDS.MARKET_GIFT_SELECTED or SOUNDS.MARKET_PURCHASE_SELECTED
+    PlaySound(selectionSound)
+
+    local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(marketProductId, presentationIndex)
+
+    local NO_DATA = nil
+    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
         ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", ZO_BUY_CROWNS_URL_TYPE, dialogParams)
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_GRACE_PERIOD_ACTIVE then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD", {}, dialogParams)
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_NOT_ALLOWED then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED", NO_DATA, dialogParams)
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY", NO_DATA, dialogParams)
     elseif not allowContinue then
-        local NO_DATA = nil
         ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DATA, dialogParams)
     elseif hasErrors then
         ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", {marketProductId = marketProductId, presentationIndex = presentationIndex}, dialogParams)
     else
-        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProductId = marketProductId, presentationIndex = presentationIndex})
+        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProductId = marketProductId, presentationIndex = presentationIndex, isGift = isGift})
     end
 
     OnMarketStartPurchase(marketProductId)
@@ -1525,14 +1601,28 @@ function Market:OnMarketPurchaseResult()
     self:RefreshCategoryTree()
 end
 
+function Market:OnCollectibleUpdated(justUnlocked)
+    ZO_Market_Shared.OnCollectibleUpdated(self, justUnlocked)
+    self:RefreshCategoryTree()
+end
+
+function Market:OnCollectiblesUpdated(numJustUnlocked)
+    ZO_Market_Shared.OnCollectiblesUpdated(self, numJustUnlocked)
+    self:RefreshCategoryTree()
+end
+
 function Market:OnShowBuyCrownsDialog()
     OnMarketPurchaseMoreCrowns()
     ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_CROWNS_URL_TYPE, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
 end
 
 function Market:RequestShowCategory(categoryIndex, subcategoryIndex)
-    self.queuedCategoryIndex = categoryIndex
-    self.queuedSubcategoryIndex = subcategoryIndex
+    if self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
+        self:SelectCategory(categoryIndex, subcategoryIndex)
+        self:ClearQueuedCategoryIndices()
+    else
+        self:SetQueuedCategoryIndices(categoryIndex, subcategoryIndex)
+    end
 end
 
 function Market:SelectCategory(categoryIndex, subcategoryIndex)
@@ -1599,15 +1689,8 @@ function Market:OnShown()
         self:RefreshCategoryTree()
     end
 
-    if self.queuedMarketProductPreview and IsCharacterPreviewingAvailable() then
-        self.queuedMarketProductPreview:Preview()
-        self.queuedMarketProductPreview = nil
-    end
-
-    if self.queuedCategoryIndex then
-        self:SelectCategory(self.queuedCategoryIndex, self.queuedSubcategoryIndex)
-        self.queuedCategoryIndex = nil
-        self.queuedSubcategoryIndex = nil
+    if self.marketState == MARKET_STATE_OPEN then
+        self:ProcessQueuedNavigation()
     end
 end
 
@@ -1618,6 +1701,9 @@ function Market:OnHidden()
     -- make sure we restore the content fragment when we close the market
     self.marketScene:AddFragment(self.contentFragment)
     ITEM_PREVIEW_KEYBOARD:UnregisterCallback("RefreshActions", self.refreshActionsCallback)
+    self.queuedMarketProductPreview = nil
+    self:ClearQueuedCategoryIndices()
+    self:ClearQueuedMarketProductId()
 end
 
 function Market:RefreshProducts()

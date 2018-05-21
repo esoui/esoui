@@ -6,20 +6,6 @@
         </Label>
         <Label name="ZO_SpecializedCollection_Book_LargeLabel_Keyboard" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard" font="ZoFontWinH2" virtual="true" />
 
-        <Control name="ZO_SpecializedCollection_Book_NavigationHeader_Keyboard" inherits="ZO_IconHeader" virtual="true">
-            <DimensionConstraints minY="48" />
-
-            <Controls>
-                <Texture name="$(parent)Icon" override="true">
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="7" />
-                </Texture>
-
-                <Label name="$(parent)Text" override="true" font="ZoFontHeader3" inherits="ZO_SelectableLabel">
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="9" />
-                </Label>
-            </Controls>
-        </Control>
-
         <Label name="ZO_SpecializedCollection_Book_NavigationEntry_Keyboard"  inherits="ZO_SelectableTooltipIfTruncatedLabel ZO_TreeEntry" font="ZoFontHeader" verticalAlignment="CENTER" virtual="true">
             <Dimensions x="210" y="22" />
 
@@ -30,13 +16,13 @@
                 </Texture>
             </Controls>
         </Label>
-
+        
         <TopLevelControl name="ZO_SpecializedCollection_Book_Keyboard" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true" virtual="true">
             <Controls>
                 <Control name="$(parent)NavigationList" inherits="ZO_ScrollContainer">
-                    <Dimensions x="285" />
-                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="77" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-10" offsetY="-60" />
+                    <Dimensions x="303" />
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-60" />
                 </Control>
 
                 <Control name="$(parent)Contents">

@@ -13,9 +13,6 @@ function ZO_GamepadTradingHouse_Sell:Initialize(control)
 
     GAMEPAD_TRADING_HOUSE_SELL_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
     self:SetFragment(GAMEPAD_TRADING_HOUSE_SELL_FRAGMENT)
-
-    self.messageControlTextNoGuildPermission = zo_strformat(GetString(SI_GAMEPAD_TRADING_HOUSE_NO_PERMISSION_GUILD), GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE))
-    self.messageControlTextNoPlayerPermission = GetString(SI_GAMEPAD_TRADING_HOUSE_NO_PERMISSION_PLAYER)
 end
 
 function ZO_GamepadTradingHouse_Sell:UpdateItemSelectedTooltip(selectedData)
@@ -41,14 +38,20 @@ end
 function ZO_GamepadTradingHouse_Sell:UpdateListForCurrentGuild()
     local guildId = GetSelectedTradingHouseGuildId()
     if CanSellOnTradingHouse(guildId) then
-        self.itemList:Activate()
-        self.listControl:SetHidden(false)
-        self.messageControl:SetHidden(true)
+        self.itemList:SetNoItemText(GetString(SI_GAMEPAD_NO_SELL_ITEMS))
+        self.itemList:SetInventoryTypes(BAG_BACKPACK)
     else
-        self.itemList:Deactivate()
-        self.listControl:SetHidden(true)
-        self.messageControl:SetHidden(false)
-        self.messageControl:SetText(DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_TRADING_HOUSE) and self.messageControlTextNoPlayerPermission or self.messageControlTextNoGuildPermission)
+        local errorMessage
+        if not IsPlayerInGuild(guildId) then
+            errorMessage = GetString(SI_GAMEPAD_TRADING_HOUSE_NOT_A_GUILD_MEMBER)
+        elseif not DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_TRADING_HOUSE) then
+            errorMessage = zo_strformat(GetString(SI_GAMEPAD_TRADING_HOUSE_NO_PERMISSION_GUILD), GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE))
+        else
+            errorMessage = GetString(SI_GAMEPAD_TRADING_HOUSE_NO_PERMISSION_PLAYER)
+        end
+
+        self.itemList:SetNoItemText(errorMessage)
+        self.itemList:ClearInventoryTypes()
     end
 
     self:UpdateKeybind()
@@ -77,14 +80,15 @@ function ZO_GamepadTradingHouse_Sell:InitializeList()
     local CATEGORIZATION_FUNCTION = nil
     local ENTRY_SETUP_CALLBACK = nil
 
-    self.messageControl = self.control:GetNamedChild("StatusMessage")
     self.itemList = ZO_GamepadInventoryList:New(self.listControl, BAG_BACKPACK, SLOT_TYPE_ITEM, OnSelectionChanged, ENTRY_SETUP_CALLBACK, 
                                                     CATEGORIZATION_FUNCTION, SORT_FUNCTION, USE_TRIGGERS, "ZO_TradingHouse_ItemListRow_Gamepad", SellItemSetupFunction)
 
     self.itemList:SetItemFilterFunction(function(slot) 
                                             return  ZO_InventoryUtils_DoesNewItemMatchFilterType(slot, ITEMFILTERTYPE_TRADING_HOUSE)
                                         end)
-    self.itemList:GetParametricList():SetAlignToScreenCenter(true)
+    local parametricList = self.itemList:GetParametricList()
+    parametricList:SetAlignToScreenCenter(true)
+    parametricList:SetValidateGradient(true)
 end
 
 function ZO_GamepadTradingHouse_Sell:OnShowing()
@@ -159,7 +163,6 @@ end
 
 function ZO_GamepadTradingHouse_Sell:DeactivateForResponse()
     ZO_GamepadTradingHouse_BaseList.DeactivateForResponse(self)
-    self.messageControl:SetHidden(true)
 end
 
 function ZO_TradingHouse_Sell_Gamepad_OnInitialize(control)

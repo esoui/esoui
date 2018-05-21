@@ -25,6 +25,7 @@ function ZO_GamepadTradingHouse_Listings:InitializeList()
     local list = self:GetList()
     list:AddDataTemplate(SCROLL_LIST_ITEM_TEMPLATE_NAME, SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
     list:SetAlignToScreenCenter(true)
+    list:SetValidateGradient(true)
     list:SetNoItemText(GetString(SI_GAMEPAD_TRADING_HOUSE_NO_LISTINGS))
 
     list:SetOnSelectedDataChangedCallback(

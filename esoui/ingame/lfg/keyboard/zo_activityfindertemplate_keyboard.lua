@@ -133,15 +133,9 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
     if selectedData then
         local filterData = selectedData.data
         if filterData.singular then
-            local activityType = filterData:GetActivityType()
-            if filterData:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.RANDOM then
-                ZO_ACTIVITY_FINDER_ROOT_MANAGER:SetActivityTypeSelected(activityType, true)
-                lockReasonText = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLockReasonForActivityType(activityType)
-            else
-                ZO_ACTIVITY_FINDER_ROOT_MANAGER:SetLocationSelected(filterData, true)
-                if filterData:IsLocked() then
-                    lockReasonText = filterData:GetLockReasonText()
-                end
+            ZO_ACTIVITY_FINDER_ROOT_MANAGER:SetLocationSelected(filterData, true)
+            if filterData:IsLocked() then
+                lockReasonText = filterData:GetLockReasonText()
             end
         else
             self.navigationTree:Reset()
@@ -151,7 +145,7 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
             local modes = self.dataManager:GetFilterModeData()
 
             local HEADER_OPEN = true
-            for activityIndex, activityType in ipairs(filterData.activityTypes) do
+            for _, activityType in ipairs(filterData.activityTypes) do
                 if ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes()) > 0 then
                     local isLocked = self:GetLevelLockInfoByActivity(activityType)
                     if not isLocked then
@@ -159,8 +153,8 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
                         local headerText = GetString("SI_LFGACTIVITY", activityType)
                         local headerNode = self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationHeader_Keyboard", headerText, nil, SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED, HEADER_OPEN)
 
-                        for locationIndex, location in ipairs(locationData) do
-                            if modes:IsEntryTypeVisible(location:GetEntryType()) then
+                        for _, location in ipairs(locationData) do
+                            if modes:IsEntryTypeVisible(location:GetEntryType()) and not location:ShouldForceFullPanelKeyboard() then
                                 self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationEntry_Keyboard", location, headerNode, SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED)
                             end
                         end
@@ -205,27 +199,38 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshFilters()
 
     local modes = self.dataManager:GetFilterModeData()
     local activityTypes = modes:GetActivityTypes()
-    --Add potential randoms
+    
+    local addListViewSubmenuEntry = false
+    
+    -- Add singular panel entries
     for _, activityType in ipairs(activityTypes) do
-        local randomInfo = modes:GetRandomInfo(activityType)
-        if randomInfo and DoesLFGActivityHasAllOption(activityType) then
+        if ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes()) > 0 then
             local isLocked = self:GetLevelLockInfoByActivity(activityType)
             if not isLocked then
-                local randomLocationData = ZO_ActivityFinderLocation_Random:New(activityType, randomInfo)
-                randomLocationData.singular = true
-                local entry = ZO_ComboBox:CreateItemEntry(randomLocationData:GetNameKeyboard(), OnFilterChanged)
-                entry.data = randomLocationData
+                local locationsData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
+                for _, location in ipairs(locationsData) do
+                    if modes:IsEntryTypeVisible(location:GetEntryType()) and location:DoesPlayerMeetLevelRequirements() then
+                        if location:ShouldForceFullPanelKeyboard() then
+                            local entry = ZO_ComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
+                            location.singular = true
+                            entry.data = location
 
-                if previousSelection and previousSelection.name == entry.name then
-                    reselectedEntry = entry
+                            if previousSelection and previousSelection.name == entry.name then
+                                reselectedEntry = entry
+                            end
+
+                            self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                        else
+                            addListViewSubmenuEntry = true
+                        end
+                    end
                 end
-                self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
             end
         end
     end
-    
-    --Add specifics
-    if modes:AreEntriesInSubmenu() then
+
+    -- Add list view submenu entry
+    if addListViewSubmenuEntry then
         local entry = ZO_ComboBox:CreateItemEntry(modes:GetSpecificFilterName(), OnFilterChanged)
         entry.data =
         {
@@ -238,21 +243,6 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshFilters()
         end
 
         self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-    else
-        for _, activityType in ipairs(activityTypes) do
-            local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
-            for _, location in ipairs(locationData) do
-                local entry = ZO_ComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
-                location.singular = true
-                entry.data = location
-
-                if previousSelection and previousSelection.name == entry.name then
-                    reselectedEntry = entry
-                end
-
-                self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-            end
-        end
     end
 
     if reselectedEntry then
@@ -282,7 +272,6 @@ function ZO_ActivityFinderTemplate_Keyboard:OnFilterChanged(comboBox, entryText,
 
     if data.singular then
         self.titleLabel:SetText(data:GetNameKeyboard())
-        self.descriptionLabel:SetText(data:GetDescription())
         self.backgroundTexture:SetTexture(data:GetDescriptionTextureLargeKeyboard())
         data:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
 

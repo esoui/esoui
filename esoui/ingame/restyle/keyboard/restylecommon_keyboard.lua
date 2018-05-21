@@ -260,7 +260,7 @@ function ZO_RestyleCommon_Keyboard:InitializeSearch()
         if restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() then
             COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
             COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(restyleCategoryData:GetSpecializedCollectibleCategory())
-            COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHideWhenLocked(true)
+            COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
             COLLECTIONS_BOOK_SINGLETON:RegisterCallback("UpdateSearchResults", self.onUpdateSearchResultsCallback)
         else
             COLLECTIONS_BOOK_SINGLETON:UnregisterCallback("UpdateSearchResults", self.onUpdateSearchResultsCallback)
@@ -353,7 +353,7 @@ do
         end
 
         local categoryDataNodes = {}
-        for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator(IsValidCategoryData) do
+        for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator({ IsValidCategoryData }) do
             local enabled = restyleCategoryData:IsSpecializedCollectibleCategoryEnabled() and (not categoryEnabledCallback or categoryEnabledCallback(categoryData))
             local categoryNode = AddCategory(categoryIndex, enabled)
             categoryDataNodes[categoryData] = categoryNode
@@ -535,8 +535,8 @@ function ZO_RestyleCommon_Keyboard:OnHidden()
     self:RemoveKeybinds()
 end
 
-function ZO_RestyleCommon_Keyboard:OnCollectibleUpdated(collectibleId, justUnlocked)
-    if self.fragment:IsShowing() and justUnlocked then
+function ZO_RestyleCommon_Keyboard:OnCollectibleUpdated(collectibleId, lockStateChange)
+    if self.fragment:IsShowing() and lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
         self:UpdateCollectibleStatus(collectibleId)
     end
 end

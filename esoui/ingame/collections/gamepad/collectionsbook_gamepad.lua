@@ -72,8 +72,13 @@ function ZO_GamepadCollectionsBook:Initialize(control)
 
     SYSTEMS:RegisterGamepadObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
 
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
+    local function OnCollectibleUpdated()
+        self:OnCollectibleUpdated()
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("PrimaryResidenceSet", OnCollectibleUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
@@ -175,7 +180,9 @@ function ZO_GamepadCollectionsBook:SetupList(list)
 
         if data:HasAnyNewCollectibles() then
             control.icon:ClearIcons()
-            control.icon:AddIcon(data:GetGamepadIcon())
+            if data:IsTopLevelCategory() then
+                control.icon:AddIcon(data:GetGamepadIcon())
+            end
             control.icon:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
             control.icon:Show()
         end
@@ -491,7 +498,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
                 elseif self:CanUpgradeCurrentTarget() then
-                    ZO_ShowChapterUpgradePlatformDialog()
+                    local IS_STANDARD_EDITION = false
+                    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_IN_GAME)
                 end
             end,
             visible = function()
@@ -591,7 +599,8 @@ function ZO_GamepadCollectionsBook:ViewCategory(categoryData)
 
     self:BuildSubcategoryList(categoryData)
     if self.subcategoryList.list:IsEmpty() then
-        self:BuildCollectionList(categoryData)
+        local RESET_SELECTION_TO_TOP = true
+        self:BuildCollectionList(categoryData, RESET_SELECTION_TO_TOP)
         self:ShowList(self.collectionList)
     else
         self:ShowList(self.subcategoryList)
@@ -617,7 +626,8 @@ function ZO_GamepadCollectionsBook:ViewSubcategory(subcategoryData)
 
     subcategoryData = self.subcategoryList.list:GetTargetData()
 
-    self:BuildCollectionList(subcategoryData)
+    local RESET_SELECTION_TO_TOP = true
+    self:BuildCollectionList(subcategoryData, RESET_SELECTION_TO_TOP)
     self:ShowList(self.collectionList)
 end
 
@@ -720,7 +730,7 @@ function ZO_GamepadCollectionsBook:OnCollectionUpdated()
     end
 end
 
-function ZO_GamepadCollectionsBook:OnCollectibleUpdated(collectibleId)
+function ZO_GamepadCollectionsBook:OnCollectibleUpdated()
     if not self.control:IsHidden() then
         self:BuildCategoryList()
 
@@ -734,7 +744,8 @@ function ZO_GamepadCollectionsBook:OnCollectibleUpdated(collectibleId)
             end
 
             if self:IsViewingCollectionsList() then
-                self:BuildCollectionList(currentCategoryData)
+                local DONT_RESET_SELECTION_TO_TOP = false
+                self:BuildCollectionList(currentCategoryData, DONT_RESET_SELECTION_TO_TOP)
             end
         end
     end
@@ -762,7 +773,7 @@ function ZO_GamepadCollectionsBook:BuildCategoryList()
     self.categoryList.list:Clear()
 
     -- Add the categories entries
-    for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator(ZO_CollectibleCategoryData.HasShownCollectiblesInCollection) do
+    for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection }) do
         local formattedCategoryName = categoryData:GetFormattedName()
         local gamepadIcon = categoryData:GetGamepadIcon()
 
@@ -786,7 +797,7 @@ function ZO_GamepadCollectionsBook:BuildSubcategoryList(categoryData)
     subcategoryListInfo.titleText = categoryData:GetFormattedName()
 
     -- Add the categories entries
-    for subcategoryIndex, subcategoryData in categoryData:SubcategoryIterator(ZO_CollectibleCategoryData.HasShownCollectiblesInCollection) do
+    for subcategoryIndex, subcategoryData in categoryData:SubcategoryIterator({ZO_CollectibleCategoryData.HasShownCollectiblesInCollection}) do
         local formattedSubcategoryName = subcategoryData:GetFormattedName()
         
         local entryData = ZO_GamepadEntryData:New(formattedSubcategoryName)
@@ -803,7 +814,7 @@ function ZO_GamepadCollectionsBook:BuildSubcategoryList(categoryData)
     self.currentCategoryData = categoryData
 end
 
-function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData)
+function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData, resetSelectionToTop)
     local collectionListInfo = self.collectionList
     local collectionList = collectionListInfo.list
 
@@ -813,16 +824,11 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData)
     local unlockedData = {}
     local lockedData = {}
 
-    for collectibleIndex, collectibleData in categoryData:CollectibleIterator(ZO_CollectibleData.IsShownInCollection) do
+    for _, collectibleData in categoryData:SortedCollectibleIterator({ ZO_CollectibleData.IsShownInCollection }) do
         local entryData = self:BuildCollectibleData(collectibleData)
         if not collectibleData:IsPlaceholder() then
             if collectibleData:IsUnlocked() then
-                --Special case: The primary residence is sorted to the top of the category for housing
-                if collectibleData:IsHouse() and collectibleData:IsPrimaryResidence() then
-                    table.insert(unlockedData, 1, entryData)
-                else
-                    table.insert(unlockedData, entryData)
-                end
+                table.insert(unlockedData, entryData)
             else
                 table.insert(lockedData, entryData)
             end
@@ -834,7 +840,7 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData)
     self:BuildListFromTable(collectionList, unlockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
     self:BuildListFromTable(collectionList, lockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED))
 
-    collectionList:Commit()
+    collectionList:Commit(resetSelectionToTop)
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(collectionListInfo.keybind)
 
@@ -982,9 +988,9 @@ function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
         questAcceptDescription:SetText(collectibleData:GetQuestDescription())
         questAcceptDescription:SetHidden(false)
     elseif not isUnlocked then
-        local canUpgrade = collectibleData:RequiresEntitlement()
-        if collectibleData:IsPurchasable() or collectibleData:IsUnlockedViaSubscription() or canUpgrade then
-            local acquireText = canUpgrade and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
+        local isChapter = collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
+        if collectibleData:IsPurchasable() or collectibleData:IsUnlockedViaSubscription() or isChapter then
+            local acquireText = isChapter and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
             questAcceptIndicator:SetText(acquireText)
             questAcceptIndicator:SetHidden(false)
         else
@@ -1236,7 +1242,7 @@ end
 function ZO_GamepadCollectionsBook:CanUpgradeCurrentTarget()
     if self:IsViewingCollectionsList() then
         local collectibleData = self:GetCurrentTargetData()
-        return collectibleData and collectibleData:IsStory() and collectibleData:RequiresEntitlement() and not collectibleData:IsOwned()
+        return collectibleData and collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) and not collectibleData:IsOwned()
     end
     return false
 end
@@ -1315,7 +1321,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     text = GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                        ZO_ShowChapterUpgradePlatformDialog()
+                        local IS_STANDARD_EDITION = false
+                        ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_IN_GAME)
                     end,
                     visible = function()
                         return self:CanUpgradeCurrentTarget()

@@ -44,8 +44,11 @@ end
 function ZO_EULA:Initialize(control)
     self.control = control
     self.isShowingLinkConfirmation = false
-    self.agreeButton = self.control:GetNamedChild("Agree")
-    self.scroll = self.control:GetNamedChild("ContainerScroll")
+    self.agreeButton = control:GetNamedChild("Agree")
+    self.notifyUpdatedTextLabel = control:GetNamedChild("NotifyUpdatedText")
+    self.readTextCheckContainer = control:GetNamedChild("ReadTextCheckContainer")
+    self.readTextCheckBox = self.readTextCheckContainer:GetNamedChild("CheckBox")
+    self.scroll = control:GetNamedChild("ContainerScroll")
     self:InitializeDialog(control)
     self:CreateEULAScene(control)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, function(...) self:OnLinkClicked(...) end)
@@ -80,13 +83,25 @@ function ZO_EULA:ShowNextEULA()
         if ZO_Dialogs_IsShowing("SHOW_EULA") then
             ZO_Dialogs_ReleaseDialog("SHOW_EULA")
         end
-        local eulaText, agreeText, disagreeText, hasAgreed, eulaTitle = GetEULADetails(self.eulaType)
+        local eulaText, agreeText, disagreeText, hasAgreed, eulaTitle, readCheckText = GetEULADetails(self.eulaType)
         if eulaTitle == "" then
             eulaTitle = SI_WINDOW_TITLE_EULA
         end
         self.titleEulaText = eulaTitle
         self.mainEulaText = eulaText
         self:SetupButtonTextData(agreeText, disagreeText)
+        local notifyUpdatedText = GetString("SI_EULATYPE_NOTIFYUPDATED", self.eulaType)
+        self.notifyUpdatedTextLabel:SetText(notifyUpdatedText)
+
+        if readCheckText ~= "" then
+            ZO_CheckButton_SetLabelText(self.readTextCheckBox, readCheckText)
+            ZO_CheckButton_SetToggleFunction(self.readTextCheckBox, function() self:CheckEnableAgreeButton() end)
+            self.readTextCheckContainer:SetHidden(false)
+        else
+            self.readTextCheckContainer:SetHidden(true)
+        end
+        
+
         self:ResetDialog()
         ZO_Dialogs_ShowDialog("SHOW_EULA")
     else
@@ -161,15 +176,23 @@ function ZO_EULA:InitializeDialog(dialogControl)
 end
 
 function ZO_EULA:CheckEnableAgreeButton(verticalOffset)
-    if(not self.agreeButton.enabledOnce) then
+    if not self.scrolledToBottomOnce then
         if(verticalOffset == nil) then
             local _
             _, verticalOffset = self.scroll:GetScrollOffsets()
         end
 
         local _, verticalExtent = self.scroll:GetScrollExtents()
-        self.agreeButton.enabledOnce = (verticalExtent == 0) or zo_floatsAreEqual(verticalOffset, verticalExtent, 0.01)
-        self.agreeButton:SetEnabled(self.agreeButton.enabledOnce)
+        self.scrolledToBottomOnce = (verticalExtent == 0) or zo_floatsAreEqual(verticalOffset, verticalExtent, 0.01)
+    end
+
+    if self.scrolledToBottomOnce then
+        if self.readTextCheckContainer:IsHidden() then
+            self.agreeButton:SetEnabled(true)
+        else
+            ZO_CheckButton_SetEnableState(self.readTextCheckBox, true)
+            self.agreeButton:SetEnabled(ZO_CheckButton_IsChecked(self.readTextCheckBox))
+        end
     end
 end
 
@@ -188,13 +211,19 @@ function ZO_EULA:ResetDialog()
         end
 
         if(GetFrameTimeMilliseconds() > automaticEnableTime) then
-            self.agreeButton:SetEnabled(true)
+            if self.readTextCheckContainer:IsHidden() then
+                self.agreeButton:SetEnabled(true)
+            else
+                ZO_CheckButton_SetEnableState(self.readTextCheckBox, true)
+            end
             self.scroll:SetHandler("OnUpdate", nil)
         end
     end
 
-    self.agreeButton.enabledOnce = false
+    self.scrolledToBottomOnce = false
     self.agreeButton:SetEnabled(false)
+    ZO_CheckButton_SetEnableState(self.readTextCheckBox, false)
+    ZO_CheckButton_SetUnchecked(self.readTextCheckBox)
     self.scroll:SetHandler("OnUpdate", OnUpdate)
 end
 

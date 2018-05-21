@@ -299,7 +299,7 @@ function ZO_CharacterSelect_Initialize(self)
             ZO_CharacterSelectChapterUpgrade:SetHidden(true)
         else
             local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
-            ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleDisplayName(chapterCollectibleId)))
+            ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId)))
             ZO_CharacterSelectChapterUpgradeImage:SetTexture(GetCurrentChapterMediumLogoFileIndex())
 
             ZO_CharacterSelectChapterUpgrade:SetHidden(false)

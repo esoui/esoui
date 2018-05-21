@@ -1,4 +1,12 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_GridEntry_IconSelectedAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.2"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
     <Controls>
         <Control name="ZO_GridScrollList_Keyboard" virtual="true">
             <Controls>

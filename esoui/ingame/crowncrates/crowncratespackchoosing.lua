@@ -707,6 +707,8 @@ function ZO_CrownCratesPackChoosing:InitializeKeybinds()
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Crown Crates Next Page",
             ethereal = true,
             keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             callback = function() self:RequestNextPage() end,
@@ -714,6 +716,8 @@ function ZO_CrownCratesPackChoosing:InitializeKeybinds()
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Crown Crates Previous Page",
             ethereal = true,
             keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             callback = function() self:RequestPreviousPage() end,

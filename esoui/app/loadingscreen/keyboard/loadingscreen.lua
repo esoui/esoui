@@ -10,6 +10,7 @@ function LoadingScreen_Keyboard:InitializeAnimations()
     self.animations:GetAnimation(4):SetAnimatedControl(LoadingScreenBottomMunge)
     self.animations:GetAnimation(5):SetAnimatedControl(LoadingScreenBottomMunge)
     self.animations.control = self
+    self.animations:SetHandler("OnStop", function(timeline) self:LoadingCompleteAnimation_OnStop(timeline) end)
 end
 
 function LoadingScreen_Keyboard:IsPreferredScreen()

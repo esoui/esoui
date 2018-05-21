@@ -22,7 +22,7 @@ end
 
 function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutReward(data, rewardContainer, previousControl)
     local rewardControl = self:AcquireRewardControl()
-    local icon = ZO_LEVEL_UP_REWARDS_MANAGER:GetPlatformIconFromRewardData(data)
+    local icon = data:GetGamepadIcon()
     if icon then
         rewardControl.iconControl:SetTexture(icon)
         rewardControl.iconControl:SetHidden(false)
@@ -32,8 +32,9 @@ function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutReward(data, rewardContainer, p
 
     local name = ZO_LEVEL_UP_REWARDS_MANAGER:GetUpcomingRewardNameFromRewardData(data)
     rewardControl.nameControl:SetText(name)
-    if data.quality then
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+    local rewardType = data:GetRewardType()
+    if rewardType then
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemQuality())
         rewardControl.nameControl:SetColor(r, g, b, 1)
     else
         local r, g, b = ZO_NORMAL_TEXT:UnpackRGB()
@@ -49,19 +50,19 @@ function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutReward(data, rewardContainer, p
     return rewardControl
 end
 
-function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutRewardsForLevel(level, rewardId, levelRewards, rewardContainer)
-    ZO_LevelUpRewardsUpcoming_Base.LayoutRewardsForLevel(self, level, rewardId, levelRewards, rewardContainer)
+function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutRewardsForLevel(level, levelRewards, rewardContainer)
+    ZO_LevelUpRewardsUpcoming_Base.LayoutRewardsForLevel(self, level, levelRewards, rewardContainer)
 
     local previousControl = nil
 
-    local attributePoints = GetAttributePointsAwardedForReward(rewardId)
+    local attributePoints = GetAttributePointsAwardedForLevel(level)
     if attributePoints > 0 then
         local attributeData = ZO_LEVEL_UP_REWARDS_MANAGER:GetAttributePointEntryInfo(attributePoints)
         local attributeControl = self:LayoutReward(attributeData, rewardContainer, previousControl)
         previousControl = attributeControl
     end
 
-    local skillPoints = GetSkillPointsAwardedForReward(rewardId)
+    local skillPoints = GetSkillPointsAwardedForLevel(level)
     if skillPoints > 0 then
         local skillPointData = ZO_LEVEL_UP_REWARDS_MANAGER:GetSkillPointEntryInfo(skillPoints)
         local skillControl = self:LayoutReward(skillPointData, rewardContainer, previousControl)
@@ -69,7 +70,7 @@ function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutRewardsForLevel(level, rewardId
     end
 
     for i, reward in ipairs(levelRewards) do
-        if ZO_LEVEL_UP_REWARDS_MANAGER:IsRewardDataValidForPlayer(reward) then
+        if reward:IsValidReward() then
             local rewardControl = self:LayoutReward(reward, rewardContainer, previousControl)
             previousControl = rewardControl
         end

@@ -242,9 +242,15 @@ function CampaignBrowser:DoQueue()
 end
 
 function CampaignBrowser:CanLeave()
-    if(self.mouseOverRow) then
-        return self.campaignBrowser:CanLeave(ZO_ScrollList_GetData(self.mouseOverRow))
+    if self.mouseOverRow then
+        local data = ZO_ScrollList_GetData(self.mouseOverRow)
+        if data then
+            if data.type == self.campaignBrowser:GetQueueType() then
+                return self.campaignBrowser:CanLeave(data.id, data.isGroup)
+            end
+        end
     end
+    return false
 end
 
 function CampaignBrowser:DoLeave()

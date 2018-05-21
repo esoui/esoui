@@ -80,8 +80,7 @@ function ZO_ChapterUpgrade_Shared:OnShowing()
 end
 
 function ZO_ChapterUpgrade_Shared:OnShown()
-    local currentVersion = GetCurrentChapterVersion()
-    SetCVar("ChapterUpgradeSeenVersion", currentVersion)
+    CHAPTER_UPGRADE_MANAGER:MarkCurrentVersionSeen()
 end
 
 function ZO_ChapterUpgrade_Shared:OnHiding()
@@ -97,15 +96,4 @@ end
 
 function ZO_ChapterUpgrade_Shared:ShowContinueDialog()
     ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_CONTINUE", self.continueDialogData)
-end
-
-function ZO_ChapterUpgrade_ShouldShow()
-    local currentChapterId = GetCurrentChapterUpgradeId()
-    if currentChapterId == 0 or IsChapterOwned(currentChapterId) then
-        return false
-    end
-
-    local currentVersion = GetCurrentChapterVersion()
-    local seenVersion = tonumber(GetCVar("ChapterUpgradeSeenVersion"))
-    return currentVersion ~= seenVersion
 end

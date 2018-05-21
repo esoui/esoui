@@ -486,10 +486,33 @@ end
 
 function ZO_Tooltip:AddFlavorText(itemLink)
     local flavorText = GetItemLinkFlavorText(itemLink)
-    if(flavorText ~= "") then
+    if flavorText ~= "" then
         local flavorSection = self:AcquireSection(self:GetStyle("bodySection"))
         flavorSection:AddLine(flavorText, self:GetStyle("flavorText"))
         self:AddSection(flavorSection)
+    end
+end
+
+function ZO_Tooltip:AddItemRequiresCollectibleText(itemLink)
+    local collectibleId = GetItemLinkTooltipRequiresCollectibleId(itemLink)
+    if collectibleId ~= 0 then
+        local collectibleName = GetCollectibleName(collectibleId)
+        if collectibleName ~= "" then
+            local formatterStringId
+            local collectibleCategory = GetCollectibleCategoryType(collectibleId)
+            if collectibleCategory == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+                formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM_UPGRADE
+            elseif IsCollectiblePurchasable(collectibleId) then
+                formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM_CROWN_STORE
+            else
+                formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM
+            end
+            local text = zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryName(collectibleId))
+            local section = self:AcquireSection(self:GetStyle("bodySection"))
+            local colorStyle = IsCollectibleUnlocked(collectibleId) and self:GetStyle("succeeded") or self:GetStyle("failed")
+            section:AddLine(text, self:GetStyle("bodyDescription"), colorStyle)
+            self:AddSection(section)
+        end
     end
 end
 
@@ -545,6 +568,7 @@ function ZO_Tooltip:AddItemTags(itemLink)
                 if categoryName ~= "" then
                     itemTagsSection:AddLine(categoryName, self:GetStyle("itemTagTitle"))
                 end
+                table.sort(itemTagStrings[i])
                 itemTagsSection:AddLine(table.concat(itemTagStrings[i], GetString(SI_LIST_COMMA_SEPARATOR)), self:GetStyle("itemTagDescription"))
                 self:AddSection(itemTagsSection)
             end
@@ -578,6 +602,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         self:AddPoisonSystemDescription()
     end
     self:AddFlavorText(itemLink)
+    self:AddItemRequiresCollectibleText(itemLink)
     -- We don't want crafted furniture to show who made it, since it will get cleared once placed in a house
     -- TODO: If we implement saving the creator name, add back in LayoutItemCreator call (ESO-495280)
     if not IsItemLinkPlaceableFurniture(itemLink) then
@@ -586,6 +611,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
+    self:AddItemForcedNotDeconstructable(itemLink)
 end
 
 function ZO_Tooltip:LayoutVendorTrash(itemLink, itemName, extraData)
@@ -725,16 +751,16 @@ do
             errorSection:AddLine(GetString(SI_DYE_STAMP_NOT_USABLE_NOW), self:GetStyle("dyeStampError"))
         elseif onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP then
             local useResult = CanPlayerUseItemDyeStamp(dyeStampId)
-            if useResult == DYE_STAMP_USE_RESULT_NO_ACTIVE_ITEMS then
+            if useResult == DYE_STAMP_USE_RESULT_NO_VALID_ITEMS then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_REQUIRES_EQUIPMENT), self:GetStyle("dyeStampError"))
-            elseif useResult == DYE_STAMP_USE_RESULT_NO_VALID_ITEMS then
+            elseif useResult == DYE_STAMP_USE_RESULT_ITEMS_HAVE_SAME_DYES then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_SAME_DYE_DATA), self:GetStyle("dyeStampError"))
             end
         elseif onUseType == ITEM_USE_TYPE_COSTUME_DYE_STAMP then
             local useResult = CanPlayerUseCostumeDyeStamp(dyeStampId)
-            if useResult == DYE_STAMP_USE_RESULT_NO_ACTIVE_COLLECTIBLES then
+            if useResult == DYE_STAMP_USE_RESULT_NO_VALID_COLLECTIBLES then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_REQUIRES_COLLECTIBLE), self:GetStyle("dyeStampError"))
-            elseif useResult == DYE_STAMP_USE_RESULT_NO_VALID_COLLECTIBLES then
+            elseif useResult == DYE_STAMP_USE_RESULT_COLLECTIBLES_HAVE_SAME_DYES then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_SAME_DYE_DATA), self:GetStyle("dyeStampError"))
             elseif useResult == DYE_STAMP_USE_RESULT_COLLECTIBLES_NOT_ACTIVE then
                 errorSection:AddLine(GetString(SI_DYE_STAMP_COLLECTIBLES_HIDDEN), self:GetStyle("dyeStampError"))
@@ -994,10 +1020,7 @@ function ZO_Tooltip:LayoutStyleMaterial(itemLink, itemName, extraData)
     self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
-    self:AddItemTitle(itemLink, itemName)
-
+function ZO_Tooltip:LayoutRawBaseMaterial(itemLink, itemName, extraData)
     local refinedItemLink = GetItemLinkRefinedMaterialItemLink(itemLink)
     if(refinedItemLink ~= "") then
         local refinedSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -1008,11 +1031,45 @@ function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, extraData)
         local minRawMats = GetSmithingRefinementMinRawMaterial()
         local maxRawMats = GetSmithingRefinementMaxRawMaterial()
 
+        self:AddTopSection(itemLink)
+        self:AddItemTitle(itemLink, itemName)
+
         refinedSection:AddLine(zo_strformat(SI_TOOLTIP_ITEM_FORMAT_REFINES_TO, minRawMats, maxRawMats, qualityColor:Colorize(refinedItemName)), self:GetStyle("bodyDescription"))
         self:AddSection(refinedSection)
 
         self:AddMaterialLevels(refinedItemLink)
+        self:AddItemTags(itemLink)
     end
+end
+
+function ZO_Tooltip:LayoutRawBooster(itemLink, itemName, extraData)
+    self:AddTopSection(itemLink)
+    self:AddItemTitle(itemLink, itemName)
+    local refinedItemLink = GetItemLinkRefinedMaterialItemLink(itemLink)
+
+    if refinedItemLink ~= "" then
+        local boosterDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
+
+        local refinedItemName = GetItemLinkName(refinedItemLink)
+        local refinedItemQuality = GetItemLinkQuality(refinedItemLink)
+        local toQuality = GetItemLinkQuality(itemLink)
+        local fromQuality = zo_max(ITEM_QUALITY_TRASH, toQuality - 1)
+
+        local requiredStackSize = GetRequiredSmithingRefinementStackSize()
+        local refinedItemText = GetItemQualityColor(refinedItemQuality):Colorize(refinedItemName)
+        local toQualityText = GetItemQualityColor(toQuality):Colorize(GetString("SI_ITEMQUALITY", toQuality))
+        local fromQualityText = GetItemQualityColor(fromQuality):Colorize(GetString("SI_ITEMQUALITY", fromQuality))
+
+        boosterDescriptionSection:AddLine(zo_strformat(SI_RAW_BOOSTER_DESCRIPTION, requiredStackSize, refinedItemText, fromQualityText, toQualityText), self:GetStyle("bodyDescription"))
+        self:AddSection(boosterDescriptionSection)
+    end
+    self:AddItemTags(itemLink)
+end
+
+function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, extraData)
+    self:AddTopSection(itemLink)
+    self:AddItemTitle(itemLink, itemName)
+    self:AddFlavorText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1023,24 +1080,18 @@ function ZO_Tooltip:LayoutMaterial(itemLink, itemName, extraData)
     self:AddItemTags(itemLink)
 end
 
-function ZO_Tooltip:LayoutArmorTrait(itemLink, itemName, extraData)
+local ITEMTYPE_TRAIT_DESCRIPTIONS = {
+    [ITEMTYPE_ARMOR_TRAIT] = SI_ITEM_FORMAT_STR_ARMOR_TRAIT,
+    [ITEMTYPE_WEAPON_TRAIT] = SI_ITEM_FORMAT_STR_WEAPON_TRAIT,
+    [ITEMTYPE_JEWELRY_TRAIT] = SI_ITEM_FORMAT_STR_JEWELRY_TRAIT,
+}
+function ZO_Tooltip:LayoutTrait(itemLink, itemName, itemType, extraData)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
 
     local traitDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
-    traitDescriptionSection:AddLine(GetString(SI_ITEM_FORMAT_STR_ARMOR_TRAIT), self:GetStyle("bodyDescription"))
-    self:AddSection(traitDescriptionSection)
-
-    self:AddTrait(itemLink, extraData)
-    self:AddItemTags(itemLink)
-end
-
-function ZO_Tooltip:LayoutWeaponTrait(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
-    self:AddItemTitle(itemLink, itemName)
-
-    local traitDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
-    traitDescriptionSection:AddLine(GetString(SI_ITEM_FORMAT_STR_WEAPON_TRAIT), self:GetStyle("bodyDescription"))
+    local descriptionId = ITEMTYPE_TRAIT_DESCRIPTIONS[itemType]
+    traitDescriptionSection:AddLine(GetString(descriptionId), self:GetStyle("bodyDescription"))
     self:AddSection(traitDescriptionSection)
 
     self:AddTrait(itemLink, extraData)
@@ -1209,6 +1260,14 @@ function ZO_Tooltip:LayoutTradeBoPInfo(tradeBoPData)
     end
 end
 
+function ZO_Tooltip:AddItemForcedNotDeconstructable(itemLink)
+    local statsSection = self:AcquireSection(self:GetStyle("bodySection"))
+    if IsItemLinkForcedNotDeconstructable(itemLink) and not IsItemLinkContainer(itemLink) then
+        statsSection:AddLine(GetString(SI_ITEM_FORMAT_STR_FORCED_NOT_DECONSTRUCTIBLE), self:GetStyle("bodyDescription"), self:GetStyle("notDeconstructable"))
+    end
+    self:AddSection(statsSection)
+end
+
 function ZO_Tooltip:SetProvisionerResultItem(recipeListIndex, recipeIndex)
     local _, icon = GetRecipeResultItemInfo(recipeListIndex, recipeIndex)
     local itemLink = GetRecipeResultItemLink(recipeListIndex, recipeIndex)
@@ -1231,6 +1290,7 @@ do
         [ITEMTYPE_BLACKSMITHING_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutBooster(itemLink, itemName, extraData) end,
         [ITEMTYPE_WOODWORKING_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutBooster(itemLink, itemName, extraData) end,
         [ITEMTYPE_CLOTHIER_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutBooster(itemLink, itemName, extraData) end,
+        [ITEMTYPE_JEWELRYCRAFTING_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutBooster(itemLink, itemName, extraData) end,
 
         [ITEMTYPE_GLYPH_WEAPON] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData, extraData) end,
         [ITEMTYPE_GLYPH_ARMOR] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData, extraData) end,
@@ -1245,17 +1305,23 @@ do
 
         [ITEMTYPE_STYLE_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutStyleMaterial(itemLink, itemName, extraData) end,
 
-        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawMaterial(itemLink, itemName, extraData) end,
-        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawMaterial(itemLink, itemName, extraData) end,
-        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawMaterial(itemLink, itemName, extraData) end,
+        [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawBaseMaterial(itemLink, itemName, extraData) end,
+        [ITEMTYPE_CLOTHIER_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawBaseMaterial(itemLink, itemName, extraData) end,
+        [ITEMTYPE_WOODWORKING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawBaseMaterial(itemLink, itemName, extraData) end,
+        [ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawBaseMaterial(itemLink, itemName, extraData) end,
+
+        [ITEMTYPE_RAW_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawMaterial(itemLink, itemName, extraData) end,
+        [ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawBooster(itemLink, itemName, extraData) end,
+        [ITEMTYPE_JEWELRY_RAW_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutRawMaterial(itemLink, itemName, extraData) end,
 
         [ITEMTYPE_BLACKSMITHING_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutMaterial(itemLink, itemName, extraData) end,
         [ITEMTYPE_CLOTHIER_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutMaterial(itemLink, itemName, extraData) end,
         [ITEMTYPE_WOODWORKING_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutMaterial(itemLink, itemName, extraData) end,
+        [ITEMTYPE_JEWELRYCRAFTING_MATERIAL] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutMaterial(itemLink, itemName, extraData) end,
 
-        [ITEMTYPE_ARMOR_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutArmorTrait(itemLink, itemName, extraData) end,
-
-        [ITEMTYPE_WEAPON_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutWeaponTrait(itemLink, itemName, extraData) end,
+        [ITEMTYPE_ARMOR_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutTrait(itemLink, itemName, ITEMTYPE_ARMOR_TRAIT, extraData) end,
+        [ITEMTYPE_WEAPON_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutTrait(itemLink, itemName, ITEMTYPE_WEAPON_TRAIT, extraData) end,
+        [ITEMTYPE_JEWELRY_TRAIT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutTrait(itemLink, itemName, ITEMTYPE_JEWELRY_TRAIT, extraData) end,
 
         [ITEMTYPE_SIEGE] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutSiege(itemLink, itemName, tradeBoPData, extraData) end,
 
@@ -1553,7 +1619,7 @@ do
                 
                 --Currency Count
                 local statValuePair = locationCurrenciesSection:AcquireStatValuePair(self:GetStyle("currencyStatValuePair"))
-                statValuePair:SetStat(zo_strformat(SI_INVENTORY_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)), self:GetStyle("currencyStatValuePairStat"))
+                statValuePair:SetStat(zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)), self:GetStyle("currencyStatValuePairStat"))
                 local amount = GetCurrencyAmount(currencyType, currencyLocation)
                 FORMAT_EXTRA_OPTIONS.currencyLocation = currencyLocation
                 local valueString = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS)

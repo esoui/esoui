@@ -7,6 +7,26 @@ function ZO_MarketDialogs_Shared_OpenURLByType(dialog)
     OpenURLByType(dialog.data.urlType)
 end
 
+function ZO_MarketDialogs_Shared_OpenGiftingLockedHelp(dialog)
+    local helpCategory, helpIndex = GetGiftingAccountLockedHelpIndices()
+    RequestShowSpecificHelp(helpCategory, helpIndex)
+end
+
+function ZO_MarketDialogs_Shared_UpdateGiftingGracePeriodTimer(dialog)
+    local data = dialog.data
+    local gracePeriodTimeLeftS = GetGiftingGracePeriodTime()
+    -- update every second
+    if data.gracePeriodTimeLeftS == nil or data.gracePeriodTimeLeftS ~= gracePeriodTimeLeftS then
+        data.gracePeriodTimeLeftS = gracePeriodTimeLeftS
+        local timeLeftString = ZO_FormatTime(gracePeriodTimeLeftS, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
+        ZO_Dialogs_UpdateDialogMainText(dialog, nil, {timeLeftString})
+    end
+end
+
+function ZO_MarketDialogs_Shared_ShouldRestartGiftFlow(giftResult)
+    return giftResult == MARKET_PURCHASE_RESULT_CANNOT_GIFT_TO_PLAYER or giftResult == MARKET_PURCHASE_RESULT_CANNOT_GIFT_RECIPIENT_NOT_FOUND
+end
+
 do
     local TEXTURE_SCALE_PERCENT = 100
     function ZO_MarketDialogs_Shared_GetPreviewHouseDialogMainTextParams(marketProductId)

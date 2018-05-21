@@ -71,6 +71,8 @@ function ZO_KeybindStrip_OnInitialized(control)
         callback = function()
             SCENE_MANAGER:RequestShowLeaderBaseScene()
         end,
+        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+        name = "Default Gamepad Exit",
     }
 
     function KEYBIND_STRIP:HasDefaultExit(stateIndex)

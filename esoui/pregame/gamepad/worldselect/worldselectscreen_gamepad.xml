@@ -12,7 +12,7 @@
 
                         <Control name="$(parent)Options">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="-5" />
-                            <Anchor point="BOTTOMRIGHT" offsetY="-90" />
+                            <Anchor point="BOTTOMRIGHT"/>
 
                             <Controls>
                                 <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">

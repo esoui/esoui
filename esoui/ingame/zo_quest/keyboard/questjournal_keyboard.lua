@@ -118,7 +118,7 @@ function ZO_QuestJournal_Keyboard:InitializeQuestList()
             self:RefreshDetails()
             -- The quest tracker performs focus logic on quest/remove/update, only force focus if the player has clicked on the quest through the journal UI
             if SCENE_MANAGER:IsShowing(self.sceneName) then
-                QUEST_TRACKER:ForceAssist(data.questIndex)
+                FOCUSED_QUEST_TRACKER:ForceAssist(data.questIndex)
             end
         end
 
@@ -146,7 +146,7 @@ function ZO_QuestJournal_Keyboard:InitializeKeybindStripDescriptors()
 
             callback = function()
                 local IGNORE_SCENE_RESTRICTION = true
-                QUEST_TRACKER:AssistNext(IGNORE_SCENE_RESTRICTION)
+                FOCUSED_QUEST_TRACKER:AssistNext(IGNORE_SCENE_RESTRICTION)
                 self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
             end,
 

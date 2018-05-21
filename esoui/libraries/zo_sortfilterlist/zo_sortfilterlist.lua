@@ -217,7 +217,7 @@ function ZO_SortFilterList:SetHighlightedRow(row)
 end
 
 function ZO_SortFilterList:EnterRow(row)
-    if(not self.lockedForUpdates) then
+    if not self.lockedForUpdates then
         ZO_ScrollList_MouseEnter(self.list, row)
         local data = ZO_ScrollList_GetData(row)
         if(data) then
@@ -229,7 +229,7 @@ function ZO_SortFilterList:EnterRow(row)
 end
 
 function ZO_SortFilterList:ExitRow(row)
-    if(not self.lockedForUpdates) then
+    if not self.lockedForUpdates then
         ZO_ScrollList_MouseExit(self.list, row)
         local data = ZO_ScrollList_GetData(row)
         if(data) then
@@ -272,9 +272,11 @@ function ZO_SortFilterList:ColorRow(control, data, mouseIsOver)
                 local childType = child:GetType()
                 local textColor, iconColor = self:GetRowColors(data, mouseIsOver, child)
                 if(childType == CT_LABEL and textColor ~= nil) then
-                    child:SetColor(textColor:UnpackRGBA())
+                    local r, g, b = textColor:UnpackRGB() 
+                    child:SetColor(r, g, b, child:GetControlAlpha())
                 elseif(childType == CT_TEXTURE and iconColor ~= nil) then
-                    child:SetColor(iconColor:UnpackRGBA())
+                    local r, g, b = iconColor:UnpackRGB() 
+                    child:SetColor(r, g, b, child:GetControlAlpha())
                 end
             end
         end

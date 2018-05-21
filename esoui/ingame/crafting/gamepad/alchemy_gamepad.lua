@@ -413,6 +413,13 @@ function ZO_GamepadAlchemyInventory:New(control, owner,...)
     return ZO_GamepadCraftingInventory.New(self, owner, control, ...)
 end
 
+local GAMEPAD_CRAFTING_ALCHEMY_ITEM_SORT =
+{
+    customSortData = { tiebreaker = "bestItemCategoryName" },
+    bestItemCategoryName = { tiebreaker = "text" },
+    text = {},
+}
+
 function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
     ZO_GamepadCraftingInventory.Initialize(self, control, ...)
 
@@ -432,6 +439,10 @@ function ZO_GamepadAlchemyInventory:Initialize(owner, control, ...)
         else
             return INGREDIENT_SORT_ORDER_OTHER + subSortOrder
         end
+    end)
+
+    self:SetOverrideItemSort(function(left, right)
+        return ZO_TableOrderingFunction(left, right, "customSortData", GAMEPAD_CRAFTING_ALCHEMY_ITEM_SORT, ZO_SORT_ORDER_UP)
     end)
 end
 

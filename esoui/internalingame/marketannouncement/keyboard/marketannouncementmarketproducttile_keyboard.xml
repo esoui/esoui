@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_MarketAnnouncementMarketProductTile_Keyboard_Control" inherits="ZO_MarketAnnouncement_MarketProductTemplate_Keyboard" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontCallout",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontHeader3",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontHeader2",
+                        lineLimit = 2,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Title"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                ZO_MarketAnnouncementMarketProductTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill />
+                    <Controls>
+                        <Button name="$(parent)ActionButton" inherits="ZO_DefaultButton">
+                            <Dimensions x="200" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)Background"  relativePoint="BOTTOMLEFT" offsetX="18" offsetY="-62" />
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

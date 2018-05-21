@@ -61,8 +61,7 @@
                         </Control>
 
                         <Control name="$(parent)TraitList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)StyleList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)StyleList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
+                            <!-- The anchor for this is dynamically set -->
                         </Control>
 
                         <Control name="$(parent)BottomPadding">
@@ -85,7 +84,7 @@
                         <Control name="$(parent)ScrollChild" override="true">
                             <Anchor point="TOPLEFT"/>
                             <Anchor point="TOPRIGHT"/>
-                            <!-- controls are parented to this in lua, see ZO_GamepadSmithingCreation:SetupScrollPanel() -->
+                            <!-- controls are parented to this in lua, see ZO_GamepadSmithingCreation:InitializeScrollPanel() -->
                         </Control>
                     </Controls>
                 </Control>

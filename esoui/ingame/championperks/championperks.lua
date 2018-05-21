@@ -549,6 +549,8 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
             enabled = function() return not self:IsAnimating() end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Star Remove Points",
             ethereal = true,
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             handlesKeyUp = true,
@@ -578,6 +580,8 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Star Add Points",
             ethereal = true,
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             handlesKeyUp = true,
@@ -607,6 +611,8 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Rotate Left",
             ethereal = true,
             keybind = "UI_SHORTCUT_LEFT_SHOULDER",
             callback = function()
@@ -616,6 +622,8 @@ function ChampionPerks:InitializeGamepadKeybindStripDescriptors()
             end,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Champion Rotate Right",
             ethereal = true,
             keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
             callback = function()

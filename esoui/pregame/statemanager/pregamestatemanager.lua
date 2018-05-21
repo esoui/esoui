@@ -53,6 +53,7 @@ do
     {
         [CHAPTER_BASE_GAME] = "Video/Opening_Cinematic_$(officialLanguage).bik",
         [CHAPTER_VOLCANO] = "Video/Morrowind_Opener_$(officialLanguage).bik",
+        [CHAPTER_GLACIER] = "Video/Summerset_Opener_$(officialLanguage).bik"
     }
 
     function AttemptToPlayIntroCinematic()
@@ -249,7 +250,7 @@ local PregameStates =
                 return true
             end
 
-            return not ZO_ChapterUpgrade_ShouldShow()
+            return not CHAPTER_UPGRADE_MANAGER:ShouldShow()
         end,
 
         OnEnter = function()
@@ -692,12 +693,34 @@ function PregameStateManager_ClearError()
     ZO_PREGAME_HAD_GLOBAL_ERROR = false
 end
 
-function PregameStateManager_RequestWorldListForLogin()
+local function OnDisplayNameReady()
     shouldTryToPlayChapterOpeningCinematic = true
     shouldTryToShowChapterInterstitial = true
-    RequestWorldList()
 end
 
+function ZO_RegisterForSavedVars(systemName, version, defaults, callback)
+    local function OnReady()
+        local savedVars = ZO_SavedVars:NewAccountWide("ZO_Pregame_SavedVariables", version, systemName, defaults)
+        callback(savedVars)
+    end
+
+    local function OnAddonLoaded(eventId, name)
+        if name == "ZO_Pregame" then
+            EVENT_MANAGER:UnregisterForEvent(systemName, EVENT_ADD_ON_LOADED)
+
+            -- Wait for login
+            if GetDisplayName() ~= "" then
+                OnReady()
+            end
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_ADD_ON_LOADED, OnAddonLoaded)
+    -- Every time we log in, we need a new saved vars for that account
+    EVENT_MANAGER:RegisterForEvent(systemName, EVENT_DISPLAY_NAME_READY, OnReady)
+end
+
+EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISPLAY_NAME_READY, OnDisplayNameReady)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_LIST_RECEIVED, OnCharacterListReceived)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SHOW_PREGAME_GUI_IN_STATE, OnShowPregameGuiInState)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelected)

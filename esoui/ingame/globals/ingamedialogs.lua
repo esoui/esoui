@@ -772,6 +772,7 @@ ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
+    canQueue = true,
     title =
     {
         text = SI_PROMPT_TITLE_FAST_TRAVEL_CONFIRM,
@@ -802,6 +803,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
+    canQueue = true,
     title =
     {
         text = SI_PROMPT_TITLE_FAST_TRAVEL_CONFIRM,
@@ -878,58 +880,6 @@ ESO_Dialogs["RECALL_CONFIRM"] =
             KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
         end
     end,
-}
-
-ESO_Dialogs["LOG_OUT"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_PROMPT_TITLE_LOG_OUT,
-    },
-    mainText =
-    {
-        text = SI_LOG_OUT_DIALOG,
-    },
-    buttons =
-    {
-        {
-            text = SI_DIALOG_YES,
-            callback = function(dialog)
-                Logout()
-            end
-        },
-        {
-            text = SI_DIALOG_NO,
-        }
-    },
-}
-
-ESO_Dialogs["QUIT"] =
-{
-    title =
-    {
-        text = SI_PROMPT_TITLE_QUIT,
-    },
-    mainText =
-    {
-        text = SI_QUIT_DIALOG,
-    },
-    buttons =
-    {
-        {
-            text = SI_DIALOG_YES,
-            callback = function(dialog)
-                Quit()
-            end
-        },
-        {
-            text = SI_DIALOG_NO,
-        }
-    },
 }
 
 ESO_Dialogs["ADD_IGNORE"] =
@@ -1609,8 +1559,45 @@ do
     }
 end
 
+ESO_Dialogs["CONFIRM_CREATE_NONSET_ITEM"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_SMITHING_CREATE_NONSET_ITEM_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = SI_SMITHING_CREATE_NONSET_ITEM_DIALOG_DESCRIPTION,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                CraftSmithingItem(unpack(dialog.data.craftingParams))
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
 ESO_Dialogs["CONVERT_STYLE_MOVED"] =
 {
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowShowOnNextScene = true,
+    },
     title =
     {
         text = SI_ITEM_ACTION_CONVERT_STYLE_MOVED_TITLE,
@@ -1624,6 +1611,7 @@ ESO_Dialogs["CONVERT_STYLE_MOVED"] =
         [1] =
         {
             text = SI_OK,
+            keybind = "DIALOG_NEGATIVE",
         }
     },
 }
@@ -1875,7 +1863,13 @@ ESO_Dialogs["CONFIRM_INTERACTION"] =
                             SetPendingInteractionConfirmed(false)
                         end
         }  
-    }
+    },
+    updateFn = function(dialog)
+                    -- Kill dialog if it is no longer valid
+                    if not IsPendingInteractionConfirmationValid() then
+                        ZO_Dialogs_ReleaseDialog(dialog)
+                    end
+                end, 
 }
 
 ESO_Dialogs["FIXING_STUCK"] =
@@ -2142,67 +2136,6 @@ ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_PROMPT"] =
         },
         {
             text = SI_DIALOG_DECLINE,
-        },
-    },
-}
-
-ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_DLC_COLLECTIBLE_LOCKED_PROMPT"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_COLLECTIBLE_LOCKED_TITLE,
-    },
-    mainText =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_WORLD_DLC_COLLECTIBLE_LOCKED_PROMPT,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_PRIMARY_BUTTON,
-            callback = function(dialog)
-                            local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleName)
-                            ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP)
-                       end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
-        },
-        {
-            text = SI_DIALOG_EXIT,
-        },
-    },
-}
-
-ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_CHAPTER_COLLECTIBLE_LOCKED_PROMPT"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_COLLECTIBLE_LOCKED_TITLE,
-    },
-    mainText =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_WORLD_CHAPTER_COLLECTIBLE_LOCKED_PROMPT,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE,
-            callback = function(dialog)
-                            ZO_ShowChapterUpgradePlatformDialog()
-                       end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
-        },
-        {
-            text = SI_DIALOG_EXIT,
         },
     },
 }
@@ -2712,7 +2645,7 @@ ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS"] =
     }
 }
 
-ESO_Dialogs["ZONE_DLC_COLLECTIBLE_REQUIREMENT_FAILED"] = 
+ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
 {
     gamepadInfo =
     {
@@ -2722,59 +2655,43 @@ ESO_Dialogs["ZONE_DLC_COLLECTIBLE_REQUIREMENT_FAILED"] =
     canQueue = true,
     title =
     {
-        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_TITLE,
+        text = SI_COLLECTIBLE_LOCKED_FAILURE_DIALOG_TITLE,
     },
-    mainText = 
+    mainText =
     {
-        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DLC_DIALOG_BODY,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_PRIMARY_BUTTON,
-            callback = function(dialog)
-                            local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleName)
-                            ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE)
-                       end
-        },
-        [2] =
-        {
-            text = SI_DIALOG_EXIT,
-        },
-    }
-}
-
-ESO_Dialogs["ZONE_CHAPTER_COLLECTIBLE_REQUIREMENT_FAILED"] = 
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-        allowShowOnNextScene = true,
-    },
-    canQueue = true,
-    title =
-    {
-        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_DIALOG_TITLE,
-    },
-    mainText = 
-    {
-        text = SI_COLLECTIBLE_ZONE_JUMP_FAILURE_CHAPTER_DIALOG_BODY,
+        text = function(dialog)
+            if dialog.data.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+                return SI_COLLECTIBLE_LOCKED_FAILURE_CHAPTER_DIALOG_BODY
+            else
+                return SI_COLLECTIBLE_LOCKED_FAILURE_DLC_DIALOG_BODY
+            end
+        end,
     },
     buttons =
     {
-        [1] =
         {
-            text = SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE,
+            text = function(dialog)
+                if dialog.data.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+                    return GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE)
+                else
+                    return GetString(SI_COLLECTIBLE_LOCKED_FAILURE_DIALOG_PRIMARY_BUTTON)
+                end
+            end,
             callback = function(dialog)
-                            ZO_ShowChapterUpgradePlatformDialog()
-                       end
+                local openSource = dialog.data.marketOpenOperation or MARKET_OPEN_OPERATION_COLLECTIBLE_FAILURE
+                if dialog.data.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+                    ZO_ShowChapterUpgradePlatformScreen(openSource)
+                else
+                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleData:GetName())
+                    ShowMarketAndSearch(searchTerm, openSource)
+                end
+            end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
         },
-        [2] =
         {
             text = SI_DIALOG_EXIT,
         },
-    }
+    },
 }
 
 ESO_Dialogs["CONSOLE_BUY_ESO_PLUS"] = 
@@ -3781,5 +3698,54 @@ ESO_Dialogs["RENAME_OUFIT"] =
         {
             text = SI_DIALOG_CANCEL,
         }
+    }
+}
+
+ESO_Dialogs["UNABLE_TO_CLAIM_GIFT"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_UNABLE_TO_CLAIM_GIFT_TITLE_FORMATTER
+    },
+    mainText =
+    {
+        text = SI_UNABLE_TO_CLAIM_GIFT_DEFAULT_ERROR_TEXT
+    },
+    warning =
+    {
+        text = SI_UNABLE_TO_CLAIM_GIFT_TEXT_FORMATTER
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_EXIT,
+        },
+    },
+}
+
+ESO_Dialogs["WORLD_MAP_CHOICE_FAILED"] =
+{
+    gamepadInfo = 
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_WORLD_MAP_CHOICE_DIALOG_FAILED_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_WORLD_MAP_CHOICE_DIALOG_FAILED_FORMATTER,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+        },
     }
 }

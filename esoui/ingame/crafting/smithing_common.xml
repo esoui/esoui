@@ -17,14 +17,20 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
-        <Button name="ZO_SmithingListSlot" inherits="ZO_ItemSlot" pixelRoundingEnabled="false" virtual="true">
-            <Dimensions x="64" y="64" />
-            <Textures mouseOver="" pressedMouseOver="" />
-        </Button>
+        <Button name="ZO_SmithingListSlot" virtual="true">
+            <Dimensions x="70" y="70" />
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="2">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER"/>
+                </Texture>
 
-        <Button name="ZO_GamepadSmithingListSlot" inherits="ZO_ItemSlot_Gamepad" pixelRoundingEnabled="false" virtual="true">
-            <Dimensions x="64" y="64" />
-            <Textures mouseOver="" pressedMouseOver="" />
+                <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-10" offsetY="1" />
+                    <!-- Allow extra space for large stack counts like 898.8k -->
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="2" offsetY="-1"/>
+                </Label>
+            </Controls>
         </Button>
 
         <Control name="ZO_SmithingHorizontalListTemplate" virtual="true">
@@ -40,7 +46,7 @@
                 </Control>
 
                 <Control name="$(parent)List" inherits="ZO_HorizontalScrollListTemplate">
-                    <Dimensions x="470" y="64" />
+                    <Dimensions x="470" y="70" />
                     <Anchor point="CENTER" />
                 </Control>
 
@@ -86,7 +92,7 @@
                 </Label>
 
                 <Control name="$(parent)List" inherits="ZO_GamepadHorizontalScrollListTemplate">
-                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="64" />
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="70" />
                     <Anchor point="CENTER"/>
                 </Control>
 

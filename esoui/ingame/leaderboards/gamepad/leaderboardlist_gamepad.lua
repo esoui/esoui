@@ -130,8 +130,8 @@ function LeaderboardList_Gamepad:FilterScrollList()
     LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, filteredClass, PreAddCallback, SearchCallback)
 end
 
-function LeaderboardList_Gamepad:EntrySelectionCallback(oldData, newData)
-    ZO_GamepadInteractiveSortFilterList.EntrySelectionCallback(self, oldData, newData)
+function LeaderboardList_Gamepad:OnSelectionChanged(oldData, newData)
+    ZO_GamepadInteractiveSortFilterList.OnSelectionChanged(self, oldData, newData)
     self:SetupOptions(newData)
 end
 

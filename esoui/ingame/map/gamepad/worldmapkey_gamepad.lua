@@ -86,6 +86,8 @@ function WorldMapKey_Gamepad:InitializeKeybindStripDescriptor()
             sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Exit Key",
             ethereal = true,
             keybind = "UI_SHORTCUT_LEFT_STICK",
             callback = function() ExitMapKey() end,

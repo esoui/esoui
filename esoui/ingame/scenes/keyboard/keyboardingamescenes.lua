@@ -321,6 +321,43 @@ stablesScene:AddFragment(STABLES_MENU_FRAGMENT)
 stablesScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 stablesScene:AddFragment(STORE_WINDOW_SOUNDS)
 
+-------------------
+--Crown Store Scene
+-------------------
+
+local marketScene = ZO_RemoteScene:New("market", SCENE_MANAGER)
+marketScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+marketScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
+marketScene:AddFragment(MARKET_KEYBIND_STRIP_FRAGMENT)
+marketScene:AddFragment(KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT)
+marketScene:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+marketScene:AddFragment(FRAME_PLAYER_FRAGMENT)
+marketScene:AddFragment(RIGHT_BG_FRAGMENT)
+marketScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
+marketScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
+marketScene:AddFragment(MARKET_WINDOW_SOUNDS)
+marketScene:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+marketScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+marketScene:AddFragment(TITLE_FRAGMENT)
+marketScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
+
+------------------------
+-- Daily Login Rewards
+------------------------
+
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(DAILY_LOGIN_REWARDS_KEYBOARD_FRAGMENT)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(RIGHT_BG_FORCE_PREPARE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(FRAME_PLAYER_FRAGMENT)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(TITLE_FRAGMENT)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(MARKET_WINDOW_SOUNDS)
+DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
+
 ------------------------
 --Collections Book Scene
 ------------------------
@@ -725,6 +762,38 @@ skillsScene:AddFragment(SKILLS_TITLE_FRAGMENT)
 skillsScene:AddFragment(SKILLS_WINDOW_SOUNDS)
 skillsScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_COMBAT_SKILLS_OPENED))
 
+------------------------
+--Gift Inventory Scene
+------------------------
+
+local giftInventoryScene = GIFT_INVENTORY_KEYBOARD:GetScene()
+giftInventoryScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+giftInventoryScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+giftInventoryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+giftInventoryScene:AddFragment(GIFT_INVENTORY_KEYBOARD:GetFragment())
+giftInventoryScene:AddFragment(RIGHT_BG_FRAGMENT)
+giftInventoryScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
+giftInventoryScene:AddFragment(TITLE_FRAGMENT)
+giftInventoryScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
+giftInventoryScene:AddFragment(MARKET_WINDOW_SOUNDS)
+giftInventoryScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
+
+----------------------------
+--Gift Inventory View Scene
+----------------------------
+
+local giftInventoryViewScene = SCENE_MANAGER:GetScene("giftInventoryViewKeyboard")
+giftInventoryViewScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+giftInventoryViewScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+
+-- the preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
+-- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
+giftInventoryViewScene:AddFragment(RIGHT_BG_FORCE_PREPARE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+giftInventoryViewScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)
+
+giftInventoryViewScene:AddFragment(MARKET_WINDOW_SOUNDS)
+giftInventoryViewScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+giftInventoryViewScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
 
 -------------------
 --Main Menu
@@ -735,9 +804,50 @@ MAIN_MENU_KEYBOARD:AddCategoryAreaFragment(TOP_BAR_FRAGMENT)
 --World Map
 MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_MAP, "worldMap")
 
---Market
+--Market Scene Group
 
-MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_MARKET, "market")
+do
+    local iconData =
+        {
+            {
+                categoryName = SI_CROWN_STORE_MENU_CROWN_STORE_LABEL,
+                descriptor = "market",
+                normal = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_up.dds",
+                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_down.dds",
+                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_over.dds",
+            },
+            {
+                categoryName = SI_CROWN_STORE_MENU_DAILY_LOGIN_LABEL,
+                descriptor = "dailyLoginRewards",
+                normal = "EsoUI/Art/Market/Keyboard/tabIcon_daily_up.dds",
+                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_daily_down.dds",
+                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_daily_over.dds",
+                statusIcon = function()
+                    if GetDailyLoginClaimableRewardIndex() then
+                        return ZO_KEYBOARD_NEW_ICON
+                    end
+                    return nil
+                end,
+            },
+            {
+                categoryName = SI_CROWN_STORE_MENU_GIFT_INVENTORY_LABEL,
+                descriptor = "giftInventoryKeyboard",
+                normal = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_up.dds",
+                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_down.dds",
+                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_over.dds",
+                statusIcon = function()
+                    if GIFT_INVENTORY_MANAGER:HasAnyUnseenGifts() then
+                        return ZO_KEYBOARD_NEW_ICON
+                    end
+                    return nil
+                end,
+            },
+        }
+
+    SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "dailyLoginRewards", "giftInventoryKeyboard"))
+    local NO_PREFERRED_SCENE_FUNCTION = nil
+    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_MARKET, "marketSceneGroup", iconData, NO_PREFERRED_SCENE_FUNCTION, TUTORIAL_TRIGGER_CROWN_STORE_TABS_SHOWN)
+end
 
 --Inventory
 

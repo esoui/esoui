@@ -332,7 +332,7 @@ do
     local function SetupHousesComboBox(dialog)
         local housesComboBoxControl = GetControl(dialog, "HousesComboBox")
         dialog.housesComboBox = ZO_ComboBox_ObjectFromContainer(housesComboBoxControl)
-        dialog.housesComboBox:SetSortsItems(false)
+        dialog.housesComboBox:SetSortsItems(false) -- sorted on setup
     end
 
     local function SetupChangePermissionsDialog(dialog)

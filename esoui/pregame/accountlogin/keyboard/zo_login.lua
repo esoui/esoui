@@ -145,7 +145,6 @@ function Login_Keyboard:Initialize(control)
 
     self.credentialsContainer:SetHidden(requiresAccountLinking)
     self:ReanchorLoginButton()
-    self:ReanchorAnnouncements()
 
     control:SetHandler("OnUpdate", function(control, timeSeconds) self:OnUpdate(control, timeSeconds) end)
 
@@ -377,27 +376,27 @@ end
 function Login_Keyboard:ShowRelaunchGameLabel()
     self:UpdateLoginButtonState()
     self.relaunchGameLabel:SetHidden(false)
+    self.mustRelaunchGame = true
+    self:ReanchorLoginButton()
 end
 
 function Login_Keyboard:ReanchorLoginButton()
     if IsUsingLinkedLogin() then
-        -- Since the credentials container is hidden when using linked login, reanchor the login button to the 
-        -- 'relaunch client' label 
-        local isValid, point, _, relPoint, offsetX, offsetY = self.loginButton:GetAnchor(0)
+        --Credentials is hidden, so move to be more centered in the available space
         self.loginButton:ClearAnchors()
-
-        self.loginButton:SetAnchor(point, self.relaunchGameLabel, relPoint, offsetX, offsetY)
+        if self.mustRelaunchGame then
+            self.loginButton:SetAnchor(TOP, self.relaunchGameLabel, BOTTOM, 0, 100)
+        else
+            self.loginButton:SetAnchor(CENTER, self.credentialsContainer, CENTER, 0, -50)
+        end
     end
+
+    self:ReanchorAnnouncements()
 end
 
 function Login_Keyboard:ReanchorAnnouncements()
     if IsUsingLinkedLogin() then
-        local isValid0, point0, _, relPoint0, offsetX0, offsetY0 = self.announcements:GetAnchor(0)
-        local isValid1, point1, _, relPoint1, offsetX1, offsetY1 = self.announcements:GetAnchor(1)
-        self.announcements:ClearAnchors()
-        
-        self.announcements:SetAnchor(point0, self.relaunchGameLabel, relPoint0, offsetX0, offsetY0)
-        self.announcements:SetAnchor(point1, self.relaunchGameLabel, relPoint1, offsetX1, offsetY1)
+        self.announcements:SetAnchor(TOP, self.loginButton, BOTTOM, 0, 100)
     end
 end
 

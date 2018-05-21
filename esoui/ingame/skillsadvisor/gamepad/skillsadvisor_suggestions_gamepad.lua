@@ -17,6 +17,7 @@ function SkillsAdvisorSuggestions_Gamepad:Initialize(control)
     ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, "ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader", 50, function(...) self:ZO_SkillsAdvisorSuggestionsTextDisplayTemplateSetup(...) end)
     ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_TEXT, "ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryText", 100, function(...) self:ZO_SkillsAdvisorSuggestionsTextDisplayTemplateSetup(...) end)
     ZO_ScrollList_SetTypeSelectable(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, false)
+    ZO_ScrollList_SetTypeCategoryHeader(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, true)
     ZO_ScrollList_SetTypeSelectable(self.list, SKILLS_ADVISOR_SUGGESTIONS_TEXT, false)
 
     SKILLS_ADVISOR_SUGGESTIONS_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -61,7 +62,8 @@ function SkillsAdvisorSuggestions_Gamepad:Deactivate()
     self.keybindStripId = nil
 end
 
-function SkillsAdvisorSuggestions_Gamepad:EntrySelectionCallback(oldData, newData)
+function SkillsAdvisorSuggestions_Gamepad:OnSelectionChanged(oldData, newData)
+    ZO_SortFilterList_Gamepad.OnSelectionChanged(self, oldData, newData)
     self:UpdateTooltip()
 end
 
@@ -77,19 +79,25 @@ function SkillsAdvisorSuggestions_Gamepad:InitializeKeybinds()
             end
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Skill Advisor Previous Category",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
             callback = function()
-                if ZO_ScrollList_CanScrollUp(ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW.list) and ZO_ScrollList_TrySelectFirstData(ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW.list) then
+                if ZO_ScrollList_CanScrollUp(self.list) then
+                    ZO_ScrollList_SelectFirstIndexInCategory(self.list, ZO_SCROLL_SELECT_CATEGORY_PREVIOUS)
                     PlaySound(ZO_PARAMETRIC_SCROLL_MOVEMENT_SOUNDS[ZO_PARAMETRIC_MOVEMENT_TYPES.JUMP_PREVIOUS])
                 end
             end
         },
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Skill Advisor Next Category",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
             callback = function()
-                if ZO_ScrollList_CanScrollDown(ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW.list) and ZO_ScrollList_TrySelectLastData(ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW.list) then
+                if ZO_ScrollList_CanScrollDown(self.list) then
+                    ZO_ScrollList_SelectFirstIndexInCategory(self.list, ZO_SCROLL_SELECT_CATEGORY_NEXT)
                     PlaySound(ZO_PARAMETRIC_SCROLL_MOVEMENT_SOUNDS[ZO_PARAMETRIC_MOVEMENT_TYPES.JUMP_NEXT])
                 end
             end

@@ -204,7 +204,7 @@ function ZO_ConveyorSceneFragment:Initialize(control, alwaysAnimate, inAnimation
         if wasHiding then
             control:SetHidden(true)
         end
-                                                                    
+
         ReleaseAnimation(self.currentAnimationTemplate, self.animationKey)
         self.animation = nil
         self.animationKey = nil
@@ -247,14 +247,19 @@ do
         local outAnimation = g_reverseAnimationDirection and self.inAnimation or self.outAnimation
 
         local currentScene = self.sceneManager:GetCurrentScene()
+        local currentSceneName = currentScene:GetName()
         if self:GetState() == SCENE_FRAGMENT_SHOWING then
-            if self.sceneManager:WasSceneOnStack(currentScene:GetName()) then
+            -- If we are showing the scene after being hidden and the scene was showing before
+            -- then we want to animate the fragment back in by reversing how the fragment was hidden
+            if currentScene:GetState() == SCENE_SHOWING and self.sceneManager:WasSceneOnStack(currentSceneName) then
                 return outAnimation, backward
             end
             return inAnimation, forward
         else
-            if self.sceneManager:WasSceneOnTopOfStack(currentScene:GetName()) then
-                if not self.sceneManager:IsSceneOnStack(currentScene:GetName()) then
+            -- if the fragment is hiding and the current scene is also being hidden and removed from the stack
+            -- then animate the fragment out by reversing how the fragment was originally shown
+            if currentScene:GetState() == SCENE_HIDING and self.sceneManager:WasSceneOnTopOfStack(currentSceneName) then
+                if not self.sceneManager:IsSceneOnStack(currentSceneName) then
                     local nextScene = self.sceneManager:GetNextScene()
                     if not nextScene or nextScene ~= self.sceneManager:GetBaseScene() then
                         return inAnimation, backward

@@ -641,25 +641,25 @@ end
 ITEM_PREVIEW_FRAGMENT = ZO_ItemPreviewFragment:New()
 
 ----------------------------------------
--- Market Keybind Strip Background
+-- Market Keybind Strip Fragment
 ----------------------------------------
 
-local ZO_MarketKeybindStripBackgroundFragment = ZO_FadeSceneFragment:Subclass()
+local ZO_MarketKeybindStripFragment = ZO_SceneFragment:Subclass()
 
-function ZO_MarketKeybindStripBackgroundFragment:New(...)
-    return ZO_FadeSceneFragment.New(self, ...)
+function ZO_MarketKeybindStripFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
 end
 
-function ZO_MarketKeybindStripBackgroundFragment:Show()
+function ZO_MarketKeybindStripFragment:Show()
     KEYBIND_STRIP:SetBackgroundStyle(KEYBIND_STRIP_STANDARD_STYLE)
-    ZO_FadeSceneFragment.Show(self)
+    ZO_SceneFragment.Show(self)
 end
 
-function ZO_MarketKeybindStripBackgroundFragment:Hide()
-    ZO_FadeSceneFragment.Hide(self)
+function ZO_MarketKeybindStripFragment:Hide()
+    ZO_SceneFragment.Hide(self)
 end
 
-MARKET_KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT = ZO_MarketKeybindStripBackgroundFragment:New(ZO_KeybindStripMungeBackground)
+MARKET_KEYBIND_STRIP_FRAGMENT = ZO_MarketKeybindStripFragment:New()
 
 ----------------------------------------
 -- Show Market Fragment
@@ -675,7 +675,11 @@ function ShowMarketFragment:Show()
     self:OnShown()
     -- This call needs to be after OnShown so we are in the correct state to show
     -- the new scene
-    SYSTEMS:GetObject("mainMenu"):ShowCategory(MENU_CATEGORY_MARKET)
+    if IsInGamepadPreferredMode() then
+        SYSTEMS:GetObject("mainMenu"):ShowCategory(MENU_CATEGORY_MARKET)
+    else
+        SYSTEMS:GetObject("mainMenu"):ShowSceneGroup("marketSceneGroup", "market")
+    end
 end
 
 function ShowMarketFragment:Hide()
@@ -879,11 +883,6 @@ CHAMPION_PERKS_CONSTELLATIONS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_ChampionPer
 PLAYER_MENU_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_MainMenu_Gamepad)
 PLAYER_MENU_FRAGMENT:SetHideOnSceneHidden(true)
 
---Gamepad fragments
-local ALWAYS_ANIMATE = true
-
-OPTIONS_MENU_INFO_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadOptionsTopLevelInfoPanel)
-
 --Sounds
 INVENTORY_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.BACKPACK_WINDOW_OPEN, SOUNDS.BACKPACK_WINDOW_CLOSE)
 CHARACTER_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.CHARACTER_WINDOW_OPEN, SOUNDS.CHARACTER_WINDOW_CLOSE)
@@ -915,7 +914,6 @@ SIEGE_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDING
 GUILD_SELECTOR_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("Guild")
 MOUSE_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("MouseUIMode")
 GAMEPAD_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("GamepadUIMode")
-GAMEPAD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("GamepadActions")
 HOUSING_EDITOR_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HOUSING_EDITOR))
 HOUSING_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HUD_HOUSING))
 BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundHud")

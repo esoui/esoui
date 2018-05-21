@@ -15,10 +15,7 @@ end
 
 function ZO_SortFilterList_Gamepad:InitializeSortFilterList(control)
     ZO_SortFilterList.InitializeSortFilterList(self, control)
-    ZO_ScrollList_EnableSelection(self.list, "ZO_GamepadInteractiveSortFilterDefaultHighlight", function(oldData, newData) self:EntrySelectionCallback(oldData, newData) end)
-end
-
-function ZO_SortFilterList_Gamepad:EntrySelectionCallback(oldData, newData)
+    ZO_ScrollList_EnableSelection(self.list, "ZO_GamepadInteractiveSortFilterDefaultHighlight", function(oldData, newData) self:OnSelectionChanged(oldData, newData) end)
 end
 
 function ZO_SortFilterList_Gamepad:SetDirectionalInputEnabled(enabled)
@@ -57,10 +54,7 @@ end
 function ZO_SortFilterList_Gamepad:MovePrevious()
     if not ZO_ScrollList_AtTopOfList(self.list) then
         PlaySound(SOUNDS.GAMEPAD_MENU_UP)
-        local oldData = ZO_ScrollList_GetSelectedData(self.list)
         ZO_ScrollList_SelectPreviousData(self.list)
-        local newData = ZO_ScrollList_GetSelectedData(self.list)
-        self:OnSelectionChanged(oldData, newData)
         self:UpdateKeybinds()
     end
 end
@@ -68,10 +62,7 @@ end
 function ZO_SortFilterList_Gamepad:MoveNext()
     if not ZO_ScrollList_AtBottomOfList(self.list) then
         PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
-        local oldData = ZO_ScrollList_GetSelectedData(self.list)
         ZO_ScrollList_SelectNextData(self.list)
-        local newData = ZO_ScrollList_GetSelectedData(self.list)
-        self:OnSelectionChanged(oldData, newData)
         self:UpdateKeybinds()
     end
 end

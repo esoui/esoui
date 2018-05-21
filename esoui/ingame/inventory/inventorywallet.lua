@@ -32,11 +32,11 @@ function InventoryWalletManager:Initialize(container)
         self:ApplySort()
     end
 
-    self:InitializeFilterBar()
-
     self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
     self.sortHeaders:AddHeadersFromContainer()
     self.sortHeaders:SelectHeaderByKey("name")
+
+    self:InitializeFilterBar()
 
     self:RegisterEvents()
     self:RefreshCurrency()
@@ -116,7 +116,7 @@ do
 
     function InventoryWalletManager:SetUpEntry(control, data)
         local nameControl = GetControl(control, "Name")
-        nameControl:SetText(zo_strformat(SI_INVENTORY_CURRENCY_NAME_FORMAT, data.name))
+        nameControl:SetText(zo_strformat(SI_CURRENCY_NAME_FORMAT, data.name))
 
         local amountControl = GetControl(control, "Amount")
         FORMAT_EXTRA_OPTIONS.currencyLocation = GetCurrencyPlayerStoredLocation(data.currencyType)

@@ -88,7 +88,7 @@
                 </Control>
 
                 <Control name="$(parent)TraitList" inherits="ZO_SmithingHorizontalListTemplate">
-                    <Anchor point="TOP" relativeTo="$(parent)StyleList" relativePoint="BOTTOM" offsetY="25"/>
+                    <!-- The anchor for this is dynamically set  -->
                 </Control>
 
                 <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip">

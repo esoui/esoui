@@ -15,12 +15,17 @@ function ZO_GridScrollList_Gamepad:New(...)
     return ZO_GridScrollList.New(self, ...)
 end
 
-function ZO_GridScrollList_Gamepad:Initialize(...)
-    ZO_GridScrollList.Initialize(self, ...)
+function ZO_GridScrollList_Gamepad:Initialize(control, fillRowWithEmptyCells, selectionTemplate)
+    ZO_GridScrollList.Initialize(self, control, fillRowWithEmptyCells)
 
     self.dimOnDeactivate = false
 
-    ZO_ScrollList_EnableSelection(self.list, "ZO_GridScrollList_Highlight_Gamepad", function(previousData, newData, selectedDuringRebuild) self:OnSelectionChanged(previousData, newData, selectedDuringRebuild) end)
+    local function SelectionCallback(previousData, newData, selectedDuringRebuild) 
+        self:OnSelectionChanged(previousData, newData, selectedDuringRebuild) 
+    end
+
+    local template = selectionTemplate or "ZO_GridScrollList_Highlight_Gamepad"
+    ZO_ScrollList_EnableSelection(self.list, template, SelectionCallback)
 
     self:InitializeTriggerKeybinds()
 
@@ -32,20 +37,24 @@ function ZO_GridScrollList_Gamepad:InitializeTriggerKeybinds()
     self.gridListTriggerKeybinds =
     {
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Grid Scroll List Previous Category",
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             ethereal = true,
 
             callback = function()
-                self:SelectNextCategory(SELECT_CATEGORY_PREVIOUS)
+                self:SelectNextCategory(ZO_SCROLL_SELECT_CATEGORY_PREVIOUS)
             end,
         },
 
         {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Grid Scroll List Next Category",
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             ethereal = true,
 
             callback = function()
-                self:SelectNextCategory(SELECT_CATEGORY_NEXT)
+                self:SelectNextCategory(ZO_SCROLL_SELECT_CATEGORY_NEXT)
             end,
         }
     }
@@ -156,6 +165,15 @@ function ZO_GridScrollList_Gamepad:GetSelectedData()
     return ZO_ScrollList_GetSelectedData(self.list)
 end
 
+function ZO_GridScrollList_Gamepad:GetSelectedDataIndex()
+    local selectedData = self:GetSelectedData()
+    if selectedData then
+        return ZO_ScrollList_GetDataIndex(self.list, selectedData.dataEntry)
+    end
+
+    return 0
+end
+
 function ZO_GridScrollList_Gamepad:RefreshSelection()
     ZO_ScrollList_AutoSelectData(self.list)
 end
@@ -174,49 +192,5 @@ function ZO_GridScrollList_Gamepad:ScrollDataToCenter(data)
 end
 
 function ZO_GridScrollList_Gamepad:SelectNextCategory(direction)
-    local currentlySelectedData = self:GetSelectedData()
-    if not currentlySelectedData then
-        return
-    end
-
-    local listData = ZO_ScrollList_GetDataList(self.list)
-    local nextDataIndex = ZO_ScrollList_GetDataIndex(self.list, currentlySelectedData.dataEntry) + direction
-
-    if nextDataIndex <= 0 or nextDataIndex > #listData then
-        -- we are already at the end of our list
-        return
-    end
-
-    -- if we are going backwards and hit a non-grid cell, we need to keep going until we find one so we don't just select the same value
-    if direction == SELECT_CATEGORY_PREVIOUS then
-        while listData[nextDataIndex].typeId ~= ZO_GRID_LIST_OPERATION_ADD_CELL do
-            nextDataIndex = nextDataIndex + direction
-            if nextDataIndex == 0 or nextDataIndex == #listData then
-                -- could not find an acceptable target, we are at the selectable end of our list
-                return
-            end
-        end
-    end
-
-
-    while nextDataIndex > 0 and nextDataIndex <= #listData do
-        local potentialData = listData[nextDataIndex]
-        local potentialDataType = potentialData.typeId
-        if potentialDataType == ZO_GRID_LIST_OPERATION_ADD_HEADER then
-            -- we found a header, select the first entry under it
-            local lookAheadIndex = nextDataIndex + 1
-            local dataAfterHeader = listData[lookAheadIndex]
-            ZO_ScrollList_SelectData(self.list, listData[lookAheadIndex].data)
-            ZO_ScrollList_ScrollDataToCenter(self.list, lookAheadIndex)
-            ZO_ScrollList_RefreshLastHoldPosition(self.list)
-            return
-        end
-
-        nextDataIndex = nextDataIndex + direction
-    end
-
-    -- could not find another header, so just pick the last selectable value we found
-    ZO_ScrollList_SelectData(self.list, listData[nextDataIndex - direction].data)
-    ZO_ScrollList_ScrollDataToCenter(self.list, nextDataIndex - direction)
-    ZO_ScrollList_RefreshLastHoldPosition(self.list)
+    ZO_ScrollList_SelectFirstIndexInCategory(self.list, direction)
 end

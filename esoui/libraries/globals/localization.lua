@@ -58,6 +58,13 @@ do
 
     ZO_CACHED_STR_FORMAT_NO_FORMATTER = ""
 
+    local g_onlyStoreOneByFormatter = { }
+
+    function ZO_SetCachedStrFormatterOnlyStoreOne(formatter)
+        internalassert(formatter ~= ZO_CACHED_STR_FORMAT_NO_FORMATTER)
+        g_onlyStoreOneByFormatter[formatter] = true
+    end
+
     local g_cachedStringsByFormatter = 
     {
         [ZO_CACHED_STR_FORMAT_NO_FORMATTER] = {} --Used for strings that need to run through grammar without a formatter
@@ -90,6 +97,12 @@ do
             cachedString = formatterCache[hashKey]
             if not cachedString then
                 cachedString = zo_strformat(formatter, ...)
+                if g_onlyStoreOneByFormatter[formatter] then
+                    local existingKey = next(formatterCache)
+                    if existingKey then
+                        formatterCache[existingKey] = nil
+                    end
+                end
                 formatterCache[hashKey] = cachedString
             end
         end
@@ -124,6 +137,11 @@ do
     end
 
     function ZO_LocalizeDecimalNumber(amount)
+        -- Guards against negative 0 as a displayed numeric value
+        if amount == 0 then
+            amount = 0
+        end
+
         local amountString = tostring(amount)
 
         if amount >= DIGIT_GROUP_REPLACER_THRESHOLD then

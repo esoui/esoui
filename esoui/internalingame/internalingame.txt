@@ -1,4 +1,5 @@
 ; Internal Ingame Script Files
+; This will need ## ValidateSavedVariables: 1 if a saved variable is added.
 ## DependsOn: ZO_InternalIngameLocalization ZO_PublicAllIngames
 
 EsoUI\InternalIngame\Globals\UnofficialClientStringOverrides.lua
@@ -10,13 +11,16 @@ EsoUI\InternalIngame\Sounds\SoundEvents.lua
 
 EsoUI\InternalIngame\Scenes\InternalIngameSceneElements.xml
 
+EsoUI\InternalIngame\Rewards\InternalIngame_Rewards_Manager.lua
+
 EsoUI\InternalIngame\Market\MarketDialogs_Shared.lua
 EsoUI\InternalIngame\Globals\MarketDialogs.lua
 EsoUI\InternalIngame\Globals\MarketDialogs.xml
 EsoUI\InternalIngame\Market\Gamepad\MarketDialogs_Gamepad.lua
 
-EsoUI\InternalIngame\Market\Keyboard\ChapterUpgrade_Keyboard.lua
-EsoUI\InternalIngame\Market\Keyboard\ChapterUpgrade_Keyboard.xml
+EsoUI\InternalIngame\ChapterUpgrade\ChapterUpgradeUtils.lua
+EsoUI\InternalIngame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.lua
+EsoUI\InternalIngame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.xml
 
 EsoUI\InternalIngame\Market\MarketColorDefs.lua
 EsoUI\InternalIngame\Market\Market_Shared.lua
@@ -36,16 +40,34 @@ EsoUI\InternalIngame\Market\Gamepad\MarketGridScreen_Gamepad.xml
 EsoUI\InternalIngame\Market\Gamepad\Market_Gamepad.lua
 EsoUI\InternalIngame\Market\Gamepad\Market_Gamepad.xml
 
-EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Base.lua
-EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Base.xml
+EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Manager.lua
+EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncementMarketProduct_Shared.lua
+EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncementMarketProduct_Shared.xml
+EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncementMarketProductTile.lua
+EsoUI\InternalIngame\MarketAnnouncement\MarketProductCarousel_Shared.lua
+EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Shared.lua
+EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Shared.xml
+EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketAnnouncementMarketProduct_Keyboard.lua
+EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketAnnouncementMarketProduct_Keyboard.xml
+EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketAnnouncementMarketProductTile_Keyboard.lua
+EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketAnnouncementMarketProductTile_Keyboard.xml
+EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketProductCarousel_Keyboard.lua
 EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketAnnouncement_Keyboard.lua
 EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketAnnouncement_Keyboard.xml
+EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncementMarketProduct_Gamepad.lua
+EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncementMarketProduct_Gamepad.xml
+EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncementMarketProductTile_Gamepad.lua
+EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncementMarketProductTile_Gamepad.xml
+EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketProductCarousel_Gamepad.lua
 EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncement_Gamepad.lua
 EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncement_Gamepad.xml
-EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Manager.lua
 
 EsoUI\InternalIngame\Mail\ConfirmMail.lua
 EsoUI\InternalIngame\URL\ConfirmURL.lua
+EsoUI\InternalIngame\Gifting\ConfirmSendGift_Shared.lua
+EsoUI\InternalIngame\Gifting\Keyboard\ConfirmSendGift_Keyboard.lua
+EsoUI\InternalIngame\Gifting\Keyboard\ConfirmSendGift_Keyboard.xml
+EsoUI\InternalIngame\Gifting\Gamepad\ConfirmSendGift_Gamepad.lua
 
 ; These should remain at the bottom of the file, to ensure functionality of fragments
 EsoUI\InternalIngame\Scenes\InternalIngameFragments.lua

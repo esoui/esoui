@@ -11,6 +11,8 @@ function ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(keyb
 	end
 
 	local genericStartButton = {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Crafting Default Exit",
 			alignment = KEYBIND_STRIP_ALIGN_LEFT,
 			keybind = "UI_SHORTCUT_EXIT",
 			order = -10000,
@@ -198,4 +200,18 @@ end
 function ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(control, resizeHandler)
     local CRAFTING_TOOLTIP_OFFSET_X = -3
     ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(control, ZO_CRAFTING_TOOLTIP_STYLES, resizeHandler, RIGHT, CRAFTING_TOOLTIP_OFFSET_X)
+end
+
+do
+    local GAMEPAD_SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE =
+    {
+       [SMITHING_FILTER_TYPE_RAW_MATERIALS] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_refine_emptySlot.dds",
+       [SMITHING_FILTER_TYPE_WEAPONS] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_weaponSlot.dds",
+       [SMITHING_FILTER_TYPE_ARMOR] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_apparelSlot.dds",
+       [SMITHING_FILTER_TYPE_JEWELRY] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_jewelrySlot.dds",
+    }
+
+    function ZO_GamepadCraftingUtils_GetItemSlotTextureFromSmithingFilter(smithingFilter)
+        return GAMEPAD_SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE[smithingFilter]
+    end
 end

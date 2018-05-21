@@ -70,6 +70,7 @@ end
 function ZO_RestyleStation_Keyboard:OnSheetChanged(newSheet, oldSheet)
     self:InitializeSearch()
     self:BuildCategories()
+    self:UpdateKeybind()
 end
 
 function ZO_RestyleStation_Keyboard:HandleTabChange(tabData)
@@ -289,6 +290,7 @@ function ZO_RestyleStation_Keyboard:InitializeKeybindStripDescriptors()
             end,
         },
 
+        -- Change outfit name
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
 

@@ -8,12 +8,14 @@ function ZO_HousingFurnitureProducts_Keyboard:InitializeKeybindStrip()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        -- purchase
         {
             name = GetString(SI_HOUSING_FURNITURE_BROWSER_PURCHASE_KEYBIND),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
-                self:RequestPurchase(mostRecentlySelectedData)
+                local IS_PURCHASE = false
+                self:RequestPurchase(mostRecentlySelectedData, IS_PURCHASE)
             end,
             enabled = function()
                 local hasMostRecentlySelectedData = self:GetMostRecentlySelectedData() ~= nil
@@ -23,6 +25,24 @@ function ZO_HousingFurnitureProducts_Keyboard:InitializeKeybindStrip()
                 return true
             end,
         },
+        -- gift
+        {
+            name = GetString(SI_HOUSING_FURNITURE_BROWSER_GIFT_KEYBIND),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+                local IS_GIFT = true
+                self:RequestPurchase(mostRecentlySelectedData, IS_GIFT)
+            end,
+            visible = function()
+                local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+                if mostRecentlySelectedData ~= nil then
+                    return IsMarketProductGiftable(mostRecentlySelectedData.marketProductId, mostRecentlySelectedData.presentationIndex)
+                end
+                return false
+            end,
+        },
+        -- end preview
         {
             name = GetString(SI_CRAFTING_EXIT_PREVIEW_MODE),
             keybind = "UI_SHORTCUT_NEGATIVE",
@@ -62,16 +82,17 @@ function ZO_HousingFurnitureProducts_Keyboard:AddListDataTypes()
     self.MarketProductFurnitureOnMouseDoubleClickCallback = function(control, buttonIndex)
         if buttonIndex == MOUSE_BUTTON_INDEX_LEFT then
             local data = ZO_ScrollList_GetData(control)
-            self:RequestPurchase(data)
+            local IS_PURCHASE = false
+            self:RequestPurchase(data, IS_PURCHASE)
         end
     end
 
     self:AddDataType(ZO_HOUSING_MARKET_PRODUCT_DATA_TYPE, "ZO_MarketProductFurnitureSlot", ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT, function(...) self:SetupMarketProductFurnitureRow(...) end, ZO_HousingFurnitureBrowser_Keyboard.OnHideFurnitureRow)
 end
 
-function ZO_HousingFurnitureProducts_Keyboard:RequestPurchase(data)
+function ZO_HousingFurnitureProducts_Keyboard:RequestPurchase(data, isGift)
     ClearTooltip(ItemTooltip)
-    RequestPurchaseMarketProduct(data.marketProductId, data.presentationIndex)
+    RequestPurchaseMarketProduct(data.marketProductId, data.presentationIndex, isGift)
 end
 
 do

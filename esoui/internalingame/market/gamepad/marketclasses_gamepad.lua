@@ -22,6 +22,8 @@ end
 
 function ZO_GamepadMarketProduct:InitializeControls(control)
     ZO_LargeSingleMarketProduct_Base.InitializeControls(self, control)
+
+    self.normalBorder = self.control:GetNamedChild("HighlightNormal")
     self.focusData =
     {
         control = self.control,
@@ -45,6 +47,16 @@ do
         
         self.background:SetTextureCoords(0, INDIVIDUAL_TEXTURE_WIDTH_COORD, 0, INDIVIDUAL_TEXTURE_HEIGHT_COORD)
         self.background:SetHidden(background == ZO_NO_TEXTURE_FILE)
+    end
+end
+
+function ZO_GamepadMarketProduct:UpdateProductStyle()
+    ZO_LargeSingleMarketProduct_Base.UpdateProductStyle(self)
+
+     if self:IsPurchaseLocked() or self.isFree then
+        self.normalBorder:SetEdgeColor(ZO_MARKET_PRODUCT_PURCHASED_COLOR:UnpackRGB())
+    else
+        self.normalBorder:SetEdgeColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
     end
 end
 

@@ -406,8 +406,9 @@ end
 function ZO_SharedFurnitureManager:CreateOrUpdateCollectibleCache()
     local collectibleCache = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]
     ZO_ClearTable(collectibleCache)
-    
-    local filteredDataTable = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects(ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsPlaceableFurniture)
+
+    local SORTED = true
+    local filteredDataTable = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsStandardCategory }, { ZO_CollectibleData.IsPlaceableFurniture, ZO_CollectibleData.IsUnlocked }, SORTED)
     for _, collectibleData in pairs(filteredDataTable) do
         self:CreateOrUpdateCollectibleDataEntry(collectibleData:GetId())
     end

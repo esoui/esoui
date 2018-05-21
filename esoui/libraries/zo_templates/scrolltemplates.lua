@@ -7,7 +7,7 @@ local ON_ALPHA = 1
 local STATE_CHANGE_DURATION = 250
 local MIN_SCROLL_VALUE = 0
 local MAX_SCROLL_VALUE = 100
-local MAX_FADE_VALUE = 64
+local MAX_FADE_DISTANCE_UI = 64
 local DEFAULT_Y_DISTANCE_FROM_EDGE_WHERE_SELECTION_CAUSES_SCROLL = 150
 
 local NO_SELECTED_DATA = nil
@@ -26,28 +26,54 @@ ZO_SCROLL_MOVEMENT_DIRECTION_POSITIVE = 1
 ZO_SCROLL_BUILD_DIRECTION_LEFT_TO_RIGHT = 1
 ZO_SCROLL_BUILD_DIRECTION_RIGHT_TO_LEFT = -1
 
+ZO_SCROLL_SELECT_CATEGORY_PREVIOUS = -1
+ZO_SCROLL_SELECT_CATEGORY_NEXT = 1
+
+-- Used by both ZO_VerticalScrollbarBase and ZO_Scroll
+local function OnInteractWithScrollBar(self)
+    if self.onInteractWithScrollbarCallback then
+        self.onInteractWithScrollbarCallback()
+    end
+end
+
+----
+-- Start of VerticalScrollbarBase functions
+----
+
+local function VerticalScrollbarBase_SetOnInteractWithScrollbarCallback(self, onInteractWithScrollbarCallback)
+    self.onInteractWithScrollbarCallback = onInteractWithScrollbarCallback
+end
+
 function ZO_VerticalScrollbarBase_OnInitialized(self)
     self:SetMinMax(MIN_SCROLL_VALUE, MAX_SCROLL_VALUE)
     self:SetValue(MIN_SCROLL_VALUE)
     self:SetAlpha(OFF_ALPHA)
     self.alphaAnimation, self.timeline = CreateSimpleAnimation(ANIMATION_ALPHA, self)
     self.alphaAnimation:SetDuration(STATE_CHANGE_DURATION)
+
+    local function OnUpdate()
+        if self.thumbHeld then
+            OnInteractWithScrollBar(self)
+        end
+    end
+
+    self:SetHandler("OnUpdate", OnUpdate)
 end
 
 local function UpdateAlpha(self)
     local newAlpha = OFF_ALPHA
 
-    if(self.areaOver) then
+    if self.areaOver then
         newAlpha = SCROLL_AREA_ALPHA
     end
     
-    if(self.thumbHeld or self.over) then
+    if self.thumbHeld or self.over then
         newAlpha = ON_ALPHA
     end
     
-    if(newAlpha ~= self:GetAlpha()) then
+    if newAlpha ~= self:GetAlpha() then
         self.targetAlpha = newAlpha
-        if(self:IsHidden()) then
+        if self:IsHidden() then
             self:SetAlpha(newAlpha)
         else
             self.timeline:Stop()
@@ -69,10 +95,14 @@ end
 
 function ZO_VerticalScrollbarBase_OnMouseDown(self)
     local thumb = self:GetThumbTextureControl()
-    if(MouseIsOver(thumb)) then
+    if MouseIsOver(thumb) then
         self.thumbHeld = true
         UpdateAlpha(self)
     end
+end
+
+function ZO_VerticalScrollbarBase_OnScrollBarArrowClicked(self)
+    OnInteractWithScrollBar(self)
 end
 
 function ZO_VerticalScrollbarBase_OnMouseUp(self)
@@ -81,7 +111,7 @@ function ZO_VerticalScrollbarBase_OnMouseUp(self)
 end
 
 function ZO_VerticalScrollbarBase_OnEffectivelyHidden(self)    
-    if(self.timeline) then
+    if self.timeline then
         self.timeline:Stop()
     end
     self:SetAlpha(self.targetAlpha)
@@ -97,11 +127,15 @@ function ZO_VerticalScrollbarBase_OnScrollAreaExit(self)
     UpdateAlpha(self)
 end
 
+----
+-- End of VerticalScrollbarBase functions
+----
+
 local function CheckMouseInScrollArea(self)
     local inScrollArea = MouseIsOver(self)
-    if(inScrollArea ~= self.inScrollArea) then
+    if inScrollArea ~= self.inScrollArea then
         self.inScrollArea = inScrollArea
-        if(inScrollArea) then
+        if inScrollArea then
             ZO_VerticalScrollbarBase_OnScrollAreaEnter(GetControl(self, "ScrollBar"))
         else
             ZO_VerticalScrollbarBase_OnScrollAreaExit(GetControl(self, "ScrollBar"))
@@ -122,7 +156,47 @@ end
 --Shared Scroll Animation Functions
 ---------------------------------------
 
-local function SetSliderValue(self, targetValue, animateInstantly)
+local SCROLL_ANIMATION_UNITS_PERCENT = 1
+local SCROLL_ANIMATION_UNITS_REAL = 2
+
+local SCROLL_ANIMATION_DEFAULT_DURATION_MS = 400
+
+local function OnScrollAnimationUpdate(animationObject, progress)
+    local scrollObject = animationObject.scrollObject
+    local value = scrollObject.animationStart + (scrollObject.animationTarget - scrollObject.animationStart) * progress
+    if scrollObject.animationUnits == SCROLL_ANIMATION_UNITS_REAL then
+        local _, verticalExtents = scrollObject.scroll:GetScrollExtents()
+        if verticalExtents > 0 then
+            value = MAX_SCROLL_VALUE * (value / verticalExtents)
+        else
+            value = 0
+        end
+    end
+    scrollObject.scrollbar:SetValue(value)
+end
+
+local function SetScrollOffset(self, targetOffset, animateInstantly, overrideDurationMS)
+    local scroll = self.scroll
+    local _, currentOffset = scroll:GetScrollOffsets()
+    if zo_abs(targetOffset - currentOffset) > 0.001 then
+        self.timeline:Stop()
+        self.animationStart = currentOffset
+        self.animationTarget = targetOffset
+        self.animationUnits = SCROLL_ANIMATION_UNITS_REAL
+        self.animation:SetDuration(overrideDurationMS or SCROLL_ANIMATION_DEFAULT_DURATION_MS)
+        if animateInstantly then
+            self.timeline:PlayInstantlyToEnd()
+        else
+            self.timeline:PlayFromStart()
+        end
+    elseif self.onScrollCompleteCallback then 
+        local SCROLL_ANIMATION_COMPLETE = true
+        self.onScrollCompleteCallback(SCROLL_ANIMATION_COMPLETE) 
+        self.onScrollCompleteCallback = nil
+    end
+end
+
+local function SetSliderValue(self, targetValue, animateInstantly, overrideDurationMS)
     if self.scrollbar then
         local startValue = self.scrollbar:GetValue()
         local scrollMin, scrollMax = self.scrollbar:GetMinMax()
@@ -131,6 +205,8 @@ local function SetSliderValue(self, targetValue, animateInstantly)
             self.timeline:Stop()
             self.animationStart = startValue
             self.animationTarget = targetValue
+            self.animationUnits = SCROLL_ANIMATION_UNITS_PERCENT
+            self.animation:SetDuration(overrideDurationMS or SCROLL_ANIMATION_DEFAULT_DURATION_MS)
             if animateInstantly then
                 self.timeline:PlayInstantlyToEnd()
             else
@@ -155,18 +231,11 @@ local function OnAnimationStop(animationObject, control, completedPlaying)
     end 
 end
 
-local function OnAnimationUpdate(animationObject, progress)
-    local scrollObject = animationObject.scrollObject
-    local value = scrollObject.animationStart + (scrollObject.animationTarget - scrollObject.animationStart) * progress
-    scrollObject.scrollbar:SetValue(value)
-end
-
 local function CreateScrollAnimation(scrollObject)
     local animation, timeline = CreateSimpleAnimation(ANIMATION_CUSTOM)
     animation.scrollObject = scrollObject
     animation:SetEasingFunction(ZO_BezierInEase)
-    animation:SetUpdateFunction(OnAnimationUpdate)
-    animation:SetDuration(400)
+    animation:SetUpdateFunction(OnScrollAnimationUpdate)
     animation:SetHandler("OnStop", OnAnimationStop)
 
     return animation, timeline
@@ -174,19 +243,42 @@ end
 
 --Shared Scroll Edge Fades
 -----------------------------------------------------------------
-local function UpdateScrollFade(useFadeGradient, scroll, slider, sliderValue)
-    if(useFadeGradient) then
-        local sliderMin, sliderMax = slider:GetMinMax()
-        sliderValue = sliderValue or slider:GetValue()
 
-        if(sliderValue > sliderMin) then
-            scroll:SetFadeGradient(1, 0, 1, zo_min(sliderValue - sliderMin, MAX_FADE_VALUE))
+local function ComputeScrollFadeDistancesFromRealValues(sliderValue, sliderMin, sliderMax, maxFadeDistance)
+    local topFadeDistance = zo_max(0, zo_min(sliderValue - sliderMin, maxFadeDistance))
+    local bottomFadeDistance = zo_max(0, zo_min(sliderMax - sliderValue, maxFadeDistance))
+    return topFadeDistance, bottomFadeDistance    
+end
+
+local function ComputeScrollFadeDistancesFromPercentValues(sliderValue, verticalExtents, maxFadeDistance)
+    local realSliderMin = 0
+    local realSliderMax = verticalExtents
+    local realSliderValue = (sliderValue / MAX_SCROLL_VALUE) * verticalExtents
+    return ComputeScrollFadeDistancesFromRealValues(realSliderValue, realSliderMin, realSliderMax, maxFadeDistance)
+end
+
+local function UpdateScrollFade(self, scroll, isPercent, sliderValue)
+    if self.useFadeGradient then
+        local slider = self.scrollbar
+        sliderValue = sliderValue or slider:GetValue()
+        local maxFadeDistance = ZO_Scroll_GetMaxFadeDistance(self)
+        local topFadeDistance, bottomFadeDistance
+        if isPercent then
+            local _, verticalExtents = scroll:GetScrollExtents()
+            topFadeDistance, bottomFadeDistance = ComputeScrollFadeDistancesFromPercentValues(sliderValue, verticalExtents, maxFadeDistance)
+        else
+            local sliderMin, sliderMax = slider:GetMinMax()
+            topFadeDistance, bottomFadeDistance = ComputeScrollFadeDistancesFromRealValues(sliderValue, sliderMin, sliderMax, maxFadeDistance)
+        end
+
+        if topFadeDistance > 0 then
+            scroll:SetFadeGradient(1, 0, 1, topFadeDistance)
         else
             scroll:SetFadeGradient(1, 0, 0, 0)
         end
         
-        if(sliderValue < sliderMax) then
-            scroll:SetFadeGradient(2, 0, -1, zo_min(sliderMax - sliderValue, MAX_FADE_VALUE))
+        if bottomFadeDistance > 0 then
+            scroll:SetFadeGradient(2, 0, -1, bottomFadeDistance)
         else
             scroll:SetFadeGradient(2, 0, 0, 0);
         end
@@ -210,8 +302,14 @@ local function ZO_ScrollDown_OnMouseDown(self)
     ZO_Scroll_ScrollRelative(self:GetParent():GetParent(), 40)
 end
 
+local function ZO_Scroll_ScrollOrBarOnHeightChanged(scrollOrBarControl, newHeight)
+    local scrollPane = scrollOrBarControl:GetParent()
+    ZO_Scroll_UpdateScrollBar(scrollPane)
+end
+
 function ZO_Scroll_Initialize(self)
     self.scroll = GetControl(self, "Scroll")
+    self.scroll:SetHandler("OnRectHeightChanged", ZO_Scroll_ScrollOrBarOnHeightChanged)
     self.scrollbar = GetControl(self, "ScrollBar")
     
     if self.scrollbar then
@@ -219,6 +317,7 @@ function ZO_Scroll_Initialize(self)
         self.scrollUpButton:SetHandler("OnMouseDown", ZO_ScrollUp_OnMouseDown)
         self.scrollDownButton = GetControl(self.scrollbar, "Down")
         self.scrollDownButton:SetHandler("OnMouseDown", ZO_ScrollDown_OnMouseDown)
+        self.scrollbar:SetHandler("OnRectHeightChanged", ZO_Scroll_ScrollOrBarOnHeightChanged)
     end
     
     self.hideScrollBarOnDisabled = true
@@ -231,7 +330,9 @@ end
 
 --Scrolling functions
 function ZO_Scroll_ResetToTop(self)
-    self.timeline:Stop()
+    if self.timeline then
+        self.timeline:Stop()
+    end
     if self.scrollbar then
         self.scrollbar:SetValue(MIN_SCROLL_VALUE)
     end
@@ -241,7 +342,7 @@ function ZO_Scroll_ScrollAbsolute(self, value)
     local scroll = self.scroll
     local _, verticalExtents = scroll:GetScrollExtents()
 
-    if(verticalExtents > 0) then
+    if verticalExtents > 0 then
         SetSliderValue(self, (value / verticalExtents) * MAX_SCROLL_VALUE)
     end
 end
@@ -253,19 +354,21 @@ function ZO_Scroll_ScrollAbsoluteInstantly(self, value)
     local targetValue = (value / verticalExtents) * MAX_SCROLL_VALUE
     local scrollMin, scrollMax = scrollbar:GetMinMax()
     targetValue = zo_clamp(targetValue, scrollMin, scrollMax)
-    self.timeline:Stop()
-    self.animationStart = scrollbar:GetValue()
-    self.animationTarget = targetValue
-    self.timeline:PlayInstantlyToEnd()
+    SetSliderValue(self, targetValue, ANIMATE_INSTANTLY)
 end
 
 function ZO_Scroll_ScrollRelative(self, verticalDelta)
     local scroll = self.scroll
     local _, verticalExtents = scroll:GetScrollExtents()   
     
-    if(verticalExtents > 0) then
-        if(self.animationTarget) then
-            local oldVerticalOffset = (self.animationTarget * verticalExtents) / MAX_SCROLL_VALUE
+    if verticalExtents > 0 then
+        if self.animationTarget then
+            local oldVerticalOffset
+            if self.animationUnits == SCROLL_ANIMATION_UNITS_PERCENT then
+                oldVerticalOffset = (self.animationTarget * verticalExtents) / MAX_SCROLL_VALUE
+            else
+                oldVerticalOffset = self.animationTarget
+            end
             local newVerticalOffset = oldVerticalOffset + verticalDelta
             SetSliderValue(self, (newVerticalOffset / verticalExtents) * MAX_SCROLL_VALUE)
         else
@@ -279,46 +382,77 @@ end
 function ZO_Scroll_MoveWindow(self, value)
     local scroll = self.scroll
     local _, verticalExtents = scroll:GetScrollExtents()
-    
+
     scroll:SetVerticalScroll((value/MAX_SCROLL_VALUE) * verticalExtents)
     ZO_Scroll_UpdateScrollBar(self)    
 end
 
-function ZO_Scroll_GetScrollDistanceToControl(self, otherControl)
-    -- self is a ScrollControl.  
-    --
-    -- NOTE: This doesn't check the lineage of the otherControl, so please don't pass in controls which aren't descended
-    -- from self.
-    
-    local scrollTop         = self:GetTop()
-    local scrollBottom      = self:GetBottom()
-    local controlTop        = otherControl:GetTop()
-    local controlBottom     = otherControl:GetBottom()   
+local SCROLL_TO_SIDE_TOP = 1
+local SCROLL_TO_SIDE_BOTTOM = 2
+
+function ZO_Scroll_GetScrollDistanceToControl(self, otherControl, scrollToSide)
+    local scroll = self.scroll
+    local scrollTop = scroll:GetTop()
+    local scrollBottom = scroll:GetBottom()
+    local controlTop = otherControl:GetTop()
+    local controlBottom = otherControl:GetBottom()   
  
-    if(controlTop < scrollTop) -- The control's top is above the top edge of the scroll, must scroll up to fully contain the control.
-    then
-        return controlTop - scrollTop 
-    elseif(controlBottom > scrollBottom) -- The control's bottom is below the bottom edge of the scroll, must scroll down to fully contain the control.
-    then
-        return controlBottom - scrollBottom
+    local scrollDistance = 0
+    if scrollToSide == SCROLL_TO_SIDE_TOP then -- The control's top is above the top edge of the scroll, must scroll up to fully contain the control.
+        scrollDistance = controlTop - scrollTop
+    elseif scrollToSide == SCROLL_TO_SIDE_BOTTOM  then -- The control's bottom is below the bottom edge of the scroll, must scroll down to fully contain the control.
+        scrollDistance = controlBottom - scrollBottom
+    end
+
+    if scrollDistance ~= 0 and self.useFadeGradient then
+        local _, verticalOffset = scroll:GetScrollOffsets()
+        local _, verticalExtents = scroll:GetScrollExtents()
+        local verticalOffsetAfterScroll = zo_clamp(verticalOffset + scrollDistance, 0, verticalExtents)
+        local topFadeDistance, bottomFadeDistance = ComputeScrollFadeDistancesFromRealValues(verticalOffsetAfterScroll, 0, verticalExtents, ZO_Scroll_GetMaxFadeDistance(self))
+        if scrollToSide == SCROLL_TO_SIDE_TOP then
+            -- divide by 2 for effect
+            scrollDistance = scrollDistance - topFadeDistance * 0.5
+        else
+            -- divide by 2 for effect
+            scrollDistance = scrollDistance + bottomFadeDistance * 0.5
+        end
     end
     
-    return 0
+    return scrollDistance
 end
 
-function ZO_Scroll_ScrollToControl(self, otherControl)    
-    local scrollDistance = ZO_Scroll_GetScrollDistanceToControl(self.scroll, otherControl)
-    
-    if(scrollDistance ~= 0) then    
+function ZO_Scroll_ScrollToControl(self, otherControl)
+    local scroll = self.scroll
+    local scrollTop = scroll:GetTop()
+    local scrollBottom = scroll:GetBottom()
+    local controlTop = otherControl:GetTop()
+    local controlBottom = otherControl:GetBottom()   
+ 
+    local scrollToSide
+    if controlTop < scrollTop then -- The control's top is above the top edge of the scroll, must scroll up to fully contain the control.
+        scrollToSide = SCROLL_TO_SIDE_TOP
+    elseif controlBottom > scrollBottom then -- The control's bottom is below the bottom edge of the scroll, must scroll down to fully contain the control.
+        scrollToSide = SCROLL_TO_SIDE_BOTTOM
+    end
+  
+    local scrollDistance = ZO_Scroll_GetScrollDistanceToControl(self, otherControl, scrollToSide)
+    if scrollDistance ~= 0 then    
          ZO_Scroll_ScrollRelative(self, scrollDistance)
     end
 end
 
 function ZO_Scroll_ScrollControlToTop(self, otherControl)
-    local scrollTop         = self.scroll:GetTop()
-    local controlTop        = otherControl:GetTop()
-   
-    ZO_Scroll_ScrollRelative(self, controlTop - scrollTop)
+    local scrollDistance = ZO_Scroll_GetScrollDistanceToControl(self, otherControl, SCROLL_TO_SIDE_TOP)
+    if scrollDistance ~= 0 then    
+         ZO_Scroll_ScrollRelative(self, scrollDistance)
+    end
+end
+
+function ZO_Scroll_ScrollControlToBottom(self, otherControl)
+    local scrollDistance = ZO_Scroll_GetScrollDistanceToControl(self, otherControl, SCROLL_TO_SIDE_BOTTOM)
+    if scrollDistance ~= 0 then    
+         ZO_Scroll_ScrollRelative(self, scrollDistance)
+    end
 end
 
 function ZO_Scroll_IsControlFullyInView(self, control)
@@ -338,9 +472,9 @@ function ZO_Scroll_ScrollControlIntoView(self, otherControl)
     local controlTop = otherControl:GetTop()
     local controlBottom = otherControl:GetBottom()
     
-    if(controlTop < scrollTop) then
+    if controlTop < scrollTop then
         ZO_Scroll_ScrollRelative(self, controlTop - scrollTop)
-    elseif(controlBottom > scrollBottom) then
+    elseif controlBottom > scrollBottom then
         ZO_Scroll_ScrollRelative(self, controlBottom - scrollBottom)
     end
 end
@@ -354,8 +488,8 @@ function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl, scrollInstan
     local controlTop = otherControl:GetTop()
     local controlBottom = otherControl:GetBottom()
 
-    local halfControlHeight = (controlBottom - controlTop) * .5
-    local halfScrollHeight = (scrollBottom - scrollTop) * .5
+    local halfControlHeight = (controlBottom - controlTop) * 0.5
+    local halfScrollHeight = (scrollBottom - scrollTop) * 0.5
     local scrollDistance = controlTop + halfControlHeight - scrollTop - halfScrollHeight
 
     local scrollToValue = zo_clamp(verticalOffset + scrollDistance, 0, verticalExtents)
@@ -371,43 +505,19 @@ function ZO_Scroll_ScrollControlIntoCentralView(self, otherControl, scrollInstan
     end
 end
 
-function ZO_Scroll_SetScrollToTargetControl(self, targetControl, extentDelta)
-    self.targetControl = targetControl
-    if targetControl == nil then
-        self.savedTargetControlDistance = nil
-        self.savedGradientOffset = nil
-    else
-        local scroll = self.scroll
-        local scrollMin = self.scrollbar:GetMinMax()
-        local _, verticalOffset = scroll:GetScrollOffsets()
-        local _, verticalExtents = scroll:GetScrollExtents()
-        local scrollTop = scroll:GetTop()
-        local controlTop = self.targetControl:GetTop()
-        local scrollDistance = controlTop - scrollTop
-        self.savedGradientOffset = 0
-        if self.useFadeGradient then
-            -- calculate the final gradient height if we were to put our targetControl at its final position
-            if extentDelta then
-                -- For animating controls, this is the delta height from
-                -- the control now to where it would be at the end of the animation
-                verticalExtents = verticalExtents + extentDelta
-            end
-            verticalOffset = zo_clamp(verticalOffset + scrollDistance, 0, verticalExtents)
-            local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
-            local gradientHeight = zo_min(finalValue - scrollMin, MAX_FADE_VALUE)
-            self.savedGradientOffset = gradientHeight / 2 -- divide by 2 for effect
-        end
-        self.savedTargetControlDistance = scrollDistance
+function ZO_Scroll_SetScrollToRealOffsetAccountingForGradients(self, finalTotalHeight, controlFinalTopOffset, durationMS)
+    local scroll = self.scroll
+    local scrollHeight = scroll:GetHeight()
+    local finalVerticalExtents = zo_max(finalTotalHeight - scrollHeight, 0)
+    local finalVerticalOffset = controlFinalTopOffset
+    if self.useFadeGradient then            
+        local topGradientHeight = ComputeScrollFadeDistancesFromRealValues(finalVerticalOffset, 0, finalVerticalExtents, ZO_Scroll_GetMaxFadeDistance(self))
+            -- divide by 2 for effect
+        finalVerticalOffset = finalVerticalOffset - topGradientHeight * 0.5
     end
-end
-
-do
-    local FORCE_UPDATE_BAR_VALUE = true
-
-    function ZO_Scroll_SetScrollPercentageToTop(self, percentage)
-        self.targetControlPercentageToTop = percentage
-        ZO_Scroll_UpdateScrollBar(self, FORCE_UPDATE_BAR_VALUE)
-    end
+    finalVerticalOffset = zo_clamp(finalVerticalOffset, 0, finalVerticalExtents)
+    local DONT_ANIMATE_INSTANTLY = false
+    SetScrollOffset(self, finalVerticalOffset, DONT_ANIMATE_INSTANTLY, durationMS)
 end
 
 --Scroll update functions
@@ -415,6 +525,14 @@ end
 function ZO_Scroll_OnExtentsChanged(self)
     if self and self.scroll and not self.targetControl then
         ZO_Scroll_UpdateScrollBar(self)
+    end
+end
+
+function ZO_Scroll_SetOnInteractWithScrollbarCallback(self, onInteractWithScrollbarCallback)
+    self.onInteractWithScrollbarCallback = onInteractWithScrollbarCallback
+
+    if self.scrollbar then
+        VerticalScrollbarBase_SetOnInteractWithScrollbarCallback(self.scrollbar, onInteractWithScrollbarCallback)
     end
 end
 
@@ -433,7 +551,7 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
         --thumb resizing
         local scrollBarHeight = scrollbar:GetHeight()
         local scrollAreaHeight = scroll:GetHeight()
-        if(verticalExtents > 0 and scrollBarHeight >= 0 and scrollAreaHeight >= 0) then
+        if verticalExtents > 0 and scrollBarHeight >= 0 and scrollAreaHeight >= 0 then
             local thumbHeight = scrollBarHeight * scrollAreaHeight /(verticalExtents + scrollAreaHeight)
             scrollbar:SetThumbTextureHeight(thumbHeight)
         else
@@ -453,25 +571,6 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
         if verticalExtentsChanged or forceUpdateBarValue then
             if verticalExtents > 0 then
                 local previousScrollBarValue = scrollbar:GetValue()
-                local scrollTop = scroll:GetTop()
-                if self.targetControl then
-                    local controlTop = self.targetControl:GetTop()
-                    local scrollDistanceToControl = controlTop - scrollTop
-                    local distanceFromControlToTop = self.savedTargetControlDistance
-                    local gradientOffset = self.savedGradientOffset
-
-                    if self.targetControlPercentageToTop then
-                        -- calculate the percentage of the distance from where the control started
-                        -- to ease from it's current position into its final position 
-                        -- at the top of the scroll viewport (offset by the graident)
-                        distanceFromControlToTop = distanceFromControlToTop * (1 - self.targetControlPercentageToTop)
-                        -- Ease into the gradient offset for a nice smooth effect
-                        gradientOffset = gradientOffset * self.targetControlPercentageToTop
-                    end
-
-                    local finalControlDistance = scrollDistanceToControl - distanceFromControlToTop - gradientOffset
-                    verticalOffset = zo_clamp(verticalOffset + finalControlDistance, 0, verticalExtents)
-                end
                 local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
                 scrollbar:SetValue(finalValue)
 
@@ -479,14 +578,15 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
                 -- the onValueChanged function will not be invoked to update the scroll child position.
                 -- We need to explicitly call to recalculate our scroll child position since our extents changed.
                 if previousScrollBarValue == finalValue then
-                    scroll:SetVerticalScroll((finalValue / MAX_SCROLL_VALUE) * verticalExtents)
+                    scroll:SetVerticalScroll(verticalOffset)
                 end
             else
                 ZO_Scroll_ResetToTop(self)
             end
         end
 
-        UpdateScrollFade(self.useFadeGradient, scroll, scrollbar)
+        local IS_PERCENT = true
+        UpdateScrollFade(self, scroll, IS_PERCENT)
     elseif scrollIndicator then
         --auto scroll indicator hiding
         local wasHidden = scrollIndicator:IsHidden()
@@ -505,6 +605,8 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
 
         ZO_UpdateScrollFade(self.useFadeGradient, scroll, ZO_SCROLL_DIRECTION_VERTICAL)
     end
+
+    OnInteractWithScrollBar(self)
 end
 
 --Visual Config
@@ -520,6 +622,14 @@ end
 
 function ZO_Scroll_SetUseFadeGradient(self, useFadeGradient)
     self.useFadeGradient = useFadeGradient
+end
+
+function ZO_Scroll_SetMaxFadeDistance(self, maxFadeDistance)
+    self.maxFadeDistanceUI = maxFadeDistance
+end
+
+function ZO_Scroll_GetMaxFadeDistance(self)
+    return self.maxFadeDistanceUI or MAX_FADE_DISTANCE_UI
 end
 
 function ZO_Scroll_SetupGutterTexture(self, textureControl)
@@ -649,7 +759,7 @@ end
 --@resetControlCallback - An optional callback when the datatype control gets reset.
 function ZO_ScrollList_AddDataType(self, typeId, templateName, height, setupCallback, hideCallback, dataTypeSelectSound, resetControlCallback)    
     if not self.dataTypes[typeId] then
-        local factoryFunction = function(objectPool) return ZO_ObjectPool_CreateNamedControl(string.format("%s%dRow", self:GetName(), tostring(typeId)), templateName, objectPool, self.contents) end
+        local factoryFunction = function(objectPool) return ZO_ObjectPool_CreateNamedControl(string.format("%s%dRow", self:GetName(), typeId), templateName, objectPool, self.contents) end
         local pool = ZO_ObjectPool:New(factoryFunction, resetControlCallback or ZO_ObjectPool_DefaultResetControl)
         self.dataTypes[typeId] = 
         {
@@ -929,6 +1039,10 @@ function ZO_ScrollList_SetTypeSelectable(self, typeId, selectable)
     self.dataTypes[typeId].selectable = selectable
 end
 
+function ZO_ScrollList_SetTypeCategoryHeader(self, typeId, isHeader)
+    self.dataTypes[typeId].categoryHeader = isHeader
+end
+
 function ZO_ScrollList_SetEqualityFunction(self, typeId, equalityFunction)
     self.dataTypes[typeId].equalityFunction = equalityFunction
 end
@@ -946,22 +1060,22 @@ function ZO_ScrollList_SetScrollBarHiddenCallback(self, callback)
 end
 
 function ZO_ScrollList_AddCategory(self, categoryId, parentId)
-    if(self.categories[categoryId]) then
+    if self.categories[categoryId] then
         return
     end    
     
     --if a parent id is given and it doesn't exist, give up
     local parent = nil
-    if(parentId) then
+    if parentId then
         parent = self.categories[parentId]
-        if(not parent) then
+        if not parent then
             return
         end        
     end
     
     local category = {id = categoryId, parent = parent, children = {}, hidden = false}
     self.categories[categoryId] = category
-    if(parent) then
+    if parent then
         table.insert(parent.children, category)
     end
 end
@@ -977,7 +1091,7 @@ end
 
 function ZO_ScrollList_GetCategoryHidden(self, categoryId)
     local category = self.categories[categoryId]
-    if(category) then
+    if category then
         return category.hidden
     end
 end
@@ -1027,7 +1141,7 @@ function ZO_ScrollList_HasVisibleData(self)
 end
 
 function ZO_ScrollList_GetSelectedData(self)
-    if(AreSelectionsEnabled(self)) then
+    if AreSelectionsEnabled(self) then
         return self.selectedData
     end
     
@@ -1047,7 +1161,7 @@ end
 function ZO_ScrollList_GetMouseOverControl(self)
     for i = 0, #self.activeControls do
         local control = self.activeControls[i]
-        if(MouseIsOver(control)) then
+        if MouseIsOver(control) then
             return control
         end
     end
@@ -1083,7 +1197,7 @@ local function HighlightControl(self, control)
 
     self.highlightedControl = control
     
-    if(self.highlightCallback) then
+    if self.highlightCallback then
         self.highlightCallback(control, true)
     end   
 end
@@ -1093,7 +1207,7 @@ local function UnhighlightControl(self, control)
 
     self.highlightedControl = nil
 
-    if(self.highlightCallback) then
+    if self.highlightCallback then
         self.highlightCallback(control, false)
     end
 end
@@ -1112,19 +1226,19 @@ end
 
 --Allows you to lock the highlight in place. The highlight will automatically unlock if the list is recommitted.
 function ZO_ScrollList_SetLockHighlight(self, lock)
-    if(not self.highlightTemplate or (self.highlightLocked == lock)) then
+    if not self.highlightTemplate or (self.highlightLocked == lock) then
         return
     end
    
     self.highlightLocked = lock
     
-    if(lock) then
+    if lock then
         self.pendingHighlightControl = self.highlightedControl
     else
-        if(self.highlightedControl) then
+        if self.highlightedControl then
             UnhighlightControl(self, self.highlightedControl)
         end
-        if(self.pendingHighlightControl) then
+        if self.pendingHighlightControl then
             HighlightControl(self, self.pendingHighlightControl)
         end
     end
@@ -1132,19 +1246,19 @@ end
 
 --Reinitializes the highlight (used mostly when a mouse enter would have been missed)
 local function RefreshHighlight(self)
-    if(not self.highlightTemplate) then
+    if not self.highlightTemplate then
         return
     end
 
     self.highlightLocked = false
-    if(self.highlightedControl) then
+    if self.highlightedControl then
         UnhighlightControl(self, self.highlightedControl)
     end
     
     --find the control to highlight if any
     for i = 0, #self.activeControls do
         local control = self.activeControls[i]
-        if(MouseIsOver(control)) then
+        if MouseIsOver(control) then
             HighlightControl(self, control)
             return
         end
@@ -1152,12 +1266,12 @@ local function RefreshHighlight(self)
 end
 
 function ZO_ScrollList_MouseEnter(self, control)
-    if(not self.highlightTemplate) then
+    if not self.highlightTemplate then
         return
     end
     
     --allows us to place the highlight correctly when we unlock
-    if(self.highlightLocked) then
+    if self.highlightLocked then
         self.pendingHighlightControl = control
         return
     end
@@ -1166,11 +1280,11 @@ function ZO_ScrollList_MouseEnter(self, control)
 end
 
 function ZO_ScrollList_MouseExit(self, control)
-    if(not self.highlightTemplate) then
+    if not self.highlightTemplate then
         return
     end
     
-    if(self.highlightLocked) then
+    if self.highlightLocked then
         self.pendingHighlightControl = nil
         return
     end
@@ -1179,9 +1293,9 @@ function ZO_ScrollList_MouseExit(self, control)
 end
 
 function ZO_ScrollList_MouseClick(self, control)
-    if(AreSelectionsEnabled(self)) then
-        if(control == self.selectedControl) then
-            if(self.deselectOnReselect) then
+    if AreSelectionsEnabled(self) then
+        if control == self.selectedControl then
+            if self.deselectOnReselect then
                 ZO_ScrollList_SelectData(self, nil)
             end
         else
@@ -1191,7 +1305,7 @@ function ZO_ScrollList_MouseClick(self, control)
 
             ZO_ScrollList_SelectData(self, data, control)
 
-            if(selectSound) then
+            if selectSound then
                 PlaySound(selectSound)
             end
         end		
@@ -1255,7 +1369,7 @@ local function AreDataEqualSelections(self, data1, data2)
 end
 
 function ZO_ScrollList_IsDataSelected(self, data)
-    if(AreSelectionsEnabled(self) and AreDataEqualSelections(self, self.selectedData, data)) then
+    if AreSelectionsEnabled(self) and AreDataEqualSelections(self, self.selectedData, data) then
         return true
     end
     return false
@@ -1343,7 +1457,7 @@ end
 local function OnContentsUpdate(self)
     local _, windowHeight = self:GetDimensions()
     
-    if(windowHeight > 0) then
+    if windowHeight > 0 then
         self:SetHandler("OnUpdate", nil)
         ZO_ScrollList_SetHeight(self, windowHeight)
         ZO_ScrollList_Commit(self:GetParent())        
@@ -1422,9 +1536,9 @@ end
 
 local function CheckRunHandler(self, handlerName)
     local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
-    if(mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl:IsChildOf(self)) then
+    if mouseOverControl and not mouseOverControl:IsHidden() and mouseOverControl:IsChildOf(self) then
         local handler = mouseOverControl:GetHandler(handlerName)
-        if(handler) then
+        if handler then
             handler(mouseOverControl)
         end
     end
@@ -1434,6 +1548,12 @@ local function CanSelectData(self, index)
     local dataEntry = self.data[index]
     local dataTypeInfo = GetDataTypeInfo(self, dataEntry.typeId)
     return dataTypeInfo.selectable
+end
+
+local function IsCategoryHeader(self, index)
+    local dataEntry = self.data[index]
+    local dataTypeInfo = GetDataTypeInfo(self, dataEntry.typeId)
+    return dataTypeInfo.categoryHeader
 end
 
 local function AutoSelect(self, animateInstantly)
@@ -1651,7 +1771,7 @@ end
 
 function ZO_ScrollList_TrySelectFirstData(self)
     for i = 1, #self.data do
-        if(CanSelectData(self, i)) then
+        if CanSelectData(self, i) then
             ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[i].data)
             return true
         end
@@ -1661,7 +1781,7 @@ end
 
 function ZO_ScrollList_TrySelectLastData(self)
     for i = #self.data, 1, -1 do
-        if(CanSelectData(self, i)) then
+        if CanSelectData(self, i) then
             ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[i].data)
             return true
         end
@@ -1675,18 +1795,72 @@ end
 
 --When the list in inactive, you can't get selected data.  Auto select is a mechanic of lists that will reselect the last thing that was selected
 -- Assuming it wasn't reset, or manually set to something else.  If another party needs to know what data would be selected if the list were active, this is how
-function ZO_ScrollList_GetAutoSelectData(self)
+function ZO_ScrollList_GetAutoSelectIndex(self)
     if #self.data > 0 then
         local recalledIndex = self.selectedDataIndex or self.lastSelectedDataIndex
         if recalledIndex and CanSelectData(self, recalledIndex) then
-            return self.data[recalledIndex].data
+            return recalledIndex
         end
+    end
+    return nil
+end
+
+function ZO_ScrollList_GetAutoSelectData(self)
+    local recalledIndex = ZO_ScrollList_GetAutoSelectIndex(self)
+    if recalledIndex then
+        return self.data[recalledIndex].data
     end
     return nil
 end
 
 function ZO_ScrollList_ResetAutoSelectIndex(self)
     self.lastSelectedDataIndex = nil
+end
+
+-- direction: ZO_SCROLL_SELECT_CATEGORY_PREVIOUS or ZO_SCROLL_SELECT_CATEGORY_NEXT
+function ZO_ScrollList_SelectFirstIndexInCategory(self, direction)
+    local currentlySelectedData = ZO_ScrollList_GetSelectedData(self)
+    if not currentlySelectedData then
+        return
+    end
+
+    local listData = ZO_ScrollList_GetDataList(self)
+    local nextDataIndex = ZO_ScrollList_GetDataIndex(self, currentlySelectedData.dataEntry) + direction
+
+    if nextDataIndex < 1 or nextDataIndex > #listData then
+        -- we are already at the end of our list
+        return
+    end
+
+    -- if we are going backwards and hit a non-selectable entry, we need to keep going until we find a selectable entry so we don't just select the same value
+    if direction == ZO_SCROLL_SELECT_CATEGORY_PREVIOUS then
+        while not CanSelectData(self, nextDataIndex) do
+            nextDataIndex = nextDataIndex + direction
+            if nextDataIndex == 0 or nextDataIndex == #listData then
+                -- could not find an acceptable target, we are at the selectable end of our list
+                return
+            end
+        end
+    end
+
+
+    while nextDataIndex > 0 and nextDataIndex <= #listData do
+        if IsCategoryHeader(self, nextDataIndex) then
+            -- we found header data, select the first selectable entry under it
+            local lookAheadIndex = nextDataIndex + 1
+            ZO_ScrollList_SelectData(self, listData[lookAheadIndex].data)
+            ZO_ScrollList_ScrollDataToCenter(self, lookAheadIndex)
+            ZO_ScrollList_RefreshLastHoldPosition(self)
+            return
+        end
+
+        nextDataIndex = nextDataIndex + direction
+    end
+
+    -- could not find another header data, so just pick the last selectable value we found
+    ZO_ScrollList_SelectData(self, listData[nextDataIndex - direction].data)
+    ZO_ScrollList_ScrollDataToCenter(self, nextDataIndex - direction)
+    ZO_ScrollList_RefreshLastHoldPosition(self)
 end
 
 --Updates the scroll control with new data. Call this when you modify the data list by adding or removing entries.
@@ -1713,9 +1887,9 @@ function ZO_ScrollList_Commit(self)
         for i, currentData in ipairs(self.data) do
             table.insert(self.visibleData, i)
             
-            if selectionsEnabled and AreDataEqualSelections(self, self.data[i].data, self.selectedData) then
+            if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
                foundSelected = true
-               ZO_ScrollList_SelectData(self, self.data[i].data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+               ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
             end
         end
 
@@ -1825,7 +1999,7 @@ end
 function ZO_ScrollList_HideData(self, index)
     if self.mode == SCROLL_LIST_UNIFORM then
         for i = 1, #self.visibleData do
-            if(self.visibleData[i] == index) then
+            if self.visibleData[i] == index then
                 table.remove(self.visibleData, i)            
                 break
             end
@@ -1842,20 +2016,20 @@ function ZO_ScrollList_HideCategory(self, categoryId)
 
     if self.mode == SCROLL_LIST_UNIFORM then
         local category = self.categories[categoryId]
-        if(category) then
+        if category then
             category.hidden = true    
             local numRemoved = 0
             
             local i = 1
-            while(i <= #self.visibleData) do
+            while i <= #self.visibleData do
                 local curCategoryId = data[visibleData[i]].categoryId
                 local curCategory = categories[curCategoryId]
                 local found = false
                 
                 --climb the hierarchy to see if this piece of data is under this category
-                while(curCategory) do
+                while curCategory do
                     curCategoryId = curCategory.id
-                    if(curCategoryId == categoryId) then
+                    if curCategoryId == categoryId then
                         table.remove(visibleData, i)
                         found = true
                         numRemoved = numRemoved + 1
@@ -1864,7 +2038,7 @@ function ZO_ScrollList_HideCategory(self, categoryId)
                     curCategory = curCategory.parent
                 end 
                 
-                if(not found) then
+                if not found then
                     i = i + 1
                 end          
             end
@@ -1912,36 +2086,36 @@ end
 function ZO_ScrollList_ShowCategory(self, categoryId)
     if self.mode == SCROLL_LIST_UNIFORM then
         local category = self.categories[categoryId]
-        if(category) then			
-            category.hidden = false    
-        
+        if category then
+            category.hidden = false
+
             local numShown = 0
             local i = 1
-            while(i <= #self.data) do
+            while i <= #self.data do
                 local curCategoryId = self.data[i].categoryId
                 local curCategory = self.categories[curCategoryId]
-                
+
                 local shouldInsert = true
-                while(curCategory) do
-                    if(curCategory.hidden) then
+                while curCategory do
+                    if curCategory.hidden then
                         shouldInsert = false
                         break
-                    end				
+                    end
                     curCategory = curCategory.parent
                 end
-                
-                if(shouldInsert) then					
+
+                if shouldInsert then
                     local found, insertionPoint = zo_binarysearch(i, self.visibleData, CompareIndices)        
-                    if(not found) then
+                    if not found then
                         numShown = numShown + 1
                         table.insert(self.visibleData, insertionPoint, i)
                     end
                 end
 
-                i = i + 1          
+                i = i + 1
             end
         
-            if(numShown > 0) then
+            if numShown > 0 then
                 UpdateAfterDataVisibilityChange(self)
             end
         end
@@ -1970,7 +2144,8 @@ function ZO_ScrollList_UpdateScroll(self)
     local activeControls = self.activeControls
     local offset = self.offset
 
-    UpdateScrollFade(self.useFadeGradient, self.contents, self.scrollbar, offset)
+    local IS_REAL_NUMBER = false
+    UpdateScrollFade(self, self.contents, IS_REAL_NUMBER, offset)
     
     --remove active controls that are now hidden
     local activeIndex = 1
@@ -2092,15 +2267,15 @@ function ZO_ScrollList_ScrollRelative(self, delta, onScrollCompleteCallback, ani
             scrollValue = self.scrollbar:GetValue() + delta
         end
 
-		self.onScrollCompleteCallback = onScrollCompleteCallback
+        self.onScrollCompleteCallback = onScrollCompleteCallback
         SetSliderValue(self, scrollValue, animateInstantly)
-	elseif onScrollCompleteCallback then
+    elseif onScrollCompleteCallback then
         onScrollCompleteCallback(true)
     end
 end
 
 function ZO_ScrollList_ScrollAbsolute(self, value)
-    if(not self.lock) then
+    if not self.lock then
         SetSliderValue(self, value)
     end
 end
@@ -2209,30 +2384,4 @@ end
 function ZO_ScrollList_EnoughEntriesToScroll(self)
     local _, scrollableDistance  = self.scrollbar:GetMinMax()
     return scrollableDistance > 0
-end
-
-function ZO_DefaultGridEntrySetup(control, data, list)
-    if not control.icon then
-        control.icon = control:GetNamedChild("Icon")
-    end
-
-    local icon = control.icon
-
-    if data.iconDesaturation then
-        icon:SetDesaturation(data.iconDesaturation)
-    end
-
-    if data.textureSampleProcessingWeights then
-        for type, weight in pairs(data.textureSampleProcessingWeights) do
-            icon:SetTextureSampleProcessingWeight(type, weight)
-        end
-    end
-
-    local iconFile = data.iconFile or data.icon
-    if iconFile then
-        icon:SetTexture(iconFile)
-        icon:SetHidden(false)
-    else
-        icon:SetHidden(true)
-    end
 end

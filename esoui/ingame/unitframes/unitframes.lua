@@ -592,9 +592,9 @@ function UnitFrameBar:UpdateText(updateBarType, updateValue)
         end
     end
 
-	if self.resourceNumbersLabel then
-		self.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(self.currentValue, self.maxValue))
-	end
+    if self.resourceNumbersLabel then
+        self.resourceNumbersLabel:SetText(ZO_FormatResourceBarCurrentAndMax(self.currentValue, self.maxValue))
+    end
 end
 
 function UnitFrameBar:SetMouseInside(inside)
@@ -1570,6 +1570,8 @@ local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
         [STAT_STATE_SHIELD_LOST]        = SOUNDS.UAV_DAMAGE_SHIELD_LOST_TARGET,
         [STAT_STATE_POSSESSION_APPLIED] = SOUNDS.UAV_POSSESSION_APPLIED_TARGET,
         [STAT_STATE_POSSESSION_REMOVED] = SOUNDS.UAV_POSSESSION_REMOVED_TARGET,
+        [STAT_STATE_TRAUMA_GAINED]      = SOUNDS.UAV_TRAUMA_ADDED_TARGET,
+        [STAT_STATE_TRAUMA_LOST]        = SOUNDS.UAV_TRAUMA_LOST_TARGET,
     },
 }
 
@@ -1638,7 +1640,7 @@ local function CreateTargetFrame()
     }
     visualizer:AddModule(ZO_UnitVisualizer_UnwaveringModule:New(VISUALIZER_ANGLE_UNWAVERING_LAYOUT_DATA))
 
-	VISUALIZER_ANGLE_POSSESSION_LAYOUT_DATA =
+    VISUALIZER_ANGLE_POSSESSION_LAYOUT_DATA =
     {
         type = "Angle",
         overlayContainerTemplate = "ZO_PossessionOverlayContainerAngle",

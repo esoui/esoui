@@ -64,7 +64,7 @@ local pregameStates =
     {
         OnEnter = function()
             ZO_Dialogs_ShowDialog("REQUESTING_WORLD_LIST")
-            PregameStateManager_RequestWorldListForLogin()
+            RequestWorldList()
         end,
 
         OnExit = function()

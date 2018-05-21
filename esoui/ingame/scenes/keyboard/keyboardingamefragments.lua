@@ -7,12 +7,22 @@ DLC_BOOK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DLCBook_Keyboard)
 HOUSING_BOOK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingBook_Keyboard)
 HOUSING_FURNITURE_BROWSER_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingFurnitureBrowserMenu_KeyboardTopLevel)
 
+CROWN_STORE_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_CROWN_STORE_TITLE)
+
 RIGHT_BG_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingLeft = 0,
     paddingRight = 950,
     dynamicFramingConsumedWidth = 1150,
     dynamicFramingConsumedHeight = 300,
     forcePreparePreview = false,
+})
+
+RIGHT_BG_FORCE_PREPARE_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = 950,
+    dynamicFramingConsumedWidth = 1150,
+    dynamicFramingConsumedHeight = 300,
+    forcePreparePreview = true,
 })
 
 RIGHT_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
@@ -46,6 +56,7 @@ RIGHT_PANEL_BG_EMPTY_WORLD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptions
     dynamicFramingConsumedWidth = 550,
     dynamicFramingConsumedHeight = 300,
     previewInEmptyWorld = true,
+    forcePreparePreview = false,
 })
 
 RESTYLE_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({

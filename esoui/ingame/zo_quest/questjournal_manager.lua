@@ -31,7 +31,7 @@ function ZO_QuestJournal_Manager:RegisterForEvents()
 
     EVENT_MANAGER:RegisterForEvent("QuestJournal_Manager", EVENT_QUEST_SHOW_JOURNAL_ENTRY, OnFocusQuestIndexChanged)
 
-    QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", OnAssistChanged)
+    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", OnAssistChanged)
 end
 
 local function BuildTextHelper(questIndex, stepIndex, conditionStep, questStrings)

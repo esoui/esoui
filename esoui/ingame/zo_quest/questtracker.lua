@@ -1,26 +1,21 @@
---constants
-local TRACKED = true
-local NOT_TRACKED = false
+--Constants
 
 local MOUSE_ENTER = 1
 local MOUSE_EXIT = 2
 
-local DEAULT_STYLE = 1
+local DEFAULT_STYLE = 1
 local HINT_STYLE = 2
-
-local QUEST_STATUS_AND                  = 1
-local QUEST_STATUS_AND_COMPLETE         = 2
-local QUEST_STATUS_OR                   = 3
-local QUEST_STATUS_OR_COMPLETE          = 4
-local QUEST_STATUS_OPTIONAL             = 5
-local QUEST_STATUS_OPTIONAL_COMPLETE    = 6
-local QUEST_STATUS_END                  = 7
-local QUEST_STATUS_TIMER                = 8
 
 local QUEST_TRACKER_TREE_HEADER                 = 1
 local QUEST_TRACKER_TREE_CONDITION              = 2
 local QUEST_TRACKER_TREE_SUBCATEGORY_TITLE      = 3
 local QUEST_TRACKER_TREE_SUBCATEGORY_CONDITION  = 4
+
+GAMEPAD_FQT_TEXT_MIN_ALPHA = 0.3
+GAMEPAD_FQT_ANIMATION_FADE_IN_MS = 300
+GAMEPAD_FQT_ANIMATION_FADE_OUT_MS = 2000
+
+--Style
 
 local KEYBOARD_CONSTANTS =
 {
@@ -116,13 +111,10 @@ local GAMEPAD_CONSTANTS =
     DISTANCE_BUTTON_TO_HEADER = 45,
 }
 
-local LEAVE_ASSISTED = true
-local CLEAR_ASSISTED = false
-
 local function ApplyStyle(label, style)
     if style == HINT_STYLE then
         label:SetColor(ZO_HINT_TEXT:UnpackRGBA())
-    else
+    elseif style == DEFAULT_STYLE then
         label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     end
 end
@@ -193,10 +185,6 @@ local function ApplyPlatformStyleToAssistedTexture(assistedTexture, assistedHead
     assistedTexture:SetInheritAlpha(constants.HEADER_INHERIT_ALPHA)
 end
 
-local function IsQuestTrackerVisible()
-    return false
-end
-
 --
 -- Tracked Data
 --
@@ -219,6 +207,13 @@ end
 
 function ZO_TrackedData:Equals(trackType, arg1, arg2)
     return (self.trackType == trackType and self.arg1 == arg1 and self.arg2 == arg2)
+end
+
+function ZO_TrackedData:EqualsTrackedData(trackedData)
+    if trackedData == nil then
+        return false
+    end
+    return (self.trackType == trackedData.trackType and self.arg1 == trackedData.arg1 and self.arg2 == trackedData.arg2)
 end
 
 --
@@ -251,9 +246,9 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
                                     end
 
                                     if control.m_StepDescriptionControls then
-                                        for _, control in ipairs(control.m_StepDescriptionControls) do
-                                            self.stepDescriptionPool:ReleaseObject(control.key)
-                                            self.treeView:RemoveNode(control.treeNode)
+                                        for _, stepControl in ipairs(control.m_StepDescriptionControls) do
+                                            self.stepDescriptionPool:ReleaseObject(stepControl.key)
+                                            self.treeView:RemoveNode(stepControl.treeNode)
                                         end
                                     end
 
@@ -289,7 +284,7 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
     self.treeView = ZO_TreeControl:New(constants.QUEST_TRACKER_TREE_ANCHOR, constants.QUEST_TRACKER_TREE_INDENT)
     
     self.tracked = {}
-    self.MAX_TRACKED = MAX_JOURNAL_QUESTS -- never allow more than this many quests...this is only controlled by the UI, not the client
+    self.MAX_TRACKED = 1 -- never allow more than this many quests...this is only controlled by the UI, not the client
     self.isMouseInside = false
     self.assistedTexture = GetControl(trackerControl, "Assisted")
     
@@ -308,8 +303,6 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
             trackerPanel:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
 
             --Events
-            self:RegisterCallback("QuestTrackerAssistStateChanged", function(unassistedQuestIndex, questIndex, questIndexIsAssisted) self:OnQuestAssistStateChanged(unassistedQuestIndex, questIndex, questIndexIsAssisted) end)
-
             trackerPanel:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED,  function(_, index) self:OnQuestConditionUpdated(index) end)
             trackerPanel:RegisterForEvent(EVENT_QUEST_ADVANCED,                   function(_, questIndex, questName, isPushed, isComplete, mainStepChanged) self:OnQuestAdvanced(questIndex, questName, isPushed, isComplete, mainStepChanged) end)
             trackerPanel:RegisterForEvent(EVENT_QUEST_ADDED,                      function(_, questIndex) self:OnQuestAdded(questIndex) end)   
@@ -319,14 +312,28 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
             trackerPanel:RegisterForEvent(EVENT_QUEST_LIST_UPDATED,               function() self:InitialTrackingUpdate() end)
             trackerPanel:RegisterForEvent(EVENT_PLAYER_ACTIVATED,                 function() self:InitialTrackingUpdate() end)
 
-            INTERACT_WINDOW:RegisterCallback("Hidden", function() self.assistedQuestCompleted = false end)
-
             self:InitialTrackingUpdate()
             trackerPanel:UnregisterForEvent(EVENT_ADD_ON_LOADED)
         end
     end
 
     trackerPanel:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+
+    self:InitializeFadeAnimations()
+    self:RegisterCallbacks()
+    self:ApplyPlatformStyle()
+
+    FOCUSED_QUEST_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(self.trackerPanel:GetNamedChild("Container"))
+    FOCUSED_QUEST_TRACKER_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState) self:FireCallbacks("QuestTrackerFragmentStateChange", oldState, newState) end)
+end
+
+function ZO_Tracker:RegisterCallbacks()
+    CALLBACK_MANAGER:RegisterCallback("GamepadChatSystemActiveOnScreen", function() self:TryFadeOut() end)
+    self.trackerControl:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
+end
+
+function ZO_Tracker:GetContainerControl()
+    return self.trackerControl
 end
 
 function ZO_Tracker:CreatePlatformAnchors()
@@ -377,24 +384,32 @@ function ZO_Tracker:ApplyPlatformStyle()
     self.treeView:SetIndent(constants.QUEST_TRACKER_TREE_INDENT)
     self.treeView:SetRelativePoint(constants.QUEST_TRACKER_TREE_RELATIVE_POINT)
     self:UpdateTreeView()
+
+    ApplyTemplateToControl(self.assistedTexture, ZO_GetPlatformTemplate("ZO_KeybindButton"))
+end
+
+function ZO_Tracker:UpdateAssistedVisibility()
+    self.assistedTexture:SetAlpha(GetNumJournalQuests() == 1 and 0 or 1)
 end
 
 function ZO_Tracker:InitialTrackingUpdate()
-    self.disableAudio = true
-    local numTracked = GetNumTracked()
-    self:ClearTracker()
-    for i=1, numTracked do
-        local trackType, arg1, arg2 = GetTrackedByIndex(i)
-        --quests only have one argument, which means the second one should be nil in lua, but it comes from c++ as 0
-        if(trackType == TRACK_TYPE_QUEST) then
-            self:BeginTracking(trackType, arg1)
-        end      
-        if(GetTrackedIsAssisted(trackType, arg1, arg2)) then
-            local header = self:GetHeaderForIndex(trackType, arg1, (arg2 ~= 0) and arg2 or nil)
-            self:SetAssisted(header, true)
+    local previouslyAssistedQuestIndex
+    for i = 1, GetNumJournalQuests() do
+        if GetTrackedIsAssisted(TRACK_TYPE_QUEST, i) then
+            previouslyAssistedQuestIndex = i
+            break
         end
     end
+
+    self:ClearTracker()
+    
+    self.disableAudio = true
+    if previouslyAssistedQuestIndex == nil or not self:BeginTracking(TRACK_TYPE_QUEST, previouslyAssistedQuestIndex) then
+        self:AssistClosestTracked()
+    end
     self.disableAudio = false
+
+    self:UpdateAssistedVisibility()
     self:FireCallbacks("QuestTrackerInitialUpdate")
 end
 
@@ -403,86 +418,60 @@ function ZO_Tracker:SetEnabled(enabled)
     self:UpdateVisibility()
 end
 
+local function IsFocusQuestTrackerVisible()
+    return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)
+end
+
 function ZO_Tracker:UpdateVisibility()
-    if(self:GetNumTracked() == 0 or not self.enabled or not IsQuestTrackerVisible()) then
-        self.trackerControl:SetHidden(true)
-    else
-        self.trackerControl:SetHidden(false)
-    end
-end
-
-function ZO_Tracker:SetTracked(questIndex, tracked)
-    if(tracked) then
-        self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
-    else
-        self:StopTracking(TRACK_TYPE_QUEST, questIndex)
-    end
-end
-
-function ZO_Tracker:ToggleTracking(questIndex)
-    local tracked = GetIsTracked(TRACK_TYPE_QUEST, questIndex)
-    local addToTracker = not tracked
-
-    if addToTracker == false or not self:IsFull() then
-        self:SetTracked(questIndex, addToTracker)
-    else
-        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_ERROR_QUEST_TRACKER_FULL_REMOVE_SOMETHING_FIRST))
-    end
+    FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("NoTrackedQuests", self:GetNumTracked() == 0, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
+    FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("DisabledBySetting", not IsFocusQuestTrackerVisible(), 0, 0)
 end
 
 function ZO_Tracker:ForceAssist(questIndex)
     local tracked = GetIsTracked(TRACK_TYPE_QUEST, questIndex)
-    if(not tracked) then
-        if(self:IsFull()) then
-            self:SetTracked(self.tracked[1]:GetJournalIndex(), false)
-        end
-        self:SetTracked(questIndex, true)
-    end
-    local header = self:GetHeaderForIndex(TRACK_TYPE_QUEST, questIndex)
-    if(header) then
-        self:SetAssisted(header, true)
+    if not tracked then
+        self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
+    else
+        local header = self:GetHeaderForIndex(TRACK_TYPE_QUEST, questIndex)
+        self:SetAssisted(header.m_Data, true)
     end
 end
 
 function ZO_Tracker:AssistClosestTracked()
+    self.disableAudio = true
     local foundValidCondition, nextQuestToAssist = GetNearestQuestCondition(QUEST_ASSIST_CONSIDER_ONLY_TRACKED_QUESTS)            
-    if foundValidCondition then
-        local questHeader = self:GetHeaderForIndex(TRACK_TYPE_QUEST, nextQuestToAssist)
-        if questHeader then
-            self.disableAudio = true
-            self:SetAssisted(questHeader, true)
-            self.disableAudio = false
-        end
-    else
+    if not foundValidCondition or not self:BeginTracking(TRACK_TYPE_QUEST, nextQuestToAssist) then
         --Even if we can't find a quest to path to, let's assist whatever other quests we might have in the journal instead
-        self:AssistNext()
+        local IGNORE_SCENE_RESTRICTION = true
+        self:AssistNext(IGNORE_SCENE_RESTRICTION)
     end
+    self.disableAudio = false
 end
 
 function ZO_Tracker:AssistNext(ignoreSceneRestriction)
     local isShowingBase = SCENE_MANAGER:IsShowingBaseScene()
-    if((ignoreSceneRestriction or isShowingBase) and #self.tracked > 0) then
+    if ignoreSceneRestriction or isShowingBase then
         if isShowingBase and self.isFaded then
-            self:FireCallbacks("QuestTrackerReactivate")
+            self:TryFadeIn()
         else
-            local assistIndex = 1
+            --if we are showing one quest now, find the next one to show ordered by the order they appear in the quest journal
             if self.assistedData then
                 local nextQuestIndex = SYSTEMS:GetObject("questJournal"):GetNextSortedQuestForQuestIndex(self.assistedData.arg1)
-                for i = 1, #self.tracked do
-                    if self.tracked[i]:GetJournalIndex() == nextQuestIndex then
-                        assistIndex = i
-                        break
+                if nextQuestIndex then
+                    if self:BeginTracking(TRACK_TYPE_QUEST, nextQuestIndex) then
+                        CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
+                        return
                     end
                 end
             end
 
-            local newAssistData = self.tracked[assistIndex]
-            if(newAssistData) then
-                local journalIndex = newAssistData:GetJournalIndex()
-                local questHeader = self:GetHeaderForIndex(TRACK_TYPE_QUEST, journalIndex)
-                if(questHeader) then
-                    self:SetAssisted(questHeader, true)
-                    CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
+            --if we aren't showing any quest look for some quest to show
+            for i = 1, MAX_JOURNAL_QUESTS do
+                if IsValidQuestIndex(i) then
+                    if self:BeginTracking(TRACK_TYPE_QUEST, i) then
+                        CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
+                        break
+                    end
                 end
             end
         end
@@ -495,24 +484,6 @@ end
 
 function ZO_Tracker:GetFaded()
     return self.isFaded
-end
-
---
--- Pins
---
-
-function ZO_Tracker:RefreshQuestPins(journalIndex, tracked)
-    -- Do not use GetMapQuestPinsAssisted to find whether or not the pin was assisted, it causes eso-56564.
-    local wasAssisted = GetTrackedIsAssisted(TRACK_TYPE_QUEST, journalIndex)
-    
-    RemoveMapQuestPins(journalIndex)
-    AddMapQuestPins(journalIndex)
-    
-    if(wasAssisted) then
-        SetMapQuestPinsAssisted(journalIndex, true)
-    end
-
-    self:FireCallbacks("QuestTrackerRefreshedMapPins", journalIndex)
 end
 
 --
@@ -593,7 +564,7 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
     end
 
     local isOptionalStep = (stepIndex > 1)
-    local style
+    local style = DEFAULT_STYLE
     if visibility == QUEST_STEP_VISIBILITY_HINT then
         style = HINT_STYLE
     end
@@ -615,16 +586,6 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
         end
     end
     
-    local conditionIconType = QUEST_STATUS_END
-    
-    if(isOptionalStep) then
-        conditionIconType = QUEST_STATUS_OPTIONAL
-    elseif(stepType == QUEST_STEP_TYPE_AND) then
-        conditionIconType = QUEST_STATUS_AND
-    elseif(stepType == QUEST_STEP_TYPE_OR) then
-        conditionIconType = QUEST_STATUS_OR
-    end
-
     local constants = GetPlatformConstants()
         
     if(stepOverrideText ~= "") then
@@ -642,7 +603,6 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
 
                 if(not isFailCondition and isComplete) then
                     stepOverride.isGroupCreditShared = isGroupCreditShared
-                    conditionIconType = conditionIconType + 1 -- move to complete
                     break -- done, at least one non-fail condition was complete
                 end
             end
@@ -710,7 +670,7 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
 end
 
 function ZO_Tracker:PopulateOptionalStepQuestConditionsForVisibility(questIndex, questHeader, treeNode, desiredVisibility, entryType)
-    for stepIndex = 2, GetJournalQuestNumSteps(questIndex) do
+    for stepIndex = QUEST_MAIN_STEP_INDEX + 1, GetJournalQuestNumSteps(questIndex) do
         self:PopulateStepQuestConditions(questIndex, stepIndex, questHeader, treeNode, desiredVisibility, entryType)
     end
     questHeader.m_hasAddedSectionHeader = nil
@@ -801,20 +761,23 @@ end
 function ZO_Tracker:OnQuestConditionUpdated(questIndex)
     if self:IsOnTracker(TRACK_TYPE_QUEST, questIndex) then
         self:RebuildConditions(questIndex)
-        self:RefreshQuestPins(questIndex, true)
     end
 end
 
 function ZO_Tracker:OnQuestAdded(questIndex)
-    if not self:IsFull() then
-        self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
-    end
+    self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
+    self:UpdateAssistedVisibility()
 end
 
 function ZO_Tracker:OnQuestRemoved(questIndex, completed, questID)
-    if(GetIsTrackedForContentId(TRACK_TYPE_QUEST, questID)) then
-        self:StopTracking(TRACK_TYPE_QUEST, questIndex, nil, completed)
+    if GetIsTrackedForContentId(TRACK_TYPE_QUEST, questID) then
+        local DONT_UPDATE_VISIBILITY = false
+        --Wait to see if we assist something to replace this before updating visibility
+        self:StopTracking(TRACK_TYPE_QUEST, questIndex, nil, DONT_UPDATE_VISIBILITY)
+        self:AssistClosestTracked()
+        self:UpdateVisibility()
     end
+    self:UpdateAssistedVisibility()
 end
 
 function ZO_Tracker:OnQuestAdvanced(questIndex, questName, isPushed, isComplete, mainStepChanged)
@@ -829,26 +792,6 @@ function ZO_Tracker:OnQuestAdvanced(questIndex, questName, isPushed, isComplete,
         end
         
         self:RebuildConditions(questIndex)
-        self:RefreshQuestPins(questIndex, true)
-    end
-end
-
-function ZO_Tracker:OnQuestAssistStateChanged(unassistedData, assistedData, applyPlatformConstants)
-    if(unassistedData) then
-        self.assistedTexture:SetHidden(true)
-    end
-
-    if(assistedData) then
-        local assistedTexture = self.assistedTexture
-        assistedTexture:SetHidden(false)
-        local assistedHeader = self:GetHeaderForIndex(assistedData.trackType, assistedData.arg1, assistedData.arg2)
-
-        if applyPlatformConstants then
-            ApplyPlatformStyleToAssistedTexture(assistedTexture, assistedHeader)
-        else
-            assistedTexture:ClearAnchors()
-            assistedTexture:SetAnchor(RIGHT, assistedHeader, LEFT, -3, -1)
-        end
     end
 end
 
@@ -906,10 +849,8 @@ end
 
 function ZO_Tracker:SetTrackTypeAssisted(trackType, show, arg1, arg2)
     SetTrackedIsAssisted(trackType, show, arg1, arg2)
-    if(trackType == TRACK_TYPE_QUEST) then
-        SetMapQuestPinsAssisted(arg1, show)
-
-        if(show and not self.disableAudio) then
+    if trackType == TRACK_TYPE_QUEST then
+        if show and not self.disableAudio then
             PlaySound(SOUNDS.QUEST_FOCUSED)
         end
     end
@@ -979,109 +920,104 @@ end
 
 
 function ZO_Tracker:BeginTracking(trackType, arg1, arg2)
-    if self:IsOnTracker(trackType, arg1, arg2) then
-        -- This quest is already tracked
-        return
+    if not CanTrack(trackType, arg1, arg2) then
+        return false
     end
 
-    if self:IsFull() then 
-        return 
+    if #self.tracked > 0 then
+        local previouslyTrackedData = self.tracked[1]
+        --We update visibility at the end of this. If we do it now we will trigger the fragment to start hiding
+        local DONT_UPDATE_VISIBILITY = false
+        self:StopTracking(previouslyTrackedData.trackType, previouslyTrackedData.arg1, previouslyTrackedData.arg2, DONT_UPDATE_VISIBILITY)
     end
 
-    if(not SetTracked(trackType, true, arg1, arg2)) then
-        return
-    end
+    SetTracked(trackType, true, arg1, arg2)
+
+    local header
+    if not self:IsOnTracker(trackType, arg1, arg2) then
+        local trackedData = ZO_TrackedData:New(trackType, arg1, arg2)
     
-    local trackedData = ZO_TrackedData:New(trackType, arg1, arg2)
+        --setup specific data
+        if trackType == TRACK_TYPE_QUEST then
+            trackedData.isComplete = GetJournalQuestIsComplete(arg1)
+            trackedData.level = GetJournalQuestLevel(arg1)
+        end
     
-    --setup specific data
-    if(trackType == TRACK_TYPE_QUEST) then
-        trackedData.isComplete = GetJournalQuestIsComplete(arg1)
-        trackedData.level = GetJournalQuestLevel(arg1)
-    end
-    
-    table.insert(self.tracked, trackedData)
+        table.insert(self.tracked, trackedData)
    
-    --build visuals
-    local header = nil
-    if(trackType == TRACK_TYPE_QUEST) then
-        header = self:AddQuest(trackedData)
-    end
-    
-    --add pins
-    if(trackType == TRACK_TYPE_QUEST) then
-        AddMapQuestPins(arg1)
-    end
-    
-    if(header) then
-        trackedData.header = header
-        self:UpdateTreeView()
-        self:UpdateVisibility()
-    end
+        --build visuals
+        if trackType == TRACK_TYPE_QUEST then
+            header = self:AddQuest(trackedData)
 
-     --if nothing is being assisted, or the player just finished their assisted quest, assist this
-    if(self.assistedQuestCompleted or self.assistedData == nil) then
-        self:SetAssisted(header, true)
-    end
-
-    self.assistedQuestCompleted = false
-
-    self:FireCallbacks("QuestTrackerTrackingStateChanged", self, true, trackType, arg1, arg2)
-end
-
-function ZO_Tracker:StopTracking(trackType, arg1, arg2, completed)
-    local wasAssisted = false
-    if GetTrackedIsAssisted(trackType, arg1, arg2) then
-        local header = self:GetHeaderForIndex(trackType, arg1, arg2)
-        if header then
-            self:SetAssisted(header, false)
-            wasAssisted = true
-
-            if completed and INTERACT_WINDOW:IsInteracting() then
-                self.assistedQuestCompleted = true
+            if header then
+                trackedData.header = header
+                self:UpdateTreeView()
             end
         end
-    end
- 
-    if(not SetTracked(trackType, false, arg1, arg2)) then
-        return
-    end
-
-    for i = 1, #self.tracked do
-        local trackedData = self.tracked[i]
-        if trackedData:Equals(trackType, arg1, arg2) then
-            table.remove(self.tracked, i)
-            break
-        end
+    else
+        header = self:GetHeaderForIndex(trackType, arg1, arg2)
     end
     
-    -- NOTE: This does not look at self.tracked, it looks at self.headerPool (which is a container of controls!)
-    local removedHeader = self:GetHeaderForIndex(trackType, arg1, arg2)
-
-    if removedHeader then
-        self.treeView:RemoveNode(removedHeader.m_TreeNode)
-        self.headerPool:ReleaseObject(removedHeader.m_ObjectKey)
+    if header then
+        self:SetAssisted(header.m_Data, true)
     end
-    
-    self:UpdateTreeView()
+
     self:UpdateVisibility()
-    
-    --remove pins
-    if(trackType == TRACK_TYPE_QUEST) then
-        RemoveMapQuestPins(arg1)
-    end   
-    
-    self:FireCallbacks("QuestTrackerTrackingStateChanged", self, false, trackType, arg1, arg2)
+    self:UpdateAssistedVisibility()
 
-    if(wasAssisted) then
-        self:AssistClosestTracked()
+    self:FireCallbacks("QuestTrackerTrackingStateChanged", self, true, trackType, arg1, arg2)
+
+    return true
+end
+
+function ZO_Tracker:StopTracking(trackType, arg1, arg2, updateVisibility)
+    if GetIsTracked(trackType, arg1, arg2) then
+        if GetTrackedIsAssisted(trackType, arg1, arg2) then
+            local header = self:GetHeaderForIndex(trackType, arg1, arg2)
+            if header then
+                self:SetAssisted(header.m_Data, false)
+            end
+        end
+ 
+        SetTracked(trackType, false, arg1, arg2)
+
+        for i, trackedData in ipairs(self.tracked) do
+            if trackedData:Equals(trackType, arg1, arg2) then
+                table.remove(self.tracked, i)
+                break
+            end
+        end
+    
+        -- NOTE: This does not look at self.tracked, it looks at self.headerPool (which is a container of controls!)
+        local removedHeader = self:GetHeaderForIndex(trackType, arg1, arg2)
+
+        if removedHeader then
+            self.treeView:RemoveNode(removedHeader.m_TreeNode)
+            self.headerPool:ReleaseObject(removedHeader.m_ObjectKey)
+        end
+    
+        self:UpdateTreeView()
+        if updateVisibility == nil or updateVisibility == true then
+            self:UpdateVisibility()
+        end
+    
+        self:FireCallbacks("QuestTrackerTrackingStateChanged", self, false, trackType, arg1, arg2)
+
+        return true
     end
+    return false
 end
 
 function ZO_Tracker:ClearTracker()
     self.treeView:Clear()
     self.headerPool:ReleaseAllObjects()
     self.assistedTexture:SetHidden(true)
+
+    --iterate backwards because SetTracked will change the tracked array size
+    for i = GetNumTracked(), 1, -1  do
+        local trackType, arg1, arg2 = GetTrackedByIndex(i)
+        SetTracked(trackType, false, arg1, arg2)
+    end
 
     for i = 1, #self.tracked do
         local trackedData = self.tracked[i]
@@ -1109,25 +1045,124 @@ function ZO_Tracker:UpdateTreeView()
     end
 end
 
-function ZO_Tracker:SetAssisted(header, showArrows)
-    local data = header.m_Data
+function ZO_Tracker:SetAssisted(data, assisted)
+    local assistingDifferentQuest = assisted and not data:EqualsTrackedData(self.assistedData)
+    local unassistingAssistedQuest = not assisted and self.assistedData and self.assistedData:EqualsTrackedData(data)
 
-    if((showArrows and self.assistedData ~= data) or (not showArrows and self.assistedData == data)) then
+    if assistingDifferentQuest or unassistingAssistedQuest then
         --unassist the assisted quest
         local unassistedData
-        if(self.assistedData) then
+        if self.assistedData then
             unassistedData = self.assistedData
             self:SetTrackTypeAssisted(unassistedData.trackType, false, unassistedData.arg1, unassistedData.arg2)
             self.assistedData = nil
+            self.assistedTexture:SetHidden(true)
         end
 
         --if we're assisting a new quest, assist that
-        if(showArrows) then
+        if assisted then
             self.assistedData = data
-            self:SetTrackTypeAssisted(data.trackType, true, data.arg1, data.arg2)   
+            self:SetTrackTypeAssisted(data.trackType, true, data.arg1, data.arg2)
+            if data then
+                local assistedTexture = self.assistedTexture
+                assistedTexture:SetHidden(false)
+                local assistedHeader = self:GetHeaderForIndex(data.trackType, data.arg1, data.arg2)
+                ApplyPlatformStyleToAssistedTexture(assistedTexture, assistedHeader)
+            end
         end
 
         self:FireCallbacks("QuestTrackerAssistStateChanged", unassistedData, self.assistedData)
+    end
+end
+
+do
+    local ANIMATION_HOLD_TIME_MS = 8000
+    local FADE_OUT_OFFSET = GAMEPAD_FQT_ANIMATION_FADE_IN_MS + ANIMATION_HOLD_TIME_MS
+
+    function ZO_Tracker:OnGamepadPreferredModeChanged()
+        self:ApplyPlatformStyle()
+    end
+
+    local function OnFadeInAnimationStop(animation, control)
+        control.isFaded = false
+    end
+
+    local function OnFadeOutAnimationStop(animation)
+        animation.control.isFaded = true
+        FOCUSED_QUEST_TRACKER:SetFaded(true)
+        CALLBACK_MANAGER:FireCallbacks("QuestTrackerFadedOutOnScreen")
+    end
+
+    local function SetupAnimationTimeline(control, fadeAnimationName, setHandlers)
+        local fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(fadeAnimationName, control)
+        local fadeInAnimation = fadeTimeline:GetAnimation(1)
+        local fadeOutAnimation = fadeTimeline:GetAnimation(2)
+
+        if setHandlers then
+            fadeInAnimation:SetHandler("OnStop", OnFadeInAnimationStop)
+            fadeTimeline:SetHandler("OnStop", OnFadeOutAnimationStop)
+        end
+
+        fadeTimeline:SetAnimationOffset(fadeOutAnimation, FADE_OUT_OFFSET)
+
+        fadeTimeline.control = control
+        control.fadeTimeline = fadeTimeline
+    end
+
+    function ZO_Tracker:InitializeFadeAnimations()
+        local SET_FADE_HANDLERS = true
+        SetupAnimationTimeline(self.trackerControl, "FocusedQuestTrackerFadeGamepad", SET_FADE_HANDLERS)
+    end
+
+    function ZO_Tracker:TryFadeOut()
+        if self:IsOverlappingTextChat() then
+            local trackerControl = self.trackerControl
+
+            if FOCUSED_QUEST_TRACKER_FRAGMENT:IsShowing() then
+                if not trackerControl.isFaded then
+                    local fadeTimeline = trackerControl.fadeTimeline
+                    fadeTimeline:Stop()
+                    fadeTimeline:PlayFromStart(FADE_OUT_OFFSET)
+                end
+            else
+                trackerControl:SetAlpha(GAMEPAD_FQT_TEXT_MIN_ALPHA)
+            end
+        end
+    end
+
+    function ZO_Tracker:TryFadeIn()
+        FOCUSED_QUEST_TRACKER:SetFaded(false)
+        CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
+    end
+end
+
+do
+    local function GetDimensions(control)
+        local width, height = 0, 0
+        -- Start at the second child control because the first is the Assisted Keybind Face Button
+        for i = 2, control:GetNumChildren() do
+            local child = control:GetChild(i)
+            local childWidth, childHeight = child:GetTextDimensions()
+
+            if childHeight ~= 0 then
+                height = height + childHeight
+            end
+
+            if child.extraWidth then
+                childWidth = childWidth + child.extraWidth
+            end
+
+            width = zo_max(width, childWidth)
+        end
+
+        return width, height
+    end
+
+    local MAX_HEIGHT_NO_COLLISION = 300
+
+    function ZO_Tracker:IsOverlappingTextChat()
+        local _, height = GetDimensions(self.trackerControl)
+        return height > MAX_HEIGHT_NO_COLLISION
     end
 end
 
@@ -1154,22 +1189,14 @@ function ZO_TrackedHeader_MouseExit(label)
 end
 
 local function ToggleGuideArrow(header)
-    local statusButton = GetControl(header, "Status")
     local trackType = header.m_Data.trackType
-    if(trackType == TRACK_TYPE_QUEST) then
+    if trackType == TRACK_TYPE_QUEST then
         local questTrackerControl = header:GetParent():GetParent()
         local isAssisted = GetTrackedIsAssisted(TRACK_TYPE_QUEST, header.m_Data:GetJournalIndex())
-        if(not isAssisted) then
-            questTrackerControl.tracker:SetAssisted(header, true)
+        if not isAssisted then
+            questTrackerControl.tracker:SetAssisted(header.m_Data, true)
         end
     end
-end
-
-local function UntrackThis(header)
-    local data = header.m_Data
-    local questIndex = header.m_Data:GetJournalIndex()	
-    local questTrackerControl = header:GetParent():GetParent()
-    questTrackerControl.tracker:StopTracking(header.m_Data.trackType, header.m_Data.arg1, header.m_Data.arg2)
 end
 
 local function ShowQuestInJournal(header)
@@ -1234,11 +1261,9 @@ function ZO_QuestTracker_HideTrackedHeaderTooltip(trackedLabel)
 end
 
 function ZO_QuestTracker_SetEnabled(enabled)
-    QUEST_TRACKER:SetEnabled(enabled)
     FOCUSED_QUEST_TRACKER:SetEnabled(enabled)
 end
 
-function ZO_QuestTracker_OnInitialized(self)
-    QUEST_TRACKER = ZO_Tracker:New(self, GetControl(self, "Container"))
-    ZO_QuestTracker.tracker = QUEST_TRACKER
+function ZO_FocusedQuestTracker_OnInitialized(control)
+    FOCUSED_QUEST_TRACKER = ZO_Tracker:New(control, control:GetNamedChild("Container"):GetNamedChild("QuestContainer"))
 end

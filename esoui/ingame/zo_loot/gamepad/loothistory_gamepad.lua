@@ -43,12 +43,24 @@ function ZO_LootHistory_Gamepad:SetEntryTemplate()
     self.entryTemplate = GAMEPAD_LOOT_HISTORY_ENTRY_TEMPLATE
 end
 
-function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
-    local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
-    return currentSceneName == "gamepadInteract" or currentSceneName == "gamepad_inventory_root"
-           or currentSceneName == "crownCrateGamepad" or currentSceneName == "gamepadTrade"
-           or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root") or currentSceneName == "gamepad_stats_root"
-           or currentSceneName == "LevelUpRewardsClaimGamepad"
+do
+    local SUPPORTED_SCENES =
+    {
+        ["gamepadInteract"] = true,
+        ["gamepad_inventory_root"] = true,
+        ["crownCrateGamepad"] = true,
+        ["gamepadTrade"] = true,
+        ["gamepad_stats_root"] = true,
+        ["LevelUpRewardsClaimGamepad"] = true,
+        ["giftInventoryViewGamepad"] = true,
+        ["playerSubmenu"] = true, -- Need this for daily login since this is the scene it exists in
+        ["mailManagerGamepad"] = true,
+        ["gamepad_market_purchase"] = true,
+    }
+    function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
+        local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
+        return not self.hidden or SUPPORTED_SCENES[currentSceneName] or SCENE_MANAGER:IsSceneOnStack("gamepad_inventory_root")
+    end
 end
 
 function ZO_LootHistory_Gamepad:GetCraftBagIcon()

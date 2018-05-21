@@ -29,6 +29,12 @@ function ZO_QueuedSoundPlayer:PlaySound(soundName, soundLength)
     end
 end
 
+function ZO_QueuedSoundPlayer:ForceStop()
+    EVENT_MANAGER:UnregisterForUpdate(self.id)
+    self.currentPlayingSoundLength = nil
+    ZO_ClearNumericallyIndexedTable(self.queue)
+end
+
 function ZO_QueuedSoundPlayer:IsPlaying()
     return self.currentPlayingSoundLength ~= nil
 end

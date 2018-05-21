@@ -93,6 +93,11 @@ function ZO_SharedCraftingInventory:ChangeFilter(filterData)
     -- intended to be overwritten, but should call base
 end
 
+--- When set, overrides the crafting inventory's default sort function.
+function ZO_SharedCraftingInventory:SetOverrideItemSort(itemSortFunction)
+    self.sortFunction = itemSortFunction
+end
+
 function ZO_SharedCraftingInventory:SetCustomExtraData(customExtraDataFunction)
     self.customExtraDataFunction = customExtraDataFunction
 end

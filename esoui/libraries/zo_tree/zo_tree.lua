@@ -16,6 +16,7 @@ function ZO_Tree:New(control, defaultIndent, defaultSpacing, width)
     tree.defaultIndent = defaultIndent
     tree.defaultSpacing = defaultSpacing
     tree.exclusive = false
+    tree.autoSelectChildOnNodeOpen = false
     tree.enabled = true
     tree.templateInfo = {}
     tree.exclusiveCloseNodeFunction =   function(treeNode)                               
@@ -29,7 +30,7 @@ function ZO_Tree:New(control, defaultIndent, defaultSpacing, width)
     
     tree.childContainerPool = ZO_ControlPool:New("ZO_TreeChildContainer", control, "Container")
 
-    tree.childContainerPool:SetCustomResetBehavior(function(control) control:SetAlpha(1) end)
+    tree.childContainerPool:SetCustomResetBehavior(function(container) container:SetAlpha(1) end)
 
     tree:Reset()
 
@@ -65,6 +66,29 @@ function ZO_Tree:Reset()
     self:SetSuspendAnimations(true)
 end
 
+function ZO_Tree:GetTreeNodeByData(data)
+    return self:GetTreeNodeInTreeByData(data, self.rootNode)
+end
+
+function ZO_Tree:GetTreeNodeInTreeByData(data, rootNode)
+    if rootNode then
+        if rootNode.data == data then
+            return rootNode
+        end
+        local currentChildren = rootNode:GetChildren()
+        if currentChildren then
+            for _, currentChild in ipairs(currentChildren) do
+                local foundNode = self:GetTreeNodeInTreeByData(data, currentChild)
+                if foundNode then 
+                    return foundNode
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
 function ZO_Tree:SelectAnything()
     if not self.selectedNode or not self.selectedNode:IsEnabled() then
         local currentNode = self.rootNode
@@ -92,20 +116,29 @@ function ZO_Tree:SetSelectionHighlight(template)
 end
 
 function ZO_Tree:SetOpenAnimation(animationTemplate)
-    self.openAnimationTemplate = animationTemplate
+    self.openAnimationPool = ZO_AnimationPool:New(animationTemplate)
+    self.openAnimationPool:SetCustomFactoryBehavior(function(timeline)
+        timeline:SetHandler("OnStop", function(currentTimeline) self:OnOpenAnimationStopped(currentTimeline) end)
+    end)
+    --populated on demand since it requires making an animation from the pool to know
+    self.openAnimationDurationMS = nil
+end
 
-    local factory = function(pool)
-                        return ANIMATION_MANAGER:CreateTimelineFromVirtual(self.openAnimationTemplate)
-                    end
-    local reset =   function(animation)
-                        animation:Stop()                       
-                    end 
-
-    self.openAnimationPool = ZO_ObjectPool:New(factory, reset)
+function ZO_Tree:GetOpenAnimationDuration()
+    if not self.openAnimationDurationMS then
+        local timeline, key = self.openAnimationPool:AcquireObject()
+        self.openAnimationDurationMS = timeline:GetDuration()
+        self.openAnimationPool:ReleaseObject(key)
+    end
+    return self.openAnimationDurationMS
 end
 
 function ZO_Tree:SetExclusive(exclusive)
     self.exclusive = exclusive
+end
+
+function ZO_Tree:SetAutoSelectChildOnNodeOpen(autoSelect)
+    self.autoSelectChildOnNodeOpen = autoSelect
 end
 
 function ZO_Tree:SetSuspendAnimations(suspendAnimations)
@@ -209,22 +242,73 @@ function ZO_Tree:RefreshVisible()
     self.rootNode:RefreshVisible(USER_REQUESTED)
 end
 
+--Computes the offset of the bottom of the control at the end of the path from the scroll child top
+--Used to determine where a node control will end up after being selected. This simulates the layout logic.
+function ZO_Tree:ComputeEndOfPathControlFinalBottomOffset(currentTreeNode, pathToSelectedNode)
+    local offset = 0
+    --Path goes from parents to children
+    local nextNodeOnPathToSelectedNode = pathToSelectedNode[#pathToSelectedNode]
+    for i, childTreeNode in ipairs(currentTreeNode:GetChildren()) do
+        if childTreeNode == nextNodeOnPathToSelectedNode then
+            --When we find a node on the path we add its height, then if we can recurse on its children we add the proper spacing for the child section (1/2 on top, 1/2 on bottom) then recurse.
+            offset = offset + childTreeNode:GetControlHeight()
+            if #pathToSelectedNode == 1 then
+                return offset
+            else
+                offset = offset + childTreeNode:GetParent():GetChildSpacing()
+                table.remove(pathToSelectedNode)
+                return offset + self:ComputeEndOfPathControlFinalBottomOffset(childTreeNode, pathToSelectedNode)
+            end
+        else
+            if self.exclusive then
+                --In exclusive mode we will be closing every non-leaf node except for the ones on the path so just count their control height. Their children will be hidden. 
+                offset = offset + childTreeNode:GetControlHeight()
+            else
+                --In non-exlcusive mode we won't be touching the nodes off the path so use their actual height with children
+                offset = offset + childTreeNode:GetHeight()
+            end
+            offset = offset + childTreeNode:GetParent():GetChildSpacing()
+        end
+    end
+    return 0
+end
+
+function ZO_Tree:SetScrollToTargetNode(treeNode)
+    local pathToSelectedNode = {}
+    local currentNode = treeNode
+    while currentNode and currentNode ~= self.rootNode do
+        table.insert(pathToSelectedNode, currentNode)
+        currentNode = currentNode:GetParent()
+    end
+
+    --Compute some metrics about the state of this tree after treeNode is selected. We use this so we can scroll to where the node WILL BE instead of where it is right now.
+    local treeNodeControlFinalBottomOffset = self:ComputeEndOfPathControlFinalBottomOffset(self.rootNode, pathToSelectedNode)
+    local treeNodeControlFinalTopOffset = treeNodeControlFinalBottomOffset - treeNode:GetControlHeight()
+
+    local finalTotalHeight
+    if self.exclusive then
+        local previouslyOpenSectionChildrenHeight = 0
+        for _, rootChild in ipairs(self.rootNode:GetChildren()) do
+            if not rootChild:IsLeaf() and rootChild:IsOpen() then
+                previouslyOpenSectionChildrenHeight = rootChild:GetChildrenHeight()
+                break
+            end
+        end
+        -- new node's height subtracted from the previously openned nodes' heights
+        -- this is the change in height the tree will have, which will be needed to calculate the scroll's animation
+        finalTotalHeight = self.rootNode:GetCurrentChildrenHeight() + treeNode:GetChildrenHeight() - previouslyOpenSectionChildrenHeight
+    else
+        finalTotalHeight = self.rootNode:GetCurrentChildrenHeight() + treeNode:GetChildrenHeight()
+    end
+
+    ZO_Scroll_SetScrollToRealOffsetAccountingForGradients(self.scrollControl, finalTotalHeight, treeNodeControlFinalTopOffset, self:GetOpenAnimationDuration())
+    self.scrollTargetNode = treeNode
+end
+
 function ZO_Tree:ToggleNode(treeNode)
     if treeNode:IsEnabled() and (not self.exclusive or not treeNode:IsOpen()) then
         if self.scrollControl and not treeNode:IsOpen() then
-            local rootChildren = self.rootNode:GetChildren()
-            local previousChildrenHeight = 0
-            for i = 1, #rootChildren do
-                local rootChild = rootChildren[i]
-                if rootChild:IsOpen() then
-                    previousChildrenHeight = previousChildrenHeight + rootChild.childrenHeight
-                end
-            end
-            -- new node's height subtracted from the previously openned nodes' heights
-            -- this is the change in height the tree will have, which will be needed to calculate the scroll's animation
-            local extentDelta = treeNode.childrenHeight - previousChildrenHeight
-            ZO_Scroll_SetScrollToTargetControl(self.scrollControl, treeNode:GetControl(), extentDelta)
-            self.scrollTargetNode = treeNode
+            self:SetScrollToTargetNode(treeNode)
         end
         self:SetNodeOpen(treeNode, not treeNode:IsOpen(), USER_REQUESTED_OPEN)
     end
@@ -235,19 +319,19 @@ function ZO_Tree:SetNodeOpen(treeNode, open, userRequested)
         treeNode:SetOpen(true, userRequested)
 
         --open the path to the root
-        local current = treeNode:GetParent()
-        while(current) do
+        local currentNode = treeNode:GetParent()
+        while currentNode do
             --because the tree is automatically opening a path, any opened nodes must be system requested opens
-            current:SetOpen(true, SYSTEM_REQUESTED_OPEN)
-            current = current:GetParent()
+            currentNode:SetOpen(true, SYSTEM_REQUESTED_OPEN)
+            currentNode = currentNode:GetParent()
         end
 
         if(self.exclusive) then
             self.exclusivePath = {}
-            local current = treeNode
-            while(current) do
-                table.insert(self.exclusivePath, current)
-                current = current:GetParent()
+            currentNode = treeNode
+            while currentNode do
+                table.insert(self.exclusivePath, currentNode)
+                currentNode = currentNode:GetParent()
             end
 
             --close every node not on the newly opened path
@@ -257,28 +341,74 @@ function ZO_Tree:SetNodeOpen(treeNode, open, userRequested)
                 self:ExecuteOnSubTree(rootChild, self.exclusiveCloseNodeFunction)
             end
         end
+
+        if self.autoSelectChildOnNodeOpen and userRequested then
+            self:SelectFirstChild(treeNode)
+        end
     else
         treeNode:SetOpen(false, userRequested)
     end
 end
 
-function ZO_Tree:SelectNode(treeNode, reselectingDuringRebuild)
-    if(treeNode:IsLeaf() and treeNode:IsEnabled() and self.selectedNode ~= treeNode) then
-        if self.selectedNode then
-            self.selectedNode:OnUnselected()
-        end
-        self.selectedNode = treeNode
-        if not reselectingDuringRebuild then
-            self:SetNodeOpen(treeNode, true, USER_REQUESTED_OPEN)
-        end
-        treeNode:OnSelected(reselectingDuringRebuild)
-        local selectionHighlight = self:GetSelectionHighlight()
-        if(selectionHighlight) then
-            selectionHighlight:ClearAnchors()
-            local treeNodeControl = treeNode:GetControl()
-            selectionHighlight:SetAnchorFill(treeNodeControl)
-            selectionHighlight:SetParent(treeNode:GetParent():GetChildContainer())
-            selectionHighlight:SetHidden(false)
+function ZO_Tree:SelectNode(treeNode, reselectingDuringRebuild, bringParentIntoView)
+    --Default to bringing the immediate parent of this node into view
+    if bringParentIntoView == nil then
+        bringParentIntoView = true
+    end
+
+    --Can only select leaf nodes
+    if treeNode:IsLeaf() and treeNode:IsEnabled() then
+        if self.selectedNode == treeNode then
+            --If we already have this node selected we should still try to bring the parent into view anyway
+            if not reselectingDuringRebuild and bringParentIntoView and self.scrollControl then
+                local immediateParentNode = treeNode:GetParent()
+                if immediateParentNode then
+                    local immediateParentNodeControl = immediateParentNode:GetControl()
+                    if immediateParentNodeControl then
+                        if immediateParentNode:IsOpen() and not immediateParentNode == self.scrollTargetNode then
+                            --If the parent is open then just scroll it to the top right now
+                            ZO_Scroll_ScrollControlToTop(self.scrollControl, immediateParentNodeControl)                            
+                        else
+                            --If the parent is closed we need to open it and set up the scroll to target node behavior
+                            self:SetScrollToTargetNode(immediateParentNode)
+                            self:SetNodeOpen(immediateParentNode, true, SYSTEM_REQUESTED_OPEN)
+                        end
+                    end
+                end                
+            end
+        else
+            --Otherwise we need to select the node
+            if self.selectedNode then
+                self.selectedNode:OnUnselected()
+            end
+            self.selectedNode = treeNode
+            if not reselectingDuringRebuild then
+                if bringParentIntoView and self.scrollControl then
+                    local immediateParentNode = treeNode:GetParent()
+                    if immediateParentNode then
+                        local immediateParentNodeControl = immediateParentNode:GetControl()
+                        if immediateParentNodeControl then
+                            if immediateParentNode:IsOpen() and not immediateParentNode == self.scrollTargetNode then
+                                --If the parent is already open we can scroll to it right now
+                                ZO_Scroll_ScrollControlToTop(self.scrollControl, immediateParentNodeControl)
+                            else
+                                --Otherwise we need to setup scroll over time since sections will be opening and closing
+                                self:SetScrollToTargetNode(immediateParentNode)
+                            end
+                        end
+                    end
+                end
+                self:SetNodeOpen(treeNode, true, USER_REQUESTED_OPEN)
+            end
+            treeNode:OnSelected(reselectingDuringRebuild)
+            local selectionHighlight = self:GetSelectionHighlight()
+            if(selectionHighlight) then
+                selectionHighlight:ClearAnchors()
+                local treeNodeControl = treeNode:GetControl()
+                selectionHighlight:SetAnchorFill(treeNodeControl)
+                selectionHighlight:SetParent(treeNode:GetParent():GetChildContainer())
+                selectionHighlight:SetHidden(false)
+            end
         end
     end
 end
@@ -340,23 +470,12 @@ function ZO_Tree:OnOpenAnimationStopped(timeline)
     local node = timeline.node
     if self.scrollTargetNode == node and self.scrollControl then
         self.scrollTargetNode = nil
-        ZO_Scroll_SetScrollToTargetControl(self.scrollControl, nil)
     end
-    self.openAnimationPool:ReleaseObject(node)
+    node:ReleaseTimeline()
 end
 
-function ZO_Tree:AcquireOpenAnimation(treeNode)
-    if(self.openAnimationPool) then
-        local timeline = self.openAnimationPool:GetExistingObject(treeNode)
-        if(timeline) then
-            return timeline
-        end
-
-        timeline = self.openAnimationPool:AcquireObject(treeNode)
-        timeline.node = treeNode
-        timeline:SetHandler("OnStop", function(timeline) self:OnOpenAnimationStopped(timeline) end)
-        return timeline
-    end
+function ZO_Tree:GetOpenAnimationPool()
+    return self.openAnimationPool
 end
 
 function ZO_Tree:GetControl()
@@ -366,12 +485,6 @@ end
 function ZO_Tree:IsAnimated()
     return not self.suspendAnimations 
            and self.openAnimationPool ~= nil
-end
-
-function ZO_Tree:SetScrollPercentageToTop(percentage)
-    if self.scrollControl then
-        ZO_Scroll_SetScrollPercentageToTop(self.scrollControl, percentage)
-    end
 end
 
 function ZO_Tree:FindScrollControl()
@@ -426,6 +539,9 @@ function ZO_TreeNode:ComputeTotalIndentFrom(treeNode)
     return total
 end
 
+--Tree nodes have a control and a child section. The child section if it exists anchors to the control with half childSpacing above and half below to center it. Tree nodes
+--within a child section anchor one after another with childSpacing between them. The first control anchors to the top left of the child section with no offset. The child spacing
+--comes from the parent of the node that the child is being added to. This is likely wrong. It should come from the node the child is being added to.
 function ZO_TreeNode:AddChild(treeNode)
     local previousNode = nil
     if(not self.children) then
@@ -515,12 +631,28 @@ function ZO_TreeNode:IsOpen()
     end
 end
 
+function ZO_TreeNode:GetOrAcquireTimeline()
+    if not self.timeline then
+        local pool = self.tree:GetOpenAnimationPool()
+        self.timeline, self.poolKey = pool:AcquireObject()
+        self.timeline.node = self
+    end
+    return self.timeline
+end
+
+function ZO_TreeNode:ReleaseTimeline()
+    local pool = self.tree:GetOpenAnimationPool()
+    pool:ReleaseObject(self.poolKey)
+    self.timeline = nil
+    self.poolKey = nil
+end
+
 function ZO_TreeNode:SetOpen(open, userRequested)
     if not self:IsLeaf() and self.enabled and self.open ~= open then
         self.open = open
         self:RefreshControl(userRequested)
         if self:IsAnimated() then
-            local timeline = self.tree:AcquireOpenAnimation(self)
+            local timeline = self:GetOrAcquireTimeline()
             if timeline:IsPlaying() then
                 if open then
                     timeline:PlayForward()
@@ -558,9 +690,6 @@ end
 function ZO_TreeNode:SetOpenPercentage(openPercentage)
     self.openPercentage = openPercentage
     self:UpdateCurrentChildrenHeightsToRoot()
-    if self.open then
-        self.tree:SetScrollPercentageToTop(self.openPercentage)
-    end
 end
 
 function ZO_TreeNode:OnSelected(reselectingDuringRebuild)
@@ -581,8 +710,20 @@ function ZO_TreeNode:GetHeight()
     return self.control:GetHeight() + self.childrenHeight
 end
 
+function ZO_TreeNode:GetControlHeight()
+    return self.control:GetHeight()
+end
+
+function ZO_TreeNode:GetChildrenHeight()
+    return self.childrenHeight
+end
+
 function ZO_TreeNode:GetCurrentHeight()
     return self.control:GetHeight() + self.childrenCurrentHeight
+end
+
+function ZO_TreeNode:GetCurrentChildrenHeight()
+    return self.childrenCurrentHeight
 end
 
 function ZO_TreeNode:GetWidth()
@@ -665,7 +806,7 @@ function ZO_TreeNode:UpdateCurrentChildrenHeightsToRoot()
     end
 end
 
-function ZO_TreeNode:UpdateAllChildrenHeightsAndCurrentHeights(currentNode)
+function ZO_TreeNode:UpdateAllChildrenHeightsAndCurrentHeights()
     if self.children then
         for _, child in ipairs(self.children) do
             child:UpdateAllChildrenHeightsAndCurrentHeights(child)
@@ -734,8 +875,14 @@ function ZO_TreeEntry_OnMouseUp(self, upInside)
             PlaySound(self.node.selectSound)
         end
 
-        self.node:GetTree():SelectNode(self.node)
+        local NOT_REBUILDING = false
+        local DONT_BRING_PARENT_INTO_VIEW = false
+        self.node:GetTree():SelectNode(self.node, NOT_REBUILDING, DONT_BRING_PARENT_INTO_VIEW)
     end
+end
+
+function ZO_TreeControl_GetNode(self)
+    return self.node
 end
 
 --ZO_Trees

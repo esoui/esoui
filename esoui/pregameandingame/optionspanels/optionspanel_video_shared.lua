@@ -428,6 +428,19 @@ local ZO_OptionsPanel_Video_ControlData =
                                                 ResetSettingToDefault(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GAMMA_ADJUSTMENT)
                                             end
         },
+
+        [OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE] =
+        {
+            controlType = OPTIONS_INVOKE_CALLBACK,
+            system = SETTING_TYPE_CUSTOM,
+            panel = SETTING_PANEL_VIDEO,
+            settingId = OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE,
+            text = SI_SETTING_ENTER_SCREENSHOT_MODE,
+            tooltipText = SI_SETTING_ENTER_SCREENSHOT_MODE_TOOLTIP,
+            callback = function()
+                            SCREENSHOT_MODE_GAMEPAD:Show()
+                        end,
+        },
     },
 }
 

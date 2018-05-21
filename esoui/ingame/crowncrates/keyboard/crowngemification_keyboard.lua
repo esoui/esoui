@@ -38,13 +38,27 @@ function ZO_CrownGemification_Keyboard:Initialize(owner, gemificationSlot)
     self:InitializeList()
     self:InitializeTabs()
 
-    local ENTRY_SORT_KEYS =
+    local NAME_FIRST_SORT_KEYS =
     {
         name = { tiebreaker = "gemTotal" },
         gemTotal = { isNumeric = true },
     }
+
+    local GEM_TOTAL_FIRST_SORT_KEYS =
+    {
+        gemTotal = { isNumeric = true, tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+        name = { },
+    }
+
     self.SortData = function(data1, data2)
-        return ZO_TableOrderingFunction(data1, data2, self.currentSortKey, ENTRY_SORT_KEYS, self.currentSortOrder)
+        local sortKeys
+        if self.currentSortKey == "name" then
+            sortKeys = NAME_FIRST_SORT_KEYS
+        else
+            sortKeys = GEM_TOTAL_FIRST_SORT_KEYS
+        end
+
+        return ZO_TableOrderingFunction(data1, data2, self.currentSortKey, sortKeys, self.currentSortOrder)
     end
 
     self:SetEmptyText(GetString(SI_GEMIFICATION_NOTHING_TO_EXTRACT))
