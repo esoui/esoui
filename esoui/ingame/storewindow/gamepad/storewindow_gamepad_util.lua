@@ -193,6 +193,7 @@ local function GetBuybackItems()
             local itemLink = GetBuybackItemLink(entryIndex)
             local itemType = GetItemLinkItemType(itemLink)
             local equipType = GetItemLinkEquipType(itemLink)
+            local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
             local totalPrice = price * stackCount
             local buybackData =
             {
@@ -210,6 +211,9 @@ local function GetBuybackItems()
                 itemType = itemType,
                 equipType = equipType,
                 filterData = { GetItemLinkFilterTypeInfo(itemLink) },
+                traitInformation = traitInformation,
+                itemTrait = GetItemLinkTraitInfo(itemLink),
+                traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(traitInformation),
             }
             buybackData.storeGroup = GetItemStoreGroup(buybackData)
             buybackData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(buybackData)

@@ -132,6 +132,21 @@ function ZO_StoreManager_GetStoreFilterTypes()
     return usedFilterTypes
 end
 
+local DOES_STORE_MODE_REPRESENT_INVENTORY =
+{
+    [ZO_MODE_STORE_BUY]              = false,
+    [ZO_MODE_STORE_BUY_BACK]         = true,
+    [ZO_MODE_STORE_SELL]             = true,
+    [ZO_MODE_STORE_REPAIR]           = true,
+    [ZO_MODE_STORE_SELL_STOLEN]      = true,
+    [ZO_MODE_STORE_LAUNDER]          = true,
+    [ZO_MODE_STORE_STABLE]           = false,
+}
+
+function ZO_StoreManager_IsInventoryStoreMode(mode)
+    return DOES_STORE_MODE_REPRESENT_INVENTORY[mode]
+end
+
 local CURRENCY_TYPE_TO_SOUND_ID =
 {
     [CURT_TELVAR_STONES] = SOUNDS.TELVAR_TRANSACT,

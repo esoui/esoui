@@ -82,7 +82,7 @@ function ZO_GamepadStoreListComponent:SetupEntry(control, data, selected, select
 end
 
 function ZO_GamepadStoreListComponent:SetupStoreItem(control, data, selected, selectedDuringRebuild, enabled, activated, price, forceValid, mode)
-    data:SetIgnoreTraitInformation(true)
+    data:SetIgnoreTraitInformation(ZO_StoreManager_IsInventoryStoreMode(mode) == false)
 
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     control:SetHidden(selected and self.confirmationMode)
