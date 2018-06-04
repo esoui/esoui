@@ -566,11 +566,11 @@ function MenuBar:ButtonObjectForDescriptor(descriptor)
     end
 end
 
-function MenuBar:SelectDescriptor(descriptor, skipAnimation)
+function MenuBar:SelectDescriptor(descriptor, skipAnimation, reselectIfSelected)
     local buttonObject = self:ButtonObjectForDescriptor(descriptor)
-    if(buttonObject) then
+    if buttonObject then
         if IsVisible(buttonObject.m_buttonData) or buttonObject.m_buttonData.ignoreVisibleCheck then
-            if(self.m_clickedButton and (self.m_clickedButton.m_buttonData == buttonObject.m_buttonData)) then
+            if (self.m_clickedButton and (self.m_clickedButton.m_buttonData == buttonObject.m_buttonData)) and not reselectIfSelected then
                 return
             end
 
@@ -689,8 +689,8 @@ function ZO_MenuBar_ClearButtons(self)
     self.m_object:ClearButtons()
 end
 
-function ZO_MenuBar_SelectDescriptor(self, descriptor, skipAnimation)
-    return self.m_object:SelectDescriptor(descriptor, skipAnimation)
+function ZO_MenuBar_SelectDescriptor(self, descriptor, skipAnimation, reselectIfSelected)
+    return self.m_object:SelectDescriptor(descriptor, skipAnimation, reselectIfSelected)
 end
 
 function ZO_MenuBar_SelectFirstVisibleButton(self, skipAnimation)

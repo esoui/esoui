@@ -457,8 +457,19 @@ function MainMenu_Keyboard:AddRawScene(sceneName, category, categoryInfo, sceneG
             local skipAnimation = not self:IsShowing()
             ZO_MenuBar_SelectDescriptor(self.categoryBar, category, skipAnimation)
             self.lastCategory = category
-            self:SetLastSceneName(categoryInfo, sceneName)
-            
+
+            if sceneGroupName == nil then
+                -- don't set the last scene name if this scene is part of a scene group
+                -- when we toggle a category we will default to showing the last scene name
+                -- however for scene groups we want to show the active scene not necessarily the last shown scene
+                self:SetLastSceneName(categoryInfo, sceneName)
+            else
+                -- if we are part of a scene group, when we show the scene, make sure to
+                -- flag this scene as the active one
+                local sceneGroup = SCENE_MANAGER:GetSceneGroup(sceneGroupName)
+                sceneGroup:SetActiveScene(sceneName)
+            end
+
             self.ignoreCallbacks = false
         end
     end)
@@ -519,7 +530,10 @@ function MainMenu_Keyboard:AddSceneGroup(category, sceneGroupName, menuBarIconDa
     sceneGroup:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_GROUP_SHOWING then
             self.sceneShowGroupName = sceneGroupName
-            sceneGroup:SetActiveScene(SCENE_MANAGER:GetNextScene():GetName())
+            local nextScene = SCENE_MANAGER:GetNextScene():GetName()
+            -- this update can be called before the scene itself is set to showing,
+            -- so make sure to set the active scene here so we can update the scene group bar correctly
+            sceneGroup:SetActiveScene(nextScene)
             self:SetLastSceneGroupName(categoryInfo, sceneGroupName)
             self:SetupSceneGroupBar(category, sceneGroupName)
         elseif newState == SCENE_GROUP_SHOWN then
@@ -684,8 +698,7 @@ function MainMenu_Keyboard:SetupSceneGroupBar(category, sceneGroupName)
                         }
                         MAIN_MENU_MANAGER:ActivatedBlockingScene_Scene(sceneData, CLICKED_BY_MOUSE)
                     else
-                        sceneGroup:SetActiveScene(sceneName)
-                        self:Update(category, sceneName)
+                        SCENE_MANAGER:Show(sceneName)
                         self.sceneGroupBarLabel:SetText(GetString(layoutData.categoryName))
                     end
 
@@ -755,21 +768,29 @@ function MainMenu_Keyboard:SetPreferredActiveScene(sceneGroupInfo, sceneGroup)
 end
 
 function MainMenu_Keyboard:ShowSceneGroup(sceneGroupName, specificScene)
-    local sceneGroupInfo = self.sceneGroupInfo[sceneGroupName]
     local sceneGroup = SCENE_MANAGER:GetSceneGroup(sceneGroupName)
     if not specificScene then
+        local sceneGroupInfo = self.sceneGroupInfo[sceneGroupName]
         self:SetPreferredActiveScene(sceneGroupInfo, sceneGroup)
         specificScene = sceneGroup:GetActiveScene()
     end
 
-    local wasSceneGroupShowing = sceneGroup:IsShowing()
-
-    self:Update(sceneGroupInfo.category, specificScene)
-
-    -- if the scene group was already showing, then we need to update the scene group bar
-    -- since we aren't actually selecting one of the buttons themselves
-    if wasSceneGroupShowing then
-        self:SetupSceneGroupBar(sceneGroupInfo.category, self.sceneShowGroupName)
+    if sceneGroup:IsShowing() then
+        -- if the scene group is already showing then we can just select the
+        -- descriptor on the scene group bar that matches the scene we want to
+        -- show. If we just show the scene, the scene bar won't update correctly.
+        local skipAnimation = not self:IsShowing()
+        local RESELECT_IF_SELECTED = true -- Necessary if we are showing a scene group scene that doesn't have a descriptor and we want to switch back to the selected descriptor scene
+        if not ZO_MenuBar_SelectDescriptor(self.sceneGroupBar, specificScene, skipAnimation, RESELECT_IF_SELECTED) then
+            -- we didn't select the descriptor successfully, which means there is no
+            -- matching descriptor for the specificScene
+            -- To support GuildSelector_Keyboard, which has a scene in its scene group
+            -- that doesn't have a descriptor, we will simply call to show the requested
+            -- scene
+            SCENE_MANAGER:Show(specificScene)
+        end
+    else
+        SCENE_MANAGER:Show(specificScene)
     end
 end
 
