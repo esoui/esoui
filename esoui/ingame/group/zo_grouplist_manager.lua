@@ -85,7 +85,7 @@ function ZO_GroupList_Manager:BuildMasterList()
         if unitTag then
             local isDps, isHeal, isTank = GetGroupMemberRoles(unitTag)
             local rawCharacterName = GetRawUnitName(unitTag)
-            local zoneName = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, GetUnitZone(unitTag))
+            local zoneName = ZO_CachedStrFormat(SI_ZONE_NAME, GetUnitZone(unitTag))
             local unitOnline = IsUnitOnline(unitTag)
             local displayName = GetUnitDisplayName(unitTag)
             local userFacingDisplayName = ZO_FormatUserFacingDisplayName(displayName)

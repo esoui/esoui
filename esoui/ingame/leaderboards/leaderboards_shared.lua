@@ -74,11 +74,11 @@ function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
             dataTable.characterName = characterName
         else
             rank, characterName, points, class, alliance, playerDisplayName = self.infoFunction(dataTable.index, self.subType)
-                
+
             dataTable.characterName = characterName
             dataTable.class = class
             dataTable.alliance = alliance
-            dataTable.formattedAllianceName = ZO_SocialManager_GetFormattedAllianceName(alliance)
+            dataTable.formattedAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(alliance))
         end
 
         --Setup common leaderboard data

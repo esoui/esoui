@@ -69,20 +69,20 @@ end
 
 function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
     local hasCharacter, characterName, zone, class, alliance, level, championPoints = GetFriendCharacterInfo(friendIndex)
-       
-    local data = 
+
+    local data =
     {
         friendIndex = friendIndex,
         displayName = displayName,
         hasCharacter = hasCharacter,
-        characterName = zo_strformat(SI_UNIT_NAME, characterName), 
+        characterName = ZO_CachedStrFormat(SI_UNIT_NAME, characterName), 
         gender = GetGenderFromNameDescriptor(characterName),
-        level = level, 
+        level = level,
         championPoints = championPoints, 
-        class = class, 
-        formattedZone = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zone), 
-        alliance = alliance, 
-        formattedAllianceName = zo_strformat(SI_SOCIAL_LIST_ALLIANCE_FORMAT, GetAllianceName(alliance)),
+        class = class,
+        formattedZone = ZO_CachedStrFormat(SI_ZONE_NAME, zone),
+        alliance = alliance,
+        formattedAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(alliance)),
         note = note,
         type = SOCIAL_NAME_SEARCH,
         status = status,
@@ -93,15 +93,15 @@ end
 
 function ZO_FriendsList:UpdateFriendData(data, friendIndex)
     local hasCharacter, characterName, zone, class, alliance, level, championPoints = GetFriendCharacterInfo(friendIndex)
-    
+
     data.friendIndex = friendIndex
     data.hasCharacter = hasCharacter
-    data.characterName = zo_strformat(SI_UNIT_NAME, characterName)
+    data.characterName = ZO_CachedStrFormat(SI_UNIT_NAME, characterName)
     data.gender = GetGenderFromNameDescriptor(characterName)
-    data.formattedZone = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zone)
+    data.formattedZone = ZO_CachedStrFormat(SI_ZONE_NAME, zone)
     data.class = class
     data.alliance = alliance
-    data.formattedAllianceName = ZO_SocialManager_GetFormattedAllianceName(alliance)
+    data.formattedAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(alliance))
     data.level = level
     data.championPoints = championPoints
 end
@@ -197,9 +197,9 @@ end
 
 function ZO_FriendsList:OnFriendCharacterZoneChanged(displayName, characterName, zoneName)
     local data = self:FindDataByDisplayName(displayName)
-    if(data) then
+    if data then
         data.zone = zoneName
-        data.formattedZone = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zoneName)
+        data.formattedZone = ZO_CachedStrFormat(SI_ZONE_NAME, zoneName)
         self:RefreshSort()
     end
 end

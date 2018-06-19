@@ -537,7 +537,6 @@ function PlayerProgressBar:SetBarState(state)
 end
 
 function PlayerProgressBar:SetBarMode(mode)
-    internalassert(mode ~= PPB_MODE_CURRENT or self.increaseStop == nil)
     self.barMode = mode
     if mode == PPB_MODE_CURRENT then
         self.lastSetCurrentTraceback = string.format("(%d) %s", GetGameTimeMilliseconds(), debug.traceback())
@@ -565,10 +564,7 @@ function PlayerProgressBar:SetBaseType(newBaseType)
                     end
                 else
                     if(self.barState == PPB_STATE_HIDING) then
-                        --This spot didn't have a nil check, remove this logging once we get a repro for ESO-558876
-                        if internalassert(self.baseType, "PlayerProgressBar:SetBaseType; self.baseType is nil and was trying to ShowCurrent") then
-                            self:ShowCurrent(self.baseType)
-                        end
+                        self:ShowCurrent(self.baseType)
                     end
                 end
             elseif(self.barMode == nil) then
@@ -634,9 +630,6 @@ function PlayerProgressBar:UpdateBar(overrideLevel)
             else
                 self.levelTypeIcon:SetHidden(true)
             end
-        else
-            local errorString = string.format("PlayerProgressBar failure; barTypeInfo is nil. BarType: %d. Num Types Cached: %d.", self.barType, #self.barTypes)
-            internalassert(false, errorString)
         end
     end
 end
@@ -656,21 +649,17 @@ function PlayerProgressBar:ShowIncrease(barType, startLevel, start, stop, increa
             waitBeforeShowMS = zo_max(FADE_DURATION_MS, waitBeforeShowMS)
             self:Hide()
         end
-        internalassert(barType, "PlayerProgressBar:ShowIncrease; barType is nil")
-        internalassert(self.pendingShowIncrease == nil)
         self.pendingShowIncrease = { barType, startLevel, start, stop, increaseSound, owner }
         self:WaitBeforeShow(waitBeforeShowMS)
     end
 end
 
 function PlayerProgressBar:ShowCurrent(barType)
-    if internalassert(barType, "PlayerProgressBar:ShowCurrent; barType is nil") then
-        self.barType = barType
-        self:SetBarMode(PPB_MODE_CURRENT)
-        self:RefreshCurrentBar()
-        self:Show()
-        self:FireCallbacks("Show")
-    end
+    self.barType = barType
+    self:SetBarMode(PPB_MODE_CURRENT)
+    self:RefreshCurrentBar()
+    self:Show()
+    self:FireCallbacks("Show")
 end
 
 --Allow time for other systems to submit increase requests before updating to current
@@ -693,7 +682,6 @@ function PlayerProgressBar:RefreshCurrentBar()
         self:SetBarValue(level, current, max)
         self:UpdateBar()
         self:SetLevelLabelText(level)
-
     end
 end
 
@@ -762,13 +750,10 @@ function PlayerProgressBar:WaitBeforeShow(waitBeforeShowMS)
 end
 
 function PlayerProgressBar:OnWaitBeforeShowComplete()
-    internalassert(self.pendingShowIncrease ~= nil, "No pending show")
-
     local barType, startLevel, start, stop, sound, owner = unpack(self.pendingShowIncrease)
     self.pendingShowIncrease = nil
 
     local needsShow = self.barType ~= barType
-    internalassert(barType ~= nil, "Pending Show with nil barType")
     self.barType = barType
     self:SetBarMode(PPB_MODE_INCREASE)
 
@@ -840,7 +825,11 @@ function PlayerProgressBar:SetLevelLabelText(text)
     else
         self.levelLabel:SetText(text)
     end
-    self.levelLabel:SetColor(barTypeInfo:GetBarLevelColor():UnpackRGBA())
+    if barTypeInfo then
+        self.levelLabel:SetColor(barTypeInfo:GetBarLevelColor():UnpackRGBA())
+    else
+        internalassert(false, string.format("(%d) IncStart: %s\nLast Set Current:\n%s\nLast Hide:\n%s", GetGameTimeMilliseconds(), tostring(self.increaseStart), self.lastSetCurrentTraceback or "", self.lastHideTraceback or ""))
+    end
 end
 
 function PlayerProgressBar:OnWaitBeforeStopGlowingComplete()

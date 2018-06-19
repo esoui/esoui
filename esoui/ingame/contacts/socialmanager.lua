@@ -75,16 +75,3 @@ function ZO_SocialManager:ProcessDisplayName(stringSearch, data, searchTerm, cac
         return true
     end
 end
-
-do
-    local FORMATTED_ALLIANCE_NAMES = {}
-
-    function ZO_SocialManager_GetFormattedAllianceName(alliance)
-        local formattedName = FORMATTED_ALLIANCE_NAMES[alliance]
-        if not formattedName then
-            formattedName = zo_strformat(SI_SOCIAL_LIST_ALLIANCE_FORMAT, GetAllianceName(alliance))
-            FORMATTED_ALLIANCE_NAMES[alliance] = formattedName
-        end
-        return formattedName
-    end
-end

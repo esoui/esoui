@@ -440,10 +440,14 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_XP_UPDATE] = function(skillType, skillI
         local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
         local sound = GUILD_SKILL_SHOW_SOUNDS[reason]
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE)
-        local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
-        barParams:SetTriggeringEvent(EVENT_SKILL_XP_UPDATE)
-        ValidateProgressBarParams(barParams)
-        messageParams:SetBarParams(barParams)
+        if rankStartXP ~= nil then
+            local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
+            barParams:SetTriggeringEvent(EVENT_SKILL_XP_UPDATE)
+            ValidateProgressBarParams(barParams)
+            messageParams:SetBarParams(barParams)
+        else
+            internalassert(false, string.format("No Rank Start XP %d %d %d %d %d %d", skillType, skillLineIndex, reason, rank, previousXP, currentXP))
+        end
         return messageParams
     end
 end

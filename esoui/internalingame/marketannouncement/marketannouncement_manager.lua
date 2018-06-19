@@ -64,7 +64,7 @@ function MarketAnnouncement_Manager:Initialize()
         end
     
         self:FireCallbacks("OnMarketAnnouncementDataUpdated")
-        if aShouldShow then
+        if aShouldShow or GetDailyLoginClaimableRewardIndex() ~= nil then
             if not self.scene:IsShowing() and not HasShownMarketAnnouncement() then
                 SCENE_MANAGER:Show("marketAnnouncement")
             end
