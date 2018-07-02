@@ -273,19 +273,21 @@ end
 
 function ZO_ActivityFinderTemplate_Gamepad:RefreshHeaderAndView(headerData)
     self.headerData = headerData
-
-    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
-    if self.headerData.tabBarEntries then
-        ZO_GamepadGenericHeader_Activate(self.header)
-    else
-        ZO_GamepadGenericHeader_Deactivate(self.header)
-    end
+    ZO_GamepadGenericHeader_Refresh(self.header, headerData)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:ClearSelections()
-    self:RefreshView()
+
+    if self:IsShowing() then
+        if self.headerData.tabBarEntries then
+            ZO_GamepadGenericHeader_Activate(self.header)
+        else
+            ZO_GamepadGenericHeader_Deactivate(self.header)
+        end
+        self:RefreshView()
+    end
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
-    if not self.scene:IsShowing() or self.navigationMode == NAVIGATION_MODES.CATEGORIES then
+    if not self:IsShowing() or self.navigationMode == NAVIGATION_MODES.CATEGORIES then
         return
     end
 
@@ -506,4 +508,8 @@ end
 
 function ZO_ActivityFinderTemplate_Gamepad:GetScene()
     return self.scene
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:IsShowing()
+    return self.scene:IsShowing()
 end
