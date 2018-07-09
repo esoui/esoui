@@ -1,5 +1,5 @@
 
-local function Vibrate(eventCode, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, foundInfo, debugSourceInfo)
+local function Vibrate(duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, foundInfo, debugSourceInfo)
     if IsInGamepadPreferredMode() and foundInfo then
         SetGamepadVibration(duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
     end
@@ -54,19 +54,24 @@ local function OnCombatEvent(event,
     local actionType = GetVibrationFromEventInfo(actionResult, sourceType, targetType)
 
     if actionType ~= nil then
-        Vibrate(nil, GetVibrationInfoFromTrigger(actionType))
+        Vibrate(GetVibrationInfoFromTrigger(actionType))
     end
 end
 
 local function OnHighFallEvent()
-    Vibrate(nil, GetVibrationInfoFromTrigger(GAMEPAD_VIBRATION_TRIGGER_FALL_DAMAGE_HIGH))
+    Vibrate(GetVibrationInfoFromTrigger(GAMEPAD_VIBRATION_TRIGGER_FALL_DAMAGE_HIGH))
 end
 
 local function OnLowFallEvent()
-    Vibrate(nil, GetVibrationInfoFromTrigger(GAMEPAD_VIBRATION_TRIGGER_FALL_DAMAGE_LOW))
+    Vibrate(GetVibrationInfoFromTrigger(GAMEPAD_VIBRATION_TRIGGER_FALL_DAMAGE_LOW))
 end
 
-EVENT_MANAGER:RegisterForEvent("Vibration", EVENT_VIBRATION, Vibrate)
+local FOUND_INFO = true
+local function OnVibrationEvent(eventId, duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, debugSourceInfo)
+    Vibrate(duration, coarseMotor, fineMotor, leftTriggerMotor, rightTriggerMotor, FOUND_INFO, debugSourceInfo)
+end
+
+EVENT_MANAGER:RegisterForEvent("Vibration", EVENT_VIBRATION, OnVibrationEvent)
 EVENT_MANAGER:RegisterForEvent("Vibration", EVENT_COMBAT_EVENT, OnCombatEvent)
 EVENT_MANAGER:AddFilterForEvent("Vibration", EVENT_COMBAT_EVENT, REGISTER_FILTER_VIBRATION_FILTER, 0)
 EVENT_MANAGER:RegisterForEvent("Vibration", EVENT_HIGH_FALL_DAMAGE, OnHighFallEvent)

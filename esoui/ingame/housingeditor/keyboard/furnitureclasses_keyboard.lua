@@ -408,14 +408,15 @@ end
 
 function ZO_HousingFurnitureList:SetMostRecentlySelectedData(data)
     self.mostRecentlySelectedData = data
-    if self.keybindStripDescriptor then
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-    end
 
     if self.mostRecentlySelectedData then
         ZO_HousingFurnitureBrowser_Base.PreviewFurniture(self.mostRecentlySelectedData)
     else
         ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+    end
+
+    if self.keybindStripDescriptor then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     self:FireCallbacks("OnMostRecentlySelectedDataChanged", data)

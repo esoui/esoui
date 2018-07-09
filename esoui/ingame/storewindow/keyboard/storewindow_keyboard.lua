@@ -6,7 +6,6 @@ local ITEM_BUY_CURRENCY_OPTIONS =
 }
 
 local MEET_BUY_REQS_FAIL_COLOR = ZO_ColorDef:New(1, 0, 0, 1)
-local COMPUTE_HAS_ENOUGH = true
 
 local DATA_TYPE_STORE_ITEM = 1
 
@@ -24,7 +23,7 @@ end
 
 function ZO_StoreManager:Initialize(control)
     ZO_SharedStoreManager.Initialize(self, control)
-    
+
     STORE_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
     STORE_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
@@ -33,13 +32,20 @@ function ZO_StoreManager:Initialize(control)
                                                         self:GetStoreItems()
                                                         self:UpdateList()
                                                         self:UpdateFreeSlots()
+                                                        if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
+                                                            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+                                                        end
                                                     elseif newState == SCENE_FRAGMENT_HIDING then
                                                         if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
                                                             self:TogglePreviewMode()
                                                         end
+
+                                                        if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
+                                                            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+                                                        end
                                                     end
                                                 end)
-    
+
     self:InitializeTabs()
     self:InitializeKeybindStripDescriptors()
 
@@ -117,11 +123,13 @@ function ZO_StoreManager:Initialize(control)
     local typicalHiddenColumns =
     {
         ["statusSortOrder"] = true,
+        ["traitInformationSortOrder"] = true,
     }
 
     local gearHiddenColumns =
     {
         ["statusSortOrder"] = true,
+        ["traitInformationSortOrder"] = true,
     }
 
     local function CreateNewTabFilterData(filterType, normal, pressed, highlight, hiddenColumns)
@@ -232,14 +240,13 @@ function ZO_StoreManager:Initialize(control)
     storeScene:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_SHOWING then
                                                         self:InitializeStore()
-                                                        ZO_StoreManager_InternalValidateItems(self.items, {("Window mode: %s"):format(tostring(self.windowMode))})
-                                                        PLAYER_INVENTORY:SelectAndChangeSort("traitInformationSortOrder", INVENTORY_BACKPACK, ZO_SORT_ORDER_DOWN)
+                                                        PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "sellInformationSortOrder", ZO_SORT_ORDER_UP)
                                                     elseif newState == SCENE_HIDDEN then
                                                         ZO_InventorySlot_RemoveMouseOverKeybinds()
                                                         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                         self.modeBar:Clear()
 
-                                                        PLAYER_INVENTORY:SelectAndChangeSort("statusSortOrder", INVENTORY_BACKPACK, ZO_SORT_ORDER_DOWN)
+                                                        PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "statusSortOrder", ZO_SORT_ORDER_DOWN)
                                                         if GetCursorContentType() == MOUSE_CONTENT_STORE_ITEM then
                                                             ClearCursor()
                                                         end
@@ -364,7 +371,7 @@ do
                     return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatKeyboard(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_AMOUNT_ERROR_ICON))
                 end,
                 keybind = "UI_SHORTCUT_SECONDARY",
-                visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
+                visible = function() return self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL and CanStoreRepair() and GetRepairAllCost() > 0 end,
                 callback = function()
                     ZO_Dialogs_ShowDialog("REPAIR_ALL", {cost = GetRepairAllCost()})
                 end,
@@ -376,7 +383,7 @@ do
                 keybind = "UI_SHORTCUT_NEGATIVE",
 
                 visible =   function()
-                                return HasAnyJunk(BAG_BACKPACK, DONT_COUNT_STOLEN_ITEMS)
+                                return self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL and HasAnyJunk(BAG_BACKPACK, DONT_COUNT_STOLEN_ITEMS)
                             end,
                 callback =  function()
                                 ZO_Dialogs_ShowDialog("SELL_ALL_JUNK")
@@ -455,7 +462,7 @@ local sortKeys =
     stackBuyPrice = { tiebreaker = "stackBuyPriceCurrency1", isNumeric = true },
     stackBuyPriceCurrency1 = { tiebreaker = "stackBuyPriceCurrency2", isNumeric = true },
     stackBuyPriceCurrency2 = { tiebreaker = "name", isNumeric = true },
-    traitInformationSortOrder = { tiebreaker = "name", isNumeric = true },
+    sellInformationSortOrder = { tiebreaker = "name", isNumeric = true },
 }
 
 function ZO_StoreManager:SortData()
@@ -566,8 +573,6 @@ end
 function ZO_StoreManager:SetUpBuySlot(control, data)
     local newStatusControl = GetControl(control, "Status")
     local slotControl = GetControl(control, "Button")
-    local iconControl = GetControl(control, "ButtonIcon")
-    local quantityControl = GetControl(control, "ButtonStackCount")
     local nameControl = GetControl(control, "Name")
     local priceControl = GetControl(control, "SellPrice")
 
@@ -758,8 +763,6 @@ function ZO_Store_OnEntryMouseExit(storeEntrySlot)
 end
 
 function ZO_Store_OnEntryClicked(storeEntrySlot, button)
-    
-
     -- left button for an inventory slot click will only try and drag and drop, but that
     -- should be handled for us by the OnReceiveDrag handler, so if we left click
     -- we'll do our custom behavior

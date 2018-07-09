@@ -43,11 +43,6 @@ local function GetLevelOrChampionPointsRequirementText(levelMin, levelMax, point
     end
 end
 
-local function IsPreferredRoleSelected()
-    local isDPS, isHeal, isTank = GetPlayerRoles()
-    return isDPS or isHeal or isTank
-end
-
 function ZO_IsActivityTypeAvA(activityType)
     return activityType == LFG_ACTIVITY_AVA
 end
@@ -62,6 +57,10 @@ end
 
 function ZO_IsActivityTypeBattleground(activityType)
     return activityType == LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL or activityType == LFG_ACTIVITY_BATTLE_GROUND_CHAMPION or activityType == LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION
+end
+
+function ZO_DoesActivityTypeRequireRoles(activityType)
+    return activityType == LFG_ACTIVITY_MASTER_DUNGEON or activityType == LFG_ACTIVITY_DUNGEON
 end
 
 ------------------
@@ -273,9 +272,6 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
     --Determine lock status for each location
     local inAGroup = IsUnitGrouped("player")
     local isLeader = IsUnitGroupLeader("player")
-    -- UI will only check local player roles.  Client and server will validate group member roles.
-    -- This prevents group members disabling the leaders selections while they're trying to set up an activity and group member roles are being changed
-    local isRoleDataValid = IsPreferredRoleSelected()
 
     for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
         local isActivityAvA = ZO_IsActivityTypeAvA(activityType)
@@ -283,7 +279,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
         local isActivityHomeShow = ZO_IsActivityTypeHomeShow(activityType)
         local isActivityBattleground = ZO_IsActivityTypeBattleground(activityType)
 
-        local activityRequiresRoles = isActivityDungeon
+        local activityRequiresRoles = ZO_DoesActivityTypeRequireRoles(activityType)
         local isGroupRelevant = inAGroup and not isActivityHomeShow
         local isPlayerInAvAWorld = IsPlayerInAvAWorld()
         local activityAvailableFromAvAWorld = isActivityAvA or isActivityBattleground
@@ -321,8 +317,6 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                 local lockReasonText = zo_strformat(lockReasonStringId, collectibleData:GetName(), collectibleData:GetCategoryData():GetName())
                 location:SetLockReasonText(lockReasonText)
                 location:SetCountsForAverageRoleTime(false)
-            elseif activityRequiresRoles and not isRoleDataValid then
-                location:SetLockReasonText(SI_LFG_LOCK_REASON_NO_ROLES_SELECTED)
             else
                 local groupTooLarge = isGroupRelevant and self.groupSize > location:GetMaxGroupSize()
 

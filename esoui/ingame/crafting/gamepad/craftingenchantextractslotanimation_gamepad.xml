@@ -1,0 +1,34 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="CraftingEnchantExtractionBurstAnimation_Gamepad">
+            <OnPlay>
+                PlaySound(SOUNDS.ENCHANTING_EXTRACT_START_ANIM)
+            </OnPlay>
+            <Animations>
+                <!-- Burst fade in -->
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeIn"/>
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeIn"/>
+
+                <ScaleAnimation inherits="CraftingExtractionBurstAnimationScaleIn"/>
+                <ScaleAnimation inherits="CraftingExtractionBurstAnimationScaleIn"/>
+
+                <!-- Burst fade out -->
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeOut"/>
+                <AlphaAnimation inherits="CraftingExtractionBurstAnimationFadeOut"/>
+
+                <!-- Icon scale up -->
+                <ScaleAnimation duration="300" startScale="1" endScale="1.1"/>
+
+                <!-- Icon scale down -->
+                <ScaleAnimation delay="500" duration="300" startScale="1.1" endScale="1.0"/>
+
+                <!-- Name fades -->
+                <AlphaAnimation duration="250" startAlpha="1.0" endAlpha="0.0"/>
+                <AlphaAnimation delay="600" duration="200" startAlpha="0.0" endAlpha="1.0"/>
+
+                <!-- Burst Rotations -->
+                <AnimationTimeline inherits="CraftingBurstRotationTimelineFast" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+</GuiXml>

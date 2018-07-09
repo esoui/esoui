@@ -11,6 +11,10 @@ end
 
 -- Begin ZO_MarketAnnouncementMarketProductTile Overrides --
 
+function ZO_MarketAnnouncementMarketProductTile:AddMouseOverElement(element)
+    self.mouseInputGroup:Add(element, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+end
+
 function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(marketProduct, selected)
     local initializingMarketProduct = not self.marketProduct or not self.marketProduct.control
 
@@ -47,8 +51,18 @@ end
 function ZO_MarketAnnouncementMarketProductTile_Keyboard:PostInitializePlatform()
     ZO_ActionTile_Keyboard.PostInitializePlatform(self)
 
+    self.numBundledProductsLabel = self.control:GetNamedChild("BundledProducts")
+    self.helpButton = self.container:GetNamedChild("Help")
+
+    local onClick = function()
+        self:OnHelpSelected()
+    end
+
+    self.helpButton:SetHandler("OnClicked", onClick)
+
     self.mouseInputGroup = ZO_MouseInputGroup:New(self.control)
     self.mouseInputGroup:Add(self.actionButton, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+    self.mouseInputGroup:Add(self.helpButton, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
 end
 
 function ZO_MarketAnnouncementMarketProductTile_Keyboard:OnMouseEnter()
@@ -56,6 +70,7 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:OnMouseEnter()
     self.isMousedOver = true
 
     self.actionButton:SetShowingHighlight(self.isMousedOver)
+    self:UpdateHelpVisibility(self.isMousedOver)
 end
 
 function ZO_MarketAnnouncementMarketProductTile_Keyboard:OnMouseExit()
@@ -63,6 +78,31 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:OnMouseExit()
     self.isMousedOver = false
 
     self.actionButton:SetShowingHighlight(self.isMousedOver)
+    
+    if self.marketProduct then
+        self.marketProduct:SetupBundleDisplay()
+    end
+
+    self:UpdateHelpVisibility(self.isMousedOver)
+end
+
+do
+    local g_fadeInAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_KeyboardMarketProductFadeInAnimation")
+
+    function ZO_MarketAnnouncementMarketProductTile_Keyboard:UpdateHelpVisibility(isMousedOver)
+        local isPromo = false
+        if self.marketProduct then
+            isPromo = self.marketProduct:IsPromo()
+        end
+
+        self.numBundledProductsLabel:SetHidden((isMousedOver and isPromo) or self.numBundledProductsLabel:IsHidden())
+
+        if not isMousedOver or not isPromo then
+            g_fadeInAnimationProvider:PlayBackward(self.helpButton)
+        else
+            g_fadeInAnimationProvider:PlayForward(self.helpButton)
+        end
+    end
 end
 
 -- End ZO_ActionTile_Keyboard Overrides --

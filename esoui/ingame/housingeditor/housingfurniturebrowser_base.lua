@@ -119,7 +119,7 @@ function ZO_HousingFurnitureBrowser_Base:OnHiding()
 end
 
 function ZO_HousingFurnitureBrowser_Base.PreviewFurniture(placeableData)
-    if placeableData then
+    if placeableData and IsCharacterPreviewingAvailable() then
         placeableData:Preview()
     end
 end

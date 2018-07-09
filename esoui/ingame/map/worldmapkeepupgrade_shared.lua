@@ -1,5 +1,5 @@
 --Keep Upgrade Window Shared
-local UPDATE_RATE = 1
+local UPDATE_RATE_SECONDS = 1
 
 ZO_MapKeepUpgrade_Shared = ZO_Object:Subclass()
 
@@ -28,10 +28,10 @@ function ZO_MapKeepUpgrade_Shared:Initialize(control)
         control.iconTexture = control:GetNamedChild("Icon")
     end)
     
-    control:SetHandler("OnUpdate", function(_, time)
-        if(self.nextUpdate == nil or time > self.nextUpdate) then
+    control:SetHandler("OnUpdate", function(_, timeS)
+        if(self.nextUpdateS == nil or timeS > self.nextUpdateS) then
             self:RefreshTimeDependentControls()
-            self.nextUpdate = time + UPDATE_RATE
+            self.nextUpdateS = timeS + UPDATE_RATE_SECONDS
         end
     end)
 
@@ -79,7 +79,7 @@ function ZO_MapKeepUpgrade_Shared:RefreshBarLabel()
 end
 
 function ZO_MapKeepUpgrade_Shared:GenerateRemainingTimeLabel(current, forNextLevel, resourceRate, level)
-    if(level >= (MAX_KEEP_UPGRADE_LEVELS - 1) or forNextLevel <= 0 or current > forNextLevel) then
+    if(level >= GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) or forNextLevel <= 0 or current > forNextLevel) then
         return nil
     elseif(resourceRate <= 0) then
         return GetString(SI_KEEP_UPGRADE_INVALID_TIME)
@@ -114,7 +114,7 @@ function ZO_MapKeepUpgrade_Shared:RefreshLevels()
 
     self.buttons = {}
     local params = self.symbolParams
-    for currentLevel = 0, MAX_KEEP_UPGRADE_LEVELS - 1 do
+    for currentLevel = 0, GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) do
         local numUpgrades = self.keepUpgradeObject:GetNumLevelUpgrades(currentLevel)
         if(numUpgrades > 0) then
             local buttonList = {}
@@ -141,7 +141,7 @@ function ZO_MapKeepUpgrade_Shared:RefreshLevels()
                 button.iconTexture:SetTexture(icon)
                 button:SetParent(levelSectionButtonsContainer)
                 button.level = currentLevel
-                button.info = {name = name, description = description, isActive = isActive }
+                button.info = {name = name, description = description }
                 button.index = i
                 if(lastButton) then
                     button:SetAnchor(TOPLEFT, lastButton, TOPRIGHT, params.SYMBOL_PADDING_X, 0)
@@ -166,7 +166,7 @@ function ZO_MapKeepUpgrade_Shared:RefreshLevelsEnabled()
     end
 
     for _, button in pairs(self.buttonPool:GetActiveObjects()) do
-        local _, _, _, _, isActive = self.keepUpgradeObject:GetLevelUpgradeInfo(button.level, button.index)
+        local isActive = level >= button.level
         button.lockTexture:SetHidden(isActive)
         ZO_ActionSlot_SetUnusable(button.iconTexture, not isActive)
     end

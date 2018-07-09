@@ -11,7 +11,7 @@ function ZO_Tooltip:LayoutDefaultAccessTooltip(defaultAccess)
     local defaultVisitorAccessBodySection = self:AcquireSection(self:GetStyle("defaultAccessBody"))
 
     defaultVisitorAccessTitleSection:AddLine(GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING",  defaultAccess), self:GetStyle("defaultAccessTitle"))
-    defaultVisitorAccessBodySection:AddLine(GetString("SI_HOUSING_PERMISSIONS_DEFAULT_ACCESS_DESCRIPTION", defaultAccess))
+    defaultVisitorAccessBodySection:AddLine(GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING_DESCRIPTION", defaultAccess))
 
     self:AddSection(defaultVisitorAccessTitleSection)
     self:AddSection(defaultVisitorAccessBodySection)

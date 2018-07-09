@@ -1043,13 +1043,28 @@ function ZO_InventorySlot_InitiateDestroyItem(inventorySlot)
     return true
 end
 
+local function CanUseItemWithOnUseType(onUseType)
+    if onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP
+       or onUseType == ITEM_USE_TYPE_COSTUME_DYE_STAMP
+       or onUseType == ITEM_USE_TYPE_KEEP_RECALL_STONE
+       or onUseType == ITEM_USE_TYPE_SKILL_RESPEC 
+       or onUseType == ITEM_USE_TYPE_MORPH_RESPEC 
+    then
+        return false
+    end
+
+    return true
+end
+
 local function CanUseItem(inventorySlot)
     local hasCooldown = inventorySlot.IsOnCooldown and inventorySlot:IsOnCooldown()
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local usable, onlyFromActionSlot = IsItemUsable(bag, index)
     local canInteractWithItem = CanInteractWithItem(bag, index)
-    local isDyeStamp = GetItemType(bag, index) == ITEMTYPE_DYE_STAMP -- dye stamps are "usable" but we do not want the player to use them directly from their inventory
-    return usable and not onlyFromActionSlot and canInteractWithItem and not hasCooldown and not isDyeStamp
+    local itemType = GetItemType(bag, index)
+    local onUseType = GetItemUseType(bag, index)
+    local canUseItemWithOnUseType = CanUseItemWithOnUseType(onUseType)
+    return usable and not onlyFromActionSlot and canInteractWithItem and not hasCooldown and canUseItemWithOnUseType
 end
 
 local function TryUseItem(inventorySlot)
@@ -1060,6 +1075,14 @@ local function TryUseItem(inventorySlot)
         UseItem(bag, index)
         return true
     end
+end
+
+local function TryShowRecallMap(inventorySlot)
+    TryUseItem(inventorySlot)
+end
+
+local function TryStartSkillRespec(inventorySlot)
+    TryUseItem(inventorySlot)
 end
 
 local function TryBuyMultiple(inventorySlot)
@@ -1748,6 +1771,19 @@ local actionHandlers =
                                     slotActions:AddSlotAction(SI_ITEM_ACTION_PREVIEW_DYE_STAMP, function() TryPreviewDyeStamp(inventorySlot) end, "primary")
                                 end
                             end,
+    ["show_map_keep_recall"] = function(inventorySlot, slotActions)
+                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                if GetItemUseType(bag, slot) == ITEM_USE_TYPE_KEEP_RECALL_STONE then
+                                    slotActions:AddSlotAction(SI_ITEM_ACTION_SHOW_MAP, function() TryShowRecallMap(inventorySlot) end, "primary")
+                                end
+                            end,
+    ["start_skill_respec"] = function(inventorySlot, slotActions)
+                                local bag, slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                local itemUseType = GetItemUseType(bag, slot)
+                                if itemUseType == ITEM_USE_TYPE_SKILL_RESPEC or itemUseType == ITEM_USE_TYPE_MORPH_RESPEC then
+                                    slotActions:AddSlotAction(SI_ITEM_ACTION_START_SKILL_RESPEC, function() TryStartSkillRespec(inventorySlot) end, "primary")
+                                end
+                            end,
 }
 
 local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
@@ -1757,7 +1793,7 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                    { "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                   NON_INTERACTABLE_ITEM_ACTIONS,
@@ -1783,7 +1819,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_SMITHING_BOOSTER] =              NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_DYEABLE_EQUIPMENT] =             NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =           { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                { "move_to_inventory", "use", "link_to_chat", "report_item" },
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] =          { "remove_from_craft", "link_to_chat", "report_item" },
@@ -1997,10 +2033,14 @@ local InventoryEnter =
     {
         function(inventorySlot)
             local entry = inventorySlot.lootEntry
-
-            if entry and not entry.currencyType then
-                ItemTooltip:SetLootItem(entry.lootId)
-                return true, ItemTooltip
+            if entry then
+                if entry.currencyType then
+                    ItemTooltip:SetCurrency(entry.currencyType, entry.currencyAmount)
+                    return true, ItemTooltip
+                else
+                    ItemTooltip:SetLootItem(entry.lootId)
+                    return true, ItemTooltip
+                end
             end
         end
     },
@@ -2186,16 +2226,12 @@ local InventoryEnter =
     },
 }
 
-local g_mouseoverCommand
+local g_mouseoverCommand = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_RIGHT, { "UI_SHORTCUT_SECONDARY", "UI_SHORTCUT_TERTIARY", })
 local g_updateCallback
 
 -- defined local above
 function UpdateMouseoverCommand(inventorySlot)
     if not IsInGamepadPreferredMode() then
-        if(not g_mouseoverCommand) then
-            g_mouseoverCommand = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_RIGHT, { "UI_SHORTCUT_SECONDARY", "UI_SHORTCUT_TERTIARY", })
-        end
-
         g_mouseoverCommand:SetInventorySlot(inventorySlot)
     end
 
@@ -2702,7 +2738,7 @@ function ZO_InventorySlot_TraitInfo_OnMouseEnter(control)
     local traitInformation = slotData.traitInformation
 
     if traitInformation and traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
-        local itemTrait = GetItemTrait(slotData.bagId, slotData.slotIndex)
+        local itemTrait = slotData.itemTrait or GetItemTrait(slotData.bagId, slotData.slotIndex)
         local traitName = GetString("SI_ITEMTRAITTYPE", itemTrait)
         local traitInformationString = GetString("SI_ITEMTRAITINFORMATION", traitInformation)
         InitializeTooltip(InformationTooltip, control, TOPRIGHT, -10, 0, TOPLEFT)
@@ -2714,6 +2750,23 @@ function ZO_InventorySlot_TraitInfo_OnMouseEnter(control)
 end
 
 function ZO_InventorySlot_TraitInfo_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+    local _, listPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, true)
+end
+
+function ZO_InventorySlot_SellInformation_OnMouseEnter(control)
+    local _, listPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
+    ZO_InventorySlot_SetHighlightHidden(listPart, false)
+
+    local slotData = control:GetParent().dataEntry.data
+    if slotData.sellInformation ~= ITEM_SELL_INFORMATION_NONE then
+        InitializeTooltip(InformationTooltip, control, TOPRIGHT, -10, 0, TOPLEFT)
+        InformationTooltip:AddLine(GetString("SI_ITEMSELLINFORMATION", slotData.sellInformation), "", ZO_NORMAL_TEXT:UnpackRGB())
+    end
+end
+
+function ZO_InventorySlot_SellInformation_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
     local _, listPart = ZO_InventorySlot_GetInventorySlotComponents(control:GetParent())
     ZO_InventorySlot_SetHighlightHidden(listPart, true)

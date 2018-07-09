@@ -12,7 +12,7 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
-        <Control name="ZO_PointerBox_KeyboardControl" virtual="true" mouseEnabled="true">
+        <Control name="ZO_PointerBox_KeyboardControl" virtual="true" mouseEnabled="true" tier="HIGH">
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
                     <AnchorFill/>

@@ -83,10 +83,7 @@ function MarketProduct_Keyboard:SetupCalloutsDisplay(discountPercent, isNew)
         textCalloutTextColor = ZO_SELECTED_TEXT
     end
 
-    if textCalloutBackgroundColor then
-        self:SetCalloutColor(textCalloutBackgroundColor)
-        self.textCallout:SetColor(textCalloutTextColor:UnpackRGB())
-    end
+    self:ApplyCalloutColor(textCalloutBackgroundColor, textCalloutTextColor)
 end
 
 function MarketProduct_Keyboard:Purchase()
@@ -108,7 +105,24 @@ function MarketProduct_Keyboard:Refresh()
     -- need to release the icons before we refresh, because Show() will grab a new icon
     self.iconPool:ReleaseAllObjects()
     self.activeMarketProductIcon = nil
+
+    -- make sure to refresh the mouse over state for the tile as well
+    local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
+    local isMousedOver = false
+    if mouseOverControl and mouseOverControl == self.control then
+        isMousedOver = true
+    end
+
+    local ANIMATE_INSTANTLY = true
+    if isMousedOver then
+        self:OnMouseExit(ANIMATE_INSTANTLY)
+    end
+
     ZO_MarketProductBase.Refresh(self)
+
+    if isMousedOver then
+        self:OnMouseEnter(ANIMATE_INSTANTLY)
+    end
 end
 
 function MarketProduct_Keyboard:RefreshAsChild()
@@ -117,7 +131,23 @@ function MarketProduct_Keyboard:RefreshAsChild()
     self.activeMarketProductIcon = nil
     local productId = self:GetId()
     if productId > 0 then
+        -- make sure to refresh the mouse over state for the tile as well
+        local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
+        local isMousedOver = false
+        if mouseOverControl and mouseOverControl == self.control then
+            isMousedOver = true
+        end
+
+        local ANIMATE_INSTANTLY = true
+        if isMousedOver then
+            self:OnMouseExit(ANIMATE_INSTANTLY)
+        end
+
         self:ShowAsChild(productId, self.parentMarketProductId)
+
+        if isMousedOver then
+            self:OnMouseEnter(ANIMATE_INSTANTLY)
+        end
     end
 end
 
@@ -147,7 +177,7 @@ do
     local g_fadeInAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_KeyboardMarketProductFadeInAnimation")
     local g_fadeOutAnimationProvider = ZO_ReversibleAnimationProvider:New("ZO_KeyboardMarketProductFadeOutAnimation")
 
-    function MarketProduct_Keyboard:OnMouseEnter()
+    function MarketProduct_Keyboard:OnMouseEnter(animateInstantly)
         if not self:IsPurchaseLocked() then
             self:SetHighlightHidden(false)
         end
@@ -167,23 +197,23 @@ do
 
         if self:IsGiftable() then
             if not self.purchaseLabelControl:IsHidden() then
-                g_fadeOutAnimationProvider:PlayForward(self.purchaseLabelControl)
+                g_fadeOutAnimationProvider:PlayForward(self.purchaseLabelControl, animateInstantly)
             end
 
             if not self.bundledProductsItemsLabel:IsHidden() then
-                g_fadeOutAnimationProvider:PlayForward(self.bundledProductsItemsLabel)
+                g_fadeOutAnimationProvider:PlayForward(self.bundledProductsItemsLabel, animateInstantly)
             end
 
             if not self.numBundledProductsLabel:IsHidden() then
-                g_fadeOutAnimationProvider:PlayForward(self.numBundledProductsLabel)
+                g_fadeOutAnimationProvider:PlayForward(self.numBundledProductsLabel, animateInstantly)
             end
 
             self.giftButton:SetHidden(false)
-            g_fadeInAnimationProvider:PlayForward(self.giftButton)
+            g_fadeInAnimationProvider:PlayForward(self.giftButton, animateInstantly)
         end
     end
 
-    function MarketProduct_Keyboard:OnMouseExit()
+    function MarketProduct_Keyboard:OnMouseExit(animateInstantly)
         self.activeMarketProductIcon = nil
         if not self:IsPurchaseLocked() then
             self:SetHighlightHidden(true)
@@ -198,19 +228,19 @@ do
         if self:IsGiftable() then
             local shouldShowPurchaseLabel = not self:CanBePurchased()
             if shouldShowPurchaseLabel then
-                g_fadeOutAnimationProvider:PlayBackward(self.purchaseLabelControl)
+                g_fadeOutAnimationProvider:PlayBackward(self.purchaseLabelControl, animateInstantly)
             end
 
             if self:IsBundle() then
-                g_fadeOutAnimationProvider:PlayBackward(self.bundledProductsItemsLabel)
+                g_fadeOutAnimationProvider:PlayBackward(self.bundledProductsItemsLabel, animateInstantly)
             end
 
             local hideBundledProductsLabel = not self:IsBundle() or GetMarketProductNumBundledProducts(self.marketProductId) <= 1
             if not hideBundledProductsLabel then
-                g_fadeOutAnimationProvider:PlayBackward(self.numBundledProductsLabel)
+                g_fadeOutAnimationProvider:PlayBackward(self.numBundledProductsLabel, animateInstantly)
             end
 
-            g_fadeInAnimationProvider:PlayBackward(self.giftButton)
+            g_fadeInAnimationProvider:PlayBackward(self.giftButton, animateInstantly)
         end
     end
 end
@@ -343,7 +373,7 @@ function MarketProduct_Keyboard:LayoutIcons(iconControls)
         control:ClearAnchors()
 
         if index == 1 then
-            control:SetAnchor(TOPRIGHT, nil, nil, -20, 20)
+            control:SetAnchor(TOPRIGHT, nil, nil, -10, 20)
             previousRowControl = control
         else
             control:SetAnchor(TOPRIGHT, previousControl, TOPLEFT, -COLUMN_PADDING, 0)
@@ -364,7 +394,6 @@ function MarketProduct_Keyboard:LayoutIcons(iconControls)
             else
                 control:SetAnchor(TOPRIGHT, previousRowControl, BOTTOMRIGHT, 0, ROW_PADDING)
             end
-            firstInRow = false
         else
             control:SetAnchor(TOPRIGHT, previousControl, TOPLEFT, -COLUMN_PADDING, 0)
         end
@@ -463,8 +492,8 @@ function ZO_MarketProductIndividual:Initialize(controlId, parent, iconPool, owne
     MarketProduct_Keyboard.Initialize(self, controlId, "ZO_MarketProduct_Keyboard", parent, iconPool, owner)
 end
 
-local SINGLE_ICON_SIZE = 64
 function ZO_MarketProductIndividual:PerformLayout(background)
+    local iconControls = {}
     local productType = self:GetProductType()
     if productType ~= MARKET_PRODUCT_TYPE_NONE then
         local marketProductIcon = self:InitializeMarketProductIcon(self.marketProductId, self:IsPurchaseLocked())
@@ -548,7 +577,6 @@ function ZO_MarketProductIcon:Show(marketProduct, marketProductId, showAsPurchas
         if not showAsPurchased then
             showAsPurchased = IsCollectibleOwnedByDefId(collectibleId)
         end
-        self.icon:SetTexture(iconFile)
     elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
         if not showAsPurchased then
             showAsPurchased = CouldAcquireMarketProduct(marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
@@ -605,8 +633,6 @@ end
 
 -- ZO_MarketProductIcon mouse functions
 
-local DONT_SHOW_COLLECTIBLE_NICKNAME = false
-local DONT_SHOW_COLLECTIBLE_HINT = false
 function ZO_MarketProductIcon:OnMouseEnter()
     self.parentMarketProduct:OnIconMouseEnter(self)
 end

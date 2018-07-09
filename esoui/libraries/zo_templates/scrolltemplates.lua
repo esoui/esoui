@@ -528,6 +528,11 @@ function ZO_Scroll_OnExtentsChanged(self)
     end
 end
 
+function ZO_Scroll_OnMouseWheel(self, delta)
+    ZO_Scroll_ScrollRelative(self, -delta * 40)
+    OnInteractWithScrollBar(self)
+end
+
 function ZO_Scroll_SetOnInteractWithScrollbarCallback(self, onInteractWithScrollbarCallback)
     self.onInteractWithScrollbarCallback = onInteractWithScrollbarCallback
 
@@ -605,8 +610,6 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
 
         ZO_UpdateScrollFade(self.useFadeGradient, scroll, ZO_SCROLL_DIRECTION_VERTICAL)
     end
-
-    OnInteractWithScrollBar(self)
 end
 
 --Visual Config

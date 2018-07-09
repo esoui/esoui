@@ -82,6 +82,21 @@ function ZO_GiftInventoryView_Gamepad:ShowClaimGiftDialog()
     ZO_Dialogs_ShowGamepadDialog("CONFIRM_CLAIM_GIFT_GAMEPAD", { gift = self.gift })
 end
 
+function ZO_GiftInventoryView_Gamepad:ShowClaimGiftNoticeDialog(noticeText, helpCategoryIndex, helpIndex)
+    local dialogData =
+    {
+        gift = self.gift,
+        helpCategoryIndex = helpCategoryIndex,
+        helpIndex = helpIndex,
+    }
+    local textParams =
+    {
+        titleParams = { self.gift:GetName() },
+        mainTextParams = { noticeText },
+    }
+    ZO_Dialogs_ShowGamepadDialog("CLAIM_GIFT_NOTICE_GAMEPAD", dialogData, textParams)
+end
+
 function ZO_GiftInventoryView_Gamepad:DeclineGift()
     if self:IsReceivedGift() then
         ZO_Dialogs_ShowGamepadDialog("CONFIRM_RETURN_GIFT_GAMEPAD", { gift = self.gift })

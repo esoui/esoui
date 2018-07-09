@@ -45,6 +45,13 @@ function ZO_MarketAnnouncementMarketProductTile:Layout(marketProduct, selected)
     end
 end
 
+function ZO_MarketAnnouncementMarketProductTile:OnHelpSelected()
+    if self.marketProduct then
+        local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(self.marketProduct.marketProductId)
+        RequestShowSpecificHelp(helpCategoryIndex, helpIndex)
+    end
+end
+
 function ZO_MarketAnnouncementMarketProductTile:SetHighlightHidden(hidden, instant)
     ZO_ActionTile.SetHighlightHidden(self, hidden, instant)
 

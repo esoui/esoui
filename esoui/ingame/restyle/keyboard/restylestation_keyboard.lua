@@ -85,7 +85,7 @@ function ZO_RestyleStation_Keyboard:HandleTabChange(tabData)
             self.pendingTabData = nil
         end
 
-        ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_RESTYLE_CHANGES", Confirm, Decline)
+        ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_CHANGES", Confirm, Decline)
     else
         self:OnTabFilterChanged(tabData)
     end
@@ -349,7 +349,7 @@ function ZO_RestyleStation_Keyboard:AttemptExit(exitDestinationData)
         local function Decline()
             self.exitDestinationData = nil
         end
-        ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_RESTYLE_CHANGES", Confirm, Decline)
+        ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_CHANGES", Confirm, Decline)
     else
         self:ConfirmExit()
     end
@@ -446,7 +446,7 @@ do
 
     local function SetupRadioButton(radioButton, currencyType)
         local label = radioButton:GetNamedChild("Label")
-        label:SetText(GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER))
+        label:SetText(zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)))
         radioButton.currencyType = currencyType
     end
 

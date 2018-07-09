@@ -160,7 +160,7 @@ end
 function ZO_SharedSmithingResearch:FindResearchingTraitIndex(craftingType, researchLineIndex, numTraits)
     local areAllTraitsKnown = true
     for traitIndex = 1, numTraits do
-        local traitType, traitDescription, known = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, traitIndex)
+        local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, traitIndex)
 
         if not known then
             areAllTraitsKnown = false
@@ -249,7 +249,7 @@ function ZO_SharedSmithingResearch:ShowTraitsFor(data)
     local OFFSET_Y = 2
 
     for traitIndex = 1, numTraits do
-        local traitType, traitDescription, known = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, traitIndex)
+        local traitType, _, known = GetSmithingResearchLineTraitInfo(craftingType, researchLineIndex, traitIndex)
         local durationSecs, timeRemainingSecs = GetSmithingResearchLineTraitTimes(craftingType, researchLineIndex, traitIndex)
         local slotControl = self.slotPool:AcquireObject()
         slotControl.owner = self
@@ -262,7 +262,11 @@ function ZO_SharedSmithingResearch:ShowTraitsFor(data)
 
         slotControl.nameLabel:SetText(GetString("SI_ITEMTRAITTYPE", traitType))
         slotControl.traitType = traitType
-        slotControl.traitDescription = traitDescription
+        slotControl.traitDescription, slotControl.traitResearchSourceDescription, slotControl.traitMaterialSourceDescription = GetSmithingResearchLineTraitDescriptions(craftingType, researchLineIndex, traitIndex)
+        if slotControl.traitResearchSourceDescription == "" then
+            slotControl.traitResearchSourceDescription = nil
+            slotControl.traitMaterialSourceDescription = nil
+        end
 
         local icon = select(3, GetSmithingTraitItemInfo(traitType + 1))
         ZO_ItemSlot_SetupSlot(slotControl, 1, icon)
@@ -366,7 +370,7 @@ function ZO_SharedSmithingResearch:CancelResearch()
 
     local dialogParams = {}
     local researchingTrait = self:FindResearchingTraitIndex(self.craftingType, self.researchLineIndex, self.numTraits)
-    local traitType, traitDescription, known = GetSmithingResearchLineTraitInfo(self.craftingType, self.researchLineIndex, researchingTrait)
+    local traitType, _, known = GetSmithingResearchLineTraitInfo(self.craftingType, self.researchLineIndex, researchingTrait)
     local researchLineName = GetSmithingResearchLineInfo(self.craftingType, self.researchLineIndex)
     dialogData.traitIndex = researchingTrait
     dialogParams.mainTextParams = { researchLineName, GetString("SI_ITEMTRAITTYPE", traitType), GetString(SI_PERFORM_ACTION_CONFIRMATION) }

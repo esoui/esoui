@@ -48,7 +48,6 @@ function ZO_GamepadInventory:Initialize(control)
 
     local function RefreshVisualLayer()
         if self.scene:IsShowing() then
-            self:OnUpdate()
             if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
                 self:RefreshCategoryList()
             end

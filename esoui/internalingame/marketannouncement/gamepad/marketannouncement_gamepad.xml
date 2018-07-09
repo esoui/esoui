@@ -97,6 +97,13 @@
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Close" relativePoint="TOPLEFT" />
                         </Control>
 
+                        <Control name="$(parent)SecondaryAction" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Close" relativePoint="TOPLEFT" />
+                            <Controls>
+                                <Label name="$(parent)NameLabel" text="SI_MARKET_ANNOUNCEMENT_HELP_BUTTON" override="true" />
+                            </Controls>
+                        </Control>
+
                         <Control name="$(parent)TertiaryAction" inherits="ZO_KeybindButton">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)PrimaryAction" relativePoint="TOPLEFT" />
                             <Controls>

@@ -52,7 +52,7 @@ function ZO_ActionTile_Gamepad:SetSelected(isSelected)
 
     self:UpdateKeybindButton()
 
-    -- Set hidden state if curent keybind button's descriptor matches tile's descriptor after the keybind has been updated
+    -- Set hidden state if current keybind button's descriptor matches tile's descriptor after the keybind has been updated
     if self.keybindButton and self.keybindButton:GetKeybindButtonDescriptorReference() == self.actionKeybindDescriptor then
         if oldSelected ~= isSelected then
             self.keybindButton:SetHidden(not (isSelected and self:IsActionAvailable()))

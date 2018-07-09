@@ -42,10 +42,10 @@ end
 do
     local MARKET_PRODUCT_COLOR_MAP_UNFOCUSED =
     {
-            [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_DIMMED_COLOR,
-            [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
-            [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
-            [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_DIMMED_COLOR,
+        [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_DIMMED_COLOR,
+        [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
+        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
+        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_DIMMED_COLOR,
     }
 
     local MARKET_PRODUCT_COLOR_MAP_FOCUSED =
@@ -190,8 +190,8 @@ function ZO_MarketProductBase:GetMarketProductCrownCrateId()
     return GetMarketProductCrownCrateId(self:GetId())
 end
 
-function ZO_MarketProductBase:GetTimeLeftInSeconds()
-    return GetMarketProductTimeLeftInSeconds(self.marketProductId)
+function ZO_MarketProductBase:GetLTOTimeLeftInSeconds()
+    return GetMarketProductLTOTimeLeftInSeconds(self.marketProductId)
 end
 
 function ZO_MarketProductBase:GetPurchaseState()
@@ -215,14 +215,7 @@ function ZO_MarketProductBase:IsPromo()
 end
 
 function ZO_MarketProductBase:IsHouseCollectible()
-    if self:GetMarketProductType() == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-        local collectibleType = select(4, GetMarketProductCollectibleInfo(self:GetId()))
-        if collectibleType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
-            return true
-        end
-    end
-
-    return false
+    return ZO_MarketProduct_IsHouseCollectible(self:GetId())
 end
 
 function ZO_MarketProductBase:HasBeenPartiallyPurchased()
@@ -254,7 +247,7 @@ function ZO_MarketProductBase:GetBackgroundSaturation(isPurchased)
 end
 
 function ZO_MarketProductBase:IsLimitedTimeProduct()
-    local remainingTime = self:GetTimeLeftInSeconds()
+    local remainingTime = self:GetLTOTimeLeftInSeconds()
     return remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS
 end
 
@@ -302,7 +295,11 @@ function ZO_MarketProductBase:LayoutCostAndText(description, currencyType, cost,
     self.purchaseLabelControl:ClearAnchors()
     self.purchaseLabelControl:SetAnchor(BOTTOMLEFT, self.cost, BOTTOMRIGHT, 10, 0)
     if self:IsBundle() then
-        self.purchaseLabelControl:SetAnchor(BOTTOMRIGHT, self.bundledProductsItemsLabel, BOTTOMLEFT, -10, 0)
+        if GetMarketProductNumBundledProducts(self.marketProductId) > 1 then
+            self.purchaseLabelControl:SetAnchor(BOTTOMRIGHT, self.bundledProductsItemsLabel, BOTTOMLEFT, -10, 0)
+        else
+            self.purchaseLabelControl:SetAnchor(BOTTOMRIGHT, self.numBundledProductsLabel, BOTTOMRIGHT, 0, -2)
+        end
     else
         self.purchaseLabelControl:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, -10, -10)
     end
@@ -316,7 +313,10 @@ function ZO_MarketProductBase:SetIsFree(cost, costAfterDiscount)
 end
 
 function ZO_MarketProductBase:ShouldShowCallouts()
-    return self:CanBePurchased() or self:IsPromo() or (self:IsHouseCollectible() and self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED)
+    local promo = self:IsPromo()
+    local purchaseable = self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
+    local purchasedAndNew  = self.isNew and not (purchaseable or self:IsLimitedTimeProduct() or self.onSale)
+    return promo or notPurchased or not purchasedAndNew
 end
 
 function ZO_MarketProductBase:IsOnOrdinarySale(discountPercent)
@@ -324,81 +324,44 @@ function ZO_MarketProductBase:IsOnOrdinarySale(discountPercent)
 end
 
 function ZO_MarketProductBase:GetCalloutText(discountPercent)
-    if self:IsOnOrdinarySale(discountPercent) then
-        return zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent)
-    else
-        -- for now, we'll just show a generic SALE tag, but in the future we may want to show the exact percents
-        return zo_strformat(SI_MARKET_TILE_CALLOUT_SALE)
-    end
+    return zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent)
 end
 
 function ZO_MarketProductBase:GetMarketProductListingsForHouseTemplate(houseTemplateId, displayGroup)
     return { GetActiveMarketProductListingsForHouseTemplate(houseTemplateId, displayGroup) }
 end
 
-do
-    local PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE = 2
-    function ZO_MarketProductBase:GetHouseSaleMinMaxDiscountPercents()
-        local hasHouseOnSale = false
-        local houseMinDiscountPercent = nil
-        local houseMaxDiscountPercent = nil
-        if self:IsHouseCollectible() then
-            local productId = self:GetId()
-            local marketProductHouseId = GetMarketProductHouseId(productId)
-            local numHouseTemplates = GetNumHouseTemplatesForHouse(marketProductHouseId)
-            for index = 1, numHouseTemplates do
-                local houseTemplateId = GetHouseTemplateIdByIndexForHouse(marketProductHouseId, index)
-                local marketProductListings = self:GetMarketProductListingsForHouseTemplate(houseTemplateId, MARKET_DISPLAY_GROUP_CROWN_STORE)
-
-                --There could be multiple listings per template, one for each currency type.
-                for i = 1, #marketProductListings, PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE do
-                    local houseTemplateMarketProductId = marketProductListings[i]
-                    local presentationIndex = marketProductListings[i + 1]
-
-                    local _, _, hasDiscount, _, discountPercent = GetMarketProductPricingByPresentation(houseTemplateMarketProductId, presentationIndex)
-                    if hasDiscount then
-                        hasHouseOnSale = true
-
-                        if not houseMinDiscountPercent or discountPercent < houseMinDiscountPercent then
-                            houseMinDiscountPercent = discountPercent
-                        end
-
-                        if not houseMaxDiscountPercent or discountPercent > houseMaxDiscountPercent then
-                            houseMaxDiscountPercent = discountPercent
-                        end
-                    else
-                        houseMinDiscountPercent = 0
-                    end
-                end
-            end
-        end
-
-        return hasHouseOnSale, houseMinDiscountPercent, houseMaxDiscountPercent
-    end
+function ZO_MarketProductBase:GetDefaultHouseTemplatePricingInfo()
+    return ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(self:GetId(), function(...) return self:GetMarketProductListingsForHouseTemplate(...) end)
 end
 
 function ZO_MarketProductBase:SetupCalloutsDisplay(discountPercent, isNew)
     local hideCallouts = true
-    
+    local onOrdinarySale = self:IsOnOrdinarySale(discountPercent)
+    local hasHouseOnSale, _, _, _, houseSaleTemplateMarketProductId = self:GetDefaultHouseTemplatePricingInfo()
+
+    self.onSale = onOrdinarySale or hasHouseOnSale
+    self.isNew = isNew
+
     -- setup the callouts for new, on sale, and LTO
     if self:ShouldShowCallouts() then
         local calloutUpdateHandler
-        local onOrdinarySale = self:IsOnOrdinarySale(discountPercent)
-        local hasHouseOnSale = self:GetHouseSaleMinMaxDiscountPercents()
-
-        self.onSale = onOrdinarySale or hasHouseOnSale
-        self.isNew = isNew
 
         -- only show limited time callouts if there is actually a limited amount of time left and it's 1 month or less
         if self:IsLimitedTimeProduct() then
             hideCallouts = false
-            self:UpdateRemainingTimeCalloutText()
-            calloutUpdateHandler = function() self:UpdateRemainingTimeCalloutText() end
+            self:UpdateLTORemainingTimeCalloutText()
+            calloutUpdateHandler = function() self:UpdateLTORemainingTimeCalloutText() end
         elseif self.onSale then
             hideCallouts = false
-            self.textCallout:SetText(self:GetCalloutText(discountPercent))
-            calloutUpdateHandler = nil
-            self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+            local saleMarketProductId = self:IsHouseCollectible() and houseSaleTemplateMarketProductId or self.marketProductId
+            self:UpdateSaleRemainingTimeCalloutText(discountPercent, saleMarketProductId)
+            local remainingTime = GetMarketProductSaleTimeLeftInSeconds(saleMarketProductId)
+            if remainingTime > 0 then
+                calloutUpdateHandler = function() self:UpdateSaleRemainingTimeCalloutText(discountPercent, saleMarketProductId) end
+            else
+                calloutUpdateHandler = nil
+            end
         elseif self.isNew then
             hideCallouts = false
             self.textCallout:SetText(GetString(SI_MARKET_TILE_CALLOUT_NEW))
@@ -412,23 +375,34 @@ function ZO_MarketProductBase:SetupCalloutsDisplay(discountPercent, isNew)
     self.textCallout:SetHidden(hideCallouts)
 end
 
+function ZO_MarketProductBase:ApplyCalloutColor(textCalloutBackgroundColor, textCalloutTextColor)
+    if textCalloutBackgroundColor then
+        self:SetCalloutColor(textCalloutBackgroundColor)
+        self.textCallout:SetColor(textCalloutTextColor:UnpackRGB())
+    end
+end
+
 function ZO_MarketProductBase:SetupPricingDisplay(currencyType, cost, costAfterDiscount)
     -- layout the price labels
     local isHouseCollectible = self:IsHouseCollectible()
-    local hidePricingInfo = self.isFree or isHouseCollectible
     -- setup the cost
-    if self.onSale and not hidePricingInfo then
+    if self.onSale and not self.isFree then
         self.previousCost:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(cost)))
     end
 
-    if not hidePricingInfo then
+    if isHouseCollectible or not self.isFree then
         self.previousCost:SetHidden(not self.onSale)
         self.previousCostStrikethrough:SetHidden(not self.onSale)
+
+        local priceFormat = "%s %s"
+        if isHouseCollectible and self.hasMultiplePriceOptions then
+            priceFormat = "%s+ %s"
+        end
 
         local INHERIT_ICON_COLOR = true
         local CURRENCY_ICON_SIZE = "100%"
         local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
-        local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(costAfterDiscount)), currencyIcon)
+        local currencyString = string.format(priceFormat, zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(costAfterDiscount)), currencyIcon)
         self.cost:SetText(currencyString)
     else
         self.previousCost:SetHidden(true)
@@ -438,7 +412,7 @@ function ZO_MarketProductBase:SetupPricingDisplay(currencyType, cost, costAfterD
 
     local FOCUSED = true
     ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.cost, FOCUSED, self.purchaseState)
-    self.cost:SetHidden(isHouseCollectible or self:IsPromo())
+    self.cost:SetHidden(self:IsPromo())
 end
 
 function ZO_MarketProductBase:SetupPurchaseLabelDisplay()
@@ -447,7 +421,7 @@ function ZO_MarketProductBase:SetupPurchaseLabelDisplay()
         if self:IsPromo() then
             self.purchaseLabelControl:SetText("")
         elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED and self:IsHouseCollectible() then
-            self.purchaseLabelControl:SetText(GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT))
+            self.purchaseLabelControl:SetText("")
         elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
             local errorStringId = GetMarketProductCompleteErrorStringId(self.marketProductId)
             self.purchaseLabelControl:SetText(GetErrorString(errorStringId))
@@ -478,10 +452,10 @@ function ZO_MarketProductBase:SetupBundleDisplay()
     self.bundleIndicator:SetHidden(not isBundle)
 end
 
-function ZO_MarketProductBase:UpdateRemainingTimeCalloutText()
-    local remainingTime = self:GetTimeLeftInSeconds()
+function ZO_MarketProductBase:UpdateLTORemainingTimeCalloutText()
+    local remainingTime = self:GetLTOTimeLeftInSeconds()
     -- if there is no time left remaining then the MarketProduct is not limited time
-    -- because when a limited time product reaches 0 it is removed form the store
+    -- because when a limited time product reaches 0 it is removed from the store
     if remainingTime > 0 then
         if remainingTime >= ZO_ONE_DAY_IN_SECONDS then
             self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
@@ -490,6 +464,27 @@ function ZO_MarketProductBase:UpdateRemainingTimeCalloutText()
             self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
             self.textCallout:SetText(zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)))
         end
+    end
+end
+
+function ZO_MarketProductBase:UpdateSaleRemainingTimeCalloutText(discountPercent, marketProductId)
+    local discountPercentText = self:GetCalloutText(discountPercent)
+    local remainingTime = GetMarketProductSaleTimeLeftInSeconds(marketProductId)
+    -- if there is no time left remaining then the MarketProduct is not limited time
+    -- because when a limited time product reaches 0 it is removed from the store
+    if remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS then
+        local remainingTimeText
+        if remainingTime >= ZO_ONE_DAY_IN_SECONDS then
+            remainingTimeText = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS)
+            self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+        else
+            remainingTimeText = ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+            self.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
+        end
+        local calloutText = string.format("%s %s", discountPercentText, remainingTimeText)
+        self.textCallout:SetText(calloutText)
+    else
+        self.textCallout:SetText(discountPercentText)
     end
 end
 
@@ -521,6 +516,14 @@ function ZO_MarketProductBase:Show(marketProductId, presentationIndex)
     self:PerformLayout(background)
 
     local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = self:GetMarketProductPricingByPresentation()
+    if self:IsHouseCollectible() then
+        local hasHouseOnSale, houseDiscountPercent, houseBasePrice, houseSalePrice, houseSaleTemplateMarketProductId, hasMultiplePriceOptions = self:GetDefaultHouseTemplatePricingInfo()
+        cost = houseBasePrice or cost
+        costAfterDiscount = houseSalePrice or costAfterDiscount
+        hasDiscount = houseDiscountPercent and houseDiscountPercent > 0 or hasDiscount
+        discountPercent = houseDiscountPercent or discountPercent
+        self.hasMultiplePriceOptions = hasMultiplePriceOptions or false
+    end
     self:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
 
     self:LayoutBackground(background)
@@ -640,4 +643,69 @@ end
 
 function ZO_MarketBlankProductBase:Show()
     self.control:SetHidden(false)
+end
+
+function ZO_MarketProduct_IsHouseCollectible(marketProductId)
+    if GetMarketProductType(marketProductId) == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+        local collectibleType = select(4, GetMarketProductCollectibleInfo(marketProductId))
+        if collectibleType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+            return true
+        end
+    end
+
+    return false
+end
+
+function ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(marketProductId, getMarketProductListingsCallback)
+    local PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE = 2
+    local hasHouseOnSale = false
+    local houseDiscountPercent = 0
+    local houseBasePrice = nil
+    local houseSalePrice = nil
+    local houseSaleTemplateMarketProductId = nil
+    local hasMultiplePriceOptions = false
+    if ZO_MarketProduct_IsHouseCollectible(marketProductId) then
+        local marketProductHouseId = GetMarketProductHouseId(marketProductId)
+        local numHouseTemplates = GetNumHouseTemplatesForHouse(marketProductHouseId)
+        local defaultHouseTemplateId = GetDefaultHouseTemplateIdForHouse(marketProductHouseId)
+        local defaultMarketProductListings = getMarketProductListingsCallback(defaultHouseTemplateId, MARKET_DISPLAY_GROUP_CROWN_STORE)
+
+        -- Iterate through all know house template defs and verify they have an equivalent market product. 
+        -- Only those with market products will be considered in determining the number of pricing options.
+        local numEnabledTemplates = 0
+        for index = 1, numHouseTemplates do
+            local houseTemplateId = GetHouseTemplateIdByIndexForHouse(marketProductHouseId, index)
+            local marketProductListings = getMarketProductListingsCallback(houseTemplateId, MARKET_DISPLAY_GROUP_CROWN_STORE)
+            if #marketProductListings > 0 then
+                numEnabledTemplates = numEnabledTemplates + 1
+            end
+        end
+
+        hasMultiplePriceOptions = numEnabledTemplates > 1
+
+        --There could be multiple listings per template, one for each currency type.
+        for i = 1, #defaultMarketProductListings, PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE do
+            local houseTemplateMarketProductId = defaultMarketProductListings[i]
+            local presentationIndex = defaultMarketProductListings[i + 1]
+
+            local _, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(houseTemplateMarketProductId, presentationIndex)
+
+            if not houseSalePrice or costAfterDiscount < houseSalePrice then
+                houseBasePrice = cost
+                houseSalePrice = costAfterDiscount
+                houseSaleTemplateMarketProductId = houseTemplateMarketProductId
+                houseDiscountPercent = discountPercent or 0
+
+                if hasDiscount then
+                    hasHouseOnSale = true
+
+                    if discountPercent < houseDiscountPercent then
+                        houseDiscountPercent = discountPercent
+                    end
+                end
+            end
+        end
+    end
+
+    return hasHouseOnSale, houseDiscountPercent, houseBasePrice, houseSalePrice, houseSaleTemplateMarketProductId, hasMultiplePriceOptions
 end

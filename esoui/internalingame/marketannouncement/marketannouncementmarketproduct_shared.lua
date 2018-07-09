@@ -31,7 +31,26 @@ end
 function ZO_MarketAnnouncementMarketProduct_Shared:Show(...)
     ZO_LargeSingleMarketProduct_Base.Show(self, ...)
 
-    self.descriptionText:SetText(zo_strformat(SI_MARKET_PRODUCT_DESCRIPTION_FORMATTER, self:GetMarketProductDescription()))
+    local descriptionText = ""
+    local description = self:GetMarketProductDescription()
+    local itemLink = GetMarketProductItemLink(self.marketProductId)
+    if itemLink ~= "" then
+        local hasAbility, _, abilityDescription = GetItemLinkOnUseAbilityInfo(itemLink)
+
+        if hasAbility then
+            if description ~= "" then
+                descriptionText = string.format("%s\n\n%s", abilityDescription, description)
+            else
+                descriptionText = abilityDescription
+            end
+        end
+    end
+
+    if descriptionText == "" then
+        descriptionText = description
+    end
+
+    self.descriptionText:SetText(zo_strformat(SI_MARKET_PRODUCT_DESCRIPTION_FORMATTER, descriptionText))
 end
 
 do
@@ -103,6 +122,13 @@ function ZO_MarketAnnouncementMarketProduct_Shared:LayoutCostAndText(description
     ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.title, FOCUSED, self.purchaseState)
 end
 
+-- Hide pricing on houses in announcements until we get the info from the b/e to display pricing properly
+function ZO_MarketAnnouncementMarketProduct_Shared:SetupPricingDisplay(currencyType, cost, costAfterDiscount)
+    ZO_MarketProductBase.SetupPricingDisplay(self, currencyType, cost, costAfterDiscount)
+
+    self.cost:SetHidden(self:IsPromo())
+end
+
 function ZO_MarketAnnouncementMarketProduct_Shared:SetupPurchaseLabelDisplay()
     ZO_MarketProductBase.SetupPurchaseLabelDisplay(self)
 
@@ -115,20 +141,8 @@ function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
     self.purchaseLabelControl:ClearAnchors()
     self.description:ClearAnchors()
 
-    -- Call IsControlHidden instead of IsHidden because our parent control is likely hidden currently
-    -- and we need to set the anchors based on whether the purchase label will be showing when we show the parent
-    local showingPurchaseLabel = not self.purchaseLabelControl:IsControlHidden()
-
     local VERTICAL_SPACING = 5
-    if showingPurchaseLabel then
-        if self.textCallout:IsControlHidden() then
-            self.purchaseLabelControl:SetAnchor(TOPLEFT, self.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING)
-            self.description:SetAnchor(TOPLEFT, self.purchaseLabelControl, BOTTOMLEFT)
-        else
-            self.purchaseLabelControl:SetAnchor(TOPLEFT, self.textCallout, BOTTOMLEFT)
-            self.description:SetAnchor(TOPLEFT, self.purchaseLabelControl, BOTTOMLEFT, 0, VERTICAL_SPACING)
-        end
-    elseif self.onSale and not self.isFree then
+    if self.onSale and not self.isFree then
         self.previousCost:SetAnchor(TOPLEFT, self.textCallout, BOTTOMLEFT)
         self.cost:SetAnchor(LEFT, self.previousCost, RIGHT, 10)
         self.description:SetAnchor(TOPLEFT, self.previousCost, BOTTOMLEFT)

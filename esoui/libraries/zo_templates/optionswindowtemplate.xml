@@ -221,11 +221,11 @@
             <Dimensions x="510" y="26" />
             
             <OnMouseEnter>
-                ZO_Options_OnMouseEnter(self)
+                ZO_Options_ColorOnMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
-                ZO_Options_OnMouseExit(self)
+                ZO_Options_ColorOnMouseExit(self)
             </OnMouseExit>
 
             <Controls>
@@ -237,11 +237,11 @@
                     <Anchor point="RIGHT" />
 
                     <OnMouseEnter>
-                        ZO_Options_OnMouseEnter(self:GetParent())
+                        ZO_Options_ColorOnMouseEnter(self:GetParent())
                     </OnMouseEnter>
 
                     <OnMouseExit>
-                        ZO_Options_OnMouseExit(self:GetParent())
+                        ZO_Options_ColorOnMouseExit(self:GetParent())
                     </OnMouseExit>
 
                     <OnMouseUp>
@@ -257,6 +257,16 @@
                     <Dimensions x="40" y="26" />
                     <Anchor point="CENTER" relativeTo="$(parent)Color" />
                 </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_ChatColor" inherits="ZO_Options_Color" virtual="true">
+            <Controls>
+                <Control name="$(parent)ColorSection" override="true">
+                    <OnMouseUp>
+                        ZO_Options_ChatColorOnMouseUp(self:GetParent(), upInside)
+                    </OnMouseUp>
+                </Control>
             </Controls>
         </Control>
 

@@ -44,14 +44,14 @@ local function SetupCharacterEntry(control, data)
     characterName:SetText(ZO_CharacterSelect_GetFormattedCharacterName(data))
     characterStatus:SetText(ZO_CharacterSelect_GetFormattedLevelChampionAndClass(data))
 
-    if(data.location ~= 0) then
+    if data.location ~= 0 then
         characterLocation:SetText(zo_strformat(SI_CHARACTER_SELECT_LOCATION, GetLocationName(data.location)))
     else
         characterLocation:SetText(GetString(SI_UNKNOWN_LOCATION))
     end
 
     local allianceTexture = ZO_GetAllianceIcon(data.alliance)
-    if(allianceTexture) then
+    if allianceTexture then
         characterAlliance:SetTexture(allianceTexture)
     end
 end
@@ -83,10 +83,18 @@ end
 
 local SetupCharacterList
 local SelectedCharacterChanged
+local SetupScrollList
 do
-    local function AddCharacter(characterData)
+    SetupScrollList = function()
         local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
-        table.insert(dataList, ZO_ScrollList_CreateDataEntry(CHARACTER_DATA, characterData))
+        local characterDataList = ZO_CharacterSelect_GetCharacterDataList()
+        if #characterDataList > 0 then
+            for _, dataEntry in ipairs(characterDataList) do
+                table.insert(dataList, ZO_ScrollList_CreateDataEntry(CHARACTER_DATA, dataEntry))
+            end
+
+            ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
+        end
     end
 
     SetupCharacterList = function(self, eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
@@ -108,20 +116,13 @@ do
         end
 
         -- Sharing data from ZO_CharacterSelectCommon
-        local characterDataList = ZO_CharacterSelect_GetCharacterDataList()
-        if(#characterDataList > 0) then
-            for _, dataEntry in ipairs(characterDataList) do
-                AddCharacter(dataEntry)
-            end
+        SetupScrollList()
 
-            ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
+        local characterData = ZO_CharacterSelect_GetBestSelectionData()
+        SelectCharacter(characterData)
 
-            local characterData = ZO_CharacterSelect_GetBestSelectionData()
-            SelectCharacter(characterData)
-
-            if characterData then
-                ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
-            end
+        if characterData then
+            ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
         end
 
         local accountChampionPoints = ZO_CharacterSelect_GetAccountChampionPoints()
@@ -133,11 +134,11 @@ do
     end
 
     SelectedCharacterChanged = function(self, previouslySelected, selected)
-        if(selected) then
-            if(g_currentlySelectedCharacterData == nil or g_currentlySelectedCharacterData.index ~= selected.index) then
+        if selected then
+            if g_currentlySelectedCharacterData == nil or g_currentlySelectedCharacterData.index ~= selected.index then
                 g_currentlySelectedCharacterData = selected
 
-                if(IsPregameCharacterConstructionReady()) then
+                if IsPregameCharacterConstructionReady() then
                     ZO_CharacterSelect_EnableSelection(g_currentlySelectedCharacterData)
                     DoCharacterSelection(g_currentlySelectedCharacterData.index)
                 end
@@ -445,6 +446,26 @@ end
 
 function ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseExit()
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_CharacterSelect_Move_Character_Up()
+    local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
+    if selectedData and selectedData.order < GetNumCharacters() then
+        ZO_CharacterSelect_OrderCharacterUp(selectedData.order)
+        ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
+        SetupScrollList()
+        SelectCharacter(selectedData)
+    end
+end
+
+function ZO_CharacterSelect_Move_Character_Down()
+    local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
+    if selectedData and selectedData.order > 1 then
+        ZO_CharacterSelect_OrderCharacterDown(selectedData.order)
+        ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
+        SetupScrollList()
+        SelectCharacter(selectedData)
+    end
 end
 
 -- Service Token Indicator Functions

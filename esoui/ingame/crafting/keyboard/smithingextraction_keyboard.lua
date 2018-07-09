@@ -50,7 +50,7 @@ function ZO_SmithingExtractionInventory:Initialize(owner, control, refinementOnl
             self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_RAW_MATERIALS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_RAW_MATERIALS), "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_disabled.dds"),
         }
 
-        self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true }, true)
+        self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true }, true)
 
         self.sortOrder = ZO_SORT_ORDER_UP
         self.sortKey = "name"
@@ -60,6 +60,8 @@ function ZO_SmithingExtractionInventory:Initialize(owner, control, refinementOnl
             self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanSmithingApparelPatternsBeCraftedHere),
             self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanSmithingWeaponPatternsBeCraftedHere),
         }
+
+        self:SetSortColumnHidden({ sellInformationSortOrder = true }, true)
 
         self.sortOrder = ZO_SORT_ORDER_UP
         self.sortKey = "traitInformationSortOrder"

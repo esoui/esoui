@@ -5,10 +5,14 @@ ZO_INTERACTION_SYSTEM_NAME = "interact"
 
 ZO_InteractionManager = ZO_CallbackObject:Subclass()
 
-function ZO_InteractionManager:New()
+function ZO_InteractionManager:New(...)
     local manager = ZO_CallbackObject.New(self)
-
+    manager:Initialize(...)
     return manager
+end
+
+function ZO_InteractionManager:Initialize()
+    SCENE_MANAGER:AddBypassHideSceneConfirmationReason("ARRESTED")
 end
 
 function ZO_InteractionManager:OnBeginInteraction(interaction)
@@ -43,12 +47,38 @@ function ZO_InteractionManager:IsInteracting(interaction)
 end
 
 function ZO_InteractionManager:ShowInteractWindow(bodyText)
+    local sceneName = SYSTEMS:GetRootSceneName(ZO_INTERACTION_SYSTEM_NAME)
+
     if IsUnderArrest() then
         PushActionLayerByName("SceneChangeInterceptLayer")
-    end
 
-    SYSTEMS:ShowScene(ZO_INTERACTION_SYSTEM_NAME)
-    self:FireCallbacks("Shown")
+        --Bypass any hide confirmations with the arrested reason
+        local DONT_PUSH = false
+        SCENE_MANAGER:Show(sceneName, DONT_PUSH, nil, nil, ZO_BHSCR_ARRESTED)
+        self:FireCallbacks("Shown")
+    else
+        SCENE_MANAGER:ShowWithFollowup(sceneName, function(allowed)
+            if allowed then
+                self:FireCallbacks("Shown")
+            else
+                -- If we're trying to bring up the conversation window but we rejected the request, we want to end that conversation
+                -- However, we don't want to end conversations if we were rejected by an already ongoing conversation
+                local isNotAlreadyInConversationInteractScene = true
+                if self.currentInteraction then
+                    for _, interactType in ipairs(self.currentInteraction.interactTypes) do
+                        if interactType == INTERACTION_CONVERSATION then
+                            isNotAlreadyInConversationInteractScene = false
+                            break
+                        end
+                    end
+                end
+
+                if isNotAlreadyInConversationInteractScene then
+                    EndInteraction(INTERACTION_CONVERSATION)
+                end
+            end
+        end)
+    end
 end
 
 function ZO_InteractionManager:IsShowingInteraction()

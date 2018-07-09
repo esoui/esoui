@@ -117,6 +117,10 @@ function CompassFrame:SetBossBarActive(active)
     self:RefreshVisible()
 end
 
+function CompassFrame:GetBossBarActive()
+    return self.bossBarActive
+end
+
 function CompassFrame:SetCompassHidden(hidden)
     self.compassHidden = hidden
     self:RefreshVisible()

@@ -109,7 +109,7 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_HUDInfamyMeter" hidden="true" >
+        <TopLevelControl name="ZO_HUDInfamyMeter" hidden="true" alpha="0">
             <OnInitialized>
                 ZO_HUDInfamyMeter_Initialize(self)
             </OnInitialized>

@@ -762,12 +762,14 @@ end
 function ZO_GamepadStats:OnEnterHeader()
     self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    self:UpdateScreenVisibility()
 end
 
 function ZO_GamepadStats:OnLeaveHeader()
     local targetData = self.mainList:GetTargetData()
     self.displayMode = targetData.displayMode
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    self:UpdateScreenVisibility()
 end
 
 do

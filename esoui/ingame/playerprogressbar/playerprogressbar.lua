@@ -267,33 +267,31 @@ function SkillBarType:New(barTypeId, ...)
     return PlayerProgressBarType.New(self, PPB_CLASS_SKILL, barTypeId, ...)
 end
 
-function SkillBarType:Initialize(barTypeClass, barTypeId, skillType, skillIndex, ...)
-    PlayerProgressBarType.Initialize(self, barTypeClass, barTypeId, skillType, skillIndex, ...)
-    self.skillType = skillType
-    self.skillIndex = skillIndex
+function SkillBarType:Initialize(barTypeClass, barTypeId, skillType, skillLineIndex, ...)
+    PlayerProgressBarType.Initialize(self, barTypeClass, barTypeId, skillType, skillLineIndex, ...)
+    self.skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
     self:SetBarGradient(ZO_SKILL_XP_BAR_GRADIENT_COLORS)
     self:SetBarGlow(ZO_SKILL_XP_BAR_GLOW_COLOR)
-    local name = GetSkillLineInfo(skillType, skillIndex)
-    self:SetLevelTypeText(name)
+    self:SetLevelTypeText(self.skillLineData:GetName())
     self:SetTooltipCurrentMaxFormat(SI_EXPERIENCE_CURRENT_MAX_PERCENT)
 end
 
 function SkillBarType:GetLevelSize(rank)
-    local startXP, nextRankStartXP = GetSkillLineRankXPExtents(self.skillType, self.skillIndex, rank)
+    local skillType, skillLineIndex = self.skillLineData:GetIndices()
+    local startXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillLineIndex, rank)
     if(startXP ~= nil and nextRankStartXP ~= nil) then
         return nextRankStartXP - startXP
     else
         return nil
     end
 end
-            
+
 function SkillBarType:GetLevel()
-    local name, rank = GetSkillLineInfo(self.skillType, self.skillIndex)
-    return rank
+    return self.skillLineData:GetCurrentRank()
 end
-            
+
 function SkillBarType:GetCurrent()
-    local lastRankXP, nextRankXP, currentXP = GetSkillLineXPInfo(self.skillType, self.skillIndex)
+    local lastRankXP, nextRankXP, currentXP = self.skillLineData:GetRankXPValues()
     return currentXP - lastRankXP
 end
 
@@ -913,14 +911,14 @@ function PlayerProgressBar:OnFadeOutComplete()
     
     self:SetBarMode(nil)
     self.barType = nil
-       
+   
     self:SetBarState(PPB_STATE_HIDDEN)
     self.control:SetHidden(true)
 
     local nextAnnouncementHasBar = CENTER_SCREEN_ANNOUNCE:DoesNextMessageHaveBarParams()
 
     if oldBarMode == PPB_MODE_INCREASE then
-		self:ClearIncreaseData()
+        self:ClearIncreaseData()
         self:FireCallbacks("Complete")
     end
 

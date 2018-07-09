@@ -205,6 +205,11 @@ function Compass:InitializeQuestPins()
     self.areaAnimationPool = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
 
     local function OnQuestAreaGoalStateChanged(journalIndex, stepIndex, conditionIndex, playerIsInside)
+        local _, _, _, isComplete = GetJournalQuestConditionValues(journalIndex, stepIndex, conditionIndex)
+        if not isComplete then
+            self.refreshingJournalIndex = true
+        end
+
         if playerIsInside and IsQuestVisible(journalIndex) then
             self:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
         else
@@ -222,6 +227,8 @@ function Compass:InitializeQuestPins()
                 end
             end
         end
+
+        self.refreshingJournalIndex = false
     end
 
     local function OnPlayerInPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
@@ -240,7 +247,9 @@ function Compass:InitializeQuestPins()
     self.control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestRemovedOrChanged)
 
     local function OnPlayerActivated()
+        self.refreshingJournalIndex = true
         self:PerformFullAreaQuestUpdate()
+        self.refreshingJournalIndex = false
         COMPASS_FRAME:SetCompassReady(true)
         self:OnZoneChanged()
     end
@@ -369,6 +378,10 @@ function Compass:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex
     playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION) or playedAnyAnimation
     playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION) or playedAnyAnimation
     playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION) or playedAnyAnimation
+    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION) or playedAnyAnimation
 
     if not self.refreshingJournalIndex and playedAnyAnimation and (self.currentOverrideJournalIndex ~= journalIndex or self.currentOverrideStepIndex ~= stepIndex or self.currentOverrideConditionIndex ~= conditionIndex) then
         if self.areaOverrideQueue then
@@ -485,7 +498,7 @@ do
 
             local bestPinDescription
             local bestPinType
-            if not (DoesUnitExist("boss1") or DoesUnitExist("boss2")) then
+            if not COMPASS_FRAME:GetBossBarActive() then
                 ZO_ClearNumericallyIndexedTable(bestPinIndices)
                 ZO_ClearNumericallyIndexedTable(bestPinDistances)
                 for i = 1, self.container:GetNumCenterOveredPins() do
@@ -544,4 +557,27 @@ end
 
 function ZO_CompassPoiPinAnimationOutUpdate(animation, progress, control)
     COMPASS:CompassPoiPinAnimationOutUpdate(animation, progress, control)
+end
+
+function ZO_Compass_AnimationIn_Size(control, animatingControl)
+    local pinScale = animatingControl.pin:GetScale()
+    local width, height = animatingControl:GetParent():GetDimensions()
+    control:SetStartAndEndWidth(32 * pinScale, width + 36)
+    control:SetStartAndEndHeight(32 * pinScale, height)
+end
+
+function ZO_Compass_AnimationIn_Translate(control, animatingControl)
+    local parent = animatingControl:GetParent()
+    local offsetX = animatingControl.pin:GetCenter() - parent:GetCenter()
+    animatingControl:SetAnchor(CENTER, parent, CENTER, offsetX, 0)
+
+    control:SetTranslateDeltas(-offsetX, 0)
+end
+
+function ZO_Compass_AnimationOut_Alpha(control, animatingControl)
+    if control:GetTimeline().owner.refreshingJournalIndex then
+        control:SetAlphaValues(0, 0)
+    else
+        control:SetAlphaValues(animatingControl:GetAlpha(), 0)
+    end
 end

@@ -12,13 +12,13 @@
             </Animations>
         </AnimationTimeline>
 
-        <AnimationTimeline name="SkillBuildSelectionAlertAnim">
+        <AnimationTimeline name="SkillBuildSelectionIncreaseAnim">
             <Animations>
                 <TextureAnimation cellsWide="16" cellsHigh="1" framerate="32"/>
             </Animations>
         </AnimationTimeline>
         
-        <AnimationTimeline name="SkillBuildSelectionAlertLoopAnim" playbackType="LOOP" loopCount="5">
+        <AnimationTimeline name="SkillBuildSelectionIncreaseLoopAnim" playbackType="LOOP" loopCount="5">
             <Animations>
                 <TextureAnimation cellsWide="64" cellsHigh="1" framerate="32"/>
             </Animations>
@@ -58,22 +58,13 @@
             <ButtonState state="DISABLED" locked="true" />
         </Button>
 
-        <Button name="ZO_Skills_UpgradeAbilitySlot" virtual="true" inherits="ZO_Skills_AbilitySlot_NonClickable">
+        <Button name="ZO_Skills_DialogAbilitySlot_MouseOverBehavior" virtual="true">
             <OnMouseEnter>
-                ZO_Skills_UpgradeAbilitySlot_OnMouseEnter(self)
+                ZO_Skills_DialogAbilitySlot_OnMouseEnter(self)
             </OnMouseEnter>
-            <OnMouseExit>
-                ZO_Skills_UpgradeAbilitySlot_OnMouseExit(self)
-            </OnMouseExit>
         </Button>
-
-        <Button name="ZO_Skills_MorphAbilitySlot" virtual="true" inherits="ZO_Skills_AbilitySlot">
-            <OnMouseEnter>
-                ZO_Skills_MorphAbilitySlot_OnMouseEnter(self)
-            </OnMouseEnter>
-            <OnClicked>
-                ZO_Skills_MorphAbilitySlot_OnClicked(self)
-            </OnClicked>
+        
+        <Button name="ZO_Skills_MorphAbilitySlot" virtual="true" inherits="ZO_Skills_AbilitySlot ZO_Skills_DialogAbilitySlot_MouseOverBehavior">
             <Controls>
                 <Texture name="$(parent)SelectedCallout" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
                     <AnchorFill />
@@ -81,29 +72,21 @@
             </Controls>
         </Button>
 
-        <Button name="ZO_Skills_AbilityAlert" virtual="true">
-            <Dimensions x="64" y="64"/>
-            <OnClicked>
-                ZO_Skills_AbilityAlert_OnClicked(self)
-            </OnClicked>
-        </Button>
-
         <Control name="ZO_Skills_Ability" virtual="true">
             <Dimensions x="580" y="70"/>
             <OnInitialized>
-                self.nameLabel = GetControl(self, "Name")
-                self.xpBar = ZO_WrappingStatusBar:New(GetControl(self, "XPBar"))
-                self.alert = GetControl(self, "Alert")
-                self.alert.ability = self
-                self.slot = GetControl(self, "Slot")
-                self.slot.icon = GetControl(self.slot, "Icon")
-                self.slot.ability = self
-                self.lock = GetControl(self.slot, "Lock")
+                self.nameLabel = self:GetNamedChild("Name")
+                self.xpBar = ZO_WrappingStatusBar:New(self:GetNamedChild("XPBar"))
+                self.increaseButton = self:GetNamedChild("Increase")
+                self.decreaseButton = self:GetNamedChild("Decrease")
+                self.slot = self:GetNamedChild("Slot")
+                self.slot.icon = self.slot:GetNamedChild("Icon")
+                self.lock = self.slot:GetNamedChild("Lock")
                 ZO_StatusBar_SetGradientColor(self.xpBar:GetControl(), ZO_XP_BAR_GRADIENT_COLORS)
             </OnInitialized>
             <Controls>
                 <Button name="$(parent)Slot" inherits="ZO_Skills_AbilitySlot">
-                    <Anchor point="LEFT" offsetX="65" />
+                    <Anchor point="LEFT" offsetX="117" />
                     
                     <MouseButton button="1" enabled="true" />
                     <MouseButton button="2" enabled="true" />
@@ -136,13 +119,42 @@
                     </Controls>
                 </Button>
 
-                <Button name="$(parent)Alert" inherits="ZO_Skills_AbilityAlert" hidden="true">
-                    <Anchor point="LEFT" relativePoint="LEFT" />
+                <Button name="$(parent)Increase" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Slot" relativePoint="LEFT" />
+                    
+                    <OnClicked>
+                        ZO_Skills_AbilityIncrease_OnClicked(self, shift)
+                    </OnClicked>
                 </Button>
 
-                <Texture name="$(parent)SelectedSkillBuildAlertAnim" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/SkillsAdvisor/animation_add_4096x128.dds" hidden="true" layer="CONTROLS" level="3" >
+                <Button name="$(parent)Decrease" hidden="true">
                     <Dimensions x="64" y="64"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alert" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Increase" relativePoint="LEFT" />
+                    
+                    <OnClicked>
+                        ZO_Skills_AbilityDecrease_OnClicked(self, shift)
+                    </OnClicked>
+
+                    <OnMouseEnter>
+                        ZO_Skills_AbilityDecrease_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Skills_AbilityDecrease_OnMouseExit(self)
+                    </OnMouseExit>
+                    
+                    <Textures
+                        normal="EsoUI/Art/Progression/removePoints_up.dds"
+                        pressed="EsoUI/Art/Progression/removePoints_down.dds"
+                        mouseOver="EsoUI/Art/Progression/removePoints_over.dds"
+                        disabled="EsoUI/Art/Progression/removePoints_disabled.dds"
+                    />
+                </Button>
+                
+                <Texture name="$(parent)SelectedSkillBuildIncreaseAnim" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/SkillsAdvisor/animation_add_4096x128.dds" hidden="true" layer="CONTROLS" level="3" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Increase" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Increase" />
                 </Texture>
 
                 <StatusBar name="$(parent)XPBar" inherits="ZO_SkillsXPBar">
@@ -159,7 +171,7 @@
             <Dimensions y="32"/>
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT" offsetX="40" />
                 </Label>
             </Controls>
         </Control>
@@ -168,7 +180,7 @@
             <Controls>
                 <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" text="SI_SKILLS_CONFIRM_DESCRIPTION"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
 
-                <Button name="$(parent)Ability" inherits="ZO_Skills_AbilitySlot_NonClickable">
+                <Button name="$(parent)Ability" inherits="ZO_Skills_AbilitySlot_NonClickable ZO_Skills_DialogAbilitySlot_MouseOverBehavior">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" />
                 </Button>
 
@@ -199,7 +211,7 @@
                     <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM" offsetX="15" offsetY="30" />
                 </Texture>
 
-                <Button name="$(parent)BaseAbility" inherits="ZO_Skills_AbilitySlot_NonClickable">
+                <Button name="$(parent)BaseAbility" inherits="ZO_Skills_AbilitySlot_NonClickable ZO_Skills_DialogAbilitySlot_MouseOverBehavior">
                     <Anchor point="RIGHT" relativeTo="$(parent)Track" relativePoint="LEFT" />
                 </Button>
 
@@ -230,11 +242,11 @@
                     <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM" offsetX="25" offsetY="20" />
                 </Texture>
 
-                <Button name="$(parent)BaseAbility" inherits="ZO_Skills_AbilitySlot_NonClickable">
+                <Button name="$(parent)BaseAbility" inherits="ZO_Skills_AbilitySlot_NonClickable ZO_Skills_DialogAbilitySlot_MouseOverBehavior">
                     <Anchor point="RIGHT" relativeTo="$(parent)Track" relativePoint="LEFT" offsetX="-25" />
                 </Button>
 
-                <Button name="$(parent)UpgradeAbility" inherits="ZO_Skills_UpgradeAbilitySlot">
+                <Button name="$(parent)UpgradeAbility" inherits="ZO_Skills_AbilitySlot_NonClickable ZO_Skills_DialogAbilitySlot_MouseOverBehavior">
                     <Anchor point="LEFT" relativeTo="$(parent)Track" relativePoint="RIGHT" offsetX="-38" />
                 </Button>
 
@@ -252,6 +264,54 @@
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_SkillsRespecConfirmationGoldDialog" inherits="ZO_CustomDialogBase">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                
+                <Label name="$(parent)Balance" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Label>
+                
+                <Label name="$(parent)BalanceHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_KEYBOARD_SKILL_RESPEC_CONFIRM_DIALOG_BALANCE_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+                
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Label>
+                
+                <Label name="$(parent)CostHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_KEYBOARD_SKILL_RESPEC_CONFIRM_DIALOG_COST_HEADER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="TOPLEFT" offsetX="-10"/>
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_SkillRespecConfirmClearDialog" inherits="ZO_CustomDialogBase">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Button name="$(parent)SkillLineRadioButton" inherits="ZO_DialogRadioButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="5" />
+                </Button>
+
+                <Button name="$(parent)AllRadioButton" inherits="ZO_DialogRadioButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillLineRadioButton" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_SKILL_RESPEC_CONFIRM_CLEAR_ALL_DIALOG_ALL_OPTION" />
+                    </Controls>
+                </Button>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        
         <Label name="ZO_SkillsNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
             <OnInitialized>
                 ZO_SkillsNavigationEntry_OnInitialized(self)
@@ -298,8 +358,8 @@
                     </OnMouseExit>
                 </Label>
 
-                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
-                    <Dimensions x="353"/>
+                <Control name="$(parent)SkillLinesContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="330"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SkyShards" relativePoint="BOTTOMLEFT" offsetX="-28" offsetY="25" />
                     <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-55" />
                 </Control>
@@ -307,18 +367,18 @@
                 <!-- Right Side -->
 
                 <Control name="$(parent)SkillInfo" inherits="ZO_SkillsSkillHeader">
-                    <Anchor point="TOPRIGHT" offsetX="-213" offsetY="-5" />
+                    <Anchor point="TOP" offsetY="-5" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)SkillLinesContainer" relativePoint="RIGHT" offsetX="45" constrains="X" />
                 </Control>
 
-                <Control name="$(parent)AbilityList" inherits="ZO_ScrollList">
-                    <Dimensions x="550"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                <Control name="$(parent)SkillList" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMLEFT" offsetX="-45" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-55" />
                 </Control>
 
                 <Control name="$(parent)SkillLineAdvisedOverlay" hidden="true" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)AbilityList" relativePoint="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)AbilityList" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkillList" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SkillList" relativePoint="BOTTOMRIGHT" />
                     <Controls>
                         <Label name="$(parent)SkillLineUnlockTitle" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                             <Dimensions y="30" />
@@ -335,6 +395,10 @@
                     <Dimensions x="450"/>
                     <Anchor point="TOP" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOM" offsetY="45" />
                 </Label>
+
+                <Control name="$(parent)AssignableActionBar" inherits="ZO_KeyboardAssignableActionBar">
+                    <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetX="-40" offsetY="30" />
+                </Control>
             </Controls>
         </TopLevelControl>
 

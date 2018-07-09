@@ -136,11 +136,11 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
 
     local function OnMarketStateUpdated(displayGroup, marketState)
         if displayGroup == MARKET_DISPLAY_GROUP_HOUSE_EDITOR then
-            self:CreateOrUpdateMarketProductCache()
+            self:BuildMarketProductCache()
         end
     end
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_STATE_UPDATED, function(eventId, ...) OnMarketStateUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) self:CreateOrUpdateMarketProductCache() end)
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) self:UpdateMarketProductCache() end)
 
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_BACKGROUND_LIST_FILTER_COMPLETE, function(eventId, ...) self:OnBackgroundListFilterComplete(...) end)
 
@@ -187,8 +187,8 @@ end
 
 function ZO_SharedFurnitureManager:InitializeFurnitureCaches()
     --setup just the placeable collections, SharedInventory will tell us when its ready to query placeable items
-    self:OnFullCollectionUpdate()
-    self:CreateOrUpdateMarketProductCache()
+    self:CreateOrUpdateCollectibleCache()
+    self:BuildMarketProductCache()
 
     ZO_ClearTable(self.retrievableFurniture)
 
@@ -270,6 +270,7 @@ end
 
 function ZO_SharedFurnitureManager:OnFullCollectionUpdate()
     self:CreateOrUpdateCollectibleCache()
+    self:UpdateMarketProductCache()
 end
 
 function ZO_SharedFurnitureManager:OnSingleCollectibleUpdate(collectibleId)
@@ -296,7 +297,9 @@ function ZO_SharedFurnitureManager:OnSingleCollectibleUpdate(collectibleId)
         --No need to run the text filter since this is just a remove. We can notify others immediately.
         self:FireCallbacks("PlaceableFurnitureChanged")
     end
-end 
+
+    self:UpdateMarketProductCache()
+end
 
 do
     local function AddEntryToCategory(categoryTreeData, entry)
@@ -416,7 +419,7 @@ function ZO_SharedFurnitureManager:CreateOrUpdateCollectibleCache()
     self:RequestApplyPlaceableTextFilterToData()
 end
 
-function ZO_SharedFurnitureManager:CreateOrUpdateMarketProductCache()
+function ZO_SharedFurnitureManager:BuildMarketProductCache()
     local productCache = self.marketProducts
     ZO_ClearTable(productCache)
     self.housingMarketProductPool:ReleaseAllObjects()
@@ -441,6 +444,15 @@ function ZO_SharedFurnitureManager:CreateOrUpdateMarketProductCache()
     self:RequestApplyMarketProductTextFilterToData()
 end
 
+function ZO_SharedFurnitureManager:UpdateMarketProductCache()
+    for index, marketHousingProduct in ipairs(self.marketProducts) do
+        marketHousingProduct:RefreshInfo(marketHousingProduct.marketProductId, marketHousingProduct.presentationIndex)
+    end
+
+    self.refreshGroups:RefreshAll("UpdateMarketProducts")
+    self:RequestApplyMarketProductTextFilterToData()
+end
+
 function ZO_SharedFurnitureManager:CreateOrUpdateItemDataEntry(bagId, slotIndex)
     local itemCache = self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]
     local bag = itemCache[bagId]
@@ -454,7 +466,6 @@ function ZO_SharedFurnitureManager:CreateOrUpdateItemDataEntry(bagId, slotIndex)
         placeableItem:RefreshInfo(bagId, slotIndex)
     else
         bag[slotIndex] = ZO_PlaceableFurnitureItem:New(bagId, slotIndex)
-        placeableItem = bag[slotIndex]
     end
 end
 

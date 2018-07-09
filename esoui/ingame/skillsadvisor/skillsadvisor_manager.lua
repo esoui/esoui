@@ -2,56 +2,64 @@
 --[[ SkillsAdvisor Singleton ]]--
 --
 
-ZO_SKILLS_ABILITY_PURCHASED = 1
-ZO_SKILLS_ABILITY_PURCHASEABLE = 2
-ZO_SKILLS_ABILITY_NOT_PURCHASEABLE = 3
+local SkillsAdvisor_Manager = ZO_CallbackObject:Subclass()
 
-ZO_SKILLS_ABILITY_NOT_MORPHABLE = 1
-ZO_SKILLS_ABILITY_MORPH_AVAILABLE = 2
-ZO_SKILLS_ABILITY_MORPH_NOT_AVAILABLE = 3
-
-ZO_SKILLS_ABILITY_NOT_UPGRADEABLE = 1
-ZO_SKILLS_ABILITY_UPGRADE_AVAILABLE = 2
-ZO_SKILLS_ABILITY_UPGRADE_NOT_AVAILABLE = 3
-
-
-local SkillsAdvisor_Singleton = ZO_CallbackObject:Subclass()
-
-function SkillsAdvisor_Singleton:New(...)
-    local skillsAdvisorSingleton = ZO_CallbackObject.New(self)
-    skillsAdvisorSingleton:Initialize(...) -- ZO_CallbackObject does not have an initialize function
-    return skillsAdvisorSingleton
+function SkillsAdvisor_Manager:New(...)
+    ZO_SKILLS_ADVISOR_SINGLETON = ZO_CallbackObject.New(self)
+    ZO_SKILLS_ADVISOR_SINGLETON:Initialize(...) -- ZO_CallbackObject does not have an initialize function
+    return ZO_SKILLS_ADVISOR_SINGLETON
 end
 
-function SkillsAdvisor_Singleton:Initialize()
+function SkillsAdvisor_Manager:Initialize()
     self.skillBuilds = {}
+    self.availableAbilityList = {}
+    self.purchasedAbilityList = {}
 
-    -- Data changed events
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_ABILITY_PROGRESSION_RESULT, function(eventId, ...) self:UpdateSkillBuildData(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_ABILITY_PROGRESSIONS_UPDATED, function(eventId, ...) self:UpdateSkillBuildData(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_BUILD_SELECTION_UPDATED, function(eventId, ...) self:OnBuildSelectionUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_FORCE_RESPEC, function(eventId, ...) self:UpdateSkillBuildData(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILL_RANK_UPDATE, function(eventId, ...) self:UpdateSkillBuildData(...) end)
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_SKILLS_FULL_UPDATE, function(eventId, ...) self:UpdateSkillBuildData(...) end)   
-    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Singleton", EVENT_ABILITY_LIST_CHANGED, function(eventId, ...) self:UpdateSkillBuildData(...) end)
-    
-    -- Visuals changed event
-    --  SKILL_POINTS_CHANGED
-    --  SKILL_LINE_ADDED
-    --  SKILL_XP_UPDATE
+    self.advancedSkillBuildData =
+    {
+        name = GetString(SI_SKILLS_ADVISOR_ADVANCED_PLAYER_NAME),
+        description = GetString(SI_SKILLS_ADVISOR_ADVANCED_PLAYER_DESCRIPTION),
+        isTank = false,
+        isHealer = false,
+        isDPS = false,
+        skillAbilities = {},
+    }
+
+    local function UpdateSkillBuildData()
+        self:UpdateSkillBuildData()
+    end
+
+    local function RefreshVisibleAbilityLists()
+        local BROADCAST = true
+        self:RefreshVisibleAbilityLists(BROADCAST)
+    end
+
+    SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", UpdateSkillBuildData)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", RefreshVisibleAbilityLists)
+    SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("OnSkillsCleared", RefreshVisibleAbilityLists)
+    SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("PurchasedChanged", RefreshVisibleAbilityLists)
+    SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("SkillProgressionKeyChanged", RefreshVisibleAbilityLists)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", RefreshVisibleAbilityLists)
+
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Manager", EVENT_SKILL_BUILD_SELECTION_UPDATED, function(eventId, ...) self:OnBuildSelectionUpdated(...) end)
+
+    --TODO: Support def changes
 
     self:UpdateSkillBuildData()
 end
 
-function SkillsAdvisor_Singleton:UpdateSkillBuildData() 
+function SkillsAdvisor_Manager:UpdateSkillBuildData()
     self.numAvailableSkillBuilds = GetNumAvailableSkillBuilds()
-    self.selectedSkillBuildId = GetSkillBuildId()
-    self.selectedSkillBuildIndex = nil
     self.isAdvancedMode = IsSkillBuildAdvancedMode()
 
-    if self.isAdvancedMode or self.selectedSkillBuildId <= 0 then
-        self.selectedSkillBuildId = nil
+    local selectedSkillBuildId = GetSkillBuildId()
+
+    if self.isAdvancedMode or selectedSkillBuildId <= 0 then
+        selectedSkillBuildId = nil
     end
+
+    self.selectedSkillBuildId = selectedSkillBuildId
+    self.selectedSkillBuildIndex = nil
 
     for skillBuildIndex = 1, self.numAvailableSkillBuilds do
         local skillBuildId = GetAvailableSkillBuildIdByIndex(skillBuildIndex)
@@ -72,22 +80,14 @@ function SkillsAdvisor_Singleton:UpdateSkillBuildData()
             }
         end
 
-        if skillBuildId == self.selectedSkillBuildId then
+        if skillBuildId == selectedSkillBuildId then
             self.selectedSkillBuildIndex = skillBuildIndex
         end
     end
 
     self.numSkillBuildIndicies = self.numAvailableSkillBuilds + 1
-    self.skillBuilds[self.numSkillBuildIndicies] =
-    {
-        index = self.numSkillBuildIndicies,
-        name = GetString(SI_SKILLS_ADVISOR_ADVANCED_PLAYER_NAME),
-        description = GetString(SI_SKILLS_ADVISOR_ADVANCED_PLAYER_DESCRIPTION),
-        isTank = false,
-        isHealer = false,
-        isDPS = false,
-        skillAbilities = {},
-    }
+    self.skillBuilds[self.numSkillBuildIndicies] = self.advancedSkillBuildData
+    self.advancedSkillBuildData.index = self.numSkillBuildIndicies
 
     -- Remove remaining stale entries, if any
     for i = self.numSkillBuildIndicies + 1, #self.skillBuilds do
@@ -95,69 +95,43 @@ function SkillsAdvisor_Singleton:UpdateSkillBuildData()
     end
     
     -- Only get SkillBuild Data for currently selected SkillBuild
-    self.selectedSkillBuildAbilityCount = GetNumSkillBuildAbilities(self.selectedSkillBuildId)
     if self.selectedSkillBuildIndex ~= nil then
-        local selectedSkillAbilities = self.skillBuilds[self.selectedSkillBuildIndex].skillAbilities
-        for skillBuildAbilityIndex = 1, self.selectedSkillBuildAbilityCount do
-            if not selectedSkillAbilities[skillBuildAbilityIndex] then
-                selectedSkillAbilities[skillBuildAbilityIndex] = {}
+        local skillAbilities = self.skillBuilds[self.selectedSkillBuildIndex].skillAbilities
+        ZO_ClearNumericallyIndexedTable(skillAbilities)
+        for skillBuildAbilityIndex = 1, GetNumSkillBuildAbilities(selectedSkillBuildId) do
+            local skillProgressionData = self:GetSkillProgressionData(selectedSkillBuildId, skillBuildAbilityIndex)
+            if skillProgressionData then
+                table.insert(skillAbilities, skillProgressionData)
             end
-            self:FillInAbilityData(selectedSkillAbilities[skillBuildAbilityIndex], self.selectedSkillBuildId, skillBuildAbilityIndex)
         end
     end
 
-    self:RefreshVisibleAbilityLists()
+    local DONT_BROADCAST = false
+    self:RefreshVisibleAbilityLists(DONT_BROADCAST)
 
     self:FireCallbacks("OnSkillsAdvisorDataUpdated")
 end
 
--- This function for retrieving data may be changed depending on what data we will actually need.
-function SkillsAdvisor_Singleton:FillInAbilityData(abilityData, skillBuildId, skillBuildAbilityIndex)
-    local skillType, lineIndex, abilityIndex, isActive, skillBuildMorphChoice, skillBuildRankIndex = GetSkillBuildEntryInfo(skillBuildId, skillBuildAbilityIndex)
-    local _, _, earnedRank, _, ultimate, purchased, progressionIndex, rankIndex = GetSkillAbilityInfo(skillType, lineIndex, abilityIndex)
-    local _, lineRank = GetSkillLineInfo(skillType, lineIndex)
-    local abilityId, rankNeeded = GetSpecificSkillAbilityInfo(skillType, lineIndex, abilityIndex, skillBuildMorphChoice, skillBuildRankIndex)
-    local _, _, nextUpgradeEarnedRank = GetSkillAbilityNextUpgradeInfo(skillType, lineIndex, abilityIndex)
-    local currentMorphChoice
-    local atMorph = false
-    if progressionIndex then
-        currentMorphChoice = select(2, GetAbilityProgressionInfo(progressionIndex)) 
-        atMorph = select(4, GetAbilityProgressionXPInfo(progressionIndex))
+function SkillsAdvisor_Manager:GetSkillProgressionData(skillBuildId, skillBuildAbilityIndex)
+    local skillType, skillLineIndex, skillIndex, _, skillBuildMorphChoice, skillBuildRankIndex = GetSkillBuildEntryInfo(skillBuildId, skillBuildAbilityIndex)
+
+    local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
+    if not skillData then
+        -- Debugging for ESO-566272
+        local name = GetSkillAbilityInfo(skillType, skillLineIndex, skillIndex)
+        local errorText = string.format("SkillsAdvisor_Manager:GetSkillProgressionData - Couldn't find skill data for skillType %d, skillLineIndex %d, skillIndex %d (%s)", skillType, skillLineIndex, skillIndex, name)
+        internalassert(false, errorText)
+        return nil
     end
 
-    -- This data is expensive to get, and won't change when the ID is the same.
-    if abilityData.abilityId ~= abilityId then
-        local rawName = GetAbilityName(abilityId)
-        local icon = GetAbilityIcon(abilityId)
-
-        local plainName = zo_strformat(SI_ABILITY_NAME, rawName)
-        abilityData.name = isActive and plainName or zo_strformat(SI_ABILITY_NAME_AND_RANK, rawName, skillBuildRankIndex)
-        abilityData.plainName = plainName
-        abilityData.icon = icon
-    end
-    abilityData.abilityId = abilityId
-    abilityData.skillType = skillType
-    abilityData.lineIndex = lineIndex
-    abilityData.abilityIndex = abilityIndex
-    abilityData.earnedRank = earnedRank
-    abilityData.nextUpgradeEarnedRank = nextUpgradeEarnedRank
-    abilityData.rankIndex = rankIndex
-    abilityData.passive = not isActive
-    abilityData.ultimate = ultimate
-    abilityData.purchased = purchased
-    abilityData.progressionIndex = progressionIndex
-    abilityData.lineRank = lineRank
-    abilityData.atMorph = atMorph
-    abilityData.morph = currentMorphChoice
-    abilityData.skillBuildMorphChoice = skillBuildMorphChoice
-    abilityData.skillBuildRankIndex = skillBuildRankIndex
-    abilityData.rankNeeded = rankNeeded
+    local skillProgressionData = skillData:IsPassive() and skillData:GetRankData(skillBuildRankIndex) or skillData:GetMorphData(skillBuildMorphChoice)
+    return skillProgressionData
 end
 
 do 
     local ADVANCED_MODE_SELECTED = true
     local SKILL_BUILD_SELECTED = false
-    function SkillsAdvisor_Singleton:OnSkillBuildSelected(skillBuildIndex)
+    function SkillsAdvisor_Manager:OnSkillBuildSelected(skillBuildIndex)
         if skillBuildIndex == self.numSkillBuildIndicies then
             SelectSkillBuild(0, ADVANCED_MODE_SELECTED)
         else
@@ -166,33 +140,29 @@ do
     end
 end
 
-function SkillsAdvisor_Singleton:OnDataUpdated()
-    self:UpdateSkillBuildData()
-end
-
-function SkillsAdvisor_Singleton:OnRequestSelectSkillLine()
+function SkillsAdvisor_Manager:OnRequestSelectSkillLine()
     self:FireCallbacks("OnRequestSelectSkillLine")
 end
 
-function SkillsAdvisor_Singleton:OnBuildSelectionUpdated()
-    self:OnDataUpdated()
+function SkillsAdvisor_Manager:OnBuildSelectionUpdated()
+    self:UpdateSkillBuildData()
 
     self:FireCallbacks("OnSelectedSkillBuildUpdated")
 end
 
-function SkillsAdvisor_Singleton:IsAdvancedModeSelected()
+function SkillsAdvisor_Manager:IsAdvancedModeSelected()
     return self.isAdvancedMode
 end
 
-function SkillsAdvisor_Singleton:GetNumSkillBuildOptions()
+function SkillsAdvisor_Manager:GetNumSkillBuildOptions()
     return self.numSkillBuildIndicies
 end
 
-function SkillsAdvisor_Singleton:GetAvailableSkillBuildByIndex(index) 
+function SkillsAdvisor_Manager:GetAvailableSkillBuildByIndex(index) 
     return self.skillBuilds[index]
 end
 
-function SkillsAdvisor_Singleton:GetAvailableSkillBuildById(skillBuildId, getAdvancedIfNoId)
+function SkillsAdvisor_Manager:GetAvailableSkillBuildById(skillBuildId, getAdvancedIfNoId)
     if skillBuildId or getAdvancedIfNoId then
         for _, data in ipairs(self.skillBuilds) do
             if data.id == skillBuildId then
@@ -203,11 +173,11 @@ function SkillsAdvisor_Singleton:GetAvailableSkillBuildById(skillBuildId, getAdv
     return nil
 end
 
-function SkillsAdvisor_Singleton:GetSelectedSkillBuildId()
+function SkillsAdvisor_Manager:GetSelectedSkillBuildId()
     return self.selectedSkillBuildId
 end
 
-function SkillsAdvisor_Singleton:GetSelectedSkillBuildIndex()
+function SkillsAdvisor_Manager:GetSelectedSkillBuildIndex()
     local selectedSkillBuild = self:GetAvailableSkillBuildById(self.selectedSkillBuildId, self:IsAdvancedModeSelected())
     if selectedSkillBuild then
         return selectedSkillBuild.index
@@ -216,7 +186,7 @@ function SkillsAdvisor_Singleton:GetSelectedSkillBuildIndex()
     end
 end
 
-function SkillsAdvisor_Singleton:GetSkillBuildRoleLinesById(skillBuildId)
+function SkillsAdvisor_Manager:GetSkillBuildRoleLinesById(skillBuildId)
     local skillBuild = self:GetAvailableSkillBuildById(skillBuildId)  
     local results = {}
     if skillBuild then   
@@ -246,79 +216,85 @@ function SkillsAdvisor_Singleton:GetSkillBuildRoleLinesById(skillBuildId)
     return results
 end
 
-function SkillsAdvisor_Singleton:GetAvailableAbilityList()
+function SkillsAdvisor_Manager:GetAvailableAbilityList()
     return self.availableAbilityList
 end
 
-function SkillsAdvisor_Singleton:GetPurchasedAbilityList()
+function SkillsAdvisor_Manager:GetPurchasedAbilityList()
     return self.purchasedAbilityList
 end
 
-function SkillsAdvisor_Singleton:RefreshVisibleAbilityLists()
-    self.availableAbilityList = {}
-    self.purchasedAbilityList = {}
+function SkillsAdvisor_Manager:RefreshVisibleAbilityLists(broadcast)
+    ZO_ClearNumericallyIndexedTable(self.availableAbilityList)
+    ZO_ClearNumericallyIndexedTable(self.purchasedAbilityList)
+
     if self.selectedSkillBuildId ~= nil then
         local skillBuild = self:GetAvailableSkillBuildById(self.selectedSkillBuildId)
         if skillBuild ~= nil then
             local suggestionLimit = GetSkillsAdvisorSuggestionLimit()
             local firstLockedAbilityAtLimit
-            for _, skillAbility in ipairs(skillBuild.skillAbilities) do
-                if skillAbility.purchased then
-                    if skillAbility.passive then
-                        if skillAbility.rankIndex >= skillAbility.skillBuildRankIndex then
-                            table.insert(self.purchasedAbilityList, skillAbility)
-                        elseif skillAbility.rankIndex + 1 == skillAbility.skillBuildRankIndex then
+            for _, skillProgressionData in ipairs(skillBuild.skillAbilities) do
+                local skillData = skillProgressionData:GetSkillData()
+                local skillPointAllocator = skillData:GetPointAllocator()
+                local isUnlocked = skillProgressionData:IsUnlocked()
+
+                if skillPointAllocator:IsPurchased() then
+                    if skillData:IsPassive() then
+                        local entryRank = skillProgressionData:GetRank()
+                        local allocatedRank = skillPointAllocator:GetRank()
+
+                        if allocatedRank >= entryRank then
+                            table.insert(self.purchasedAbilityList, skillProgressionData)
+                        elseif allocatedRank + 1 == entryRank then
+                            -- This data is the next rank to purchased
                             if #self.availableAbilityList < suggestionLimit then
-                                local isLocked = self:IsSpecificSkillAbilityLocked(skillAbility.skillType, skillAbility.lineIndex, skillAbility.abilityIndex, skillAbility.skillBuildMorphChoice, skillAbility.skillBuildRankIndex, ZO_SKILL_ABILITY_DISPLAY_VIEW)
-                                if #self.availableAbilityList < suggestionLimit - 1 or not isLocked then
-                                    table.insert(self.availableAbilityList, skillAbility)
+                                if #self.availableAbilityList < suggestionLimit - 1 or isUnlocked then
+                                    table.insert(self.availableAbilityList, skillProgressionData)
                                 elseif firstLockedAbilityAtLimit == nil then
-                                    firstLockedAbilityAtLimit = skillAbility
+                                    firstLockedAbilityAtLimit = skillProgressionData
                                 end
                             end
                         end  
                     else
-                        if skillAbility.skillBuildMorphChoice == 0 or skillAbility.skillBuildMorphChoice == skillAbility.morph then
-                            table.insert(self.purchasedAbilityList, skillAbility)
-                        else
-                            if #self.availableAbilityList < suggestionLimit then
-                                if skillAbility.morph == 0 then
-                                    local isLocked = self:IsSpecificSkillAbilityLocked(skillAbility.skillType, skillAbility.lineIndex, skillAbility.abilityIndex, skillAbility.skillBuildMorphChoice, skillAbility.skillBuildRankIndex, ZO_SKILL_ABILITY_DISPLAY_VIEW)
-                                    if #self.availableAbilityList < suggestionLimit - 1 or not isLocked then
-                                        table.insert(self.availableAbilityList, skillAbility)
-                                    elseif firstLockedAbilityAtLimit == nil then
-                                        firstLockedAbilityAtLimit = skillAbility
-                                    end
-                                else 
-                                    local siblingSkillBuildAbilityData = self:GetSiblingAbilityDataFromSelectedSkillBuild(skillAbility.skillType, skillAbility.lineIndex, skillAbility.abilityIndex, skillAbility.skillBuildMorphChoice)
-                                    if not siblingSkillBuildAbilityData or siblingSkillBuildAbilityData.skillBuildMorphChoice ~= skillAbility.morph then 
-                                        local isLocked = self:IsSpecificSkillAbilityLocked(skillAbility.skillType, skillAbility.lineIndex, skillAbility.abilityIndex, skillAbility.skillBuildMorphChoice, skillAbility.skillBuildRankIndex, ZO_SKILL_ABILITY_DISPLAY_VIEW)
-                                        if #self.availableAbilityList < suggestionLimit - 1 or not isLocked then
-                                            table.insert(self.availableAbilityList, skillAbility)
-                                        elseif firstLockedAbilityAtLimit == nil then
-                                            firstLockedAbilityAtLimit = skillAbility
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end    
-                else
-                    if #self.availableAbilityList < suggestionLimit then
-                        local isLocked = self:IsSpecificSkillAbilityLocked(skillAbility.skillType, skillAbility.lineIndex, skillAbility.abilityIndex, skillAbility.skillBuildMorphChoice, skillAbility.skillBuildRankIndex, ZO_SKILL_ABILITY_DISPLAY_VIEW)
-                        if #self.availableAbilityList < suggestionLimit - 1 or not isLocked then
-                            if skillAbility.passive then
-                                if skillAbility.rankIndex == skillAbility.skillBuildRankIndex then
-                                    table.insert(self.availableAbilityList, skillAbility)
+                        local entryMorphSlot = skillProgressionData:GetMorphSlot()
+                        local allocatedMorphSlot = skillPointAllocator:GetMorphSlot()
+
+                        if skillProgressionData:IsBase() or entryMorphSlot == allocatedMorphSlot then
+                            table.insert(self.purchasedAbilityList, skillProgressionData)
+                        elseif #self.availableAbilityList < suggestionLimit then
+                            if allocatedMorphSlot == MORPH_SLOT_BASE then
+                                -- If we're currently at base, any advised morph is acceptable to display
+                                if #self.availableAbilityList < suggestionLimit - 1 or isUnlocked then
+                                    table.insert(self.availableAbilityList, skillProgressionData)
+                                elseif firstLockedAbilityAtLimit == nil then
+                                    firstLockedAbilityAtLimit = skillProgressionData
                                 end
                             else
-                                if skillAbility.skillBuildMorphChoice == 0 then
-                                    table.insert(self.availableAbilityList, skillAbility)
+                                -- If we've already morphed, only continue to show this morph as advised if the other morph is NOT advised
+                                local siblingMorphData = skillProgressionData:GetSiblingMorphData()
+                                if not siblingMorphData:IsAdvised() then 
+                                    if #self.availableAbilityList < suggestionLimit - 1 or isUnlocked then
+                                        table.insert(self.availableAbilityList, skillProgressionData)
+                                    elseif firstLockedAbilityAtLimit == nil then
+                                        firstLockedAbilityAtLimit = skillProgressionData
+                                    end
                                 end
                             end
-                        elseif firstLockedAbilityAtLimit == nil then
-                            firstLockedAbilityAtLimit = skillAbility
                         end
+                    end
+                elseif #self.availableAbilityList < suggestionLimit then
+                    if #self.availableAbilityList < suggestionLimit - 1 or isUnlocked then
+                        if skillData:IsPassive() then
+                            if skillProgressionData:GetRank() == 1 then
+                                table.insert(self.availableAbilityList, skillProgressionData)
+                            end
+                        else
+                            if skillProgressionData:IsBase() then
+                                table.insert(self.availableAbilityList, skillProgressionData)
+                            end
+                        end
+                    elseif firstLockedAbilityAtLimit == nil then
+                        firstLockedAbilityAtLimit = skillProgressionData
                     end
                 end
             end
@@ -328,160 +304,38 @@ function SkillsAdvisor_Singleton:RefreshVisibleAbilityLists()
             end
         end
     end
-end
 
-function SkillsAdvisor_Singleton:IsPassiveRankPurchased(control)
-    local data = control and control.ability and control.ability.dataEntry and control.ability.dataEntry.data
-    return data and data.purchased and data.passive and data.rankIndex >= data.skillBuildRankIndex
-end
-
-function SkillsAdvisor_Singleton:IsPurchaseable(skillType, skillLineIndex, abilityIndex)
-    local _, lineRank, available = GetSkillLineInfo(skillType, skillLineIndex)
-    local name, _, earnedRank, _, _, purchased = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-
-    if purchased then 
-        return ZO_SKILLS_ABILITY_PURCHASED
-    elseif available and lineRank >= earnedRank then
-        return ZO_SKILLS_ABILITY_PURCHASEABLE
-    else
-        return ZO_SKILLS_ABILITY_NOT_PURCHASEABLE
+    if broadcast then
+        self:FireCallbacks("RefreshVisibleAbilityLists")
     end
 end
 
-function SkillsAdvisor_Singleton:IsMorphAvailable(skillType, skillLineIndex, abilityIndex, skillBuildMorphChoice)
-    local name, _, _, passive, _, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-    local atMorph = progressionIndex and select(4, GetAbilityProgressionXPInfo(progressionIndex))
-    
-    if not purchased or passive or (skillBuildMorphChoice and skillBuildMorphChoice == 0) then
-        return ZO_SKILLS_ABILITY_NOT_MORPHABLE
-    elseif atMorph then
-        return ZO_SKILLS_ABILITY_MORPH_AVAILABLE
+function SkillsAdvisor_Manager:IsSkillDataInSelectedBuild(skillData)
+    local skillType, skillLineIndex, skillIndex = skillData:GetIndices()
+    local skillProgressionData
+    if skillData:IsPassive() then
+        skillProgressionData = skillData:GetRankData(1)
     else
-        return ZO_SKILLS_ABILITY_MORPH_NOT_AVAILABLE
-    end 
-end
-
-function SkillsAdvisor_Singleton:IsUpgradeAvailable(skillType, skillLineIndex, abilityIndex, skillBuildRankIndex)
-    local _, lineRank = GetSkillLineInfo(skillType, skillLineIndex)
-    local name, _, _, passive, _, purchased = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-    local _, _, nextUpgradeEarnedRank = GetSkillAbilityNextUpgradeInfo(skillType, skillLineIndex, abilityIndex)
-    local earnedRankIndex, maxRankIndex = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
-
-    local skillBuildRankUnattained = earnedRankIndex and skillBuildRankIndex and skillBuildRankIndex > earnedRankIndex
-    local currentRankNotMax = earnedRankIndex and maxRankIndex and earnedRankIndex < maxRankIndex
-    local upgradeNeeded = skillBuildRankUnattained or currentRankNotMax
-    local upgradeAccessible = nextUpgradeEarnedRank and lineRank >= nextUpgradeEarnedRank
-
-    if not purchased or not passive or not upgradeNeeded then
-        return ZO_SKILLS_ABILITY_NOT_UPGRADEABLE
-    elseif (skillBuildRankIndex and not skillBuildRankUnattained) or upgradeAccessible then
-        return ZO_SKILLS_ABILITY_UPGRADE_AVAILABLE
-    else
-        return ZO_SKILLS_ABILITY_UPGRADE_NOT_AVAILABLE
+        skillProgressionData = skillData:GetMorphData(MORPH_SLOT_BASE)
     end
+
+    return self:IsSkillProgressionDataInSelectedBuild(skillProgressionData)
 end
 
-function SkillsAdvisor_Singleton:IsMorphedOrAtMaxRank(skillType, skillLineIndex, abilityIndex)
-    local name, _, _, passive, _, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-    if purchased then 
-        if passive then
-            local earnedRankIndex, maxRankIndex = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
-            return earnedRankIndex == maxRankIndex
-        elseif progressionIndex then
-            local _, morph = GetAbilityProgressionInfo(progressionIndex)
-            -- Not morphed is 0, 1 and 2 are the possible morphed values
-            return morph > 0
+function SkillsAdvisor_Manager:IsSkillProgressionDataInSelectedBuild(skillProgressionData)
+    if self.selectedSkillBuildIndex ~= nil then
+        local skillAbilities = self.skillBuilds[self.selectedSkillBuildIndex].skillAbilities
+        for _, skillBuildProgressionData in ipairs(skillAbilities) do
+            if skillBuildProgressionData == skillProgressionData then
+                return true
+            end
         end
     end
 
     return false
 end
 
-function SkillsAdvisor_Singleton:IsSpecificSkillAbilityMorph(skillType, skillLineIndex, abilityIndex, skillBuildMorphChoice)
-	local name, _, _, passive = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-
-    return not passive and skillBuildMorphChoice > 0
-end
-
-function SkillsAdvisor_Singleton:IsSpecificSkillAbilityLocked(skillType, skillLineIndex, abilityIndex, skillBuildMorphChoice, skillBuildRankIndex)
-    if self:IsMorphedOrAtMaxRank(skillType, skillLineIndex, abilityIndex) then
-        return false
-    elseif  self:IsPurchaseable(skillType, skillLineIndex, abilityIndex) == ZO_SKILLS_ABILITY_NOT_PURCHASEABLE then
-        return true
-    elseif self:IsMorphAvailable(skillType, skillLineIndex, abilityIndex, skillBuildMorphChoice) == ZO_SKILLS_ABILITY_MORPH_NOT_AVAILABLE then
-        return true
-    elseif self:IsUpgradeAvailable(skillType, skillLineIndex, abilityIndex, skillBuildRankIndex) == ZO_SKILLS_ABILITY_UPGRADE_NOT_AVAILABLE then
-        return true
-    else
-        return false
-    end
-end
-
-function SkillsAdvisor_Singleton:IsCurrentSkillAbilityLocked(skillType, skillLineIndex, abilityIndex)
-	return self:IsPurchaseable(skillType, skillLineIndex, abilityIndex) == ZO_SKILLS_ABILITY_NOT_PURCHASEABLE
-end
-
-function SkillsAdvisor_Singleton:IsAbilityInSelectedSkillBuild(skillType, lineIndex, abilityIndex, skillBuildMorphChoice, skillBuildRankIndex)
-    local abilitySkillBuildData = self:GetAbilityDataFromSelectedSkillBuild(skillType, lineIndex, abilityIndex, skillBuildMorphChoice, skillBuildRankIndex)
-    return abilitySkillBuildData ~= nil
-end
-
-function SkillsAdvisor_Singleton:IsSiblingMorphInSelectedSkillBuild(skillType, lineIndex, abilityIndex, morphIndex)
-    return self:GetSiblingAbilityDataFromSelectedSkillBuild(skillType, lineIndex, abilityIndex, morphIndex) ~= nil
-end
-
-function SkillsAdvisor_Singleton:GetSiblingAbilityDataFromSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morphIndex)
-    local NO_MORPH = 0
-    if self:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, NO_MORPH) then
-        local siblingMorph = 1
-        if morphIndex == 1 then
-            siblingMorph = 2
-        end
-        return self:GetAbilityDataFromSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, siblingMorph)
-    end
-    return nil
-end
-
-function SkillsAdvisor_Singleton:GetAbilityDataFromSelectedSkillBuild(skillType, lineIndex, abilityIndex, skillBuildMorphChoice, skillBuildRankIndex)
-    if self.selectedSkillBuildIndex ~= nil then
-        for skillBuildAbilityIndex = 1, self.selectedSkillBuildAbilityCount do
-            local skillBuildAbilityData = self.skillBuilds[self.selectedSkillBuildIndex].skillAbilities[skillBuildAbilityIndex]
-
-            if skillType == skillBuildAbilityData.skillType and lineIndex == skillBuildAbilityData.lineIndex and abilityIndex == skillBuildAbilityData.abilityIndex then
-                local _, _, _, passive, _, _, progressionIndex = GetSkillAbilityInfo(skillType, lineIndex, abilityIndex)
-                if passive then
-                    local currentRankIndex, maxRankIndex = GetSkillAbilityUpgradeInfo(skillType, lineIndex, abilityIndex)
-
-                    if not skillBuildRankIndex then
-                        skillBuildRankIndex = self:GetValidatedRankIndex(currentRankIndex)
-                    end
-
-                    if skillBuildRankIndex == skillBuildAbilityData.skillBuildRankIndex or skillBuildRankIndex == maxRankIndex then
-                        return skillBuildAbilityData
-                    end
-                else
-                    if progressionIndex then
-                        local _, currentMorphChoice, _ = GetAbilityProgressionInfo(progressionIndex)
-                        
-                        -- If checking abilities displayed anywhere besides the skills advisor the skill build related fields may not be set, so default values for them must be set in that case
-                        if not skillBuildMorphChoice then
-                            skillBuildMorphChoice = currentMorphChoice
-                        end
-                    elseif not skillBuildMorphChoice then
-                        skillBuildMorphChoice = 0
-                    end
-
-                    if skillBuildMorphChoice == skillBuildAbilityData.skillBuildMorphChoice then
-                        return skillBuildAbilityData
-                    end
-                end                
-            end
-        end
-    end
-    return nil
-end
-
-function SkillsAdvisor_Singleton:GetValidatedRankIndex(rankIndex)
+function SkillsAdvisor_Manager:GetValidatedRankIndex(rankIndex)
     if not rankIndex or rankIndex == 0 then 
         return 1
     else
@@ -489,7 +343,7 @@ function SkillsAdvisor_Singleton:GetValidatedRankIndex(rankIndex)
     end    
 end
 
-function SkillsAdvisor_Singleton:SetupKeyboardSkillBuildTooltip(data)
+function SkillsAdvisor_Manager:SetupKeyboardSkillBuildTooltip(data)
     if data then
         local buildTypeTable = ZO_SKILLS_ADVISOR_SINGLETON:GetSkillBuildRoleLinesById(data.id)
 
@@ -505,4 +359,4 @@ function SkillsAdvisor_Singleton:SetupKeyboardSkillBuildTooltip(data)
     end
 end
 
-ZO_SKILLS_ADVISOR_SINGLETON = SkillsAdvisor_Singleton:New()
+SkillsAdvisor_Manager:New()

@@ -140,10 +140,10 @@ function HousingHUDFragment:OnPlayerActivated()
     self:CheckShowCopyPermissionsDialog()
 end
 
-function HousingHUDFragment:OnPlayerInfoChanged(wasOwner, oldCanEdit)
+function HousingHUDFragment:OnPlayerInfoChanged(wasOwner, permissionsChanged)
     self:UpdateKeybind()
     local isHouseOwner = IsOwnerOfCurrentHouse()
-    if not isHouseOwner and oldCanEdit ~= self.canEditHouse then
+    if not isHouseOwner and permissionsChanged then
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(SI_HOUSING_PLAYER_PERMISSIONS_CHANGED))
     end
 end

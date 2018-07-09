@@ -1,5 +1,17 @@
 <GuiXml>
     <Controls>
+        <Button name="ZO_CharacterEntryOrderButton" virtual="true" inherits="ZO_ButtonBehaviorClickSound">
+            <Dimensions x="32" y="32" />
+            <OnMouseEnter>
+                local parent = self:GetParent()
+                ZO_PropagateHandler(parent, "OnMouseEnter", parent)
+            </OnMouseEnter>
+            <OnMouseExit>
+                local parent = self:GetParent()
+                ZO_PropagateHandler(parent, "OnMouseExit", parent)
+            </OnMouseExit>
+        </Button>
+        
         <Control name="ZO_CharacterEntry" mouseEnabled="true" virtual="true">
             <Dimensions x="367" y="ZO_CHARACTER_SELECT_ENTRY_HEIGHT" />
 
@@ -38,10 +50,12 @@
                     <Anchor point="TOPLEFT" offsetX="52" offsetY="7"/>
                     <Anchor point="TOPRIGHT" offsetY="7"/>
                 </Label>
+                
                 <Label name="$(parent)ClassLevel" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="1" wrapMode="ELLIPSIS">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT"/>
                 </Label>
+                
                 <Label name="$(parent)Location" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" maxLineCount="1" wrapMode="ELLIPSIS">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMRIGHT" />

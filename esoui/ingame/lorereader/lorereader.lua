@@ -39,7 +39,7 @@ function LoreReader:Initialize(control)
 
     local function OnAllGuiScreensResized()
         if not self.control:IsHidden() then
-            self.page = 1
+            self.pageGrouping = 1
             self:LayoutText()
         end
     end
@@ -99,7 +99,7 @@ function LoreReader:InitializeKeybindStripDescriptors()
             keybind = "CUSTOM_LORE_READER",
             callback = function() end,
             customKeybindControl = customKeybindControl,
-            visible = function() return self.maxPages > 1 end,
+            visible = function() return self.maxPageGroupings > 1 end,
         },
 
         -- The keyboard exit should just close this scene (so if it was pushed on the scene stack it will go back, such as going back to the lore library)
@@ -121,10 +121,10 @@ function LoreReader:InitializeKeybindStripDescriptors()
             name = GetString(SI_LORE_READER_PREVIOUS_PAGE),
             keybind = "UI_SHORTCUT_LEFT_TRIGGER",
             callback = function() 
-                self:ChangePage(-1)
+                self:ChangePageGrouping(-1)
             end,
-            enabled = function() return self.page ~= 1 end,
-            visible = function() return self.maxPages > 1 end,
+            enabled = function() return self.pageGrouping ~= 1 end,
+            visible = function() return self.maxPageGroupings > 1 end,
         },
 
         -- Gamepad turn page forward
@@ -133,10 +133,10 @@ function LoreReader:InitializeKeybindStripDescriptors()
             name = GetString(SI_LORE_READER_NEXT_PAGE),
             keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
             callback = function() 
-                self:ChangePage(1)
+                self:ChangePageGrouping(1)
             end,
-            enabled = function() return self.page ~= self.maxPages end,
-            visible = function() return self.maxPages > 1 end,
+            enabled = function() return self.pageGrouping ~= self.maxPageGroupings end,
+            visible = function() return self.maxPageGroupings > 1 end,
         },
     }
 
@@ -176,7 +176,7 @@ end
 
 function LoreReader:SetupBook(title, body, medium, showTitle, isGamepad)
     self:ApplyMedium(medium, isGamepad)
-    self.page = 1
+    self.pageGrouping = 1
     self:SetText(title, body, showTitle)
 end
 
@@ -412,8 +412,8 @@ function LoreReader:ApplyMedium(medium, isGamepad)
     local pageWidth = mediumData.PageWidth or 375
     local pageYOffset = mediumData.PageYOffset or -20
     self.title:SetWidth(pageWidth)
-    self.numPages = mediumData.NumPages
-    if self.numPages > 1 then
+    self.numPagesPerGrouping = mediumData.NumPages
+    if self.numPagesPerGrouping > 1 then
         local leftPageXOffset = mediumData.LeftPageXOffset or 100
         local rightPageXOffset = mediumData.RightPageXOffset or -95
 
@@ -440,6 +440,7 @@ end
 
 function LoreReader:LayoutText()
     local bodyFontHeight = self.firstPage.body:GetFontHeight()
+    --Calculate the number of full lines that can fit in the page then save the height of that many lines as pageHeight.
     self.pageHeight = CalculatePageHeight(bodyFontHeight, self.renderablePageHeight)
 
     self.firstPage:SetHeight(self.pageHeight)
@@ -463,7 +464,7 @@ function LoreReader:LayoutText()
     
     self.firstPage.body:SetText(self.bodyText)
 
-    if self.numPages > 1 then
+    if self.numPagesPerGrouping > 1 then
         self.secondPage:SetHidden(false)
         self.secondPage:SetHeight(self.pageHeight)
         self.secondPage.body:SetText(self.bodyText)
@@ -474,9 +475,17 @@ function LoreReader:LayoutText()
     end
 
     self.firstPage:SetVerticalScroll(0)
+    
+    --The title height + the spacing between the title and body + the body height
+    local entireHeight = titleHeight + yOffsetNeededToAlignLines + self.firstPage.body:GetTextHeight()
 
-    local entireHeight = titleHeight + self.firstPage.body:GetTextHeight()
-    self.maxPages = zo_ceil((entireHeight / self.pageHeight) / self.numPages)
+    --There are cases where the entire height is just barely larger than what can fit in one page (or two pages, or any integer number of pages). This leads to us
+    --allocating a whole new page to show the bottom of the last line which often doesn't even have anything visible going on. The slop value is used to modify the
+    --calculation so that if the amount that overflows the page is less than 10% of one line in height we don't bother making a new page. This pretty much only happens
+    --due to minor floating point differences, but we might as well handle as much as we can.
+    local slop = (bodyFontHeight * 0.1) / self.pageHeight
+    local numPages = zo_ceil((entireHeight / self.pageHeight) - slop)
+    self.maxPageGroupings = zo_ceil(numPages / self.numPagesPerGrouping)
 
     self:UpdatePagingButtons()
 end
@@ -489,13 +498,13 @@ function LoreReader:SetText(title, body, showTitle)
     self:LayoutText()
 end
 
-function LoreReader:ChangePage(offset)
-    local newPage = zo_clamp(self.page + offset, 1, self.maxPages)
-    if self.page ~= newPage then
-        self.page = newPage
-        local scrollOffset = (self.page - 1) * self.pageHeight * self.numPages
+function LoreReader:ChangePageGrouping(offset)
+    local newPage = zo_clamp(self.pageGrouping + offset, 1, self.maxPageGroupings)
+    if self.pageGrouping ~= newPage then
+        self.pageGrouping = newPage
+        local scrollOffset = (self.pageGrouping - 1) * self.pageHeight * self.numPagesPerGrouping
         self.firstPage:SetVerticalScroll(scrollOffset)
-        if self.numPages > 1 then
+        if self.numPagesPerGrouping > 1 then
             self.secondPage:SetVerticalScroll(scrollOffset + self.secondPageAdditionalOffset)
         end
 
@@ -519,16 +528,16 @@ end
 
 function ZO_LoreReader_OnClicked(control, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
-        control.owner:ChangePage(-1)
+        control.owner:ChangePageGrouping(-1)
     elseif button == MOUSE_BUTTON_INDEX_RIGHT then
-        control.owner:ChangePage(1)
+        control.owner:ChangePageGrouping(1)
     end
 end
 
 function ZO_LoreReader_OnPagePreviousClicked(control)
-    control.owner:ChangePage(-1)
+    control.owner:ChangePageGrouping(-1)
 end
 
 function ZO_LoreReader_OnPageNextClicked(control)
-    control.owner:ChangePage(1)
+    control.owner:ChangePageGrouping(1)
 end

@@ -56,5 +56,22 @@
                 <Label name="$(parent)NoteHeader" override="true" text="SI_CONFIRM_GIFT_KEYBOARD_GENERAL_NOTE_ENTRY_HEADER"/>
             </Controls>
         </TopLevelControl>
+
+        <TopLevelControl name="ZO_GiftClaimNoticeDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_GiftClaimNoticeDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+
+                <Label name="$(parent)Text" inherits="ZO_SmallKeyMarkupLabel ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Button name="$(parent)HelpButton" inherits="ZO_DefaultButton" text="SI_CLAIM_GIFT_NOTICE_MORE_INFO_KEYBIND">
+                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="30" />
+                </Button>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Continue" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

@@ -1,9 +1,10 @@
 
 ZO_CAMPAIGN_BONUS_TYPE_HOME_KEEPS = 1
 ZO_CAMPAIGN_BONUS_TYPE_ENEMY_KEEPS = 2
-ZO_CAMPAIGN_BONUS_TYPE_DEFENSIVE_SCROLLS = 3
-ZO_CAMPAIGN_BONUS_TYPE_OFFENSIVE_SCROLLS = 4
-ZO_CAMPAIGN_BONUS_TYPE_EMPEROR = 5
+ZO_CAMPAIGN_BONUS_TYPE_EDGE_KEEPS = 3
+ZO_CAMPAIGN_BONUS_TYPE_DEFENSIVE_SCROLLS = 4
+ZO_CAMPAIGN_BONUS_TYPE_OFFENSIVE_SCROLLS = 5
+ZO_CAMPAIGN_BONUS_TYPE_EMPEROR = 6
 
 local function GetHomeKeepBonusString(campaignId)
     local allHomeKeepsHeld = GetAvAKeepScore(campaignId, GetUnitAlliance("player"))
@@ -29,6 +30,14 @@ local function GetKeepBonusScore(campaignId)
     return allHomeKeepsHeld and enemyKeepsHeld or 0
 end
 
+local function GetEdgeKeepBonusScore(campaignId)
+    return select(5, GetAvAKeepScore(campaignId, GetUnitAlliance("player")))
+end
+
+local function GetEdgeKeepBonusString(campaignId)
+    return zo_strformat(SI_CAMPAIGN_BONUSES_EDGE_KEEP_INFO, GetEdgeKeepBonusScore(campaignId))
+end
+
 local function GetDefensiveBonusString(campaignId)
     local _, enemyScrollsHeld = GetAvAArtifactScore(campaignId, GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
     return zo_strformat(SI_CAMPAIGN_BONUSES_ENEMY_SCROLL_INFO, enemyScrollsHeld)
@@ -38,8 +47,8 @@ local function GetDefensiveBonusCount()
     return GetNumArtifactScoreBonuses(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE)
 end
 
-local function GetDefensiveBonusInfo(index)
-    return GetArtifactScoreBonusInfo(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE, index)
+local function GetDefensiveBonusAbilityId(index)
+    return GetArtifactScoreBonusAbilityId(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_DEFENSIVE, index)
 end
 
 local function GetDefensiveBonusScore(campaignId)
@@ -56,8 +65,8 @@ local function GetOffensiveBonusCount()
     return GetNumArtifactScoreBonuses(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE)
 end
 
-local function GetOffensiveBonusInfo(index)
-    return GetArtifactScoreBonusInfo(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE, index)
+local function GetOffensiveBonusAbilityId(index)
+    return GetArtifactScoreBonusAbilityId(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE, index)
 end
 
 local function GetOffensiveBonusScore(campaignId)
@@ -78,8 +87,8 @@ local function GetEmperorBonusString(campaignId)
     end
 end
 
-local function GetEmperorBonusInfo(campaignId)
-    return GetEmperorAllianceBonusInfo(campaignId, GetUnitAlliance("player"))
+local function GetEmperorBonusAbilityId(campaignId)
+    return GetEmperorAllianceBonusAbilityId(campaignId, GetUnitAlliance("player"))
 end
 
 local function GetEmperorBonusScore(campaignId)
@@ -104,7 +113,7 @@ local BONUS_SECTION_DATA =
                                             infoText = GetHomeKeepBonusString,
                                             count = 1, 
                                             countText = GetString(SI_CAMPAIGN_BONUSES_HOME_KEEP_ALL), 
-                                            infoFunction = GetKeepScoreBonusInfo,
+                                            abilityFunction = GetKeepScoreBonusAbilityId,
                                             scoreFunction = GetHomeKeepBonusScore,
                                         },
     [ZO_CAMPAIGN_BONUS_TYPE_ENEMY_KEEPS] =          {
@@ -114,7 +123,7 @@ local BONUS_SECTION_DATA =
                                             infoText = GetKeepBonusString,
                                             count = GetNumKeepScoreBonuses,
                                             startIndex = 2,
-                                            infoFunction = GetKeepScoreBonusInfo,
+                                            abilityFunction = GetKeepScoreBonusAbilityId,
                                             scoreFunction = GetKeepBonusScore,
                                         },
     [ZO_CAMPAIGN_BONUS_TYPE_DEFENSIVE_SCROLLS] =    {
@@ -123,7 +132,7 @@ local BONUS_SECTION_DATA =
                                             headerText = GetString(SI_CAMPAIGN_BONUSES_DEFENSIVE_SCROLL_HEADER),
                                             infoText = GetDefensiveBonusString,
                                             count = GetDefensiveBonusCount,
-                                            infoFunction = GetDefensiveBonusInfo,
+                                            abilityFunction = GetDefensiveBonusAbilityId,
                                             scoreFunction = GetDefensiveBonusScore,
                                         },
     [ZO_CAMPAIGN_BONUS_TYPE_OFFENSIVE_SCROLLS] =    {
@@ -132,7 +141,7 @@ local BONUS_SECTION_DATA =
                                             headerText = GetString(SI_CAMPAIGN_BONUSES_OFFENSIVE_SCROLL_HEADER),
                                             infoText = GetOffensiveBonusString,
                                             count = GetOffensiveBonusCount,
-                                            infoFunction = GetOffensiveBonusInfo,
+                                            abilityFunction = GetOffensiveBonusAbilityId,
                                             scoreFunction = GetOffensiveBonusScore,
                                         },
     [ZO_CAMPAIGN_BONUS_TYPE_EMPEROR] =              {
@@ -142,8 +151,17 @@ local BONUS_SECTION_DATA =
                                             infoText = GetEmperorBonusString,
                                             count = 1,
                                             countText = HIDE_COUNT,
-                                            infoFunction = GetEmperorBonusInfo,
+                                            abilityFunction = GetEmperorBonusAbilityId,
                                             scoreFunction = GetEmperorBonusScore,
+                                        },
+    [ZO_CAMPAIGN_BONUS_TYPE_EDGE_KEEPS] =           {
+                                            typeIcon = "EsoUI/Art/Campaign/campaignBonus_keepIcon.dds",
+                                            typeIconGamepad = "EsoUI/Art/Campaign/Gamepad/gp_bonusIcon_keeps.dds",
+                                            headerText = GetString(SI_CAMPAIGN_BONUSES_EDGE_KEEP_HEADER),
+                                            infoText = GetEdgeKeepBonusString,
+                                            count = GetNumEdgeKeepBonuses, 
+                                            abilityFunction = GetEdgeKeepBonusAbilityId,
+                                            scoreFunction = GetEdgeKeepBonusScore,
                                         },
 }
 
@@ -215,7 +233,10 @@ function ZO_CampaignBonuses_Shared:BuildMasterList()
         local score = info.scoreFunction(self.campaignId)
 
         for i = startIndex, count do
-            local name, icon, description = info.infoFunction(i)
+            local abilityId = info.abilityFunction(i)
+            local name = GetAbilityName(abilityId)
+            local icon = GetAbilityIcon(abilityId)
+            local description = GetAbilityDescription(abilityId)
 
             local scoreIndex = i - startIndex + 1
             local countText = scoreIndex

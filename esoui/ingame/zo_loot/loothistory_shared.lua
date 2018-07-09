@@ -6,6 +6,7 @@ LOOT_ENTRY_TYPE_MEDAL = 5
 LOOT_ENTRY_TYPE_SCORE = 6
 LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 7
 LOOT_ENTRY_TYPE_CROWN_CRATE = 8
+LOOT_ENTRY_TYPE_KEEP_REWARD = 9
 
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
@@ -94,9 +95,11 @@ do
         elseif data1EntryType == LOOT_ENTRY_TYPE_SCORE then
             return false -- scores are always on their own line (also expecting to only be showing one of these at a time)
         elseif data1EntryType == LOOT_ENTRY_TYPE_SKILL_EXPERIENCE then
-            return data1.skillType == data2.skillType and data1.skillIndex == data2.skillIndex
+            return data1.skillLineData == data2.skillLineData
         elseif data1EntryType == LOOT_ENTRY_TYPE_CROWN_CRATE then
             return data1.lootCrateId == data2.lootCrateId
+        elseif data1EntryType == LOOT_ENTRY_TYPE_KEEP_REWARD then
+            return false -- special info, cannot be merged
         else
             return true
         end
@@ -272,16 +275,13 @@ function ZO_LootHistory_Shared:AddScoreEntry(score)
     self:InsertOrQueue(lootEntry)
 end
 
-function ZO_LootHistory_Shared:AddSkillEntry(skillType, skillIndex, skillXpAdded)
-    local skillName = GetSkillLineInfo(skillType, skillIndex)
-    local announcementIcon = GetSkillLineAnnouncementIcon(skillType, skillIndex)
+function ZO_LootHistory_Shared:AddSkillEntry(skillLineData, skillXpAdded)
     local lootData = {
-                        text = zo_strformat(SI_LOOT_HISTORY_SKILL_LINE_NAME_FORMATTER, skillName),
-                        icon = announcementIcon,
+                        skillLineData = skillLineData,
+                        text = skillLineData:GetFormattedName(),
+                        icon = skillLineData:GetAnnounceIcon(),
                         stackCount = skillXpAdded,
                         color = ZO_SELECTED_TEXT,
-                        skillType = skillType,
-                        skillIndex = skillIndex,
                         entryType = LOOT_ENTRY_TYPE_SKILL_EXPERIENCE,
                         iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
                         showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
@@ -304,6 +304,23 @@ function ZO_LootHistory_Shared:AddCrownCrateEntry(lootCrateId, numCrates)
                             entryType = LOOT_ENTRY_TYPE_CROWN_CRATE,
                             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
                             showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+                        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        self:InsertOrQueue(lootEntry)
+    end
+end
+
+function ZO_LootHistory_Shared:AddKeepTickEntry(keepId, reason)
+    if self:CanShowItemsInHistory() then
+        local keepName = GetKeepName(keepId)
+        local entryIcon = GetAllianceKeepRewardIcon(GetUnitAlliance("player"))
+        local textId = reason == CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD and SI_LOOT_HISTORY_KEEP_REWARD_DEFENSE_TITLE or SI_LOOT_HISTORY_KEEP_REWARD_OFFENSE_TITLE
+        local lootData = {
+                            text = zo_strformat(textId, keepName),
+                            icon = entryIcon,
+                            color = ZO_SELECTED_TEXT,
+                            entryType = LOOT_ENTRY_TYPE_KEEP_REWARD,
+                            showIconOverlayText = false
                         }
         local lootEntry = self:CreateLootEntry(lootData)
         self:InsertOrQueue(lootEntry)
@@ -410,16 +427,21 @@ function ZO_LootHistory_Shared:OnBattlegroundEnteredPostGame()
     self:AddScoreEntry(GetScoreboardEntryScoreByType(playerIndex, SCORE_TRACKER_TYPE_SCORE))
 end
 
+function ZO_LootHistory_Shared:OnKeepTickAwarded(keepId, reason)
+    self:AddKeepTickEntry(keepId, reason)
+end
+
 do
     local ALLOWED_SKILL_TYPES = 
     {
         [SKILL_TYPE_GUILD] = true
     }
 
-    function ZO_LootHistory_Shared:OnSkillExperienceUpdated(skillType, skillIndex, reason, rank, previousXP, currentXP)
-        local delta = currentXP - previousXP
-        if delta > 0 and ALLOWED_SKILL_TYPES[skillType] then
-            self:AddSkillEntry(skillType, skillIndex, delta)
+    function ZO_LootHistory_Shared:OnSkillExperienceUpdated(skillType, skillLineIndex, reason, rank, previousXP, currentXP)
+        local differenceXP = currentXP - previousXP
+        if differenceXP > 0 and ALLOWED_SKILL_TYPES[skillType] then
+            local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
+            self:AddSkillEntry(skillLineData, differenceXP)
         end
     end
 end

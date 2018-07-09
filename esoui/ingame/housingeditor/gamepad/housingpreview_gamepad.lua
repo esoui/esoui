@@ -102,8 +102,8 @@ function HousingPreviewDialog_Gamepad:SelectFocusedPurchaseOption()
     end
 end
 
-function HousingPreviewDialog_Gamepad:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId)
-    ZO_HousingPreviewDialog_Shared.SetupPurchaseOptionControl(self, control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId)
+function HousingPreviewDialog_Gamepad:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId, getRemainingTimeFunction)
+    ZO_HousingPreviewDialog_Shared.SetupPurchaseOptionControl(self, control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId, getRemainingTimeFunction)
 
     local highlightColor = errorStringId and ZO_DEFAULT_DISABLED_COLOR or ZO_DEFAULT_ENABLED_COLOR
     control.button:GetNamedChild("Highlight"):SetEdgeColor(highlightColor:UnpackRGB())

@@ -1128,6 +1128,9 @@ do
         [COLLECTIBLE_CATEGORY_TYPE_ASSISTANT] = true,
         [COLLECTIBLE_CATEGORY_TYPE_MEMENTO] = true,
         [COLLECTIBLE_CATEGORY_TYPE_DLC] = true,
+        [COLLECTIBLE_CATEGORY_TYPE_HOUSE] = true,
+        [COLLECTIBLE_CATEGORY_TYPE_FURNITURE] = true,
+        [COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE] = true,
     }
 
     function ZO_CrownCratesCard:CanActivateCollectible()

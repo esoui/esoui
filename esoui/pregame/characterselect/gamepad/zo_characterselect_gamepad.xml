@@ -37,31 +37,6 @@
                 <Label name="$(parent)ProfileLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CHARACTER_SELECT_PROFILE_LABEL" modifyTextType="UPPERCASE">
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Profile" offsetX="-10" />
                 </Label>
-
-                <Label name="$(parent)CharacterCount" font="ZoFontGamepad42">
-                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)ProfileLabel" offsetX="-10"/>
-                </Label>
-
-                <Label name="$(parent)CharacterCountLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CHARACTER_SELECT_GAMEPAD_CHARACTERS" modifyTextType="UPPERCASE">
-                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)CharacterCount" offsetX="-10"/>
-                </Label>
-
-                <Control name="$(parent)ChampionPointsContainer" hidden="true">
-                    <Controls>
-                        <Label name="$(parent)ChampionPointsCount" font="ZoFontGamepad42">
-                            <AnchorToBaseline side="LEFT" relativeToLabel="$(grandparent)CharacterCountLabel" offsetX="-20"/>
-                        </Label>
-                
-                        <Label name="$(parent)ChampionPointsLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CHARACTER_SELECT_CHAMPION_POINTS_LABEL" modifyTextType="UPPERCASE">
-                            <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)ChampionPointsCount" offsetX="-10"/>
-                        </Label>
-
-                        <Texture name="$(parent)ChampionPointsIcon" textureFile="EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds">
-                            <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" y="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)ChampionPointsLabel" relativePoint="LEFT" />
-                        </Texture>
-                    </Controls>
-                </Control>
             </Controls>
         </TopLevelControl>
 

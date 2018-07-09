@@ -221,6 +221,63 @@ function ZO_IsElementInNumericallyIndexedTable(table, element)
     return false
 end
 
+function ZO_IndexOfElementInNumericallyIndexedTable(table, element)
+    for index, value in ipairs(table) do
+        if value == element then
+            return index
+        end
+    end
+    return nil
+end
+
 function ZO_TableRandomInsert(t, element)
     table.insert(t, zo_random(#t + 1), element)
+end
+
+function ZO_FilteredNumericallyIndexedTableIterator(table, filterFunctions)
+    local index = 0
+    local count = #table
+    local numFilters = filterFunctions and #filterFunctions or 0
+    return function()
+        index = index + 1
+        while index <= count do
+            local passesFilter = true
+            local data = table[index]
+            for filterIndex = 1, numFilters do
+                if not filterFunctions[filterIndex](data) then
+                    passesFilter = false
+                    break
+                end
+            end
+
+            if passesFilter then
+                return index, data
+            else
+                index = index + 1
+            end
+        end
+    end
+end
+
+function ZO_FilteredNonContiguousTableIterator(table, filterFunctions)
+    local nextKey, nextData = next(table)
+    local numFilters = filterFunctions and #filterFunctions or 0
+    return function()
+        while nextKey do
+            local currentKey, currentData = nextKey, nextData
+            nextKey, nextData = next(table, nextKey)
+
+            local passesFilter = true
+            for filterIndex = 1, numFilters do
+                if not filterFunctions[filterIndex](currentData) then
+                    passesFilter = false
+                    break
+                end
+            end
+
+            if passesFilter then
+                return currentKey, currentData
+            end
+        end
+    end
 end

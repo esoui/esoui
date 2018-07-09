@@ -139,7 +139,7 @@
         <!--Scroll Panel-->
         <Scroll name="ZO_Scroll" inherits="ZO_Scroll_Shared" mouseEnabled="true" virtual="true">
             <OnMouseWheel>
-                ZO_Scroll_ScrollRelative(self:GetParent(), -delta * 40)
+                ZO_Scroll_OnMouseWheel(self:GetParent(), delta)
             </OnMouseWheel>
         </Scroll>
 
@@ -157,7 +157,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetY="16" />
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetY="-16" />
                     <OnMouseWheel>
-                        ZO_Scroll_ScrollRelative(self:GetParent(), -delta * 40)
+                        ZO_Scroll_OnMouseWheel(self:GetParent(), delta)
                     </OnMouseWheel>
 
                     <OnValueChanged>

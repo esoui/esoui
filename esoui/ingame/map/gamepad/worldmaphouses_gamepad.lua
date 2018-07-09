@@ -5,7 +5,7 @@ function ZO_MapHouses_Gamepad:New(...)
 end
 
 function ZO_MapHouses_Gamepad:Initialize(control)
-    ZO_MapHouses_Shared.Initialize(self, control)
+    ZO_MapHouses_Shared.Initialize(self, control, ZO_SimpleSceneFragment)
     self:SetNoHousesLabelControl(control:GetNamedChild("Main"):GetNamedChild("NoHouses"))
     self:InitializeKeybindDescriptor()
 end

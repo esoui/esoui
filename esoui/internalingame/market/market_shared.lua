@@ -168,15 +168,14 @@ function Market_Singleton:GetMarketProductPurchaseErrorInfo(marketProductId, pre
 
     self:AddMarketProductPurchaseWarningStringsToTable(marketProductId, presentationIndex, errorStrings)
 
-    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK then
+    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK
+            or expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_CROWN_GEMS
+            or expectedPurchaseResult == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY then
         allowContinue = false
         table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
         allowContinue = false
         table.insert(errorStrings, self.insufficientFundsMainText)
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_CROWN_GEMS then
-        allowContinue = false
-        table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
         local slotsRequired = GetSpaceNeededToAcquireMarketProduct(marketProductId)
         allowContinue = false
@@ -622,7 +621,10 @@ do
     {
         buttonText = GetString(SI_MARKET_LOG_OUT_TO_CHARACTER_SELECT_KEYBIND_LABEL),
         transactionCompleteText = GetString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE),
-        GoToUseProductLocation = Logout,
+        GoToUseProductLocation = function()
+            SCENE_MANAGER:RequestShowLeaderBaseScene()
+            Logout()
+        end,
     }
 
     local CROWN_CRATE =
@@ -939,7 +941,7 @@ end
 do
     local freeTrialColor = GetItemQualityColor(ITEM_QUALITY_LEGENDARY)
     local function UpdateEsoPlusFreeTrialStatusText(productId)
-        local remainingTime = GetMarketProductTimeLeftInSeconds(productId)
+        local remainingTime = GetMarketProductLTOTimeLeftInSeconds(productId)
         local formattedRemainingTime = ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
         local statusText = zo_strformat(SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_FREE_TRIAL, formattedRemainingTime)
         return freeTrialColor:Colorize(statusText)

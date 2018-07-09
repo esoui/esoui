@@ -34,6 +34,11 @@ function ZO_ComboBox_Gamepad:Initialize(control)
     self.m_highlightFont = ZO_GAMEPAD_COMBO_BOX_HIGHLIGHTED_FONT
     self.m_itemTemplate = "ZO_ComboBox_Item_Gamepad"
 
+    -- find the difference in font size to keep the width of text the same between them
+    -- so line wrapping looks consistent between the two fonts
+    local _, unselectedSize = _G[self.m_font]:GetFontInfo()
+    local _, selectedSize = _G[self.m_highlightFont]:GetFontInfo()
+    self.m_fontRatio = unselectedSize / selectedSize
 end
 
 function ZO_ComboBox_Gamepad:ShowDropdownInternal()
@@ -109,6 +114,7 @@ function ZO_ComboBox_Gamepad:AddMenuItems()
 
         if self.m_font then
             control.nameControl:SetFont(self.m_font)
+            control.nameControl:SetWidth(self.m_container:GetWidth() * self.m_fontRatio)
         end
         
         local focusEntry = {
@@ -124,6 +130,7 @@ function ZO_ComboBox_Gamepad:AddMenuItems()
 end
 
 function ZO_ComboBox_Gamepad:OnItemSelected(control, data)
+    control.nameControl:SetWidth(self.m_container:GetWidth())
     control.nameControl:SetColor(self:GetHighlightColor(data):UnpackRGBA())
     control.nameControl:SetFont(self.m_highlightFont)
     self:UpdateAnchors(control)
@@ -134,6 +141,7 @@ function ZO_ComboBox_Gamepad:OnItemSelected(control, data)
 end
 
 function ZO_ComboBox_Gamepad:OnItemDeselected(control, data)
+    control.nameControl:SetWidth(self.m_container:GetWidth() * self.m_fontRatio)
     control.nameControl:SetColor(self:GetNormalColor(data):UnpackRGBA())
     control.nameControl:SetFont(self.m_font)
 

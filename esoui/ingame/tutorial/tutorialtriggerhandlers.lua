@@ -27,7 +27,7 @@ local TutorialTriggerHandlers = {
         end
     end,
 
-    [EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoints, newPartialPoints)
+    [EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoints, newPartialPoints, changeReason)
         if oldPartialPoints ~= newPartialPoints then
             return TUTORIAL_TRIGGER_SKYSHARDS_DISCOVERED
         end

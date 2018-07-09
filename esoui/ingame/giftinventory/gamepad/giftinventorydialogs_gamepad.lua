@@ -52,6 +52,7 @@ do
                     end,
         },
         blockDialogReleaseOnPress = true, -- We'll handle Dialog Releases ourselves since we don't want DIALOG_PRIMARY to release the dialog on press.
+        canQueue = true,
         parametricList =
         {
             -- Thank You message
@@ -241,6 +242,54 @@ ZO_Dialogs_RegisterCustomDialog("CONFIRM_DELETE_GIFT_GAMEPAD",
         {
             keybind = "DIALOG_NEGATIVE",
             text = GetString(SI_DIALOG_CANCEL),
+        },
+    },
+})
+
+-- Claim Gift Notice
+
+ZO_Dialogs_RegisterCustomDialog("CLAIM_GIFT_NOTICE_GAMEPAD",
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_MARKET_PRODUCT_NAME_FORMATTER,
+    },
+    mainText =
+    {
+        text = SI_CLAIM_GIFT_NOTICE_BODY_FORMATTER,
+    },
+    buttons =
+    {
+        -- Continue Button
+        {
+            keybind = "DIALOG_PRIMARY",
+            text = GetString(SI_CLAIM_GIFT_NOTICE_CONTINUE_KEYBIND),
+            callback = function(dialog)
+                ZO_Dialogs_ShowGamepadDialog("CONFIRM_CLAIM_GIFT_GAMEPAD", { gift = dialog.data.gift })
+            end,
+        },
+
+        -- Cancel Button
+        {
+            keybind = "DIALOG_NEGATIVE",
+            text = GetString(SI_DIALOG_CANCEL),
+        },
+
+        -- More Info Button
+        {
+            keybind = "DIALOG_TERTIARY",
+            text = GetString(SI_CLAIM_GIFT_NOTICE_MORE_INFO_KEYBIND),
+            visible = function(dialog)
+                return dialog.data.helpCategoryIndex ~= nil
+            end,
+            callback = function(dialog)
+                local data = dialog.data
+                HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(data.helpCategoryIndex, data.helpIndex)
+            end,
         },
     },
 })

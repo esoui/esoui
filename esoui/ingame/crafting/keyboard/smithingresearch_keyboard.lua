@@ -67,9 +67,17 @@ end
 
 function ZO_SmithingResearch:SetupTooltip(row)
     InitializeTooltip(InformationTooltip, row, RIGHT, -10)
+
     SetTooltipText(InformationTooltip, GetString("SI_ITEMTRAITTYPE", row.traitType))
     ZO_Tooltip_AddDivider(InformationTooltip)
-    InformationTooltip:AddLine(row.traitDescription)
+
+    local r, g, b = ZO_SELECTED_TEXT:UnpackRGB()
+    local SET_TO_FULL_SIZE = true
+    InformationTooltip:AddLine(row.traitDescription, "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+    if row.traitResearchSourceDescription then
+        InformationTooltip:AddLine(zo_strformat(SI_SMITHING_TRAIT_RESEARCH_SOURCE_DESCRIPTION, row.traitResearchSourceDescription), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+        InformationTooltip:AddLine(zo_strformat(SI_SMITHING_TRAIT_MATERIAL_SOURCE_DESCRIPTION, row.traitMaterialSourceDescription), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+    end
 end
 
 function ZO_SmithingResearch:ClearTooltip(row)
@@ -80,10 +88,8 @@ function ZO_SmithingResearch:Research(overrideRow)
     local canResearchCurrentTrait = self:CanResearchCurrentTraitLine()
 
     if self.atMaxResearchLimit then
-        local skillType, skillIndex = GetCraftingSkillLineIndices(GetCraftingInteractionType())
-        local lineName = GetSkillLineInfo(skillType, skillIndex)
-
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, SI_SMITHING_RESEARCH_ALL_SLOTS_IN_USE, lineName)
+        local craftingSkillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(GetCraftingInteractionType())
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, SI_SMITHING_RESEARCH_ALL_SLOTS_IN_USE, craftingSkillLineData:GetName())
     elseif not canResearchCurrentTrait then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, SI_SMITHING_RESEARCH_TRAIT_ALREADY_BEING_RESEARCHED, self.traitLineText)
     else

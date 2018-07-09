@@ -121,11 +121,11 @@ function ZO_MapKeepSummary_Shared:RefreshGuildOwner()
 end
 
 function ZO_MapKeepSummary_Shared:GenerateRemainingTimeLabel(current, forNextLevel, resourceRate, level)
-    if(self.keepUpgradeObject:IsInputEnemyControlled()) then
+    if self.keepUpgradeObject:IsInputEnemyControlled() then
         return GetString(SI_KEEP_UPGRADE_ENEMY_CONTROLLED)
-    elseif(level >= MAX_KEEP_UPGRADE_LEVELS - 1) then
+    elseif level >= GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) then
         return GetString(SI_KEEP_UPGRADE_AT_MAX)
-    elseif(forNextLevel <= 0 or resourceRate <= 0 or current > forNextLevel) then
+    elseif forNextLevel <= 0 or resourceRate <= 0 or current > forNextLevel then
         return GetString(SI_KEEP_UPGRADE_TIME_TO_NEXT_LEVEL_INVALID)
     else        
         local timeRemaining = ((forNextLevel - current) / resourceRate) * 60

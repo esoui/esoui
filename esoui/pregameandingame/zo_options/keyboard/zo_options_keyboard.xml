@@ -29,6 +29,10 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="2"/>
                 </Texture>
 
+                <Texture name="$(parent)Options_Color_SharedHighlight" textureFile="EsoUI/Art/Buttons/generic_highlight.dds" layer="3" hidden="true">
+                    <Dimensions x="36" y="22" />
+                </Texture>
+
                 <Control name="$(parent)Settings" inherits="ZO_ScrollContainer">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-120" offsetY="-120" />

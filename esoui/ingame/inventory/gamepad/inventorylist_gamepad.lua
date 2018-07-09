@@ -87,6 +87,7 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
         for k, inventoryType in ipairs(self.inventoryTypes) do
             if bagId == inventoryType then
                 self:RefreshList()
+                break
             end
         end
     end
@@ -111,6 +112,8 @@ function ZO_GamepadInventoryList:Initialize(control, inventoryType, slotType, se
                     else -- The item is new.
                         self:RefreshList()
                     end
+                    -- don't loop over any more inventoryTypes, we've handled the slot update
+                    break
                 end
             end
         end

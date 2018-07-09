@@ -6,11 +6,11 @@ function ZO_MapHouses_Shared:New(...)
     return object
 end
 
-function ZO_MapHouses_Shared:Initialize(control)
+function ZO_MapHouses_Shared:Initialize(control, fragmentClass)
     self.control = control
     self:InitializeList(control)
 
-    self.fragment = ZO_FadeSceneFragment:New(control)
+    self.fragment = fragmentClass:New(control)
     self.fragment:RegisterCallback("StateChange",  function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()

@@ -131,28 +131,11 @@
             </Controls>
         </TopLevelControl>
 
-        <StatusBar name="AbilityTooltipProgressionBar" inherits="ZO_ArrowStatusBarWithBG" virtual="true" />
-
         <TopLevelControl name="AbilityTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
                 <Tooltip name="AbilityTooltip" inherits="ZO_BaseTooltip">
                     <ResizeToFitPadding width="32" height="40"/>
                     <DimensionConstraints minX="384" maxX="384" />
-                    <OnInitialized>
-                        ZO_AbilityTooltip_Initialize(self)
-                    </OnInitialized>
-
-                    <OnCleared>
-                        ZO_AbilityTooltip_Cleared(self)
-                    </OnCleared>
-
-                    <OnAddGameData>
-                        ZO_AbilityTooltip_OnAddGameData(...)
-                    </OnAddGameData>
-
-                    <Controls>
-                        <StatusBar name="$(parent)Progression" inherits="AbilityTooltipProgressionBar" hidden="true" />
-                    </Controls>
                 </Tooltip>
             </Controls>
         </TopLevelControl>

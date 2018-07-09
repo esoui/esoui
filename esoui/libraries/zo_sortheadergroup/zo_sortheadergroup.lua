@@ -224,7 +224,11 @@ end
 -- keyList is indexed by key.
 function ZO_SortHeaderGroup:SetHeadersHiddenFromKeyList(keyList, hidden)
     for _, header in ipairs(self.sortHeaders) do
-        local hideHeader = keyList[header.key] and hidden
+        local shouldHide = keyList[header.key]
+        if shouldHide and type(shouldHide) == "function" then
+            shouldHide = shouldHide()
+        end
+        local hideHeader = shouldHide and hidden
         header:SetHidden(hideHeader)
     end
 end

@@ -326,8 +326,12 @@ function ZO_Dialogs_ShowGamepadDialog(name, data, textParams)
     local dialog = ESO_Dialogs[name]
     if currentScene and currentScene:IsShowing() then
         ZO_Dialogs_ShowDialog(name, data, textParams, IS_GAMEPAD)
-    elseif dialog.gamepadInfo and dialog.gamepadInfo.allowShowOnNextScene and SCENE_MANAGER:GetNextScene() and not dialog.gamepadInfo.nextSceneCallback then
-        --Only one of this type of dialog can be registered for the next scene at a time, first come first serve
+    elseif dialog.gamepadInfo and dialog.gamepadInfo.allowShowOnNextScene and SCENE_MANAGER:GetNextScene() then
+        -- if we are waiting for the scene to change and ask to show the same dialog multiple times, only use the latest call's data
+        if dialog.gamepadInfo.nextSceneCallback then
+            SCENE_MANAGER:UnregisterCallback("SceneStateChanged", dialog.gamepadInfo.nextSceneCallback)
+        end
+
         dialog.gamepadInfo.nextSceneCallback = function(scene, oldState, newState)
             if newState == SCENE_SHOWN then
                 SCENE_MANAGER:UnregisterCallback("SceneStateChanged", dialog.gamepadInfo.nextSceneCallback)

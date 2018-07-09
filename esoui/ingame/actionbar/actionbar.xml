@@ -86,7 +86,7 @@
                 <Texture name="$(parent)CooldownIcon" hidden="true" />
 
                 <Label name="$(parent)ButtonText" font="ZoFontGameSmall">
-                    <Dimensions x="70" y="18"/>
+                    <Dimensions x="50" y="18"/>
                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="1"/>
                 </Label>
 
@@ -256,7 +256,7 @@
         <TopLevelControl name="ZO_ActionBar1" hidden="true" allowBringToTop="false" layer="OVERLAY" level="1">
             <Dimensions y="70"/>
             <OnInitialized>
-                ZO_ActionBar1_OnInitialized(self)
+                ZO_ActionBar_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)KeybindBG" textureFile="EsoUI/Art/ActionBar/ability_keybindBG.dds">
@@ -275,15 +275,6 @@
                     </OnMouseEnter>
                 </Button>
             </Controls>
-        </TopLevelControl>
-
-        <TopLevelControl name="ZO_ClassActionBar">
-            <Dimensions x="166" y="40" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_ActionBar1" relativePoint="BOTTOMLEFT" offsetX="-6" />
-
-            <OnInitialized>
-                ZO_ActionBar_Initialize()
-            </OnInitialized>
         </TopLevelControl>
     </Controls>
 </GuiXml>

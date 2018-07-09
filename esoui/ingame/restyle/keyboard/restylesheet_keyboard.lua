@@ -235,7 +235,7 @@ function ZO_RestyleSlot_OutfitStyle:OnIconMouseUp(button, upInside)
                         end
 
                         if self.owner:AreChangesPending() then
-                            ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_RESTYLE_CHANGES", GoToCrownStore)
+                            ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_CHANGES", GoToCrownStore)
                         else
                             GoToCrownStore()
                         end

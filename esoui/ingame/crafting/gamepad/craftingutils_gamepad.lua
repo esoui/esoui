@@ -58,11 +58,11 @@ end
 
 -- Generic crafting header functions
 function ZO_GamepadCraftingUtils_GetLineNameForCraftingType(craftingType)
-    local skillType, skillIndex = GetCraftingSkillLineIndices(craftingType)
-    local lineName = GetSkillLineInfo(skillType, skillIndex)
-    local text = zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, lineName)
-
-    return text
+    local craftingSkillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(craftingType)
+    if craftingSkillLineData then
+        return craftingSkillLineData:GetFormattedName()
+    end
+    return ""
 end
 
 function ZO_GamepadCraftingUtils_InitializeGenericHeader(craftingObject, createTabBar)

@@ -97,6 +97,7 @@ BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         sortByOffsetY = 110,
         sortByHeaderWidth = 690,
         sortByNameWidth = 341,
+        emptyLabelOffsetY = 140,
         selectedTab = ITEMFILTERTYPE_TRADING_HOUSE,
         useSearchBar = true,
         hideTabBar = true,

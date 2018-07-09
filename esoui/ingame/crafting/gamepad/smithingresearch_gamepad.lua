@@ -379,7 +379,7 @@ function ZO_GamepadSmithingResearch:OnControlsAcquired()
 end
 
 function ZO_GamepadSmithingResearch:SetupTooltip(row)
-    GAMEPAD_TOOLTIPS:LayoutResearchSmithingItem(GAMEPAD_LEFT_TOOLTIP, GetString("SI_ITEMTRAITTYPE", row.traitType), row.traitDescription)
+    GAMEPAD_TOOLTIPS:LayoutResearchSmithingItem(GAMEPAD_LEFT_TOOLTIP, GetString("SI_ITEMTRAITTYPE", row.traitType), row.traitDescription, row.traitResearchSourceDescription, row.traitMaterialSourceDescription)
 end
 
 function ZO_GamepadSmithingResearch:ClearTooltip(row)
@@ -390,10 +390,8 @@ function ZO_GamepadSmithingResearch:Research()
     local canResearchCurrentTrait = self:CanResearchCurrentTraitLine()
 
     if self.atMaxResearchLimit then
-        local skillType, skillIndex = GetCraftingSkillLineIndices(GetCraftingInteractionType())
-        local lineName = GetSkillLineInfo(skillType, skillIndex)
-
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, SI_SMITHING_RESEARCH_ALL_SLOTS_IN_USE, lineName)
+        local craftingSkillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(GetCraftingInteractionType())
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, SI_SMITHING_RESEARCH_ALL_SLOTS_IN_USE, craftingSkillLineData:GetName())
     elseif not canResearchCurrentTrait then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, SI_SMITHING_RESEARCH_TRAIT_ALREADY_BEING_RESEARCHED, self.traitLineText)
     else

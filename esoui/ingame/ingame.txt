@@ -43,6 +43,10 @@ EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.lua
 EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.xml
 
 EsoUI\Ingame\Collections\CollectibleDataManager.lua
+EsoUI\Ingame\Skills\SkillsDataManager.lua
+EsoUI\Ingame\Skills\SkillsAndActionBarManager.lua
+EsoUI\Ingame\Skills\SkillPointAllocationManager.lua
+EsoUI\Ingame\Skills\ActionBarAssignmentManager.lua
 
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
@@ -60,16 +64,10 @@ EsoUI\Ingame\Keybindings\Keybindings_Manager.lua
 EsoUI\Ingame\Keybindings\Keyboard\Keybindings.lua
 EsoUI\Ingame\Keybindings\Keyboard\Keybindings.xml
 
-EsoUI\Ingame\Logout\DailyRewardsLogoutTile.lua
-EsoUI\Ingame\Logout\DailyRewardsLogoutTile.xml
-EsoUI\Ingame\Logout\Keyboard\DailyRewardsLogoutTile_Keyboard.lua
-EsoUI\Ingame\Logout\Keyboard\DailyRewardsLogoutTile_Keyboard.xml
 EsoUI\Ingame\Logout\Keyboard\LogoutDialog_Keyboard.lua
 EsoUI\Ingame\Logout\Keyboard\LogoutDialog_Keyboard.xml
 EsoUI\Ingame\Logout\Keyboard\QuitDialog_Keyboard.lua
 EsoUI\Ingame\Logout\Keyboard\QuitDialog_Keyboard.xml
-EsoUI\Ingame\Logout\Gamepad\DailyRewardsLogoutTile_Gamepad.lua
-EsoUI\Ingame\Logout\Gamepad\DailyRewardsLogoutTile_Gamepad.xml
 EsoUI\Ingame\Logout\Gamepad\LogoutDialog_Gamepad.lua
 EsoUI\Ingame\Logout\Gamepad\LogoutDialog_Gamepad.xml
 
@@ -577,10 +575,10 @@ EsoUI\Ingame\Tutorial\Tutorial.xml
 EsoUI\Ingame\SkillsAdvisor\SkillsAdvisor_Manager.lua
 EsoUI\Ingame\Skills\SharedSkills.lua
 EsoUI\Ingame\Skills\SharedSkills.xml
-EsoUI\Ingame\Skills\NewSkillCalloutManager.lua
+EsoUI\Ingame\Skills\Keyboard\KeyboardAssignableActionBar.lua
+EsoUI\Ingame\Skills\Keyboard\KeyboardAssignableActionBar.xml
 EsoUI\Ingame\Skills\Keyboard\ZO_Skills.lua
 EsoUI\Ingame\Skills\Keyboard\ZO_Skills.xml
-EsoUI\Ingame\Skills\Gamepad\GamepadActionBar.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadAssignableActionBar.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.xml
@@ -672,6 +670,8 @@ EsoUI\Ingame\Crafting\Gamepad\CraftingUtils_Gamepad.xml
 EsoUI\Ingame\Crafting\CraftingCreateSlotAnimation.lua
 EsoUI\Ingame\Crafting\CraftingEnchantExtractSlotAnimation.lua
 EsoUI\Ingame\Crafting\CraftingSmithingExtractSlotAnimation.lua
+EsoUI\Ingame\Crafting\Gamepad\CraftingEnchantExtractSlotAnimation_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\CraftingEnchantExtractSlotAnimation_Gamepad.xml
 
 EsoUI\Ingame\Crafting\SharedCraftingInventory.lua
 EsoUI\Ingame\Crafting\Keyboard\CraftingInventory.lua

@@ -28,11 +28,7 @@ function ZO_GamepadEnchanting:Initialize(control)
         end
     end)
 
-    local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(CRAFTING_TYPE_ENCHANTING)
-
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
-    ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
-    ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
 end
 
 function ZO_GamepadEnchanting:InitializeModes()
@@ -336,6 +332,9 @@ function ZO_GamepadEnchanting:InitializeExtractionSlots()
     }
     self.extractionCraftingBar:AddEntry("ZO_GamepadEnchantingRuneExtractionSlot", newData)
     self.extractionSlot = newData.slot
+
+    self.extractionSlotAnimation = ZO_CraftingEnchantExtractSlotAnimation_Gamepad:New("gamepad_enchanting_extraction", function() return self.enchantingMode == ENCHANTING_MODE_EXTRACTION end)
+    self.extractionSlotAnimation:AddSlot(self.extractionSlot)
 
     self.extractionCraftingBar:Commit()
 end

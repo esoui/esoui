@@ -37,7 +37,7 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
 
     local function OnPrimaryResidenceClicked(button)
         if self.currentHouse ~= self.primaryResidence then
-            local collectibleId = GetCollectibleIdForHouse(self.currentHouse)
+            local collectibleId = GetCollectibleIdForHouse(self.primaryResidence)
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
             ZO_Dialogs_ShowDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = self.currentHouse}, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()} })
         end
@@ -230,7 +230,7 @@ function ZO_HousingFurnitureSettings_Keyboard:ShowDefaultAccessTooltip(control)
     InformationTooltip:AddLine(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_DEFAULT_ACCESS_TOOLTIP_TEXT), "", r, g, b)
 
     local selectionTitle = GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING",  defaultAccess)
-    local selectionDescription = GetString("SI_HOUSING_PERMISSIONS_DEFAULT_ACCESS_DESCRIPTION", defaultAccess)
+    local selectionDescription = GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING_DESCRIPTION", defaultAccess)
 
     InformationTooltip:AddLine(selectionTitle)
     InformationTooltip:AddLine(selectionDescription, "", r, g, b)

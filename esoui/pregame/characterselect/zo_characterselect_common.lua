@@ -21,13 +21,63 @@ function ZO_CharacterSelect_GetDataForCharacterId(charId)
     end
 end
 
+local function UpdateCharacterSelectOrder()
+    table.sort(g_characterDataList, function(left, right) 
+                                        if left.order == right.order then
+                                            return left.index < right.index
+                                        else
+                                            return left.order > right.order
+                                        end
+                                    end)
+end
+
+local function FindCharacterWithOrderWeight(orderWeight)
+    for _,characterData in ipairs(g_characterDataList) do
+        if characterData.order == orderWeight then
+            return characterData
+        end
+    end
+
+    return nil
+end
+
+local function SaveCharacterOrder()
+    for _, charData in ipairs(g_characterDataList) do
+        ChangeCharacterOrderWeight(charData.index, charData.order)
+    end
+end
+
+function ZO_CharacterSelect_OrderCharacterUp(orderWeight)
+    local currentCharacterData = FindCharacterWithOrderWeight(orderWeight)
+    local nextCharacterData = FindCharacterWithOrderWeight(orderWeight + 1)
+    if nextCharacterData then
+        currentCharacterData.order = orderWeight + 1
+        nextCharacterData.order = orderWeight
+        SaveCharacterOrder()
+
+        UpdateCharacterSelectOrder()
+    end
+end
+
+function ZO_CharacterSelect_OrderCharacterDown(orderWeight)
+    local currentCharacterData = FindCharacterWithOrderWeight(orderWeight)
+    local nextCharacterData = FindCharacterWithOrderWeight(orderWeight - 1)
+    if nextCharacterData then
+        currentCharacterData.order = orderWeight - 1
+        nextCharacterData.order = orderWeight
+        SaveCharacterOrder()
+
+        UpdateCharacterSelectOrder()
+    end
+end
+
 do
     local iconString = IsInGamepadPreferredMode() and "EsoUI/Art/Champion/Gamepad/gp_champion_icon.dds" or "EsoUI/Art/Champion/champion_icon.dds"
     local CHAMPION_FORMATTED_ICON = zo_iconFormat(iconString, "100%", "100%")
 
     function ZO_CharacterSelect_GetFormattedLevel(characterData)
         if characterData.championPoints and characterData.championPoints > 0 then
-            return zo_strformat(SI_CHARACTER_SELECT_LEVEL_CHAMPION, characterData.level, CHAMPION_FORMATTED_ICON)
+            return zo_strformat(SI_CHARACTER_SELECT_LEVEL_CHAMPION, CHAMPION_FORMATTED_ICON, characterData.championPoints)
         else
             return zo_strformat(SI_CHARACTER_SELECT_LEVEL_VALUE, characterData.level)
         end
@@ -84,7 +134,7 @@ do
     local g_mostRecentCharId
 
     local function AddCharacter(i)
-        local name, gender, level, championPoints, class, race, alliance, id, locationId, needsRename = GetCharacterInfo(i)
+        local name, gender, level, championPoints, class, race, alliance, id, locationId, orderWeight, needsRename = GetCharacterInfo(i)
 
         -- if one character has champion points, than the account has champion points
         -- also make sure that the account never loses champion points between characters
@@ -92,26 +142,30 @@ do
             g_accountChampionPoints = championPoints
         end
 
+        if orderWeight == 0 then
+            orderWeight = GetNumCharacters() - #g_characterDataList
+        end
+
         -- Because of the way the messaging works, ensure this character doesn't already exist in the table.
         local characterData = ZO_CharacterSelect_GetDataForCharacterId(id)
-        if(characterData == nil) then
-            characterData = { name = name, gender = gender, level = level, championPoints = championPoints, class = class, race = race, alliance = alliance, id = id, location = locationId, needsRename = needsRename, index = #g_characterDataList + 1 }
+        if characterData == nil then
+            characterData = { name = name, gender = gender, level = level, championPoints = championPoints, class = class, race = race, alliance = alliance, id = id, location = locationId, needsRename = needsRename, index = #g_characterDataList + 1, order = orderWeight }
             table.insert(g_characterDataList, characterData)
 
-            if(g_bestSelectionPriority < PRIORITY_DEFAULT) then
+            if g_bestSelectionPriority < PRIORITY_DEFAULT then
                 g_bestSelectionPriority = PRIORITY_DEFAULT
                 g_bestSelectionData = characterData
                 g_bestSelectionIndex = i
             end
 
-            if(AreId64sEqual(g_playerSelectedCharacterId, id)) then
+            if AreId64sEqual(g_playerSelectedCharacterId, id) then
                 g_bestSelectionPriority = PRIORITY_PLAYER_CHOSEN
                 g_bestSelectionData = characterData
                 g_bestSelectionIndex = i
             end
 
-            if(AreId64sEqual(g_mostRecentCharId, id)) then
-                if(g_bestSelectionPriority < PRIORITY_MOST_RECENT_CHARACTER) then
+            if AreId64sEqual(g_mostRecentCharId, id) then
+                if g_bestSelectionPriority < PRIORITY_MOST_RECENT_CHARACTER then
                     g_bestSelectionPriority = PRIORITY_MOST_RECENT_CHARACTER
                     g_bestSelectionData = characterData
                     g_bestSelectionIndex = i
@@ -128,7 +182,7 @@ do
 
         g_characterDataList = {}
     
-        if(numCharacters > 0) then
+        if numCharacters > 0 then
             for i = 1, numCharacters do
                 AddCharacter(i)
             end

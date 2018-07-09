@@ -129,8 +129,6 @@ function ZO_GamepadProvisioner:Initialize(control)
     self:InitializeKeybindStripDescriptors()
     self:InitializeDetails()
 
-    local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(CRAFTING_TYPE_PROVISIONING)
-
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 

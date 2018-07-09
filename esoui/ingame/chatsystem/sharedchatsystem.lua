@@ -1797,10 +1797,17 @@ function SharedChatSystem:SubmitTextEntry()
     
     if IsChatSystemAvailableForCurrentPlatform() and #text > 0 then
         self.textEntry:AddCommandHistory(text)
-        
-        local switch = self.switchLookup[text:lower()]
-        if switch and not switch.target and (not switch.requires or switch.requires(switch.id)) then
-            self:SetChannel(switch.id)
+
+        local switch, valid, switchArg, deferredError = self:TextToSwitchData(text, false)
+        if switch and valid then
+            self:SetChannel(switch.id, switchArg)
+            if deferredError then
+                -- Validate immediately to run the custom error
+                self.requirementErrorMessage = switch.requirementErrorMessage
+                self:ValidateChatChannel()
+            else
+                self.requirementErrorMessage = nil
+            end
         else
             local prefix = text:byte(1)
             if self.commandPrefixes[prefix] then
@@ -1835,39 +1842,55 @@ function SharedChatSystem:ValidateTargetName(name)
     return (name:match("^%S+$") ~= nil)
 end
 
-function SharedChatSystem:ValidateSwitch(switch, text, firstSpaceStart)
+function SharedChatSystem:ValidateSwitch(switch, text, firstSpaceStart, inferTargetEnd)
     if switch then
         if switch.target then
             -- Either get the arguments from the text or from an channel target
             local switchArg
-            local finalSpace          
+            local finalSpace
             if switch.target == true then
+                if not firstSpaceStart then
+                    -- No space means we can't have a target specified
+                    return false
+                end
+
                 self.pendingChannel = switch.id
                 --No channel, just a target requirement
-                local secondWordStart = firstSpaceStart + 1
-                local secondSpaceStart, secondSpaceEnd = zo_strfind(text, " ", secondWordStart, true)
-
                 local doAutoComplete = true
-
-                if secondSpaceStart and secondSpaceStart > 1 then
-                    finalSpace = secondSpaceStart
-                    -- dont look for a second space if the targer begins with a display name flag char
-                    if text:byte(secondWordStart) == DISPLAY_NAME_PREFIX_BYTE then
-                        if(self:ValidateTargetName(zo_strsub(text, secondWordStart + 1, secondSpaceStart - 1))) then 
-                            switchArg = zo_strsub(text, secondWordStart, secondSpaceStart - 1)
+                local secondWordStart = firstSpaceStart + 1
+                local isDisplayName = text:byte(secondWordStart) == DISPLAY_NAME_PREFIX_BYTE
+                if inferTargetEnd then
+                    -- Don't look for a second space if the target begins with a display name flag char
+                    if isDisplayName then
+                        local secondSpaceStart, secondSpaceEnd = zo_strfind(text, " ", secondWordStart, true)
+                        if secondSpaceStart and secondSpaceStart > 1 then
+                            finalSpace = secondSpaceStart
+                            if(self:ValidateTargetName(zo_strsub(text, secondWordStart + 1, secondSpaceStart - 1))) then 
+                                switchArg = zo_strsub(text, secondWordStart, secondSpaceStart - 1)
+                                doAutoComplete = false
+                            end
+                        end
+                    else
+                        -- Look for the comma as the final delimiter (character names can have multiple spaces)
+                        local commaStart, commaEnd = zo_strfind(text, ",", secondWordStart + 1, true)
+                        if commaStart and commaStart > 1 then
+                            finalSpace = commaEnd
+                            switchArg = zo_strsub(text, secondWordStart, commaStart - 1)
                             doAutoComplete = false
                         end
                     end
-                end
+                else
+                    local potentialSwitchArg = zo_strsub(text, secondWordStart)
+                    if potentialSwitchArg ~= "" then
+                        if isDisplayName and not self:ValidateTargetName(zo_strsub(potentialSwitchArg, 2)) then
+                            potentialSwitchArg = nil
+                        end
 
-                if not switchArg and text:byte(secondWordStart) ~= DISPLAY_NAME_PREFIX_BYTE then
-                    -- look for the comma as the final delimiter (names can have multiple spaces)
-                    local commaStart, commaEnd = zo_strfind(text, ",", secondWordStart + 1, true)
-
-                    if commaStart and commaStart > 1 then
-                        finalSpace = commaEnd
-                        switchArg = zo_strsub(text, secondWordStart, commaStart - 1)
-                        doAutoComplete = false
+                        if potentialSwitchArg ~= nil then
+                            finalSpace = zo_strlen(text)
+                            switchArg = potentialSwitchArg
+                            doAutoComplete = false
+                        end
                     end
                 end
 
@@ -1901,19 +1924,38 @@ function SharedChatSystem:ValidateSwitch(switch, text, firstSpaceStart)
     return false
 end
 
+function SharedChatSystem:TextToSwitchData(text, inferTargetEnd)
+    local lowerText = text:lower()
+    local switch = self.switchLookup[lowerText]
+    local isValid = false
+    local switchArg = nil
+    local deferredError = nil
+    local spaceStart = nil
+    if not switch then
+        spaceStart = zo_strfind(lowerText, " ", 1, true)
+        if spaceStart and spaceStart > 1 then
+            local potentialSwitch = zo_strsub(lowerText, 1, spaceStart - 1)
+            switch = self.switchLookup[potentialSwitch:lower()]
+        end
+    end
+
+    if switch then
+        local spaceStartOverride = nil
+        isValid, switchArg, deferredError, spaceStartOverride = self:ValidateSwitch(switch, text, spaceStart, inferTargetEnd)
+        spaceStart = spaceStartOverride or spaceStart
+    end
+
+    return switch, isValid, switchArg, deferredError, spaceStart
+end
+
 function SharedChatSystem:OnTextEntryChanged(newText)
     if self.ignoreTextEntryChangedEvent then return end
     self.ignoreTextEntryChangedEvent = true
-         
-    local spaceStart, spaceEnd = zo_strfind(newText, " ", 1, true)
     
+    local switch, valid, switchArg, deferredError, spaceStart = self:TextToSwitchData(newText, true)
+
     if spaceStart and spaceStart > 1 then
-        local potentialSwitch = zo_strsub(newText, 1, spaceStart - 1)
-        local switch = self.switchLookup[potentialSwitch:lower()]
-
-        local valid, switchArg, deferredError, spaceStartOverride = self:ValidateSwitch(switch, newText, spaceStart)
-
-        if valid then
+        if switch and valid then
             if(deferredError) then
                 self.requirementErrorMessage = switch.requirementErrorMessage
             else
@@ -1924,7 +1966,6 @@ function SharedChatSystem:OnTextEntryChanged(newText)
 
             local oldCursorPos = self.textEntry:GetCursorPosition()
 
-            spaceStart = spaceStartOverride or spaceStart
             self.textEntry:SetText(zo_strsub(newText, spaceStart + 1))
             self.textEntry:SetCursorPosition(oldCursorPos - spaceStart)
         end

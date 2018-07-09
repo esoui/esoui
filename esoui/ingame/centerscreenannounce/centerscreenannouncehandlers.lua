@@ -231,7 +231,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_OBJECTIVE_COMPLETED] = function(zoneIndex, po
     return messageParams
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_CONDITION_COUNTER_CHANGED] = function(journalIndex, questName, conditionText, conditionType, currConditionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isComplete, isConditionComplete, isStepHidden)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_CONDITION_COUNTER_CHANGED] = function(journalIndex, questName, conditionText, conditionType, currConditionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isComplete, isConditionComplete, isStepHidden, isConditionCompleteChanged)
     if isStepHidden or (isPushed and isComplete) or (currConditionVal >= newConditionVal) then
         return
     end
@@ -405,14 +405,14 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_PLAYER_ACTIVATED] = function()
     end
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_RANK_UPDATE] = function(skillType, lineIndex, rank)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_RANK_UPDATE] = function(skillType, skillLineIndex, rank)
     -- crafting skill updates get deferred if they're increased while crafting animations are in progress
     -- ZO_Skills_TieSkillInfoHeaderToCraftingSkill handles triggering the deferred center screen announce in that case
     if skillType ~= SKILL_TYPE_RACIAL and (skillType ~= SKILL_TYPE_TRADESKILL or not ZO_CraftingUtils_IsPerformingCraftProcess()) then
-        local lineName, _, available = GetSkillLineInfo(skillType, lineIndex)
-        if available then
+        local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
+        if skillLineData and skillLineData:IsAvailable() then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SKILL_LINE_LEVELED_UP)
-            messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, lineName, rank))
+            messageParams:SetText(zo_strformat(SI_SKILL_RANK_UP, skillLineData:GetName(), rank))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE)
             return messageParams
         end
@@ -433,11 +433,11 @@ local GUILD_SKILL_SHOW_SOUNDS =
     [PROGRESS_REASON_BOSS_KILL] = SOUNDS.SKILL_XP_BOSS_KILLED,
 }
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_XP_UPDATE] = function(skillType, skillIndex, reason, rank, previousXP, currentXP)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_XP_UPDATE] = function(skillType, skillLineIndex, reason, rank, previousXP, currentXP)
     if (skillType == SKILL_TYPE_GUILD and GUILD_SKILL_SHOW_REASONS[reason]) or reason == PROGRESS_REASON_JUSTICE_SKILL_EVENT then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_NO_TEXT)
-        local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
-        local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
+        local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillLineIndex)
+        local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillLineIndex, rank)
         local sound = GUILD_SKILL_SHOW_SOUNDS[reason]
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE)
         if rankStartXP ~= nil then
@@ -469,7 +469,14 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ABILITY_PROGRESSION_RANK_UPDATE] = function(p
     end
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoints, newPartialPoints)
+local SUPPRESS_SKILL_POINT_CSA_REASONS =
+{
+    [SKILL_POINT_CHANGE_REASON_IGNORE] = true,
+    [SKILL_POINT_CHANGE_REASON_SKILL_RESPEC] = true,
+    [SKILL_POINT_CHANGE_REASON_SKILL_RESET] = true,
+}
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoints, newPartialPoints, changeReason)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
     if oldPartialPoints ~= newPartialPoints then
         messageParams:SetSound(SOUNDS.SKYSHARD_GAINED)
@@ -487,30 +494,20 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, n
         end
         return messageParams
     elseif newPoints > oldPoints then
-        messageParams:SetSound(SOUNDS.SKILL_GAINED)
-        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
-        messageParams:SetText(zo_strformat(SI_SKILL_POINT_GAINED, newPoints - oldPoints))
-        return messageParams
+        if not SUPPRESS_SKILL_POINT_CSA_REASONS[changeReason] then
+            messageParams:SetSound(SOUNDS.SKILL_GAINED)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
+            messageParams:SetText(zo_strformat(SI_SKILL_POINT_GAINED, newPoints - oldPoints))
+            return messageParams
+        end
     end
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_LINE_ADDED] = function(skillType, lineIndex)
-    local lineName, _, available = GetSkillLineInfo(skillType, lineIndex)
-    if available then
-        local discoverIcon = zo_iconFormat(select(4, ZO_Skills_GetIconsForSkillType(skillType)), 32, 32)
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
-        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_LINE_ADDED)
-        messageParams:SetText(zo_strformat(SI_SKILL_LINE_ADDED, discoverIcon, lineName))
-        return messageParams
-    end
-    return nil
-end
-
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, bookIndex, guildReputationIndex, skillType, skillLineIndex, rank, previousXP, currentXP)
     if guildReputationIndex > 0 then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_ACQUIRED)
-        local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
-        local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
+        local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillLineIndex)
+        local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillLineIndex, rank)
         local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
         barParams:SetTriggeringEvent(EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE)
         ValidateProgressBarParams(barParams)
@@ -534,13 +531,13 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_COLLECTION_COMPLETED] = function(categor
     end
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, guildReputationIndex, skillType, skillIndex, rank, previousXP, currentXP)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE] = function(categoryIndex, collectionIndex, guildReputationIndex, skillType, skillLineIndex, rank, previousXP, currentXP)
     if guildReputationIndex > 0 then
         local collectionName, description, numKnownBooks, totalBooks, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
         if not hidden then
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.BOOK_COLLECTION_COMPLETED)
-            local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillIndex)
-            local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillIndex, rank)
+            local barType = PLAYER_PROGRESS_BAR:GetBarType(PPB_CLASS_SKILL, skillType, skillLineIndex)
+            local rankStartXP, nextRankStartXP = GetSkillLineRankXPExtents(skillType, skillLineIndex, rank)
             local barParams = CENTER_SCREEN_ANNOUNCE:CreateBarParams(barType, rank, previousXP - rankStartXP, currentXP - rankStartXP)
             barParams:SetTriggeringEvent(EVENT_LORE_COLLECTION_COMPLETED_SKILL_EXPERIENCE)
             ValidateProgressBarParams(barParams)
@@ -770,20 +767,29 @@ end
 
 -- End Battleground Event Handlers --
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISPLAY_ANNOUNCEMENT] = function(title, description)
-    local messageParams
-    if title ~= "" and description ~= "" then
-        messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DISPLAY_ANNOUNCEMENT)
-    elseif title ~= "" then
-        messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DISPLAY_ANNOUNCEMENT)
-    elseif description ~= "" then
-        messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.DISPLAY_ANNOUNCEMENT)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISPLAY_ANNOUNCEMENT] = function(primaryText, secondaryText, icon, soundId, lifespanMS, category)
+    soundId = soundId == "" and SOUNDS.DISPLAY_ANNOUNCEMENT or soundId
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(category, soundId)
+    
+    if icon ~= ZO_NO_TEXTURE_FILE then
+        messageParams:SetIconData(icon)
     end
 
-    if messageParams then
-        messageParams:SetText(title, description)
-        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+    if lifespanMS > 0 then
+        messageParams:SetLifespanMS(lifespanMS)
     end
+
+    -- sanatize text
+    if primaryText == "" then
+        primaryText = nil
+    end
+    if secondaryText == "" then
+        secondaryText = nil
+    end
+
+    messageParams:SetText(primaryText, secondaryText)
+    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+
     return messageParams
 end
 
@@ -1303,7 +1309,23 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                 return messageParams
             end
         end,
-    }
+    },
+
+    {
+        event = EVENT_SKILL_LINE_ADDED,
+        callbackManager = SKILLS_DATA_MANAGER,
+        callbackRegistration = "SkillLineAdded",
+        callbackFunction = function(skillLineData)
+            if skillLineData:IsAvailable() then
+                local skillTypeData = skillLineData:GetSkillTypeData()
+                local announceIcon = zo_iconFormat(skillTypeData:GetAnnounceIcon(), 32, 32)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.SKILL_LINE_ADDED)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_LINE_ADDED)
+                messageParams:SetText(zo_strformat(SI_SKILL_LINE_ADDED, announceIcon, skillLineData:GetName()))
+                return messageParams
+            end
+        end,
+    },
 }
 
 function ZO_CenterScreenAnnounce_GetCallbackHandlers()

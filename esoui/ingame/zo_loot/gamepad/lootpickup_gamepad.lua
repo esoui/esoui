@@ -1,9 +1,7 @@
 local ZO_LootPickup_Gamepad = ZO_Loot_Gamepad_Base:Subclass()
 
 function ZO_LootPickup_Gamepad:New(...)
-    local screen = ZO_Loot_Gamepad_Base.New(self)
-    screen:Initialize(...)
-    return screen
+    return ZO_Loot_Gamepad_Base.New(self, ...)
 end
 
 local function OnBlockingSceneActivated()
@@ -11,6 +9,8 @@ local function OnBlockingSceneActivated()
 end
 
 function ZO_LootPickup_Gamepad:Initialize(control)
+    ZO_Loot_Gamepad_Base.Initialize(self, GAMEPAD_RIGHT_TOOLTIP)
+
     control.owner = self
     self.control = control
 

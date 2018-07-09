@@ -30,14 +30,17 @@ function HelpTutorialsEntriesGamepad:InitializeEvents()
 
     local function OnShowSpecificPage(eventId, helpCategoryIndex, helpIndex)
         if IsInGamepadPreferredMode() then
-            self:Push(helpCategoryIndex, helpIndex)
+            -- ideally we would do a push here, but that is currently not playing
+            -- well with opening help from the Crown Store
+            -- specifically: attempting to gift from the furniture browser with gifting locked
+            self:Show(helpCategoryIndex, helpIndex)
         end
     end
 
     self.control:RegisterForEvent(EVENT_HELP_SHOW_SPECIFIC_PAGE, OnShowSpecificPage)
 end
 
-function HelpTutorialsEntriesGamepad:Push(categoryIndex, helpIndex)
+function HelpTutorialsEntriesGamepad:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
     if self.categoryIndex ~= categoryIndex then
         self.dirty = true
         self.showHelpIndex = helpIndex
@@ -46,7 +49,16 @@ function HelpTutorialsEntriesGamepad:Push(categoryIndex, helpIndex)
     end
 
     self.categoryIndex = categoryIndex
+end
+
+function HelpTutorialsEntriesGamepad:Push(categoryIndex, helpIndex)
+    self:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
     SCENE_MANAGER:Push("helpTutorialsEntriesGamepad")
+end
+
+function HelpTutorialsEntriesGamepad:Show(categoryIndex, helpIndex)
+    self:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
+    SCENE_MANAGER:Show("helpTutorialsEntriesGamepad")
 end
 
 function HelpTutorialsEntriesGamepad:InitializeKeybindStripDescriptors()

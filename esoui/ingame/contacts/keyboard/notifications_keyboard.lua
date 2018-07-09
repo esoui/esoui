@@ -1,6 +1,6 @@
 local EVENT_NAMESPACE = "KeyboardNotifications"
 
-local KEYBOARD_NOTIFICATION_ICONS =
+ZO_KEYBOARD_NOTIFICATION_ICONS =
 {
     [NOTIFICATION_TYPE_FRIEND] = "EsoUI/Art/Notifications/notificationIcon_friend.dds",
     [NOTIFICATION_TYPE_GUILD] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
@@ -20,6 +20,7 @@ local KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/notificationIcon_ESO+.dds",
+    [NOTIFICATION_TYPE_GIFT_GRACE_STARTED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFTING_UNLOCKED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
@@ -33,7 +34,7 @@ local KEYBOARD_NOTIFICATION_ICONS =
 -- Friend Request Provier
 -------------------------
 
-local ZO_KeyboardFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
+ZO_KeyboardFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
 
 function ZO_KeyboardFriendRequestProvider:New(notificationManager)
     local provider = ZO_FriendRequestProvider.New(self, notificationManager)
@@ -71,7 +72,7 @@ end
 -- Guild Invite Request Provier
 -------------------------
 
-local ZO_KeyboardGuildInviteProvider = ZO_GuildInviteProvider:Subclass()
+ZO_KeyboardGuildInviteProvider = ZO_GuildInviteProvider:Subclass()
 
 function ZO_KeyboardGuildInviteProvider:New(notificationManager)
     local provider = ZO_GuildInviteProvider.New(self, notificationManager)
@@ -110,7 +111,7 @@ end
 --Campaign Queue Provider
 -------------------------
 
-local ZO_KeyboardCampaignQueueProvider = ZO_CampaignQueueProvider:Subclass()
+ZO_KeyboardCampaignQueueProvider = ZO_CampaignQueueProvider:Subclass()
 
 function ZO_KeyboardCampaignQueueProvider:New(notificationManager)
     local provider = ZO_CampaignQueueProvider.New(self, notificationManager)
@@ -124,7 +125,7 @@ end
 -- CS Chat Request Provider
 -------------------------
 
-local ZO_KeyboardAgentChatRequestProvider = ZO_AgentChatRequestProvider:Subclass()
+ZO_KeyboardAgentChatRequestProvider = ZO_AgentChatRequestProvider:Subclass()
 
 function ZO_KeyboardAgentChatRequestProvider:New(notificationManager)
     local provider = ZO_AgentChatRequestProvider.New(self, notificationManager)
@@ -138,7 +139,7 @@ end
 -- Leaderboard Raid Provider
 -------------------------
 
-local ZO_KeyboardLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
+ZO_KeyboardLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
 
 function ZO_KeyboardLeaderboardRaidProvider:New(notificationManager)
     local provider = ZO_LeaderboardRaidProvider.New(self, notificationManager)
@@ -189,7 +190,7 @@ end
 --Collections Update Provider
 -------------------------
 
-local ZO_KeyboardCollectionsUpdateProvider = ZO_CollectionsUpdateProvider:Subclass()
+ZO_KeyboardCollectionsUpdateProvider = ZO_CollectionsUpdateProvider:Subclass()
 
 function ZO_KeyboardCollectionsUpdateProvider:New(notificationManager)
     return ZO_CollectionsUpdateProvider.New(self, notificationManager)
@@ -220,7 +221,7 @@ end
 -- ZO_KeyboardEsoPlusSubscriptionStatusProvider
 -------------------------
 
-local ZO_KeyboardEsoPlusSubscriptionStatusProvider = ZO_EsoPlusSubscriptionStatusProvider:Subclass()
+ZO_KeyboardEsoPlusSubscriptionStatusProvider = ZO_EsoPlusSubscriptionStatusProvider:Subclass()
 
 function ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(notificationManager)
     return ZO_EsoPlusSubscriptionStatusProvider.New(self, notificationManager)
@@ -232,10 +233,25 @@ function ZO_KeyboardEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
     end
 end
 
+-- ZO_KeyboardGiftingGracePeriodStartedProvider
+-------------------------
+
+ZO_KeyboardGiftingGracePeriodStartedProvider = ZO_GiftingGracePeriodStartedProvider:Subclass()
+
+function ZO_KeyboardGiftingGracePeriodStartedProvider:New(notificationManager)
+    return ZO_GiftingGracePeriodStartedProvider.New(self, notificationManager)
+end
+
+function ZO_KeyboardGiftingGracePeriodStartedProvider:ShowMoreInfo(entryData)
+    if entryData.moreInfo then
+        HELP:ShowSpecificHelp(entryData.helpCategoryIndex, entryData.helpIndex)
+    end
+end
+
 -- ZO_KeyboardGiftingUnlockedProvider
 -------------------------
 
-local ZO_KeyboardGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
+ZO_KeyboardGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
 
 function ZO_KeyboardGiftingUnlockedProvider:New(notificationManager)
     return ZO_GiftingUnlockedProvider.New(self, notificationManager)
@@ -250,7 +266,7 @@ end
 --Notification Manager
 -------------------------
 
-local ZO_KeyboardNotificationManager = ZO_NotificationManager:Subclass()
+ZO_KeyboardNotificationManager = ZO_NotificationManager:Subclass()
 
 function ZO_KeyboardNotificationManager:New(control)
     return ZO_NotificationManager.New(self, control)
@@ -274,6 +290,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RECEIVED_DATA, "ZO_NotificationsGiftReceivedRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RETURNED_DATA, "ZO_NotificationsGiftReturnedRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_CLAIMED_DATA, "ZO_NotificationsGiftClaimedRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA, "ZO_NotificationsGiftingUnlockedRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_UNLOCKED_DATA, "ZO_NotificationsGiftingUnlockedRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", 50, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
@@ -303,6 +320,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_DuelInviteProvider:New(self),
         ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(self),
         ZO_GiftInventoryProvider:New(self),
+        ZO_KeyboardGiftingGracePeriodStartedProvider:New(self),
         ZO_KeyboardGiftingUnlockedProvider:New(self),
         ZO_DailyLoginRewardsClaimProvider:New(self),
     }
@@ -453,7 +471,7 @@ function ZO_KeyboardNotificationManager:SetupBaseRow(control, data)
     control.notificationType = notificationType
     control.index = data.index
 
-    GetControl(control, "Icon"):SetTexture(KEYBOARD_NOTIFICATION_ICONS[notificationType])
+    GetControl(control, "Icon"):SetTexture(ZO_KEYBOARD_NOTIFICATION_ICONS[notificationType])
     GetControl(control, "Type"):SetText(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", notificationType)))
 end
 

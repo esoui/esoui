@@ -68,15 +68,10 @@ function ZO_ActionBar_AttemptPickup(slotNum)
 end
 
 local g_currentUltimateMax = 0
-local g_ultimateBarFull = nil
 local g_ultimateReadyBurstTimeline = nil
 local g_ultimateReadyLoopTimeline = nil
-local g_ultimateFillTimeline = nil
 local g_ultimateBarFillLeftTimeline = nil
 local g_ultimateBarFillRightTimeline = nil
-
-local ZO_ULTIMATE_BAR_GRADIENT_COLORS = { ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ULTIMATE_BAR, ULTIMATE_BAR_COLOR_BAR_START)), ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ULTIMATE_BAR, ULTIMATE_BAR_COLOR_BAR_END)) }
-local ZO_ULTIMATE_BAR_FULL_GRADIENT_COLORS = { ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ULTIMATE_BAR, ULTIMATE_BAR_COLOR_FULL_BAR_START)), ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ULTIMATE_BAR, ULTIMATE_BAR_COLOR_FULL_BAR_END)) }
 
 local function UpdateCurrentUltimateMax()
     local cost, mechanic = GetSlotAbilityCost(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
@@ -511,13 +506,13 @@ local function ApplyStyle(style)
     UpdateUltimateMeter()
 end
 
-function ZO_ActionBar_Initialize()
+function ZO_ActionBar_OnInitialized(control)
     local MAIN_BAR_STYLE =
     {
         type = ACTION_BUTTON_TYPE_VISIBLE,
         template = ACTION_BUTTON_TEMPLATE,
         showBinds = true,
-        parentBar = ZO_ActionBar1,
+        parentBar = control,
     }
 
     --Quick Bar Slot
@@ -525,7 +520,7 @@ function ZO_ActionBar_Initialize()
     quickBarButton.slot:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)  
     quickBarButton:SetupBounceAnimation()
     
-    ZO_ActionBar1WeaponSwap:SetAnchor(LEFT, quickBarButton.slot, RIGHT, 5, 0)
+    control:GetNamedChild("WeaponSwap"):SetAnchor(LEFT, quickBarButton.slot, RIGHT, 5, 0)
 
     local function OnSwapAnimationHalfDone(animation, button)
         button:HandleSlotChanged()
@@ -559,7 +554,7 @@ function ZO_ActionBar_Initialize()
         type = ACTION_BUTTON_TYPE_VISIBLE,
         template = "ZO_UltimateActionButton",
         showBinds = true,
-        parentBar = ZO_ActionBar1,
+        parentBar = control,
     }
 
     local ultimateButton = MakeActionButton(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1, ULTIMATE_BUTTON_STYLE)
@@ -568,8 +563,8 @@ function ZO_ActionBar_Initialize()
     ultimateButton:SetupKeySlideAnimation()
     UpdateUltimateMeter()
 
-    local function OnActionSlotsFullUpdate(event, isHotbarSwap)
-        if isHotbarSwap then
+    local function OnActiveHotbarUpdated(event, didActiveHotbarChange)
+        if didActiveHotbarChange then
             for _, physicalSlot in pairs(g_actionBarButtons) do
                 if physicalSlot.hotbarSwapAnimation then
                     physicalSlot.noUpdates = true
@@ -582,8 +577,14 @@ function ZO_ActionBar_Initialize()
         end
     end
 
+    local function OnAllHotbarsUpdated(event)
+        g_activeWeaponSwapInProgress = false
+        UpdateAllSlots()
+    end
+
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOT_UPDATED, function (_, slotnum) HandleSlotChanged(slotnum) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOTS_FULL_UPDATE, OnActionSlotsFullUpdate)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, OnActiveHotbarUpdated)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, OnAllHotbarsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOT_STATE_UPDATED, function (_, slotnum) HandleStateChanged(slotnum) end)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOT_ABILITY_USED, function (_, slotnum) HandleAbilityUsed(slotnum) end)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_UPDATE_COOLDOWNS, UpdateCooldowns)
@@ -605,8 +606,6 @@ function ZO_ActionBar_Initialize()
     ZO_PlatformStyle:New(ApplyStyle, KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS)
 
     HideHiddenButtons()
-end
 
-function ZO_ActionBar1_OnInitialized(self)
-    ACTION_BAR_FRAGMENT = ZO_HUDFadeSceneFragment:New(self)
+    ACTION_BAR_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
 end

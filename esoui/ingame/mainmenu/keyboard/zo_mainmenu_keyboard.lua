@@ -153,7 +153,7 @@ local CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_skills_over.dds",
 
         indicators = function()
-            if NEW_SKILL_CALLOUTS and NEW_SKILL_CALLOUTS:AreAnySkillLinesNew() then
+            if SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnySkillLinesNew() then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
         end,
@@ -266,6 +266,11 @@ local CATEGORY_LAYOUT_INFO =
         pressed = "EsoUI/Art/MainMenu/menuBar_ava_down.dds",
         disabled = "EsoUI/Art/MainMenu/menuBar_ava_disabled.dds",
         highlight = "EsoUI/Art/MainMenu/menuBar_ava_over.dds",
+
+        visible = function()
+            local currentLevel = GetUnitLevel("player")
+            return currentLevel >= GetMinLevelForCampaignTutorial()
+        end,
     },
     [MENU_CATEGORY_MAIL] =
     {
@@ -386,6 +391,8 @@ function MainMenu_Keyboard:Initialize(control)
     end
     control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, UpdateCategoryBar)
     control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, UpdateCategoryBar)
+    control:RegisterForEvent(EVENT_LEVEL_UPDATE, UpdateCategoryBar)
+    control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
 
     self:UpdateCategories()
 end
@@ -919,6 +926,11 @@ function MainMenu_Keyboard:OnCategoryClicked(category)
             }
             MAIN_MENU_MANAGER:ActivatedBlockingScene_Scene(sceneData, CLICKED_BY_MOUSE)
         else
+			--If the scene will need confirmation to hide then go back to the previous button. We'll select the button for this category on the scene or scene group showing (if it is allowed).
+            if SCENE_MANAGER:WillCurrentSceneConfirmHide() then
+                local SKIP_ANIMATION = true
+                ZO_MenuBar_RestoreLastClickedButton(self.categoryBar, SKIP_ANIMATION)
+            end
             self:ShowCategory(category)
         end
     end

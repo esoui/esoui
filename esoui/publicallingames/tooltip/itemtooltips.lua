@@ -493,6 +493,14 @@ function ZO_Tooltip:AddFlavorText(itemLink)
     end
 end
 
+function ZO_Tooltip:AddPrioritySellText(itemLink)
+    if IsItemLinkPrioritySell(itemLink) then
+        local prioritySellSection = self:AcquireSection(self:GetStyle("bodySection"))
+        prioritySellSection:AddLine(GetString(SI_ITEM_FORMAT_STR_PRIORITY_SELL), self:GetStyle("prioritySellText"))
+        self:AddSection(prioritySellSection)
+    end
+end
+
 function ZO_Tooltip:AddItemRequiresCollectibleText(itemLink)
     local collectibleId = GetItemLinkTooltipRequiresCollectibleId(itemLink)
     if collectibleId ~= 0 then
@@ -602,6 +610,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         self:AddPoisonSystemDescription()
     end
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemRequiresCollectibleText(itemLink)
     -- We don't want crafted furniture to show who made it, since it will get cleared once placed in a house
     -- TODO: If we implement saving the creator name, add back in LayoutItemCreator call (ESO-495280)
@@ -618,6 +627,7 @@ function ZO_Tooltip:LayoutVendorTrash(itemLink, itemName, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:AddItemValue(itemLink)
 end
@@ -635,6 +645,7 @@ function ZO_Tooltip:LayoutBooster(itemLink, itemName, extraData)
     fromQualityText = GetItemQualityColor(fromQuality):Colorize(fromQualityText)
     boosterDescriptionSection:AddLine(zo_strformat(SI_ENCHANTMENT_BOOSTER_DESCRIPTION, fromQualityText, toQualityText), self:GetStyle("bodyDescription"))
     self:AddSection(boosterDescriptionSection)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -663,6 +674,7 @@ function ZO_Tooltip:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData, e
     self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:LayoutInlineGlyph(itemLink, itemName)
     self:AddCreator(itemLink, creatorName)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
 end
@@ -680,6 +692,7 @@ function ZO_Tooltip:LayoutSiege(itemLink, itemName, tradeBoPData, extraData)
         self:AddSection(statsSection)
     end
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
 end
@@ -689,6 +702,7 @@ function ZO_Tooltip:LayoutTool(itemLink, itemName, tradeBoPData, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
@@ -699,6 +713,7 @@ function ZO_Tooltip:LayoutSoulGem(itemLink, itemName, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:AddItemValue(itemLink)
 end
@@ -707,6 +722,7 @@ function ZO_Tooltip:LayoutAvARepair(itemLink, itemName, extraData)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -743,6 +759,7 @@ do
         self:AddSection(dyesSection)
 
         self:AddFlavorText(itemLink)
+        self:AddPrioritySellText(itemLink)
         self:AddItemTags(itemLink)
 
         local dyeStampId = GetItemLinkDyeStampId(itemLink)
@@ -783,6 +800,7 @@ function ZO_Tooltip:LayoutMasterWritItem(itemLink, tradeBoPData, extraData)
     self:AddSection(rewardDescription)
 
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
 end
@@ -798,6 +816,7 @@ function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
     end
     self:AddSection(knownSection)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
 end
@@ -806,6 +825,7 @@ function ZO_Tooltip:LayoutLure(itemLink, itemName, extraData)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -813,6 +833,7 @@ function ZO_Tooltip:LayoutQuestStartOrFinishItem(itemLink, itemName, extraData)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -888,6 +909,7 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData, ex
         useToLearnOrKnownSection:AddLine(GetString(SI_GAMEPAD_PROVISIONER_USE_TO_LEARN_RECIPE), self:GetStyle("bodyDescription"))
     end
     self:AddSection(useToLearnOrKnownSection)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
@@ -922,6 +944,7 @@ function ZO_Tooltip:LayoutReagent(itemLink, itemName, extraData)
     if traitSection then
         self:AddSection(traitSection)
     end
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -995,6 +1018,7 @@ function ZO_Tooltip:LayoutAlchemyBase(itemLink, itemName, extraData)
     end
     requirementSection:AddLine(zo_strformat(SI_REQUIRES_ALCHEMY_SOLVENT_PURIFICATION, requiredRank), requirementStyle, self:GetStyle("bodyDescription"))
     self:AddSection(requirementSection)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1002,6 +1026,7 @@ function ZO_Tooltip:LayoutIngredient(itemLink, itemName, extraData)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1017,6 +1042,7 @@ function ZO_Tooltip:LayoutStyleMaterial(itemLink, itemName, extraData)
     end
     styleSection:AddLine(zo_strformat(descriptionString, GetItemStyleName(style)), self:GetStyle("bodyDescription"))
     self:AddSection(styleSection)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1038,6 +1064,7 @@ function ZO_Tooltip:LayoutRawBaseMaterial(itemLink, itemName, extraData)
         self:AddSection(refinedSection)
 
         self:AddMaterialLevels(refinedItemLink)
+        self:AddPrioritySellText(itemLink)
         self:AddItemTags(itemLink)
     end
 end
@@ -1063,6 +1090,7 @@ function ZO_Tooltip:LayoutRawBooster(itemLink, itemName, extraData)
         boosterDescriptionSection:AddLine(zo_strformat(SI_RAW_BOOSTER_DESCRIPTION, requiredStackSize, refinedItemText, fromQualityText, toQualityText), self:GetStyle("bodyDescription"))
         self:AddSection(boosterDescriptionSection)
     end
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1070,6 +1098,7 @@ function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, extraData)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1077,6 +1106,7 @@ function ZO_Tooltip:LayoutMaterial(itemLink, itemName, extraData)
     self:AddTopSection(itemLink)
     self:AddItemTitle(itemLink, itemName)
     self:AddMaterialLevels(itemLink)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1095,6 +1125,7 @@ function ZO_Tooltip:LayoutTrait(itemLink, itemName, itemType, extraData)
     self:AddSection(traitDescriptionSection)
 
     self:AddTrait(itemLink, extraData)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1232,6 +1263,7 @@ function ZO_Tooltip:LayoutUniversalStyleItem(itemLink)
     styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_TOOLTIP), self:GetStyle("bodyDescription"))
     styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_CROWN_STORE_TOOLTIP), self:GetStyle("bodyDescription"))
     self:AddSection(styleSection)
+    self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
 
@@ -1504,7 +1536,22 @@ function ZO_Tooltip:LayoutPendingItemRepair(itemBagId, itemSlotIndex, improvemen
     self:LayoutPendingItemChargeOrRepair(itemBagId, itemSlotIndex, improvementKitBagId, improvementKitIndex, GetAmountRepairKitWouldRepairItem)
 end
 
-function ZO_Tooltip:LayoutImprovedSmithingItem(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
+function ZO_Tooltip:LayoutImproveSourceSmithingItem(bagId, slotIndex)
+    local itemLink = GetItemLink(bagId, slotIndex)
+    local showPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
+
+    local tradeBoPData
+    if IsItemBoPAndTradeable(bagId, slotIndex) then
+        tradeBoPData =
+        {
+            timeRemaining = GetItemBoPTimeRemainingSeconds(bagId, slotIndex),
+            namesString = GetItemBoPTradeableDisplayNamesString(bagId, slotIndex),
+        }
+    end
+    return self:LayoutItem(itemLink, NOT_EQUIPPED, GetItemCreatorName(bagId, slotIndex), DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, NO_ITEM_NAME, EQUIP_SLOT_NONE, showPlayerLocked, tradeBoPData)
+end
+
+function ZO_Tooltip:LayoutImproveResultSmithingItem(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
     local _, icon = GetSmithingImprovedItemInfo(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
     local itemLink = GetSmithingImprovedItemLink(itemToImproveBagId, itemToImproveSlotIndex, craftingSkillType)
 
@@ -1525,7 +1572,7 @@ function ZO_Tooltip:LayoutImprovedSmithingItem(itemToImproveBagId, itemToImprove
     end
 end
 
-function ZO_Tooltip:LayoutResearchSmithingItem(traitType, traitDescription)
+function ZO_Tooltip:LayoutResearchSmithingItem(traitType, traitDescription, traitResearchSourceDescription, traitMaterialSourceDescription)
     if self.icon then
         self.icon:SetHidden(true)
     end
@@ -1533,6 +1580,10 @@ function ZO_Tooltip:LayoutResearchSmithingItem(traitType, traitDescription)
     self:AddLine(traitType, self:GetStyle("title"))
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     bodySection:AddLine(traitDescription, self:GetStyle("bodyDescription"))
+    if traitResearchSourceDescription then
+        bodySection:AddLine(zo_strformat(SI_SMITHING_TRAIT_RESEARCH_SOURCE_DESCRIPTION, traitResearchSourceDescription), self:GetStyle("bodyDescription"))
+        bodySection:AddLine(zo_strformat(SI_SMITHING_TRAIT_MATERIAL_SOURCE_DESCRIPTION, traitMaterialSourceDescription), self:GetStyle("bodyDescription"))
+    end
     self:AddSection(bodySection)
 end
 

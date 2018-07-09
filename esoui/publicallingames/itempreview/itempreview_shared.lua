@@ -851,7 +851,7 @@ end
 function ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
     local itemType, specializedItemType = GetItemLinkItemType(itemLink)
     if itemType == ITEMTYPE_FURNISHING then
-        return true
+        return specializedItemType ~= SPECIALIZED_ITEMTYPE_FURNISHING_ATTUNABLE_STATION
     elseif itemType == ITEMTYPE_RECIPE then
         return IsItemLinkFurnitureRecipe(itemLink)
     end

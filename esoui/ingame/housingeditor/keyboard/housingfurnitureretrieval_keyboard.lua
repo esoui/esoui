@@ -68,7 +68,7 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
                 self:ClearSelection()
             end,
             visible = function()
-                local hasSelection = self:GetMostRecentlySelectedData() ~= nil
+                local hasSelection = self:GetMostRecentlySelectedData() ~= nil and IsCurrentlyPreviewing()
                 return hasSelection
             end,
         },

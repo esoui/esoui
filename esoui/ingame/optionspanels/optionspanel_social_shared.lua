@@ -1,52 +1,6 @@
-function ZO_OptionsPanel_Social_OnColorOptionEnter(colorControl)
-    ZO_Options_OnMouseEnter(colorControl:GetParent())
-
-    local textureControl = colorControl:GetNamedChild("Texture") 
-    Options_Social_SharedHighlight:ClearAnchors()
-    Options_Social_SharedHighlight:SetAnchor(CENTER, textureControl, CENTER)
-    Options_Social_SharedHighlight:SetHidden(false)
-end
-
-function ZO_OptionsPanel_Social_OnColorOptionExit(colorControl)
-    ZO_Options_OnMouseExit(colorControl:GetParent())
-    Options_Social_SharedHighlight:SetHidden(true)
-end
-
-local function SetupColor(control)
-    control.data.currentRed, control.data.currentGreen, control.data.currentBlue = GetChatCategoryColor(control.data.chatChannelCategory)
-    control.data.texture:SetColor(control.data.currentRed, control.data.currentGreen, control.data.currentBlue, 1)
-end
-
 do
-    local categoryChildren = {
-        [CHAT_CATEGORY_MONSTER_SAY] = {CHAT_CATEGORY_MONSTER_YELL, CHAT_CATEGORY_MONSTER_WHISPER, CHAT_CATEGORY_MONSTER_EMOTE}
-    }
-
-    local function OpenColorPicker(colorControl, button, upInside)
-        if upInside then
-            local optionControl = colorControl:GetParent()
-            local data = optionControl.data
-            local texture = colorControl:GetNamedChild("Texture") 
-
-            local function OnColorSet(r, g, b)
-                texture:SetColor(r, g, b, 1)
-                data.currentRed, data.currentGreen, data.currentBlue = r, g, b
-                CHAT_SYSTEM:SetChannelCategoryColor(data.chatChannelCategory, r, g, b)
-                SetChatCategoryColor(data.chatChannelCategory, r, g, b)
-
-                local children = categoryChildren[data.chatChannelCategory]
-                if children then
-                    for i = 1, #children do
-                        CHAT_SYSTEM:SetChannelCategoryColor(children[i], r, g, b)
-                        SetChatCategoryColor(children[i], r, g, b)
-                    end
-                end
-            end
-            SYSTEMS:GetObject("colorPicker"):Show(OnColorSet, data.currentRed, data.currentGreen, data.currentBlue)
-        end
-    end
-
-    local categoryToChannelMappings = {
+    local categoryToChannelMappings = 
+    {
         [CHAT_CATEGORY_SAY] = CHAT_CHANNEL_SAY,
         [CHAT_CATEGORY_YELL] = CHAT_CHANNEL_YELL,
         [CHAT_CATEGORY_ZONE] = CHAT_CHANNEL_ZONE,
@@ -70,7 +24,7 @@ do
         [CHAT_CATEGORY_OFFICER_5] = CHAT_CHANNEL_OFFICER_5,
     }
 
-    function ZO_OptionsPanel_Social_InitializeColorControl(control)
+    function ZO_OptionsPanel_Social_GetColorControlName(control)
         local data = control.data
         local name
 
@@ -89,21 +43,12 @@ do
             end
         end
 
-        control:GetNamedChild("Label"):SetText(name)
-
-        local color = control:GetNamedChild("Color")
-        color:SetHandler("OnMouseUp", OpenColorPicker)
-        data.texture = color:GetNamedChild("Texture")
-
-        data.customResetToDefaultsFunction = ZO_OptionsPanel_Social_ResetColorToDefault
-
-        control:SetHandler("OnShow", SetupColor)
+        return name
     end
 end
 
-function ZO_OptionsPanel_Social_ResetColorToDefault(control)
-    CHAT_SYSTEM:ResetChannelCategoryToDefault(control.data.chatChannelCategory)
-    SetupColor(control)
+function ZO_OptionsPanel_Social_ResetChatColorToDefault(control, data)
+    CHAT_SYSTEM:ResetChannelCategoryToDefault(data.chatChannelCategory)
 end
 
 function ZO_OptionsPanel_Social_InitializeGuildLabel(control)
@@ -162,7 +107,6 @@ do
         ZO_Options_SetupSlider(control, selected)
     end
 end
-
 
 function ZO_OptionsPanel_Social_MinAlphaOnShow(control)
     local currentChoice = zo_round(CHAT_SYSTEM:GetMinAlpha() * 100)
@@ -302,8 +246,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Say
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SAY] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_SAY,
             tooltipText = SI_SOCIAL_OPTIONS_SAY_COLOR_TOOLTIP,
@@ -311,8 +255,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Yell
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_YELL] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_YELL,
             tooltipText = SI_SOCIAL_OPTIONS_YELL_COLOR_TOOLTIP,
@@ -320,8 +264,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_WhisperIncoming
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_INC] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_WHISPER_INCOMING,
             nameFormatter = SI_SOCIAL_OPTIONS_TELL_INCOMING_FORMATTER,
@@ -330,8 +274,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_WhisperOutoing
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_OUT] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_WHISPER_OUTGOING,
             nameFormatter = SI_SOCIAL_OPTIONS_TELL_OUTGOING_FORMATTER,
@@ -340,8 +284,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Group
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GROUP] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_PARTY,
             tooltipText = SI_SOCIAL_OPTIONS_GROUP_COLOR_TOOLTIP,
@@ -349,8 +293,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Zone
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_COLOR_TOOLTIP,
@@ -358,8 +302,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Zone_English
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_ENG] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE_ENGLISH,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_ENGLISH_COLOR_TOOLTIP,
@@ -367,8 +311,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Zone_French
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_FRA] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE_FRENCH,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_FRENCH_COLOR_TOOLTIP,
@@ -376,8 +320,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Zone_German
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_GER] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE_GERMAN,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_GERMAN_COLOR_TOOLTIP,
@@ -385,8 +329,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Zone_Japan
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_ZONE_JAPANESE,
             tooltipText = SI_SOCIAL_OPTIONS_ZONE_JAPANESE_COLOR_TOOLTIP,
@@ -394,8 +338,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_NPC
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_MONSTER_SAY,
             overrideName = SI_CHAT_CHANNEL_NAME_NPC,
@@ -404,8 +348,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Emote
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_EMOTE] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_EMOTE,
             tooltipText = SI_SOCIAL_OPTIONS_EMOTE_COLOR_TOOLTIP,
@@ -413,8 +357,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_System
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SYSTEM] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_SYSTEM,
             tooltipText = SI_SOCIAL_OPTIONS_SYSTEM_COLOR_TOOLTIP,
@@ -430,8 +374,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Guild1
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD1] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_GUILD_1,
             tooltipText = SI_SOCIAL_OPTIONS_GUILD1_COLOR_TOOLTIP,
@@ -439,8 +383,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Officer1
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER1] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_OFFICER_1,
             tooltipText = SI_SOCIAL_OPTIONS_OFFICER1_COLOR_TOOLTIP,
@@ -456,8 +400,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Guild2
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD2] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_GUILD_2,
             tooltipText = SI_SOCIAL_OPTIONS_GUILD2_COLOR_TOOLTIP,
@@ -465,8 +409,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Officer2
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER2] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_OFFICER_2,
             tooltipText = SI_SOCIAL_OPTIONS_OFFICER2_COLOR_TOOLTIP,
@@ -482,8 +426,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Guild3
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD3] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_GUILD_3,
             tooltipText = SI_SOCIAL_OPTIONS_GUILD3_COLOR_TOOLTIP,
@@ -491,8 +435,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Officer3
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER3] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_OFFICER_3,
             tooltipText = SI_SOCIAL_OPTIONS_OFFICER3_COLOR_TOOLTIP,
@@ -508,8 +452,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Guild4
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD4] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_GUILD_4,
             tooltipText = SI_SOCIAL_OPTIONS_GUILD4_COLOR_TOOLTIP,
@@ -517,8 +461,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Officer4
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER4] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_OFFICER_4,
             tooltipText = SI_SOCIAL_OPTIONS_OFFICER4_COLOR_TOOLTIP,
@@ -534,8 +478,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Guild5
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD5] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_GUILD_5,
             tooltipText = SI_SOCIAL_OPTIONS_GUILD5_COLOR_TOOLTIP,
@@ -543,8 +487,8 @@ local ZO_OptionsPanel_Social_ControlData =
         --Options_Social_ChatColor_Officer5
         [OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER5] = 
         {
-            controlType = OPTIONS_CUSTOM,
-            customSetupFunction = ZO_OptionsPanel_Social_InitializeColorControl,
+            controlType = OPTIONS_CHAT_COLOR,
+            text = ZO_OptionsPanel_Social_GetColorControlName,
             panel = SETTING_PANEL_SOCIAL,
             chatChannelCategory = CHAT_CATEGORY_OFFICER_5,
             tooltipText = SI_SOCIAL_OPTIONS_OFFICER5_COLOR_TOOLTIP,

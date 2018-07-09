@@ -42,7 +42,7 @@ function ZO_RadioButtonGroup:SetButtonState(button, clickedButton, enabled)
     end
 end
 
-function ZO_RadioButtonGroup:HandleClick(control, buttonId)
+function ZO_RadioButtonGroup:HandleClick(control, buttonId, ignoreCallback)
     if not self.m_enabled or self.m_clickedButton == control then
         return
     end
@@ -67,7 +67,7 @@ function ZO_RadioButtonGroup:HandleClick(control, buttonId)
         local previousControl = self.m_clickedButton
         self.m_clickedButton = control
 
-        if self.onSelectionChangedCallback then
+        if self.onSelectionChangedCallback and not ignoreCallback then
             self:onSelectionChangedCallback(control, previousControl)
         end
     end
@@ -81,8 +81,8 @@ function ZO_RadioButtonGroup:Add(button)
             self.m_buttons[button] = { originalHandler = originalHandler, isValidOption = true } -- newly added buttons always start as valid options for now.
             
             -- This throws away return values from the original function, which is most likely ok in the case of a click handler.
-            local newHandler =  function(control, buttonId) 
-                self:HandleClick(control, buttonId)
+            local newHandler =  function(control, buttonId, ignoreCallback) 
+                self:HandleClick(control, buttonId, ignoreCallback)
 
                 if originalHandler then
                     originalHandler(control, buttonId)
@@ -145,11 +145,11 @@ function ZO_RadioButtonGroup:Clear()
     self.m_clickedButton = nil
 end
 
-function ZO_RadioButtonGroup:SetClickedButton(button)
+function ZO_RadioButtonGroup:SetClickedButton(button, ignoreCallback)
     local buttonData = self.m_buttons[button]
     if(buttonData and buttonData.isValidOption)
     then
-       button:GetHandler("OnClicked")(button, MOUSE_BUTTON_INDEX_LEFT)
+       button:GetHandler("OnClicked")(button, MOUSE_BUTTON_INDEX_LEFT, ignoreCallback)
     end
 end
 

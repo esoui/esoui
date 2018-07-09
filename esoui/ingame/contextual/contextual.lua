@@ -159,7 +159,7 @@ function ZO_ContextualActionBar_OnInitialized(self)
     end)
 
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_ACTION_SLOT_UPDATED, OnSlotsUpdated)
-    EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_ACTION_SLOTS_FULL_UPDATE, OnSlotsUpdated)
+    EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, OnSlotsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_PLAYER_ACTIVATED, OnSlotsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_POWER_UPDATE, OnPowerUpdate)
     EVENT_MANAGER:AddFilterForEvent("ZO_Contextual", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH, REGISTER_FILTER_UNIT_TAG, "reticleover")

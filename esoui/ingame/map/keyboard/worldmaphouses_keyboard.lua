@@ -11,7 +11,7 @@ function ZO_MapHouses_Keyboard:New(...)
 end
 
 function ZO_MapHouses_Keyboard:Initialize(control)
-    ZO_MapHouses_Shared.Initialize(self, control)
+    ZO_MapHouses_Shared.Initialize(self, control, ZO_FadeSceneFragment)
     self:SetNoHousesLabelControl(control:GetNamedChild("NoHouses"))
 end
 

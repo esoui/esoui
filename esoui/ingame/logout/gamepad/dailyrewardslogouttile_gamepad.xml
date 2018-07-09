@@ -1,9 +1,0 @@
-<GuiXml>
-    <Controls>
-        <Control name="ZO_DailyRewardsLogoutTile_Gamepad_Control" inherits="ZO_DailyRewardsLogoutTile_Control ZO_ActionTile_Gamepad_Control" virtual="true">
-            <OnInitialized>
-                ZO_DailyRewardsLogoutTile_Gamepad_OnInitialized(self)
-            </OnInitialized>
-        </Control>
-    </Controls>
-</GuiXml>

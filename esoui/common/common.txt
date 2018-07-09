@@ -85,8 +85,8 @@ EsoUI\Common\Tooltip\CommonTooltips.lua
 EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.lua
 EsoUI\Common\ZO_Tooltip\Gamepad\ZO_Tooltip_Gamepad.xml
 
-EsoUI\Common\ZO_IMECandidates\ZO_IMECandidates.lua
-EsoUI\Common\ZO_IMECandidates\ZO_IMECandidates.xml
+EsoUI\Common\ZO_IMECandidates\PC\ZO_IMECandidates.lua
+EsoUI\Common\ZO_IMECandidates\PC\ZO_IMECandidates.xml
 
 EsoUI\Common\MarketTemplates\MarketTemplates_Shared.xml
 EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.lua

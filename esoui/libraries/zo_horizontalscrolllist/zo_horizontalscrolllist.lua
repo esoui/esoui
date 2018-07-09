@@ -325,6 +325,11 @@ function ZO_HorizontalScrollList:SetAutoScroll(movementType, autoScrollDuration,
     self.autoScrollPostInteractionDuration = postInteractionDuration or autoScrollDuration
 end
 
+function ZO_HorizontalScrollList:ResetAutoScrollTimer()
+    self.lastScrollTime = GetFrameTimeSeconds()
+    self.lastInteractionAutomatic = false
+end
+
 --[[ Private API ]]--
 
 function ZO_HorizontalScrollList:OnUpdate(currentFrameTimeSeconds)

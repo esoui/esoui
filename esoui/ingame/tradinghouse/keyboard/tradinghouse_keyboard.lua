@@ -302,14 +302,20 @@ function ZO_TradingHouseManager:HandleTabSwitch(tabData)
     local notBrowseMode = mode ~= ZO_TRADING_HOUSE_MODE_BROWSE
     local notListingsMode = mode ~= ZO_TRADING_HOUSE_MODE_LISTINGS
 
+    -- sell mode controls
     self.m_postItems:SetHidden(notSellMode)
+
+    -- search/browse mode controls
     self.m_browseItems:SetHidden(notBrowseMode)
     self.m_searchResultsList:SetHidden(notBrowseMode)
     self.m_searchSortHeadersControl:SetHidden(notBrowseMode)
     self.m_nagivationBar:SetHidden(notBrowseMode)
-    self.m_noItemsContainer:SetHidden(notBrowseMode)
+    self.noSearchItemsContainer:SetHidden(notBrowseMode)
+
+    -- player listings mode controls
     self.m_postedItemsList:SetHidden(notListingsMode)
     self.m_postedItemsHeader:SetHidden(notListingsMode)
+    self.noPostedItemsContainer:SetHidden(notListingsMode)
 
     if mode == ZO_TRADING_HOUSE_MODE_SELL then
         SCENE_MANAGER:AddFragment(INVENTORY_FRAGMENT)
@@ -588,13 +594,15 @@ function ZO_TradingHouseManager:OnListingsRequestSuccess()
     ZO_ScrollList_Clear(list)
 
     for i = 1, GetNumTradingHouseListings() do
-        local itemData = ZO_TradingHouse_CreateItemData(i, GetTradingHouseListingItemInfo)
+        local itemData = ZO_TradingHouse_CreateListingItemData(i)
         if itemData then
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(ITEM_LISTINGS_DATA_TYPE, itemData)
         end
     end
 
     ZO_ScrollList_Commit(list)
+
+    self.noPostedItemsLabel:SetHidden(#scrollData > 0)
 end
 
 function ZO_TradingHouseManager:RefreshListingsIfNecessary()
@@ -784,7 +792,7 @@ function ZO_TradingHouseManager:RebuildSearchResultsPage()
     ZO_ScrollList_ResetToTop(list)
 
     for i = 1, self.m_numItemsOnPage do
-        local result = ZO_TradingHouse_CreateItemData(i, GetTradingHouseSearchResultItemInfo)
+        local result = ZO_TradingHouse_CreateSearchResultItemData(i)
         if result then
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(SEARCH_RESULTS_DATA_TYPE, result)
         end
@@ -796,7 +804,7 @@ function ZO_TradingHouseManager:RebuildSearchResultsPage()
     -- If no results were returned, disallow further searches (until one or more search criteria are modified),
     -- and display a "no items found" label.
     self.m_searchAllowed = (numItems ~= 0)
-    self.m_noItemsLabel:SetHidden(self.m_searchAllowed)
+    self.noSearchItemsLabel:SetHidden(self.m_searchAllowed)
 
     ZO_ScrollList_Commit(list)
 end
@@ -820,7 +828,7 @@ function ZO_TradingHouseManager:AddGuildSpecificItems(ignoreFiltering)
     -- If no results were returned, disallow further searches (until one or more search criteria are modified),
     -- and display a "no items found" label.
     self.m_searchAllowed = (numItems ~= 0)
-    self.m_noItemsLabel:SetHidden(self.m_searchAllowed)
+    self.noSearchItemsLabel:SetHidden(self.m_searchAllowed)
 
     ZO_ScrollList_Commit(list)
 
@@ -873,6 +881,7 @@ end
 function ZO_TradingHouseManager:ClearListedItems()
     ZO_ScrollList_Clear(self.m_postedItemsList)
     ZO_ScrollList_Commit(self.m_postedItemsList)
+    self.noPostedItemsLabel:SetHidden(false)
 end
 
 local function ResetSearchFilter(entryIndex, entryData)
@@ -1211,11 +1220,12 @@ end
 function ZO_TradingHouseManager:RunInitialSetup(control)
     self.m_leftPane = control:GetNamedChild("LeftPane")
 
-    self.m_noItemsContainer = control:GetNamedChild("ItemPaneNoItemsContainer")
-    self.m_noItemsContainer:SetHidden(false)
-    self.m_noItemsLabel = self.m_noItemsContainer:GetChild()
-    self.m_noItemsLabel:SetHidden(true)
-    self.m_noItemsLabelSavedHiddenState = self.m_noItemsLabel:IsHidden()
+    self.noSearchItemsContainer = control:GetNamedChild("ItemPaneNoItemsContainer")
+    self.noSearchItemsLabel = self.noSearchItemsContainer:GetNamedChild("NoItems")
+
+    self.noPostedItemsContainer = control:GetNamedChild("PostedItemsNoItemsContainer")
+    self.noPostedItemsLabel = self.noPostedItemsContainer:GetNamedChild("NoItems")
+
     self.m_playerMoney = {}
 
     self:InitializeSharedEvents()
@@ -1225,8 +1235,6 @@ function ZO_TradingHouseManager:RunInitialSetup(control)
     self:InitializeBrowseItems(control)
     self:InitializeListings(control)
     self:InitializeScene()
-
-    return self
 end
 
 local function SetPostPriceCallback(moneyInput, gold, eventType)
@@ -1253,8 +1261,8 @@ end
 function ZO_TradingHouseManager:AllowSearch()
     self.m_searchAllowed = true
 
-    if self.m_noItemsLabel then
-        self.m_noItemsLabel:SetHidden(true)
+    if self.noSearchItemsLabel then
+        self.noSearchItemsLabel:SetHidden(true)
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)

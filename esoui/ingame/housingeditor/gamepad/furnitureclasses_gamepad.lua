@@ -62,13 +62,16 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
     local PRICE_LABEL_PADDING_X = 5
 
     local function MarketProductEntryDataSetup(control, data, selected, ...)
+        local canBePurchased = data.furnitureObject:CanBePurchased()
+        data.iconDesaturation = canBePurchased and 0 or 1
+        data.disabled = not canBePurchased
         FurnitureEntryDataSetup(control, data, selected, ...)
 
         local furnitureObject = data.furnitureObject
 
         ZO_CurrencyControl_SetSimpleCurrency(control.priceLabel, ZO_Currency_MarketCurrencyToUICurrency(furnitureObject.currencyType), furnitureObject.costAfterDiscount, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL)
         
-        local priceWidth = control.priceLabel:GetTextWidth() 
+        local priceWidth = control.priceLabel:GetTextWidth()
         control.label:SetDimensions(ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT - PRICE_LABEL_PADDING_X - priceWidth)
 
         if furnitureObject.onSale then
@@ -90,7 +93,7 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
             subLabelTextColor = selected and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
             control.subLabel1:SetText(zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, furnitureObject.discountPercent))
             control.subLabel1:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-        elseif furnitureObject.isNew then
+        elseif furnitureObject.isNew and canBePurchased then -- only show the new tag if the product isn't purchased
             subLabelBackgroundColor = selected and ZO_MARKET_PRODUCT_NEW_COLOR or ZO_MARKET_PRODUCT_NEW_DIMMED_COLOR
             subLabelTextColor = selected and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
             control.subLabel1:SetText(GetString(SI_MARKET_TILE_CALLOUT_NEW))
@@ -375,7 +378,7 @@ end
 
 do
     local function CreateCategoryEntryData(categoryData)
-        local name, gamepadIcon
+        local gamepadIcon
         local categoryId = categoryData:GetCategoryId()
         if categoryId == ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
             gamepadIcon = ZO_NO_TEXTURE_FILE -- TODO: get an icon for this category

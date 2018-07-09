@@ -79,6 +79,21 @@ function ZO_GiftInventoryView_Keyboard:ShowClaimGiftDialog()
     ZO_Dialogs_ShowDialog("CONFIRM_CLAIM_GIFT_KEYBOARD", self.gift)
 end
 
+function ZO_GiftInventoryView_Keyboard:ShowClaimGiftNoticeDialog(noticeText, helpCategoryIndex, helpIndex)
+    local dialogData =
+    {
+        gift = self.gift,
+        helpCategoryIndex = helpCategoryIndex,
+        helpIndex = helpIndex,
+    }
+    local textParams =
+    {
+        titleParams = { self.gift:GetName() },
+        mainTextParams = { noticeText },
+    }
+    ZO_Dialogs_ShowDialog("CLAIM_GIFT_NOTICE_KEYBOARD", dialogData, textParams)
+end
+
 function ZO_GiftInventoryView_Keyboard:DeclineGift()
     if self:IsReceivedGift() then
         ZO_Dialogs_ShowDialog("CONFIRM_RETURN_GIFT_KEYBOARD", self.gift)

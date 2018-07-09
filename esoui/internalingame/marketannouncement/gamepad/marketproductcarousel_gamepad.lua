@@ -79,12 +79,22 @@ function ZO_MarketProductCarousel_Gamepad:SetSelectKeybindButton(selectKeybindBu
     self.selectKeybindButton = selectKeybindButton
 end
 
+function ZO_MarketProductCarousel_Gamepad:SetHelpKeybindButton(helpKeybindButton)
+    self.helpKeybindButton = helpKeybindButton
+end
+
 function ZO_MarketProductCarousel_Gamepad:SetScrollKeybindButton(scrollKeybindButton)
     self.scrollKeybindButton = scrollKeybindButton
 end
 
+function ZO_MarketProductCarousel_Gamepad:SetKeybindAnchorControl(keybindAnchorControl)
+    self.keybindAnchorControl = keybindAnchorControl
+end
+
 function ZO_MarketProductCarousel_Gamepad:EntrySetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
     control.object:SetKeybindButton(self.selectKeybindButton)
+    control.object:SetHelpKeybindButton(self.helpKeybindButton)
+    control.object:SetKeybindAnchorControl(self.keybindAnchorControl)
 
     ZO_MarketProductCarousel_Shared.EntrySetup(self, control, data, self.active and selected, reselectingDuringRebuild, enabled, activated)
 end

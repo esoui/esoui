@@ -104,6 +104,10 @@ function ZO_SelectionIndicator:AddButton()
     return button
 end
 
+function ZO_SelectionIndicator:GetButtonByIndex(index)
+    return self.indicatorList[index]
+end
+
 function ZO_SelectionIndicator:GetButtonIndex(button)
     for i, indicatorButton in ipairs(self.indicatorList) do
         if button == indicatorButton then

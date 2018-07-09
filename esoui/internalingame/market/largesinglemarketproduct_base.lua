@@ -134,10 +134,7 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
         textCalloutTextColor = isFocused and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
     end
 
-    if textCalloutBackgroundColor then
-        self:SetCalloutColor(textCalloutBackgroundColor)
-        self.textCallout:SetColor(textCalloutTextColor:UnpackRGB())
-    end
+    self:ApplyCalloutColor(textCalloutBackgroundColor, textCalloutTextColor)
 
     local backgroundColor = isFocused and ZO_MARKET_PRODUCT_BACKGROUND_BRIGHTNESS_COLOR or ZO_MARKET_DIMMED_COLOR
     self.background:SetColor(backgroundColor:UnpackRGB())

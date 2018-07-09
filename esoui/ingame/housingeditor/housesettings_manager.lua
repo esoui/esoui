@@ -84,6 +84,8 @@ function ZO_HouseSettings_Manager:GetDefaultHousingPermission(houseId)
             return HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_DECORATOR
         elseif preset == HOUSE_PERMISSION_PRESET_SETTING_VISITOR then
             return HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_VISITOR
+        elseif preset == HOUSE_PERMISSION_PRESET_SETTING_LIMITED_VISITOR then
+            return HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_LIMITED_VISITOR
         end
     end
     return HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_NO_ACCESS
@@ -100,6 +102,9 @@ function ZO_HouseSettings_Manager:GetHousingPermissionsFromDefaultAccess(default
     elseif defaultAccessType == HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_DECORATOR then
         canAccess = true
         preset = HOUSE_PERMISSION_PRESET_SETTING_DECORATOR
+    elseif defaultAccessType == HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_LIMITED_VISITOR then
+        canAccess = true
+        preset = HOUSE_PERMISSION_PRESET_SETTING_LIMITED_VISITOR
     end
 
     return canAccess, preset

@@ -99,7 +99,13 @@
             </Action>
 
             <Action name="SPECIAL_MOVE_WEAPON_SWAP">
-                <Down>OnWeaponSwap()</Down>
+                <Down>
+                    if SKILLS_FRAGMENT and SKILLS_FRAGMENT:IsShowing() then
+                        ACTION_BAR_ASSIGNMENT_MANAGER:CycleCurrentHotbar()
+                    else
+                        OnWeaponSwap()
+                    end
+                </Down>
             </Action>
 
             <Action name="SPECIAL_MOVE_WEAPON_SWAP_TO_SET_1">

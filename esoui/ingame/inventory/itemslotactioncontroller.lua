@@ -107,10 +107,13 @@ end
 
 function ZO_ItemSlotActionsController:SetInventorySlot(inventorySlot)
     self.inventorySlot = inventorySlot
+    self:RebuildActions()
+end
 
+function ZO_ItemSlotActionsController:RebuildActions()
     for i, command in ipairs(self) do
         if command.activateCallback then
-            command.activateCallback(inventorySlot)
+            command.activateCallback(self.inventorySlot)
         end
     end
 

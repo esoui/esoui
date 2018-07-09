@@ -11,6 +11,7 @@ end
 function ZO_KeyboardOptions:Initialize(control)
     self.currentPanelId = 100 --must be higher than total EsoGameDataEnums::SettingSystemPanel, currently 6
     ZO_SharedOptions.Initialize(self, control)
+    self.colorOptionHighlight = control:GetNamedChild("Options_Color_SharedHighlight")
     OPTIONS_WINDOW_FRAGMENT = ZO_FadeSceneFragment:New(control)
     OPTIONS_WINDOW_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_FRAGMENT_SHOWING then
@@ -87,6 +88,8 @@ function ZO_KeyboardOptions:InitializeControl(control)
         -- Update visible state
         control:SetHidden(not (data.panel == self.currentPanel))
     end
+
+    ZO_Options_SetOptionActive(control)
 end
 
 function ZO_KeyboardOptions:ChangePanels(panel)
@@ -160,6 +163,10 @@ end
 
 function ZO_KeyboardOptions:UpdateCurrentPanelOptions(saveOptions)
     self:UpdatePanelOptions(self.currentPanel, saveOptions)
+end
+
+function ZO_KeyboardOptions:GetColorOptionHighlight()
+    return self.colorOptionHighlight
 end
 
 -- Pass SAVE_CURRENT_VALUES in the first parameter to save the updated values (can't click cancel to restore afterwards).

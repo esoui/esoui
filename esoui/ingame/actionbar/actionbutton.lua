@@ -80,14 +80,6 @@ function ActionButton:New(slotNum, buttonType, parent, controlTemplate)
     return newB
 end
 
-function ActionButton:IsClassBarButton()
-    return self.slot.slotNum > ACTION_BAR_FIRST_CLASS_BAR_SLOT and self.slot.slotNum <= ACTION_BAR_FIRST_CLASS_BAR_SLOT + ACTION_BAR_CLASS_BAR_SIZE
-end
-
-function ActionButton:IsSiegeBarButton()
-    return self.slot.slotNum > ACTION_BAR_FIRST_SIEGE_BAR_SLOT and self.slot.slotNum <= ACTION_BAR_FIRST_SIEGE_BAR_SLOT + ACTION_BAR_SIEGE_BAR_SIZE
-end
-
 function ActionButton:SetShowBindingText(visible)
     self.buttonText:SetHidden(not visible)
 end
@@ -149,10 +141,6 @@ local function SetupItemSlot(slotObject, slotId)
     slotObject:SetupCount()
 end
 
-local function SetupSiegeActionSlot(slotObject, slotId)
-    SetupActionSlot(slotObject, slotId)
-end
-
 local function SetupCollectibleActionSlot(slotObject, slotId)
     SetupActionSlotWithBg(slotObject, slotId)
     slotObject:ClearCount()
@@ -162,7 +150,6 @@ SetupSlotHandlers =
 {
     [ACTION_TYPE_ABILITY]       = SetupAbilitySlot,
     [ACTION_TYPE_ITEM]          = SetupItemSlot,
-    [ACTION_TYPE_SIEGE_ACTION]  = SetupSiegeActionSlot,
     [ACTION_TYPE_COLLECTIBLE]   = SetupCollectibleActionSlot,
 }
 

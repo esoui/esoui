@@ -1,7 +1,7 @@
 local EVENT_NAMESPACE = "GamepadNotifications"
 local GAMEPAD_NOTIFICATIONS_CONFIRM_DECLINE_DIALOG_NAME = "GamepadNotificationsConfirmDecline"
 
-local GAMEPAD_NOTIFICATION_ICONS =
+ZO_GAMEPAD_NOTIFICATION_ICONS =
 {
     [NOTIFICATION_TYPE_FRIEND] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_friend.dds",
     [NOTIFICATION_TYPE_GUILD] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_guild.dds",
@@ -21,6 +21,7 @@ local GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/Gamepad/gp_notification_ESO+.dds",
+    [NOTIFICATION_TYPE_GIFT_GRACE_STARTED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFTING_UNLOCKED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
@@ -28,7 +29,7 @@ local GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_NEW_DAILY_LOGIN_REWARD] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_dailyLoginRewards.dds",
 }
 
-local DATA_TYPE_TO_TEMPLATE = 
+ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE = 
 {
     [NOTIFICATIONS_REQUEST_DATA] = "ZO_GamepadNotificationsRequestRow",
     [NOTIFICATIONS_YES_NO_DATA] = "ZO_GamepadNotificationsYesNoRow",
@@ -42,6 +43,7 @@ local DATA_TYPE_TO_TEMPLATE =
     [NOTIFICATIONS_GIFT_RECEIVED_DATA] = "ZO_GamepadNotificationsGiftReceivedRow",
     [NOTIFICATIONS_GIFT_RETURNED_DATA] = "ZO_GamepadNotificationsGiftReturnedRow",
     [NOTIFICATIONS_GIFT_CLAIMED_DATA] = "ZO_GamepadNotificationsGiftClaimedRow",
+    [NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA] = "ZO_GamepadNotificationsGiftingUnlockedRow",
     [NOTIFICATIONS_GIFTING_UNLOCKED_DATA] = "ZO_GamepadNotificationsGiftingUnlockedRow",
     [NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA] = "ZO_GamepadNotificationsNewDailyLoginRewardRow",
 }
@@ -52,7 +54,7 @@ local DATA_TYPE_TO_TEMPLATE =
 -- Friend Request Provier
 -------------------------
 
-local ZO_GamepadFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
+ZO_GamepadFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
 
 function ZO_GamepadFriendRequestProvider:New(notificationManager)
     local provider = ZO_FriendRequestProvider.New(self, notificationManager)
@@ -98,7 +100,7 @@ end
 -- Guild Invite Request Provier
 -------------------------
 
-local ZO_GamepadGuildInviteProvider = ZO_GuildInviteProvider:Subclass()
+ZO_GamepadGuildInviteProvider = ZO_GuildInviteProvider:Subclass()
 
 function ZO_GamepadGuildInviteProvider:New(notificationManager)
     local provider = ZO_GuildInviteProvider.New(self, notificationManager)
@@ -153,7 +155,7 @@ end
 --Guild MotD Provider
 -------------------------
 
-local ZO_GamepadGuildMotDProvider = ZO_GuildMotDProvider:Subclass()
+ZO_GamepadGuildMotDProvider = ZO_GuildMotDProvider:Subclass()
 
 function ZO_GamepadGuildMotDProvider:New(notificationManager)
     local provider = ZO_GuildMotDProvider.New(self, notificationManager)
@@ -169,7 +171,7 @@ end
 --Campaign Queue Provider
 -------------------------
 
-local ZO_GamepadCampaignQueueProvider = ZO_CampaignQueueProvider:Subclass()
+ZO_GamepadCampaignQueueProvider = ZO_CampaignQueueProvider:Subclass()
 
 function ZO_GamepadCampaignQueueProvider:New(notificationManager)
     local provider = ZO_CampaignQueueProvider.New(self, notificationManager)
@@ -182,7 +184,7 @@ end
 
 --Resurrect Provider
 -------------------------
-local ZO_GamepadResurrectProvider = ZO_ResurrectProvider:Subclass()
+ZO_GamepadResurrectProvider = ZO_ResurrectProvider:Subclass()
 
 function ZO_GamepadResurrectProvider:New(notificationManager)
     local provider = ZO_ResurrectProvider.New(self, notificationManager)
@@ -192,7 +194,7 @@ end
 
 --Group Invite Provider
 -------------------------
-local ZO_GamepadGroupInviteProvider = ZO_GroupInviteProvider:Subclass()
+ZO_GamepadGroupInviteProvider = ZO_GroupInviteProvider:Subclass()
 
 function ZO_GamepadGroupInviteProvider:New(notificationManager)
     local provider = ZO_GroupInviteProvider.New(self, notificationManager)
@@ -203,7 +205,7 @@ end
 --Trade Invite Provider
 -------------------------
 
-local ZO_GamepadTradeInviteProvider = ZO_TradeInviteProvider:Subclass()
+ZO_GamepadTradeInviteProvider = ZO_TradeInviteProvider:Subclass()
 
 function ZO_GamepadTradeInviteProvider:New(notificationManager)
     local provider = ZO_TradeInviteProvider.New(self, notificationManager)
@@ -215,7 +217,7 @@ end
 --Quest Share Provider
 -------------------------
 
-local ZO_GamepadQuestShareProvider = ZO_QuestShareProvider:Subclass()
+ZO_GamepadQuestShareProvider = ZO_QuestShareProvider:Subclass()
 
 function ZO_GamepadQuestShareProvider:New(notificationManager)
     local provider = ZO_QuestShareProvider.New(self, notificationManager)
@@ -226,7 +228,7 @@ end
 --Pledge of Mara Provider
 -------------------------
 
-local ZO_GamepadPledgeOfMaraProvider = ZO_PledgeOfMaraProvider:Subclass()
+ZO_GamepadPledgeOfMaraProvider = ZO_PledgeOfMaraProvider:Subclass()
 
 function ZO_GamepadPledgeOfMaraProvider:New(notificationManager)
     local provider = ZO_PledgeOfMaraProvider.New(self, notificationManager)
@@ -237,7 +239,7 @@ end
 -- CS Chat Request Provider
 -------------------------
 
-local ZO_GamepadAgentChatRequestProvider = ZO_AgentChatRequestProvider:Subclass()
+ZO_GamepadAgentChatRequestProvider = ZO_AgentChatRequestProvider:Subclass()
 
 function ZO_GamepadAgentChatRequestProvider:New(notificationManager)
     local provider = ZO_AgentChatRequestProvider.New(self, notificationManager)
@@ -251,7 +253,7 @@ end
 -- Leaderboard Raid Provider
 -------------------------
 
-local ZO_GamepadLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
+ZO_GamepadLeaderboardRaidProvider = ZO_LeaderboardRaidProvider:Subclass()
 
 function ZO_GamepadLeaderboardRaidProvider:New(notificationManager)
     return ZO_LeaderboardRaidProvider.New(self, notificationManager)
@@ -310,7 +312,7 @@ end
 --Collections Update Provider
 -------------------------
 
-local ZO_GamepadCollectionsUpdateProvider = ZO_CollectionsUpdateProvider:Subclass()
+ZO_GamepadCollectionsUpdateProvider = ZO_CollectionsUpdateProvider:Subclass()
 
 function ZO_GamepadCollectionsUpdateProvider:New(notificationManager)
     return ZO_CollectionsUpdateProvider.New(self, notificationManager)
@@ -343,7 +345,7 @@ end
 --LFG Update Provider
 -------------------------
 
-local ZO_GamepadLFGUpdateProvider = ZO_LFGUpdateProvider:Subclass()
+ZO_GamepadLFGUpdateProvider = ZO_LFGUpdateProvider:Subclass()
 
 function ZO_GamepadLFGUpdateProvider:New(notificationManager)
     return ZO_LFGUpdateProvider.New(self, notificationManager)
@@ -353,7 +355,7 @@ end
 --Duel Invite Provider
 -------------------------
 
-local ZO_GamepadDuelInviteProvider = ZO_DuelInviteProvider:Subclass()
+ZO_GamepadDuelInviteProvider = ZO_DuelInviteProvider:Subclass()
 
 function ZO_GamepadDuelInviteProvider:New(notificationManager)
     local provider = ZO_DuelInviteProvider.New(self, notificationManager)
@@ -364,7 +366,7 @@ end
 -- ZO_GamepadEsoPlusSubscriptionStatusProvider
 -------------------------
 
-local ZO_GamepadEsoPlusSubscriptionStatusProvider = ZO_EsoPlusSubscriptionStatusProvider:Subclass()
+ZO_GamepadEsoPlusSubscriptionStatusProvider = ZO_EsoPlusSubscriptionStatusProvider:Subclass()
 
 function ZO_GamepadEsoPlusSubscriptionStatusProvider:New(notificationManager)
     return ZO_EsoPlusSubscriptionStatusProvider.New(self, notificationManager)
@@ -376,10 +378,25 @@ function ZO_GamepadEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
     end
 end
 
+-- ZO_GamepadGiftingGracePeriodStartedProvider
+-------------------------
+
+ZO_GamepadGiftingGracePeriodStartedProvider = ZO_GiftingGracePeriodStartedProvider:Subclass()
+
+function ZO_GamepadGiftingGracePeriodStartedProvider:New(notificationManager)
+    return ZO_GiftingGracePeriodStartedProvider.New(self, notificationManager)
+end
+
+function ZO_GamepadGiftingGracePeriodStartedProvider:ShowMoreInfo(entryData)
+    if entryData.moreInfo then
+        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(entryData.helpCategoryIndex, entryData.helpIndex)
+    end
+end
+
 -- ZO_GamepadGiftingUnlockedProvider
 -------------------------
 
-local ZO_GamepadGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
+ZO_GamepadGiftingUnlockedProvider = ZO_GiftingUnlockedProvider:Subclass()
 
 function ZO_GamepadGiftingUnlockedProvider:New(notificationManager)
     return ZO_GiftingUnlockedProvider.New(self, notificationManager)
@@ -394,7 +411,7 @@ end
 --Notification Manager
 -------------------------
 
-local ZO_GamepadNotificationManager = ZO_Object:MultiSubclass(ZO_NotificationManager, ZO_Gamepad_ParametricList_Screen)
+ZO_GamepadNotificationManager = ZO_Object:MultiSubclass(ZO_NotificationManager, ZO_Gamepad_ParametricList_Screen)
 
 function ZO_GamepadNotificationManager:New(control)
     local notificationManager = ZO_Object.New(self)
@@ -490,6 +507,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadDuelInviteProvider:New(self),
         ZO_GamepadEsoPlusSubscriptionStatusProvider:New(self),
         ZO_GiftInventoryProvider:New(self),
+        ZO_GamepadGiftingGracePeriodStartedProvider:New(self),
         ZO_GamepadGiftingUnlockedProvider:New(self),
         ZO_DailyLoginRewardsClaimProvider:New(self),
     }
@@ -711,16 +729,16 @@ function ZO_GamepadNotificationManager:RefreshVisible()
 end
 
 function ZO_GamepadNotificationManager:AddDataEntry(dataType, data, isHeader)
-    local entryData = ZO_GamepadEntryData:New(data.shortDisplayText, GAMEPAD_NOTIFICATION_ICONS[data.notificationType])
+    local entryData = ZO_GamepadEntryData:New(data.shortDisplayText, ZO_GAMEPAD_NOTIFICATION_ICONS[data.notificationType])
     entryData.data = data
     entryData:SetIconTintOnSelection(true)
     entryData:SetIconDisabledTintOnSelection(true)
 
     if isHeader then
         entryData:SetHeader(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", data.notificationType)))
-        self.list:AddEntryWithHeader(DATA_TYPE_TO_TEMPLATE[dataType], entryData)
+        self.list:AddEntryWithHeader(ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE[dataType], entryData)
     else
-        self.list:AddEntry(DATA_TYPE_TO_TEMPLATE[dataType], entryData)
+        self.list:AddEntry(ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE[dataType], entryData)
     end
 end
 

@@ -1,63 +1,8 @@
 <GuiXml>
     <Controls>
-        <Control name="Options_Social_ColorOption" mouseEnabled="true" virtual="true">
-            <Dimensions x="510" y="26" />
-            <OnMouseEnter>
-                ZO_Options_OnMouseEnter(self)
-            </OnMouseEnter>
-
-            <OnMouseExit>
-                ZO_Options_OnMouseExit(self)
-            </OnMouseExit>
-
-            <Controls>
-                <Label name="$(parent)Label" font="ZoFontWinH4" wrapMode="ELLIPSIS">
-                    <Anchor point="LEFT" />
-                </Label>
-                <Control name="$(parent)Color" mouseEnabled="true">
-                    <Dimensions x="200" y="26" />
-                    <Anchor point="RIGHT" />
-
-                    <OnMouseEnter>
-                        ZO_OptionsPanel_Social_OnColorOptionEnter(self)
-                    </OnMouseEnter>
-
-                    <OnMouseExit>
-                        ZO_OptionsPanel_Social_OnColorOptionExit(self)
-                    </OnMouseExit>
-
-                    <OnMouseUp>
-                        if upInside then
-                            PlaySound(SOUNDS.DEFAULT_CLICK)
-                        end
-                    </OnMouseUp>
-
-                    <Controls>
-                        <Texture name="$(parent)Texture">
-                            <Dimensions x="36" y="22" />
-                            <Anchor point="LEFT" offsetX="4" />
-                        </Texture>
-                        <Texture name="$(parent)Border" textureFile="EsoUI/Art/ChatWindow/chatOptions_bgColSwatch_frame.dds">
-                            <TextureCoords left="0" right="0.625" top="0" bottom="0.8125"/>
-                            <Dimensions x="40" y="26" />
-                            <Anchor point="CENTER" relativeTo="$(parent)Texture" />
-                        </Texture>
-                    </Controls>
-                </Control>
-            </Controls>
-        </Control>
-
         <Label name="Options_Social_GuildLabel" font="ZoFontWinH3" modifyTextType="UPPERCASE" virtual="true">
             <Dimensions x="510" y="26" />
         </Label>
-
-        <Texture name="Options_Social_SharedHighlight" textureFile="EsoUI/Art/Buttons/generic_highlight.dds" layer="3" hidden="true">
-            <Dimensions x="36" y="22" />
-            <OnInitialized>
-                self.data = { controlType = OPTIONS_CUSTOM }
-                ZO_OptionsWindow_InitializeControl(self)
-            </OnInitialized>
-        </Texture>
 
         <Control name="Options_Social_ChatSettingsSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
             <OnInitialized>
@@ -143,7 +88,7 @@
             </OnEffectivelyHidden>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Say" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Say" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColorsSection" relativePoint="BOTTOMLEFT" offsetY="4" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SAY)
@@ -151,7 +96,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Yell" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Yell" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Say" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_YELL)
@@ -159,7 +104,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_WhisperIncoming" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_WhisperIncoming" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Yell" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_INC)
@@ -167,7 +112,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_WhisperOutoing" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_WhisperOutoing" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_WhisperIncoming" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_OUT)
@@ -175,7 +120,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Group" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Group" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_WhisperOutoing" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GROUP)
@@ -183,7 +128,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Zone" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Zone" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Group" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE)
@@ -191,7 +136,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Zone_English" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Zone_English" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_ENG)
@@ -199,7 +144,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Zone_French" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Zone_French" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_English" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_FRA)
@@ -207,7 +152,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Zone_German" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Zone_German" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_French" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_GER)
@@ -215,7 +160,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Zone_Japanese" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Zone_Japanese" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_German" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN)
@@ -223,7 +168,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_NPC" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_NPC" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Zone_Japanese" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC)
@@ -231,7 +176,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Emote" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Emote" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_NPC" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_EMOTE)
@@ -239,7 +184,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_System" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_System" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Emote" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SYSTEM)
@@ -255,7 +200,7 @@
             </OnInitialized>
         </Label>
 
-        <Control name="Options_Social_ChatColor_Guild1" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Guild1" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild1Title" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD1)
@@ -263,7 +208,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Officer1" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Officer1" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild1" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER1)
@@ -279,7 +224,7 @@
             </OnInitialized>
         </Label>
 
-        <Control name="Options_Social_ChatColor_Guild2" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Guild2" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild2Title" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD2)
@@ -287,7 +232,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Officer2" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Officer2" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild2" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER2)
@@ -303,7 +248,7 @@
             </OnInitialized>
         </Label>
 
-        <Control name="Options_Social_ChatColor_Guild3" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Guild3" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild3Title" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD3)
@@ -311,7 +256,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Officer3" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Officer3" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild3" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER3)
@@ -327,7 +272,7 @@
             </OnInitialized>
         </Label>
 
-        <Control name="Options_Social_ChatColor_Guild4" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Guild4" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild4Title" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD4)
@@ -335,7 +280,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Officer4" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Officer4" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild4" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER4)
@@ -351,7 +296,7 @@
             </OnInitialized>
         </Label>
 
-        <Control name="Options_Social_ChatColor_Guild5" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Guild5" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_Guild5Title" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD5)
@@ -359,7 +304,7 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Social_ChatColor_Officer5" inherits="Options_Social_ColorOption">
+        <Control name="Options_Social_ChatColor_Officer5" inherits="ZO_Options_ChatColor">
             <Anchor point="TOPLEFT" relativeTo="Options_Social_ChatColor_Guild5" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_SOCIAL, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER5)

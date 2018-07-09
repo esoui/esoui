@@ -285,7 +285,7 @@ function ZO_GamepadTradingHouse_BrowseResults:BuildList()
     end
 
     for i = 1, numNonGuildItems do
-        local itemData = ZO_TradingHouse_CreateItemData(i, GetTradingHouseSearchResultItemInfo)
+        local itemData = ZO_TradingHouse_CreateSearchResultItemData(i)
 
         if itemData then
             itemData.itemLink = GetTradingHouseSearchResultItemLink(itemData.slotIndex)

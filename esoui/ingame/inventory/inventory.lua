@@ -46,20 +46,6 @@ GUILD_BANKING_INTERACTION =
 --tabs 
 
 local function HandleTabSwitch(tabData)
-    -- special case inventory list hiding based on selecting quest inventory
-    -- bank filters don't mess with the visibility of the regular inventory
-    if tabData.descriptor == ITEMFILTERTYPE_QUEST then
-        ZO_PlayerInventoryList:SetHidden(true)
-        ZO_PlayerInventoryQuest:SetHidden(false)
-        g_playerInventory.selectedTabType = INVENTORY_QUEST_ITEM
-    end
-
-    if tabData.inventoryType == INVENTORY_BACKPACK then
-        ZO_PlayerInventoryList:SetHidden(false)
-        ZO_PlayerInventoryQuest:SetHidden(true)
-        g_playerInventory.selectedTabType = INVENTORY_BACKPACK
-    end
-
     g_playerInventory:ChangeFilter(tabData)
 end
 
@@ -142,31 +128,11 @@ local sortKeys =
     statusSortOrder = { tiebreaker = "age", isNumeric = true},
     age = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true},
     traitInformationSortOrder = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+    sellInformationSortOrder = { tiebreaker = "name", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
 }
 
 function ZO_Inventory_GetDefaultHeaderSortKeys()
     return sortKeys
-end
-
-local bankSortTypes =
-{
-    ZO_ComboBox:CreateItemEntry(GetString(SI_INVENTORY_SORT_TYPE_NAME), function() g_playerInventory:ChangeSort("name", INVENTORY_BANK) end),
-    ZO_ComboBox:CreateItemEntry(GetString(SI_INVENTORY_SORT_TYPE_PRICE), function() g_playerInventory:ChangeSort("stackSellPrice", INVENTORY_BANK) end),
-    -- NOTE: Bank cannot sort by age...items moved to the bank (or back again) do not have their age persisted yet.
-}
-
-local function InitializeHeaderSort(inventoryType, inventory, headerControl)
-    local sortHeaders = ZO_SortHeaderGroup:New(headerControl, true)
-
-    local function OnSortHeaderClicked(key, order)
-        g_playerInventory:ChangeSort(key, inventoryType, order)
-    end
-
-    sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
-    sortHeaders:AddHeadersFromContainer()
-    sortHeaders:SelectHeaderByKey(inventory.currentSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
-
-    inventory.sortHeaders = sortHeaders
 end
 
 -- Item List Display management
@@ -235,9 +201,21 @@ function ZO_UpdateTraitInformationControlIcon(inventorySlot, slotData)
 
     traitInfoControl:ClearIcons()
 
-    if slotData.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
+    if slotData.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE and not ZO_Store_IsShopping() then
         traitInfoControl:AddIcon(GetPlatformTraitInformationIcon(slotData.traitInformation))
         traitInfoControl:Show()
+    end
+end
+
+function ZO_UpdateSellInformationControlIcon(inventorySlot, slotData)
+    local sellInformationControl = GetControl(inventorySlot, "SellInformation")
+    local sellInformationTexture = GetItemSellInformationIcon(slotData.sellInformation)
+
+    if sellInformationTexture then
+        sellInformationControl:SetTexture(sellInformationTexture)
+        sellInformationControl:SetHidden(not ZO_Store_IsShopping())
+    else
+        sellInformationControl:SetHidden(true)
     end
 end
 
@@ -278,6 +256,7 @@ local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
 
     ZO_UpdateStatusControlIcons(rowControl, slot)
     ZO_UpdateTraitInformationControlIcon(rowControl, slot)
+    ZO_UpdateSellInformationControlIcon(rowControl, slot)
 end
 
 local function GetItemSlotSellValueWithBonus(slot)
@@ -395,23 +374,27 @@ function ZO_InventoryManager:Initialize(control)
     local typicalHiddenColumns =
     {
         ["traitInformationSortOrder"] = true,
+        ["sellInformationSortOrder"] = true,
     }
 
     local questHiddenColumns =
     {
         ["traitInformationSortOrder"] = true,
+        ["sellInformationSortOrder"] = true,
         ["statusSortOrder"] = true,
         ["stackSellPrice"] = true,
     }
 
     local gearHiddenColumns =
     {
-        -- Don't hide anything!
+        ["traitInformationSortOrder"] = function() return GetInteractionType() == INTERACTION_VENDOR end,
+        ["sellInformationSortOrder"] = function() return GetInteractionType() ~= INTERACTION_VENDOR end,
     }
 
     local tradingHouseHiddenColumns =
     {
         ["statusSortOrder"] = true,
+        ["sellInformationSortOrder"] = true,
     }
 
     local HIDE_TAB = true
@@ -649,11 +632,11 @@ function ZO_InventoryManager:Initialize(control)
 
     self.isListDirty = {}
 
-    InitializeHeaderSort(INVENTORY_BACKPACK, inventories[INVENTORY_BACKPACK], ZO_PlayerInventorySortBy)
-    InitializeHeaderSort(INVENTORY_BANK, inventories[INVENTORY_BANK], ZO_PlayerBankSortBy)
-    InitializeHeaderSort(INVENTORY_HOUSE_BANK, inventories[INVENTORY_HOUSE_BANK], ZO_HouseBankSortBy)
-    InitializeHeaderSort(INVENTORY_GUILD_BANK, inventories[INVENTORY_GUILD_BANK], ZO_GuildBankSortBy)
-    InitializeHeaderSort(INVENTORY_CRAFT_BAG, inventories[INVENTORY_CRAFT_BAG], ZO_CraftBagSortBy)
+    self:InitializeHeaderSort(INVENTORY_BACKPACK, inventories[INVENTORY_BACKPACK], ZO_PlayerInventorySortBy)
+    self:InitializeHeaderSort(INVENTORY_BANK, inventories[INVENTORY_BANK], ZO_PlayerBankSortBy)
+    self:InitializeHeaderSort(INVENTORY_HOUSE_BANK, inventories[INVENTORY_HOUSE_BANK], ZO_HouseBankSortBy)
+    self:InitializeHeaderSort(INVENTORY_GUILD_BANK, inventories[INVENTORY_GUILD_BANK], ZO_GuildBankSortBy)
+    self:InitializeHeaderSort(INVENTORY_CRAFT_BAG, inventories[INVENTORY_CRAFT_BAG], ZO_CraftBagSortBy)
 
     self.inventories = inventories
     self.searchToInventoryType = {}
@@ -727,6 +710,20 @@ function ZO_InventoryManager:Initialize(control)
     self:CreateCraftBagFragment()
 
     self:RegisterForEvents(control)
+end
+
+function ZO_InventoryManager:InitializeHeaderSort(inventoryType, inventory, headerControl)
+    local sortHeaders = ZO_SortHeaderGroup:New(headerControl, true)
+
+    local function OnSortHeaderClicked(key, order)
+        self:ChangeSort(key, inventoryType, order)
+    end
+
+    sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+    sortHeaders:AddHeadersFromContainer()
+    sortHeaders:SelectHeaderByKey(inventory.currentSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+
+    inventory.sortHeaders = sortHeaders
 end
 
 do
@@ -1001,10 +998,25 @@ end
 --General
 ---------
 
-function ZO_InventoryManager:SelectAndChangeSort(newSortKey, inventoryType, newSortOrder)
+--Selects a filter tab in this inventory type and then sorts by a key that appears under that filter tab
+function ZO_InventoryManager:SelectAndChangeSort(inventoryType, tabFilterType, newSortKey, newSortOrder)
     local inventoryInfo = self.inventories[inventoryType]
-    inventoryInfo.sortHeaders:SelectHeaderByKey(newSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, not ZO_SortHeaderGroup.FORCE_RESELECT, newSortOrder)
-    self:ChangeSort(newSortKey, inventoryType, newSortOrder)
+    if inventoryInfo then
+        local tabFilter
+        for _, searchTabFilter in ipairs(inventoryInfo.tabFilters) do
+            if searchTabFilter.filterType == tabFilterType then
+                tabFilter = searchTabFilter
+                break
+            end
+        end
+
+        if tabFilter then
+            self:ChangeFilter(tabFilter)
+            --The sort headers change based on the selected tab filter
+            inventoryInfo.sortHeaders:SelectHeaderByKey(newSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, not ZO_SortHeaderGroup.FORCE_RESELECT, newSortOrder)
+            self:ChangeSort(newSortKey, inventoryType, newSortOrder)
+        end
+    end
 end
 
 function ZO_InventoryManager:ChangeSort(newSortKey, inventoryType, newSortOrder)
@@ -1070,6 +1082,20 @@ do
     end
 
     function ZO_InventoryManager:ChangeFilter(filterTab)
+        -- special case inventory list hiding based on selecting quest inventory
+        -- bank filters don't mess with the visibility of the regular inventory
+        if filterTab.descriptor == ITEMFILTERTYPE_QUEST then
+            ZO_PlayerInventoryList:SetHidden(true)
+            ZO_PlayerInventoryQuest:SetHidden(false)
+            self.selectedTabType = INVENTORY_QUEST_ITEM
+        end
+
+        if filterTab.inventoryType == INVENTORY_BACKPACK then
+            ZO_PlayerInventoryList:SetHidden(false)
+            ZO_PlayerInventoryQuest:SetHidden(true)
+            self.selectedTabType = INVENTORY_BACKPACK
+        end
+
         local inventoryType = filterTab.inventoryType
         local inventory = self.inventories[inventoryType]
 
@@ -1087,8 +1113,19 @@ do
         local sortHeaders = displayInventory.sortHeaders
         if sortHeaders then
             sortHeaders:SetHeadersHiddenFromKeyList(inventory.hiddenColumns, true)
+            
+            local canUseLastSavedSortKey = inventory.lastSavedSortKey and inventory.hiddenColumns[inventory.lastSavedSortKey]
+            if type(canUseLastSavedSortKey) == "function" then
+                canUseLastSavedSortKey = canUseLastSavedSortKey()
+            end
 
-            if inventory.lastSavedSortKey and not inventory.hiddenColumns[inventory.lastSavedSortKey] then
+            local canUseCurrentSortKey = inventory.hiddenColumns[inventory.currentSortKey]
+            if canUseCurrentSortKey and type(canUseCurrentSortKey) == "function" then
+                canUseCurrentSortKey = canUseCurrentSortKey()
+            end
+
+
+            if inventory.lastSavedSortKey and not canUseLastSavedSortKey then
                 -- Restore the last saved value if the header exists again
                 local lastSavedSortKey = inventory.lastSavedSortKey
                 local lastSavedSortOrder = inventory.lastSavedSortOrder
@@ -1097,7 +1134,7 @@ do
                 ForceSortDataOnInventory(displayInventory, lastSavedSortKey, lastSavedSortOrder)
                 inventory.lastSavedSortKey = nil
                 inventory.lastSavedSortOrder = nil
-            elseif inventory.hiddenColumns[inventory.currentSortKey] then
+            elseif canUseCurrentSortKey then
                 inventory.lastSavedSortKey = inventory.currentSortKey
                 inventory.lastSavedSortOrder = inventory.currentSortOrder
                 -- User wanted to sort by a column that's gone!
@@ -1754,12 +1791,14 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
     local inventory = self.inventories[INVENTORY_BACKPACK]
     inventory.additionalFilter = layoutData.additionalFilter
     local menuBar = inventory.filterBar
+
     ZO_MenuBar_ClearButtons(menuBar)
     for _, filterData in ipairs(inventory.tabFilters) do
-        if(not layoutData.hiddenFilters or not layoutData.hiddenFilters[filterData.filterType]) then
+        if not layoutData.hiddenFilters or not layoutData.hiddenFilters[filterData.filterType] then
             ZO_MenuBar_AddButton(menuBar, filterData)
         end
     end
+
     local selectedTab = layoutData.selectedTab or ITEMFILTERTYPE_ALL
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_BACKPACK].filterBar, selectedTab)
 

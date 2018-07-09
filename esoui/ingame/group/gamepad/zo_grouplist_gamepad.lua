@@ -72,6 +72,8 @@ function GroupList_Gamepad:RefreshData()
     if not self.control:IsHidden() then
         ZO_GamepadSocialListPanel.RefreshData(self)
     end
+
+    GAMEPAD_GROUP_ROLES_BAR:UpdateEnabledState()
 end
 
 function GroupList_Gamepad:RefreshTooltip()

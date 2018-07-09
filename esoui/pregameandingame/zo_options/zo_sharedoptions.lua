@@ -59,6 +59,8 @@ function ZO_SharedOptions:InitializeControl(control, selected, isKeyboardControl
 
     if type(data.text) == "string" then
         text = data.text
+    elseif type(data.text) == "function" then
+        text = data.text(control)
     else
         text = GetString(data.text)
     end
@@ -84,6 +86,9 @@ function ZO_SharedOptions:InitializeControl(control, selected, isKeyboardControl
         ZO_Options_SetupInvokeCallback(control, selected, text)
     elseif controlType == OPTIONS_COLOR then
         GetControl(control, "Name"):SetText(text)
+    elseif controlType == OPTIONS_CHAT_COLOR then
+        GetControl(control, "Name"):SetText(text)
+        data.customResetToDefaultsFunction = ZO_OptionsPanel_Social_ResetChatColorToDefault
     elseif controlType == OPTIONS_CUSTOM then
         if data.customSetupFunction then
             data.customSetupFunction(control, selected)
@@ -103,6 +108,7 @@ do
         [OPTIONS_SLIDER] = true,
         [OPTIONS_HORIZONTAL_SCROLL_LIST] = true,
         [OPTIONS_COLOR] = true,
+        [OPTIONS_CHAT_COLOR] = true,
     }
 
     function ZO_SharedOptions:IsControlTypeAnOption(data)
@@ -112,12 +118,12 @@ do
 end
 
 function ZO_SharedOptions:LoadDefaults(control, data) 
-    if self:IsControlTypeAnOption(data) then
-        if(not data.excludeFromResetToDefault) then
+    if data.customResetToDefaultsFunction then
+        data.customResetToDefaultsFunction(control, data)
+    elseif self:IsControlTypeAnOption(data) then
+        if not data.excludeFromResetToDefault then
             ResetSettingToDefault(data.system, data.settingId)
         end
-    elseif data.customResetToDefaultsFunction then
-        data.customResetToDefaultsFunction(control)
     end
 end
 
@@ -144,4 +150,8 @@ function ZO_SharedOptions.AddTableToSystem(panel, system, table)
         end
         ZO_SharedOptions_SettingsData[panel][system][key] = entry
     end
+end
+
+function ZO_SharedOptions.GetColorOptionHighlight()
+    -- override in derived classes
 end

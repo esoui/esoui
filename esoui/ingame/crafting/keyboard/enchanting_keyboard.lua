@@ -240,7 +240,7 @@ function ZO_EnchantingInventory:Initialize(owner, control, ...)
     self.filterType = NO_FILTER
 
     local SET_HIDDEN = true
-    self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true }, SET_HIDDEN)
+    self:SetSortColumnHidden({ statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, }, SET_HIDDEN)
 end
 
 

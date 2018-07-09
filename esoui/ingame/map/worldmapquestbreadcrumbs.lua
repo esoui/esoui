@@ -11,12 +11,13 @@ function ZO_WorldMapQuestBreadcrumbs:Initialize()
     self.conditionDataToPosition = {}
 
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_POSITION_REQUEST_COMPLETE, function(_, ...) self:OnQuestPositionRequestComplete(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, ...) self:OnQuestConditionCounterChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, ...) self:OnQuestConditionInfoChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_ADDED, function(_, ...) self:OnQuestAdded(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_REMOVED, function(_, ...) self:OnQuestRemoved(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_LIST_UPDATED, function() self:OnQuestListUpdated() end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_LINKED_WORLD_POSITION_CHANGED, function() self:OnLinkedWorldPositionChanged() end)
     EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_QUEST_ADVANCED, function(_, ...) self:OnQuestAdvanced(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_WorldMapQuestBreadcrumbs", EVENT_PATH_FINDING_NETWORK_LINK_CHANGED, function() self:OnPathFindingNetworkLinkChanged() end)
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function() self:OnWorldMapChanged() end)
 end
 
@@ -64,8 +65,7 @@ function ZO_WorldMapQuestBreadcrumbs:RequestConditionPosition(questIndex, stepIn
         conditionIndex = conditionIndex,
     }
 
-    local NOT_ASSISTED = false
-    local taskId = RequestJournalQuestConditionAssistance(questIndex, stepIndex, conditionIndex, NOT_ASSISTED)
+    local taskId = RequestJournalQuestConditionAssistance(questIndex, stepIndex, conditionIndex)
     if taskId then
         self.taskIdToConditionData[taskId] = conditionData
         return taskId
@@ -179,8 +179,12 @@ function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinT
     end
 end
 
-function ZO_WorldMapQuestBreadcrumbs:OnQuestConditionCounterChanged(questIndex)
-    self:RefreshQuest(questIndex)
+function ZO_WorldMapQuestBreadcrumbs:OnQuestConditionInfoChanged(questIndex, questName, conditionText, conditionType, curCondtionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isQuestComplete, isConditionComplete, isStepHidden, isConditionCompleteStatusChanged)
+    -- Only refresh if the condition completed has changed but the quest is not complete since there is another event for a quest completing.
+    -- This will reduce the number of times the pins are refreshed so that they are not refreshed unnecessarily.
+    if not isQuestComplete and isConditionCompleteStatusChanged then
+        self:RefreshQuest(questIndex)
+    end
 end
 
 function ZO_WorldMapQuestBreadcrumbs:OnQuestRemoved(isCompleted, questIndex)
@@ -211,6 +215,10 @@ function ZO_WorldMapQuestBreadcrumbs:OnQuestAdvanced(questIndex)
 end
 
 function ZO_WorldMapQuestBreadcrumbs:OnWorldMapChanged()
+    self:RefreshAllQuests()
+end
+
+function ZO_WorldMapQuestBreadcrumbs:OnPathFindingNetworkLinkChanged()
     self:RefreshAllQuests()
 end
 

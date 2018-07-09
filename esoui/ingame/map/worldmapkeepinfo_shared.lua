@@ -285,6 +285,7 @@ function ZO_WorldMapKeepInfo_Shared:HideKeep()
         SCENE_MANAGER:RemoveFragment(self.worldMapKeepInfoFragment)
         SCENE_MANAGER:RemoveFragment(self.worldMapKeepInfoBGFragment)
     end
+    ZO_WorldMap_InvalidateTooltip()
 end
 
 function ZO_WorldMapKeepInfo_Shared:CreateButtonData(normal, pressed, highlight)

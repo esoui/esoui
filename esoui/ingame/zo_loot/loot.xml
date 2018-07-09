@@ -92,7 +92,7 @@
             <Controls>
                 <Label name="$(parent)Title" font="ZoInteractionPrompt">
                     <DimensionConstraints maxX="260" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_ReticleContainerInteractContext" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_ReticleContainerInteractContext" offsetY="-2" />
                 </Label>
 
                 <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton">

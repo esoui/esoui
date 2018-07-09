@@ -67,14 +67,18 @@ function ZO_IngameSceneManager:SetInUIMode(inUIMode)
                 return true
             else
                 if not self:IsLockedInUIMode() and DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor() then
-                    self.manuallyEnteredHUDUIMode = nil
-                    EndLooting()
-                    SetGameCameraUIMode(false)
-                    self:HideTopLevels()
-                    DIRECTIONAL_INPUT:Deactivate(self)
-                    self:SetBaseScene(self.hudSceneName)
-                    self:ShowBaseScene()
-                    MAIN_MENU_MANAGER:ForceClearBlockingScenes()
+                    --Showing the hud scene may fail if the current scene needs confirmation before closing. So we wait to do all of the other parts until after the hide of the current scene succeeds.
+                    self:ShowWithFollowup(self.hudSceneName, function(allowed)
+                        if allowed then
+                            self.manuallyEnteredHUDUIMode = nil
+                            EndLooting()
+                            SetGameCameraUIMode(false)
+                            self:HideTopLevels()
+                            DIRECTIONAL_INPUT:Deactivate(self)
+                            MAIN_MENU_MANAGER:ForceClearBlockingScenes()
+                            self:SetBaseScene(self.hudSceneName)
+                        end
+                    end)
                     return true
                 end
             end

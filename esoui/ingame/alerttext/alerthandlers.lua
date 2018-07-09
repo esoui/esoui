@@ -43,6 +43,7 @@ local CombatEventToSoundId =
     [ACTION_RESULT_INVALID_JUSTICE_TARGET] = SOUNDS.ABILITY_INVALID_JUSTICE_TARGET,
     [ACTION_RESULT_NOT_ENOUGH_INVENTORY_SPACE] = SOUNDS.NEGATIVE_CLICK,
     [ACTION_RESULT_IN_HIDEYHOLE] = SOUNDS.ABILITY_CASTER_STUNNED,
+    [ACTION_RESULT_CANT_SWAP_HOTBAR_IS_OVERRIDDEN] = SOUNDS.ABILITY_WEAPON_SWAP_FAIL,
 }
 
 local ExperienceReasonToSoundId =
@@ -915,7 +916,21 @@ local AlertHandlers = {
         if message and message ~= "" then
             return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
         end
-    end
+    end,
+
+    [EVENT_RECALL_KEEP_USE_RESULT] = function(result)
+        local message = GetString("SI_KEEPRECALLSTONEUSERESULT", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_SKILL_RESPEC_RESULT] = function(result)
+        local message = GetString("SI_RESPECRESULT", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
 }
 
 ZO_ClientInteractResultSpecificSound =
