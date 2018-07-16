@@ -255,11 +255,8 @@ function ZO_StoreManager:Initialize(control)
 
     control:RegisterForEvent(EVENT_OPEN_STORE, ShowStoreWindow)
     control:RegisterForEvent(EVENT_CLOSE_STORE, CloseStoreWindow)
-    control:RegisterForEvent(EVENT_MONEY_UPDATE, RefreshStoreWindow)
     control:RegisterForEvent(EVENT_BUY_RECEIPT, OnBuySuccess)
-    control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, RefreshStoreWindow)
-    control:RegisterForEvent(EVENT_TELVAR_STONE_UPDATE, RefreshStoreWindow)
-    control:RegisterForEvent(EVENT_WRIT_VOUCHER_UPDATE, RefreshStoreWindow)
+    control:RegisterForEvent(EVENT_CURRENCY_UPDATE, RefreshStoreWindow)
     control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
     control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
     control:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
@@ -520,6 +517,10 @@ function ZO_StoreManager:RefreshCurrency()
         self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
     end 
 
+    if self.storeUsesEventCurrency then
+        self:SetCurrencyControl(CURT_EVENT_TICKETS, self.currentEventCurrency or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    end
+
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -618,7 +619,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, isLocked)
     ZO_UpdateTraitInformationControlIcon(control, data)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS)
+    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS, CURT_EVENT_TICKETS)
 
     local currencyType1 = data.currencyType1
     local currencyType2 = data.currencyType2
@@ -639,6 +640,8 @@ function ZO_StoreManager:HasEnoughCurrencyToBuyItem(currencyType, itemCost)
         return self.currentTelvarStones >= itemCost
     elseif currencyType == CURT_WRIT_VOUCHERS then
         return self.currentWritVouchers >= itemCost
+    elseif currencyType == CURT_EVENT_TICKETS then
+        return self.currentEventCurrency >= itemCost
     end
 
     return false
@@ -689,7 +692,7 @@ function ZO_StoreManager:RefreshBuyMultiple()
     end
     ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, meetsRequirementsToBuy and meetsRequirementsToEquip)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS)
+    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS, CURT_EVENT_TICKETS)
 
     local total = quantity * price
     local type1Total = quantity * currencyQuantity1

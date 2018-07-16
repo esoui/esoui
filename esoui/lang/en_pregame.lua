@@ -2108,6 +2108,8 @@ SafeAddString(SI_KEEPRECALLSTONEUSERESULT3, "Cannot use keep recall while near a
 SafeAddString(SI_KEEPRECALLSTONEUSERESULT4, "Cannot use keep recall while in combat.", 1)
 SafeAddString(SI_KEEPRECALLSTONEUSERESULT5, "You need a keep recall stone.", 0)
 SafeAddString(SI_KEEPRECALLSTONEUSERESULT6, "Cannot use keep recall while dead.", 0)
+SafeAddString(SI_KEEPRECALLSTONEUSERESULT7, "Cannot use keep recall while carrying an artifact.", 0)
+SafeAddString(SI_KEEPRECALLSTONEUSERESULT8, "Cannot use keep recall while already recalling.", 0)
 SafeAddString(SI_KEEPRESOURCETYPE0, "None", 0)
 SafeAddString(SI_KEEPRESOURCETYPE1, "Wood", 0)
 SafeAddString(SI_KEEPRESOURCETYPE2, "Food", 0)

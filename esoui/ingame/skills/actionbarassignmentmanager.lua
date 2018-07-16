@@ -723,12 +723,25 @@ function ZO_ActionBarAssignmentManager:ResetAllHotbars()
     self:FireCallbacks("CurrentHotbarUpdated", self.currentHotbarCategory, self.currentHotbarCategory)
 end
 
+function ZO_ActionBarAssignmentManager:ShouldSubmitChangesForHotbarCategory(hotbarCategory)
+    -- Don't perform werewolf changes if the werewolf line isn't unlocked
+    -- this solves an issue where characters that have refunded werewolf still try to place their auto-grant ultimate on the werewolf bar
+    if hotbarCategory == HOTBAR_CATEGORY_WEREWOLF then
+        local werewolfSkillLineData = SKILLS_DATA_MANAGER:GetWerewolfSkillLineData()
+        return werewolfSkillLineData and werewolfSkillLineData:IsAvailable()
+    end
+
+    return true -- most hotbars are cool
+end
+
 function ZO_ActionBarAssignmentManager:IsAnyChangePending()
     for hotbarCategory in pairs(ASSIGNABLE_HOTBAR_CATEGORY_SET) do
-        local hotbar = self.hotbars[hotbarCategory]
-        for actionSlotIndex in hotbar:SlotIterator() do
-            if hotbar:DoesSlotHavePendingChanges(actionSlotIndex) then
-                return true
+        if self:ShouldSubmitChangesForHotbarCategory(hotbarCategory) then
+            local hotbar = self.hotbars[hotbarCategory]
+            for actionSlotIndex in hotbar:SlotIterator() do
+                if hotbar:DoesSlotHavePendingChanges(actionSlotIndex) then
+                    return true
+                end
             end
         end
     end
@@ -738,11 +751,13 @@ end
 function ZO_ActionBarAssignmentManager:AddChangesToMessage()
     local anyChangesAdded = false
     for hotbarCategory in pairs(ASSIGNABLE_HOTBAR_CATEGORY_SET) do
-        local hotbar = self.hotbars[hotbarCategory]
-        for actionSlotIndex, action in hotbar:SlotIterator() do
-            if hotbar:DoesSlotHavePendingChanges(actionSlotIndex) then
-                anyChangesAdded = true
-                AddHotbarSlotChangeToAllocationRequest(actionSlotIndex, hotbarCategory, action:GetActionType(), action:GetActionId())
+        if self:ShouldSubmitChangesForHotbarCategory(hotbarCategory) then
+            local hotbar = self.hotbars[hotbarCategory]
+            for actionSlotIndex, action in hotbar:SlotIterator() do
+                if hotbar:DoesSlotHavePendingChanges(actionSlotIndex) then
+                    anyChangesAdded = true
+                    AddHotbarSlotChangeToAllocationRequest(actionSlotIndex, hotbarCategory, action:GetActionType(), action:GetActionId())
+                end
             end
         end
     end

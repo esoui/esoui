@@ -341,6 +341,8 @@ function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleUpdated(collectible
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
     if self:IsCollectibleRelevant(collectibleData) then
         if lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
+            -- This collectible may have been hidden, rebuild data so we can add it to the list
+            self.categoryLayoutObject:BuildData()
             self:RefreshList()
         else
             local node = self.collectibleIdToTreeNode[collectibleId]

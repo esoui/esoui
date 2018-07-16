@@ -119,9 +119,8 @@ do
         SetupScrollList()
 
         local characterData = ZO_CharacterSelect_GetBestSelectionData()
-        SelectCharacter(characterData)
-
         if characterData then
+            SelectCharacter(characterData)
             ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
         end
 

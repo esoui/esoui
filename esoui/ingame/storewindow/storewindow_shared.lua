@@ -30,7 +30,7 @@ function ZO_SharedStoreManager:Initialize(control)
 end
 
 function ZO_SharedStoreManager:InitializeStore()
-    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers = GetStoreCurrencyTypes()
+    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers, self.storeUsesEventCurrency = GetStoreCurrencyTypes()
 end
 
 function ZO_SharedStoreManager:RefreshCurrency()
@@ -38,6 +38,7 @@ function ZO_SharedStoreManager:RefreshCurrency()
     self.currentAP = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
     self.currentTelvarStones = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
     self.currentWritVouchers = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
+    self.currentEventCurrency = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
 end
 
 -- Shared global functions

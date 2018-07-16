@@ -1260,6 +1260,18 @@ function ZO_SkillsDataManager:GetCraftingSkillLineData(craftingSkillType)
     return nil
 end
 
+function ZO_SkillsDataManager:GetWerewolfSkillLineData()
+    local skillTypeData = self:GetSkillTypeData(SKILL_TYPE_WORLD)
+    if skillTypeData then
+        for _, skillLineData in skillTypeData:SkillLineIterator() do
+            if skillLineData:IsWerewolf() then
+                return skillLineData
+            end
+        end
+    end
+    return nil
+end
+
 function ZO_SkillsDataManager:SkillTypeIterator(skillTypeFilterFunctions)
     -- This only works because we use the categoryObjectPool like a numerically indexed table
     return ZO_FilteredNumericallyIndexedTableIterator(self.skillTypeObjectPool:GetActiveObjects(), skillTypeFilterFunctions)

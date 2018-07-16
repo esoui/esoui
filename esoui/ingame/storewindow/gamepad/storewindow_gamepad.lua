@@ -333,6 +333,11 @@ do
         return true
     end
 
+    local function UpdateEventCurrency(control)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_EVENT_TICKETS, GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+        return true
+    end
+
     local function UpdateRidingTrainingCost(control)
         ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, STABLE_MANAGER.trainingCost, ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT, nil, not STABLE_MANAGER:CanAffordTraining())
         return true
@@ -377,6 +382,11 @@ do
     {
         headerText = ZO_Currency_GetAmountLabel(CURT_WRIT_VOUCHERS),
         text = UpdateWritVouchers
+    }
+    local EVENT_CURRENCY_HEADER_DATA =
+    {
+        headerText = ZO_Currency_GetAmountLabel(CURT_EVENT_TICKETS),
+        text = UpdateEventCurrency
     }
 
     local RIDING_TRAINING_COST_HEADER_DATA =
@@ -435,6 +445,10 @@ do
             end
             if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesWritVouchers then
                 table.insert(g_pendingHeaderData, WRIT_VOUCHER_HEADER_DATA)
+                alternateCurrenciesUsed = alternateCurrenciesUsed + 1
+            end
+            if alternateCurrenciesUsed < MAX_ALTERNATE_CURRENCIES and self.storeUsesEventCurrency then
+                table.insert(g_pendingHeaderData, EVENT_CURRENCY_HEADER_DATA)
                 alternateCurrenciesUsed = alternateCurrenciesUsed + 1
             end
         else
@@ -547,6 +561,8 @@ function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
             return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES)
         elseif currencyType == CURT_WRIT_VOUCHERS then
             return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS)
+        elseif currencyType == CURT_EVENT_TICKETS then
+            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_EVENT_CURRENCY)
         end
     elseif selectedData.price > 0 and selectedData.price > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
         return false, GetString(SI_NOT_ENOUGH_MONEY)
