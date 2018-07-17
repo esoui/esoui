@@ -5012,7 +5012,7 @@ SafeAddString(SI_LEVEL_UP_REWARDS_KEYBOARD_CLAIM_REWARDS_BUTTON_MISSING_CHOICE_T
 SafeAddString(SI_LEVEL_UP_REWARDS_KEYBOARD_TIP_FORMAT, "|cffffff<<1>> :|r <<2>>", 0)
 SafeAddString(SI_LEVEL_UP_REWARDS_NEXT_LEVEL_REWARD_HEADER, "Niveau suivant", 0)
 SafeAddString(SI_LEVEL_UP_REWARDS_NEXT_MILESTONE_REWARD_HEADER, "Prochaine étape - Niveau <<X:1>>", 0)
-SafeAddString(SI_LEVEL_UP_REWARDS_OPEN_CLAIM_SCREEN_TEXT, "Réclamez votre récompense", 0)
+SafeAddString(SI_LEVEL_UP_REWARDS_OPEN_CLAIM_SCREEN_TEXT, "Récupérez votre récompense", 0)
 SafeAddString(SI_LEVEL_UP_REWARDS_SKILL_POINTS_ENTRY_FORMATTER, "<<X:1>> <<1[point de compétences/points de compétences]>>", 0)
 SafeAddString(SI_LEVEL_UP_REWARDS_SKILL_POINT_TOOLTIP_BODY, "Les points de compétences sont utilisés à l'écran de personnage, pour déverrouiller, améliorer ou faire évoluer les compétences de votre personnage.", 0)
 SafeAddString(SI_LEVEL_UP_REWARDS_SKILL_POINT_TOOLTIP_HEADER, "Points de compétences", 0)
