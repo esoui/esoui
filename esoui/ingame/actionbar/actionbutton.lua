@@ -287,16 +287,7 @@ function ActionButton:UpdateUseFailure()
     local nonCostFailure = slotType ~= ACTION_TYPE_NOTHING and
                            self.itemQtyFailure or
                            soulGemFailure or
-                           HasTargetFailure(slotnum) or
-                           HasRequirementFailure(slotnum) or
-                           HasWeaponSlotFailure(slotnum) or
-                           HasStatusEffectFailure(slotnum) or
-                           HasFallingFailure(slotnum) or
-                           HasSwimmingFailure(slotnum) or
-                           HasMountedFailure(slotnum) or
-                           HasReincarnatingFailure(slotnum) or
-                           HasRangeFailure(slotnum) or
-                           HasLeapKeepTargetFailure(slotnum)
+                           HasNonCostStateFailure(slotnum)
 
     self.costFailureOnly = costFailure and not nonCostFailure
     self.useFailure = costFailure or nonCostFailure

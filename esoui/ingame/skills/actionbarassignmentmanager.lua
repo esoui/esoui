@@ -25,6 +25,14 @@ local ASSIGNABLE_HOTBAR_CATEGORY_SET =
     [HOTBAR_CATEGORY_WEREWOLF] = true,
 }
 
+-- These bars have an associated weapon pair with them
+local WEAPON_PAIR_HOTBAR_CATEGORY_SET = {}
+for hotbarCategory in pairs(ASSIGNABLE_HOTBAR_CATEGORY_SET) do
+    if GetWeaponPairFromHotbarCategory(hotbarCategory) ~= ACTIVE_WEAPON_PAIR_NONE then
+        WEAPON_PAIR_HOTBAR_CATEGORY_SET[hotbarCategory] = true
+    end
+end
+
 local HOTBAR_CYCLE_ORDER =
 {
     HOTBAR_CATEGORY_PRIMARY,
@@ -113,6 +121,11 @@ end
 
 function ZO_BaseSlottableAction:IsEmpty()
     return self:GetSlottableActionType() == ZO_SLOTTABLE_ACTION_TYPE_EMPTY
+end
+
+function ZO_BaseSlottableAction:IsWerewolf()
+    -- can be overridden
+    return false
 end
 
 ------------------
@@ -259,6 +272,10 @@ end
 function ZO_SlottableSkill:TryCursorPickup()
     PickupAbilityBySkillLine(self.skillData:GetIndices())
     return true
+end
+
+function ZO_SlottableSkill:IsWerewolf()
+    return self.skillData:GetSkillLineData():IsWerewolf()
 end
 
 -----------------------
@@ -816,10 +833,8 @@ function ZO_ActionBarAssignmentManager:ChangeNumHotbarsInCycle(numHotbarsEnabled
     end
 end
 
-function ZO_ActionBarAssignmentManager:EnableAndSwitchToHotbarInCycle(hotbarCategory)
+function ZO_ActionBarAssignmentManager:EnableHotbarInCycle(hotbarCategory)
     self:GetHotbar(hotbarCategory):EnableInCycle()
-
-    self:SetCurrentHotbar(hotbarCategory)
 end
 
 function ZO_ActionBarAssignmentManager:DisableAndSwitchOffHotbarInCycle(hotbarCategory)
@@ -842,6 +857,27 @@ function ZO_ActionBarAssignmentManager:UpdateBackupBarStateInCycle()
     end
 end
 
+function ZO_ActionBarAssignmentManager:IsWerewolfUltimateSlottedOnAnyWeaponBar()
+    for hotbarCategory in pairs(WEAPON_PAIR_HOTBAR_CATEGORY_SET) do
+        local ultimateSlotData = self:GetHotbar(hotbarCategory):GetSlotData(ACTION_BAR_ULTIMATE_SLOT_INDEX + 1)
+        if ultimateSlotData:IsWerewolf() then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_ActionBarAssignmentManager:UpdateWerewolfBarStateInCycle(selectedSkillLineData)
+    if selectedSkillLineData and selectedSkillLineData:IsWerewolf() then
+        self:EnableHotbarInCycle(HOTBAR_CATEGORY_WEREWOLF)
+        if ACTION_BAR_ASSIGNMENT_MANAGER:IsWerewolfUltimateSlottedOnAnyWeaponBar() then
+            self:SetCurrentHotbar(HOTBAR_CATEGORY_WEREWOLF)
+        end
+    else
+        self:DisableAndSwitchOffHotbarInCycle(HOTBAR_CATEGORY_WEREWOLF)
+    end
+end
+
 function ZO_ActionBarAssignmentManager:ShouldShowHotbarSwap()
     return self.numHotbarsInCycle > 1
 end
@@ -850,8 +886,8 @@ function ZO_ActionBarAssignmentManager:CanCycleHotbars()
     if self:IsHotbarSwapAnimationPlaying() or not self:ShouldShowHotbarSwap() then
         return false
     end
-    -- If the player is in a state where their active hotbar is "non-normal", they should not be able to hotbar cycle
-    return self.playerActiveHotbarCategory == HOTBAR_CATEGORY_PRIMARY or self.playerActiveHotbarCategory == HOTBAR_CATEGORY_BACKUP
+    -- Normally you can only hotbar cycle from your weapon bars, so preserve that behavior here
+    return WEAPON_PAIR_HOTBAR_CATEGORY_SET[self.playerActiveHotbarCategory] == true
 end
 
 function ZO_ActionBarAssignmentManager:CycleCurrentHotbar()

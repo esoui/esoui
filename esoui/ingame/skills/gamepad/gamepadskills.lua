@@ -115,13 +115,12 @@ function ZO_GamepadSkills:Initialize(control)
                 self.lineFilterList:SetSelectedIndexWithoutAnimation(1)
             end
 
-            if targetSkillLineData:IsWerewolf() then
-                ACTION_BAR_ASSIGNMENT_MANAGER:EnableAndSwitchToHotbarInCycle(HOTBAR_CATEGORY_WEREWOLF)
-            end
+            ACTION_BAR_ASSIGNMENT_MANAGER:UpdateWerewolfBarStateInCycle(targetSkillLineData)
             
             KEYBIND_STRIP:AddKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
         elseif newState == SCENE_HIDDEN then
-            ACTION_BAR_ASSIGNMENT_MANAGER:DisableAndSwitchOffHotbarInCycle(HOTBAR_CATEGORY_WEREWOLF)
+            local NO_SKILL_LINE_SELECTED = nil
+            ACTION_BAR_ASSIGNMENT_MANAGER:UpdateWerewolfBarStateInCycle(NO_SKILL_LINE_SELECTED)
             self.assignableActionBar:OnHidden()
             self:DisableCurrentList()
             self:TryClearSkillUpdatedStatus()

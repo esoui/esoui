@@ -16,34 +16,55 @@ function ZO_MapKeepUpgrade_Shared:Initialize(control)
     self.barControl = control:GetNamedChild("Bar")
     self.timeContainer = control:GetNamedChild("Time")
     self.timeUntilNextLevelLabel = control:GetNamedChild("TimeUntilNextLevel")
+    self.levelsControl = control:GetNamedChild("Levels")
     ZO_StatusBar_InitializeDefaultColors(self.barControl)
-    
-    self.levelPool = ZO_ControlPool:New(self.levelLayout, control, "UpgradeLevel")
-    self.levelPool:SetCustomFactoryBehavior(function(control)
-        control.nameLabel = control:GetNamedChild("Name")
-    end)
-    self.buttonPool = ZO_ControlPool:New(self.buttonLayout, control, "UpgradeButton")
-    self.buttonPool:SetCustomFactoryBehavior(function(control)
-        control.lockTexture = control:GetNamedChild("Lock")
-        control.iconTexture = control:GetNamedChild("Icon")
-    end)
-    
+
+    self.levelsGridList = self.gridListClass:New(self.levelsControl, ZO_GRID_SCROLL_LIST_DONT_AUTOFILL)
+
+    local function WorldMapKeepUpgradeGridHeaderEntrySetup(control, data, list)
+        ZO_DefaultGridHeaderSetup(control, data, list)
+
+        local level = self.keepUpgradeObject:GetUpgradeLevel()
+        if data.data.level <= level then
+            control:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+        else
+            control:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        end
+    end
+
+    local function WorldMapKeepUpgradeGridEntrySetup(control, data, list)
+        ZO_DefaultGridEntrySetup(control, data, list)
+        
+        local level = self.keepUpgradeObject:GetUpgradeLevel()
+        local isActive = level >= data.dataSource.level
+        local lockControl = control:GetNamedChild("Lock")
+        lockControl:SetHidden(isActive)
+        ZO_ActionSlot_SetUnusable(control.icon, not isActive)
+    end
+
+    local HIDE_CALLBACK = nil
+    local SPACING_X = 6
+    local params = self.symbolParams
+    self.levelsGridList:SetGridEntryTemplate(self.buttonLayout, params.SYMBOL_ICON_SIZE, params.SYMBOL_ICON_SIZE, WorldMapKeepUpgradeGridEntrySetup, HIDE_CALLBACK, ZO_ObjectPool_DefaultResetControl, SPACING_X, params.GRID_DEFAULT_SPACING_Y)
+    self.levelsGridList:SetHeaderTemplate(self.labelLayout, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, WorldMapKeepUpgradeGridHeaderEntrySetup)
+    self.levelsGridList:SetLineBreakAmount(params.SYMBOL_PADDING_Y + params.SYMBOL_ICON_SIZE)
+
     control:SetHandler("OnUpdate", function(_, timeS)
-        if(self.nextUpdateS == nil or timeS > self.nextUpdateS) then
+        if self.nextUpdateS == nil or timeS > self.nextUpdateS then
             self:RefreshTimeDependentControls()
             self.nextUpdateS = timeS + UPDATE_RATE_SECONDS
         end
     end)
 
-    local function IfShowing(f)
-        if(self.fragment:IsShowing()) then
-            f(self)
+    local function IfShowing(callback)
+        if self.fragment:IsShowing() then
+            callback(self)
         end
     end
 
-    local function IfShowingKeep(keepId, bgQueryType, f)
-        if(self.keepUpgradeObject and keepId == self.keepUpgradeObject:GetKeep() and DoBattlegroundContextsIntersect(bgQueryType, self.keepUpgradeObject:GetBGQueryType())) then
-            f(self)
+    local function IfShowingKeep(keepId, bgQueryType, callback)
+        if self.keepUpgradeObject and keepId == self.keepUpgradeObject:GetKeep() and DoBattlegroundContextsIntersect(bgQueryType, self.keepUpgradeObject:GetBGQueryType()) then
+            callback(self)
         end
     end
 
@@ -66,12 +87,16 @@ function ZO_MapKeepUpgrade_Shared:GetFragment()
     return self.fragment
 end
 
+function ZO_MapKeepUpgrade_Shared:OnGridListSelectedDataChanged(previousData, newData)
+    -- To be overridden
+end
+
 function ZO_MapKeepUpgrade_Shared:RefreshAll()
-    -- stub
+    -- To be overridden
 end
 
 function ZO_MapKeepUpgrade_Shared:RefreshData()
-    -- stub
+    -- To be overridden
 end
 
 function ZO_MapKeepUpgrade_Shared:RefreshBarLabel()
@@ -79,9 +104,9 @@ function ZO_MapKeepUpgrade_Shared:RefreshBarLabel()
 end
 
 function ZO_MapKeepUpgrade_Shared:GenerateRemainingTimeLabel(current, forNextLevel, resourceRate, level)
-    if(level >= GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) or forNextLevel <= 0 or current > forNextLevel) then
+    if level >= GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) or forNextLevel <= 0 or current > forNextLevel then
         return nil
-    elseif(resourceRate <= 0) then
+    elseif resourceRate <= 0 then
         return GetString(SI_KEEP_UPGRADE_INVALID_TIME)
     else        
         local timeRemaining = ((forNextLevel - current) / resourceRate) * 60
@@ -99,7 +124,7 @@ function ZO_MapKeepUpgrade_Shared:RefreshBar()
 
     local resourceRate = self.keepUpgradeObject:GetRate()
     local remainingTimeText = self:GenerateRemainingTimeLabel(cur, max, resourceRate, level)
-    if(remainingTimeText) then
+    if remainingTimeText then
         self.timeContainer:SetHidden(false)
         self.timeUntilNextLevelLabel:SetText(remainingTimeText)
     else
@@ -108,101 +133,36 @@ function ZO_MapKeepUpgrade_Shared:RefreshBar()
 end
 
 function ZO_MapKeepUpgrade_Shared:RefreshLevels()
-    self.levelPool:ReleaseAllObjects()
-    self.buttonPool:ReleaseAllObjects()
-    local prevLevelSection
+    self.levelsGridList:ClearGridList()
 
-    self.buttons = {}
     local params = self.symbolParams
     for currentLevel = 0, GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) do
         local numUpgrades = self.keepUpgradeObject:GetNumLevelUpgrades(currentLevel)
-        if(numUpgrades > 0) then
-            local buttonList = {}
-            self.buttons[#self.buttons + 1] = buttonList
-
-            local levelSection = self.levelPool:AcquireObject()
-            levelSection.level = currentLevel
-            levelSection.nameLabel:SetText(zo_strformat(SI_KEEP_UPGRADE_LEVEL_SECTION_HEADER, currentLevel))
-
-            if(prevLevelSection) then
-                levelSection:SetAnchor(TOPLEFT, prevLevelSection, BOTTOMLEFT, params.SYMBOL_SECTION_OFFSET_X, params.SYMBOL_SECTION_OFFSET_Y)
-            else
-                levelSection:SetAnchor(TOPLEFT, self.currentLevelLabel, BOTTOMLEFT, params.FIRST_SECTION_OFFSET_X, params.FIRST_SECTION_OFFSET_Y)
-            end
-
-            prevLevelSection = levelSection
-                            
-            local levelSectionButtonsContainer = levelSection:GetNamedChild("Buttons")
-            local lastButton
-
+        if numUpgrades > 0 then
+            local gridTable = {}
+            local levelHeaderText = zo_strformat(SI_KEEP_UPGRADE_LEVEL_SECTION_HEADER, currentLevel)
             for i = 1, numUpgrades do
                 local name, description, icon, atPercent, isActive = self.keepUpgradeObject:GetLevelUpgradeInfo(currentLevel, i)
-                local button = self.buttonPool:AcquireObject()
-                button.iconTexture:SetTexture(icon)
-                button:SetParent(levelSectionButtonsContainer)
-                button.level = currentLevel
-                button.info = {name = name, description = description }
-                button.index = i
-                if(lastButton) then
-                    button:SetAnchor(TOPLEFT, lastButton, TOPRIGHT, params.SYMBOL_PADDING_X, 0)
-                else
-                    button:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, params.SYMBOL_PADDING_Y)
-                end
-                buttonList[#buttonList + 1] = button
-                lastButton = button
+                local data = {
+                    index = i,
+                    gridHeaderName = levelHeaderText,
+                    level = currentLevel,
+                    name = name,
+                    description = description,
+                    icon = icon,
+                    atPercent = atPercent,
+                    isActive = isActive,
+                }
+
+                self.levelsGridList:AddEntry(ZO_GridSquareEntryData_Shared:New(data))
             end
         end
     end
-end
 
-function ZO_MapKeepUpgrade_Shared:RefreshLevelsEnabled()
-    local level = self.keepUpgradeObject:GetUpgradeLevel()
-    for _, levelSection in pairs(self.levelPool:GetActiveObjects()) do
-        if(levelSection.level <= level) then
-            levelSection.nameLabel:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
-        else
-            levelSection.nameLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
-        end 
-    end
-
-    for _, button in pairs(self.buttonPool:GetActiveObjects()) do
-        local isActive = level >= button.level
-        button.lockTexture:SetHidden(isActive)
-        ZO_ActionSlot_SetUnusable(button.iconTexture, not isActive)
-    end
+    self.levelsGridList:CommitGridList()
 end
 
 function ZO_MapKeepUpgrade_Shared:RefreshTimeDependentControls()
-    self:RefreshLevelsEnabled()
+    self.levelsGridList:RefreshGridList()
     self:RefreshBar()
-end
-
---Local XML
-
-function ZO_MapKeepUpgrade_Shared:Button_OnMouseEnter(button)
-    InitializeTooltip(KeepUpgradeTooltip, button, TOPLEFT, 5, 0)
-    self.keepUpgradeObject:SetUpgradeTooltip(button.level, button.index)
-end
-
-function ZO_MapKeepUpgrade_Shared:Button_OnMouseExit(button)
-    ClearTooltip(KeepUpgradeTooltip)
-end
-
-function ZO_MapKeepUpgrade_Shared:Time_OnMouseEnter(label)
-    InitializeTooltip(InformationTooltip, label, TOPLEFT, 10, 0)
-    self.keepUpgradeObject:SetRateTooltip()    
-end
-
-function ZO_MapKeepUpgrade_Shared:Time_OnMouseExit(label)
-    ClearTooltip(InformationTooltip)
-end
-
-function ZO_MapKeepUpgrade_Shared:Bar_OnMouseEnter(bar)
-    if(not self.timeContainer:IsHidden()) then
-        self:Time_OnMouseEnter(self.timeContainer)
-    end
-end
-
-function ZO_MapKeepUpgrade_Shared:Bar_OnMouseExit(bar)
-    self:Time_OnMouseExit(self.timeContainer)
 end

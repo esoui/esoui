@@ -29,6 +29,8 @@ ZO_SCROLL_BUILD_DIRECTION_RIGHT_TO_LEFT = -1
 ZO_SCROLL_SELECT_CATEGORY_PREVIOUS = -1
 ZO_SCROLL_SELECT_CATEGORY_NEXT = 1
 
+ZO_SCROLL_BAR_WIDTH = 16
+
 -- Used by both ZO_VerticalScrollbarBase and ZO_Scroll
 local function OnInteractWithScrollBar(self)
     if self.onInteractWithScrollbarCallback then
@@ -2239,7 +2241,7 @@ function ZO_ScrollList_UpdateScroll(self)
         local currentData = currentControl.dataEntry
         if self.mode == SCROLL_LIST_OPERATIONS then
             local currentOperation = GetDataTypeInfo(self, currentData.typeId)
-            currentOperation:AddToScrollContents(self.contents, currentControl, currentData.left, currentData.top, offset)
+            currentOperation:AddToScrollContents(contents, currentControl, currentData.left, currentData.top, offset)
         else
             local yOffset = currentData.top - offset
             local xOffset = currentData.left

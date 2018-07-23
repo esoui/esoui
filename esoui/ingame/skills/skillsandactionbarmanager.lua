@@ -82,6 +82,8 @@ end
 function ZO_SkillsAndActionBarManager:OnSkillRespecResult(result)
     if result == RESPEC_RESULT_SUCCESS then
         self:ResetInterface()
+    else
+        internalassert(false, string.format("Respec failed (%d)", result))
     end
 end
 

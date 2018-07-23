@@ -3784,7 +3784,7 @@ EsoStrings =
     "<<1>>/<<2>>", -- SI_STATS_BAR_VALUE
     "Attribute Points:", -- SI_STATS_AVAILABLE_POINTS
     "You have attribute points to spend. Use these to increase your health, magicka, and stamina.", -- SI_STATS_SPEND_ATTRIBUTE_POINTS_MESSAGE
-    "Equipment Bonus:", -- SI_STATS_EQUIPMENT_BONUS_TITLE_KEYBOARD
+    "Equipment Bonus", -- SI_STATS_EQUIPMENT_BONUS_TITLE_KEYBOARD
     "Lowest Piece: <<t:1>>", -- SI_STATS_EQUIPMENT_BONUS_LOWEST_PIECE_KEYBOARD
     "Health Idle Regen:", -- SI_STAT_HEALTH_REGENERATION_IDLE
     "Health Combat Regen:", -- SI_STAT_HEALTH_REGENERATION_COMBAT
@@ -16018,6 +16018,7 @@ SafeAddVersion(SI_LOOT_MONEY, 1)
 SafeAddVersion(SI_QUEST_JOURNAL_GROUP_TOOLTIP, 1)
 SafeAddVersion(SI_SOCIAL_MENU_GROUP, 1)
 SafeAddVersion(SI_STATS_AVAILABLE_POINTS, 1)
+SafeAddVersion(SI_STATS_EQUIPMENT_BONUS_TITLE_KEYBOARD, 1)
 SafeAddVersion(SI_STAT_HEALTH_REGENERATION_IDLE, 1)
 SafeAddVersion(SI_STAT_HEALTH_REGENERATION_COMBAT, 1)
 SafeAddVersion(SI_STAT_MAGICKA_REGENERATION_IDLE, 1)

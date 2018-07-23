@@ -7453,6 +7453,8 @@ function ZO_WorldMap_SetKeepMode(active)
     if active then
         ZO_WorldMap_SetGamepadKeybindsShown(false)
 
+        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Activate()
+
         -- Hide the tooltips
         ZO_WorldMap_HideAllTooltips()
 
@@ -7463,6 +7465,9 @@ function ZO_WorldMap_SetKeepMode(active)
     else
         -- Remove the Close Keep keybind
         KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseKeep:GetDescriptor())
+
+        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Deactivate()
+
         ZO_WorldMap_SetGamepadKeybindsShown(true)
         ZO_WorldMap_InteractKeybindForceHidden(false)
     end

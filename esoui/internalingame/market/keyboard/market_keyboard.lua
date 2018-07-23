@@ -1245,7 +1245,7 @@ do
     local NUM_COLUMNS = 2
     local LABELED_GROUP_PADDING = 70
     local FIRST_LABELED_GROUP_PADDING = 40
-    local LABELED_GROUP_LABEL_PADDING = -20
+    local LABELED_GROUP_LABEL_PADDING = -10
     function Market.LayoutProductGrid(marketProductInfos, previousRowControl, sectionHeader, labelPool)
         local previousRowControl = previousRowControl
         local previousControl

@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
-        <Button name="ZO_WorldMapKeepUpgradeButton" virtual="true">
-            <Dimensions x="40" y="40"/>
+        <Button name="ZO_WorldMapKeepUpgradeButton_Keyboard" virtual="true">
+            <Dimensions x="ZO_WORLD_MAP_KEEP_UPGRADE_KEYBOARD_BUTTON_SIZE" y="ZO_WORLD_MAP_KEEP_UPGRADE_KEYBOARD_BUTTON_SIZE"/>
             <Textures
                 normal="EsoUI/Art/ActionBar/abilityFrame64_up.dds"
                 pressed="EsoUI/Art/ActionBar/abilityFrame64_down.dds"
@@ -27,16 +27,7 @@
             </Controls>
         </Button>
 
-        <Control name="ZO_WorldMapKeepUpgradeLevel" resizeToFitDescendents="true" virtual="true">
-            <Controls>
-                <Label name="$(parent)Name" font="ZoFontWinH5" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT"/>
-                </Label>
-                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="10"/>
-                </Control>
-            </Controls>
-        </Control>
+        <Label name="ZO_WorldMapKeepUpgradeHeader_Keyboard" inherit="ZO_GridScrollList_Entry_Header_Keyboard" override="true" font="ZoFontWinH4" modifyTextType="UPPERCASE" virtual="true" />
         
         <TopLevelControl name="ZO_WorldMapKeepUpgrade" inherits="ZO_WorldMapKeepInfoContent">
             <OnInitialized>
@@ -46,6 +37,11 @@
                 <Label name="$(parent)CurrentLevel" font="ZoFontCallout3">
                     <Anchor point="TOPLEFT"/>
                 </Label>
+
+                <Control name="$(parent)Levels" inherits="ZO_GridScrollList_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMLEFT" offsetX="39" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" />
+                </Control>
 
                 <StatusBar name="$(parent)Bar" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true">
                     <Dimensions x="275"/>

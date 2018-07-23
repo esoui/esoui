@@ -1123,13 +1123,7 @@ function ZO_SkillsManager:RefreshSkillLineDisplay(skillLineData)
 end
 
 function ZO_SkillsManager:RefreshActionbarState()
-    local skillLineData = self:GetSelectedSkillLineData()
-
-    if skillLineData and skillLineData:IsWerewolf() then
-        ACTION_BAR_ASSIGNMENT_MANAGER:EnableAndSwitchToHotbarInCycle(HOTBAR_CATEGORY_WEREWOLF)
-    else
-        ACTION_BAR_ASSIGNMENT_MANAGER:DisableAndSwitchOffHotbarInCycle(HOTBAR_CATEGORY_WEREWOLF)
-    end
+    ACTION_BAR_ASSIGNMENT_MANAGER:UpdateWerewolfBarStateInCycle(self:GetSelectedSkillLineData())
 end
 
 function ZO_SkillsManager:RebuildSkillLineList()

@@ -799,9 +799,12 @@ end
 do
     function ZO_ItemPreview_Shared:RemoveFragmentImmediately(fragment)
         if fragment:GetHideOnSceneHidden() then
+            --The fragment may already be in the hiding state waiting for scene hidden when this happens. So we enable show/hide time updates so it can re-try hiding now that it doesn't have to wait on scene hidden.
+            fragment:SetAllowShowHideTimeUpdates(true)
             fragment:SetHideOnSceneHidden(false)
             SCENE_MANAGER:RemoveFragment(fragment)
             fragment:SetHideOnSceneHidden(true)
+            fragment:SetAllowShowHideTimeUpdates(false)
         else
             SCENE_MANAGER:RemoveFragment(fragment)
         end

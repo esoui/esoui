@@ -166,6 +166,7 @@ end
 function ZO_DailyLoginRewards_Base:UpdateGridList()
 	local gridListPanelList = self.gridListPanelList
     gridListPanelList:ClearGridList()
+    self.defaultSelectionData = nil
 	
     local numPreviewableRewards = 0
     local numRewardsInMonth = GetNumRewardsInCurrentDailyLoginMonth()
