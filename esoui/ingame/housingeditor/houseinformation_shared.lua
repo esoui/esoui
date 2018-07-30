@@ -93,7 +93,7 @@ function ZO_HouseInformation_Shared:UpdateHouseInformation()
 
     local ownerDisplayName = GetCurrentHouseOwner()
     if ownerDisplayName ~= "" then
-        self.ownerRow.valueLabel:SetText(ownerDisplayName)
+        self.ownerRow.valueLabel:SetText(ZO_FormatUserFacingDisplayName(ownerDisplayName))
         self.ownerRow:SetHidden(false)
         self.infoSection:SetAnchor(TOPLEFT, self.ownerRow, BOTTOMLEFT, 0, self.sectionVerticalPadding)
     else

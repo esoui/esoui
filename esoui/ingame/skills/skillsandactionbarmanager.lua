@@ -79,11 +79,18 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
     end
 end
 
-function ZO_SkillsAndActionBarManager:OnSkillRespecResult(result)
-    if result == RESPEC_RESULT_SUCCESS then
-        self:ResetInterface()
-    else
-        internalassert(false, string.format("Respec failed (%d)", result))
+do
+    internalassert(RESPEC_RESULT_MAX_VALUE == 16, "Update EXPECTED_RESPEC_FAILURES")
+    local EXPECTED_RESPEC_FAILURES =
+    {
+        [RESPEC_RESULT_IS_IN_COMBAT] = true,
+    }
+    function ZO_SkillsAndActionBarManager:OnSkillRespecResult(result)
+        if result == RESPEC_RESULT_SUCCESS then
+            self:ResetInterface()
+        else
+            internalassert(EXPECTED_RESPEC_FAILURES[result], string.format("Unexpected Respec Failure (%d)", result))
+        end
     end
 end
 

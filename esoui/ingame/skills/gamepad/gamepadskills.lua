@@ -2020,10 +2020,10 @@ function ZO_GamepadSkills:SetMode(mode)
         else
             self:SetCurrentList(self.lineFilterList)
         end
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
+        self.lineFilterListRefreshGroup:MarkDirty("Visible")
     elseif self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
         self:DisableCurrentList()
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
+        self.lineFilterListRefreshGroup:MarkDirty("Visible") -- The action bar reuses line filter list keybinds, so refresh those
     end
 end
 

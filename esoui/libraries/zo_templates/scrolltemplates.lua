@@ -579,12 +579,14 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
             if verticalExtents > 0 then
                 local previousScrollBarValue = scrollbar:GetValue()
                 local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
-                scrollbar:SetValue(finalValue)
+                if not zo_floatsAreEqual(previousScrollBarValue, finalValue) then
+                    scrollbar:SetValue(finalValue)
+                end
 
                 -- If the previous and current scrollBar values are the same, 
                 -- the onValueChanged function will not be invoked to update the scroll child position.
                 -- We need to explicitly call to recalculate our scroll child position since our extents changed.
-                if previousScrollBarValue == finalValue then
+                if previousScrollBarValue == scrollbar:GetValue() then
                     scroll:SetVerticalScroll(verticalOffset)
                 end
             else

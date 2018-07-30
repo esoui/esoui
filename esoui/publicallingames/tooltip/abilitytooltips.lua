@@ -406,7 +406,8 @@ function ZO_Tooltip:LayoutSimpleAbility(abilityId)
 
     self:AddSectionEvenIfEmpty(headerSection)
 
-    self:AddLine(GetAbilityName(abilityId), self:GetStyle("title"))
+    local formattedAbilityName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
+    self:AddLine(formattedAbilityName, self:GetStyle("title"))
 
     self:AddAbilityStats(abilityId)
 

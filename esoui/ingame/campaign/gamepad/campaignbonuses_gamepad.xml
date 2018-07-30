@@ -39,9 +39,9 @@
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ItemIcon" offsetX="-6" />
                 </Label>
 
-                <Texture name="$(parent)CircleFrame" tier="HIGH" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_44.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                <Texture name="$(parent)CircleFrame" tier="HIGH" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_64.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-5" offsetY="-5"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="5" offsetY="5"/>
                 </Texture>
 
                 <Texture name="$(parent)Checkmark" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" tier="HIGH" hidden="true">

@@ -212,7 +212,7 @@ do
                 formattedCurrencyString = string.format("%s %s", formattedCurrencyString, ZO_Currency_FormatPlatform(currencyType, currencyAmount, ZO_CURRENCY_FORMAT_PARENTHETICAL_AMOUNT, FORMAT_EXTRA_OPTIONS))
             end
 
-            return formattedCurrencyString
+            return zo_strformat(SI_CURRENCY_NAME_FORMAT, formattedCurrencyString)
         end
 
         local lootData = {
