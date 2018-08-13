@@ -16,6 +16,13 @@ local COST_OPTION_TO_PROMPT_TITLE =
     [CHATTER_TALK_CHOICE_PAY_BOUNTY] = GetString(SI_PAY_FOR_CONVERSATION_GIVE_TITLE),
 }
 
+local CHATTER_OPTION_SHOWS_GOLD_COST =
+{
+    [CHATTER_TALK_CHOICE_MONEY]      = true,
+    [CHATTER_TALK_CHOICE_PAY_BOUNTY] = true,
+    [CHATTER_TALK_CHOICE_BEGIN_SKILL_RESPEC] = true,
+}
+
 CHATTER_OPTION_ERROR =
 {
     [CHATTER_TALK_CHOICE_MONEY] = SI_ERROR_CANT_AFFORD_OPTION,
@@ -25,6 +32,7 @@ CHATTER_OPTION_ERROR =
     [CHATTER_TALK_CHOICE_PAY_BOUNTY] = SI_ERROR_CANT_AFFORD_OPTION,
     [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED] = SI_ERROR_NEED_CLEMENCY,
     [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN] = SI_ERROR_CLEMENCY_ON_COOLDOWN,
+    [CHATTER_TALK_CHOICE_BEGIN_SKILL_RESPEC] = SI_ERROR_CANT_AFFORD_OPTION,
 }
 
 --Event Handlers
@@ -253,6 +261,7 @@ local OPTION_TO_ICON =
     [CHATTER_TALK_CHOICE_PERSUADE_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
+    [CHATTER_TALK_CHOICE_BEGIN_SKILL_RESPEC]    = "EsoUI/Art/Interaction/ConversationWithCost.dds",
     [CHATTER_START_NEW_QUEST_BESTOWAL]          = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_START_COMPLETE_QUEST]              = "EsoUI/Art/Interaction/QuestCompleteAvailable.dds",
     [CHATTER_START_GIVE_ITEM]                   = "EsoUI/Art/Interaction/ConversationAvailable.dds",
@@ -306,7 +315,7 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
         labelUpdateFunction = nil,
     }
 
-    if(optionText and optionType) then
+    if optionText and optionType then
         chatterData.optionsEnabled = true
         chatterData.optionUsable = true
         chatterData.recolorIfUnusable = true
@@ -315,17 +324,17 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             chatterData.labelUpdateFunction = UpdateFleeChatterOption
         end
 
-        if(COST_OPTION_TO_PROMPT[optionType] ~= nil) then
+        if CHATTER_OPTION_SHOWS_GOLD_COST[optionType] then
             --optional arg is the cost in gold
             chatterData.gold = optionalArg
-
-            --Determine rules for suppressing the cost suffix
-            local suppressCostSuffix = (optionType == CHATTER_TALK_CHOICE_PAY_BOUNTY)
 
             if optionalArg > 0 then
                 if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) < optionalArg then
                     chatterData.optionUsable = false
                 end
+
+                --Determine rules for suppressing the cost suffix
+                local suppressCostSuffix = (optionType == CHATTER_TALK_CHOICE_PAY_BOUNTY)
 
                 if not suppressCostSuffix then
                     local currencyText
@@ -337,11 +346,10 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
                     chatterData.optionText = zo_strformat(SI_INTERACT_OPTION_COST, optionText, currencyText)
                 end
             end
-
-        elseif(optionType == CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED 
+        elseif optionType == CHATTER_TALK_CHOICE_INTIMIDATE_DISABLED
             or optionType == CHATTER_TALK_CHOICE_PERSUADE_DISABLED
             or optionType == CHATTER_TALK_CHOICE_CLEMENCY_DISABLED
-            or optionType == CHATTER_GUILDKIOSK_IN_TRANSITION) then
+            or optionType == CHATTER_GUILDKIOSK_IN_TRANSITION then
             chatterData.optionUsable = false
             chatterData.recolorIfUnusable = false
         elseif optionType == CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN then
@@ -350,7 +358,7 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             if clemencyTimeRemaningSeconds <= 0 then
                 chatterData.optionUsable = true
             else
-                chatterData.labelUpdateFunction = function(control) 
+                chatterData.labelUpdateFunction = function(control)
                                                     self:UpdateClemencyChatterOption(control, chatterData)
                                                   end
                 chatterData.optionUsable = false
@@ -362,7 +370,7 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
                 -- We're not on cooldown, but the option is otherwise unusable (most likely, the player hasn't unlocked this passive)
                 chatterData.optionUsable = false
             else
-                chatterData.labelUpdateFunction = function(control) 
+                chatterData.labelUpdateFunction = function(control)
                                                     self:UpdateShadowyConnectionsChatterOption(control, chatterData)
                                                   end
                 chatterData.optionUsable = false
@@ -408,6 +416,7 @@ end
 
 --Reward Creator
 
+local USE_LOWERCASE_NUMBER_SUFFIXES = false
 local function SetupBasicReward(control, name, stackSize, icon, meetsUsageRequirement, r, g, b)
     local nameControl = GetControl(control, "Name")
     local iconControl = GetControl(control, "Icon")
@@ -419,7 +428,7 @@ local function SetupBasicReward(control, name, stackSize, icon, meetsUsageRequir
     iconControl:SetTexture(icon)
     iconControl:SetHidden(false)
 
-    if(meetsUsageRequirement) then
+    if meetsUsageRequirement then
         nameControl:SetColor(r or 1, g or 1, b or 1, 1)
         iconControl:SetColor(1, 1, 1, 1)
     else
@@ -427,8 +436,9 @@ local function SetupBasicReward(control, name, stackSize, icon, meetsUsageRequir
         iconControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
     end
 
-    if(stackSize > 1) then
-        stackControl:SetText(stackSize)
+    if stackSize > 1 then
+        local stackSizeString = zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackSize, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        stackControl:SetText(stackSizeString)
         stackControl:SetHidden(false)
     else
         stackControl:SetHidden(true)
@@ -582,8 +592,9 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex, isGamepad)
             }
 
             if rewardType == REWARD_TYPE_SKILL_LINE then
-                local skillType, skillLineIndex = GetJournalQuestRewardSkillLine(journalQuestIndex, i)
-                local down, up, over, announce = ZO_Skills_GetIconsForSkillType(skillType)
+                local skillType = GetJournalQuestRewardSkillLine(journalQuestIndex, i)
+                local skillTypeData = SKILLS_DATA_MANAGER:GetSkillTypeData(skillType)
+                local announce = skillTypeData:GetAnnounceIcon()
                 rewardData.icon = announce
             elseif rewardType == REWARD_TYPE_INSPIRATION then
                 if isGamepad then

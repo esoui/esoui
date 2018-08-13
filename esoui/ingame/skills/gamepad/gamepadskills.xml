@@ -17,11 +17,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="GamepadActionBarAbilitySlotted">
-            <Animations>
-                <AlphaAnimation duration="200" startAlpha=".5" endAlpha="1" />
-            </Animations>
-        </AnimationTimeline>
     </Animations>
     <Controls>
         <Control name="ZO_GamepadSkillsSimpleActionButtonTemplate" tier="MEDIUM" virtual="true">
@@ -53,7 +48,7 @@
             <!-- This container needs to be large enough to contain the buttons without them popping out the bottom -->
             <Dimensions x="466" y="106" />
             <Controls>
-                <Label name="$(parent)Header" modifyTextType="UPPERCASE" text="SI_GAMEPAD_SKILLS_ACTIONBAR_HEADER" inherits="ZO_GamepadMenuEntryHeaderTemplate">
+                <Label name="$(parent)Header" modifyTextType="UPPERCASE" inherits="ZO_GamepadMenuEntryHeaderTemplate">
                     <Anchor point="TOP"/>
                 </Label>
 
@@ -88,6 +83,24 @@
             <Dimensions x="440" y="0" />
         </Control>
 
+        <Control name="ZO_GamepadSkills_RespecBindings" hidden="true" virtual="true">
+            <Dimensions y="36"/>
+            <Controls>
+                <Control name="$(parent)Increase" inherits="ZO_KeybindButton">
+                    <Anchor point="TOPLEFT" offsetX="-5"/>
+                    <OnInitialized>
+                        ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, "UI_SHORTCUT_LEFT_SHOULDER")
+                    </OnInitialized>
+                </Control>
+                <Control name="$(parent)Decrease" inherits="ZO_KeybindButton">
+                    <Anchor point="TOPRIGHT" offsetX="5"/>
+                    <OnInitialized>
+                        ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, "UI_SHORTCUT_RIGHT_SHOULDER")
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_GamepadSkillsFooter" inherits="ZO_GamepadXPBarFooter" virtual="true">
             <OnInitialized>
                 ZO_SkillsInfo_OnInitialized(self)
@@ -95,7 +108,7 @@
         </TopLevelControl>
 
         <!--Toplevel so it can show above Gamepad Tooltips Left Background -->
-        <TopLevelControl name="ZO_GamepadSkillsLinePreview" allowBringToTop="false" hidden="true" tier="HIGH">
+        <TopLevelControl name="ZO_GamepadSkillsLinePreview" hidden="true" tier="HIGH">
             <AnchorFill/>
             <Controls>
                 <Scroll name="$(parent)Scroll" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors">

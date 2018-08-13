@@ -1,6 +1,3 @@
-local USER_REQUESTED = true
-local SYSTEM_REQUESTED = false
-
 --------------------------------------
 --Preferred Roles Manager
 --------------------------------------
@@ -14,101 +11,49 @@ end
 
 function PreferredRolesManager:Initialize(control)
     self.control = control
+
     self:InitializeRoles()
 
-    local function OnActivityFinderStatusUpdate(status)
-        self:DisableRoleButtons(status == ACTIVITY_FINDER_STATUS_QUEUED)
+    local function OnActivityFinderStatusUpdate()
+        self:RefreshRadioButtonGroupEnabledState()
     end
     
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", OnActivityFinderStatusUpdate)
 end
 
 function PreferredRolesManager:InitializeRoles()
-    local isDPS, isHeal, isTank = GetPlayerRoles()
-    self.roles = {
-        [LFG_ROLE_DPS] = {
-            button = self.control:GetNamedChild("ButtonsDPS"),
-            isSelected = isDPS,
-            tooltip = GetString(SI_GROUP_PREFERRED_ROLE_DPS_TOOLTIP),
-        },
-        [LFG_ROLE_HEAL] = {
-            button = self.control:GetNamedChild("ButtonsHeal"),
-            isSelected = isHeal,
-            tooltip = GetString(SI_GROUP_PREFERRED_ROLE_HEAL_TOOLTIP),
-        },
-        [LFG_ROLE_TANK] = {
-            button = self.control:GetNamedChild("ButtonsTank"),
-            isSelected = isTank,
-            tooltip = GetString(SI_GROUP_PREFERRED_ROLE_TANK_TOOLTIP),
-        },
+    self.roleButtons =
+    {
+        [LFG_ROLE_DPS] = self.control:GetNamedChild("ButtonsDPS"),
+        [LFG_ROLE_HEAL] = self.control:GetNamedChild("ButtonsHeal"),
+        [LFG_ROLE_TANK] = self.control:GetNamedChild("ButtonsTank"),
     }
 
-    for roleType, roleData in pairs(self.roles) do
-        if roleData.isSelected then
-            ZO_CheckButton_SetChecked(roleData.button)
-        end
+    self.radioButtonGroup = ZO_RadioButtonGroup:New()
+    for roleType, roleButton in pairs(self.roleButtons) do
+        self.radioButtonGroup:Add(roleButton)
     end
+
+    self.radioButtonGroup:SetSelectionChangedCallback(function(_, ...) self:OnRoleButtonSelectionChanged(...) end)
+
+    self:RefreshRoles()
 end
 
 function PreferredRolesManager:RefreshRoles()
-    local isDPS, isHeal, isTank = GetPlayerRoles()
+    local IGNORE_CALLBACK = true
+    self.radioButtonGroup:SetClickedButton(self.roleButtons[GetSelectedLFGRole()], IGNORE_CALLBACK)
 
-    self:SetRoleToggled(LFG_ROLE_TANK, isTank, SYSTEM_REQUESTED)
-    self:SetRoleToggled(LFG_ROLE_HEAL, isHeal, SYSTEM_REQUESTED)
-    self:SetRoleToggled(LFG_ROLE_DPS, isDPS, SYSTEM_REQUESTED)
-
-    self:DisableRoleButtons(IsCurrentlySearchingForGroup())
+    self:RefreshRadioButtonGroupEnabledState()
 end
 
-function PreferredRolesManager:SetRoleToggled(role, selected, userRequested)
-    self.roles[role].isSelected = selected
-    if userRequested then
-        PlaySound(selected and SOUNDS.GROUP_ROLE_SELECTED or SOUNDS.GROUP_ROLE_DESELECTED)
-        UpdatePlayerRole(role, selected)
-        ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
-    else
-        ZO_CheckButton_SetCheckState(self.roles[role].button, selected)
-    end
+function PreferredRolesManager:RefreshRadioButtonGroupEnabledState()
+    local canUpdateSelectedLFGRole = CanUpdateSelectedLFGRole()
+    self.radioButtonGroup:SetEnabled(canUpdateSelectedLFGRole)
 end
 
-function PreferredRolesManager:DisableRoleButtons(isDisabled)
-    for roleType, roleData in pairs(self.roles) do
-
-        --Force buttons only half selected (mouse down only) to be unselected before disabling
-        if not roleData.isSelected then
-            ZO_CheckButton_SetUnchecked(roleData.button, false)
-        end
-
-        ZO_CheckButton_SetEnableState(roleData.button, not isDisabled)
-
-        --Force mouse to be enabled on disabled buttons so tooltips still work
-        roleData.button:SetMouseEnabled(true)
-    end
-end
-
-function PreferredRolesManager:GetSelectedRoleCount()
-    local count = 0
-    for roleType, roleData in pairs(self.roles) do
-        if roleData.isSelected then
-            count = count + 1
-        end
-    end
-
-    return count
-end
-
-function PreferredRolesManager:GetRoles()
-    local roles = self.roles
-    return {
-        [LFG_ROLE_DPS] = roles[LFG_ROLE_DPS].isSelected,
-        [LFG_ROLE_HEAL] = roles[LFG_ROLE_HEAL].isSelected,
-        [LFG_ROLE_TANK] = roles[LFG_ROLE_TANK].isSelected,
-    }
-end
-
-function PreferredRolesManager:IsRoleSelected()
-    local roles = self.roles
-    return roles[LFG_ROLE_DPS].isSelected or roles[LFG_ROLE_HEAL].isSelected or roles[LFG_ROLE_TANK].isSelected
+function PreferredRolesManager:OnRoleButtonSelectionChanged(newButton, previousButton)
+    UpdateSelectedLFGRole(newButton.role)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
 end
 
 ---- XML Callbacks ----
@@ -117,7 +62,7 @@ function ZO_PreferredRolesButton_OnMouseEnter(control)
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
     local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
     InformationTooltip:AddLine(GetString("SI_LFGROLE", control.role), "", r, g, b)
-    InformationTooltip:AddLine(PREFERRED_ROLES.roles[control.role].tooltip, "", r, g, b)
+    InformationTooltip:AddLine(control.tooltipString, "", r, g, b)
     InformationTooltip:AddLine(GetString(SI_GROUP_PREFERRED_ROLE_DESCRIPTION), "", r, g, b)
     local lowestAverage = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetAverageRoleTime(control.role)
     if lowestAverage > 0 then
@@ -127,21 +72,12 @@ function ZO_PreferredRolesButton_OnMouseEnter(control)
 
     local currentState = control:GetState()
     if currentState == BSTATE_DISABLED or currentState == BSTATE_DISABLED_PRESSED then
-        InformationTooltip:AddLine(zo_strformat(SI_GROUP_LIST_PANEL_DISABLED_ROLE_TOOLTIP, tooltipText), "", ZO_ColorDef:New("ff0000"):UnpackRGB())
+        InformationTooltip:AddLine(GetString(SI_GROUP_LIST_PANEL_DISABLED_ROLE_TOOLTIP), "", ZO_ColorDef:New("ff0000"):UnpackRGB())
     end
 end
 
 function ZO_PreferredRolesButton_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
-end
-
-function ZO_PreferredRolesButton_OnClicked(buttonControl, mouseButton)
-    local buttonState = buttonControl:GetState()
-    local role = buttonControl.role
-
-    local toggleCheckOn = buttonState == BSTATE_NORMAL
-    ZO_CheckButton_SetCheckState(buttonControl, toggleCheckOn)
-    PREFERRED_ROLES:SetRoleToggled(role, toggleCheckOn, USER_REQUESTED)
 end
 
 do
@@ -150,6 +86,13 @@ do
         [LFG_ROLE_TANK] = "tank",
         [LFG_ROLE_HEAL] = "healer",
         [LFG_ROLE_DPS] = "dps",
+    }
+
+    local TOOLTIP_STRING_LOOKUP =
+    {
+        [LFG_ROLE_TANK] = GetString(SI_GROUP_PREFERRED_ROLE_TANK_TOOLTIP),
+        [LFG_ROLE_HEAL] = GetString(SI_GROUP_PREFERRED_ROLE_HEAL_TOOLTIP),
+        [LFG_ROLE_DPS] = GetString(SI_GROUP_PREFERRED_ROLE_DPS_TOOLTIP),
     }
 
     function ZO_PreferredRoleButton_OnInitialized(control, role)
@@ -161,6 +104,7 @@ do
         control:SetDisabledTexture(string.format("EsoUI/Art/LFG/LFG_%s_disabled_64.dds", roleName))
         control:SetDisabledPressedTexture(string.format("EsoUI/Art/LFG/LFG_%s_down_disabled_64.dds", roleName))
         control.role = role
+        control.tooltipString = TOOLTIP_STRING_LOOKUP[role]
     end
 end
 

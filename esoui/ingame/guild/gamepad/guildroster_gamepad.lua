@@ -22,6 +22,13 @@ function ZO_GamepadGuildRosterManager:Initialize(control)
 	self:SetEmptyText(GetString(""))
 
     self:SetupSort(GUILD_ROSTER_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_DOWN)
+
+    local function OnGuildMemberNoteChanged(eventId, guildId, displayName, note)
+        if GUILD_ROSTER_MANAGER:MatchesGuild(guildId) then 
+            self:RefreshTooltip() 
+        end
+    end
+    control:RegisterForEvent(EVENT_GUILD_MEMBER_NOTE_CHANGED, OnGuildMemberNoteChanged)
 end
 
 function ZO_GamepadGuildRosterManager:InitializeHeader()

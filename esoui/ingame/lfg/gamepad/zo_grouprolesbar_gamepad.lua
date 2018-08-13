@@ -47,46 +47,45 @@ function ZO_GroupRolesBar_Gamepad:Initialize(control)
     local function OnSelected(control)
         control.selectedFrame:SetHidden(false)
         
-        local roleType = control.data.role
-        local roleData = ZO_GAMEPAD_LFG_OPTION_INFO[roleType]
+        local roleData = control.data
+        local roleType = roleData.role
         local lowestAverage = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetAverageRoleTime(roleType)
         GAMEPAD_TOOLTIPS:LayoutGroupRole(GAMEPAD_LEFT_TOOLTIP, roleData.optionName, roleData.tooltip, lowestAverage)
     end
+
     local function OnUnselected(control)
         control.selectedFrame:SetHidden(true)
     end
+
     local function OnPressed(control)
-        local roleType = control.data.role
-        local isSelected = not self.roles[roleType].isSelected
-        UpdatePlayerRole(roleType, isSelected)
+        UpdateSelectedLFGRole(control.data.role)
         ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
         self:RefreshRoles()
     end
 
     ZO_GamepadButtonTabBar.Initialize(self, control, OnSelected, OnUnselected, OnPressed)
 
-    local tankControl = control:GetNamedChild("Tank")
-    local healerControl = control:GetNamedChild("Healer")
-    local dpsControl = control:GetNamedChild("DPS")
-    self.roles = {
-        [LFG_ROLE_TANK] = {button = tankControl},
-        [LFG_ROLE_HEAL] = {button = healerControl},
-        [LFG_ROLE_DPS] = {button = dpsControl},
+    self.roleControls =
+    {
+        [LFG_ROLE_TANK] = control:GetNamedChild("Tank"),
+        [LFG_ROLE_HEAL] = control:GetNamedChild("Healer"),
+        [LFG_ROLE_DPS] = control:GetNamedChild("DPS"),
     }
-    self:AddButton(tankControl, ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_TANK])
-    self:AddButton(healerControl, ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_HEAL])
-    self:AddButton(dpsControl, ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_DPS])
+
+    self:AddButton(self.roleControls[LFG_ROLE_TANK], ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_TANK])
+    self:AddButton(self.roleControls[LFG_ROLE_HEAL], ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_HEAL])
+    self:AddButton(self.roleControls[LFG_ROLE_DPS], ZO_GAMEPAD_LFG_OPTION_INFO[LFG_ROLE_DPS])
 
     self:RefreshRoles()
 
     --The fragment needs to be manually added and removed for the animation to work between the two group scenes
     GAMEPAD_GROUP_ROLES_FRAGMENT = ZO_ConveyorSceneFragment:New(ZO_GroupRolesBarGamepadMaskContainer, ZO_Anchor:New(TOPLEFT, nil, TOPLEFT))
     GAMEPAD_GROUP_ROLES_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-	    if newState == SCENE_FRAGMENT_SHOWING then
-	 	    self:RefreshRoles()
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:RefreshRoles()
         elseif(newState == SCENE_HIDDEN) then
             self:Deactivate()
-	    end
+        end
     end)
     GAMEPAD_GROUP_ROLES_FRAGMENT:SetForceRefresh(true)
 
@@ -97,15 +96,14 @@ end
 
 function ZO_GroupRolesBar_Gamepad:InitializeEvents()
     local function OnActivityFinderStatusUpdate(status)
-        self.isLockedFromSearch = status == ACTIVITY_FINDER_STATUS_QUEUED
-        self:UpdateDimming()
+        self:UpdateEnabledState()
     end
     
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", OnActivityFinderStatusUpdate)
 end
 
 function ZO_GroupRolesBar_Gamepad:ToggleSelected()
-    if self.selectedIndex and not self.isLockedFromSearch then
+    if self.selectedIndex and self.canUpdateSelectedLFGRole then
         local selectedButton = self.buttons[self.selectedIndex]
         self.onPressedCallback(selectedButton)
         PlaySound(SOUNDS.DEFAULT_CLICK)
@@ -113,21 +111,23 @@ function ZO_GroupRolesBar_Gamepad:ToggleSelected()
 end
 
 function ZO_GroupRolesBar_Gamepad:SetRoleSelected(roleType, isSelected)
-    local role = self.roles[roleType]
-    local button = role.button
-
-    role.isSelected = isSelected
-    local roleData = ZO_GAMEPAD_LFG_OPTION_INFO[roleType]
-    button.icon:SetTexture(isSelected and roleData.iconDown or roleData.iconUp)
-    button.pressedFrame:SetHidden(not isSelected)
+    local roleControl = self.roleControls[roleType]
+    local roleData = roleControl.data
+    roleControl.icon:SetTexture(isSelected and roleData.iconDown or roleData.iconUp)
+    roleControl.pressedFrame:SetHidden(not isSelected)
 end
 
 function ZO_GroupRolesBar_Gamepad:RefreshRoles()
-    local isDPS, isHeal, isTank = GetPlayerRoles()
+    local selectedRole = GetSelectedLFGRole()
+    for roleType, _ in pairs(self.roleControls) do
+        self:SetRoleSelected(roleType, roleType == selectedRole)
+    end
+    self:UpdateEnabledState()
+end
 
-    self:SetRoleSelected(LFG_ROLE_DPS, isDPS)
-    self:SetRoleSelected(LFG_ROLE_HEAL, isHeal)
-    self:SetRoleSelected(LFG_ROLE_TANK, isTank)
+function ZO_GroupRolesBar_Gamepad:UpdateEnabledState()
+    self.canUpdateSelectedLFGRole = CanUpdateSelectedLFGRole()
+    self:UpdateDimming()
 end
 
 function ZO_GroupRolesBar_Gamepad:SetIsManuallyDimmed(isDimmed)
@@ -136,26 +136,12 @@ function ZO_GroupRolesBar_Gamepad:SetIsManuallyDimmed(isDimmed)
 end
 
 function ZO_GroupRolesBar_Gamepad:UpdateDimming()
-    local isDimmed = self.isLockedFromSearch or self.isManuallyDimmed
+    local isDimmed = not self.canUpdateSelectedLFGRole or self.isManuallyDimmed
     local alpha = isDimmed and ZO_GAMEPAD_ICON_UNSELECTED_ALPHA or ZO_GAMEPAD_ICON_SELECTED_ALPHA
 
-    for roleType, data in pairs(self.roles) do
-        data.button:SetAlpha(alpha)
+    for _, roleControl in pairs(self.roleControls) do
+        roleControl:SetAlpha(alpha)
     end
-end
-
-function ZO_GroupRolesBar_Gamepad:GetRoles()
-    local roles = self.roles
-    return {
-        [LFG_ROLE_DPS] = roles[LFG_ROLE_DPS].isSelected,
-        [LFG_ROLE_HEAL] = roles[LFG_ROLE_HEAL].isSelected,
-        [LFG_ROLE_TANK] = roles[LFG_ROLE_TANK].isSelected,
-    }
-end
-
-function ZO_GroupRolesBar_Gamepad:IsRoleSelected()
-    local roles = self.roles
-    return roles[LFG_ROLE_DPS].isSelected or roles[LFG_ROLE_HEAL].isSelected or roles[LFG_ROLE_TANK].isSelected
 end
 
 --ZO_GamepadButtonTabBar Overrides

@@ -88,7 +88,7 @@ end
 function ZO_SceneManager_Base:RemoveFragment(fragment)
     if self.currentScene then
         local state = self.currentScene:GetState()
-        if state == SCENE_SHOWING or state == SCENE_SHOWN then
+        if state ~= SCENE_HIDDEN then
             self.currentScene:RemoveTemporaryFragment(fragment)
         end
     end
@@ -171,10 +171,6 @@ function ZO_SceneManager_Base:HideScene(scene, sequenceNumber)
 end
 
 function ZO_SceneManager_Base:ShowBaseScene()
-    if KEYBIND_STRIP then
-        KEYBIND_STRIP:ClearKeybindGroupStateStack()
-    end
-
     if self.baseScene then
         if not self.currentScene or (self.currentScene ~= self.baseScene and self.nextScene ~= self.baseScene) then
             self:Show(self.baseScene:GetName())

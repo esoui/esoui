@@ -183,7 +183,6 @@ function ZO_KeepClaimDialog:InitializeGamepadReleaseKeepDialog()
                 end,
                 visible = function()
                     local keepId = dialogSingleton.data.keepId
-                    local keepName = GetKeepName(keepId)    
                     local time = GetSecondsUntilKeepClaimAvailable(keepId, BGQUERY_LOCAL)
                     return time == 0
                 end,
@@ -349,7 +348,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
                             self.noViolations = entry.noViolations
                             UpdateSelectedGuildId(entry.guildId)
                             UpdateSelectedGuildIndex(entry.index)
-                            
+
                             if self.noViolations then
                                 self.currentDropdown:SetSelectedColor(ZO_SELECTED_TEXT)
                             else
@@ -377,14 +376,10 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
 
                             control.dropdown:AddItem(newEntry)
 
-                            if(count == 1) then
-                                OnGuildSelected(nil, nil, newEntry)
-                            end
-
                             count = count + 1
                         end
-                        
-                        self.currentDropdown:SetSelectedItemText(self.selectedGuildName)
+
+                        self.currentDropdown:SelectFirstItem()
 
                         control.dropdown:UpdateItems()
 
@@ -393,7 +388,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
                         end
 
                         control.dropdown:SetDeactivatedCallback(OnDropdownDeactivated)
-                    end,               
+                    end,
                 },
             },
         },

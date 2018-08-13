@@ -28,12 +28,11 @@ function ZO_MarketProductCarousel_Shared:EntrySetup(control, data, selected, res
 
     control.object:Layout(data.marketProduct, selected)
 
-    local function resetAutoScroll()
-        self.lastScrollTime = GetFrameTimeSeconds()
-        self.lastInteractionAutomatic = false
+    local function ResetAutoScroll()
+        self:ResetAutoScrollTimer()
     end
 
-    control.object.marketProduct:SetOnInteractWithScrollCallback(resetAutoScroll)
+    control.object.marketProduct:SetOnInteractWithScrollCallback(ResetAutoScroll)
 end
 
 function ZO_MarketProductCarousel_Shared:Initialize(control, template)
@@ -51,7 +50,7 @@ function ZO_MarketProductCarousel_Shared:Initialize(control, template)
     self:SetDisplayEntryType(ZO_HORIZONTAL_SCROLL_LIST_DISPLAY_FIXED_NUMBER_OF_ENTRIES)
 
     local MOVEMENT_DIRECTION = ZO_HORIZONTALSCROLLLIST_MOVEMENT_TYPES.MOVE_LEFT
-    local AUTO_SCROLL_DURATION_SECONDS = 5
+    local AUTO_SCROLL_DURATION_SECONDS = 10
     local POST_INTERACTION_DURATION_SECONDS = 10
     local ENABLE_CAROUSEL_WRAP = true
     self:SetAutoScroll(MOVEMENT_DIRECTION, AUTO_SCROLL_DURATION_SECONDS, POST_INTERACTION_DURATION_SECONDS)

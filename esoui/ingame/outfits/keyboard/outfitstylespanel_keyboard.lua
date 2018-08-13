@@ -589,7 +589,7 @@ function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryRightClick(entryData)
                     end
 
                     if ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:AreChangesPending() then
-                        ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_RESTYLE_CHANGES", GoToCrownStore)
+                        ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_CHANGES", GoToCrownStore)
                     else
                         GoToCrownStore()
                     end

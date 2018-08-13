@@ -89,6 +89,19 @@ do
     end
 end
 
+do
+    local ALLIANCE_KEEP_REWARD_ICONS =
+    {
+        [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Icons/AVA_Siege_UI_006.dds",
+        [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Icons/AVA_Siege_UI_008.dds",
+        [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Icons/AVA_Siege_UI_007.dds",
+    }
+
+    function GetAllianceKeepRewardIcon(alliance)
+        return ALLIANCE_KEEP_REWARD_ICONS[alliance]
+    end
+end
+
 -- Instance Display Type --
 do
     local INSTANCE_DISPLAY_TYPE_ICONS =
@@ -467,6 +480,22 @@ do
             else
                 return ITEM_TRAIT_INFORMATION_KEYBOARD_ICON_PATHS[itemTraitInformation]
             end
+        end
+    end
+end
+
+do
+    local ITEM_SELL_INFORMATION_ICON_PATHS =
+    {
+        [ITEM_SELL_INFORMATION_PRIORITY_SELL] = "EsoUI/Art/Inventory/inventory_trait_ornate_icon.dds",
+        [ITEM_SELL_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/inventory_trait_intricate_icon.dds",
+        [ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED] = "EsoUI/Art/Inventory/inventory_trait_not_researched_icon.dds",
+        [ITEM_SELL_INFORMATION_CANNOT_SELL] = "EsoUI/Art/Inventory/inventory_sell_forbidden_icon.dds",
+    }
+
+    function GetItemSellInformationIcon(itemSellInformation)
+        if itemSellInformation then
+            return ITEM_SELL_INFORMATION_ICON_PATHS[itemSellInformation]
         end
     end
 end

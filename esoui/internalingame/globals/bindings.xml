@@ -82,6 +82,10 @@
                 <Down>SYSTEMS:GetObject("marketAnnouncement"):OnSelectionClicked()</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+            <Action name="MARKET_ANNOUNCEMENT_HELP" hideAction="true" inheritsBindFrom="UI_SHORTCUT_SECONDARY">
+                <Down>SYSTEMS:GetObject("marketAnnouncement"):OnHelpClicked()</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
         </Category>
     </Layer>
 </Bindings>

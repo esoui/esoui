@@ -55,28 +55,50 @@ function CMapHandlers:InitializeEvents()
         self:FireCallbacks("RefreshedAllQuestPins")
     end
 
+    local function OnQuestConditionCounterChanged(eventCode, questIndex, questName, conditionText, conditionType, curCondtionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isQuestComplete, isConditionComplete, isStepHidden, isConditionCompleteStatusChanged) 
+        -- Only refresh if the condition completed has changed but the quest is not complete since there is another event for a quest completing.
+        -- This will reduce the number of times the pins are refreshed so that they are not refreshed unnecessarily.
+        if not isQuestComplete and isConditionCompleteStatusChanged then 
+            RefreshSingleQuestPins(questIndex) 
+        end 
+    end
+
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADVANCED, function(_, questIndex) RefreshSingleQuestPins(questIndex) end)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADDED, RefreshAllQuestPins)   
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_REMOVED, RefreshAllQuestPins)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_LIST_UPDATED, RefreshAllQuestPins)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_PATH_FINDING_NETWORK_LINK_CHANGED, RefreshAllQuestPins)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_LINKED_WORLD_POSITION_CHANGED, RefreshAllQuestPins)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_CONDITION_COUNTER_CHANGED, OnQuestConditionCounterChanged)
+
+    local function OnQuestTrackerTrackingStateChanged(questTracker, tracked, trackType, arg1, arg2)
+        if trackType == TRACK_TYPE_QUEST then
+            local questIndex = arg1
+            local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, questIndex)
+            SetMapQuestPinsTrackingLevel(questIndex, trackingLevel)
+        end
+    end
+
     local function OnQuestTrackerAssistStateChanged(unassistedData, assistedData)
         if unassistedData then
             local questIndex = unassistedData:GetJournalIndex()
             if questIndex then
-                SetMapQuestPinsAssisted(questIndex, false)
+                local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, questIndex)
+                SetMapQuestPinsTrackingLevel(questIndex, trackingLevel)
             end
         end
         if assistedData then
             local questIndex = assistedData:GetJournalIndex()
             if questIndex then
-                SetMapQuestPinsAssisted(questIndex, true)
+                local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, questIndex)
+                SetMapQuestPinsTrackingLevel(questIndex, trackingLevel)
             end
         end
     end
 
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, questIndex) RefreshSingleQuestPins(questIndex) end)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADVANCED, function(_, questIndex) RefreshSingleQuestPins(questIndex) end)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADDED, RefreshAllQuestPins)   
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_REMOVED, RefreshAllQuestPins)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_LIST_UPDATED, RefreshAllQuestPins)
     FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", OnQuestTrackerAssistStateChanged)
-
+    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerTrackingStateChanged", OnQuestTrackerTrackingStateChanged)
+    
     self:RefreshAllQuestPins()
 end
 
@@ -138,15 +160,10 @@ function CMapHandlers:ValidatePvPPinAllowed(pinType)
 end
 
 function CMapHandlers:RefreshSingleQuestPins(journalIndex)
-    -- Do not use GetMapQuestPinsAssisted to find whether or not the pin was assisted, it causes eso-56564.
-    local isAssisted = GetTrackedIsAssisted(TRACK_TYPE_QUEST, journalIndex)
+    local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, journalIndex)
     
     RemoveMapQuestPins(journalIndex)
-    AddMapQuestPins(journalIndex)
-    
-    if isAssisted then
-        SetMapQuestPinsAssisted(journalIndex, true)
-    end
+    AddMapQuestPins(journalIndex, trackingLevel)
 end
 
 function CMapHandlers:RefreshAllQuestPins()

@@ -92,7 +92,8 @@ function ZO_SkillsGamepadEntry_OnInitialized(control)
     --skill lines
     control.rank = control:GetNamedChild("Rank")
     --abilities
-    control.alert = control:GetNamedChild("Alert")
+    control.leftIndicator = control:GetNamedChild("LeftIndicator")
+    control.rightIndicator = control:GetNamedChild("RightIndicator")
     control.lock = control:GetNamedChild("Lock")
     control.frame = control:GetNamedChild("Frame") --not sure if still needed by other menus
     control.circleFrame = control:GetNamedChild("CircleFrame")

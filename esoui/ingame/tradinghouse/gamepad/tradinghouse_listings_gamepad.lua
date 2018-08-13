@@ -26,7 +26,7 @@ function ZO_GamepadTradingHouse_Listings:InitializeList()
     list:AddDataTemplate(SCROLL_LIST_ITEM_TEMPLATE_NAME, SetupListing, ZO_GamepadMenuEntryTemplateParametricListFunction)
     list:SetAlignToScreenCenter(true)
     list:SetValidateGradient(true)
-    list:SetNoItemText(GetString(SI_GAMEPAD_TRADING_HOUSE_NO_LISTINGS))
+    list:SetNoItemText(GetString(SI_GUILD_STORE_NO_LISTINGS))
 
     list:SetOnSelectedDataChangedCallback(
         function(list, selectedData)
@@ -84,7 +84,7 @@ end
 function ZO_GamepadTradingHouse_Listings:BuildList()
     local list = self:GetList()
     for i = 1, GetNumTradingHouseListings() do
-        local itemData = ZO_TradingHouse_CreateItemData(i, GetTradingHouseListingItemInfo)
+        local itemData = ZO_TradingHouse_CreateListingItemData(i)
         if itemData then
             itemData.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemData.name)
             itemData.price = itemData.purchasePrice

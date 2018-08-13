@@ -62,7 +62,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
         if selectedData and selectedData.bagId and selectedData.slotIndex then
             self.sourceTooltip.scrollTooltip:ResetToTop()
             self.sourceTooltip.tip:ClearLines()
-            self.sourceTooltip.tip:LayoutBagItem(selectedData.bagId, selectedData.slotIndex)
+            self.sourceTooltip.tip:LayoutImproveSourceSmithingItem(selectedData.bagId, selectedData.slotIndex)
             self.sourceTooltip.icon:SetTexture(selectedData.pressedIcon)
             self.sourceTooltip:SetHidden(false)
 
@@ -196,10 +196,6 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
                 self:SetInventoryActive(true)
             end
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-
-            if self.shouldActivateTabBar then
-                ZO_GamepadGenericHeader_Activate(self.owner.header)
-            end
         end
     end)
 end
@@ -502,8 +498,9 @@ function ZO_GamepadSmithingImprovement:ColorizeText(qualityRow)
 end
 
 function ZO_GamepadSmithingImprovement:SetupResultTooltip(...)
+    self.resultTooltip.scrollTooltip:ResetToTop()
     self.resultTooltip.tip:ClearLines()
-    self.resultTooltip.tip:LayoutImprovedSmithingItem(...)
+    self.resultTooltip.tip:LayoutImproveResultSmithingItem(...)
 end
 
 function ZO_GamepadSmithingImprovement:SetInventoryActive(active)

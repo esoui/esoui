@@ -24,7 +24,9 @@ function ZO_MarketAnnouncement_Gamepad:Initialize(control)
     ZO_MarketAnnouncement_Shared.Initialize(self, control, IsInGamepadPreferredMode)
     self.carousel = ZO_MarketProductCarousel_Gamepad:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Gamepad_Control")
     self.carousel:SetSelectKeybindButton(self.selectButton)
+    self.carousel:SetHelpKeybindButton(self.helpButton)
     self.carousel:SetScrollKeybindButton(self.scrollButton)
+    self.carousel:SetKeybindAnchorControl(self.closeButton)
 
     -- Action Tile Focus object must be setup before vertical navigation
     self.actionTileListFocus = ZO_GamepadFocus:New(self.actionTileListControl, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
@@ -87,6 +89,9 @@ function ZO_MarketAnnouncement_Gamepad:InitializeKeybindButtons()
 
     self.selectButton = self.controlContainer:GetNamedChild("PrimaryAction")
     self.selectButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+    self.helpButton = self.controlContainer:GetNamedChild("SecondaryAction")
+    self.helpButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+    self.helpButton:SetHidden(true)
     self.scrollButton = self.controlContainer:GetNamedChild("TertiaryAction")
     self.scrollButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
     local WIDE_SPACING = false
@@ -99,11 +104,24 @@ function ZO_MarketAnnouncement_Gamepad:OnSelectionClicked()
     self.selectButton:OnClicked()
 end
 
+function ZO_MarketAnnouncement_Gamepad:OnHelpClicked()
+    self.helpButton:OnClicked()
+end
+
 function ZO_MarketAnnouncement_Gamepad:UpdateActionTileNavigation()
     self.actionTileListFocus:RemoveAllEntries()
     for _, data in ipairs(self.actionTileList) do
         local entryData = data:GetFocusEntryData()
         self.actionTileListFocus:AddEntry(entryData)
+    end
+end
+
+function ZO_MarketAnnouncement_Gamepad:OnDailyLoginRewardsUpdated()
+    if self.fragment:IsShowing() then 
+        self:LayoutActionTiles() 
+        self.verticalFocus:Deactivate()
+        self:UpdateVerticalNavigation()
+        self.verticalFocus:Activate()
     end
 end
 

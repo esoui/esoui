@@ -60,9 +60,7 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
     self.marketProductSelectedCallback = function(...) self:UpdateLabels(...) end
 
     local function OnDailyLoginRewardsUpdated() 
-        if self.fragment:IsShowing() then 
-            self:LayoutActionTiles() 
-        end
+        self:OnDailyLoginRewardsUpdated()
     end
 
     ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("OnMarketAnnouncementDataUpdated", function() self:UpdateMarketCarousel() end)
@@ -88,6 +86,12 @@ function ZO_MarketAnnouncement_Shared:OnStateChanged(oldState, newState)
         self:OnHiding()
     elseif newState == SCENE_HIDDEN then
         self:OnHidden()
+    end
+end
+
+function ZO_MarketAnnouncement_Shared:OnDailyLoginRewardsUpdated()
+    if self.fragment:IsShowing() then 
+        self:LayoutActionTiles() 
     end
 end
 
@@ -149,6 +153,10 @@ function ZO_MarketAnnouncement_Shared:UpdateMarketCarousel()
 end
 
 function ZO_MarketAnnouncement_Shared:OnSelectionClicked()
+    -- To be overridden
+end
+
+function ZO_MarketAnnouncement_Shared:OnHelpClicked()
     -- To be overridden
 end
 

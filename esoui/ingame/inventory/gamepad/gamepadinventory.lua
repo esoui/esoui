@@ -48,7 +48,6 @@ function ZO_GamepadInventory:Initialize(control)
 
     local function RefreshVisualLayer()
         if self.scene:IsShowing() then
-            self:OnUpdate()
             if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
                 self:RefreshCategoryList()
             end
@@ -412,28 +411,30 @@ function ZO_GamepadInventory:InitializeSplitStackDialog()
 end
 
 function ZO_GamepadInventory:OnActionsDialogFinished()
-    -- make sure to wipe out the keybinds added by actions
-    self:SetActiveKeybinds(self.currentKeybindDescriptor)
-    --restore the selected inventory item
-    if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
-        --if we refresh item actions we will get a keybind conflict
-        local currentList = self:GetCurrentList()
-        if currentList then
-            local targetData = currentList:GetTargetData()
-            if currentList == self.categoryList then
-                targetData = self:GenerateItemSlotData(targetData)
+    if self.scene:IsShowing() then
+        -- make sure to wipe out the keybinds added by actions
+        self:SetActiveKeybinds(self.currentKeybindDescriptor)
+        --restore the selected inventory item
+        if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
+            --if we refresh item actions we will get a keybind conflict
+            local currentList = self:GetCurrentList()
+            if currentList then
+                local targetData = currentList:GetTargetData()
+                if currentList == self.categoryList then
+                    targetData = self:GenerateItemSlotData(targetData)
+                end
+                self:SetSelectedItemUniqueId(targetData)
             end
-            self:SetSelectedItemUniqueId(targetData)
+        else
+            self:RefreshItemActions()
         end
-    else
-        self:RefreshItemActions()
-    end
-    --refresh so keybinds react to newly selected item
-    self:RefreshActiveKeybinds()
+        --refresh so keybinds react to newly selected item
+        self:RefreshActiveKeybinds()
 
-    self:OnUpdate()
-    if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
-        self:RefreshCategoryList()
+        self:OnUpdate()
+        if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
+            self:RefreshCategoryList()
+        end
     end
 end
 

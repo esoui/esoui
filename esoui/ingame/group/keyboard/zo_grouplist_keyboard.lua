@@ -279,6 +279,8 @@ function ZO_GroupList_Keyboard:RefreshData()
     if not self.control:IsHidden() then
         ZO_SortFilterList.RefreshData(self)
     end
+
+    PREFERRED_ROLES:RefreshRadioButtonGroupEnabledState()
 end
 
 

@@ -11,9 +11,8 @@ ZO_TRADING_HOUSE_INTERACTION =
     interactTypes = { INTERACTION_TRADINGHOUSE },
 }
 
-function ZO_TradingHouse_CreateItemData(index, fn)
-    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType = fn(index)
-    if(name ~= "" and stackCount > 0) then
+function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType)
+    if name ~= "" and stackCount > 0 then
         local result =
         {
             slotIndex = index,
@@ -29,6 +28,18 @@ function ZO_TradingHouse_CreateItemData(index, fn)
 
         return result
     end
+
+    return nil
+end
+
+function ZO_TradingHouse_CreateListingItemData(index)
+    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType = GetTradingHouseListingItemInfo(index)
+    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType)
+end
+
+function ZO_TradingHouse_CreateSearchResultItemData(index)
+    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType = GetTradingHouseSearchResultItemInfo(index)
+    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType)
 end
 
 local TRADING_HOUSE_DESIRED_FILTER_ORDERING =
@@ -131,7 +142,7 @@ ZO_TradingHouseComboBoxSetter = ZO_TradingHouseSearchFieldSetter:Subclass()
 function ZO_TradingHouseComboBoxSetter:Initialize(filterType, comboBoxObject)
     ZO_TradingHouseSearchFieldSetter.Initialize(self, filterType)
     self.m_comboBox = comboBoxObject
-	self.SelectionChanged = ZO_TradingHouse_ComboBoxSelectionChanged
+    self.SelectionChanged = ZO_TradingHouse_ComboBoxSelectionChanged
 end
 
 function ZO_TradingHouseComboBoxSetter:ApplyToSearch(searchObject)
@@ -303,7 +314,9 @@ function ZO_TradingHouse_Shared:InitializeSharedEvents()
     end
 
     local function OnConfirmPendingPurchase(_, pendingPurchaseIndex)
-        self:ConfirmPendingPurchase(pendingPurchaseIndex)
+        if pendingPurchaseIndex ~= nil then
+            self:ConfirmPendingPurchase(pendingPurchaseIndex)
+        end
     end
 
    self.m_eventCallbacks = {
@@ -323,7 +336,7 @@ function ZO_TradingHouse_Shared:InitializeSharedEvents()
 end
 
 function ZO_TradingHouse_Shared:SetSearchItemCategory(_, _, entry, selectionChanged)
-	ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
+    ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
 
     if selectionChanged then
         self:SetSearchActiveFilter(entry.filterObject)
@@ -475,7 +488,7 @@ end
 --[[ Trading House Shared Globals ]]--
 
 function ZO_TradingHouse_FinishLocalString(sString)
-	return zo_strformat(SI_DISPLAY_GUILD_STORE_ITEM_NAME, sString)
+    return zo_strformat(SI_DISPLAY_GUILD_STORE_ITEM_NAME, sString)
 end
 
 function ZO_TradingHouse_GetComboBoxString(stringData)
@@ -487,11 +500,11 @@ function ZO_TradingHouse_GetComboBoxString(stringData)
 end
 
 function ZO_TradingHouse_SearchCriteriaChanged(changed)
-	if changed == nil then
-		changed = true
-	end
+    if changed == nil then
+        changed = true
+    end
 
-	SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):HandleSearchCriteriaChanged(changed)
+    SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):HandleSearchCriteriaChanged(changed)
 end
 
 function ZO_TradingHouse_InitializeCategoryComboBox(...)
@@ -523,7 +536,7 @@ function ZO_TradingHouse_InitializeColoredComboBox(comboBox, entryData, callback
 end
 
 function ZO_TradingHouse_ComboBoxSelectionChanged(_, _, _, selectionChanged)
-	ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
+    ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
 end
 
 --[[

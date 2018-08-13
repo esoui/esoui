@@ -1,0 +1,127 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_KeyboardAssignableActionBar" virtual="true" allowBringToTop="false" layer="OVERLAY" level="1">
+            <Dimensions x="483" y="70"/>
+            <Controls>
+                <Button name="$(parent)HotbarSwap" inherits="ZO_WeaponSwapRight">
+                    <Anchor point="LEFT" offsetX="54" />
+
+                    <!-- Overriding the inherited ZO_WeaponSwap handlers -->
+                    <OnInitialized>
+                    </OnInitialized>
+
+                    <OnMouseEnter>
+                        ZO_KeyboardAssignableActionBarHotbarSwap_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_KeyboardAssignableActionBarHotbarSwap_OnMouseExit(self)
+                    </OnMouseExit>
+
+                    <OnMouseDown>
+                    </OnMouseDown>
+
+                    <OnClicked>
+                        ZO_KeyboardAssignableActionBarHotbarSwap_OnClicked(self)
+                    </OnClicked>
+
+                    <Controls>
+                        <Label name="$(parent)HotbarName" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                        </Label>
+                    </Controls>
+                </Button>
+
+                <Control name="$(parent)Button1" inherits="ZO_AssignableActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)HotbarSwap" offsetX="54" />
+                </Control>
+
+                <Control name="$(parent)Button2" inherits="ZO_AssignableActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button1" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)Button3" inherits="ZO_AssignableActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button2" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)Button4" inherits="ZO_AssignableActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button3" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)Button5" inherits="ZO_AssignableActionButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button4" relativePoint="RIGHT" offsetX="2"/>
+                </Control>
+
+                <Control name="$(parent)Button6" inherits="ZO_AssignableUltimateButton_Keyboard">
+                    <Anchor point="LEFT" relativeTo="$(parent)Button5" relativePoint="RIGHT" offsetX="62"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AssignableActionButton_Keyboard_FlipCardControl" virtual="true">
+            <Anchor point="TOPLEFT" relativeTo="$(parent)FlipCard" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" />
+        </Control>
+
+        <Control name="ZO_AssignableActionButton_Keyboard" virtual="true">
+            <Dimensions x="50" y="50" />
+            <Controls>
+                <Button name="$(parent)Button" mouseOverBlendMode="ADD">
+                    <AnchorFill />
+
+                    <MouseButton button="1" enabled="true" />
+                    <MouseButton button="2" enabled="true" />
+
+                    <Textures mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" />
+                    
+                    <OnClicked>
+                        ZO_KeyboardAssignableActionBarButton_OnMouseClicked(self, button)
+                    </OnClicked>
+
+                    <OnDragStart>
+                        ZO_KeyboardAssignableActionBarButton_OnDragStart(self)
+                    </OnDragStart>
+
+                    <OnReceiveDrag>
+                        ZO_KeyboardAssignableActionBarButton_OnReceiveDrag(self)
+                    </OnReceiveDrag>
+
+                    <OnMouseEnter>
+                        ZO_KeyboardAssignableActionBarButton_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_KeyboardAssignableActionBarButton_OnMouseExit(self)
+                    </OnMouseExit>
+                </Button>
+
+                <Control name="$(parent)FlipCard">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="47" y="47" />
+                </Control>
+
+                <Texture name="$(parent)Icon" inherits="ZO_AssignableActionButton_Keyboard_FlipCardControl" level="1" />
+
+                <Texture name="$(parent)BG" inherits="ZO_AssignableActionButton_Keyboard_FlipCardControl" textureFile="EsoUI/Art/ActionBar/abilityInset.dds" level="0" />
+
+                <Label name="$(parent)ButtonText" font="ZoFontGameSmall" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" tier="HIGH" verticalAlignment="TOP">
+                    <Dimensions x="50" y="18"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="1"/>
+                </Label>
+
+                <Texture name="$(parent)DropCallout" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AssignableUltimateButton_Keyboard" virtual="true" inherits="ZO_AssignableActionButton_Keyboard">
+            <Controls>
+                <Texture name="$(parent)Decoration" textureFile="EsoUI/Art/ActionBar/ability_ultimate_frameDecoBG.dds" level="2">
+                    <Anchor point="TOPLEFT" offsetX="-25" offsetY="-25"/>
+                    <Dimensions x="100" y="100"/>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

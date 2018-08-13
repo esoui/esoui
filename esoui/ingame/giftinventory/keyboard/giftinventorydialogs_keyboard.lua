@@ -11,6 +11,7 @@ function ZO_ConfirmClaimGiftDialog_Keyboard_OnInitialized(self)
 
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_CLAIM_GIFT_KEYBOARD",
     {
+        canQueue = true,
         title =
         {
             text = SI_CONFIRM_CLAIM_GIFT_TITLE,
@@ -122,3 +123,47 @@ ZO_Dialogs_RegisterCustomDialog("CONFIRM_DELETE_GIFT_KEYBOARD",
         },
     },
 })
+
+-- Claim Gift Notice
+function ZO_GiftClaimNoticeDialog_Keyboard_OnInitialized(control)
+    local helpButton = control:GetNamedChild("HelpButton")
+    ZO_Dialogs_RegisterCustomDialog("CLAIM_GIFT_NOTICE_KEYBOARD",
+    {
+        customControl = control,
+        setup = function(dialog)
+            local data = dialog.data
+            helpButton:SetHidden(data.helpCategoryIndex == nil)
+            helpButton:SetHandler("OnClicked", function()
+                HELP:ShowSpecificHelp(data.helpCategoryIndex, data.helpIndex)
+                ZO_Dialogs_ReleaseDialog(dialog)
+            end)
+        end,
+        title =
+        {
+            text = SI_MARKET_PRODUCT_NAME_FORMATTER,
+        },
+        mainText =
+        {
+            text = SI_CLAIM_GIFT_NOTICE_BODY_FORMATTER,
+        },
+        buttons =
+        {
+            -- Continue Button
+            {
+                control = control:GetNamedChild("Continue"),
+                keybind = "DIALOG_PRIMARY",
+                text = GetString(SI_CLAIM_GIFT_NOTICE_CONTINUE_KEYBIND),
+                callback = function(dialog)
+                    ZO_Dialogs_ShowDialog("CONFIRM_CLAIM_GIFT_KEYBOARD", dialog.data.gift)
+                end,
+            },
+
+            -- Cancel Button
+            {
+                control = control:GetNamedChild("Cancel"),
+                keybind = "DIALOG_NEGATIVE",
+                text = GetString(SI_DIALOG_CANCEL),
+            }
+        },
+    })
+end

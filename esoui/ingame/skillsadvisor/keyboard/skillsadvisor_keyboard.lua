@@ -66,7 +66,6 @@ function ZO_SkillsAdvisor_Keyboard:Initialize(control)
 end
 
 function ZO_SkillsAdvisor_Keyboard:UpdateSkillsAdvisorBuildSelection()
-    SKILLS_WINDOW:RefreshList()
     self:SetSelectedSkillBuildName()
     self:SetSelectedTab()
     self:HandleTabChange()

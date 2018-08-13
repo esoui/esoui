@@ -13,9 +13,9 @@ end
 
 function SkillsAdvisorSuggestions_Gamepad:Initialize(control)
     ZO_SortFilterList_Gamepad.Initialize(self, control)
-    ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_DATA, "ZO_SkillsAdvisorSuggestions_Gamepad_AbilityEntryTemplate", 60, function(...) self:ZO_SkillsAdvisorSuggestionsEntryTemplateSetup(...) end)
-    ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, "ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader", 50, function(...) self:ZO_SkillsAdvisorSuggestionsTextDisplayTemplateSetup(...) end)
-    ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_TEXT, "ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryText", 100, function(...) self:ZO_SkillsAdvisorSuggestionsTextDisplayTemplateSetup(...) end)
+    ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_DATA, "ZO_SkillsAdvisorSuggestion_Gamepad_SkillRow", 60, function(...) self:GamepadSingleLineAbilityEntryTemplateSetup(...) end)
+    ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, "ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader", 50, function(...) self:SkillsAdvisorSuggestionsTextDisplayTemplateSetup(...) end)
+    ZO_ScrollList_AddDataType(self.list, SKILLS_ADVISOR_SUGGESTIONS_TEXT, "ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryText", 100, function(...) self:SkillsAdvisorSuggestionsTextDisplayTemplateSetup(...) end)
     ZO_ScrollList_SetTypeSelectable(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, false)
     ZO_ScrollList_SetTypeCategoryHeader(self.list, SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, true)
     ZO_ScrollList_SetTypeSelectable(self.list, SKILLS_ADVISOR_SUGGESTIONS_TEXT, false)
@@ -40,6 +40,10 @@ end
 function SkillsAdvisorSuggestions_Gamepad:OnHidden()
     self:Deactivate()
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+end
+
+function SkillsAdvisorSuggestions_Gamepad:IsShowing()
+    return SKILLS_ADVISOR_SUGGESTIONS_GAMEPAD_FRAGMENT:IsShowing()
 end
 
 function SkillsAdvisorSuggestions_Gamepad:Activate()
@@ -122,29 +126,28 @@ function SkillsAdvisorSuggestions_Gamepad:InitializeKeybinds()
             sound = SOUNDS.SKILLS_ADVISOR_SELECT,
             visible =  function() return true end,
             callback = function() 
-                SCENE_MANAGER:Push(ZO_GAMEPAD_SKILLS_ADVISOR_BUILD_SELECTION_ROOT_SCENE_NAME)
+                SCENE_MANAGER:Push("gamepad_skills_advisor_build_selection_root")
             end,
         }
     }
 end
 
 function SkillsAdvisorSuggestions_Gamepad:UpdateTooltip()
-    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
-    if self.isActive then
-        local selectedData = ZO_ScrollList_GetSelectedData(self.list)
-        if selectedData and not selectedData.isHeader then
-            local rankIndex = GetSkillLineProgressionAbilityRankIndex(selectedData.dataSource.skillType, selectedData.dataSource.lineIndex, selectedData.dataSource.abilityIndex, selectedData.dataSource.skillBuildMorphChoice)
-            local hideNextUpgrade = false
-            local showRank = false
-            local showPurchaseInfo = true
-            local hidePointsAndAdvisedInfo = true
-            GAMEPAD_TOOLTIPS:LayoutSkillLineAbility(GAMEPAD_RIGHT_TOOLTIP, selectedData.dataSource.skillType, selectedData.dataSource.lineIndex, selectedData.dataSource.abilityIndex, hideNextUpgrade, showRank, rankIndex, showPurchaseInfo, selectedData.dataSource.abilityId, hidePointsAndAdvisedInfo)
-            return
-        end
-    end
+    if self:IsShowing() then
+        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
-    GAMEPAD_TOOLTIPS:LayoutSkillBuild(GAMEPAD_RIGHT_TOOLTIP, ZO_SKILLS_ADVISOR_SINGLETON:GetSelectedSkillBuildId())
-    GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
+        if self.isActive then
+            local selectedData = self:GetSelectedData()
+            if selectedData and not selectedData.isHeader then
+                local SHOW_RANK_NEEDED_LINE = true
+                GAMEPAD_TOOLTIPS:LayoutSkillProgression(GAMEPAD_RIGHT_TOOLTIP, selectedData.skillProgressionData, SHOW_RANK_NEEDED_LINE)
+                return
+            end
+        end
+
+        GAMEPAD_TOOLTIPS:LayoutSkillBuild(GAMEPAD_RIGHT_TOOLTIP, ZO_SKILLS_ADVISOR_SINGLETON:GetSelectedSkillBuildId())
+        GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
+    end
 end
 
 function SkillsAdvisorSuggestions_Gamepad:BuildMasterList()
@@ -157,60 +160,75 @@ function SkillsAdvisorSuggestions_Gamepad:FilterScrollList()
     -- should take the master list data and filter it
 end
 
-function SkillsAdvisorSuggestions_Gamepad:SortScrollList()
-    ZO_ScrollList_Clear(self.list)
-    local scrollData = ZO_ScrollList_GetDataList(self.list)
-
-    local headerData = ZO_GamepadEntryData:New(GetString(SI_SKILLS_ADVISOR_ADVISED_TITLE))
-    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, headerData))
-
-    local availableAbilities = ZO_SKILLS_ADVISOR_SINGLETON:GetAvailableAbilityList()
-    if #availableAbilities > 0 then
-        for i = 1, #availableAbilities do
-            local data = availableAbilities[i]
-            local entryData = ZO_GamepadEntryData:New(data.name, data.icon)
-            entryData:SetDataSource(data)
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_DATA, entryData))
-        end
-    else
-        local textData = ZO_GamepadEntryData:New(GetString(SI_SKILLS_ADVISOR_NO_ADVISED_ABILITIES_DESCRIPTION))
-        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_TEXT, textData))
-    end
-
-    local purchasedAbilities = ZO_SKILLS_ADVISOR_SINGLETON:GetPurchasedAbilityList()
-    for i = 1, #purchasedAbilities do
-        local data = purchasedAbilities[i]
-        local entryData = ZO_GamepadEntryData:New(data.name, data.icon)
-        entryData:SetDataSource(data)
-        if i == 1 then
-            local headerData = ZO_GamepadEntryData:New(GetString(SI_SKILLS_ADVISOR_PURCHASED_TITLE))
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, headerData))
-        end
+do
+    local function AddEntry(scrollData, skillProgressionData)
+        local name = skillProgressionData:IsPassive() and skillProgressionData:GetFormattedNameWithRank() or skillProgressionData:GetFormattedName()
+        local entryData = ZO_GamepadEntryData:New(name, skillProgressionData:GetIcon())
+        entryData.skillProgressionData = skillProgressionData
         table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_DATA, entryData))
+        return entryData
     end
 
-    ZO_ScrollList_Commit(self.list)
+    function SkillsAdvisorSuggestions_Gamepad:SortScrollList()
+        local previouslySelectedData = self:GetSelectedData()
+        local previouslySelectedSkillProgressionData = previouslySelectedData and previouslySelectedData.skillProgressionData
+        local reselectData = nil
+
+        ZO_ScrollList_Clear(self.list)
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
+
+        local availableHeaderData = ZO_GamepadEntryData:New(GetString(SI_SKILLS_ADVISOR_ADVISED_TITLE))
+        table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, availableHeaderData))
+
+        local availableAbilities = ZO_SKILLS_ADVISOR_SINGLETON:GetAvailableAbilityList()
+        if #availableAbilities > 0 then
+            for _, skillProgressionData in ipairs(availableAbilities) do
+                local entryData = AddEntry(scrollData, skillProgressionData)
+                if previouslySelectedSkillProgressionData == skillProgressionData then
+                    reselectData = entryData
+                end
+            end
+        else
+            local textData = ZO_GamepadEntryData:New(GetString(SI_SKILLS_ADVISOR_NO_ADVISED_ABILITIES_DESCRIPTION))
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_TEXT, textData))
+        end
+
+        local purchasedAbilities = ZO_SKILLS_ADVISOR_SINGLETON:GetPurchasedAbilityList()
+        if #purchasedAbilities > 0 then
+            local purchasedHeaderData = ZO_GamepadEntryData:New(GetString(SI_SKILLS_ADVISOR_PURCHASED_TITLE))
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILLS_ADVISOR_SUGGESTIONS_HEADER_DATA, purchasedHeaderData))
+
+            for _, skillProgressionData in ipairs(purchasedAbilities) do
+                local entryData = AddEntry(scrollData, skillProgressionData)
+                if previouslySelectedSkillProgressionData == skillProgressionData then
+                    reselectData = entryData
+                end
+            end
+        end
+
+        ZO_ScrollList_Commit(self.list)
+
+        if reselectData then
+            ZO_ScrollList_SelectData(self.list, reselectData)
+        end
+    end
 end
 
-function SkillsAdvisorSuggestions_Gamepad:ZO_SkillsAdvisorSuggestionsEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+function SkillsAdvisorSuggestions_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    ZO_GamepadAbilityEntryTemplate_Setup(control, data.dataSource, selected, activated, ZO_SKILL_ABILITY_DISPLAY_VIEW)
+    ZO_GamepadSkillEntryTemplate_Setup(control, data, selected, activated, ZO_SKILL_ABILITY_DISPLAY_VIEW)
 end
 
-function SkillsAdvisorSuggestions_Gamepad:ZO_SkillsAdvisorSuggestionsTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+function SkillsAdvisorSuggestions_Gamepad:SkillsAdvisorSuggestionsTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     control.label:SetText(data.text)
 end
 
-function SkillsAdvisorSuggestions_Gamepad:SetSelectedAbilityData(skillType, skillIndex, abilityIndex)
-    self.selectAbilityData = {
-        skillType = skillType,
-        skillIndex = skillIndex,
-        abilityIndex = abilityIndex,
-    }
+function SkillsAdvisorSuggestions_Gamepad:SetSelectSkillData(skillData)
+    self.selectSkillData = skillData
 end
 
-function SkillsAdvisorSuggestions_Gamepad:GetSelectedAbilityData()
-    return self.selectAbilityData
+function SkillsAdvisorSuggestions_Gamepad:GetSelectSkillData()
+    return self.selectSkillData
 end
 
 -----------------------------

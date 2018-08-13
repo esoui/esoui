@@ -29,6 +29,8 @@ ZO_SCROLL_BUILD_DIRECTION_RIGHT_TO_LEFT = -1
 ZO_SCROLL_SELECT_CATEGORY_PREVIOUS = -1
 ZO_SCROLL_SELECT_CATEGORY_NEXT = 1
 
+ZO_SCROLL_BAR_WIDTH = 16
+
 -- Used by both ZO_VerticalScrollbarBase and ZO_Scroll
 local function OnInteractWithScrollBar(self)
     if self.onInteractWithScrollbarCallback then
@@ -528,6 +530,11 @@ function ZO_Scroll_OnExtentsChanged(self)
     end
 end
 
+function ZO_Scroll_OnMouseWheel(self, delta)
+    ZO_Scroll_ScrollRelative(self, -delta * 40)
+    OnInteractWithScrollBar(self)
+end
+
 function ZO_Scroll_SetOnInteractWithScrollbarCallback(self, onInteractWithScrollbarCallback)
     self.onInteractWithScrollbarCallback = onInteractWithScrollbarCallback
 
@@ -572,12 +579,14 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
             if verticalExtents > 0 then
                 local previousScrollBarValue = scrollbar:GetValue()
                 local finalValue = MAX_SCROLL_VALUE * (verticalOffset / verticalExtents)
-                scrollbar:SetValue(finalValue)
+                if not zo_floatsAreEqual(previousScrollBarValue, finalValue) then
+                    scrollbar:SetValue(finalValue)
+                end
 
                 -- If the previous and current scrollBar values are the same, 
                 -- the onValueChanged function will not be invoked to update the scroll child position.
                 -- We need to explicitly call to recalculate our scroll child position since our extents changed.
-                if previousScrollBarValue == finalValue then
+                if previousScrollBarValue == scrollbar:GetValue() then
                     scroll:SetVerticalScroll(verticalOffset)
                 end
             else
@@ -605,8 +614,6 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
 
         ZO_UpdateScrollFade(self.useFadeGradient, scroll, ZO_SCROLL_DIRECTION_VERTICAL)
     end
-
-    OnInteractWithScrollBar(self)
 end
 
 --Visual Config
@@ -2236,7 +2243,7 @@ function ZO_ScrollList_UpdateScroll(self)
         local currentData = currentControl.dataEntry
         if self.mode == SCROLL_LIST_OPERATIONS then
             local currentOperation = GetDataTypeInfo(self, currentData.typeId)
-            currentOperation:AddToScrollContents(self.contents, currentControl, currentData.left, currentData.top, offset)
+            currentOperation:AddToScrollContents(contents, currentControl, currentData.left, currentData.top, offset)
         else
             local yOffset = currentData.top - offset
             local xOffset = currentData.left

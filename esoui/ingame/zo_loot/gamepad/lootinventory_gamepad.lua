@@ -8,6 +8,7 @@ end
 
 function ZO_LootInventory_Gamepad:Initialize(control)
     local DONT_CREATE_TABBAR = false
+    ZO_Loot_Gamepad_Base.Initialize(self, GAMEPAD_LEFT_TOOLTIP)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, DONT_CREATE_TABBAR)
 
     self.initialLootUpdate = true
@@ -30,31 +31,6 @@ end
 function ZO_LootInventory_Gamepad:SetupList(list)
     list:AddDataTemplate("ZO_GamepadItemSubEntryTemplate", ZO_SharedGamepadEntry_OnSetup)
     self.itemList = list
-end
-
-do
-    local FORCE_FULL_DURABILITY = true
-    local NOT_EQUIPPED = false
-    local NO_CREATOR_NAME = nil
-    local NO_PREVIEW_VALUE = nil
-    function ZO_LootInventory_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
-
-        if selectedData then
-            if not selectedData.currencyType then 
-                local lootLink = GetLootItemLink(selectedData.lootId)
-                local lootType = selectedData.itemType
-                if lootType == LOOT_TYPE_COLLECTIBLE then
-                    GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(GAMEPAD_LEFT_TOOLTIP, lootLink)
-                else
-                    GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_LEFT_TOOLTIP, lootLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, selectedData.stackCount, EQUIP_SLOT_NONE)
-                end
-            end
-
-            self:UpdateButtonTextOnSelection(selectedData)
-        end
-    end
 end
 
 function ZO_LootInventory_Gamepad:DeferredInitialize()

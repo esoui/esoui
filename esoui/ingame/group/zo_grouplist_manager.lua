@@ -69,7 +69,7 @@ function ZO_GroupList_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_LEVEL_UPDATE, RefreshOnUnitEvent)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_CHAMPION_POINT_UPDATE, RefreshOnUnitEvent)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_ZONE_UPDATE, RefreshOnUnitEvent)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_ROLES_CHANGED, RegisterDelayedRefreshOnUnitEvent)
+    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_ROLE_CHANGED, RegisterDelayedRefreshOnUnitEvent)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_CONNECTED_STATUS, RefreshOnUnitEvent)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_LEADER_UPDATE, RegisterDelayedRefresh)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_UPDATE, RegisterDelayedRefresh)
@@ -83,7 +83,10 @@ function ZO_GroupList_Manager:BuildMasterList()
     for i = 1, GetGroupSize() do
         local unitTag = GetGroupUnitTagByIndex(i)
         if unitTag then
-            local isDps, isHeal, isTank = GetGroupMemberRoles(unitTag)
+            local selectedRole = GetGroupMemberSelectedRole(unitTag)
+            local isDps = selectedRole == LFG_ROLE_DPS
+            local isHeal = selectedRole == LFG_ROLE_HEAL
+            local isTank = selectedRole == LFG_ROLE_TANK
             local rawCharacterName = GetRawUnitName(unitTag)
             local zoneName = ZO_CachedStrFormat(SI_ZONE_NAME, GetUnitZone(unitTag))
             local unitOnline = IsUnitOnline(unitTag)

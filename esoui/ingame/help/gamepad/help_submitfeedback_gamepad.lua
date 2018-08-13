@@ -98,26 +98,43 @@ function ZO_Help_SubmitFeedback_Gamepad:SetupList(list)
             enumIterationEnd = fieldData.iterationEnd
         end
 
-        local function AddEntry(enumValue)
-            local name = GetString(fieldData.enumStringPrefix, enumValue)
-            if name ~= nil then
-                local entry = ZO_ComboBox:CreateItemEntry(name, OnDropdownSelectionChanged)
-                entry.categoryEnumValue = enumValue
-                entry.fieldType = fieldType
-                dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-                if savedValue == enumValue then
-                    savedDropdownIndex = currentDropdownIndex
-                end
-                currentDropdownIndex = currentDropdownIndex + 1
+        local function CreateEntry(enumValue)
+            local entry = ZO_ComboBox:CreateItemEntry(GetString(fieldData.enumStringPrefix, enumValue), OnDropdownSelectionChanged)
+            entry.categoryEnumValue = enumValue
+            entry.fieldType = fieldType
+            return entry
+        end
+
+        local function AddEntry(entry)
+            dropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            if savedValue == entry.categoryEnumValue then
+                savedDropdownIndex = currentDropdownIndex
             end
+            currentDropdownIndex = currentDropdownIndex + 1
         end
 
         if fieldData.universallyAddEnum then
-            AddEntry(fieldData.universallyAddEnum)
+            local entry = CreateEntry(fieldData.universallyAddEnum)
+            AddEntry(entry)
         end
 
+        local iterationEntries = {}
         for enumValue = enumIterationBegin, enumIterationEnd do
-            AddEntry(enumValue)
+            local entry = CreateEntry(enumValue)
+            table.insert(iterationEntries, entry)
+        end
+
+        if fieldData.sortFunction then
+            table.sort(iterationEntries, fieldData.sortFunction)
+        end
+
+        for _, entry in ipairs(iterationEntries) do
+            AddEntry(entry)
+        end
+
+        if fieldData.otherEnum then
+            local entry = CreateEntry(fieldData.otherEnum)
+            AddEntry(entry)
         end
 
         dropdown:UpdateItems()

@@ -8,6 +8,7 @@ OPTIONS_HORIZONTAL_SCROLL_LIST = 6
 OPTIONS_FINITE_LIST = 7
 OPTIONS_INVOKE_CALLBACK = 8  --used for two special controls in gamepad pregame
 OPTIONS_COLOR = 9
+OPTIONS_CHAT_COLOR = 10
 
 local function GetControlType(control)
     return control.optionsManager:GetControlTypeFromControl(control)
@@ -75,6 +76,10 @@ local activateOptionControl =
                                 SetupColorOptionActivated(control, true)
                             end,
 
+    [OPTIONS_CHAT_COLOR] =  function(control)
+                                SetupColorOptionActivated(control, true)
+                            end,
+
     [OPTIONS_INVOKE_CALLBACK] = function(control)
                                     control:GetNamedChild("Button"):SetEnabled(true)
                                 end,
@@ -103,6 +108,10 @@ local deactivateOptionControl =
                             end,
 
     [OPTIONS_COLOR] =       function(control)
+                                SetupColorOptionActivated(control, false)
+                            end,
+
+    [OPTIONS_CHAT_COLOR] =  function(control)
                                 SetupColorOptionActivated(control, false)
                             end,
 
@@ -388,6 +397,19 @@ local updateControlFromSettings =
                                 if color then
                                     control:GetNamedChild("Color"):SetColor(color:UnpackRGB())
                                 end
+                                --Gamepad has to setup controls out of a pool so it needs to update enabled state all the time instead
+                                --of just once like keyboard. This should probably be done as a call to setting the activated state in
+                                --the gamepad code instead as part of the option update in gamepad only.
+                                if IsGamepadOption(control) then
+                                    SetupColorOptionActivated(control, ZO_Options_IsOptionActive(control))
+                                end
+                            end,
+
+    [OPTIONS_CHAT_COLOR] =  function(control)
+                                local data = control.data
+                                local currentRed, currentGreen, currentBlue = GetChatCategoryColor(data.chatChannelCategory)
+                                control:GetNamedChild("Color"):SetColor(currentRed, currentGreen, currentBlue)
+
                                 --Gamepad has to setup controls out of a pool so it needs to update enabled state all the time instead
                                 --of just once like keyboard. This should probably be done as a call to setting the activated state in
                                 --the gamepad code instead as part of the option update in gamepad only.
@@ -723,9 +745,70 @@ function ZO_Options_ColorOnClicked(control)
     end
 end
 
+do
+    local categoryChildren = 
+    {
+        [CHAT_CATEGORY_MONSTER_SAY] = {CHAT_CATEGORY_MONSTER_YELL, CHAT_CATEGORY_MONSTER_WHISPER, CHAT_CATEGORY_MONSTER_EMOTE}
+    }
+
+    function ZO_Options_ChatColorOnClicked(control)
+        local data = control.data
+        if ZO_Options_IsOptionActive(control) then
+            local data = control.data
+            if data then
+                local function OnColorSet(r, g, b)
+                    control:GetNamedChild("Color"):SetColor(r, g, b)
+                    CHAT_SYSTEM:SetChannelCategoryColor(data.chatChannelCategory, r, g, b)
+                    SetChatCategoryColor(data.chatChannelCategory, r, g, b)
+
+                    local children = categoryChildren[data.chatChannelCategory]
+                    if children then
+                        for i = 1, #children do
+                            CHAT_SYSTEM:SetChannelCategoryColor(children[i], r, g, b)
+                            SetChatCategoryColor(children[i], r, g, b)
+                        end
+                    end
+
+                    if IsGamepadOption(control) then
+                        local RESELECT = true
+                        CHAT_MENU_GAMEPAD:RefreshChannelDropdown(RESELECT)
+                    end
+                end
+                local currentRed, currentGreen, currentBlue = GetChatCategoryColor(data.chatChannelCategory)
+                SYSTEMS:GetObject("colorPicker"):Show(OnColorSet, currentRed, currentGreen, currentBlue)
+            end
+        end
+    end
+end
+
+function ZO_Options_ColorOnMouseEnter(colorControl)
+    local textureControl = colorControl:GetNamedChild("Color") 
+    local sharedHighlight = SYSTEMS:GetObject("options"):GetColorOptionHighlight()
+    if sharedHighlight then
+        sharedHighlight:ClearAnchors()
+        sharedHighlight:SetAnchor(CENTER, textureControl, CENTER)
+        sharedHighlight:SetHidden(false)
+    end
+    ZO_Options_OnMouseEnter(colorControl)
+end
+
+function ZO_Options_ColorOnMouseExit(colorControl)
+    local sharedHighlight = SYSTEMS:GetObject("options"):GetColorOptionHighlight()
+    if sharedHighlight then
+        sharedHighlight:SetHidden(true)
+    end
+    ZO_Options_OnMouseExit(colorControl)
+end
+
 function ZO_Options_ColorOnMouseUp(control, upInside)
     if upInside then
         ZO_Options_ColorOnClicked(control)
+    end
+end
+
+function ZO_Options_ChatColorOnMouseUp(control, upInside)
+    if upInside then
+        ZO_Options_ChatColorOnClicked(control)
     end
 end
 

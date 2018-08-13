@@ -125,6 +125,8 @@ function ZO_CampaignBonuses_AbilitySlot_OnMouseEnter(control)
         SkillTooltip:SetScrollBonusAbility(GetUnitAlliance("player"), OBJECTIVE_ARTIFACT_OFFENSIVE, control.index)
     elseif control.bonusType == ZO_CAMPAIGN_BONUS_TYPE_EMPEROR then
         SkillTooltip:SetEmperorBonusAbility(CAMPAIGN_BONUSES.campaignBonuses:GetCurrentCampaignId(), GetUnitAlliance("player"))
+    elseif control.bonusType== ZO_CAMPAIGN_BONUS_TYPE_EDGE_KEEPS then
+        SkillTooltip:SetEdgeKeepBonusAbility(control.index)
     else
         SkillTooltip:SetKeepBonusAbility(control.index)
     end

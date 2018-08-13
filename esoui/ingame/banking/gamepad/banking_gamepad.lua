@@ -1,6 +1,3 @@
-local ACTIVATE_SPINNER = true
-local DEACTIVATE_SPINNER = false
-
 -------------------------------------
 -- Gamepad Bank Inventory List
 -------------------------------------
@@ -188,9 +185,9 @@ function ZO_GamepadBanking:RefreshWithdrawNoItemText()
         local collectibleId = GetCollectibleForHouseBankBag(bankingBag)
         local nickname
         if collectibleId ~= 0 then
-        	local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-			if collectibleData then
-				nickname = collectibleData:GetNickname()
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            if collectibleData then
+                nickname = collectibleData:GetNickname()
             end
         end
 
@@ -413,9 +410,9 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
             callback = function()
                 local collectibleId = GetCollectibleForHouseBankBag(GetBankingBag())
                 if collectibleId ~= 0 then
-	                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-	                if collectibleData then
-		                local nickname = collectibleData:GetNickname()
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                    if collectibleData then
+                        local nickname = collectibleData:GetNickname()
                         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId, name = nickname })
                     end
                 end
@@ -590,7 +587,7 @@ end
 function ZO_GamepadBanking:PerformWithdrawDepositFunds()
     local inventoryData = self:GetTargetData()
     if inventoryData.currencyType then
-        if self:IsInWithdrawMode() then 
+        if self:IsInWithdrawMode() then
             self:SetMaxInputFunction(function(currencyType) return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_BANK, CURRENCY_LOCATION_CHARACTER) end)
         elseif self:IsInDepositMode() then
             self:SetMaxInputFunction(function(currencyType) return GetMaxCurrencyTransfer(currencyType, CURRENCY_LOCATION_CHARACTER, CURRENCY_LOCATION_BANK) end) 
@@ -604,6 +601,9 @@ function ZO_GamepadBanking:ShowActions()
     {
         targetData = self:GetTargetData(),
         itemActions = self.itemActions,
+        -- make sure to update the item actions after we close the dialog
+        -- since the underlying data may have changed (lock state for instance)
+        finishedCallback = function() self.itemActions:RebuildActions() end
     }
 
     ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)

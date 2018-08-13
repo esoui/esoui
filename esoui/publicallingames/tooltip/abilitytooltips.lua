@@ -1,21 +1,8 @@
 --Section Generators
 
-function ZO_Tooltip:AddAbilityName(abilityId, hideRank, overrideRank)
-    local abilityName = GetAbilityName(abilityId)
-    local rank = overrideRank
-    if(overrideRank == nil) then
-        rank = GetAbilityProgressionRankFromAbilityId(abilityId)
-    end
-    if(not hideRank and rank ~= nil and rank > 0) then
-        self:AddLine(zo_strformat(SI_ABILITY_NAME_AND_RANK, abilityName, rank), self:GetStyle("title"))
-    else
-        self:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_NAME, abilityName), self:GetStyle("title"))
-    end
-end
-
-function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP, atMorph)
+function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
     local bar = self:AcquireStatusBar(self:GetStyle("abilityProgressBar"))
-    if(nextRankXP == 0) then
+    if nextRankXP == 0 then
         bar:SetMinMax(0, 1)
         bar:SetValue(1)
     else
@@ -26,88 +13,88 @@ function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP, atM
 end
 
 do
-    local TANK_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_tank_down_no_glow_64.dds", 48, 48)
-    local HEALER_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_healer_down_no_glow_64.dds", 48, 48)
-    local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_dps_down_no_glow_64.dds", 48, 48)
+    local TANK_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_tank_down_no_glow_64.dds", 40, 40)
+    local HEALER_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_healer_down_no_glow_64.dds", 40, 40)
+    local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_dps_down_no_glow_64.dds", 40, 40)
     local g_roleIconTable = {}
 
-    function ZO_Tooltip:AddAbilityStats(abilityId)
+    function ZO_Tooltip:AddAbilityStats(abilityId, overrideActiveRank)
         local statsSection = self:AcquireSection(self:GetStyle("abilityStatsSection"))
 
         --Cast Time
-        local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId)
+        local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId, overrideActiveRank)
         local castTimePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
         if(channeled) then
             castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CHANNEL_TIME_LABEL), self:GetStyle("statValuePairStat"))
-            castTimePair:SetValue(ZO_FormatTimeMilliseconds(channelTime, TIME_FORMAT_STYLE_CHANNEL_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
+            castTimePair:SetValue(ZO_FormatTimeMilliseconds(channelTime, TIME_FORMAT_STYLE_CHANNEL_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
         else
             castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CAST_TIME_LABEL), self:GetStyle("statValuePairStat"))
-            castTimePair:SetValue(ZO_FormatTimeMilliseconds(castTime, TIME_FORMAT_STYLE_CAST_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
+            castTimePair:SetValue(ZO_FormatTimeMilliseconds(castTime, TIME_FORMAT_STYLE_CAST_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
         end
         statsSection:AddStatValuePair(castTimePair)
 
         --Target
-        local targetDescription = GetAbilityTargetDescription(abilityId)
+        local targetDescription = GetAbilityTargetDescription(abilityId, overrideActiveRank)
         if(targetDescription) then
             local targetPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             targetPair:SetStat(GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_LABEL), self:GetStyle("statValuePairStat"))
-            targetPair:SetValue(targetDescription, self:GetStyle("statValuePairValue"))
+            targetPair:SetValue(targetDescription, self:GetStyle("abilityStatValuePairValue"))
             statsSection:AddStatValuePair(targetPair)
         end
 
         --Range
-        local minRangeCM, maxRangeCM = GetAbilityRange(abilityId)
+        local minRangeCM, maxRangeCM = GetAbilityRange(abilityId, overrideActiveRank)
         if(maxRangeCM > 0) then
             local rangePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             rangePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RANGE_LABEL), self:GetStyle("statValuePairStat"))
             if(minRangeCM == 0) then
-                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RANGE, FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("statValuePairValue"))
+                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RANGE, FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("abilityStatValuePairValue"))
             else
-                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_MIN_TO_MAX_RANGE, FormatFloatRelevantFraction(minRangeCM / 100), FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("statValuePairValue"))
+                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_MIN_TO_MAX_RANGE, FormatFloatRelevantFraction(minRangeCM / 100), FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("abilityStatValuePairValue"))
             end
             statsSection:AddStatValuePair(rangePair)
         end
 
         --Radius/Distance
-        local radiusCM = GetAbilityRadius(abilityId)
+        local radiusCM = GetAbilityRadius(abilityId, overrideActiveRank)
         local angleDistanceCM = GetAbilityAngleDistance(abilityId)
         if(radiusCM > 0) then
             local radiusDistancePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             if(angleDistanceCM > 0) then
                 radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_AREA_LABEL), self:GetStyle("statValuePairStat"))
                 -- Angle distance is the distance to the left and right of the caster, not total distance. So we're multiplying by 2 to accurately reflect that in the UI.
-                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_AOE_DIMENSIONS, FormatFloatRelevantFraction(radiusCM / 100), FormatFloatRelevantFraction(angleDistanceCM * 2 / 100)), self:GetStyle("statValuePairValue"))
+                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_AOE_DIMENSIONS, FormatFloatRelevantFraction(radiusCM / 100), FormatFloatRelevantFraction(angleDistanceCM * 2 / 100)), self:GetStyle("abilityStatValuePairValue"))
             else
                 radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RADIUS_LABEL), self:GetStyle("statValuePairStat"))
-                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RADIUS, FormatFloatRelevantFraction(radiusCM / 100)), self:GetStyle("statValuePairValue")) 
+                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RADIUS, FormatFloatRelevantFraction(radiusCM / 100)), self:GetStyle("abilityStatValuePairValue")) 
             end
             statsSection:AddStatValuePair(radiusDistancePair)
         end
 
         --Duration
-        local durationMS = GetAbilityDuration(abilityId)
+        local durationMS = GetAbilityDuration(abilityId, overrideActiveRank)
         if(durationMS > 0) then
             local durationPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             durationPair:SetStat(GetString(SI_ABILITY_TOOLTIP_DURATION_LABEL), self:GetStyle("statValuePairStat"))
-            durationPair:SetValue(ZO_FormatTimeMilliseconds(durationMS, TIME_FORMAT_STYLE_DURATION, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("statValuePairValue"))
+            durationPair:SetValue(ZO_FormatTimeMilliseconds(durationMS, TIME_FORMAT_STYLE_DURATION, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
             statsSection:AddStatValuePair(durationPair)
         end
 
         --Cost
-        local cost, mechanic = GetAbilityCost(abilityId)
+        local cost, mechanic = GetAbilityCost(abilityId, overrideActiveRank)
         if(cost > 0) then
             local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
             local mechanicName = GetString("SI_COMBATMECHANICTYPE", mechanic)
             local costString = zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST, cost, mechanicName)
             if(mechanic == POWERTYPE_MAGICKA) then
-                costPair:SetValue(costString, self:GetStyle("statValuePairMagickaValue"))
+                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairMagickaValue"))
             elseif(mechanic == POWERTYPE_STAMINA) then
-                costPair:SetValue(costString, self:GetStyle("statValuePairStaminaValue"))
+                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairStaminaValue"))
             elseif(mechanic == POWERTYPE_HEALTH) then
-                costPair:SetValue(costString, self:GetStyle("statValuePairHealthValue"))
+                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairHealthValue"))
             else
-                costPair:SetValue(costString, self:GetStyle("statValuePairValue"))
+                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairValue"))
             end
             statsSection:AddStatValuePair(costPair)
         end
@@ -127,7 +114,7 @@ do
             local rolesPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             rolesPair:SetStat(GetString(SI_ABILITY_TOOLTIP_ROLE_LABEL), self:GetStyle("statValuePairStat"))
             local finalIconText = table.concat(g_roleIconTable, "")
-            rolesPair:SetValue(finalIconText, self:GetStyle("statValuePairValue"))
+            rolesPair:SetValue(finalIconText, self:GetStyle("abilityStatValuePairValue"))
             statsSection:AddStatValuePair(rolesPair)
             ZO_ClearNumericallyIndexedTable(g_roleIconTable)
         end
@@ -136,11 +123,11 @@ do
     end
 end
 
-function ZO_Tooltip:AddAbilityDescription(abilityId, pendingChampionPoints)
+function ZO_Tooltip:AddAbilityDescription(abilityId, pendingChampionPoints, overrideActiveRank)
     local descriptionHeader = GetAbilityDescriptionHeader(abilityId)
     local description
     if not pendingChampionPoints then
-        description = GetAbilityDescription(abilityId)
+        description = GetAbilityDescription(abilityId, overrideActiveRank)
     else
         description = GetChampionAbilityDescription(abilityId, pendingChampionPoints)
     end
@@ -155,19 +142,6 @@ function ZO_Tooltip:AddAbilityDescription(abilityId, pendingChampionPoints)
             descriptionSection:AddLine(description, self:GetStyle("bodyDescription"))
         end
         self:AddSection(descriptionSection)
-    end
-end
-
-function ZO_Tooltip:AddAbilityUpgrades(...)
-    local numUpgradeReturns = select("#", ...)
-    if(numUpgradeReturns > 0) then
-        for i = 1, numUpgradeReturns, 3 do
-            local label, oldValue, newValue = select(i, ...)
-            local upgradeSection = self:AcquireSection(self:GetStyle("bodySection"))
-            upgradeSection:AddLine(GetString(SI_ABILITY_TOOLTIP_UPGRADE), self:GetStyle("abilityUpgrade"), self:GetStyle("bodyHeader"))
-            upgradeSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_UPGRADE_FORMAT, label, oldValue, newValue), self:GetStyle("abilityUpgrade"), self:GetStyle("bodyDescription"))
-            self:AddSection(upgradeSection)
-        end
     end
 end
 
@@ -186,180 +160,202 @@ end
 
 --Layout Functions
 
-function ZO_Tooltip:LayoutAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects, headerSection, isSkillAbility)
-    if DoesAbilityExist(abilityId) then
-        --Specialized ability tooltips may want to add their own things to the header section. If they do they'll make the header section and pass it in. If they don't pass it in we make
-        --one for the standard ability header.
-        if not headerSection then
-            headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
-        end
+--showRankNeededLine: adds a line with the skill line rank needed to unlock the specific progression
+--showPointSpendLine: adds a line telling the user they can spend a skill point to purchase/upgrade/morph the ability
+--showAdvisedLine: adds a line if the skill progression is advised
+--showRespecToFixBadMorphLine: adds a line telling the player to respec if the player has chosen the incorrect (not-advised) morph
+--showUpgradeInfoBlock: adds a block of text explaining what upgrading the skill does. For passives it adds the next rank description below the current. For morphs it adds text explaining what the morph changes.
+--shouldOverrideRankForComparison: changes the tooltip to reference rank 1 instead of the rank the player has and removes the skill XP bar to aid in morph comparison.
+function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededLine, showPointSpendLine, showAdvisedLine, showRespecToFixBadMorphLine, showUpgradeInfoBlock, shouldOverrideRankForComparison)
+    local skillData = skillProgressionData:GetSkillData()
+    local skillLineData = skillData:GetSkillLineData()
+    local isPassive = skillData:IsPassive()
+    local isActive = not isPassive
+    local skillPointAllocator = skillData:GetPointAllocator()
+    local isPurchased = skillPointAllocator:IsPurchased()
+    local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
 
-        --If this is a morph, add what it morphed from to the header section
-        local skillType, skillIndex, abilityIndex, morphChoice, rankIndex = GetSpecificSkillAbilityKeysByAbilityId(abilityId)
-        if not isSkillAbility and skillType ~= SKILL_TYPE_NONE then
-            --0 means the base ability. The morphs are 1 and 2.
-            if morphChoice > 0 then
-                local progressionName = GetProgressionSkillProgressionName(skillType, skillIndex, abilityIndex)
-                if progressionName ~= "" then
-                    headerSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_MORPHS_FROM, progressionName), self:GetStyle("abilityHeader"))
-                end
+    --Rank Needed Line
+    local hadRankNeededLineToShow = false
+    if showRankNeededLine then
+        if not isPurchased then
+            --Skill progression data is the skill progression data that would be isPurchased
+            local isLocked = skillProgressionData:IsLocked()
+            if isLocked then
+                local skillLineName = skillLineData:GetName()
+                local lineRankNeededToPurchase = skillData:GetLineRankNeededToPurchase()
+                headerSection:AddLine(zo_strformat(SI_ABILITY_UNLOCKED_AT, skillLineName, lineRankNeededToPurchase), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                hadRankNeededLineToShow = true
+            end
+        else
+            if isPassive then
+                --Skill progression data is the skill progression data that is being upgraded from
+                local nextSkillProgressionData = skillProgressionData:GetNextRankData()
+                if nextSkillProgressionData then
+                    local isLocked = nextSkillProgressionData:IsLocked()
+                    if isLocked then
+                        local skillLineName = skillLineData:GetName()
+                        local lineRankNeededToUnlock = nextSkillProgressionData:GetLineRankNeededToUnlock()
+                        headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_UNLOCK_INFO, skillLineName, lineRankNeededToUnlock), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                        hadRankNeededLineToShow = true
+                    end
+                end                
             end
         end
-
-        self:AddSectionEvenIfEmpty(headerSection)
-
-        self:LayoutHeaderlessAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects)
     end
-end
 
-function ZO_Tooltip:LayoutHeaderlessAbility(abilityId, hideRank, overrideRank, pendingChampionPoints, addNewEffects)
-    if DoesAbilityExist(abilityId) then
-        local hasProgression, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph = GetAbilityProgressionXPInfoFromAbilityId(abilityId)
-
-        self:AddAbilityName(abilityId, hideRank, overrideRank)
-        if hasProgression then
-            self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP, atMorph)
-        end
-        if not IsAbilityPassive(abilityId) then
-            self:AddAbilityStats(abilityId)
-        end
-        if addNewEffects then
-            self:AddAbilityNewEffects(GetAbilityNewEffectLines(abilityId))
-        end
-        self:AddAbilityDescription(abilityId, pendingChampionPoints)
-    end
-end
-
-function ZO_Tooltip:LayoutSkillLineAbility(skillType, skillLineIndex, abilityIndex, showNextUpgrade, hideRank, overrideRank, showPurchaseInfo, abilityId, hidePointsAndAdvisedInfo)
-    if not abilityId then 
-        local DONT_GET_NEXT_UPGRADE = false
-        abilityId = GetSkillAbilityId(skillType, skillLineIndex, abilityIndex, DONT_GET_NEXT_UPGRADE)   
-    end  
-
-    local headerSection
-    if showPurchaseInfo then
-        headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
-        
-        --Purchase Information
-        local hasProgression, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph = GetAbilityProgressionXPInfoFromAbilityId(abilityId)
-        local name, icon, earnedRank, passive, ultimate, purchased, progressionIndex = GetSkillAbilityInfo(skillType, skillLineIndex, abilityIndex)
-        if not hidePointsAndAdvisedInfo and purchased and hasProgression and atMorph then
-            if GetAvailableSkillPoints() == 0 then
-                headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-            else
-                headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
-            end
-        elseif not purchased then
-            local skillLineName, skillLineRank = GetSkillLineInfo(skillType, skillLineIndex)
-            if(skillLineRank < earnedRank) then
-                headerSection:AddLine(zo_strformat(SI_ABILITY_UNLOCKED_AT, skillLineName, earnedRank), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-            elseif not hidePointsAndAdvisedInfo then
-                if GetAvailableSkillPoints() == 0 then
-                    headerSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-                else
+    --Skill Point Spending Line
+    if showPointSpendLine and not hadRankNeededLineToShow and skillPointAllocator:GetProgressionData() == skillProgressionData then
+        local hasAvailableSkillPoint = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints() > 0
+        if not isPurchased then
+            --Skill progression data is the skill progression data that would be isPurchased
+            local isLocked = skillProgressionData:IsLocked()
+            if not isLocked then
+                if hasAvailableSkillPoint then
                     headerSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+                else
+                    headerSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
                 end
             end
-        elseif passive then
-            local currentUpgradeLevel, maxUpgradeLevel = GetSkillAbilityUpgradeInfo(skillType, skillLineIndex, abilityIndex)
-            if(currentUpgradeLevel and maxUpgradeLevel and currentUpgradeLevel < maxUpgradeLevel) then
-                local skillLineName, skillLineRank = GetSkillLineInfo(skillType, skillLineIndex)
-                local _, _, nextUpgradeEarnedRank = GetSkillAbilityNextUpgradeInfo(skillType, skillLineIndex, abilityIndex)
-                if(skillLineRank < nextUpgradeEarnedRank) then
-                    headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_UNLOCK_INFO, skillLineName, nextUpgradeEarnedRank), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-                elseif not hidePointsAndAdvisedInfo then 
-                    if GetAvailableSkillPoints() == 0 then
-                        headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+        else
+            if isActive then
+                if skillProgressionData:IsBase() and skillData:IsAtMorph()  then
+                    if hasAvailableSkillPoint then
+                        headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
                     else
-                        headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+                        headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
                     end
                 end
-            end
-        end
-        
-        -- Show Skill Advisor info
-        if not hidePointsAndAdvisedInfo then
-            local NO_MORPH = 0
-            if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, NO_MORPH) then
-                local _, morph, rank = GetAbilityProgressionInfo(progressionIndex)
-                if morph > 0 then
-                    local morphIndexInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
-                    local morphSiblingInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsSiblingMorphInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph)
-                    if morphIndexInSelectedSkillBuild ~= morphSiblingInSelectedSkillBuild then
-                        if not ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morph) then
-                            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED_SUGGESTION), self:GetStyle("bodyHeader"), self:GetStyle("abilityHeader"))
+            else
+                --Skill progression data is the skill progression data that is being upgrade from
+                local nextSkillProgressionData = skillProgressionData:GetNextRankData()
+                if nextSkillProgressionData then
+                    local isLocked = nextSkillProgressionData:IsLocked()
+                    if not isLocked then
+                        if hasAvailableSkillPoint then
+                            headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+                        else
+                            headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
                         end
                     end
-                else
-                    headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
-                end
+                end                
             end
         end
     end
 
-
-    self:LayoutAbility(abilityId, hideRank, overrideRank, nil, nil, headerSection)
-
-    --For gamepad skills tips, when you ask for showNextUpgrade we show you the regular one with the description of the new one in green
-    --This mostly affects passive abilities since active ones have morphs with their own style tooltip.
-    local upgradeAbilityId = showNextUpgrade and GetSkillAbilityId(skillType, skillLineIndex, abilityIndex, true)   
-    if showPurchaseInfo and upgradeAbilityId then
-        local newEffectSection = self:AcquireSection(self:GetStyle("bodySection"))
-        newEffectSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NEXT_RANK), self:GetStyle("newEffectTitle"), self:GetStyle("bodyHeader"))      
-        local description = GetAbilityDescription(upgradeAbilityId)
-        newEffectSection:AddLine(description, self:GetStyle("newEffectBody"), self:GetStyle("bodyDescription"))
-        self:AddSection(newEffectSection)
-    end
-end
-
-function ZO_Tooltip:LayoutAbilityMorph(progressionIndex, morphIndex, skillType, skillLineIndex, abilityIndex)
-    local RANK = 1
-    local abilityId = GetAbilityProgressionAbilityId(progressionIndex, morphIndex, RANK)
-    local headerSection
-    
-    -- Show Skill Advisor info
-    local NO_MORPH = 0
-    if ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, NO_MORPH) then
-        headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
-        if morphIndex > 0 then
-            local morphIndexInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsAbilityInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morphIndex)
-            local morphSiblingInSelectedSkillBuild = ZO_SKILLS_ADVISOR_SINGLETON:IsSiblingMorphInSelectedSkillBuild(skillType, skillLineIndex, abilityIndex, morphIndex)
-            if morphIndexInSelectedSkillBuild ~= morphSiblingInSelectedSkillBuild then
-                if morphIndexInSelectedSkillBuild then
-                    headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_ADVISED), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
-                else
-                    headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+    --Advised Line
+    if showAdvisedLine then
+        if isActive then
+            if skillProgressionData:IsMorph() then
+                local morphSiblingProgressionData = skillProgressionData:GetSiblingMorphData()
+                local morphSiblingInSelectedSkillBuild = morphSiblingProgressionData:IsAdvised()
+                if skillProgressionData:IsAdvised() and not morphSiblingInSelectedSkillBuild then
+                    headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
                 end
-            elseif morphIndexInSelectedSkillBuild then
+            else
                 headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
             end
         else
-            headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+            if skillProgressionData:IsAdvised() then
+                headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
+            end
+        end
+    end
+
+    --Respec To Fix Bad Morph Line
+    if showRespecToFixBadMorphLine then
+        if isActive and skillProgressionData:IsBadMorph() then
+            headerSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NOT_ADVISED_SUGGESTION), self:GetStyle("bodyHeader"), self:GetStyle("abilityHeader"))
+        end
+    end
+        
+    --Passives and actives can both show a block of text that explains what upgrading or morphing them will change but they are done different ways.
+    local passiveUpgradeSectionSkillProgressionData
+    local addNewEffects = false
+    if showUpgradeInfoBlock then
+        if isPassive then
+            if isPurchased then
+                local passiveRank = skillProgressionData:GetRank()
+                if passiveRank < skillData:GetNumRanks() then
+                    passiveUpgradeSectionSkillProgressionData = skillData:GetRankData(passiveRank + 1)
+                end
+            end
+        else
+            addNewEffects = true
+        end
+    end
+
+    --Morphed From Header
+    if isActive and skillProgressionData:IsMorph() then
+        local baseMorphProgressionData = skillData:GetMorphData(MORPH_SLOT_BASE)
+        headerSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_MORPHS_FROM, baseMorphProgressionData:GetName()), self:GetStyle("abilityHeader"))
+    end
+
+    self:AddSectionEvenIfEmpty(headerSection)
+
+    --Ability Tooltip
+    local nameRank
+    local activeRank
+    if shouldOverrideRankForComparison then
+        if isActive then
+            activeRank = 1
+        end
+        nameRank = 1
+    else
+        if isActive then
+            activeRank = skillProgressionData:GetCurrentRank()
+            nameRank = activeRank
+        else
+            nameRank = skillProgressionData:GetRank()
         end
     end
     
+    --if you have never owned an active then the rank is nil and we show no rank in the title
+    if nameRank == nil then
+        self:AddLine(skillProgressionData:GetFormattedName(), self:GetStyle("title"))
+    else
+        local name = skillProgressionData:GetName()
+        local formattedNameAndRank = ZO_CachedStrFormat(SI_ABILITY_NAME_AND_RANK, name, nameRank)
+        self:AddLine(formattedNameAndRank, self:GetStyle("title"))
+    end
+    
+    if isActive then
+        --No point in showing the current XP if we overriding the rank anyway
+        if not shouldOverrideRankForComparison then
+            local currentRank = skillProgressionData:GetCurrentRank()
+            --if you have never owned an active then the rank is nil and we don't show an XP bar
+            if currentRank then
+                local currentXP = skillProgressionData:GetCurrentXP()
+                local lastRankXP, nextRankXP = skillProgressionData:GetRankXPExtents(currentRank)
+                self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
+            end
+        end
 
-    local ADD_NEW_EFFECTS = true
-    local HIDE_RANK = nil
-    local CHAMPION_POINTS = nil
-    local IS_SKILL_ABILITY = true
-    self:LayoutAbility(abilityId, HIDE_RANK, RANK, CHAMPION_POINTS, ADD_NEW_EFFECTS, headerSection, IS_SKILL_ABILITY)
-    self:AddAbilityUpgrades(GetAbilityUpgradeLines(abilityId))
-end
+        self:AddAbilityStats(skillProgressionData:GetAbilityId(), activeRank)
+    end
+    
+    if addNewEffects then
+        self:AddAbilityNewEffects(GetAbilityNewEffectLines(skillProgressionData:GetAbilityId()))
+    end
+    local NO_CHAMPION_POINTS = nil
+    self:AddAbilityDescription(skillProgressionData:GetAbilityId(), NO_CHAMPION_POINTS, activeRank)
 
-function ZO_Tooltip:LayoutActionBarAbility(slotId)
-    local slotType = GetSlotType(slotId)
-    if slotType == ACTION_TYPE_ABILITY then
-        self:LayoutAbility(GetSlotBoundId(slotId))
+    --Passive Upgrade Section
+
+    if passiveUpgradeSectionSkillProgressionData then
+        local newEffectSection = self:AcquireSection(self:GetStyle("bodySection"))
+        newEffectSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NEXT_RANK), self:GetStyle("newEffectTitle"), self:GetStyle("bodyHeader"))      
+        local description = GetAbilityDescription(passiveUpgradeSectionSkillProgressionData:GetAbilityId())
+        newEffectSection:AddLine(description, self:GetStyle("newEffectBody"), self:GetStyle("bodyDescription"))
+        self:AddSection(newEffectSection)
     end
 end
 
 function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pendingPoints)
     local abilityId = GetChampionAbilityId(disciplineIndex, skillIndex)
     
-    local HIDE_RANK = true
-    local OVERRIDE_RANK = nil
-    self:LayoutHeaderlessAbility(abilityId, HIDE_RANK, OVERRIDE_RANK, pendingPoints)
+    self:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_NAME, GetAbilityName(abilityId)), self:GetStyle("title"))
+    self:AddAbilityDescription(abilityId, pendingPoints)
 
     local unlockLevel = GetChampionSkillUnlockLevel(disciplineIndex, skillIndex)
     if unlockLevel ~= nil then
@@ -403,6 +399,19 @@ function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pend
             self:AddSection(pointCostSection)
         end
     end
+end
+
+function ZO_Tooltip:LayoutSimpleAbility(abilityId)
+    local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+
+    self:AddSectionEvenIfEmpty(headerSection)
+
+    local formattedAbilityName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
+    self:AddLine(formattedAbilityName, self:GetStyle("title"))
+
+    self:AddAbilityStats(abilityId)
+
+    self:AddAbilityDescription(abilityId)
 end
 
 do

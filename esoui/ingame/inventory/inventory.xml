@@ -83,6 +83,21 @@
                         ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_TRAIT_INFORMATION), BOTTOMRIGHT, 0, 32)
                     </OnInitialized>
                 </Control>
+                <Control name="$(parent)SellInformation" inherits="ZO_SortHeaderIcon">
+                    <Dimensions x="16" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="75" />
+                    <OnInitialized>
+                        ZO_PlayerInventory_InitSortHeaderIcon(self,
+                        "EsoUI/Art/Miscellaneous/list_sortHeader_icon_neutral.dds",
+                        "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortUp.dds",
+                        "EsoUI/Art/Miscellaneous/list_sortHeader_icon_sortDown.dds",
+                        "EsoUI/Art/Miscellaneous/list_sortHeader_icon_over.dds",
+                        "sellInformationSortOrder",
+                        ZO_SORT_ORDER_DOWN)
+
+                        ZO_SortHeader_SetTooltip(self, GetString(SI_INVENTORY_SORT_TYPE_SELL_INFORMATION), BOTTOMRIGHT, 0, 32)
+                    </OnInitialized>
+                </Control>
                 <Control name="$(parent)Price" inherits="ZO_SortHeader">
                     <Dimensions x="70" y="20" />
                     <Anchor point="LEFT" relativeTo="$(parent)TraitInfo" relativePoint="RIGHT" offsetX="30" />
@@ -369,8 +384,8 @@
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 
-                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" hidden="true"/>
-                
+                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true"/>
+
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
 

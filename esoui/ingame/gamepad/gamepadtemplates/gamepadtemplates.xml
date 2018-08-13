@@ -161,7 +161,7 @@
 
         <Control name="ZO_GamepadSimpleAbilityEntryTemplateBase" virtual="true">
             <Controls>
-                <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true"/>
+                <Backdrop name="$(parent)EdgeFrame" tier="HIGH" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="00000000" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true"/>
                 <Label name="$(parent)Keybind" excludeFromResizeToFitExtents="true" tier="HIGH" font="ZoFontGamepad18" verticalAlignment="CENTER">
                     <Anchor point="TOPRIGHT" />
                     <Anchor point="BOTTOMRIGHT"/>
@@ -169,36 +169,59 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_GamepadAbilityEntryTemplateBase" inherits="ZO_GamepadSimpleAbilityEntryTemplateBase" virtual="true">
+        <Texture name="ZO_GamepadSkillsEntryIcon" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" virtual="true">
+            <Anchor point="CENTER" relativePoint="LEFT" offsetX="68" />
+            <Dimensions x="32" y="32"/>
+        </Texture>
+
+        <Control name="ZO_GamepadAbilityEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate ZO_GamepadSimpleAbilityEntryTemplateBase" virtual="true" override="true">
             <Controls>
-                <Texture name="$(parent)Alert" tier="HIGH" pixelRoundingEnabled="false" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" hidden="true">
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadSkillsEntryIcon" override="true"/>
+                
+                <Label name="$(parent)Label" override="true" >
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                </Label>
+
+                <Texture name="$(parent)LeftIndicator" inherits="ZO_MultiIcon" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" hidden="true">
                     <Dimensions x="32" y="32" />
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="12" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="20" />
                 </Texture>
 
-                <Texture name="$(parent)CircleFrame" tier="HIGH" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_44.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="50" y="50" />
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ICON_INDENT_CENTER" />
+                <Texture name="$(parent)RightIndicator" inherits="ZO_MultiIcon" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="-20" />
                 </Texture>
+
+                <Texture name="$(parent)CircleFrame" tier="HIGH" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_44.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
 
                 <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds" excludeFromResizeToFitExtents="true" tier="HIGH" pixelRoundingEnabled="false">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
-                </Texture>
+                </Texture>                
             </Controls>
         </Control>
-
-        <Texture name="ZO_GamepadSkillsEntryIcon" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" virtual="true">
-            <Dimensions x="32" y="32" />
-            <Anchor point="CENTER" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ICON_INDENT_CENTER" />
-        </Texture>
-
-        <Control name="ZO_GamepadAbilityEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate ZO_GamepadAbilityEntryTemplateBase" virtual="true" override="true">
+        
+        <Control name="ZO_GamepadSingleLineAbilityEntryTemplate" inherits="ZO_GamepadAbilityEntryTemplate" resizeToFitDescendents="false" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepad34",
+                        lineLimit = 1,
+                    },
+                    {
+                        font = "ZoFontGamepad27",
+                        lineLimit = 1,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Label"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
+            </OnInitialized>
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50"/>
             <Controls>
-                <Texture name="$(parent)Icon" inherits="ZO_GamepadSkillsEntryIcon" override="true"/>
                 <Label name="$(parent)Label" override="true" >
-                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
-                    <Dimensions x="290"/>
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
                 </Label>
             </Controls>
         </Control>

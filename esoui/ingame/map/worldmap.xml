@@ -67,6 +67,25 @@
             </OnMouseExit>
         </Button>
 
+        <Control name="ZO_MapLevelNavigation" virtual="true">
+            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+            <Controls>
+                <Label name="$(parent)Text" text="SI_GAMEPAD_WORLD_MAP_SWITCH_LEVEL_KEYBIND" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE" hidden="false">
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+
+                <Button name="$(parent)Down" mouseEnabled="false">
+                    <Dimensions x="42" y="42" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX ="-5" />
+                </Button>
+
+                <Button name="$(parent)Up" mouseEnabled="false">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Down" relativePoint="TOPLEFT" />
+                    <Dimensions x="42" y="42" />
+                </Button>
+            </Controls>
+        </Control>
+
         <Control name="ZO_DungeonFloorNavigation_Keyboard_Template" virtual="true">
             <Anchor point="TOPRIGHT" offsetX="-11" offsetY="1"/>
             <Controls>
@@ -87,7 +106,7 @@
         <Control name="ZO_DungeonFloorNavigation_Gamepad_Template" virtual="true">
             <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="10"/>
             <Controls>
-                <Label name="$(parent)Text" text="SI_GAMEPAD_WORLD_MAP_SWITCH_ELEVATION_KEYBIND" hidden="false" />
+                <Label name="$(parent)Text" text="SI_GAMEPAD_WORLD_MAP_SWITCH_ELEVATION_KEYBIND" font="ZoFontGamepad34" hidden="false" />
 
                 <Button name="$(parent)Down" mouseEnabled="false">
                     <Dimensions x="42" y="42" />
@@ -103,7 +122,7 @@
 
         <Control name="ZO_DungeonFloorNavigation" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
+                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                     <Anchor point="TOPRIGHT" />
                 </Label>
 
@@ -393,6 +412,7 @@
                         </Slider>
 
                         <Control name="$(parent)Floors" inherits="ZO_DungeonFloorNavigation" resizeToFitDescendents="true" />
+                        <Control name="$(parent)Levels" inherits="ZO_MapLevelNavigation" resizeToFitDescendents="true" />
                     </Controls>
                 </Control>
 

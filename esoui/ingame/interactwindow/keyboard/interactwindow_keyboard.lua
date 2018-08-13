@@ -127,7 +127,9 @@ end
 function ZO_Interaction:RestoreOtherImportantOptions(chatterControl)
     for i, control in ipairs(self.importantOptions) do
         if control ~= chatterControl then
-            if control.enabled then
+            if control.chosenBefore then
+                control:SetColor(SEEN_PLAYER_OPTION_COLOR:UnpackRGBA())
+            elseif control.enabled then
                 control:SetColor(ENABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
             else
                 control:SetColor(DISABLED_PLAYER_OPTION_COLOR:UnpackRGBA())

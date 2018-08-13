@@ -43,8 +43,14 @@
                             </Controls>
                         </Control>
 
+                        <Control name="$(parent)OwnerRow" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row" >
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)LocationRow" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_HOUSING_OWNER_HEADER" />
+                            </Controls>
+                        </Control>
+
                         <Control name="$(parent)InfoSection" resizeToFitDescendents="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)LocationRow" relativePoint="BOTTOMLEFT" offsetY="70" />
                             <Controls>
                                 <Control name="$(parent)FurnishingLimits" resizToFitDescendents="true">
                                     <Anchor point="TOPLEFT" />

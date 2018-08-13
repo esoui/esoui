@@ -87,8 +87,24 @@ function ZO_HousingPreviewDialog_Shared:BuildDialogInfo()
 end
 
 function ZO_HousingPreviewDialog_Shared:RegisterForCallbacks()
-    ZO_HOUSE_PREVIEW_MANAGER:RegisterCallback("OnHouseTemplateDataUpdated", function() if not self.control:IsHidden() then self:RefreshTemplateComboBox() end end)
-    ZO_HOUSE_PREVIEW_MANAGER:RegisterCallback("OnPlayerActivated", function() if not self.control:IsHidden() then self:RefreshDisplayInfo() else self.displayInfoDirty = true end end)
+    local function OnHouseTemplateDataUpdated()
+        if self.control:IsHidden() then
+            self.houseTemplatesDirty = true
+        else
+            self:RefreshTemplateComboBox()
+        end
+    end
+
+    local function OnPlayerActivated()
+        if self.control:IsHidden() then
+            self.displayInfoDirty = true
+        else
+            self:RefreshDisplayInfo()
+        end
+    end
+
+    ZO_HOUSE_PREVIEW_MANAGER:RegisterCallback("OnHouseTemplateDataUpdated", OnHouseTemplateDataUpdated)
+    ZO_HOUSE_PREVIEW_MANAGER:RegisterCallback("OnPlayerActivated", OnPlayerActivated)
 end
 
 do
@@ -130,6 +146,8 @@ do
         else
             self:OnFilterChanged(NO_DATA)
         end
+
+        self.houseTemplatesDirty = false
     end
 end
 
@@ -152,7 +170,7 @@ do
         control:SetWidth(0)
     end
 
-    function ZO_HousingPreviewDialog_Shared:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId)
+    function ZO_HousingPreviewDialog_Shared:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId, getRemainingTimeFunction)
         control:SetHidden(false)
 
         local priceText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(priceAfterDiscount, DONT_USE_SHORT_FORMAT, currencyType, IsInGamepadPreferredMode())
@@ -172,8 +190,16 @@ do
         control.errorLabel:SetHidden(noError)
 
         if noError and onSale then
-            control.textCallout:SetHidden(false)
-            control.textCallout:SetText(zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent))
+            local calloutUpdateHandler
+            self:UpdateSaleRemainingTimeCalloutText(control, discountPercent, getRemainingTimeFunction)
+            local remainingTime = getRemainingTimeFunction and getRemainingTimeFunction(control, discountPercent) or 0
+            if remainingTime > 0 then
+                calloutUpdateHandler = function() self:UpdateSaleRemainingTimeCalloutText(control, discountPercent, getRemainingTimeFunction) end
+            else
+                calloutUpdateHandler = nil
+            end
+
+            control.textCallout:SetHandler("OnUpdate", calloutUpdateHandler)
         else
             control.textCallout:SetHidden(true)
         end
@@ -211,6 +237,36 @@ do
 
         control:SetWidth(self.purchaseOptionSectionWidth)
         control.errorLabel:SetWidth(self.purchaseOptionSectionWidth - (ZO_HOUSING_PREVIEW_ERROR_LABEL_PADDING_X * 2))
+    end
+
+    function ZO_HousingPreviewDialog_Shared:GetMarketProductSaleRemainingTime(control, discountPercent)
+        local purchaseData = control and control.button and control.button.purchaseData
+        local marketProductId = purchaseData and purchaseData.marketProductId
+
+        return GetMarketProductSaleTimeLeftInSeconds(marketProductId)
+    end
+
+    function ZO_HousingPreviewDialog_Shared:UpdateSaleRemainingTimeCalloutText(control, discountPercent, getRemainingTimeFunction)
+        local discountPercentText = zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent)
+        local remainingTime = getRemainingTimeFunction and getRemainingTimeFunction(control, discountPercent) or 0
+        -- if there is no time left remaining then the MarketProduct is not limited time
+        -- because when a limited time product reaches 0 it is removed from the store
+        if remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS then
+            local remainingTimeText
+            if remainingTime >= ZO_ONE_DAY_IN_SECONDS then
+                remainingTimeText = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS)
+                control.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+            else
+                remainingTimeText = ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+                control.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
+            end
+            local calloutText = string.format("%s %s", discountPercentText, remainingTimeText)
+            control.textCallout:SetText(calloutText)
+        else
+            control.textCallout:SetText(discountPercentText)
+        end
+
+        control.textCallout:SetHidden(false)
     end
 
     function ZO_HousingPreviewDialog_Shared:OnFilterChanged(entryData)
@@ -251,7 +307,7 @@ do
                     local marketControl = self.marketPurchaseOptionControlsByCurrencyType[marketCurrencyType]
                     local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
                     --Currently there are no requirement failures for market options, but there could be in the future, and here is where we would handle them
-                    self:SetupPurchaseOptionControl(marketControl, currencyType, CURRENCY_LOCATION_ACCOUNT, purchaseData.cost, purchaseData.costAfterDiscount, purchaseData.discountPercent, NO_ERROR)
+                    self:SetupPurchaseOptionControl(marketControl, currencyType, CURRENCY_LOCATION_ACCOUNT, purchaseData.cost, purchaseData.costAfterDiscount, purchaseData.discountPercent, NO_ERROR, function(...) return self:GetMarketProductSaleRemainingTime(...) end)
                     marketControl.button.purchaseData = purchaseData
                 end
             end
@@ -263,7 +319,12 @@ function ZO_HousingPreviewDialog_Shared:ShowDialog()
     if self.displayInfoDirty then
         self:RefreshDisplayInfo()
     end
+    
     ZO_Dialogs_ShowPlatformDialog(self.dialogName)
+
+    if self.houseTemplatesDirty then
+        self:RefreshTemplateComboBox()
+    end
 end
 
 function ZO_HousingPreviewDialog_Shared:OnDialogShowing()

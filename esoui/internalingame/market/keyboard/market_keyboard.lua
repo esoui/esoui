@@ -1245,7 +1245,7 @@ do
     local NUM_COLUMNS = 2
     local LABELED_GROUP_PADDING = 70
     local FIRST_LABELED_GROUP_PADDING = 40
-    local LABELED_GROUP_LABEL_PADDING = -20
+    local LABELED_GROUP_LABEL_PADDING = -10
     function Market.LayoutProductGrid(marketProductInfos, previousRowControl, sectionHeader, labelPool)
         local previousRowControl = previousRowControl
         local previousControl
@@ -1425,7 +1425,7 @@ function Market:LayoutMarketProducts(marketProductPresentations, disableLTOGroup
             if doesContainDLC and categoryType == ZO_MARKET_CATEGORY_TYPE_FEATURED then
                 self:AddProductToLabeledGroupTable(self.dlcProducts, name, marketProduct)
             else
-                local timeLeft = marketProduct:GetTimeLeftInSeconds()
+                local timeLeft = marketProduct:GetLTOTimeLeftInSeconds()
                 -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time
                 local isLimitedTime = timeLeft > 0 and timeLeft <= ZO_ONE_MONTH_IN_SECONDS
                 -- Otherwise in a normal category we will put the product into one of these buckets

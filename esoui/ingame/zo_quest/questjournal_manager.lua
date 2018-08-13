@@ -98,6 +98,60 @@ local function ZO_QuestJournal_Manager_SortQuestEntries(entry1, entry2)
     return entry1.categoryType < entry2.categoryType
 end
 
+ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY =
+{
+    [QUEST_TYPE_MAIN_STORY] = true,
+    [QUEST_TYPE_GUILD] = true,
+    [QUEST_TYPE_CRAFTING] = true,
+    [QUEST_TYPE_HOLIDAY_EVENT] = true,
+    [QUEST_TYPE_BATTLEGROUND] = true,
+}
+
+function ZO_QuestJournal_Manager:GetQuestCategoryNameAndType(questType, zone)
+    local categoryName, categoryType
+    if ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY[questType] then
+        categoryName = GetString("SI_QUESTTYPE", questType)
+        categoryType = QUEST_CAT_OTHER
+    elseif zone ~= "" then
+        categoryName = zo_strformat(SI_QUEST_JOURNAL_ZONE_FORMAT, zone)
+        categoryType = QUEST_CAT_ZONE
+    else
+        categoryName = GetString(SI_QUEST_JOURNAL_GENERAL_CATEGORY)
+        categoryType = QUEST_CAT_MISC
+    end
+    return categoryName, categoryType
+end
+
+function ZO_QuestJournal_Manager:AreQuestsInTheSameCategory(quest1Type, quest1Zone, quest2Type, quest2Zone)
+    local quest1IsOtherCategory = ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY[quest1Type]
+    local quest2IsOtherCategory = ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY[quest2Type]
+    if quest1IsOtherCategory ~= quest2IsOtherCategory then
+        return false
+    else
+        if quest1IsOtherCategory then
+            return quest1Type == quest2Type
+        else
+            --true if they have the same zone or if they both have no zone and would end up in the general category
+            return quest1Zone == quest2Zone
+        end
+    end
+end
+
+function ZO_QuestJournal_Manager:FindQuestWithSameCategoryAsCompletedQuest(questId)
+    local _, completedQuestType = GetCompletedQuestInfo(questId)
+    local completedQuestZone = GetCompletedQuestLocationInfo(questId)
+    for i = 1, MAX_JOURNAL_QUESTS do
+        if IsValidQuestIndex(i) then
+            local questType = GetJournalQuestType(i)
+            local zone = GetJournalQuestLocationInfo(i)
+            if self:AreQuestsInTheSameCategory(completedQuestType, completedQuestZone, questType, zone) then
+                return i
+            end
+        end 
+    end
+    return nil
+end
+
 function ZO_QuestJournal_Manager:GetQuestListData()
     local seenCategories = {}
     local categories = {}
@@ -111,34 +165,10 @@ function ZO_QuestJournal_Manager:GetQuestListData()
             local name = GetJournalQuestName(i)
             local level = GetJournalQuestLevel(i)
             local instanceDisplayType = GetJournalQuestInstanceDisplayType(i)
-            local categoryName
-            local type
-
-            if questType == QUEST_TYPE_MAIN_STORY then
-                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_MAIN_STORY)
-                type = QUEST_CAT_OTHER
-            elseif questType == QUEST_TYPE_GUILD then
-                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_GUILD)
-                type = QUEST_CAT_OTHER
-            elseif questType == QUEST_TYPE_CRAFTING then
-                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_CRAFTING)
-                type = QUEST_CAT_OTHER
-            elseif questType == QUEST_TYPE_HOLIDAY_EVENT then
-                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_HOLIDAY_EVENT)
-                type= QUEST_CAT_OTHER
-            elseif questType == QUEST_TYPE_BATTLEGROUND then
-                categoryName = GetString("SI_QUESTTYPE", QUEST_TYPE_BATTLEGROUND)
-                type = QUEST_CAT_OTHER
-            elseif zone ~= "" then
-                categoryName = zo_strformat(SI_QUEST_JOURNAL_ZONE_FORMAT, zone)
-                type = QUEST_CAT_ZONE
-            else
-                categoryName = GetString(SI_QUEST_JOURNAL_GENERAL_CATEGORY)
-                type = QUEST_CAT_MISC
-            end
+            local categoryName, categoryType = self:GetQuestCategoryNameAndType(questType, zone)
 
             if not seenCategories[categoryName] then
-                table.insert(categories, {name = categoryName, type = type})
+                table.insert(categories, {name = categoryName, type = categoryType})
                 seenCategories[categoryName] = true
             end
 
@@ -151,9 +181,8 @@ function ZO_QuestJournal_Manager:GetQuestListData()
                     name = name,
                     questIndex = i,
                     level = level,
-                    questType = questType,
                     categoryName = categoryName,
-                    categoryType = type,
+                    categoryType = categoryType,
                     questType = questType,
                     displayType = instanceDisplayType
                 }

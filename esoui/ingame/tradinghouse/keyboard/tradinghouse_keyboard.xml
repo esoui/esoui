@@ -458,6 +458,17 @@
                     <Anchor point="BOTTOMRIGHT" />
 
                     <Controls>
+                        <Control name="$(parent)NoItemsContainer">
+                            <Anchor point="TOPLEFT" offsetY="9" />
+                            <Anchor point="TOPRIGHT" offsetY="9" offsetX="-10" />
+                            <Controls>
+                                <Label name="$(parent)NoItems" hidden="true" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_GUILD_STORE_NO_LISTINGS">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                        
                         <!-- Listings Headers -->
                         <Control name="$(parent)Header">
                             <Dimensions y="32" />
@@ -501,13 +512,13 @@
                     <Anchor point="BOTTOMRIGHT" />
 
                     <Controls>
-                        <Control name="$(parent)NoItemsContainer" hidden="false">
+                        <Control name="$(parent)NoItemsContainer">
                           <Anchor point="TOPLEFT" offsetY="9" />
                           <Anchor point="TOPRIGHT" offsetY="9" offsetX="-10" />
                           <Controls>
-                                <Label name="$(parent)NoItems" hidden="false" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_DISPLAY_GUILD_STORE_NO_ITEMS">
-                                    <Anchor point="TOPLEFT" offsetY="9" />
-                                    <Anchor point="TOPRIGHT" offsetY="9" offsetX="-10" />
+                                <Label name="$(parent)NoItems" hidden="true" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_DISPLAY_GUILD_STORE_NO_ITEMS">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
                                 </Label>
                             </Controls>
                         </Control>

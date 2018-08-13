@@ -228,9 +228,18 @@ function ZO_GamepadCollectionsBook:OnShowing()
     elseif self.savedOutfitStyleIndex then
         self:ShowList(self.subcategoryList)
         self.subcategoryList.list:SetSelectedIndexWithoutAnimation(self.savedOutfitStyleIndex)
+    elseif self.savedQuickSlotCollectibleData then
+        local categoryData = self.savedQuickSlotCollectibleData:GetCategoryData()
+        if categoryData:IsSubcategory() then
+            self:ViewSubcategory(categoryData)
+        else
+            self:ViewCategory(categoryData)
+        end
+        self:SelectCollectibleEntry(self.savedQuickSlotCollectibleData:GetId())
     end
     
     self.savedOutfitStyleIndex = nil
+    self.savedQuickSlotCollectibleData = nil
 end
 
 function ZO_GamepadCollectionsBook:OnHide()
@@ -492,6 +501,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             callback = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData:IsSlottable() then
+                    self.savedQuickSlotCollectibleData = collectibleData
                     GAMEPAD_QUICKSLOT:SetCollectibleToQuickslot(collectibleData:GetId())
                     SCENE_MANAGER:Push("gamepad_quickslot")
                 elseif self:CanPurchaseCurrentTarget() then

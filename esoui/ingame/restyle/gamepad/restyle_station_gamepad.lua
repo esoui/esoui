@@ -1426,7 +1426,7 @@ function ZO_Restyle_Station_Gamepad:AttemptExit()
     end
 
     if self:DoesCurrentOutfitHaveChanges() then
-        ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_RESTYLE_CHANGES", { confirmCallback = function()
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_CHANGES", { confirmCallback = function()
                                                                                                 ZO_OUTFIT_MANAGER:EquipOutfit(self.currentOutfitManipulator:GetOutfitIndex()) 
                                                                                                 SCENE_MANAGER:HideCurrentScene()
                                                                                                 self.currentOutfitManipulator:ClearPendingChanges() 
@@ -1634,7 +1634,7 @@ function ZO_Restyle_Station_Gamepad:InitializeConfirmationDialog()
 
             -- outfit scraps
             if flatCost > 0 then
-                local entryData = ZO_GamepadEntryData:New(GetCurrencyName(CURT_STYLE_STONES, IS_SINGULAR, IS_UPPER))
+                local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(CURT_STYLE_STONES, IS_SINGULAR, IS_UPPER)))
                 entryData.currencyType = CURT_STYLE_STONES
                 entryData.currencyLocation = CURRENCY_LOCATION_ACCOUNT
                 entryData.setup = SetupOutfitApplyOption

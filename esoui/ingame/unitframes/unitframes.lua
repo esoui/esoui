@@ -1229,9 +1229,9 @@ function UnitFrame:UpdateAssignment()
                 assignmentTexture = GetBattlegroundTeamIcon(battlegroundAlliance)
             end
         else
-            local assignedRole = GetGroupMemberAssignedRole(unitTag)
-            if assignedRole ~= LFG_ROLE_INVALID then
-                assignmentTexture = GetRoleIcon(assignedRole)
+            local selectedRole = GetGroupMemberSelectedRole(unitTag)
+            if selectedRole ~= LFG_ROLE_INVALID then
+                assignmentTexture = GetRoleIcon(selectedRole)
             end
         end
 
@@ -1965,6 +1965,13 @@ local function RegisterForEvents()
         UpdateStatus(unitTag, IsUnitDead(unitTag), isOnline)
     end
     
+    local function OnGroupMemberRoleChanged(event, unitTag, role)
+        local unitFrame = UnitFrames:GetFrame(unitTag)    
+        if unitFrame then
+            unitFrame:UpdateAssignment()
+        end
+    end
+
     local function OnUnitDeathStateChanged(event, unitTag, isDead)
         UpdateStatus(unitTag, isDead, IsUnitOnline(unitTag))
     end
@@ -2026,6 +2033,7 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_UPDATE, OnGroupUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_CONNECTED_STATUS, OnGroupMemberConnectedStateChanged)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_MEMBER_ROLE_CHANGED, OnGroupMemberRoleChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_DEATH_STATE_CHANGED, OnUnitDeathStateChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_RANK_POINT_UPDATE, OnRankPointUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_CHAMPION_POINT_UPDATE, OnChampionPointsUpdate)

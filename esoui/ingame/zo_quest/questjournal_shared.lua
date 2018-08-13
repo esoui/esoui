@@ -35,7 +35,7 @@ function ZO_QuestJournal_Shared:Initialize(control)
     control:RegisterForEvent(EVENT_QUEST_REMOVED, function() self:OnQuestsUpdated() end)
     control:RegisterForEvent(EVENT_QUEST_LIST_UPDATED, function() self:OnQuestsUpdated() end)
     control:RegisterForEvent(EVENT_QUEST_ADVANCED, function(eventCode, questIndex) self:OnQuestAdvanced(questIndex) end)
-    control:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(eventCode, questIndex) self:OnQuestConditionCounterChanged(questIndex) end)
+    control:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(eventCode, ...) self:OnQuestConditionInfoChanged(...) end)
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, function(eventCode, unitTag) self:OnLevelUpdated(unitTag) end)
 end
 
@@ -185,7 +185,7 @@ function ZO_QuestJournal_Shared:OnQuestAdvanced(questIndex)
     end
 end
 
-function ZO_QuestJournal_Shared:OnQuestConditionCounterChanged(questIndex)
+function ZO_QuestJournal_Shared:OnQuestConditionInfoChanged(questIndex, questName, conditionText, conditionType, curCondtionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isQuestComplete, isConditionComplete, isStepHidden, isConditionCompleteStatusChanged)
     local selectedQuestIndex = self:GetSelectedQuestIndex()
     if questIndex == selectedQuestIndex then
         self:RefreshDetails()

@@ -94,7 +94,7 @@ function ZO_GamepadTabBarScrollList:New(control, leftIcon, rightIcon, onActivate
     list.leftIcon = leftIcon or CreateButtonIcon("$(parent)LeftIcon", control, KEY_GAMEPAD_LEFT_SHOULDER, LEFT)
     list.rightIcon = rightIcon or CreateButtonIcon("$(parent)RightIcon", control, KEY_GAMEPAD_RIGHT_SHOULDER, RIGHT)
 
-    list.entryAnchors = { BOTTOM, BOTTOM }
+    list:SetEntryAnchors({ BOTTOM, BOTTOM })
 
     list:InitializeKeybindStripDescriptors()
     list.control = control

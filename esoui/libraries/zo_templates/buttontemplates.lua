@@ -468,13 +468,9 @@ function ZO_WeaponSwap_OnMouseEnter(self, anchorPoint, xOffset, yOffset)
         local unlockLevel = GetWeaponSwapUnlockedLevel()
         InformationTooltip:AddLine(GetString(SI_WEAPON_SWAP_TOOLTIP), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
         InformationTooltip:AddLine(zo_strformat(SI_WEAPON_SWAP_UNEARNED_TOOLTIP, unlockLevel), "", ZO_ERROR_COLOR:UnpackRGB())
-    elseif self.externallyLocked then
+    elseif self.externallyLocked or self.disabled then
         InformationTooltip:AddLine(GetString(SI_WEAPON_SWAP_TOOLTIP), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
         InformationTooltip:AddLine(GetString(SI_WEAPON_SWAP_DISABLED_TOOLTIP), "", ZO_ERROR_COLOR:UnpackRGB())
-    elseif self.disabled then
-        local disabledErrorString = HasActivatableSwapWeaponsEquipped() and SI_WEAPON_SWAP_DISABLED_TOOLTIP or SI_WEAPON_SWAP_ONE_WEAPON_SET_TOOLTIP
-        InformationTooltip:AddLine(GetString(SI_WEAPON_SWAP_TOOLTIP), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
-        InformationTooltip:AddLine(GetString(disabledErrorString), "", ZO_ERROR_COLOR:UnpackRGB())
     else
         SetTooltipText(InformationTooltip, GetString(SI_WEAPON_SWAP_TOOLTIP))
     end

@@ -176,7 +176,7 @@ local function GetSellItems()
 
             itemData.storeGroup = GetItemStoreGroup(itemData)
             itemData.bestGamepadItemCategoryName = GetBestSellItemCategoryDescription(itemData)
-            itemData.customSortOrder = ZO_InventoryUtils_Gamepad_GetSellItemCustomSortOrder(itemData)
+            itemData.customSortOrder = itemData.sellInformationSortOrder
             table.insert(unequippedItems, itemData)
         end
     end
@@ -194,6 +194,7 @@ local function GetBuybackItems()
             local itemType = GetItemLinkItemType(itemLink)
             local equipType = GetItemLinkEquipType(itemLink)
             local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
+            local sellInformation = GetItemLinkSellInformation(itemLink)
             local totalPrice = price * stackCount
             local buybackData =
             {
@@ -214,6 +215,8 @@ local function GetBuybackItems()
                 traitInformation = traitInformation,
                 itemTrait = GetItemLinkTraitInfo(itemLink),
                 traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(traitInformation),
+                sellInformation = sellInformation,
+                sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(sellInformation),
             }
             buybackData.storeGroup = GetItemStoreGroup(buybackData)
             buybackData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(buybackData)

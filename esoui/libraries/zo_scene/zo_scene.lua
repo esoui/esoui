@@ -96,6 +96,7 @@ function ZO_Scene:Initialize(name, sceneManager)
     self.fragments = {}
     self.restoresHUDSceneToggleUIMode = false
     self.restoresHUDSceneToggleGameMenu = false
+    self.disallowEvaluateTransitionCompleteCount = 0
 
     sceneManager:Add(self)
 end
@@ -266,6 +267,9 @@ function ZO_Scene:SetState(newState)
         if self.state == SCENE_SHOWING then
             self.wasShownInGamepadPreferredMode = IsInGamepadPreferredMode()
         end
+        --We will DetermineIfTransitionIsComplete when calling RefreshFragments below. Allowing DetermineIfTransitionIsComplete before then will not have allowed the fragments to react the scene state change which
+        --can cause the scene to finish the transition before some fragments even got a chance to try hiding or showing. The specific case that triggered this was removing a temporary fragment in the scene hiding callback.
+        self:DisallowEvaluateTransitionComplete()
         self:FireCallbacks("StateChange", oldState, newState)
         self.sceneManager:OnSceneStateChange(self, oldState, newState)
         if self.state == SCENE_HIDDEN then
@@ -274,6 +278,7 @@ function ZO_Scene:SetState(newState)
                 self:RemoveStackFragmentGroups()
             end
         end
+        self:AllowEvaluateTransitionComplete()
         local AS_A_RESULT_OF_SCENE_STATE_CHANGE = true
         self:RefreshFragments(AS_A_RESULT_OF_SCENE_STATE_CHANGE)
     end
@@ -318,17 +323,15 @@ end
 
 function ZO_Scene:RefreshFragments(asAResultOfSceneStateChange)
     --wait until after we have refreshed all fragments to evaluate if we're done 
-    self.allowEvaluateTransitionComplete = false
+    self:DisallowEvaluateTransitionComplete()
     --Protect against fragments being added or removed during iteration by unpacking onto the stack
     self:RefreshFragmentsHelper(asAResultOfSceneStateChange, unpack(self.fragments))
-    self.allowEvaluateTransitionComplete = true
+    self:AllowEvaluateTransitionComplete()
     self:DetermineIfTransitionIsComplete()
 end
 
 function ZO_Scene:OnSceneFragmentStateChange(fragment, oldState, newState)
-    if self.allowEvaluateTransitionComplete then
-        self:DetermineIfTransitionIsComplete()
-    end
+    self:DetermineIfTransitionIsComplete()
 end
 
 function ZO_Scene:HideAllHideOnSceneHiddenFragments(...)
@@ -371,17 +374,29 @@ function ZO_Scene:IsTransitionComplete()
     if hasHideOnSceneHiddenFragments then
         --dont evaluate whether we should transition as a result of hiding a fragment here
         --since we're already evaluating that right now and will return the correct result
-        self.allowEvaluateTransitionComplete = false
+        self:DisallowEvaluateTransitionComplete()
         --Protect against fragments being added or removed during iteration by unpacking onto the stack
         local allHiddenImmediately = self:HideAllHideOnSceneHiddenFragments(unpack(self.fragments))
-        self.allowEvaluateTransitionComplete = true
+        self:AllowEvaluateTransitionComplete()
         return allHiddenImmediately
     end
 
     return true
 end
 
+function ZO_Scene:AllowEvaluateTransitionComplete()
+    self.disallowEvaluateTransitionCompleteCount = self.disallowEvaluateTransitionCompleteCount - 1
+end
+
+function ZO_Scene:DisallowEvaluateTransitionComplete()
+    self.disallowEvaluateTransitionCompleteCount = self.disallowEvaluateTransitionCompleteCount + 1
+end
+
 function ZO_Scene:DetermineIfTransitionIsComplete()
+    if self.disallowEvaluateTransitionCompleteCount ~= 0 then
+        return
+    end
+
     local nextState = nil
     if self.state == SCENE_SHOWING then
         nextState = SCENE_SHOWN
@@ -408,6 +423,45 @@ end
 
 function ZO_Scene:SetSceneGroup(sceneGroup)
     self.sceneGroup = sceneGroup
+end
+
+function ZO_Scene:SetHideSceneConfirmationCallback(callback)
+    self.hideSceneConfirmationCallback = callback
+end
+
+function ZO_Scene:HasHideSceneConfirmation()
+    return self.hideSceneConfirmationCallback ~= nil
+end
+
+function ZO_Scene:ConfirmHideScene(nextSceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
+    self.hideSceneConfirmationNextSceneName = nextSceneName
+    self.hideSceneConfirmationPush = push
+    self.hideSceneConfirmationNextSceneClearsSceneStack = nextSceneClearsSceneStack
+    self.hideSceneConfirmationNumScenesNextScenePops = numScenesNextScenePops
+    self.hideSceneConfirmationCallback(self, nextSceneName, bypassHideSceneConfirmationReason)
+end
+
+local function ClearHideSceneConfirmationState(self)
+    self.hideSceneConfirmationNextSceneName = nil
+    self.hideSceneConfirmationPush = nil
+    self.hideSceneConfirmationNextSceneClearsSceneStack = nil
+    self.hideSceneConfirmationNumScenesNextScenePops = nil
+    self:UnregisterAllCallbacks("HideSceneConfirmationResult")
+end
+
+function ZO_Scene:AcceptHideScene()
+    local nextSceneName = self.hideSceneConfirmationNextSceneName
+    local push = self.hideSceneConfirmationPush
+    local nextSceneClearsSceneStack = self.hideSceneConfirmationNextSceneClearsSceneStack
+    local numScenesNextScenePops = self.hideSceneConfirmationNumScenesNextScenePops
+    self:FireCallbacks("HideSceneConfirmationResult", true)
+    ClearHideSceneConfirmationState(self)
+    SCENE_MANAGER:Show(nextSceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, ZO_BHSCR_ALREADY_SEEN)
+end
+
+function ZO_Scene:RejectHideScene()
+    self:FireCallbacks("HideSceneConfirmationResult", false)
+    ClearHideSceneConfirmationState(self)
 end
 
 function ZO_Scene:WasShownInGamepadPreferredMode()
@@ -505,9 +559,7 @@ function ZO_RemoteScene:OnRemoteSceneFinishedFragmentTransition(sequenceNumber)
         self:Log("Was Notified Remote Fragments Complete")
         if self:GetSequenceNumber() == sequenceNumber then
             self.waitingOnRemoteFragmentTransition = false
-            if self.allowEvaluateTransitionComplete then
-                self:DetermineIfTransitionIsComplete()
-            end
+            self:DetermineIfTransitionIsComplete()
         else
             self:Log(string.format("Sequence Numbers did not match. Expected %d, got %d", self:GetSequenceNumber(), sequenceNumber))
         end

@@ -405,7 +405,8 @@ function ZO_Tracker:InitialTrackingUpdate()
     
     self.disableAudio = true
     if previouslyAssistedQuestIndex == nil or not self:BeginTracking(TRACK_TYPE_QUEST, previouslyAssistedQuestIndex) then
-        self:AssistClosestTracked()
+        local IGNORE_SCENE_RESTRICTION = true
+        self:AssistNext(IGNORE_SCENE_RESTRICTION)
     end
     self.disableAudio = false
 
@@ -428,20 +429,14 @@ function ZO_Tracker:UpdateVisibility()
 end
 
 function ZO_Tracker:ForceAssist(questIndex)
-    local tracked = GetIsTracked(TRACK_TYPE_QUEST, questIndex)
-    if not tracked then
-        self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
-    else
-        local header = self:GetHeaderForIndex(TRACK_TYPE_QUEST, questIndex)
-        self:SetAssisted(header.m_Data, true)
-    end
+    self:BeginTracking(TRACK_TYPE_QUEST, questIndex)
 end
 
-function ZO_Tracker:AssistClosestTracked()
+function ZO_Tracker:AssistAnotherQuestWithTheSameQuestJournalCategory(questId)
     self.disableAudio = true
-    local foundValidCondition, nextQuestToAssist = GetNearestQuestCondition(QUEST_ASSIST_CONSIDER_ONLY_TRACKED_QUESTS)            
-    if not foundValidCondition or not self:BeginTracking(TRACK_TYPE_QUEST, nextQuestToAssist) then
-        --Even if we can't find a quest to path to, let's assist whatever other quests we might have in the journal instead
+    local nextQuestToAssist = QUEST_JOURNAL_MANAGER:FindQuestWithSameCategoryAsCompletedQuest(questId)
+    if not self:BeginTracking(TRACK_TYPE_QUEST, nextQuestToAssist) then
+        --Even if we can't find a quest in the same quest journal category to, let's assist whatever other quests we might have in the journal instead
         local IGNORE_SCENE_RESTRICTION = true
         self:AssistNext(IGNORE_SCENE_RESTRICTION)
     end
@@ -769,12 +764,12 @@ function ZO_Tracker:OnQuestAdded(questIndex)
     self:UpdateAssistedVisibility()
 end
 
-function ZO_Tracker:OnQuestRemoved(questIndex, completed, questID)
-    if GetIsTrackedForContentId(TRACK_TYPE_QUEST, questID) then
+function ZO_Tracker:OnQuestRemoved(questIndex, completed, questId)
+    if GetIsTrackedForContentId(TRACK_TYPE_QUEST, questId) then
         local DONT_UPDATE_VISIBILITY = false
         --Wait to see if we assist something to replace this before updating visibility
         self:StopTracking(TRACK_TYPE_QUEST, questIndex, nil, DONT_UPDATE_VISIBILITY)
-        self:AssistClosestTracked()
+        self:AssistAnotherQuestWithTheSameQuestJournalCategory(questId)
         self:UpdateVisibility()
     end
     self:UpdateAssistedVisibility()
@@ -926,6 +921,12 @@ function ZO_Tracker:BeginTracking(trackType, arg1, arg2)
 
     if #self.tracked > 0 then
         local previouslyTrackedData = self.tracked[1]
+
+        --If we are already tracking this we are good to go
+        if previouslyTrackedData:Equals(trackType, arg1, arg2) then
+            return true
+        end
+
         --We update visibility at the end of this. If we do it now we will trigger the fragment to start hiding
         local DONT_UPDATE_VISIBILITY = false
         self:StopTracking(previouslyTrackedData.trackType, previouslyTrackedData.arg1, previouslyTrackedData.arg2, DONT_UPDATE_VISIBILITY)
@@ -1022,7 +1023,7 @@ function ZO_Tracker:ClearTracker()
     for i = 1, #self.tracked do
         local trackedData = self.tracked[i]
         if(trackedData.trackType == TRACK_TYPE_QUEST) then
-            RemoveMapQuestPins(trackedData.arg1)
+            SetMapQuestPinsTrackingLevel(trackedData.arg1, TRACKING_LEVEL_UNTRACKED)
         end
     end
     
@@ -1188,17 +1189,6 @@ function ZO_TrackedHeader_MouseExit(label)
     ZO_QuestTracker_HideTrackedHeaderTooltip(label)
 end
 
-local function ToggleGuideArrow(header)
-    local trackType = header.m_Data.trackType
-    if trackType == TRACK_TYPE_QUEST then
-        local questTrackerControl = header:GetParent():GetParent()
-        local isAssisted = GetTrackedIsAssisted(TRACK_TYPE_QUEST, header.m_Data:GetJournalIndex())
-        if not isAssisted then
-            questTrackerControl.tracker:SetAssisted(header.m_Data, true)
-        end
-    end
-end
-
 local function ShowQuestInJournal(header)
     local questJournalObject = SYSTEMS:GetObject("questJournal")
 
@@ -1219,17 +1209,13 @@ end
 local function ShowTrackingMenu(header)
     ClearMenu()
 
-    if(not GetTrackedIsAssisted(TRACK_TYPE_QUEST, header.m_Data:GetJournalIndex())) then
-        AddMenuItem(GetString(SI_QUEST_TRACKER_MENU_SHOW_ARROW), function() ToggleGuideArrow(header) end)
-    end
-    
-    if(header.m_Data.trackType == TRACK_TYPE_QUEST) then
+    if header.m_Data.trackType == TRACK_TYPE_QUEST then
         AddMenuItem(GetString(SI_QUEST_TRACKER_MENU_SHOW_IN_JOURNAL), function() ShowQuestInJournal(header) end)
         AddMenuItem(GetString(SI_QUEST_TRACKER_MENU_SHOW_ON_MAP), function() ZO_WorldMap_ShowQuestOnMap(header.m_Data:GetJournalIndex()) end)
-        if(GetIsQuestSharable(header.m_Data:GetJournalIndex()) and IsUnitGrouped("player")) then
+        if GetIsQuestSharable(header.m_Data:GetJournalIndex()) and IsUnitGrouped("player") then
             AddMenuItem(GetString(SI_QUEST_TRACKER_MENU_SHARE), function() ShareTrackedQuest(header) end)
         end
-        if(GetJournalQuestType(header.m_Data:GetJournalIndex()) ~= QUEST_TYPE_MAIN_STORY) then
+        if GetJournalQuestType(header.m_Data:GetJournalIndex()) ~= QUEST_TYPE_MAIN_STORY then
             AddMenuItem(GetString(SI_QUEST_TRACKER_MENU_ABANDON), function() AbandonTrackedQuest(header) end)
         end
     end
@@ -1241,9 +1227,7 @@ function ZO_TrackedHeader_MouseUp(label, button, upInside)
     if(upInside) then
         PlaySound(SOUNDS.DEFAULT_CLICK)
         local header = label
-        if(button == MOUSE_BUTTON_INDEX_LEFT) then
-            ToggleGuideArrow(header)
-        elseif(button == MOUSE_BUTTON_INDEX_RIGHT) then
+        if(button == MOUSE_BUTTON_INDEX_RIGHT) then
             ShowTrackingMenu(header)
         end
     end

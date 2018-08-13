@@ -16,10 +16,19 @@ function ZO_ErrorFrame:Initialize(control)
     self.titleControl = control:GetNamedChild("Title")
     self.dismissControl = control:GetNamedChild("Dismiss")
     self.dismissIcon = self.dismissControl:GetNamedChild("GamepadIcon")
+    self.moreInfoButton = control:GetNamedChild("MoreInfo")
+    ZO_CheckButton_SetToggleFunction(self.moreInfoButton, function()
+        self.moreInfo = not self.moreInfo
+        SetCVar("UIErrorShowMoreInfo", self.moreInfo and "1" or "0")
+        self:RefreshErrorText()
+    end)
 
     self.queuedErrors = {}
     self.suppressErrorDialog = false
     self.displayingError = false
+
+    self.moreInfo = GetCVar("UIErrorShowMoreInfo") == "1"
+    ZO_CheckButton_SetCheckState(self.moreInfoButton, self.moreInfo)
 
     self:InitializePlatformStyles()
 
@@ -65,10 +74,39 @@ function ZO_ErrorFrame:OnUIError(errorString)
         if not self.displayingError then
             self.displayingError = true
             self.control:SetHidden(false)
-            self.textEditControl:SetText(self:GetNextQueuedError())
-            self.textEditControl:SetTopLineIndex(1)
+            local fullError = self:GetNextQueuedError()
+
+            --Colored Full Error: Wrap the <Locals>...</Locals> section with color markup
+            self.coloredFullError = string.gsub(fullError, "<Locals>.-</Locals>", function(match)
+                return "|caaaaaa"..match.."|r"
+            end)
+            
+            --Copy Error : Tab the <Locals>...</Locals> section for easier reading.
+            self.copyError = string.gsub(fullError, "<Locals>.-</Locals>", function(match)
+                return "\t"..match
+            end)
+
+            --Simple Error: Remove the <Locals>...</Locals> section and any newline after it if there is one
+            self.simpleError = string.gsub(fullError, "<Locals>.-</Locals>\n?", "")
+
+            self:RefreshErrorText()
         end
     end
+end
+
+function ZO_ErrorFrame:CopyErrorToClipboard()
+    if self.copyError then
+        CopyToClipboard(self.copyError)
+    end
+end
+
+function ZO_ErrorFrame:RefreshErrorText()
+    if self.simpleError then
+        self.textEditControl:SetText(self.moreInfo and self.coloredFullError or self.simpleError)
+    else
+        self.textEditControl:SetText("")
+    end
+    self.textEditControl:SetTopLineIndex(1)
 end
 
 function ZO_ErrorFrame:HideCurrentError()

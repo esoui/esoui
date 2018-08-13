@@ -214,7 +214,7 @@ function WorldMapFilters_Gamepad:Initialize(control)
 
     self:InitializeKeybindDescriptor()
 
-    GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
         if(newState == SCENE_SHOWING) then
             self.currentPanel.list:Activate()

@@ -24,6 +24,10 @@ function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base:GetCategoriz
     return self.categorizedLists
 end
 
+function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base:OnCollectibleLockStateChanged()
+    -- Can be overriden
+end
+
 ----------------------------------
 -- Category Layout Unlock State --
 ----------------------------------
@@ -88,6 +92,11 @@ function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_UnlockState:Refre
             table.insert(lockedList, data)
         end
     end
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_UnlockState:OnCollectibleLockStateChanged()
+    -- A collectible may have been hidden before being unlocked. Rebuild the relevantCollectibles list to unhide them.
+    self:BuildData()
 end
 
 -----------------------------------
@@ -341,6 +350,7 @@ function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleUpdated(collectible
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
     if self:IsCollectibleRelevant(collectibleData) then
         if lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
+            self.categoryLayoutObject:OnCollectibleLockStateChanged()
             self:RefreshList()
         else
             local node = self.collectibleIdToTreeNode[collectibleId]

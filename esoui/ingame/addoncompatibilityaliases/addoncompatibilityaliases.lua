@@ -519,3 +519,150 @@ function IsCollectibleHiddenWhenLocked(collectibleId)
         return GetCollectibleHideMode(collectibleId) == COLLECTIBLE_HIDE_MODE_WHEN_LOCKED
     end
 end
+
+--Added Tracking Level Map Pin Function
+
+function SetMapQuestPinsAssisted(questIndex, assisted)
+    SetMapQuestPinsTrackingLevel(questIndex, assisted and TRACKING_LEVEL_ASSISTED or TRACKING_LEVEL_UNTRACKED)
+end
+
+-- LFG now only supports single role selection
+
+do
+    local function RoleToRoles(role)
+        local isDPS = false
+        local isHealer = false
+        local isTank = false
+
+        if role == LFG_ROLE_DPS then
+            isDPS = true
+        elseif role == LFG_ROLE_HEAL then
+            isHealer = true
+        elseif role == LFG_ROLE_TANK then
+            isTank = true
+        end
+
+        return isDPS, isHealer, isTank
+    end
+
+    function GetGroupMemberRoles(unitTag)
+        local role = GetGroupMemberSelectedRole()
+        return RoleToRoles(role)
+    end
+
+    function GetPlayerRoles()
+        local role = GetSelectedLFGRole()
+        return RoleToRoles(role)
+    end
+end
+
+GetGroupMemberAssignedRole = GetGroupMemberSelectedRole
+
+function DoAllGroupMembersHavePreferredRole()
+    return true
+end
+
+function UpdatePlayerRole(role, selected)
+    if selected then
+        UpdateSelectedLFGRole(role)
+    end
+end
+
+--Skills refactor
+SelectSlotSkillAbility = SlotSkillAbilityInSlot
+
+function ZO_Skills_GetIconsForSkillType(skillType)
+    local skillTypeData = SKILLS_DATA_MANAGER:GetSkillTypeData(skillType)
+    if skillTypeData then
+        local normal, pressed, mouseOver = skillTypeData:GetKeyboardIcons()
+        local announce = skillTypeData:GetAnnounceIcon()
+        return pressed, normal, mouseOver, announce
+    end
+end
+
+function ZO_Skills_GenerateAbilityName(stringIndex, name, currentUpgradeLevel, maxUpgradeLevel, progressionIndex)
+    if currentUpgradeLevel and maxUpgradeLevel then
+        return zo_strformat(stringIndex, name, currentUpgradeLevel, maxUpgradeLevel) 
+    elseif progressionIndex then
+        local _, _, rank = GetAbilityProgressionInfo(progressionIndex)
+        if rank > 0 then
+            return zo_strformat(SI_ABILITY_NAME_AND_RANK, name, rank)
+        end
+    end
+
+    return zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, name)
+end
+
+function ZO_Skills_PurchaseAbility(skillType, skillLineIndex, skillIndex)
+    local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
+    if skillData then
+        skillData:GetPointAllocator():Purchase()
+    end
+end
+
+function ZO_Skills_UpgradeAbility(skillType, skillLineIndex, skillIndex)
+    local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
+    if skillData then
+        skillData:GetPointAllocator():IncreaseRank()
+    end
+end
+
+function ZO_Skills_MorphAbility(progressionIndex, morphSlot)
+    local skillType, skillLineIndex, skillIndex = GetSkillAbilityIndicesFromProgressionIndex(progressionIndex)
+    local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
+    if skillData then
+        skillData:GetPointAllocator():Morph(morphSlot)
+    end
+end
+
+function ZO_Skills_AbilityFailsWerewolfRequirement(skillType, skillLineIndex)
+    local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
+    return IsWerewolf() and not skillLineData:IsWerewolf()
+end
+
+function ZO_Skills_OnlyWerewolfAbilitiesAllowedAlert()
+    ZO_AlertEvent(EVENT_HOT_BAR_RESULT, HOT_BAR_RESULT_CANNOT_USE_WHILE_WEREWOLF)
+end
+
+EVENT_SKILL_ABILITY_PROGRESSIONS_UPDATED = EVENT_SKILLS_FULL_UPDATE
+
+function GetSkillLineInfo(skillType, skillLineIndex)
+    local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataByIndices(skillType, skillLineIndex)
+    if skillLineData then
+        return skillLineData:GetName(), skillLineData:GetCurrentRank(), skillLineData:IsAvailable(), skillLineData:GetId(), skillLineData:IsAdvised(), skillLineData:GetUnlockText(), skillLineData:IsActive(), skillLineData:IsDiscovered()
+    end
+    return "", 1, false, 0, false, "", false, false
+end
+
+-- Campaign Bonus Ability Refactor
+function GetArtifactScoreBonusInfo(alliance, artifactType, index)
+    local abilityId = GetArtifactScoreBonusAbilityId(alliance, artifactType, index)
+    local name = GetAbilityName(abilityId)
+    local icon = GetAbilityIcon(abilityId)
+    local description = GetAbilityDescription(abilityId)
+    return name, icon, description
+end
+
+function GetEmperorAllianceBonusInfo(campaignId, alliance)
+    local abilityId = GetEmperorAllianceBonusAbilityId(campaignId, alliance)
+    local name = GetAbilityName(abilityId)
+    local icon = GetAbilityIcon(abilityId)
+    local description = GetAbilityDescription(abilityId)
+    return name, icon, description
+end
+
+function GetKeepScoreBonusInfo(index)
+    local abilityId = GetKeepScoreBonusAbilityId(index)
+    local name = GetAbilityName(abilityId)
+    local icon = GetAbilityIcon(abilityId)
+    local description = GetAbilityDescription(abilityId)
+    return name, icon, description
+end
+
+-- Action slots refactor
+EVENT_ACTION_SLOTS_FULL_UPDATE = EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED
+
+-- You can now weapon swap to unarmed, so this function no longer means anything to the UI
+function HasActivatableSwapWeaponsEquipped()
+    return true
+end

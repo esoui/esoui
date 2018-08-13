@@ -14,7 +14,7 @@ function ZO_HousingFurnitureBrowser_Keyboard:Initialize(control)
 
     local function OnListMostRecentlySelectedDataChanged(data)
         -- selecting the list data will preview the furniture, so we will need to show/hide the house info as appropriate
-        if data then
+        if data and IsCharacterPreviewingAvailable() then
             SCENE_MANAGER:RemoveFragmentGroup(self.houseInfoFragmentGroup)
         else
             SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)

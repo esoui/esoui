@@ -42,21 +42,26 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_42)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
-    statValuePairMagickaValue =
+    abilityStatValuePairValue =
     {
-        fontSize = "$(GP_42)",
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    abilityStatValuePairMagickaValue =
+    {
+        fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_POWER,
         fontColorField = POWERTYPE_MAGICKA,
     },
-    statValuePairStaminaValue =
+    abilityStatValuePairStaminaValue =
     {
-        fontSize = "$(GP_42)",
+        fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_POWER,
         fontColorField = POWERTYPE_STAMINA,
     },
-    statValuePairHealthValue =
+    abilityStatValuePairHealthValue =
     {
-        fontSize = "$(GP_42)",
+        fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_POWER,
         fontColorField = POWERTYPE_HEALTH,
     },
@@ -282,6 +287,10 @@ ZO_TOOLTIP_STYLES =
     {
         fontSize = "$(GP_42)",
     },
+    prioritySellText =
+    {
+        fontSize = "$(GP_42)",
+    },
     inactiveBonus =
     {
         fontColorField = GAMEPAD_TOOLTIP_COLOR_INACTIVE,
@@ -412,7 +421,7 @@ ZO_TOOLTIP_STYLES =
     abilityStatsSection =
     {
         statValuePairSpacing = 10,
-        childSpacing = 3,
+        childSpacing = 1,
         customSpacing = 20,
     },
     abilityHeaderSection =

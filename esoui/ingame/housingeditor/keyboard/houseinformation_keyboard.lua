@@ -1,6 +1,7 @@
 ZO_HouseInformation_Keyboard = ZO_HouseInformation_Shared:Subclass()
 
-local VERTICAL_PADDING = 5
+local CHILD_VERTICAL_PADDING = 5
+local SECTION_VERTICAL_PADDING = 30
 
 function ZO_HouseInformation_Keyboard:New(...)
     return ZO_HouseInformation_Shared.New(self, ...)
@@ -9,7 +10,7 @@ end
 function ZO_HouseInformation_Keyboard:Initialize(control)
     HOUSE_INFORMATION_FRAGMENT = ZO_FadeSceneFragment:New(control)
     
-    ZO_HouseInformation_Shared.Initialize(self, control, HOUSE_INFORMATION_FRAGMENT, "ZO_HouseInformation_Keyboard_Row", VERTICAL_PADDING)
+    ZO_HouseInformation_Shared.Initialize(self, control, HOUSE_INFORMATION_FRAGMENT, "ZO_HouseInformation_Keyboard_Row", CHILD_VERTICAL_PADDING, SECTION_VERTICAL_PADDING)
 end
 
 -- XML functions --

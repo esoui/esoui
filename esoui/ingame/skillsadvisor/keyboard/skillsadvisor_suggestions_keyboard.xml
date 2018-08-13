@@ -20,13 +20,15 @@
                 </Button>
                 <Label name="$(parent)Name" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" override="true"  wrapMode="ELLIPSIS" maxLineCount="2" >
                     <Dimensions x="190" />
-                    <!-- Anchor set in Lua-->
+                    <Anchor point="LEFT" relativeTo="$(parent)Slot" relativePoint="RIGHT" offsetX="10" />
                 </Label>
 
                 <Texture name="$(parent)Morph" textureFile="EsoUI/Art/SkillsAdvisor/indicator_abilityMorph.dds" tier="HIGH" hidden="true">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)Slot" relativePoint="LEFT" offsetX="-10" />
                 </Texture>
+                
+                <StatusBar name="$(parent)XPBar" override="true" hidden="true" />
             </Controls>
         </Control>
 

@@ -1,5 +1,3 @@
-local g_remoteSceneSequenceNumber = 0
-
 ZO_SceneManager_Leader = ZO_SceneManager_Base:Subclass()
 
 function ZO_SceneManager_Leader:New(...)
@@ -11,6 +9,10 @@ function ZO_SceneManager_Leader:Initialize(...)
 
     self.sceneStack = {}
     self.previousSceneStack = {}
+    self.remoteSceneSequenceNumber = 0
+    self.bypassHideSceneConfirmationReason = 0
+
+    self:AddBypassHideSceneConfirmationReason("ALREADY_SEEN")
 
     EVENT_MANAGER:RegisterForEvent("SceneManager", EVENT_REMOTE_SCENE_REQUEST, function(eventId, ...) self:OnRemoteSceneRequest(...) end)
 end
@@ -18,8 +20,15 @@ end
 -- sequence number
 
 function ZO_SceneManager_Leader:GetNextSequenceNumber()
-    g_remoteSceneSequenceNumber = g_remoteSceneSequenceNumber + 1
-    return g_remoteSceneSequenceNumber
+    self.remoteSceneSequenceNumber = self.remoteSceneSequenceNumber + 1
+    return self.remoteSceneSequenceNumber
+end
+
+function ZO_SceneManager_Leader:AddBypassHideSceneConfirmationReason(name)
+    self.bypassHideSceneConfirmationReason = self.bypassHideSceneConfirmationReason + 1
+    local reasonName = "ZO_BHSCR_"..name
+    internalassert(_G[reasonName] == nil)
+    _G[reasonName] = self.bypassHideSceneConfirmationReason
 end
 
 function ZO_SceneManager_Leader:OnRemoteSceneRequest(messageOrigin, requestType, sceneName)
@@ -189,9 +198,20 @@ function ZO_SceneManager_Leader:Push(sceneName)
     self:Show(sceneName, IS_PUSH)
 end
 
--- Note that push, nextSceneClearsSceneStack and numScenesNextScenePops are meant to be INTERNAL parameters. They should NOT
--- be used when calling Show from outside of this file
-function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops)
+function ZO_SceneManager_Leader:ShowWithFollowup(sceneName, resultCallback)
+    if self:WillCurrentSceneConfirmHide() then
+        self.currentScene:RegisterCallback("HideSceneConfirmationResult", resultCallback)
+        self:Show(sceneName)
+    else
+        self:Show(sceneName)
+        local ALLOWED_TO_HIDE_CURRENT_SCENE = true
+        resultCallback(ALLOWED_TO_HIDE_CURRENT_SCENE)
+    end
+end
+
+-- Note that push, nextSceneClearsSceneStack, numScenesNextScenePops, and bypassHideSceneConfirmationReason are meant to be INTERNAL parameters. They should NOT
+-- be used when calling Show from outside of this file. These same params should be passed to ConfirmHideScene.
+function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
     local currentScene = self.currentScene
     local nextScene = self.scenes[sceneName]
 
@@ -205,6 +225,11 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
         --if a scene exists
         if currentScene then
             if nextScene ~= currentScene then
+                --If we need confirmation to hide this scene go request it unless we've already done that and this is the response
+                if self:WillCurrentSceneConfirmHide(bypassHideSceneConfirmationReason) then
+                    return currentScene:ConfirmHideScene(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
+                end
+
                 if self.nextScene then
                     if nextScene ~= self.nextScene then
                         local oldNextScene = self.nextScene
@@ -246,6 +271,11 @@ function ZO_SceneManager_Leader:Hide(sceneName)
     if self.currentScene and self.currentScene:GetName() == sceneName and self.currentScene:GetState() ~= SCENE_HIDING then
         self:PopScenes(1)
     end
+end
+
+function ZO_SceneManager_Leader:WillCurrentSceneConfirmHide(bypassHideSceneConfirmationReason)
+    local currentScene = self.currentScene
+    return currentScene and currentScene:HasHideSceneConfirmation() and bypassHideSceneConfirmationReason ~= ZO_BHSCR_ALREADY_SEEN and currentScene:IsShowing()
 end
 
 function ZO_SceneManager_Leader:ShowScene(scene)

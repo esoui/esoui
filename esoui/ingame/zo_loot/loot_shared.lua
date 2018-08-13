@@ -54,10 +54,14 @@ function ZO_Loot_Shared:Initialize(control)
         ZO_PlayMonsterLootSound(CLOSE_LOOT_WINDOW)
     end
 
-    local function LootItemFailed(eventCode, reason, itemName)
+    local function LootItemFailed(eventCode, reason, itemLink)
         if reason == LOOT_ITEM_RESULT_INVENTORY_FULL or reason == LOOT_ITEM_RESULT_INVENTORY_FULL_LOOT_ALL then
             TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
         end
+        local itemName = GetItemLinkName(itemLink)
+        local itemQuality = GetItemLinkQuality(itemLink)
+        local qualityColor = GetItemQualityColor(itemQuality)
+        itemName = qualityColor:Colorize(itemName)
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
     end
 

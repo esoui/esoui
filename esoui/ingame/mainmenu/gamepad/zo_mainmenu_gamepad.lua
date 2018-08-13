@@ -195,8 +195,7 @@ local MENU_ENTRY_DATA =
             return GetAvailableSkillPoints() > 0
         end,
         isNewCallback =  function()
-            local CHECK_ABILITIES_IN_SKILL_LINES = true
-            return NEW_SKILL_CALLOUTS and NEW_SKILL_CALLOUTS:AreAnySkillLinesNew(CHECK_ABILITIES_IN_SKILL_LINES)
+            return SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnySkillLinesOrAbilitiesNew()
         end,
     },
     [MENU_MAIN_ENTRIES.CHAMPION] =
@@ -485,6 +484,12 @@ function ZO_MainMenuManager_Gamepad:OnShowing()
     -- Both MAIN_MENU_GAMEPAD_SCENE and PLAYER_SUBMENU_SCENE use OnShowing to set the active list, which also adds the appropriate list fragment to the scene
     -- Two separate scenes are needed for this to properly control the direction the fragments conveyor in and out.
     self:SetCurrentList(self.mode == MODE_SUBLIST and self.subList or self.mainList)
+
+    -- This is to set the Daily Rewards panel to selected if we entered the main menu from the Daily Rewards Preview. 
+    -- (ie. we backed out of a preview we entered from a selected Daily Reward screen)
+    if SCENE_MANAGER:GetPreviousSceneName() == "dailyLoginRewardsPreview_Gamepad" then
+        self:SwitchToSelectedScene(self:GetCurrentList())
+    end
 end
 
 function ZO_MainMenuManager_Gamepad:OnHiding()

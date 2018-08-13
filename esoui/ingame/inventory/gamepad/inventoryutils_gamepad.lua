@@ -140,22 +140,6 @@ function ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
     return zo_strformat(SI_INVENTORY_HEADER, GetString("SI_ITEMTYPE", itemData.itemType))
 end
 
-do
-    local SELL_ITEM_SORT_ORDER_ORNATE = 0
-    local SELL_ITEM_SORT_ORDER_TRASH = 1
-    local SELL_ITEM_SORT_ORDER_OTHER = 2
-
-    function ZO_InventoryUtils_Gamepad_GetSellItemCustomSortOrder(itemData)
-        if itemData.traitInformation == ITEM_TRAIT_INFORMATION_ORNATE then
-            return SELL_ITEM_SORT_ORDER_ORNATE
-        elseif itemData.itemType == ITEMTYPE_TRASH then
-            return SELL_ITEM_SORT_ORDER_TRASH
-        end
-
-        return SELL_ITEM_SORT_ORDER_OTHER
-     end
- end
-
  --helper comparators
 function ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, currentFilter)
     if not currentFilter then return true end

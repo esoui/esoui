@@ -36,16 +36,20 @@ function ZO_SceneGroup:GetActiveScene()
     return self.scenes[self.activeScene]
 end
 
-function ZO_SceneGroup:SetActiveScene(scene)
-    self.activeScene = self:GetSceneIndexFromScene(scene) or 1
+function ZO_SceneGroup:SetActiveScene(sceneName)
+    self.activeScene = self:GetSceneIndexFromScene(sceneName) or 1
 end
 
-function ZO_SceneGroup:GetSceneIndexFromScene(scene)
+function ZO_SceneGroup:GetSceneIndexFromScene(sceneName)
     for i=1, #self.scenes do
-        if self.scenes[i] == scene then
+        if self.scenes[i] == sceneName then
             return i
         end
     end
+end
+
+function ZO_SceneGroup:HasScene(sceneName)
+    return self:GetSceneIndexFromScene(sceneName) ~= nil
 end
 
 function ZO_SceneGroup:SetState(newState)

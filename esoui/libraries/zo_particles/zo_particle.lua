@@ -202,9 +202,8 @@ end
 function ZO_Particle:GetDimensionsFromParameters()
     local parameters = self.parameters
     local size = parameters["Size"]
-    local width, height
-    width = parameters["Width"] or size
-    height = parameters["Height"] or size
+    local width = parameters["Width"] or size
+    local height = parameters["Height"] or size
     return width, height
 end
 

@@ -19,7 +19,7 @@ function MapLocations_Gamepad:Initialize(control)
 
     self:InitializeKeybindDescriptor()
 
-    GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
         if(newState == SCENE_SHOWING) then
             if not self.listDisabled then

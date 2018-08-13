@@ -30,7 +30,7 @@ function WorldMapQuests_Gamepad:Initialize(control)
 
     self:InitializeKeybindDescriptor()
 
-    GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.questList:Activate()

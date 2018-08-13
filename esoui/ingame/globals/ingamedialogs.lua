@@ -3514,7 +3514,7 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
     },
 }
 
-ESO_Dialogs["CONFIRM_REVERT_RESTYLE_CHANGES"] =
+ESO_Dialogs["CONFIRM_REVERT_CHANGES"] =
 {
     canQueue = true,
     gamepadInfo =
@@ -3523,11 +3523,11 @@ ESO_Dialogs["CONFIRM_REVERT_RESTYLE_CHANGES"] =
     },
     title =
     {
-        text = SI_RESTYLE_REVERT_CHANGES_TITLE
+        text = SI_REVERT_CHANGES_DIALOG_TITLE
     },
     mainText = 
     {
-        text = SI_RESTYLE_REVERT_CHANGES_DESCRIPTION
+        text = SI_REVERT_CHANGES_DIALOG_DESCRIPTION
     },
     mustChoose = true,
     buttons =
@@ -3748,4 +3748,84 @@ ESO_Dialogs["WORLD_MAP_CHOICE_FAILED"] =
             text = SI_DIALOG_ACCEPT,
         },
     }
+}
+
+ESO_Dialogs["SKILL_RESPEC_CONFIRM_FREE"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = function()
+            local introText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO)
+            local noCostText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_FREE)
+            return string.format("%s\n\n%s", introText, noCostText)
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function()
+                SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+            end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = function(dialog)
+            local introText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO)
+            local scrollItemLink = GetPendingSkillRespecScrollItemLink()
+            local scrollName = GetItemLinkName(scrollItemLink)
+            local scrollQuality = GetItemLinkQuality(scrollItemLink)
+            local qualityColor = GetItemQualityColor(scrollQuality)
+            local costText = zo_strformat(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, qualityColor:Colorize(scrollName))
+            return string.format("%s\n\n%s", introText, costText)
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function()
+                SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+            end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
 }

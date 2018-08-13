@@ -195,7 +195,12 @@ function ZO_GiftInventoryView_Shared:ClaimGift()
     local marketProductId = self.gift:GetMarketProductId()
     local expectedclaimResult = CouldAcquireMarketProduct(marketProductId)
     if expectedclaimResult == MARKET_PURCHASE_RESULT_SUCCESS then
-        self:ShowClaimGiftDialog()
+        if ShouldMarketProductShowClaimGiftNotice(marketProductId) then
+            local noticeText, helpCategoryIndex, helpIndex = GetMarketProductClaimGiftNoticeInfo(marketProductId)
+            self:ShowClaimGiftNoticeDialog(noticeText, helpCategoryIndex, helpIndex)
+        else
+            self:ShowClaimGiftDialog()
+        end
     else
         -- We can't claim this gift for some reason
         local errorString
@@ -235,6 +240,10 @@ function ZO_GiftInventoryView_Shared:ClaimGift()
 end
 
 function ZO_GiftInventoryView_Shared:ShowClaimGiftDialog()
+    assert(false) -- Must be overriden
+end
+
+function ZO_GiftInventoryView_Shared:ShowClaimGiftNoticeDialog(noticeText, helpCategoryIndex, helpIndex)
     assert(false) -- Must be overriden
 end
 
@@ -282,7 +291,6 @@ function ZO_GiftInventoryView_Shared:OnHidden()
     self:GetItemPreviewListHelper():UnregisterCallback("RefreshActions", self.updateKeybindsCallback)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:RestoreDefaultExit()
-    self.gift = nil
     self.blastParticleSystem:Stop()
     self.headerSparksParticleSystem:Stop()
     self.headerStarbustParticleSystem:Stop()

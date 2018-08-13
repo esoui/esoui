@@ -108,12 +108,16 @@ end
 
 function ZO_PlayerToPlayer:CreateGamepadRadialMenu()
     self.gamepadMenu = ZO_RadialMenu:New(ZO_PlayerToPlayerMenu_Gamepad, "ZO_RadialMenuHUDEntryTemplate_Gamepad", "DefaultRadialMenuAnimation", "DefaultRadialMenuEntryAnimation", "RadialMenu")
-    self.gamepadMenu:SetOnClearCallback(function() self:StopInteraction() end)
+    self.gamepadMenu:SetOnClearCallback(function()
+        self:StopInteraction()
+    end)
 end
 
 function ZO_PlayerToPlayer:CreateKeyboardRadialMenu()
     self.keyboardMenu = ZO_RadialMenu:New(ZO_PlayerToPlayerMenu_Keyboard, "ZO_PlayerToPlayerMenuEntryTemplate_Keyboard", "DefaultRadialMenuAnimation", "DefaultRadialMenuEntryAnimation", "RadialMenu")
-    self.keyboardMenu:SetOnClearCallback(function() self:StopInteraction() end)
+    self.keyboardMenu:SetOnClearCallback(function()
+        self:StopInteraction()
+    end)
 end
 
 --Gets or creates the radial menu for the current keyboard/gamepad mode
@@ -131,13 +135,14 @@ function ZO_PlayerToPlayer:GetRadialMenu()
     end
 end
 
---Gets the radial menu that is currently showing
-function ZO_PlayerToPlayer:GetCurrentlyShowingRadialMenu()
-    if self.gamepadMenu and self.gamepadMenu:IsShown() then
-        return self.gamepadMenu
-    elseif self.keyboardMenu and self.keyboardMenu:IsShown() then
-        return self.keyboardMenu
-    end        
+--Gets the radial menu that was most recently interacted with. This resolves issues where switching platform type during an interaction sent the close events to the wrong menu
+function ZO_PlayerToPlayer:GetLastActiveRadialMenu()
+    internalassert(self.isLastRadialMenuGamepad ~= nil, "GetLastActiveRadialMenu() called without a previous active menu")
+    if self.isLastRadialMenuGamepad then
+        return internalassert(self.gamepadMenu)
+    else
+        return internalassert(self.keyboardMenu)
+    end
 end
 
 function ZO_PlayerToPlayer:InitializeKeybinds()
@@ -733,6 +738,7 @@ end
 function ZO_PlayerToPlayer:ShowGamepadResponseMenu(data)
     local menu = self:GetRadialMenu()
 
+    menu:Clear()
     if data.deferDecisionCallback then
         local deferDecisionText = data.deferDecisionText or GetString(SI_GAMEPAD_NOTIFICATIONS_DEFER_OPTION)
         menu:AddEntry( deferDecisionText, 
@@ -762,8 +768,8 @@ function ZO_PlayerToPlayer:ShowGamepadResponseMenu(data)
     end
 
     menu:Show()
-
     self.showingGamepadResponseMenu = true
+    self.isLastRadialMenuGamepad = true
 end
 
 do
@@ -829,7 +835,7 @@ do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
                 local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
 
-                if i == 1 and (self.responding or self.showingGamepadResponseMenu) then
+                if i == 1 and (self.showingResponsePrompt or self.showingGamepadResponseMenu) then
                     self:StopInteraction()
                 end
                 break
@@ -842,7 +848,7 @@ do
             if DoesDataMatch(incomingEntry, incomingType, characterName, displayName) then
                 local incomingEntry = self:RemoveEntryFromIncomingQueueTable(i)
 
-                if i == 1 and (self.responding or self.showingGamepadResponseMenu) then
+                if i == 1 and (self.showingResponsePrompt or self.showingGamepadResponseMenu) then
                     self:StopInteraction()
                 end
             end
@@ -882,7 +888,7 @@ function ZO_PlayerToPlayer:RemoveScriptedWorldEventFromIncomingQueue(eventId, qu
         if incomingEntry.incomingType == INTERACT_TYPE_WORLD_EVENT_INVITE and (incomingEntry.eventId == eventId or incomingEntry.questName == questName) then
             self:RemoveEntryFromIncomingQueueTable(i)
 
-            if i == 1 and self.responding then
+            if i == 1 and self.showingResponsePrompt then
                 self:StopInteraction()
             end
             break
@@ -959,7 +965,7 @@ function ZO_PlayerToPlayer:SetDelayPromptTime(timeMs)
 end
 
 function ZO_PlayerToPlayer:TryDisplayingIncomingRequests()
-    if self.responding then
+    if self.showingResponsePrompt then
         local incomingEntryToRespondTo = self.incomingQueue[1]
         if ShouldUseGamepadResponseMenu(incomingEntryToRespondTo) then
             --if there is only one option just accept it instead of showing a radial with one option
@@ -984,9 +990,10 @@ end
 
 function ZO_PlayerToPlayer:StartInteraction()
     if not SCENE_MANAGER:IsInUIMode() then
-        -- Keyboard only requires a target to start interaction, self.responding is only used by Gamepad and does not require a target 
-        local isInteractionPossible = self:HasTarget() or (IsInGamepadPreferredMode() and self.responding)
-        if not isInteractionPossible then
+        -- most interactions require a target, but on gamepad, response prompts don't. Response prompts on keyboard do.
+        local doesInteractionHaveTarget = self:HasTarget() or (IsInGamepadPreferredMode() and self.showingResponsePrompt)
+
+        if not doesInteractionHaveTarget then
             PlaySound(SOUNDS.NO_INTERACT_TARGET)
         elseif not self.isInteracting and not SHARED_INFORMATION_AREA:IsSuppressed() then
             self:SetHidden(false)
@@ -1014,7 +1021,6 @@ end
 
 function ZO_PlayerToPlayer:StopInteraction()
     self.targetLabel:SetHidden(false)
-    local currentlyShowingRadialMenu = self:GetCurrentlyShowingRadialMenu()
     
     if self.isInteracting then
         self.isInteracting = false
@@ -1022,26 +1028,28 @@ function ZO_PlayerToPlayer:StopInteraction()
         LockCameraRotation(false)
 
         CancelSoulGemResurrection()
-
-        if currentlyShowingRadialMenu then
-            currentlyShowingRadialMenu:SelectCurrentEntry()
-        end
-
         self.lastFailedPromptTime = GetFrameTimeMilliseconds() - self.msToDelayToShowPrompt
-    elseif self.responding then
-        self.responding = false
-        if self.showingGamepadResponseMenu and currentlyShowingRadialMenu then
-            currentlyShowingRadialMenu:SelectCurrentEntry()
-        end
-    end
 
-    if self.showingGamepadResponseMenu then
+        if self.showingPlayerInteractMenu then
+            self.showingPlayerInteractMenu = false
+            local radialMenu = self:GetLastActiveRadialMenu()
+            if radialMenu then
+                radialMenu:SelectCurrentEntry()
+            end
+        end
+    elseif self.showingGamepadResponseMenu then
         self.showingGamepadResponseMenu = false
         RETICLE:RequestHidden(false)
         LockCameraRotation(false)
-        if currentlyShowingRadialMenu then
-            currentlyShowingRadialMenu:Clear()
+
+        local radialMenu = self:GetLastActiveRadialMenu()
+        if radialMenu then
+            radialMenu:SelectCurrentEntry()
         end
+    end
+
+    if self.showingResponsePrompt then
+        self.showingResponsePrompt = false
     end
 end
 
@@ -1071,7 +1079,7 @@ end
 
 --With proper timing, both of these events can fire in the same frame, making it possible to be responding but having already cleared the incoming queue
 function ZO_PlayerToPlayer:OnPromptAccepted()
-    if self.responding and #self.incomingQueue > 0 then
+    if self.showingResponsePrompt and #self.incomingQueue > 0 then
         local incomingEntryToRespondTo = self.incomingQueue[1]
         if not incomingEntryToRespondTo.dontRemoveOnAccept then
             self:RemoveEntryFromIncomingQueueTable(1)
@@ -1081,7 +1089,7 @@ function ZO_PlayerToPlayer:OnPromptAccepted()
 end
 
 function ZO_PlayerToPlayer:OnPromptDeclined()
-    if self.responding and #self.incomingQueue > 0 then
+    if self.showingResponsePrompt and #self.incomingQueue > 0 then
         local incomingEntryToRespondTo = self.incomingQueue[1]
         if not incomingEntryToRespondTo.dontRemoveOnDecline then
             self:RemoveEntryFromIncomingQueueTable(1)
@@ -1242,7 +1250,7 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
                 self.shouldShowNotificationKeybindLayer = true
             end
 
-            self.responding = true
+            self.showingResponsePrompt = true
             incomingEntry.seen = true
             return true
         end
@@ -1261,7 +1269,7 @@ local notificationsKeybindLayerName = GetString(SI_KEYBINDINGS_LAYER_NOTIFICATIO
 function ZO_PlayerToPlayer:OnUpdate()
     for i, incomingEntry in ipairs(self.incomingQueue) do
         if incomingEntry.updateFn then
-            local isActive = i == 1 and (self.responding or self.isInteracting)
+            local isActive = i == 1 and (self.showingResponsePrompt or self.isInteracting)
             incomingEntry.updateFn(incomingEntry, isActive)
         end
 
@@ -1279,7 +1287,7 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.resurrectable = false
         self.hasRequiredSoulGem = false
         self.failedRaidRevives = false
-        self.responding = false
+        self.showingResponsePrompt = false
         self.actionKeybindButton:SetHidden(true)
         self.actionKeybindButton:SetEnabled(true)
         self.additionalInfo:SetHidden(true)
@@ -1470,13 +1478,14 @@ do
         local currentTargetCharacterName = self.currentTargetCharacterName
         local currentTargetCharacterNameRaw = self.currentTargetCharacterNameRaw
         local currentTargetDisplayName = self.currentTargetDisplayName
-        local primaryName = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName);
-        local primaryNameInternal = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName, USE_INTERNAL_FORMAT);
+        local primaryName = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName)
+        local primaryNameInternal = ZO_GetPrimaryPlayerName(currentTargetDisplayName, currentTargetCharacterName, USE_INTERNAL_FORMAT)
         local platformIcons = IsInGamepadPreferredMode() and GAMEPAD_INTERACT_ICONS or KEYBOARD_INTERACT_ICONS
         local ENABLED = true
         local DISABLED = false
         local ENABLED_IF_NOT_IGNORED = not isIgnored
-    
+
+        self:GetRadialMenu():Clear()
         --Gamecard--
         if IsConsoleUI() then
             self:AddShowGamerCard(currentTargetDisplayName, currentTargetCharacterName)
@@ -1579,6 +1588,8 @@ do
         self:AddMenuEntry(GetString(SI_RADIAL_MENU_CANCEL_BUTTON), platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)
 
         self:GetRadialMenu():Show()
+        self.showingPlayerInteractMenu = true
+        self.isLastRadialMenuGamepad = IsInGamepadPreferredMode()
     end
 end
 

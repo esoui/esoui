@@ -56,10 +56,7 @@
                 
                 <SizeAnimation duration="350">
                     <OnPlay>
-                        local pinScale = animatingControl.pin:GetScale()
-                        local width, height = animatingControl:GetParent():GetDimensions()
-                        self:SetStartAndEndWidth(32 * pinScale, width + 36)
-                        self:SetStartAndEndHeight(32 * pinScale, height)
+                        ZO_Compass_AnimationIn_Size(self, animatingControl)
                     </OnPlay>
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
@@ -68,11 +65,7 @@
                 
                 <TranslateAnimation duration="350">
                     <OnPlay>
-                        local parent = animatingControl:GetParent()
-                        local offsetX = animatingControl.pin:GetCenter() - parent:GetCenter()
-                        animatingControl:SetAnchor(CENTER, parent, CENTER, offsetX, 0)
-
-                        self:SetTranslateDeltas(-offsetX, 0)
+                        ZO_Compass_AnimationIn_Translate(self, animatingControl)
                     </OnPlay>
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
@@ -101,11 +94,7 @@
                 </ScaleAnimation>
                 <AlphaAnimation duration="350">
                     <OnPlay>
-                        if self:GetTimeline().owner.refreshingJournalIndex then
-                            self:SetAlphaValues(0, 0)
-                        else
-                            self:SetAlphaValues(animatingControl:GetAlpha(), 0)
-                        end
+                        ZO_Compass_AnimationOut_Alpha(self, animatingControl)
                     </OnPlay>
                 </AlphaAnimation>
                 <AnimationTimeline delay="700" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
@@ -420,6 +409,58 @@
                                     linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds"
                                     layer="TEXT"
                                     drawLevelOffsetBase="18"
+                    />
+                    <CompassPinType name="QUEST_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)quest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)quest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="19"
+                    />
+                    <CompassPinType name="QUEST_OPTIONAL_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)quest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)quest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="19"
+                    />
+                    <CompassPinType name="QUEST_ENDING"
+                                    pinTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)quest_icon.dds"
+                                    linkTexture="$(COMPASS_PATH)quest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="19"
+                    />
+                    <CompassPinType name="QUEST_REPEATABLE_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)repeatableQuest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="20"
+                    />
+                    <CompassPinType name="QUEST_REPEATABLE_OPTIONAL_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)repeatableQuest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="20"
+                    />
+                    <CompassPinType name="QUEST_REPEATABLE_ENDING"
+                                    pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
+                                    linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="20"
                     />
                     <CompassPinType name="POI_SEEN"
                                     minScale="1.0"

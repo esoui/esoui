@@ -8,7 +8,7 @@
             </Controls>
         </Control>
 
-        <Button name="ZO_PreferredRolesButton"  inherits="ZO_CheckButton" virtual="true">
+        <Button name="ZO_PreferredRolesButton"  inherits="ZO_RadioButton" virtual="true">
             <Dimensions x="48" y="48"/>
             <OnMouseEnter>
                 ZO_PreferredRolesButton_OnMouseEnter(self)
@@ -17,10 +17,6 @@
             <OnMouseExit>
                 ZO_PreferredRolesButton_OnMouseExit(self)
             </OnMouseExit>
-
-            <OnClicked>
-                ZO_PreferredRolesButton_OnClicked(self, button)
-            </OnClicked>
         </Button>
         
         <TopLevelControl name="ZO_GroupMenu_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">

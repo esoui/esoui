@@ -1,8 +1,15 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GridScrollList_Gamepad" virtual="true">
+        <Control name="ZO_GridScrollList_Gamepad" inherits="ZO_GridScrollList_NotAnchored_Gamepad" virtual="true">
             <Controls>
-                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" >
+                <Control name="$(parent)Container" override="true" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GridScrollList_NotAnchored_Gamepad" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill />
                     <Controls>
                         <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
                             <AnchorFill />

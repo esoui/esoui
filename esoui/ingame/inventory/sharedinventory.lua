@@ -530,6 +530,8 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.isPlaceableFurniture = IsItemPlaceableFurniture(bagId, slotIndex)
     slot.traitInformation = GetItemTraitInformation(bagId, slotIndex)
     slot.traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(slot.traitInformation)
+    slot.sellInformation = GetItemSellInformation(bagId, slotIndex)
+    slot.sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(slot.sellInformation)
 
     local isFromCrownCrate = IsItemFromCrownCrate(bagId, slotIndex)
     slot.isGemmable = false
@@ -786,5 +788,23 @@ do
 
     function ZO_GetItemTraitInformation_SortOrder(traitInfo)
         return ITEM_TRAIT_INFORMATION_SORT_ORDER[traitInfo]
+    end
+end
+
+do
+    -- if this triggers, need to add new sell information to this arbitrary sort order
+    internalassert(ITEM_SELL_INFORMATION_MAX_VALUE == 4)
+
+    local ITEM_SELL_INFORMATION_SORT_ORDER =
+    {
+        [ITEM_SELL_INFORMATION_PRIORITY_SELL] = 0,
+        [ITEM_SELL_INFORMATION_NONE] = 1,
+        [ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED] = 2,
+        [ITEM_SELL_INFORMATION_INTRICATE] = 3,
+        [ITEM_SELL_INFORMATION_CANNOT_SELL] = 4,
+    }
+
+    function ZO_GetItemSellInformationCustomSortOrder(sellInformation)
+        return ITEM_SELL_INFORMATION_SORT_ORDER[sellInformation]
     end
 end

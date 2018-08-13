@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_ScrollUpButton" virtual="true">
-            <Dimensions x="16" y="16" />
+            <Dimensions x="ZO_SCROLL_BAR_WIDTH" y="16" />
             <Anchor point="BOTTOM" relativePoint="TOP"/>
 
             <Textures
@@ -13,7 +13,7 @@
         </Button>
 
         <Button name="ZO_ScrollDownButton" virtual="true">
-            <Dimensions x="16" y="16" />
+            <Dimensions x="ZO_SCROLL_BAR_WIDTH" y="16" />
             <Anchor point="TOP" relativePoint="BOTTOM"/>
 
             <Textures
@@ -34,7 +34,7 @@
         </Button>
         
         <Button name="ZO_ScrollLeftButton" inherits="ZO_DefaultButton" mouseOverBlendMode="ALPHA" virtual="true">
-            <Dimensions x="16" y="16" />
+            <Dimensions x="ZO_SCROLL_BAR_WIDTH" y="16" />
             <Anchor point="RIGHT" relativePoint="LEFT" />
 
             <Textures
@@ -45,7 +45,7 @@
         </Button>
         
         <Button name="ZO_ScrollRightButton" inherits="ZO_DefaultButton" mouseOverBlendMode="ALPHA" virtual="true">
-            <Dimensions x="16" y="16" />
+            <Dimensions x="ZO_SCROLL_BAR_WIDTH" y="16" />
             <Anchor point="LEFT" relativePoint="RIGHT" />
 
             <Textures
@@ -117,7 +117,7 @@
             <Controls>
                 <Scroll name="$(parent)Contents" mouseEnabled="true">
                     <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-16" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SCROLL_BAR_WIDTH" />
                     <OnMouseWheel>
                         ZO_ScrollList_ScrollRelative(self:GetParent(), -delta * 40)
                     </OnMouseWheel>
@@ -139,7 +139,7 @@
         <!--Scroll Panel-->
         <Scroll name="ZO_Scroll" inherits="ZO_Scroll_Shared" mouseEnabled="true" virtual="true">
             <OnMouseWheel>
-                ZO_Scroll_ScrollRelative(self:GetParent(), -delta * 40)
+                ZO_Scroll_OnMouseWheel(self:GetParent(), delta)
             </OnMouseWheel>
         </Scroll>
 
@@ -150,14 +150,14 @@
             <Controls>
                 <Scroll name="$(parent)Scroll" inherits="ZO_Scroll">
                     <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-16" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SCROLL_BAR_WIDTH" />
                 </Scroll>
 
                 <Slider name="$(parent)ScrollBar" inherits="ZO_VerticalScrollbarBase">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetY="16" />
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetY="-16" />
                     <OnMouseWheel>
-                        ZO_Scroll_ScrollRelative(self:GetParent(), -delta * 40)
+                        ZO_Scroll_OnMouseWheel(self:GetParent(), delta)
                     </OnMouseWheel>
 
                     <OnValueChanged>

@@ -176,7 +176,6 @@ local g_mapPanAndZoom
 
 local g_pinUpdateTime           = nil
 local g_refreshUpdateTime       = nil
-local g_playerPin
 local g_activeGroupPins = {}
 local ObjectiveContinuous = {}
 local g_nextRespawnTimeMS = 0
@@ -187,6 +186,7 @@ MAP_MODE_LARGE_CUSTOM = 2
 MAP_MODE_KEEP_TRAVEL = 3
 MAP_MODE_FAST_TRAVEL = 4
 MAP_MODE_AVA_RESPAWN = 5
+MAP_MODE_AVA_KEEP_RECALL = 6
 
 local MAP_TRANSIENT_MODES =
 {
@@ -203,6 +203,10 @@ local MAP_MODE_CHANGE_RESTRICTIONS =
     [MAP_MODE_AVA_RESPAWN] =
     {
         restrictedCyrodiilImperialCityMapChanging = true,
+    },
+    [MAP_MODE_AVA_KEEP_RECALL] =
+    {
+        disableMapChanging = true,
     },
 }
 
@@ -428,6 +432,12 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION]           = { level = 130, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
     [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION]  = { level = 130, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
     [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_ENDING]              = { level = 130, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
+    [MAP_PIN_TYPE_QUEST_CONDITION]                              = { level = 125, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
+    [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION]                     = { level = 125, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
+    [MAP_PIN_TYPE_QUEST_ENDING]                                 = { level = 125, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION]                   = { level = 120, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION]          = { level = 120, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_ENDING]                      = { level = 120, size = CONSTANTS.QUEST_PIN_SIZE, minAreaSize = CONSTANTS.QUEST_AREA_MIN_SIZE, texture = GetQuestPinTexture, insetX = 7, insetY = 4},
     [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE]                        = { level = GetFastTravelPinDrawLevel, size = CONSTANTS.POI_PIN_SIZE, texture = GetFastTravelPinTextures, tint = GetPOIPinTint, insetX = 5, insetY = 10},
     [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC]            = { level = CONSTANTS.FAST_TRAVEL_DEFAULT_PIN_LEVEL, size = CONSTANTS.POI_PIN_SIZE, texture = GetFastTravelPinTextures, tint = GetPOIPinTint, insetX = 5, insetY = 10},
     [MAP_PIN_TYPE_FORWARD_CAMP_ALDMERI_DOMINION]                = { level = 110, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_cemetary_aldmeri.dds", insetX = 20, insetY = 20, showsPinAndArea = true},
@@ -612,6 +622,12 @@ ZO_MapPin.QUEST_PIN_TYPES =
     [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION] = true,
     [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = true,
     [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_ENDING] = true,
+    [MAP_PIN_TYPE_QUEST_CONDITION] = true,
+    [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION] = true,
+    [MAP_PIN_TYPE_QUEST_ENDING] = true,
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION] = true,
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION] = true,
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_ENDING] = true,
 }
 
 ZO_MapPin.QUEST_CONDITION_PIN_TYPES =
@@ -624,16 +640,10 @@ ZO_MapPin.QUEST_CONDITION_PIN_TYPES =
     [MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION] = true,
     [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION] = true,
     [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = true,
-}
-
-ZO_MapPin.TRACKED_PIN_TYPES =
-{
-    [MAP_PIN_TYPE_TRACKED_QUEST_CONDITION] = true,
-    [MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION] = true,
-    [MAP_PIN_TYPE_TRACKED_QUEST_ENDING] = true,
-    [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION] = true,
-    [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = true,
-    [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_ENDING] = true,
+    [MAP_PIN_TYPE_QUEST_CONDITION] = true,
+    [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION] = true,
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION] = true,
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION] = true,
 }
 
 ZO_MapPin.ASSISTED_PIN_TYPES =
@@ -1161,6 +1171,8 @@ do
 
         SetButtonTextures(ZO_WorldMapButtonsFloorsUp, buttonTextures.UP)
         SetButtonTextures(ZO_WorldMapButtonsFloorsDown, buttonTextures.DOWN)
+        SetButtonTextures(ZO_WorldMapButtonsLevelsUp, buttonTextures.UP)
+        SetButtonTextures(ZO_WorldMapButtonsLevelsDown, buttonTextures.DOWN)
 
         ApplyTemplateToControl(ZO_WorldMapMapFrame, ZO_GetPlatformTemplate("ZO_WorldMapFrame"))
         ApplyTemplateToControl(ZO_WorldMapButtonsFloors, ZO_GetPlatformTemplate("ZO_DungeonFloorNavigation"))
@@ -1265,7 +1277,13 @@ do
         [MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION]             =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_ENDING]              =   SHARED_TOOLTIP_CREATORS.QUEST_ENDING,
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION]           =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
-        [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION]  =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION]          =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
+        [MAP_PIN_TYPE_QUEST_ENDING]                                 =   SHARED_TOOLTIP_CREATORS.QUEST_ENDING,
+        [MAP_PIN_TYPE_QUEST_CONDITION]                              =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
+        [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION]                     =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_ENDING]                      =   SHARED_TOOLTIP_CREATORS.QUEST_ENDING,
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION]                   =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION]          =   SHARED_TOOLTIP_CREATORS.QUEST_CONDITION,
         [MAP_PIN_TYPE_LOCATION]                                     =   { creator = LayoutMapLocation, hasTooltip = HasMapLocationTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, categoryId = ZO_MapPin.PIN_ORDERS.CRAFTING, gamepadSpacing = true },
         [MAP_PIN_TYPE_PING]                                         =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_PING, pin:GetUnitTag()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, categoryId = ZO_MapPin.PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
         [MAP_PIN_TYPE_RALLY_POINT]                                  =   { creator = function(pin) INFORMATION_TOOLTIP:AppendMapPing(MAP_PIN_TYPE_RALLY_POINT) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = SI_GAMEPAD_WORLD_MAP_TOOLTIP_CATEGORY_DESTINATION, categoryId = ZO_MapPin.PIN_ORDERS.DESTINATIONS, gamepadSpacing = true },
@@ -2034,9 +2052,9 @@ local RALLY_POINT_RMB =
 
 local function CanFastTravelToKeep(keepId, bgContext)
     local isLocalKeep = IsLocalBattlegroundContext(bgContext)
-    if(keepId ~= 0 and g_mode == MAP_MODE_KEEP_TRAVEL and isLocalKeep) then
+    if keepId ~= 0 and (g_mode == MAP_MODE_KEEP_TRAVEL or g_mode == MAP_MODE_AVA_KEEP_RECALL) and isLocalKeep then
         local fastTravelPin = g_mapPinManager:FindPin("fastTravelKeep", keepId, keepId)
-        if(fastTravelPin) then
+        if fastTravelPin then
             return true
         end
     end
@@ -2053,8 +2071,12 @@ local KEEP_TRAVEL_BIND =
     failedAfterBeingShownError = GetString(SI_WORLD_MAP_ACTION_TRAVEL_TO_KEEP_FAILED),
     callback = function(pin)
         local keepId = pin:GetKeepId()
-        local startKeepId = GetKeepFastTravelInteraction()
-        if(startKeepId and keepId ~= startKeepId) then
+        local canTravelToKeep = g_mode == MAP_MODE_AVA_KEEP_RECALL
+        if not canTravelToKeep then
+            local startKeepId = GetKeepFastTravelInteraction()
+            canTravelToKeep = startKeepId and keepId ~= startKeepId
+        end
+        if canTravelToKeep then
             TravelToKeep(keepId)
             ZO_WorldMap_HideWorldMap()
         end
@@ -2095,7 +2117,7 @@ local KEEP_INFO_BIND =
     show = function(pin)
         local keepId = pin:GetKeepId()
         local keepType = GetKeepType(keepId)
-        return (keepType == KEEPTYPE_KEEP or keepType == KEEPTYPE_RESOURCE) and g_mode ~= MAP_MODE_KEEP_TRAVEL and g_mode ~= MAP_MODE_AVA_RESPAWN
+        return (keepType == KEEPTYPE_KEEP or keepType == KEEPTYPE_RESOURCE) and g_mode ~= MAP_MODE_KEEP_TRAVEL and g_mode ~= MAP_MODE_AVA_RESPAWN and g_mode ~= MAP_MODE_AVA_KEEP_RECALL
     end,
     callback = function(pin)
         local keepId = pin:GetKeepId()
@@ -2109,7 +2131,7 @@ local HIDE_KEEP_INFO_BIND =
     name = GetString(SI_WORLD_MAP_ACTION_HIDE_INFORMATION),
     gamepadName = GetString(SI_WORLD_MAP_ACTION_HIDE_INFORMATION),
     show = function(pin)
-        return g_mode ~= MAP_MODE_KEEP_TRAVEL and g_mode ~= MAP_MODE_AVA_RESPAWN and SYSTEMS:GetObject("world_map_keep_info"):GetKeepUpgradeObject() ~= nil
+        return g_mode ~= MAP_MODE_KEEP_TRAVEL and g_mode ~= MAP_MODE_AVA_RESPAWN and g_mode ~= MAP_MODE_AVA_KEEP_RECALL and SYSTEMS:GetObject("world_map_keep_info"):GetKeepUpgradeObject() ~= nil
     end,
     callback = function(pin)
         SYSTEMS:GetObject("world_map_keep_info"):HideKeep()
@@ -2312,6 +2334,12 @@ ZO_MapPin.PIN_CLICK_HANDLERS =
         [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION] = QUEST_PIN_LMB,
         [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = QUEST_PIN_LMB,
         [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_ENDING] = QUEST_PIN_LMB,
+        [MAP_PIN_TYPE_QUEST_CONDITION] = QUEST_PIN_LMB,
+        [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION] = QUEST_PIN_LMB,
+        [MAP_PIN_TYPE_QUEST_ENDING] = QUEST_PIN_LMB,
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION] = QUEST_PIN_LMB,
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION] = QUEST_PIN_LMB,
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_ENDING] = QUEST_PIN_LMB,
         [MAP_PIN_TYPE_KEEP_NEUTRAL] = KEEP_PIN_LMB,
         [MAP_PIN_TYPE_KEEP_ALDMERI_DOMINION] = KEEP_PIN_LMB,
         [MAP_PIN_TYPE_KEEP_EBONHEART_PACT] = KEEP_PIN_LMB,
@@ -2813,6 +2841,12 @@ do
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_ENDING] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
+        [MAP_PIN_TYPE_QUEST_CONDITION] = "EsoUI/Art/Compass/quest_icon.dds",
+        [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/quest_icon.dds",
+        [MAP_PIN_TYPE_QUEST_ENDING] = "EsoUI/Art/Compass/quest_icon.dds",
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_ENDING] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
     }
 
     local breadcrumbQuestPinTextures =
@@ -2829,10 +2863,16 @@ do
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon_door.dds",
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon_door.dds",
         [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_ENDING] = "EsoUI/Art/Compass/repeatableQuest_icon_door.dds",
+        [MAP_PIN_TYPE_QUEST_CONDITION] = "EsoUI/Art/Compass/quest_icon_door.dds",
+        [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/quest_icon_door.dds",
+        [MAP_PIN_TYPE_QUEST_ENDING] = "EsoUI/Art/Compass/quest_icon_door.dds",
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon_door.dds",
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon_door.dds",
+        [MAP_PIN_TYPE_QUEST_REPEATABLE_ENDING] = "EsoUI/Art/Compass/repeatableQuest_icon_door.dds",
     }
     
     function ZO_MapPin:GetQuestIcon()
-        if(self.m_PinTag.isBreadcrumb) then
+        if self.m_PinTag.isBreadcrumb then
             return breadcrumbQuestPinTextures[self:GetPinType()]
         else
             return questPinTextures[self:GetPinType()]
@@ -3088,6 +3128,10 @@ end
 
 function ZO_MapPin:GetControl()
     return self.m_Control
+end
+
+function ZO_MapPin:SetHidden(hidden)
+    return self.m_Control:SetHidden(hidden)
 end
 
 function ZO_MapPin:GetLevel()
@@ -3445,8 +3489,7 @@ function ZO_WorldMapPins:New()
 
                         pin:ClearData()
 
-                        local pinControl = pin:GetControl()
-                        pinControl:SetHidden(true)
+                        pin:SetHidden(true)
 
                         pin:ClearScaleChildren()
                         pin:ResetAnimation(CONSTANTS.RESET_ANIM_HIDE_CONTROL)
@@ -3488,8 +3531,16 @@ function ZO_WorldMapPins:New()
     mapPins.nextCustomPinType = MAP_PIN_TYPE_INVALID
     mapPins.customPins = {}
 
-    WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestAvailable", function(...) mapPins:OnQuestAvailable(...) end)
-    WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestRemoved", function(...) mapPins:OnQuestRemoved(...) end)
+    --Wait until the map mode has been set before fielding these updates since adding a pin depends on the map having a mode.
+    local OnWorldMapModeChanged
+    OnWorldMapModeChanged = function(modeData)
+        if modeData then
+            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestAvailable", function(...) mapPins:OnQuestAvailable(...) end)
+            WORLD_MAP_QUEST_BREADCRUMBS:RegisterCallback("QuestRemoved", function(...) mapPins:OnQuestRemoved(...) end)
+            CALLBACK_MANAGER:UnregisterCallback("OnWorldMapModeChanged", OnWorldMapModeChanged)
+        end
+    end    
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnWorldMapModeChanged)
 
     return mapPins
 end
@@ -3521,19 +3572,13 @@ do
 
         local questSteps = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
         if questSteps then
-            local isAssisted = FOCUSED_QUEST_TRACKER:IsTrackTypeAssisted(TRACK_TYPE_QUEST, questIndex)
             for stepIndex, questConditions in pairs(questSteps) do
                 for conditionIndex, conditionData in pairs(questConditions) do
                     local xLoc, yLoc = conditionData.xLoc, conditionData.yLoc
                     if conditionData.insideCurrentMapWorld and IsNormalizedPointInsideMapBounds(xLoc, yLoc) then
                         local tag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
                         tag.isBreadcrumb = conditionData.isBreadcrumb
-                        local pinType = conditionData.pinType
-                        --Need to convert to an assisted pin from a tracked since the shared breadcrumbing stuff never passes in assisted
-                        if isAssisted and ZO_MapPin.TRACKED_PIN_TYPES[pinType] then
-                            pinType = AssistedQuestPinForTracked(pinType)
-                        end
-                        self:CreatePin(pinType, tag, xLoc, yLoc, conditionData.areaRadius)
+                        self:CreatePin(conditionData.pinType, tag, xLoc, yLoc, conditionData.areaRadius)
                     end
                 end
             end
@@ -3680,10 +3725,11 @@ function ZO_WorldMapPins:SetQuestPinsAssisted(questIndex, assisted)
 
     for pinKey, pin in pairs(pins) do
         local curIndex = pin:GetQuestIndex()
-        if curIndex == questIndex and assisted ~= pin:IsAssisted() then
-            local assistedToTrackedDelta = MAP_PIN_TYPE_TRACKED_QUEST_CONDITION - MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION
-            local delta = assisted and -assistedToTrackedDelta or assistedToTrackedDelta
-            pin:ChangePinType(pin:GetPinType() + delta)
+        if curIndex == questIndex then
+            local currentPinType = pin:GetPinType()
+            local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, questIndex)
+            local newPinType = GetQuestPinTypeForTrackingLevel(currentPinType, trackingLevel)
+            pin:ChangePinType(newPinType)
         end
     end
 end
@@ -4072,29 +4118,41 @@ do
 
         AddNetworkLinks(self)
 
-        if GetKeepFastTravelInteraction() then
+        if GetKeepFastTravelInteraction() or g_mode == MAP_MODE_AVA_KEEP_RECALL then
             local bgContext = ZO_WorldMap_GetBattlegroundQueryType();
 
             for i = 1, GetNumKeepTravelNetworkNodes(bgContext) do
-                local keepId, accessible, normalizedX, normalizedY = GetKeepTravelNetworkNodeInfo(i, bgContext)
-                if(IsNormalizedPointInsideMapBounds(normalizedX, normalizedY)) then
-                    local tag = ZO_MapPin.CreateKeepTravelNetworkPinTag(keepId)
-                    if(accessible) then
-                        local pinType = MAP_PIN_TYPE_FAST_TRAVEL_KEEP_ACCESSIBLE
-                        local keepType = GetKeepType(keepId)
-                        if(keepType == KEEPTYPE_BORDER_KEEP) then
-                            pinType = MAP_PIN_TYPE_FAST_TRAVEL_BORDER_KEEP_ACCESSIBLE
-                        elseif(keepType == KEEPTYPE_OUTPOST) then
-                            pinType = MAP_PIN_TYPE_FAST_TRAVEL_OUTPOST_ACCESSIBLE
-                        end
-                        g_mapPinManager:CreatePin(pinType, tag, normalizedX, normalizedY)
+                if self:CanAddKeep(i, bgContext) then
+                    local keepId, accessible, normalizedX, normalizedY = GetKeepTravelNetworkNodeInfo(i, bgContext)
+                    local pinType = MAP_PIN_TYPE_FAST_TRAVEL_KEEP_ACCESSIBLE
+                    local keepType = GetKeepType(keepId)
+                    if(keepType == KEEPTYPE_BORDER_KEEP) then
+                        pinType = MAP_PIN_TYPE_FAST_TRAVEL_BORDER_KEEP_ACCESSIBLE
+                    elseif(keepType == KEEPTYPE_OUTPOST) then
+                        pinType = MAP_PIN_TYPE_FAST_TRAVEL_OUTPOST_ACCESSIBLE
                     end
+                    local tag = ZO_MapPin.CreateKeepTravelNetworkPinTag(keepId)
+                    g_mapPinManager:CreatePin(pinType, tag, normalizedX, normalizedY)
                 end
             end
         end
     end
 
-end
+    function ZO_KeepNetwork:CanAddKeep(keepIndex, bgContext)
+        local normalizedX, normalizedY = GetKeepTravelNetworkNodePosition(keepIndex, bgContext)
+        if IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
+            local keepId = GetKeepTravelNetworkNodeKeepId(keepIndex, bgContext)
+            if g_mode == MAP_MODE_AVA_KEEP_RECALL then
+                return GetKeepRecallAvailable(keepId, bgContext)
+            else
+                return GetKeepAccessible(keepId, bgContext)
+            end
+        end
+
+        return false
+    end
+
+end 
 
 --[[
     World Map Logic
@@ -4108,10 +4166,15 @@ local function UpdateGroupPins()
 end
 
 local function UpdatePlayerPin()
-    local x, y = GetMapPlayerPosition("player")
-    local heading = GetPlayerCameraHeading()
-    g_playerPin:SetLocation(x, y)
-    g_playerPin:SetRotation(heading)
+    local playerPin = g_mapPinManager:GetPlayerPin()
+    local x, y, _, isShownInCurrentMap = GetMapPlayerPosition("player")
+    playerPin:SetLocation(x, y)
+    if isShownInCurrentMap then
+        playerPin:SetHidden(false)
+        playerPin:SetRotation(GetPlayerCameraHeading())
+    else
+        playerPin:SetHidden(true)
+    end
 end
 
 local function UpdateMovingPins()
@@ -5212,7 +5275,7 @@ end
 
 local function ZO_WorldMap_FindAvAKeepMap()
     local desiredMap
-    if g_mode == MAP_MODE_KEEP_TRAVEL then
+    if g_mode == MAP_MODE_KEEP_TRAVEL or g_mode == MAP_MODE_AVA_KEEP_RECALL then
         desiredMap = g_cyrodiilMapIndex
     elseif g_mode == MAP_MODE_AVA_RESPAWN then
         if IsInImperialCity() then
@@ -5422,7 +5485,7 @@ end
 function ZO_WorldMap_RefreshImperialCity(bgContext)
     --Check for Imperial City information
     g_mapPinManager:RemovePins("imperialCity")
-    if(GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL and ZO_WorldMap_IsPinGroupShown(MAP_FILTER_IMPERIAL_CITY_ENTRANCES)) then
+    if g_campaignId ~= 0 and GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL and ZO_WorldMap_IsPinGroupShown(MAP_FILTER_IMPERIAL_CITY_ENTRANCES) then
         bgContext = bgContext or ZO_WorldMap_GetBattlegroundQueryType()
         local hasAccess = DoesAllianceHaveImperialCityAccess(g_campaignId, GetUnitAlliance("player"))
         local icPinType = hasAccess and MAP_PIN_TYPE_IMPERIAL_CITY_OPEN or MAP_PIN_TYPE_IMPERIAL_CITY_CLOSED
@@ -5657,22 +5720,22 @@ function ZO_WorldMap_RefreshKillLocations()
 end
 
 function ZO_WorldMap_RefreshRespawnTimer(currentTime)
-    if (g_nextRespawnTimeMS ~= 0) then
+    if g_nextRespawnTimeMS ~= 0 then
         local currentTimeMS = currentTime * 1000
         local formattedTimeRemaining = ""
         local isTimerHidden = true
 
-        if (currentTimeMS > g_nextRespawnTimeMS) then
+        if currentTimeMS > g_nextRespawnTimeMS then
             -- hide the timer and refresh the forward camp pins (which turns the green hightlight back on)
             g_nextRespawnTimeMS = 0
             isTimerHidden = true
 
             ZO_WorldMap_RefreshForwardCamps()
-            if(g_mode == MAP_MODE_AVA_RESPAWN) then
+            if g_mode == MAP_MODE_AVA_RESPAWN then
                 ZO_WorldMap_RefreshAccessibleAvAGraveyards()
             end
         else
-            if(g_mode == MAP_MODE_AVA_RESPAWN) then
+            if g_mode == MAP_MODE_AVA_RESPAWN then
                 local secondsRemaining = (g_nextRespawnTimeMS - currentTimeMS) / 1000
                 formattedTimeRemaining = ZO_FormatTimeAsDecimalWhenBelowThreshold(secondsRemaining)
                 isTimerHidden = false
@@ -5718,8 +5781,8 @@ end
 
 function ZO_WorldMap_RefreshAccessibleAvAGraveyards()
     g_mapPinManager:RemovePins("AvARespawn")
-    if(g_mode == MAP_MODE_AVA_RESPAWN) then
-        if(ZO_WorldMap_IsPinGroupShown(MAP_FILTER_AVA_GRAVEYARDS)) then
+    if g_mode == MAP_MODE_AVA_RESPAWN then
+        if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_AVA_GRAVEYARDS) then
             for i = 1, GetNumForwardCamps(g_queryType) do
                 local _, normalizedX, normalizedY, normalizedRadius, useable = GetForwardCampPinInfo(g_queryType, i)
                 if(useable and IsNormalizedPointInsideMapBounds(normalizedX, normalizedY)) then
@@ -5730,7 +5793,7 @@ function ZO_WorldMap_RefreshAccessibleAvAGraveyards()
 
         for i = 1, GetNumKeeps() do
             local keepId, _ = GetKeepKeysByIndex(i)
-            if(CanRespawnAtKeep(keepId)) then
+            if CanRespawnAtKeep(keepId) then
                 local keepType = GetKeepType(keepId)
                 local pinType
                 if keepType == KEEPTYPE_BORDER_KEEP then
@@ -5763,34 +5826,34 @@ function ZO_WorldMap_RefreshGroupPins()
     if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) then
         for i = 1, GROUP_SIZE_MAX do
             local groupTag = ZO_Group_GetUnitTagForGroupIndex(i)
-            local shouldShowOnCurrentMap = false
-            if DoesCurrentMapMatchMapForPlayerLocation() then
-                if IsGroupMemberInSameInstanceAsPlayer(groupTag) then
-                    shouldShowOnCurrentMap = true
-                else
-                    -- Show if in a house and house we are in doesn't have it's own (dungeon) map
-                    if GetCurrentZoneHouseId() and GetMapContentType() ~= MAP_CONTENT_DUNGEON then
-                        shouldShowOnCurrentMap = true
-                    end
+            if DoesUnitExist(groupTag) and not AreUnitsEqual("player", groupTag) and IsUnitOnline(groupTag) then
+                local isGroupMemberHiddenByInstance = false
+                -- We're in the same world as the group member, but a different instance
+                if DoesCurrentMapMatchMapForPlayerLocation() and IsGroupMemberInSameWorldAsPlayer(groupTag) and not IsGroupMemberInSameInstanceAsPlayer(groupTag) then
+                    -- If the instance we're in has it's own map, it's going to be a dungeon map.  Don't show on the map if we're on different instances
+                    -- If it doesn't have it's own map, we're okay to show the group member regardless of instance
+                    isGroupMemberHiddenByInstance = GetMapContentType() == MAP_CONTENT_DUNGEON
                 end
-            else
-                shouldShowOnCurrentMap = true
-            end
 
-            if DoesUnitExist(groupTag) and IsUnitOnline(groupTag) and not AreUnitsEqual("player", groupTag) and shouldShowOnCurrentMap then
-                local isLeader = IsUnitGroupLeader(groupTag)
-                local tagData = groupTag
-                if IsUnitWorldMapPositionBreadcrumbed(groupTag) then
-                    tagData = {
-                        groupTag = groupTag,
-                        isBreadcrumb = true
-                    }
-                end
-                local groupPin = g_mapPinManager:CreatePin(isLeader and MAP_PIN_TYPE_GROUP_LEADER or MAP_PIN_TYPE_GROUP, tagData)
-                if groupPin then
-                    g_activeGroupPins[groupTag] = groupPin
-                    local x, y = GetMapPlayerPosition(groupTag)
-                    groupPin:SetLocation(x, y)
+                if not isGroupMemberHiddenByInstance then
+                    local x, y, _, isInCurrentMap = GetMapPlayerPosition(groupTag)
+                    if isInCurrentMap then
+                        local isLeader = IsUnitGroupLeader(groupTag)
+                        local tagData = groupTag
+                        if IsUnitWorldMapPositionBreadcrumbed(groupTag) then
+                            tagData =
+                            {
+                                groupTag = groupTag,
+                                isBreadcrumb = true
+                            }
+                        end
+
+                        local groupPin = g_mapPinManager:CreatePin(isLeader and MAP_PIN_TYPE_GROUP_LEADER or MAP_PIN_TYPE_GROUP, tagData)
+                        if groupPin then
+                            g_activeGroupPins[groupTag] = groupPin
+                            groupPin:SetLocation(x, y)
+                        end
+                    end
                 end
             end
         end
@@ -5817,12 +5880,9 @@ local function CreateSinglePOIPin(zoneIndex, poiIndex)
         if(ZO_MapPin.POI_PIN_TYPES[iconType]) then
             local poiType = GetPOIType(zoneIndex, poiIndex)
 
-            --Skip these, they're handled by AddWayshrines()
-            if poiType == POI_TYPE_GROUP_DUNGEON or poiType == POI_TYPE_HOUSE then
-                return
-            end
             --Seen Wayshines are POIs, discovered Wayshrines are handled by AddWayshrines()
-            if poiType == POI_TYPE_WAYSHRINE and iconType ~= MAP_PIN_TYPE_POI_SEEN then
+            --Request was made by design to have houses and dungeons behave like wayshrines.
+            if (poiType == POI_TYPE_WAYSHRINE or poiType == POI_TYPE_HOUSE or poiType == POI_TYPE_GROUP_DUNGEON) and iconType ~= MAP_PIN_TYPE_POI_SEEN then
                 return
             end
 
@@ -5850,12 +5910,24 @@ function ZO_WorldMap_RefreshAllPOIs()
     end
 end
 
-local function FloorNavigationUpdate()
+local function FloorLevelNavigationUpdate()
     local currentFloor, numFloors = GetMapFloorInfo()
 
-    ZO_WorldMapButtonsFloors:SetHidden(numFloors == 0)
+    local showFloorControls = false
+    local showLevelControls = false
+    if IsInGamepadPreferredMode() then
+        if not ZO_WorldMap_IsWorldMapInfoShowing() then
+            showFloorControls = numFloors > 0
+            showLevelControls = not showFloorControls
+        end
+    else
+        showFloorControls = numFloors > 0
+    end
 
-    if(numFloors > 0) then
+    ZO_WorldMapButtonsFloors:SetHidden(not showFloorControls)
+    ZO_WorldMapButtonsLevels:SetHidden(not showLevelControls)
+
+    if showFloorControls then
         ZO_WorldMapButtonsFloorsUp:SetEnabled(currentFloor ~= 1)
         ZO_WorldMapButtonsFloorsDown:SetEnabled(currentFloor ~= numFloors)
     end
@@ -5889,7 +5961,7 @@ function ZO_WorldMap_GetMapTitle()
 end
 
 function ZO_WorldMap_GetMapDungeonDifficulty()
-    if DoesCurrentMapMatchMapForPlayerLocation() then
+    if DoesCurrentMapShowPlayerWorld() and GetMapContentType() == MAP_CONTENT_DUNGEON then
         return GetCurrentZoneDungeonDifficulty()
     else
         return DUNGEON_DIFFICULTY_NONE
@@ -5912,10 +5984,10 @@ function ZO_WorldMap_UpdateMap()
     end
 
     -- Set up map location names
-    g_mapLocationManager:RefreshLocations()
+    g_mapRefresh:RefreshAll("location")
     g_mapRefresh:RefreshAll("keepNetwork")
     ZO_WorldMap_RefreshAllPOIs()
-    FloorNavigationUpdate()
+    FloorLevelNavigationUpdate()
     ZO_WorldMap_RefreshObjectives()
     ZO_WorldMap_RefreshKeeps()
     RefreshMapPings()
@@ -5967,6 +6039,10 @@ local function UpdateMapCampaign()
         g_dataRegistration:Refresh()
         CALLBACK_MANAGER:FireCallbacks("OnWorldMapCampaignChanged")
     end
+end
+
+function ZO_WorldMap_GetCampaign()
+    return g_campaignId, g_queryType
 end
 
 local OnFastTravelBegin, OnFastTravelEnd
@@ -6073,9 +6149,8 @@ function ZO_WorldMap_ResetHistorySlider()
 end
 
 function ZO_WorldMap_OnHide()
-    if(g_playerPin) then
-        g_playerPin:ResetAnimation(CONSTANTS.RESET_ANIM_HIDE_CONTROL)
-    end
+    local playerPin = g_mapPinManager:GetPlayerPin()
+    playerPin:ResetAnimation(CONSTANTS.RESET_ANIM_HIDE_CONTROL)
 
     -- Always needs to be cleared
     ZO_WorldMapMouseoverName:SetText("")
@@ -6092,7 +6167,7 @@ function ZO_WorldMap_OnHide()
     EndInteraction(INTERACTION_FAST_TRAVEL)
 
     --Exit respawn mode
-    if(g_mode == MAP_MODE_AVA_RESPAWN) then
+    if g_mode == MAP_MODE_AVA_RESPAWN or g_mode == MAP_MODE_AVA_KEEP_RECALL then
         ZO_WorldMap_PopSpecialMode()
         ZO_WorldMap_RefreshAccessibleAvAGraveyards()
     end
@@ -6100,9 +6175,8 @@ end
 
 function ZO_WorldMap_OnShow()
     -- We really only want to ping the player pin when the map is opened...not every pin that's on the map.
-    if(g_playerPin) then
-        g_playerPin:PingMapPin(ZO_MapPin.PulseAninmation)
-    end
+    local playerPin = g_mapPinManager:GetPlayerPin()
+    playerPin:PingMapPin(ZO_MapPin.PulseAninmation)
 
     ZO_WorldMap_ResetHistorySlider()
 end
@@ -6253,6 +6327,12 @@ end
 function ZO_WorldMap_ShowAvARespawns()
     ZO_WorldMap_PushSpecialMode(MAP_MODE_AVA_RESPAWN)
     ZO_WorldMap_RefreshAccessibleAvAGraveyards()
+end
+
+function ZO_WorldMap_ShowAvAKeepRecall()
+    ZO_WorldMap_PushSpecialMode(MAP_MODE_AVA_KEEP_RECALL)
+    g_mapRefresh:RefreshAll("keepNetwork")
+    ZO_WorldMap_ShowWorldMap()
 end
 
 function ZO_WorldMap_AddCustomPin(pinType, pinTypeAddCallback, pinTypeOnResizeCallback, pinLayoutData, pinTooltipCreator)
@@ -6464,9 +6544,13 @@ do
     ---------------------
     local EVENT_HANDLERS =
     {
+        [EVENT_NON_COMBAT_BONUS_CHANGED] = function()
+            g_mapRefresh:RefreshAll("location")
+        end,
+
         [EVENT_POI_UPDATED] = function(eventCode, zoneIndex, poiIndex)
             RefreshSinglePOI(zoneIndex, poiIndex)
-            g_mapLocationManager:RefreshLocations()
+            g_mapRefresh:RefreshAll("location")
         end,
         
         [EVENT_UNIT_CREATED] = function(eventCode, unitTag)
@@ -6564,6 +6648,27 @@ do
             ZO_WorldMap_PopSpecialMode()
         end,
 
+        [EVENT_RECALL_KEEP_USE_RESULT] = function(eventId, result)
+            if result == KEEP_RECALL_STONE_USE_RESULT_SUCCESS then
+                ZO_WorldMap_ShowAvAKeepRecall()
+            end
+        end,
+        [EVENT_ZONE_CHANGED] = function(eventId, zoneName, subzoneName)
+            if g_mode == MAP_MODE_AVA_KEEP_RECALL and subzoneName ~= "" then
+                g_mapRefresh:RefreshAll("keepNetwork")
+            end
+        end,
+        [EVENT_PLAYER_COMBAT_STATE] = function()
+            if g_mode == MAP_MODE_AVA_KEEP_RECALL then
+                g_mapRefresh:RefreshAll("keepNetwork")
+            end
+        end,
+        [EVENT_PLAYER_DEAD] = function()
+            if g_mode == MAP_MODE_AVA_KEEP_RECALL then
+                g_mapRefresh:RefreshAll("keepNetwork")
+            end
+        end,
+
         [EVENT_FAST_TRAVEL_NETWORK_UPDATED] = ZO_WorldMap_RefreshWayshrines,
         [EVENT_START_FAST_TRAVEL_INTERACTION] = OnFastTravelBegin,
         [EVENT_END_FAST_TRAVEL_INTERACTION] = OnFastTravelEnd,
@@ -6616,6 +6721,7 @@ do
     
     local function OnGamepadPreferredModeChanged()
         SetupWorldMap()
+        FloorLevelNavigationUpdate()
     end
 
     local function OnCollectibleUpdated(collectibleId, lockStateChange)
@@ -6710,11 +6816,16 @@ do
                 keybind = "UI_SHORTCUT_LEFT_SHOULDER",
                 ethereal = true,
                 callback = function()
-                    ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsUp)
-                end,
-                enabled = function()
                     local currentFloor, numFloors = GetMapFloorInfo()
-                    return numFloors > 0 and currentFloor ~= 1
+                    if numFloors > 0 and currentFloor ~= numFloors then
+                        ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsDown)
+                    else
+                        if ZO_WorldMap_IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT) and MapZoomOut() == SET_MAP_RESULT_MAP_CHANGED then
+                            g_gamepadMap:StopMotion()
+                            local NAVIGATE_OUT = false
+                            PlayerChosenMapUpdate(nil, NAVIGATE_OUT)
+                        end
+                    end
                 end,
             },
             -- Gamepad go down a level on a map with floors
@@ -6724,11 +6835,16 @@ do
                 keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
                 ethereal = true,
                 callback = function()
-                    ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsDown)
-                end,
-                enabled = function()
                     local currentFloor, numFloors = GetMapFloorInfo()
-                    return numFloors > 0 and currentFloor ~= numFloors
+                    if numFloors > 0 then
+                        ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsUp)
+                    else
+                        if ZO_WorldMap_IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN) and ProcessMapClick(NormalizePreferredMousePositionToMap()) == SET_MAP_RESULT_MAP_CHANGED then
+                            g_gamepadMap:StopMotion()
+                            local NAVIGATE_IN = true
+                            PlayerChosenMapUpdate(nil, NAVIGATE_IN)
+                        end
+                    end
                 end,
             },
             -- Gamepad selection of pins
@@ -6756,7 +6872,7 @@ do
                     ZO_WorldMap_HideAllTooltips()
 
                     -- Add the World Map Info
-                    GAMEPAD_WORLD_MAP_INFO:Show()
+                    GAMEPAD_WORLD_MAP_INFO:Show()                    
                 end,
                 sound = SOUNDS.GAMEPAD_MENU_FORWARD,
             },
@@ -6921,6 +7037,13 @@ do
         {
             RefreshAll = ZO_WorldMap_RefreshGroupPins,
         })
+
+        g_mapRefresh:AddRefreshGroup("location",
+        {
+            RefreshAll =  function()
+                g_mapLocationManager:RefreshLocations()
+            end,
+        })
     end
 
     --Initialize
@@ -6967,6 +7090,8 @@ do
                     ZO_WorldMapButtonsToggleSize:SetHidden(false)
                 end
 
+                --Expand zoom area
+
                 ZO_SavePlayerConsoleProfile()
                 ZO_WorldMap_SetGamepadKeybindsShown(false)
             end
@@ -6982,7 +7107,8 @@ do
         g_mapRefresh = ZO_Refresh:New()
         InitializeRefreshGroups()
 
-        g_playerPin = g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
+        g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
+
         g_nextRespawnTimeMS = GetNextForwardCampRespawnTime()
 
         local function TryTriggeringTutorials()
@@ -7154,6 +7280,31 @@ do
                             }
                         },
                     },
+                    [MAP_MODE_AVA_KEEP_RECALL] =
+                    {
+                        mapSize = CONSTANTS.WORLDMAP_SIZE_FULLSCREEN,
+                        allowHistory = false,
+                        filters =
+                        {
+                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                            {
+                                [MAP_FILTER_KILL_LOCATIONS] = false,
+                                [MAP_FILTER_OBJECTIVES] = false,
+                                [MAP_FILTER_QUESTS] = false,
+                                [MAP_FILTER_RESOURCE_KEEPS] = false,
+                                [MAP_FILTER_AVA_GRAVEYARDS] = false,
+                                [MAP_FILTER_WAYSHRINES] = false,
+                                [MAP_FILTER_TRANSIT_LINES] = false,
+                            }
+                        },
+                        disabledStickyPins =
+                        {
+                            [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                            {
+                                [MAP_FILTER_RESOURCE_KEEPS] = true,
+                            }
+                        },
+                    },
                     userMode = MAP_MODE_LARGE_CUSTOM,
                 }
 
@@ -7233,11 +7384,16 @@ do
 
         --info panels
         if ZO_WorldMapInfo_Initialize then
-        ZO_WorldMapInfo_Initialize()
+            ZO_WorldMapInfo_Initialize()
         end
         if ZO_WorldMapInfo_Gamepad_Initialize then
             ZO_WorldMapInfo_Gamepad_Initialize()
         end
+        GAMEPAD_WORLD_MAP_INFO_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+            if newState == SCENE_FRAGMENT_SHOWING or newState == SCENE_FRAGMENT_HIDDEN then
+                FloorLevelNavigationUpdate()
+            end
+        end)
 
         --Information tooltip mixin
         zo_mixin(InformationTooltip, InformationTooltipMixin)
@@ -7297,6 +7453,8 @@ function ZO_WorldMap_SetKeepMode(active)
     if active then
         ZO_WorldMap_SetGamepadKeybindsShown(false)
 
+        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Activate()
+
         -- Hide the tooltips
         ZO_WorldMap_HideAllTooltips()
 
@@ -7307,6 +7465,9 @@ function ZO_WorldMap_SetKeepMode(active)
     else
         -- Remove the Close Keep keybind
         KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseKeep:GetDescriptor())
+
+        GAMEPAD_WORLD_MAP_KEEP_UPGRADE:Deactivate()
+
         ZO_WorldMap_SetGamepadKeybindsShown(true)
         ZO_WorldMap_InteractKeybindForceHidden(false)
     end
@@ -7389,6 +7550,8 @@ function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
             local KEYBIND_SCALE_PERCENT = 120
             ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT, KEYBIND_SCALE_PERCENT), buttonText))
         end
+    elseif not IsInGamepadPreferredMode() then
+        ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
     end
 end
 

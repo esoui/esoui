@@ -6,10 +6,11 @@ function ZO_HouseInformation_Shared:New(...)
     return houseInformation
 end
 
-function ZO_HouseInformation_Shared:Initialize(control, fragment, rowTemplate, verticalPadding)
+function ZO_HouseInformation_Shared:Initialize(control, fragment, rowTemplate, childVerticalPadding, sectionVerticalPadding)
     self.control = control
     self.rowTemplate = rowTemplate
-    self.verticalPadding = verticalPadding
+    self.childVerticalPadding = childVerticalPadding
+    self.sectionVerticalPadding = sectionVerticalPadding
 
     self:SetupControls()
     
@@ -56,6 +57,7 @@ do
     function ZO_HouseInformation_Shared:SetupControls()
         self.nameRow = SetupRow(self.control, "NameRow")
         self.locationRow = SetupRow(self.control, "LocationRow")
+        self.ownerRow = SetupRow(self.control, "OwnerRow")
         self.infoSection = SetupRow(self.control, "InfoSection")
         self.primaryResidenceRow = SetupRow(self.control, "PrimaryResidenceRow")
         self.currentVisitorsRow = SetupRow(self.control, "CurrentVisitorsRow")
@@ -70,7 +72,7 @@ do
             if not lastRow then
                 furnishingLimitRow:SetAnchor(TOPLEFT)
             else
-                furnishingLimitRow:SetAnchor(TOPLEFT, lastRow, BOTTOMLEFT, 0, self.verticalPadding)
+                furnishingLimitRow:SetAnchor(TOPLEFT, lastRow, BOTTOMLEFT, 0, self.childVerticalPadding)
             end
             lastRow = furnishingLimitRow
             self.limitRows[i] = SetupRow(furnishingLimits, "Row"..i)
@@ -88,6 +90,16 @@ function ZO_HouseInformation_Shared:UpdateHouseInformation()
     self.nameRow.valueLabel:SetText(houseCollectibleData:GetFormattedName())
     self.locationRow.valueLabel:SetText(houseCollectibleData:GetFormattedHouseLocation())
     self.primaryResidenceRow.valueLabel:SetText(isPrimaryHouse and GetString(SI_YES) or GetString(SI_NO))
+
+    local ownerDisplayName = GetCurrentHouseOwner()
+    if ownerDisplayName ~= "" then
+        self.ownerRow.valueLabel:SetText(ZO_FormatUserFacingDisplayName(ownerDisplayName))
+        self.ownerRow:SetHidden(false)
+        self.infoSection:SetAnchor(TOPLEFT, self.ownerRow, BOTTOMLEFT, 0, self.sectionVerticalPadding)
+    else
+        self.ownerRow:SetHidden(true)
+        self.infoSection:SetAnchor(TOPLEFT, self.locationRow, BOTTOMLEFT, 0, self.sectionVerticalPadding)
+    end
 end
 
 function ZO_HouseInformation_Shared:UpdateHousePopulation(population)

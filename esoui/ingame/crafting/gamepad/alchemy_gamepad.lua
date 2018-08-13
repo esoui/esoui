@@ -28,10 +28,7 @@ end
 function ZO_GamepadAlchemy:Initialize(control)
     ZO_SharedAlchemy.Initialize(self, control)
 
-    local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(CRAFTING_TYPE_ALCHEMY)
     ZO_GamepadCraftingUtils_InitializeGenericHeader(self, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
-    ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
-    ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
 
     self:InitializeKeybindStripDescriptors()
     self:InitializeModeList()
@@ -46,6 +43,10 @@ function ZO_GamepadAlchemy:InitializeScenes()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.modeKeybindStripDescriptor)
             TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_OPENED)
             self.modeList:Activate()
+
+            local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(CRAFTING_TYPE_ALCHEMY)
+            ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
+            ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.modeKeybindStripDescriptor)
             self.modeList:Deactivate()

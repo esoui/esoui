@@ -50,14 +50,19 @@ do
         local claimableRewardIndex = GetDailyLoginClaimableRewardIndex()
         local nextPotentialRewardIndex = ZO_DAILYLOGINREWARDS_MANAGER:GetNextPotentialReward()
         if not claimableRewardIndex and nextPotentialRewardIndex == rewardIndex then
-            local timerSection = self:AcquireSection(self:GetStyle("dailyLoginRewardsTimerSection"))
-            local statValuePair = timerSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            statValuePair:SetStat(GetString(SI_GAMEPAD_DAILY_LOGIN_REWARDS_TOOLTIP_AVAILABLE_TIMER), self:GetStyle("statValuePairStat"))
-            local formattedTime = ZO_FormatTimeLargestTwo(GetTimeUntilNextDailyLoginRewardClaimS(), TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-            statValuePair:SetValue(formattedTime, self:GetStyle("statValuePairValue"))
-            timerSection:AddStatValuePair(statValuePair)
-            self:AddSection(timerSection)
-            g_dailyLoginRewardtimerStatValuePair = statValuePair
+            local timeToNextClaim = GetTimeUntilNextDailyLoginRewardClaimS()
+            local timeToNextMonth = GetTimeUntilNextDailyLoginMonthS()
+            if timeToNextMonth == 0 or timeToNextClaim < timeToNextMonth then
+                local timerSection = self:AcquireSection(self:GetStyle("dailyLoginRewardsTimerSection"))
+                local statValuePair = timerSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+                statValuePair:SetStat(GetString(SI_GAMEPAD_DAILY_LOGIN_REWARDS_TOOLTIP_AVAILABLE_TIMER), self:GetStyle("statValuePairStat"))
+                local formattedTime = ZO_FormatTimeLargestTwo(timeToNextClaim, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+            
+                statValuePair:SetValue(formattedTime, self:GetStyle("statValuePairValue"))
+                timerSection:AddStatValuePair(statValuePair)
+                self:AddSection(timerSection)
+                g_dailyLoginRewardtimerStatValuePair = statValuePair
+            end
         end
     end
 

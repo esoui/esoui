@@ -65,7 +65,7 @@
                     <Anchor point="TOPLEFT" offsetY="30"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-40"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" />
+                        <EditBox name="$(parent)Edit" escapeMarkup="false"/>
                     </Controls>
                 </Backdrop>
 
@@ -77,6 +77,13 @@
                             </OnInitialized>
                         </Texture>
                     </Controls>
+                </Button>
+            
+                <Button name="$(parent)MoreInfo" inherits="ZO_CheckButton">
+                    <Anchor point="BOTTOMLEFT" offsetY="-11"/>
+                    <OnInitialized>
+                        ZO_CheckButton_SetLabelText(self, GetString(SI_UI_ERROR_MORE_INFO))
+                    </OnInitialized>
                 </Button>
             </Controls>
         </TopLevelControl>

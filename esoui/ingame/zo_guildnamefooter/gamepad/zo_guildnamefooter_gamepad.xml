@@ -4,7 +4,7 @@
             <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_X" offsetY="ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_Y" />
             <Controls>
                 <Label name="$(parent)GuildName" horizontalAlignment="RIGHT" font="ZoFontGamepad42">
-                    <Anchor point="BOTTOMRIGHT" offsetX="-145"/>
+                    <Anchor point="BOTTOMRIGHT" />
                 </Label>
                 
                 <Label name="$(parent)GuildNameLabel" font="ZoFontGamepad27" modifyTextType="UPPERCASE" text="SI_GAMEPAD_GUILD_BANK_GUILD_FOOTER_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">

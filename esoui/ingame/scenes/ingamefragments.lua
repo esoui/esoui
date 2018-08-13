@@ -41,11 +41,14 @@ end
 
 function ZO_FramePlayerFragment:Show()
     SetFrameLocalPlayerInGameCamera(true)
+    --Restart the framing if we changed regions (player was recreated) and framing is active. 
+    EVENT_MANAGER:RegisterForEvent("ZO_FramePlayerFragment", EVENT_PLAYER_ACTIVATED, function() SetFrameLocalPlayerInGameCamera(true) end)
     self:OnShown()
 end
 
 function ZO_FramePlayerFragment:Hide()
     SetFrameLocalPlayerInGameCamera(false)
+    EVENT_MANAGER:UnregisterForEvent("ZO_FramePlayerFragment", EVENT_PLAYER_ACTIVATED)
     self:OnHidden()
 end
 
@@ -82,7 +85,7 @@ ZO_NormalizedPointFragment.id = 0
 
 function ZO_NormalizedPointFragment:New(normalizedPointCallback, executeCallback)
     local fragment = ZO_SceneFragment.New(self)
-    fragment.id = self.id
+    fragment.eventNamespace = "ZO_FramePlayerTargetFragment"..self.id
     self.id = self.id + 1
 
     function fragment.UpdateTarget()
@@ -96,12 +99,12 @@ end
 
 function ZO_NormalizedPointFragment:Show()
     self.UpdateTarget()
-    EVENT_MANAGER:RegisterForEvent("ZO_FramePlayerTargetFragment"..self.id, EVENT_SCREEN_RESIZED, self.UpdateTarget)
+    EVENT_MANAGER:RegisterForEvent(self.eventNamespace, EVENT_SCREEN_RESIZED, self.UpdateTarget)
     self:OnShown()
 end
 
 function ZO_NormalizedPointFragment:Hide()
-    EVENT_MANAGER:UnregisterForEvent("ZO_FramePlayerTargetFragment"..self.id, EVENT_SCREEN_RESIZED)
+    EVENT_MANAGER:UnregisterForEvent(self.eventNamespace, EVENT_SCREEN_RESIZED)
     self:OnHidden()
 end
 
@@ -286,41 +289,6 @@ FRAME_EMOTE_FRAGMENT_LOOT = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_LOOT)
 FRAME_EMOTE_FRAGMENT_CHAMPION = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CHAMPION)
 FRAME_EMOTE_FRAGMENT_CROWN_STORE = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROWN_STORE)
 FRAME_EMOTE_FRAGMENT_CROWN_CRATES = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROWN_CRATES)
-
--------------------------------
---Skills Action Bar Fragment (re-anchors it)
--------------------------------
-
-ZO_SkillsActionBarFragment = ZO_FadeSceneFragment:Subclass()
-
-function ZO_SkillsActionBarFragment:New()
-    local fragment = ZO_FadeSceneFragment.New(self, ZO_ActionBar1)
-    fragment:RegisterCallback("StateChange", function(...) fragment:OnStateChange(...) end)
-    return fragment
-end
-
-function ZO_SkillsActionBarFragment:Show()
-    ZO_ActionBar1:ClearAnchors()
-    ZO_ActionBar1:SetAnchor(BOTTOM, ZO_Skills, BOTTOM, -40, 40)
-
-    ActionButton9:SetHidden(true)
-    ZO_ActionBar1KeybindBG:SetHidden(true)
-
-    ZO_FadeSceneFragment.Show(self)
-end
-
-function ZO_SkillsActionBarFragment:Hide()
-    ZO_FadeSceneFragment.Hide(self)
-end
-
-function ZO_SkillsActionBarFragment:OnStateChange(oldState, newState)
-    if newState == SCENE_FRAGMENT_HIDDEN then
-        ZO_ActionBar1:ClearAnchors()
-        ZO_ActionBar_GetAnchor():Set(ZO_ActionBar1)
-        ActionButton9:SetHidden(false)
-        ZO_ActionBar1KeybindBG:SetHidden(IsInGamepadPreferredMode())
-    end
-end
 
 -------------------------------
 --Set Title Fragment (sets the title on the ZO_SharedTitle control when it becomes active)
@@ -760,8 +728,6 @@ INVENTORY_FRAGMENT:AddDependencies(
     BACKPACK_FENCE_LAYOUT_FRAGMENT,
     BACKPACK_LAUNDER_LAYOUT_FRAGMENT
 )
-
-SKILLS_ACTION_BAR_FRAGMENT = ZO_SkillsActionBarFragment:New()
 
 CLEAR_CURSOR_FRAGMENT = ZO_ClearCursorFragment:New()
 UI_COMBAT_OVERLAY_FRAGMENT = ZO_UICombatOverlayFragment:New()

@@ -24,16 +24,16 @@ function ZO_SkillsAdvisor_Suggestions_Keyboard:Initialize(control)
     ZO_ScrollList_AddDataType(self.skillSuggestionListControl, SKILL_SUGGESTION_LABEL_TYPE, "ZO_SkillsAdvisorSuggestedLabel", 30, function(control, data) self:SetupHeadingLabel(control, data) end)
     ZO_ScrollList_AddDataType(self.skillSuggestionListControl, SKILL_SUGGESTION_TEXT_TYPE, "ZO_SkillsAdvisorSuggestedText", 70, function(control, data) self:SetupHeadingLabel(control, data) end)
 
-
-    local function OnSkillPointsChanged()
-        if not self.control:IsHidden() then
+    local function OnSkillsAdvisorManagerUpdate()
+        if ZO_SKILLS_ADVISOR_SUGGESTION_FRAGMENT:IsShowing() then
             self:LoadSkillSuggestionList()
         end
     end
 
     SKILLS_WINDOW:RegisterCallback("OnReadyToHandleClickAction", function() self:OnReadyToHandleClickAction() end)
-    ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnSkillsAdvisorDataUpdated", OnSkillPointsChanged)
-    
+    ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnSkillsAdvisorDataUpdated", OnSkillsAdvisorManagerUpdate)
+    ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("RefreshVisibleAbilityLists", OnSkillsAdvisorManagerUpdate)
+
     ZO_SKILLS_ADVISOR_SUGGESTION_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()
@@ -42,7 +42,7 @@ function ZO_SkillsAdvisor_Suggestions_Keyboard:Initialize(control)
 end
 
 function ZO_SkillsAdvisor_Suggestions_Keyboard:OnShowing()
-    self:LoadSkillSuggestionList() 
+    self:LoadSkillSuggestionList()
 end
 
 function ZO_SkillsAdvisor_Suggestions_Keyboard:LoadSkillSuggestionList()
@@ -76,49 +76,62 @@ function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupHeadingLabel(control, data)
     textControl:SetText(data.text)
 end
 
-function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupAbilityEntry(ability, data)
-    local IS_DISPLAY_VIEW = true
-    SKILLS_WINDOW:SetupAbilityEntry(ability, data, ZO_SKILL_ABILITY_DISPLAY_VIEW)
+function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupAbilityEntry(ability, skillProgressionData)
+    local skillData = skillProgressionData:GetSkillData()
+    local isPassive = skillData:IsPassive()
+
+    local detailedName = (isPassive and skillData:GetNumRanks() > 1) and skillProgressionData:GetFormattedNameWithRank() or skillProgressionData:GetFormattedName()
+    ability.nameLabel:SetText(detailedName)
+    ability.nameLabel:SetColor(PURCHASED_COLOR:UnpackRGBA())
+    ability.lock:SetHidden(skillProgressionData:IsUnlocked())
+    ability.skillProgressionData = skillProgressionData
+
+    local morphControl = ability:GetNamedChild("Morph")
+    morphControl:SetHidden(isPassive or not skillProgressionData:IsMorph())
+
+    local slot = ability.slot
+    slot.skillProgressionData = skillProgressionData
+    slot.icon:SetTexture(skillProgressionData:GetIcon())
+    ZO_Skills_SetKeyboardAbilityButtonTextures(slot)
+    slot:SetMouseOverTexture(nil)
 end
 
 function ZO_SkillsAdvisor_Suggestions_Keyboard:OnReadyToHandleClickAction()
-    local control = self.lastClickedControl
+    if self.lastClickedControl then
+        local skillProgressionData = self.lastClickedControl.skillProgressionData
+        local skillData = skillProgressionData:GetSkillData()
+        local skillPointAllocator = skillData:GetPointAllocator()
 
-    if control and control.ability and not ZO_SKILLS_ADVISOR_SINGLETON:IsPassiveRankPurchased(control) then
-        local availablePoints = GetAvailableSkillPoints()
-        local ability = control.ability
-        local skillType = ability.skillType
-        local skillLineIndex = ability.lineIndex
-        local abilityIndex = ability.index
-        local purchaseAvailable = ZO_SKILLS_ADVISOR_SINGLETON:IsPurchaseable(skillType, skillLineIndex, abilityIndex) == ZO_SKILLS_ABILITY_PURCHASEABLE
-        local morphAvailable = ZO_SKILLS_ADVISOR_SINGLETON:IsMorphAvailable(skillType, skillLineIndex, abilityIndex, ability.skillBuildMorphChoice) == ZO_SKILLS_ABILITY_MORPH_AVAILABLE
-	    local upgradeAvailable = ZO_SKILLS_ADVISOR_SINGLETON:IsUpgradeAvailable(skillType, skillLineIndex, abilityIndex, ability.skillBuildRankIndex) == ZO_SKILLS_ABILITY_UPGRADE_AVAILABLE
-        if availablePoints > 0 then
-            if purchaseAvailable then
-                ZO_Dialogs_ShowDialog("PURCHASE_ABILITY_CONFIRM", control)
+        if not skillPointAllocator:IsProgressedToKey(skillProgressionData:GetSkillProgressionKey()) then
+            if skillPointAllocator:CanPurchase() then
+                ZO_Dialogs_ShowDialog("PURCHASE_ABILITY_CONFIRM", skillProgressionData)
                 SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
-            elseif morphAvailable then
-                ZO_Dialogs_ShowDialog("MORPH_ABILITY_CONFIRM", control)
-                SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
-            elseif upgradeAvailable then
-                ZO_Dialogs_ShowDialog("UPGRADE_ABILITY_CONFIRM", control)
-                SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
+            elseif skillData:IsPassive() then
+                if skillPointAllocator:CanIncreaseRank() then
+                    ZO_Dialogs_ShowDialog("UPGRADE_ABILITY_CONFIRM", skillData)
+                    SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
+                end
+            else
+                if skillPointAllocator:CanMorph() then
+                    ZO_Dialogs_ShowDialog("MORPH_ABILITY_CONFIRM", skillData)
+                    SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
+                end
             end
         end
+
+        self.lastClickedControl = nil
     end
-    self.lastClickedControl = nil
 end
 
 function ZO_SkillsAdvisor_OnMouseEnter(control)
     InitializeTooltip(SkillTooltip, control, TOPLEFT, 5, -5, TOPRIGHT)
-    local data = control.ability.dataEntry.data
-    SkillTooltip:SetSkillLineAbilityId(data.abilityId, data.skillType, data.lineIndex, data.abilityIndex, data.skillBuildMorphChoice)
+    control.skillProgressionData:SetKeyboardTooltip(SkillTooltip)
 end
 
 function ZO_SkillsAdvisor_AbilitySlot_OnClick(control)
     PlaySound(SOUNDS.SKILLS_ADVISOR_SELECT)
     ZO_SKILLS_ADVISOR_SUGGESTION_WINDOW.lastClickedControl = control
-    SKILLS_WINDOW:OnSkillLineSet(control.skillType, control.lineIndex, control.index)
+    SKILLS_WINDOW:BrowseToSkill(control.skillProgressionData:GetSkillData())
 end
 
 function ZO_SkillsAdvisor_Suggestions_Keyboard_OnInitialized(control)

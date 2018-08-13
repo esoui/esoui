@@ -483,17 +483,17 @@ function ZO_HousingMarketProduct:GetMarketProductPricingByPresentation()
     return GetMarketProductPricingByPresentation(self.marketProductId, self.presentationIndex)
 end
 
-function ZO_HousingMarketProduct:GetTimeLeftInSeconds()
-    return GetMarketProductTimeLeftInSeconds(self.marketProductId)
+function ZO_HousingMarketProduct:GetLTOTimeLeftInSeconds()
+    return GetMarketProductLTOTimeLeftInSeconds(self.marketProductId)
 end
 
 function ZO_HousingMarketProduct:IsLimitedTimeProduct()
-    local remainingTime = self:GetTimeLeftInSeconds()
+    local remainingTime = self:GetLTOTimeLeftInSeconds()
     return remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS
 end
 
 function ZO_HousingMarketProduct:SetTimeLeftOnLabel(label)
-    local remainingTime = self:GetTimeLeftInSeconds()
+    local remainingTime = self:GetLTOTimeLeftInSeconds()
     if remainingTime > 0 then
         if remainingTime >= ZO_ONE_DAY_IN_SECONDS then
             label:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
@@ -512,6 +512,10 @@ function ZO_HousingMarketProduct.SetCalloutBackgroundColor(leftBackground, right
     leftBackground:SetColor(r, g, b, TEXT_CALLOUT_BACKGROUND_ALPHA)
     rightBackground:SetColor(r, g, b, TEXT_CALLOUT_BACKGROUND_ALPHA)
     centerBackground:SetColor(r, g, b, TEXT_CALLOUT_BACKGROUND_ALPHA)
+end
+
+function ZO_HousingMarketProduct:CanBePurchased()
+    return self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
 end
 
 --

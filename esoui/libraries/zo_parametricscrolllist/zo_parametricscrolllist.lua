@@ -906,6 +906,10 @@ function ZO_ParametricScrollList:SetAnchorForEntryControl(control, anchor1, anch
     control:SetAnchor(anchor1, anchorTo, anchor2, offsetX, offsetY)
 end
 
+function ZO_ParametricScrollList:SetEntryAnchors(entryAnchors)
+    self.entryAnchors = entryAnchors
+end
+
 function ZO_ParametricScrollList:GetDesiredEntryAnchors()
     if self.entryAnchors then
        return self.entryAnchors[1], self.entryAnchors[2]
@@ -1383,6 +1387,10 @@ function ZO_ParametricScrollList:EnsureValidGradient()
 
         self.validGradientDirty = false
     end
+end
+
+function ZO_ParametricScrollList:SetGradient(gradientIndex, gradientSize)
+    self.scrollControl:SetFadeGradient(gradientIndex, gradientSize)
 end
 
 function ZO_ParametricScrollList:IsEmpty()

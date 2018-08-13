@@ -161,15 +161,15 @@ function ZO_ChapterUpgrade_Data:HasMarketProductData()
     return self.marketProductId ~= 0
 end
 
-function ZO_ChapterUpgrade_Data:GetTimeLeftInSeconds()
+function ZO_ChapterUpgrade_Data:GetLTOTimeLeftInSeconds()
     if self:HasMarketProductData() then
-        return GetMarketProductTimeLeftInSeconds(self.marketProductId)
+        return GetMarketProductLTOTimeLeftInSeconds(self.marketProductId)
     end
     return 0
 end
 
 function ZO_ChapterUpgrade_Data:IsLimitedTime()
-    local remainingTime = self:GetTimeLeftInSeconds()
+    local remainingTime = self:GetLTOTimeLeftInSeconds()
     return remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS
 end
 

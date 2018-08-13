@@ -270,7 +270,7 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
         self:CreateNewTabFilterData(nil, GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL), "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_all_disabled.dds"),
     }
 
-    self:SetSortColumnHidden({ stackSellPrice = true, statusSortOrder = true, traitInformationSortOrder = true }, true)
+    self:SetSortColumnHidden({ stackSellPrice = true, statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, }, true)
 end
 
 function ZO_AlchemyInventory:IsLocked(bagId, slotIndex)

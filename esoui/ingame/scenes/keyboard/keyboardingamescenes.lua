@@ -649,6 +649,7 @@ furnitureBrowserScene:AddFragment(HOUSING_FURNITURE_BROWSER_TITLE_FRAGMENT)
 furnitureBrowserScene:AddFragment(FURNITURE_BROWSER_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 furnitureBrowserScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
 furnitureBrowserScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+furnitureBrowserScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
 
 -------------------------------
 -- Dye Stamp Confirmation Scene
@@ -748,7 +749,7 @@ guildBankScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_GUILD
 --Combat Skills Scene
 ----------------
 
-local skillsScene = ZO_Scene:New("skills", SCENE_MANAGER)
+local skillsScene = SCENE_MANAGER:GetScene("skills")
 skillsScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 skillsScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
 skillsScene:AddFragment(FRAME_PLAYER_FRAGMENT)
@@ -756,7 +757,6 @@ skillsScene:AddFragment(RIGHT_BG_FRAGMENT)
 skillsScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
 skillsScene:AddFragment(TITLE_FRAGMENT)
 skillsScene:AddFragment(SKILLS_FRAGMENT)
-skillsScene:AddFragment(SKILLS_ACTION_BAR_FRAGMENT)
 skillsScene:AddFragment(FRAME_EMOTE_FRAGMENT_SKILLS)
 skillsScene:AddFragment(SKILLS_TITLE_FRAGMENT)
 skillsScene:AddFragment(SKILLS_WINDOW_SOUNDS)

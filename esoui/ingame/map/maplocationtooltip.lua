@@ -61,37 +61,36 @@ local function GetMapLocationLines(locationIndex)
     return groupings
 end
 
-local g_maxWidth = MIN_HEADER_WIDTH
-
-local function CreateLineLabel(self, text, indentation)
-    local isIndented = indentation > 0
-    if isIndented then
+local function CreateLineLabel(self, text, indentation, currentLargestWidth)
+    if indentation > 0 then
         self:AddVerticalPadding(-5)
     end
     local label = self.labelPool:AcquireObject()
-    label.indented = isIndented
+    label.indentation = indentation
     label:SetDimensions(0,0)
     label:SetText(text)
-    local labelWidth = label:GetTextWidth() + indentation
-    g_maxWidth = zo_max(labelWidth, g_maxWidth)
 
     self:AddControl(label)
     label:SetAnchor(CENTER, nil, CENTER, indentation, 0)
     self:AddVerticalPadding(-8)
+
+    local labelWidth = label:GetTextWidth() + indentation + 5
+    return zo_max(currentLargestWidth, labelWidth)
 end
 
 local function SetMapLocation(self, locationIndex)
     self:ClearLines()
 
-    g_maxWidth = MIN_HEADER_WIDTH
-    local NAME_INDENT = 32
+    local largestWidth = MIN_HEADER_WIDTH
 
     --add header
     local headerText = GetMapLocationTooltipHeader(locationIndex)
-    if(headerText ~= "") then
+    if headerText ~= "" then
+        self.header:SetWidth(0)
         self.header:SetText(headerText)
         self:AddControl(self.header)
         self.header:SetAnchor(CENTER)
+        largestWidth = zo_max(self.header:GetTextWidth(), largestWidth)
 
         self:AddVerticalPadding(-5)
         self:AddControl(self.divider)
@@ -104,19 +103,21 @@ local function SetMapLocation(self, locationIndex)
         local grouping = groupings[groupingIndex]
         for _, entry in ipairs(grouping) do
             local iconText = zo_iconFormat(entry.icon, 32, 32)
-            CreateLineLabel(self, zo_strformat(SI_TOOLTIP_MAP_LOCATION_CATEGORY_FORMAT, iconText, entry.categoryName), 0)
+            local NO_INDENT = 0 
+            largestWidth = CreateLineLabel(self, zo_strformat(SI_TOOLTIP_MAP_LOCATION_CATEGORY_FORMAT, iconText, entry.categoryName), NO_INDENT, largestWidth)
             
             if entry.showName then
-                CreateLineLabel(self, zo_strformat(SI_TOOLTIP_UNIT_NAME, entry.name), NAME_INDENT)
+                local NAME_INDENT = 32
+                largestWidth = CreateLineLabel(self, zo_strformat(SI_TOOLTIP_UNIT_NAME, entry.name), NAME_INDENT, largestWidth)
             end
         end
     end
 
-    self.header:SetWidth(g_maxWidth)
-    self.divider:SetWidth(g_maxWidth)
+    self.header:SetWidth(largestWidth)
+    self.divider:SetWidth(largestWidth)
     local labels = self.labelPool:GetActiveObjects()
     for _, label in pairs(labels) do
-        label:SetWidth(label.indented and (g_maxWidth - NAME_INDENT) or g_maxWidth)
+        label:SetWidth(largestWidth - label.indentation)
     end
 end
 

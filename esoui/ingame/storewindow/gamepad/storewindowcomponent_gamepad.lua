@@ -104,13 +104,15 @@ function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mod
     local priceControl = control:GetNamedChild("Price")
 
     if mode == ZO_MODE_STORE_BUY then 
-        local storeUsesAP, storeUsesTelvarStones, storeUsesWritVouchers = select(2, GetStoreCurrencyTypes())
+        local storeUsesAP, storeUsesTelvarStones, storeUsesWritVouchers, storeUsesEventCurrency = select(2, GetStoreCurrencyTypes())
         if storeUsesAP and currencyType == CURT_ALLIANCE_POINTS then
             invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER) or false
         elseif storeUsesTelvarStones and currencyType == CURT_TELVAR_STONES then
             invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER) or false
         elseif storeUsesWritVouchers and currencyType == CURT_WRIT_VOUCHERS then
             invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER) or false
+        elseif storeUsesEventCurrency and currencyType == CURT_EVENT_TICKETS then
+            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT) or false
         end
     end
 

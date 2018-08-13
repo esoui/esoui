@@ -2,6 +2,16 @@ local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 
 ZO_Loot_Gamepad_Base = ZO_Object:Subclass()
 
+function ZO_Loot_Gamepad_Base:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
+end
+
+function ZO_Loot_Gamepad_Base:Initialize(tooltipType)
+    self.tooltipType = tooltipType
+end
+
 function ZO_Loot_Gamepad_Base:InitializeKeybindStripDescriptorsMixin(areEthereal)
     local lootBackupKeybind = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(
             function()
@@ -47,19 +57,16 @@ function ZO_Loot_Gamepad_Base:OnSelectionChanged(list, selectedData, oldSelected
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     if selectedData then
-        if selectedData.currencyType then 
-            self:HideTooltip()
-        else
-            self:ShowTooltip(selectedData)
-        end
-
+        self:ShowTooltip(selectedData)
         self:UpdateButtonTextOnSelection(selectedData)
+    else
+        self:HideTooltip()
     end
 end
 
 function ZO_Loot_Gamepad_Base:HideTooltip()
-    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    GAMEPAD_TOOLTIPS:HideBg(GAMEPAD_RIGHT_TOOLTIP)
+    GAMEPAD_TOOLTIPS:ClearTooltip(self.tooltipType)
+    GAMEPAD_TOOLTIPS:HideBg(self.tooltipType)
 end
 
 do
@@ -68,21 +75,23 @@ do
     local FORCE_FULL_DURABILITY = true
     local NO_PREVIEW_VALUE = nil
     function ZO_Loot_Gamepad_Base:ShowTooltip(selectedData)
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-        GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
+        GAMEPAD_TOOLTIPS:ClearTooltip(self.tooltipType)
+        GAMEPAD_TOOLTIPS:Reset(self.tooltipType)
 
-        if selectedData.isQuest then
-            GAMEPAD_TOOLTIPS:LayoutQuestItem(GAMEPAD_RIGHT_TOOLTIP, GetLootQuestItemId(selectedData.lootId))
+        if selectedData.currencyType then
+            GAMEPAD_TOOLTIPS:LayoutCurrency(self.tooltipType, selectedData.currencyType, selectedData.currencyAmount)
+        elseif selectedData.isQuest then
+            GAMEPAD_TOOLTIPS:LayoutQuestItem(self.tooltipType, GetLootQuestItemId(selectedData.lootId))
         else
             local lootLink = GetLootItemLink(selectedData.lootId)
-            local lootType = selectedData.itemType
+            local lootType = selectedData.lootType
             if lootType == LOOT_TYPE_COLLECTIBLE then
-                GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(GAMEPAD_RIGHT_TOOLTIP, lootLink)
+                GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(self.tooltipType, lootLink)
             else
-                GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(GAMEPAD_RIGHT_TOOLTIP, lootLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, selectedData.stackCount)
+                GAMEPAD_TOOLTIPS:LayoutItemWithStackCount(self.tooltipType, lootLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, selectedData.stackCount)
             end
         end
-        GAMEPAD_TOOLTIPS:ShowBg(GAMEPAD_RIGHT_TOOLTIP)
+        GAMEPAD_TOOLTIPS:ShowBg(self.tooltipType)
     end
 end
 
@@ -167,13 +176,13 @@ end
 
 function ZO_Loot_Gamepad_Base:UpdateListAddLootItems(numLootItems, addStolenItems)
     for i = 1, numLootItems do
-        local lootId, name, icon, count, quality, value, isQuest, isStolen, itemType = GetLootItemInfo(i)
+        local lootId, name, icon, count, quality, value, isQuest, isStolen, lootType = GetLootItemInfo(i)
             
         -- only add stolen items or non stolen items
         if addStolenItems == isStolen then
             name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
             local lootEntry = ZO_GamepadEntryData:New(name, icon)
-            lootEntry:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen, itemType)
+            lootEntry:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen, lootType)
             if isStolen then
                 lootEntry:AddIcon(STOLEN_ICON_TEXTURE)
             end

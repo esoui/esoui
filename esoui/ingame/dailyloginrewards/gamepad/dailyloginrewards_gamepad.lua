@@ -23,6 +23,8 @@ function ZO_DailyLoginRewards_Gamepad:Initialize(control)
 
     self.blastParticleSystem:SetParentControl(self.particleGeneratorPosition)
 
+    self.exitScreenByBackingOutOfPreviewIndex = 0
+
     self:InitializeGridListPanel()
 
     GAMEPAD_DAILY_LOGIN_PREVIEW_SCENE = ZO_Scene:New("dailyLoginRewardsPreview_Gamepad", SCENE_MANAGER)
@@ -133,8 +135,16 @@ function ZO_DailyLoginRewards_Gamepad:InitializeKeybinds()
             visible = function() return self:HasMultiplePreviews() end,
             enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() end,
         },
-        KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
+        self:GetBackButtonDescriptor()
     }
+end
+
+function ZO_DailyLoginRewards_Gamepad:GetBackButtonDescriptor()
+    local function backButtonCallback()
+        self.exitScreenByBackingOutOfPreviewIndex = ZO_ScrollList_GetAutoSelectIndex(self.gridListPanelList.list)
+        SCENE_MANAGER:HideCurrentScene()
+    end
+    return KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(backButtonCallback)
 end
 
 function ZO_DailyLoginRewards_Gamepad:UpdateTimeToNextMonthText(formattedTime)
@@ -154,9 +164,20 @@ end
 function ZO_DailyLoginRewards_Gamepad:Activate()
     self.gridListPanelList:Activate()
     ZO_Main_Menu_Helper_Panel_Gamepad.Activate(self)
-    if self.defaultSelectionData then
-        self.gridListPanelList:ScrollDataToCenter(self.defaultSelectionData)
+
+    local previewData
+    if self.exitScreenByBackingOutOfPreviewIndex > 0 then
+        local data = self.gridListPanelList:GetData()
+        if data and self.exitScreenByBackingOutOfPreviewIndex then
+            previewData = data[self.exitScreenByBackingOutOfPreviewIndex].data
+        end
     end
+
+    local selectionData = previewData or self.defaultSelectionData 
+    if selectionData then
+        self.gridListPanelList:ScrollDataToCenter(selectionData)
+    end
+    self.exitScreenByBackingOutOfPreviewIndex = 0
 end
 
 function ZO_DailyLoginRewards_Gamepad:Deactivate()
@@ -185,7 +206,7 @@ do
     local function UpdateTooltip()
         if g_currentTooltipDay then
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP, true)
-			GAMEPAD_TOOLTIPS:LayoutDailyLoginReward(GAMEPAD_RIGHT_TOOLTIP, g_currentTooltipDay)
+            GAMEPAD_TOOLTIPS:LayoutDailyLoginReward(GAMEPAD_RIGHT_TOOLTIP, g_currentTooltipDay)
         end
     end
 

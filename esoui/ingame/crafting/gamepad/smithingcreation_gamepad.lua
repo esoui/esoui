@@ -644,12 +644,11 @@ end
 function ZO_GamepadSmithingCreation:SetupOptionData()
     if self.optionDataList == nil then return end
 
-    local skillType, skillIndex = GetCraftingSkillLineIndices(GetCraftingInteractionType())
-    local lineName = GetSkillLineInfo(skillType, skillIndex)
+    local craftingSkillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(GetCraftingInteractionType())
     for key, optionInfo in pairs(g_options) do
         local headerText = nil
         if optionInfo.header then
-            headerText = zo_strformat(optionInfo.header, lineName)
+            headerText = zo_strformat(optionInfo.header, craftingSkillLineData:GetName())
         end
 
         local newOptionData = ZO_GamepadEntryData:New(optionInfo.optionName)

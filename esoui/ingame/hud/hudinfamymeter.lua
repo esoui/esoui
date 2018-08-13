@@ -16,10 +16,6 @@ local INFAMY_METER_SLOW_FADE_TIME = 1400 -- in milliseconds
 local INFAMY_METER_SLOW_FADE_DELAY = 600 -- in milliseconds
 local INFAMY_METER_FADE_TIME = 200 -- in milliseconds
 
-local CENTER_ICON_STATE_DAGGER_GREY = 1
-local CENTER_ICON_STATE_DAGGER_RED = 2
-local CENTER_ICON_STATE_EYE = 3
-
 local GREY_DAGGER_ICON = "EsoUI/Art/HUD/infamy_dagger-grey.dds" 
 local RED_DAGGER_ICON = "EsoUI/Art/HUD/infamy_dagger-red.dds" 
 local DAGGER_ICON_CUTOUT = "EsoUI/Art/HUD/infamy_dagger-cutout.dds" 
@@ -114,31 +110,30 @@ function ZO_HUDInfamyMeter:Initialize(control)
     -- Register for events
     control:RegisterForEvent(EVENT_JUSTICE_INFAMY_UPDATED, function()
         if self:ShouldProcessUpdateEvent() then
-            self:OnInfamyUpdated(UPDATE_TYPE_EVENT) 
+            self:OnInfamyUpdated(UPDATE_TYPE_EVENT)
         end
     end)
 
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, function()
         if self:ShouldProcessUpdateEvent() then
-            self:OnInfamyUpdated(UPDATE_TYPE_EVENT) 
+            self:OnInfamyUpdated(UPDATE_TYPE_EVENT)
         end
     end)
 
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() 
-        local infamy = GetInfamy()
         if IsInJusticeEnabledZone() then
             if self:ShouldProcessUpdateEvent() then
-                self:OnInfamyUpdated(UPDATE_TYPE_EVENT) 
+                self:OnInfamyUpdated(UPDATE_TYPE_EVENT)
             end
         else
             self.control:SetHidden(true)
+            self.control:SetAlpha(0)
         end
     end)
 end
 
 function ZO_HUDInfamyMeter:ShouldProcessUpdateEvent()
     local infamy = GetInfamy()
-    local isKOS = IsKillOnSight()
     local isTrespassing = IsTrespassing()
     return IsInJusticeEnabledZone() 
            and not self.hiddenExternalRequest 
@@ -177,7 +172,6 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
         if self.infamyMeterState.infamy == 0 then
             self.fadeAnim:FadeOut(INFAMY_METER_SLOW_FADE_DELAY, INFAMY_METER_SLOW_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA, function() self.control:SetHidden(true) end)
         else
-            self.control:SetHidden(false)
             self.fadeAnim:FadeIn(0, INFAMY_METER_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA)
         end
 
@@ -199,7 +193,7 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
         -- Fire CSA
         if self.infamyMeterState.isTrespassing ~= wasTrespassing then
             local sound, primaryMessage, secondaryMessage
-            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
+            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
             if wasTrespassing then
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS)
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
@@ -211,16 +205,17 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
                 end
             else
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
-            	TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_ENTERED)
+                TriggerTutorial(TUTORIAL_TRIGGER_TRESPASS_SUBZONE_ENTERED)
                 sound = SOUNDS.JUSTICE_NOW_KOS
                 primaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_PRIMARY)
                 secondaryMessage = zo_strformat(SI_JUSTICE_NOW_TRESPASSING_SECONDARY)
             end
 
             messageParams:SetText(primaryMessage, secondaryMessage)
-        elseif infamyLevel ~= oldInfamyLevel then 
+            messageParams:SetSound(sound)
+        elseif infamyLevel ~= oldInfamyLevel then
             local sound, primaryMessage, secondaryMessage, icon
-            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, sound)
+            messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
             if oldInfamyLevel == INFAMY_THRESHOLD_FUGITIVE then
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS)
                 sound = SOUNDS.JUSTICE_NO_LONGER_KOS
@@ -248,6 +243,7 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
 
             messageParams:SetText(primaryMessage, secondaryMessage)
             messageParams:SetIconData(icon)
+            messageParams:SetSound(sound)
             messageParams:MarkSuppressIconFrame()
         end
 
@@ -314,17 +310,16 @@ function ZO_HUDInfamyMeter:SetBarValue(bar, percentFilled)
     bar:StartFixedCooldown(percentFilled, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_REMAINING, NO_LEADING_EDGE) -- CD_TIME_TYPE_TIME_REMAINING causes clockwise scroll
 end
 
-function ZO_HUDInfamyMeter:RequestHidden(hidden)    
+function ZO_HUDInfamyMeter:RequestHidden(hidden)
     if hidden ~= self.hiddenExternalRequest then
         if hidden then
-            self.fadeAnim:FadeOut(0, INFAMY_METER_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA, function() self.control:SetHidden(true) end)
+            self.fadeAnim:FadeOut(0, INFAMY_METER_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA, function() self.control:SetHidden(true) end, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_SHOWN)
         elseif IsInJusticeEnabledZone() and (GetInfamy() ~= 0 or self.infamyMeterState.infamy ~= 0) then
-            self.control:SetHidden(false)
             self.fadeAnim:FadeIn(0, INFAMY_METER_FADE_TIME, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA)
         end
-    end
 
-    self.hiddenExternalRequest = hidden
+        self.hiddenExternalRequest = hidden
+    end
 end
 
 function ZO_HUDInfamyMeter_Initialize(control)

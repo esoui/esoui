@@ -1,5 +1,9 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_SkillsAdvisorSuggestion_Gamepad_SkillRow" inherits="ZO_GamepadSingleLineAbilityEntryTemplate" virtual="true">
+            <Dimensions y="60"/>
+        </Control>
+        
         <Control name="ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader" virtual="true">
             <OnInitialized>
                 ZO_SkillsAdvisorSuggestions_Gamepad_MenuEntryHeader_OnInitialized(self)
@@ -20,39 +24,6 @@
                     <Dimensions x="390" />
                     <Anchor point="TOPLEFT" offsetX="30" />
                 </Label>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_SkillsAdvisorSuggestions_Gamepad_AbilityEntryTemplate" inherits="ZO_GamepadAbilityEntryTemplate" resizeToFitDescendents="false" virtual="true" >
-            <Dimensions y="60" />
-            <OnInitialized>
-                ZO_SharedGamepadEntry_OnInitialized(self)
-                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
-                local fonts =
-                {
-                    {
-                        font = "ZoFontGamepad42",
-                        lineLimit = 1,
-                    },
-                    {
-                        font = "ZoFontGamepad34",
-                        lineLimit = 1,
-                    },
-                    {
-                        font = "ZoFontGamepad27",
-                        lineLimit = 1,
-                        dontUseForAdjusting = true,
-                    },
-                }
-                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Label"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)Label" override="true" >
-                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
-                </Label>
-                <Texture name="$(parent)Alert" override="true">
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="19" />
-                </Texture>
             </Controls>
         </Control>
 

@@ -30,7 +30,7 @@ function ZO_SharedStoreManager:Initialize(control)
 end
 
 function ZO_SharedStoreManager:InitializeStore()
-    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers = GetStoreCurrencyTypes()
+    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers, self.storeUsesEventCurrency = GetStoreCurrencyTypes()
 end
 
 function ZO_SharedStoreManager:RefreshCurrency()
@@ -38,33 +38,7 @@ function ZO_SharedStoreManager:RefreshCurrency()
     self.currentAP = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
     self.currentTelvarStones = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
     self.currentWritVouchers = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
-end
-
-local INTERNAL_IMPORTANT_ITEMDATA_KEYS = { "entryType", "slotIndex", "name", "stack", "traitInformation",}
-function ZO_StoreManager_InternalValidateItems(items, optionalExtraLines)
-    for _, itemData in ipairs(items) do
-        if not itemData.traitInformation then
-            local lines = optionalExtraLines or {}
-            table.insert(lines, ("interact name: %q"):format(tostring(GetUnitName("interact"))))
-            table.insert(lines, ("Item Link: %q"):format(tostring(GetStoreItemLink(itemData.slotIndex))))
-            for _, k in ipairs(INTERNAL_IMPORTANT_ITEMDATA_KEYS) do
-                local v = itemData[k]
-                local key = type(k) == "string" and string.format("%q", k) or tostring(k)
-                local value = type(v) == "string" and string.format("%q", v) or tostring(v)
-                table.insert(lines, ("  %s: %s"):format(key, value))
-            end
-            -- these will probably be cut off by the message limit
-            table.insert(lines, "----")
-            for k, v in pairs(itemData) do
-                local key = type(k) == "string" and string.format("%q", k) or tostring(k)
-                local value = type(v) == "string" and string.format("%q", v) or tostring(v)
-                table.insert(lines, ("  %s: %s"):format(key, value))
-            end
-
-            table.insert(lines, 1, "Invalid vendor object state:")
-            internalassert(false, table.concat(lines, "\n  "))
-        end
-    end
+    self.currentEventCurrency = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
 end
 
 -- Shared global functions
@@ -79,6 +53,7 @@ function ZO_StoreManager_GetStoreItems()
         if stack > 0 then
             local itemLink = GetStoreItemLink(entryIndex)
             local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
+            local sellInformation = GetItemLinkSellInformation(itemLink)
             local itemData =
             {
                 entryType = entryType,
@@ -103,7 +78,10 @@ function ZO_StoreManager_GetStoreItems()
                 statValue = GetStoreEntryStatValue(entryIndex),
                 isUnique = IsItemLinkUnique(itemLink),
                 traitInformation = traitInformation,
+                itemTrait = GetItemLinkTraitInfo(itemLink),
                 traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(traitInformation),
+                sellInformation = sellInformation,
+                sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(sellInformation),
             }
 
             if entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
@@ -117,7 +95,6 @@ function ZO_StoreManager_GetStoreItems()
         end
     end
 
-    ZO_StoreManager_InternalValidateItems(items)
     return items, usedFilterTypes
 end
 

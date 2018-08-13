@@ -64,7 +64,7 @@ function ZO_GridScrollList:AddEntry(data)
         end
         self.currentHeaderName = data.gridHeaderName
         if self.currentHeaderName and self.currentHeaderName ~= "" then
-            ZO_ScrollList_AddOperation(self.list, ZO_GRID_LIST_OPERATION_ADD_HEADER, { header = data.gridHeaderName })
+            ZO_ScrollList_AddOperation(self.list, ZO_GRID_LIST_OPERATION_ADD_HEADER, { header = data.gridHeaderName, data = data })
         end
     end
     ZO_ScrollList_AddOperation(self.list, ZO_GRID_LIST_OPERATION_ADD_CELL, data)

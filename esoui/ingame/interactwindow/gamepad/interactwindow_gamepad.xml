@@ -103,7 +103,7 @@
 
                                         <Texture name="$(parent)ScrollDown" textureFile="EsoUI/Art/Miscellaneous/gamepad/gp_scrollArrow.dds" hidden="true">
                                             <Dimensions x="32" y="32"/>
-                                            <Anchor point="LEFT" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="LEFT" relativePoint="BOTTOMLEFT" offsetY="-15"/>
                                         </Texture>
                                     </Controls>
                                 </Control>

@@ -152,6 +152,8 @@ function ZO_GamepadOptions:Select()
         ZO_Options_InvokeCallback(control)
     elseif controlType == OPTIONS_COLOR then
         ZO_Options_ColorOnClicked(control)
+    elseif controlType == OPTIONS_CHAT_COLOR then
+        ZO_Options_ChatColorOnClicked(control)
     end
 end
 
@@ -353,6 +355,7 @@ do
         [OPTIONS_CHECKBOX] = true,
         [OPTIONS_INVOKE_CALLBACK] = true,
         [OPTIONS_COLOR] = true,
+        [OPTIONS_CHAT_COLOR] = true,
     }
 
     function ZO_GamepadOptions:OnSelectionChanged(list)
@@ -474,9 +477,12 @@ end
 
 function ZO_GamepadOptions:InitializeControl(control, selected)
     local label = GetControl(control, "Name")
+
+    control.data.enabled = true
     --determine if this control should be disabled because of a dependency on another control type
-    --this is rarely used so enabled == nil or true, only false is disabled
-    control.data.enabled = control.data.gamepadIsEnabledCallback and control.data.gamepadIsEnabledCallback()
+    if control.data.gamepadIsEnabledCallback then
+        control.data.enabled = control.data.gamepadIsEnabledCallback()
+    end
     SetSelectedStateOnControl(control, selected)
 
     local IS_GAMEPAD_CONTROL = false
@@ -634,6 +640,7 @@ local TEMPLATE_NAMES =
     [OPTIONS_CHECKBOX] = "ZO_GamepadOptionsCheckboxRow",
     [OPTIONS_INVOKE_CALLBACK] = "ZO_GamepadOptionsLabelRow",
     [OPTIONS_COLOR] = "ZO_GamepadOptionsColorRow",
+    [OPTIONS_CHAT_COLOR] = "ZO_GamepadOptionsColorRow",
 }
 
 function ZO_GamepadOptions:RefreshCategoryList()
@@ -695,7 +702,15 @@ function ZO_GamepadOptions:AddSettingGroup(panelId)
     if settings then
         for i = 1, #settings do
             local setting = settings[i]
-            local header = setting.header and GetString(setting.header)
+            local header
+            if setting.header then
+                if type(setting.header) == "function" then
+                    header = setting.header(setting)
+                else
+                    header = GetString(setting.header)
+                end
+            end
+
             local data = self:GetSettingsData(setting.panel, setting.system, setting.settingId)
             local controlType = self:GetControlType(data.controlType)
             
