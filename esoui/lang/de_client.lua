@@ -707,7 +707,7 @@ SafeAddString(SI_CAMPAIGN_ARTIFACT_DROPPED, "(<<4>>) <<C:1>> vom <<2>> hat den <
 SafeAddString(SI_CAMPAIGN_ARTIFACT_PICKED_UP, "(<<4>>) <<C:1>> vom <<2>> hat den <<3>> aufgenommen.", 1)
 SafeAddString(SI_CAMPAIGN_ARTIFACT_RETURNED, "(<<5>>) <<C:1>> vom <<2>> hat den <<3>> <<L:4>> zurückgebracht.", 1)
 SafeAddString(SI_CAMPAIGN_ARTIFACT_RETURNED_BY_TIMER, "(<<3>>) Der <<1>> ist <<L:2>> zurückgekehrt.", 1)
-SafeAddString(SI_CAMPAIGN_ARTIFACT_TAKEN, "(<<5>>) <<C:1>> vom <<2>> hat den <<3>> aus dem <<4>> genommen.", 1)
+SafeAddString(SI_CAMPAIGN_ARTIFACT_TAKEN, "(<<C:5>>) <<C:1>> vom <<2>> hat den <<3>> aus dem <<4>> genommen.", 1)
 SafeAddString(SI_CAMPAIGN_BONUSES_DEFENSIVE_SCROLL_HEADER, "Defensive Boni durch Schriftrollen", 0)
 SafeAddString(SI_CAMPAIGN_BONUSES_EDGE_KEEP_HEADER, "Boni durch Randburgen", 0)
 SafeAddString(SI_CAMPAIGN_BONUSES_EDGE_KEEP_INFO, "Gehaltene Randburgen: |cffffff<<1>>|r", 0)

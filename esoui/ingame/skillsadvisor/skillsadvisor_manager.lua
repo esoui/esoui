@@ -49,6 +49,11 @@ function SkillsAdvisor_Manager:Initialize()
 end
 
 function SkillsAdvisor_Manager:UpdateSkillBuildData()
+    if not SKILLS_DATA_MANAGER:IsDataReady() then
+        --If we don't have skills data, the rest of this is pretty useless, so wait until the data becomes ready
+        return
+    end
+
     self.numAvailableSkillBuilds = GetNumAvailableSkillBuilds()
     self.isAdvancedMode = IsSkillBuildAdvancedMode()
 
@@ -117,7 +122,7 @@ function SkillsAdvisor_Manager:GetSkillProgressionData(skillBuildId, skillBuildA
 
     local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
     if not skillData then
-        -- Debugging for ESO-566272
+        -- Debugging for ESO-566272 / ESO-581396
         local name = GetSkillAbilityInfo(skillType, skillLineIndex, skillIndex)
         local errorText = string.format("SkillsAdvisor_Manager:GetSkillProgressionData - Couldn't find skill data for skillType %d, skillLineIndex %d, skillIndex %d (%s)", skillType, skillLineIndex, skillIndex, name)
         internalassert(false, errorText)
