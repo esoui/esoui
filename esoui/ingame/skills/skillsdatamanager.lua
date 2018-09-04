@@ -1079,7 +1079,6 @@ function ZO_SkillsDataManager:RegisterForEvents()
         end
     end
 
-    EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILLS_INITIALIZED, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillsDataReady))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILLS_FULL_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnFullSystemUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_LINE_ADDED, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineAdded))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_RANK_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineUpdated))
@@ -1145,20 +1144,16 @@ end
 
 -- Begin Event Handlers --
 
-function ZO_SkillsDataManager:OnSkillsDataReady()
+function ZO_SkillsDataManager:OnFullSystemUpdated()
     if self.isDataReady then
-        self:OnFullSystemUpdated()
+        for skillType = SKILL_TYPE_ITERATION_BEGIN, SKILL_TYPE_ITERATION_END do
+            local skillTypeData = self:GetSkillTypeData(skillType)
+            skillTypeData:RefreshDynamicData(REFRESH_CHILDREN)
+        end
+        self:FireCallbacks("FullSystemUpdated")
     else
         self:RebuildSkillsData()
     end
-end
-
-function ZO_SkillsDataManager:OnFullSystemUpdated()
-    for skillType = SKILL_TYPE_ITERATION_BEGIN, SKILL_TYPE_ITERATION_END do
-        local skillTypeData = self:GetSkillTypeData(skillType)
-        skillTypeData:RefreshDynamicData(REFRESH_CHILDREN)
-    end
-    self:FireCallbacks("FullSystemUpdated")
 end
 
 function ZO_SkillsDataManager:OnSkillLineAdded(skillType, skillLineIndex)

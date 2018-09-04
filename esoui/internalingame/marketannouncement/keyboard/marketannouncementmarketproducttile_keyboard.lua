@@ -91,13 +91,16 @@ do
 
     function ZO_MarketAnnouncementMarketProductTile_Keyboard:UpdateHelpVisibility(isMousedOver)
         local isPromo = false
+        local hasHelpLink = false
         if self.marketProduct then
             isPromo = self.marketProduct:IsPromo()
+            local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(self.marketProduct:GetId())
+            hasHelpLink = helpCategoryIndex and helpIndex
         end
 
         self.numBundledProductsLabel:SetHidden((isMousedOver and isPromo) or self.numBundledProductsLabel:IsHidden())
 
-        if not isMousedOver or not isPromo then
+        if not isMousedOver or not isPromo or not hasHelpLink then
             g_fadeInAnimationProvider:PlayBackward(self.helpButton)
         else
             g_fadeInAnimationProvider:PlayForward(self.helpButton)

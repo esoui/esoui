@@ -14,6 +14,8 @@ function SkillsAdvisor_Manager:Initialize()
     self.skillBuilds = {}
     self.availableAbilityList = {}
     self.purchasedAbilityList = {}
+    self.numSkillBuildIndicies = 0
+    self.numAvailableSkillBuilds = 0
 
     self.advancedSkillBuildData =
     {
