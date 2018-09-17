@@ -49,7 +49,10 @@ end
 function ZO_MarketProductCarousel_Keyboard:ResetScrollToTop()
     local data = self:GetSelectedData()
     local marketProduct = data and data.marketProduct
-    if marketProduct and marketProduct.description then
-        ZO_Scroll_ResetToTop(marketProduct.description)
+    if marketProduct then
+        local descriptionControl = marketProduct:GetDescriptionControl()
+        if descriptionControl then
+            ZO_Scroll_ResetToTop(descriptionControl)
+        end
     end
 end

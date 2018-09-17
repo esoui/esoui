@@ -10,6 +10,7 @@ local pregameStates =
         end,
 
         OnExit = function()
+            TrySaveCharacterListOrder()
         end
     },
 

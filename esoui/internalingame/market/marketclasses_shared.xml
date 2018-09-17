@@ -1,23 +1,16 @@
 ﻿<GuiXml>
-    <Animations>
-        <AnimationTimeline name="MarketProductHighlightAnimation">
-            <Animations>
-                <AlphaAnimation duration="ZO_MARKET_PRODUCT_HIGHLIGHT_ANIMATION_DURATION_MS" startAlpha="0" endAlpha=".7">
-                    <EasingFunction>
-                        return ZO_EaseOutQuadratic(progress)
-                    </EasingFunction>
-                </AlphaAnimation>
-            </Animations>
-        </AnimationTimeline>
-    </Animations>
     <Controls>
 
         <Control name="ZO_MarketProductBase" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_MarketProductBase_OnInitialized(self)
+            </OnInitialized>
+
             <Controls>
                 <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <AnchorFill />
                 </Texture>
-                
+
                 <!-- The Overlay should appear over top of the background -->
                 <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="ZO_MARKET_TILE_OVERLAY_LEVEL">
                     <AnchorFill />
@@ -31,18 +24,11 @@
 
                 <Label name="$(parent)PreviousCost" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" level="ZO_MARKET_TILE_TEXT_LEVEL">
                     <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
-                    <Controls>
-                        <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY" level="ZO_MARKET_TILE_ABOVE_TEXT_LEVEL">
-                            <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
-                            <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
-                            <OnInitialized>
-                                self:SetHeight(2.5)
-                            </OnInitialized>
-                        </Texture>
-                    </Controls>
                 </Label>
 
                 <Label name="$(parent)Cost" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+
+                <Label name="$(parent)EsoPlusCost" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ESO_PLUS" level="ZO_MARKET_TILE_TEXT_LEVEL" />
 
                 <Label name="$(parent)TextCallout" />
 
@@ -61,6 +47,8 @@
 
                 <!-- anchored programmatically -->
                 <Label name="$(parent)Purchased" level="ZO_MARKET_TILE_TEXT_LEVEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" horizontalAlignment="RIGHT" maxLineCount="2" wrapMode="ELLIPSIS" />
+
+                <Label name="$(parent)EsoPlusDeal" modifyTextType="UPPERCASE" level="ZO_MARKET_TILE_TEXT_LEVEL" horizontalAlignment="RIGHT" />
             </Controls>
         </Control>
     </Controls>

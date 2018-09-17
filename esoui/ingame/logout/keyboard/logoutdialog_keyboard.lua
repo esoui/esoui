@@ -1,13 +1,13 @@
 local function SetupLogoutDialog(dialog)
-    local hasNoRewards = GetNumRewardsInCurrentDailyLoginMonth() == 0
+    local isLocked = ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
 	local dailyRewardTile = dialog:GetNamedChild("DailyRewardTile")
 	if dailyRewardTile then
-        dailyRewardTile.object:SetHidden(hasNoRewards)
-        dailyRewardTile.object:SetActionAvailable(not hasNoRewards)
+        dailyRewardTile.object:SetHidden(isLocked)
+        dailyRewardTile.object:SetActionAvailable(not isLocked)
 		dailyRewardTile.object:RefreshLayout()
 	end
 	local dividerControl = dialog:GetNamedChild("TileDivider")
-    dividerControl:SetHidden(hasNoRewards)
+    dividerControl:SetHidden(isLocked)
 end
 
 function ZO_LogoutDialog_Keyboard_OnInitialized(self)
@@ -21,9 +21,9 @@ function ZO_LogoutDialog_Keyboard_OnInitialized(self)
                 text = SI_PROMPT_TITLE_LOG_OUT,
             },
             updateFn = function(dialog) -- if lock status changes, make sure to update the tile visibility
-                local hasNoRewards = GetNumRewardsInCurrentDailyLoginMonth() == 0
+                local isLocked = ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
                 local dailyRewardTile = dialog:GetNamedChild("DailyRewardTile")
-                if dailyRewardTile.object:IsActionAvailable() == hasNoRewards then
+                if dailyRewardTile.object:IsActionAvailable() == isLocked then
                     SetupLogoutDialog(dialog)
                 end
             end,

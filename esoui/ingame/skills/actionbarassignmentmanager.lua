@@ -258,7 +258,7 @@ function ZO_SlottableSkill:IsStillValid()
 end
 
 function ZO_SlottableSkill:LayoutGamepadTooltip(tooltipType)
-    GAMEPAD_TOOLTIPS:LayoutSimpleAbility(tooltipType, self:GetEffectiveAbilityId())
+    GAMEPAD_TOOLTIPS:LayoutAbilityWithSkillProgressionData(tooltipType, self:GetEffectiveAbilityId(), self.skillData:GetPointAllocatorProgressionData())
 end
 
 function ZO_SlottableSkill:GetKeyboardTooltipControl()
@@ -455,6 +455,10 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedClearSlotResult(actionS
         return HOT_BAR_RESULT_CANNOT_EDIT_SLOT
     end
 
+    if IsUnitInCombat("player") then
+        return HOT_BAR_RESULT_NO_COMBAT_SWAP
+    end
+
     return HOT_BAR_RESULT_SUCCESS
 end
 
@@ -484,6 +488,10 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSkillSlotResult(actionS
 
     if not skillData:GetPointAllocator():IsPurchased() then
         return HOT_BAR_RESULT_ABILITY_NOT_KNOWN
+    end
+
+    if IsUnitInCombat("player") then
+        return HOT_BAR_RESULT_NO_COMBAT_SWAP
     end
 
     return HOT_BAR_RESULT_SUCCESS
@@ -637,16 +645,12 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, OnActiveHotbarUpdated)
 
-    local function OnAllHotbarsUpdated()
+    local function ResetAllHotbars()
         self:ResetAllHotbars()
     end
-    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, OnAllHotbarsUpdated)
-
-    local function OnSkillPointAllocationModeChanged()
-        -- We are entering/leaving respec mode, hard reset
-        self:ResetAllHotbars()
-    end
-    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", OnSkillPointAllocationModeChanged)
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, ResetAllHotbars)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", ResetAllHotbars)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", ResetAllHotbars)
 
     local function OnSkillsDataFullUpdate()
         -- Current morph may have changed, refresh visuals

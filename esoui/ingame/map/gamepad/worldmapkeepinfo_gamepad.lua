@@ -11,38 +11,23 @@ local ResourceUpgrade_Gamepad = ZO_ResourceUpgrade_Shared:Subclass()
 local WorldMapKeepInfo_Gamepad = ZO_WorldMapKeepInfo_Shared:Subclass()
 
 function WorldMapKeepInfo_Gamepad:New(...)
-    local object = ZO_WorldMapKeepInfo_Shared.New(self, ...)
-    return object
+    return ZO_WorldMapKeepInfo_Shared.New(self, ...)
 end
 
 function WorldMapKeepInfo_Gamepad:Initialize(control)
     self.header = control:GetNamedChild("Container"):GetNamedChild("Header")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
-    ZO_WorldMapKeepInfo_Shared.Initialize(self, control)
+    ZO_WorldMapKeepInfo_Shared.Initialize(self, control, ZO_TranslateFromLeftSceneFragment)
 
     self.keepUpgrade = KeepUpgrade_Gamepad:New()
     self.resourceUpgrade = ResourceUpgrade_Gamepad:New()
 
-    self.worldMapKeepInfoBGFragment = ZO_FadeSceneFragment:New(ZO_WorldMapKeepInfoFootPrintBackground_Gamepad)
-    self.worldMapKeepInfoFragment = ZO_FadeSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_KEEP_INFO_FRAGMENT = self.worldMapKeepInfoFragment
-    self.worldMapKeepInfoFragment:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_SHOWING) then
-            ZO_WorldMap_SetKeepMode(true)
-            ZO_GamepadGenericHeader_Activate(self.header)
-            if self.fragments then
-                SCENE_MANAGER:AddFragmentGroup(self.fragments)
-            end
-        elseif(newState == SCENE_FRAGMENT_HIDDEN) then
-            self.keepUpgradeObject = nil
-            ZO_GamepadGenericHeader_Deactivate(self.header)
-            if self.fragments then
-                SCENE_MANAGER:RemoveFragmentGroup(self.fragments)
-            end
-            ZO_WorldMap_SetKeepMode(false)
-        end
-    end)
+end
+
+function WorldMapKeepInfo_Gamepad:GetBackgroundFragment()
+    return GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT
 end
 
 function WorldMapKeepInfo_Gamepad:SwitchToFragments(fragments)
@@ -74,6 +59,29 @@ function WorldMapKeepInfo_Gamepad:FinishBar()
     }
     ZO_GamepadGenericHeader_Refresh(self.header, self.baseHeaderData)
     ZO_GamepadGenericHeader_SetActiveTabIndex(self.header, 1)
+end
+
+function WorldMapKeepInfo_Gamepad:OnShowing()
+    ZO_WorldMapKeepInfo_Shared.OnShowing(self)
+
+    ZO_WorldMap_SetKeepMode(true)
+    ZO_GamepadGenericHeader_Activate(self.header)
+    if self.fragments then
+        SCENE_MANAGER:AddFragmentGroup(self.fragments)
+    end
+    ZO_WorldMap_UpdateMap()
+end
+
+function WorldMapKeepInfo_Gamepad:OnHidden()
+    ZO_WorldMapKeepInfo_Shared.OnHidden(self)
+
+    self.keepUpgradeObject = nil
+    ZO_GamepadGenericHeader_Deactivate(self.header)
+    if self.fragments then
+        SCENE_MANAGER:RemoveFragmentGroup(self.fragments)
+    end
+    ZO_WorldMap_SetKeepMode(false)
+    ZO_WorldMap_UpdateMap()
 end
 
 --Global

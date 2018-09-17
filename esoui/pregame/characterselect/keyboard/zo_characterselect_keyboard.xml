@@ -15,25 +15,35 @@
         <Control name="ZO_CharacterEntry" mouseEnabled="true" virtual="true">
             <Dimensions x="367" y="ZO_CHARACTER_SELECT_ENTRY_HEIGHT" />
 
-            <OnMouseUp>
-                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+            <OnMouseDown>
+                if button == MOUSE_BUTTON_INDEX_LEFT then
                     ZO_CharacterEntry_OnMouseClick(self)
+                end
+            </OnMouseDown>
+            
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_LEFT then
+                    ZO_CharacterEntry_OnMouseUp(self)
                 end
             </OnMouseUp>
 
             <OnMouseDoubleClick>
-                if(button == MOUSE_BUTTON_INDEX_LEFT) then
-                    ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)
-                end
+                ZO_CharacterEntry_OnMouseDoubleClick(self, button)
             </OnMouseDoubleClick>
 
             <OnMouseEnter>
-                ZO_ScrollList_MouseEnter(ZO_CharacterSelectScrollList, self)
+                ZO_CharacterEntry_OnMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
-                ZO_ScrollList_MouseExit(ZO_CharacterSelectScrollList, self)
+                ZO_CharacterEntry_OnMouseExit(self)
             </OnMouseExit>
+
+            <OnDragStart>
+                if button == MOUSE_BUTTON_INDEX_LEFT then
+                    ZO_CharacterEntry_OnDragStart(self)
+                end
+            </OnDragStart>
 
             <Controls>
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
@@ -60,6 +70,22 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMRIGHT" />
                 </Label>
+                
+                <Button name="$(parent)OrderUp" inherits="ZO_CharacterEntryOrderButton">
+                    <Anchor point="TOPRIGHT" offsetX="-5" offsetY="10"/>
+                    <Textures normal="EsoUI/Art/Buttons/large_upArrow_up.dds" mouseOver="EsoUI/Art/Buttons/large_upArrow_over.dds" pressed="EsoUI/Art/Buttons/large_upArrow_down.dds" disabled="EsoUI/Art/Buttons/large_upArrow_disabled.dds" />
+                    <OnClicked>
+                        ZO_CharacterSelect_Move_Character_Up()
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)OrderDown" inherits="ZO_CharacterEntryOrderButton">
+                    <Anchor point="TOP" relativeTo="$(parent)OrderUp" relativePoint="BOTTOM" offsetY="10" />
+                    <Textures normal="EsoUI/Art/Buttons/large_downArrow_up.dds" mouseOver="EsoUI/Art/Buttons/large_downArrow_over.dds" pressed="EsoUI/Art/Buttons/large_downArrow_down.dds" disabled="EsoUI/Art/Buttons/large_downArrow_disabled.dds" />
+                    <OnClicked>
+                        ZO_CharacterSelect_Move_Character_Down()
+                    </OnClicked>
+                </Button>
             </Controls>
         </Control>
 
@@ -273,6 +299,21 @@
                         </Label>
                     </Controls>
                 </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CharacterOrderDivider" hidden="true">
+            <Dimensions x="367" y="16" />
+
+            <OnInitialized>
+                ZO_CharacterOrderDivider_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Line" textureFile="EsoUI/Art/Miscellaneous/listItem_divider.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom=".799" />
+                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>

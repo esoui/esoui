@@ -44,8 +44,7 @@ end
 function ZO_DailyLoginRewards_Gamepad:InitializeGridListPanel()
     local gridListPanel = self.control:GetNamedChild("Rewards")
     self.gridListPanelControl = gridListPanel
-    local FILL_ROW_WITH_EMPTY_CELLS = true
-    self.gridListPanelList = ZO_GridScrollList_Gamepad:New(gridListPanel, FILL_ROW_WITH_EMPTY_CELLS, "ZO_Daily_Login_Reward_Highlight_Gamepad")
+    self.gridListPanelList = ZO_SingleTemplateGridScrollList_Gamepad:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL, "ZO_Daily_Login_Reward_Highlight_Gamepad")
 
     local function DailyLoginRewardsGridEntryReset(control)
         ZO_Daily_Login_Rewards_Gamepad_CleanupAnimationOnControl(control, self.currentRewardAnimationPool)
@@ -86,7 +85,7 @@ function ZO_DailyLoginRewards_Gamepad:InitializeKeybinds()
         enabled = function()
             local selectedReward = self.gridListPanelList:GetSelectedData()
 
-            if selectedReward.day then
+            if selectedReward and selectedReward.day then
                 return GetDailyLoginClaimableRewardIndex() == selectedReward.day
             end
 
@@ -106,7 +105,7 @@ function ZO_DailyLoginRewards_Gamepad:InitializeKeybinds()
         visible = function()
             local selectedReward = self.gridListPanelList:GetSelectedData()
 
-            if selectedReward.day then
+            if selectedReward and selectedReward.day then
                 return CanPreviewReward(selectedReward:GetRewardId())
             end
 
@@ -148,12 +147,13 @@ function ZO_DailyLoginRewards_Gamepad:GetBackButtonDescriptor()
 end
 
 function ZO_DailyLoginRewards_Gamepad:UpdateTimeToNextMonthText(formattedTime)
+    ZO_DailyLoginRewards_Base.UpdateTimeToNextMonthText(self, formattedTime)
+
     self.changeTimerValueLabel:SetText(formattedTime)
 end
 
 function ZO_DailyLoginRewards_Gamepad:UpdateTimeToNextMonthVisibility()
-    local shouldBeHidden = self.lastCalculatedTimeUntilNextMonthS == 0 or GetNumRewardsInCurrentDailyLoginMonth() == 0
-    self.changeTimer:SetHidden(shouldBeHidden)
+    self.changeTimer:SetHidden(self:ShouldChangeTimerBeHidden())
 end
 
 function ZO_DailyLoginRewards_Gamepad:OnHiding()
@@ -183,7 +183,7 @@ end
 function ZO_DailyLoginRewards_Gamepad:Deactivate()
     ZO_Main_Menu_Helper_Panel_Gamepad.Deactivate(self)
     self.gridListPanelList:Deactivate()
-    self:CleanupTooltip()
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 end
 
 function ZO_DailyLoginRewards_Gamepad:CleanDirty()
@@ -201,32 +201,13 @@ function ZO_DailyLoginRewards_Gamepad:OnGridListSelectedDataChanged(previousData
     end
 end
 
-do
-    local g_currentTooltipDay
-    local function UpdateTooltip()
-        if g_currentTooltipDay then
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP, true)
-            GAMEPAD_TOOLTIPS:LayoutDailyLoginReward(GAMEPAD_RIGHT_TOOLTIP, g_currentTooltipDay)
+function ZO_DailyLoginRewards_Gamepad:RefreshTooltip(selectedData)
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
+
+    if selectedData then
+        if not selectedData.isEmptyCell then
+            GAMEPAD_TOOLTIPS:LayoutDailyLoginReward(GAMEPAD_RIGHT_TOOLTIP, selectedData.day)
         end
-    end
-
-    function ZO_DailyLoginRewards_Gamepad:RefreshTooltip(selectedData)
-        self:CleanupTooltip()
-
-        if selectedData then
-            if not selectedData.isEmptyCell then
-                GAMEPAD_TOOLTIPS:LayoutDailyLoginReward(GAMEPAD_RIGHT_TOOLTIP, selectedData.day)
-                g_currentTooltipDay = selectedData.day
-                EVENT_MANAGER:RegisterForUpdate("DailyLoginRewards_Tooltip", 30, function(...) UpdateTooltip(...) end)
-                return
-            end
-        end
-    end
-
-    function ZO_DailyLoginRewards_Gamepad:CleanupTooltip()
-        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
-        g_currentTooltipDay = nil
-        EVENT_MANAGER:UnregisterForUpdate("DailyLoginRewards_Tooltip")
     end
 end
 
@@ -259,7 +240,11 @@ do
                 end
                 edgeTexture = "EsoUI/Art/Restyle/Gamepad/gp_outfits_edge_bluePending_16.dds"
             else
-                edgeTexture = "EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds"
+                if data.day > GetNumClaimableDailyLoginRewardsInCurrentMonth() then
+                    edgeTexture = "EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_grey_16.dds"
+                else
+                    edgeTexture = "EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds"
+                end
             end
             control.isMilestoneTag:SetHidden(not isMilestone)
         end
@@ -342,7 +327,7 @@ end
 function ZO_DailyLoginRewards_Gamepad:OnPreviewHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDesciptor)
     self.currentRewardPreviewIndex = 0
-    self:CleanupTooltip()
+    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 end
 
 function ZO_DailyLoginRewards_Gamepad:OnPreviewHidden()

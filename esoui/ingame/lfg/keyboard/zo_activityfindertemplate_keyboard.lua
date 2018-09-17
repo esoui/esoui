@@ -275,6 +275,19 @@ function ZO_ActivityFinderTemplate_Keyboard:OnFilterChanged(comboBox, entryText,
         self.backgroundTexture:SetTexture(data:GetDescriptionTextureLargeKeyboard())
         data:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
 
+        -- Add game mode text into battlegrounds info
+        local hideControls = true
+        local setTypeListControl = self.setTypesSectionControl:GetNamedChild("List")
+        if data:IsSetEntryType() then
+            local setTypesHeaderText = data:GetSetTypesHeaderText()
+            local setTypesListText = data:GetSetTypesListText()
+            if setTypesHeaderText ~= "" and setTypesListText ~= "" then
+                setTypeListControl:SetText(zo_strformat(SI_BATTLEGROUND_GAME_MODE_FORMATTER_KEYBOARD, setTypesHeaderText, setTypesListText))
+                hideControls = false
+            end
+        end
+        setTypeListControl:SetHidden(hideControls)
+
         self:RefreshRewards(data)
     end
 
@@ -365,7 +378,7 @@ function ZO_ActivityFinderTemplate_Keyboard.ShowActivityTooltip(control)
     end
 
     local setTypesSectionControl = tooltipContents:GetNamedChild("SetTypesSection")
-    ZO_ActivityFinderTemplate_Shared.AppendSetDataToTooltip(setTypesSectionControl, data)
+    ZO_ActivityFinderTemplate_Shared.AppendSetDataToControl(setTypesSectionControl, data)
 end
 
 function ZO_ActivityFinderTemplate_Keyboard.HideActivityTooltip()

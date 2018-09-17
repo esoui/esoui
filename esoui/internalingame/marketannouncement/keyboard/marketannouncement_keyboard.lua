@@ -12,7 +12,7 @@ function ZO_MarketAnnouncement_Keyboard:Initialize(control)
     -- This data must be setup before parent initialize is called
     self.actionTileControlByType =
     {
-        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Keyboard_Control"
+        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Keyboard_Control",
     }
 
     local conditionFunction = function() return not IsInGamepadPreferredMode() end
@@ -31,10 +31,8 @@ function ZO_MarketAnnouncement_Keyboard:OnShowing()
     ZO_MarketAnnouncement_Shared.OnShowing(self)
 end
 
-function ZO_MarketAnnouncement_Keyboard:CreateMarketProduct(productId)
-    local marketProduct = ZO_MarketAnnouncementMarketProduct_Keyboard:New()
-    marketProduct:SetId(productId)
-    return marketProduct
+function ZO_MarketAnnouncement_Keyboard:CreateMarketProduct()
+    return ZO_MarketAnnouncementMarketProduct_Keyboard:New()
 end
 
 --global XML functions
@@ -44,6 +42,6 @@ function ZO_MarketAnnouncement_Keyboard_OnInitialize(control)
     SYSTEMS:RegisterKeyboardObject("marketAnnouncement", ZO_KEYBOARD_MARKET_ANNOUNCEMENT)
 end
 
-function ZO_MarketAnnouncement_Keyboard_OnOpenCrownStore()    
+function ZO_MarketAnnouncement_Keyboard_OnOpenCrownStore()
     ZO_KEYBOARD_MARKET_ANNOUNCEMENT:OnMarketAnnouncementViewCrownStoreKeybind()
 end

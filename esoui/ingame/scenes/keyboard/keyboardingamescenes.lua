@@ -796,6 +796,26 @@ giftInventoryViewScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 giftInventoryViewScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
 
 -------------------
+-- ESO Plus Offers Scene
+-------------------
+
+local esoPlusOffersScene = ZO_RemoteScene:New("esoPlusOffersSceneKeyboard", SCENE_MANAGER)
+esoPlusOffersScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+esoPlusOffersScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
+esoPlusOffersScene:AddFragment(MARKET_KEYBIND_STRIP_FRAGMENT)
+esoPlusOffersScene:AddFragment(KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT)
+esoPlusOffersScene:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+esoPlusOffersScene:AddFragment(FRAME_PLAYER_FRAGMENT)
+esoPlusOffersScene:AddFragment(RIGHT_BG_FRAGMENT)
+esoPlusOffersScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
+esoPlusOffersScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
+esoPlusOffersScene:AddFragment(MARKET_WINDOW_SOUNDS)
+esoPlusOffersScene:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+esoPlusOffersScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+esoPlusOffersScene:AddFragment(TITLE_FRAGMENT)
+esoPlusOffersScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
+
+-------------------
 --Main Menu
 -------------------
 
@@ -815,6 +835,13 @@ do
                 normal = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_up.dds",
                 pressed = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_down.dds",
                 highlight = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_over.dds",
+            },
+            {
+                categoryName = SI_CROWN_STORE_MENU_ESO_PLUS_LABEL,
+                descriptor = "esoPlusOffersSceneKeyboard",
+                normal = "esoui/art/treeicons/store_indexIcon_ESOPlus_up.dds",
+                pressed = "esoui/art/treeicons/store_indexIcon_ESOPlus_down.dds",
+                highlight = "esoui/art/treeicons/store_indexIcon_ESOPlus_over.dds",
             },
             {
                 categoryName = SI_CROWN_STORE_MENU_DAILY_LOGIN_LABEL,
@@ -844,7 +871,7 @@ do
             },
         }
 
-    SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "dailyLoginRewards", "giftInventoryKeyboard"))
+    SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "esoPlusOffersSceneKeyboard", "dailyLoginRewards", "giftInventoryKeyboard"))
     local NO_PREFERRED_SCENE_FUNCTION = nil
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_MARKET, "marketSceneGroup", iconData, NO_PREFERRED_SCENE_FUNCTION, TUTORIAL_TRIGGER_CROWN_STORE_TABS_SHOWN)
 end

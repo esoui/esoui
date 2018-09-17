@@ -348,7 +348,7 @@ do
         end
     end
 
-    function ZO_Stats_Common:UpdateOutfitDropdownOutfits(dropdown)
+    function ZO_Stats:UpdateOutfitDropdownOutfits(dropdown)
         dropdown:ClearItems()
 
         local function OnUnequipOutfitSelected()

@@ -411,12 +411,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
 
     list:SetOnSelectedDataChangedCallback(OnSelectedMenuEntry)
 
-    local listControl = list.control
-    local _, point1, relativeTo1, relativePoint1, offsetX1, offsetY1 = listControl:GetAnchor(0)
-    local _, point2, relativeTo2, relativePoint2, offsetX2, offsetY2 = listControl:GetAnchor(1)
-    listControl:ClearAnchors()
-    listControl:SetAnchor(point1, relativeTo1, relativePoint1, offsetX1, offsetY1 + ZO_GAMEPAD_ROLES_BAR_ADDITIONAL_HEADER_SPACE)
-    listControl:SetAnchor(point2, relativeTo2, relativePoint2, offsetX2, offsetY2)
+    GAMEPAD_GROUP_ROLES_BAR:SetupListAnchorsBelowGroupBar(list.control)
 
     list:SetDefaultSelectedIndex(2) --don't select MENU_ENTRY_TYPE_ROLES by default
 

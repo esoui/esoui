@@ -52,6 +52,7 @@ function ZO_ActivityFinderTemplate_Shared:InitializeSingularPanelControls(reward
     self.backgroundTexture = panel:GetNamedChild("Background")
     self.titleLabel = panel:GetNamedChild("Title")
     self.descriptionLabel = panel:GetNamedChild("Description")
+    self.setTypesSectionControl = panel:GetNamedChild("SetTypesSection")
     self.groupSizeRangeLabel = panel:GetNamedChild("GroupSizeLabel")
     
     local rewardsSection = panel:GetNamedChild("RewardsSection")
@@ -345,7 +346,7 @@ function ZO_ActivityFinderTemplate_Shared:GetLockTextByActivity(activityType)
     return lockText
 end
 
-function ZO_ActivityFinderTemplate_Shared.AppendSetDataToTooltip(setTypesSectionControl, setData)
+function ZO_ActivityFinderTemplate_Shared.AppendSetDataToControl(setTypesSectionControl, setData)
     local hideControls = true
     local setTypesHeader = setTypesSectionControl:GetNamedChild("Header")
     local setTypesList = setTypesSectionControl:GetNamedChild("List")

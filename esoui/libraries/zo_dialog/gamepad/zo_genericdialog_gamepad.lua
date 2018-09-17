@@ -412,40 +412,44 @@ end
 
 function ZO_GenericGamepadDialog_RefreshHeaderData(dialog, data)
     local headerData = dialog.headerData
-
-    local needRefresh = false
-
     if headerData and data then
         if data.data1 then
             headerData.data1HeaderText = data.data1.header
             headerData.data1Text = data.data1.value
-            needRefresh = true
+        else
+            headerData.data1HeaderText = nil
+            headerData.data1Text = nil
         end
 
         if data.data2 then
             headerData.data2HeaderText = data.data2.header
             headerData.data2Text = data.data2.value
-            needRefresh = true
+        else
+            headerData.data2HeaderText = nil
+            headerData.data2Text = nil
         end
 
         if data.data3 then
             headerData.data3HeaderText = data.data3.header
             headerData.data3Text = data.data3.value
-            needRefresh = true
+        else
+            headerData.data3HeaderText = nil
+            headerData.data3Text = nil
         end
 
         if data.data4 then
             headerData.data4HeaderText = data.data4.header
             headerData.data4Text = data.data4.value
-            needRefresh = true
+        else
+            headerData.data4HeaderText = nil
+            headerData.data4Text = nil
         end
-    end
 
-    if needRefresh then
         ZO_GamepadGenericHeader_Refresh(dialog.header, headerData)
+        return true
     end
 
-    return needRefresh
+    return false
 end
 
 function ZO_GenericGamepadDialog_OnInitialized(dialog)

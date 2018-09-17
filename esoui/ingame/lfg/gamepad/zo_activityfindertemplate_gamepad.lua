@@ -126,16 +126,16 @@ end
 function ZO_ActivityFinderTemplate_Gamepad:InitializeSingularPanelControls(rewardsTemplate)
     ZO_ActivityFinderTemplate_Shared.InitializeSingularPanelControls(self, rewardsTemplate)
 
-    self.lockControl = self.singularSection:GetNamedChild("Lock")
-    self.lockReasonLabel = self.lockControl:GetNamedChild("Reason")
-
-    local function OnLockReasonLabelUpdate()
+    local function OnUpdate()
         if self.lockReasonTextFunction then
-            self.lockReasonLabel:SetText(self.lockReasonTextFunction())
+            self:LayoutLockedTooltip(self.lockReasonTextFunction())
         end
     end
-    self.lockReasonLabel:SetHandler("OnUpdate", OnLockReasonLabelUpdate)
-    self.setTypesSectionControl = self.singularSection:GetNamedChild("SetTypesSection")
+    self.control:SetHandler("OnUpdate", OnUpdate)
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:LayoutLockedTooltip(lockReasonText)
+    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_GAMEPAD_ACTIVITY_FINDER_LOCATION_LOCKED_TOOLTIP_TITLE), lockReasonText)
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:RegisterEvents()
@@ -469,15 +469,14 @@ do
                             if type(lockReasonText) == "function" then
                                 self.lockReasonTextFunction = lockReasonText
                             else
-                                self.lockReasonLabel:SetText(lockReasonText)
+                                self:LayoutLockedTooltip(lockReasonText)
                                 self.lockReasonTextFunction = nil
                             end
-                            self.lockControl:SetHidden(false)
                         else
-                            self.lockControl:SetHidden(true)
+                            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
                         end
                         
-                        ZO_ActivityFinderTemplate_Shared.AppendSetDataToTooltip(self.setTypesSectionControl, entryData)
+                        ZO_ActivityFinderTemplate_Shared.AppendSetDataToControl(self.setTypesSectionControl, entryData)
                         return
                     end
                 end
@@ -486,6 +485,8 @@ do
 
         if self.isShowingSingularPanel then
             SCENE_MANAGER:RemoveFragmentGroup(self.singularFragmentGroup)
+            self.lockReasonTextFunction = nil
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
             self.isShowingSingularPanel = false
         end
     end

@@ -19,6 +19,13 @@ announcementScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYB
 local showMarketScene = ZO_RemoteScene:New("show_market", SCENE_MANAGER)
 showMarketScene:AddFragment(SHOW_MARKET_FRAGMENT)
 
+-------------------
+-- Show Eso Plus Scene
+-------------------
+
+local showEsoPlusScene = ZO_RemoteScene:New("show_esoPlus", SCENE_MANAGER)
+showEsoPlusScene:AddFragment(SHOW_ESO_PLUS_FRAGMENT)
+
 ----------------
 --Lockpick Scene
 ----------------

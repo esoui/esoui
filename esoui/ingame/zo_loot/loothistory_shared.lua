@@ -123,7 +123,7 @@ do
     end
 
     function ZO_LootHistory_Shared:CreateFadingStationaryControlBuffer(control, fadeLabelAnimationName, fadeIconAnimationName, fadeContainerAnimation, anchor, maxEntries, containerShowTime, containerType)
-        lootStream = ZO_FadingStationaryControlBuffer:New(control, maxEntries, fadeLabelAnimationName,  fadeIconAnimationName, fadeContainerAnimation, anchor, containerType)
+        local lootStream = ZO_FadingStationaryControlBuffer:New(control, maxEntries, fadeLabelAnimationName,  fadeIconAnimationName, fadeContainerAnimation, anchor, containerType)
         lootStream:AddTemplate(self.entryTemplate, {setup = LootSetupFunction, equalityCheck = AreEntriesEqual, equalitySetup = EqualitySetup })
         lootStream:SetContainerShowTime(containerShowTime or 5000)
 
@@ -166,15 +166,17 @@ function ZO_LootHistory_Shared:DisplayLootQueue()
             self:AddLootEntry(lootEntry)
             self.lootQueue[i] = nil
         end
-
+        self.lootStream:Resume()
+        self.lootStreamPersistent:Resume()
         self.hidden = false
     end
 end
 
 function ZO_LootHistory_Shared:HideLootQueue()
     if not self.hidden then
-        self.lootStream:FadeAll()
         self.hidden = true
+        self.lootStream:Pause()
+        self.lootStreamPersistent:Pause()
     end
 end
 

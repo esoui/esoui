@@ -185,7 +185,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeGridListPanel()
     GAMEPAD_OUTFITS_GRID_LIST_FRAGMENT = ZO_FadeSceneFragment:New(gridListPanel)
 
     self.gridListPanelControl = gridListPanel
-    self.gridListPanelList = ZO_GridScrollList_Gamepad:New(gridListPanel, FILL_ROW_WITH_EMPTY_CELLS)
+    self.gridListPanelList = ZO_SingleTemplateGridScrollList_Gamepad:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local function OutfitStyleGridEntrySetup(control, data, list)
         ZO_DefaultGridEntrySetup(control, data, list)

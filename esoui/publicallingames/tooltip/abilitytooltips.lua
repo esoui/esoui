@@ -401,6 +401,30 @@ function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pend
     end
 end
 
+-- In most cases, you should prefer LayoutSkillProgressionData(), which carries inside of it the abilityId associated with that progression.
+-- This is for cases where we might want to show an ability that is indirectly associated with a progression, like for example a chain ability.
+function ZO_Tooltip:LayoutAbilityWithSkillProgressionData(abilityId, skillProgressionData)
+    local abilityName = GetAbilityName(abilityId)
+    local currentRank = skillProgressionData:GetCurrentRank()
+    if currentRank then
+        local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+
+        self:AddSectionEvenIfEmpty(headerSection)
+
+        local formattedNameAndRank = ZO_CachedStrFormat(SI_ABILITY_NAME_AND_RANK, abilityName, currentRank)
+        self:AddLine(formattedNameAndRank, self:GetStyle("title"))
+
+        local currentXP = skillProgressionData:GetCurrentXP()
+        local lastRankXP, nextRankXP = skillProgressionData:GetRankXPExtents(currentRank)
+        self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
+
+        self:AddAbilityStats(abilityId, currentRank)
+        self:AddAbilityDescription(abilityId)
+    else
+        self:LayoutSimpleAbility(abilityId)
+    end
+end
+
 function ZO_Tooltip:LayoutSimpleAbility(abilityId)
     local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
 

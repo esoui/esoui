@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_KeyboardCrownStore_TopLevel" inherits="ZO_MarketTemplate">
+            <OnInitialized>
+                ZO_CrownStore_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)ChapterUpgrade" inherits="ZO_ChapterUpgrade_KeyboardTemplate" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-15"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

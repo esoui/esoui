@@ -1,7 +1,5 @@
 ZO_DYE_TOOL_GRID_ENTRY_DIMENTIONS = 64
 
-local GAMEPAD_DYEING_SCENE_NAME = "gamepad_dyeing"
-
 --[[ ZO_Dyeing_Slots_Panel_Gamepad ]]--
 
 ZO_Dyeing_Slots_Panel_Gamepad = ZO_Restyle_Station_Helper_Panel_Gamepad:Subclass()
@@ -61,7 +59,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
     -- Apply
     local apply = ZO_RESTYLE_STATION_GAMEPAD:CreateApplyKeybind(self)
 
-	-- Options
+    -- Options
     local options = ZO_RESTYLE_STATION_GAMEPAD:CreateOptionsKeybind()
 
     -- Undo All
@@ -144,7 +142,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeTools()
 
     GAMEPAD_DYE_TOOLS_GRID_LIST_FRAGMENT = ZO_FadeSceneFragment:New(toolsGrid)
 
-    self.dyeToolsGridList = ZO_GridScrollList_Gamepad:New(toolsGrid)
+    self.dyeToolsGridList = ZO_SingleTemplateGridScrollList_Gamepad:New(toolsGrid, ZO_GRID_SCROLL_LIST_DONT_AUTOFILL)
 
     local function DyeToolGridEntrySetup(control, data, list)
         ZO_DefaultGridEntrySetup(control, data, selected)
@@ -188,7 +186,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeDyesGrid()
     local dyesGrid = self.control:GetNamedChild("DyesGrid")
     GAMEPAD_DYES_GRID_LIST_FRAGMENT = ZO_FadeSceneFragment:New(dyesGrid)
 
-    self.dyeGridList = ZO_GridScrollList_Gamepad:New(dyesGrid)
+    self.dyeGridList = ZO_SingleTemplateGridScrollList_Gamepad:New(dyesGrid, ZO_GRID_SCROLL_LIST_DONT_AUTOFILL)
 
     local function DyeSwatchGridEntrySetup(control, data, list)
         control:SetColor(ZO_DYEING_SWATCH_INDEX, data.r, data.g, data.b)

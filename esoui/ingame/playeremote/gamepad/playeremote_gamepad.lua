@@ -671,11 +671,11 @@ function ZO_GamepadPlayerEmote:AssignSelectedQuickslot()
     if self.radialMenu.selectedEntry then
         local selectedData = self.radialMenu.selectedEntry.data
         local slotIndex = selectedData.slot + ACTION_BAR_FIRST_EMOTE_QUICK_SLOT_INDEX
-        if self.activeEmoteType == EMOTE_ITEM_TYPE_EMOTE then
-            SelectSlotEmote(self.activeEmoteId, slotIndex)
-        elseif self.activeEmoteType == EMOTE_ITEM_TYPE_QUICK_CHAT then
-            SelectSlotQuickChat(self.activeEmoteId, slotIndex)
+        local actionType = ACTION_TYPE_EMOTE
+        if self.activeEmoteType == EMOTE_ITEM_TYPE_QUICK_CHAT then
+            actionType = ACTION_TYPE_QUICK_CHAT
         end
+        SelectSlotSimpleAction(actionType, self.activeEmoteId, slotIndex)
         self.slotIndexForAnim = selectedData.slot
         PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
     end

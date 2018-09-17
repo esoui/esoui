@@ -9,9 +9,13 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:New(...)
     return ZO_MarketAnnouncementMarketProductTile.New(self, ...)
 end
 
+function ZO_MarketAnnouncementMarketProductTile_Keyboard:Initialize(...)
+    return ZO_MarketAnnouncementMarketProductTile.Initialize(self, ...)
+end
+
 -- Begin ZO_MarketAnnouncementMarketProductTile Overrides --
 
-function ZO_MarketAnnouncementMarketProductTile:AddMouseOverElement(element)
+function ZO_MarketAnnouncementMarketProductTile_Keyboard:AddMouseOverElement(element)
     self.mouseInputGroup:Add(element, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
 end
 
@@ -23,12 +27,15 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(marketProduct, s
     if initializingMarketProduct then
         self.control.object:SetActionCallback(function() ZO_KEYBOARD_MARKET_ANNOUNCEMENT:OnMarketAnnouncementViewCrownStoreKeybind() end)
 
-        if self.marketProduct and self.marketProduct.description then
-            self.mouseInputGroup:Add(self.marketProduct.description, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-            self.mouseInputGroup:Add(self.marketProduct.description.scroll, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-            self.mouseInputGroup:Add(self.marketProduct.description.scrollbar, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-            self.mouseInputGroup:Add(self.marketProduct.description.scrollUpButton, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
-            self.mouseInputGroup:Add(self.marketProduct.description.scrollDownButton, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+        if self.marketProduct then
+            local descriptionControl = self.marketProduct:GetDescriptionControl()
+            if descriptionControl then
+                self.mouseInputGroup:Add(descriptionControl, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+                self.mouseInputGroup:Add(descriptionControl.scroll, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+                self.mouseInputGroup:Add(descriptionControl.scrollbar, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+                self.mouseInputGroup:Add(descriptionControl.scrollUpButton, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+                self.mouseInputGroup:Add(descriptionControl.scrollDownButton, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+            end
         end
     end
 end
@@ -108,6 +115,14 @@ do
     end
 end
 
+function ZO_MarketAnnouncementMarketProductTile_Keyboard:SetHighlightHidden(hidden, instant)
+    ZO_MarketAnnouncementMarketProductTile.SetHighlightHidden(self, hidden, instant)
+
+    if self.marketProduct then
+        self.marketProduct:SetHighlightHidden(hidden)
+    end
+end
+
 -- End ZO_ActionTile_Keyboard Overrides --
 
 function ZO_MarketAnnouncementMarketProductTile_Keyboard:OnMouseUp(button, upInside)
@@ -121,5 +136,6 @@ end
 -----
 
 function ZO_MarketAnnouncementMarketProductTile_Keyboard_OnInitialized(control)
+    ZO_MarketAnnouncementMarketProduct_Keyboard_OnInitialized(control)
     ZO_MarketAnnouncementMarketProductTile_Keyboard:New(control)
 end

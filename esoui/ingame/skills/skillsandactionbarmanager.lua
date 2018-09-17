@@ -34,6 +34,12 @@ function ZO_SkillsAndActionBarManager:ResetInterface()
     self:SetSkillPointAllocationMode(SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
 end
 
+function ZO_SkillsAndActionBarManager:ResetRespecState()
+    self:SetSkillRespecPaymentType(SKILL_RESPEC_PAYMENT_TYPE_GOLD)
+    self:SetSkillPointAllocationMode(SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+    self:FireCallbacks("RespecStateReset")
+end
+
 function ZO_SkillsAndActionBarManager:GetSkillRespecPaymentType()
     return self.skillRespecPaymentType
 end
@@ -80,7 +86,7 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
 end
 
 do
-    internalassert(RESPEC_RESULT_MAX_VALUE == 16, "Update EXPECTED_RESPEC_FAILURES")
+    internalassert(RESPEC_RESULT_MAX_VALUE == 30, "Update EXPECTED_RESPEC_FAILURES")
     local EXPECTED_RESPEC_FAILURES =
     {
         [RESPEC_RESULT_IS_IN_COMBAT] = true,
@@ -90,6 +96,10 @@ do
             self:ResetInterface()
         else
             internalassert(EXPECTED_RESPEC_FAILURES[result], string.format("Unexpected Respec Failure (%d)", result))
+            if not self:DoesSkillPointAllocationModeBatchSave() then
+                -- if we aren't in batch mode, the user has no way to fix bad state, so we need to hard reset for them
+                self:ResetRespecState()
+            end
         end
     end
 end

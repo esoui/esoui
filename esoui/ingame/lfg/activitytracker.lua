@@ -1,36 +1,3 @@
-local KEYBOARD_STYLE =
-{
-    FONT_HEADER = "ZoFontGameShadow",
-    FONT_STATUS = "ZoFontGameShadow",
-    TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
-
-    TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMLEFT, 0, 10),
-    -- The quest timer anchors are very old and bizarre and they screw everything up
-    -- So these anchors match what the quest tracker normally does.  If we get the time to redo quest timer/tracker in a not insane way, we should fix this
-    -- Everything else should anchor to the bottom of the activity tracker, cause it got all the hard stuff out of the way and made it intuitive from here on
-    TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelTimerAnchor, BOTTOMLEFT, 35, 10),
-    TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 10, ANCHOR_CONSTRAINS_X),
-
-    CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
-    CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
-
-    STATUS_PRIMARY_ANCHOR_OFFSET_Y = 2,
-}
-
-local GAMEPAD_STYLE =
-{
-    FONT_HEADER = "ZoFontGamepadBold27",
-    FONT_STATUS = "ZoFontGamepad34",
-    TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
-
-    TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMRIGHT, 0, 20),
-    TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelTimerAnchor, BOTTOMRIGHT, -44, 20),
-
-    CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
-
-    STATUS_PRIMARY_ANCHOR_OFFSET_Y = 10,
-}
-
 local HEADER_MAPPING =
 {
     [LFG_ACTIVITY_DUNGEON] = GetString(SI_ACTIVITY_FINDER_CATEGORY_DUNGEON_FINDER),
@@ -45,53 +12,64 @@ local HEADER_MAPPING =
 --Initialization--
 ------------------
 
-local ActivityTracker = ZO_Object:Subclass()
+local ActivityTracker = ZO_HUDTracker_Base:Subclass()
 
 function ActivityTracker:New(...)
-    local tracker = ZO_Object.New(self)
-    tracker:Initialize(...)
-    return tracker
+    return ZO_HUDTracker_Base.New(self, ...)
 end
 
 function ActivityTracker:Initialize(control)
-    self.control = control
-    control.owner = self
+    ZO_HUDTracker_Base.Initialize(self, control)
 
-    self.container = control:GetNamedChild("Container")
-    self.headerLabel = self.container:GetNamedChild("Header")
-    self.statusLabel = self.container:GetNamedChild("Status")
+    ACTIVITY_TRACKER_FRAGMENT = self:GetFragment()
+end
 
-    local allConstants = { KEYBOARD_STYLE, GAMEPAD_STYLE }
-    for _, constants in ipairs(allConstants) do
-        constants.HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
-        constants.STATUS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, constants.STATUS_PRIMARY_ANCHOR_OFFSET_Y)
-    end
+function ActivityTracker:InitializeStyles()
+    self.styles =
+    {
+        keyboard =
+        {
+            FONT_HEADER = "ZoFontGameShadow",
+            FONT_SUBLABEL = "ZoFontGameShadow",
+            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
 
-    KEYBOARD_STYLE.HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
-    KEYBOARD_STYLE.STATUS_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, KEYBOARD_STYLE.STATUS_PRIMARY_ANCHOR_OFFSET_Y)
+            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMLEFT, 0, 10),
+            -- The quest timer anchors are very old and bizarre and they screw everything up
+            -- So these anchors match what the quest tracker normally does.  If we get the time to redo quest timer/tracker in a not insane way, we should fix this
+            -- Everything else should anchor to the bottom of the activity tracker, cause it got all the hard stuff out of the way and made it intuitive from here on
+            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelTimerAnchor, BOTTOMLEFT, 35, 10),
+            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 10, ANCHOR_CONSTRAINS_X),
 
-    ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
+            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
+            CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
 
+            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 2,
+        },
+        gamepad =
+        {
+            FONT_HEADER = "ZoFontGamepadBold27",
+            FONT_SUBLABEL = "ZoFontGamepad34",
+            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
-    ACTIVITY_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(self.container)
+            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMRIGHT, 0, 20),
+            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelTimerAnchor, BOTTOMRIGHT, -44, 20),
 
-    self:RegisterEvents()
+            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
+
+            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 10,
+        }
+    }
+    ZO_HUDTracker_Base.InitializeStyles(self)
 end
 
 function ActivityTracker:RegisterEvents()
+    ZO_HUDTracker_Base.RegisterEvents(self)
+
     local function Update()
         self:Update()
     end
-    
+
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", Update)
-
-    local function OnQuestTrackerFragmentStateChanged(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING or newState == SCENE_FRAGMENT_HIDDEN then
-            self:RefreshAnchors()
-        end
-    end
-
-    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerFragmentStateChange", OnQuestTrackerFragmentStateChanged)
 end
 
 function ActivityTracker:Update()
@@ -106,56 +84,32 @@ function ActivityTracker:Update()
 
     if activityId > 0 then
         activityType = GetActivityType(activityId)
-        self.headerLabel:SetText(HEADER_MAPPING[activityType])
-        self.statusLabel:SetText(GetString("SI_ACTIVITYFINDERSTATUS", GetActivityFinderStatus()))
+        self:SetHeaderText(HEADER_MAPPING[activityType])
+        self:SetSubLabelText(GetString("SI_ACTIVITYFINDERSTATUS", GetActivityFinderStatus()))
     end
 
-    self.headerLabel:SetHidden(activityType == nil)
-    self.statusLabel:SetHidden(activityType == nil)
+    local fragment = self:GetFragment()
+    if fragment then
+        fragment:SetHiddenForReason("NoTrackedActivity", activityType == nil, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
+    end
     self.activityType = activityType
 end
 
-function ActivityTracker:ApplyPlatformStyle(style)
-    self.currentStyle = style
-
-    self.headerLabel:SetModifyTextType(style.TEXT_TYPE_HEADER)
-    self.headerLabel:SetFont(style.FONT_HEADER)
-    if self.activityType then
-        self.headerLabel:SetText(HEADER_MAPPING[self.activityType])
-    end
-    self.statusLabel:SetFont(style.FONT_STATUS)
-    
-    self:RefreshAnchors()
-    
+function ActivityTracker:OnShowing()
+    self:FireCallbacks("OnActivityTrackerUpdated")
 end
 
-function ActivityTracker:RefreshAnchors()
+function ActivityTracker:GetPrimaryAnchor()
     local style = self.currentStyle
-
-    self.control:ClearAnchors()
-    local primaryAnchor = FOCUSED_QUEST_TRACKER_FRAGMENT:IsShowing() and style.TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER or style.TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER
-    primaryAnchor:AddToControl(self.control)
-    if style.TOP_LEVEL_SECONDARY_ANCHOR then
-        style.TOP_LEVEL_SECONDARY_ANCHOR:AddToControl(self.control)
+    if FOCUSED_QUEST_TRACKER_FRAGMENT:IsShowing() then
+        return style.TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER
+    else
+        return style.TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER
     end
+end
 
-    self.container:ClearAnchors()
-    style.CONTAINER_PRIMARY_ANCHOR:AddToControl(self.container)
-    if style.CONTAINER_SECONDARY_ANCHOR then
-        style.CONTAINER_SECONDARY_ANCHOR:AddToControl(self.container)
-    end
-
-    self.headerLabel:ClearAnchors()
-    style.HEADER_PRIMARY_ANCHOR:AddToControl(self.headerLabel)
-    if style.HEADER_SECONDARY_ANCHOR then
-        style.HEADER_SECONDARY_ANCHOR:AddToControl(self.headerLabel)
-    end
-
-    self.statusLabel:ClearAnchors()
-    style.STATUS_PRIMARY_ANCHOR:AddToControl(self.statusLabel)
-    if style.STATUS_SECONDARY_ANCHOR then
-        style.STATUS_SECONDARY_ANCHOR:AddToControl(self.statusLabel)
-    end
+function ActivityTracker:GetSecondaryAnchor()
+    return self.currentStyle.TOP_LEVEL_SECONDARY_ANCHOR
 end
 
 function ZO_ActivityTracker_OnInitialized(control)

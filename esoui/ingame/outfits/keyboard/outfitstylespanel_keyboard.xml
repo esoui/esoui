@@ -73,7 +73,7 @@
             </OnInitialized>
 
             <Controls>
-                <StatusBar name="$(parent)ProgressStatusBar" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true">
+                <StatusBar name="$(parent)ProgressStatusBar" inherits="ZO_ArrowProgressBarWithBG" mouseEnabled="true">
                     <Anchor point="TOPLEFT" />
                     <Anchor point="TOPRIGHT" />
 
@@ -84,12 +84,6 @@
                     <OnMouseExit>
                         ZO_OutfitStylesProgressBar_Keyboard_OnMouseExit(self)
                     </OnMouseExit>
-                    
-                    <Controls>
-                        <Label name="$(parent)Progress" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY">
-                            <Anchor point="CENTER" />
-                        </Label>
-                    </Controls>
                 </StatusBar>
 
                 <Control name="$(parent)TypeFilter" inherits="ZO_ComboBox">

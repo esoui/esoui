@@ -484,6 +484,11 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
+    if self.hudUISceneName == "housingEditorHud" or self.hudUISceneName == "housingEditorHudUI" then
+        HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
+        return
+    end
+
     if not IsInGamepadPreferredMode() and GUILD_RANKS:AttemptSaveIfBlocking() then
         -- The guild ranks scene was the current blocking scene, so we can return early here.
         return

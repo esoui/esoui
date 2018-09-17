@@ -8,11 +8,7 @@
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <Backdrop name="$(parent)Highlight" centerColor="00000000" alpha="0" layer="0" level="2" blendMode="ADD">
-                            <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16" />
-                            <Anchor point="TOPLEFT" offsetX="5" offsetY="5"/>
-                            <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5"/>
-                        </Backdrop>
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_AnnouncementTileHighlight_Keyboard" />
 
                         <Button name="$(parent)ActionButton" override="true" mouseOverBlendMode="ALPHA" level="5" />
                     </Controls>

@@ -229,12 +229,6 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
         self:LayoutBankingEntryTooltip(self:GetTargetData())
     end
 
-    local function OnGuildBankTransferError(_, reason)
-        if reason == GUILD_BANK_ITEM_NOT_FOUND or reason == GUILD_BANK_NOT_IN_A_GUILD then
-            GAMEPAD_GUILD_BANK_ERROR:Show(reason)
-        end
-    end
-    
     local function OnGuildBankSelected()
         self.loadingGuildBank = true
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
@@ -326,7 +320,6 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
         [EVENT_GUILD_BANK_ITEM_ADDED] = OnGuildBankUpdated,
         [EVENT_GUILD_BANK_ITEM_REMOVED] = OnGuildBankUpdated,
         [EVENT_GUILD_BANK_UPDATED_QUANTITY] = OnGuildBankUpdated,
-        [EVENT_GUILD_BANK_TRANSFER_ERROR] = OnGuildBankTransferError,
 
         [EVENT_MONEY_UPDATE] = UpdateMoney,
         [EVENT_GUILD_BANKED_MONEY_UPDATE] = UpdateGuildBankedCurrency,

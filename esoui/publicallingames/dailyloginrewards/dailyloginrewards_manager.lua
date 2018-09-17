@@ -45,4 +45,9 @@ function DailyLoginRewards_Manager:IsClaimableRewardInMonth()
     return GetDailyLoginNumRewardsClaimedInMonth() < GetNumRewardsInCurrentDailyLoginMonth() and GetTimeUntilNextDailyLoginMonthS() > ZO_ONE_DAY_IN_SECONDS
 end
 
+function DailyLoginRewards_Manager:IsDailyRewardsLocked()
+    local numRewards = GetNumRewardsInCurrentDailyLoginMonth()
+    return numRewards == 0
+end
+
 ZO_DAILYLOGINREWARDS_MANAGER = DailyLoginRewards_Manager:New()

@@ -667,10 +667,16 @@ function ZO_SkillsManager:RegisterForEvents()
         self.skillListRefreshGroup:MarkDirty("Visible")
         self:UpdateKeybinds()
     end
-
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", OnSkillPointAllocationModeChanged)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", OnFullSystemUpdated)
 
+    control:RegisterForEvent(EVENT_PLAYER_DEACTIVATED, function() self:OnPlayerDeactivated() end)
     KEYBOARD_SKILLS_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
+
+    local function OnPlayerCombatStateChanged()
+        self.skillListRefreshGroup:MarkDirty("Visible")
+    end
+    control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnPlayerCombatStateChanged)
 end
 
 function ZO_SkillsManager:GetSelectedSkillLineData()
@@ -954,7 +960,7 @@ do
         slot.icon:SetTexture(skillProgressionData:GetIcon())
         ZO_Skills_SetKeyboardAbilityButtonTextures(slot)
         ZO_ActionSlot_SetUnusable(slot.icon, not isPurchased)
-        slot:SetEnabled(isPurchased)
+        slot:SetEnabled(isPurchased and not isPassive)
 
         local hideXPBar = true
         if isActive and skillProgressionData:HasRankData() then
@@ -1001,7 +1007,11 @@ do
 
             if increaseTextures then
                 ApplyButtonTextures(increaseButton, increaseTextures)
-                increaseButton:SetState(BSTATE_NORMAL)
+                if IsUnitInCombat("player") then
+                    increaseButton:SetState(BSTATE_DISABLED)
+                else
+                    increaseButton:SetState(BSTATE_NORMAL)
+                end
                 hideIncreaseButton = false
             end
         else
@@ -1200,6 +1210,16 @@ function ZO_SkillsManager:OnConfirmHideScene(scene, nextSceneName, bypassHideSce
     end
 end
 
+function ZO_SkillsManager:OnPlayerDeactivated()
+    --If we are deactivated we might be jumping somewhere else. We also might be in the respec interaction which will not be valid when we get where we are going. So just clear out the respec here.
+    if KEYBOARD_SKILLS_SCENE:IsShowing() and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+        local DEFAULT_PUSH = nil
+        local DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK = nil
+        local DEFAULT_NUM_SCENES_NEXT_SCENE_POPS = nil
+        SCENE_MANAGER:Show(SCENE_MANAGER:GetBaseScene():GetName(), DEFAULT_PUSH, DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK, DEFAULT_NUM_SCENES_NEXT_SCENE_POPS, ZO_BHSCR_SKILLS_PLAYER_DEACTIVATED)
+    end
+end
+
 function ZO_Skills_AbilitySlot_OnMouseEnter(control)
     SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations()
 
@@ -1296,6 +1316,17 @@ function ZO_Skills_AbilityIncrease_OnClicked(control, shift)
             ZO_Dialogs_ShowDialog("MORPH_ABILITY_CONFIRM", skillData)
         end
     end
+end
+
+function ZO_Skills_AbilityIncrease_OnMouseEnter(control)
+    if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY and IsUnitInCombat("player") then
+        InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+        SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT))
+    end
+end
+
+function ZO_Skills_AbilityIncrease_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end
 
 function ZO_Skills_AbilityDecrease_OnClicked(control, shift)

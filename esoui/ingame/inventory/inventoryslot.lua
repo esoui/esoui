@@ -390,6 +390,17 @@ local function TryUseQuestItem(inventorySlot)
     end
 end
 
+function ZO_InventorySlot_CanQuickslotItem(inventorySlot)
+    if inventorySlot.filterData then
+        if ZO_IsElementInNumericallyIndexedTable(inventorySlot.filterData, ITEMFILTERTYPE_QUICKSLOT) then
+            return true
+        elseif ZO_IsElementInNumericallyIndexedTable(inventorySlot.filterData, ITEMFILTERTYPE_QUEST_QUICKSLOT) then
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_InventorySlot_CanSplitItemStack(inventorySlot)
     if ZO_InventorySlot_GetStackCount(inventorySlot) > 1 then
         local hasFreeSlot = FindFirstEmptySlotInBag(inventorySlot.bagId) ~= nil
@@ -1461,41 +1472,60 @@ local function AddQuickslotAddAction(callback, slotActions)
     slotActions:AddSlotAction(SI_ITEM_ACTION_MAP_TO_QUICKSLOT, callback, "primary", nil, QUICKSLOT_SHARED_OPTIONS)
 end
 
-local function DefaultQuickslotAction(inventorySlot, slotActions)
+local function ItemQuickslotAction(inventorySlot, slotActions)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     if(QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
-        local currentSlot = GetItemCurrentActionBarSlot(bag, index)
+        local currentSlot = FindActionSlotMatchingItem(bag, index)
         if currentSlot then
             AddQuickslotRemoveAction(slotActions, currentSlot)
         else
             local validSlot = GetFirstFreeValidSlotForItem(bag, index)
             if validSlot then
-                AddQuickslotAddAction(function() SelectSlotItem(bag, index, validSlot) end, slotActions)
+                AddQuickslotAddAction(function()
+                     SelectSlotItem(bag, index, validSlot)
+                 end, slotActions)
             end
         end
     end
 end
 
-local function CollectionsQuickslotAction(slot, slotActions)
+local function ApplySimpleQuickslotAction(slotActions, actionType, actionId)
     if(QUICKSLOT_WINDOW:AreQuickSlotsShowing()) then
-        local collectibleId = slot.collectibleId
-        local currentSlot = GetCollectibleCurrentActionBarSlot(collectibleId)
+        local currentSlot = FindActionSlotMatchingSimpleAction(actionType, actionId)
         if currentSlot then
             AddQuickslotRemoveAction(slotActions, currentSlot)
         else
-            local validSlot = GetFirstFreeValidSlotForCollectible(collectibleId)
+            local validSlot = GetFirstFreeValidSlotForSimpleAction(actionType, actionId)
             if validSlot then
-                AddQuickslotAddAction(function() SelectSlotCollectible(collectibleId, validSlot) end, slotActions)
+                AddQuickslotAddAction(function()
+                    SelectSlotSimpleAction(actionType, actionId, validSlot)
+                end, slotActions)
             end
         end
     end
 end
 
+local function CollectibleQuickslotAction(slot, slotActions)
+    ApplySimpleQuickslotAction(slotActions, ACTION_TYPE_COLLECTIBLE, slot.collectibleId)
+end
+
+local function QuestItemQuickslotAction(slot, slotActions)
+    local questItemId
+    if slot.toolIndex then
+        questItemId = GetQuestToolQuestItemId(slot.questIndex, slot.toolIndex)
+    else
+        questItemId = GetQuestConditionQuestItemId(slot.questIndex, slot.stepIndex, slot.conditionIndex)
+    end
+    ApplySimpleQuickslotAction(slotActions, ACTION_TYPE_QUEST_ITEM, questItemId)
+end
+
+internalassert(ACTION_TYPE_MAX_VALUE == 11, "Update quickslot actions")
 local quickslotActions =
 {
-    [SLOT_TYPE_ITEM] = DefaultQuickslotAction,
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] = DefaultQuickslotAction,
-    [SLOT_TYPE_COLLECTIONS_INVENTORY] = CollectionsQuickslotAction,
+    [SLOT_TYPE_ITEM] = ItemQuickslotAction,
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] = ItemQuickslotAction,
+    [SLOT_TYPE_COLLECTIONS_INVENTORY] = CollectibleQuickslotAction,
+    [SLOT_TYPE_QUEST_ITEM] = QuestItemQuickslotAction,
 }
 
 ---- Rename Action Handlers ----
@@ -1792,7 +1822,7 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 -- The order of the rest of the secondary actions in the table determines the order they appear on the context menu
 local potentialActionsForSlotType =
 {
-    [SLOT_TYPE_QUEST_ITEM] =                    { "use", "link_to_chat" },
+    [SLOT_TYPE_QUEST_ITEM] =                    { "quickslot", "use", "link_to_chat" },
     [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },

@@ -94,7 +94,7 @@ end
 
 function ZO_ItemPreviewListHelper_Shared:GetPreviewData(previewIndex)
     if self:IsValidPreviewIndex(previewIndex) then
-        return self.previewListEntries[self.previewIndex]
+        return self.previewListEntries[previewIndex]
     end
 end
 

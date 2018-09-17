@@ -1,16 +1,16 @@
 local function SetupLogoutDialog(dialog)
 	local dailyRewardTile = dialog:GetNamedChild("DailyRewardTile")
-    local hasNoRewards = GetNumRewardsInCurrentDailyLoginMonth() == 0
+    local isLocked = ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
 	if dailyRewardTile then
         local tileObject = dailyRewardTile.object
-        tileObject:SetHidden(hasNoRewards)
-		tileObject:SetActionAvailable(not hasNoRewards)
+        tileObject:SetHidden(isLocked)
+		tileObject:SetActionAvailable(not isLocked)
 		tileObject:RefreshLayout()
 		tileObject:SetSelected(true)
 	end
 
     local dividerControl = dialog:GetNamedChild("TileDivider")
-    dividerControl:SetHidden(hasNoRewards)
+    dividerControl:SetHidden(isLocked)
 end
 
 function ZO_LogoutDialog_Gamepad_OnInitialized(self)
@@ -30,15 +30,15 @@ function ZO_LogoutDialog_Gamepad_OnInitialized(self)
         customControl = self,
         setup = SetupLogoutDialog,
         updateFn = function(dialog)
-            local hasNoRewards = GetNumRewardsInCurrentDailyLoginMonth() == 0
-            if tileObject:IsActionAvailable() == hasNoRewards then
-                tileObject:SetHidden(hasNoRewards)
-		        tileObject:SetActionAvailable(not hasNoRewards)
+            local isLocked = ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
+            if tileObject:IsActionAvailable() == isLocked then
+                tileObject:SetHidden(isLocked)
+		        tileObject:SetActionAvailable(not isLocked)
                 tileObject:RefreshLayout()
                 ZO_GenericGamepadDialog_RefreshKeybinds(self)
 
                 local dividerControl = dialog:GetNamedChild("TileDivider")
-                dividerControl:SetHidden(hasNoRewards)
+                dividerControl:SetHidden(isLocked)
             end
         end,
         OnHiddenCallback = CleanupLogoutDialog,

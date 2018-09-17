@@ -6,16 +6,9 @@ function WorldMapInfo:New(...)
 end
 
 function WorldMapInfo:Initialize(control)
-    ZO_WorldMapInfo_Shared.Initialize(self, control)
+    ZO_WorldMapInfo_Shared.Initialize(self, control, ZO_FadeSceneFragment)
 
-    WORLD_MAP_INFO_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    WORLD_MAP_INFO_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_SHOWING) then
-            self.modeBar:ShowLastFragment()
-        elseif(newState == SCENE_FRAGMENT_HIDDEN) then
-            self.modeBar:Clear()
-        end
-    end)
+    WORLD_MAP_INFO_FRAGMENT = self.worldMapInfoFragment
 end
 
 function WorldMapInfo:InitializeTabs()
@@ -68,6 +61,14 @@ function WorldMapInfo:SelectTab(name)
     else
         self.modeBar:SetStartingFragment(name)
     end
+end
+
+function WorldMapInfo:OnShowing()
+    self.modeBar:ShowLastFragment()
+end
+
+function WorldMapInfo:OnHidden()
+    self.modeBar:Clear()
 end
 
 --Global

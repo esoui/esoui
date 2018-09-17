@@ -39,6 +39,7 @@ function ZO_SharedGamepadEntry_OnInitialized(control)
     control.statusIndicator = control:GetNamedChild("StatusIndicator")
 
     ZO_PregameGamepadEntry_OnInitialized(control)
+    ZO_StatusBarGamepadEntry_OnInitialized(control)
     ZO_CraftingGamepadEntry_OnInitialized(control)
     ZO_SkillsGamepadEntry_OnInitialized(control)
     ZO_CharacterGamepadEntry_OnInitialized(control)
@@ -47,6 +48,12 @@ end
 
 function ZO_PregameGamepadEntry_OnInitialized(control)
     control.description = control:GetNamedChild("Description")
+end
+
+function ZO_StatusBarGamepadEntry_OnInitialized(control)
+    control.barContainer = control:GetNamedChild("BarContainer")
+
+    ZO_SharedGamepadEntry_SetHeightFromLabelAndStatusBar(control)
 end
 
 function ZO_CraftingGamepadEntryTraits_OnInitialized(control)
@@ -88,7 +95,6 @@ function ZO_CraftingGamepadEntry_OnInitialized(control)
 end
 
 function ZO_SkillsGamepadEntry_OnInitialized(control)
-    control.barContainer = control:GetNamedChild("BarContainer")
     --skill lines
     control.rank = control:GetNamedChild("Rank")
     --abilities
@@ -154,6 +160,26 @@ do
     end
 end
 
+do
+    local function ComputeHeightFromLabelAndStatusBar(control)
+        local height = 0
+        if control.label then
+            height = height + control.label:GetTextHeight()
+        end
+        if not control.barContainer:IsControlHidden() then
+            height = height + control.barContainer:GetHeight()
+        end
+        return height
+    end
+
+    function ZO_SharedGamepadEntry_SetHeightFromLabelAndStatusBar(control)
+        -- Don't override the GetHeight functionality if their's no bar container to affect the height
+        if control.barContainer then
+            control.GetHeight = ComputeHeightFromLabelAndStatusBar
+        end
+    end
+end
+
 --Setup Subfunctions
 
 local function ZO_SharedGamepadEntryLabelSetup(label, data, selected)
@@ -215,6 +241,21 @@ local function ZO_SharedGamepadEntryCooldownSetup(control, data)
         else
             ZO_SharedGamepadEntry_Cooldown(control, remaining, duration, CD_TYPE_RADIAL, CD_TIME_TYPE_TIME_UNTIL, DONT_USE_LEADING_EDGE, 0.85, 0, OVERWRITE_PREVIOUS_COOLDOWN)
         end
+    end
+end
+
+local function ZO_SharedGamepadEntryBarSetup(control, data, selected)
+    local barContainer = control.barContainer
+    if barContainer then
+        if data.barMax then
+            local barMin = data.barMin or 0
+            barContainer:SetMinMax(barMin, data.barMax)
+
+            if data.barValue then
+                barContainer:SetValue(data.barValue)
+            end
+        end
+        barContainer:SetHidden(not selected)
     end
 end
 
@@ -479,6 +520,8 @@ function ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDurin
 
     ZO_SharedGamepadEntryCooldownSetup(control, data)
 
+    ZO_SharedGamepadEntryBarSetup(control, data, selected)
+
     ZO_SharedGamepadEntryStatusIndicatorSetup(control.statusIndicator, data)
 
     if control.subLabel and data.custom then
@@ -674,7 +717,7 @@ function ZO_GamepadMenuHeaderTemplate_OnInitialized(control)
 end
 
 function ZO_GamepadMenuHeaderTemplate_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    -- The header can not be selected, unless explicitly overriden by the user.
+    -- The header can not be selected, unless explicitly overridden by the user.
     if data.canSelect == nil then
         data.canSelect = false 
     end
@@ -725,7 +768,7 @@ function ZO_GamepadPipCreator:New(control, drawLayer)
     return pipCreator
 end
 
-local PIP_WIDTH = 32 --This is the width taken up by a pip in the control.  It is independant of whatever size dds is being used
+local PIP_WIDTH = 32 --This is the width taken up by a pip in the control.  It is independent of whatever size dds is being used
 function ZO_GamepadPipCreator:RefreshPips(numPips, activePipIndex)
     self.pool:ReleaseAllObjects()
     if (not numPips) or (numPips == 0) then

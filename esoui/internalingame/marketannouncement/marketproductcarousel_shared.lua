@@ -37,7 +37,7 @@ end
 
 function ZO_MarketProductCarousel_Shared:Initialize(control, template)
     local function OnSelectionChanged(newData)
-        if newData.callback then
+        if newData and newData.callback then
             newData.callback(newData)
         end
     end

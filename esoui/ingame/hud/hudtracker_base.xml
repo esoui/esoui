@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_HUDTracker_Base_Template" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                        <Label name="$(parent)SubLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

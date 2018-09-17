@@ -235,6 +235,10 @@ local function GetHistoryPercentToUse()
     end
 end
 
+local function IsShowingCosmicMap()
+    return GetMapType() == MAPTYPE_COSMIC
+end
+
 --[[
     Pin Utility Functions
 --]]
@@ -586,6 +590,12 @@ ZO_MapPin.PIN_DATA =
     [MAP_PIN_TYPE_RESTRICTED_LINK_ALDMERI_DOMINION]             = { level = 20, size = CONSTANTS.RESTRICTED_LINK_PIN_SIZE, texture = "EsoUI/Art/AvA/AvA_transitLocked.dds", tint = GetAllianceColor(ALLIANCE_ALDMERI_DOMINION)},
     [MAP_PIN_TYPE_RESTRICTED_LINK_EBONHEART_PACT]               = { level = 20, size = CONSTANTS.RESTRICTED_LINK_PIN_SIZE, texture = "EsoUI/Art/AvA/AvA_transitLocked.dds", tint = GetAllianceColor(ALLIANCE_EBONHEART_PACT)},
     [MAP_PIN_TYPE_RESTRICTED_LINK_DAGGERFALL_COVENANT]          = { level = 20, size = CONSTANTS.RESTRICTED_LINK_PIN_SIZE, texture = "EsoUI/Art/AvA/AvA_transitLocked.dds", tint = GetAllianceColor(ALLIANCE_DAGGERFALL_COVENANT)},
+    [MAP_PIN_TYPE_KEEP_BRIDGE]                                  = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_bridge_passable.dds", insetX = 20, insetY = 16},
+    [MAP_PIN_TYPE_KEEP_BRIDGE_IMPASSABLE]                       = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_bridge_not_passable.dds", insetX = 20, insetY = 16},
+    [MAP_PIN_TYPE_KEEP_MILEGATE]                                = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_milegate_passable.dds", insetX = 20, insetY = 16},
+    [MAP_PIN_TYPE_KEEP_MILEGATE_CENTER_DESTROYED]               = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_milegate_center_destroyed.dds", insetX = 20, insetY = 16},
+    [MAP_PIN_TYPE_KEEP_MILEGATE_IMPASSABLE]                     = { level = 50, size = CONSTANTS.KEEP_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_milegate_not_passable.dds", insetX = 20, insetY = 16},
+    [MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING]                     = { level = 10, minSize = 100, texture = "EsoUI/Art/MapPins/MapAutoNavigationPing.dds", isAnimated = true },
     --[[ Pins should start with a level greater than 2 ]]--
 }
 
@@ -780,6 +790,11 @@ ZO_MapPin.KEEP_PIN_TYPES =
     [MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION] = true,
     [MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT] = true,
     [MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT] = true,
+    [MAP_PIN_TYPE_KEEP_BRIDGE] = true,
+    [MAP_PIN_TYPE_KEEP_BRIDGE_IMPASSABLE] = true,
+    [MAP_PIN_TYPE_KEEP_MILEGATE] = true,
+    [MAP_PIN_TYPE_KEEP_MILEGATE_CENTER_DESTROYED] = true,
+    [MAP_PIN_TYPE_KEEP_MILEGATE_IMPASSABLE] = true,
 }
 
 ZO_MapPin.IMPERIAL_CITY_GATE_TYPES = 
@@ -803,6 +818,7 @@ ZO_MapPin.MAP_PING_PIN_TYPES =
     [MAP_PIN_TYPE_PING] = true,
     [MAP_PIN_TYPE_RALLY_POINT] = true,
     [MAP_PIN_TYPE_PLAYER_WAYPOINT] = true,
+    [MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING] = true,
 }
 
 ZO_MapPin.KILL_LOCATION_PIN_TYPES =
@@ -1302,6 +1318,11 @@ do
         [MAP_PIN_TYPE_ARTIFACT_KEEP_ALDMERI_DOMINION]               =   SHARED_TOOLTIP_CREATORS.KEEP,
         [MAP_PIN_TYPE_ARTIFACT_KEEP_EBONHEART_PACT]                 =   SHARED_TOOLTIP_CREATORS.KEEP,
         [MAP_PIN_TYPE_ARTIFACT_KEEP_DAGGERFALL_COVENANT]            =   SHARED_TOOLTIP_CREATORS.KEEP,
+        [MAP_PIN_TYPE_KEEP_BRIDGE]                                  =   SHARED_TOOLTIP_CREATORS.KEEP,
+        [MAP_PIN_TYPE_KEEP_BRIDGE_IMPASSABLE]                       =   SHARED_TOOLTIP_CREATORS.KEEP,
+        [MAP_PIN_TYPE_KEEP_MILEGATE]                                =   SHARED_TOOLTIP_CREATORS.KEEP,
+        [MAP_PIN_TYPE_KEEP_MILEGATE_CENTER_DESTROYED]               =   SHARED_TOOLTIP_CREATORS.KEEP,
+        [MAP_PIN_TYPE_KEEP_MILEGATE_IMPASSABLE]                     =   SHARED_TOOLTIP_CREATORS.KEEP,
         [MAP_PIN_TYPE_FARM_NEUTRAL]                                 =   SHARED_TOOLTIP_CREATORS.RESOURCE,
         [MAP_PIN_TYPE_FARM_ALDMERI_DOMINION]                        =   SHARED_TOOLTIP_CREATORS.RESOURCE,
         [MAP_PIN_TYPE_FARM_EBONHEART_PACT]                          =   SHARED_TOOLTIP_CREATORS.RESOURCE,
@@ -1433,8 +1454,8 @@ function WorldMapStickyPin:SetEnabled(enabled)
     self.m_enabled = enabled
 end
 
-function WorldMapStickyPin:UpdateThresholdDistance(minZoom, maxZoom, currentZoom)
-    local stickyDistance = zo_lerp(self.BASE_STICKY_MIN_DISTANCE_UNITS, self.BASE_STICKY_MAX_DISTANCE_UNITS, zo_percentBetween(minZoom, maxZoom, currentZoom))
+function WorldMapStickyPin:UpdateThresholdDistance(currentNormalizedZoom)
+    local stickyDistance = zo_lerp(self.BASE_STICKY_MIN_DISTANCE_UNITS, self.BASE_STICKY_MAX_DISTANCE_UNITS, currentNormalizedZoom)
     self.m_thresholdDistanceSq = stickyDistance * stickyDistance
 end
 
@@ -2145,8 +2166,15 @@ local KEEP_PIN_LMB =
     KEEP_INFO_BIND,
 }
 
-local TOWN_DISTRICT_PIN_LMB = 
+local DISTRICT_PIN_LMB = 
 {
+    KEEP_RESPAWN_BIND,
+    HIDE_KEEP_INFO_BIND,
+}
+
+local TOWN_PIN_LMB = 
+{
+    KEEP_TRAVEL_BIND,
     KEEP_RESPAWN_BIND,
     HIDE_KEEP_INFO_BIND,
 }
@@ -2366,14 +2394,14 @@ ZO_MapPin.PIN_CLICK_HANDLERS =
         [MAP_PIN_TYPE_FORWARD_CAMP_ALDMERI_DOMINION] = FORWARD_CAMP_LMB,
         [MAP_PIN_TYPE_FORWARD_CAMP_EBONHEART_PACT] = FORWARD_CAMP_LMB,
         [MAP_PIN_TYPE_FORWARD_CAMP_DAGGERFALL_COVENANT] = FORWARD_CAMP_LMB,
-        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_NEUTRAL] = TOWN_DISTRICT_PIN_LMB,
-        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_ALDMERI_DOMINION] = TOWN_DISTRICT_PIN_LMB,
-        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_EBONHEART_PACT] = TOWN_DISTRICT_PIN_LMB,
-        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_DAGGERFALL_COVENANT] = TOWN_DISTRICT_PIN_LMB,
-        [MAP_PIN_TYPE_AVA_TOWN_NEUTRAL] = TOWN_DISTRICT_PIN_LMB,
-        [MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION] = TOWN_DISTRICT_PIN_LMB,
-        [MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT] = TOWN_DISTRICT_PIN_LMB,
-        [MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT] = TOWN_DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_NEUTRAL] = DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_ALDMERI_DOMINION] = DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_EBONHEART_PACT] = DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_IMPERIAL_DISTRICT_DAGGERFALL_COVENANT] = DISTRICT_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_NEUTRAL] = TOWN_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_ALDMERI_DOMINION] = TOWN_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_EBONHEART_PACT] = TOWN_PIN_LMB,
+        [MAP_PIN_TYPE_AVA_TOWN_DAGGERFALL_COVENANT] = TOWN_PIN_LMB,
     },
 
     [2] =
@@ -3220,7 +3248,7 @@ do
                 --full size. This is to preserve relative sizes between the pins. Second, we bound it by an absolute size to prevent any pin from getting smaller than that size,
                 --because any pin that small is unreadable. A pin may specify its own min size as well.
                 local minSize = singlePinData.minSize or CONSTANTS.MIN_PIN_SIZE
-                local scale = zo_clamp(g_mapPanAndZoom:GetCurrentZoom(), CONSTANTS.MIN_PIN_SCALE, CONSTANTS.MAX_PIN_SCALE)
+                local scale = zo_clamp(g_mapPanAndZoom:GetCurrentCurvedZoom(), CONSTANTS.MIN_PIN_SCALE, CONSTANTS.MAX_PIN_SCALE)
                 local size = zo_max((baseSize * scale) / GetUICustomScale(), minSize)
 
                 control:SetDimensions(size, size)
@@ -3885,8 +3913,8 @@ function ZO_MouseoverMapBlobManager:Update(normalizedMouseX, normalizedMouseY)
         self:HideCurrent()
         self.m_currentTexture = textureFile
         textureChanged = true
-    elseif(self.m_zoom ~= g_mapPanAndZoom:GetCurrentZoom()) then
-        self.m_zoom = g_mapPanAndZoom:GetCurrentZoom()
+    elseif(self.m_zoom ~= g_mapPanAndZoom:GetCurrentCurvedZoom()) then
+        self.m_zoom = g_mapPanAndZoom:GetCurrentCurvedZoom()
         textureChanged = true
     end
 
@@ -4169,7 +4197,8 @@ local function UpdatePlayerPin()
     local playerPin = g_mapPinManager:GetPlayerPin()
     local x, y, _, isShownInCurrentMap = GetMapPlayerPosition("player")
     playerPin:SetLocation(x, y)
-    if isShownInCurrentMap then
+    -- Design rule, don't show player pin on cosmic, even if they're in the map
+    if isShownInCurrentMap and not IsShowingCosmicMap() then
         playerPin:SetHidden(false)
         playerPin:SetRotation(GetPlayerCameraHeading())
     else
@@ -4277,15 +4306,15 @@ local function SetMapWindowSize(newWidth, newHeight)
 
     local containerHeight = zo_floor(newHeight - verticalPadding)
     local containerWidth = zo_floor(newWidth - horizontalPadding)
-    local mapSize = zo_max(containerHeight, containerWidth) * g_mapPanAndZoom:GetCurrentZoom()
+    local mapSize = zo_max(containerHeight, containerWidth) * g_mapPanAndZoom:GetCurrentCurvedZoom()
 
     CONSTANTS.MAP_WIDTH = mapSize
     CONSTANTS.MAP_HEIGHT = mapSize
 
     local RAGGED_EDGE_OFFSET_X = 90
     local RAGGED_EDGE_OFFSET_Y = 95
-    local raggedEdgeScaledOffsetX = RAGGED_EDGE_OFFSET_X * g_mapPanAndZoom:GetCurrentZoom()
-    local raggedEdgeScaledOffsetY = RAGGED_EDGE_OFFSET_Y * g_mapPanAndZoom:GetCurrentZoom()
+    local raggedEdgeScaledOffsetX = RAGGED_EDGE_OFFSET_X * g_mapPanAndZoom:GetCurrentCurvedZoom()
+    local raggedEdgeScaledOffsetY = RAGGED_EDGE_OFFSET_Y * g_mapPanAndZoom:GetCurrentCurvedZoom()
 
     if(IsInGamepadPreferredMode()) then
         g_mapOverflowX = mapSize * .5
@@ -4306,7 +4335,7 @@ local function SetMapWindowSize(newWidth, newHeight)
     ZO_WorldMapContainerRaggedEdge:SetAnchor(TOPLEFT, ZO_WorldMapContainer, TOPLEFT, -raggedEdgeScaledOffsetX, -raggedEdgeScaledOffsetY)
     ZO_WorldMapContainerRaggedEdge:SetAnchor(BOTTOMRIGHT, ZO_WorldMapContainer, BOTTOMRIGHT, raggedEdgeScaledOffsetX, raggedEdgeScaledOffsetY)
 
-    ZO_WorldMapContainerRaggedEdge:SetScale(g_mapPanAndZoom:GetCurrentZoom())
+    ZO_WorldMapContainerRaggedEdge:SetScale(g_mapPanAndZoom:GetCurrentCurvedZoom())
 
     ZO_WorldMapScroll:SetDimensions(containerWidth, containerHeight)
     ZO_WorldMapScroll:SetAnchor(TOPLEFT, ZO_WorldMap, TOPLEFT, LAYOUT.offsetX, LAYOUT.offsetY)
@@ -4497,15 +4526,16 @@ function ZO_MapPanAndZoom:Initialize(zoomControl)
 
     self.zoomSlider = ZO_SmoothSlider:New(self.zoomSliderControl, "ZO_WorldMapZoomButton", 16, 25, -2, 1.8)
     self.zoomSlider:EnableHighlight("EsoUI/Art/Buttons/smoothSliderButton_up.dds", "EsoUI/Art/Buttons/smoothSliderButton_selected.dds")
-    self.zoomSlider:SetNumDivisions(9)
+    self.zoomSlider:SetNumDivisions(11)
+    self.zoomSlider:SetMinMax(0, 1)
 
     local function zoomSliderButtonClicked(value)
         PlaySound(SOUNDS.MAP_ZOOM_LEVEL_CLICKED)
-        self:SetTargetZoom(value)
+        self:SetTargetNormalizedZoom(value)
     end
     self.zoomSlider:SetClickedCallback(zoomSliderButtonClicked)
     self:SetMapZoomMinMax(1,5)
-    self:SetCurrentZoomInternal(1)
+    self:SetCurrentNormalizedZoomInternal(0)
     self.reachedTargetOffset = true
 
     zoomControl:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function(eventId, isGamepadPreferred)
@@ -4535,20 +4565,20 @@ function ZO_MapPanAndZoom:ClearTargetOffset()
     self.reachedTargetOffset = true
 end
 
-function ZO_MapPanAndZoom:ClearTargetZoom()
-    self.targetZoom = nil
+function ZO_MapPanAndZoom:ClearTargetNormalizedZoom()
+    self.targetNormalizedZoom = nil
     self:RefreshZoomButtonsEnabled()
 end
 
-function ZO_MapPanAndZoom:SetTargetZoom(zoom)
-    if(zo_abs(self.currentZoom - zoom) > 0.001) then
-        self.targetZoom = zoom
+function ZO_MapPanAndZoom:SetTargetNormalizedZoom(normalizedZoom)
+    if zo_abs(self.currentNormalizedZoom - normalizedZoom) > 0.001 then
+        self.targetNormalizedZoom = normalizedZoom
         self:RefreshZoomButtonsEnabled()
     end
 end
 
 ZO_MapPanAndZoom.MAX_OVER_ZOOM = 1.3
-ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_ADJUSTMENT = 0.2
+ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_NORMALIZED_ZOOM_ADJUSTMENT = 0.1
 
 function ZO_MapPanAndZoom:ComputeMinZoom()
     return 1
@@ -4558,13 +4588,19 @@ function ZO_MapPanAndZoom:ComputeMaxZoom()
     if(not self:CanMapZoom()) then
         return 1
     else
-        local numTiles = GetMapNumTiles()
-        local tilePixelWidth = ZO_WorldMapContainer1:GetTextureFileDimensions()
-        local totalPixels = numTiles * tilePixelWidth
-        local mapAreaUIUnits = ZO_WorldMapScroll:GetHeight()
-        local mapAreaPixels = mapAreaUIUnits * GetUIGlobalScale()
-        local maxZoomToStayBelowNative = totalPixels / mapAreaPixels
-        return zo_max(maxZoomToStayBelowNative * ZO_MapPanAndZoom.MAX_OVER_ZOOM, 1)
+        local customMaxZoom = GetMapCustomMaxZoom()
+        if customMaxZoom then
+            return customMaxZoom
+        else
+            --default to a zoom level that doesn't make the map texture look bad
+            local numTiles = GetMapNumTiles()
+            local tilePixelWidth = ZO_WorldMapContainer1:GetTextureFileDimensions()
+            local totalPixels = numTiles * tilePixelWidth
+            local mapAreaUIUnits = ZO_WorldMapScroll:GetHeight()
+            local mapAreaPixels = mapAreaUIUnits * GetUIGlobalScale()
+            local maxZoomToStayBelowNative = totalPixels / mapAreaPixels
+            return zo_max(maxZoomToStayBelowNative * ZO_MapPanAndZoom.MAX_OVER_ZOOM, 1)
+        end
     end
 end
 
@@ -4575,8 +4611,8 @@ end
 
 local USE_CURRENT_ZOOM = true
 
-function ZO_MapPanAndZoom:SetZoomAndOffsetInNewMap(zoom)
-    self:SetCurrentZoom(zoom)
+function ZO_MapPanAndZoom:SetNormalizedZoomAndOffsetInNewMap(normalizedZoom)
+    self:SetCurrentNormalizedZoom(normalizedZoom)
     local pin = g_mapPinManager:GetPlayerPin()
 
     if self:JumpToPin(pin, USE_CURRENT_ZOOM) then
@@ -4587,34 +4623,37 @@ function ZO_MapPanAndZoom:SetZoomAndOffsetInNewMap(zoom)
 end
 
 function ZO_MapPanAndZoom:InitializeMap(wasNavigateIn)
-    if(self:CanInitializeMap()) then
+    if self:CanInitializeMap() then
         self.pendingInitializeMap = false
 
         self:ClearLockPoint()
         self:ClearTargetOffset()
-        self:ClearTargetZoom()
+        self:ClearTargetNormalizedZoom()
         self:SetMapZoomMinMax(self:ComputeMinZoom(), self:ComputeMaxZoom())
 
-        if(self.pendingJumpToPin) then
-            self:SetCurrentZoomInternal(self.maxZoom)
+        if self.pendingJumpToPin then
             self:JumpToPin(self.pendingJumpToPin, self.pendingJumpToPinZoomMode)
-        elseif(self.pendingPanToPin) then
+        elseif self.pendingPanToPin then
             self:PanToPin(self.pendingPanToPin, self.pendingPanToPinZoomMode)
-        elseif(wasNavigateIn ~= nil and IsInGamepadPreferredMode()) then
-            if(wasNavigateIn) then
-                self:SetZoomAndOffsetInNewMap(self.minZoom + ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_ADJUSTMENT)
+        elseif self.pendingPanToNormalizedPosition then
+            self:PanToNormalizedPosition(self.pendingPanToNormalizedPosition.positionX, self.pendingPanToNormalizedPosition.positionY, self.pendingPanToNormalizedPositionZoomMode)
+        elseif wasNavigateIn ~= nil and IsInGamepadPreferredMode() then
+            if wasNavigateIn then
+                self:SetNormalizedZoomAndOffsetInNewMap(ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_NORMALIZED_ZOOM_ADJUSTMENT)
             else
-                self:SetZoomAndOffsetInNewMap(self.maxZoom - ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_ADJUSTMENT)
+                self:SetNormalizedZoomAndOffsetInNewMap(1 - ZO_MapPanAndZoom.NAVIGATE_IN_OR_OUT_NORMALIZED_ZOOM_ADJUSTMENT)
             end
         else
-            self:SetCurrentZoom(1)
+            self:SetCurrentNormalizedZoom(0)
             self:SetCurrentOffset(0, 0)
         end
 
         self.pendingJumpToPin = nil
         self.pendingPanToPin = nil
+        self.pendingPanToNormalizedPosition = nil
         self.pendingPanToPinZoomMode = nil
         self.pendingJumpToPinZoomMode = nil
+        self.pendingPanToNormalizedPositionZoomMode = nil
     else
         self.pendingInitializeMap = true
         self.pendingInitializeMapWasNavigateIn = wasNavigateIn
@@ -4650,34 +4689,46 @@ end
 function ZO_MapPanAndZoom:SetZoomMinMax(minZoom, maxZoom)
     self.minZoom = minZoom
     self.maxZoom = maxZoom
-    local hideZoomBar = true
-
-    if(self.maxZoom - self.minZoom > 0) then
-        self.zoomSlider:SetMinMax(self.minZoom, self.maxZoom)
-        hideZoomBar = false
-    end
-
+    local hideZoomBar = self.maxZoom - self.minZoom <= 0
     self.zoomSliderControl:SetHidden(hideZoomBar)
     self.zoomPlusControl:SetHidden(hideZoomBar)
     self.zoomMinusControl:SetHidden(hideZoomBar)
     self:RefreshZoomButtonsEnabled()
 end
 
-function ZO_MapPanAndZoom:GetCurrentZoom()
-    return self.currentZoom
+function ZO_MapPanAndZoom:GetCurrentNormalizedZoom()
+    return self.currentNormalizedZoom
 end
 
-function ZO_MapPanAndZoom:SetCurrentZoom(zoom)
-    self:ClearTargetZoom()
-    self:SetCurrentZoomInternal(zoom)
+do
+    --The actual zoom level we use to size things does not go linearly from min to mix. Going linearly causes the zoom to feel like it is moving very fast to start
+    --and then moving more and more slowly as we reach max zoom. To counteract this we treat the progression from min to max as a curve that increases more slowly to
+    --start and then faster later. Research has shown that the curve y=e^px best matches human expectations of an even zoom speed with a p value of 6^0.25 ~= 1.57. We
+    --normalized this curve so that y goes from 0 to 1 as x goes from 0 to 1 since we operate on a normalized value between min and max zoom.
+    local exp = math.exp
+    local P = 1.57
+    local DIVISOR = exp(P) - 1
+    function ZO_MapPanAndZoom:ComputeCurvedZoom(normalizedZoom)
+        normalizedZoom = (exp(P * normalizedZoom) - 1) / DIVISOR
+        return self.minZoom + normalizedZoom * (self.maxZoom - self.minZoom)
+    end
 end
 
-function ZO_MapPanAndZoom:SetCurrentZoomInternal(zoom)
-    zoom = zo_clamp(zoom, self.minZoom, self.maxZoom)
-    self.currentZoom = zoom
-    self.zoomSlider:SetValue(zoom)
+function ZO_MapPanAndZoom:GetCurrentCurvedZoom()
+    return self:ComputeCurvedZoom(self.currentNormalizedZoom)
+end
 
-    g_stickyPin:UpdateThresholdDistance(self.minZoom, self.maxZoom, zoom)
+function ZO_MapPanAndZoom:SetCurrentNormalizedZoom(zoom)
+    self:ClearTargetNormalizedZoom()
+    self:SetCurrentNormalizedZoomInternal(zoom)
+end
+
+function ZO_MapPanAndZoom:SetCurrentNormalizedZoomInternal(normalizedZoom)
+    normalizedZoom = zo_clamp(normalizedZoom, 0, 1)
+    self.currentNormalizedZoom = normalizedZoom
+    self.zoomSlider:SetValue(normalizedZoom)
+
+    g_stickyPin:UpdateThresholdDistance(normalizedZoom)
 
     self:RefreshZoomButtonsEnabled()
 
@@ -4687,16 +4738,21 @@ function ZO_MapPanAndZoom:SetCurrentZoomInternal(zoom)
 end
 
 function ZO_MapPanAndZoom:RefreshZoomButtonsEnabled()
-    local considerZoom
-    if(self.targetZoom) then
-        considerZoom = self.targetZoom
+    local considerNormalizedZoom
+    if self.targetNormalizedZoom then
+        considerNormalizedZoom = self.targetNormalizedZoom
     else
-        considerZoom = self.currentZoom
+        considerNormalizedZoom = self.currentNormalizedZoom
     end
 
-    if(considerZoom) then
-        self.canZoomOutFurther = considerZoom > self.minZoom
-        self.canZoomInFurther = considerZoom < self.maxZoom
+    if considerNormalizedZoom then
+        if self.mapMax - self.mapMin > 0 then
+            self.canZoomOutFurther = considerNormalizedZoom > 0
+            self.canZoomInFurther = considerNormalizedZoom < 1
+        else
+            self.canZoomOutFurther = false
+            self.canZoomInFurther = false
+        end
         self.zoomMinusControl:SetEnabled(self.canZoomOutFurther)
         self.zoomPlusControl:SetEnabled(self.canZoomInFurther)
     end
@@ -4711,28 +4767,47 @@ function ZO_MapPanAndZoom:CanZoomOutFurther()
 end
 
 function ZO_MapPanAndZoom:Step(amount)
-    local currentTarget = self.targetZoom or self.currentZoom
-    local stepValue = self.zoomSlider:GetStepValue(currentTarget, amount)
-    self:SetLockedZoom(stepValue)
+    local oldNormalizedZoom = self.targetNormalizedZoom or self.currentNormalizedZoom
+    local newNormalizedZoom = self.zoomSlider:GetStepValue(oldNormalizedZoom, amount)
+    self:SetLockedNormalizedZoom(newNormalizedZoom, ZO_WorldMapScroll:GetCenter())
 end
 
-function ZO_MapPanAndZoom:AddZoomDelta(delta, mouseX, mouseY)
-    local oldZoom = self.targetZoom or self.currentZoom
-    local newZoom = zo_clamp(oldZoom + delta * .3, self.minZoom, self.maxZoom)
-    self:SetLockedZoom(newZoom, mouseX, mouseY)
-    if(delta > 0 and self.canZoomInFurther) then
-        PlaySound(SOUNDS.MAP_ZOOM_IN)
-    elseif(delta < 0 and self.canZoomOutFurther) then
-        PlaySound(SOUNDS.MAP_ZOOM_OUT)
+do
+    local NORMALIZED_ZOOM_PER_DELTA = 0.1
+
+    function ZO_MapPanAndZoom:AddZoomDelta(delta, mouseX, mouseY)
+        local oldNormalizedZoom = self.targetNormalizedZoom or self.currentNormalizedZoom
+        local newNormalizedZoom = zo_clamp(oldNormalizedZoom + delta * NORMALIZED_ZOOM_PER_DELTA, 0, 1)
+        self:SetLockedNormalizedZoom(newNormalizedZoom, mouseX, mouseY)
+        if(delta > 0 and self.canZoomInFurther) then
+            PlaySound(SOUNDS.MAP_ZOOM_IN)
+        elseif(delta < 0 and self.canZoomOutFurther) then
+            PlaySound(SOUNDS.MAP_ZOOM_OUT)
+        end
     end
 end
 
-function ZO_MapPanAndZoom:SetLockedZoom(zoom, mouseX, mouseY)
-    if(mouseX == nil or mouseY == nil) then
-        mouseX, mouseY = ZO_WorldMapScroll:GetCenter()
-    end
+do
+    local MAX_FULL_ZOOM_DURATION_S = 2
+    local MIN_ZOOM_SPEED_PER_S = 2
 
-    if zoom ~= self.currentZoom then
+    function ZO_MapPanAndZoom:AddZoomDeltaGamepad(triggerMagnitude, frameDeltaS)
+        local oldNormalizedZoom = self.targetNormalizedZoom or self.currentNormalizedZoom
+        local zoomDifference = self.maxZoom - self.minZoom
+        local speed = triggerMagnitude * zo_max(MIN_ZOOM_SPEED_PER_S, zoomDifference / MAX_FULL_ZOOM_DURATION_S)
+        local normalizedSpeed = zoomDifference > 0 and (speed / zoomDifference) or 0
+        local newNormalizedZoom = zo_clamp(oldNormalizedZoom + frameDeltaS * normalizedSpeed, 0, 1)
+        self:SetLockedNormalizedZoom(newNormalizedZoom, ZO_WorldMapScroll:GetCenter())
+        if triggerMagnitude > 0 and self.canZoomInFurther then
+            PlaySound(SOUNDS.MAP_ZOOM_IN)
+        elseif triggerMagnitude < 0 and self.canZoomOutFurther then
+            PlaySound(SOUNDS.MAP_ZOOM_OUT)
+        end
+    end
+end
+
+function ZO_MapPanAndZoom:SetLockedNormalizedZoom(normalizedZoom, mouseX, mouseY)
+    if normalizedZoom ~= self.currentNormalizedZoom then
         self:ClearTargetOffset()
 
         local cX, cY = ZO_WorldMapScroll:GetCenter()
@@ -4743,7 +4818,7 @@ function ZO_MapPanAndZoom:SetLockedZoom(zoom, mouseX, mouseY)
         self.lockPointNX = (self.lockPointX - oldContainerOffsetX) / oldMapSize
         self.lockPointNY = (self.lockPointY - oldContainerOffsetY) / oldMapSize
 
-        self:SetTargetZoom(zoom)
+        self:SetTargetNormalizedZoom(normalizedZoom)
     end
 end
 
@@ -4777,8 +4852,8 @@ function ZO_MapPanAndZoom:AddTargetOffsetDelta(deltaX, deltaY)
     self:SetTargetOffset(nextOffsetX, nextOffsetY)
 end
 
-function ZO_MapPanAndZoom:SetFinalTargetOffset(offsetX, offsetY, targetZoom)
-    local ratio = targetZoom / self.currentZoom
+function ZO_MapPanAndZoom:SetFinalTargetOffset(offsetX, offsetY, targetNormalizedZoom)
+    local ratio = self:ComputeCurvedZoom(targetNormalizedZoom) / self:GetCurrentCurvedZoom()
     self:SetTargetOffset(offsetX / ratio, offsetY / ratio)
 end
 
@@ -4791,59 +4866,77 @@ function ZO_MapPanAndZoom:HasTargetOffset()
 end
 
 function ZO_MapPanAndZoom:HasTargetZoom()
-    return self.targetZoom ~= nil
+    return self.targetNormalizedZoom ~= nil
+end
+
+function ZO_MapPanAndZoom:GetNormalizedPositionFocusZoomAndOffset(normalizedX, normalizedY, useCurrentZoom)
+    if normalizedX and normalizedY and IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
+        local minCoordNX = normalizedX < 0.5 and normalizedX or (1 - normalizedX)
+        local minCoordNY = normalizedY < 0.5 and normalizedY or (1 - normalizedY)
+        local minCoordN = zo_min(minCoordNX, minCoordNY)
+        local targetNormalizedZoom = useCurrentZoom and self.currentNormalizedZoom or 1
+        local curvedTargetZoom = self:ComputeCurvedZoom(targetNormalizedZoom)
+
+        local zoomedNX = normalizedX * curvedTargetZoom
+        local zoomedNY = normalizedY * curvedTargetZoom
+        local borderSizeN = (curvedTargetZoom - 1) / 2
+        local offsetNX = 0.5 + borderSizeN - zoomedNX
+        local offsetNY = 0.5 + borderSizeN - zoomedNY
+
+        if(not self.allowPanPastMapEdge) then
+            offsetNX = zo_clamp(offsetNX, -borderSizeN, borderSizeN)
+            offsetNY = zo_clamp(offsetNY, -borderSizeN, borderSizeN)
+        end
+
+        local offsetX = offsetNX * ZO_WorldMapScroll:GetWidth()
+        local offsetY = offsetNY * ZO_WorldMapScroll:GetHeight()
+
+        return targetNormalizedZoom, offsetX, offsetY
+    end
 end
 
 function ZO_MapPanAndZoom:GetPinFocusZoomAndOffset(pin, useCurrentZoom)
-    if(pin) then
-        local NX, NY = pin:GetNormalizedPosition()
-        if(NX and NY and IsNormalizedPointInsideMapBounds(NX, NY)) then
-            local minCoordNX = NX < 0.5 and NX or (1 - NX)
-            local minCoordNY = NY < 0.5 and NY or (1 - NY)
-            local minCoordN = zo_min(minCoordNX, minCoordNY)
-            local targetZoom = useCurrentZoom and self.currentZoom or self.maxZoom
-
-            local zoomedNX = NX * targetZoom
-            local zoomedNY = NY * targetZoom
-            local borderSizeN = (targetZoom - 1) / 2
-            local offsetNX = 0.5 + borderSizeN - zoomedNX
-            local offsetNY = 0.5 + borderSizeN - zoomedNY
-
-            if(not self.allowPanPastMapEdge) then
-                offsetNX = zo_clamp(offsetNX, -borderSizeN, borderSizeN)
-                offsetNY = zo_clamp(offsetNY, -borderSizeN, borderSizeN)
-            end
-
-            local offsetX = offsetNX * ZO_WorldMapScroll:GetWidth()
-            local offsetY = offsetNY * ZO_WorldMapScroll:GetHeight()
-
-            return targetZoom, offsetX, offsetY
-        end
+    if pin then
+        local x, y = pin:GetNormalizedPosition()
+        return self:GetNormalizedPositionFocusZoomAndOffset(x, y, useCurrentZoom)
     end
 end
 
 function ZO_MapPanAndZoom:PanToPin(pin, useCurrentZoom)
-    if(self.pendingInitializeMap) then
+    if self.pendingInitializeMap then
         self.pendingPanToPin = pin
         self.pendingPanToPinZoomMode = useCurrentZoom
     else
-        local targetZoom, offsetX, offsetY = self:GetPinFocusZoomAndOffset(pin, useCurrentZoom)
-        if(targetZoom) then
-            self:SetFinalTargetOffset(offsetX, offsetY, targetZoom)
-            self:SetTargetZoom(targetZoom)
+        local targetNormalizedZoom, offsetX, offsetY = self:GetPinFocusZoomAndOffset(pin, useCurrentZoom)
+        if targetNormalizedZoom then
+            self:SetFinalTargetOffset(offsetX, offsetY, targetNormalizedZoom)
+            self:SetTargetNormalizedZoom(targetNormalizedZoom)
+        end
+    end
+end
+
+function ZO_MapPanAndZoom:PanToNormalizedPosition(positionX, positionY, useCurrentZoom)
+    if self.pendingInitializeMap then
+        self.pendingPanToNormalizedPosition = { positionX = positionX, positionY = positionY }
+        self.pendingPanToNormalizedPositionZoomMode = useCurrentZoom
+    else
+        local targetNormalizedZoom, offsetX, offsetY = self:GetNormalizedPositionFocusZoomAndOffset(positionX, positionY, useCurrentZoom)
+        if targetNormalizedZoom then
+            self:SetFinalTargetOffset(offsetX, offsetY, targetNormalizedZoom)
+            self:SetTargetNormalizedZoom(targetNormalizedZoom)
         end
     end
 end
 
 function ZO_MapPanAndZoom:JumpToPin(pin, useCurrentZoom)
-    if(self.pendingInitializeMap) then
+    if self.pendingInitializeMap then
         self.pendingJumpToPin = pin
         self.pendingJumpToPinZoomMode = useCurrentZoom
         return false
     else
-        local targetZoom, offsetX, offsetY = self:GetPinFocusZoomAndOffset(pin, useCurrentZoom)
-        if(targetZoom) then
-            self:SetCurrentZoom(targetZoom)
+        local targetNormalizedZoom, offsetX, offsetY = self:GetPinFocusZoomAndOffset(pin, useCurrentZoom)
+        if targetNormalizedZoom then
+            self:SetCurrentNormalizedZoom(targetNormalizedZoom)
             self:SetCurrentOffset(offsetX, offsetY)
             return true
         end
@@ -4871,28 +4964,20 @@ function ZO_MapPanAndZoom:Update(currentTime)
         self:InitializeMap(self.pendingInitializeMapWasNavigateIn)
     end
 
-    --Under Min
-    if self.currentZoom < self.minZoom then
-        self.targetZoom = self.minZoom
-    end
-
-    --Over Max
-    if self.currentZoom > self.maxZoom then
-        self.targetZoom = self.maxZoom
-    end
+    self.currentNormalizedZoom = zo_clamp(self.currentNormalizedZoom, 0, 1)
 
     if self:HasTargetZoom() then
-        local oldZoom = self.currentZoom
+        local oldNormalizedZoom = self.currentNormalizedZoom
 
-        if self.targetZoom >= self.minZoom and zo_abs(self.currentZoom - self.targetZoom) < .001 then
-            self:SetCurrentZoomInternal(self.targetZoom)
-            self:ClearTargetZoom()
+        if self.targetNormalizedZoom >= 0 and zo_abs(self.currentNormalizedZoom - self.targetNormalizedZoom) < .001 then
+            self:SetCurrentNormalizedZoomInternal(self.targetNormalizedZoom)
+            self:ClearTargetNormalizedZoom()
             self:ClearLockPoint()
         else
-            self:SetCurrentZoomInternal(zo_deltaNormalizedLerp(self.currentZoom, self.targetZoom, LERP_FACTOR))
+            self:SetCurrentNormalizedZoomInternal(zo_deltaNormalizedLerp(self.currentNormalizedZoom, self.targetNormalizedZoom, LERP_FACTOR))
         end
 
-        local ratio = self.currentZoom / oldZoom
+        local ratio = self:GetCurrentCurvedZoom() / self:ComputeCurvedZoom(oldNormalizedZoom)
 
         if not self:HasLockPoint() then
             local offsetX, offsetY = CalculateContainerAnchorOffsets()
@@ -4906,7 +4991,7 @@ function ZO_MapPanAndZoom:Update(currentTime)
     local offsetX, offsetY = CalculateContainerAnchorOffsets()
 
     if self:HasLockPoint() then
-        local mapSize = ZO_WorldMapScroll:GetHeight() * self.currentZoom
+        local mapSize = ZO_WorldMapScroll:GetHeight() * self:GetCurrentCurvedZoom()
         local newLockPointX = self.lockPointNX * mapSize
         local newLockPointY = self.lockPointNY * mapSize
         local newContainerOffsetX = self.lockPointX - newLockPointX
@@ -5041,7 +5126,7 @@ function GamepadMap:UpdateDirectionalInput()
         self.navigateOutAt = nil
 
         if wantsToZoom then
-            performedZoom = self:TryZoom(normalizedFrameDelta, dx, dy, navigateInAt, navigateOutAt)
+            performedZoom = self:TryZoom(GetFrameDeltaSeconds(), dx, dy, navigateInAt, navigateOutAt)
         end
 
         if g_dragging and not performedZoom then
@@ -5066,7 +5151,7 @@ function GamepadMap:TryZoom(normalizedFrameDelta, dx, dy, navigateInAt, navigate
         if(self.zoomDelta > 0) then
             if(g_mapPanAndZoom:CanZoomInFurther()) then
                 g_mapPanAndZoom:AddCurrentOffsetDelta(dx, dy)
-                g_mapPanAndZoom:AddZoomDelta(self.zoomDelta * self.GAMEPAD_MAP_ZOOM_SCALE * normalizedFrameDelta)
+                g_mapPanAndZoom:AddZoomDeltaGamepad(self.zoomDelta, normalizedFrameDelta)
                 return true
             else
                 local canNavigateIn = g_mouseoverMapBlobManager:IsShowingMapRegionBlob() and ZO_WorldMap_IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN)
@@ -5091,10 +5176,10 @@ function GamepadMap:TryZoom(normalizedFrameDelta, dx, dy, navigateInAt, navigate
                 end
             end
         else
-            local canNavigateOut = GetMapType() ~= MAPTYPE_COSMIC and ZO_WorldMap_IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT)
+            local canNavigateOut = not IsShowingCosmicMap() and ZO_WorldMap_IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT)
             if(g_mapPanAndZoom:CanZoomOutFurther()) then
                 g_mapPanAndZoom:AddCurrentOffsetDelta(dx, dy)
-                g_mapPanAndZoom:AddZoomDelta(self.zoomDelta * self.GAMEPAD_MAP_ZOOM_SCALE * normalizedFrameDelta)
+                g_mapPanAndZoom:AddZoomDeltaGamepad(self.zoomDelta, normalizedFrameDelta)
                 return true
             else
                 if(navigateOutAt == nil) then
@@ -5270,6 +5355,8 @@ do
             g_hideTooltipsAt = nil
             HideAllTooltips()
         end
+
+        WORLD_MAP_MANAGER:Update(currentTime)
     end
 end
 
@@ -5315,7 +5402,7 @@ local function ZO_WorldMap_SetToMode(mode)
     --store off any settings that aren't maintained in saved variables
     if(g_mode == MAP_MODE_SMALL_CUSTOM or g_mode == MAP_MODE_LARGE_CUSTOM) then
         local transientData = MAP_TRANSIENT_MODES[g_mode]
-        transientData.mapZoom = g_mapPanAndZoom:GetCurrentZoom()
+        transientData.mapZoom = g_mapPanAndZoom:GetCurrentNormalizedZoom()
         local _, _, _, _, containerOffsetX, containerOffsetY = ZO_WorldMapContainer:GetAnchor(0)
         transientData.offsetX, transientData.offsetY = containerOffsetX, containerOffsetY
     end
@@ -5329,11 +5416,11 @@ local function ZO_WorldMap_SetToMode(mode)
         g_transientModeData = nil
     end
 
-    if(g_transientModeData) then
-        g_mapPanAndZoom:SetCurrentZoom(g_transientModeData.mapZoom or 1)
-    else
-        g_mapPanAndZoom:SetCurrentZoom(1)
+    local initialNormalizedZoom = 0
+    if g_transientModeData and g_transientModeData.mapZoom then
+        initialNormalizedZoom = zo_clamp(g_transientModeData.mapZoom, 0, 1)
     end
+    g_mapPanAndZoom:SetCurrentNormalizedZoom(initialNormalizedZoom)
 
     local smallMap = (g_modeData.mapSize == CONSTANTS.WORLDMAP_SIZE_SMALL)
     if(smallMap) then
@@ -5367,7 +5454,7 @@ local function ZO_WorldMap_SetToMode(mode)
     end
 
     if(g_transientModeData) then
-        g_mapPanAndZoom:SetFinalTargetOffset(g_transientModeData.offsetX or 0, g_transientModeData.offsetY or 0, g_mapPanAndZoom:GetCurrentZoom())
+        g_mapPanAndZoom:SetFinalTargetOffset(g_transientModeData.offsetX or 0, g_transientModeData.offsetY or 0, g_mapPanAndZoom:GetCurrentNormalizedZoom())
     else
         g_mapPanAndZoom:SetCurrentOffset(0, 0)
     end
@@ -5587,28 +5674,35 @@ end
 local function RefreshMapPings()
     g_mapPinManager:RemovePins("pings")
 
-    if(GetMapType() == MAPTYPE_COSMIC) then return end
+    if not IsShowingCosmicMap() then
+        -- We don't want these manual player pings showing up on the Aurbis
+        for i = 1, GROUP_SIZE_MAX do
+            local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
+            local x, y = GetMapPing(unitTag)
 
-    for i = 1, GROUP_SIZE_MAX do
-        local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
-        local x, y = GetMapPing(unitTag)
+            if(x ~= 0 and y ~= 0) then
+                g_mapPinManager:CreatePin(MAP_PIN_TYPE_PING, unitTag, x, y)
+            end
+        end
+
+        -- Add rally point
+        local x, y = GetMapRallyPoint()
 
         if(x ~= 0 and y ~= 0) then
-            g_mapPinManager:CreatePin(MAP_PIN_TYPE_PING, unitTag, x, y)
+            g_mapPinManager:CreatePin(MAP_PIN_TYPE_RALLY_POINT, "rally", x, y)
+        end
+
+        -- Add Player Waypoint
+        x, y = GetMapPlayerWaypoint()
+        if(x ~= 0 and y ~= 0) then
+            g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER_WAYPOINT , "waypoint", x, y)
         end
     end
 
-    -- Add rally point
-    local x, y = GetMapRallyPoint()
-
-    if(x ~= 0 and y ~= 0) then
-        g_mapPinManager:CreatePin(MAP_PIN_TYPE_RALLY_POINT, "rally", x, y)
-    end
-
-    -- Add Player Waypoint
-    x, y = GetMapPlayerWaypoint()
-    if(x ~= 0 and y ~= 0) then
-        g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER_WAYPOINT , "waypoint", x, y)
+    -- Add auto navigation target, and we do want this on the Aurbis
+    if HasAutoMapNavigationTarget() then
+        local normalizedX, normalizedY = GetAutoMapNavigationNormalizedPositionForCurrentMap()
+        g_mapPinManager:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "autoMapNavigation", normalizedX, normalizedY)
     end
 end
 
@@ -5823,7 +5917,7 @@ function ZO_WorldMap_RefreshGroupPins()
     g_mapPinManager:RemovePins("group")
     ZO_ClearTable(g_activeGroupPins)
 
-    if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) then
+    if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) and not IsShowingCosmicMap() then
         for i = 1, GROUP_SIZE_MAX do
             local groupTag = ZO_Group_GetUnitTagForGroupIndex(i)
             if DoesUnitExist(groupTag) and not AreUnitsEqual("player", groupTag) and IsUnitOnline(groupTag) then
@@ -5874,16 +5968,18 @@ end
 
 -- This should only be called by RefreshAllPOI and RefreshSinglePOI as appropriate.
 local function CreateSinglePOIPin(zoneIndex, poiIndex)
-    local xLoc, zLoc, iconType, icon, isShownInCurrentMap, linkedCollectibleIsLocked = GetPOIMapInfo(zoneIndex, poiIndex)
+    local xLoc, zLoc, iconType, icon, isShownInCurrentMap, linkedCollectibleIsLocked, isDiscovered, isNearby = GetPOIMapInfo(zoneIndex, poiIndex)
 
-    if(isShownInCurrentMap) then
+    if isShownInCurrentMap and (isDiscovered or isNearby) then
         if(ZO_MapPin.POI_PIN_TYPES[iconType]) then
             local poiType = GetPOIType(zoneIndex, poiIndex)
 
-            --Seen Wayshines are POIs, discovered Wayshrines are handled by AddWayshrines()
-            --Request was made by design to have houses and dungeons behave like wayshrines.
-            if (poiType == POI_TYPE_WAYSHRINE or poiType == POI_TYPE_HOUSE or poiType == POI_TYPE_GROUP_DUNGEON) and iconType ~= MAP_PIN_TYPE_POI_SEEN then
-                return
+            if iconType ~= MAP_PIN_TYPE_POI_SEEN then
+                -- Seen Wayshines are POIs, discovered Wayshrines are handled by AddWayshrines()
+                -- Request was made by design to have houses and dungeons behave like wayshrines.
+                if poiType == POI_TYPE_WAYSHRINE or poiType == POI_TYPE_HOUSE or poiType == POI_TYPE_GROUP_DUNGEON then
+                    return
+                end
             end
 
             local tag = ZO_MapPin.CreatePOIPinTag(zoneIndex, poiIndex, icon, linkedCollectibleIsLocked)
@@ -5916,7 +6012,7 @@ local function FloorLevelNavigationUpdate()
     local showFloorControls = false
     local showLevelControls = false
     if IsInGamepadPreferredMode() then
-        if not ZO_WorldMap_IsWorldMapInfoShowing() then
+        if not (ZO_WorldMap_IsWorldMapInfoShowing() or ZO_WorldMap_IsKeepInfoShowing()) then
             showFloorControls = numFloors > 0
             showLevelControls = not showFloorControls
         end
@@ -6049,7 +6145,10 @@ local OnFastTravelBegin, OnFastTravelEnd
 do
     local function AddWayshrines()
         -- Dungeons no longer show wayshrines of any kind (possibly pending some system rework)
-        if(not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_WAYSHRINES)) then return end
+        -- Design rule, don't show wayshrine pins on cosmic, even if they're in the map
+        if IsShowingCosmicMap() or not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_WAYSHRINES) then
+            return
+        end
 
         for nodeIndex = 1, GetNumFastTravelNodes() do
             local known, name, normalizedX, normalizedY, icon, glowIcon, poiType, isLocatedInCurrentMap, linkedCollectibleIsLocked = GetFastTravelNodeInfo(nodeIndex)
@@ -6396,6 +6495,11 @@ function ZO_WorldMap_PanToPlayer()
     g_mapPanAndZoom:PanToPin(pin)
 end
 
+function ZO_WorldMap_PanToNormalizedPosition(x, y)
+    g_gamepadMap:StopMotion()
+    g_mapPanAndZoom:PanToNormalizedPosition(x, y)
+end
+
 function ZO_WorldMap_JumpToPlayer()
     local pin = g_mapPinManager:GetPlayerPin()
     g_gamepadMap:StopMotion()
@@ -6604,6 +6708,12 @@ do
             if(g_mode == MAP_MODE_AVA_RESPAWN) then
                 ZO_WorldMap_RefreshAccessibleAvAGraveyards()
             end
+        end,
+        [EVENT_KEEP_IS_PASSABLE_CHANGED] = function(_, keepId, bgContext)
+            g_mapRefresh:RefreshSingle("keep", keepId, bgContext)
+        end,
+        [EVENT_KEEP_PIECE_DIRECTIONAL_ACCESS_CHANGED] = function(_, keepId, bgContext)
+            g_mapRefresh:RefreshSingle("keep", keepId, bgContext)
         end,
         [EVENT_KEEP_GATE_STATE_CHANGED] = ZO_WorldMap_RefreshKeeps,
         [EVENT_KEEP_INITIALIZED] = function(_, keepId, bgContext)
@@ -6911,7 +7021,7 @@ do
                                 end
                             end,
                 visible =   function()
-                                return (GetMapType() ~= MAPTYPE_COSMIC) and IsMouseOverMap()
+                                return not IsShowingCosmicMap() and IsMouseOverMap()
                             end
             }
         }
@@ -6999,7 +7109,7 @@ do
                                 end
                             end,
                 visible =   function()
-                                return (GetMapType() ~= MAPTYPE_COSMIC) and IsMouseOverMap()
+                                return not IsShowingCosmicMap() and IsMouseOverMap()
                             end
             },
         }
@@ -7089,8 +7199,6 @@ do
                 if ZO_WorldMapButtonsToggleSize then
                     ZO_WorldMapButtonsToggleSize:SetHidden(false)
                 end
-
-                --Expand zoom area
 
                 ZO_SavePlayerConsoleProfile()
                 ZO_WorldMap_SetGamepadKeybindsShown(false)
@@ -7408,12 +7516,15 @@ do
                                                                 UpdateMovingPins()
                                                                 g_dataRegistration:Refresh()
                                                                 g_mapPanAndZoom:OnWorldMapShowing()
+                                                                WORLD_MAP_MANAGER:OnShowing()
                                                                 TryTriggeringTutorials()
                                                             elseif(newState == SCENE_FRAGMENT_HIDING) then
                                                                 HideAllTooltips()
                                                                 ResetMouseOverPins()
+                                                                WORLD_MAP_MANAGER:OnHiding()
                                                             elseif(newState == SCENE_FRAGMENT_HIDDEN) then
                                                                 g_dataRegistration:Refresh()
+                                                                WORLD_MAP_MANAGER:OnHidden()
                                                             end
                                                         end)
 
@@ -7424,6 +7535,9 @@ do
         if(GetKeepFastTravelInteraction()) then
             CloseChatter()
         end
+
+        --TODO: Move WAY more into the object
+        WORLD_MAP_MANAGER = ZO_WorldMapManager:New(self)
     end
 end
 
@@ -7651,4 +7765,140 @@ end
 
 function ZO_WorldMap_SetupGamepadChoiceDialog(mouseOverPinHandlers)
     ZO_Dialogs_ShowGamepadDialog("WORLD_MAP_CHOICE_GAMEPAD", { mouseOverPinHandlers = mouseOverPinHandlers })
+end
+
+--[[--
+The World Map object, where state for the map system in general can be stored
+This file still relies heavily on locals and global functions but in time that can be migrated to the class
+--]]--
+
+local AUTO_NAVIGATION_STATE =
+{
+    INACTIVE = 1,
+    PANNING = 2,
+    WAITING_TO_PAN = 3,
+    WAITING_TO_CLICK = 4,
+}
+
+local AUTO_NAVIGATION_CONSTANTS =
+{
+    PAN_DELAY_S = 1.5,
+    CLICK_DELAY_S = .25,
+    START_ZOOM = .3,
+}
+
+ZO_WorldMapManager = ZO_CallbackObject:Subclass()
+
+function ZO_WorldMapManager:New(...)
+    local manager = ZO_CallbackObject.New(self)
+    manager:Initialize(...)
+    return manager
+end
+
+function ZO_WorldMapManager:Initialize(control)
+    self.control = control
+
+    self.autoNavigationState = AUTO_NAVIGATION_STATE.INACTIVE
+    self.autoNavigationDelayUntilFrameTimeS = nil
+
+    self.control:RegisterForEvent(EVENT_AUTO_MAP_NAVIGATION_TARGET_SET, function()
+        self:OnAutoNavigationTargetSet()
+    end)
+end
+
+function ZO_WorldMapManager:Update(currentFrameTimeS)
+    self:RefreshAutoNavigation(currentFrameTimeS)
+end
+
+function ZO_WorldMapManager:OnShowing()
+    self:FireCallbacks("Showing")
+end
+
+function ZO_WorldMapManager:OnHiding()
+    self:FireCallbacks("Hiding")
+end
+
+function ZO_WorldMapManager:OnHidden()
+    self:FireCallbacks("Hidden")
+end
+
+function ZO_WorldMapManager:OnAutoNavigationTargetSet()
+    if HasAutoMapNavigationTarget() and ZO_WorldMap_IsMapChangingAllowed() then
+        local hasMapChanged = false
+
+        if not ZO_WorldMap_IsWorldMapShowing() then
+            -- We're about to choose a map, and it's based on the players location map unless we're manually viewing a different map
+            if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
+                hasMapChanged = true
+            end
+        end
+
+        local mapIndex = GetAutoMapNavigationCommonZoomOutMapIndex()
+        if mapIndex then
+            self.autoNavigationState = AUTO_NAVIGATION_STATE.WAITING_TO_PAN
+            self.autoNavigationDelayUntilFrameTimeS = GetFrameTimeSeconds() + AUTO_NAVIGATION_CONSTANTS.PAN_DELAY_S
+            g_playerChoseCurrentMap = true
+
+            if SetMapToMapListIndex(mapIndex) == SET_MAP_RESULT_MAP_CHANGED then
+                hasMapChanged = true
+            end
+
+            ZO_WorldMap_ShowWorldMap()
+
+            if hasMapChanged then
+                CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
+            end
+
+            g_mapPanAndZoom:SetNormalizedZoomAndOffsetInNewMap(AUTO_NAVIGATION_CONSTANTS.START_ZOOM)
+        else
+            -- We can't actually auto navigate from where we are to where we're going
+            self:ClearAutoNavigation()
+
+            if hasMapChanged then
+                CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
+            end
+        end
+    end
+end
+
+function ZO_WorldMapManager:RefreshAutoNavigation(currentFrameTimeS)
+    if HasAutoMapNavigationTarget() then
+        local normalizedX, normalizedY = GetAutoMapNavigationNormalizedPositionForCurrentMap()
+
+        if self.autoNavigationState == AUTO_NAVIGATION_STATE.WAITING_TO_PAN then
+            if self.autoNavigationDelayUntilFrameTimeS <= currentFrameTimeS then
+                g_mapPanAndZoom:PanToNormalizedPosition(normalizedX, normalizedY)
+                self.autoNavigationState = AUTO_NAVIGATION_STATE.PANNING
+            end
+        elseif self.autoNavigationState == AUTO_NAVIGATION_STATE.PANNING then
+            if g_mapPanAndZoom:ReachedTargetOffset() then
+                if WouldProcessMapClick(normalizedX, normalizedY) then
+                    self.autoNavigationDelayUntilFrameTimeS = currentFrameTimeS + AUTO_NAVIGATION_CONSTANTS.CLICK_DELAY_S
+                    self.autoNavigationState = AUTO_NAVIGATION_STATE.WAITING_TO_CLICK
+                else
+                    -- No further to go
+                    self:ClearAutoNavigation()
+                end
+            end
+        elseif self.autoNavigationState == AUTO_NAVIGATION_STATE.WAITING_TO_CLICK then
+            if self.autoNavigationDelayUntilFrameTimeS <= currentFrameTimeS then
+                if ProcessMapClick(normalizedX, normalizedY) == SET_MAP_RESULT_MAP_CHANGED then
+                    local SIMULATE_PLAYER_CHOSEN = true
+                    local NAVIGATE_IN = true
+                    PlayerChosenMapUpdate(SIMULATE_PLAYER_CHOSEN, NAVIGATE_IN)
+                    self.autoNavigationDelayUntilFrameTimeS = currentFrameTimeS + AUTO_NAVIGATION_CONSTANTS.PAN_DELAY_S
+                    self.autoNavigationState = AUTO_NAVIGATION_STATE.WAITING_TO_PAN
+                else
+                    -- No further to go
+                    self:ClearAutoNavigation()
+                end
+            end
+        end
+    end
+end
+
+function ZO_WorldMapManager:ClearAutoNavigation()
+    ClearAutoMapNavigationTarget()
+    self.autoNavigationState = AUTO_NAVIGATION_STATE.INACTIVE
+    self.autoNavigationDelayUntilFrameTimeS = nil
 end

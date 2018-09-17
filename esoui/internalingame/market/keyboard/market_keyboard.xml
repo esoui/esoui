@@ -38,16 +38,14 @@
             </Controls>
         </Label>
 
-        <Label name="ZO_Market_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" modifyTextType="UPPERCASE" virtual="true"/>
-
-        <Label name="ZO_Market_SubscriptionBenefitLine" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_Market_GroupLabel" inherits="ZO_GridScrollList_Entry_Header_Keyboard" font="ZoFontHeader" modifyTextType="UPPERCASE"  virtual="true" />
 
         <Control name="ZO_MarketFragmentBackLabel" inherits="ZO_IconHeader" virtual="true">
             <OnInitialized>
                 ZO_IconHeader_OnInitialized(self)
                 self.enabled = true
                 self.allowIconScaling = false
-                self.OnMouseUp = ZO_MarketContentFragmentBack_OnMouseUp
+                self.OnMouseUp = nil
             </OnInitialized>
 
             <Controls>
@@ -58,153 +56,6 @@
                 </Texture>
 
                 <Label name="$(parent)Text" text="SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL" override="true" />
-            </Controls>
-        </Control>
-
-        <Control name="ZO_KeyboardMarketContents" mouseEnabled="true" hidden="true" virtual="true">
-            <Controls>
-                <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="26" />
-                    <Dimensions x="240"/>
-                    <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                            <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_MARKET_SEARCH_EDIT_DEFAULT))
-                            </OnInitialized>
-
-                            <OnTextChanged>
-                                ZO_EditDefaultText_OnTextChanged(self)
-                                ZO_Market_OnSearchTextChanged(self)
-                            </OnTextChanged>
-
-                            <OnEnter>
-                                ZO_Market_OnSearchEnterKeyPressed(self)
-                            </OnEnter>
-                        </EditBox>
-                    </Controls>
-                </Backdrop>
-
-                <Label name="$(parent)SearchLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_SEARCH_FILTER_BY_LABEL">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT"/>
-                </Label>
-
-                <Control name="$(parent)Filter" inherits="ZO_ComboBox">
-                    <Dimensions x="222" y="32" />
-                    <Anchor point="TOPRIGHT" offsetX="-30" offsetY="26"/>
-                </Control>
-
-                <Label name="$(parent)FilterLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_FILTER_LABEL">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Filter" relativePoint="TOPLEFT"/>
-                </Label>
-
-                <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                    <Dimensions x="ZO_MARKET_CATEGORY_CONTAINER_WIDTH" />
-                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="72"/>
-                    <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-130"/>
-                </Control>
-
-                <Control name="$(parent)EntryList" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-10"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
-                </Control>
-
-                <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
-                    <Anchor point="TOP" relativeTo="$(parent)EntryList"/>
-                </Label>
-
-                <Control name="$(parent)SubscriptionPage" inherits="ZO_ScrollContainer" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-10"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
-
-                    <Controls>
-                        <Control name="$(parent)ScrollChild" override="true">
-                            <Controls>
-                                <Texture name="$(parent)MembershipInfoBanner">
-                                    <Dimensions x="636" y="150" />
-                                    <!-- 1024x256 image cropped to 636x150 -->
-                                    <TextureCoords left="0" right="0.62109375" top="0" bottom="0.5859375"/>
-                                    <Anchor point="TOPLEFT" />
-                                </Texture>
-
-                                <Label name="$(parent)MembershipInfoTitle" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoBanner" offsetX="140" offsetY="45" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfoBanner" offsetX="-20" offsetY="45" />
-                                </Label>
-
-                                <Label name="$(parent)MembershipInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL_KEYBOARD">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoTitle" relativePoint="BOTTOMLEFT" />
-                                </Label>
-
-                                <Label name="$(parent)MembershipInfoStatus" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                    <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)MembershipInfoLabel" offsetX="5" />
-                                </Label>
-
-                                <Label name="$(parent)Overview" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoBanner" relativePoint="BOTTOMLEFT" offsetY="10" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfoBanner" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="10" />
-                                </Label>
-
-                                <Label name="$(parent)BenefitsTitle" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="30" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="30" />
-                                </Label>
-
-                                <Control name="$(parent)BenefitsLineContainer" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BenefitsTitle" relativePoint="BOTTOMLEFT" offsetY="4" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BenefitsTitle" relativePoint="BOTTOMRIGHT" offsetY="4" />
-                                </Control>
-                            </Controls>
-                        </Control>
-
-                        <Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_BUY_SUBSCRIPTION">
-                            <Dimensions x="230" />
-                            <Anchor point="TOP" relativeTo="$(parent)Scroll" relativePoint="BOTTOM" offsetY="30" />
-
-                            <OnClicked>
-                                ZO_MarketSubscribeButton_OnClicked(self)
-                            </OnClicked>
-                        </Button>
-
-                        <Button name="$(parent)FreeTrialButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_FREE_TRIAL">
-                            <Dimensions x="230" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)SubscribeButton" relativePoint="LEFT" offsetX="-40" />
-
-                            <OnClicked>
-                                ZO_MarketFreeTrialButton_OnClicked(self)
-                            </OnClicked>
-                        </Button>
-                    </Controls>
-                </Control>
-
-                <Control name="$(parent)ChapterUpgrade" inherits="ZO_ChapterUpgrade_KeyboardTemplate" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-15"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
-                </Control>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_KeyboardBundleContents" mouseEnabled="true" hidden="true" virtual="true">
-            <Controls>
-
-                <Control name="$(parent)BackLabel" level="1" inherits="ZO_MarketFragmentBackLabel">
-                    <Anchor point="TOPLEFT" offsetY="80" />
-                </Control>
-
-                <Control name="$(parent)ProductList" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" offsetX="280" offsetY="62"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
-                </Control>
-
-                <Label name="$(parent)ContentHeader" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ProductList" relativePoint="TOPLEFT" offsetY="-30"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ProductList" relativePoint="TOPRIGHT" offsetY="-30"/>
-                </Label>
-
-                <Label name="$(parent)Cost" font="ZoFontWinH4">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMLEFT" offsetX="0"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMRIGHT"/>
-                </Label>
-
             </Controls>
         </Control>
 
@@ -280,23 +131,21 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_Market" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
+        <TopLevelControl name="ZO_MarketTemplate" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true" virtual="true">
             <OnInitialized>
                 ZO_Market_OnInitialize(self)
             </OnInitialized>
 
             <Controls>
-
                 <Control name="$(parent)Message">
                     <Anchor point="TOPLEFT" offsetY="5" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-5" />
-
                     <Controls>
                         <Label name="$(parent)Label" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
                             <Dimensions y="100"/>
                             <Anchor point="TOP" offsetY="77"/>
                         </Label>
-                        
+
                         <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="TOPLEFT" offsetX="-10"/>
                             <Dimensions x="64" y="64"/>
@@ -307,8 +156,61 @@
                     </Controls>
                 </Control>
 
+                <Control name="$(parent)Contents" mouseEnabled="true" hidden="true">
+                    <Anchor point="TOPLEFT" offsetY="5"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
+                    <Controls>
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="26" />
+                            <Dimensions x="240"/>
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_MARKET_SEARCH_EDIT_DEFAULT))
+                                    </OnInitialized>
+
+                                    <OnTextChanged>
+                                        ZO_EditDefaultText_OnTextChanged(self)
+                                        ZO_Market_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+
+                                    <OnEnter>
+                                        ZO_Market_OnSearchEnterKeyPressed(self)
+                                    </OnEnter>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)SearchLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_SEARCH_FILTER_BY_LABEL">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT"/>
+                        </Label>
+
+                        <Control name="$(parent)Filter" inherits="ZO_ComboBox">
+                            <Dimensions x="222" y="32" />
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="26"/>
+                        </Control>
+
+                        <Label name="$(parent)FilterLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_FILTER_LABEL">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Filter" relativePoint="TOPLEFT"/>
+                        </Label>
+
+                        <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                            <Dimensions x="ZO_MARKET_CATEGORY_CONTAINER_WIDTH" />
+                            <Anchor point="TOPLEFT" offsetX="-28" offsetY="72"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-130"/>
+                        </Control>
+
+                        <Control name="$(parent)ProductList" inherits="ZO_GridScrollList_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-10"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
+                        </Control>
+
+                        <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
+                            <Anchor point="TOP" relativeTo="$(parent)ProductList"/>
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
-
     </Controls>
 </GuiXml>

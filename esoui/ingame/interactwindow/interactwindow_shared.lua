@@ -518,6 +518,10 @@ local REWARD_CREATORS =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_TELVAR_STONES, amount, currencyOptions)
         end,
+    [REWARD_TYPE_EVENT_TICKETS] =
+        function(control, name, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_EVENT_TICKETS, amount, currencyOptions)
+        end,
     [REWARD_TYPE_MONEY] =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_MONEY, amount, currencyOptions)
@@ -542,6 +546,7 @@ local currencyRewards =
     [REWARD_TYPE_ALLIANCE_POINTS] = true,
     [REWARD_TYPE_TELVAR_STONES] = true,
     [REWARD_TYPE_WRIT_VOUCHERS] = true,
+    [REWARD_TYPE_EVENT_TICKETS] = true,
 }
 
 function ZO_SharedInteraction:IsCurrencyReward(rewardType)
@@ -554,6 +559,7 @@ local currencyRewardToCurrencyType =
     [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
     [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
     [REWARD_TYPE_WRIT_VOUCHERS] = CURT_WRIT_VOUCHERS,
+    [REWARD_TYPE_EVENT_TICKETS] = CURT_EVENT_TICKETS,
 }
 
 function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)

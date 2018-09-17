@@ -72,7 +72,7 @@ function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected
         if texturePath then
             texture:SetTexture(texturePath)
             texture.tooltipText = self:GetTooltipText(iconData.questType, iconData.displayType)
-        
+
             texture:SetAlpha(0.50)
             texture:SetHidden(false)
         else

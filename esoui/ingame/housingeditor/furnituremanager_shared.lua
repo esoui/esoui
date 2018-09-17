@@ -150,6 +150,7 @@ end
 
 function ZO_SharedFurnitureManager:SetPlayerWaypointTo(retrievableFurniture)
     local furnitureId = retrievableFurniture:GetRetrievableFurnitureId()
+    SetHousingEditorTrackedFurnitureId(furnitureId)
     local worldX, worldY, worldZ = HousingEditorGetFurnitureWorldPosition(furnitureId)
     if SetPlayerWaypointByWorldLocation(worldX, worldY, worldZ) then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_HOUSING_FURNIUTRE_SET_WAYPOINT_SUCCESS))
@@ -169,6 +170,7 @@ function ZO_SharedFurnitureManager:OnMapPing(pingEventType, pingType, pingTag, x
             --Otherwise something else removed the player waypoint so clear out our state info.
             if not self.ourWaypointAdd then
                 self.waypointToFurnitureId = nil
+                ResetHousingEditorTrackedFurnitureId()
             end
         end
     end
@@ -178,6 +180,7 @@ function ZO_SharedFurnitureManager:OnHousingEditorModeChanged(oldMode, newMode)
     --If they picked up the furniture clear the player waypoint if it was showing the location of that furniture
     if newMode == HOUSING_EDITOR_MODE_PLACEMENT and self.waypointToFurnitureId and HousingEditorGetSelectedFurnitureId() == self.waypointToFurnitureId then
         RemovePlayerWaypoint()
+        ResetHousingEditorTrackedFurnitureId()
     end
 end
 
@@ -240,6 +243,7 @@ function ZO_SharedFurnitureManager:OnFurnitureRemovedFromHouse(furnitureId, coll
     if self.waypointToFurnitureId then
         if AreId64sEqual(furnitureId, self.waypointToFurnitureId) then
             RemovePlayerWaypoint()
+            ResetHousingEditorTrackedFurnitureId()
         end
     end
 end

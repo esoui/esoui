@@ -1,0 +1,99 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Market_SubscriptionBenefitLine" resizeToFitDescendents="true" virtual="true">
+            <Dimensions x="ZO_ESO_PLUS_OFFERS_SCROLL_AREA_WIDTH" />
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="LEFT" />
+                </Texture>
+                <Label name="$(parent)HeaderText" font="ZoFontTooltipTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="74" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+                <Label name="$(parent)LineText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderText" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderText" relativePoint="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_EsoPlusOffersTopLevel_Keyboard" inherits="ZO_MarketTemplate">
+            <OnInitialized>
+                ZO_EsoPlusOffers_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)SubscriptionPage" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-58"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
+
+                            <Controls>
+                                <Texture name="$(parent)MembershipInfoBanner">
+                                    <Dimensions x="636" y="150" />
+                                    <!-- 1024x256 image cropped to 636x150 -->
+                                    <TextureCoords left="0" right="0.62109375" top="0" bottom="0.5859375"/>
+                                    <Anchor point="TOPLEFT" offsetX="-20"/>
+                                </Texture>
+
+                                <Label name="$(parent)MembershipInfoTitle" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoBanner" offsetX="140" offsetY="45" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfoBanner" offsetX="-20" offsetY="45" />
+                                </Label>
+
+                                <Label name="$(parent)MembershipInfoLabel" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL_KEYBOARD">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoTitle" relativePoint="BOTTOMLEFT" />
+                                </Label>
+
+                                <Label name="$(parent)MembershipInfoStatus" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)MembershipInfoLabel" offsetX="5" />
+                                </Label>
+
+                                <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfoBanner" relativePoint="BOTTOMLEFT" offsetX="40" offsetY="10" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Controls>
+                                        <Control name="$(parent)ScrollChild" override="true">
+                                            <Dimensions x="ZO_ESO_PLUS_OFFERS_SCROLL_AREA_WIDTH" />
+                                            <Controls>
+                                                <Label name="$(parent)Overview" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                                    <Anchor point="TOPLEFT" />
+                                                    <Anchor point="TOPRIGHT" />
+                                                </Label>
+
+                                                <Control name="$(parent)BenefitsLineContainer" resizeToFitDescendents="true">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="16" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Overview" relativePoint="BOTTOMRIGHT" offsetY="16" />
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+
+                                <Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_BUY_SUBSCRIPTION">
+                                    <Dimensions x="230" />
+                                    <Anchor point="TOP" relativeTo="$(parent)ScrollContainerScroll" relativePoint="BOTTOM" offsetY="30" />
+
+                                    <OnClicked>
+                                        ZO_MarketSubscribeButton_OnClicked(self)
+                                    </OnClicked>
+                                </Button>
+
+                                <Button name="$(parent)FreeTrialButton" inherits="ZO_DefaultButton" text="SI_MARKET_SUBSCRIPTION_PAGE_FREE_TRIAL">
+                                    <Dimensions x="230" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)SubscribeButton" relativePoint="LEFT" offsetX="-40" />
+
+                                    <OnClicked>
+                                        ZO_MarketFreeTrialButton_OnClicked(self)
+                                    </OnClicked>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

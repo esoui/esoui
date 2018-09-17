@@ -44,14 +44,16 @@ end
 function ZO_ChapterUpgradePane_Gamepad:ShowSelectedDataTooltip()
     local marketProductId = self:GetSelectedProductId()
     if marketProductId ~= 0 then
-        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, marketProductId)
+        local SHOW_PURCHASABLE_HINT = true
+        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, marketProductId, SHOW_PURCHASABLE_HINT)
     end
 end
 
 function ZO_ChapterUpgradePane_Gamepad:ShowPreviewIndexTooltip()
     local marketProductId = ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetCurrentPreviewData()
     if marketProductId then
-        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, marketProductId)
+        local SHOW_PURCHASABLE_HINT = true
+        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, marketProductId, SHOW_PURCHASABLE_HINT)
     end
 end
 
@@ -313,18 +315,12 @@ do
 
     function ZO_ChapterUpgrade_Gamepad:BuildCategories()
         self.categoryList:Clear()
-        if ZO_CHAPTER_UPGRADE_MANAGER:GetNumChapterUpgrades() > 0 then
-            local prepurchaseChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetPrepurchaseChapterUpgradeData()
-            if prepurchaseChapterUpgradeData then
-                AddChapterUpgradeEntry(self.categoryList, prepurchaseChapterUpgradeData)
-            else
-                --TODO: Implement the full market control approach, allowing the current chapter to be controlled the same way prepurchase is
-                local currentChapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetCurrentChapterUpgradeData()
-                if currentChapterUpgradeData then
-                    AddChapterUpgradeEntry(self.categoryList, currentChapterUpgradeData)
-                end
-            end
+
+        for index = 1, ZO_CHAPTER_UPGRADE_MANAGER:GetNumChapterUpgrades() do
+            local chapterUpgradeData = ZO_CHAPTER_UPGRADE_MANAGER:GetChapterUpgradeDataByIndex(index)
+            AddChapterUpgradeEntry(self.categoryList, chapterUpgradeData)
         end
+
         self.categoryList:Commit()
 
         -- If we're rebuilding the categories, we rebuilt the rewards as well, so if we're in rewards view we want to come back out to the categories

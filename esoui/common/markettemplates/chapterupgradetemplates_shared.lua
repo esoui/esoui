@@ -68,8 +68,8 @@ do
                     text = zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
                 end
             else
-                local hasDiscount, discountPercent = chapterUpgradeData:GetDiscountInfo()
-                if hasDiscount then
+                local discountPercent = chapterUpgradeData:GetDiscountPercent()
+                if discountPercent > 0 then
                     style = ON_SALE_STYLE
                     text = zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, discountPercent)
                 elseif chapterUpgradeData:IsNew() then

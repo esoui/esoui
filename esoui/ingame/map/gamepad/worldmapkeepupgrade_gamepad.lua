@@ -18,7 +18,7 @@ function MapKeepUpgrade_Gamepad:Initialize(control)
     self.symbolParams = SYMBOL_PARAMS
     self.sideContent = control:GetNamedChild("SideContent")
 
-    self.gridListClass = ZO_GridScrollList_Gamepad
+    self.gridListClass = ZO_SingleTemplateGridScrollList_Gamepad
     self.labelLayout = "ZO_WorldMapKeepUpgradeHeader_Gamepad"
     self.buttonLayout = "ZO_WorldMapKeepUpgradeButton_Gamepad"
 
@@ -36,10 +36,12 @@ function MapKeepUpgrade_Gamepad:Initialize(control)
         if newState == SCENE_FRAGMENT_SHOWN then
             self:RefreshAll()
             SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+            ZO_WorldMap_UpdateMap()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self.keepUpgradeObject = nil
             self.scrollTooltip:ClearLines()
             SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+            ZO_WorldMap_UpdateMap()
         end
     end)
 end

@@ -662,6 +662,44 @@ local function InitKeybindingDescriptor(self)
                 end
             end,
         },
+        -- Order Character Up
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = GetString(SI_CHARACTER_SELECT_ORDER_CHARACTER_UP),
+            keybind = "UI_SHORTCUT_LEFT_SHOULDER",
+            order = 101,
+            callback = function()
+                if not g_hasNeedsRenameCharacter then
+                    local selectedData = self.characterList:GetTargetData()
+                    if selectedData and selectedData.type == ENTRY_TYPE_CHARACTER and selectedData.order > 1 then
+                        ZO_CharacterSelect_OrderCharacterUp(selectedData.order)
+                        CreateList(self)
+                        local ALLOW_EVEN_IF_DISABLED = true
+                        local FORCE_ANIMATION = false
+                        ZO_CharacterSelect_Gamepad.characterList:SetSelectedIndexWithoutAnimation(selectedData.slot, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION)
+                    end
+                end
+            end
+        },
+        -- Order Character Down
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = GetString(SI_CHARACTER_SELECT_ORDER_CHARACTER_DOWN),
+            keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
+            order = 102,
+            callback = function()
+                if not g_hasNeedsRenameCharacter then
+                    local selectedData = self.characterList:GetTargetData()
+                    if selectedData and selectedData.order < GetNumCharacters() then
+                        ZO_CharacterSelect_OrderCharacterDown(selectedData.order)
+                        CreateList(self)
+                        local ALLOW_EVEN_IF_DISABLED = true
+                        local FORCE_ANIMATION = false
+                        ZO_CharacterSelect_Gamepad.characterList:SetSelectedIndexWithoutAnimation(selectedData.slot, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION)
+                    end
+                end
+            end
+        },
         deleteKeybind,
         optionsKeybind,
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
@@ -1212,7 +1250,11 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
 
                 return mainText
             end,
-            onBack = function() ZO_CharacterSelect_Gamepad_ReturnToCharacterList(ACTIVATE_VIEWPORT) end,
+            onBack = function()
+                -- viewport was never deactivated, so don't reactivate
+                local DONT_ACTIVATE_VIEWPORT = false
+                ZO_CharacterSelect_Gamepad_ReturnToCharacterList(DONT_ACTIVATE_VIEWPORT)
+            end,
             onFinish = function(dialog)
                 g_requestedRename = dialog.selectedName
 

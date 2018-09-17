@@ -31,7 +31,8 @@ local CATEGORY_LAYOUT_INFO =
             local membershipControl = button:GetNamedChild("Membership")
             local remainingCrownsControl = button:GetNamedChild("RemainingCrowns")
             membershipControl:SetHidden(not isSubscriber)
-            membershipControl:SetText(GetString(SI_ESO_PLUS_TITLE))
+            local esoPlusString = zo_iconTextFormatNoSpace("EsoUI/Art/Market/Keyboard/ESOPlus_Chalice_GOLD_32.dds", 28, 28, GetString(SI_ESO_PLUS_TITLE))
+            membershipControl:SetText(esoPlusString)
             remainingCrownsControl:SetHidden(false)
             local currentCrownBalance = GetPlayerCrowns()
             remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentCrownBalance)))
@@ -926,7 +927,7 @@ function MainMenu_Keyboard:OnCategoryClicked(category)
             }
             MAIN_MENU_MANAGER:ActivatedBlockingScene_Scene(sceneData, CLICKED_BY_MOUSE)
         else
-			--If the scene will need confirmation to hide then go back to the previous button. We'll select the button for this category on the scene or scene group showing (if it is allowed).
+            --If the scene will need confirmation to hide then go back to the previous button. We'll select the button for this category on the scene or scene group showing (if it is allowed).
             if SCENE_MANAGER:WillCurrentSceneConfirmHide() then
                 local SKIP_ANIMATION = true
                 ZO_MenuBar_RestoreLastClickedButton(self.categoryBar, SKIP_ANIMATION)

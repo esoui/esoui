@@ -67,7 +67,7 @@ function zo_binarysearch(searchData, dataList, comparator)
     high = zo_max(high, 1)
     local numEntries = #dataList
     while(high <= numEntries) do
-		if(comparator(searchData, dataList[high], high) < 0) then
+        if(comparator(searchData, dataList[high], high) < 0) then
             return false, high
         end
         high = high + 1
@@ -104,10 +104,10 @@ end
 
 function zo_roundToZero(value)
     if value > 0 then
-		return zo_ceil(value - .5)
-	else
-		return zo_floor(value + .5)
-	end
+        return zo_ceil(value - .5)
+    else
+        return zo_floor(value + .5)
+    end
 end
 
 function zo_roundToNearest(value, nearest)
@@ -118,7 +118,7 @@ function zo_roundToNearest(value, nearest)
 end
 
 function zo_strjoin(separator, ...)
-	return table.concat({...}, separator)
+    return table.concat({...}, separator)
 end
 
 function zo_lerp(from, to, amount)
@@ -158,12 +158,20 @@ function zo_iconFormatInheritColor(path, width, height)
     return string.format("|t%s:%s:%s:inheritcolor|t", tostring(width), tostring(height), path)
 end
 
-function zo_iconTextFormat(path, width, height, text)
-    return zo_strformat(SI_FORMAT_ICON_TEXT, zo_iconFormat(path, width, height), text)
+function zo_iconTextFormat(path, width, height, text, inheritColor)
+    local iconFormatter = zo_iconFormat
+    if inheritColor then
+        iconFormatter = zo_iconFormatInheritColor
+    end
+    return string.format("%s %s", iconFormatter(path, width, height), zo_strformat("<<1>>", text))
 end
 
-function zo_iconTextFormatNoSpace(path, width, height, text)
-    return zo_strformat(SI_FORMAT_ICON_TEXT_NO_SPACE, zo_iconFormat(path, width, height), text)
+function zo_iconTextFormatNoSpace(path, width, height, text, inheritColor)
+    local iconFormatter = zo_iconFormat
+    if inheritColor then
+        iconFormatter = zo_iconFormatInheritColor
+    end
+    return string.format("%s%s", iconFormatter(path, width, height), zo_strformat("<<1>>", text))
 end
 
 function zo_bulletFormat(label, text)
@@ -171,6 +179,10 @@ function zo_bulletFormat(label, text)
     local bulletSpacingWidth = label:GetStringWidth(bulletSpacer)
     label:SetNewLineX(bulletSpacingWidth)
     label:SetText(zo_strformat(SI_FORMAT_BULLET_TEXT, text))
+end
+
+function zo_strikethroughTextFormat(text)
+   return string.format("|L0:0:0:45%%:8%%:ignore|l%s|l", text)
 end
 
 function zo_callHandler(object, handler, ...)
@@ -236,7 +248,7 @@ end
 -- id64s are stored as lua Number type, and sometimes generate the same hash key for very similar numbers. 
 -- Use this function to get unique hash key for a given id64. 
 function zo_getSafeId64Key(id)
-	return Id64ToString(id)
+    return Id64ToString(id)
 end
 
 function zo_distance3D(x1, y1, z1, x2, y2, z2)

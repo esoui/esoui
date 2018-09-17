@@ -116,13 +116,13 @@ do
         if comparativeTooltip1 and comparativeTooltip2 then
             if quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT then
                 comparativeTooltip1:SetOwner(tooltip, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0)
-                comparativeTooltip2:SetOwner(comparativeTooltip1, TOPLEFT, 0, BETWEEN_TOOLTIP_OFFSET_Y, BOTTOMLEFT)
+                comparativeTooltip2:SetOwner(comparativeTooltip1, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0, TOPRIGHT)
             else
                 comparativeTooltip1:SetOwner(tooltip, TOPRIGHT, -BETWEEN_TOOLTIP_OFFSET_X, 0)
-                comparativeTooltip2:SetOwner(comparativeTooltip1, TOPLEFT, 0, BETWEEN_TOOLTIP_OFFSET_Y, BOTTOMLEFT)
+                comparativeTooltip2:SetOwner(comparativeTooltip1, TOPRIGHT, -BETWEEN_TOOLTIP_OFFSET_X, 0, TOPLEFT)
             end
 
-            comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, comparativeTooltip2:GetHeight() + BETWEEN_TOOLTIP_OFFSET_Y)
+            comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, 0)
             comparativeTooltip2:SetClampedToScreenInsets(0, comparativeTooltip2.topClampedToScreenInset, 0, 0)
         elseif comparativeTooltip1 then
             if quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT then

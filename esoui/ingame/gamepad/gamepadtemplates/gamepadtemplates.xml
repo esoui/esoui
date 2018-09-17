@@ -69,21 +69,24 @@
         <Control name="ZO_GamepadMenuEntryWithBarTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                self.GetHeight = function(control)
-                    return control.label:GetTextHeight() + self:GetNamedChild("BarContainer"):GetHeight()
-                end
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" />
+                
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate" />
 
                 <StatusBar name="$(parent)BarContainer" inherits="ZO_GamepadArrowStatusBarWithBGMedium">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT" />
+
+                    <OnInitialized>
+                        self.gloss = self:GetNamedChild("Gloss")
+                        ZO_StatusBar_SetGradientColor(self, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
+                    </OnInitialized>
                 </StatusBar>
             </Controls>
         </Control>
-
+        
         <!-- Tooltip Templates -->
         <Control name="ZO_GamepadSelectedTooltipContainerTemplate" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" virtual="true">
             <Controls>
@@ -125,37 +128,21 @@
 
         <!-- Skill Related Scroll List Templates -->
 
-        <Control name="ZO_GamepadSkillLineEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
+        <Control name="ZO_GamepadSkillLineEntryTemplate" inherits="ZO_GamepadMenuEntryWithBarTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
-                self.GetHeight = function(control)
-                    local height = control.label:GetTextHeight()
-                    local barContainer = self:GetNamedChild("BarContainer")
-                    if not barContainer:IsControlHidden() then
-                        height = height + barContainer:GetHeight()
-                    end
-                    return height
-                end
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate"/>
 
+                self.barContainer.xpBar = ZO_WrappingStatusBar:New(self.barContainer, ZO_GamepadSkillLineEntryTemplate_OnLevelChanged)
+            </OnInitialized>
+            
+            <Controls>
                 <Label name="$(parent)Rank" inherits="ZO_GamepadMenuEntryLabelTemplate" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="-10"/>
                 </Label>
-
+                
+                <Texture name="$(parent)Icon" override="true" hidden="true" />
+                
                 <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
-
-                <StatusBar name="$(parent)BarContainer" inherits="ZO_GamepadArrowStatusBarWithBGMedium">
-                    <Dimensions x="244" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
-                    <OnInitialized>
-                        self.gloss = self:GetNamedChild("Gloss")
-
-                        self.xpBar = ZO_WrappingStatusBar:New(self, ZO_GamepadSkillLineEntryTemplate_OnLevelChanged)
-                        ZO_StatusBar_SetGradientColor(self, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
-                    </OnInitialized>
-                </StatusBar>                
             </Controls>
         </Control>
 

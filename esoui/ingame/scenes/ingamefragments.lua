@@ -656,6 +656,31 @@ end
 
 SHOW_MARKET_FRAGMENT = ShowMarketFragment:New()
 
+----------------------------------------
+-- Show Eso Plus Fragment
+----------------------------------------
+
+local ShowEsoPlusFragment = ZO_SceneFragment:Subclass()
+
+function ShowMarketFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ShowEsoPlusFragment:Show()
+    self:OnShown()
+    -- This call needs to be after OnShown so we are in the correct state to show
+    -- the new scene
+    if not IsInGamepadPreferredMode() then
+        SYSTEMS:GetObject("mainMenu"):ShowSceneGroup("marketSceneGroup", "esoPlusOffersSceneKeyboard")
+    end
+end
+
+function ShowEsoPlusFragment:Hide()
+    self:OnHidden()
+end
+
+SHOW_ESO_PLUS_FRAGMENT = ShowEsoPlusFragment:New()
+
 -------------------------------------------------
 -- Suppress Collectible Notifications Fragment
 -------------------------------------------------
@@ -881,6 +906,7 @@ GUILD_SELECTOR_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("Guild")
 MOUSE_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("MouseUIMode")
 GAMEPAD_UI_MODE_FRAGMENT = ZO_ActionLayerFragment:New("GamepadUIMode")
 HOUSING_EDITOR_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HOUSING_EDITOR))
+HOUSING_EDITOR_HUD_PLACEMENT_MODE_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HOUSING_EDITOR_PLACEMENT_MODE))
 HOUSING_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HUD_HOUSING))
 BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundHud")
 BATTLEGROUND_SCOREBOARD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundScoreboard")

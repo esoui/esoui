@@ -149,7 +149,7 @@ end
 function ZO_GamepadCollectionsBook:InitializeGridListPanel()
     local gridListPanel = self.control:GetNamedChild("GridListPanel")
     self.gridListPanelControl = gridListPanel
-    self.gridListPanelList = ZO_GridScrollList_Gamepad:New(gridListPanel, FILL_ROW_WITH_EMPTY_CELLS)
+    self.gridListPanelList = ZO_SingleTemplateGridScrollList_Gamepad:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local function OutfitStyleGridEntrySetup(control, data, list)
         ZO_DefaultGridEntrySetup(control, data, list)
@@ -345,26 +345,26 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
 
         -- Options
         {
-		    name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
-		    keybind = "UI_SHORTCUT_TERTIARY",
-		    callback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_OPTIONS", { showLockedOption }) end,
+            name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_OPTIONS", { showLockedOption }) end,
             visible = function()
                 return self.currentCategoryData:IsOutfitStylesCategory()
             end,
-	    },
+        },
 
         -- Clear Preview
         {
             name = GetString(SI_OUTFIT_STYLES_BOOK_END_ALL_PREVIEWS_KEYBIND),
-		    keybind = "UI_SHORTCUT_LEFT_STICK",
-		    callback = ClearPreviewList,
+            keybind = "UI_SHORTCUT_LEFT_STICK",
+            callback = ClearPreviewList,
             visible = function()
                 return self.currentCategoryData:IsOutfitStylesCategory() and self:HasAnyCurrentSlotPreviews()
             end,
         }
     }
 
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() 
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.subcategoryKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
                                                                                                                             self:ClearAllCurrentSlotPreviews()
                                                                                                                             self:ShowList(self.categoryList) 
                                                                                                                         end)
@@ -402,16 +402,16 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         
         -- Options
         {
-		    name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
-		    keybind = "UI_SHORTCUT_TERTIARY",
-		    callback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_OPTIONS", { showLockedOption }) end,
-	    },
+            name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_OPTIONS", { showLockedOption }) end,
+        },
 
         -- Clear Preview
         {
             name = GetString(SI_OUTFIT_STYLES_BOOK_END_ALL_PREVIEWS_KEYBIND),
-		    keybind = "UI_SHORTCUT_LEFT_STICK",
-		    callback = ClearPreviewGrid,
+            keybind = "UI_SHORTCUT_LEFT_STICK",
+            callback = ClearPreviewGrid,
             visible = function() return self:HasAnyCurrentSlotPreviews() end
         }
     }
@@ -1398,9 +1398,8 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
 
         KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
     end
-    
+
     local function SetActiveEdit(edit)
-        local SAVE_EXISTING_TEXT = true
         edit:TakeFocus()
         UpdateSelectedName(inputText)
     end

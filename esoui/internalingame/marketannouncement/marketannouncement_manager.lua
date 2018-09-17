@@ -20,6 +20,7 @@ function MarketAnnouncement_Manager:Initialize()
 
     local MARKET_PRODUCT_SORT_KEYS =
     {
+        isDeprioritized = { tiebreaker = "isPromo", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isPromo = { tiebreaker = "isLimitedTime", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isLimitedTime = {tiebreaker = "timeLeft", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
         timeLeft = {isNumeric = true, tiebreaker = "containsDLC", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
@@ -27,11 +28,12 @@ function MarketAnnouncement_Manager:Initialize()
         isNew = { tiebreaker = "isOnSale", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isOnSale = { tiebreaker = "onSaleTimeLeft", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
         onSaleTimeLeft = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        name = {},
+        name = { tiebreaker = "stackCount", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        stackCount = {}
     }
 
     function CompareMarketProducts(entry1, entry2)
-        return ZO_TableOrderingFunction(entry1, entry2, "isPromo", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_DOWN)
+        return ZO_TableOrderingFunction(entry1, entry2, "isDeprioritized", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_UP)
     end
 
     OnMarketAnnouncementDataUpdated = function(eventId, aShouldShow, aIsLocked)
@@ -39,30 +41,30 @@ function MarketAnnouncement_Manager:Initialize()
         self.productInfoTable = {}
 
         local numAnnouncementProducts = GetNumMarketAnnouncementProducts()
-        if numAnnouncementProducts > 0 then --future proofing for likely addition of text-only announcements
+        if numAnnouncementProducts > 0 then -- future proofing for possible addition of non-market product announcements or just no announcements
             for i = 1, numAnnouncementProducts do
                 local productId = GetMarketAnnouncementProductDefId(i)
+                local productData = ZO_MarketProductData:New(productId, ZO_FEATURED_PRESENTATION_INDEX)
 
-                local name, _, _, isNew, _ = GetMarketProductInfo(productId)
-                local ltoTimeLeft = GetMarketProductLTOTimeLeftInSeconds(productId)
-                local saleTimeLeft = GetMarketProductSaleTimeLeftInSeconds(productId)
-                local containsDLC = DoesMarketProductContainDLC(productId)
-                -- durations longer than 1 month aren't represented to the user, so it's effectively not limited time
-                local isLimitedTime = ltoTimeLeft > 0 and ltoTimeLeft <= ZO_ONE_MONTH_IN_SECONDS
-                local isSaleTime = saleTimeLeft > 0 and saleTimeLeft <= ZO_ONE_MONTH_IN_SECONDS
-                local isPromo = GetMarketProductType(productId) == MARKET_PRODUCT_TYPE_PROMO
-                local _, _, hasDiscount = GetMarketProductPricingByPresentation(productId)
-                local hasDiscount = hasDiscount or self:HasHouseDiscount(productId)
+                -- need to check if the products should show as limited time first instead of just getting the time left
+                local isLimitedTime = productData:IsLimitedTimeProduct()
+                local isSaleTime = productData:IsLimitedSaleTimeProduct()
+                local isDeprioritized = productData:IsDeprioritizeInAnnouncements()
+                local discountPercent = select(4, productData:GetMarketProductPricingByPresentation())
+                local hasDiscount = discountPercent > 0 or self:HasHouseDiscount(productData)
                 local productInfo = {
-                                        productId = productId,
+                                        productData = productData,
+                                        -- for sorting
                                         isLimitedTime = isLimitedTime,
-                                        timeLeft = isLimitedTime and ltoTimeLeft or 0,
-                                        isNew = isNew,
-                                        name = name,
-                                        containsDLC = containsDLC,
-                                        isPromo = isPromo,
+                                        timeLeft = isLimitedTime and productData:GetLTOTimeLeftInSeconds() or 0,
+                                        isNew = productData:IsNew(),
+                                        name = productData:GetDisplayName(),
+                                        containsDLC = productData:ContainsDLC(),
+                                        isPromo = productData:IsPromo(),
                                         isOnSale = hasDiscount,
-                                        onSaleTimeLeft = isSaleTime and saleTimeLeft or 0,
+                                        onSaleTimeLeft = isSaleTime and productData:GetSaleTimeLeftInSeconds() or 0,
+                                        stackCount = productData:GetStackCount(),
+                                        isDeprioritized = isDeprioritized,
                                     }
 
                 table.insert(self.productInfoTable, productInfo)
@@ -70,7 +72,7 @@ function MarketAnnouncement_Manager:Initialize()
 
             table.sort(self.productInfoTable, CompareMarketProducts)
         end
-    
+
         self:FireCallbacks("OnMarketAnnouncementDataUpdated")
         if aShouldShow or GetDailyLoginClaimableRewardIndex() ~= nil then
             if not self.scene:IsShowing() and not HasShownMarketAnnouncement() then
@@ -82,15 +84,18 @@ function MarketAnnouncement_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("EVENT_MARKET_ANNOUNCEMENT_UPDATED", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementDataUpdated) 
 end
 
+function MarketAnnouncement_Manager:GetProductInfoTable()
+    return self.productInfoTable
+end
+
 function MarketAnnouncement_Manager:GetMarketProductListingsForHouseTemplate(houseTemplateId, displayGroup)
     return { GetActiveAnnouncementMarketProductListingsForHouseTemplate(houseTemplateId) }
 end
 
-function MarketAnnouncement_Manager:HasHouseDiscount(productId)
-    if ZO_MarketProduct_IsHouseCollectible(productId) then
-        local _, houseDiscountPercent = ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(productId, function(...) return self:GetMarketProductListingsForHouseTemplate(...) end)
-
-        return houseDiscountPercent and houseDiscountPercent > 0
+function MarketAnnouncement_Manager:HasHouseDiscount(productData)
+    if productData:IsHouseCollectible() then
+        local houseDiscountPercent = select(4, ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(productData:GetId(), function(...) return self:GetMarketProductListingsForHouseTemplate(...) end))
+        return houseDiscountPercent > 0
     end
     return false
 end

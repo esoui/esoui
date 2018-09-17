@@ -54,7 +54,7 @@ local MENU_ENTRY_DATA =
         customTemplate = "ZO_GamepadMenuCrownStoreEntryTemplate",
         name = GetString(SI_GAMEPAD_MAIN_MENU_CROWN_STORE_CATEGORY),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_store.dds",
-        header = GetString(SI_ESO_PLUS_TITLE),
+        header = zo_iconTextFormatNoSpace("EsoUI/Art/Market/Gamepad/gp_ESOPlus_Chalice_GOLD_64.dds", 32, 32, ZO_MARKET_PRODUCT_ESO_PLUS_COLOR:Colorize(GetString(SI_ESO_PLUS_TITLE))),
         postPadding = 70,
         showHeader = function() return IsESOPlusSubscriber() end,
         isNewCallback = function(entryData)
@@ -79,7 +79,7 @@ local MENU_ENTRY_DATA =
                 name = GetString(SI_GAMEPAD_MAIN_MENU_DAILY_LOGIN_REWARDS_ENTRY),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_dailyLoginRewards.dds",
                 shouldDisableFunction = function()
-                    return GetNumRewardsInCurrentDailyLoginMonth() == 0
+                    return ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() or not ZO_DAILYLOGINREWARDS_MANAGER:IsClaimableRewardInMonth()
                 end,
                 fragmentGroupCallback = function()
                     return {ZO_DAILY_LOGIN_REWARDS_GAMEPAD:GetFragment(), GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT}

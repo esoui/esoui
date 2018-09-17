@@ -1,6 +1,9 @@
 local CHARACTER_DATA = 1
 local g_currentlySelectedCharacterData
 local g_deletingCharacterIds = {}
+local g_characterOrderDividerHalfHeight
+local g_characterSelectStartDragOrder
+local g_selectedOrderControl
 
 local function GetDataForCharacterId(charId)
     local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
@@ -53,6 +56,37 @@ local function SetupCharacterEntry(control, data)
     local allianceTexture = ZO_GetAllianceIcon(data.alliance)
     if allianceTexture then
         characterAlliance:SetTexture(allianceTexture)
+    end
+
+    if not control.orderUpButton then
+        local characterOrderUp = control:GetNamedChild("OrderUp")
+        local characterOrderDown = control:GetNamedChild("OrderDown")
+        characterOrderUp:SetHidden(true)
+        characterOrderDown:SetHidden(true)
+
+        control.orderUpButton = characterOrderUp;
+        control.orderDownButton = characterOrderDown;
+    end
+
+    local selectedData = ZO_CharacterSelect_GetSelectedCharacterData();
+    if selectedData == data then
+        control.orderUpButton:SetHidden(false)
+        control.orderDownButton:SetHidden(false)
+    else
+        control.orderUpButton:SetHidden(true)
+        control.orderDownButton:SetHidden(true)
+    end
+
+    if g_characterSelectStartDragOrder and g_characterSelectStartDragOrder ~= data.order then
+        characterName:SetAlpha(0.5)
+        characterStatus:SetAlpha(0.5)
+        characterLocation:SetAlpha(0.5)
+        characterAlliance:SetAlpha(0.5)
+    else
+        characterName:SetAlpha(1)
+        characterStatus:SetAlpha(1)
+        characterLocation:SetAlpha(1)
+        characterAlliance:SetAlpha(1)
     end
 end
 
@@ -121,7 +155,7 @@ do
         local characterData = ZO_CharacterSelect_GetBestSelectionData()
         if characterData then
             SelectCharacter(characterData)
-            ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.index)
+            ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.order)
         end
 
         local accountChampionPoints = ZO_CharacterSelect_GetAccountChampionPoints()
@@ -133,6 +167,13 @@ do
     end
 
     SelectedCharacterChanged = function(self, previouslySelected, selected)
+        if previouslySelected then
+            if previouslySelected.dataEntry.control then
+                previouslySelected.dataEntry.control.orderUpButton:SetHidden(true)
+                previouslySelected.dataEntry.control.orderDownButton:SetHidden(true)
+            end
+        end
+
         if selected then
             if g_currentlySelectedCharacterData == nil or g_currentlySelectedCharacterData.index ~= selected.index then
                 g_currentlySelectedCharacterData = selected
@@ -141,6 +182,11 @@ do
                     ZO_CharacterSelect_EnableSelection(g_currentlySelectedCharacterData)
                     DoCharacterSelection(g_currentlySelectedCharacterData.index)
                 end
+            end
+
+            if selected.dataEntry.control then
+                selected.dataEntry.control.orderUpButton:SetHidden(false)
+                selected.dataEntry.control.orderDownButton:SetHidden(false)
             end
         end
     end
@@ -319,10 +365,18 @@ function ZO_CharacterSelect_Initialize(self)
     self:RegisterForEvent(EVENT_CHARACTER_SELECTED_FOR_PLAY, ContextFilter(OnCharacterSelectedForPlay))
     self:RegisterForEvent(EVENT_CHARACTER_RENAME_RESULT, ContextFilter(OnCharacterRenamed))
 
+    self:SetHandler("OnUpdate", function(_, timeS)
+        ZO_CharacterSelect_OnUpdate(timeS)
+    end)
+
     CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", ContextFilter(OnCharacterConstructionReady))
     CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", ContextFilter(OnPregameFullyLoaded))
 
     CHARACTER_SELECT_FRAGMENT = ZO_FadeSceneFragment:New(self, 300)
+end
+
+function ZO_CharacterOrderDivider_Initialize()
+    g_characterOrderDividerHalfHeight = ZO_CharacterOrderDivider:GetHeight() / 2
 end
 
 function ZO_CharacterSelect_SetupAddonManager()
@@ -361,6 +415,34 @@ function ZO_CharacterSelect_Login(option)
     end
 end
 
+do
+    local DRAG_GRACE_DISTANCE = 50
+    function ZO_CharacterSelect_OnUpdate(timeS)
+        if g_characterSelectStartDragOrder then
+            local control = WINDOW_MANAGER:GetMouseOverControl()
+            if control and control.dataEntry then -- make sure we are looking at a control in the scroll list
+                ZO_CharacterOrderDivider:ClearAnchors()
+                ZO_CharacterOrderDivider:SetHidden(false)
+                local centerX, centerY = control:GetCenter()
+                local mouseX, mouseY = GetUIMousePosition()
+                if mouseY > centerY then
+                    ZO_CharacterOrderDivider:SetAnchor(TOP, control, BOTTOM, 0, -g_characterOrderDividerHalfHeight)
+                else
+                    ZO_CharacterOrderDivider:SetAnchor(BOTTOM, control, TOP, 0 , g_characterOrderDividerHalfHeight)
+                end
+                g_selectedOrderControl = control
+            elseif g_selectedOrderControl then
+                local mouseX = GetUIMousePosition()
+                if g_selectedOrderControl:GetLeft() - mouseX > DRAG_GRACE_DISTANCE then
+                    g_selectedOrderControl = nil
+                    ZO_CharacterOrderDivider:ClearAnchors()
+                    ZO_CharacterOrderDivider:SetHidden(true)
+                end
+            end
+        end
+    end
+end
+
 function ZO_CharacterSelect_GetSelectedCharacterData()
     return ZO_ScrollList_GetSelectedData(ZO_CharacterSelectScrollList)
 end
@@ -368,13 +450,20 @@ end
 local function ChangeSelectedCharacter(direction)
     local list = ZO_CharacterSelectScrollList
     local selectedData = ZO_ScrollList_GetSelectedData(list)
-    if(PregameStateManager_GetCurrentState() == "CharacterSelect" and selectedData ~= nil) then
+    if PregameStateManager_GetCurrentState() == "CharacterSelect" and selectedData ~= nil then
         local dataList = ZO_ScrollList_GetDataList(list)
-        local selectedDataIndex = selectedData.index
+        local selectedDataIndex
+        for index, dataEntry in ipairs(dataList) do
+            if dataEntry.data == selectedData then
+                selectedDataIndex = index
+                break
+            end
+        end
         local nextDataIndex = selectedDataIndex + direction
-        if(nextDataIndex >= 1 and nextDataIndex <= #dataList) then
+        if nextDataIndex >= 1 and nextDataIndex <= #dataList then
             local nextDataEntry = dataList[nextDataIndex]
             ZO_CharacterSelect_SetPlayerSelectedCharacterId(nextDataEntry.data.id)
+            ZO_ScrollList_ScrollDataIntoView(list, nextDataIndex)
             SelectCharacter(nextDataEntry.data)
         end
     end
@@ -413,6 +502,69 @@ function ZO_CharacterEntry_OnMouseClick(self)
     SelectCharacter(data)
 end
 
+function ZO_CharacterEntry_OnDragStart(self)
+    local data = ZO_ScrollList_GetData(self)
+    g_characterSelectStartDragOrder = data.order
+    ZO_CharacterSelect_RefreshCharacters()
+end
+
+function ZO_CharacterEntry_OnMouseUp(self)
+    if g_characterSelectStartDragOrder then
+        if g_selectedOrderControl then
+            local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
+            local endedOrder = g_selectedOrderControl.dataEntry.data.order
+            local centerX, centerY = g_selectedOrderControl:GetCenter()
+            local mouseX, mouseY = GetUIMousePosition()
+            -- correct end order based on mouse position and direction we are reordering
+            if endedOrder < g_characterSelectStartDragOrder and mouseY > centerY then
+                endedOrder = endedOrder + 1
+            elseif endedOrder > g_characterSelectStartDragOrder and mouseY <= centerY then
+                endedOrder = endedOrder - 1
+            end
+            ZO_CharacterSelect_ChangeCharacterOrders(g_characterSelectStartDragOrder, endedOrder)
+
+            g_selectedOrderControl = nil
+            g_characterSelectStartDragOrder = nil
+
+            ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
+            SetupScrollList()
+            SelectCharacter(selectedData)
+        else
+            g_characterSelectStartDragOrder = nil
+            g_selectedOrderControl = nil
+            ZO_CharacterSelect_RefreshCharacters()
+        end
+
+        ZO_CharacterOrderDivider:ClearAnchors()
+        ZO_CharacterOrderDivider:SetHidden(true)
+    end
+end
+
+function ZO_CharacterEntry_OnMouseDoubleClick(self, button)
+    if button == MOUSE_BUTTON_INDEX_LEFT then
+        local orderUpButton = self:GetNamedChild("OrderUp")
+        if MouseIsInside(orderUpButton) then
+            return
+        end
+        local orderDownButton = self:GetNamedChild("OrderDown")
+        if MouseIsInside(orderDownButton) then
+            return
+        end
+
+        ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)
+    end
+end
+
+function ZO_CharacterEntry_OnMouseEnter(self)
+    if not g_characterSelectStartDragOrder then
+        ZO_ScrollList_MouseEnter(ZO_CharacterSelectScrollList, self)
+    end
+end
+
+function ZO_CharacterEntry_OnMouseExit(self)
+    ZO_ScrollList_MouseExit(ZO_CharacterSelectScrollList, self)
+end
+
 function ZO_CharacterSelect_RefreshCharacters()
     ZO_ScrollList_RefreshVisible(ZO_CharacterSelectScrollList)
 end
@@ -449,7 +601,7 @@ end
 
 function ZO_CharacterSelect_Move_Character_Up()
     local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
-    if selectedData and selectedData.order < GetNumCharacters() then
+    if selectedData and selectedData.order > 1 then
         ZO_CharacterSelect_OrderCharacterUp(selectedData.order)
         ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
         SetupScrollList()
@@ -459,7 +611,7 @@ end
 
 function ZO_CharacterSelect_Move_Character_Down()
     local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
-    if selectedData and selectedData.order > 1 then
+    if selectedData and selectedData.order < GetNumCharacters() then
         ZO_CharacterSelect_OrderCharacterDown(selectedData.order)
         ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
         SetupScrollList()

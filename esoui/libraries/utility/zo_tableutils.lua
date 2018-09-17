@@ -234,6 +234,36 @@ function ZO_TableRandomInsert(t, element)
     table.insert(t, zo_random(#t + 1), element)
 end
 
+function ZO_NumericallyIndexedTableIterator(t)
+    local i = 0
+    local count = #t
+    return function()
+        if i < count then
+            i = i + 1
+            return i, t[i]
+        end
+    end
+end
+
+function ZO_NumericallyIndexedTableReverseIterator(t)
+    local i = #t + 1
+    return function()
+        if i > 1 then
+            i = i - 1
+            return i, t[i]
+        end
+    end
+end
+
+function ZO_NonContiguousTableIterator(t)
+    local k = nil
+    local v = nil
+    return function()
+        k, v = next(t, k)
+        return k, v
+    end
+end
+
 function ZO_FilteredNumericallyIndexedTableIterator(table, filterFunctions)
     local index = 0
     local count = #table
@@ -280,4 +310,47 @@ function ZO_FilteredNonContiguousTableIterator(table, filterFunctions)
             end
         end
     end
+end
+
+function ZO_DeepAcyclicTableCompare(t1, t2, maxTablesVisited)
+    local visitedLeft, visitedRight = {}, {}
+    local numVisited = 0
+
+    local function visit(left, right)
+        if type(left) == 'table' and type(right) == 'table' then
+            if visitedLeft[left] or visitedRight[right] then
+                internalassert(false, "Comparing tables with cycles.")
+                return false
+            end
+            visitedLeft[left], visitedRight[right] = true, true
+
+            numVisited = numVisited + 2
+            if numVisited > maxTablesVisited then
+                internalassert(false, "Max table limit reached")
+                return false
+            end
+
+            for k, v in pairs(left) do
+                if not visit(v, right[k]) then
+                    return false
+                end
+            end
+
+            for k, v in pairs(right) do
+                if left[k] == nil then
+                    return false
+                end
+            end
+
+            if getmetatable(left) ~= getmetatable(right) then
+                return false
+            end
+
+            return true
+        else
+            return left == right
+        end
+    end
+
+    return visit(t1, t2)
 end

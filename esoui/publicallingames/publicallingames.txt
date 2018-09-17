@@ -8,6 +8,7 @@ EsoUI\PublicAllIngames\Currency\Keyboard\CurrencyOptionsTable_Keyboard.lua
 EsoUI\PublicAllIngames\Currency\Gamepad\CurrencyOptionsTable_Gamepad.lua
 
 EsoUI\PublicAllIngames\Character\Character_Utils.lua
+EsoUI\PublicAllIngames\Exploration\ExplorationUtils.lua
 
 EsoUI\PublicAllIngames\Currency\Currency.lua
 EsoUI\PublicAllIngames\Currency\Currency.xml

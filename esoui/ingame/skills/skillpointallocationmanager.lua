@@ -489,6 +489,7 @@ function ZO_SkillPointAllocationManager:Initialize()
 
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", function() self:OnFullSystemUpdated() end)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", function(...) self:OnSkillPointAllocationModeChanged(...) end)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", function(...) self:OnFullSystemUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_SkillPointAllocationManager", EVENT_SKILL_POINTS_CHANGED, function(eventId, ...) self:OnSkillPointsChanged(...) end)
     SKILLS_AND_ACTION_BAR_MANAGER:OnSkillPointAllocationManagerReady(self)
 end

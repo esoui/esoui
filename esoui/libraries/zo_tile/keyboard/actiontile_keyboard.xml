@@ -16,5 +16,12 @@
                 </Control>
             </Controls>
         </Control>
+
+        <!-- Generic Keyboard Tile Elements -->
+        <Backdrop name="ZO_AnnouncementTileHighlight_Keyboard" centerColor="00000000" alpha="0" layer="0" level="2" blendMode="ADD" virtual="true">
+            <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+            <Anchor point="TOPLEFT" offsetX="5" offsetY="5"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5"/>
+        </Backdrop>
     </Controls>
 </GuiXml>

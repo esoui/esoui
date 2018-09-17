@@ -45,6 +45,7 @@ function ZO_FadingStationaryControlBuffer:Initialize(control, maxDisplayedEntrie
     self.resetPositionY = offsetY
     self.controllerType = controllerType
     self.additionalEntrySpacingY = 0
+    self.paused = false
 
     self:InitializeContainerAnimations(containerAnimationName)
 
@@ -52,6 +53,10 @@ function ZO_FadingStationaryControlBuffer:Initialize(control, maxDisplayedEntrie
 end
 
 function ZO_FadingStationaryControlBuffer:OnUpdateBuffer(timeMs)
+    if self.paused then
+        return
+    end
+
     if timeMs > self.nextTimeToFlushMS then
         self:FlushEntries()
         self.nextTimeToFlushMS = timeMs + FLUSH_UPDATE_TIME_MS
@@ -70,6 +75,29 @@ function ZO_FadingStationaryControlBuffer:OnUpdateBuffer(timeMs)
         if self.queuedTimedEntries[i].fadeStartDelayMs < timeMs then
             self.queuedTimedEntries[i].control.fadeIconTimeline:PlayFromStart()
             table.remove(self.queuedTimedEntries, i)
+        end
+    end
+end
+
+function ZO_FadingStationaryControlBuffer:Pause()
+    if not self.paused then
+        self.paused = true
+        self.pauseTimeMS = GetFrameTimeMilliseconds()
+    end
+end
+
+function ZO_FadingStationaryControlBuffer:Resume()
+    if self.paused then
+        self.paused = false
+        local timePausedMS = GetFrameTimeMilliseconds() - self.pauseTimeMS
+        self.pauseTimeMS = nil
+
+        if self.containerStartTimeMs ~= 0 then
+            self.containerStartTimeMs = self.containerStartTimeMs + timePausedMS
+        end
+
+        for i, queuedTimedEntry in ipairs(self.queuedTimedEntries) do
+            queuedTimedEntry.fadeStartDelayMs = queuedTimedEntry.fadeStartDelayMs + timePausedMS
         end
     end
 end
@@ -193,12 +221,6 @@ function ZO_FadingStationaryControlBuffer:TryConcatWithExistingEntry(templateNam
                         templateData.equalitySetup(self, activeEntry, entry)
                         activeEntryControl.setupTime = GetFrameTimeMilliseconds()
                         handled = true
-                    else
-                        -- The headers are equal, but the lines are not equal.  Prepend the lines to the header if there is space.
-                        if self:CanDisplayMore() then
-                            self:PrependLinesToExistingEntry(activeEntryControl, entry.lines)
-                            handled = true
-                        end
                     end
                 end
             -- Headers are either not equal or not present.  Are all lines equal?
