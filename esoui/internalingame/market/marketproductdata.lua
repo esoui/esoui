@@ -114,7 +114,11 @@ function ZO_MarketProductData:IsFeatured()
 end
 
 function ZO_MarketProductData:IsGiftable()
-    return IsMarketProductGiftable(self.marketProductId, self.presentationIndex)
+    if self:HasValidPresentationIndex() then
+        return IsMarketProductGiftable(self.marketProductId, self.presentationIndex)
+    else
+        return false
+    end
 end
 
 function ZO_MarketProductData:GetLTOTimeLeftInSeconds()

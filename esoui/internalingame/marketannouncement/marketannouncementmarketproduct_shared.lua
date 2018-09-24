@@ -105,13 +105,6 @@ function ZO_MarketAnnouncementMarketProduct_Shared:LayoutCostAndText()
     ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.control.title, FOCUSED, self.purchaseState)
 end
 
--- Hide pricing on houses in announcements until we get the info from the b/e to display pricing properly
-function ZO_MarketAnnouncementMarketProduct_Shared:SetupPricingDisplay()
-    ZO_MarketProductBase.SetupPricingDisplay(self)
-
-    self.control.cost:SetHidden(self.control.cost:IsHidden() or self:IsPromo())
-end
-
 function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
     local control = self.control
     control.previousCost:ClearAnchors()

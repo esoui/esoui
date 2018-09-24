@@ -183,7 +183,7 @@ function ZO_HousingEditorHud:Initialize(control)
             elseif currentMode == HOUSING_EDITOR_MODE_SELECTION then
                 SCENE_MANAGER:AddFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
             end
-            KEYBIND_STRIP:AddKeybindButton(self.exitKeybindButton)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RemoveDefaultExit()
             self:UpdateKeybinds()
         elseif newState == SCENE_HIDDEN then
@@ -191,7 +191,7 @@ function ZO_HousingEditorHud:Initialize(control)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
-            KEYBIND_STRIP:RemoveKeybindButton(self.exitKeybindButton)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
             self.currentKeybindDescriptor = nil
         end
@@ -204,12 +204,12 @@ function ZO_HousingEditorHud:Initialize(control)
             KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
-            KEYBIND_STRIP:AddKeybindButton(self.exitKeybindButton)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
         elseif newState == SCENE_HIDDEN then
             self:ClearPlacementKeyPresses()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
-            KEYBIND_STRIP:RemoveKeybindButton(self.exitKeybindButton)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
         end
     end)
@@ -308,6 +308,10 @@ function ZO_HousingEditorHud:OnHousingModeChanged(oldMode, newMode)
         end
     end
 
+    if oldMode == HOUSING_EDITOR_MODE_PLACEMENT then
+        self:ClearPlacementKeyPresses()
+    end
+
     self:UpdateKeybinds()
 end
 
@@ -335,6 +339,7 @@ function ZO_HousingEditorHud:UpdateKeybinds()
         end
     end
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
 
     if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
         SCENE_MANAGER:AddFragment(HOUSING_EDITOR_HUD_PLACEMENT_MODE_ACTION_LAYER_FRAGMENT)
@@ -472,14 +477,21 @@ do
         end
         
         -- Exit
-        self.exitKeybindButton =
+        self.exitKeybindButtonStripDescriptor =
         {
-            name = GetString(SI_EXIT_BUTTON),
-            keybind = "DISABLE_HOUSING_EDITOR",
-            callback = function()
-                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
-                end,
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+
+            {
+                name = GetString(SI_EXIT_BUTTON),
+                keybind = "DISABLE_HOUSING_EDITOR",
+                visible = function()
+                        return GetHousingEditorMode() == HOUSING_EDITOR_MODE_SELECTION
+                    end,
+                callback = function()
+                        HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
+                    end,
+                alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            },
         }
         
         self.placementKeyPresses =

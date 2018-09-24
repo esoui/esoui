@@ -751,7 +751,7 @@ function PlayerProgressBar:OnWaitBeforeShowComplete()
     local barType, startLevel, start, stop, sound, owner = unpack(self.pendingShowIncrease)
     self.pendingShowIncrease = nil
 
-    local needsShow = self.barType ~= barType
+    local needsShow = self.barState == PPB_STATE_HIDING or self.barState == PPB_STATE_HIDDEN
     self.barType = barType
     self:SetBarMode(PPB_MODE_INCREASE)
 

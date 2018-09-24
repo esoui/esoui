@@ -250,14 +250,18 @@ end
 
 function ZO_GamepadTradingHouse:OnAwaitingResponse(...)
 	self:FireTabEvents(EVENT_TRADING_HOUSE_AWAITING_RESPONSE, ...)
-    ZO_GamepadGenericHeader_Deactivate(self.m_header)
+    if not self.m_header:IsHidden() then
+        ZO_GamepadGenericHeader_Deactivate(self.m_header)
+    end
     self.m_loading:SetHidden(false)
     self.m_currentObject:SetAwaitingResponse(true)
 end
 
 function ZO_GamepadTradingHouse:OnResponseReceived(...)
 	self:FireTabEvents(EVENT_TRADING_HOUSE_RESPONSE_RECEIVED, ...)
-    ZO_GamepadGenericHeader_Activate(self.m_header)
+    if not self.m_header:IsHidden() then
+        ZO_GamepadGenericHeader_Activate(self.m_header)
+    end
     self.m_loading:SetHidden(true)
     self.m_currentObject:SetAwaitingResponse(false)
 end
