@@ -37,6 +37,7 @@ function ZO_GiftInventoryReturned_Gamepad:CreateGiftEntryData(gift)
     local entryData = ZO_GamepadEntryData:New(formattedGiftName, icon)
     entryData:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
     entryData:SetIconTintOnSelection(true)
+    entryData:SetStackCount(gift:GetStackCount())
     local formattedPlayerName = zo_strformat(SI_GAMEPAD_GIFT_INVENTORY_FROM_FORMATTER, gift:GetUserFacingPlayerName())
     entryData:AddSubLabel(formattedPlayerName)
     entryData.gift = gift

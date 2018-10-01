@@ -38,6 +38,10 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(marketProduct, s
             end
         end
     end
+
+    -- we call layout when setting up the tile to be shown, so make sure the help button is reset to being hidden
+    -- until we choose to show it on mouse over
+    self.helpButton:SetHidden(true)
 end
 
 -- End ZO_MarketAnnouncementMarketProductTile Overrides --
@@ -107,10 +111,11 @@ do
 
         self.numBundledProductsLabel:SetHidden((isMousedOver and isPromo) or self.numBundledProductsLabel:IsHidden())
 
-        if not isMousedOver or not isPromo or not hasHelpLink then
-            g_fadeInAnimationProvider:PlayBackward(self.helpButton)
-        else
+        if isMousedOver and isPromo and hasHelpLink then
+            self.helpButton:SetHidden(false)
             g_fadeInAnimationProvider:PlayForward(self.helpButton)
+        else
+            g_fadeInAnimationProvider:PlayBackward(self.helpButton)
         end
     end
 end

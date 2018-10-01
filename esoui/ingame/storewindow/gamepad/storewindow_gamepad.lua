@@ -549,27 +549,31 @@ function ZO_GamepadStoreManager:FailedRepairMessageBox(reason)
     end
 end
 
-function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
-    local currencyType = selectedData.currencyType1
-    local currencyQuantity1 = selectedData.currencyQuantity1
-    if currencyType and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) then
-        if currencyType == CURT_MONEY then
+do
+    local STORE_FAILURE_FOR_CURRENCY_TYPE =
+    {
+        [CURT_ALLIANCE_POINTS] = STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS,
+        [CURT_TELVAR_STONES] = STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES,
+        [CURT_WRIT_VOUCHERS] = STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS,
+        [CURT_EVENT_TICKETS] = STORE_FAILURE_NOT_ENOUGH_EVENT_TICKETS,
+    }
+    function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
+        local currencyType = selectedData.currencyType1
+        local currencyQuantity1 = selectedData.currencyQuantity1
+        local playerCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
+
+        if currencyType and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > playerCurrencyAmount then
+            if currencyType == CURT_MONEY then
+                return false, GetString(SI_NOT_ENOUGH_MONEY)
+            end
+            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_FOR_CURRENCY_TYPE[currencyType])
+        elseif selectedData.price > 0 and selectedData.price > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             return false, GetString(SI_NOT_ENOUGH_MONEY)
-        elseif currencyType == CURT_ALLIANCE_POINTS then
-            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS)
-        elseif currencyType == CURT_TELVAR_STONES then
-            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES)
-        elseif currencyType == CURT_WRIT_VOUCHERS then
-            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS)
-        elseif currencyType == CURT_EVENT_TICKETS then
-            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_NOT_ENOUGH_EVENT_CURRENCY)
+        elseif not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
+            return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
+        else
+            return true
         end
-    elseif selectedData.price > 0 and selectedData.price > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
-        return false, GetString(SI_NOT_ENOUGH_MONEY)
-    elseif not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
-        return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
-    else
-        return true
     end
 end
 

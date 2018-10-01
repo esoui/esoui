@@ -99,6 +99,12 @@ function ZO_OutfitStylesBook_Keyboard:InitializeModeData()
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateEquipmentModeDropdown()
 end
 
+function ZO_OutfitStylesBook_Keyboard:OnHidden()
+    ZO_RestyleCommon_Keyboard.OnHidden(self)
+
+    ZO_OUTFIT_STYLES_PANEL_KEYBOARD:ClearAllCurrentSlotPreviews()
+end
+
 do
     local DISALLOW_DYEING = false
     local SPECIALIZED_COLLECTIBLE_CATEGORY_ENABLED = true

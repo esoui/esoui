@@ -16,6 +16,7 @@
                     <Dimensions x="40" y="40"/>
                     <Anchor point="CENTER" relativePoint="LEFT" offsetX="32"/>
                 </Texture>
+                <Label name="$(parent)StackCount" inherits="ZO_GiftInventoryCategory_Keyboard_StackCountLabel"/>
                 <Label name="$(parent)Name" inherits="ZO_GiftInventoryCategory_Keyboard_TooltipIfTruncatedLabel" font="ZoFontWinH4" maxLineCount="1">
                     <Dimensions x="260"/>
                     <Anchor point="LEFT" offsetX="80"/>

@@ -90,6 +90,17 @@ function ZO_GiftInventoryCategory_Keyboard:SetupRow(control, gift)
     end
 end
 
+function ZO_GiftInventoryCategory_Keyboard:SetupStackCount(control, gift)
+    local stackCountLabel = control:GetNamedChild("StackCount")
+    local stackCount = gift:GetStackCount()
+    if stackCount > 1 then
+        stackCountLabel:SetHidden(false)
+        stackCountLabel:SetText(stackCount)
+    else
+        stackCountLabel:SetHidden(true)
+    end
+end
+
 function ZO_GiftInventoryCategory_Keyboard:EnterRow(row)
     ZO_SortFilterList.EnterRow(self, row)
     if not self.lockedForUpdates then

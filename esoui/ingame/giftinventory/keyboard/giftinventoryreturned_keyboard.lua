@@ -41,6 +41,8 @@ function ZO_GiftInventoryReturned_Keyboard:SetupReturned(control, gift)
     local iconTexture = control:GetNamedChild("Icon")
     iconTexture:SetTexture(gift:GetIcon())
 
+    self:SetupStackCount(control, gift)
+
     local nameLabel = control:GetNamedChild("Name")
     nameLabel:SetText(gift:GetFormattedName())
 

@@ -44,5 +44,12 @@
                 ZO_PropagateHandler(self:GetParent(), "OnMouseDoubleClick", button)
             </OnMouseDoubleClick>
         </Label>
+
+        <Label name="ZO_GiftInventoryCategory_Keyboard_StackCountLabel" font="ZoFontGameOutline" virtual="true">
+            <OnInitialized>
+                self.nonRecolorable = true
+            </OnInitialized>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+        </Label>
     </Controls>
 </GuiXml>

@@ -18,6 +18,7 @@ function ZO_Gift_Base:Initialize(giftId, state, seen, marketProductId, senderNam
     self.note = note
     local description
     self.name, description, self.icon = GetMarketProductInfo(marketProductId)
+    self.stackCount = GetMarketProductStackCount(marketProductId)    
     self.formattedName = ZO_CachedStrFormat(SI_MARKET_PRODUCT_NAME_FORMATTER, self.name)
 end
 
@@ -39,6 +40,10 @@ end
 
 function ZO_Gift_Base:GetIcon()
     return self.icon
+end
+
+function ZO_Gift_Base:GetStackCount()
+    return self.stackCount
 end
 
 function ZO_Gift_Base:SetPlayerName(senderName, recipientName)

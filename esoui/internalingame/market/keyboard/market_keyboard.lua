@@ -765,6 +765,9 @@ function ZO_Market_Keyboard:ClearMarketProducts()
     self.productGridList:ClearGridList()
     self.productGridList:CommitGridList()
     self:ShowNoMatchesMessage(false)
+    -- make sure to clear the selected market product as its
+    -- product data will no longer be valid when it's reset
+    self.selectedMarketProduct = nil
 end
 
 function ZO_Market_Keyboard:AddLabeledGroupTable(labeledGroupName, labeledGroupTable)
@@ -797,6 +800,9 @@ function ZO_Market_Keyboard:LayoutMarketProducts(marketProductPresentations, dis
     self.categoryFilter:SetHidden(false)
     self.categoryFilterLabel:SetHidden(false)
     self:ShowNoMatchesMessage(false)
+    -- make sure to clear the selected market product as its
+    -- product data will no longer be valid when it's reset
+    self.selectedMarketProduct = nil
 
     self.productGridList:ClearGridList()
 
