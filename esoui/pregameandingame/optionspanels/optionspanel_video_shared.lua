@@ -94,6 +94,26 @@ function ZO_OptionsPanel_Video_UseCustomScale_OnShow(control)
     end
 end
 
+function ZO_OptionsPanel_Video_ActiveDisplay_OnInitialize(control)
+    if IsActiveDisplayEnabledOnPlatform() then
+        control.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY)
+        ZO_OptionsPanel_Video_InitializeDisplays(control)
+
+        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_AVAILABLE_DISPLAY_DEVICES_CHANGED, function() ZO_OptionsPanel_Video_OnActiveDisplayChanged(control) end)
+    else
+        control:SetHidden(true)
+    end
+end
+
+function ZO_OptionsPanel_Video_Resolution_OnInitialize(control)
+    if not IsActiveDisplayEnabledOnPlatform() then
+        control:SetAnchor(TOPLEFT, Options_Video_DisplayMode, BOTTOMLEFT, 0, 10)
+    end
+
+    control.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_RESOLUTION)
+    ZO_OptionsPanel_Video_InitializeResolution(control)
+end
+
 local ZO_OptionsPanel_Video_ControlData =
 {
     --Graphics

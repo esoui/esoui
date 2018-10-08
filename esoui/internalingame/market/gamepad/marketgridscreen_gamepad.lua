@@ -515,7 +515,7 @@ end
 
 function ZO_GamepadMarket_GridScreen:TrySelectLastPreviewedProduct()
     local marketProductId = self.lastPreviewedMarketProductId
-    if marketProductId and (self.selectedGridEntry:GetEntryType() ~= ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT or marketProductId ~= self.selectedGridEntry:GetId()) then
+    if marketProductId and self.selectedGridEntry and (self.selectedGridEntry:GetEntryType() ~= ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT or marketProductId ~= self.selectedGridEntry:GetId()) then
         self.focusList:SetFocusToMatchingEntry(marketProductId,
         function(comparisonValue, focusListEntry)
             if focusListEntry.object:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then

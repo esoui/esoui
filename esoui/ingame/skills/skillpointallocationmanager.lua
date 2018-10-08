@@ -76,8 +76,31 @@ function ZO_SkillPointAllocator:IsPurchasedChangePending()
     return self.isPurchased ~= self.skillData:IsPurchased()
 end
 
+function ZO_SkillPointAllocator:IsSellPending()
+    return self.skillData:IsPurchased() and not self.isPurchased
+end
+
 function ZO_SkillPointAllocator:IsSkillProgressionKeyChangePending()
     return self.skillProgressionKey ~= self.skillData:GetCurrentSkillProgressionKey()
+end
+
+function ZO_SkillPointAllocator:IsSkillProgressionKeyDowngradePending()
+    if self:IsSkillProgressionKeyChangePending() then
+        if self.skillData:IsPassive() then
+            return self.skillData:GetCurrentSkillProgressionKey() > self.skillProgressionKey
+        else
+            return self.skillProgressionKey == MORPH_SLOT_BASE
+        end
+    end
+    return false
+end
+
+function ZO_SkillPointAllocator:IsSkillProgressionKeySidegradePending()
+    if self.skillData:IsActive() then
+        local currentProgressionKey = self.skillData:GetCurrentSkillProgressionKey()
+        return currentProgressionKey ~= self.skillProgressionKey and currentProgressionKey ~= MORPH_SLOT_BASE and self.skillProgressionKey ~= MORPH_SLOT_BASE
+    end
+    return false
 end
 
 function ZO_SkillPointAllocator:IsAnyChangePending()
@@ -85,17 +108,7 @@ function ZO_SkillPointAllocator:IsAnyChangePending()
 end
 
 function ZO_SkillPointAllocator:DoPendingChangesIncurCost()
-    if self:IsPurchasedChangePending() then
-        return not self.isPurchased
-    elseif self:IsSkillProgressionKeyChangePending() then
-        local currentProgressionKey = self.skillData:GetCurrentSkillProgressionKey()
-        if self.skillData:IsPassive() then
-            return currentProgressionKey > self.skillProgressionKey
-        else
-            return currentProgressionKey ~= MORPH_SLOT_BASE
-        end
-    end
-    return false
+    return self:IsSellPending() or self:IsSkillProgressionKeyDowngradePending() or self:IsSkillProgressionKeySidegradePending()
 end
 
 --Returns how many more points will be spent
@@ -117,6 +130,21 @@ function ZO_SkillPointAllocator:GetNumPointsAllocated()
         end
     end
     return 0
+end
+
+function ZO_SkillPointAllocator:HasValidChangesForMode(allocationMode)
+    if self:DoPendingChangesIncurCost() then
+        if allocationMode == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY then
+            return false
+        elseif allocationMode == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY then
+            if self:IsSellPending() then
+                return false
+            elseif self:IsSkillProgressionKeyDowngradePending() then
+                return self.skillData:IsActive()
+            end
+        end
+    end
+    return true
 end
 
 -- Modify --
@@ -153,6 +181,9 @@ end
 -- You cannot sell a progressed skill
 function ZO_SkillPointAllocator:Sell(ignoreCallbacks)
     if self:CanSell() then
+        -- Debug: Trying to track down data in a bad state
+        internalassert(not self.skillData:IsPurchased() or SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_FULL, "Attempting to sell skill when not in full allocation mode")
+
         self:InternalSetIsPurchased(false, ignoreCallbacks)
         return true
     end
@@ -178,11 +209,18 @@ function ZO_SkillPointAllocator:IncreaseRank(ignoreCallbacks)
 end
 
 function ZO_SkillPointAllocator:CanDecreaseRank()
-    return self.skillData:IsPassive() and self.isPurchased and self.skillProgressionKey > 1
+    return self.skillData:IsPassive() and self.isPurchased and self.skillProgressionKey > self:GetLowestAllowedRank()
+end
+
+function ZO_SkillPointAllocator:GetLowestAllowedRank()
+    return 1
 end
 
 function ZO_SkillPointAllocator:DecreaseRank(ignoreCallbacks)
     if self:CanDecreaseRank() then
+        -- Debug: Trying to track down data in a bad state
+        internalassert(self.skillData:GetCurrentRank() < self.skillProgressionKey or SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_FULL, "Attempting to decrease skill rank when not in full allocation mode")
+
         self:InternalSetSkillProgressionKey(self.skillProgressionKey - 1, ignoreCallbacks)
         return true
     end
@@ -198,6 +236,9 @@ end
 function ZO_SkillPointAllocator:Morph(morphSlot, ignoreCallbacks)
     internalassert(morphSlot ~= MORPH_SLOT_BASE, "Use Unmorph function to go to base")
     if self:CanMorph() then
+        -- Debug: Trying to track down data in a bad state
+        internalassert(self.skillProgressionKey == MORPH_SLOT_BASE or SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY, "Attempting to change skill morph when in purchase-only allocation mode")
+
         self:InternalSetSkillProgressionKey(morphSlot, ignoreCallbacks)
         return true
     end
@@ -210,6 +251,9 @@ end
 
 function ZO_SkillPointAllocator:Unmorph(ignoreCallbacks)
     if self:CanUnmorph() then
+        -- Debug: Trying to track down data in a bad state
+        internalassert(SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY, "Attempting to unmorph skill when in purchase-only allocation mode")
+
         self:InternalSetSkillProgressionKey(MORPH_SLOT_BASE, ignoreCallbacks)
         return true
     end
@@ -222,12 +266,19 @@ end
 
 function ZO_SkillPointAllocator:Clear(ignoreCallbacks)
     if self:CanClear() then
-        local oldSkillProgressionKey = self.skillProgressionKey
+        -- Debug: Trying to track down data in a bad state
+        local allocationMode = SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()
+        internalassert(allocationMode ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY, "Attempting to clear skill in purchase-only allocation mode")
 
+        local oldSkillProgressionKey = self.skillProgressionKey
         local IGNORE_CALLBACKS_UNTIL_LAST_STEP = true
 
         if self.skillData:IsPassive() then
-            self:InternalSetSkillProgressionKey(1, IGNORE_CALLBACKS_UNTIL_LAST_STEP)
+            local lowestDecreaseRank = self:GetLowestAllowedRank()
+            -- Debug: Trying to track down data in a bad state
+            internalassert(lowestDecreaseRank == self.skillData:GetCurrentRank() or allocationMode == SKILL_POINT_ALLOCATION_MODE_FULL, "Attempting to decrease skill rank when not in full allocation mode")
+
+            self:InternalSetSkillProgressionKey(lowestDecreaseRank, IGNORE_CALLBACKS_UNTIL_LAST_STEP)
         else
             self:InternalSetSkillProgressionKey(MORPH_SLOT_BASE, IGNORE_CALLBACKS_UNTIL_LAST_STEP)
         end
@@ -405,12 +456,9 @@ function ZO_MorphsOnlySkillPointAllocator:CanSell()
     return false
 end
 
-function ZO_MorphsOnlySkillPointAllocator:CanDecreaseRank()
-    if ZO_SkillPointAllocator.CanDecreaseRank(self) then
-        -- You can only decrease rank if it's not lower than the rank saved on the server
-        return self:GetRank() > self:GetSkillData():GetCurrentRank()
-    end
-    return false
+function ZO_MorphsOnlySkillPointAllocator:GetLowestAllowedRank()
+    -- You can only decrease rank if it's not lower than the rank saved on the server
+    return self:GetSkillData():GetCurrentRank()
 end
 
 function ZO_MorphsOnlySkillPointAllocator.GetPurchaseSound()
@@ -625,11 +673,31 @@ end
 
 function ZO_SkillPointAllocationManager:AddChangesToMessage()
     local anyChangesAdded = false
+    local allValidChanges = true
+    local allocationMode = SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()
     for _, allocator in self:AllocatorIterator({ ZO_SkillPointAllocator.IsAnyChangePending }) do
-        allocator:AddChangesToMessage()
-        anyChangesAdded = true
+        if allocator:HasValidChangesForMode(allocationMode) then
+            allocator:AddChangesToMessage()
+            anyChangesAdded = true
+        else
+            allValidChanges = false
+        end
     end
+
+    -- Debug: Trying to track down data in a bad state
+    internalassert(allValidChanges, "Has pending skill changes incompatible with current mode")
+
     return anyChangesAdded
+end
+
+function ZO_SkillPointAllocationManager:HasValidChangesForMode()
+    local allocationMode = SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()
+    for _, allocator in self:AllocatorIterator({ ZO_SkillPointAllocator.IsAnyChangePending }) do
+        if not allocator:HasValidChangesForMode(allocationMode) then
+            return false
+        end
+    end
+    return true
 end
 
 function ZO_SkillPointAllocationManager:GetNumPointsAllocatedInSkillLine(skillLineData)

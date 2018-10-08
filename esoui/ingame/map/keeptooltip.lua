@@ -259,19 +259,6 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
             AddLine(self, GetString(SI_TOOLTIP_KEEP_IN_COMBAT), KEEP_TOOLTIP_ATTACK_LINE)
         end
 
-        -- Keep Wall Breached
-        local innerWallBreached = GetKeepInnerWallBreached(keepId, battlegroundContext)
-        local outerWallBreached = GetKeepOuterWallBreached(keepId, battlegroundContext)
-        if innerWallBreached then
-            if keepType == KEEPTYPE_OUTPOST then
-                AddLine(self, GetString(SI_TOOLTIP_OUTPOST_INNER_WALL_BREACHED), KEEP_TOOLTIP_ATTACK_LINE)
-            else
-                AddLine(self, GetString(SI_TOOLTIP_KEEP_INNER_WALL_BREACHED), KEEP_TOOLTIP_ATTACK_LINE)
-            end
-        elseif outerWallBreached then
-            AddLine(self, GetString(SI_TOOLTIP_KEEP_OUTER_WALL_BREACHED), KEEP_TOOLTIP_ATTACK_LINE)
-        end
-
         if(ZO_WorldMap_GetMode() == MAP_MODE_AVA_RESPAWN and IsLocalBattlegroundContext(battlegroundContext)) then
             if(CanRespawnAtKeep(keepId)) then
                 AddLine(self, GetString(SI_TOOLTIP_KEEP_RESPAWNABLE), KEEP_TOOLTIP_ACCESSIBLE)
@@ -350,19 +337,6 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
         --Keep Under Attack
         if showUnderAttackLine then
             self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_IN_COMBAT), self.tooltip:GetStyle("mapKeepUnderAttack"))
-        end
-
-        -- Keep Wall Breached
-        local innerWallBreached = GetKeepInnerWallBreached(keepId, battlegroundContext)
-        local outerWallBreached = GetKeepOuterWallBreached(keepId, battlegroundContext)
-        if innerWallBreached then
-            if keepType == KEEPTYPE_OUTPOST then
-                self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_OUTPOST_INNER_WALL_BREACHED), self.tooltip:GetStyle("mapKeepUnderAttack"))
-            else
-                self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_INNER_WALL_BREACHED), self.tooltip:GetStyle("mapKeepUnderAttack"))
-            end
-        elseif outerWallBreached then
-            self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_OUTER_WALL_BREACHED), self.tooltip:GetStyle("mapKeepUnderAttack"))
         end
 
         -- Respawn

@@ -27,6 +27,9 @@ function ZO_SkillsAndActionBarManager:SetSkillPointAllocationMode(skillPointAllo
         self.skillPointAllocationMode = skillPointAllocationMode
         self:FireCallbacks("SkillPointAllocationModeChanged", skillPointAllocationMode, oldSkillPointAllocationMode)
     end
+
+    -- Debug: Trying to track down data in a bad state
+    internalassert(SKILL_POINT_ALLOCATION_MANAGER:HasValidChangesForMode(), "Skill point allocation manager has pending changes incompatible with current mode")
 end
 
 function ZO_SkillsAndActionBarManager:ResetInterface()

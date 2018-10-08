@@ -621,7 +621,7 @@ function ZO_Market_Shared:ShowMarket(show)
     self:ProcessQueuedNavigation()
 
     if self.queuedSearchString then
-        self:DisplayQueuedMarketProductsBySearchString()
+        self:RequestShowMarketWithSearchString(self.queuedSearchString)
     end
 end
 

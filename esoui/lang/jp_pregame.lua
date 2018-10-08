@@ -1503,7 +1503,7 @@ SafeAddString(SI_GROUPDIFFICULTYCHANGEREASON0, "ダンジョンモードを設�
 SafeAddString(SI_GROUPDIFFICULTYCHANGEREASON1, "キャラクターがレベル50に到達すると解除される。", 2)
 SafeAddString(SI_GROUPDIFFICULTYCHANGEREASON2, "グループリーダーだけが、グループダンジョンのモードを変更できる。", 0)
 SafeAddString(SI_GROUPDIFFICULTYCHANGEREASON3, "既にダンジョンにいる間は、ダンジョンモードを変更できない。", 0)
-SafeAddString(SI_GROUPDIFFICULTYCHANGEREASON4, "アクティビティファインダーで作成したグループにいる間は、ダンジョンモードを変更できない。", 2)
+SafeAddString(SI_GROUPDIFFICULTYCHANGEREASON4, "アクティビティ検索で作成したグループにいる間は、ダンジョンモードを変更できない。", 2)
 SafeAddString(SI_GROUPELECTIONFAILURE1, "投票失敗: 後ほどもう一度お試しください。", 1)
 SafeAddString(SI_GROUPELECTIONFAILURE10, "既に投票を行っています。", 1)
 SafeAddString(SI_GROUPELECTIONFAILURE11, "既に投票を行っています。", 0)

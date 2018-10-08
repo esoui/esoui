@@ -579,10 +579,7 @@ end
 
 function ZO_Market_Keyboard:DisplayMarketProductsBySearchString(searchString)
     self.searchBox:SetText(searchString)
-end
-
-function ZO_Market_Keyboard:DisplayQueuedMarketProductsBySearchString()
-    self:DisplayMarketProductsBySearchString(self.queuedSearchString)
+    -- once we've done a search then we don't care about whatever was queued
     self.queuedSearchString = nil
 end
 

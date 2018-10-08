@@ -1156,14 +1156,22 @@ function GamepadMarket:OnMarketOpen()
 end
 
 function GamepadMarket:OnMarketLocked()
-    if self.isInitialized and SCENE_MANAGER:IsShowing(ZO_GAMEPAD_MARKET_SCENE_NAME) and (not ZO_GAMEPAD_MARKET_LOCKED_SCENE:IsShowing()) then
-        SCENE_MANAGER:SwapCurrentScene(ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME)
+    if self.isInitialized then
+        -- if the market locks while we are showing the Crown Store we want to switch to the locked screen
+        if self.marketScene:IsShowing() then
+            -- if we are in the base Crown Store we can just swap the current scene to the locked scene to preserve the stack
+            SCENE_MANAGER:SwapCurrentScene(ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME)
+        elseif GAMEPAD_MARKET_SCENE_GROUP:IsShowing() and not SCENE_MANAGER:IsShowing(ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME) then
+            -- otherwise if we are in another Crown Store scene then just show the lock screen since we don't
+            -- know what's on the stack. Additionally, we won't interrupt the purchase dialog if that's showing.
+            SCENE_MANAGER:Show(ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME)
+        end
     end
 end
 
 -- If the Market is loading/updating switch to the pre-scene so we can show the loading info and then switch to the proper market state
 function GamepadMarket:OnMarketLoading()
-    if self.isInitialized and (SCENE_MANAGER:IsShowing(ZO_GAMEPAD_MARKET_SCENE_NAME) or ZO_GAMEPAD_MARKET_LOCKED_SCENE:IsShowing()) then
+    if self.isInitialized and (self.marketScene:IsShowing() or ZO_GAMEPAD_MARKET_LOCKED_SCENE:IsShowing()) then
         SCENE_MANAGER:SwapCurrentScene(ZO_GAMEPAD_MARKET_PRE_SCENE_NAME)
     end
 end
