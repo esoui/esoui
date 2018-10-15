@@ -2417,11 +2417,13 @@ local function GetValidHandler(pin, button)
             for i = 1, #handlers do
                 local handler = handlers[i]
                 if(handler.show == nil or handler.show(pin)) then
-                    return handler, pin
+                    return handler
                 end
             end
         end
     end
+
+    return nil
 end
 
 function ZO_WorldMap_WouldPinHandleClick(pinControl, button, ctrl, alt, shift)
@@ -2447,24 +2449,13 @@ end
 
 ZO_MapPin.pinDatas = {}
 
-local function SortPinDatas(firstData, secondData)
-    local firstEntryName = GetValueOrExecute(firstData.handler.name, firstData.pin)
-    local secondEntryName = GetValueOrExecute(secondData.handler.name, secondData.pin)
-    local idResult = CompareIgnoreNil(firstEntryName, secondEntryName)
-    if idResult ~= nil then
-        return idResult
-    end
-
-    return false
-end
-
-function ZO_WorldMap_GetPinHandlers(button)
+function ZO_WorldMap_GetPinHandlers(mouseButton)
     local pinDatas = ZO_MapPin.pinDatas
     ZO_ClearNumericallyIndexedTable(pinDatas)
 
     for pin, isMousedOver in pairs(currentMouseOverPins) do
         if isMousedOver then
-            local validHandler = GetValidHandler(pin, button)
+            local validHandler = GetValidHandler(pin, mouseButton)
             if validHandler then
                 local duplicate = false
                 local duplicatesFunction = validHandler.duplicates
@@ -2486,8 +2477,6 @@ function ZO_WorldMap_GetPinHandlers(button)
             end
         end
     end
-
-    table.sort(pinDatas, SortPinDatas)
 
     return pinDatas
 end
@@ -2512,6 +2501,17 @@ function ZO_WorldMap_ChoosePinOption(pin, handler)
 end
 
 do
+    local function SortPinDatas(firstData, secondData)
+        local firstEntryName = GetValueOrExecute(firstData.handler.name, firstData.pin)
+        local secondEntryName = GetValueOrExecute(secondData.handler.name, secondData.pin)
+        local idResult = CompareIgnoreNil(firstEntryName, secondEntryName)
+        if idResult ~= nil then
+            return idResult
+        end
+
+        return false
+    end
+
     local function OnMenuHiddenCallback()
         ZO_MapPin.pinsInKeyboardMapChoiceDialog = nil
     end
@@ -2519,6 +2519,9 @@ do
     function ZO_WorldMap_SetupKeyboardChoiceMenu(pinDatas)
         ClearMenu()
         ZO_MapPin.pinsInKeyboardMapChoiceDialog = { }
+
+        table.sort(pinDatas, SortPinDatas)
+
         for i = 1, #pinDatas do
             local handler = pinDatas[i].handler
             local pin = pinDatas[i].pin
@@ -2536,10 +2539,10 @@ do
     end
 end
 
-function ZO_WorldMap_HandlePinClicked(pinControl, button, ctrl, alt, shift)
+function ZO_WorldMap_HandlePinClicked(pinControl, mouseButton, ctrl, alt, shift)
     if(ctrl or alt) then return end
 
-    local pinDatas = ZO_WorldMap_GetPinHandlers(button)
+    local pinDatas = ZO_WorldMap_GetPinHandlers(mouseButton)
 
     RemoveInvalidSpawnLocations(pinDatas)
 
@@ -3202,7 +3205,10 @@ function ZO_MapPin:NeedsContinuousTooltipUpdates()
     end
 
     if self:IsFastTravelWayShrine() then
-        return true
+        local cooldownRemaining, premiumTimeLeft = GetRecallCooldown()
+        if cooldownRemaining > 0 then
+            return true
+        end
     end
 
     if IsInGamepadPreferredMode() and ZO_WorldMapCenterPoint:IsHidden() then
@@ -7633,7 +7639,7 @@ end
 
 function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
     if IsInGamepadPreferredMode() and not ZO_WorldMap_IsWorldMapInfoShowing() then
-        local pinDatas = ZO_WorldMap_GetPinHandlers(1)
+        local pinDatas = ZO_WorldMap_GetPinHandlers(MOUSE_BUTTON_INDEX_LEFT)
 
         if #pinDatas == 0 then
             -- There are no actionable pins under the cursor.

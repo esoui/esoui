@@ -124,6 +124,11 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
         self:InitializeFurnitureCaches()
         if GetCurrentZoneHouseId() ~= 0 then
             EVENT_MANAGER:RegisterForUpdate("SharedFurniture", 100, InHouseOnUpdate)
+
+            -- make sure all furniture found in house banks are populated in this manager
+            for bagId = BAG_HOUSE_BANK_ONE, BAG_HOUSE_BANK_TEN do
+                SHARED_INVENTORY:GetOrCreateBagCache(bagId)
+            end
         else
             EVENT_MANAGER:UnregisterForUpdate("SharedFurniture")
         end
