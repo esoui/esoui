@@ -104,7 +104,7 @@ function ZO_HousingPreview_Manager:UpdateHouseMarketData(marketState)
                         local marketProductId = marketProductListings[i]
                         local presentationIndex = marketProductListings[i + 1]
 
-                        local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
+                        local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
 
                         --Don't allow the same currency twice. This is a nonsense scenario but technically possible.
                         if not houseTemplateData.marketPurchaseOptions[currencyType] then

@@ -1,16 +1,5 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_WorldMapKeepInfoFootPrintBackground" layer="BACKGROUND" allowBringToTop="false" hidden="true" mouseEnabled="true">
-            <Dimensions x="350" y="540" />
-            <Anchor point="LEFT" offsetY="-80"/>
-            <Controls>
-                <Texture name="$(parent)BG" textureFile="EsoUI/Art/WorldMap/map_AVA_panelBG.dds">
-                    <Dimensions x="512" y="1024" />
-                    <Anchor point="TOPLEFT" offsetY="-75" />
-                </Texture>
-            </Controls>
-        </TopLevelControl>
-
         <TopLevelControl name="ZO_WorldMapKeepInfoContent" hidden="true" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="ZO_WorldMapKeepInfoKeepName" relativePoint="BOTTOMLEFT"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="ZO_WorldMapKeepInfo" relativePoint="BOTTOMRIGHT"/>

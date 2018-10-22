@@ -18,11 +18,17 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Video_Resolution" inherits="ZO_Options_Dropdown">
+        <Control name="Options_Video_ActiveDisplay" inherits="ZO_Options_Dropdown">
             <Anchor point="TOPLEFT" relativeTo="Options_Video_DisplayMode" relativePoint="BOTTOMLEFT" offsetY="10" />
             <OnInitialized>
-                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_RESOLUTION)
-                ZO_OptionsPanel_Video_InitializeResolution(self)
+                ZO_OptionsPanel_Video_ActiveDisplay_OnInitialize(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Video_Resolution" inherits="ZO_Options_Dropdown">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_ActiveDisplay" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                ZO_OptionsPanel_Video_Resolution_OnInitialize(self)
             </OnInitialized>
         </Control>
 
@@ -189,10 +195,10 @@
             </OnInitialized>
         </Control>
 
-        <Control name="Options_Video_Ambient_Occlusion" inherits="ZO_Options_Checkbox ZO_Options_DefaultIndentedDimensions">
-            <Anchor point="TOPLEFT" relativeTo="Options_Video_View_Distance" relativePoint="BOTTOMLEFT" offsetY="4" />
+        <Control name="Options_Video_Ambient_Occlusion" inherits="ZO_Options_Dropdown_IncludeApplyScreenWarning ZO_Options_DefaultIndentedDimensions">
+            <Anchor point="TOPLEFT" relativeTo="Options_Video_View_Distance" relativePoint="BOTTOMLEFT" offsetY="8" />
             <OnInitialized>
-                 self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_AMBIENT_OCCLUSION)
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_AMBIENT_OCCLUSION_TYPE)
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
         </Control>

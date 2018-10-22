@@ -30,7 +30,7 @@
                 <Label name="$(parent)RemainingCrowns" font="ZoFontHeader2" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHTED" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-20" offsetY="0" />
                 </Label>
-                <Label name="$(parent)Membership" font="ZoFontGameSmall" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
+                <Label name="$(parent)Membership" font="ZoFontGameSmall" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ESO_PLUS" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
                     <Dimensions x="210"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RemainingCrowns" relativePoint="TOPRIGHT" />
                 </Label>

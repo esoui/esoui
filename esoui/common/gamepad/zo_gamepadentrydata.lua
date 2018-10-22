@@ -405,3 +405,9 @@ function ZO_GamepadEntryData:CanLevel()
         return false
     end
 end
+
+function ZO_GamepadEntryData:SetBarValues(min, max, value)
+    self.barMin = min
+    self.barMax = max
+    self.barValue = value
+end

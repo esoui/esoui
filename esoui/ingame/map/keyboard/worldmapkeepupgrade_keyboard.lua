@@ -17,7 +17,7 @@ end
 function MapKeepUpgrade:Initialize(control)
     self.symbolParams = SYMBOL_PARAMS
 
-    self.gridListClass = ZO_GridScrollList
+    self.gridListClass = ZO_SingleTemplateGridScrollList_Keyboard
     self.labelLayout = "ZO_WorldMapKeepUpgradeHeader_Keyboard"
     self.buttonLayout = "ZO_WorldMapKeepUpgradeButton_Keyboard"
 

@@ -546,7 +546,7 @@ do
     end
 
     function GetGroupMemberRoles(unitTag)
-        local role = GetGroupMemberSelectedRole()
+        local role = GetGroupMemberSelectedRole(unitTag)
         return RoleToRoles(role)
     end
 
@@ -661,6 +661,18 @@ end
 
 -- Action slots refactor
 EVENT_ACTION_SLOTS_FULL_UPDATE = EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED
+
+function GetItemCurrentActionBarSlot(bagId, slotIndex)
+    return FindActionSlotMatchingItem(bagId, slotIndex)
+end
+
+function GetCollectibleCurrentActionBarSlot(collectibleId)
+    return FindActionSlotMatchingSimpleAction(ACTION_TYPE_COLLECTIBLE, collectibleId)
+end
+
+function GetFirstFreeValidSlotForCollectible(collectibleId)
+    return GetFirstFreeValidSlotForSimpleAction(ACTION_TYPE_COLLECTIBLE, collectibleId)
+end
 
 -- You can now weapon swap to unarmed, so this function no longer means anything to the UI
 function HasActivatableSwapWeaponsEquipped()

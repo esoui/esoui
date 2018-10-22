@@ -154,6 +154,8 @@ do
             or equipSlot == EQUIP_SLOT_RING2 
             or equipSlot == EQUIP_SLOT_MAIN_HAND
             or equipSlot == EQUIP_SLOT_OFF_HAND
+            or equipSlot == EQUIP_SLOT_BACKUP_MAIN
+            or equipSlot == EQUIP_SLOT_BACKUP_OFF
     end
 
     function ZO_ItemTooltip_SetEquippedInfo(tooltipControl, equipSlot)

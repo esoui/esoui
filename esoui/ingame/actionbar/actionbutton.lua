@@ -146,11 +146,22 @@ local function SetupCollectibleActionSlot(slotObject, slotId)
     slotObject:ClearCount()
 end
 
+local function SetupQuestItemActionSlot(slotObject, slotId)
+    SetupActionSlotWithBg(slotObject, slotId)
+    slotObject:SetupCount()
+end
+
+local function SetupEmptyActionSlot(slotObject, slotId)
+    slotObject:Clear()
+end
+
 SetupSlotHandlers =
 {
     [ACTION_TYPE_ABILITY]       = SetupAbilitySlot,
     [ACTION_TYPE_ITEM]          = SetupItemSlot,
     [ACTION_TYPE_COLLECTIBLE]   = SetupCollectibleActionSlot,
+    [ACTION_TYPE_QUEST_ITEM]    = SetupQuestItemActionSlot,
+    [ACTION_TYPE_NOTHING]       = SetupEmptyActionSlot,
 }
 
 function ActionButton:SetupCount()
@@ -178,10 +189,8 @@ function ActionButton:HandleSlotChanged()
     local slotType = GetSlotType(slotId)
 
     local setupSlotHandler = SetupSlotHandlers[slotType]
-    if setupSlotHandler then
+    if internalassert(setupSlotHandler, "update slot handlers") then
         setupSlotHandler(self, slotId)
-    else
-        self:Clear()
     end
 
     if self.showingCooldown then

@@ -27,9 +27,9 @@ end
 function ZO_MarketAnnouncementMarketProductTile:Layout(marketProduct, selected)
     ZO_Tile.Layout(self, marketProduct, selected)
 
-    if not marketProduct.control or marketProduct.control ~= self.control or self.marketProduct.marketProductId ~= marketProduct.marketProductId then
+    if not marketProduct.control or marketProduct.control ~= self.control or self.marketProduct:GetId() ~= marketProduct:GetId() then
         self.marketProduct = marketProduct
-        marketProduct:InitializeControls(self.control)
+        marketProduct:SetControl(self.control)
         marketProduct:Show()
         marketProduct:SetIsFocused(selected)
 
@@ -47,15 +47,7 @@ end
 
 function ZO_MarketAnnouncementMarketProductTile:OnHelpSelected()
     if self.marketProduct then
-        local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(self.marketProduct.marketProductId)
+        local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(self.marketProduct:GetId())
         RequestShowSpecificHelp(helpCategoryIndex, helpIndex)
-    end
-end
-
-function ZO_MarketAnnouncementMarketProductTile:SetHighlightHidden(hidden, instant)
-    ZO_ActionTile.SetHighlightHidden(self, hidden, instant)
-
-    if self.marketProduct then
-        self.marketProduct:SetHighlightHidden(hidden)
     end
 end

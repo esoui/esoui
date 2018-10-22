@@ -524,6 +524,15 @@ function ZO_Tooltip:AddItemRequiresCollectibleText(itemLink)
     end
 end
 
+function ZO_Tooltip:AddItemCombinationText(itemLink)
+    local description = GetItemLinkCombinationDescription(itemLink)
+    if description ~= "" then
+        local combinationSection = self:AcquireSection(self:GetStyle("bodySection"))
+        combinationSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_COMBINATION, description), self:GetStyle("bodyDescription"))
+        self:AddSection(combinationSection)
+    end
+end
+
 function ZO_Tooltip:AddCreator(itemLink, creatorName)
     if creatorName then
         local creatorSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -609,6 +618,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     if GetItemLinkItemType(itemLink) == ITEMTYPE_POISON then
         self:AddPoisonSystemDescription()
     end
+    self:AddItemCombinationText(itemLink)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
     self:AddItemRequiresCollectibleText(itemLink)
@@ -808,13 +818,15 @@ end
 function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
     self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
     self:AddItemTitle(itemLink)
-    local knownSection = self:AcquireSection(self:GetStyle("bodySection"))
-    if(IsItemLinkBookKnown(itemLink)) then
-        knownSection:AddLine(GetString(SI_LORE_LIBRARY_IN_LIBRARY), self:GetStyle("bodyDescription"))
-    else
-        knownSection:AddLine(GetString(SI_LORE_LIBRARY_USE_TO_LEARN), self:GetStyle("bodyDescription"))
+    if IsItemLinkBookPartOfCollection(itemLink) then
+        local knownSection = self:AcquireSection(self:GetStyle("bodySection"))
+        if IsItemLinkBookKnown(itemLink) then
+            knownSection:AddLine(GetString(SI_LORE_LIBRARY_IN_LIBRARY), self:GetStyle("bodyDescription"))
+        else
+            knownSection:AddLine(GetString(SI_LORE_LIBRARY_USE_TO_LEARN), self:GetStyle("bodyDescription"))
+        end
+        self:AddSection(knownSection)
     end
-    self:AddSection(knownSection)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)

@@ -1510,9 +1510,9 @@ do
     local ALLOWED_TYPES_WHILE_CRAFTING = 
     {
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COUNTER_CHANGED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_OPTIONAL_STEP_ADVANCED] = true,
-        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
@@ -1578,7 +1578,9 @@ function CenterScreenAnnounce:QueueMessage(messageParams)
             if reinsertStompedMsg then
                 --If we are interrupting a message, lets put the current message back in the queue so it can come back 
                 --up when were done with the immediate message that is interrupting.
-                table.insert(self.displayQueue, 1, oldestLine:GetMessageParams())
+                local oldestMessageParams = oldestLine:GetMessageParams()
+                oldestMessageParams:SetQueuedOrder(self.nextQueueIndex)
+                table.insert(self.displayQueue, 1, oldestMessageParams)
                 oldestLine:SetShouldCleanupMessageParams(false)
             end
             self:ReleaseLine(oldestLine)
@@ -1594,6 +1596,7 @@ function CenterScreenAnnounce:QueueMessage(messageParams)
     local timeNowSeconds = GetFrameTimeMilliseconds() / 1000
     self.nextUpdateTimeSeconds = timeNowSeconds + waitOffset
 
+    messageParams:SetQueuedOrder(self.nextQueueIndex)
     table.insert(self.displayQueue, messageParams)
     self.nextQueueIndex = self.nextQueueIndex + 1
     self.isQueueDirty = true

@@ -125,7 +125,7 @@ do
         rowControl.icon:SetDesaturation(iconDesaturation)
 
         -- setup the cost
-        local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = marketProductFurnitureObject:GetMarketProductPricingByPresentation()
+        local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = marketProductFurnitureObject:GetMarketProductPricingByPresentation()
         local onSale = discountPercent > 0
 
         rowControl.textCallout:ClearAnchors()

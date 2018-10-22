@@ -22,6 +22,10 @@ function GroupMenu_Keyboard:Initialize(control)
                                                                     SCENE_MANAGER:AddFragment(self.currentCategoryFragment)
                                                                 end
                                                                 PREFERRED_ROLES:RefreshRoles()
+                                                                if self.categoryFragmentToShow then
+                                                                    self:SetCurrentCategory(self.categoryFragmentToShow)
+                                                                    self.categoryFragmentToShow = nil
+                                                                end
                                                             elseif(newState == SCENE_HIDDEN) then
                                                                 KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
                                                             end
@@ -116,6 +120,10 @@ function GroupMenu_Keyboard:OnUpdateGroupStatus()
     if KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
         KEYBIND_STRIP:UpdateKeybindButton(self.keybindStripDescriptor)
     end
+end
+
+function GroupMenu_Keyboard:SetCategoryOnShow(categoryFragment)
+    self.categoryFragmentToShow = categoryFragment
 end
 
 function GroupMenu_Keyboard:SetCurrentCategory(categoryFragment)

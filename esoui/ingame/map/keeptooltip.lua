@@ -8,6 +8,7 @@ local KEEP_TOOLTIP_ATTACK_LINE = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COL
 local KEEP_TOOLTIP_NORMAL_LINE = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_NORMAL_LINE))
 local KEEP_TOOLTIP_ACCESSIBLE = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_ACCESSIBLE))
 local KEEP_TOOLTIP_NOT_ACCESSIBLE = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_NOT_ACCESSIBLE))
+local KEEP_TOOLTIP_UNIDIRECTIONALLY_ACCESSIBLE = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_UNIDIRECTIONALLY_ACCESSIBLE))
 local KEEP_TOOLTIP_AT_KEEP = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_AT_KEEP))
 local KEEP_TOOLTIP_OWNER = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_OWNER))
 local KEEP_TOOLTIP_UNCLAIMED = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_KEEP_TOOLTIP, KEEP_TOOLTIP_COLOR_UNCLAIMED))
@@ -102,22 +103,25 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
         nameControl:SetColor(KEEP_TOOLTIP_NAME:UnpackRGBA())
         local width, height = nameControl:GetTextDimensions()
         self.width = width
-        self.height = height                
+        self.height = height
+
+        local keepType = GetKeepType(keepId)
+        local alliance = GetHistoricalKeepAlliance(keepId, battlegroundContext, historyPercent)
     
         --Alliance Owner Name
-        local alliance = GetHistoricalKeepAlliance(keepId, battlegroundContext, historyPercent)
-        local allianceName
-        local allianceColor = GetAllianceColor(alliance)
-        if(alliance == ALLIANCE_NONE) then
-            allianceName = GetString(SI_KEEP_UNCLAIMED)
-        else
-            allianceName = GetAllianceName(alliance)
+        if IsKeepTypeCapturable(keepType) then
+            local allianceName
+            local allianceColor = GetAllianceColor(alliance)
+            if(alliance == ALLIANCE_NONE) then
+                allianceName = GetString(SI_KEEP_UNCLAIMED)
+            else
+                allianceName = GetAllianceName(alliance)
+            end
+            local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceColor:Colorize(allianceName))
+            AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
         end
-        local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceColor:Colorize(allianceName))
-        AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
 
         local notHistorical = historyPercent >= 1.0
-        local keepType = GetKeepType(keepId)
         if notHistorical then
 
             --Guild Owner Name
@@ -134,7 +138,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
             end
 
             -- siege weapons
-            if keepType ~= KEEPTYPE_ARTIFACT_GATE and keepType ~= KEEPTYPE_IMPERIAL_CITY_DISTRICT then
+            if DoesKeepTypeHaveSiegeLimit(keepType) then
                 local playerAlliance = GetUnitAlliance("player")
                 local playerAllianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(playerAlliance))
                 local maxSiegeWeapons = GetMaxKeepSieges(keepId, battlegroundContext)
@@ -194,6 +198,24 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                 end
             end
 
+            if IsKeepTypePassable(keepType) then
+                local directionalAccess = GetKeepDirectionalAccess(keepId, battlegroundContext)
+                local status
+                if directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_BIDIRECTIONAL then
+                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CAN_PASS)
+                    status = KEEP_TOOLTIP_ACCESSIBLE:Colorize(statusText)
+                elseif directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_BLOCKED then
+                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CANNOT_PASS)
+                    status = KEEP_TOOLTIP_NOT_ACCESSIBLE:Colorize(statusText)
+                elseif directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_UNIDIRECTIONAL then
+                    if keepType == KEEPTYPE_MILEGATE then
+                        local statusText = GetString(SI_MAP_KEEP_MILEGATE_UNIDIRECTIONALLY_PASSABLE)
+                        status = KEEP_TOOLTIP_UNIDIRECTIONALLY_ACCESSIBLE:Colorize(statusText)
+                    end
+                end
+                AddLine(self, zo_strformat(SI_TOOLTIP_KEEP_PASSABLE_STATUS, status), KEEP_TOOLTIP_NORMAL_LINE)
+            end
+
             --Keep Fast Travel Status
             local startingKeep = GetKeepFastTravelInteraction()
             if startingKeep or ZO_WorldMap_GetMode() == MAP_MODE_AVA_KEEP_RECALL then
@@ -207,7 +229,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                         AddLine(self, GetString(SI_TOOLTIP_KEEP_ACCESSIBLE), KEEP_TOOLTIP_ACCESSIBLE)
                     else
                         local playerAlliance = GetUnitAlliance("player")
-                        if keepType ~= KEEPTYPE_KEEP and keepType ~= KEEPTYPE_BORDER_KEEP and keepType ~= KEEPTYPE_OUTPOST then
+                        if keepType ~= KEEPTYPE_KEEP and keepType ~= KEEPTYPE_BORDER_KEEP and keepType ~= KEEPTYPE_OUTPOST and keepType ~= KEEPTYPE_TOWN then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                         elseif playerAlliance ~= alliance then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_WRONG_OWNER), KEEP_TOOLTIP_NOT_ACCESSIBLE)
@@ -235,19 +257,6 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
         local showUnderAttackLine = GetHistoricalKeepUnderAttack(keepId, battlegroundContext, historyPercent)
         if(showUnderAttackLine) then
             AddLine(self, GetString(SI_TOOLTIP_KEEP_IN_COMBAT), KEEP_TOOLTIP_ATTACK_LINE)
-        end
-
-        -- Keep Wall Breached
-        local innerWallBreached = GetKeepInnerWallBreached(keepId, battlegroundContext)
-        local outerWallBreached = GetKeepOuterWallBreached(keepId, battlegroundContext)
-        if innerWallBreached then
-            if keepType == KEEPTYPE_OUTPOST then
-                AddLine(self, GetString(SI_TOOLTIP_OUTPOST_INNER_WALL_BREACHED), KEEP_TOOLTIP_ATTACK_LINE)
-            else
-                AddLine(self, GetString(SI_TOOLTIP_KEEP_INNER_WALL_BREACHED), KEEP_TOOLTIP_ATTACK_LINE)
-            end
-        elseif outerWallBreached then
-            AddLine(self, GetString(SI_TOOLTIP_KEEP_OUTER_WALL_BREACHED), KEEP_TOOLTIP_ATTACK_LINE)
         end
 
         if(ZO_WorldMap_GetMode() == MAP_MODE_AVA_RESPAWN and IsLocalBattlegroundContext(battlegroundContext)) then
@@ -330,31 +339,20 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
             self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_IN_COMBAT), self.tooltip:GetStyle("mapKeepUnderAttack"))
         end
 
-        -- Keep Wall Breached
-        local innerWallBreached = GetKeepInnerWallBreached(keepId, battlegroundContext)
-        local outerWallBreached = GetKeepOuterWallBreached(keepId, battlegroundContext)
-        if innerWallBreached then
-            if keepType == KEEPTYPE_OUTPOST then
-                self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_OUTPOST_INNER_WALL_BREACHED), self.tooltip:GetStyle("mapKeepUnderAttack"))
-            else
-                self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_INNER_WALL_BREACHED), self.tooltip:GetStyle("mapKeepUnderAttack"))
-            end
-        elseif outerWallBreached then
-            self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_OUTER_WALL_BREACHED), self.tooltip:GetStyle("mapKeepUnderAttack"))
-        end
-
         -- Respawn
         if (ZO_WorldMap_GetMode() == MAP_MODE_AVA_RESPAWN) and IsLocalBattlegroundContext(battlegroundContext) then
             LayoutKeepActionLine_Gamepad(self, keepSection, SI_GAMEPAD_WORLD_MAP_TOOLTIP_KEEP_RESPAWNABLE, CanRespawnAtKeep(keepId))
         end
 
         --Alliance Owner Name
-        if(keepAlliance == ALLIANCE_NONE) then
-            LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), nil, GetString(SI_KEEP_UNCLAIMED), self.tooltip:GetStyle("mapLocationKeepUnclaimed"))
-        else
-            local allianceIcon = GetLargeAllianceSymbolIcon(keepAlliance)
-            local allianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(keepAlliance))
-            LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), allianceIcon, allianceName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
+        if IsKeepTypeCapturable(keepType) then
+            if keepAlliance == ALLIANCE_NONE then
+                LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), nil, GetString(SI_KEEP_UNCLAIMED), self.tooltip:GetStyle("mapLocationKeepUnclaimed"))
+            else
+                local allianceIcon = GetLargeAllianceSymbolIcon(keepAlliance)
+                local allianceName = zo_strformat(SI_MAP_KEEP_INFO_ALLIANCE_TOOLTIP_FORMAT, GetColoredAllianceName(keepAlliance))
+                LayoutKeepOwnerSection_Gamepad(self, keepSection, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_ALLIANCE_OWNER), allianceIcon, allianceName, self.tooltip:GetStyle("mapLocationKeepClaimed"))
+            end
         end
         
         local notHistorical = historyPercent >= 1.0
@@ -370,7 +368,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
             end
 
             -- Siege Weapons
-            if(keepType ~= KEEPTYPE_ARTIFACT_GATE and keepType ~= KEEPTYPE_IMPERIAL_CITY_DISTRICT) then
+            if DoesKeepTypeHaveSiegeLimit(keepType) then
                 local maxSiegeWeapons = GetMaxKeepSieges(keepId, battlegroundContext)
 
                 -- Always show players alliance weapons.
@@ -401,6 +399,22 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                 end
 
                 keepSection:AddSection(weaponsSection)
+            end
+
+            if IsKeepTypePassable(keepType) then
+                local passable = IsKeepPassable(keepId, battlegroundContext)
+                local status
+                if passable then
+                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CAN_PASS)
+                    status = KEEP_TOOLTIP_ACCESSIBLE:Colorize(statusText)
+                else
+                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CANNOT_PASS)
+                    status = KEEP_TOOLTIP_NOT_ACCESSIBLE:Colorize(statusText)
+                end
+                local passableSection = keepSection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
+                self:LayoutIconStringLine(passableSection, nil, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_KEEP_PASSABLE), self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
+                self:LayoutIconStringLine(passableSection, allianceIcon, status, self.tooltip:GetStyle("mapLocationKeepClaimed"))
+                keepSection:AddSection(passableSection)
             end
 
             --Artifact Info

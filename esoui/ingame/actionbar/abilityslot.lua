@@ -5,8 +5,6 @@ ABILITY_SLOT_TYPE_QUICKSLOT = 2
 
 local USE_BASE_ABILITY = true
 
-local g_abilitySlotWithTooltipShowing = nil
-
 function ZO_ActionSlot_SetupSlot(iconControl, buttonControl, icon, normalFrame, downFrame, cooldownIconControl)
     iconControl:SetHidden(false)
     iconControl:SetTexture(icon)
@@ -249,11 +247,8 @@ function ZO_AbilitySlot_OnReceiveDrag(abilitySlot, button)
 end
 
 local function AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
-    g_abilitySlotWithTooltipShowing = abilitySlot
     abilitySlot.activeTooltip = tooltip
     InitializeTooltip(tooltip, owner, BOTTOM, 0, -5, TOP)
-
-    EVENT_MANAGER:AddFilterForEvent("ZO_AbilitySlot_CooldownUpdated", EVENT_ABILITY_COOLDOWN_UPDATED, REGISTER_FILTER_ABILITY_ID, abilitySlot.actionId)
 end
 
 local function TryShowActionBarTooltip(abilitySlot, tooltip, owner)
@@ -317,16 +312,6 @@ function ZO_AbilitySlot_OnMouseExit(abilitySlot)
     end
 
     abilitySlot.activeTooltip = nil
-    g_abilitySlotWithTooltipShowing = nil
 
     RunHandlers(AbilityExit, abilitySlot)
 end
-
-local function OnAbilityCooldownUpdated(event, abilityId)
-    if(g_abilitySlotWithTooltipShowing and g_abilitySlotWithTooltipShowing.actionId == abilityId)
-    then
-        ZO_AbilitySlot_OnMouseEnter(g_abilitySlotWithTooltipShowing)
-    end
-end
-
-EVENT_MANAGER:RegisterForEvent("ZO_AbilitySlot_CooldownUpdated", EVENT_ABILITY_COOLDOWN_UPDATED, OnAbilityCooldownUpdated)

@@ -2,6 +2,7 @@ ZO_GamepadQuickslot = ZO_Object:Subclass()
 
 local QUICKSLOT_ASSIGNMENT_TYPE_ITEM = 1
 local QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE = 2
+local QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM = 3
 
 function ZO_GamepadQuickslot:New(control)
     local menu = ZO_Object.New(self)
@@ -85,6 +86,11 @@ function ZO_GamepadQuickslot:ResetActiveIcon()
         local icon, stack, _, meetsUsageRequirements = GetItemInfo(self.itemToSlotId, self.itemToSlotIndex)
         slotIcon = icon
         slotEnabled = meetsUsageRequirements
+    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM then
+        slotIcon = GetQuestItemIcon(self.questItemToSlotId)
+        slotEnabled = true
+    else
+        internalassert(false)
     end
 
     self.radialMenu.activeIcon:SetTexture(slotIcon)
@@ -110,8 +116,15 @@ function ZO_GamepadQuickslot:OnSelectionChanged(selectedEntry)
     local itemLink = GetSlotItemLink(selectedEntry.data)
     if slotType == ACTION_TYPE_COLLECTIBLE then
         GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(GAMEPAD_LEFT_TOOLTIP, itemLink)
-    else
+    elseif slotType == ACTION_TYPE_ITEM then
         GAMEPAD_TOOLTIPS:LayoutItemWithStackCountSimple(GAMEPAD_LEFT_TOOLTIP, itemLink, ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT)
+    elseif slotType == ACTION_TYPE_QUEST_ITEM then
+        local questItemId = GetSlotBoundId(selectedEntry.data)
+        GAMEPAD_TOOLTIPS:LayoutQuestItem(GAMEPAD_LEFT_TOOLTIP, questItemId)
+    elseif slotType == ACTION_TYPE_NOTHING then
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    else
+        internalassert(false)
     end
 end
 
@@ -190,13 +203,29 @@ function ZO_GamepadQuickslot:RefreshHeader()
             data1Text = UpdateGold,
 
             data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_ALLIANCE_POINTS),
-	        data2Text = UpdateAlliancePoints,
+            data2Text = UpdateAlliancePoints,
 
             data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
             data3Text = UpdateCapacityString,
 
             titleText = GetString(SI_GAMEPAD_INVENTORY_CONSUMABLES),
         }
+    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM then
+        self.headerData = 
+        { 
+            data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
+            data1Text = UpdateGold,
+
+            data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_ALLIANCE_POINTS),
+            data2Text = UpdateAlliancePoints,
+
+            data3HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+            data3Text = UpdateCapacityString,
+
+            titleText = GetString(SI_GAMEPAD_INVENTORY_QUEST_ITEMS)
+        }
+    else
+        internalassert(false)
     end
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
@@ -221,14 +250,20 @@ function ZO_GamepadQuickslot:ShowQuickslotMenu()
 
     --special entrance case, unslot selected item
     local slotNum
-    if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
-        if self.collectibleToSlotId then
-            slotNum = GetCollectibleCurrentActionBarSlot(self.collectibleToSlotId)
-        end
-    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
+    if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
         if self.itemToSlotId and self.itemToSlotIndex then
-            slotNum = GetItemCurrentActionBarSlot(self.itemToSlotId, self.itemToSlotIndex)
+            slotNum = FindActionSlotMatchingItem(self.itemToSlotId, self.itemToSlotIndex)
         end
+    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
+        if self.collectibleToSlotId then
+            slotNum = FindActionSlotMatchingSimpleAction(ACTION_TYPE_COLLECTIBLE, self.collectibleToSlotId)
+        end
+    elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM then
+        if self.questItemToSlotId then
+            slotNum = FindActionSlotMatchingSimpleAction(ACTION_TYPE_QUEST_ITEM, self.questItemToSlotId)
+        end
+    else
+        internalassert(false)
     end
 
     if slotNum then
@@ -286,12 +321,17 @@ function ZO_GamepadQuickslot:SetCollectibleToQuickslot(collectibleId)
     self.collectibleToSlotId = collectibleId
 end
 
+function ZO_GamepadQuickslot:SetQuestItemToQuickslot(questItemId)
+    self.assignmentType = QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM
+    self.questItemToSlotId = questItemId
+end
+
 function ZO_GamepadQuickslot:TryAssignItemToSlot()
     local selectedData = self.radialMenu.selectedEntry
     if selectedData then
         if self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_COLLECTIBLE then
             if self.collectibleToSlotId then
-                SelectSlotCollectible(self.collectibleToSlotId, selectedData.data)
+                SelectSlotSimpleAction(ACTION_TYPE_COLLECTIBLE, self.collectibleToSlotId, selectedData.data)
                 self.collectibleToSlotId = nil
             end
         elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_ITEM then
@@ -300,6 +340,13 @@ function ZO_GamepadQuickslot:TryAssignItemToSlot()
                 self.itemToSlotId = nil
                 self.itemToSlotIndex = nil
             end
+        elseif self.assignmentType == QUICKSLOT_ASSIGNMENT_TYPE_QUEST_ITEM then
+            if self.questItemToSlotId then
+                SelectSlotSimpleAction(ACTION_TYPE_QUEST_ITEM, self.questItemToSlotId, selectedData.data)
+                self.questItemToSlotId = nil
+            end
+        else
+            internalassert(false)
         end
 
         self.radialMenu.activeIcon:SetHidden(true)

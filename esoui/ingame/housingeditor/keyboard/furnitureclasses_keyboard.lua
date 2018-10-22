@@ -458,7 +458,7 @@ function ZO_HousingFurnitureList:UpdateFreeSlots()
     end
 end
 
-function ZO_HousingBrowserList:InitializeThemeSelector()
+function ZO_HousingFurnitureList:InitializeThemeSelector()
     --Override
 end
 

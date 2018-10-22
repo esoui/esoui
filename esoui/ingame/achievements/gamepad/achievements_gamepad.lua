@@ -92,18 +92,9 @@ function ZO_Achievements_Gamepad:Initialize(control)
 end
 
 function ZO_Achievements_Gamepad:SetupList(list)
-    local function MenuEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
-        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
-
-        control.barContainer:SetMinMax(0, data.totalPoints)
-        control.barContainer:SetValue(data.earnedPoints)
-        control.barContainer:SetHidden(not selected)
-        ZO_StatusBar_SetGradientColor(control.barContainer, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
-    end
-
     list:AddDataTemplate("ZO_GamepadAchievementsEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     list:AddDataTemplateWithHeader("ZO_GamepadAchievementsEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", MenuEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     self.itemList = list
 end
@@ -556,18 +547,18 @@ function ZO_Achievements_Gamepad:OnSelectionChanged(list, selectedData, oldSelec
 end
 
 function ZO_Achievements_Gamepad:PopulateCategories()
+    local MIN_POINTS = 0
     local totalPoints = GetTotalAchievementPoints()
     local earnedPoints = GetEarnedAchievementPoints()
     self.footerBarName:SetText(GetString(SI_GAMEPAD_ACHIEVEMENTS_POINTS_LABEL))
     self.footerBarValue:SetText(earnedPoints)
-    self.footerBarBar:SetMinMax(0, totalPoints)
+    self.footerBarBar:SetMinMax(MIN_POINTS, totalPoints)
     self.footerBarBar:SetValue(earnedPoints)
 
     -- Create summary "category".
     local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_JOURNAL_PROGRESS_SUMMARY), SUMMARY_ICON)
     entryData:SetIconTintOnSelection(true)
-    entryData.earnedPoints = earnedPoints
-    entryData.totalPoints = totalPoints
+    entryData:SetBarValues(MIN_POINTS, totalPoints, earnedPoints)
     entryData.canEnter = false
     entryData.isSummary = true
     self.itemList:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", entryData)
@@ -579,9 +570,8 @@ function ZO_Achievements_Gamepad:PopulateCategories()
 
         local entryData = ZO_GamepadEntryData:New(zo_strformat(categoryName), gamepadIcon)
         entryData:SetIconTintOnSelection(true)
+        entryData:SetBarValues(MIN_POINTS, totalPoints, earnedPoints)
         entryData.categoryIndex = categoryIndex
-        entryData.earnedPoints = earnedPoints
-        entryData.totalPoints = totalPoints
         entryData.canEnter = true
 
         self.itemList:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", entryData)

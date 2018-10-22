@@ -1109,6 +1109,7 @@
             <AllowAction name="TOGGLE_SYSTEM" />
             <AllowAction name="TOGGLE_HUD_UI" />
             <AllowAction name="TOGGLE_GAMEPAD_MODE" />
+            <AllowAction name="TOGGLE_HELP" />
 
             <Action name="HOUSING_EDITOR_PRIMARY_ACTION">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
@@ -1135,6 +1136,35 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
+            <Action name="HOUSING_EDITOR_JUMP_TO_SAFE_LOC">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="DISABLE_HOUSING_EDITOR" inheritsBindFrom="SHOW_HOUSING_PANEL" hideAction="true">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_UNDO_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            
+            <Action name="HOUSING_EDITOR_REDO_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            
+            <Action name="HOUSING_EDITOR_BEGIN_FURNITURE_LINKING">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="SI_KEYBINDINGS_LAYER_HOUSING_EDITOR_PLACEMENT_MODE" allowFallthrough="true">
+        <Category>
             <Action name="HOUSING_EDITOR_YAW_LEFT">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -1159,7 +1189,7 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
-            
+
             <Action name="HOUSING_EDITOR_ROLL_RIGHT">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -1179,16 +1209,8 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
-
-            <Action name="HOUSING_EDITOR_JUMP_TO_SAFE_LOC">
-                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
-                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
-            </Action>
-
-            <Action name="DISABLE_HOUSING_EDITOR" inheritsBindFrom="SHOW_HOUSING_PANEL" hideAction="true">
-                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
-                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
-            </Action>
         </Category>
     </Layer>
+            
+    
 </Bindings>

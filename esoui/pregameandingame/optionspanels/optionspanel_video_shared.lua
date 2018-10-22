@@ -1,22 +1,45 @@
-local function AddResolution(resolutions, w, h)
-    
-    local newResolution = { w = w, h = h }
-    resolutions[#resolutions + 1] = newResolution
+local function GetDisplayText(index)
+    -- Start index display at 1 instead of 0
+    return zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, index + 1)
+end
 
+local function InitializeDisplays(control, numDisplays)
+    local valid = {}
+    local events = {}
+    local itemText = {}
+
+    for i = 1, numDisplays do
+        -- Identifying indicies start at 0
+        local index = i - 1
+        local optionText = GetDisplayText(index)
+        valid[#valid + 1] = index
+        events[#events + 1] = "ActiveDisplayChanged"
+        itemText[#itemText + 1] = optionText
+    end
+
+    control.data.valid = valid
+    control.data.events = events
+    control.data.itemText = itemText
+
+    ZO_OptionsWindow_InitializeControl(control)
+
+    ZO_Options_SetOptionActiveOrInactive(control, GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
+end
+
+local function GetResolutionInfo(w, h)
     local optionValue = string.format("%dx%d", w, h)
     local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_RESOLUTION_FORMAT, w, h)
     return optionValue, optionText
 end
 
 local function InitializeResolution(control, ...)
-    local resolutions = {}
     local valid = {}
     local itemText = {}
 
     -- process two elements at a time since the input looks like this: {w1, h1, w2, h2, w3, h3, ...}
     for i = 1, select("#", ...), 2 do
-        local optionValue, optionText = AddResolution(resolutions, select(i, ...))
-        if(optionValue and optionText) then
+        local optionValue, optionText = GetResolutionInfo(select(i, ...))
+        if optionValue and optionText then
             valid[#valid + 1] = optionValue
             itemText[#itemText + 1] = optionText
         end
@@ -30,8 +53,18 @@ local function InitializeResolution(control, ...)
     ZO_Options_SetOptionActiveOrInactive(control, GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
 end
 
+function ZO_OptionsPanel_Video_InitializeDisplays(control)
+    InitializeDisplays(control, GetNumDisplays())
+end
+
+function ZO_OptionsPanel_Video_OnActiveDisplayChanged(control)
+    ZO_OptionsWindow_InitializeControl(control)
+    ZO_Options_UpdateOption(control)
+end
+
 function ZO_OptionsPanel_Video_InitializeResolution(control)
-    InitializeResolution(control, GetDisplayModes())
+    local DEFAULT_DISPLAY_INDEX = 1
+    InitializeResolution(control, GetDisplayModes(DEFAULT_DISPLAY_INDEX))
 end
 
 function ZO_OptionsPanel_Video_SetCustomScale(self, formattedValueString)
@@ -61,6 +94,26 @@ function ZO_OptionsPanel_Video_UseCustomScale_OnShow(control)
     end
 end
 
+function ZO_OptionsPanel_Video_ActiveDisplay_OnInitialize(control)
+    if IsActiveDisplayEnabledOnPlatform() then
+        control.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY)
+        ZO_OptionsPanel_Video_InitializeDisplays(control)
+
+        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_AVAILABLE_DISPLAY_DEVICES_CHANGED, function() ZO_OptionsPanel_Video_OnActiveDisplayChanged(control) end)
+    else
+        control:SetHidden(true)
+    end
+end
+
+function ZO_OptionsPanel_Video_Resolution_OnInitialize(control)
+    if not IsActiveDisplayEnabledOnPlatform() then
+        control:SetAnchor(TOPLEFT, Options_Video_DisplayMode, BOTTOMLEFT, 0, 10)
+    end
+
+    control.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_RESOLUTION)
+    ZO_OptionsPanel_Video_InitializeResolution(control)
+end
+
 local ZO_OptionsPanel_Video_ControlData =
 {
     --Graphics
@@ -80,6 +133,22 @@ local ZO_OptionsPanel_Video_ControlData =
             
             events = {[FULLSCREEN_MODE_WINDOWED] = "DisplayModeNonExclusive", [FULLSCREEN_MODE_FULLSCREEN_WINDOWED] = "DisplayModeNonExclusive", [FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE] = "DisplayModeExclusive",},
         },
+        --Options_Video_ActiveDisplay
+        [GRAPHICS_SETTING_ACTIVE_DISPLAY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_ACTIVE_DISPLAY,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_TOOLTIP,
+
+            eventCallbacks =
+            {
+                ["DisplayModeNonExclusive"] = ZO_Options_SetOptionInactive,
+                ["DisplayModeExclusive"] = ZO_Options_SetOptionActive,
+            },
+        },
         --Options_Video_Resolution
         [GRAPHICS_SETTING_RESOLUTION] =
         {
@@ -94,6 +163,7 @@ local ZO_OptionsPanel_Video_ControlData =
             {
                 ["DisplayModeNonExclusive"] = ZO_Options_SetOptionInactive,
                 ["DisplayModeExclusive"] = ZO_Options_SetOptionActive,
+                ["ActiveDisplayChanged"] = ZO_OptionsPanel_Video_OnActiveDisplayChanged,
             },
 
             gamepadIsEnabledCallback = function()
@@ -255,14 +325,17 @@ local ZO_OptionsPanel_Video_ControlData =
             showValueMax = 100,
         },
         --Options_Video_Ambient_Occlusion
-        [GRAPHICS_SETTING_AMBIENT_OCCLUSION] =
+        [GRAPHICS_SETTING_AMBIENT_OCCLUSION_TYPE] =
         {
-            controlType = OPTIONS_CHECKBOX,
+            controlType = OPTIONS_FINITE_LIST,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_AMBIENT_OCCLUSION,
+            settingId = GRAPHICS_SETTING_AMBIENT_OCCLUSION_TYPE,
             panel = SETTING_PANEL_VIDEO,
-            text = SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION,
-            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TOOLTIP,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_AMBIENT_OCCLUSION_TYPE_TOOLTIP,
+            valid = {AMBIENT_OCCLUSION_TYPE_NONE, AMBIENT_OCCLUSION_TYPE_SSAO, AMBIENT_OCCLUSION_TYPE_HBAO},
+            valueStringPrefix = "SI_AMBIENTOCCLUSIONTYPE",
+            mustPushApply = true,
         },
         --Options_Video_Bloom
         [GRAPHICS_SETTING_BLOOM] =

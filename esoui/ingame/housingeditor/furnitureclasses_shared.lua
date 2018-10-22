@@ -320,7 +320,7 @@ function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
     end
 
     --Refresh the name which depends on the collectible nickname.
-    self.collectibleId = nil    
+    self.collectibleId = nil
     local itemLink, collectibleLink = GetPlacedFurnitureLink(retrievableFurnitureId)
     if collectibleLink ~= "" then
         local collectibleId = GetCollectibleIdFromLink(collectibleLink)
@@ -423,16 +423,15 @@ function ZO_HousingMarketProduct:RefreshInfo(marketProductId, presentationIndex)
 
     self.purchaseState = GetMarketProductPurchaseState(marketProductId)
 
-    local rawName, description, icon, isNew, isFeatured = GetMarketProductInfo(marketProductId)
-    self.rawName = rawName
+    self.rawName = GetMarketProductDisplayName(marketProductId)
     self.formattedName = nil
 
-    self.icon = icon
+    self.icon = GetMarketProductIcon(marketProductId)
 
-    local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = self:GetMarketProductPricingByPresentation()
-    self.isFree = (cost == 0 or costAfterDiscount == 0)
-    self.onSale = hasDiscount
-    self.isNew = isNew
+    local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = self:GetMarketProductPricingByPresentation()
+    self.isFree = costAfterDiscount == 0
+    self.onSale = discountPercent > 0
+    self.isNew = IsMarketProductNew(marketProductId)
     self.currencyType = currencyType
     self.cost = cost
     self.costAfterDiscount = costAfterDiscount

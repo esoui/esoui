@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_KeyboardBundleContents" mouseEnabled="true" hidden="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)BackLabel" level="1" inherits="ZO_MarketFragmentBackLabel">
+                    <Anchor point="TOPLEFT" offsetY="80" />
+                </Control>
+
+                <Control name="$(parent)ProductList" inherits="ZO_GridScrollList_Keyboard">
+                    <Anchor point="TOPLEFT" offsetX="280" offsetY="62"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
+                </Control>
+
+                <Label name="$(parent)ContentHeader" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ProductList" relativePoint="TOPLEFT" offsetY="-30"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ProductList" relativePoint="TOPRIGHT" offsetY="-30"/>
+                </Label>
+
+                <Label name="$(parent)Cost" font="ZoFontWinH4">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMLEFT" offsetX="0"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ContentHeader" relativePoint="BOTTOMRIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

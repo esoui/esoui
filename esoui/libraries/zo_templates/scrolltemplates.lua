@@ -734,7 +734,11 @@ function ZO_ScrollList_GetHeight(self)
 end
 
 local function AreSelectionsEnabled(self)
-    return self.selectionTemplate or self.selectionCallback
+    if self.selectionTemplate or self.selectionCallback then
+        return true
+    else
+        return false
+    end
 end
 
 function ZO_ScrollList_AddResizeOnScreenResize(self)
@@ -764,7 +768,7 @@ end
 --@setupCallback - The function that will be called when a control of this type becomes visible. Signature: setupCallback(control, data)
 --@dataTypeSelectSound - An optional sound to play when a row of this data type is selected.
 --@resetControlCallback - An optional callback when the datatype control gets reset.
-function ZO_ScrollList_AddDataType(self, typeId, templateName, height, setupCallback, hideCallback, dataTypeSelectSound, resetControlCallback)    
+function ZO_ScrollList_AddDataType(self, typeId, templateName, height, setupCallback, hideCallback, dataTypeSelectSound, resetControlCallback)
     if not self.dataTypes[typeId] then
         local factoryFunction = function(objectPool) return ZO_ObjectPool_CreateNamedControl(string.format("%s%dRow", self:GetName(), typeId), templateName, objectPool, self.contents) end
         local pool = ZO_ObjectPool:New(factoryFunction, resetControlCallback or ZO_ObjectPool_DefaultResetControl)
@@ -908,7 +912,10 @@ function ZO_ScrollList_AddControl_Operation:SetControlTemplate(templateName, par
     self.controlWidth = controlWidth
     self.controlHeight = controlHeight
     self.templateName = templateName
-    local factoryFunction = function(objectPool) return ZO_ObjectPool_CreateNamedControl(string.format("%s%dControl", parentControl:GetName(), operationId), templateName, objectPool, parentControl) end
+    local factoryFunction = function(objectPool)
+        local controlName = string.format("%s%dControl", parentControl:GetName(), operationId)
+        return ZO_ObjectPool_CreateNamedControl(controlName, templateName, objectPool, parentControl)
+    end
     self.pool = ZO_ObjectPool:New(factoryFunction, resetControlCallback or ZO_ObjectPool_DefaultResetControl)
 end
 
@@ -1016,7 +1023,7 @@ function ZO_ScrollList_SetBuildDirection(self, buildDirection)
 end
 
 -- A controlWidth of nil will cause controls to be added Anchor TOPLEFT Anchor TOPRIGHT to fill the horizontal space of the parent control
-function ZO_ScrollList_AddControlOperation(self, operationId, templateName, controlWidth, controlHeight, resetControlCallback, showCallback, hideCallback, spacingX, spacingY, selectable, centerEntries)   
+function ZO_ScrollList_AddControlOperation(self, operationId, templateName, controlWidth, controlHeight, resetControlCallback, showCallback, hideCallback, spacingX, spacingY, selectable, centerEntries)
     if not self.dataTypes[operationId] then
         local operation = centerEntries and ZO_ScrollList_AddControl_Centered_Operation:New() or ZO_ScrollList_AddControl_Operation:New()
         operation:SetSpacingValues(spacingX, spacingY)
@@ -1315,7 +1322,7 @@ function ZO_ScrollList_MouseClick(self, control)
             if selectSound then
                 PlaySound(selectSound)
             end
-        end		
+        end
     end
 end
 
@@ -1922,7 +1929,7 @@ function ZO_ScrollList_Commit(self)
             layoutInfo.startPos = 0
             layoutInfo.endPos = self.contents:GetWidth()
         else
-            layoutInfo.startPos = self.contents:GetWidth()            
+            layoutInfo.startPos = self.contents:GetWidth()
             layoutInfo.endPos = 0
         end
         local currentX = layoutInfo.startPos
@@ -1931,7 +1938,7 @@ function ZO_ScrollList_Commit(self)
             local currentOperation = GetDataTypeInfo(self, currentData.typeId)
             currentX, currentY = currentOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, currentData)
             table.insert(self.visibleData, i)
-            
+
             if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
                 foundSelected = true
                 ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)

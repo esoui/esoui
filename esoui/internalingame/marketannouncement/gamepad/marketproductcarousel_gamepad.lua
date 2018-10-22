@@ -54,9 +54,11 @@ function ZO_MarketProductCarousel_Gamepad:UpdateScrollKeybind(newData)
     if self.scrollKeybindButton then
         local marketProduct = newData and newData.marketProduct
         if self.active and marketProduct then
-            local shouldScroll = marketProduct.descriptionText and marketProduct.descriptionText:GetHeight() > marketProduct.description:GetHeight()
+            local descriptionControl = marketProduct:GetDescriptionControl()
+            local descriptionTextControl = marketProduct:GetDescriptionTextControl()
+            local shouldScroll = descriptionTextControl and descriptionTextControl:GetHeight() > descriptionControl:GetHeight()
             self.scrollKeybindButton:SetHidden(not shouldScroll)
-            marketProduct.description:SetDisabled(not self.active)
+            descriptionControl:SetDisabled(not self.active)
         else
             self.scrollKeybindButton:SetHidden(true)
         end
@@ -66,8 +68,11 @@ end
 function ZO_MarketProductCarousel_Gamepad:ResetScrollToTop()
     local data = self:GetSelectedData()
     local marketProduct = data and data.marketProduct
-    if marketProduct and marketProduct.description then
-        marketProduct.description:ResetToTop()
+    if marketProduct then
+        local descriptionControl = marketProduct:GetDescriptionControl()
+        if descriptionControl then
+            descriptionControl:ResetToTop()
+        end
     end
 end
 

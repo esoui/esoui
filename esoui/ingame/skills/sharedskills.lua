@@ -10,6 +10,8 @@ ZO_SKILL_RESPEC_INTERACT_INFO =
     interactTypes = { INTERACTION_SKILL_RESPEC },
 }
 
+SCENE_MANAGER:AddBypassHideSceneConfirmationReason("SKILLS_PLAYER_DEACTIVATED")
+
 function ZO_SkillInfoXPBar_OnLevelChanged(xpBar, level)
     xpBar:GetControl():GetParent().rank:SetText(level)
 end
@@ -112,7 +114,7 @@ function ZO_Skills_SetKeyboardAbilityButtonTextures(button)
         if isPassive then
             button:SetNormalTexture("EsoUI/Art/SkillsAdvisor/circle_passiveAbilityFrame_doubleframe.dds")
             button:SetPressedTexture("EsoUI/Art/SkillsAdvisor/circle_passiveAbilityFrame_doubleframe_down.dds")
-            button:SetMouseOverTexture(nil)
+            button:SetMouseOverTexture("EsoUI/Art/ActionBar/passiveAbilityFrame_round_over.dds")
             button:SetDisabledTexture("EsoUI/Art/SkillsAdvisor/circle_passiveAbilityFrame_doubleframe.dds")
         else
             button:SetNormalTexture("EsoUI/Art/SkillsAdvisor/square_abilityFrame64_doubleFrame.dds")

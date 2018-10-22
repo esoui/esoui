@@ -97,8 +97,22 @@
                 </Control>
 
                 <Label name="$(parent)SelectedLabel" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)List" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING"/>
+                    <OnInitialized>                        
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad34",
+                                lineLimit = 1,
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                                lineLimit = 1,
+                            },
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                    <Anchor point="LEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="-23"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)List" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="-23"/>
                 </Label>
 
                 <Label name="$(parent)ExtraInfoLabel" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">

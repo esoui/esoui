@@ -42,6 +42,11 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_42)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
+    statValuePairValueSmall =
+    {
+        fontSize = "$(GP_34)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
     abilityStatValuePairValue =
     {
         fontSize = "$(GP_34)",
@@ -753,39 +758,6 @@ ZO_TOOLTIP_STYLES =
     },
 
     -- Achievement Tooltip
-    achievementSubtitleText =
-    {
-        fontSize = "$(GP_30)",
-        uppercase = true,
-        fontColorField = GENERAL_COLOR_WHITE,
-    },
-
-    achievementTextSection =
-    {
-        widthPercent = 100,
-        uppercase = true,
-        layoutPrimaryDirection = "down",
-        layoutSecondaryDirection = "right",
-    },
-    
-    achievementPointsSection =
-    {
-        fontSize = "$(GP_27)",
-        childSpacing = 10,
-        fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3,
-        layoutPrimaryDirection = "right",
-        layoutSecondaryDirection = "up",
-    },
-
-    achievementRewardsEntrySection =
-    {
-        widthPercent = 100,
-        fontSize = "$(GP_30)",
-        childSpacing = 10,
-        layoutPrimaryDirection = "right",
-        layoutSecondaryDirection = "down",
-    },
-    
     achievementRewardsSection =
     {
         widthPercent = 100,
@@ -794,20 +766,6 @@ ZO_TOOLTIP_STYLES =
         childSpacing = 25,
         layoutPrimaryDirection = "down",
         layoutSecondaryDirection = "right",
-    },
-
-    achievementRewardsTitle =
-    {
-        widthPercent = 100,
-        fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3,
-    },
-    
-    achievementRewardsName =
-    {
-        widthPercent = 100,
-        fontSize = "$(GP_34)",
-        uppercase = true,
-        fontColorField = GENERAL_COLOR_WHITE,
     },
 
     achievementSummaryCategorySection =
@@ -835,17 +793,6 @@ ZO_TOOLTIP_STYLES =
         layoutSecondaryDirection = "down",
     },
 
-    achievementCriteriaSectionBar =
-    {
-        widthPercent = 100,
-        paddingBottom = 5,
-    },
-
-    achievementCriteriaBarWrapper =
-    {
-        paddingLeft = 2
-    },
-
     achievementCriteriaBar =
     {
         width = 380,
@@ -854,24 +801,24 @@ ZO_TOOLTIP_STYLES =
         statusBarGradientColors = ZO_SKILL_XP_BAR_GRADIENT_COLORS,
     },
 
-    achievementCriteriaProgress =
+    achievementSummaryCriteriaHeader =
     {
         widthPercent = 100,
-        fontSize = "$(GP_30)",
+        fontSize = "$(GP_27)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
 
     achievementDescriptionComplete =
     {
         width = 357,
-        fontSize = "$(GP_30)",
+        fontSize = "$(GP_27)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_GENERAL_COLOR_3,
     },
 
     achievementDescriptionIncomplete =
     {
         width = 357,
-        fontSize = "$(GP_30)",
+        fontSize = "$(GP_27)",
         fontColorField = GAMEPAD_TOOLTIP_COLOR_INACTIVE,
     },
 
@@ -1102,6 +1049,12 @@ ZO_TOOLTIP_STYLES =
     instantUnlockIneligibilityLine =
     {
         fontSize = "$(GP_34)",
+    },
+
+    esoPlusColorStyle =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_MARKET_COLORS,
+        fontColorField = MARKET_COLORS_ESO_PLUS,
     },
 
     -- Gamepad Keep Information
@@ -1432,6 +1385,14 @@ ZO_TOOLTIP_STYLES =
         childSecondarySpacing = 3,
         widthPercent = 100,
         customSpacing = 25,
+    },
+    dailyLoginRewardsLockedSection =
+    {
+        fontSize = "$(GP_42)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontColorField = GENERAL_COLOR_GREY,
+        widthPercent = 100,
+        customSpacing = 40,
     },
 }
 

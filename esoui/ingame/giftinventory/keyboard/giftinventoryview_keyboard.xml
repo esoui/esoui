@@ -73,6 +73,10 @@
                             <Anchor point="CENTER" offsetY="-35" />
                         </Texture>
 
+                        <Label name="$(parent)StackCount" font="ZoFontGameOutline">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                        </Label>
+
                         <Label name="$(parent)Name" override="true" font="ZoFontWinH3" horizontalAlignment="CENTER">
                             <Dimensions x="220" />
                             <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="35" />

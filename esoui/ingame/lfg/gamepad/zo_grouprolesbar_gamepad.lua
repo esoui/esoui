@@ -144,6 +144,12 @@ function ZO_GroupRolesBar_Gamepad:UpdateDimming()
     end
 end
 
+-- Static function to be used by list screens that show the group roles bar
+function ZO_GroupRolesBar_Gamepad:SetupListAnchorsBelowGroupBar(listControl)
+    local _, point1, relativeTo1, relativePoint1, offsetX1, offsetY1 = listControl:GetAnchor(0)
+    listControl:SetAnchor(point1, relativeTo1, relativePoint1, offsetX1, offsetY1 + ZO_GAMEPAD_ROLES_BAR_ADDITIONAL_HEADER_SPACE)
+end
+
 --ZO_GamepadButtonTabBar Overrides
 function ZO_GroupRolesBar_Gamepad:Activate()
     ZO_GamepadButtonTabBar.Activate(self)

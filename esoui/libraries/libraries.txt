@@ -201,10 +201,14 @@ EsoUI\Libraries\ZO_RecentMessages\ZO_RecentMessages.lua
 
 EsoUI\Libraries\ZO_HiddenReasons\ZO_HiddenReasons.lua
 
-EsoUI\Libraries\ZO_ParametricGridList\ZO_GridScrollList.lua
+EsoUI\Libraries\ZO_ParametricGridList\ZO_AbstractGridScrollList.lua
+EsoUI\Libraries\ZO_ParametricGridList\ZO_AbstractSingleTemplateGridScrollList.lua
+EsoUI\Libraries\ZO_ParametricGridList\Keyboard\ZO_GridScrollList_Keyboard.lua
 EsoUI\Libraries\ZO_ParametricGridList\Keyboard\ZO_GridScrollList_Keyboard.xml
+EsoUI\Libraries\ZO_ParametricGridList\Keyboard\ZO_SingleTemplateGridScrollList_Keyboard.lua
 EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_GridScrollList_Gamepad.lua
 EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_GridScrollList_Gamepad.xml
+EsoUI\Libraries\ZO_ParametricGridList\Gamepad\ZO_SingleTemplateGridScrollList_Gamepad.lua
 
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.lua
 EsoUI\Libraries\ZO_Tooltip\ZO_Tooltip.xml
@@ -271,3 +275,5 @@ EsoUI\Libraries\ZO_Tile\Gamepad\ClaimTile_Gamepad.xml
 
 EsoUI\Libraries\ZO_SelectionIndicator\ZO_SelectionIndicator.lua
 EsoUI\Libraries\ZO_SelectionIndicator\ZO_SelectionIndicator.xml
+
+EsoUI\Libraries\ZO_ScriptProfiler\ZO_ScriptProfiler.lua

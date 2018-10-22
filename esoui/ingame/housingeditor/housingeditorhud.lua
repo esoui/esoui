@@ -89,7 +89,11 @@ function HousingHUDFragment:OnHousingHUDButtonPressed()
                 HousingEditorJumpToSafeLocation()
             else
                 local result = HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)              
+                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+
+                if isHouseOwner and IsESOPlusSubscriber() then
+                    TriggerTutorial(TUTORIAL_TRIGGER_ENTERED_OWNED_HOUSING_EDITOR_AS_SUBSCRIBER)
+                end
             end
         elseif visitorRole == HOUSING_VISITOR_ROLE_PREVIEW then
             SYSTEMS:GetObject("HOUSING_PREVIEW"):ShowDialog()
@@ -173,18 +177,23 @@ function ZO_HousingEditorHud:Initialize(control)
     HOUSING_EDITOR_HUD_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:OnDeferredInitialization()
-            if GetHousingEditorMode() == HOUSING_EDITOR_MODE_BROWSE then --if someone cancelled out of the browser without selecting anything
+            local currentMode = GetHousingEditorMode()
+            if currentMode == HOUSING_EDITOR_MODE_BROWSE then --if someone cancelled out of the browser without selecting anything
                 HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+            elseif currentMode == HOUSING_EDITOR_MODE_SELECTION then
+                SCENE_MANAGER:AddFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
             end
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RemoveDefaultExit()
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self:UpdateKeybinds()
         elseif newState == SCENE_HIDDEN then
             self:ClearPlacementKeyPresses()
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
+            self.currentKeybindDescriptor = nil
         end
     end)
 
@@ -195,10 +204,12 @@ function ZO_HousingEditorHud:Initialize(control)
             KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
         elseif newState == SCENE_HIDDEN then
             self:ClearPlacementKeyPresses()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
         end
     end)
@@ -226,13 +237,17 @@ function ZO_HousingEditorHud:Initialize(control)
         self.isDirty = true
     end
 
-    local function OnFurniturePlaced()
-        self:UpdateKeybinds() --for stack count
+    local function OnFurnitureChanged()
+        self:UpdateKeybinds()
     end
 
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_MODE_CHANGED, OnHousingModeChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadModeChanged)
-    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PLACED, OnFurniturePlaced)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PLACED, OnFurnitureChanged)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_REMOVED, OnFurnitureChanged)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_MOVED, OnFurnitureChanged)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_COMMAND_RESULT, OnFurnitureChanged)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_LINK_TARGET_CHANGED, OnFurnitureChanged)
 
     control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
 
@@ -279,12 +294,22 @@ function ZO_HousingEditorHud:OnHousingModeChanged(oldMode, newMode)
         self:OnHousingModeEnabled()
     end
 
+    if newMode == HOUSING_EDITOR_MODE_SELECTION then
+        SCENE_MANAGER:AddFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
+    elseif oldMode == HOUSING_EDITOR_MODE_SELECTION then
+        SCENE_MANAGER:RemoveFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
+    end
+
     if newMode == HOUSING_EDITOR_MODE_BROWSE then
         SYSTEMS:PushScene("housing_furniture_browser")
     elseif oldMode == HOUSING_EDITOR_MODE_BROWSE then --if something external exited the housing mode hide everything
         if SYSTEMS:IsShowing("housing_furniture_browser") then
             SCENE_MANAGER:HideCurrentScene()
         end
+    end
+
+    if oldMode == HOUSING_EDITOR_MODE_PLACEMENT then
+        self:ClearPlacementKeyPresses()
     end
 
     self:UpdateKeybinds()
@@ -300,10 +325,24 @@ function ZO_HousingEditorHud:OnDeferredInitialization()
 end
 
 function ZO_HousingEditorHud:UpdateKeybinds()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    if not HOUSING_EDITOR_HUD_UI_SCENE:IsShowing() then
+        local currentMode = GetHousingEditorMode()
+        local currentModeKeybindDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
+        if self.currentKeybindDescriptor ~= currentModeKeybindDescriptor then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
+            self.currentKeybindDescriptor = currentModeKeybindDescriptor
+            if currentModeKeybindDescriptor then
+                KEYBIND_STRIP:AddKeybindButtonGroup(currentModeKeybindDescriptor)
+            end
+        else
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindDescriptor)
+        end
+    end
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
 
     if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
+        SCENE_MANAGER:AddFragment(HOUSING_EDITOR_HUD_PLACEMENT_MODE_ACTION_LAYER_FRAGMENT)
         if HousingEditorIsSurfaceDragModeEnabled() then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
@@ -312,6 +351,7 @@ function ZO_HousingEditorHud:UpdateKeybinds()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
         end 
     else
+        SCENE_MANAGER:RemoveFragment(HOUSING_EDITOR_HUD_PLACEMENT_MODE_ACTION_LAYER_FRAGMENT)
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
     end 
@@ -437,14 +477,21 @@ do
         end
         
         -- Exit
-        local g_ExitKeybind =
+        self.exitKeybindButtonStripDescriptor =
         {
-            name = GetString(SI_EXIT_BUTTON),
-            keybind = "DISABLE_HOUSING_EDITOR",
-            callback = function()
-                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
-                end,
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+
+            {
+                name = GetString(SI_EXIT_BUTTON),
+                keybind = "DISABLE_HOUSING_EDITOR",
+                visible = function()
+                        return GetHousingEditorMode() == HOUSING_EDITOR_MODE_SELECTION
+                    end,
+                callback = function()
+                        HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
+                    end,
+                alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            },
         }
         
         self.placementKeyPresses =
@@ -457,29 +504,92 @@ do
             [PULL_BACKWARD] = false,
         }
 
-        self.keybindStripDescriptor =
+        self.selectionModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            --Primary (Selection/Placement)
+            {
+                name =  GetString(SI_HOUSING_EDITOR_SELECT),
+                keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
+                callback =  function()
+                                local result = HousingEditorSelectTargettedFurniture()
+                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                    PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                                    return true
+                                end
+                                return false --if not successful return false so you can jump in editor with a gamepad
+                            end,
+                order = 10,
+            },
+
+            -- Link Furniture
+            {
+                name = GetString(SI_HOUSING_EDITOR_LINK),
+                keybind = "HOUSING_EDITOR_BEGIN_FURNITURE_LINKING",
+                callback =  function()
+                                local result = HousingEditorBeginLinkingTargettedFurniture()
+                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                    PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                                end
+                            end,
+                order = 15,
+            },
+
+            --Secondary 
+            {
+                name = GetString(SI_HOUSING_EDITOR_BROWSE),
+                keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
+                visible = function() 
+                                return IsOwnerOfCurrentHouse()
+                            end,
+                callback =  function()
+                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
+                            end,
+                order = 20,
+            },
+
+             --Jump to safe loc
+            {
+                name = GetString(SI_HOUSING_EDITOR_SAFE_LOC),
+                keybind = "HOUSING_EDITOR_JUMP_TO_SAFE_LOC",
+                callback =  function()
+                                HousingEditorJumpToSafeLocation()
+                            end,
+                order = 60,
+            },
+
+            -- Undo
+            {
+                name = GetString(SI_HOUSING_EDITOR_UNDO),
+                keybind = "HOUSING_EDITOR_UNDO_ACTION",
+                enabled = function() return CanUndoLastHousingEditorCommand() end,
+                callback = function()
+                                UndoLastHousingEditorCommand()
+                           end,
+            },
+
+            -- Redo
+            {
+                name = GetString(SI_HOUSING_EDITOR_REDO),
+                keybind = "HOUSING_EDITOR_REDO_ACTION",
+                enabled = function() return CanRedoLastHousingEditorCommand() end,
+                callback = function()
+                                RedoLastHousingEditorCommand()
+                           end,
+            },
+        }
+
+        self.placementModeKeybindStripDescriptor =
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
             --Negative
             {
-                name = function()
-                            local mode = GetHousingEditorMode()
-                            if mode == HOUSING_EDITOR_MODE_PLACEMENT then
-                                return GetString(SI_HOUSING_EDITOR_CANCEL)
-                            elseif mode == HOUSING_EDITOR_MODE_SELECTION then
-                                return GetString(SI_HOUSING_EDITOR_SAFE_LOC)
-                            end
-                        end,
+                name = GetString(SI_HOUSING_EDITOR_CANCEL),
                 keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
-                visible = function() --only do the selection mode version if not in gamepad mode (that's right stick)
-                                local mode = GetHousingEditorMode()
-                                return  mode == HOUSING_EDITOR_MODE_PLACEMENT
-                            end,
                 callback = function()
-                                local mode = GetHousingEditorMode()
-                                if mode == HOUSING_EDITOR_MODE_PLACEMENT then
-                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-                                end
+                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
                             end,
                 alignment = KEYBIND_STRIP_ALIGN_LEFT,
             },
@@ -487,73 +597,37 @@ do
             --Primary (Selection/Placement)
             {
                 name =  function()
-                            local mode = GetHousingEditorMode()
-                            if mode == HOUSING_EDITOR_MODE_PLACEMENT then
-                                local stackCount = HousingEditorGetSelectedFurnitureStackCount()
-                                if stackCount <= 1 then
-                                    return GetString(SI_HOUSING_EDITOR_PLACE)
-                                else
-                                    return zo_strformat(SI_HOUSING_EDITOR_PLACE_WITH_STACK_COUNT, stackCount)
-                                end
-                            elseif mode == HOUSING_EDITOR_MODE_SELECTION then
-                                return GetString(SI_HOUSING_EDITOR_SELECT)
+                            local stackCount = HousingEditorGetSelectedFurnitureStackCount()
+                            if stackCount <= 1 then
+                                return GetString(SI_HOUSING_EDITOR_PLACE)
+                            else
+                                return zo_strformat(SI_HOUSING_EDITOR_PLACE_WITH_STACK_COUNT, stackCount)
                             end
                         end,
                 keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
-                visible =   function()
-                                local mode = GetHousingEditorMode()
-                                return  mode == HOUSING_EDITOR_MODE_PLACEMENT or
-                                        mode == HOUSING_EDITOR_MODE_SELECTION
-                            end,
                 callback =  function()
-                                local mode = GetHousingEditorMode() 
-                                if mode == HOUSING_EDITOR_MODE_PLACEMENT then
-                                    local result = HousingEditorRequestSelectedPlacement()
-                                    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                                    if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                                        PlaySound(SOUNDS.HOUSING_EDITOR_PLACE_ITEM)
-                                    end
-                                    self:ClearPlacementKeyPresses()
-                                    return true
-                                elseif mode == HOUSING_EDITOR_MODE_SELECTION then
-                                    local result = HousingEditorSelectTargettedFurniture()
-                                    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                                    if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                                        PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
-                                        return true
-                                    end
-                                    return false --if not successful return false so you can jump in editor with a gamepad
+                                local result = HousingEditorRequestSelectedPlacement()
+                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                    PlaySound(SOUNDS.HOUSING_EDITOR_PLACE_ITEM)
                                 end
+                                self:ClearPlacementKeyPresses()
                             end,
                 order = 10,
             },
 
             --Secondary 
             {
-                name =  function() 
-                            local mode = GetHousingEditorMode()
-                            if mode == HOUSING_EDITOR_MODE_PLACEMENT then
-                                return GetString(SI_HOUSING_EDITOR_PUT_AWAY)
-                            elseif mode == HOUSING_EDITOR_MODE_SELECTION then
-                                return GetString(SI_HOUSING_EDITOR_BROWSE)
-                            end
-                        end,
+                name = GetString(SI_HOUSING_EDITOR_PUT_AWAY),
                 keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
                 visible = function() 
-                                local mode = GetHousingEditorMode()
-                                local isOwner = IsOwnerOfCurrentHouse()
-                                return mode ~= HOUSING_EDITOR_MODE_DISABLED and isOwner
+                                return IsOwnerOfCurrentHouse()
                             end,
                 callback =  function()
-                                local mode = GetHousingEditorMode()
-                                if mode == HOUSING_EDITOR_MODE_PLACEMENT then
-                                    local result = HousingEditorRequestRemoveSelectedFurniture()
-                                    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                                    if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                                        PlaySound(SOUNDS.HOUSING_EDITOR_RETRIEVE_ITEM)
-                                    end
-                                else
-                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
+                                local result = HousingEditorRequestRemoveSelectedFurniture()
+                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                    PlaySound(SOUNDS.HOUSING_EDITOR_RETRIEVE_ITEM)
                                 end
                             end,
                 order = 20,
@@ -573,7 +647,6 @@ do
                             end
                         end,
                 keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
-                visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 callback = function()
                                 if IsInGamepadPreferredMode() then 
                                     HousingEditorToggleSurfaceDragMode()
@@ -595,7 +668,7 @@ do
                             end
                         end,
                 keybind = "HOUSING_EDITOR_QUATERNARY_ACTION",
-                visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT and not IsInGamepadPreferredMode() end,
+                visible = function() return not IsInGamepadPreferredMode() end,
                 callback = function() 
                                 HousingEditorToggleSurfaceDragMode()
                                 self:UpdateKeybinds()
@@ -609,7 +682,6 @@ do
                 name = "Furniture Yaw Right",
                 keybind = "HOUSING_EDITOR_YAW_RIGHT",
                 ethereal = true,
-                enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 PlacementCallback(ROTATE_YAW_RIGHT, isUp)
@@ -622,7 +694,6 @@ do
                 name = "Furniture Yaw Left",
                 keybind = "HOUSING_EDITOR_YAW_LEFT",
                 ethereal = true,
-                enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 PlacementCallback(ROTATE_YAW_LEFT, isUp)
@@ -635,7 +706,6 @@ do
                 name = "Furniture Pitch Forward",
                 keybind = "HOUSING_EDITOR_PITCH_FORWARD",
                 ethereal = true,
-                enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 PlacementCallback(ROTATE_PITCH_FORWARD, isUp)
@@ -648,7 +718,6 @@ do
                 name = "Furniture Pitch Backward",
                 keybind = "HOUSING_EDITOR_PITCH_BACKWARD",
                 ethereal = true,
-                enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 PlacementCallback(ROTATE_PITCH_BACKWARD, isUp)
@@ -661,7 +730,6 @@ do
                 name = "Furniture Roll Right",
                 keybind = "HOUSING_EDITOR_ROLL_RIGHT",
                 ethereal = true,
-                enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 PlacementCallback(ROTATE_ROLL_RIGHT, isUp)
@@ -674,7 +742,6 @@ do
                 name = "Furniture Roll Left",
                 keybind = "HOUSING_EDITOR_ROLL_LEFT",
                 ethereal = true,
-                enabled = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 PlacementCallback(ROTATE_ROLL_LEFT, isUp)
@@ -684,26 +751,91 @@ do
             {
                 name = GetString(SI_HOUSING_EDITOR_ALIGN),
                 keybind = "HOUSING_EDITOR_ALIGN_TO_SURFACE",
-                visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT end,
                 callback =  function()
                                 HousingEditorAlignFurnitureToSurface()
                             end,
                 order = 50,
             },
+        }
 
-            --Jump to safe loc (gamepad)
+        self.linkModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            --Negative
             {
-                name = GetString(SI_HOUSING_EDITOR_SAFE_LOC),
-                keybind = "HOUSING_EDITOR_JUMP_TO_SAFE_LOC",
+                name = GetString(SI_HOUSING_EDITOR_EXIT_LINK),
+                keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
+                callback = function()
+                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                            end,
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            },
+
+            --Primary (Unlink/Link As Child)
+            {
+                name = function()
+                            local linkResult = HousingEditorGetLinkRelationshipFromSelectedChildToPendingFurniture()
+                            if linkResult == HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_LINKED_TO_PARENT then
+                                return GetString(SI_HOUSING_EDITOR_REMOVE_PARENT)
+                            elseif linkResult == HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_LINKED_AS_CHILD then
+                                return GetString(SI_HOUSING_EDITOR_REMOVE_CHILD)
+                            elseif linkResult == HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_NO_LINK then
+                                return GetString(SI_HOUSING_EDITOR_ADD_AS_CHILD)
+                            elseif linkResult == HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_BAD_LINK then
+                                return GetString(SI_HOUSING_EDITOR_BAD_LINK_ACTION)
+                            end
+                       end,
+                keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
+                visible = function()
+                              local linkResult = HousingEditorGetLinkRelationshipFromSelectedChildToPendingFurniture()
+                              return linkResult ~= HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_INVALID
+                          end,
+                enabled = function()
+                                local linkResult = HousingEditorGetLinkRelationshipFromSelectedChildToPendingFurniture()
+                                if linkResult == HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_BAD_LINK then
+                                    local result = HousingEditorGetPendingBadLinkResult()
+                                    return false, GetString("SI_HOUSINGREQUESTRESULT", result)
+                                else
+                                    return true
+                                end
+                          end,
+                callback =  function()
+                                HousingEditorPerformPendingLinkOperation()
+                            end,
+                order = 10,
+            },
+
+            --Secondary (Remove My Parent)
+            {
+                name = GetString(SI_HOUSING_EDITOR_REMOVE_PARENT),
+                keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
                 visible = function() 
-                                return GetHousingEditorMode() == HOUSING_EDITOR_MODE_SELECTION 
+                                local linkResult = HousingEditorGetLinkRelationshipFromSelectedChildToPendingFurniture()
+                                if linkResult == HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_INVALID then
+                                    return HousingEditorCanRemoveParentFromPendingFurniture() == HOUSING_REQUEST_RESULT_SUCCESS
+                                end
                             end,
                 callback =  function()
-                                HousingEditorJumpToSafeLocation()
+                                HousingEditorRemoveParentFromPendingFurniture()
                             end,
-                order = 60,
+                order = 20,
             },
-            g_ExitKeybind,
+
+            --Tertiary (Remove All Children)
+            {
+                name = GetString(SI_HOUSING_EDITOR_REMOVE_ALL_CHILDREN),
+                keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
+                visible = function()
+                                local linkResult = HousingEditorGetLinkRelationshipFromSelectedChildToPendingFurniture()
+                                if linkResult == HOUSING_EDITOR_PENDING_LINK_RELATIONSHIP_INVALID then
+                                    return HousingEditorCanRemoveAllChildrenFromPendingFurniture() == HOUSING_REQUEST_RESULT_SUCCESS
+                                end
+                           end,
+                callback = function()
+                                HousingEditorRemoveAllChildrenFromPendingFurniture()
+                           end,
+                order = 30,
+            },
         }
 
         self.UIModeKeybindStripDescriptor =
@@ -719,7 +851,6 @@ do
                                 end
                             end,
             },
-            g_ExitKeybind
         }
 
         --Push/Pull Visible (for when surface drag is off)
@@ -789,6 +920,16 @@ do
                             end,
             }
         }
+    end
+
+    function ZO_HousingEditorHud:GetKeybindStripDescriptorForMode(mode)
+        if mode == HOUSING_EDITOR_MODE_SELECTION then
+            return self.selectionModeKeybindStripDescriptor
+        elseif mode == HOUSING_EDITOR_MODE_PLACEMENT then
+            return self.placementModeKeybindStripDescriptor
+        elseif mode == HOUSING_EDITOR_MODE_LINK then
+            return self.linkModeKeybindStripDescriptor
+        end
     end
 
     function ZO_HousingEditorHud:GetRotationAmount(axis)
@@ -874,6 +1015,159 @@ function ZO_HousingEditorHud:SetupHousingEditorHudScene()
     end
 end
 
+-----------------------------
+--Housing Editor History 
+-----------------------------
+
+local MAX_COMMANDS_SHOWN = 6
+ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_KEYBOARD_X = 290
+ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_KEYBOARD_Y = 50
+ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_GAMEPAD_X = 315
+ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_GAMEPAD_Y = 58
+ZO_HOUSING_EDITOR_HISTORY_CONTAINER_DIMENSION_X = ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_GAMEPAD_X
+ZO_HOUSING_EDITOR_HISTORY_CONTAINER_DIMENSION_Y = ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_GAMEPAD_Y * MAX_COMMANDS_SHOWN
+
+ZO_HousingEditorHistory = ZO_Object:Subclass()
+
+function ZO_HousingEditorHistory:New(...)
+    local undoStack = ZO_Object.New(self)
+    undoStack:Initialize(...)
+    return undoStack
+end
+
+function ZO_HousingEditorHistory:Initialize(control)
+    self.control = control
+    self.entryContainer = control:GetNamedChild("Container")
+    self.historyTitle = control:GetNamedChild("Header")
+
+    self:SetDefaultIndicies()
+
+    ZO_HOUSING_EDITOR_HISTORY_FRAGMENT = ZO_FadeSceneFragment:New(control)
+
+    ZO_HOUSING_EDITOR_HISTORY_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:UpdateUndoStack()
+        end
+    end)
+
+    self.historyEntryPool = ZO_ControlPool:New("ZO_HousingEditorHistory_Entry", self.entryContainer)
+    self.recentUndoStackControls = {}
+
+    local function OnUndoRedoCommand()
+        self:UpdateUndoStack()
+    end
+
+    control:RegisterForEvent(EVENT_HOUSING_EDITOR_COMMAND_RESULT, OnUndoRedoCommand)
+
+    ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
+
+    -- Make sure title is setup properly
+    self:ApplyPlatformStyle()
+end
+
+function ZO_HousingEditorHistory:UpdateUndoStack()
+    self.historyEntryPool:ReleaseAllObjects()
+    ZO_ClearNumericallyIndexedTable(self.recentUndoStackControls)
+
+    local numCommands = GetNumHousingEditorHistoryCommands()
+    local currentCommandIndex = GetCurrentHousingEditorHistoryCommandIndex()
+
+    if self.numCommands ~= numCommands then
+        self:SetDefaultIndicies()
+    else
+        local commandDirection = currentCommandIndex - self.lastCommandIndex
+        if commandDirection < 0 and currentCommandIndex == self.endingIndex + (MAX_COMMANDS_SHOWN / 2) then
+            self:SetContrainedEndingIndex(self.endingIndex - 1)
+            if self.startingIndex - self.endingIndex > MAX_COMMANDS_SHOWN then
+                self:SetContrainedStartingIndex(self.startingIndex - 1)
+            end
+        elseif commandDirection > 0 and currentCommandIndex == self.startingIndex  then
+            self:SetContrainedStartingIndex(self.startingIndex + 1)
+            if self.startingIndex - self.endingIndex > MAX_COMMANDS_SHOWN then
+                self:SetContrainedEndingIndex(self.endingIndex + 1)
+            end
+        end
+    end
+
+    local currentCommandControl
+    local nextIndex = self.endingIndex
+    local lastIndex = self.startingIndex
+    local offsetY = 0
+
+    while nextIndex < lastIndex do
+        local commandType, name, icon = GetHousingEditorHistoryCommandInfo(nextIndex)
+        if commandType ~= HOUSING_EDITOR_COMMAND_TYPE_NONE then
+            local isEntryActive = false
+            local historyEntry = self.historyEntryPool:AcquireObject()
+            ApplyTemplateToControl(historyEntry, ZO_GetPlatformTemplate("ZO_HousingEditorHistory_Entry"))
+            table.insert(self.recentUndoStackControls, historyEntry)
+            historyEntry:SetAnchor(TOPRIGHT, self.entryContainer, TOPRIGHT, 0, offsetY)
+            historyEntry.label:SetText(zo_strformat(SI_HOUSE_HISTORY_COMMAND_FORMATTER, GetString("SI_HOUSINGEDITORCOMMANDTYPE", commandType), name))
+            historyEntry.icon:SetTexture(icon)
+            if nextIndex + 1 == currentCommandIndex then
+                currentCommandControl = historyEntry
+                isEntryActive = true
+            elseif currentCommandIndex > nextIndex then
+                isEntryActive = true
+            end
+
+            if isEntryActive then
+                historyEntry.label:SetColor(ZO_SELECTED_TEXT:UnpackRGB())
+                historyEntry.icon:SetDesaturation(0)
+            else
+                historyEntry.label:SetColor(ZO_DISABLED_TEXT:UnpackRGB())
+                historyEntry.icon:SetDesaturation(1)
+            end
+            historyEntry.backgroundHighlight:SetHidden(true)
+            offsetY = offsetY + historyEntry:GetHeight()
+        end
+
+        nextIndex = nextIndex + 1
+    end
+
+    if currentCommandControl then
+        currentCommandControl.backgroundHighlight:SetHidden(false)
+    end
+
+    self.historyTitle:SetHidden(numCommands == 0)
+
+    self.lastCommandIndex = currentCommandIndex
+end
+
+function ZO_HousingEditorHistory:SetDefaultIndicies()
+    self.numCommands = GetNumHousingEditorHistoryCommands()
+    self.lastCommandIndex = GetCurrentHousingEditorHistoryCommandIndex()
+    self:SetContrainedStartingIndex(self.lastCommandIndex + 2)
+    self:SetContrainedEndingIndex(self.startingIndex - MAX_COMMANDS_SHOWN)
+end
+
+function ZO_HousingEditorHistory:SetContrainedStartingIndex(newIndex)
+    self.startingIndex = newIndex
+
+    local totalCommands = GetNumHousingEditorHistoryCommands()
+    if self.startingIndex > totalCommands then
+        self.startingIndex = totalCommands
+    end
+end
+
+function ZO_HousingEditorHistory:SetContrainedEndingIndex(newIndex)
+    self.endingIndex = newIndex
+    
+    if self.endingIndex < 0 then
+        self.endingIndex = 0
+    end
+end
+
+function ZO_HousingEditorHistory:ApplyPlatformStyle()
+    for i,control in ipairs(self.recentUndoStackControls) do
+        ApplyTemplateToControl(control, ZO_GetPlatformTemplate("ZO_HousingEditorHistory_Entry"))
+        control:ClearAnchors()
+        control:SetAnchor(TOPRIGHT, self.entryContainer, TOPRIGHT, 0, control:GetHeight() * (i - 1))
+    end
+
+    self.historyTitle:SetFont(IsInGamepadPreferredMode() and "ZoFontGamepadBold34" or "ZoFontWinH2")
+end
+
 --[[ Globals ]]--
 function ZO_HousingEditorActionBar_OnInitialize(control)
     HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED) --disable if someone reloads ui from editor mode
@@ -882,4 +1176,15 @@ end
 
 function ZO_HousingHUDFragmentTopLevel_Initialize(control)
     HOUSING_HUD_FRAGMENT = HousingHUDFragment:New(control)
+end
+
+function ZO_HousingEditorHistory_Initialize(control)
+    HOUSING_EDITOR_UNDO_STACK = ZO_HousingEditorHistory:New(control)
+end
+
+function ZO_HousingEditorHistory_Entry_OnInitialized(control)
+    control.icon = control:GetNamedChild("Icon")
+    control.label = control:GetNamedChild("Label")
+    control.background = control:GetNamedChild("Bg")
+    control.backgroundHighlight = control:GetNamedChild("Highlight")
 end

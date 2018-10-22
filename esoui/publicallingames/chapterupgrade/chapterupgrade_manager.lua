@@ -31,7 +31,6 @@ function ZO_ChapterUpgrade_Data:Initialize(chapterUpgradeId)
     self.marketBackgroundImage = GetChapterMarketBackgroundFileImage(chapterUpgradeId)
     self.isOwned = IsChapterOwned(chapterUpgradeId)
     self.isNew = false
-    self.hasDiscount = false
     self.discountPercent = 0
     self:PopulateRewardsData()
 end
@@ -103,8 +102,7 @@ end
 function ZO_ChapterUpgrade_Data:SetMarketProductId(marketProductId)
     self.marketProductId = marketProductId
     self.isNew = select(4, GetMarketProductInfo(marketProductId))
-    local _
-    self.hasDiscount, _, self.discountPercent = select(3, GetMarketProductPricingByPresentation(self.marketProductId))
+    self.discountPercent = select(4, GetMarketProductPricingByPresentation(self.marketProductId))
 end
 
 function ZO_ChapterUpgrade_Data:GetChapterUpgradeId()
@@ -173,8 +171,8 @@ function ZO_ChapterUpgrade_Data:IsLimitedTime()
     return remainingTime > 0 and remainingTime <= ZO_ONE_MONTH_IN_SECONDS
 end
 
-function ZO_ChapterUpgrade_Data:GetDiscountInfo()
-    return self.hasDiscount, self.discountPercent
+function ZO_ChapterUpgrade_Data:GetDiscountPercent()
+    return self.discountPercent
 end
 
 function ZO_ChapterUpgrade_Data:IsNew()
@@ -212,13 +210,16 @@ end
 function ChapterUpgrade_Manager:Initialize()
     local currentChapterId = GetCurrentChapterUpgradeId()
     self.currentChapterData = ZO_ChapterUpgrade_Data:New(currentChapterId)
-    self.chapterUpgradeDataById =
-    {
-        [currentChapterId] = self.currentChapterData,
-    }
+
+    self.chaperUpgradeDataList = {}
+    self.chapterUpgradeDataById = {}
+
+    self.marketState = GetMarketState(MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE)
+    self:RefreshChapterUpgradeData()
 
     local function OnMarketStateUpdated(eventCode, displayGroup, marketState)
         if displayGroup == MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE then
+            self.marketState = marketState
             self:RefreshChapterUpgradeData()
         end
     end
@@ -226,62 +227,66 @@ function ChapterUpgrade_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("ChapterUpgrade_Manager", EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
 end
 
-function ChapterUpgrade_Manager:RefreshChapterUpgradeData()
-    ZO_ClearTable(self.chapterUpgradeDataById)
-
-    self.chapterUpgradeDataById[self.currentChapterData:GetChapterUpgradeId()] = self.currentChapterData --static data
-    
-    local prepurchaseChapterId, marketProductId = self:GetPrepurchaseChapterUpgradeInfo()
-    if prepurchaseChapterId ~= 0 then
-        local prepurchaseChapterData = self.prepurchaseChapterData
-        if prepurchaseChapterData then
-            if prepurchaseChapterData:GetChapterUpgradeId() ~= prepurchaseChapterId then
-                prepurchaseChapterData:Initialize(prepurchaseChapterId)
-            end
+do
+    local function ChapterUpgradeDataSort(left, right)
+        local leftChapterUpgradeId = left:GetChapterUpgradeId()
+        local rightChapterUpgradeId = right:GetChapterUpgradeId()
+        local leftChapterEnum = GetChapterEnumFromUpgradeId(leftChapterUpgradeId)
+        local rightChapterEnum = GetChapterEnumFromUpgradeId(rightChapterUpgradeId)
+        if leftChapterEnum == rightChapterEnum then
+            return leftChapterUpgradeId > rightChapterUpgradeId
         else
-            prepurchaseChapterData = ZO_ChapterUpgrade_Data:New(prepurchaseChapterId)
-            self.prepurchaseChapterData = prepurchaseChapterData
+            return leftChapterEnum > rightChapterEnum
         end
-        prepurchaseChapterData:SetMarketProductId(marketProductId)
-        self.chapterUpgradeDataById[prepurchaseChapterData:GetChapterUpgradeId()] = prepurchaseChapterData
-    else
-        self.prepurchaseChapterData = nil
     end
 
-    self:FireCallbacks("ChapterUpgradeDataUpdated")
+    function ChapterUpgrade_Manager:RefreshChapterUpgradeData()
+        ZO_ClearNumericallyIndexedTable(self.chaperUpgradeDataList)
+        ZO_ClearTable(self.chapterUpgradeDataById)
+
+        local marketProductIds = { GetActiveChapterUpgradeMarketProductListings(MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE) }
+
+        for _, marketProductId in ipairs(marketProductIds) do
+            local chapterUpgradeId = GetMarketProductChapterUpgradeId(marketProductId)
+            -- Two entries for the same chapter id is undefined behavior, so just ignore duplicates
+            if not self.chapterUpgradeDataById[chapterUpgradeId] then
+                local chapterUpgradeData = ZO_ChapterUpgrade_Data:New(chapterUpgradeId)
+                chapterUpgradeData:SetMarketProductId(marketProductId)
+                table.insert(self.chaperUpgradeDataList, chapterUpgradeData)
+                self.chapterUpgradeDataById[chapterUpgradeId] = chapterUpgradeData
+            end
+        end
+
+        if #marketProductIds == 0 then
+            --static fallback data
+            table.insert(self.chaperUpgradeDataList, self.currentChapterData)
+            self.chapterUpgradeDataById[self.currentChapterData:GetChapterUpgradeId()] = self.currentChapterData
+        end
+
+        table.sort(self.chaperUpgradeDataList, ChapterUpgradeDataSort)
+
+        self:FireCallbacks("ChapterUpgradeDataUpdated")
+    end
 end
 
-function ChapterUpgrade_Manager:GetPrepurchaseChapterUpgradeInfo()
-    local chapterUpgradeId = 0
-    local marketProductId = GetActiveChapterUpgradeMarketProductListing(MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE)
-    if marketProductId ~= 0 then
-        chapterUpgradeId = GetMarketProductChapterUpgradeId(marketProductId)
-    end
-    return chapterUpgradeId, marketProductId
+function ChapterUpgrade_Manager:GetChapterUpgradeDataByIndex(index)
+    return self.chaperUpgradeDataList[index]
 end
 
 function ChapterUpgrade_Manager:GetChapterUpgradeDataById(chapterUpgradeId)
     return self.chapterUpgradeDataById[chapterUpgradeId]
 end
 
-function ChapterUpgrade_Manager:GetPrepurchaseChapterUpgradeData()
-    return self.prepurchaseChapterData
-end
-
-function ChapterUpgrade_Manager:GetCurrentChapterUpgradeData()
-    return self.currentChapterData
-end
-
 function ChapterUpgrade_Manager:GetNumChapterUpgrades()
-    return NonContiguousCount(self.chapterUpgradeDataById)
+    return #self.chaperUpgradeDataList
 end
 
 function ChapterUpgrade_Manager:RequestPrepurchaseData()
     OpenMarket(MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE)
-    local marketState = GetMarketState(MARKET_DISPLAY_GROUP_CHAPTER_UPGRADE)
-    if marketState == MARKET_STATE_OPEN then
-        self:RefreshChapterUpgradeData()
-    end
+end
+
+function ChapterUpgrade_Manager:GetMarketState()
+    return self.marketState
 end
 
 ZO_CHAPTER_UPGRADE_MANAGER = ChapterUpgrade_Manager:New()

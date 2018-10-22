@@ -86,8 +86,7 @@ end
 function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
     local gridListPanel = self.control:GetNamedChild("Pane")
     self.gridListPanelControl = gridListPanel
-    local FILL_ROW_WITH_EMPTY_CELLS = true
-    self.gridListPanelList = ZO_GridScrollList:New(gridListPanel, FILL_ROW_WITH_EMPTY_CELLS)
+    self.gridListPanelList = ZO_SingleTemplateGridScrollList_Keyboard:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local HEADER_HEIGHT = 30
     local HIDE_CALLBACK = nil

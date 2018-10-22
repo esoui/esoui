@@ -15,7 +15,7 @@ function ZO_SmithingResearch:Initialize(control, owner)
     ZO_InventoryInfoBar_ConnectStandardBar(control:GetNamedChild("InfoBar"))
 end
 
-function ZO_SharedSmithingResearch:SetHidden(hidden)
+function ZO_SmithingResearch:SetHidden(hidden)
     self.control:SetHidden(hidden)
     if not hidden and self.dirty then
         self:Refresh()

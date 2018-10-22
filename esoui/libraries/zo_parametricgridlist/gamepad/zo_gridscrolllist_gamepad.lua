@@ -7,21 +7,22 @@ ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD = 10
 local SELECT_CATEGORY_PREVIOUS = -1
 local SELECT_CATEGORY_NEXT = 1
 
--- ZO_GridScrollList_Gamepad --
+-- ZO_AbstractGridScrollList_Gamepad --
 
-ZO_GridScrollList_Gamepad = ZO_GridScrollList:Subclass()
+ZO_AbstractGridScrollList_Gamepad = ZO_Object:Subclass()
 
-function ZO_GridScrollList_Gamepad:New(...)
-    return ZO_GridScrollList.New(self, ...)
+function ZO_AbstractGridScrollList_Gamepad:New(...)
+    local grid = ZO_Object.New(self)
+    grid:Initialize(...)
+    return grid
 end
 
-function ZO_GridScrollList_Gamepad:Initialize(control, fillRowWithEmptyCells, selectionTemplate)
-    ZO_GridScrollList.Initialize(self, control, fillRowWithEmptyCells)
+function ZO_AbstractGridScrollList_Gamepad:Initialize(control, selectionTemplate)
 
     self.dimOnDeactivate = false
 
-    local function SelectionCallback(previousData, newData, selectedDuringRebuild) 
-        self:OnSelectionChanged(previousData, newData, selectedDuringRebuild) 
+    local function SelectionCallback(previousData, newData, selectedDuringRebuild)
+        self:OnSelectionChanged(previousData, newData, selectedDuringRebuild)
     end
 
     local template = selectionTemplate or "ZO_GridScrollList_Highlight_Gamepad"
@@ -33,7 +34,7 @@ function ZO_GridScrollList_Gamepad:Initialize(control, fillRowWithEmptyCells, se
     self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 end
 
-function ZO_GridScrollList_Gamepad:InitializeTriggerKeybinds()
+function ZO_AbstractGridScrollList_Gamepad:InitializeTriggerKeybinds()
     self.gridListTriggerKeybinds =
     {
         {
@@ -60,7 +61,7 @@ function ZO_GridScrollList_Gamepad:InitializeTriggerKeybinds()
     }
 end
 
-function ZO_GridScrollList_Gamepad:SetDirectionalInputEnabled(enabled)
+function ZO_AbstractGridScrollList_Gamepad:SetDirectionalInputEnabled(enabled)
     if self.directionalInputEnabled ~= enabled then
         self.directionalInputEnabled = enabled
         if enabled then
@@ -71,7 +72,7 @@ function ZO_GridScrollList_Gamepad:SetDirectionalInputEnabled(enabled)
     end
 end
 
-function ZO_GridScrollList_Gamepad:SetDimsOnDeactivate(dimOnDeactivate)
+function ZO_AbstractGridScrollList_Gamepad:SetDimsOnDeactivate(dimOnDeactivate)
     if self.dimOnDeactivate ~= dimOnDeactivate then
         self.dimOnDeactivate = dimOnDeactivate
         -- If we set this to true, we want to have the control go to its default alpha state
@@ -81,7 +82,7 @@ function ZO_GridScrollList_Gamepad:SetDimsOnDeactivate(dimOnDeactivate)
     end
 end
 
-function ZO_GridScrollList_Gamepad:UpdateDirectionalInput()
+function ZO_AbstractGridScrollList_Gamepad:UpdateDirectionalInput()
     local moveX, moveY = self.horizontalMovementController:CheckMovement(), self.verticalMovementController:CheckMovement()
     if moveX ~= MOVEMENT_CONTROLLER_NO_CHANGE or moveY ~= MOVEMENT_CONTROLLER_NO_CHANGE then
         self:HandleMoveInDirection(moveX, moveY)
@@ -96,34 +97,34 @@ do
         [MOVEMENT_CONTROLLER_MOVE_PREVIOUS] = ZO_SCROLL_MOVEMENT_DIRECTION_NEGATIVE
     }
 
-    function ZO_GridScrollList_Gamepad:HandleMoveInDirection(moveX, moveY)
+    function ZO_AbstractGridScrollList_Gamepad:HandleMoveInDirection(moveX, moveY)
         local scrollXDirection, scrollYDirection = MOVE_DIRECTION_TABLE[moveX], MOVE_DIRECTION_TABLE[moveY]
         ZO_ScrollList_SelectNextDataInDirection(self.list, scrollXDirection, scrollYDirection)
     end
 end
 
-function ZO_GridScrollList_Gamepad:OnSelectionChanged(previousData, newData, selectedDuringRebuild)
+function ZO_AbstractGridScrollList_Gamepad:OnSelectionChanged(previousData, newData, selectedDuringRebuild)
     self:FireCallbacks("SelectedDataChanged", previousData, newData)
 end
 
-function ZO_GridScrollList_Gamepad:SetOnSelectedDataChangedCallback(onSelectedDataChangedCallback)
+function ZO_AbstractGridScrollList_Gamepad:SetOnSelectedDataChangedCallback(onSelectedDataChangedCallback)
     self:RegisterCallback("SelectedDataChanged", onSelectedDataChangedCallback)
 end
 
-function ZO_GridScrollList_Gamepad:ClearGridList(retainScrollPosition)
-    ZO_GridScrollList.ClearGridList(self, retainScrollPosition)
+function ZO_AbstractGridScrollList_Gamepad:ClearGridList(retainScrollPosition)
+    ZO_AbstractGridScrollList.ClearGridList(self, retainScrollPosition)
     ZO_ScrollList_ResetLastHoldPosition(self.list)
 end
 
-function ZO_GridScrollList_Gamepad:CommitGridList()
-    ZO_GridScrollList.CommitGridList(self)
+function ZO_AbstractGridScrollList_Gamepad:CommitGridList()
+    ZO_AbstractGridScrollList.CommitGridList(self)
     ZO_ScrollList_RefreshLastHoldPosition(self.list)
     if self.active then
         self:RefreshSelection()
     end
 end
 
-function ZO_GridScrollList_Gamepad:Activate(foregoDirectionalInput)
+function ZO_AbstractGridScrollList_Gamepad:Activate(foregoDirectionalInput)
     if self.active ~= true then
         self.active = true
 
@@ -140,7 +141,7 @@ function ZO_GridScrollList_Gamepad:Activate(foregoDirectionalInput)
     end
 end
 
-function ZO_GridScrollList_Gamepad:Deactivate(foregoDirectionalInput)
+function ZO_AbstractGridScrollList_Gamepad:Deactivate(foregoDirectionalInput)
     if self.active ~= false then
         self.active = false
 
@@ -157,15 +158,15 @@ function ZO_GridScrollList_Gamepad:Deactivate(foregoDirectionalInput)
     end
 end
 
-function ZO_GridScrollList_Gamepad:IsActive()
+function ZO_AbstractGridScrollList_Gamepad:IsActive()
     return self.active
 end
 
-function ZO_GridScrollList_Gamepad:GetSelectedData()
+function ZO_AbstractGridScrollList_Gamepad:GetSelectedData()
     return ZO_ScrollList_GetSelectedData(self.list)
 end
 
-function ZO_GridScrollList_Gamepad:GetSelectedDataIndex()
+function ZO_AbstractGridScrollList_Gamepad:GetSelectedDataIndex()
     local selectedData = self:GetSelectedData()
     if selectedData then
         return ZO_ScrollList_GetDataIndex(self.list, selectedData.dataEntry)
@@ -174,23 +175,36 @@ function ZO_GridScrollList_Gamepad:GetSelectedDataIndex()
     return 0
 end
 
-function ZO_GridScrollList_Gamepad:RefreshSelection()
+function ZO_AbstractGridScrollList_Gamepad:RefreshSelection()
     ZO_ScrollList_AutoSelectData(self.list)
 end
 
-function ZO_GridScrollList_Gamepad:AddTriggerKeybinds()
+function ZO_AbstractGridScrollList_Gamepad:AddTriggerKeybinds()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.gridListTriggerKeybinds)
 end
 
-function ZO_GridScrollList_Gamepad:RemoveTriggerKeybinds()
+function ZO_AbstractGridScrollList_Gamepad:RemoveTriggerKeybinds()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.gridListTriggerKeybinds)
 end
 
-function ZO_GridScrollList_Gamepad:ScrollDataToCenter(data)
-    ZO_GridScrollList.ScrollDataToCenter(self, data)
+function ZO_AbstractGridScrollList_Gamepad:ScrollDataToCenter(data)
+    ZO_AbstractGridScrollList.ScrollDataToCenter(self, data)
     ZO_ScrollList_RefreshLastHoldPosition(self.list)
 end
 
-function ZO_GridScrollList_Gamepad:SelectNextCategory(direction)
+function ZO_AbstractGridScrollList_Gamepad:SelectNextCategory(direction)
     ZO_ScrollList_SelectFirstIndexInCategory(self.list, direction)
+end
+
+-- ZO_GridScrollList_Gamepad --
+
+ZO_GridScrollList_Gamepad = ZO_Object.MultiSubclass(ZO_AbstractGridScrollList_Gamepad, ZO_AbstractGridScrollList)
+
+function ZO_GridScrollList_Gamepad:New(...)
+    return ZO_AbstractGridScrollList.New(self, ...)
+end
+
+function ZO_GridScrollList_Gamepad:Initialize(control, selectionTemplate)
+    ZO_AbstractGridScrollList.Initialize(self, control)
+    ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate)
 end

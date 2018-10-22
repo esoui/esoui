@@ -18,7 +18,7 @@ function ZO_MarketAnnouncement_Gamepad:Initialize(control)
     -- This data must be setup before parent initialize is called
     self.actionTileControlByType = 
     {
-        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Gamepad_Control"
+        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Gamepad_Control",
     }
 
     ZO_MarketAnnouncement_Shared.Initialize(self, control, IsInGamepadPreferredMode)
@@ -131,10 +131,8 @@ function ZO_MarketAnnouncement_Gamepad:LayoutActionTiles()
     self:UpdateActionTileNavigation()
 end
 
-function ZO_MarketAnnouncement_Gamepad:CreateMarketProduct(productId)
-    local marketProduct = ZO_MarketAnnouncementMarketProduct_Gamepad:New()
-    marketProduct:SetId(productId)
-    return marketProduct
+function ZO_MarketAnnouncement_Gamepad:CreateMarketProduct()
+    return ZO_MarketAnnouncementMarketProduct_Gamepad:New()
 end
 
 --global XML functions

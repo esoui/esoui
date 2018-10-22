@@ -2,17 +2,21 @@
     <Controls>
         <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Gamepad" inherits="ZO_MarketAnnouncement_MarketProductTemplate_Base" virtual="true" >
             <Controls>
-                <Label name="$(parent)Type" font="ZoFontGamepadBold34" override="true" />
+                <Label name="$(parent)Type" override="true" font="ZoFontGamepadBold34" />
 
-                <Label name="$(parent)Title" font="ZoFontGamepad34" override="true" />
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
 
-                <Label name="$(parent)TextCallout" font="ZoMarketGamepadCalloutFont" override="true" />
+                <Label name="$(parent)TextCallout" override="true" font="ZoMarketGamepadCalloutFont" />
 
-                <Label name="$(parent)PreviousCost" font="ZoFontGamepadBold27" override="true" />
+                <Label name="$(parent)PreviousCost" override="true" font="ZoFontGamepadBold27" />
 
-                <Label name="$(parent)Cost" font="ZoFontGamepadBold27" override="true "/>
+                <Label name="$(parent)Cost" override="true" font="ZoFontGamepadBold27" />
 
-                <Label name="$(parent)Purchased" font="ZoFontGamepadBold25" override="true" />
+                <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontGamepadBold27" />
+
+                <Label name="$(parent)Purchased" override="true" hidden="true" />
+
+                <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontGamepadBold27" />
 
                 <Control name="$(parent)ProductDescription" inherits="ZO_ScrollContainer_Gamepad">
                     <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH" />
@@ -32,9 +36,9 @@
                     </Controls>
                 </Control>
 
-                <Label name="$(parent)BundledProducts" font="ZoFontGamepad34" override="true">
+                <Label name="$(parent)BundledProducts" override="true" font="ZoFontGamepad34">
                     <Controls>
-                        <Label name="$(parent)Label" font="ZoFontGamepadBold25" override="true" />
+                        <Label name="$(parent)Label" override="true" font="ZoFontGamepadBold25" />
                     </Controls>
                 </Label>
             </Controls>

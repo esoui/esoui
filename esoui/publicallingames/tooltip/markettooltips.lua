@@ -15,9 +15,6 @@ end
 do
     local BUNDLE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_BUNDLE)
     local DLC_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_DLC)
-    local UPGRADE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_UPGRADE)
-    local UNLOCK_LABEL = GetString(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK)
-    local SERVICE_HEADER = GetString(SI_SERVICE_TOOLTIP_TYPE)
 
     local NO_CATEGORY_NAME = nil
     local NO_NICKNAME = nil
@@ -25,28 +22,35 @@ do
     local NO_COOLDOWN = nil
     local HIDE_BLOCK_REASON = false
 
-    function ZO_Tooltip:LayoutMarketProduct(productId)
+    function ZO_Tooltip:LayoutMarketProduct(productId, showCollectiblePurchasableHint)
         local productType = GetMarketProductType(productId)
         -- For some market product types we can just use other tooltip layouts
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-            local collectibleId, _, name, type, description, owned, isPlaceholder, isPurchasable, hint = GetMarketProductCollectibleInfo(productId)
-            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, isPurchasable, description, hint, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
-            return
+            local collectibleId, _, name, type, description, _, isPlaceholder, isPurchasable, hint = GetMarketProductCollectibleInfo(productId)
+            local showAsPurchasable
+            if not showCollectiblePurchasableHint then
+                showAsPurchasable = false
+            else
+                showAsPurchasable = isPurchasable
+            end
+
+            if type == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+                hint = nil
+            end
+
+            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, showAsPurchasable, description, hint, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             local itemLink = GetMarketProductItemLink(productId)
             local stackCount = GetMarketProductStackCount(productId)
             self:LayoutItemWithStackCountSimple(itemLink, stackCount)
-            return
         elseif productType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
             local crateId = GetMarketProductCrownCrateId(productId)
             local stackCount = GetMarketProductStackCount(productId)
             self:LayoutCrownCrate(crateId, stackCount)
-            return
         elseif productType == MARKET_PRODUCT_TYPE_CURRENCY then
             local currencyType = GetMarketProductCurrencyType(productId)
             local amount = GetMarketProductStackCount(productId)
             self:LayoutCurrency(currencyType, amount)
-            return
         elseif productType == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK then
             local instantUnlockId = GetMarketProductInstantUnlockId(productId)
             self:LayoutInstantUnlock(instantUnlockId)
@@ -58,35 +62,56 @@ do
                     self:AddInstantUnlockEligibilityFailures(GetMarketProductEligibilityErrorStringIds(productId))
                 end
             end
-            return
-        end
-
-        -- things added to the topSection stack upwards
-        local topSection = self:AcquireSection(self:GetStyle("topSection"))
-
-        if productType == MARKET_PRODUCT_TYPE_BUNDLE then
-            if DoesMarketProductContainDLC(productId) and GetMarketProductNumBundledProducts(productId) == 1 then
-                topSection:AddLine(DLC_HEADER)
-            else
-                topSection:AddLine(BUNDLE_HEADER)
-            end
-        end
-
-        self:AddSection(topSection)
-
-        -- Name
-        local displayName = GetMarketProductDisplayName(productId)
-        local stackCount = GetMarketProductStackCount(productId)
-        if stackCount > 1 then
-            displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, displayName, stackCount)
         else
-            displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
-        end
-        self:AddLine(displayName, self:GetStyle("title"))
+            -- things added to the topSection stack upwards
+            local topSection = self:AcquireSection(self:GetStyle("topSection"))
 
-        -- Description
-        local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
-        bodySection:AddLine(GetMarketProductDescription(productId), self:GetStyle("bodyDescription"))
+            if productType == MARKET_PRODUCT_TYPE_BUNDLE then
+                if DoesMarketProductContainDLC(productId) and GetMarketProductNumBundledProducts(productId) == 1 then
+                    topSection:AddLine(DLC_HEADER)
+                else
+                    topSection:AddLine(BUNDLE_HEADER)
+                end
+            end
+
+            self:AddSection(topSection)
+
+            -- Name
+            local displayName = GetMarketProductDisplayName(productId)
+            local stackCount = GetMarketProductStackCount(productId)
+            if stackCount > 1 then
+                displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, displayName, stackCount)
+            else
+                displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
+            end
+            self:AddLine(displayName, self:GetStyle("title"))
+
+            -- Description
+            local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
+            bodySection:AddLine(GetMarketProductDescription(productId), self:GetStyle("bodyDescription"))
+            self:AddSection(bodySection)
+        end
+    end
+end
+
+function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationIndex)
+    local DONT_SHOW_AS_PURCHASABLE = false
+    self:LayoutMarketProduct(marketProductId, DONT_SHOW_AS_PURCHASABLE)
+
+    local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
+    if esoPlusCost then
+        local dealText
+        if cost then
+            dealText = GetString(SI_MARKET_PRODUCT_TOOLTIP_ESO_PLUS_DEAL_DESCRIPTION)
+        else
+            dealText = GetString(SI_MARKET_PRODUCT_TOOLTIP_ESO_PLUS_EXCLUSIVE_DESCRIPTION)
+        end
+
+        local INHERIT_COLOR = true
+        local esoPlusDealString = zo_iconTextFormatNoSpace("EsoUI/Art/Market/Gamepad/gp_ESOPlus_Chalice_WHITE_64.dds", "100%", "100%", dealText, INHERIT_COLOR)
+
+        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+        bodySection:AddLine(esoPlusDealString, self:GetStyle("bodyDescription"), self:GetStyle("esoPlusColorStyle"))
         self:AddSection(bodySection)
     end
 end
@@ -101,11 +126,27 @@ function ZO_Tooltip:LayoutEsoPlusTrialNotification(marketProductId, keybindIcon)
     bodySection:AddLine(zo_strformat(SI_MARKET_FREE_TRIAL_TOOLTIP_DESCRIPTION, endTimeString), self:GetStyle("bodyDescription"))
     self:AddSection(bodySection)
 
-    -- using a second body section here to separate out the start instruction from the description
-    local bodySection2 = self:AcquireSection(self:GetStyle("bodySection"))
-    local startInstructionString = zo_strformat(SI_MARKET_FREE_TRIAL_TOOLTIP_START_INSTRUCTIONS, keybindIcon)
-    bodySection2:AddLine(startInstructionString, self:GetStyle("bodyDescription"))
-    self:AddSection(bodySection2)
+    if not IsOnESOPlusFreeTrial() then
+        -- using a second body section here to separate out the start instruction from the description
+        local bodySection2 = self:AcquireSection(self:GetStyle("bodySection"))
+        local startInstructionString = zo_strformat(SI_MARKET_FREE_TRIAL_TOOLTIP_START_INSTRUCTIONS, keybindIcon)
+        bodySection2:AddLine(startInstructionString, self:GetStyle("bodyDescription"))
+        self:AddSection(bodySection2)
+    end
+end
+
+function ZO_Tooltip:LayoutEsoPlusMembershipTooltip(statusText)
+    self:AddLine(GetString(SI_GAMEPAD_MEMBERSHIP_INFO_TOOLTIP_TITLE), self:GetStyle("title"))
+
+    local statValuePair = self:AcquireStatValuePair(self:GetStyle("statValuePair"))
+    statValuePair:SetStat(GetString(SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL_GAMEPAD), self:GetStyle("statValuePairStat"))
+    statValuePair:SetValue(statusText, self:GetStyle("statValuePairValue"))
+    self:AddStatValuePair(statValuePair)
+
+    local overview = GetMarketSubscriptionGamepadInfo()
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(overview, self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
 end
 
 function ZO_Tooltip:LayoutCrownCrate(crateId, stackCount)
@@ -136,86 +177,92 @@ function ZO_Tooltip:LayoutCrownCrate(crateId, stackCount)
     self:AddSection(bodySection)
 end
 
-function ZO_Tooltip:LayoutInstantUnlock(instantUnlockId)
-    -- things added to the topSection stack upwards
-    local topSection = self:AcquireSection(self:GetStyle("topSection"))
+do
+    local UPGRADE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_UPGRADE)
+    local SERVICE_HEADER = GetString(SI_SERVICE_TOOLTIP_TYPE)
+    local UNLOCK_LABEL = GetString(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK)
 
-    local isServiceToken = IsInstantUnlockRewardServiceToken(instantUnlockId)
-    local isUpgrade = IsInstantUnlockRewardUpgrade(instantUnlockId)
-    if isServiceToken then
-        topSection:AddLine(SERVICE_HEADER)
-    elseif isUpgrade then
-        topSection:AddLine(UPGRADE_HEADER)
-    end
+    function ZO_Tooltip:LayoutInstantUnlock(instantUnlockId)
+        -- things added to the topSection stack upwards
+        local topSection = self:AcquireSection(self:GetStyle("topSection"))
 
-    self:AddSection(topSection)
-
-    -- Name
-    local displayName = GetInstantUnlockRewardDisplayName(instantUnlockId)
-    displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
-    self:AddLine(displayName, self:GetStyle("title"))
-
-    local tooltipLines = {}
-    local instantUnlockType = GetInstantUnlockRewardType(instantUnlockId)
-    if isUpgrade then
-        local statsSection = self:AcquireSection(self:GetStyle("baseStatsSection"))
-        local statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        statValuePair:SetStat(UNLOCK_LABEL, self:GetStyle("statValuePairStat"))
-
-        local currentUnlock
-        local maxUnlock
-        local unlockDescription
-
-        if instantUnlockType == INSTANT_UNLOCK_PLAYER_BACKPACK then
-            currentUnlock = GetCurrentBackpackUpgrade()
-            maxUnlock = GetMaxBackpackUpgrade()
-            unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BACKPACK_UPGRADE_DESCRIPTION, GetNumBackpackSlotsPerUpgrade())
-        elseif instantUnlockType == INSTANT_UNLOCK_PLAYER_BANK then
-            currentUnlock = GetCurrentBankUpgrade()
-            maxUnlock = GetMaxBankUpgrade()
-            unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION, GetNumBankSlotsPerUpgrade())
-        elseif instantUnlockType == INSTANT_UNLOCK_CHARACTER_SLOT then
-            currentUnlock = GetCurrentCharacterSlotsUpgrade()
-            maxUnlock = GetMaxCharacterSlotsUpgrade()
-            unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_CHARACTER_SLOT_UPGRADE_DESCRIPTION, GetNumCharacterSlotsPerUpgrade())
-        elseif instantUnlockType == INSTANT_UNLOCK_OUTFIT then
-            currentUnlock = GetNumUnlockedOutfits()
-            maxUnlock = MAX_OUTFIT_UNLOCKS
-            unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_OUTFIT_UPGRADE_DESCRIPTION, NUM_OUTFITS_PER_UPGRADE)
+        local isServiceToken = IsInstantUnlockRewardServiceToken(instantUnlockId)
+        local isUpgrade = IsInstantUnlockRewardUpgrade(instantUnlockId)
+        if isServiceToken then
+            topSection:AddLine(SERVICE_HEADER)
+        else
+            topSection:AddLine(UPGRADE_HEADER)
         end
 
-        table.insert(tooltipLines, unlockDescription)
+        self:AddSection(topSection)
 
-        statValuePair:SetValue(zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL, currentUnlock, maxUnlock), self:GetStyle("statValuePairValue"))
-        statsSection:AddStatValuePair(statValuePair)
-        self:AddSection(statsSection)
-    elseif isServiceToken then
-        local tokenDescription
-        local tokenUsageRequirement = GetString(SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT) -- All tokens only usable from character select
-        local tokenCountString
+        -- Name
+        local displayName = GetInstantUnlockRewardDisplayName(instantUnlockId)
+        displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
+        self:AddLine(displayName, self:GetStyle("title"))
 
-        if instantUnlockType == INSTANT_UNLOCK_RENAME_TOKEN then
-            tokenDescription = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
-            tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_NAME_CHANGE))
-        elseif instantUnlockType == INSTANT_UNLOCK_RACE_CHANGE_TOKEN then
-            tokenDescription = GetString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
-            tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_RACE_CHANGE))
-        elseif instantUnlockType == INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN then
-            tokenDescription = GetString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
-            tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_APPEARANCE_CHANGE))
+        local tooltipLines = {}
+        local instantUnlockType = GetInstantUnlockRewardType(instantUnlockId)
+        if isUpgrade then
+            local statsSection = self:AcquireSection(self:GetStyle("baseStatsSection"))
+            local statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
+            statValuePair:SetStat(UNLOCK_LABEL, self:GetStyle("statValuePairStat"))
+
+            local currentUnlock
+            local maxUnlock
+            local unlockDescription
+
+            if instantUnlockType == INSTANT_UNLOCK_PLAYER_BACKPACK then
+                currentUnlock = GetCurrentBackpackUpgrade()
+                maxUnlock = GetMaxBackpackUpgrade()
+                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BACKPACK_UPGRADE_DESCRIPTION, GetNumBackpackSlotsPerUpgrade())
+            elseif instantUnlockType == INSTANT_UNLOCK_PLAYER_BANK then
+                currentUnlock = GetCurrentBankUpgrade()
+                maxUnlock = GetMaxBankUpgrade()
+                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION, GetNumBankSlotsPerUpgrade())
+            elseif instantUnlockType == INSTANT_UNLOCK_CHARACTER_SLOT then
+                currentUnlock = GetCurrentCharacterSlotsUpgrade()
+                maxUnlock = GetMaxCharacterSlotsUpgrade()
+                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_CHARACTER_SLOT_UPGRADE_DESCRIPTION, GetNumCharacterSlotsPerUpgrade())
+            elseif instantUnlockType == INSTANT_UNLOCK_OUTFIT then
+                currentUnlock = GetNumUnlockedOutfits()
+                maxUnlock = MAX_OUTFIT_UNLOCKS
+                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_OUTFIT_UPGRADE_DESCRIPTION, NUM_OUTFITS_PER_UPGRADE)
+            end
+
+            table.insert(tooltipLines, unlockDescription)
+
+            statValuePair:SetValue(zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL, currentUnlock, maxUnlock), self:GetStyle("statValuePairValue"))
+            statsSection:AddStatValuePair(statValuePair)
+            self:AddSection(statsSection)
+        elseif isServiceToken then
+            local tokenDescription
+            local tokenUsageRequirement = GetString(SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT) -- All tokens only usable from character select
+            local tokenCountString
+
+            if instantUnlockType == INSTANT_UNLOCK_RENAME_TOKEN then
+                tokenDescription = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
+                tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_NAME_CHANGE))
+            elseif instantUnlockType == INSTANT_UNLOCK_RACE_CHANGE_TOKEN then
+                tokenDescription = GetString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
+                tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_RACE_CHANGE))
+            elseif instantUnlockType == INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN then
+                tokenDescription = GetString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
+                tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_APPEARANCE_CHANGE))
+            end
+
+            table.insert(tooltipLines, tokenDescription)
+            table.insert(tooltipLines, tokenUsageRequirement)
+            table.insert(tooltipLines, tokenCountString)
+        else
+            table.insert(tooltipLines, GetInstantUnlockRewardDescription(instantUnlockId))
         end
 
-        table.insert(tooltipLines, tokenDescription)
-        table.insert(tooltipLines, tokenUsageRequirement)
-        table.insert(tooltipLines, tokenCountString)
-    else
-        table.insert(tooltipLines, GetInstantUnlockRewardDescription(instantUnlockId))
+        -- Description
+        local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
+        for i = 1, #tooltipLines do
+            bodySection:AddLine(tooltipLines[i], self:GetStyle("bodyDescription"))
+        end
+        self:AddSection(bodySection)
     end
-
-    -- Description
-    local bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
-    for i = 1, #tooltipLines do
-        bodySection:AddLine(tooltipLines[i], self:GetStyle("bodyDescription"))
-    end
-    self:AddSection(bodySection)
 end

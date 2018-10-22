@@ -27,6 +27,22 @@ function ZO_MarketDialogs_Shared_ShouldRestartGiftFlow(giftResult)
     return giftResult == MARKET_PURCHASE_RESULT_CANNOT_GIFT_TO_PLAYER or giftResult == MARKET_PURCHASE_RESULT_CANNOT_GIFT_RECIPIENT_NOT_FOUND
 end
 
+function ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(productData)
+    if IsEligibleForEsoPlusPricing() then
+        local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = productData:GetMarketProductPricingByPresentation()
+        if esoPlusCost ~= nil and costAfterDiscount ~= nil then
+            local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
+            local esoPlusSavings = costAfterDiscount - esoPlusCost
+            if esoPlusSavings > 0 then
+                local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, esoPlusSavings, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+                return zo_strformat(SI_MARKET_PURCHASE_SUCCESS_ESO_PLUS_SAVINGS_TEXT, currencyString)
+            end
+        end
+    end
+
+    return nil
+end
+
 do
     local TEXTURE_SCALE_PERCENT = 100
     function ZO_MarketDialogs_Shared_GetPreviewHouseDialogMainTextParams(marketProductId)
@@ -66,7 +82,7 @@ ESO_Dialogs["CROWN_STORE_PREVIEW_HOUSE"] =
         {
             text = SI_DIALOG_CONFIRM,
             callback =  function(dialog)
-                            local houseId = GetMarketProductHouseId(dialog.data.marketProductId)
+                            local houseId = dialog.data.marketProductData:GetHouseId()
                             RequestJumpToHouse(houseId)
                             SCENE_MANAGER:RequestShowLeaderBaseScene()
                         end,

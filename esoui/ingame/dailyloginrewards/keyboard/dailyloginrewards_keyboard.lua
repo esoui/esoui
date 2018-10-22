@@ -9,22 +9,22 @@ function ZO_DailyLoginRewards_Keyboard:New(...)
 end
 
 function ZO_DailyLoginRewards_Keyboard:Initialize(control)
-	ZO_DailyLoginRewards_Base.Initialize(self, control)
+    ZO_DailyLoginRewards_Base.Initialize(self, control)
     
-	self.changeTimerLabel = control:GetNamedChild("ChangeTimer")
-	self.currentMonthLabel = control:GetNamedChild("CurrentMonth")
-	self.particleGeneratorPosition = control:GetNamedChild("RewardParticleGeneratorPosition")
-	self.lockedLabel = control:GetNamedChild("LockedText")
+    self.changeTimerLabel = control:GetNamedChild("ChangeTimer")
+    self.currentMonthLabel = control:GetNamedChild("CurrentMonth")
+    self.particleGeneratorPosition = control:GetNamedChild("RewardParticleGeneratorPosition")
+    self.lockedLabel = control:GetNamedChild("LockedText")
 
     self.blastParticleSystem:SetParentControl(self.particleGeneratorPosition)
-	
+    
     self:InitializeKeybindStripDescriptors()
-	self:InitializeGridListPanel()
-	
-	DAILY_LOGIN_REWARDS_KEYBOARD_SCENE = ZO_Scene:New("dailyLoginRewards", SCENE_MANAGER)
+    self:InitializeGridListPanel()
+    
+    DAILY_LOGIN_REWARDS_KEYBOARD_SCENE = ZO_Scene:New("dailyLoginRewards", SCENE_MANAGER)
     DAILY_LOGIN_REWARDS_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
-	
-	DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+    
+    DAILY_LOGIN_REWARDS_KEYBOARD_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:OnShowing()
         elseif newState == SCENE_HIDING then
@@ -88,20 +88,19 @@ local function ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control
 end
 
 function ZO_DailyLoginRewards_Keyboard:InitializeGridListPanel()
-	local gridListPanel = self.control:GetNamedChild("Rewards")
+    local gridListPanel = self.control:GetNamedChild("Rewards")
     self.gridListPanelControl = gridListPanel
-    local FILL_ROW_WITH_EMPTY_CELLS = true
-    self.gridListPanelList = ZO_GridScrollList:New(gridListPanel, FILL_ROW_WITH_EMPTY_CELLS)
-	
-	local function DailyLoginRewardsGridEntryReset(control)
+    self.gridListPanelList = ZO_SingleTemplateGridScrollList_Keyboard:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
+
+    local function DailyLoginRewardsGridEntryReset(control)
         ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control, self.currentRewardAnimationPool)
         self:GridEntryCleanup(control)
         ZO_GridEntry_SetIconScaledUpInstantly(control, false)
-	end
-	
-	local HEADER_HEIGHT = 30
+    end
+    
+    local HEADER_HEIGHT = 30
     local HIDE_CALLBACK = nil
-	self.gridListPanelList:SetGridEntryTemplate("ZO_DailyLoginRewards_GridEntry_Template_Keyboard", ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD, self.dailyLoginRewardsGridEntrySetup, HIDE_CALLBACK, DailyLoginRewardsGridEntryReset, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_KEYBOARD, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_KEYBOARD)
+    self.gridListPanelList:SetGridEntryTemplate("ZO_DailyLoginRewards_GridEntry_Template_Keyboard", ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD, self.dailyLoginRewardsGridEntrySetup, HIDE_CALLBACK, DailyLoginRewardsGridEntryReset, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_KEYBOARD, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_KEYBOARD)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetLineBreakAmount(ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_KEYBOARD + (ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_KEYBOARD * 3))
 end
@@ -127,17 +126,17 @@ do
 end
 
 function ZO_DailyLoginRewards_Keyboard:OnShowing()
-	ZO_DailyLoginRewards_Base.OnShowing(self)
+    ZO_DailyLoginRewards_Base.OnShowing(self)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_DailyLoginRewards_Keyboard:OnHiding()
     ZO_DailyLoginRewards_Base.OnHiding(self)
-	KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_DailyLoginRewards_Keyboard:OnHidden()
-	
+    
 end
 
 function ZO_DailyLoginRewards_Keyboard:OnDailyLoginRewardEntryMouseEnter(control)
@@ -209,12 +208,13 @@ function ZO_DailyLoginRewards_Keyboard:CleanDirty()
 end
 
 function ZO_DailyLoginRewards_Keyboard:UpdateTimeToNextMonthText(formattedTime)
+    ZO_DailyLoginRewards_Base.UpdateTimeToNextMonthText(self, formattedTime)
+
     self.changeTimerLabel:SetText(zo_strformat(SI_DAILY_LOGIN_REWARDS_CHANGES_IN, ZO_WHITE:Colorize(formattedTime)))
 end
 
 function ZO_DailyLoginRewards_Keyboard:UpdateTimeToNextMonthVisibility()
-    local shouldBeHidden = self.lastCalculatedTimeUntilNextMonthS == 0 or GetNumRewardsInCurrentDailyLoginMonth() == 0
-    self.changeTimerLabel:SetHidden(shouldBeHidden)
+    self.changeTimerLabel:SetHidden(self:ShouldChangeTimerBeHidden())
 end
 
 function ZO_DailyLoginRewards_Keyboard:IsShowing()
@@ -229,42 +229,23 @@ end
 -- XML Functions
 -------------------
 
-do
-    local currentTooltipDay
-    local currentTooltipControl
-    local function UpdateTooltip()
-        if currentTooltipDay then
-            InitializeTooltip(ItemTooltip, currentTooltipControl, RIGHT, -15, 0, LEFT)
-			ItemTooltip:SetDailyLoginRewardEntry(currentTooltipDay)
-        end
-    end
-
-    function ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseEnter(control)
-        local rewardData = control.data
-	    if rewardData then
-            if not rewardData.isEmptyCell then
-                local rewardData = control.data
-	            if rewardData then
-                    local rewardType = rewardData:GetRewardType()
-		            if rewardType and rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
-			            InitializeTooltip(ItemTooltip, control, RIGHT, -15, 0, LEFT)
-                        currentTooltipDay = rewardData.day
-                        currentTooltipControl = control
-			            ItemTooltip:SetDailyLoginRewardEntry(currentTooltipDay)
-                        EVENT_MANAGER:RegisterForUpdate("DailyLoginRewards_Tooltip", 30, function(...) UpdateTooltip(...) end)
-                    end
-                end
+function ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseEnter(control)
+    local rewardData = control.data
+    if rewardData then
+        if not rewardData.isEmptyCell then
+            local rewardType = rewardData:GetRewardType()
+            if rewardType and rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
+                InitializeTooltip(ItemTooltip, control, RIGHT, -15, 0, LEFT)
+                ItemTooltip:SetDailyLoginRewardEntry(rewardData.day)
             end
         end
-        ZO_DAILYLOGINREWARDS_KEYBOARD:OnDailyLoginRewardEntryMouseEnter(control)
     end
+    ZO_DAILYLOGINREWARDS_KEYBOARD:OnDailyLoginRewardEntryMouseEnter(control)
+end
 
-    function ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseExit(control)
-        ClearTooltip(ItemTooltip)
-        ZO_DAILYLOGINREWARDS_KEYBOARD:OnDailyLoginRewardEntryMouseExit(control)
-        currentTooltipDay = nil
-        EVENT_MANAGER:UnregisterForUpdate("DailyLoginRewards_Tooltip")
-    end
+function ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseExit(control)
+    ClearTooltip(ItemTooltip)
+    ZO_DAILYLOGINREWARDS_KEYBOARD:OnDailyLoginRewardEntryMouseExit(control)
 end
 
 function ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseUp(control, button, upInside)
@@ -275,5 +256,5 @@ function ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseUp(control, but
 end
 
 function ZO_DailyLoginRewards_Keyboard_OnInitialize(control)
-	ZO_DAILYLOGINREWARDS_KEYBOARD = ZO_DailyLoginRewards_Keyboard:New(control)
+    ZO_DAILYLOGINREWARDS_KEYBOARD = ZO_DailyLoginRewards_Keyboard:New(control)
 end

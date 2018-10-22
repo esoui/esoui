@@ -23,6 +23,8 @@ EsoUI\InternalIngame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.lua
 EsoUI\InternalIngame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.xml
 
 EsoUI\InternalIngame\Market\MarketColorDefs.lua
+EsoUI\InternalIngame\Market\MarketProductData.lua
+EsoUI\InternalIngame\Market\Market_Manager.lua
 EsoUI\InternalIngame\Market\Market_Shared.lua
 EsoUI\InternalIngame\Market\MarketClasses_Shared.lua
 EsoUI\InternalIngame\Market\MarketClasses_Shared.xml
@@ -30,11 +32,23 @@ EsoUI\InternalIngame\Market\LargeSingleMarketProduct_Base.lua
 EsoUI\InternalIngame\Market\LargeSingleMarketProduct_Base.xml
 EsoUI\InternalIngame\Market\Keyboard\MarketClasses_Keyboard.lua
 EsoUI\InternalIngame\Market\Keyboard\MarketClasses_Keyboard.xml
+EsoUI\InternalIngame\Market\Keyboard\MarketContentFragment_Keyboard.lua
+EsoUI\InternalIngame\Market\Keyboard\MarketContentFragment_Keyboard.xml
+EsoUI\InternalIngame\Market\Keyboard\MarketListFragment_Keyboard.lua
 EsoUI\InternalIngame\Market\Keyboard\Market_Keyboard.lua
 EsoUI\InternalIngame\Market\Keyboard\Market_Keyboard.xml
+EsoUI\InternalIngame\Market\Keyboard\CrownStore_Keyboard.lua
+EsoUI\InternalIngame\Market\Keyboard\CrownStore_Keyboard.xml
+EsoUI\InternalIngame\EsoPlusOffers\Keyboard\EsoPlusOffers.lua
+EsoUI\InternalIngame\EsoPlusOffers\Keyboard\EsoPlusOffers.xml
 
+EsoUI\InternalIngame\Market\Gamepad\EsoPlusMembershipInfoDialog_Gamepad.lua
+EsoUI\InternalIngame\Market\Gamepad\EsoPlusMembershipInfoDialog_Gamepad.xml
 EsoUI\InternalIngame\Market\Gamepad\MarketClasses_Gamepad.lua
 EsoUI\InternalIngame\Market\Gamepad\MarketClasses_Gamepad.xml
+EsoUI\InternalIngame\Market\Gamepad\MarketProductListScene_Gamepad.lua
+EsoUI\InternalIngame\Market\Gamepad\MarketProductListScene_Gamepad.xml
+EsoUI\InternalIngame\Market\Gamepad\MarketPreview_Gamepad.lua
 EsoUI\InternalIngame\Market\Gamepad\MarketGridScreen_Gamepad.lua
 EsoUI\InternalIngame\Market\Gamepad\MarketGridScreen_Gamepad.xml
 EsoUI\InternalIngame\Market\Gamepad\Market_Gamepad.lua

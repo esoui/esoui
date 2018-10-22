@@ -240,6 +240,26 @@ function Compass:InitializeQuestPins()
 
     self.control:RegisterForEvent(EVENT_PLAYER_IN_PIN_AREA_CHANGED, OnPlayerInPinAreaChanged)
 
+    local function OnQuestTrackerTrackingStateChanged()
+       local template = IsInGamepadPreferredMode() and "ZO_CompassAreaTexture_Gamepad_Template" or "ZO_CompassAreaTexture_Keyboard_Template"
+       local restingAlpha = IsInGamepadPreferredMode() and AREA_TEXTURE_RESTING_ALPHA_GAMEPAD or AREA_TEXTURE_RESTING_ALPHA_KEYBOARD
+
+       if self.areaPinAnimations then
+            for _, journalEntry in pairs(self.areaPinAnimations) do
+                for _, stepEntry in pairs(journalEntry) do
+                    for _, animation in pairs(stepEntry) do
+                        local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, animation.journalIndex)
+                        local newPinType = GetQuestPinTypeForTrackingLevel(animation.areaTexture.pinType, trackingLevel)
+
+                        self:ApplyTemplateToAreaTexture(animation.areaTexture, template, restingAlpha, newPinType)
+                    end
+                end
+            end
+        end
+    end
+
+    FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerTrackingStateChanged", OnQuestTrackerTrackingStateChanged)
+
     local function OnQuestRemovedOrChanged(eventCode, journalIndex)
         self:RemoveAreaPinsByQuest(journalIndex)
     end
@@ -346,6 +366,7 @@ function Compass:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, condition
         return false
     else
         animation.key = key
+        animation.journalIndex = journalIndex
         self:StoreAreaPinAnimation(journalIndex, stepIndex, conditionIndex, animation)
         self.currentlyAnimatingAreaPinType = nil
         return true

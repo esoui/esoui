@@ -17,7 +17,7 @@ function ZO_MarketAnnouncementMarketProductTile_Gamepad:InitializePlatform()
         name = GetString(SI_MARKET_ANNOUNCEMENT_HELP_BUTTON),
         keybind = "UI_SHORTCUT_SECONDARY",
         sound = function()
-            if self:IsActionAvailable() then
+             if self:IsActionAvailable() then
                 return SOUNDS.DIALOG_ACCEPT
             else
                 return SOUNDS.DIALOG_DECLINE
@@ -27,8 +27,8 @@ function ZO_MarketAnnouncementMarketProductTile_Gamepad:InitializePlatform()
             return self:IsHelpButtonKeybindVisible()
         end,
         callback = function()
-            if self.marketProduct  and self:IsHelpButtonKeybindVisible() then
-                local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(self.marketProduct.marketProductId)
+            if self.marketProduct then
+                local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(self.marketProduct:GetId())
                 RequestShowSpecificHelp(helpCategoryIndex, helpIndex)
             end
         end
@@ -92,5 +92,6 @@ end
 -----
 
 function ZO_MarketAnnouncementMarketProductTile_Gamepad_OnInitialized(control)
+    ZO_MarketAnnouncementMarketProduct_Shared_OnInitialized(control)
     ZO_MarketAnnouncementMarketProductTile_Gamepad:New(control)
 end

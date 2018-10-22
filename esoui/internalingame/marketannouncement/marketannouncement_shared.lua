@@ -2,9 +2,17 @@
 -- ZO_MarketAnnouncement_Shared
 ----
 
+ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X = 315
+ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y = 210
+
 ZO_ACTION_TILE_TYPE = 
 {
-    DAILY_REWARDS = 1
+    DAILY_REWARDS = 1,
+}
+
+ZO_ACTION_SORTED_TILE_TYPE =
+{
+    ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
 }
 
 ZO_MarketAnnouncement_Shared = ZO_Object:Subclass()
@@ -40,13 +48,7 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
     self.actionTileList = {}
     self.actionTileObjectPoolMap = {}
     for _, tileType in pairs(ZO_ACTION_TILE_TYPE) do
-        local function FactoryFunction(objectPool)
-            return self:CreateActionTile(tileType, objectPool)
-        end
-        local function ResetFunction(tileObject)
-            return tileObject:Reset()
-        end
-        self.actionTileObjectPoolMap[tileType] = ZO_ObjectPool:New(FactoryFunction, ResetFunction)
+        self:AddTileTypeObjectPoolToMap(tileType)
     end
 
     self:InitializeKeybindButtons()
@@ -65,6 +67,16 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
 
     ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("OnMarketAnnouncementDataUpdated", function() self:UpdateMarketCarousel() end)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, OnDailyLoginRewardsUpdated)
+end
+
+function ZO_MarketAnnouncement_Shared:AddTileTypeObjectPoolToMap(tileType)
+    local function FactoryFunction(objectPool)
+        return self:CreateActionTile(tileType, objectPool)
+    end
+    local function ResetFunction(tileObject)
+        return tileObject:Reset()
+    end
+    self.actionTileObjectPoolMap[tileType] = ZO_ObjectPool:New(FactoryFunction, ResetFunction)
 end
 
 function ZO_MarketAnnouncement_Shared:CreateActionTile(tileType, objectPool)
@@ -90,8 +102,8 @@ function ZO_MarketAnnouncement_Shared:OnStateChanged(oldState, newState)
 end
 
 function ZO_MarketAnnouncement_Shared:OnDailyLoginRewardsUpdated()
-    if self.fragment:IsShowing() then 
-        self:LayoutActionTiles() 
+    if self.fragment:IsShowing() then
+        self:LayoutActionTiles()
     end
 end
 
@@ -124,6 +136,7 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
 end
 
 function ZO_MarketAnnouncement_Shared:OnShown()
+    -- To be overridden
 end
 
 function ZO_MarketAnnouncement_Shared:OnHiding()
@@ -132,21 +145,23 @@ function ZO_MarketAnnouncement_Shared:OnHiding()
 end
 
 function ZO_MarketAnnouncement_Shared:OnHidden()
+    -- To be overridden
 end
 
 function ZO_MarketAnnouncement_Shared:UpdateMarketCarousel()
     if self.fragment:IsShowing() then
-        local productInfoTable = ZO_MARKET_ANNOUNCEMENT_MANAGER.productInfoTable
+        local productInfoTable = ZO_MARKET_ANNOUNCEMENT_MANAGER:GetProductInfoTable()
         self.numAnnouncementProducts = #productInfoTable
         if self.numAnnouncementProducts > 0 then
             self.carousel:SetNumProductAnnouncements(self.numAnnouncementProducts)
             self.carousel:UpdateSelection(1)
         end
-        
+
         self.carousel:Clear()
-        for i = 1, #productInfoTable do
-            local marketProduct = self:CreateMarketProduct(productInfoTable[i].productId) 
-            self.carousel:AddEntry({marketProduct = marketProduct, callback = self.marketProductSelectedCallback, index = i})
+        for index, productInfo in ipairs(productInfoTable) do
+            local marketProduct = self:CreateMarketProduct()
+            marketProduct:SetMarketProductData(productInfo.productData)
+            self.carousel:AddEntry({marketProduct = marketProduct, callback = self.marketProductSelectedCallback, index = index})
         end
         self.carousel:Commit()
     end
@@ -180,35 +195,39 @@ function ZO_MarketAnnouncement_Shared:OnMarketAnnouncementViewCrownStoreKeybind(
 
     if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
         ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ANNOUNCEMENT, additionalData)
+    elseif not IsInGamepadPreferredMode() and openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_ESO_PLUS_CATEGORY then
+        ESO_PLUS_OFFERS_KEYBOARD:RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, openBehavior, additionalData)
     else
         SYSTEMS:GetObject(ZO_MARKET_NAME):RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, openBehavior, additionalData)
     end
 end
 
-function ZO_MarketAnnouncement_Shared:GetDailyRewardsTilesData(tileInfoList)
-    --- Don't add tile if Daily Rewards is locked
-    if GetNumRewardsInCurrentDailyLoginMonth() ~= 0 then
+function ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData(tileInfoList)
+    --- Add tile if Daily Rewards is unlocked
+    if not ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() then
          local dailyRewardIndex = ZO_DAILYLOGINREWARDS_MANAGER:GetDailyLoginRewardIndex()
 
         local dailyRewardTileInfo = 
         {
             type = ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
-            layoutParams = { dailyRewardIndex }
+            layoutParams = { dailyRewardIndex },
+            visible = true,
         }
         table.insert(tileInfoList, dailyRewardTileInfo)
     end
 end
 
 do
-    local TILE_TYPE_TO_GET_TILE_INFO_FUNCTION = 
+    ZO_TILE_TYPE_TO_GET_TILE_INFO_FUNCTION = 
     {
-        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData
+        [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData,
     }
     function ZO_MarketAnnouncement_Shared:LayoutActionTiles()
         -- Get list of available tile infos 
         local availableTileInfoList = {}
-        for _, tileInfoFunction in pairs(TILE_TYPE_TO_GET_TILE_INFO_FUNCTION) do
-            tileInfoFunction(self, availableTileInfoList)
+        for _, data in ipairs(ZO_ACTION_SORTED_TILE_TYPE) do
+            local tileInfoFunction = ZO_TILE_TYPE_TO_GET_TILE_INFO_FUNCTION[data]
+            tileInfoFunction(availableTileInfoList)
         end
 
         -- Clear Data from previous show
@@ -220,7 +239,14 @@ do
         -- Create display tiles from available tile infos (Limited at 3 as that's the most the display supports)
         local NUM_MAX_DISPLAY_TILES = 3
         for i, actionTileInfo in ipairs(availableTileInfoList) do
-             if self.actionTileObjectPoolMap[actionTileInfo.type] then
+            local visible
+            if type(actionTileInfo.visible) == "function" then
+                visible = actionTileInfo.visible()
+            else
+                visible = actionTileInfo.visible
+            end
+
+            if visible and self.actionTileObjectPoolMap[actionTileInfo.type] then
                 local actionTile = self.actionTileObjectPoolMap[actionTileInfo.type]:AcquireObject()
                 actionTile:Layout(unpack(actionTileInfo.layoutParams))
                 table.insert(self.actionTileList, actionTile)
@@ -229,7 +255,7 @@ do
 
                 -- Set Anchors
                 local ACTION_TILE_HORIZONTAL_PADDING = 34
-                if i > 1 then
+                if #self.actionTileList > 1 then
                     actionTileControl:SetAnchor(TOPLEFT, self.actionTileList[i-1].control, TOPRIGHT, ACTION_TILE_HORIZONTAL_PADDING)
                 else 
                     actionTileControl:SetAnchor(TOPLEFT)

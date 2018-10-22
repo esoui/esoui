@@ -170,25 +170,6 @@ function ZO_TradingHouse_NumericRangeSetter:Initialize(filterType, minEditContro
 end
 
 local function GetSafeNumericRange(valMin, valMax)
-    if(valMin == nil) then return nil, nil end
-
-    if(valMin == 0) then
-        if(valMax ~= nil and valMax > 0) then
-            valMin = 1
-        end
-    end
-
-    if(valMin > 0) then
-        if(valMax ~= nil and valMax > 0 and (valMin > valMax)) then
-            valMin, valMax = valMax, valMin
-        end
-    else
-        -- TODO: Make valMax the actual max...queries that specify a min without a max are treated as "exact match only"
-        -- Requires that max be passed safely.  Right now price and level are the only things using this.
-        -- Just return exact value for this one...
-        return valMin, nil
-    end
-
     return valMin, valMax
 end
 
@@ -609,11 +590,14 @@ function ZO_TradingHouseSearch:HasNextPage()
     return self.m_hasMorePages
 end
 
-local function AddData(dataTable, ...)
+local function AddData(dataTable, index, ...)
     -- NOTE: At this point each arg must not be a table!
     for i = 1, select("#", ...) do
-        dataTable[#dataTable + 1] = select(i, ...)
+        dataTable[index] = select(i, ...)
+        index = index + 1
     end
+
+    return index
 end
 
 local function SafeUnpack(data)
@@ -628,9 +612,10 @@ function ZO_TradingHouseSearch:SetFilter(filterType, ...)
     local filter = self.m_filters[filterType]
     if(filter) then
         local dataTable = filter.values
+        local index = 1
         for i = 1, select("#", ...) do
             local data = select(i, ...)
-            AddData(dataTable, SafeUnpack(data))
+            index = AddData(dataTable, index, SafeUnpack(data))
         end
     end
 end
@@ -701,7 +686,7 @@ end
 function ZO_TradingHouseSearch:InternalExecuteSearch()
     for filterType, filter in pairs(self.m_filters) do
         if(filter.isRange) then
-            SetTradingHouseFilterRange(filterType, unpack(filter.values))
+            SetTradingHouseFilterRange(filterType, filter.values[1], filter.values[2])
         else
             SetTradingHouseFilter(filterType, unpack(filter.values))
         end

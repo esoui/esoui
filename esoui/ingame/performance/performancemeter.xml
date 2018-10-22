@@ -34,7 +34,7 @@
                     <Dimensions x="65" y="40"/>
                     <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="CENTER"/>
                     <Controls>
-                        <Texture name="$(parent)Bars" textureFile="EsoUI/Art/Campaign/campaignBrowser_highPop.dds">
+                        <Texture name="$(parent)Bars" textureFile="EsoUI/Art/Campaign/campaignBrowser_hiPop.dds">
                             <Dimensions x="26" y="26"/>
                             <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="LEFT"/>
                         </Texture>

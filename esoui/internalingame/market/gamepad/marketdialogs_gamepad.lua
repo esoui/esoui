@@ -40,13 +40,45 @@ local function GetAvailableCurrencyHeaderData(marketCurrencyType)
                 header = GetString(SI_GAMEPAD_MARKET_FUNDS_LABEL),
             }
 end
-local function GetProductCostHeaderData(cost, marketCurrencyType)
+
+local function GetProductCostHeaderData(cost, marketCurrencyType, hasEsoPlusCost)
+
     return  {
                 value = function(control)
-                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS)
+                    local displayOptions
+                    if hasEsoPlusCost then
+                        displayOptions =
+                        {
+                            iconInheritColor = true,
+                            color = ZO_DEFAULT_TEXT,
+                            strikethroughCurrencyAmount = true,
+                        }
+                    end
+                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
                     return true
                 end,
-                header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_COST_LABEL),
+                header = function(control)
+                    if hasEsoPlusCost then
+                        return GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_NORMAL_COST_LABEL)
+                    else
+                        return GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_COST_LABEL)
+                    end
+                end,
+            }
+end
+
+local function GetProductEsoPlusCostHeaderData(cost, marketCurrencyType)
+    return  {
+                value = function(control)
+                    local displayOptions =
+                    {
+                        iconInheritColor = true,
+                        color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
+                    }
+                    ZO_CurrencyControl_SetSimpleCurrency(control, ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType), cost, ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, CURRENCY_IGNORE_HAS_ENOUGH, displayOptions)
+                    return true
+                end,
+                header = GetString(SI_GAMEPAD_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL),
             }
 end
 
@@ -80,7 +112,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         EndPurchase(dialog, IS_NO_CHOICE)
     end
 
-    local defaultMarketBackButton = 
+    local defaultMarketBackButton =
     {
         text = SI_DIALOG_EXIT,
         callback = EndPurchase,
@@ -188,12 +220,42 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             },
         },
 
-        finishedCallback = function() 
+        finishedCallback = function()
                                 if not self.doMoveToNextFlowPosition then
                                     OnMarketEndPurchase()
                                 end
-                                self:MoveToNextFlowPosition() 
+                                self:MoveToNextFlowPosition()
                            end
+    }
+
+    ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+        },
+        mainText =
+        {
+            text = SI_MARKET_PURCHASE_ERROR_TEXT_FORMATTER
+        },
+        buttons =
+        {
+            {
+                text = SI_MARKET_JOIN_ESO_PLUS_CONFIRM_BUTTON_TEXT,
+                callback = function()
+                    ZO_GamepadMarket_ShowBuyPlusDialog(EndPurchase)
+                end,
+            },
+            defaultMarketBackButton,
+        },
+        noChoiceCallback = EndPurchaseNoChoice,
+        finishedCallback =  function()
+                                OnMarketEndPurchase()
+                            end,
     }
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
@@ -444,7 +506,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     end
                 end,
                 callback =  function(dialog)
-                                OnMarketEndPurchase(self.marketProductId)
+                                OnMarketEndPurchase(self.marketProductData:GetId())
                                 ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
                                 self:SetFlowPosition(FLOW_PURCHASING)
                             end,
@@ -503,7 +565,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         mainText =
         {
             text =  function(dialog)
-                        local endTimeString = GetMarketProductEndTimeString(self.marketProductId)
+                        local endTimeString = self.marketProductData:GetEndTimeString()
                         local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, CURRENCY_ICON_SIZE)
                         return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
                     end,
@@ -524,7 +586,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 keybind = "DIALOG_SECONDARY",
                 text = SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT,
                 callback =  function(dialog)
-                                OnMarketEndPurchase(self.marketProductId)
+                                OnMarketEndPurchase(self.marketProductData:GetId())
                                 self.doMoveToNextFlowPosition = true
                             end,
             },
@@ -558,6 +620,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
         },
+        canQueue = true,
         title =
         {
             text = SI_GAMEPAD_MARKET_BUY_PLUS_TITLE
@@ -566,7 +629,8 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text = buyPlusMainText
         },
-        buttons = buyPlusButtons
+        buttons = buyPlusButtons,
+        noChoiceCallback = EndPurchaseNoChoice,
     })
 
     local LOADING_DELAY_MS = 500 -- delay is in milliseconds
@@ -583,7 +647,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             end
 
             if purchaseSucceeded then
-                self.useProductInfo = ZO_Market_Shared.GetUseProductInfo(self.marketProductId)
+                self.useProductInfo = ZO_Market_Shared.GetUseProductInfo(self.marketProductData)
             end
         end
 
@@ -609,9 +673,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         dialog:setupFunc()
         EVENT_MANAGER:RegisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) OnMarketPurchaseResult(dialog, ...) end)
         if not self.isGift then
-            BuyMarketProduct(self.marketProductId, self.presentationIndex)
+            self.marketProductData:RequestPurchase()
         else
-            GiftMarketProduct(self.marketProductId, self.presentationIndex, self.giftMessage, self.recipientDisplayName)
+            self.marketProductData:RequestPurchaseAsGift(self.giftMessage, self.recipientDisplayName)
         end
     end
 
@@ -653,9 +717,10 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             end
 
             if self.showRemainingBalance then
+                local currencyType = self.marketProductData:GetMarketProductPricingByPresentation()
                 dialog.data =
                 {
-                    data1 = GetAvailableCurrencyHeaderData(self.productCostCurrencyType),
+                    data1 = GetAvailableCurrencyHeaderData(currencyType),
                 }
             end
 
@@ -689,18 +754,29 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     else
                         return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, self.itemName, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     end
-                elseif self.useProductInfo then
-                    return zo_strformat(self.useProductInfo.transactionCompleteText, self.itemName, self.stackCount)
                 else
-                    if self.stackCount > 1 then
-                        return zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, self.stackCount)
+                    local mainText
+                    if self.useProductInfo then
+                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, self.itemName, self.stackCount)
                     else
-                        if not self.isGift and GetMarketProductNumCollectibles(self.marketProductId) > 0 then
-                            return zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
+                        if self.stackCount > 1 then
+                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, self.stackCount)
                         else
-                            return zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, self.itemName)
+                            if not self.isGift and self.marketProductData:GetNumAttachedCollectibles() > 0 then
+                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
+                            else
+                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, self.itemName)
+                            end
                         end
                     end
+
+                    -- append ESO Plus savings, if any
+                    local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(self.marketProductData)
+                    if esoPlusSavingsString then
+                        mainText = string.format("%s\n\n%s", mainText, esoPlusSavingsString)
+                    end
+
+                    return mainText
                 end
             end
         },
@@ -739,12 +815,12 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                     end
                 end,
                 callback = function()
-                    local marketProductId = self.marketProductId
+                    local marketProductData = self.marketProductData -- cache off the productData, because reset state will clear it
                     -- since we are trying to logout/go to another scene we don't want to trigger any of the scene changes
                     -- or try to show tutorials, however we want to clean up after ourselves
                     -- in case we don't actually logout
                     self:ResetState()
-                    ZO_Market_Shared.GoToUseProductLocation(marketProductId)
+                    ZO_Market_Shared.GoToUseProductLocation(marketProductData)
                 end,
             },
         },
@@ -753,10 +829,12 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_FAILED],
     {
         setup = function(dialog)
+            local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
             local displayData =
             {
-                data1 = GetAvailableCurrencyHeaderData(self.productCostCurrencyType),
-                data2 = GetProductCostHeaderData(self.productCost, self.productCostCurrencyType),
+                data1 = data1,
+                data2 = data2,
+                data3 = data3,
                 purchaseResult = dialog.data.purchaseResult,
             }
 
@@ -801,26 +879,49 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     })
 end
 
-function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationDialogSetup(dialog)
-    local isBundle = GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
-    self.stackCount = 0
+function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData()
+    local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = self.marketProductData:GetMarketProductPricingByPresentation()
+    local hasNormalCost = cost ~= nil
 
-    if not isBundle then
-        self.stackCount = GetMarketProductStackCount(self.marketProductId)
+    local hasEsoPlusCost
+    if self.isGift then
+        hasEsoPlusCost = false -- gifts aren't eligible for ESO Plus pricing
+    else
+        hasEsoPlusCost = esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
     end
 
-    local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(self.marketProductId, self.presentationIndex)
+    local data1 = GetAvailableCurrencyHeaderData(currencyType)
 
-    self.productCostCurrencyType = currencyType
-    self.productCost = costAfterDiscount
+    local data2
+    local data3
+    if hasNormalCost then
+        data2 = GetProductCostHeaderData(costAfterDiscount, currencyType, hasEsoPlusCost)
+        if hasEsoPlusCost then
+            data3 = GetProductEsoPlusCostHeaderData(esoPlusCost, currencyType)
+        end
+    elseif hasEsoPlusCost then
+        data2 = GetProductEsoPlusCostHeaderData(esoPlusCost, currencyType)
+    end
+
+    return data1, data2, data3
+end
+
+function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationDialogSetup(dialog)
+    self.stackCount = 0
+
+    if not self.marketProductData:IsBundle() then
+        self.stackCount = self.marketProductData:GetStackCount()
+    end
 
     self:BuildMarketPurchaseConfirmationDialogEntries(dialog)
 
-    dialog.data = { }
+    local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+
     local displayData =
     {
-        data1 = GetAvailableCurrencyHeaderData(currencyType),
-        data2 = GetProductCostHeaderData(costAfterDiscount, currencyType),
+        data1 = data1,
+        data2 = data2,
+        data3 = data3,
     }
     local DONT_LIMIT_NUM_ENTRIES = nil
     dialog.setupFunc(dialog, DONT_LIMIT_NUM_ENTRIES, displayData)
@@ -840,21 +941,31 @@ do
                 local function SetAsGift(isGift)
                     if isGift ~= self.isGift then
                         self.isGift = isGift
-                        self:BuildMarketPurchaseConfirmationDialogEntries(chooseAsGiftDropdownEntryData.dialog)
-                        ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(chooseAsGiftDropdownEntryData.dialog)
+                        local dialog = chooseAsGiftDropdownEntryData.dialog
+                        self:BuildMarketPurchaseConfirmationDialogEntries(dialog)
+                        ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog)
+
+                        local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+                        local headerData =
+                        {
+                            data1 = data1,
+                            data2 = data2,
+                            data3 = data3,
+                        }
+                        ZO_GenericGamepadDialog_RefreshHeaderData(dialog, headerData)
                     end
                 end
 
                 local forMeEntry = dropdown:CreateItemEntry(GetString(SI_MARKET_CONFIRM_PURCHASE_FOR_ME_LABEL), function() SetAsGift(false) end)
-                forMeEntry.expectedResult = CouldPurchaseMarketProduct(self.marketProductId, self.presentationIndex)
+                forMeEntry.expectedResult = self.marketProductData:CouldPurchase()
                 forMeEntry.enabled = forMeEntry.expectedResult == MARKET_PURCHASE_RESULT_SUCCESS
                 local purchaseWarningStrings = {}
-                ZO_MARKET_SINGLETON:AddMarketProductPurchaseWarningStringsToTable(self.marketProductId, self.presentationIndex, purchaseWarningStrings)
+                ZO_MARKET_MANAGER:AddMarketProductPurchaseWarningStringsToTable(self.marketProductData, purchaseWarningStrings)
                 forMeEntry.warningStrings = purchaseWarningStrings
                 dropdown:AddItem(forMeEntry)
 
                 local asGiftEntry = dropdown:CreateItemEntry(GetString(SI_MARKET_CONFIRM_PURCHASE_AS_GIFT_LABEL), function() SetAsGift(true) end)
-                asGiftEntry.expectedResult = CouldGiftMarketProduct(self.marketProductId, self.presentationIndex)
+                asGiftEntry.expectedResult = self.marketProductData:CouldGift()
                 asGiftEntry.enabled = asGiftEntry.expectedResult == MARKET_PURCHASE_RESULT_SUCCESS
                 dropdown:AddItem(asGiftEntry)
 
@@ -1003,50 +1114,41 @@ function ZO_GamepadMarketPurchaseManager:BuildMarketPurchaseConfirmationDialogEn
 end
 
 function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationFreeTrialDialogSetup(dialog)
-    local isBundle = GetMarketProductType(self.marketProductId) == MARKET_PRODUCT_TYPE_BUNDLE
     self.stackCount = 0
 
-    if not isBundle then
-        self.stackCount = GetMarketProductStackCount(self.marketProductId, self.presentationIndex)
+    if not self.marketProductData:IsBundle() then
+        self.stackCount = self.marketProductData:GetStackCount()
     end
-
-    local currencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(self.marketProductId)
-
-    self.productCostCurrencyType = currencyType
-    self.productCost = costAfterDiscount
 
     dialog.setupFunc(dialog)
 end
 
 -- onPurchaseSuccessCallback is only called on a successful transfer, onPurchaseEndCallback is called on transaction success, failure, and decline
 -- onPurchaseEndCallback passes a bool value for whether the confirmation scene was reached (true) or not (false)
-function ZO_GamepadMarketPurchaseManager:BeginPurchaseBase(marketProductId, presentationIndex, isGift, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+function ZO_GamepadMarketPurchaseManager:BeginPurchaseBase(marketProductData, isGift, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
     self:ResetState() -- make sure nothing is carried over from the last purchase attempt
 
-    self.marketProductId = marketProductId
-    self.presentationIndex = presentationIndex
+    self.marketProductData = marketProductData
     self.isGift = isGift
     self.purchaseFromIngame = isPurchaseFromIngame
     self.onPurchaseSuccessCallback = onPurchaseSuccessCallback
     self.onPurchaseEndCallback = onPurchaseEndCallback
 
-    local color = GetItemQualityColor(GetMarketProductQuality(self.marketProductId))
-    local colorizedName = color:Colorize(GetMarketProductDisplayName(self.marketProductId))
-    self.itemName = colorizedName
+    self.itemName = marketProductData:GetColorizedDisplayName()
 
     local selectionSound = isGift and SOUNDS.MARKET_GIFT_SELECTED or SOUNDS.MARKET_PURCHASE_SELECTED
     PlaySound(selectionSound)
-    OnMarketStartPurchase(marketProductId)
+    OnMarketStartPurchase(marketProductData:GetId())
 end
 
 do
     local AS_PURCHASE = false
     local function GetPurchaseErrorInfo(...)
-        return ZO_MARKET_SINGLETON:GetMarketProductPurchaseErrorInfo(...)
+        return ZO_MARKET_MANAGER:GetMarketProductPurchaseErrorInfo(...)
     end
 
-    function ZO_GamepadMarketPurchaseManager:BeginPurchase(marketProductId, presentationIndex, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        self:BeginPurchaseBase(marketProductId, presentationIndex, AS_PURCHASE, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+    function ZO_GamepadMarketPurchaseManager:BeginPurchase(marketProductData, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+        self:BeginPurchaseBase(marketProductData, AS_PURCHASE, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
         self:StartPurchaseFlow(GetPurchaseErrorInfo)
     end
 end
@@ -1054,11 +1156,11 @@ end
 do
     local AS_GIFT = true
     local function GetGiftErrorInfo(...)
-        return ZO_MARKET_SINGLETON:GetMarketProductGiftErrorInfo(...)
+        return ZO_MARKET_MANAGER:GetMarketProductGiftErrorInfo(...)
     end
 
-    function ZO_GamepadMarketPurchaseManager:BeginGiftPurchase(marketProductId, presentationIndex, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
-        self:BeginPurchaseBase(marketProductId, presentationIndex, AS_GIFT, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+    function ZO_GamepadMarketPurchaseManager:BeginGiftPurchase(marketProductData, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+        self:BeginPurchaseBase(marketProductData, AS_GIFT, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
         self:StartPurchaseFlow(GetGiftErrorInfo)
     end
 end
@@ -1066,9 +1168,11 @@ end
 do
     local NO_DIALOG_DATA = nil
     function ZO_GamepadMarketPurchaseManager:StartPurchaseFlow(errorInfoFunction)
-        local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(self.marketProductId, self.presentationIndex)
+        local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(self.marketProductData)
 
-        if expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
+        if expectedPurchaseResult == MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS then
+            self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DATA, dialogParams)
+        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
             self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", ZO_BUY_CROWNS_URL_TYPE, dialogParams)
         elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_GRACE_PERIOD_ACTIVE then
             self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD", {}, dialogParams)
@@ -1086,8 +1190,9 @@ do
     end
 end
 
-function ZO_GamepadMarketPurchaseManager:BeginFreeTrialPurchase(marketProductId, presentationIndex, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
-    self:BeginPurchaseBase(marketProductId, presentationIndex, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+function ZO_GamepadMarketPurchaseManager:BeginFreeTrialPurchase(marketProductData, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
+    local AS_PURCHASE = false
+    self:BeginPurchaseBase(marketProductData, AS_PURCHASE, isPurchaseFromIngame, onPurchaseSuccessCallback, onPurchaseEndCallback)
 
     self.showRemainingBalance = false
     self:SetFlowPosition(FLOW_CONFIRMATION_ESO_PLUS)
@@ -1095,7 +1200,7 @@ end
 
 function ZO_GamepadMarketPurchaseManager:EndPurchase(isNoChoice)
     local reachedConfirmationScene = self.flowPosition >= FLOW_CONFIRMATION
-    local consumablePurchaseSuccessful = self.flowPosition == FLOW_SUCCESS and DoesMarketProductContainConsumables(self.marketProductId)
+    local consumablePurchaseSuccessful = self.flowPosition == FLOW_SUCCESS and self.marketProductData:ContainsConsumables()
     if self.onPurchaseEndCallback then
         self.onPurchaseEndCallback(reachedConfirmationScene, consumablePurchaseSuccessful, self.triggerTutorialOnPurchase)
     end
@@ -1114,8 +1219,7 @@ function ZO_GamepadMarketPurchaseManager:EndPurchaseFromErrorDialog()
 end
 
 function ZO_GamepadMarketPurchaseManager:ResetState()
-    self.marketProductId = nil
-    self.presentationIndex = nil
+    self.marketProductData = nil
     self.onPurchaseSuccessCallback = nil
     self.onPurchaseEndCallback = nil
     self.triggerTutorialOnPurchase = nil
@@ -1135,7 +1239,7 @@ function ZO_GamepadMarketPurchaseManager:SetFlowPosition(position, dialogData, d
     local dialogName = DIALOG_FLOW[position]
 
     if position == FLOW_UNLOCKED then
-        local name = GetMarketProductDisplayName(self.marketProductId)
+        local name = self.marketProductData:GetDisplayName()
         dialogParams = {titleParams = {name}, mainTextParams = {ZO_SELECTED_TEXT:Colorize(name)}}
     end
 
@@ -1189,10 +1293,15 @@ function ZO_GamepadMarketPurchaseManager:ShowBuyCrownsDialog(isFromIngame)
     self:ShowFlowDialog("GAMEPAD_MARKET_BUY_CROWNS", g_buyCrownsData, g_buyCrownsTextParams)
 end
 
-function ZO_GamepadMarket_ShowBuyPlusDialog()
+function ZO_GamepadMarket_ShowBuyPlusDialog(finishedCallback)
     local uiPlatform = GetUIPlatform()
     if uiPlatform == UI_PLATFORM_PC then
-        ZO_Dialogs_ShowGamepadDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
+        local dialogData =
+        {
+            urlType = APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION,
+            finishedCallback = finishedCallback,
+        }
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_OPEN_URL_BY_TYPE", dialogData, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
     else
         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_BUY_PLUS")
     end

@@ -1947,12 +1947,11 @@ local function RegisterForEvents()
     end
 
     local function OnGroupUpdate(eventCode)
-        -- RefreshGroups will get called in the CreateGroupsAfter function that is called whenever the unit frames are refreshed
-        if UnitFrames:GetIsDirty() then
-            RefreshUnitFrames()
-        else
-            RefreshGroups(eventCode)
-        end
+        --Pretty much anything can happen on a full group update so refresh everything
+        UnitFrames:SetGroupSize(GetGroupSize())
+        UnitFrames:DisableGroupAndRaidFrames()
+        CreateGroups()
+        UnitFrames:ClearDirty()
     end
 
     local function OnGroupMemberLeft(eventCode, characterName, reason, wasLocalPlayer, amLeader)
@@ -2019,6 +2018,22 @@ local function RegisterForEvents()
         RefreshGroups(eventCode)
     end
 
+    local function OnGuildNameAvailable()
+        --only reticle over can show a guild name in a caption
+        local unitFrame = UnitFrames:GetFrame("reticleover")
+        if unitFrame then
+            unitFrame:UpdateCaption()
+        end
+    end
+
+    local function OnGuildIdChanged()
+        --this is filtered to only fire on reticle over unit tag
+        local unitFrame = UnitFrames:GetFrame("reticleover")
+        if unitFrame then
+            unitFrame:UpdateCaption()
+        end
+    end
+
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_CHANGED, OnTargetChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_FRAME_UPDATE, OnUnitFrameUpdate)
@@ -2040,6 +2055,9 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_TITLE_UPDATE, OnTitleUpdated)
     ZO_UnitFrames:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
     ZO_UnitFrames:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GUILD_NAME_AVAILABLE, OnGuildNameAvailable)
+    ZO_UnitFrames:RegisterForEvent(EVENT_GUILD_ID_CHANGED, OnGuildIdChanged)
+    ZO_UnitFrames:AddFilterForEvent(EVENT_GUILD_ID_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
 
     CALLBACK_MANAGER:RegisterCallback("TargetOfTargetEnabledChanged", OnTargetOfTargetEnabledChanged)
 end

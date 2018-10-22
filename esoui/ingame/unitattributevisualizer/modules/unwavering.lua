@@ -120,9 +120,9 @@ function ZO_UnitVisualizer_UnwaveringModule:PlayAnimation(bar, info, instant)
         end
 
         info.animation = animation
-    end
 
-    ApplyPlatformStyleToUnwavering(info.control, self.layoutData.overlayContainerTemplate)
+        ApplyPlatformStyleToUnwavering(info.control, self.layoutData.overlayContainerTemplate)
+    end
 
     info.animation.instant = instant
     info.animation.owner = self:GetOwner()

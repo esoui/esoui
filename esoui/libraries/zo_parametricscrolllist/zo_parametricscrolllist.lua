@@ -1,7 +1,7 @@
 local DEFAULT_EXPECTED_ENTRY_HEIGHT = ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SELECTED_HEIGHT
 local DEFAULT_EXPECTED_HEADER_HEIGHT = 24
 
-ZO_PARAMETRIC_MOVEMENT_TYPES = 
+ZO_PARAMETRIC_MOVEMENT_TYPES =
 {
     MOVE_NEXT = 1,
     MOVE_PREVIOUS = 2,
@@ -81,7 +81,7 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
     self.movementController = ZO_MovementController:New(self.mode == PARAMETRIC_SCROLL_LIST_VERTICAL and MOVEMENT_CONTROLLER_DIRECTION_VERTICAL or MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
 
     self.dataTypes = {}
-	self.commitHistoryDictionary = {}
+    self.commitHistoryDictionary = {}
 
     self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
@@ -230,6 +230,16 @@ function ZO_ParametricScrollList:GetIndexForData(templateName, data)
             end
         end
     end
+end
+
+function ZO_ParametricScrollList:FindFirstIndexByEval(evalFunction)
+    for index, data in ipairs(self.dataList) do
+        if evalFunction(data) then
+            return index
+        end
+    end
+
+    return nil
 end
 
 function ZO_ParametricScrollList:AddEntryWithHeader(templateName, ...)
@@ -510,7 +520,7 @@ function ZO_ParametricScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisa
         if self.targetSelectedIndex and self.selectedIndex then
             local moveAmount = zo_abs(self.targetSelectedIndex - self.selectedIndex)
             if jumpType and moveAmount > 0 then
-                self:SetJumping(true)                
+                self:SetJumping(true)
                 self.onPlaySoundFunction(jumpType)
             end
         end
@@ -629,9 +639,9 @@ function ZO_ParametricScrollList:Clear()
 
     ReleaseAllControls(self)
 
-	if self.currentCommitHistoryKey then
-		self.commitHistoryDictionary[self.currentCommitHistoryKey] = { data = self.oldSelectedData, template = self.oldSelectedDataTemplate, selectedIndex = self.oldSelectedIndex }
-	end
+    if self.currentCommitHistoryKey then
+        self.commitHistoryDictionary[self.currentCommitHistoryKey] = { data = self.oldSelectedData, template = self.oldSelectedDataTemplate, selectedIndex = self.oldSelectedIndex }
+    end
 
     if self.onClearedFunction then
         self.onClearedFunction(self)
@@ -655,7 +665,7 @@ local function FindMatchingIndex(oldSelectedData, newDataList, equalityFunction,
 end
 
 function ZO_ParametricScrollList:SetKeyForNextCommit(key)
-	self.nextCommitHistoryKey = key
+    self.nextCommitHistoryKey = key
 end
 
 function ZO_ParametricScrollList:CommitWithoutReselect()
@@ -677,45 +687,45 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
             table.sort(self.dataList, self.sortFunction)
         end
 
-		local nextSelectedIndex
-		if self.nextCommitHistoryKey then
-			local nextCommitHistory = self.commitHistoryDictionary[self.nextCommitHistoryKey]
-			if nextCommitHistory then
-				nextSelectedIndex = nextCommitHistory.selectedIndex
-			end
-		else
-			nextSelectedIndex = self.oldSelectedIndex
-		end
+        local nextSelectedIndex
+        if self.nextCommitHistoryKey then
+            local nextCommitHistory = self.commitHistoryDictionary[self.nextCommitHistoryKey]
+            if nextCommitHistory then
+                nextSelectedIndex = nextCommitHistory.selectedIndex
+            end
+        else
+            nextSelectedIndex = self.oldSelectedIndex
+        end
         
-		local matchingIndex = self.targetSelectedIndex or nextSelectedIndex or self.defaultSelectedIndex
+        local matchingIndex = self.targetSelectedIndex or nextSelectedIndex or self.defaultSelectedIndex
         if dontReselect then
             matchingIndex = self.defaultSelectedIndex
         else
             local oldSelectedData, oldSelectedDataTemplate
 
-			if self.nextCommitHistoryKey and self.nextCommitHistoryKey ~= self.currentCommitHistoryKey then
-				local nextCommitHistory = self.commitHistoryDictionary[self.nextCommitHistoryKey]
-				if nextCommitHistory then
-					oldSelectedData, oldSelectedDataTemplate = nextCommitHistory.data, nextCommitHistory.template
-				end
-			else
-				oldSelectedData, oldSelectedDataTemplate = self.oldSelectedData, self.oldSelectedDataTemplate
-			end
+            if self.nextCommitHistoryKey and self.nextCommitHistoryKey ~= self.currentCommitHistoryKey then
+                local nextCommitHistory = self.commitHistoryDictionary[self.nextCommitHistoryKey]
+                if nextCommitHistory then
+                    oldSelectedData, oldSelectedDataTemplate = nextCommitHistory.data, nextCommitHistory.template
+                end
+            else
+                oldSelectedData, oldSelectedDataTemplate = self.oldSelectedData, self.oldSelectedDataTemplate
+            end
 
-			if oldSelectedDataTemplate then
-				local equalityFunction = self.dataTypes[oldSelectedDataTemplate].equalityFunction
-				matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, equalityFunction, matchingIndex)
-            
-				if (matchingIndex > dataListSize) then
-					matchingIndex = dataListSize
-				end
-			end
+            if oldSelectedDataTemplate then
+                local equalityFunction = self.dataTypes[oldSelectedDataTemplate].equalityFunction
+                matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, equalityFunction, matchingIndex)
+
+                if matchingIndex > dataListSize then
+                    matchingIndex = dataListSize
+                end
+            end
         end
 
         while (matchingIndex <= dataListSize) and (self:CanSelect(matchingIndex) == false) do
             matchingIndex = matchingIndex + 1
         end
-        if(matchingIndex > dataListSize) then
+        if matchingIndex > dataListSize then
             matchingIndex = dataListSize
         end
 
@@ -733,7 +743,7 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
         --  such, we need to check for that condition, and move to the next item if we hit it.
         if not CanSelectData(self.selectedData) then
             -- NOTE: MoveNext() will skip over additional unselectable items internally.
-            if(matchingIndex == dataListSize) then
+            if matchingIndex == dataListSize then
                 self:MovePrevious()
             else
                 self:MoveNext()
@@ -758,7 +768,7 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
         self.nextArrow:SetHidden(hideArrows)
     end
 
-	self.currentCommitHistoryKey, self.nextCommitHistoryKey = self.nextCommitHistoryKey, nil
+    self.currentCommitHistoryKey, self.nextCommitHistoryKey = self.nextCommitHistoryKey, nil
 
     if hasItems then
         if self.onCommitWithItemsFunction then
@@ -802,7 +812,7 @@ function ZO_ParametricScrollList:SetPlaySoundFunction(fn)
 end
 
 function ZO_ParametricScrollList:SetMouseEnabled(mouseEnabled)
-	self.control:SetMouseEnabled(mouseEnabled)
+    self.control:SetMouseEnabled(mouseEnabled)
 end
 
 --[[ Private API ]]--
@@ -898,7 +908,7 @@ end
 function ZO_ParametricScrollList:SetAnchorForEntryControl(control, anchor1, anchor2, offsetX, offsetY) 
     local anchorTo = self.control
 
-    if(self.alignToScreenCenter) then
+    if self.alignToScreenCenter then
         anchorTo = self.alignToScreenCenterAnchor
     end
 
@@ -925,7 +935,7 @@ function ZO_ParametricScrollList:GetDesiredEntryAnchors()
 end
 
 function ZO_ParametricScrollList:GetEntryFixedCenterOffset()
-    if(self.alignToScreenCenter) then
+    if self.alignToScreenCenter then
         return self.fixedCenterOffset - self.alignToScreenCenterExpectedEntryHalfHeight
     end
     return self.fixedCenterOffset
@@ -982,7 +992,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
     local centerOffsetX, centerOffsetY = TransformAnchorOffsetsForMode(self.mode, centerOffset * self.centerDampingFactor + fixedCenterOffset + centerSelectedOffset * (1 - baseOffset), 0)
     self:SetAnchorForEntryControl(centerControl, entryAnchor1, entryAnchor2, centerOffsetX, centerOffsetY)
 
-    if(not self.hideUnselectedControls) then
+    if not self.hideUnselectedControls then
         -- Layout items before the center
         do
             local prevControlOffsets = centerOffset - (self.anchorOppositeSide and centerControlDimension or 0) + preCenterPadding + centerSelectedOffset * (1 - baseOffset)
@@ -1036,7 +1046,7 @@ function ZO_ParametricScrollList:UpdateAnchors(continousTargetOffset, initialUpd
                 prevControlOffsets = prevControlOffsets + parametricOffset + prePadding + additionalBottomParametricOffset + (self.anchorOppositeSide and controlDimension or 0)
 
                 self:SetAnchorForEntryControl(control, entryAnchor1, entryAnchor2, TransformAnchorOffsetsForMode(self.mode, prevControlOffsets + fixedCenterOffset, 0))
-                
+
                 prevControlOffsets = prevControlOffsets + (self.anchorOppositeSide and 0 or controlDimension) + postPadding
 
                 if GetEndOfControl(self.mode, control) >= endOfScrollContainer then
@@ -1086,7 +1096,7 @@ local function CalculateStandardOffset(distanceFromCenter, continuousParametricO
 
 
     local hasAdditionalPadding = (endAdditionalPadding ~= 0 or startAdditionalPadding ~= 0) and distanceFromCenter >= -1 and distanceFromCenter <= 1
-    
+
     -- If easing function wasn't specified for additional padding, use the default
     if not additionalPaddingEasingFunc then
         additionalPaddingEasingFunc = ZO_EaseInQuartic
@@ -1177,7 +1187,7 @@ end
 function ZO_ParametricScrollList:GetPaddingForDataIndex(dataIndex, distanceFromCenter, continousParametricOffset)
     local prePadding = self.prePadding[dataIndex]
     local postPadding = self.postPadding[dataIndex]
-    if (not postPadding) then
+    if not postPadding then
         local isHeader, isNextHeader = self:GetHasHeaderForDataIndex(dataIndex)
         postPadding = postPadding or (isNextHeader and self.headerDefaultPadding) or 0
     end
@@ -1208,14 +1218,14 @@ end
 
 
 local function HasEditControl(control)
-    if(control:GetType() == CT_EDITBOX) then
+    if control:GetType() == CT_EDITBOX then
         return true
     else
-        local numChildren = control:GetNumChildren()    
+        local numChildren = control:GetNumChildren()
         if numChildren > 0 then
             for i = 1, numChildren do
                 local child = control:GetChild(i)
-                if(child and HasEditControl(child)) then
+                if child and HasEditControl(child) then
                     return true
                 end
             end
@@ -1242,7 +1252,7 @@ function ZO_ParametricScrollList:AcquireControlAtDataIndex(dataIndex)
     control.dataIndex = dataIndex
 
     --Check if one of the children of this control is an edit box the first time we create one of these
-    if(self.dataTypes[templateName].hasEditControl == nil) then
+    if self.dataTypes[templateName].hasEditControl == nil then
         self.dataTypes[templateName].hasEditControl = HasEditControl(control)
     end
 
@@ -1272,10 +1282,10 @@ function ZO_ParametricScrollList:AcquireAndSetupControl(dataIndex, selectedDataC
 end
 
 local function FindEditControl(control)
-    if(control:GetType() == CT_EDITBOX) then
+    if control:GetType() == CT_EDITBOX then
         return control
     else
-        local numChildren = control:GetNumChildren()    
+        local numChildren = control:GetNumChildren()
         if numChildren > 0 then
             for i = 1, numChildren do
                 local child = control:GetChild(i)
@@ -1327,8 +1337,8 @@ function ZO_ParametricScrollList:SetValidateGradient(validate)
             self.validateGradient = validate
             if validate then
                 self.scrollControl:SetHandler("OnRectChanged", function(scrollControl, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
-                    --if the edges of the scroll area changed we need to fix up the gradients                
-                    if (not zo_floatsAreEqual(newTop, oldTop) or not zo_floatsAreEqual(newBottom, oldBottom)) then
+                    --if the edges of the scroll area changed we need to fix up the gradients
+                    if not zo_floatsAreEqual(newTop, oldTop) or not zo_floatsAreEqual(newBottom, oldBottom) then
                         self.validGradientDirty = true
                         self:EnsureValidGradient()
                     end

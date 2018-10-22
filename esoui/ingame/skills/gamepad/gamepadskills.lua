@@ -216,6 +216,16 @@ function ZO_GamepadSkills.OnConfirmHideScene(scene, nextSceneName, bypassHideSce
     end
 end
 
+function ZO_GamepadSkills:OnPlayerDeactivated()
+    --If we are deactivated we might be jumping somewhere else. We also might be in the respec interaction which will not be valid when we get where we are going. So just clear out the respec here.
+    if GAMEPAD_SKILLS_SCENE_GROUP:IsShowing() and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+        local DEFAULT_PUSH = nil
+        local DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK = nil
+        local DEFAULT_NUM_SCENES_NEXT_SCENE_POPS = nil
+        SCENE_MANAGER:Show(SCENE_MANAGER:GetBaseScene():GetName(), DEFAULT_PUSH, DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK, DEFAULT_NUM_SCENES_NEXT_SCENE_POPS, ZO_BHSCR_SKILLS_PLAYER_DEACTIVATED)
+    end
+end
+
 function ZO_GamepadSkills:PerformUpdate()
     -- Include update functionality here if the screen uses self.dirty to track needing to update
     self.dirty = false
@@ -451,6 +461,10 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
 end
 
 function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
+    local function EnableWhileNotInCombat()
+        return not IsUnitInCombat("player"), GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT)
+    end
+
     table.insert(self.lineFilterKeybindStripDescriptor,
     {
         name = function()
@@ -479,6 +493,8 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
                 end
             end
         end,
+
+        enabled = EnableWhileNotInCombat,
 
         callback = function()
             --This is confirm when respecing and assign otherwise
@@ -655,6 +671,8 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
                 return true
             end
         end,
+
+        enabled = EnableWhileNotInCombat,
 
         callback = function()
             if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
@@ -1156,6 +1174,7 @@ function ZO_GamepadSkills:InitializeEvents()
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("OnSkillsCleared", OnSkillsCleared)
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("SkillPointsChanged", OnSkillPointsChanged)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", OnSkillPointAllocationModeChanged)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", FullRebuild)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", OnCurrentHotbarUpdated)
 
     --Weapon Swap
@@ -1170,6 +1189,14 @@ function ZO_GamepadSkills:InitializeEvents()
 
     --Skill Advisor
     ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnRequestSelectSkillLine", function() self:SelectSkillLineFromAdvisor() end)
+
+    self.control:RegisterForEvent(EVENT_PLAYER_DEACTIVATED, function() self:OnPlayerDeactivated() end)
+
+    local function OnPlayerCombatStateChanged()
+        -- Refresh state of purchase/morph/assign keybinds
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
+    end
+    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnPlayerCombatStateChanged)
 end
 
 function ZO_GamepadSkills:TryClearSkillUpdatedStatus()

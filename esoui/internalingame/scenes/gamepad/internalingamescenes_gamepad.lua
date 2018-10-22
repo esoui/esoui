@@ -13,7 +13,7 @@ gamepadMarketScene:AddFragment(MARKET_CURRENCY_GAMEPAD_FRAGMENT)
 
 GAMEPAD_MARKET_PREVIEW_SCENE:AddFragmentGroup(ZO_GAMEPAD_INTERNAL_INGAME_FRAGMENT_GROUP)
 GAMEPAD_MARKET_PREVIEW_SCENE:AddFragment(GAMEPAD_MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
-GAMEPAD_MARKET_PREVIEW_SCENE:AddFragment(ITEM_PREVIEW_GAMEPAD:GetFragment())
+GAMEPAD_MARKET_PREVIEW_SCENE:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_GAMEPAD_FRAGMENT_GROUP)
 
 local gamepadMarketBundleContentsScene = SCENE_MANAGER:GetScene(ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE_NAME)
 gamepadMarketBundleContentsScene:AddFragmentGroup(ZO_GAMEPAD_INTERNAL_INGAME_FRAGMENT_GROUP)
@@ -40,15 +40,16 @@ gamepadMarketContentListScene:AddFragment(GAMEPAD_MARKET_LIST_FRAGMENT)
 gamepadMarketContentListScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 gamepadMarketContentListScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
 
-local marketSceneGroup = ZO_SceneGroup:New(
+GAMEPAD_MARKET_SCENE_GROUP = ZO_SceneGroup:New(
                                         ZO_GAMEPAD_MARKET_SCENE_NAME,
                                         ZO_GAMEPAD_MARKET_PREVIEW_SCENE_NAME,
                                         ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE_NAME,
                                         ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME,
-                                        ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME
+                                        ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME,
+                                        ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME
                                           )
 
-SCENE_MANAGER:AddSceneGroup("gamepad_market_scenegroup", marketSceneGroup)
+SCENE_MANAGER:AddSceneGroup("gamepad_market_scenegroup", GAMEPAD_MARKET_SCENE_GROUP)
 
 ZO_GAMEPAD_MARKET:SetupSceneGroupCallback()
 

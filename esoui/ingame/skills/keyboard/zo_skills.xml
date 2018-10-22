@@ -126,6 +126,14 @@
                     <OnClicked>
                         ZO_Skills_AbilityIncrease_OnClicked(self, shift)
                     </OnClicked>
+
+                    <OnMouseEnter>
+                        ZO_Skills_AbilityIncrease_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Skills_AbilityIncrease_OnMouseExit(self)
+                    </OnMouseExit>
                 </Button>
 
                 <Button name="$(parent)Decrease" hidden="true">

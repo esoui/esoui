@@ -91,6 +91,9 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
     end
 
     list:SetOnSelectedDataChangedCallback(OnSelectedMenuEntry)
+
+    GAMEPAD_GROUP_ROLES_BAR:SetupListAnchorsBelowGroupBar(list.control)
+
     list:SetDefaultSelectedIndex(2) --Don't select roles by default
 end
 
@@ -125,18 +128,20 @@ do
 
     function ActivityFinderRoot_Gamepad:RefreshTooltip(data)
         if self.scene:IsShowing() and not data.isRoleSelector then
-            local isLevelLocked, lowestLevelLimit, lowestPointsLimit = data.activityFinderObject:GetLevelLockInfo()
-            local lockedText
-            if isLevelLocked then
-                if lowestLevelLimit then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
-                elseif lowestPointsLimit then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestPointsLimit)
-                end
-            else
-                local numLocations = data.activityFinderObject:GetNumLocations()
-                if numLocations == 0 then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
+            local lockedText = nil
+            if data.activityFinderObject then
+                local isLevelLocked, lowestLevelLimit, lowestPointsLimit = data.activityFinderObject:GetLevelLockInfo()
+                if isLevelLocked then
+                    if lowestLevelLimit then
+                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
+                    elseif lowestPointsLimit then
+                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestPointsLimit)
+                    end
+                else
+                    local numLocations = data.activityFinderObject:GetNumLocations()
+                    if numLocations == 0 then
+                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
+                    end
                 end
             end
 

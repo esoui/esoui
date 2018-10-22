@@ -35,6 +35,7 @@ function ZO_GiftInventoryView_Shared:InitializeControls()
     self.giftContainer = control:GetNamedChild("GiftContainer")
     self.giftIconTexture = self.giftContainer:GetNamedChild("Icon")
     self.giftNameLabel = self.giftContainer:GetNamedChild("Name")
+    self.giftStackCountLabel = self.giftContainer:GetNamedChild("StackCount")
     self.noteContainer = control:GetNamedChild("NoteContainer")
     local noteScrollChild = self.noteContainer:GetNamedChild("ScrollChild")
     local noteScrollArea = self.noteContainer:GetNamedChild("Scroll")
@@ -327,6 +328,13 @@ function ZO_GiftInventoryView_Shared:SetupAndShowGift(gift)
     self.titleLabel:SetText(zo_strformat(titleStringFormatterId, gift:GetUserFacingPlayerName()))
     self.giftNameLabel:SetText(gift:GetFormattedName())
     self.giftIconTexture:SetTexture(gift:GetIcon())
+    local stackCount = gift:GetStackCount()
+    if stackCount > 1 then
+        self.giftStackCountLabel:SetHidden(false)
+        self.giftStackCountLabel:SetText(stackCount)
+    else
+        self.giftStackCountLabel:SetHidden(true)
+    end
     self.noteLabel:SetText(gift:GetNote())
 
     local noteHeight = self.noteLabel:GetHeight()

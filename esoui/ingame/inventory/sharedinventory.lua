@@ -20,6 +20,14 @@ function ZO_SharedInventoryManager:Initialize()
     end
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_ITEM_USED, OnInventoryItemUsed)
 
+    local function OnItemCombinationResult(_, itemCombinationResult)
+        if itemCombinationResult == ITEM_COMBINATION_RESULT_SUCCESS then
+            -- Combinations play an animation on success, hide UI so the player can bask in it
+            SCENE_MANAGER:SetInUIMode(false)
+        end
+    end 
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_ITEM_COMBINATION_RESULT, OnItemCombinationResult)
+
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, function() 
         self:RefreshInventory(BAG_BACKPACK) 
         self:RefreshInventory(BAG_WORN)
@@ -628,9 +636,13 @@ function ZO_SharedInventoryManager:CreateQuestData(iconFile, stackCount, questIn
             sellPrice       = 0,
             stackSellPrice  = 0,
             filterData      = { ITEMFILTERTYPE_QUEST },
-            questItemId        = questItemId,
+            questItemId     = questItemId,
             age             = 0, -- 0 for now, probably need to come up with a way to make these appear new when appropriate.  maybe diffing what was there before with what's being added?
         }
+
+        if CanQuickslotQuestItemById(questItemId) then
+            table.insert(questItem.filterData, ITEMFILTERTYPE_QUEST_QUICKSLOT)
+        end
 
         questItems[questItemId] = questItem
     end

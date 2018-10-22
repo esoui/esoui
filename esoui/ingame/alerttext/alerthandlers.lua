@@ -438,17 +438,22 @@ local AlertHandlers = {
                                     end,
 
     [EVENT_GUILD_BANK_OPEN_ERROR] = function(errorCode)
-        return ERROR, GetString("SI_GUILDBANKRESULT", errorCode), SOUNDS.GENERAL_ALERT_ERROR
+        local text = GetString("SI_GUILDBANKRESULT", errorCode)
+        if text ~= "" then
+            return ERROR, text, SOUNDS.GENERAL_ALERT_ERROR
+        end
     end,
 
     [EVENT_GUILD_BANK_TRANSFER_ERROR] = function(errorCode)
         local text = GetString("SI_GUILDBANKRESULT", errorCode)
-        if(errorCode == GUILD_BANK_GUILD_TOO_SMALL) then
-            local numMembers = GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_BANK_DEPOSIT)
-            text = zo_strformat(text, numMembers)
-        end
+        if text ~= "" then
+            if errorCode == GUILD_BANK_GUILD_TOO_SMALL then
+                local numMembers = GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_BANK_DEPOSIT)
+                text = zo_strformat(text, numMembers)
+            end
 
-        return ERROR, text, SOUNDS.GENERAL_ALERT_ERROR
+            return ERROR, text, SOUNDS.GENERAL_ALERT_ERROR
+        end
     end,
 
     [EVENT_GUILD_KIOSK_ERROR] = function(errorCode)
@@ -598,9 +603,7 @@ local AlertHandlers = {
     end,
 
     [EVENT_PLAYER_DEAD] = function()
-        local isAVADeath, isBattleGroundDeath = select(6, GetDeathInfo())
-        local isDuelingDeath = IsDuelingDeath()
-        if(not (isAVADeath or isBattleGroundDeath or isDuelingDeath)) then
+        if DidDeathCauseDurabilityDamage() then
             return ALERT, GetString(SI_DEATH_DURABILITY_ANNOUNCEMENT)
         end
     end,
@@ -927,6 +930,20 @@ local AlertHandlers = {
 
     [EVENT_SKILL_RESPEC_RESULT] = function(result)
         local message = GetString("SI_RESPECRESULT", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_HOUSING_EDITOR_COMMAND_RESULT] = function(result)
+        local message = GetString("SI_HOUSINGEDITORCOMMANDRESULT", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_ITEM_COMBINATION_RESULT] = function(result)
+        local message = GetString("SI_ITEMCOMBINATIONRESULT", result)
         if message and message ~= "" then
             return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
         end

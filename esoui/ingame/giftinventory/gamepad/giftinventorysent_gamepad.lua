@@ -62,6 +62,7 @@ function ZO_GiftInventorySent_Gamepad:CreateGiftEntryData(gift)
     local entryData = ZO_GamepadEntryData:New(formattedGiftName, icon)
     entryData:SetIconTintOnSelection(true)
     entryData:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
+    entryData:SetStackCount(gift:GetStackCount())
     entryData.gift = gift
 
     local header

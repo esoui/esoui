@@ -19,21 +19,16 @@ function ZO_MarketAnnouncementMarketProduct_Shared:New(...)
     return ZO_LargeSingleMarketProduct_Base.New(self, ...)
 end
 
-function ZO_MarketAnnouncementMarketProduct_Shared:InitializeControls(control)
-    ZO_LargeSingleMarketProduct_Base.InitializeControls(self, control)
-
-    self.type = self.control:GetNamedChild("Type")
-    self.description = self.control:GetNamedChild("ProductDescription")
-    local scrollChild = self.description:GetNamedChild("ScrollChild")
-    self.descriptionText = scrollChild:GetNamedChild("ProductDescriptionText")
+function ZO_MarketAnnouncementMarketProduct_Shared:Initialize(...)
+    ZO_LargeSingleMarketProduct_Base.Initialize(self, ...)
 end
 
 function ZO_MarketAnnouncementMarketProduct_Shared:Show(...)
     ZO_LargeSingleMarketProduct_Base.Show(self, ...)
 
     local descriptionText = ""
-    local description = self:GetMarketProductDescription()
-    local itemLink = GetMarketProductItemLink(self.marketProductId)
+    local description = self.productData:GetMarketProductDescription()
+    local itemLink = GetMarketProductItemLink(self:GetId())
     if itemLink ~= "" then
         local hasAbility, _, abilityDescription = GetItemLinkOnUseAbilityInfo(itemLink)
 
@@ -50,18 +45,7 @@ function ZO_MarketAnnouncementMarketProduct_Shared:Show(...)
         descriptionText = description
     end
 
-    self.descriptionText:SetText(zo_strformat(SI_MARKET_PRODUCT_DESCRIPTION_FORMATTER, descriptionText))
-end
-
-do
-    -- Allow text to retain it's original size
-    local TEXTURE_WIDTH_COORD = 1
-    local TEXTURE_HEIGHT_COORD = 1
-
-    function ZO_MarketAnnouncementMarketProduct_Shared:LayoutBackground(background)
-        self.background:SetTexture(background)
-        self.background:SetTextureCoords(0, TEXTURE_WIDTH_COORD, 0, TEXTURE_HEIGHT_COORD)
-    end
+    self.control.descriptionTextControl:SetText(zo_strformat(SI_MARKET_PRODUCT_DESCRIPTION_FORMATTER, descriptionText))
 end
 
 function ZO_MarketAnnouncementMarketProduct_Shared:SetOnInteractWithScrollCallback(onInteractWithScrollCallback)
@@ -79,16 +63,16 @@ function ZO_MarketAnnouncementMarketProduct_Shared:UpdateProductStyle()
 
     local isFocused = self.isFocused
     if isFocused then
-        self.descriptionText:SetColor(DESCRIPTION_TEXT_COLORS.SELECTED_TEXT_COLOR:UnpackRGB())
-        self.type:SetColor(DESCRIPTION_TEXT_COLORS.SELECTED_TEXT_COLOR:UnpackRGB())
+        self.control.descriptionTextControl:SetColor(DESCRIPTION_TEXT_COLORS.SELECTED_TEXT_COLOR:UnpackRGB())
+        self.control.typeLabel:SetColor(DESCRIPTION_TEXT_COLORS.SELECTED_TEXT_COLOR:UnpackRGB())
     else
-        self.descriptionText:SetColor(DESCRIPTION_TEXT_COLORS.UNSELECTED_TEXT_COLOR:UnpackRGB())
-        self.type:SetColor(DESCRIPTION_TEXT_COLORS.UNSELECTED_TEXT_COLOR:UnpackRGB())
+        self.control.descriptionTextControl:SetColor(DESCRIPTION_TEXT_COLORS.UNSELECTED_TEXT_COLOR:UnpackRGB())
+        self.control.typeLabel:SetColor(DESCRIPTION_TEXT_COLORS.UNSELECTED_TEXT_COLOR:UnpackRGB())
     end
 end
 
 function ZO_MarketAnnouncementMarketProduct_Shared:GetBackground()
-    return GetMarketProductAnnouncementBackground(self.marketProductId)
+    return GetMarketProductAnnouncementBackground(self:GetId())
 end
 
 -- Market Announcements only show tiles in an available state, never as purchased or a "fail" condition
@@ -104,57 +88,90 @@ function ZO_MarketAnnouncementMarketProduct_Shared:GetMarketProductListingsForHo
     return { GetActiveAnnouncementMarketProductListingsForHouseTemplate(houseTemplateId) }
 end
 
-function ZO_MarketAnnouncementMarketProduct_Shared:LayoutCostAndText(description, currencyType, cost, hasDiscount, costAfterDiscount, discountPercent, isNew)
-    self:SetIsFree(cost, costAfterDiscount)
-
-    self:SetupCalloutsDisplay(discountPercent, isNew)
+-- override of ZO_MarketProductBase:LayoutCostAndText
+function ZO_MarketAnnouncementMarketProduct_Shared:LayoutCostAndText()
+    self:SetupCalloutsDisplay()
 
     -- layout the price labels
-    self:SetupPricingDisplay(currencyType, cost, costAfterDiscount)
-
-    self:SetupPurchaseLabelDisplay()
+    self:SetupPricingDisplay()
 
     self:SetupTextCalloutAnchors()
 
     self:SetupBundleDisplay()
 
+    self:SetupEsoPlusDealLabelDisplay()
+
     local FOCUSED = true
-    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.title, FOCUSED, self.purchaseState)
-end
-
--- Hide pricing on houses in announcements until we get the info from the b/e to display pricing properly
-function ZO_MarketAnnouncementMarketProduct_Shared:SetupPricingDisplay(currencyType, cost, costAfterDiscount)
-    ZO_MarketProductBase.SetupPricingDisplay(self, currencyType, cost, costAfterDiscount)
-
-    self.cost:SetHidden(self:IsPromo())
-end
-
-function ZO_MarketAnnouncementMarketProduct_Shared:SetupPurchaseLabelDisplay()
-    ZO_MarketProductBase.SetupPurchaseLabelDisplay(self)
-
-   self.purchaseLabelControl:SetHidden(self:CanBePurchased() or self:IsPromo())
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.control.title, FOCUSED, self.purchaseState)
 end
 
 function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
-    self.previousCost:ClearAnchors()
-    self.cost:ClearAnchors()
-    self.purchaseLabelControl:ClearAnchors()
-    self.description:ClearAnchors()
+    local control = self.control
+    control.previousCost:ClearAnchors()
+    control.cost:ClearAnchors()
+    control.esoPlusCost:ClearAnchors()
+    control.descriptionControl:ClearAnchors()
 
-    local VERTICAL_SPACING = 5
-    if self.onSale and not self.isFree then
-        self.previousCost:SetAnchor(TOPLEFT, self.textCallout, BOTTOMLEFT)
-        self.cost:SetAnchor(LEFT, self.previousCost, RIGHT, 10)
-        self.description:SetAnchor(TOPLEFT, self.previousCost, BOTTOMLEFT)
-    elseif self.textCallout:IsControlHidden() then
-        if self.cost:IsControlHidden() then
-            self.description:SetAnchor(TOPLEFT, self.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING) 
+    local hasNormalCost = self:HasCost()
+    if hasNormalCost then
+        if self:IsOnSale() and not self:IsFree() then
+            control.previousCost:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
+            control.cost:SetAnchor(LEFT, control.previousCost, RIGHT, 10)
+            control.descriptionControl:SetAnchor(TOPLEFT, control.previousCost, BOTTOMLEFT)
+        elseif control.textCallout:IsControlHidden() then
+            local VERTICAL_SPACING = 5
+            if control.cost:IsControlHidden() then
+                control.descriptionControl:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING) 
+            else
+                control.cost:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING)
+                control.descriptionControl:SetAnchor(TOPLEFT, control.cost, BOTTOMLEFT)
+            end
         else
-            self.cost:SetAnchor(TOPLEFT, self.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING) 
-            self.description:SetAnchor(TOPLEFT, self.cost, BOTTOMLEFT)
+            control.cost:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
+            control.descriptionControl:SetAnchor(TOPLEFT, control.cost, BOTTOMLEFT)
         end
-    else
-        self.cost:SetAnchor(TOPLEFT, self.textCallout, BOTTOMLEFT)  
-        self.description:SetAnchor(TOPLEFT, self.cost, BOTTOMLEFT)
     end
+
+    local hasEsoPlusCost = self:HasEsoPlusCost()
+    if hasEsoPlusCost then
+        if hasNormalCost then
+            control.esoPlusCost:SetAnchor(BOTTOMLEFT, control.cost, BOTTOMRIGHT, 10)
+        else
+            if control.textCallout:IsControlHidden() then
+                control.esoPlusCost:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING)
+            else
+                control.esoPlusCost:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
+            end
+            control.descriptionControl:SetAnchor(TOPLEFT, control.esoPlusCost, BOTTOMLEFT)
+        end
+    end
+end
+
+-- override of ZO_MarketProductBase:AnchorEsoPlusDealLabel()
+function ZO_MarketAnnouncementMarketProduct_Shared:AnchorEsoPlusDealLabel()
+    local control = self.control
+    local esoPlusDealLabelControl = control.esoPlusDealLabelControl
+    esoPlusDealLabelControl:ClearAnchors()
+
+    -- anchor the left side to the right-most cost label
+    -- AnchorEsoPlusDealLabel is only called if HasEsoPlusCost is true
+    -- and the esoPlusCost is always the right-most label
+    esoPlusDealLabelControl:SetAnchor(BOTTOMLEFT, control.esoPlusCost, BOTTOMRIGHT, 10, 0)
+end
+
+function ZO_MarketAnnouncementMarketProduct_Shared:GetDescriptionControl()
+    return self.control.descriptionControl
+end
+
+function ZO_MarketAnnouncementMarketProduct_Shared:GetDescriptionTextControl()
+    return self.control.descriptionTextControl
+end
+
+function ZO_MarketAnnouncementMarketProduct_Shared_OnInitialized(control)
+    ZO_MarketProductBase_OnInitialized(control)
+
+    control.typeLabel = control:GetNamedChild("Type")
+    control.descriptionControl = control:GetNamedChild("ProductDescription")
+    local scrollChild = control.descriptionControl:GetNamedChild("ScrollChild")
+    control.descriptionTextControl = scrollChild:GetNamedChild("ProductDescriptionText")
 end

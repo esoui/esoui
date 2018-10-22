@@ -1,0 +1,54 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadMembershipInfoDialog_BenefitLine" resizeToFitDescendents="true" virtual="true">
+            <Dimensions x="830" />
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+                <Label name="$(parent)HeaderText" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="74" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+                <Label name="$(parent)LineText" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderText" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderText" relativePoint="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_MembershipInfoDialog_Gamepad" inherits="ZO_CustomCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+            <Dimensions x="930" y="680" />
+            <Anchor point="TOP" offsetY="150"/>
+
+            <OnInitialized>
+                ZO_EsoPlusMembershipInfoDialog_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer" >
+                    <Anchor point="TOPLEFT" offsetX="50" offsetY="-8" />
+                    <Anchor point="TOPRIGHT" offsetX="-50" offsetY="-8" />
+                </Control>
+
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer_Gamepad" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="12" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-78" offsetX="-50" />
+                    <Controls>
+                        <Texture name="$(parent)ScrollIndicator" override="true">
+                            <Anchor point="CENTER" relativeTo="$(grandparent)" relativePoint="RIGHT" offsetX="1"/>
+                        </Texture>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Dimensions x="830" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)BackKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" >
+                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-48" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

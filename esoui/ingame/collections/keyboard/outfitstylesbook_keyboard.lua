@@ -58,6 +58,26 @@ function ZO_OutfitStylesBook_Keyboard:InitializeKeybindStripDescriptors()
                 ZO_OUTFIT_STYLES_PANEL_KEYBOARD:TogglePreviewOutfitStyle(collectibleData)
             end,
         },
+
+        -- Change outfit name
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+            keybind = "UI_SHORTCUT_QUATERNARY",
+
+            name = GetString(SI_OUTFIT_CHANGE_NAME),
+
+            visible = function()
+                local currentSheet = ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:GetCurrentSheet()
+                return currentSheet:GetRestyleMode() == RESTYLE_MODE_OUTFIT
+            end,
+
+            callback = function()
+                local currentSheet = ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:GetCurrentSheet()
+                local outfitManipulator = currentSheet:GetCurrentOutfitManipulator()
+                ZO_Dialogs_ShowDialog("RENAME_OUFIT", { outfitIndex = outfitManipulator:GetOutfitIndex() }, { initialEditText = outfitManipulator:GetOutfitName() })
+            end,
+        },
     }
 end
 
@@ -77,6 +97,12 @@ end
 
 function ZO_OutfitStylesBook_Keyboard:InitializeModeData()
     ZO_RESTYLE_SHEET_WINDOW_KEYBOARD:PopulateEquipmentModeDropdown()
+end
+
+function ZO_OutfitStylesBook_Keyboard:OnHidden()
+    ZO_RestyleCommon_Keyboard.OnHidden(self)
+
+    ZO_OUTFIT_STYLES_PANEL_KEYBOARD:ClearAllCurrentSlotPreviews()
 end
 
 do

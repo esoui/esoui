@@ -197,12 +197,21 @@ function ZO_WorldMapKeepInfo_Shared:New(...)
     return object
 end
 
-function ZO_WorldMapKeepInfo_Shared:Initialize(control)
+function ZO_WorldMapKeepInfo_Shared:Initialize(control, fragmentClass)
     self.control = control
     self.externalFragments = {}
     self.keepNameLabel = control:GetNamedChild("KeepName")
 
     self:InitializeTabs()
+
+    self.worldMapKeepInfoFragment = fragmentClass:New(control)
+    self.worldMapKeepInfoFragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:OnShowing()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:OnHidden()
+        end
+    end)
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapCampaignChanged", function()
         if(self.keepUpgradeObject) then
@@ -243,11 +252,11 @@ function ZO_WorldMapKeepInfo_Shared:ToggleKeep(keepId)
 end
 
 function ZO_WorldMapKeepInfo_Shared:PreShowKeep()
-    -- stub
+    self:FireCallbacks("PreShowKeep")
 end
 
 function ZO_WorldMapKeepInfo_Shared:PostShowKeep()
-    -- stub
+    self:FireCallbacks("PostShowKeep")
 end
 
 function ZO_WorldMapKeepInfo_Shared:ShowKeep(keepId)
@@ -275,17 +284,26 @@ function ZO_WorldMapKeepInfo_Shared:ShowKeep(keepId)
         self:PostShowKeep()
 
         SCENE_MANAGER:AddFragment(self.worldMapKeepInfoFragment)
-        SCENE_MANAGER:AddFragment(self.worldMapKeepInfoBGFragment)
+        SCENE_MANAGER:AddFragment(self:GetBackgroundFragment())
         CALLBACK_MANAGER:FireCallbacks("OnWorldMapKeepChanged")
     end
 end
 
 function ZO_WorldMapKeepInfo_Shared:HideKeep()
-    if(self.keepUpgradeObject) then
+    if self.keepUpgradeObject then
+        SCENE_MANAGER:RemoveFragment(self:GetBackgroundFragment())
         SCENE_MANAGER:RemoveFragment(self.worldMapKeepInfoFragment)
-        SCENE_MANAGER:RemoveFragment(self.worldMapKeepInfoBGFragment)
+        self:FireCallbacks("WorldMapKeepInfoHidden")
     end
     ZO_WorldMap_InvalidateTooltip()
+end
+
+function ZO_WorldMapKeepInfo_Shared:GetFragment()
+    return self.worldMapKeepInfoFragment
+end
+
+function ZO_WorldMapKeepInfo_Shared:GetBackgroundFragment()
+    assert(false) -- Must be overriden
 end
 
 function ZO_WorldMapKeepInfo_Shared:CreateButtonData(normal, pressed, highlight)
@@ -394,3 +412,10 @@ function ZO_WorldMapKeepInfo_Shared:SetFragment(name, fragment)
     self.externalFragments[name] = fragment
 end
 
+function ZO_WorldMapKeepInfo_Shared:OnShowing()
+    -- To be overriden
+end
+
+function ZO_WorldMapKeepInfo_Shared:OnHidden()
+    self:FireCallbacks("WorldMapKeepInfoHidden")
+end

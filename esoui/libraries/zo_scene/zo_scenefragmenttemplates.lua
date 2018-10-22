@@ -418,43 +418,40 @@ end
 -- Hidable Scene Fragment
 ----------------------------
 
-ZO_HideableSceneFragment = ZO_SceneFragment:Subclass()
+ZO_HideableSceneFragmentMixin = {}
 
-function ZO_HideableSceneFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
-function ZO_HideableSceneFragment:Initialize()
-    ZO_SceneFragment.Initialize(self)
-    self.hiddenReasons = ZO_HiddenReasons:New()
-
-    self:SetConditional(function()
-        return not self.hiddenReasons:IsHidden()
-    end)
-end
-
-function ZO_HideableSceneFragment:SetHiddenForReason(reason, hidden, customShowDuration, customHideDuration)
+function ZO_HideableSceneFragmentMixin:SetHiddenForReason(reason, hidden, customShowDuration, customHideDuration)
     --Refresh here even if this reason didn't change the hidden state for the hiddenReasons object. If, for example, a reason came in
     --that wanted to hide over 0 ms and the fragment was currently hiding over 200ms, we want to Refresh so we can Hide at the faster rate.
     self.hiddenReasons:SetHiddenForReason(reason, hidden)
     self:Refresh(customShowDuration, customHideDuration)
 end
 
-function ZO_HideableSceneFragment:IsHiddenForReason(reason)
+function ZO_HideableSceneFragmentMixin:IsHiddenForReason(reason)
     return self.hiddenReasons:IsHiddenForReason(reason)
+end
+
+function ZO_MixinHideableSceneFragment(self)
+    zo_mixin(self, ZO_HideableSceneFragmentMixin)
+    self.hiddenReasons = ZO_HiddenReasons:New()
+    self:SetConditional(function()
+        return not self.hiddenReasons:IsHidden()
+    end)
 end
 
 --HUD Fade Scene Fragment
 
 DEFAULT_HUD_DURATION = 250
-ZO_HUDFadeSceneFragment = ZO_HideableSceneFragment:Subclass()
+ZO_HUDFadeSceneFragment = ZO_SceneFragment:Subclass()
 
 function ZO_HUDFadeSceneFragment:New(...)
     return ZO_SceneFragment.New(self, ...)
 end
 
 function ZO_HUDFadeSceneFragment:Initialize(control, showDuration, hideDuration)
-    ZO_HideableSceneFragment.Initialize(self)
+    ZO_SceneFragment.Initialize(self)
+
+    ZO_MixinHideableSceneFragment(self)
 
     showDuration = showDuration or DEFAULT_HUD_DURATION
     hideDuration = hideDuration or 0
@@ -650,14 +647,17 @@ end
 --Action Layer Fragment
 -------------------------
 
-ZO_ActionLayerFragment = ZO_HideableSceneFragment:Subclass()
+ZO_ActionLayerFragment = ZO_SceneFragment:Subclass()
 
 function ZO_ActionLayerFragment:New(...)
     return ZO_SceneFragment.New(self, ...)
 end
 
 function ZO_ActionLayerFragment:Initialize(actionLayerName)
-    ZO_HideableSceneFragment.Initialize(self)
+    ZO_SceneFragment.Initialize(self)
+
+    ZO_MixinHideableSceneFragment(self)
+
     self.actionLayerName = actionLayerName
 
     self:RegisterCallback("Refreshed", function(oldState, newState, asAResultOfSceneStateChange, refreshedForScene)

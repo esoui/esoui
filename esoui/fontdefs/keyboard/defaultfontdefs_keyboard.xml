@@ -78,9 +78,8 @@
 
     <Font name="ZoFontSubtitleText" font="$(MEDIUM_FONT)|$(KB_28)|soft-shadow-thick" />
 
-    <Font name="ZoMarketAnnouncementKeyboardDescriptionFont" font="$(MEDIUM_FONT)|$(KB_22)" />
     <Font name="ZoMarketAnnouncementCalloutFont" font="$(BOLD_FONT)|$(KB_32)|soft-shadow-thin" />
-    
+
     <!-- In Game Book Fonts-->
     <Font name="ZoFontBookPaper" font="$(ANTIQUE_FONT)|20" />
     <Font name="ZoFontBookSkin" font="$(ANTIQUE_FONT)|20" />

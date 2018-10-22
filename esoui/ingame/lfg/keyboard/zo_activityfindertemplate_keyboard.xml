@@ -142,22 +142,36 @@
                             <Anchor point="TOPLEFT" offsetX="20" offsetY="30" />
                         </Label>
 
+                        <Label name="$(parent)Description" override="true" font="ZoFontWinH4">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPLEFT" offsetY="-20" />
+                        </Label>
+
                         <Control name="$(parent)RewardsSection" override="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="-250" />
-                            
+
                             <Controls>
                                 <Label name="$(parent)Header" override="true" font="ZoFontWinH2" />
-                                
+
                                 <Control name="$(parent)Entries" override="true">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
                                 </Control>
                             </Controls>
                         </Control>
 
-                        <Label name="$(parent)Description" override="true" font="ZoFontWinH4">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" offsetY="-20" />
-                        </Label>
+                        <Control name="$(parent)SetTypesSection" override="true">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RewardsSection" relativePoint="TOPRIGHT" offsetY="-24" />
+
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true" />
+
+                                <Label name="$(parent)List" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
 

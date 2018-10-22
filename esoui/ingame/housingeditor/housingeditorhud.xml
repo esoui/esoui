@@ -1,5 +1,73 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_HousingEditorHistory_Entry_Gamepad_Template" virtual="true">
+            <Dimensions x="ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_GAMEPAD_X" y="ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_GAMEPAD_Y" />
+
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad27">
+                    <Dimensions x="260"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HousingEditorHistory_Entry_Keyboard_Template" virtual="true">
+            <Dimensions x="ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_KEYBOARD_X" y="ZO_HOUSING_EDITOR_HISTORY_ENTRY_DIMENSION_KEYBOARD_Y" />
+
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGameShadow">
+                    <Dimensions x="240"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_HousingEditorHistory_Entry" virtual="true">
+            <OnInitialized>
+                ZO_HousingEditorHistory_Entry_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" tier="MEDIUM" pixelRoundingEnabled="false" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="LEFT" offsetX="-5"/>
+                </Texture>
+
+                <Label name="$(parent)Label" verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="1">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                </Label>
+
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <TextureCoords left="0" right="1" top="0" bottom=".78125" />
+                    <Anchor point="TOPLEFT" offsetX="-50"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="50"/>
+                </Texture>
+
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds">
+                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                    <Anchor point="TOPLEFT" offsetX="-50"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="50"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_HousingEditorHistory_TopLevel" hidden="true">
+            <Anchor point="RIGHT" />
+            <OnInitialized>
+                ZO_HousingEditorHistory_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Dimensions x="ZO_HOUSING_EDITOR_HISTORY_CONTAINER_DIMENSION_X" y="ZO_HOUSING_EDITOR_HISTORY_CONTAINER_DIMENSION_Y" />
+                    <Anchor point="TOPRIGHT" offsetY="-20" />
+                </Control>
+                
+                <Label name="$(parent)Header" text="SI_HOUSE_HISTORY_CONTAINER_TITLE">
+                    <Dimensions x="240"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Container" relativePoint="TOPLEFT" offsetY="-5"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+        
         <TopLevelControl name="ZO_HousingHUDFragmentTopLevel" hidden="true">
             <AnchorFill />
             <OnInitialized>

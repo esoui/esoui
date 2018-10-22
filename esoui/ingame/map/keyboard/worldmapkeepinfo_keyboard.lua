@@ -11,29 +11,25 @@ local ResourceUpgrade = ZO_ResourceUpgrade_Shared:Subclass()
 local WorldMapKeepInfo = ZO_WorldMapKeepInfo_Shared:Subclass()
 
 function WorldMapKeepInfo:New(...)
-    local object = ZO_WorldMapKeepInfo_Shared.New(self, ...)
-    return object
+    return ZO_WorldMapKeepInfo_Shared.New(self, ...)
 end
 
 function WorldMapKeepInfo:Initialize(control)
     self.modeBar = ZO_SceneFragmentBar:New(control:GetNamedChild("MenuBar"))
 
-    ZO_WorldMapKeepInfo_Shared.Initialize(self, control)
+    ZO_WorldMapKeepInfo_Shared.Initialize(self, control, ZO_FadeSceneFragment)
 
     self.keepUpgrade = KeepUpgrade:New()
     self.resourceUpgrade = ResourceUpgrade:New()
+end
 
-    self.worldMapKeepInfoBGFragment = ZO_FadeSceneFragment:New(ZO_WorldMapKeepInfoFootPrintBackground)
-    self.worldMapKeepInfoFragment = ZO_FadeSceneFragment:New(control)
-    self.worldMapKeepInfoFragment:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_HIDDEN) then
-            self.keepUpgradeObject = nil
-            self.modeBar:Clear()
-        end
-    end)
+function WorldMapKeepInfo:GetBackgroundFragment()
+    return MEDIUM_LEFT_PANEL_BG_FRAGMENT
 end
 
 function WorldMapKeepInfo:PreShowKeep()
+    ZO_WorldMapKeepInfo_Shared.PreShowKeep(self)
+
     self.modeBar:RemoveAll()
 end
 
@@ -49,6 +45,13 @@ function WorldMapKeepInfo:AddBar(text, fragments, buttonData)
 end
 
 function WorldMapKeepInfo:FinishBar()
+end
+
+function WorldMapKeepInfo:OnHidden()
+    ZO_WorldMapKeepInfo_Shared.OnHidden(self)
+
+    self.keepUpgradeObject = nil
+    self.modeBar:Clear()
 end
 
 --Global

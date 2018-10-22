@@ -126,6 +126,14 @@
             </Controls>
         </StatusBar>
 
+        <StatusBar name="ZO_ArrowProgressBarWithBG" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
+            <Controls>
+                <Label name="$(parent)Progress" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY">
+                    <Anchor point="CENTER" />
+                </Label>
+            </Controls>
+        </StatusBar>
+            
         <StatusBar name="ZO_DefaultStatusBarBG" inherits="ZO_DefaultStatusBar" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">

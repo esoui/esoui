@@ -21,9 +21,9 @@
             </Controls>
         </Control>
         
-        <Label name="ZO_GridScrollList_Entry_Header_Template_Keyboard" font="ZoFontWinH3" maxLineCount="1"  wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" virtual="true" />
+        <Label name="ZO_GridScrollList_Entry_Header_Keyboard" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" virtual="true" />
 
-        <Control name="ZO_GridScrollList_Entry_Template_Keyboard" mouseEnabled="true" virtual="true">
+        <Control name="ZO_GridScrollList_Entry_Keyboard" mouseEnabled="true" virtual="true">
             <Dimensions x="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_KEYBOARD" y="ZO_GRID_SCROLL_LIST_DEFAULT_TEMPLATE_DIMENSIONS_KEYBOARD" />
             <Controls>
                 <Texture name="$(parent)Icon" level="1">

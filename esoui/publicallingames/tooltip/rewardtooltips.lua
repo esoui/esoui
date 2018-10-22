@@ -64,6 +64,12 @@ do
                 g_dailyLoginRewardtimerStatValuePair = statValuePair
             end
         end
+
+        if rewardIndex > GetNumClaimableDailyLoginRewardsInCurrentMonth() then
+            local lockedSection = self:AcquireSection(self:GetStyle("dailyLoginRewardsLockedSection"))
+            lockedSection:AddLine(GetString(SI_DAILY_LOGIN_REWARDS_NOT_CLAIMABLE_TOOLTIP))
+            self:AddSection(lockedSection)
+        end
     end
 
     function ZO_Tooltip:UpdateDailyLoginRewardTimer()

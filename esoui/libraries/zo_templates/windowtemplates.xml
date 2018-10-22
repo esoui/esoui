@@ -331,7 +331,7 @@
             </Controls>
         </TopLevelControl>
 
-        <Control name="ZO_RightPanelBG" allowBringToTop="false" virtual="true">
+        <Control name="ZO_RightPanelBG" virtual="true">
             <Dimensions x="575" y="750" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
@@ -342,7 +342,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_LeftPanelBG" allowBringToTop="false" virtual="true">
+        <Control name="ZO_LeftPanelBG" virtual="true">
             <Dimensions x="575" y="750" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>
@@ -368,7 +368,7 @@
             </Controls>
         </Control>
         
-        <Control name="ZO_ThinLeftPanelBG" allowBringToTop="false" virtual="true">
+        <Control name="ZO_ThinLeftPanelBG" virtual="true">
             <Dimensions x="240" y="500" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-85"/>
             <Controls>
@@ -433,7 +433,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_MediumTallLeftPanelBG" allowBringToTop="false" virtual="true">
+        <Control name="ZO_MediumTallLeftPanelBG" virtual="true">
             <Dimensions x="366" y="600" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-55"/>
             <Controls>
@@ -456,7 +456,7 @@
             <Dimensions x="535" y="500" />
         </Control>
 
-        <Control name="ZO_WideTallLeftPanelBG" allowBringToTop="false" virtual="true">
+        <Control name="ZO_WideTallLeftPanelBG" virtual="true">
             <Dimensions x="535" y="750" />
             <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="20"/>
             <Controls>

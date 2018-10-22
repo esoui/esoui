@@ -42,6 +42,7 @@ function SkillsAdvisor_Manager:Initialize()
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("PurchasedChanged", RefreshVisibleAbilityLists)
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("SkillProgressionKeyChanged", RefreshVisibleAbilityLists)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", RefreshVisibleAbilityLists)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", RefreshVisibleAbilityLists)
 
     EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Manager", EVENT_SKILL_BUILD_SELECTION_UPDATED, function(eventId, ...) self:OnBuildSelectionUpdated(...) end)
 

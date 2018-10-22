@@ -93,7 +93,6 @@ function ZO_SkillsAdvisor_Suggestions_Keyboard:SetupAbilityEntry(ability, skillP
     slot.skillProgressionData = skillProgressionData
     slot.icon:SetTexture(skillProgressionData:GetIcon())
     ZO_Skills_SetKeyboardAbilityButtonTextures(slot)
-    slot:SetMouseOverTexture(nil)
 end
 
 function ZO_SkillsAdvisor_Suggestions_Keyboard:OnReadyToHandleClickAction()

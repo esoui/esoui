@@ -2,7 +2,7 @@ local function LogPurchaseClose(dialog)
     if dialog.data then
         if not dialog.data.dontLogClose then
             if dialog.data.logPurchasedMarketId then
-                OnMarketEndPurchase(dialog.data.marketProductId)
+                OnMarketEndPurchase(dialog.data.marketProductData:GetId())
             else
                 OnMarketEndPurchase()
             end
@@ -63,6 +63,33 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
             keybind = "DIALOG_PRIMARY",
         },
         [2] =
+        {
+            text = SI_DIALOG_EXIT,
+            keybind = "DIALOG_NEGATIVE",
+        },
+    },
+}
+
+ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
+{
+    finishedCallback = LogPurchaseClose,
+    title =
+    {
+        text = SI_MARKET_PURCHASE_ERROR_TITLE_FORMATTER
+    },
+    mainText =
+    {
+        text = SI_MARKET_PURCHASE_ERROR_TEXT_FORMATTER
+    },
+    buttons =
+    {
+        {
+            text = SI_MARKET_JOIN_ESO_PLUS_CONFIRM_BUTTON_TEXT,
+            callback = function()
+                ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
+            end,
+            keybind = "DIALOG_PRIMARY",
+        },
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
@@ -189,7 +216,7 @@ ESO_Dialogs["MARKET_FREE_TRIAL_PURCHASE_CONFIRMATION"] =
     mainText =
     {
         text =  function(dialog)
-                    local endTimeString = GetMarketProductEndTimeString(dialog.data.marketProductId)
+                    local endTimeString = dialog.data.marketProductData:GetEndTimeString()
                     local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS, 24)
                     return zo_strformat(SI_MARKET_PURCHASE_FREE_TRIAL_TEXT, endTimeString, currencyIcon)
                 end,
@@ -201,19 +228,13 @@ ESO_Dialogs["MARKET_FREE_TRIAL_PURCHASE_CONFIRMATION"] =
             text = SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT,
             callback =  function(dialog)
                             dialog.data.logPurchasedMarketId = true
-                            local marketProductId = dialog.data.marketProductId
-                            local presentationIndex = dialog.data.presentationIndex
-
-                            local name, description, icon, isNew, isFeatured = GetMarketProductInfo(marketProductId)
-                            local productQuality = GetMarketProductQuality(marketProductId)
+                            local marketProductData = dialog.data.marketProductData
 
                             -- set this up for the MARKET_PURCHASING dialog
-                            local color = GetItemQualityColor(productQuality)
-                            local productName = color:Colorize(name)
-                            local hasConsumables = DoesMarketProductContainConsumables(marketProductId)
+                            local productName = marketProductData:GetColorizedDisplayName()
                             -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
-                            ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = productName, hasConsumables = hasConsumables, marketProductId = marketProductId, presentationIndex = presentationIndex})
-                            BuyMarketProduct(marketProductId, presentationIndex)
+                            ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = productName, marketProductData = marketProductData})
+                            marketProductData:RequestPurchase()
                         end,
         },
 
@@ -243,6 +264,72 @@ local function MarketPurchaseConfirmationDialogSetupGiftingControls(dialog, data
     -- prefill fields if available
     dialog:GetNamedChild("GiftRecipientEditBox"):SetText(data.recipientDisplayName or "")
     dialog:GetNamedChild("NoteEdit"):SetText(data.note or "")
+end
+
+local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data)
+    local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = data.marketProductData:GetMarketProductPricingByPresentation()
+    local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
+
+    local hasCost = cost ~= nil
+    local hasEsoPlusCost
+    if data.isGift then
+        hasEsoPlusCost = false -- gifts aren't eligible for ESO Plus pricing
+    else
+        hasEsoPlusCost = esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
+    end
+
+    if hasCost then
+        local extraOptions = nil
+        local currencyFormat
+        local costAmountLabel = dialog.costContainer.currencyAmount
+        if hasEsoPlusCost then
+            extraOptions =
+            {
+                color = ZO_DEFAULT_TEXT,
+                iconInheritColor = true,
+            }
+
+            costAmountLabel:SetColor(ZO_DEFAULT_TEXT:UnpackRGB())
+            currencyFormat = ZO_CURRENCY_FORMAT_STRIKETHROUGH_AMOUNT_ICON
+        else
+            costAmountLabel:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGB())
+            currencyFormat = ZO_CURRENCY_FORMAT_AMOUNT_ICON
+        end
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, costAfterDiscount, currencyFormat, extraOptions))
+        costAmountLabel:SetText(currencyString)
+
+        local labelString
+        if hasEsoPlusCost then
+            labelString = SI_MARKET_CONFIRM_PURCHASE_NORMAL_COST_LABEL
+        else
+            labelString = SI_MARKET_CONFIRM_PURCHASE_COST_LABEL
+        end
+        local costLabel = dialog.costContainer.currencyLabel
+        costLabel:SetText(GetString(labelString))
+    end
+    dialog.costContainer:SetHidden(not hasCost)
+
+    if hasEsoPlusCost then
+        local extraOptions =
+        {
+            color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
+            iconInheritColor = marketCurrencyType ~= MKCT_CROWN_GEMS,
+        }
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, esoPlusCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON, extraOptions))
+
+        local costAmountLabel = dialog.esoPlusCostContainer.currencyAmount
+        costAmountLabel:SetText(currencyString)
+
+        dialog.esoPlusCostContainer:ClearAnchors()
+        local controlToAnchorCostContainerTo = hasCost and dialog.costContainer or dialog.balanceContainer
+        dialog.esoPlusCostContainer:SetAnchor(TOPLEFT, controlToAnchorCostContainerTo, BOTTOMLEFT, 0, 30)
+        dialog.esoPlusCostContainer:SetAnchor(TOPRIGHT, controlToAnchorCostContainerTo, BOTTOMRIGHT, 0, 30)
+    end
+    dialog.esoPlusCostContainer:SetHidden(not hasEsoPlusCost)
+
+    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    local currentBalanceAmountLabel = dialog.balanceContainer.currencyAmount
+    currentBalanceAmountLabel:SetText(currencyString)
 end
 
 local function UpdateConfirmRestrictions(dialogControl)
@@ -297,8 +384,7 @@ local function SetupRadioButtonWithBasicTextTooltip(radioButtonGroup, radioButto
 end
 
 local function MarketPurchaseConfirmationDialogSetup(dialog, data)
-    local marketProductId = data.marketProductId
-    local presentationIndex = data.presentationIndex
+    local marketProductData = data.marketProductData
 
     local selectedRadioButton, otherRadioButtonResult, otherRadioButton, anchorToControl, anchorDirection
     local selectedRadioButtonWarningStrings = {}
@@ -306,16 +392,16 @@ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
     if data.isGift then
         selectedRadioButton = dialog.asGiftRadioButton
         otherRadioButton = dialog.forMeRadioButton
-        otherRadioButtonResult = CouldPurchaseMarketProduct(marketProductId, presentationIndex)
-        ZO_MARKET_SINGLETON:AddMarketProductPurchaseWarningStringsToTable(marketProductId, presentationIndex, otherRadioButtonWarningStrings)
+        otherRadioButtonResult = marketProductData:CouldPurchase()
+        ZO_MARKET_MANAGER:AddMarketProductPurchaseWarningStringsToTable(marketProductData, otherRadioButtonWarningStrings)
         -- draw tooltip to the left of the buttons
         anchorToControl = otherRadioButton
         anchorDirection = LEFT
     else
         selectedRadioButton = dialog.forMeRadioButton
         otherRadioButton = dialog.asGiftRadioButton
-        otherRadioButtonResult = CouldGiftMarketProduct(marketProductId, presentationIndex)
-        ZO_MARKET_SINGLETON:AddMarketProductPurchaseWarningStringsToTable(marketProductId, presentationIndex, selectedRadioButtonWarningStrings)
+        otherRadioButtonResult = marketProductData:CouldGift()
+        ZO_MARKET_MANAGER:AddMarketProductPurchaseWarningStringsToTable(marketProductData, selectedRadioButtonWarningStrings)
         -- draw tooltip to the right of the buttons
         anchorToControl = otherRadioButton.label
         anchorDirection = RIGHT
@@ -376,42 +462,23 @@ local function MarketPurchaseConfirmationDialogSetup(dialog, data)
 
     MarketPurchaseConfirmationDialogSetupGiftingControls(dialog, data)
 
-    local name, description, icon, isNew, isFeatured = GetMarketProductInfo(marketProductId)
-    local productQuality = GetMarketProductQuality(marketProductId)
-
     -- set this up for the MARKET_PURCHASING dialog
-    local color = GetItemQualityColor(productQuality)
-    data.itemName = color:Colorize(name)
-    data.hasConsumables = DoesMarketProductContainConsumables(marketProductId)
+    data.itemName = marketProductData:GetColorizedDisplayName()
 
     local itemContainerControl = dialog:GetNamedChild("ItemContainer")
     itemContainerControl:GetNamedChild("ItemName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, data.itemName))
 
     local iconTextureControl = itemContainerControl:GetNamedChild("Icon")
+    local icon = marketProductData:GetIcon()
     iconTextureControl:SetTexture(icon)
 
-    local stackSize = GetMarketProductStackCount(marketProductId)
+    local stackSize = marketProductData:GetStackCount()
 
     local stackCountControl = iconTextureControl:GetNamedChild("StackCount")
     stackCountControl:SetText(stackSize)
     stackCountControl:SetHidden(stackSize < 2)
 
-    local marketCurrencyType, cost, hasDiscount, costAfterDiscount, discountPercent = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
-
-    local finalCost = cost
-    if hasDiscount then
-        finalCost = costAfterDiscount
-    end
-
-    local currencyType = ZO_Currency_MarketCurrencyToUICurrency(marketCurrencyType)
-
-    local costLabel = dialog:GetNamedChild("CostContainerItemCostAmount")
-    local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, finalCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
-    costLabel:SetText(currencyString)
-
-    local currentBalance = dialog:GetNamedChild("BalanceContainerCurrentBalanceAmount")
-    currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON))
-    currentBalance:SetText(currencyString)
+    MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data)
 
     UpdateConfirmRestrictions(dialog)
 end
@@ -433,6 +500,10 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
     control.forMeRadioButton = forMeRadioButton
     control.asGiftRadioButton = asGiftRadioButton
 
+    control.balanceContainer = control:GetNamedChild("BalanceContainer")
+    control.costContainer = control:GetNamedChild("CostContainer")
+    control.esoPlusCostContainer = control:GetNamedChild("EsoPlusCostContainer")
+
     local function OnRadioButtonSelectionChanged(buttonGroup, selectedButton, previousButton)
         local data = control.data
         if selectedButton == forMeRadioButton then
@@ -443,6 +514,7 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
 
         UpdateConfirmRestrictions(control)
         MarketPurchaseConfirmationDialogSetupGiftingControls(control, data)
+        MarketPurchaseConfirmationDialogSetupPricingControls(control, data)
     end
 
     radioButtonGroup:SetSelectionChangedCallback(OnRadioButtonSelectionChanged)
@@ -481,8 +553,7 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
                     callback =  function(dialog)
                                     local data = dialog.data
                                     data.logPurchasedMarketId = true
-                                    local marketProductId = data.marketProductId
-                                    local presentationIndex = data.presentationIndex
+                                    local marketProductData = data.marketProductData
                                     local recipientDisplayName
                                     local note
                                     if data.isGift then
@@ -490,12 +561,12 @@ function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
                                         note = dialog:GetNamedChild("NoteEdit"):GetText()
                                     end
                                     -- the MARKET_PURCHASING dialog will be queued to show once this one is hidden
-                                    ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = data.itemName, hasConsumables = data.hasConsumables, marketProductId = marketProductId, presentationIndex = presentationIndex, recipientDisplayName = recipientDisplayName, note = note})
+                                    ZO_Dialogs_ShowDialog("MARKET_PURCHASING", {itemName = data.itemName, marketProductData = marketProductData, recipientDisplayName = recipientDisplayName, note = note})
 
                                     if data.isGift then
-                                        GiftMarketProduct(marketProductId, presentationIndex, note, recipientDisplayName)
+                                        marketProductData:RequestPurchaseAsGift(note, recipientDisplayName)
                                     else
-                                        BuyMarketProduct(marketProductId, presentationIndex)
+                                        marketProductData:RequestPurchase()
                                     end
                                 end,
                 },
@@ -546,12 +617,13 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
     if result ~= nil and data.currentState ~= MARKET_PURCHASING_STATE_RESULT then
         data.currentState = MARKET_PURCHASING_STATE_RESULT
 
-        local titleText, mainText
+        local titleText
+        local mainText
         if result == MARKET_PURCHASE_RESULT_SUCCESS then
             titleText = GetString(SI_TRANSACTION_COMPLETE_TITLE)
 
-            local marketProductId = data.marketProductId
-            local stackCount = GetMarketProductStackCount(marketProductId)
+            local marketProductData = data.marketProductData
+            local stackCount = marketProductData:GetStackCount()
 
             if data.wasGift then
                 if stackCount > 1 then
@@ -560,7 +632,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                     mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, data.itemName, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 end
             else
-                local useProductInfo = ZO_Market_Shared.GetUseProductInfo(marketProductId)
+                local useProductInfo = ZO_Market_Shared.GetUseProductInfo(marketProductData)
                 if useProductInfo then
                     if useProductInfo.transactionCompleteTitleText then
                         titleText = useProductInfo.transactionCompleteTitleText
@@ -574,11 +646,17 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                 else
                     if stackCount > 1 then
                         mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, data.itemName, stackCount)
-                    elseif GetMarketProductNumCollectibles(marketProductId) > 0 then
+                    elseif marketProductData:GetNumAttachedCollectibles() > 0 then
                         mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, data.itemName)
                     else
                         mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, data.itemName)
                     end
+                end
+
+                -- append ESO Plus savings, if any
+                local esoPlusSavingsString = ZO_MarketDialogs_Shared_GetEsoPlusSavingsString(data.marketProductData)
+                if esoPlusSavingsString then
+                    mainText = string.format("%s\n\n%s", mainText, esoPlusSavingsString)
                 end
             end
         else
@@ -645,7 +723,7 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                     control =   self:GetNamedChild("UseProduct"),
                     keybind =   "DIALOG_RESET",
                     callback =  function(dialog)
-                                    ZO_Market_Shared.GoToUseProductLocation(dialog.data.marketProductId)
+                                    ZO_Market_Shared.GoToUseProductLocation(dialog.data.marketProductData)
                                 end,
                 },
                 {
@@ -658,8 +736,7 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                                        local restartData =
                                        {
                                            isGift = true,
-                                           marketProductId = data.marketProductId,
-                                           presentationIndex = data.presentationIndex,
+                                           marketProductData = data.marketProductData,
                                            recipientDisplayName = data.recipientDisplayName,
                                            note = data.note,
                                        }
@@ -673,7 +750,7 @@ function ZO_MarketPurchasingDialog_OnInitialized(self)
                                            MARKET:ShowTutorial(data.tutorialTrigger)
                                        end
 
-                                       if data.result == MARKET_PURCHASE_RESULT_SUCCESS and data.hasConsumables then
+                                       if data.result == MARKET_PURCHASE_RESULT_SUCCESS and data.marketProductData:ContainsConsumables() then
                                            MARKET:ShowTutorial(TUTORIAL_TRIGGER_CROWN_CONSUMABLE_PURCHASED)
                                        end
                                    end

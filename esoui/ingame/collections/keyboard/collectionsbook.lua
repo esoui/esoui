@@ -187,13 +187,12 @@ function ZO_CollectionsBook:InitializeGridListPanel()
     local function ResetEntryData(data)
         data:SetDataSource(nil)
     end
-    
+
     self.entryDataObjectPool = ZO_ObjectPool:New(CreateEntryData, ResetEntryData)
 
     local gridListPanel = self.control:GetNamedChild("List")
     self.gridListPanelControl = gridListPanel
-    local FILL_ROW_WITH_EMPTY_CELLS = true
-    self.gridListPanelList = ZO_GridScrollList:New(gridListPanel, FILL_ROW_WITH_EMPTY_CELLS)
+    self.gridListPanelList = ZO_SingleTemplateGridScrollList_Keyboard:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local HIDE_CALLBACK = nil
 

@@ -197,6 +197,9 @@ EsoUI\Ingame\Collections\Keyboard\DLCBook_Keyboard.xml
 EsoUI\Ingame\Collections\Keyboard\HousingBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\HousingBook_Keyboard.xml
 
+EsoUI\Ingame\HUD\HUDTracker_Base.lua
+EsoUI\Ingame\HUD\HUDTracker_Base.xml
+
 EsoUI\Ingame\ZO_Quest\QuestTimer.lua
 EsoUI\Ingame\ZO_Quest\QuestTimer.xml
 EsoUI\Ingame\ZO_Quest\QuestTracker.lua
@@ -991,8 +994,6 @@ EsoUI\Ingame\Leaderboards\Gamepad\BattlegroundLeaderboards_Gamepad.xml
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Dialogs_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.xml
-EsoUI\Ingame\Inventory\Gamepad\GuildBankError_Gamepad.lua
-EsoUI\Ingame\Inventory\Gamepad\GuildBankError_Gamepad.xml
 
 EsoUI\Ingame\DeathRecap\DeathRecap.lua
 EsoUI\Ingame\DeathRecap\DeathRecap.xml

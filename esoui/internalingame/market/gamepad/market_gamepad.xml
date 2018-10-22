@@ -4,10 +4,8 @@
             <Anchor point="TOPLEFT" relativeTo="$(grandparent)"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)"/>
         </Control>
-        
-        <Label name="ZO_GamepadMarket_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" virtual="true"/>
 
-        <Label name="ZO_GamepadMarket_SubscriptionBenefitLine" font="ZoFontGamepadCondensed36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_GamepadMarket_GroupLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" virtual="true"/>
 
         <TopLevelControl name="ZO_GamepadMarket" hidden="true" inherits="ZO_GamepadMarket_GridScreen">
             <OnInitialized>
@@ -50,12 +48,6 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_GamepadMarket_ProductListScene" inherits="ZO_Gamepad_ParametricList_Screen">
-            <OnInitialized>
-                ZO_GamepadMarketProductList_OnInitialized(self)
-            </OnInitialized>
-        </TopLevelControl>
-
         <TopLevelControl name="ZO_GamepadMarket_Locked" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" hidden="true" >
             <OnInitialized>
                 ZO_GamepadMarket_Locked_OnInitialize(self)
@@ -81,7 +73,7 @@
                                                         </Label>
                                                     </Controls>
                                                 </Control>
-                                                
+
                                                 <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
                                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
@@ -101,7 +93,7 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-        
+
         <TopLevelControl name="ZO_GamepadMarket_PreScene" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" hidden="true" >
             <OnInitialized>
                 ZO_GamepadMarket_PreScene_OnInitialize(self)
@@ -109,7 +101,7 @@
 
             <Controls>
                 <Control name="$(parent)FullPane" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
-                    
+
                     <Controls>
                         <Control name="$(parent)Container" resizeToFitDescendents="true">
                             <Anchor point="CENTER" offsetY="-150"/>
@@ -123,67 +115,13 @@
                                     <Dimensions x="128" y="128"/>
                                 </Control>
                             </Controls>
-                            
+
                         </Control>
                     </Controls>
-                    
+
                 </Control>
             </Controls>
         </TopLevelControl>
-
-        <Control name="ZO_GamepadMarket_EsoPlusCategoryTemplate" inherits="ZO_GamepadMarket_CategoryTemplate" virtual="true">
-            <DimensionConstraints minX="1288" maxY="805"/>
-            <Controls>
-                <Control name="$(parent)MembershipInfo" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" offsetX="30" />
-                    <Anchor point="TOPRIGHT" offsetX="-30" />
-
-                    <Controls>
-                        <Texture name="$(parent)Banner">
-                            <Dimensions x="1224" y="288" />
-                            <!-- 2048x512 image cropped to 1224x288 -->
-                            <TextureCoords left="0" right="0.59765625" top="0" bottom="0.5625"/>
-                            <Anchor point="TOPLEFT" />
-                        </Texture>
-
-                        <Label name="$(parent)Title" font="ZoFontGamepadBold48" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_TITLE" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Banner" offsetX="260" offsetY="100" />
-                            <Anchor point="TOPRIGHT" offsetY="100" />
-                        </Label>
-
-                        <Label name="$(parent)Label" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_MARKET_SUBSCRIPTION_PAGE_SUBSCRIPTION_STATUS_LABEL_GAMEPAD" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
-                        </Label>
-
-                        <Label name="$(parent)Status" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)Label" offsetX="10" />
-                        </Label>
-                    </Controls>
-                </Control>
-
-                <Label name="$(parent)Overview" font="ZoFontGamepadCondensed36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMLEFT" offsetY="10" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MembershipInfo" relativePoint="BOTTOMRIGHT" offsetY="10" offsetX="-30"/>
-                </Label>
-
-                <Control name="$(parent)Benefits" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Overview" relativePoint="BOTTOMLEFT" offsetY="40" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-30" />
-
-                    <Controls>
-                        <Label name="$(parent)Title" font="ZoFontGamepad45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SUBSCRIPTION_PAGE_BENEFITS_TITLE" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" />
-                        </Label>
-
-                        <Control name="$(parent)LineContainer">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="10" />
-                        </Control>
-                    </Controls>
-                </Control>
-            </Controls>
-        </Control>
 
     </Controls>
 </GuiXml>
