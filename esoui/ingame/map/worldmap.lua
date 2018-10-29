@@ -5271,7 +5271,7 @@ function ZO_WorldMapZoomPlus_OnClicked()
 end
 
 function ZO_WorldMapZoom_OnMouseWheel(delta)
-    g_mapPanAndZoom:AddZoomDelta(delta)
+    g_mapPanAndZoom:Step(delta)
 end
 
 function ZO_WorldMapZoom_OnInitialized(self)
