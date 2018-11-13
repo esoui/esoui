@@ -157,7 +157,7 @@ function ZO_DailyLoginRewards_Base:GridEntryCleanup(control)
 end
 
 function ZO_DailyLoginRewards_Base:UpdateCurrentMonthName()
-    local shouldHideMonth = not ZO_DAILYLOGINREWARDS_MANAGER:IsClaimableRewardInMonth() or ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
+    local shouldHideMonth = not ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth() or ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
     self.currentMonthLabel:SetHidden(shouldHideMonth)
 
     local currentMonth = GetCurrentDailyLoginMonth()
@@ -176,7 +176,7 @@ function ZO_DailyLoginRewards_Base:UpdateGridList()
     if ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() then
         self.lockedLabel:SetText(GetString(SI_DAILY_LOGIN_REWARDS_LOCKED))
         self.lockedLabel:SetHidden(false)
-    elseif ZO_DAILYLOGINREWARDS_MANAGER:IsClaimableRewardInMonth() then
+    elseif ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth() then
         local numRewardsInMonth = GetNumRewardsInCurrentDailyLoginMonth()
         for i = 1, numRewardsInMonth do
             local rewardId, quantity, isMilestone = GetDailyLoginRewardInfoForCurrentMonth(i)
@@ -252,8 +252,13 @@ end
 
 function ZO_DailyLoginRewards_Base:OnRewardClaimed()
     if self:IsShowing() then
-        self.gridListPanelList:RefreshGridList()
-        self:ShowClaimedRewardFlair()
+        if ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth() then
+            self.gridListPanelList:RefreshGridList()
+            self:ShowClaimedRewardFlair()
+        else
+            -- this will hide all the controls and show the "nothing left to claim" message
+            self:MarkDirty()
+        end
     else
         self:MarkDirty()
     end
@@ -299,7 +304,7 @@ function ZO_DailyLoginRewards_Base:UpdateTimeToNextMonthText(formattedTime)
 end
 
 function ZO_DailyLoginRewards_Base:ShouldChangeTimerBeHidden()
-    return self.lastCalculatedTimeUntilNextMonthS == 0 or ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() or not ZO_DAILYLOGINREWARDS_MANAGER:IsClaimableRewardInMonth()
+    return self.lastCalculatedTimeUntilNextMonthS == 0 or ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() or not ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth()
 end
 
 function ZO_DailyLoginRewards_Base:UpdateTimeToNextMonthVisibility()

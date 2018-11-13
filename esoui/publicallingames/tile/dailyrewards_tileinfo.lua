@@ -15,7 +15,7 @@ end
 
 function ZO_DailyRewards_TileInfo:GetClaimedHeaderText(isSelected)
     local timeRemaining
-    if ZO_DAILYLOGINREWARDS_MANAGER:IsClaimableRewardInMonth() then
+    if ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth() then
         timeRemaining = GetTimeUntilNextDailyLoginRewardClaimS()
     else
         timeRemaining = GetTimeUntilNextDailyLoginMonthS()

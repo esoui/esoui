@@ -79,7 +79,7 @@ local MENU_ENTRY_DATA =
                 name = GetString(SI_GAMEPAD_MAIN_MENU_DAILY_LOGIN_REWARDS_ENTRY),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_dailyLoginRewards.dds",
                 shouldDisableFunction = function()
-                    return ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() or not ZO_DAILYLOGINREWARDS_MANAGER:IsClaimableRewardInMonth()
+                    return ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() or not ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth()
                 end,
                 fragmentGroupCallback = function()
                     return {ZO_DAILY_LOGIN_REWARDS_GAMEPAD:GetFragment(), GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT}
@@ -477,6 +477,8 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
     end)
     MAIN_MENU_MANAGER:RegisterCallback("OnPlayerStateUpdate", function() self:UpdateEntryEnabledStates() end)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, function() self:UpdateEntryEnabledStates() end)
+    control:RegisterForEvent(EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, function() self:UpdateEntryEnabledStates() end)
+    control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_CLAIMED, function() self:UpdateEntryEnabledStates() end)
 end
 
 function ZO_MainMenuManager_Gamepad:OnShowing()

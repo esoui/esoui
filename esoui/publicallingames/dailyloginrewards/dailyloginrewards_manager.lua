@@ -25,7 +25,7 @@ end
 function DailyLoginRewards_Manager:GetDailyLoginRewardIndex()
 	local dailyRewardIndex = GetDailyLoginClaimableRewardIndex()
     -- Daily reward has been claimed, get index for tomorrows reward if applicable
-    if not dailyRewardIndex and self:IsClaimableRewardInMonth() then
+    if not dailyRewardIndex and self:HasClaimableRewardInMonth() then
         dailyRewardIndex = self:GetNextPotentialReward()
     end
 	
@@ -41,8 +41,14 @@ function DailyLoginRewards_Manager:GetNextPotentialReward()
     return nil
 end
 
-function DailyLoginRewards_Manager:IsClaimableRewardInMonth()
-    return GetDailyLoginNumRewardsClaimedInMonth() < GetNumRewardsInCurrentDailyLoginMonth() and GetTimeUntilNextDailyLoginMonthS() > ZO_ONE_DAY_IN_SECONDS
+function DailyLoginRewards_Manager:HasClaimableRewardInMonth()
+    local hasRewardsLeftNotOnLastDay = GetDailyLoginNumRewardsClaimedInMonth() < GetNumRewardsInCurrentDailyLoginMonth() and not self:IsLastDay()
+    local hasReward = GetDailyLoginClaimableRewardIndex() ~= nil
+    return hasRewardsLeftNotOnLastDay or hasReward
+end
+
+function DailyLoginRewards_Manager:IsLastDay()
+    return GetTimeUntilNextDailyLoginMonthS() <= ZO_ONE_DAY_IN_SECONDS
 end
 
 function DailyLoginRewards_Manager:IsDailyRewardsLocked()

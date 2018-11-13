@@ -135,7 +135,7 @@ function ZO_DailyRewardsTile:Layout(dailyRewardIndex)
     end
     self:RefreshHeaderText()
     self:RefreshActionText()
-    self:SetActionAvailable(ZO_DAILYLOGINREWARDS_MANAGER:IsClaimableRewardInMonth())
+    self:SetActionAvailable(ZO_DAILYLOGINREWARDS_MANAGER:HasClaimableRewardInMonth())
 
     local title, background = self:GetTitleAndBackground(dailyRewardIndex)
     self:SetTitle(title)
