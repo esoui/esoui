@@ -27,16 +27,18 @@ function ZO_KeyboardIgnoreListManager:Initialize(control)
     IGNORE_LIST_SCENE = ZO_Scene:New("ignoreList", SCENE_MANAGER)
    
     IGNORE_LIST_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
-                                                           if(newState == SCENE_SHOWING) then 
-                                                                self:PerformDeferredInitialization()                                                               
-                                                                KEYBIND_STRIP:AddKeybindButtonGroup(self.staticKeybindStripDescriptor)
-                                                                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                           elseif(newState == SCENE_HIDDEN) then                                     
-                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.staticKeybindStripDescriptor)                           
-                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-                                                           end
-                                                       end)
+       if newState == SCENE_SHOWING then 
+            self:PerformDeferredInitialization()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.staticKeybindStripDescriptor)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+       elseif newState == SCENE_HIDDEN then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.staticKeybindStripDescriptor)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+       end
+    end)
 
+    IGNORE_LIST_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    self:InitializeDirtyLogic(IGNORE_LIST_FRAGMENT)
 end
 
 function ZO_KeyboardIgnoreListManager:PerformDeferredInitialization()   

@@ -9,7 +9,7 @@ ZO_GAMEPAD_SOCIAL_LIST_CHAMPION_POINTS_ICON_OFFSET_X = 20
 -- Social List
 -----------------
 
-ZO_GamepadSocialListPanel = ZO_Object.MultiSubclass(ZO_GamepadInteractiveSortFilterList, ZO_SocialOptionsDialogGamepad)
+ZO_GamepadSocialListPanel = ZO_Object.MultiSubclass(ZO_GamepadInteractiveSortFilterList, ZO_SocialOptionsDialogGamepad, ZO_SocialListDirtyLogic_Shared)
 
 function ZO_GamepadSocialListPanel:New(...)
     return ZO_GamepadInteractiveSortFilterList.New(self, ...)
@@ -18,6 +18,7 @@ end
 function ZO_GamepadSocialListPanel:Initialize(control, socialManager, rowTemplate)
     ZO_GamepadInteractiveSortFilterList.Initialize(self, control)
     ZO_SocialOptionsDialogGamepad.Initialize(self)
+    self:InitializeDirtyLogic(self.listFragment)
     self.socialManager = socialManager
     ZO_ScrollList_AddDataType(self.list, ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, rowTemplate, ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(control, data) self:SetupRow(control, data) end)
     self:SetMasterList(socialManager:GetMasterList())

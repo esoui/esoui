@@ -1,6 +1,6 @@
 --Social List
 
-ZO_SocialListKeyboard = ZO_SortFilterList:Subclass()
+ZO_SocialListKeyboard = ZO_Object.MultiSubclass(ZO_SortFilterList, ZO_SocialListDirtyLogic_Shared)
 
 function ZO_SocialListKeyboard:InitializeSortFilterList(control)
     ZO_SortFilterList.InitializeSortFilterList(self, control)
@@ -26,15 +26,15 @@ function ZO_SocialListKeyboard:SharedSocialSetup(control, data)
 end
 
 function ZO_SocialListKeyboard:UpdateHideOfflineCheckBox(checkBox)
-	local hideOfflineSetting = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
-	if hideOfflineSetting ~= ZO_CheckButton_IsChecked(checkBox) then
-		if hideOfflineSetting then
-			ZO_CheckButton_SetChecked(checkBox)
-		else
-			ZO_CheckButton_SetUnchecked(checkBox)
-		end
-		self:RefreshFilters()
-	end
+    local hideOfflineSetting = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
+    if hideOfflineSetting ~= ZO_CheckButton_IsChecked(checkBox) then
+        if hideOfflineSetting then
+            ZO_CheckButton_SetChecked(checkBox)
+        else
+            ZO_CheckButton_SetUnchecked(checkBox)
+        end
+        self:RefreshFilters()
+    end
 end
 
 --XML

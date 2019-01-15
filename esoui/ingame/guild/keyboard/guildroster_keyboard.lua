@@ -4,7 +4,6 @@
 
 local ZO_KeyboardGuildRosterManager = ZO_SocialListKeyboard:Subclass()
 
-
 function ZO_KeyboardGuildRosterManager:New(...)
     return ZO_SocialListKeyboard.New(self, ...)
 end
@@ -27,15 +26,19 @@ function ZO_KeyboardGuildRosterManager:Initialize(control)
 	self.hideOfflineCheckBox = GetControl(control, "HideOffline")
 
     GUILD_ROSTER_SCENE = ZO_Scene:New("guildRoster", SCENE_MANAGER)
-    GUILD_ROSTER_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if(newState == SCENE_SHOWING) then
-                                                                self:PerformDeferredInitialization()
-                                                                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-																self:UpdateHideOfflineCheckBox(self.hideOfflineCheckBox)
-                                                            elseif(newState == SCENE_HIDDEN) then
-                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-                                                            end
-                                                        end)
+    GUILD_ROSTER_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:PerformDeferredInitialization()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            self:UpdateHideOfflineCheckBox(self.hideOfflineCheckBox)
+        elseif newState == SCENE_HIDDEN then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end)
+
+    GUILD_ROSTER_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    self:InitializeDirtyLogic(GUILD_ROSTER_FRAGMENT)
+
     GUILD_ROSTER_MANAGER:AddList(self)
 end
 

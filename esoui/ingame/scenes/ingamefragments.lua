@@ -834,8 +834,6 @@ TRADING_HOUSE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TradingHouse)
 
 PLAYER_TRADE_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_TRADE)
 
-FRIENDS_LIST_FRAGMENT = ZO_FadeSceneFragment:New(ZO_KeyboardFriendsList)
-IGNORE_LIST_FRAGMENT = ZO_FadeSceneFragment:New(ZO_KeyboardIgnoreList)
 CONTACTS_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_SOCIAL_MENU_CONTACTS)
 DISPLAY_NAME_FRAGMENT = ZO_FadeSceneFragment:New(ZO_DisplayName)
 FRIENDS_ONLINE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_FriendsOnline)
@@ -846,7 +844,7 @@ SEARCHING_FOR_GROUP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SearchingForGroup)
 
 GUILD_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildSelector)
 GUILD_HOME_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHome)
-GUILD_ROSTER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildRoster)
+-- GUILD_ROSTER_FRAGMENT defined in GuildRoster_Keyboard.lua
 GUILD_RANKS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildRanks)
 GUILD_HISTORY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildHistory)
 GUILD_CREATE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildCreate)

@@ -124,3 +124,47 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
         end
     end
 end
+
+-- Social lists tend to respond to events caused by other players, which can happen even when you aren't viewing the list directly.
+-- To make sure this doesn't impact the rest of the game these events should just dirty the list when it isn't visible, instead of refreshing and potentially causing slow sorts/string formats
+-- This class should be used as part of an inheritance chain that includes SortFilterList
+ZO_SocialListDirtyLogic_Shared = ZO_Object:Subclass()
+
+function ZO_SocialListDirtyLogic_Shared:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
+end
+
+function ZO_SocialListDirtyLogic_Shared:InitializeDirtyLogic(listFragment)
+    self.refreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_IMMEDIATELY)
+    self.refreshGroup:AddDirtyState("Data", function()
+        self:RefreshData()
+    end)
+    self.refreshGroup:AddDirtyState("Filters", function()
+        self:RefreshFilters()
+    end)
+    self.refreshGroup:AddDirtyState("Sort", function()
+        self:RefreshSort()
+    end)
+    self.refreshGroup:SetActive(function()
+        return listFragment:IsShowing()
+    end)
+    listFragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self.refreshGroup:TryClean()
+        end
+    end)
+end
+
+function ZO_SocialListDirtyLogic_Shared:DirtyData()
+    self.refreshGroup:MarkDirty("Data")
+end
+
+function ZO_SocialListDirtyLogic_Shared:DirtyFilters()
+    self.refreshGroup:MarkDirty("Filters")
+end
+
+function ZO_SocialListDirtyLogic_Shared:DirtySort()
+    self.refreshGroup:MarkDirty("Sort")
+end

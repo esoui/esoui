@@ -44,16 +44,19 @@ function ZO_SocialManager:SetupEntry(control, data, selected)
 end
 
 function ZO_SocialManager:RefreshSort()
-    self:CallFunctionOnLists("RefreshSort")
+    -- dirty will only refresh when visible, or it will refresh next time it's visible
+    self:CallFunctionOnLists("DirtySort")
 end
 
 function ZO_SocialManager:RefreshFilters()
-    self:CallFunctionOnLists("RefreshFilters")
+    -- dirty will only refresh when visible, or it will refresh next time it's visible
+    self:CallFunctionOnLists("DirtyFilters")
 end
 
 function ZO_SocialManager:RefreshData()
     self:BuildMasterList()
-    self:CallFunctionOnLists("RefreshData")
+    -- dirty will only refresh when visible, or it will refresh next time it's visible
+    self:CallFunctionOnLists("DirtyData")
 end
 
 function ZO_SocialManager:RefreshVisible()

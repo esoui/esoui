@@ -12,7 +12,7 @@ ZO_KEYBOARD_GROUP_LIST_ROLES_WIDTH = 80 - ZO_KEYBOARD_GROUP_LIST_PADDING_X
 --Group List Keyboard
 ----------------------------------
 
-local ZO_GroupList_Keyboard = ZO_SortFilterList:Subclass()
+local ZO_GroupList_Keyboard = ZO_Object.MultiSubclass(ZO_SortFilterList, ZO_SocialListDirtyLogic_Shared)
 
 local GROUP_DATA = 1
 
@@ -46,15 +46,16 @@ function ZO_GroupList_Keyboard:Initialize(control)
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
     
     GROUP_LIST_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    GROUP_LIST_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if(newState == SCENE_SHOWING) then
-                                                                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                            elseif(newState == SCENE_SHOWN) then
-                                                                self:RefreshData()
-                                                            elseif(newState == SCENE_HIDDEN) then
-                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-                                                            end
-                                                        end)
+    GROUP_LIST_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            self:RefreshData()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end)
+    self:InitializeDirtyLogic(GROUP_LIST_FRAGMENT)
 
     self.activeColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
     self.inactiveColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED))
