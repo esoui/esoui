@@ -49,7 +49,7 @@
 
             <Controls>
                 <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Anchor point="TOPRIGHT" offsetX="-50" offsetY="30" />
+                    <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
                     <Dimensions x="240"/>
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
@@ -74,13 +74,13 @@
                 
                 <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
                     <Dimensions x="365"/>
-                    <Anchor point="TOPLEFT" offsetY="64" />
+                    <Anchor point="TOPLEFT" offsetY="72" />
                     <Anchor point="BOTTOMLEFT"/>
                 </Control>
 
                 <Control name="$(parent)DetailsContainer" inherits="ZO_ScrollContainer">
                     <Dimensions x="550"/>
-                    <Anchor point="TOPRIGHT" offsetX="-33" offsetY="64" />
+                    <Anchor point="TOPRIGHT" offsetX="-33" offsetY="72" />
                     <Anchor point="BOTTOMRIGHT" />
                 </Control>
 

@@ -187,8 +187,6 @@ EsoUI\Libraries\ZO_HorizontalScrollList\Gamepad\ZO_HorizontalScrollList_Gamepad.
 EsoUI\Libraries\ZO_ParametricScrollList\ZO_ParametricScrollList.lua
 EsoUI\Libraries\ZO_ParametricScrollList\ZO_ParametricScrollList.xml
 
-EsoUI\Libraries\ZO_SortableParametricList\ZO_SortableParametricList.lua
-
 EsoUI\Libraries\ZO_SmoothSlider\ZO_SmoothSlider.lua
 EsoUI\Libraries\ZO_SmoothSlider\ZO_SmoothSlider.xml
 

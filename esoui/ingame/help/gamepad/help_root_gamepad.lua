@@ -349,7 +349,9 @@ do
         AddEntry(list, SI_GAMEPAD_HELP_GET_ME_UNSTUCK, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_unstuck.dds", UnstuckDialogNameCallback, IS_DIALOG)
         AddEntry(list, SI_HELP_TUTORIALS, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tutorial.dds", "helpTutorialsCategoriesGamepad", IS_SCENE)
         AddEntry(list, SI_GAMEPAD_HELP_LEGAL_MENU, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_terms.dds", "helpLegalDocsGamepad", IS_SCENE)
-        AddEntry(list, SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_submitFeedback.dds", "helpSubmitFeedbackGamepad", IS_SCENE)
+        if IsSubmitFeedbackSupported() then
+            AddEntry(list, SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_submitFeedback.dds", "helpSubmitFeedbackGamepad", IS_SCENE)
+        end
         AddEntry(list, SI_CUSTOMER_SERVICE_QUEST_ASSISTANCE, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quests.dds", "helpQuestAssistanceGamepad", IS_SCENE)
         AddEntry(list, SI_CUSTOMER_SERVICE_ITEM_ASSISTANCE, "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_inventory.dds", "helpItemAssistanceGamepad", IS_SCENE)
         

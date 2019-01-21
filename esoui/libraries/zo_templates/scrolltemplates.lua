@@ -49,7 +49,8 @@ end
 function ZO_VerticalScrollbarBase_OnInitialized(self)
     self:SetMinMax(MIN_SCROLL_VALUE, MAX_SCROLL_VALUE)
     self:SetValue(MIN_SCROLL_VALUE)
-    self:SetAlpha(OFF_ALPHA)
+    self.targetAlpha = OFF_ALPHA
+    self:SetAlpha(self.targetAlpha)
     self.alphaAnimation, self.timeline = CreateSimpleAnimation(ANIMATION_ALPHA, self)
     self.alphaAnimation:SetDuration(STATE_CHANGE_DURATION)
 
@@ -322,6 +323,7 @@ function ZO_Scroll_Initialize(self)
         self.scrollbar:SetHandler("OnRectHeightChanged", ZO_Scroll_ScrollOrBarOnHeightChanged)
     end
     
+    self.useScrollbar = true
     self.hideScrollBarOnDisabled = true
     self.useFadeGradient = true
 
@@ -550,7 +552,7 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
     local scrollEnabled = (verticalExtents > 0 or verticalOffset > 0)
     local scrollbar  = self.scrollbar
     local scrollIndicator = self.scrollIndicator
-    local scrollbarHidden = (self.hideScrollBarOnDisabled and not scrollEnabled)
+    local scrollbarHidden = not self.useScrollbar or (self.hideScrollBarOnDisabled and not scrollEnabled)
     local verticalExtentsChanged = self.verticalExtents ~= nil and not zo_floatsAreEqual(self.verticalExtents, verticalExtents)
     self.verticalExtents = verticalExtents
 
@@ -624,6 +626,11 @@ end
 
 function ZO_Scroll_SetHideScrollbarOnDisable(self, hide)
     self.hideScrollBarOnDisabled = hide    
+    ZO_Scroll_UpdateScrollBar(self)
+end
+
+function ZO_Scroll_SetUseScrollbar(self, useScrollbar)
+    self.useScrollbar = useScrollbar
     ZO_Scroll_UpdateScrollBar(self)
 end
 
@@ -716,6 +723,7 @@ function ZO_ScrollList_Initialize(self)
     self.animation, self.timeline = CreateScrollAnimation(self)
 
     self.hideScrollBarOnDisabled = true
+    self.useScrollbar = true
     self.useFadeGradient = true
 
     ZO_ScrollList_Commit(self)
@@ -789,9 +797,11 @@ end
 
 -- Scroll List Construction Operations --
 
-local function GetLineBreakPositions(layoutInfo, currentX, currentY, lineBreakAmount)
-    currentX = layoutInfo.startPos
-    currentY = currentY + lineBreakAmount
+local function GetLineBreakPositions(layoutInfo, currentX, currentY, lineBreakAmount, indentX)
+    indentX = indentX or 0
+    currentX = layoutInfo.startPos + indentX * layoutInfo.direction
+    currentY = currentY + lineBreakAmount + layoutInfo.lineBreakModifier
+    layoutInfo.lineBreakModifier = 0
 
     return currentX, currentY
 end
@@ -854,7 +864,7 @@ end
 function ZO_ScrollList_LineBreak_Operation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, data)
     local instanceData = data.data
     data.top = currentY
-    data.bottom = currentY + instanceData.lineBreakAmount
+    data.bottom = currentY + instanceData.lineBreakAmount + layoutInfo.lineBreakModifier
     if layoutInfo.startPos < layoutInfo.endPos then
         data.left = layoutInfo.startPos
         data.right = layoutInfo.endPos
@@ -863,7 +873,8 @@ function ZO_ScrollList_LineBreak_Operation:GetPositionsAndAdvance(layoutInfo, cu
         data.right = layoutInfo.startPos
     end
 
-    currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, instanceData.lineBreakAmount)
+    local indentX = instanceData.indentX or 0
+    currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, instanceData.lineBreakAmount, indentX)
 
     return currentX, currentY
 end
@@ -923,6 +934,10 @@ function ZO_ScrollList_AddControl_Operation:SetSelectable(isSelectable)
     self.selectable = isSelectable
 end
 
+function ZO_ScrollList_AddControl_Operation:SetIndentAmount(indentX)
+    self.indentX = indentX
+end
+
 function ZO_ScrollList_AddControl_Operation:SetOnSelectedSound(onSelectSound)
     self.onSelectSound = onSelectSound
 end
@@ -936,7 +951,7 @@ function ZO_ScrollList_AddControl_Operation:GetPositionsAndAdvance(layoutInfo, c
     local controlWidth = self.controlWidth
     if controlWidth then
         if currentX * layoutInfo.direction + controlWidth > layoutInfo.endPos then
-            currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, self.controlHeight + self.spacingY)
+            currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, self.spacingY, self.indentX)
         end
 
         -- Calculate left and right based on the direction we are told to advance
@@ -951,6 +966,8 @@ function ZO_ScrollList_AddControl_Operation:GetPositionsAndAdvance(layoutInfo, c
         data.bottom = currentY + self.controlHeight
 
         currentX = currentX + (controlWidth + self.spacingX) * layoutInfo.direction
+
+        layoutInfo.lineBreakModifier = zo_max(layoutInfo.lineBreakModifier, self.controlHeight)
     else
         if layoutInfo.startPos < layoutInfo.endPos then
             data.left = layoutInfo.startPos
@@ -961,8 +978,9 @@ function ZO_ScrollList_AddControl_Operation:GetPositionsAndAdvance(layoutInfo, c
         end
         data.top = currentY
         data.bottom = currentY + self.controlHeight
+        layoutInfo.lineBreakModifier = zo_max(layoutInfo.lineBreakModifier, self.controlHeight)
 
-        currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, self.controlHeight + self.spacingY)
+        currentX, currentY = GetLineBreakPositions(layoutInfo, currentX, currentY, self.spacingY, self.indentX)
     end
 
     return currentX, currentY
@@ -1023,13 +1041,14 @@ function ZO_ScrollList_SetBuildDirection(self, buildDirection)
 end
 
 -- A controlWidth of nil will cause controls to be added Anchor TOPLEFT Anchor TOPRIGHT to fill the horizontal space of the parent control
-function ZO_ScrollList_AddControlOperation(self, operationId, templateName, controlWidth, controlHeight, resetControlCallback, showCallback, hideCallback, spacingX, spacingY, selectable, centerEntries)
+function ZO_ScrollList_AddControlOperation(self, operationId, templateName, controlWidth, controlHeight, resetControlCallback, showCallback, hideCallback, spacingX, spacingY, indentX, selectable, centerEntries)
     if not self.dataTypes[operationId] then
         local operation = centerEntries and ZO_ScrollList_AddControl_Centered_Operation:New() or ZO_ScrollList_AddControl_Operation:New()
         operation:SetSpacingValues(spacingX, spacingY)
         operation:SetControlTemplate(templateName, self.contents, operationId, controlWidth, controlHeight, resetControlCallback)
         operation:SetScrollUpdateCallbacks(showCallback, hideCallback)
         operation:SetSelectable(selectable)
+        operation:SetIndentAmount(indentX)
 
         self.dataTypes[operationId] = operation
 
@@ -1344,8 +1363,20 @@ function ZO_ScrollList_SetHideScrollbarOnDisable(self, hideOnDisable)
     self.hideScrollBarOnDisabled = hideOnDisable
 end
 
+function ZO_ScrollList_SetUseScrollbar(self, useScrollbar)
+    -- Not updating state here, you should call this when the list is being created.
+    -- The bar will update state properly when the list has data committed.
+    self.useScrollbar = useScrollbar
+end
+
 function ZO_ScrollList_SetUseFadeGradient(self, useFadeGradient)
     self.useFadeGradient = useFadeGradient
+end
+
+function ZO_ScrollList_IgnoreMouseDownEditFocusLoss(self)
+    ZO_PreHookHandler(self.scrollbar, "OnMouseDown", IgnoreMouseDownEditFocusLoss)
+    ZO_PreHookHandler(self.upButton, "OnMouseDown", IgnoreMouseDownEditFocusLoss)
+    ZO_PreHookHandler(self.downButton, "OnMouseDown", IgnoreMouseDownEditFocusLoss)
 end
 
 function ZO_ScrollList_EnableSelection(self, selectionTemplate, selectionCallback)
@@ -1483,10 +1514,14 @@ local function FreeActiveScrollListControl(self, i)
     local currentDataEntry = currentControl.dataEntry
     local dataType = GetDataTypeInfo(self, currentDataEntry.typeId)
     
-    if self.highlightTemplate and currentControl == self.highlightedControl then
-        UnhighlightControl(self, currentControl)
-        if self.highlightLocked then
-            self.highlightLocked = false
+    if self.highlightTemplate then
+        if currentControl == self.highlightedControl then
+            UnhighlightControl(self, currentControl)
+            if self.highlightLocked then
+                self.highlightLocked = false
+            end
+        else
+            RemoveAnimationOnControl(currentControl, "HighlightAnimation", ANIMATE_INSTANTLY)
         end
     end
 
@@ -1494,8 +1529,12 @@ local function FreeActiveScrollListControl(self, i)
         self.pendingHighlightControl = nil
     end
     
-    if AreSelectionsEnabled(self) and currentControl == self.selectedControl then
-        UnselectControl(self, currentControl, ANIMATE_INSTANTLY)
+    if AreSelectionsEnabled(self) then
+        if currentControl == self.selectedControl then
+            UnselectControl(self, currentControl, ANIMATE_INSTANTLY)
+        else
+            RemoveAnimationOnControl(currentControl, "SelectionAnimation", ANIMATE_INSTANTLY)
+        end
     end
     
     local controlPool = dataType.pool
@@ -1514,36 +1553,34 @@ local function FreeActiveScrollListControl(self, i)
     self.activeControls[#self.activeControls] = nil
 end
 
-local HIDE_SCROLLBAR = true
 local function ResizeScrollBar(self, scrollableDistance)
+    local shouldHideScrollbar
     local scrollBarHeight = self.scrollbar:GetHeight()
     local scrollListHeight = ZO_ScrollList_GetHeight(self)
+
     if scrollableDistance > 0 then
-        self.scrollbar:SetEnabled(true)
-
-        if self.ScrollBarHiddenCallback then
-            self.ScrollBarHiddenCallback(self, not HIDE_SCROLLBAR)
-        else
-            self.scrollbar:SetHidden(false)
-        end
-
-        self.scrollbar:SetThumbTextureHeight(scrollBarHeight * scrollListHeight / (scrollableDistance + scrollListHeight))
         if self.offset > scrollableDistance then
             self.offset = scrollableDistance
         end
+        self.scrollbar:SetThumbTextureHeight(scrollBarHeight * scrollListHeight / (scrollableDistance + scrollListHeight))
         self.scrollbar:SetMinMax(0, scrollableDistance)
+        self.scrollbar:SetEnabled(true)
+        shouldHideScrollbar = false
     else
         self.offset = 0
         self.scrollbar:SetThumbTextureHeight(scrollBarHeight)
         self.scrollbar:SetMinMax(0, 0)
         self.scrollbar:SetEnabled(false)
+        shouldHideScrollbar = self.hideScrollBarOnDisabled
+    end
 
-        if self.hideScrollBarOnDisabled then
-            if self.ScrollBarHiddenCallback then
-                self.ScrollBarHiddenCallback(self, HIDE_SCROLLBAR)
-            else
-                self.scrollbar:SetHidden(true)
-            end
+    shouldHideScrollbar = shouldHideScrollbar or not self.useScrollbar
+
+    if self.scrollbar:IsControlHidden() ~= shouldHideScrollbar then
+        if self.ScrollBarHiddenCallback then
+            self.ScrollBarHiddenCallback(self, shouldHideScrollbar)
+        else
+            self.scrollbar:SetHidden(shouldHideScrollbar)
         end
     end
 end
@@ -1661,30 +1698,32 @@ function ZO_ScrollList_ScrollDataToCenter(self, dataIndex, onScrollCompleteCallb
     ZO_ScrollList_ScrollRelative(self, controlCenter - scrollCenter - scrollAnimationOffset, onScrollCompleteCallback, animateInstantly)
 end
 
-function ZO_ScrollList_SelectNextData(self)
+function ZO_ScrollList_SelectNextData(self, onScrollCompleteCallback, shouldAnimateInstantly)
     if not self.selectedDataIndex then
         return
     end
     for i = 1, #self.data do
-        -- Allow Wraping
+        -- Allow Wrapping
         local newIndex = ((self.selectedDataIndex + i - 1) % #self.data) + 1
+        local hasWrapped = newIndex < self.selectedDataIndex
         if CanSelectData(self, newIndex) then
-            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[newIndex].data)
-            break
+            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[newIndex].data, onScrollCompleteCallback, hasWrapped or shouldAnimateInstantly)
+            return
         end
     end
 end
 
-function ZO_ScrollList_SelectPreviousData(self)
+function ZO_ScrollList_SelectPreviousData(self, onScrollCompleteCallback, shouldAnimateInstantly)
     if not self.selectedDataIndex then
         return
     end
     for i = 1, #self.data do
         -- Allow Wrapping
         local newIndex = ((self.selectedDataIndex + #self.data - i - 1) % #self.data) + 1
+        local hasWrapped = newIndex > self.selectedDataIndex
         if CanSelectData(self, newIndex) then
-            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[newIndex].data)
-            break
+            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[newIndex].data, onScrollCompleteCallback, hasWrapped or shouldAnimateInstantly)
+            return
         end
     end
 end
@@ -1703,22 +1742,27 @@ function ZO_ScrollList_SelectNextDataInDirection(self, xDirection, yDirection)
 
         local nextIndex = self.selectedDataIndex + yDirection
         local currentTopValue = currentData.top * yDirection
+        local bestDistance = math.huge
+        local bestIndex = nil
         while nextIndex <= numDataEntries and nextIndex > 0 do
             if CanSelectData(self, nextIndex) then
                 local nextData = self.data[nextIndex]
                 local nextDataTopValue = nextData.top * yDirection
                 -- check and see if the next data is within the y direction we are searching, 
                 -- and has an x direction greater than or equal to our current data's x
-                if nextDataTopValue > currentTopValue and nextData.left * yDirection >= holdXPos * yDirection then
-                    ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[nextIndex].data)
-                    break
+                if nextDataTopValue > currentTopValue then
+                    local deltaDistance = zo_abs(nextData.left - holdXPos)
+                    if deltaDistance < bestDistance then
+                        bestIndex = nextIndex
+                        bestDistance = deltaDistance
+                    end
                 end
 
                 -- we only want to select an entry that is only one y delta away. 
                 -- We must look ahead and see if the next data after current next data has an even greater y
                 local lookAheadIndex = nextIndex + yDirection
                 local nextSelectableData
-                local foundInLookAhead = false
+                local noFurtherDataToExplore = false
                 while not nextSelectableData do
                     -- we can't look ahead anymore, bail out
                     if lookAheadIndex > numDataEntries or lookAheadIndex < 1 then
@@ -1728,21 +1772,24 @@ function ZO_ScrollList_SelectNextDataInDirection(self, xDirection, yDirection)
                     if CanSelectData(self, lookAheadIndex) then
                         nextSelectableData = self.data[lookAheadIndex]
                         if currentTopValue < nextDataTopValue and nextDataTopValue < nextSelectableData.top * yDirection then
-                            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[nextIndex].data)
-                            foundInLookAhead = true
+                            noFurtherDataToExplore = true
                             break
                         end
                     end
                     lookAheadIndex = lookAheadIndex + yDirection
                 end
 
-                -- we found that our current next data is the best choice
+                -- we found that there is no other data to look at
                 -- and we no longer need to look any further
-                if foundInLookAhead then
+                if noFurtherDataToExplore then
                     break
                 end
             end
             nextIndex = nextIndex + yDirection
+        end
+
+        if bestIndex then
+            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[bestIndex].data)
         end
     end
 
@@ -1783,20 +1830,20 @@ function ZO_ScrollList_RefreshLastHoldPosition(self)
     end
 end
 
-function ZO_ScrollList_TrySelectFirstData(self)
+function ZO_ScrollList_TrySelectFirstData(self, onScrollCompleteCallback, shouldAnimateInstantly)
     for i = 1, #self.data do
         if CanSelectData(self, i) then
-            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[i].data)
+            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[i].data, onScrollCompleteCallback, shouldAnimateInstantly)
             return true
         end
     end
     return false
 end
 
-function ZO_ScrollList_TrySelectLastData(self)
+function ZO_ScrollList_TrySelectLastData(self, onScrollCompleteCallback, shouldAnimateInstantly)
     for i = #self.data, 1, -1 do
         if CanSelectData(self, i) then
-            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[i].data)
+            ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[i].data, onScrollCompleteCallback, shouldAnimateInstantly)
             return true
         end
     end
@@ -1924,6 +1971,7 @@ function ZO_ScrollList_Commit(self)
         scrollableDistance = currentY - windowHeight
     elseif self.mode == SCROLL_LIST_OPERATIONS then
         local layoutInfo = {}
+        layoutInfo.lineBreakModifier = 0
         layoutInfo.direction = self.buildDirection
         if self.buildDirection == ZO_SCROLL_BUILD_DIRECTION_LEFT_TO_RIGHT then
             layoutInfo.startPos = 0
@@ -2390,9 +2438,9 @@ function ZO_ScrollList_AtBottomOfList(self)
     end
 end
 
-function ZO_ScrollList_SelectDataAndScrollIntoView(self, data, onScrollCompleteCallback)
-    ZO_ScrollList_SelectData(self, data)
-    ZO_ScrollList_ScrollDataIntoView(self, self.selectedDataIndex, onScrollCompleteCallback)
+function ZO_ScrollList_SelectDataAndScrollIntoView(self, data, onScrollCompleteCallback, shouldAnimateInstantly)
+    ZO_ScrollList_SelectData(self, data, NOT_RESELECTING_DURING_REBUILD, NO_DATA_CONTROL, shouldAnimateInstantly)
+    ZO_ScrollList_ScrollDataIntoView(self, self.selectedDataIndex, onScrollCompleteCallback, shouldAnimateInstantly)
 end
 
 function ZO_ScrollList_EnoughEntriesToScroll(self)

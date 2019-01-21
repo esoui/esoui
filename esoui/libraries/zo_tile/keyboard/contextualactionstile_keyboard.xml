@@ -14,20 +14,16 @@
     <Controls>
         <Control name="ZO_ContextualActionsTile_Keyboard_Control" inherits="ZO_Tile_Keyboard_Control" mouseEnabled="true" virtual="true">
             <Controls>
-                <Control name="$(parent)Container" override="true">
-                    <Controls>
-                        <Backdrop name="$(parent)OverlayBorder" override="true">
-                            <Edge file="EsoUI/Art/Miscellaneous/inset_edgeFile_8.dds" edgeFileWidth="128" edgeFileHeight="16" />
-                        </Backdrop>
+                <Backdrop name="$(parent)OverlayBorder" override="true">
+                    <Edge file="EsoUI/Art/Miscellaneous/inset_edgeFile_8.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                </Backdrop>
                         
-                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Market/market_slotBGandHighlight.dds" alpha="0" layer="BACKGROUND" level="1">
-                            <AnchorFill />
-                            <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
-                        </Texture>
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Market/market_slotBGandHighlight.dds" alpha="0" layer="BACKGROUND" level="1">
+                    <AnchorFill />
+                    <TextureCoords left="0.2880859375" right="0.576171875" top="0" bottom="0.302734375"/>
+                </Texture>
 
-                        <Label name="$(parent)Title" override="true" font="ZoFontWinH2" />
-                    </Controls>
-                </Control>
+                <Label name="$(parent)Title" override="true" font="ZoFontWinH2" />
             </Controls>
         </Control>
     </Controls>

@@ -44,9 +44,19 @@ function ZO_QuestJournal_Keyboard:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   "EsoUI/Art/Journal/journal_Quest_Dungeon.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            "EsoUI/Art/Journal/journal_Quest_Delve.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          "EsoUI/Art/Journal/journal_Quest_Housing.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_ZONE_STORY,       "EsoUI/Art/Journal/journal_Quest_ZoneStory.dds")
 end
 
 function ZO_QuestJournal_Keyboard:RegisterTooltips()
+    local function ZoneStoryParamFunction()
+        local questData = self:GetSelectedQuestData()
+        if questData then
+            local zoneId = GetJournalQuestZoneStoryZoneId(questData.questIndex)
+            return GetZoneNameById(zoneId)
+        end
+        return ""
+    end
+
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             SI_QUEST_JOURNAL_SOLO_TOOLTIP)
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          SI_QUEST_JOURNAL_DUNGEON_TOOLTIP)
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_RAID,             SI_QUEST_JOURNAL_RAID_TOOLTIP)
@@ -56,6 +66,7 @@ function ZO_QuestJournal_Keyboard:RegisterTooltips()
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   SI_QUEST_JOURNAL_PUBLIC_DUNGEON_TOOLTIP)
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            SI_QUEST_JOURNAL_DELVE_TOOLTIP)
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          SI_QUEST_JOURNAL_HOUSING_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_ZONE_STORY,       SI_QUEST_JOURNAL_ZONE_STORY_TOOLTIP, ZoneStoryParamFunction)
 end
 
 function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected)
@@ -466,30 +477,34 @@ function ZO_QuestJournalNavigationEntry_GetTextColor(self)
 end
 
 function ZO_QuestJournalNavigationEntry_OnMouseUp(label, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_RIGHT and upInside) then
-
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
         local node = label.node
         local questIndex = node.data.questIndex
         if questIndex then
             ClearMenu()
 
             AddMenuItem(GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP), function() ZO_WorldMap_ShowQuestOnMap(questIndex) end)
+
             if GetIsQuestSharable(questIndex) and IsUnitGrouped("player") then
                 AddMenuItem(GetString(SI_QUEST_JOURNAL_SHARE), function() QUEST_JOURNAL_MANAGER:ShareQuest(questIndex) end)
             end
+
             if(node.data.questType ~= QUEST_TYPE_MAIN_STORY) then
                 AddMenuItem(GetString(SI_QUEST_JOURNAL_ABANDON), function() QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(questIndex) end)
             end
 
-            AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function() 
-																	HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:GetFragment())
-																	HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:SetDetailsText(node.data.name)
-																end)
+            AddMenuItem(GetString(SI_QUEST_JOURNAL_REPORT_QUEST), function()
+                                                                    HELP_CUSTOMER_SUPPORT_KEYBOARD:OpenScreen(HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:GetFragment())
+                                                                    HELP_CUSTOMER_SERVICE_QUEST_ASSISTANCE_KEYBOARD:SetDetailsText(node.data.name)
+                                                                end)
 
             ShowMenu(label)
         end
         return
     end
+
+    ZO_ZoneStories_Manager.StopZoneStoryTracking()
+
     ZO_TreeEntry_OnMouseUp(label, upInside)
 end
 

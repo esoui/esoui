@@ -117,7 +117,7 @@ function ZO_KeybindStrip:PushKeybindGroupState()
 
     --now copy/overwrite any left over buttons to the state
     for key, value in pairs(self.keybinds) do
-        state.individualButtons[key] = value.keybindButtonDescriptor
+        state.individualButtons[key] = value.keybindButtonDescriptor or value
         self:RemoveKeybindButton(value.keybindButtonDescriptor or value, topStateIndex)
     end
 
@@ -925,6 +925,10 @@ do
                 enabled = false
             end
             button:SetEnabled(enabled)
+            -- if we have a custom keybind control then attempt to disable it as well to match
+            if customKeybindControl and customKeybindControl.SetEnabled then
+                customKeybindControl:SetEnabled(enabled)
+            end
 
             local name = GetValueFromRawOrFunction(keybindButtonDescriptor, "name")
             if cooldown then
@@ -971,10 +975,11 @@ do
             UI_SHORTCUT_NEGATIVE = 2,
             UI_SHORTCUT_SECONDARY = 3,
             UI_SHORTCUT_TERTIARY = 4,
-            UI_SHORTCUT_LEFT_STICK = 5,
-            UI_SHORTCUT_RIGHT_STICK = 6,
-            UI_SHORTCUT_LEFT_TRIGGER = 7,
-            UI_SHORTCUT_RIGHT_TRIGGER = 8,
+            UI_SHORTCUT_QUATERNARY = 5,
+            UI_SHORTCUT_LEFT_STICK = 6,
+            UI_SHORTCUT_RIGHT_STICK = 7,
+            UI_SHORTCUT_LEFT_TRIGGER = 8,
+            UI_SHORTCUT_RIGHT_TRIGGER = 9,
 
             DIALOG_PRIMARY = 1,
             DIALOG_NEGATIVE = 2,

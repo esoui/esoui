@@ -181,6 +181,21 @@ function ZO_GamepadMultiFocusArea_Manager:SelectFocusArea(focusArea)
     end
 end
 
+function ZO_GamepadMultiFocusArea_Manager:ActivateFocusArea(focusArea)
+    local hasActiveFocus = self:HasActiveFocus()
+    if self.currentFocalArea and hasActiveFocus then
+        self.currentFocalArea:Deactivate()
+    end
+
+    self.currentFocalArea = focusArea
+
+    if focusArea then
+        focusArea:Activate()
+    end
+
+    self:OnFocusChanged()
+end
+
 function ZO_GamepadMultiFocusArea_Manager:OnFocusChanged()
     -- override in derived classes for desired behaviour
 end

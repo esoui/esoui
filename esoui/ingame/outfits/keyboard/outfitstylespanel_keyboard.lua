@@ -143,7 +143,7 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
 
     self.gridListPanelList:SetGridEntryTemplate("ZO_OutfitStyle_GridEntry_Template_Keyboard", ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD, OutfitStyleGridEntrySetup, HIDE_CALLBACK, OutfitStyleGridEntryReset, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD, ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.gridListPanelList:SetLineBreakAmount(ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_TEMPLATE_DIMENSIONS_KEYBOARD + (ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD * 3))
+    self.gridListPanelList:SetHeaderPrePadding(ZO_GRID_SCROLL_LIST_OUTFIT_STYLE_SPACING_KEYBOARD * 3)
 end
 
 function ZO_OutfitStylesPanel_Keyboard:RegisterEvents()
@@ -170,7 +170,6 @@ function ZO_OutfitStylesPanel_Keyboard:RegisterEvents()
     end
 
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("UpdateSearchResults", RefreshVisible)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshVisible)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshVisible)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", OnCollectibleNewStatusCleared)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleCategoryNewStatusCleared", OnCollectibleCategoryNewStatusCleared)

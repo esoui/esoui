@@ -424,7 +424,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         mainText =
         {
-            text = function() return zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, self.itemName) end
+            text = function()
+                local stackCount = self.marketProductData:GetStackCount()
+                if stackCount > 1 then
+                    return zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, self.itemName, stackCount)
+                else
+                    return zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, self.itemName)
+                end
+            end
         },
         canQueue = true,
         parametricList = {}, --we'll generate the entries on setup
@@ -697,8 +704,9 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         loading = 
         {
             text =  function()
-                        if self.stackCount > 1 then
-                            return zo_strformat(SI_MARKET_PURCHASING_TEXT_WITH_QUANTITY, self.itemName, self.stackCount)
+                        local stackCount = self.marketProductData:GetStackCount()
+                        if stackCount > 1 then
+                            return zo_strformat(SI_MARKET_PURCHASING_TEXT_WITH_QUANTITY, self.itemName, stackCount)
                         else
                             return zo_strformat(SI_MARKET_PURCHASING_TEXT, self.itemName)
                         end
@@ -748,19 +756,20 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         mainText =
         {
             text = function(dialog)
+                local stackCount = self.marketProductData:GetStackCount()
                 if self.isGift then
-                    if self.stackCount > 1 then
-                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, self.stackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
+                    if stackCount > 1 then
+                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, stackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     else
                         return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, self.itemName, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     end
                 else
                     local mainText
                     if self.useProductInfo then
-                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, self.itemName, self.stackCount)
+                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, self.itemName, stackCount)
                     else
-                        if self.stackCount > 1 then
-                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, self.stackCount)
+                        if stackCount > 1 then
+                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, stackCount)
                         else
                             if not self.isGift and self.marketProductData:GetNumAttachedCollectibles() > 0 then
                                 mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
@@ -907,12 +916,6 @@ function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData()
 end
 
 function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationDialogSetup(dialog)
-    self.stackCount = 0
-
-    if not self.marketProductData:IsBundle() then
-        self.stackCount = self.marketProductData:GetStackCount()
-    end
-
     self:BuildMarketPurchaseConfirmationDialogEntries(dialog)
 
     local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
@@ -1114,12 +1117,6 @@ function ZO_GamepadMarketPurchaseManager:BuildMarketPurchaseConfirmationDialogEn
 end
 
 function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationFreeTrialDialogSetup(dialog)
-    self.stackCount = 0
-
-    if not self.marketProductData:IsBundle() then
-        self.stackCount = self.marketProductData:GetStackCount()
-    end
-
     dialog.setupFunc(dialog)
 end
 

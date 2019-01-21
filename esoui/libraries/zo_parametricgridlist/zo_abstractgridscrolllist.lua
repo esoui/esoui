@@ -14,11 +14,23 @@ function ZO_AbstractGridScrollList:Initialize(control)
     self.scrollbar = self.list:GetNamedChild("ScrollBar")
     self.currentHeaderName = nil
     self.nextOperationId = 1
+    self.indentAmount = 0
+    self.headerPrePadding = 0
+    self.headerPostPadding = 0
     self.templateOperationIds = {}
 end
 
-function ZO_AbstractGridScrollList:SetLineBreakAmount(lineBreakAmount)
-    self.lineBreakAmount = lineBreakAmount
+function ZO_AbstractGridScrollList:SetHeaderPrePadding(prePadding)
+    self.headerPrePadding = prePadding
+end
+
+function ZO_AbstractGridScrollList:SetHeaderPostPadding(postPadding)
+    self.headerPostPadding = postPadding
+end
+
+function ZO_AbstractGridScrollList:SetIndentAmount(indentAmount)
+    self.indentAmount = indentAmount
+    internalassert(self.nextOperationId == 1, "You have to call this function before adding templates or they won't get the indent amount")
 end
 
 function ZO_AbstractGridScrollList:SetYDistanceFromEdgeWhereSelectionCausesScroll(yDistanceFromEdgeWhereSelectionCausesScroll)
@@ -32,7 +44,7 @@ function ZO_AbstractGridScrollList:AddHeaderTemplate(templateName, height, setup
         local NOT_SELECTABLE = false
         local WIDTH = nil
 
-        ZO_ScrollList_AddControlOperation(self.list, operationId, templateName, WIDTH, height, resetControlFunc, setupFunc, onHideFunc, SPACING_XY, SPACING_XY, NOT_SELECTABLE)
+        ZO_ScrollList_AddControlOperation(self.list, operationId, templateName, WIDTH, height, resetControlFunc, setupFunc, onHideFunc, SPACING_XY, SPACING_XY, self.indentAmount, NOT_SELECTABLE)
         ZO_ScrollList_SetTypeCategoryHeader(self.list, operationId, true)
 
         self.nextOperationId = self.nextOperationId + 1
@@ -47,7 +59,7 @@ function ZO_AbstractGridScrollList:AddEntryTemplate(templateName, width, height,
     if self.templateOperationIds[templateName] == nil then
         local operationId = self.nextOperationId
         local IS_SELECTABLE = true
-        ZO_ScrollList_AddControlOperation(self.list, operationId, templateName, width, height, resetControlFunc, setupFunc, onHideFunc, spacingX, spacingY, IS_SELECTABLE, centerEntries)
+        ZO_ScrollList_AddControlOperation(self.list, operationId, templateName, width, height, resetControlFunc, setupFunc, onHideFunc, spacingX, spacingY, self.indentAmount, IS_SELECTABLE, centerEntries)
 
         self.nextOperationId = self.nextOperationId + 1
         self.templateOperationIds[templateName] = operationId
@@ -64,12 +76,15 @@ function ZO_AbstractGridScrollList:AddEntry(data, templateName)
         if self.currentHeaderName ~= gridHeaderName then
             local scrollData = ZO_ScrollList_GetDataList(self.list)
             if self.currentHeaderName or #scrollData > 0 then
-                ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.lineBreakAmount })
+                ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.headerPrePadding })
             end
             self.currentHeaderName = gridHeaderName
             if self.currentHeaderName and self.currentHeaderName ~= "" then
                 local headerOperationId = self.templateOperationIds[data.gridHeaderTemplate]
                 ZO_ScrollList_AddOperation(self.list, headerOperationId, { header = gridHeaderName, data = data })
+                if self.headerPostPadding > 0 then
+                    ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.headerPostPadding, indentX = self.indentAmount })
+                end
             end
         end
         ZO_ScrollList_AddOperation(self.list, operationId, data)

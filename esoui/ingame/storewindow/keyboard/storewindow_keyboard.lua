@@ -261,7 +261,6 @@ function ZO_StoreManager:Initialize(control)
     control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
     control:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
     control:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshStoreWindow)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshStoreWindow)
 
     local function OnItemRepaired(bagId, slotIndex)
@@ -720,7 +719,7 @@ function ZO_StoreManager:PreviewStoreEntry(storeEntryIndex)
         self:TogglePreviewMode()
     end
 
-    ITEM_PREVIEW_KEYBOARD:PreviewStoreEntryAsFurniture(storeEntryIndex)
+    ZO_StoreManager_DoPreviewAction(ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE, storeEntryIndex)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -734,8 +733,7 @@ local function GetStoreEntryIndexForPreviewFromSlot(storeEntrySlot)
     local slotType = ZO_InventorySlot_GetType(inventorySlot)
     if slotType == SLOT_TYPE_STORE_BUY then
         local storeEntryIndex = inventorySlot.index
-        local itemLink = GetStoreItemLink(storeEntryIndex)
-        if ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink) then
+        if ZO_StoreManager_DoPreviewAction(ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE, storeEntryIndex) then
             return storeEntryIndex
         end
     end

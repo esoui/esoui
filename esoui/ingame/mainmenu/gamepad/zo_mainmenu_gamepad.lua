@@ -931,6 +931,27 @@ function ZO_MainMenuManager_Gamepad:ShowDailyLoginRewardsEntry()
     SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu")
 end
 
+function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
+    local activityFinderSceneName = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME
+    local zoneStoriesSceneName = "zoneStoriesGamepad"
+
+    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.ACTIVITY_FINDER])
+    local mainList = ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:GetMainList()
+    for i = 1, mainList:GetNumEntries() do
+        local entryData = mainList:GetEntryData(i)
+        if entryData.data.sceneName and entryData.data.sceneName == zoneStoriesSceneName then
+            mainList:SetSelectedIndexWithoutAnimation(i)
+            break
+        end
+    end
+
+    if createFullStack then
+       SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", activityFinderSceneName, zoneStoriesSceneName)
+    else
+        SCENE_MANAGER:Push(zoneStoriesSceneName)
+    end
+end
+
 function ZO_MainMenu_Gamepad_OnInitialized(self)
     MAIN_MENU_GAMEPAD = ZO_MainMenuManager_Gamepad:New(self)
     SYSTEMS:RegisterGamepadObject("mainMenu", MAIN_MENU_GAMEPAD)

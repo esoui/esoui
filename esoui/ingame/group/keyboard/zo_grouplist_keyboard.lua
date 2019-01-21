@@ -44,13 +44,14 @@ function ZO_GroupList_Keyboard:Initialize(control)
     end
 
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
-    
+
     GROUP_LIST_FRAGMENT = ZO_FadeSceneFragment:New(control)
     GROUP_LIST_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         elseif newState == SCENE_FRAGMENT_SHOWN then
             self:RefreshData()
+            TriggerTutorial(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED)
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         end
@@ -69,7 +70,7 @@ function ZO_GroupList_Keyboard:Initialize(control)
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_group_over.dds",
     }
-    GROUP_MENU_KEYBOARD:AddCategory(data)
+    GROUP_MENU_KEYBOARD:AddCategory(data, ZO_ACTIVITY_FINDER_SORT_PRIORITY.GROUP)
 end
 
 function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()

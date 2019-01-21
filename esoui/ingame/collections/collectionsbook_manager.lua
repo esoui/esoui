@@ -23,16 +23,37 @@ function CollectionsBook_Singleton:Initialize()
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLES_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_COLLECTIBLE_REQUEST_BROWSE_TO, function(eventId, ...) self:BrowseToCollectible(...) end)
     EVENT_MANAGER:RegisterForEvent("CollectionsBook_Singleton", EVENT_ACTION_UPDATE_COOLDOWNS, function(eventId, ...) self:OnUpdateCooldowns(...) end)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
 
-    local function OnCollectionUpdated()
-        self:RefreshOwnedHouses()
-        -- When the data is getting rebuilt, the indicies can change so our old search results are no longer any good
-        if self:GetSearchResults() then
-            local currentSearch = self.searchString
-            ZO_ClearTable(self.searchResults)
-            self:SetSearchString("")
-            self:SetSearchString(currentSearch)
+    local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
+            self:RefreshOwnedHouses()
+
+            -- When the data is getting rebuilt, the indices can change so our old search results are no longer any good
+            if self:GetSearchResults() then
+                local currentSearch = self.searchString
+                ZO_ClearTable(self.searchResults)
+                self:SetSearchString("")
+                self:SetSearchString(currentSearch)
+            end
+        else
+            --TODO: Refactor naming, ownedHouses is a misnomer.  It should really be unlocked houses.  It just so happens that we don't (yet) allow you to unlock a house other than by owning it.
+            for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
+                for _, collectibleData in ipairs(unlockStateTable) do
+                    if collectibleData:IsHouse() then
+                        local nowUnlocked = collectibleData:IsUnlocked()
+                        local collectibleId = collectibleData:GetId()
+                        if nowUnlocked and not self.ownedHouses[collectibleId] then
+                            self.ownedHouses[collectibleId] = 
+                            {
+                                houseId = collectibleData:GetReferenceId(),
+                                showPermissionsDialogOnEnter = true,
+                            }
+                        elseif not nowUnlocked and self.ownedHouses[collectibleId] then
+                            self.ownedHouses[collectibleId] = nil
+                        end
+                    end
+                end
+            end
         end
     end
 
@@ -130,27 +151,6 @@ function CollectionsBook_Singleton:RefreshOwnedHouses()
     for _, collectibleData in ipairs(ownedHouses) do
         self.ownedHouses[collectibleData:GetId()] = { houseId = collectibleData:GetReferenceId() }
     end
-end
-
-function CollectionsBook_Singleton:RefreshOwnedHouseById(collectibleId, lockStateChange)
-    if lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        if collectibleData:IsHouse() then
-            if lockStateChange == ZO_COLLECTIBLE_LOCK_STATE_CHANGE.LOCKED then
-                self.ownedHouses[collectibleId] = nil
-            else
-                self.ownedHouses[collectibleId] = 
-                {
-                    houseId = collectibleData:GetReferenceId(),
-                    showPermissionsDialogOnEnter = true,
-                }
-            end
-        end
-    end
-end
-
-function CollectionsBook_Singleton:OnCollectibleUpdated(collectibleId, lockStateChange)
-    self:RefreshOwnedHouseById(collectibleId, lockStateChange)
 end
 
 function CollectionsBook_Singleton:OnUpdateCooldowns(...)

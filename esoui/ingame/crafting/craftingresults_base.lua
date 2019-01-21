@@ -107,7 +107,7 @@ function ZO_CraftingResults_Base:AssociateAnimations(tooltip)
         tooltipBurst1:SetAlpha(0)
         tooltipBurst2:SetAlpha(0)
 
-        self:OnTooltipAnimationStopped()
+        self:OnTooltipAnimationStopped(self.resultTooltipAnimation.craftingType)
     end
 
     self.forceStopHandler = function()
@@ -191,7 +191,7 @@ function ZO_CraftingResults_Base:OnRetraitStarted()
     self:StartCraftProcess(playStopTooltipAnimation)
 end
 
-function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalResult)
+function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalResult, craftingType)
     if self.tooltipControl and not self.tooltipControl:IsHidden() then
         self:ForceStop()
 
@@ -219,6 +219,7 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalRe
         self.tooltipBurst1:SetHidden(isFailure)
         self.tooltipBurst2:SetHidden(isFailure)
 
+        self.resultTooltipAnimation.craftingType = craftingType
         self.resultTooltipAnimation:PlayFromStart()
 
         local secondaryTooltipAnimations = self.secondaryTooltipAnimationPool:GetActiveObjects()
@@ -226,18 +227,18 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalRe
             animation:PlayFromStart()
         end
     else
-        self:OnTooltipAnimationStopped()
+        self:OnTooltipAnimationStopped(craftingType)
     end
     PlaySound(isFailure and self.tooltipAnimationFailureSound or self.tooltipAnimationSuccessSound)
 end
 
-function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed, isExceptionalResult)
+function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed, isExceptionalResult, craftingType)
     self.enchantSoundPlayer:ForceStop()
     if not self.craftingProcessCompleted then
         self.craftingProcessCompleted = true
 
         if self.playStopTooltipAnimation then
-            self:PlayTooltipAnimation(craftFailed, isExceptionalResult)
+            self:PlayTooltipAnimation(craftFailed, isExceptionalResult, craftingType)
         else
             self:CheckCraftProcessCompleted()
         end
@@ -247,7 +248,8 @@ end
 function ZO_CraftingResults_Base:OnCraftCompleted(craftingType)
     local numItemsGained = GetNumLastCraftingResultItemsAndPenalty()
     local craftFailed = numItemsGained == 0
-    self:CompleteCraftProcess(craftFailed)
+    local NOT_EXECTIONAL_RESULT = false
+    self:CompleteCraftProcess(craftFailed, NOT_EXECTIONAL_RESULT, craftingType)
 end
 
 function ZO_CraftingResults_Base:OnRetraitCompleted(result)
@@ -263,10 +265,10 @@ function ZO_CraftingResults_Base:OnAllEnchantSoundsFinished()
     end
 end
 
-function ZO_CraftingResults_Base:OnTooltipAnimationStopped()
+function ZO_CraftingResults_Base:OnTooltipAnimationStopped(craftingType)
     if self.tooltipAnimationCompleted == false then
         self.tooltipAnimationCompleted = true
-        self:CheckCraftProcessCompleted()
+        self:CheckCraftProcessCompleted(craftingType)
     end
 end
 
@@ -303,10 +305,8 @@ local SMITHING_TYPE_TO_FAILED_EXTRACTION_SOUND =
     [CRAFTING_TYPE_WOODWORKING] = SOUNDS.WOODWORKER_FAILED_EXTRACTION,
     [CRAFTING_TYPE_JEWELRYCRAFTING] = SOUNDS.JEWELRYCRAFTER_FAILED_EXTRACTION,
 }
-local function GetFailedSmithingExtractionResultInfo()
-    local craftingType = GetCraftingInteractionType()
+local function GetFailedSmithingExtractionResultInfo(craftingType)
     local failedExtractionSound = internalassert(SMITHING_TYPE_TO_FAILED_EXTRACTION_SOUND[craftingType])
-
     return SI_SMITHING_EXTRACTION_FAILED, failedExtractionSound
 end
 
@@ -342,7 +342,7 @@ function ZO_CraftingResults_Base:RestoreAnchor(control)
     restoredAnchor:Set(control)
 end
 
-function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
+function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType)
     if self:IsActive() and self.craftingProcessCompleted and self.tooltipAnimationCompleted then
         if GetNumLastCraftingResultLearnedTraits() > 0 then
             self:DisplayDiscoveredTraits()
@@ -359,7 +359,7 @@ function ZO_CraftingResults_Base:CheckCraftProcessCompleted()
             if SYSTEMS:IsShowing("alchemy") then
                 ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
             elseif smithingObject and smithingObject:IsExtracting() then
-                local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo()
+                local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
                 if penaltyApplied then
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
                 else

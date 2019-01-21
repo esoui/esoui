@@ -167,7 +167,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeTools()
     local SPACING_X = 12
     self.dyeToolsGridList:SetGridEntryTemplate("ZO_DyeTool_GridEntry_Template_Gamepad", ZO_DYE_TOOL_GRID_ENTRY_DIMENTIONS, ZO_DYE_TOOL_GRID_ENTRY_DIMENTIONS, DyeToolGridEntrySetup, HIDE_CALLBACK, DyeToolGridEntryReset, SPACING_X, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.dyeToolsGridList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.dyeToolsGridList:SetLineBreakAmount(ZO_DYE_TOOL_GRID_ENTRY_DIMENTIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
+    self.dyeToolsGridList:SetHeaderPrePadding(ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.dyeToolsGridList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnDyeToolsGridSelectedDataChanged(previousData, newData) end)
     self.dyeToolsGridList:SetDimsOnDeactivate(true)
 
@@ -205,7 +205,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeDyesGrid()
     -- the values sent for control dimensions are the scaled up size so that when the control is scaled up, they do not clip with the scroll mask
     self.dyeGridList:SetGridEntryTemplate("ZO_DyeingSwatch_Gamepad", DYE_SWATCH_DIMENSIONS, DYE_SWATCH_DIMENSIONS, DyeSwatchGridEntrySetup, HIDE_CALLBACK, DyeSwatchGridEntryReset, SPACING_XY, SPACING_XY, CENTER_ENTRIES)
     self.dyeGridList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.dyeGridList:SetLineBreakAmount(DYE_SWATCH_DIMENSIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD * 2)
+    self.dyeGridList:SetHeaderPrePadding(ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD * 2)
     self.dyeGridList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnDyesGridSelectedDataChanged(previousData, newData) end)
     self.dyeGridList:SetDimsOnDeactivate(true)
 end

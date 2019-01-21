@@ -421,7 +421,7 @@ function ZO_Market_Keyboard:InitializeMarketList()
     self.productGridList:AddEntryTemplate("ZO_MarketProduct_Keyboard", ZO_MARKET_PRODUCT_WIDTH, ZO_MARKET_PRODUCT_HEIGHT, MarketProductEntrySetup, HIDE_CALLBACK, MarketProductEntryReset, ZO_MARKET_PRODUCT_COLUMN_PADDING, ROW_PADDING, CENTER_ENTRIES)
     self.productGridList:AddEntryTemplate("ZO_MarketProductBundle_Keyboard", ZO_MARKET_PRODUCT_BUNDLE_WIDTH, ZO_MARKET_PRODUCT_HEIGHT, MarketProductBundleEntrySetup, HIDE_CALLBACK, MarketProductEntryReset, ZO_MARKET_PRODUCT_COLUMN_PADDING, ROW_PADDING, CENTER_ENTRIES)
     self.productGridList:AddHeaderTemplate("ZO_Market_GroupLabel", HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.productGridList:SetLineBreakAmount(ZO_MARKET_PRODUCT_HEIGHT + 30)
+    self.productGridList:SetHeaderPrePadding(30)
 end
 
 function ZO_Market_Keyboard:BuildCategories()
@@ -429,6 +429,7 @@ function ZO_Market_Keyboard:BuildCategories()
     self.categoryTree:Reset()
     self.nodeLookupData = {}
 
+    self:HideCustomTopLevelCategories()
     self:AddTopLevelCategories()
 
     local nodeToSelect
@@ -1015,13 +1016,8 @@ function ZO_Market_Keyboard:OnMarketPurchaseResult()
     self:RefreshCategoryTree()
 end
 
-function ZO_Market_Keyboard:OnCollectibleUpdated(justUnlocked)
-    ZO_Market_Shared.OnCollectibleUpdated(self, justUnlocked)
-    self:RefreshCategoryTree()
-end
-
-function ZO_Market_Keyboard:OnCollectiblesUpdated(numJustUnlocked)
-    ZO_Market_Shared.OnCollectiblesUpdated(self, numJustUnlocked)
+function ZO_Market_Keyboard:OnCollectiblesUnlockStateChanged()
+    ZO_Market_Shared.OnCollectiblesUnlockStateChanged(self)
     self:RefreshCategoryTree()
 end
 

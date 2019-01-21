@@ -117,7 +117,7 @@ function ZO_MetaPool:AcquireObject()
 end
 
 function ZO_MetaPool:GetExistingObject(objectKey)
-    return self.activeObjects[key]
+    return self.activeObjects[objectKey]
 end
 
 function ZO_MetaPool:GetActiveObjectCount()

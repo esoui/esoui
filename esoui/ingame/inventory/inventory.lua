@@ -18,11 +18,6 @@ local DONT_USE_SHORT_FORMAT = false
 local PREVENT_LAYOUT = false
 local NOT_IS_GAMEPAD = false
 
-local searchButtonTexture = "EsoUI/Art/Buttons/searchButton_normal.dds"
-local searchButtonDownTexture = "EsoUI/Art/Buttons/searchButton_mouseDown.dds"
-local cancelButtonTexture = "EsoUI/Art/Buttons/cancelButton_normal.dds"
-local cancelButtonDownTexture = "EsoUI/Art/Buttons/cancelButton_mouseDown.dds"
-
 local NEW_ICON_TEXTURE = "EsoUI/Art/Inventory/newItem_icon.dds"
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 
@@ -300,7 +295,6 @@ local function SetupQuestRow(rowControl, questItem)
 end
 
 local function CreateNewTabFilterData(filterType, inventoryType, normal, pressed, highlight, hiddenColumns, hideTab)
-    local isHiddenTab = isHidden == true -- nil means don't hide
     local filterString = GetString("SI_ITEMFILTERTYPE", filterType)
 
     local tabData = 
@@ -1305,7 +1299,7 @@ end
 function ZO_InventoryManager:AddInventoryItem(inventoryType, slotIndex, bagId)
     local inventory = self.inventories[inventoryType]
     if inventory.backingBags then
-    	-- Default bagId to backingBags[1] for addon backwards-compatibility
+        -- Default bagId to backingBags[1] for addon backwards-compatibility
         bagId = bagId or inventory.backingBags[1]
         inventory.slots[bagId][slotIndex] = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
     end
@@ -1814,7 +1808,7 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
     ZO_CraftBagInfoBarAltFreeSlots:SetHidden(hideBankInfo)
 
     local useSearchBar = layoutData.useSearchBar
-    ZO_PlayerInventorySearchBox:SetHidden(not useSearchBar)
+    ZO_PlayerInventorySearch:SetHidden(not useSearchBar)
 
     local hideTabBar = layoutData.hideTabBar
     ZO_PlayerInventoryTabs:SetHidden(hideTabBar)
@@ -2534,7 +2528,6 @@ function ZO_InventoryManager:RefreshAllGuildBankItems()
     self.suppressItemAddedAlert = true
 
     --Add items
-    local slotId = GetNextGuildBankSlotId()
     for k, bagId in ipairs(inventory.backingBags) do
         local slotIndex = ZO_GetNextBagSlotIndex(bagId)
         while slotIndex do
@@ -2547,7 +2540,7 @@ function ZO_InventoryManager:RefreshAllGuildBankItems()
 
     self:UpdateFreeSlots(INVENTORY_BACKPACK)
 
-    self.suppressItemAddedAlert = nil   
+    self.suppressItemAddedAlert = nil
 end
 
 function ZO_InventoryManager:ClearAllGuildBankItems()

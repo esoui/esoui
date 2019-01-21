@@ -19,6 +19,16 @@ GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT = ZO_TranslateFromLeftSceneFragme
 
 -- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
 
+GAMEPAD_NAV_QUADRANT_2_3_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedWidth = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedHeight = 400,
+    forcePreparePreview = false,
+    previewInEmptyWorld = true,
+    previewBufferMS = 300
+})
+
 GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     paddingLeft = ZO_GAMEPAD_QUADRANT_2_RIGHT_OFFSET,
     paddingRight = 0,
@@ -51,26 +61,6 @@ GAMEPAD_COLLECTIONS_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragmen
     dynamicFramingConsumedHeight = 400,
     forcePreparePreview = false,
     previewBufferMS = 300,
-    maintainsPreviewCollection = true,
-})
-
-GAMEPAD_RESTYLE_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
-    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    paddingRight = 0,
-    dynamicFramingConsumedWidth = 1150,
-    dynamicFramingConsumedHeight = 400,
-    forcePreparePreview = false,
-    maintainsPreviewCollection = true,
-})
-
-FURNITURE_BROWSER_GAMEPAD_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
-    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    dynamicFramingConsumedWidth = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
-    dynamicFramingConsumedHeight = 400,
-    forcePreparePreview = false,
-    previewInEmptyWorld = true,
-    previewBufferMS = 300
 })
 
 local ZO_Gamepad_GuildNameFooterFragment = ZO_FadeSceneFragment:Subclass()
@@ -235,8 +225,13 @@ GAMEPAD_GUILD_BANK_WITHDRAW_DEPOSIT_GOLD_FRAGMENT = ZO_SimpleSceneFragment:New(Z
 GAMEPAD_GUILD_KIOSK_PURCHASE_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_GuildKiosk_Purchase)
 GAMEPAD_GUILD_KIOSK_BID_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_GuildKiosk_Bid)
 
-GAMEPAD_TRADING_HOUSE_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_TradingHouse_Gamepad)
-GAMEPAD_TRADING_HOUSE_CREATE_LISTING_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_TradingHouse_CreateListing_Gamepad)
+GAMEPAD_TRADING_HOUSE_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_TradingHouse_Gamepad)
+GAMEPAD_TRADING_HOUSE_FRAGMENT:SetHideOnSceneHidden(true)
+GAMEPAD_TRADING_HOUSE_CREATE_LISTING_ROOT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TradingHouse_CreateListing_Gamepad)
+GAMEPAD_TRADING_HOUSE_CREATE_LISTING_LIST_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_TradingHouse_CreateListing_GamepadMaskContainer)
 
 GAMEPAD_RESTYLE_STATION_LIST_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_RestyleStation_GamepadMaskContainer)
 GAMEPAD_OUTFITS_SELECTOR_ROOT_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Outfits_Selector_GamepadMaskContainer)
+
+GAMEPAD_ZONE_STORIES_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_ZoneStoriesTopLevel_Gamepad)
+GAMEPAD_ZONE_STORIES_FRAGMENT:SetHideOnSceneHidden(true)

@@ -1,0 +1,31 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_ActivityCompletionHeader_Keyboard" inherits="ZO_ZoneStory_ActivityCompletionHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true" font="ZoFontWinH2" >
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ZoneStory_ActivityCompletionTile_Keyboard_Control" inherits="ZO_ZoneStory_ActivityCompletionTile_Control ZO_Tile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_KEYBOARD_DIMENSIONS_Y" />
+
+            <OnInitialized>
+                ZO_ZoneStory_ActivityCompletionTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_KEYBOARD_ICON_DIMENSIONS" />
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+                
+                <Label name="$(parent)Value" override="true" font="ZoFontWinH4">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" />
+                    <Anchor point="RIGHT" constrains="X" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

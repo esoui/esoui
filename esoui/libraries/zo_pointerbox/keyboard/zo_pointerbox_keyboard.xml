@@ -14,10 +14,10 @@
     <Controls>
         <Control name="ZO_PointerBox_KeyboardControl" virtual="true" mouseEnabled="true" tier="HIGH">
             <Controls>
-                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" tier="HIGH" layer="CONTROLS">
                     <AnchorFill/>
                 </Backdrop>
-                <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Miscellaneous/Keyboard/toolTipHintArrow.dds">
+                <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Miscellaneous/Keyboard/toolTipHintArrow.dds" tier="HIGH" layer="CONTROLS" level="1">
                     <Dimensions x="ZO_POINTER_BOX_ARROW_SIZE" y="ZO_POINTER_BOX_ARROW_SIZE"/>
                 </Texture>
             </Controls>

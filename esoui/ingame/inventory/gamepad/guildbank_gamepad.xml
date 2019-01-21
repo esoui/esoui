@@ -12,16 +12,6 @@
             </OnInitialized>
             
             <Controls>
-                <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
-                    <Controls>
-                        <Control name="$(parent)Container" override="true">
-                            <Controls>
-                                <Label name="$(parent)Text" text="SI_INVENTORY_RETRIEVING_ITEMS" override="true"/>
-                            </Controls>
-                        </Control>
-                    </Controls>
-                </Control>
-
                 <Control name="$(parent)CenterIsAlongTop">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT"/>
                     <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM"/>

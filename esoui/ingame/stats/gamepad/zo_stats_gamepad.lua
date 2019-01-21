@@ -651,11 +651,6 @@ function ZO_GamepadStats:RefreshContentHeader(title, dataHeaderText, dataText)
     self.contentHeaderData.data1HeaderText = dataHeaderText
     self.contentHeaderData.data1Text = dataText
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
-
-    local headerTitle = self.contentHeader:GetNamedChild("TitleContainer"):GetNamedChild("Title")
-    headerTitle:ClearAnchors()
-    headerTitle:SetAnchor(LEFT)
-    headerTitle:SetAnchor(BOTTOMRIGHT, self.equipmentBonus:GetNamedChild("Header"), BOTTOMLEFT, 0, 2)
 end
 
 ---------------

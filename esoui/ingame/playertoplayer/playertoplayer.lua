@@ -15,6 +15,7 @@ local INTERACT_TYPE_DUEL_INVITE = 12
 local INTERACT_TYPE_LFG_READY_CHECK = 13
 local INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS = 14
 local INTERACT_TYPE_GIFT_RECEIVED = 15
+local INTERACT_TYPE_TRACK_ZONE_STORY = 16
 
 local TIMED_PROMPTS =
 {
@@ -587,6 +588,45 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED, function(event, ...) OnGroupElectionNotificationAdded(...) end)
     self.control:RegisterForEvent(EVENT_GROUP_ELECTION_NOTIFICATION_REMOVED, function(event, ...) OnGroupElectionNotificationRemoved(...) end)
 
+    local function OnTrackedZoneStoryActivityCompleted(zoneId, zoneCompletionType, activityId)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY)
+
+        local numCompletedActivities, totalActivities, numUnblockedActivities, _, progressText = ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType)
+        
+        if numCompletedActivities == totalActivities and not CanZoneStoryContinueTrackingActivities(zoneId) then
+            return
+        end
+
+        local function AcceptCallback()
+            local SET_AUTO_MAP_NAVIGATION_TARGET = true
+            local COMPLETION_TYPE_ALL = nil
+            TrackNextActivityForZoneStory(zoneId, COMPLETION_TYPE_ALL, SET_AUTO_MAP_NAVIGATION_TARGET)
+        end
+
+        local function DeclineCallback()
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY)
+        end
+        
+        PlaySound(SOUNDS.NEW_TIMED_NOTIFICATION)
+        
+        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY, nil, nil, nil, AcceptCallback, DeclineCallback)
+        promptData.acceptText = GetString(SI_ZONE_STORY_CONTINUE_EXPLORING_ACTION)
+        promptData.declineText = GetString(SI_DIALOG_DISMISS)
+
+        promptData.messageFormat = GetString("SI_ZONECOMPLETIONTYPE_PROGRESSDESCRIPTION", zoneCompletionType)
+        promptData.messageParams = { ZO_SELECTED_TEXT:Colorize(progressText), ZO_SELECTED_TEXT:Colorize(GetZoneNameById(zoneId)) }
+        promptData.dialogTitle = GetString("SI_ZONE_STORY_INFO_HEADER")
+        promptData.uniqueSounds =
+        {
+            accept = SOUNDS.ZONE_STORIES_TRACK_ACTIVITY,
+        }
+    end
+    self.control:RegisterForEvent(EVENT_TRACKED_ZONE_STORY_ACTIVITY_COMPLETED, function(event, ...) OnTrackedZoneStoryActivityCompleted(...) end)
+
+    local function OnZoneStoryActivityTracked()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY)
+    end
+    self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_TRACKED, function(event, ...) OnZoneStoryActivityTracked(...) end)
 
     local function OnPlayerActivated()
         local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()

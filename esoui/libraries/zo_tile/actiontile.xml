@@ -9,6 +9,10 @@
                             <AnchorFill />
                         </Texture>
 
+                        <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="8">
+                            <AnchorFill />
+                        </Texture>
+                        
                         <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="10">
                             <AnchorFill />
                             <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>

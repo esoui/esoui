@@ -37,23 +37,24 @@ function ZO_Help_GenericTicketSubmission_Manager:OnCustomerServiceTicketSubmitte
     self.reportPlayerTicketSubmittedCallback = nil
 
     if IsInGamepadPreferredMode() then
-
         local dialogParams = {}
 
         if success == true and response ~= nil then
             dialogParams.titleParams = { self.ticketSubmittedSuccessHeader }
-            dialogParams.mainTextParams =   {
-                                                string.format("%s%s", response, self.emailAppendText),
-                                                self.knowledgeBaseText, 
-                                                self.websiteText,
-                                            }
+            dialogParams.mainTextParams =
+            {
+                string.format("%s%s", response, self.emailAppendText),
+                self.knowledgeBaseText,
+                self.websiteText,
+            }
         else
             dialogParams.titleParams = { self.ticketSubmittedFailedHeader }
-            dialogParams.mainTextParams =   {
-                                                self.ticketSubmittedFailedMessage,
-                                                self.knowledgeBaseText,
-                                                self.websiteText,
-                                            }
+            dialogParams.mainTextParams =
+            {
+                self.ticketSubmittedFailedMessage,
+                self.knowledgeBaseText,
+                self.websiteText,
+            }
         end
 
         ZO_Dialogs_ShowGamepadDialog("HELP_CUSTOMER_SERVICE_GAMEPAD_TICKET_SUBMITTED", nil, dialogParams)

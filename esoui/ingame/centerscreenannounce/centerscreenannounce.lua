@@ -922,9 +922,16 @@ do
             control:RegisterForEvent(event, OnCenterScreenEvent)
         end
 
-        -- Calbbacks
+        -- Callbacks
         for _, data in ipairs(callbackHandlers) do
-            data.callbackManager:RegisterCallback(data.callbackRegistration, function(...) self:AddMessageWithParams(data.callbackFunction(...)) end)
+            local function Callback(...)
+                local paramsObjects = { data.callbackFunction(...) }
+                for _, params in ipairs(paramsObjects) do
+                    self:AddMessageWithParams(params)
+                end
+            end
+            
+            data.callbackManager:RegisterCallback(data.callbackRegistration, Callback)
         end
 
         self:InitializeMessagePools()

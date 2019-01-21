@@ -61,8 +61,7 @@ function ZO_Market_Shared:RegisterForMarketSingletonCallbacks()
 
     -- events we only need to react to if we're showing
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketPurchaseResult", function(...) if self:IsShowing() then self:OnMarketPurchaseResult(...) end end)
-    ZO_MARKET_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) if self:IsShowing() then self:OnCollectibleUpdated(...) end end)
-    ZO_MARKET_MANAGER:RegisterCallback("OnCollectiblesUpdated", function(...) if self:IsShowing() then self:OnCollectiblesUpdated(...) end end)
+    ZO_MARKET_MANAGER:RegisterCallback("OnCollectiblesUnlockStateChanged", function(...) if self:IsShowing() then self:OnCollectiblesUnlockStateChanged(...) end end)
     ZO_MARKET_MANAGER:RegisterCallback("OnEsoPlusSubscriptionStatusChanged", function(...) if self:IsShowing() then self:OnEsoPlusSubscriptionStatusChanged(...) end end)
 end
 
@@ -164,16 +163,8 @@ function ZO_Market_Shared:UpdateCurrentCategory()
     end
 end
 
-function ZO_Market_Shared:OnCollectibleUpdated(justUnlocked)
-    if justUnlocked then
-        self:UpdateCurrentCategory()
-    end
-end
-
-function ZO_Market_Shared:OnCollectiblesUpdated(numJustUnlocked)
-    if numJustUnlocked > 0 then
-        self:UpdateCurrentCategory()
-    end
+function ZO_Market_Shared:OnCollectiblesUnlockStateChanged()
+    self:UpdateCurrentCategory()
 end
 
 function ZO_Market_Shared:OnShowMarketProduct(marketProductId)

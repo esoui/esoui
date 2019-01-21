@@ -26,7 +26,7 @@ do
         local productType = GetMarketProductType(productId)
         -- For some market product types we can just use other tooltip layouts
         if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-            local collectibleId, _, name, type, description, _, isPlaceholder, isPurchasable, hint = GetMarketProductCollectibleInfo(productId)
+            local collectibleId, _, name, type, description, _, isPurchasable, hint = GetMarketProductCollectibleInfo(productId)
             local showAsPurchasable
             if not showCollectiblePurchasableHint then
                 showAsPurchasable = false
@@ -38,7 +38,8 @@ do
                 hint = nil
             end
 
-            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, showAsPurchasable, description, hint, isPlaceholder, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            local DEPRECATED_ARG = nil
+            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, showAsPurchasable, description, hint, DEPRECATED_ARG, type, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
         elseif productType == MARKET_PRODUCT_TYPE_ITEM then
             local itemLink = GetMarketProductItemLink(productId)
             local stackCount = GetMarketProductStackCount(productId)

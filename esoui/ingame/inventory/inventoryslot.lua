@@ -361,7 +361,7 @@ end
 local function CanUseSecondaryActionOnSlot(inventorySlot)
     return inventorySlot
            and not QUICKSLOT_WINDOW:AreQuickSlotsShowing() 
-           and not (TRADING_HOUSE and TRADING_HOUSE:IsAtTradingHouse())
+           and not (TRADING_HOUSE_SEARCH and TRADING_HOUSE_SEARCH:IsAtTradingHouse())
            and not (ZO_Store_IsShopping and ZO_Store_IsShopping())
            and not IsSendingMail() 
            and not (TRADE_WINDOW and TRADE_WINDOW:IsTrading())
@@ -1058,8 +1058,8 @@ local function CanUseItemWithOnUseType(onUseType)
     if onUseType == ITEM_USE_TYPE_ITEM_DYE_STAMP
        or onUseType == ITEM_USE_TYPE_COSTUME_DYE_STAMP
        or onUseType == ITEM_USE_TYPE_KEEP_RECALL_STONE
-       or onUseType == ITEM_USE_TYPE_SKILL_RESPEC 
-       or onUseType == ITEM_USE_TYPE_MORPH_RESPEC 
+       or onUseType == ITEM_USE_TYPE_SKILL_RESPEC
+       or onUseType == ITEM_USE_TYPE_MORPH_RESPEC
     then
         return false
     end
@@ -1072,7 +1072,6 @@ local function CanUseItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
     local usable, onlyFromActionSlot = IsItemUsable(bag, index)
     local canInteractWithItem = CanInteractWithItem(bag, index)
-    local itemType = GetItemType(bag, index)
     local onUseType = GetItemUseType(bag, index)
     local canUseItemWithOnUseType = CanUseItemWithOnUseType(onUseType)
     return usable and not onlyFromActionSlot and canInteractWithItem and not hasCooldown and canUseItemWithOnUseType
@@ -1086,6 +1085,17 @@ local function TryUseItem(inventorySlot)
         UseItem(bag, index)
         return true
     end
+end
+
+function ZO_InventorySlot_InitiateConfirmUseItem(inventorySlot)
+    if IsSlotLocked(inventorySlot) then
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_ERROR_ITEM_LOCKED))
+        return false
+    end
+
+    local bag, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+    InitiateConfirmUseInventoryItem(bag, slotIndex)
+    return true
 end
 
 local function TryShowRecallMap(inventorySlot)
@@ -1280,8 +1290,13 @@ end
 
 local function DefaultUseItemFunction(inventorySlot, slotActions)
     if CanUseItem(inventorySlot) then
-        -- TODO: Localization will involve determining the correct name of the action that will be performed on the item (eat, drink, open, etc...)
-        slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() TryUseItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
+        local bag, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local onUseType = GetItemUseType(bag, slotIndex)
+        if onUseType == ITEM_USE_TYPE_EVOLUTION then
+            slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() ZO_InventorySlot_InitiateConfirmUseItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
+        else
+            slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() TryUseItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
+        end
     end
 end
 
@@ -1723,13 +1738,43 @@ local actionHandlers =
                         end,
 
     ["trading_house_post"] = function(inventorySlot, slotActions)
-                                if(TRADING_HOUSE:IsAtTradingHouse() and not IsItemAlreadyBeingPosted(inventorySlot)) then
+                                if(TRADING_HOUSE_SEARCH:IsAtTradingHouse() and not IsItemAlreadyBeingPosted(inventorySlot)) then
                                     slotActions:AddSlotAction(SI_TRADING_HOUSE_ADD_ITEM_TO_LISTING, function() TryInitiatingItemPost(inventorySlot) end, "primary")
                                 end
                             end,
 
+    ["trading_house_search_from_sell"] =    function(inventorySlot, slotActions)
+                                                if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
+                                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
+                                                        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+                                                        local itemLink = GetItemLink(bag, index)
+                                                        TRADING_HOUSE:SearchForItemLink(itemLink)
+                                                    end, "keybind3")
+                                                 end
+                                            end,
+
+    ["trading_house_search_from_results"] = function(inventorySlot, slotActions)
+                                                 if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
+                                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
+                                                        local resultIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
+                                                        local itemLink = GetTradingHouseSearchResultItemLink(resultIndex)
+                                                        TRADING_HOUSE:SearchForItemLink(itemLink)
+                                                    end, "primary")
+                                                 end
+                                            end,
+
+    ["trading_house_search_from_listings"] = function(inventorySlot, slotActions)
+                                                 if TRADING_HOUSE_SEARCH:IsAtTradingHouse() then
+                                                    slotActions:AddSlotAction(SI_TRADING_HOUSE_SEARCH_FROM_ITEM, function()
+                                                        local listingIndex = ZO_Inventory_GetSlotIndex(inventorySlot)
+                                                        local itemLink = GetTradingHouseListingItemLink(listingIndex)
+                                                        TRADING_HOUSE:SearchForItemLink(itemLink)
+                                                    end, "primary")
+                                                 end
+                                            end,
+
     ["trading_house_remove_pending_post"] = function(inventorySlot, slotActions)
-                                                if(TRADING_HOUSE:IsAtTradingHouse() and IsItemAlreadyBeingPosted(inventorySlot)) then
+                                                if(TRADING_HOUSE_SEARCH:IsAtTradingHouse() and IsItemAlreadyBeingPosted(inventorySlot)) then
                                                     slotActions:AddSlotAction(SI_TRADING_HOUSE_REMOVE_PENDING_POST, function() ClearItemPost(inventorySlot) end, "primary")
                                                 end
                                             end,
@@ -1823,7 +1868,7 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 local potentialActionsForSlotType =
 {
     [SLOT_TYPE_QUEST_ITEM] =                    { "quickslot", "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },
     [SLOT_TYPE_THEIR_TRADE] =                   NON_INTERACTABLE_ITEM_ACTIONS,
@@ -1837,8 +1882,8 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_LOOT] =                          { "take_loot", "link_to_chat", "report_item" },
     [SLOT_TYPE_ACHIEVEMENT_REWARD] =            NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_TRADING_HOUSE_POST_ITEM] =       { "trading_house_remove_pending_post", "link_to_chat", "report_item" },
-    [SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT] =     { "trading_house_buy_item", "link_to_chat" },
-    [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] =    { "trading_house_cancel_listing", "link_to_chat" },
+    [SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT] =     { "trading_house_buy_item", "link_to_chat", "trading_house_search_from_results" },
+    [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] =    { "trading_house_cancel_listing", "link_to_chat", "trading_house_search_from_listings" },
     [SLOT_TYPE_REPAIR] =                        { "vendor_repair", "link_to_chat", "destroy", "report_item" },
     [SLOT_TYPE_PENDING_REPAIR] =                NON_INTERACTABLE_ITEM_ACTIONS,
     [SLOT_TYPE_CRAFTING_COMPONENT] =            { "add_to_craft", "remove_from_craft", "mark_as_locked", "unmark_as_locked", "link_to_chat", "report_item" },
@@ -2256,12 +2301,13 @@ local InventoryEnter =
     },
 }
 
-local g_mouseoverCommand = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_RIGHT, { "UI_SHORTCUT_SECONDARY", "UI_SHORTCUT_TERTIARY", })
+local g_mouseoverCommand = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_RIGHT, { "UI_SHORTCUT_SECONDARY", "UI_SHORTCUT_TERTIARY", "UI_SHORTCUT_QUATERNARY" })
 local g_updateCallback
 
 -- defined local above
 function UpdateMouseoverCommand(inventorySlot)
-    if not IsInGamepadPreferredMode() then
+    -- we check if inventorySlot == nil here to ensure that slot keybinds are removed, even if we have switched from keyboard to gamepad.
+    if not IsInGamepadPreferredMode() or inventorySlot == nil then
         g_mouseoverCommand:SetInventorySlot(inventorySlot)
     end
 

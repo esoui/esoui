@@ -62,6 +62,7 @@ local function QuestJournal_Shared_GetDataFromTable(table, questType, instanceDi
     return data
 end
 
+--TODO: Get ride of this exstensibility.  The icon should only be controlled by the display type.
 function ZO_QuestJournal_Shared:RegisterIconTexture(questType, instanceDisplayType, texturePath)
     QuestJournal_Shared_RegisterDataInTable(self.icons, questType, instanceDisplayType, texturePath)
 end

@@ -123,8 +123,7 @@ function ZO_DLCBook_Keyboard_OnSubscribeClicked(control)
 end
 
 function ZO_DLCBook_Keyboard_OnChapterUpgradeClicked(control)
-    local IS_STANDARD_EDITION = false
-    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_IN_GAME)
+    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
 end
 
 function ZO_DLCBook_Keyboard_OnInitialize(control)

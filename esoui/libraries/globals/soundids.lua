@@ -422,6 +422,8 @@ SOUNDS = {
     MAP_ZOOM_OUT                    = "Map_Zoom_Out",
     MAP_ZOOM_LEVEL_CLICKED          = "Map_Zoom_Level_Clicked",
     MAP_LOCATION_CLICKED            = "Map_Location_Clicked",
+    MAP_AUTO_NAVIGATION_MAP_CHANGE  = "Map_Auto_Navigation_Map_Change",
+    MAP_AUTO_NAVIGATION_BEGIN_ZOOM  = "Map_Auto_Navigation_Begin_Zoom",
     GAMEPAD_MAP_START_MAP_CHANGE    = "Console_Map_Start_Map_Change",
     GAMEPAD_MAP_COMPLETE_MAP_CHANGE = "Console_Map_Complete_Map_Change",
 
@@ -937,7 +939,7 @@ SOUNDS = {
 
     --Daily Login Rewards
     DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT  = "DailyLoginRewards_ClaimAnnouncement",
-	DAILY_LOGIN_REWARDS_CLAIM_FANFARE       = "DailyLoginRewards_ClaimFanfare",
+    DAILY_LOGIN_REWARDS_CLAIM_FANFARE       = "DailyLoginRewards_ClaimFanfare",
     DAILY_LOGIN_REWARDS_ACTION_CLAIM        = "DailyLoginRewards_ActionClaim",
     DAILY_LOGIN_REWARDS_MONTH_CHANGE        = "DailyLoginRewards_MonthChange",
 
@@ -946,4 +948,7 @@ SOUNDS = {
     GIFT_INVENTORY_VIEW_FANFARE_SPARKS      = "GiftInventoryView_FanfareSparks",
     GIFT_INVENTORY_VIEW_FANFARE_STARBURST   = "GiftInventoryView_FanfareStarburst",
     GIFT_INVENTORY_ACTION_CLAIM             = "GiftInventory_ActionClaim",
+
+    --Zone Stories
+    ZONE_STORIES_TRACK_ACTIVITY             = "ZoneStories_TrackActivity",
 }

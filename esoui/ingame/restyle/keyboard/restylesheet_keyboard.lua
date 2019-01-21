@@ -700,13 +700,31 @@ function ZO_RestyleCollectibleSlotsSheet:RegisterForEvents()
         end
     end
 
+    local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
+            self:MarkViewDirty()
+        else
+            for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
+                for _, collectibleData in ipairs(unlockStateTable) do
+                    local updatedCollectibleCategoryType = collectibleData:GetCategoryType()
+                    for slotCollectibleCategoryType, slotData in pairs(self:GetSlots()) do
+                        if updatedCollectibleCategoryType == slotCollectibleCategoryType then
+                            self:MarkViewDirty()
+                            return
+                        end
+                    end
+                end
+            end
+        end
+    end
+
     local function MarkViewDirty()
         self:MarkViewDirty()
     end
 
     self.control:RegisterForEvent(EVENT_COLLECTIBLE_DYE_DATA_UPDATED, MarkViewDirty)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:MarkViewDirty() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 end
 
 function ZO_RestyleCollectibleSlotsSheet:New(...)

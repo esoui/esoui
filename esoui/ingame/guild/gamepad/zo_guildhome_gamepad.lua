@@ -1,6 +1,6 @@
 GAMEPAD_GUILD_HOME_SCENE_NAME = "gamepad_guild_home"
 
-local ZO_GamepadGuildHome = ZO_Gamepad_ParametricList_Screen:Subclass()
+ZO_GamepadGuildHome = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_GamepadGuildHome:New(...)
     return ZO_Gamepad_ParametricList_Screen.New(self, ...)
@@ -48,7 +48,7 @@ function ZO_GamepadGuildHome:PerformDeferredInitializationHome()
     self.deferredInitialized = true
     
     self.itemList = self:GetMainList()
-    self.optionsList = self:AddList("Options", SetupOptionsList)
+    self.optionsList = self:AddList("Options")
 
     self:InitializeHeader()
     self:InitializeFooter()

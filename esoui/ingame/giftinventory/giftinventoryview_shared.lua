@@ -192,6 +192,7 @@ function ZO_GiftInventoryView_Shared:InitializeKeybinds(claimKeybind, previewKey
     self.updateKeybindsCallback = function() KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor) end
 end
 
+internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 28, "Update gift claim dialog to handle new purchase result")
 function ZO_GiftInventoryView_Shared:ClaimGift()
     local marketProductId = self.gift:GetMarketProductId()
     local expectedclaimResult = CouldAcquireMarketProduct(marketProductId)
@@ -210,6 +211,8 @@ function ZO_GiftInventoryView_Shared:ClaimGift()
             errorString = zo_strformat(SI_UNABLE_TO_CLAIM_GIFT_INSUFFICIENT_SPACE_ERROR_TEXT, slotsRequired)
         elseif expectedclaimResult == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY then
             errorString = GetString(SI_UNABLE_TO_CLAIM_GIFT_COLLECTIBLE_OWNED_ERROR_TEXT)
+        elseif expectedclaimResult == MARKET_PURCHASE_RESULT_EXCEEDS_CURRENCY_CAP then
+            errorString = GetString(SI_UNABLE_TO_CLAIM_GIFT_EXCEEDS_CURRENCY_CAP_ERROR_TEXT)
         elseif expectedclaimResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK then
             local unlockType = GetMarketProductInstantUnlockType(marketProductId)
             if unlockType == INSTANT_UNLOCK_WEREWOLF_BITE or unlockType == INSTANT_UNLOCK_VAMPIRE_BITE then

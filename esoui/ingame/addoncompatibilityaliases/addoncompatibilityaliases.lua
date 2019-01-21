@@ -678,3 +678,16 @@ end
 function HasActivatableSwapWeaponsEquipped()
     return true
 end
+
+-- rename rankIndex -> rank: ranks are from 1-4, and not array indices
+GetSkillLineProgressionAbilityRankIndex = GetSkillLineProgressionAbilityRank
+GetUpgradeSkillHighestRankIndexAvailableAtSkillLineRank = GetUpgradeSkillHighestRankAvailableAtSkillLineRank
+
+
+-- removed placeholder collectibles
+function ZO_CollectibleData:IsPlaceholder()
+    return false
+end
+
+-- Renamed to better reflect behavior: the output isn't localized, it's delimited.
+ZO_LocalizeDecimalNumber = ZO_CommaDelimitDecimalNumber

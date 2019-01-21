@@ -1,5 +1,20 @@
 ZO_SceneManager_Leader = ZO_SceneManager_Base:Subclass()
 
+--static
+
+ZO_SceneManager_Leader.bypassHideSceneConfirmationReason = 0
+
+function ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason(name)
+    ZO_SceneManager_Leader.bypassHideSceneConfirmationReason = ZO_SceneManager_Leader.bypassHideSceneConfirmationReason + 1
+    local reasonName = "ZO_BHSCR_"..name
+    internalassert(_G[reasonName] == nil)
+    _G[reasonName] = ZO_SceneManager_Leader.bypassHideSceneConfirmationReason
+end
+
+ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("ALREADY_SEEN")
+
+--class
+
 function ZO_SceneManager_Leader:New(...)
     return ZO_SceneManager_Base.New(self, ...)
 end
@@ -10,9 +25,6 @@ function ZO_SceneManager_Leader:Initialize(...)
     self.sceneStack = {}
     self.previousSceneStack = {}
     self.remoteSceneSequenceNumber = 0
-    self.bypassHideSceneConfirmationReason = 0
-
-    self:AddBypassHideSceneConfirmationReason("ALREADY_SEEN")
 
     EVENT_MANAGER:RegisterForEvent("SceneManager", EVENT_REMOTE_SCENE_REQUEST, function(eventId, ...) self:OnRemoteSceneRequest(...) end)
 end
@@ -22,13 +34,6 @@ end
 function ZO_SceneManager_Leader:GetNextSequenceNumber()
     self.remoteSceneSequenceNumber = self.remoteSceneSequenceNumber + 1
     return self.remoteSceneSequenceNumber
-end
-
-function ZO_SceneManager_Leader:AddBypassHideSceneConfirmationReason(name)
-    self.bypassHideSceneConfirmationReason = self.bypassHideSceneConfirmationReason + 1
-    local reasonName = "ZO_BHSCR_"..name
-    internalassert(_G[reasonName] == nil)
-    _G[reasonName] = self.bypassHideSceneConfirmationReason
 end
 
 function ZO_SceneManager_Leader:OnRemoteSceneRequest(messageOrigin, requestType, sceneName)

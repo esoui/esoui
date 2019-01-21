@@ -14,7 +14,8 @@ local categoryData =
         menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_ava.dds",
         sceneName = "gamepadAvAFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_ALLIANCE_WAR),
-    }
+    },
+    priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.AVA
 }
 
 local AllianceWarFinder_Manager = ZO_ActivityFinderTemplate_Manager:Subclass()

@@ -429,13 +429,19 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_TRADING_HOUSE_ERROR] =   function(errorCode)
-                                        if(errorCode == TRADING_HOUSE_RESULT_CANT_SELL_FOR_OVER_MAX_AMOUNT) then
-                                            return ERROR, zo_strformat(GetString("SI_TRADINGHOUSERESULT", errorCode), MAX_PLAYER_CURRENCY), SOUNDS.GENERAL_ALERT_ERROR
-                                        else
-                                            return ERROR, GetString("SI_TRADINGHOUSERESULT", errorCode), SOUNDS.GENERAL_ALERT_ERROR
-                                        end
-                                    end,
+    [EVENT_TRADING_HOUSE_ERROR] = function(errorCode)
+        if errorCode == TRADING_HOUSE_RESULT_CANT_SELL_FOR_OVER_MAX_AMOUNT then
+            return ERROR, zo_strformat(GetString("SI_TRADINGHOUSERESULT", errorCode), MAX_PLAYER_CURRENCY), SOUNDS.GENERAL_ALERT_ERROR
+        else
+            return ERROR, GetString("SI_TRADINGHOUSERESULT", errorCode), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_TRADING_HOUSE_RESPONSE_RECEIVED] = function(responseType, responseResult)
+        if responseResult ~= TRADING_HOUSE_RESULT_SUCCESS then
+            return ERROR, GetString("SI_TRADINGHOUSERESULT", responseResult), SOUNDS.NEGATIVE_CLICK
+        end
+    end,
 
     [EVENT_GUILD_BANK_OPEN_ERROR] = function(errorCode)
         local text = GetString("SI_GUILDBANKRESULT", errorCode)
@@ -456,14 +462,20 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_GUILD_KIOSK_ERROR] = function(errorCode)
-        local text = GetString("SI_GUILDKIOSKRESULT", errorCode)
-        if(errorCode == GUILD_KIOSK_GUILD_TOO_SMALL) then
-            local numMembers = GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE)
-            text = zo_strformat(text, numMembers)
-        end
+    [EVENT_GUILD_KIOSK_RESULT] = function(guildKioskResult)
+        local text = GetString("SI_GUILDKIOSKRESULT", guildKioskResult)
+        if text ~= "" then
+            if guildKioskResult == GUILD_KIOSK_PURCHASE_SUCCESSFUL then
+                return ALERT, text
+            end
 
-        return ERROR, text, SOUNDS.GENERAL_ALERT_ERROR
+            if guildKioskResult == GUILD_KIOSK_GUILD_TOO_SMALL then
+                local numMembers = GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE)
+                text = zo_strformat(text, numMembers)
+            end
+
+            return ERROR, text, SOUNDS.GENERAL_ALERT_ERROR
+        end
     end,
 
     [EVENT_GUILD_SELF_LEFT_GUILD] = function(guildId, guildName)
@@ -943,9 +955,14 @@ local AlertHandlers = {
     end,
 
     [EVENT_ITEM_COMBINATION_RESULT] = function(result)
-        local message = GetString("SI_ITEMCOMBINATIONRESULT", result)
-        if message and message ~= "" then
-            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        if result ~= ITEM_COMBINATION_RESULT_SUCCESS then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_ITEMCOMBINATIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_COLLECTIBLE_EVOLUTION_RESULT] = function(result)
+        if result ~= COLLECTIBLE_EVOLUTION_RESULT_SUCCESS then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_COLLECTIBLEEVOLUTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 }

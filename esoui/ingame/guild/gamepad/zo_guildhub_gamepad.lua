@@ -37,7 +37,7 @@ local function EqualityFunction(leftData, rightData)
     return leftData.optionId == rightData.optionId 
 end
 
-local ZO_GamepadGuildHub = ZO_Gamepad_ParametricList_Screen:Subclass()
+ZO_GamepadGuildHub = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_GamepadGuildHub_OnInitialize(control)
     GAMEPAD_GUILD_HUB = ZO_GamepadGuildHub:New(control)
@@ -56,45 +56,9 @@ function ZO_GamepadGuildHub:Initialize(control)
     GAMEPAD_GUILD_HUB_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HUB_SCENE_NAME, SCENE_MANAGER)
     GAMEPAD_GUILD_HUB_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            self.displayMode = self.enterInSingleGuildList and GUILD_HUB_DISPLAY_MODE.SINGLE_GUILD_LIST or GUILD_HUB_DISPLAY_MODE.GUILDS_LIST
-            self.enterInSingleGuildList = false
-
-            self.displayedGuildId = nil
-            self.displayedCreateGuild = nil
-            self.filteredGuildId = nil
-
-            self:PerformDeferredInitializationHub()
-            self:Update()
-
-            local OnRefreshMatchGuildId = function(_, guildId)
-                if self.optionsGuildId == guildId then
-                    self:Update()
-                end
-            end
-
-            control:RegisterForEvent(EVENT_GUILD_DATA_LOADED, function() self:Update() end)
-            control:RegisterForEvent(EVENT_PLAYER_STATUS_CHANGED, function() self:Update() end)
-            control:RegisterForEvent(EVENT_LEVEL_UPDATE, function() self:Update() end)
-            control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-            control:RegisterForEvent(EVENT_GUILD_MOTD_CHANGED, OnRefreshMatchGuildId)
-            control:RegisterForEvent(EVENT_GUILD_DESCRIPTION_CHANGED, OnRefreshMatchGuildId)
-            control:RegisterForEvent(EVENT_GUILD_RANK_CHANGED, OnRefreshMatchGuildId)
-            control:RegisterForEvent(EVENT_GUILD_RANKS_CHANGED, OnRefreshMatchGuildId)
-            control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnRefreshMatchGuildId)
-            control:RegisterForEvent(EVENT_GUILD_KEEP_CLAIM_UPDATED, OnRefreshMatchGuildId)
-            control:RegisterForEvent(EVENT_GUILD_TRADER_HIRED_UPDATED, OnRefreshMatchGuildId)
-            TriggerTutorial(TUTORIAL_TRIGGER_GUILDS_HOME_OPENED)
+            self:OnSceneShowing()
         elseif newState == SCENE_HIDDEN then
-            control:UnregisterForEvent(EVENT_GUILD_DATA_LOADED)
-            control:UnregisterForEvent(EVENT_PLAYER_STATUS_CHANGED)
-            control:UnregisterForEvent(EVENT_LEVEL_UPDATE)
-            control:UnregisterForEvent(EVENT_GUILD_MOTD_CHANGED)
-            control:UnregisterForEvent(EVENT_GUILD_DESCRIPTION_CHANGED)
-            control:UnregisterForEvent(EVENT_GUILD_RANK_CHANGED)
-            control:UnregisterForEvent(EVENT_GUILD_RANKS_CHANGED)
-            control:UnregisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED)
-            control:UnregisterForEvent(EVENT_GUILD_KEEP_CLAIM_UPDATED)
-            control:UnregisterForEvent(EVENT_GUILD_TRADER_HIRED_UPDATED)
+            self:OnSceneHidden()
         end
 
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
@@ -131,6 +95,52 @@ function ZO_GamepadGuildHub:PerformUpdate()
     if self.optionsGuildId ~= nil then
         self:ValidateOptionsGuildId()
     end
+end
+
+function ZO_GamepadGuildHub:OnSceneShowing(oldState, newState)
+    self.displayMode = self.enterInSingleGuildList and GUILD_HUB_DISPLAY_MODE.SINGLE_GUILD_LIST or GUILD_HUB_DISPLAY_MODE.GUILDS_LIST
+    self.enterInSingleGuildList = false
+
+    self.displayedGuildId = nil
+    self.displayedCreateGuild = nil
+    self.filteredGuildId = nil
+
+    self:PerformDeferredInitializationHub()
+    self:Update()
+
+    local OnRefreshMatchGuildId = function(_, guildId)
+        if self.optionsGuildId == guildId then
+            self:Update()
+        end
+    end
+
+    local control = self.control
+    control:RegisterForEvent(EVENT_GUILD_DATA_LOADED, function() self:Update() end)
+    control:RegisterForEvent(EVENT_PLAYER_STATUS_CHANGED, function() self:Update() end)
+    control:RegisterForEvent(EVENT_LEVEL_UPDATE, function() self:Update() end)
+    control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
+    control:RegisterForEvent(EVENT_GUILD_MOTD_CHANGED, OnRefreshMatchGuildId)
+    control:RegisterForEvent(EVENT_GUILD_DESCRIPTION_CHANGED, OnRefreshMatchGuildId)
+    control:RegisterForEvent(EVENT_GUILD_RANK_CHANGED, OnRefreshMatchGuildId)
+    control:RegisterForEvent(EVENT_GUILD_RANKS_CHANGED, OnRefreshMatchGuildId)
+    control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnRefreshMatchGuildId)
+    control:RegisterForEvent(EVENT_GUILD_KEEP_CLAIM_UPDATED, OnRefreshMatchGuildId)
+    control:RegisterForEvent(EVENT_GUILD_TRADER_HIRED_UPDATED, OnRefreshMatchGuildId)
+    TriggerTutorial(TUTORIAL_TRIGGER_GUILDS_HOME_OPENED)
+end
+
+function ZO_GamepadGuildHub:OnSceneHidden(oldState, newState)
+    local control = self.control
+    control:UnregisterForEvent(EVENT_GUILD_DATA_LOADED)
+    control:UnregisterForEvent(EVENT_PLAYER_STATUS_CHANGED)
+    control:UnregisterForEvent(EVENT_LEVEL_UPDATE)
+    control:UnregisterForEvent(EVENT_GUILD_MOTD_CHANGED)
+    control:UnregisterForEvent(EVENT_GUILD_DESCRIPTION_CHANGED)
+    control:UnregisterForEvent(EVENT_GUILD_RANK_CHANGED)
+    control:UnregisterForEvent(EVENT_GUILD_RANKS_CHANGED)
+    control:UnregisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED)
+    control:UnregisterForEvent(EVENT_GUILD_KEEP_CLAIM_UPDATED)
+    control:UnregisterForEvent(EVENT_GUILD_TRADER_HIRED_UPDATED)
 end
 
 function ZO_GamepadGuildHub:UpdateLists()
@@ -622,7 +632,7 @@ end
 
 function ZO_GamepadGuildHub:RefreshGuildInfo()
     local targetData = self.guildList:GetTargetData()
-    if targetData == nil or targetData.createGuild then
+    if targetData == nil or targetData.isCreateGuild then
         GAMEPAD_GUILD_HUB_SCENE:RemoveFragment(GUILD_INFO_GAMEPAD_FRAGMENT)
         GAMEPAD_GUILD_HUB_SCENE:RemoveFragment(GAMEPAD_GENERIC_FOOTER_FRAGMENT)
     else
@@ -654,9 +664,7 @@ end
 
 function ZO_GamepadGuildHub:RefreshCreateGuildExplanation()
     local targetData = self.guildList:GetTargetData()
-    local shouldShowCreateGuildExplanation = not targetData or targetData.createGuild
-
-    self.contentHeader:SetHidden(not shouldShowCreateGuildExplanation)
+    local shouldShowCreateGuildExplanation = not targetData or targetData.isCreateGuild
 
     if shouldShowCreateGuildExplanation and not self.creatingGuild then
         GAMEPAD_GUILD_HUB_SCENE:AddFragment(self.createGuildExplainationFragment)
@@ -664,7 +672,7 @@ function ZO_GamepadGuildHub:RefreshCreateGuildExplanation()
         GAMEPAD_GUILD_HUB_SCENE:RemoveFragment(self.createGuildExplainationFragment)
     end
 end
-                            
+
 ------------
 -- Header --
 ------------
@@ -696,8 +704,12 @@ function ZO_GamepadGuildHub:RefreshHeader()
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
+
+    local targetData = self.guildList:GetTargetData()
+    local shouldShowHeader = not targetData or targetData.isCreateGuild
+    self.contentHeader:SetHidden(not shouldShowHeader)
 end
-                                              
+
 --------------------
 -- Key Bind Strip --
 --------------------
@@ -719,7 +731,7 @@ function ZO_GamepadGuildHub:InitializeKeybindStripDescriptors()
                     end
                 else
                     local targetData = self.guildList:GetTargetData()
-                    if targetData.createGuild == true then
+                    if targetData.isCreateGuild == true then
                         ZO_Dialogs_ShowGamepadDialog(GUILD_CREATE_GAMEPAD_DIALOG)
                     else
                         self.optionsGuildId = targetData.guildId
@@ -937,7 +949,7 @@ end
 function ZO_GamepadGuildHub:OnTargetChanged(list, selectedData, oldSelectedData)
     if selectedData ~= nil then
         if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST then
-            local refreshDueToCreateExplanation = (self.displayedCreateGuild ~= selectedData.createGuild)
+            local refreshDueToCreateExplanation = (self.displayedCreateGuild ~= selectedData.isCreateGuild)
             local refreshDueToGuildId = (selectedData.guildId ~= nil and self.displayedGuildId ~= selectedData.guildId)
 
             if refreshDueToCreateExplanation or refreshDueToGuildId then
@@ -947,8 +959,8 @@ function ZO_GamepadGuildHub:OnTargetChanged(list, selectedData, oldSelectedData)
                 end
 
                 if refreshDueToCreateExplanation then
-                    self.displayedCreateGuild = selectedData.createGuild
-                    if selectedData.createGuild then
+                    self.displayedCreateGuild = selectedData.isCreateGuild
+                    if selectedData.isCreateGuild then
                         self.optionsGuildId = nil
                     end
                 end
@@ -989,7 +1001,7 @@ function ZO_GamepadGuildHub:RefreshGuildList()
     data:SetFontScaleOnSelection(false)
     data:SetEnabled(ZO_CanPlayerCreateGuild())
 
-    data.createGuild = true
+    data.isCreateGuild = true
     local createError
     if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST then
         createError = ZO_GetGuildCreateError()

@@ -22,7 +22,7 @@ function ZO_ItemPreviewListHelper_Gamepad:InitializeKeybinds()
                 self:PreviewPrevious()
             end,
             visible = function() return self:HasMultiplePreviewDatas() end,
-            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() end,
+            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() and self:CanPreviewPrevious() end,
         },
 
         {
@@ -32,7 +32,7 @@ function ZO_ItemPreviewListHelper_Gamepad:InitializeKeybinds()
                 self:PreviewNext()
             end,
             visible = function() return self:HasMultiplePreviewDatas() end,
-            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() end,
+            enabled = function() return ITEM_PREVIEW_GAMEPAD:CanChangePreview() and self:CanPreviewNext() end,
         },
     }
 end

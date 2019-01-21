@@ -76,6 +76,13 @@ EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketProductCarousel_Gamepad.lu
 EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncement_Gamepad.lua
 EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncement_Gamepad.xml
 
+EsoUI\InternalIngame\ZoneStories\ZoneStoriesTile.lua
+EsoUI\InternalIngame\ZoneStories\ZoneStoriesTile.xml
+EsoUI\InternalIngame\ZoneStories\Gamepad\ZoneStoriesTile_Gamepad.lua
+EsoUI\InternalIngame\ZoneStories\Gamepad\ZoneStoriesTile_Gamepad.xml
+EsoUI\InternalIngame\ZoneStories\Keyboard\ZoneStoriesTile_Keyboard.lua
+EsoUI\InternalIngame\ZoneStories\Keyboard\ZoneStoriesTile_Keyboard.xml
+
 EsoUI\InternalIngame\Mail\ConfirmMail.lua
 EsoUI\InternalIngame\URL\ConfirmURL.lua
 EsoUI\InternalIngame\Gifting\ConfirmSendGift_Shared.lua

@@ -1,28 +1,30 @@
 local CHECKED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 
-function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(selectedData, dialogName, displayPrice)
+function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dialogName, displayPrice, iconFile)
+    local listingIndex = itemData.slotIndex
+    local stackCount = itemData.stackCount
+    local itemName = itemData.name
 
-    local listingIndex = ZO_Inventory_GetSlotIndex(selectedData)
-    local stackCount = ZO_InventorySlot_GetStackCount(selectedData)
-
-    local GET_SELECTED_ICON = true
-    local ICON_DEFAULT_INDEX = 1
-    local icon = selectedData.icon
-    local iconFile = selectedData:GetIcon(ICON_DEFAULT_INDEX, GET_SELECTED_ICON)
     local price = displayPrice
-    local nameColor = selectedData.selectedNameColor or ZO_SELECTED_TEXT
-    local itemName = nameColor:Colorize(selectedData.name)
-    local currencyType = selectedData.currencyType or CURT_MONEY
+    local nameColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemData.quality))
+    local currencyType = itemData.currencyType or CURT_MONEY
     
-    local itemIconAndName = itemName
+    local itemNameWithQuantity = nameColor:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, stackCount))
+    local title = itemNameWithQuantity
     if iconFile then
-        local iconText = zo_iconFormat(iconFile, 55, 55)
-        itemIconAndName = zo_strformat(SI_GAMEPAD_TRADING_HOUSE_ITEM_DESCRIPTION, iconText, itemName)
+        local iconMarkup = zo_iconFormat(iconFile, 55, 55)
+        title = string.format("%s %s", iconMarkup, itemNameWithQuantity)
     end
 
     local priceText = zo_strformat(SI_GAMEPAD_TRADING_HOUSE_ITEM_AMOUNT, ZO_CurrencyControl_FormatCurrency(price), ZO_Currency_GetGamepadFormattedCurrencyIcon(currencyType))
 
-    ZO_Dialogs_ShowGamepadDialog(dialogName, {listingIndex = listingIndex, stackCount = stackCount, price = price}, {mainTextParams = {itemIconAndName, itemName, priceText}})
+    local mainTextParams
+    if stackCount > 1 then
+        mainTextParams = {title, "|c"..nameColor:ToHex(), itemName, stackCount, priceText}
+    else
+        mainTextParams = {title, nameColor:Colorize(itemName), priceText}
+    end
+    ZO_Dialogs_ShowGamepadDialog(dialogName, {listingIndex = listingIndex, stackCount = stackCount, price = price}, {mainTextParams = mainTextParams})
 end
 
 ESO_Dialogs["TRADING_HOUSE_CONFIRM_REMOVE_LISTING"] =
@@ -37,7 +39,13 @@ ESO_Dialogs["TRADING_HOUSE_CONFIRM_REMOVE_LISTING"] =
     },
     mainText = 
     {
-        text = SI_GAMEPAD_TRADING_HOUSE_LISTING_REMOVE_DIALOG_TEXT,
+        text =  function(dialog)
+                    if dialog.data.stackCount > 1 then
+                        return SI_GAMEPAD_TRADING_HOUSE_LISTING_REMOVE_MULTIPLE_DIALOG_TEXT
+                    else
+                        return SI_GAMEPAD_TRADING_HOUSE_LISTING_REMOVE_DIALOG_TEXT
+                    end
+                end,
     },
     buttons =
     {
@@ -69,7 +77,13 @@ ESO_Dialogs["TRADING_HOUSE_CONFIRM_SELL_ITEM"] =
     },
     mainText = 
     {
-        text = SI_GAMEPAD_TRADING_HOUSE_CONFIRM_SELL_DIALOG_TEXT,
+        text =  function(dialog)
+                    if dialog.data.stackCount > 1 then
+                        return SI_GAMEPAD_TRADING_HOUSE_CONFIRM_SELL_MULTIPLE_DIALOG_TEXT
+                    else
+                        return SI_GAMEPAD_TRADING_HOUSE_CONFIRM_SELL_DIALOG_TEXT
+                    end
+                end,
     },
     setup = function()
         exitOnFinished = false
@@ -83,20 +97,19 @@ ESO_Dialogs["TRADING_HOUSE_CONFIRM_SELL_ITEM"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_YES,
-            callback =  function(dialog)
-                            local stackCount = dialog.data.stackCount
-                            local desiredPrice = dialog.data.price
-                            local listingIndex = dialog.data.listingIndex
-                            RequestPostItemOnTradingHouse(BAG_BACKPACK, listingIndex, stackCount, desiredPrice)
-                            TRADING_HOUSE_GAMEPAD:SetSearchAllowed(true) -- allow update to cached search results to find newly sold items
-                            exitOnFinished = true
-                         end
+            text = SI_DIALOG_YES,
+            callback = function(dialog)
+               local stackCount = dialog.data.stackCount
+               local desiredPrice = dialog.data.price
+               local listingIndex = dialog.data.listingIndex
+               RequestPostItemOnTradingHouse(BAG_BACKPACK, listingIndex, stackCount, desiredPrice)
+               exitOnFinished = true
+            end
         },
 
         [2] =
         {
-            text =       SI_DIALOG_NO,
+            text = SI_DIALOG_NO,
         }  
     }
 }
@@ -113,7 +126,13 @@ ESO_Dialogs["TRADING_HOUSE_CONFIRM_BUY_ITEM"] =
     },
     mainText = 
     {
-        text = SI_GAMEPAD_TRADING_HOUSE_CONFIRM_BUY_DIALOG_TEXT,
+        text = function(dialog)
+            if dialog.data.stackCount > 1 then
+                return SI_GAMEPAD_TRADING_HOUSE_CONFIRM_BUY_MULTIPLE_DIALOG_TEXT
+            else
+                return SI_GAMEPAD_TRADING_HOUSE_CONFIRM_BUY_DIALOG_TEXT
+            end
+        end,
     },
     buttons =
     {
@@ -147,7 +166,13 @@ ESO_Dialogs["TRADING_HOUSE_CONFIRM_BUY_GUILD_SPECIFIC_ITEM"] =
     },
     mainText = 
     {
-        text = SI_GAMEPAD_TRADING_HOUSE_CONFIRM_BUY_DIALOG_TEXT,
+        text = function(dialog)
+            if dialog.data.stackCount > 1 then
+                return SI_GAMEPAD_TRADING_HOUSE_CONFIRM_BUY_MULTIPLE_DIALOG_TEXT
+            else
+                return SI_GAMEPAD_TRADING_HOUSE_CONFIRM_BUY_DIALOG_TEXT
+            end
+        end,
     },
     buttons =
     {
@@ -182,9 +207,10 @@ end
 local GUILD_ENTRY_TEMPLATE = "ZO_GamepadSubMenuEntryWithStatusTemplate"
 
 local function SetupGuildSelectionDialog(dialog)
-    local currentGuildID = GetSelectedTradingHouseGuildId()
+    local currentGuildId = GetSelectedTradingHouseGuildId()
 
     dialog.info.parametricList = {}
+    local indexToSelect = nil
     for i = 1, GetNumGuilds() do
         local guildId = GetGuildId(i)
         local guildName = GetGuildName(guildId)
@@ -201,16 +227,22 @@ local function SetupGuildSelectionDialog(dialog)
                  allianceId = allianceId,
                  fontScaleOnSelection = false,
                  setup = SetupTradingHouseGuildItem,
-                 isCurrentGuild = guildId == currentGuildID
+                 isCurrentGuild = guildId == currentGuildId
             },
             icon = icon,
             text = guildName,
         }
         table.insert(dialog.info.parametricList, listItem)
+
+        if guildId == currentGuildId then
+            indexToSelect = i
+        end
     end
 
     dialog:setupFunc()
-    dialog.entryList:SetSelectedDataByEval(IsActiveGuild)
+    if indexToSelect then
+        dialog.entryList:SetSelectedIndexWithoutAnimation(indexToSelect)
+    end
 end
 
 ESO_Dialogs["TRADING_HOUSE_CHANGE_ACTIVE_GUILD"] =
@@ -228,20 +260,18 @@ ESO_Dialogs["TRADING_HOUSE_CHANGE_ACTIVE_GUILD"] =
     {
         [1] =
         {
-            text =      SI_GAMEPAD_SELECT_OPTION,
-            callback =  function(dialog)
-                            local data = dialog.entryList:GetTargetData()
-                            if(data.guildId) then
-                                if(SelectTradingHouseGuildId(data.guildId)) then
-                                    TRADING_HOUSE_GAMEPAD:UpdateForGuildChange()
-                                end
-                            end
-                         end
+            text = SI_GAMEPAD_SELECT_OPTION,
+            callback = function(dialog)
+               local data = dialog.entryList:GetTargetData()
+               if data.guildId then
+                   SelectTradingHouseGuildId(data.guildId)
+               end
+            end
         },
 
         [2] =
         {
-            text =      SI_DIALOG_EXIT,
+            text = SI_DIALOG_EXIT,
         }
     }
 }

@@ -1281,44 +1281,39 @@ local COLLECTIBLE_EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_s
 local CENTER_SCREEN_CALLBACK_HANDLERS = 
 {
     {
-        event = EVENT_COLLECTIBLE_UPDATED,
         callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
-        callbackRegistration = "OnCollectibleUpdated",
-        callbackFunction = function(collectibleId, lockStateChange)
-            if lockStateChange == ZO_COLLECTIBLE_LOCK_STATE_CHANGE.UNLOCKED then
-                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                if not collectibleData:IsPlaceholder() then
-                    local collectibleName = collectibleData:GetName()
-                    local icon = collectibleData:GetIcon()
-                    local categoryData = collectibleData:GetCategoryData()
-                    local categoryName = categoryData:GetName()
+        callbackRegistration = "OnCollectionUpdated",
+        callbackFunction = function(collectionUpdateType, collectiblesByUnlockState)
+            if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES then
+                local nowOwnedCollectibles = collectiblesByUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED]
+                if nowOwnedCollectibles then
+                    if #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES then
+                        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                        messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles))
+                        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
+                        return messageParams
+                    else
+                        local messageParamsObjects = {}
+                        for _, collectibleData in ipairs(nowOwnedCollectibles) do
+                            local collectibleName = collectibleData:GetName()
+                            local icon = collectibleData:GetIcon()
+                            local categoryData = collectibleData:GetCategoryData()
+                            local categoryName = categoryData:GetName()
 
-                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
-                    messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName))
-                    messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
-                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
-                    return messageParams
+                            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                            messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName))
+                            messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
+                            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+                            table.insert(messageParamsObjects, messageParams)
+                        end
+                        return unpack(messageParamsObjects)
+                    end
                 end
             end
         end,
     },
 
     {
-        event = EVENT_COLLECTIBLES_UPDATED,
-        callbackManager = ZO_COLLECTIBLE_DATA_MANAGER,
-        callbackRegistration = "OnCollectionUpdated",
-        callbackFunction = function(numJustUnlocked)
-            if numJustUnlocked > 0 then
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
-                messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, numJustUnlocked))
-                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
-                return messageParams
-            end
-        end,
-    },
-
-    {
-        event = EVENT_SKILL_LINE_ADDED,
         callbackManager = SKILLS_DATA_MANAGER,
         callbackRegistration = "SkillLineAdded",
         callbackFunction = function(skillLineData)

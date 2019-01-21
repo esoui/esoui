@@ -31,12 +31,8 @@ function Market_Manager:InitializeEvents()
         self:FireCallbacks("OnMarketSearchResultsCanceled", ...)
     end
 
-    local function OnCollectibleUpdated(eventId, _, justUnlocked)
-        self:FireCallbacks("OnCollectibleUpdated", justUnlocked)
-    end
-
-    local function OnCollectiblesUpdated(eventId, numJustUnlocked)
-        self:FireCallbacks("OnCollectiblesUpdated", numJustUnlocked)
+    local function OnCollectiblesUnlockStateChanged()
+        self:FireCallbacks("OnCollectiblesUnlockStateChanged")
     end
 
     local function OnShowMarketProduct(eventId, ...)
@@ -75,8 +71,7 @@ function Market_Manager:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_CANCELED, OnMarketSearchResultsCanceled)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLE_UPDATED, OnCollectibleUpdated)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UPDATED, OnCollectiblesUpdated)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, OnCollectiblesUnlockStateChanged)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, OnShowMarketProduct)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, OnShowMarketAndSearch)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
@@ -121,43 +116,51 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
     end
 end
 
-function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
-    local expectedPurchaseResult = marketProductData:CouldPurchase()
+do
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 28, "Update market error flow to handle new purchase result")
+    local IS_SIMPLE_MARKET_PURCHASE_ERROR = 
+    {
+        [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,
+        [MARKET_PURCHASE_RESULT_NOT_ENOUGH_CROWN_GEMS] = true,
+        [MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY] = true,
+        [MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS] = true,
+        [MARKET_PURCHASE_RESULT_EXCEEDS_CURRENCY_CAP] = true,
+    }
+    function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
+        local expectedPurchaseResult = marketProductData:CouldPurchase()
 
-    local displayName = marketProductData:GetDisplayName()
-    local titleString = displayName
-    local errorStrings = {}
-    local allowContinue = true
+        local displayName = marketProductData:GetDisplayName()
+        local titleString = displayName
+        local errorStrings = {}
+        local allowContinue = true
 
-    self:AddMarketProductPurchaseWarningStringsToTable(marketProductData, errorStrings)
+        self:AddMarketProductPurchaseWarningStringsToTable(marketProductData, errorStrings)
 
-    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK
-            or expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_CROWN_GEMS
-            or expectedPurchaseResult == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
-            or expectedPurchaseResult == MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS then
-        allowContinue = false
-        table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
-        allowContinue = false
-        table.insert(errorStrings, self.insufficientFundsMainText)
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
-        local slotsRequired = marketProductData:GetSpaceNeededToAcquire()
-        allowContinue = false
-        table.insert(errorStrings, zo_strformat(SI_MARKET_INVENTORY_FULL_TEXT, slotsRequired))
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
-        allowContinue = false
-        table.insert(errorStrings, zo_strformat(SI_MARKET_PURCHASE_ALREADY_HAVE_GIFT_TEXT, ZO_SELECTED_TEXT:Colorize(displayName)))
+        if IS_SIMPLE_MARKET_PURCHASE_ERROR[expectedPurchaseResult] then
+            allowContinue = false
+            table.insert(errorStrings, zo_strformat(SI_MARKET_UNABLE_TO_PURCHASE_TEXT, GetString("SI_MARKETPURCHASABLERESULT", expectedPurchaseResult)))
+        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
+            allowContinue = false
+            table.insert(errorStrings, self.insufficientFundsMainText)
+        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
+            local slotsRequired = marketProductData:GetSpaceNeededToAcquire()
+            allowContinue = false
+            table.insert(errorStrings, zo_strformat(SI_MARKET_INVENTORY_FULL_TEXT, slotsRequired))
+        elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
+            allowContinue = false
+            table.insert(errorStrings, zo_strformat(SI_MARKET_PURCHASE_ALREADY_HAVE_GIFT_TEXT, ZO_SELECTED_TEXT:Colorize(displayName)))
+        end
+
+        local mainText = table.concat(errorStrings, "\n\n")
+
+        local dialogParams = {
+                                titleParams = { titleString },
+                                mainTextParams = { mainText }
+                             }
+        local hasErrors = #errorStrings > 0
+
+        return hasErrors, dialogParams, allowContinue, expectedPurchaseResult
     end
-
-    local mainText = table.concat(errorStrings, "\n\n")
-
-    local dialogParams = {
-                            titleParams = { titleString },
-                            mainTextParams = { mainText }
-                         }
-    local hasErrors = #errorStrings > 0
-
-    return hasErrors, dialogParams, allowContinue, expectedPurchaseResult
 end
 
 function Market_Manager:GetMarketProductGiftErrorInfo(marketProductData)

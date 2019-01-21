@@ -1,4 +1,4 @@
-local GuildSelector = ZO_Object:Subclass()
+GuildSelector = ZO_Object:Subclass()
 
 function GuildSelector:New(...)
     local selector = ZO_Object.New(self)

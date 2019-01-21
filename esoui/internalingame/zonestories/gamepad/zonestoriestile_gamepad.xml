@@ -1,0 +1,10 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStoriesTile_Gamepad_Control" inherits="ZO_ZoneStoriesTile_Control ZO_ActionTile_Gamepad_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X" y="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y" />
+            <OnInitialized>
+                ZO_ZoneStoriesTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </Control>
+    </Controls>
+</GuiXml>

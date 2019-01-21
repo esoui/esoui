@@ -488,7 +488,7 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
 end
 
 function ZO_GamepadProvisioner:TogglePreviewMode()
-    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, FURNITURE_BROWSER_GAMEPAD_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
     if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
         self.control:GetNamedChild("IngredientsBar"):SetHidden(true)
     else

@@ -1,0 +1,77 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapZoneStoryRow_Gamepad" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="52" />
+            
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="52" y="52" />
+                    <Anchor point="LEFT" />
+                </Texture>
+
+                <Label name="$(parent)ProgressLabel" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="RIGHT"/>
+                </Label>
+
+                <StatusBar name="$(parent)ProgressBar" inherits="ZO_GamepadArrowStatusBarWithBGMedium">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)ProgressLabel" relativePoint="LEFT" offsetX="-15"/>
+
+                    <OnInitialized>
+                        self.gloss = self:GetNamedChild("Gloss")
+                        ZO_StatusBar_SetGradientColor(self, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
+                    </OnInitialized>
+                </StatusBar>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_WorldMapZoneStoryTopLevel_Gamepad" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors">
+            <OnInitialized>
+                ZO_WorldMapZoneStory_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)Scroll" inherits="ZO_ScrollContainer_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <Control name="ZO_WorldMapInfoZoneStoryEntry_Gamepad" inherits="ZO_GamepadMenuEntryWithBarTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" override="true" modifyTextType="NONE" maxLineCount="1">
+                    <Dimensions x="ZO_WORLD_MAP_INFO_ZONE_STORY_ENTRY_LABEL_WIDTH"/>
+                </Label>
+                
+                <Label name="$(parent)SubLabel1" font="ZoFontGamepad34" horizontalAlignment="RIGHT" maxLineCount="1">
+                    <AnchorToBaseline relativeToLabel="$(parent)Label" side="RIGHT"/>
+                    <Dimensions x="ZO_WORLD_MAP_INFO_ZONE_STORY_ENTRY_PROGRESS_WIDTH"/>
+                </Label>
+
+                <StatusBar name="$(parent)BarContainer" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel1" relativePoint="BOTTOMRIGHT" />
+                </StatusBar>
+            </Controls>
+        </Control>
+    
+        <TopLevelControl name="ZO_WorldMapInfoZoneStoryTopLevel_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_WorldMapInfoZoneStory_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Main" inherits="ZO_WorldMapInfoContent_Gamepad">
+                    <Controls>
+                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                            <AnchorFill/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

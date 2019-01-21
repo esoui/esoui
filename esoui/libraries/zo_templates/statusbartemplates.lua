@@ -23,19 +23,17 @@ do
         local bar = animation.bar
         local initialValue = animation.initialValue
         local endValue = animation.endValue
-        if progress < 1 then
-            local newBarValue = zo_lerp(initialValue, endValue, progress)
-            bar:SetValue(newBarValue)
-        end
+        local newBarValue = zo_lerp(initialValue, endValue, progress)
+        bar:SetValue(newBarValue)
     end
 
-    local function OnStopAnimation(animation)
+    local function OnStopAnimation(animation, completedPlaying)
         local animationKey = animation.key
         local bar = animation:GetFirstAnimation().bar
         bar.animation = nil
         g_animationPool:ReleaseObject(animationKey)
         if bar.onStopCallback then
-            bar.onStopCallback(bar)
+            bar.onStopCallback(bar, completedPlaying)
         end
     end
 
@@ -44,7 +42,7 @@ do
             local function Factory(objectPool)
                 local animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_StatusBarGrowTemplate")
                 animation:GetFirstAnimation():SetUpdateFunction(OnAnimationTransitionUpdate)
-                animation:SetHandler("OnStop", function(animation) OnStopAnimation(animation)  end)
+                animation:SetHandler("OnStop", function(...) OnStopAnimation(...)  end)
                 return animation
             end
 
@@ -89,8 +87,6 @@ do
             if not self.animation then
                 local updateAnimation = AcquireAnimation()
                 self.animation = updateAnimation
-            else
-                local x = 2
             end
 
             local customAnimation = self.animation:GetFirstAnimation()
@@ -120,8 +116,8 @@ function ZO_WrappingStatusBar:Initialize(statusBar, onLevelChangedCallback)
     self.statusBar = statusBar
     self:SetOnLevelChangeCallback(onLevelChangedCallback)
 
-    self.onAnimationFinishedCallback = function()
-        self:OnAnimationFinished()
+    self.onAnimationFinishedCallback = function(timeline, completedPlaying)
+        self:OnAnimationFinished(completedPlaying)
     end
 end
 
@@ -147,6 +143,7 @@ end
 
 function ZO_WrappingStatusBar:Reset()
     self.level = nil
+    self.noWrap = nil
 end
 
 function ZO_WrappingStatusBar:SetAnimationTime(time)
@@ -154,8 +151,11 @@ function ZO_WrappingStatusBar:SetAnimationTime(time)
 end
 
 function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
+    if noWrap == nil then
+        noWrap = false
+    end
     local forceInit = false
-    if self.level ~= level then
+    if self.level ~= level or self.noWrap ~= noWrap then
         if self.level and level then
             if level > self.level and not noWrap then
                 self.pendingLevels = (self.pendingLevels or 0) + level - self.level
@@ -169,6 +169,7 @@ function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
         end
 
         self.level = level
+        self.noWrap = noWrap
         
         if self.pendingLevels == nil and self.onLevelChangedCallback then
             self.onLevelChangedCallback(self, self.level)
@@ -192,25 +193,27 @@ function ZO_WrappingStatusBar:SetValue(level, value, max, noWrap)
     end
 end
 
-function ZO_WrappingStatusBar:OnAnimationFinished()
-    self.pendingLevels = self.pendingLevels - 1
-    if self.pendingLevels == 0 then
-        ZO_StatusBar_SmoothTransition(self.statusBar, 0, self.pendingMax, FORCE_INIT_SMOOTH_STATUS_BAR)
-        ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingValue, self.pendingMax, nil, self.onCompleteCallback, self.customAnimationTime)
+function ZO_WrappingStatusBar:OnAnimationFinished(completedPlaying)
+    if completedPlaying then
+        self.pendingLevels = self.pendingLevels - 1
+        if self.pendingLevels == 0 then
+            ZO_StatusBar_SmoothTransition(self.statusBar, 0, self.pendingMax, FORCE_INIT_SMOOTH_STATUS_BAR)
+            ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingValue, self.pendingMax, nil, self.onCompleteCallback, self.customAnimationTime)
 
-        self.pendingLevels = nil
-        self.pendingValue = nil
-        self.pendingMax = nil
+            self.pendingLevels = nil
+            self.pendingValue = nil
+            self.pendingMax = nil
 
-        if self.onLevelChangedCallback then
-            self.onLevelChangedCallback(self, self.level)
-        end
-    else
-        ZO_StatusBar_SmoothTransition(self.statusBar, 0, self.pendingMax, FORCE_INIT_SMOOTH_STATUS_BAR)
-        ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingMax, self.pendingMax, nil, self.onAnimationFinishedCallback, self.customAnimationTime)
+            if self.onLevelChangedCallback then
+                self.onLevelChangedCallback(self, self.level)
+            end
+        else
+            ZO_StatusBar_SmoothTransition(self.statusBar, 0, self.pendingMax, FORCE_INIT_SMOOTH_STATUS_BAR)
+            ZO_StatusBar_SmoothTransition(self.statusBar, self.pendingMax, self.pendingMax, nil, self.onAnimationFinishedCallback, self.customAnimationTime)
 
-        if self.onLevelChangedCallback then
-            self.onLevelChangedCallback(self, self.level - self.pendingLevels)
+            if self.onLevelChangedCallback then
+                self.onLevelChangedCallback(self, self.level - self.pendingLevels)
+            end
         end
     end
 end
@@ -252,18 +255,25 @@ function ZO_StableTrainingBar_Gamepad:Initialize(control)
     zo_mixin(control, ZO_StableTrainingBar_Gamepad)
     control.bar = control:GetNamedChild("StatusBar"):GetNamedChild("Bar")
     control.value = control:GetNamedChild("Value")
+    self.min, self.max = 0, 0
+    self.valueFormat = nil
 end
 
 function ZO_StableTrainingBar_Gamepad:SetMinMax(min, max)
-    self.currentBar:SetMinMax(min, max)
-    self.improvementBar:SetMinMax(min, max)
     self.min, self.max = min, max
 end
 
+function ZO_StableTrainingBar_Gamepad:SetValueFormatString(valueFormat)
+    self.valueFormat = valueFormat
+end
+
 local FORCE_VALUE = true
-function ZO_StableTrainingBar_Gamepad:SetValue(value, maxValue, format)
-    ZO_StatusBar_SmoothTransition(self.bar, value, maxValue, FORCE_VALUE)
-    self.value:SetText(zo_strformat(format, value))
+function ZO_StableTrainingBar_Gamepad:SetValue(value)
+    ZO_StatusBar_SmoothTransition(self.bar, value, self.max, FORCE_VALUE)
+
+    if self.valueFormat then
+        self.value:SetText(zo_strformat(self.valueFormat, value))
+    end
 end
 
 function ZO_StableTrainingBar_Gamepad:SetGradientColors(...)

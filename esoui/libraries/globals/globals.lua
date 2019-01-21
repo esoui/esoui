@@ -130,7 +130,7 @@ function ZO_AbbreviateNumber(amount, precision, useUppercaseSuffixes)
     if amount >= ABBREVIATION_THRESHOLD then
         local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes)
 
-        return ZO_LocalizeDecimalNumber(shortAmount) .. suffix
+        return ZO_CommaDelimitDecimalNumber(shortAmount) .. suffix
     else
         return amount
     end

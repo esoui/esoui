@@ -65,7 +65,16 @@ function WorldMapInfo_Gamepad:InitializeTabs()
             callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT, USES_RIGHT_SIDE_CONTENT) end
         },
         {
-            text = GetString(SI_MAP_INFO_MODE_LOCATIONS), 
+            text = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER), 
+            callback = function()
+                self:SwitchToFragment(WORLD_MAP_ZONE_INFO_STORY_GAMEPAD_FRAGMENT, USES_RIGHT_SIDE_CONTENT)
+            end,
+            visible = function()
+                return WORLD_MAP_ZONE_STORY_GAMEPAD and WORLD_MAP_ZONE_STORY_GAMEPAD:HasZoneStoryData()
+            end,
+        },
+        {
+            text = GetString(SI_MAP_INFO_MODE_LOCATIONS),
             callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT, USES_RIGHT_SIDE_CONTENT) end
         },
         {

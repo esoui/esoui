@@ -251,23 +251,47 @@ local function AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
     InitializeTooltip(tooltip, owner, BOTTOM, 0, -5, TOP)
 end
 
-local function TryShowActionBarTooltip(abilitySlot, tooltip, owner)
+local function SetTooltipToActionBarSlot(tooltip, slot)
+    local slotType = GetSlotType(slot)
+
+    if slotType ~= ACTION_TYPE_NOTHING then
+        tooltip:SetAction(slot)
+        return true
+    end
+    return false
+end
+
+local function TryShowActionBarTooltip(abilitySlot)
     local button = ZO_ActionBar_GetButton(abilitySlot.slotNum)
     if button then
-        local slotNum = button:GetSlot()
-        if(GetSlotType(slotNum) ~= ACTION_TYPE_NOTHING) 
-        then
-            AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
-            return SetTooltipToActionBarSlot(tooltip, slotNum)
+        local actionSlotIndex = button:GetSlot()
+        local slotData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():GetSlotData(actionSlotIndex)
+        if slotData then
+            -- This is an ability, use the slotData tooltip
+            if abilitySlot.activeTooltip then
+                ClearTooltip(abilitySlot.activeTooltip)
+                abilitySlot.activeTooltip = nil
+            end
+
+            local tooltip = slotData:GetKeyboardTooltipControl()
+            if tooltip then
+                AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, abilitySlot)
+                slotData:SetKeyboardTooltip(tooltip)
+            end
         else
-            ClearTooltip(tooltip)
+            -- this is a quickslot, use the quickslot path
+            if GetSlotType(actionSlotIndex) ~= ACTION_TYPE_NOTHING then
+                AbilitySlotTooltipBaseInitialize(abilitySlot, ItemTooltip, abilitySlot)
+                return SetTooltipToActionBarSlot(ItemTooltip, actionSlotIndex)
+            else
+                ClearTooltip(ItemTooltip)
+            end
         end
     end
 end
 
 local function TryShowQuickslotTooltip(abilitySlot, tooltip, owner)
-    if(GetSlotType(abilitySlot.slotNum) ~= ACTION_TYPE_NOTHING) 
-    then
+    if GetSlotType(abilitySlot.slotNum) ~= ACTION_TYPE_NOTHING then
         AbilitySlotTooltipBaseInitialize(abilitySlot, tooltip, owner)
         return SetTooltipToActionBarSlot(tooltip, abilitySlot.slotNum)
     else
@@ -280,7 +304,7 @@ local AbilityEnter =
     [ABILITY_SLOT_TYPE_ACTIONBAR] =
     {
         function(abilitySlot)
-            return TryShowActionBarTooltip(abilitySlot, abilitySlot.tooltip, abilitySlot)
+            return TryShowActionBarTooltip(abilitySlot)
         end,
     },
     [ABILITY_SLOT_TYPE_QUICKSLOT] =

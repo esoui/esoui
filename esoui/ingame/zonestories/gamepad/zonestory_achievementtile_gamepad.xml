@@ -1,0 +1,35 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_AchievementTile_Gamepad_Control" inherits="ZO_ZoneStory_AchievementTile_Control ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_X" y="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_Y" />
+
+            <OnInitialized>
+                ZO_ZoneStory_AchievementTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" level="2" layer="CONTROLS">
+                    <Dimensions x="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_ICON_DIMENSIONS" />
+                    <Anchor point="LEFT" offsetX="14" />
+                </Texture>
+
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+
+                <Control name ="$(parent)TextContainer" override="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
+                    <Anchor point="RIGHT" offsetX="-10"/>
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" font="ZoFontGamepadCondensed34">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Status" override="true" font="ZoFontGamepadCondensed34">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

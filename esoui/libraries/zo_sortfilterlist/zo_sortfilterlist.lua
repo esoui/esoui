@@ -172,8 +172,6 @@ function ZO_SortFilterList:SetLockedForUpdates(locked)
                     self:RefreshFilters()
                 elseif(pendingUpdate == UPDATE_SORT) then
                     self:RefreshSort()
-                elseif(pendingUpdate == UPDATE_VISIBLE) then
-                    self:RefreshVisible()
                 end
             end
         end

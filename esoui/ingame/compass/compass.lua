@@ -6,18 +6,60 @@ function Compass:New(...)
     return compass
 end
 
+local QUEST_AREA_PIN_TYPES =
+{
+    MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION,
+    MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION,
+    MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_ASSISTED_QUEST_ZONE_STORY_CONDITION,
+    MAP_PIN_TYPE_ASSISTED_QUEST_ZONE_STORY_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_TRACKED_QUEST_CONDITION,
+    MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION,
+    MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_TRACKED_QUEST_ZONE_STORY_CONDITION,
+    MAP_PIN_TYPE_TRACKED_QUEST_ZONE_STORY_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_QUEST_CONDITION,
+    MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION,
+    MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION,
+    MAP_PIN_TYPE_QUEST_ZONE_STORY_CONDITION,
+    MAP_PIN_TYPE_QUEST_ZONE_STORY_OPTIONAL_CONDITION,
+}
+
+local QUEST_AREA_PIN_TYPES_TO_ANIMATION_PIN_TEXTURE =
+{
+    [MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION] = "EsoUI/Art/Compass/quest_icon_assisted.dds",
+    [MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/quest_icon_assisted.dds",
+    [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds",
+    [MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon_assisted.dds",
+    [MAP_PIN_TYPE_ASSISTED_QUEST_ZONE_STORY_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon_assisted.dds",
+    [MAP_PIN_TYPE_ASSISTED_QUEST_ZONE_STORY_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon_assisted.dds",
+    [MAP_PIN_TYPE_TRACKED_QUEST_CONDITION] = "EsoUI/Art/Compass/quest_icon.dds",
+    [MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/quest_icon.dds",
+    [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
+    [MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
+    [MAP_PIN_TYPE_TRACKED_QUEST_ZONE_STORY_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon.dds",
+    [MAP_PIN_TYPE_TRACKED_QUEST_ZONE_STORY_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon.dds",
+    [MAP_PIN_TYPE_QUEST_CONDITION] = "EsoUI/Art/Compass/quest_icon.dds",
+    [MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/quest_icon.dds",
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
+    [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
+    [MAP_PIN_TYPE_QUEST_ZONE_STORY_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon.dds",
+    [MAP_PIN_TYPE_QUEST_ZONE_STORY_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon.dds",
+}
+
 local function IsPlayerInsideJournalQuestConditionGoalArea(journalIndex, stepIndex, conditionIndex)
     journalIndex = journalIndex - 1
     stepIndex = stepIndex - 1
     conditionIndex = conditionIndex - 1
-    return IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION, journalIndex, stepIndex, conditionIndex)
-        or IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
-        or IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION, journalIndex, stepIndex, conditionIndex)
-        or IsPlayerInsidePinArea(MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
-        or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_CONDITION, journalIndex, stepIndex, conditionIndex)
-        or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
-        or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION, journalIndex, stepIndex, conditionIndex)
-        or IsPlayerInsidePinArea(MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION, journalIndex, stepIndex, conditionIndex)
+    for _, pinType in ipairs(QUEST_AREA_PIN_TYPES) do
+        if IsPlayerInsidePinArea(pinType, journalIndex, stepIndex, conditionIndex) then
+            return true
+        end
+    end
+    return false
 end
 
 local function IsQuestVisible(journalIndex)
@@ -110,7 +152,7 @@ function Compass:ApplyTemplateToAreaTexture(texture, template, restingAlpha, pin
         end
     end
 
-    return self:SetAreaTexturePlatformTextures(texture, pinType)
+    self:SetAreaTexturePlatformTextures(texture, pinType)
 end
 
 local AREA_TEXTURE_RESTING_ALPHA_GAMEPAD = 1
@@ -131,8 +173,6 @@ function Compass:SetAreaTexturePlatformTextures(areaTexture, pinType)
         areaTexture.center:SetTexture("EsoUI/Art/Compass/"..platformModifier.."area2frameAnim_standard_center.dds")
         areaTexture.pinType = pinType
     end
-
-    return pinTypeAssisted
 end
 
 function Compass:InitializeQuestPins()
@@ -175,16 +215,16 @@ function Compass:InitializeQuestPins()
         animationTimeline.pin = pin
 
         local areaTexture, key = areaTexturePinPool:AcquireObject()
-        local pinTypeAssited = self:ApplyTemplateToAreaTexture(areaTexture, IsInGamepadPreferredMode() and "ZO_CompassAreaTexture_Gamepad_Template" or "ZO_CompassAreaTexture_Keyboard_Template", nil, self.currentlyAnimatingAreaPinType)
         areaTexture.key = key
         animationTimeline.areaTexture = areaTexture
         areaTexture.pin = pin
 
-        if pinTypeAssited then
-            pin:SetTexture("EsoUI/Art/Compass/quest_icon_assisted.dds")
-        else
-            pin:SetTexture("EsoUI/Art/Compass/quest_icon.dds")
-        end
+        local NO_RESTING_ALPHA = nil
+        local compassAreaTextureTemplate = IsInGamepadPreferredMode() and "ZO_CompassAreaTexture_Gamepad_Template" or "ZO_CompassAreaTexture_Keyboard_Template"
+        self:ApplyTemplateToAreaTexture(areaTexture, compassAreaTextureTemplate, NO_RESTING_ALPHA, self.currentlyAnimatingAreaPinType)
+        local pinTexture = QUEST_AREA_PIN_TYPES_TO_ANIMATION_PIN_TEXTURE[self.currentlyAnimatingAreaPinType]
+        internalassert(pinTexture ~= nil)
+        pin:SetTexture(pinTexture)
 
         areaTexture:SetAlpha(self.refreshingJournalIndex and 1 or pin:GetAlpha())
         areaTexture:SetHidden(false)
@@ -206,7 +246,7 @@ function Compass:InitializeQuestPins()
 
     local function OnQuestAreaGoalStateChanged(journalIndex, stepIndex, conditionIndex, playerIsInside)
         local _, _, _, isComplete = GetJournalQuestConditionValues(journalIndex, stepIndex, conditionIndex)
-        if not isComplete then
+        if not isComplete and playerIsInside == self.playerIsInside then
             self.refreshingJournalIndex = true
         end
 
@@ -228,6 +268,7 @@ function Compass:InitializeQuestPins()
             end
         end
 
+        self.playerIsInside = playerIsInside
         self.refreshingJournalIndex = false
     end
 
@@ -383,7 +424,7 @@ function Compass:PlayAreaOverrideAnimation(journalIndex, stepIndex, conditionInd
     sizeAnimation:SetStartAndEndWidth(0, desiredWidth)
     local currentAreaOverrideHeight = self.areaOverride:GetHeight()
     sizeAnimation:SetStartAndEndHeight(currentAreaOverrideHeight, currentAreaOverrideHeight) -- Make sure the height is the correct height for the current keyboard/gamepad template
-	self.areaOverrideAnimation:PlayFromStart()
+    self.areaOverrideAnimation:PlayFromStart()
 
     self.currentOverrideJournalIndex = journalIndex
     self.currentOverrideStepIndex = stepIndex
@@ -391,18 +432,12 @@ function Compass:PlayAreaOverrideAnimation(journalIndex, stepIndex, conditionInd
 end
 
 function Compass:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
-    local playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION)
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_OPTIONAL_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_OPTIONAL_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_REPEATABLE_CONDITION) or playedAnyAnimation
-    playedAnyAnimation = self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION) or playedAnyAnimation
+    local playedAnyAnimation = false
+    for _, pinType in ipairs(QUEST_AREA_PIN_TYPES) do
+        if self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, pinType) then
+            playedAnyAnimation = true
+        end
+    end
 
     if not self.refreshingJournalIndex and playedAnyAnimation and (self.currentOverrideJournalIndex ~= journalIndex or self.currentOverrideStepIndex ~= stepIndex or self.currentOverrideConditionIndex ~= conditionIndex) then
         if self.areaOverrideQueue then

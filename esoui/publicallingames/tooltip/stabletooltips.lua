@@ -8,9 +8,12 @@ function ZO_Tooltip:LayoutRidingSkill(trainingType, bonus, maxBonus)
     local barSection = self:AcquireSection(self:GetStyle("conditionOrChargeBarSection"))
     local valueFormat = trainingType == RIDING_TRAIN_SPEED and SI_MOUNT_ATTRIBUTE_SPEED_FORMAT or SI_MOUNT_ATTRIBUTE_SIMPLE_FORMAT
     local skillBar = self:AcquireStatusBar(self:GetStyle("ridingTrainingChargeBar"))
-    skillBar:SetValue(bonus, maxBonus, valueFormat)
+    local MIN_BONUS = 0
+    skillBar:SetValueFormatString(valueFormat)
+    skillBar:SetMinMax(MIN_BONUS, maxBonus)
+    skillBar:SetValue(bonus)
     barSection:AddStatusBar(skillBar)
-	self:AddSection(barSection)
+    self:AddSection(barSection)
 
     --Body
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))

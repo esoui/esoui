@@ -67,6 +67,16 @@ function ZO_HousingFurnitureSettings_Base:TryShowCopyDialog()
     end
 end
 
+function ZO_HousingFurnitureSettings_Base:SetPrimaryResidence()
+    if self.primaryResidence == 0 then
+        SetHousingPrimaryHouse(self.currentHouse)
+    elseif self.currentHouse ~= self.primaryResidence then
+        local collectibleId = GetCollectibleIdForHouse(self.primaryResidence)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = self.currentHouse}, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()}})
+    end
+end
+
 function ZO_HousingFurnitureSettings_Base:ShowDefaultAccessTooltip()
     assert(false) -- override in derived classes
 end

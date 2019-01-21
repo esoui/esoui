@@ -63,11 +63,7 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                             local targetData = self.mainList:GetTargetData()
                             if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
                                 if targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE] then
-                                    if self.currentHouse ~= self.primaryResidence then
-                                        local collectibleId = GetCollectibleIdForHouse(self.primaryResidence)
-                                        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                                        ZO_Dialogs_ShowGamepadDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = self.currentHouse}, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()} })
-                                    end
+                                    self:SetPrimaryResidence()
                                 end
                             elseif self.activePanel then
                                 self.owner:DeactivateCurrentList()

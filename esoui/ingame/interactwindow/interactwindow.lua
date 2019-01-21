@@ -12,7 +12,7 @@ function ZO_InteractionManager:New(...)
 end
 
 function ZO_InteractionManager:Initialize()
-    SCENE_MANAGER:AddBypassHideSceneConfirmationReason("ARRESTED")
+    ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("ARRESTED")
 end
 
 function ZO_InteractionManager:OnBeginInteraction(interaction)

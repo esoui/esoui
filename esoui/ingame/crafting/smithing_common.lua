@@ -237,6 +237,16 @@ end
 function ZO_SmithingHorizontalListTemplate_OnInitialized(control)
     control.listControl = control:GetNamedChild("List")
     control.titleLabel = control:GetNamedChild("Title")
-    control.selectedLabel = control:GetNamedChild("SelectedLabel")
     control.extraInfoLabel = control:GetNamedChild("ExtraInfoLabel")
+
+    --Center the selected label text in the whole control but limit its width such that it doesn't run into title text which is on the left side of it
+    local selectedLabel = control:GetNamedChild("SelectedLabel")
+    control.selectedLabel = selectedLabel
+    control.titleLabel:SetHandler("OnTextChanged", function(titleLabel)
+        local titleWidth = titleLabel:GetTextWidth()
+        local totalWidth = control:GetWidth()
+        local TITLE_SELECTED_LABEL_PADDING_X = 10
+        local selectedLabelWidth = (totalWidth - titleWidth * 2) - TITLE_SELECTED_LABEL_PADDING_X * 2
+        selectedLabel:SetWidth(selectedLabelWidth)
+    end)
 end

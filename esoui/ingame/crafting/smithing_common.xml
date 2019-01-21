@@ -34,7 +34,7 @@
         </Button>
 
         <Control name="ZO_SmithingHorizontalListTemplate" virtual="true">
-            <Dimensions x="500" y="125" />
+            <Dimensions x="500" y="127" />
 
             <OnInitialized>
                 ZO_SmithingHorizontalListTemplate_OnInitialized(self)
@@ -54,12 +54,14 @@
                     <Anchor point="TOPLEFT" offsetY="8"/>
                 </Label>
 
-                <Label name="$(parent)SelectedLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <!-- This label's width is computed in ZO_SmithingHorizontalListTemplate_OnInitialized-->
+                <Label name="$(parent)SelectedLabel" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOP" offsetY="8"/>
                 </Label>
 
-                <Label name="$(parent)ExtraInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
-                    <Anchor point="BOTTOM" offsetY="-8"/>
+                <Label name="$(parent)ExtraInfoLabel" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                    <Anchor point="BOTTOMLEFT" offsetY="-8"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="-8"/>
                 </Label>
             </Controls>
         </Control>

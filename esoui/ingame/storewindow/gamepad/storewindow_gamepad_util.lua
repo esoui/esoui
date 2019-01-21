@@ -380,8 +380,14 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
 
         local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
         
-        --This is only used by stables        
-        entry.data = itemData.data
+        --This is only used by stables
+        local stableTrainingData = itemData.data
+        if stableTrainingData then
+            entry.trainingData = stableTrainingData
+            local MIN_BONUS = 0
+            entry:SetBarValues(MIN_BONUS, stableTrainingData.maxBonus, stableTrainingData.bonus)
+            entry:SetShowBarEvenWhenUnselected(true)
+        end
         
         if not itemData.ignoreStoreVisualInit then
             entry:InitializeStoreVisualData(itemData)

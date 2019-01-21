@@ -15,14 +15,13 @@ end
 
 function ZO_CollectibleTile_Keyboard:InitializePlatform()
     ZO_ContextualActionsTile_Keyboard.InitializePlatform(self)
-    
-    local container = self.control:GetNamedChild("Container")
-    self.statusMultiIcon = container:GetNamedChild("Status")
-    self.cornerTagTexture = container:GetNamedChild("CornerTag")
-    self.cooldownIcon = container:GetNamedChild("CooldownIcon")
-    self.cooldownIconDesaturated = container:GetNamedChild("CooldownIconDesaturated")
-    self.cooldownTimeLabel = container:GetNamedChild("CooldownTime")
-    self.cooldownEdgeTexture = container:GetNamedChild("CooldownEdge")
+
+    self.statusMultiIcon = self.control:GetNamedChild("Status")
+    self.cornerTagTexture = self.control:GetNamedChild("CornerTag")
+    self.cooldownIcon = self.control:GetNamedChild("CooldownIcon")
+    self.cooldownIconDesaturated = self.control:GetNamedChild("CooldownIconDesaturated")
+    self.cooldownTimeLabel = self.control:GetNamedChild("CooldownTime")
+    self.cooldownEdgeTexture = self.control:GetNamedChild("CooldownEdge")
 
     self:SetCanFocus(false)
 

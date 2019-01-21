@@ -15,7 +15,6 @@ end
 function ZO_GamepadTradingHouse_BaseList:Initialize()
     self.eventCallbacks = {}
     self:InitializeEvents()
-    self:InitializeKeybindStripDescriptors()
 end
 
 function ZO_GamepadTradingHouse_BaseList:InitializeKeybindStripDescriptors()
@@ -27,68 +26,59 @@ function ZO_GamepadTradingHouse_BaseList:UpdateKeybind()
 end
 
 function ZO_GamepadTradingHouse_BaseList:Hide()
-    SCENE_MANAGER:RemoveFragmentGroup(self:GetFragmentGroup())
+    TRADING_HOUSE_GAMEPAD_SUBSCENE_MANAGER:Hide(self:GetSubscene():GetName())
 end
 
 function ZO_GamepadTradingHouse_BaseList:Show()
-    SCENE_MANAGER:AddFragmentGroup(self:GetFragmentGroup())
+    TRADING_HOUSE_GAMEPAD_SUBSCENE_MANAGER:Show(self:GetSubscene():GetName())
 end
 
-function ZO_GamepadTradingHouse_BaseList:SetEventCallback(event, callback)
-    self.eventCallbacks[event] = callback
-end
-
-function ZO_GamepadTradingHouse_BaseList:RegisterForEvents(eventTable)
-    if self.eventCallbacks then
-        for event, callback in pairs(self.eventCallbacks) do
-            if eventTable[event] ~= nil then
-                table.insert(eventTable[event], callback)
+do
+    local function FilterForGamepadEvents(callback)
+        return function(...)
+            if IsInGamepadPreferredMode() then
+                callback(...)
             end
         end
     end
-end
 
-function ZO_GamepadTradingHouse_BaseList:DisplayErrorDialog(errorMessage)
-    ZO_Dialogs_ShowPlatformDialog("TRADING_HOUSE_DISPLAY_ERROR", {}, {mainTextParams = {errorMessage}})
-end
-
-function ZO_GamepadTradingHouse_BaseList:DisplayChangeGuildDialog()
-    ZO_Dialogs_ShowPlatformDialog("TRADING_HOUSE_CHANGE_ACTIVE_GUILD")
-end
-
-function ZO_GamepadTradingHouse_BaseList:SetAwaitingResponse(awaitingResponse)
-    self.awaitingResponse = awaitingResponse
-    if awaitingResponse then
-        self:DeactivateForResponse()
-    else
-        self:ActivateOnResponse()
+    function ZO_GamepadTradingHouse_BaseList:RegisterForTradingHouseEvent(event, callback)
+        self.control:RegisterForEvent(event, FilterForGamepadEvents(callback))
     end
+end
 
-    if not self.control:IsHidden() then
-        self:UpdateKeybind()
-    end
+function ZO_GamepadTradingHouse_BaseList:AddGuildChangeKeybindDescriptor(keybindStripDescriptor)
+    table.insert(keybindStripDescriptor,
+    {
+        name = GetString(SI_TRADING_HOUSE_GUILD_HEADER),
+        keybind = "UI_SHORTCUT_TERTIARY",
+        callback = function()
+            ZO_Dialogs_ShowPlatformDialog("TRADING_HOUSE_CHANGE_ACTIVE_GUILD")
+        end,
+        visible = function()
+            return GetSelectedTradingHouseGuildId() ~= nil and GetNumTradingHouseGuilds() > 1
+        end,
+    })
 end
 
 -- Functions to be overridden
 
-function ZO_GamepadTradingHouse_BaseList:InitializeList()
-    --- should be overridden to add in templates to parametric list & handle needed callbacks
-end
-
 function ZO_GamepadTradingHouse_BaseList:InitializeEvents()
-    --should be overridden
+    TRADING_HOUSE_GAMEPAD:RegisterCallback("OnLockedForInput", function(...) self:OnLockedForInput(...) end)
+    TRADING_HOUSE_GAMEPAD:RegisterCallback("OnUnlockedForInput", function(...) self:OnUnlockedForInput(...) end)
 end
 
-function ZO_GamepadTradingHouse_BaseList:GetFragmentGroup()
+function ZO_GamepadTradingHouse_BaseList:GetSubscene()
     assert(false) -- This should never be reached, must be overridden
 end
 
-function ZO_GamepadTradingHouse_BaseList:OnInitialInteraction()
-    --should be overridden
+function ZO_GamepadTradingHouse_BaseList:GetTradingHouseMode()
+    return nil -- should be overriden
 end
 
-function ZO_GamepadTradingHouse_BaseList:OnEndInteraction()
-    --should be overridden
+function ZO_GamepadTradingHouse_BaseList:GetHeaderReplacementInfo()
+    -- returns isReplacementActive, replacementTitleText: should be overridden
+    return false, ""
 end
 
 function ZO_GamepadTradingHouse_BaseList:UpdateForGuildChange()
@@ -111,20 +101,20 @@ function ZO_GamepadTradingHouse_BaseList:OnShown()
     --should be overridden
 end
 
-function ZO_GamepadTradingHouse_BaseList:DeactivateForResponse()
-    self.listControl:SetHidden(true)
-    self.itemList:Deactivate()
+function ZO_GamepadTradingHouse_BaseList:OnLockedForInput()
+    --should be overridden
 end
 
-function ZO_GamepadTradingHouse_BaseList:ActivateOnResponse()
-    self.listControl:SetHidden(false)
-    if not self.control:IsHidden() then
-        self.itemList:Activate() 
-    end
+function ZO_GamepadTradingHouse_BaseList:OnUnlockedForInput()
+    --should be overridden
 end
 
-function ZO_GamepadTradingHouse_BaseList:HasNoCooldown()
-    return GetTradingHouseCooldownRemaining() == 0 
+function ZO_GamepadTradingHouse_BaseList:Deactivate()
+    --should be overridden
+end
+
+function ZO_GamepadTradingHouse_BaseList:Activate()
+    --should be overridden
 end
 
 ------------------
@@ -142,6 +132,8 @@ function ZO_GamepadTradingHouse_ItemList:Initialize(control)
     control.owner = self
     self.listControl = self.control:GetNamedChild("List")
     self:InitializeList()
+    self:InitializeFragment()
+    self:InitializeKeybindStripDescriptors()
     ZO_GamepadTradingHouse_BaseList.Initialize(self)
 end
 
@@ -149,161 +141,69 @@ function ZO_GamepadTradingHouse_ItemList:GetKeyBind()
     return self.keybindStripDescriptor
 end
 
-function ZO_GamepadTradingHouse_ItemList:SetFragment(fragment)
-    self.fragment = fragment
-    fragment:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
+function ZO_GamepadTradingHouse_ItemList:InitializeFragment()
+    local ALWAYS_ANIMATE = true
+    self.fragment = ZO_CreateQuadrantConveyorFragment(self.control, ALWAYS_ANIMATE)
+    self.subscene = ZO_Scene:New(self.control:GetName().."Scene", TRADING_HOUSE_GAMEPAD_SUBSCENE_MANAGER)
+    self.subscene:AddFragment(self.fragment)
+    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:Activate()
             self:UpdateList()
-            if not self.awaitingResponse then
-                self.itemList:Activate()
-            end
-            
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self:OnShowing()
-        elseif newState == SCENE_SHOWN then
+        elseif newState == SCENE_FRAGMENT_SHOWN then
             self:OnShown()
-        elseif newState == SCENE_HIDING then
+        elseif newState == SCENE_FRAGMENT_HIDING then
             self:OnHiding()
-            self.itemList:Deactivate()
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-        elseif newState == SCENE_HIDDEN then
+            self:Deactivate()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:OnHidden()
         end
     end)
+end
+
+function ZO_GamepadTradingHouse_ItemList:GetFragment()
+    return self.fragment
+end
+
+function ZO_GamepadTradingHouse_ItemList:GetSubscene()
+    return self.subscene
 end
 
 function ZO_GamepadTradingHouse_ItemList:InitializeList()
     self.itemList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("List"))
 end
 
+function ZO_GamepadTradingHouse_ItemList:OnLockedForInput()
+    self.listControl:SetHidden(true)
+    if not self.control:IsHidden() then
+        self.itemList:Deactivate()
+        self:UpdateKeybind()
+    end
+end
+
+function ZO_GamepadTradingHouse_ItemList:OnUnlockedForInput()
+    self.listControl:SetHidden(false)
+    if not self.control:IsHidden() then
+        self.itemList:Activate() 
+        self:UpdateKeybind()
+    end
+end
+
+function ZO_GamepadTradingHouse_ItemList:Deactivate()
+    self.itemList:Deactivate()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadTradingHouse_ItemList:Activate()
+    self.itemList:Activate() 
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
 -- Functions to be overridden
 
 function ZO_GamepadTradingHouse_ItemList:UpdateList()
     --should be overridden
-end
-
-----------------------
--- Sortable Item List
-----------------------
-
-ZO_GamepadTradingHouse_SortableItemList = ZO_Object.MultiSubclass(ZO_GamepadTradingHouse_BaseList, ZO_SortableParametricList)
-
-ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_TIME = "time"
-ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_NAME = "name"
-ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_PRICE = "price"
-
-function ZO_GamepadTradingHouse_SortableItemList:New(...)
-    return ZO_SortableParametricList.New(self, ...)
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:Initialize(control, initialSortKey, useHighlight)
-    ZO_SortableParametricList.Initialize(self, control, useHighlight)
-    ZO_GamepadTradingHouse_BaseList.Initialize(self)
-    self.initialSortKey = initialSortKey
-    self:InitializeSortOptions()
-end
-
-local NAME_SORT_KEYS =
-{
-    name = {tiebreaker = "time"},
-    time = {}
-}
-
-local TIME_SORT_KEYS =
-{
-    time = {tiebreaker = "name"},
-    name = {}
-}
-
-local PRICE_SORT_KEYS =
-{
-    price = {tiebreaker = "name"},
-    name = {}
-}
-
-local tradingHouseSortOptions = {
-    [ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_TIME] = TIME_SORT_KEYS,
-    [ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_NAME] = NAME_SORT_KEYS,
-    [ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_PRICE] = PRICE_SORT_KEYS,
-}
-
-function ZO_GamepadTradingHouse_SortableItemList:GetKeyBind()
-    return self.keybindStripDescriptor
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:SetFragment(fragment)
-    self.fragment = fragment
-    fragment:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:Activate()
-            self:RequestListUpdate()
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-            self:OnShowing()
-        elseif newState == SCENE_SHOWN then
-            self:OnShown()
-        elseif newState == SCENE_HIDING then
-            self:OnHiding()
-            self:Deactivate()
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-        elseif newState == SCENE_HIDDEN then
-            self:OnHidden()
-        end
-    end)
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:InitializeSortOptions()
-    self.currentTimePriceKey = ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_TIME
-    self.toggleTimePriceKey = ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_PRICE
-    self:SetSortOptions(tradingHouseSortOptions)
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:ResetSortOptions()
-    if self.currentTimePriceKey ~= self.initialSortKey then
-        self:ToggleSortOptions()
-    end
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:SelectInitialSortOption()
-    if self.initialSortKey then
-        self:SelectAndResetSortForKey(self.initialSortKey)
-    end
-end
-
-local function GetTextForKey(key)
-    if key == ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_PRICE then
-        return GetString(SI_TRADING_HOUSE_SORT_TYPE_PRICE)
-    else
-        return GetString(SI_TRADING_HOUSE_SORT_TYPE_TIME)
-    end
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:GetTextForCurrentTimePriceKey()
-    return GetTextForKey(self.currentTimePriceKey)
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:GetTextForToggleTimePriceKey()
-    return GetTextForKey(self.toggleTimePriceKey)
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:ToggleSortOptions()
-    local SELECT_NEW_KEY = true
-    self:ReplaceKey(self.currentTimePriceKey, self.toggleTimePriceKey, self:GetTextForToggleTimePriceKey(), SELECT_NEW_KEY)
-    self.currentTimePriceKey, self.toggleTimePriceKey = self.toggleTimePriceKey, self.currentTimePriceKey
-    self:RefreshSort()
-    self:UpdateKeybind()
-end
-
--- Functions to be overridden
-
-function ZO_GamepadTradingHouse_SortableItemList:BuildList()
-    -- intended to be overriden
-    -- should populate the itemList by calling AddEntry
-end
-
-function ZO_GamepadTradingHouse_SortableItemList:RequestListUpdate()
-    -- intended to be overridden if needed
-    -- use to send a message to the server that a list update is needed
-    -- response from that message should call RefreshData
 end
 
 --[[ Globals ]]--

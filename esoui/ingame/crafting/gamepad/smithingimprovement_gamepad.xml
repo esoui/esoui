@@ -139,6 +139,7 @@
 
                         <Label name="$(parent)ExtraInfoLabel" override="true">
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                            <ClearAnchors/>
                             <Anchor point="TOP" relativeTo="$(parent)Spinner" relativePoint="BOTTOM" offsetY="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING"/>
                         </Label>
                     </Controls>

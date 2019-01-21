@@ -1,6 +1,3 @@
-local ITEM_TEMPLATE = "ZO_GamepadItemSubEntryTemplate"
-local CATEGORY_HEADER_TEMPLATE = "ZO_GamepadMenuEntryHeaderTemplate"
-
 -------------------------------------
 -- Gamepad Guild Bank Inventory List
 -------------------------------------
@@ -153,6 +150,8 @@ function ZO_GuildBank_Gamepad:New(...)
 end
 
 function ZO_GuildBank_Gamepad:Initialize(control)
+    self.withdrawLoadingControlShown = false
+
     GAMEPAD_GUILD_BANK_SCENE = ZO_InteractScene:New(GAMEPAD_GUILD_BANK_SCENE_NAME, SCENE_MANAGER, GUILD_BANKING_INTERACTION)
     ZO_BankingCommon_Gamepad.Initialize(self, control, GAMEPAD_GUILD_BANK_SCENE)
 
@@ -196,9 +195,19 @@ function ZO_GuildBank_Gamepad:OnWithdrawDepositStateChanged(oldState, newState)
     end
 end
 
-function ZO_GuildBank_Gamepad:SetWithdrawLoadingControlShown(shouldShow)
-    self.withdrawLoadingControl:SetHidden(not shouldShow)
-    self.withdrawList:GetControl():SetHidden(shouldShow)
+function ZO_GuildBank_Gamepad:SetWithdrawLoadingControlShown(shouldShowLoading)
+    if self.withdrawLoadingControlShown ~= shouldShowLoading then
+        self.withdrawLoadingControlShown = shouldShowLoading
+        self.withdrawLoadingControl:SetHidden(not shouldShowLoading)
+        local shouldShowWithdrawList = not shouldShowLoading
+        if not (self:GetListFragment("withdraw"):GetState() == SCENE_FRAGMENT_HIDING and shouldShowWithdrawList) then
+            --Because we change the active lists by adding and removing fragments, everytime we change tabs we are in a state where two list fragments are showing at the same. This causes problems
+            --when the bank info becomes avaiable as the withdraw fragment is hiding because it will try to activate and adds its list bindings when the deposit list is also active and has added its
+            --binds. The best way to fix this is to have these lists be scenes on a sub-scene manager so they don't overlap times when they are active. However, that means significant changes to the
+            --parametric list screen. So we handle the problem by not showing the withdraw list if the fragment is hiding. We wait until it is hidden to do that in the fragment's state change callback. 
+            self.withdrawList:GetControl():SetHidden(not shouldShowWithdrawList)
+        end
+    end
 end
 
 function ZO_GuildBank_Gamepad:CreateEventTable()
@@ -259,19 +268,20 @@ function ZO_GuildBank_Gamepad:CreateEventTable()
         self.withdrawList:RefreshList()
     end
 
-    local function AlertAndRefreshHeader(currencyType, currentCurrency, oldCurrency, reason)       
+    local function AlertAndRefreshHeader(currencyType, currentCurrency, oldCurrency, reason)
         local alertString
         local amount
         local IS_GAMEPAD = true
+        local DONT_USE_SHORT_FORMAT = nil
 
         if reason == CURRENCY_CHANGE_REASON_GUILD_BANK_DEPOSIT then
             amount = oldCurrency - currentCurrency
-            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_DEPOSITED, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, useShortFormat, currencyType, IS_GAMEPAD))
+            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_DEPOSITED, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, DONT_USE_SHORT_FORMAT, currencyType, IS_GAMEPAD))
         elseif CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL then
             amount = currentCurrency - oldCurrency
-            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_WITHDRAWN, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, useShortFormat, currencyType, IS_GAMEPAD)) 
+            alertString = zo_strformat(SI_GAMEPAD_BANK_GOLD_AMOUNT_WITHDRAWN, ZO_CurrencyControl_FormatCurrencyAndAppendIcon(amount, DONT_USE_SHORT_FORMAT, currencyType, IS_GAMEPAD)) 
         end
-       
+
         if alertString then
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, alertString)
         end
@@ -354,8 +364,6 @@ end
 function ZO_GuildBank_Gamepad:OnDeferredInitialization()
     ZO_SharedInventory_SelectAccessibleGuildBank()
 
-    self.withdrawLoadingControl = self.control:GetNamedChild("Loading")
-
     if self.loadingGuildBank then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         self:SetWithdrawLoadingControlShown(true)
@@ -388,7 +396,16 @@ do
                 --selection is out of date. So we run OnTargetChanged when a list shows to remedy this.
                 self:OnTargetChanged(self:GetCurrentList(), self:GetTargetData())
             end
+            --See SetWithdrawLoadingControlShown for more info
+            if newState ~= SCENE_FRAGMENT_HIDING then
+                self.withdrawList:GetControl():SetHidden(self.withdrawLoadingControlShown)
+            end
         end)
+        
+        local withdrawListControl = withdrawList:GetControl()
+        local withdrawContainerControl = withdrawListControl:GetParent()
+        self.withdrawLoadingControl = CreateControlFromVirtual("$(parent)Loading", withdrawContainerControl, "ZO_GamepadCenteredLoadingIconAndLabelTemplate")
+        self.withdrawLoadingControl:GetNamedChild("ContainerText"):SetText(GetString(SI_INVENTORY_RETRIEVING_ITEMS))
 
         local depositList = self:AddList("deposit", SETUP_LIST_LOCALLY, ZO_GamepadGuildBankInventoryList, BANKING_GAMEPAD_MODE_DEPOSIT, self.carriedBag, SLOT_TYPE_ITEM, NO_ON_SELECTED_DATA_CHANGED_CALLBACK, nil, nil, nil, nil, nil, ZO_SharedGamepadEntry_OnSetup)
         depositList:SetOnTargetDataChangedCallback(OnTargetDataChangedCallback)
@@ -515,15 +532,6 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
     })
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.depositKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
-end
-
-local function CreateModeData(name, mode, itemList, keybind)
-    return {
-        text = GetString(name),
-        mode = mode,
-        itemList = itemList,
-        keybind = keybind,
-    }
 end
 
 function ZO_GuildBank_Gamepad:CanDeposit()
@@ -658,24 +666,6 @@ end
 
 function ZO_GuildBank_Gamepad:OnRefreshHeaderData()
     ZO_GUILD_NAME_FOOTER_FRAGMENT:SetGuildName(GetGuildName(GetSelectedGuildBankId()))
-end
-
-local function GuildBankEntryHeaderTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    control:SetText(data.bestGamepadItemCategoryName)
-end
-
-local SORT_KEYS =
-{
-    bestGamepadItemCategoryName = { tiebreaker = "name" },
-    name = { tiebreaker = "requiredLevel" },
-    requiredLevel = { tiebreaker = "requiredChampionPoints", isNumeric = true },
-    requiredChampionPoints = { tiebreaker = "iconFile", isNumeric = true },
-    iconFile = { tiebreaker = "uniqueId" },
-    uniqueId = { isId64 = true },
-}
-
-local function ItemSort(item1, item2)
-    return ZO_TableOrderingFunction(item1, item2, "bestGamepadItemCategoryName", SORT_KEYS, ZO_SORT_ORDER_UP)
 end
 
 function ZO_GuildBank_Gamepad:UpdateGuildBankList()

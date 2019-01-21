@@ -11,8 +11,24 @@ ZO_TRADING_HOUSE_INTERACTION =
     interactTypes = { INTERACTION_TRADINGHOUSE },
 }
 
-function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType)
+function ZO_TradingHouse_GetItemDataFormattedName(itemData)
+    if not itemData.formattedName then
+        itemData.formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemData.name)
+    end
+    return itemData.formattedName
+end
+
+function ZO_TradingHouse_GetItemDataFormattedTime(itemData)
+    local timeString = ZO_FormatTime(itemData.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_TWELVE_HOUR_NO_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+    return ZO_CachedStrFormat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, timeString)
+end
+
+function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
     if name ~= "" and stackCount > 0 then
+        local UNIT_PRICE_PRECISION = .01
+        purchasePricePerUnit = zo_roundToNearest(purchasePricePerUnit, UNIT_PRICE_PRECISION)
+        currencyType = currencyType or CURT_MONEY
+
         local result =
         {
             slotIndex = index,
@@ -23,7 +39,10 @@ function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, 
             sellerName = sellerName,
             timeRemaining = timeRemaining,
             purchasePrice = purchasePrice,
-            currencyType = currencyType or CURT_MONEY
+            purchasePricePerUnit = purchasePricePerUnit,
+            currencyType = currencyType,
+            itemLink = itemLink,
+            itemUniqueId = itemUniqueId,
         }
 
         return result
@@ -33,41 +52,23 @@ function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, 
 end
 
 function ZO_TradingHouse_CreateListingItemData(index)
-    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType = GetTradingHouseListingItemInfo(index)
-    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType)
+    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemUniqueId, purchasePricePerUnit = GetTradingHouseListingItemInfo(index)
+    local itemLink = GetTradingHouseListingItemLink(index)
+    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
 end
 
 function ZO_TradingHouse_CreateSearchResultItemData(index)
-    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType = GetTradingHouseSearchResultItemInfo(index)
-    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType)
+    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemUniqueId, purchasePricePerUnit = GetTradingHouseSearchResultItemInfo(index)
+    local itemLink = GetTradingHouseSearchResultItemLink(index)
+    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
 end
 
-local TRADING_HOUSE_DESIRED_FILTER_ORDERING =
-{
-    SI_TRADING_HOUSE_BROWSE_ALL_ITEMS,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_WEAPON,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_APPAREL,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_GLYPHS_AND_GEMS,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_CRAFTING,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_GUILD_ITEMS,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_CONSUMABLES,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_FURNISHINGS,
-    SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_OTHER,
-}
-
-ZO_TRADING_HOUSE_QUALITIES =
-{
-    { ITEM_QUALITY_TRASH, ITEM_QUALITY_LEGENDARY, SI_TRADING_HOUSE_BROWSE_QUALITY_ANY },
-    { ITEM_QUALITY_NORMAL, ITEM_QUALITY_NORMAL, SI_TRADING_HOUSE_BROWSE_QUALITY_NORMAL },
-    { ITEM_QUALITY_MAGIC, ITEM_QUALITY_MAGIC, SI_TRADING_HOUSE_BROWSE_QUALITY_MAGIC },
-    { ITEM_QUALITY_ARCANE, ITEM_QUALITY_ARCANE, SI_TRADING_HOUSE_BROWSE_QUALITY_ARCANE },
-    { ITEM_QUALITY_ARTIFACT, ITEM_QUALITY_ARTIFACT, SI_TRADING_HOUSE_BROWSE_QUALITY_ARTIFACT },
-    { ITEM_QUALITY_LEGENDARY, ITEM_QUALITY_LEGENDARY, SI_TRADING_HOUSE_BROWSE_QUALITY_LEGENDARY },
-}
- 
-ZO_RANGE_COMBO_INDEX_MIN_VALUE = 1
-ZO_RANGE_COMBO_INDEX_MAX_VALUE = 2
-ZO_RANGE_COMBO_INDEX_TEXT = 3
+function ZO_TradingHouse_CalculateItemSuggestedPostPrice(bagId, slotIndex)
+    -- It would be nice if we could record historical posts made by this character, and recall those prices here.
+    local SUGGESTED_VALUE_MULTIPLIER = 3
+    local _, stackCount, vendorPricePerUnit = GetItemInfo(bagId, slotIndex)
+    return vendorPricePerUnit * stackCount * SUGGESTED_VALUE_MULTIPLIER
+end
 
 --[[ 
     Trading House Singleton 
@@ -82,8 +83,6 @@ function ZO_TradingHouse_Singleton:New(...)
 end
 
 function ZO_TradingHouse_Singleton:Initialize()
-    ZO_TradingHouseFilter_Shared_InitializeData()
-
     local function OnTradingHouseOpen()
         SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):OpenTradingHouse()
         SYSTEMS:ShowScene(ZO_TRADING_HOUSE_SYSTEM_NAME)
@@ -100,292 +99,46 @@ end
 ZO_TRADING_HOUSE_SINGLETON = ZO_TradingHouse_Singleton:New()
 
 --[[
-    Trading House Search Field Setter
-    Other objects derive from this to call specific methods on a master search object (which then passes data in for the search)
-
-    NOTE: When inheriting from this object, do not call obj:Initialize in your derived New function.  The base object will automatically call the derived object's
-    initialize.  In the derived object's Initialize function, that's where the base init should be called; in the form: BaseObj.Initialize(self, ...)
---]]
-
-ZO_TradingHouseSearchFieldSetter = ZO_Object:Subclass()
-
-function ZO_TradingHouseSearchFieldSetter:New(...)
-    local setter = ZO_Object.New(self)
-    setter:Initialize(...)
-    return setter
-end
-
-function ZO_TradingHouseSearchFieldSetter:Initialize(filterType)
-    self.m_filterType = filterType
-end
-
-function ZO_TradingHouseSearchFieldSetter:ApplyToSearch(searchObject)
-    local filterType = self.m_filterType
-    if(type(filterType) == "function") then
-        filterType = filterType()
-    end
-
-    searchObject:SetFilter(filterType, self:GetValues())
-end
-
--- Can be overridden
-function ZO_TradingHouseSearchFieldSetter:GetValues()
-    return self.m_min, self.m_max
-end
-
---[[
-    Combo Box Setter
---]]
-
-ZO_TradingHouseComboBoxSetter = ZO_TradingHouseSearchFieldSetter:Subclass()
-
-function ZO_TradingHouseComboBoxSetter:Initialize(filterType, comboBoxObject)
-    ZO_TradingHouseSearchFieldSetter.Initialize(self, filterType)
-    self.m_comboBox = comboBoxObject
-    self.SelectionChanged = ZO_TradingHouse_ComboBoxSelectionChanged
-end
-
-function ZO_TradingHouseComboBoxSetter:ApplyToSearch(searchObject)
-    local selectedItem = self.m_comboBox:GetSelectedItemData()
-    if(selectedItem) then
-        self.m_min = selectedItem.minValue
-        self.m_max = selectedItem.maxValue
-        ZO_TradingHouseSearchFieldSetter.ApplyToSearch(self, searchObject)
-    end
-end
-
---[[
-    Numeric Range Setter (for Price and Level...)
---]]
-ZO_TradingHouse_NumericRangeSetter = ZO_TradingHouseSearchFieldSetter:Subclass()
-
-function ZO_TradingHouse_NumericRangeSetter:New(...)
-    return ZO_TradingHouseSearchFieldSetter.New(self, ...)
-end
-
-function ZO_TradingHouse_NumericRangeSetter:Initialize(filterType, minEditControl, maxEditControl)
-    ZO_TradingHouseSearchFieldSetter.Initialize(self, filterType)
-    self.m_minEdit = minEditControl
-    self.m_maxEdit = maxEditControl
-end
-
-local function GetSafeNumericRange(valMin, valMax)
-    return valMin, valMax
-end
-
-function ZO_TradingHouse_NumericRangeSetter:ApplyToSearch(searchObject)
-    local minVal = tonumber(self.m_minEdit:GetText())
-    local maxVal = tonumber(self.m_maxEdit:GetText())
-
-    self.m_min, self.m_max = GetSafeNumericRange(minVal, maxVal)
-
-    ZO_TradingHouseSearchFieldSetter.ApplyToSearch(self, searchObject)
-end
-
---[[
     TradingHouseShared
 --]]
 
-ZO_TradingHouse_Shared = ZO_Object:Subclass()
+ZO_TradingHouse_Shared = ZO_CallbackObject:Subclass()
 
 function ZO_TradingHouse_Shared:New(...)
-    local tradingHouse = ZO_Object.New(self)
+    local tradingHouse = ZO_CallbackObject.New(self)
     tradingHouse:Initialize(...)
     return tradingHouse
 end
 
 function ZO_TradingHouse_Shared:Initialize(control)
-    self.m_control = control
-    self.m_registeredFilterTypes = {}
-end
-
-function ZO_TradingHouse_Shared:IsAtTradingHouse()
-    return GetInteractionType() == INTERACTION_TRADINGHOUSE
-end
-
-function ZO_TradingHouse_Shared:CanDoCommonOperation()
-    return not self:IsAwaitingResponse() and self:IsAtTradingHouse()
-end
-
-function ZO_TradingHouse_Shared:CanSearch()
-    return self:CanDoCommonOperation() and self:IsInSearchMode()
+    self.control = control
 end
 
 function ZO_TradingHouse_Shared:GetCurrentMode()
-    return self.m_currentMode
+    return self.currentMode
 end
 
 function ZO_TradingHouse_Shared:SetCurrentMode(mode)
-    self.m_currentMode = mode
+    self.currentMode = mode
 end
 
 function ZO_TradingHouse_Shared:IsInSellMode()
-    return self.m_currentMode == ZO_TRADING_HOUSE_MODE_SELL
+    return self.currentMode == ZO_TRADING_HOUSE_MODE_SELL
 end
 
 function ZO_TradingHouse_Shared:IsInSearchMode()
-    return self.m_currentMode == ZO_TRADING_HOUSE_MODE_BROWSE
+    return self.currentMode == ZO_TRADING_HOUSE_MODE_BROWSE
 end
 
 function ZO_TradingHouse_Shared:IsInListingsMode()
-    return self.m_currentMode == ZO_TRADING_HOUSE_MODE_LISTINGS
-end
-
-function ZO_TradingHouse_Shared:IsAwaitingResponse()
-    return self.m_awaitingResponseType ~= nil
-end
-
-function ZO_TradingHouse_Shared:IsWaitingForResponseType(responseType)
-    return self.m_awaitingResponseType == responseType
-end
-
---Event Handlers
-
-local function ContextFilter(tradingHouse, callback)
-    -- This will wrap the callback so that it gets called with the control
-    return function(...)
-        local activeTradingHouse = SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME)
-
-        if (activeTradingHouse == tradingHouse) then
-            callback(...)
-        end
-    end
-end
-
-function ZO_TradingHouse_Shared:InitializeSharedEvents()    
-    local function OnUpdateStatus()
-        self:UpdateStatus()
-    end
-
-    local function OnOperationTimeout()
-        self:OnOperationTimeout()
-    end
-    
-    local function OnSearchCooldownUpdate(_, cooldownMilliseconds)
-        if cooldownMilliseconds == 0 then
-            self.hasSearchCooldown = false
-        else
-            self.hasSearchCooldown = true
-        end
-        self:OnSearchCooldownUpdate(cooldownMilliseconds)
-    end
-    
-    local function OnPendingPostItemUpdated(_, slotId, isPending)
-        self:OnPendingPostItemUpdated(slotId, isPending)
-    end
-    
-    local function OnAwaitingResponse(_, responseType)
-        self.m_awaitingResponseType = responseType
-        self:OnAwaitingResponse(responseType)
-    end
-    
-    local function OnResponseReceived(_, responseType, result)
-        if responseType == self.m_awaitingResponseType then
-            self.m_awaitingResponseType = nil
-            self:OnResponseReceived(responseType, result)
-        end
-
-        if(result ~= TRADING_HOUSE_RESULT_SUCCESS) then
-            ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_TRADINGHOUSERESULT", result))
-        end
-    end
-    
-    local function OnSearchResultsReceived(_, guildId, numItemsOnPage, currentPage, hasMorePages)
-        self:OnSearchResultsReceived(guildId, numItemsOnPage, currentPage, hasMorePages)
-    end
-
-    local function OnConfirmPendingPurchase(_, pendingPurchaseIndex)
-        if pendingPurchaseIndex ~= nil then
-            self:ConfirmPendingPurchase(pendingPurchaseIndex)
-        end
-    end
-
-   self.m_eventCallbacks = {
-        [EVENT_TRADING_HOUSE_STATUS_RECEIVED] = OnUpdateStatus,
-        [EVENT_TRADING_HOUSE_OPERATION_TIME_OUT] = OnOperationTimeout,
-        [EVENT_TRADING_HOUSE_SEARCH_COOLDOWN_UPDATE] = OnSearchCooldownUpdate,
-        [EVENT_TRADING_HOUSE_PENDING_ITEM_UPDATE] = OnPendingPostItemUpdated,
-        [EVENT_TRADING_HOUSE_AWAITING_RESPONSE] = OnAwaitingResponse,
-        [EVENT_TRADING_HOUSE_RESPONSE_RECEIVED] = OnResponseReceived,
-        [EVENT_TRADING_HOUSE_SEARCH_RESULTS_RECEIVED] = OnSearchResultsReceived,
-        [EVENT_TRADING_HOUSE_CONFIRM_ITEM_PURCHASE] = OnConfirmPendingPurchase,
-    }
-
-    for event, callback in pairs(self.m_eventCallbacks) do
-        self.m_control:RegisterForEvent(event, ContextFilter(self, callback))
-    end
-end
-
-function ZO_TradingHouse_Shared:SetSearchItemCategory(_, _, entry, selectionChanged)
-    ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
-
-    if selectionChanged then
-        self:SetSearchActiveFilter(entry.filterObject)
-    end
-end
-
-function ZO_TradingHouse_Shared:InitializeCategoryComboBox(comboBox, callback, selectFirstItem)
-    local function combinedCallback(comboBox, entryName, entry, selectionChanged)
-        if callback then
-            selectionChanged = callback(comboBox, entryName, entry, selectionChanged)
-        end
-
-        self:SetSearchItemCategory(comboBox, entryName, entry, selectionChanged)
-    end
-
-    for _, filterStringId in ipairs(TRADING_HOUSE_DESIRED_FILTER_ORDERING) do
-        local entry = comboBox:CreateItemEntry(ZO_TradingHouse_GetComboBoxString(filterStringId), combinedCallback)
-        self:InitializeEntryFilter(entry, filterStringId)
-        comboBox:AddItem(entry)
-    end
-
-    if selectFirstItem ~= false then
-        comboBox:SelectFirstItem()
-    end
-end
-
--- changed == false means the user selected the same combobox item that is currently selected.
--- changed == true means the user either selected a different combobox item from what is currently selected, or changed edit control text.
-function ZO_TradingHouse_Shared:HandleSearchCriteriaChanged(changed)
-    if changed then
-        self:AllowSearch()
-    end
-end
-
-function ZO_TradingHouse_Shared:RegisterSearchFilter(factory, stringId)
-    self.m_registeredFilterTypes[stringId] = factory
-end
-
-function ZO_TradingHouse_Shared:InitializeEntryFilter(entry, filterStringId)
-    local filterFactory = self.m_registeredFilterTypes[filterStringId]
-    if(filterFactory) then
-        self:InitializeFilterFactory(entry, filterFactory, filterStringId)
-    end
-end
-
-function ZO_TradingHouse_Shared:GetSearchActiveFilter()
-    return self.m_search:GetActiveFilter()
-end
-
-function ZO_TradingHouse_Shared:SetSearchActiveFilter(filter)
-    self.m_search:SetActiveFilter(filter)
-end
-
-function ZO_TradingHouse_Shared:GetTraitFilters()
-    return self.m_traitFilters
-end
-
-function ZO_TradingHouse_Shared:GetEnchantmentFilters()
-    return self.m_enchantmentFilters
-end
-
-function ZO_TradingHouse_Shared:DoSearch()
-    self.m_search:DoSearch()
+    return self.currentMode == ZO_TRADING_HOUSE_MODE_LISTINGS
 end
 
 function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
     local icon, name, quality, stackCount, requiredLevel, requiredCP, purchasePrice, currencyType = fn(index)
-    if(name ~= "") then
+    if name ~= "" then
+        local UNIT_PRICE_PRECISION = .01
+        local purchasePricePerUnit = zo_roundToNearest(purchasePrice / stackCount, UNIT_PRICE_PRECISION)
         local result =
         {
             slotIndex = index,
@@ -398,6 +151,7 @@ function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
             requiredLevel = requiredLevel,
             requiredCP = requiredCP,
             purchasePrice = purchasePrice,
+            purchasePricePerUnit = purchasePricePerUnit,
             currencyType = currencyType,
             isGuildSpecificItem = true,
         }
@@ -406,54 +160,9 @@ function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
     end
 end
 
-function ZO_TradingHouse_Shared:ShouldAddGuildSpecificItemToList(itemData)
-    for _, setter in ipairs(self.m_search.m_setters) do
-        local filterType = setter.m_filterType
-        if(type(filterType) == "function") then
-            filterType = filterType()
-        end
-
-        if filterType == TRADING_HOUSE_FILTER_TYPE_PRICE then
-            if (setter.m_min and itemData.purchasePrice < setter.m_min) or (setter.m_max and itemData.purchasePrice > setter.m_max) then
-                return false
-            end
-        elseif filterType == TRADING_HOUSE_FILTER_TYPE_LEVEL then
-            if (setter.m_min and itemData.requiredLevel < setter.m_min) or (setter.m_max and itemData.requiredLevel > setter.m_max) then
-                return false
-            end
-        elseif filterType == TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS then
-            if (setter.m_min and itemData.requiredCP < setter.m_min) or (setter.m_max and itemData.requiredCP > setter.m_max) then
-                return false
-            end
-        elseif filterType == TRADING_HOUSE_FILTER_TYPE_QUALITY then
-            if not setter.m_max then
-                return itemData.quality == setter.m_min
-            else
-                return itemData.quality >= setter.m_min and itemData.quality <= setter.m_max
-            end
-        end
-    end
-
-    return true
-end
-
-function ZO_TradingHouse_Shared:HasSearchCooldown()
-    return self.hasSearchCooldown
-end
-
-function ZO_TradingHouse_Shared:CanRequestListing()
-    return not self:HasSearchCooldown() and not self:IsAwaitingResponse()
-end
-
 --[[ Functions to be overridden ]]--
 
 function ZO_TradingHouse_Shared:InitializeSearchTerms()
-end
-
-function ZO_TradingHouse_Shared:AllowSearch()
-end
-
-function ZO_TradingHouse_Shared:AddGuildSpecificItems(ignoreFiltering)
 end
 
 function ZO_TradingHouse_Shared:UpdateForGuildChange()
@@ -462,241 +171,384 @@ end
 function ZO_TradingHouse_Shared:CloseTradingHouse()
 end
 
-function ZO_TradingHouse_Shared:InitializeFilterFactory(entry, filterFactory, filterStringId)
+function ZO_TradingHouse_Shared:SearchForItemLink(itemLink)
     assert(false) -- must be overridden
 end
 
---[[ Trading House Shared Globals ]]--
-
-function ZO_TradingHouse_FinishLocalString(sString)
-    return zo_strformat(SI_DISPLAY_GUILD_STORE_ITEM_NAME, sString)
-end
-
-function ZO_TradingHouse_GetComboBoxString(stringData)
-    if(type(stringData) == "number") then
-        return ZO_TradingHouse_FinishLocalString(GetString(stringData))
-    end
-
-    return ZO_TradingHouse_FinishLocalString(stringData)
-end
-
-function ZO_TradingHouse_SearchCriteriaChanged(changed)
-    if changed == nil then
-        changed = true
-    end
-
-    SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):HandleSearchCriteriaChanged(changed)
-end
-
-function ZO_TradingHouse_InitializeCategoryComboBox(...)
-    SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):InitializeCategoryComboBox(...)
-end
-
-function ZO_TradingHouse_InitializeColoredComboBox(comboBox, entryData, callback, interfaceColorType, colorIndex, selectFirstItem)
-    local color = ZO_ColorDef:New()
-
-    for _, data in ipairs(entryData) do
-        local text = ZO_TradingHouse_GetComboBoxString(data[ZO_RANGE_COMBO_INDEX_TEXT])
-
-        if(interfaceColorType ~= nil) then
-            color:SetRGB(GetInterfaceColor(interfaceColorType, data[colorIndex]))
-            text = color:Colorize(text)
-        end
-
-        local entry = comboBox:CreateItemEntry(text, callback)
-        entry.minValue = data[ZO_RANGE_COMBO_INDEX_MIN_VALUE]
-        entry.maxValue = data[ZO_RANGE_COMBO_INDEX_MAX_VALUE]
-        entry.childKey = data[ZO_RANGE_COMBO_INDEX_CHILD_KEY]
-
-        comboBox:AddItem(entry)
-    end
-
-    if selectFirstItem ~= false then
-        comboBox:SelectFirstItem()
-    end
-end
-
-function ZO_TradingHouse_ComboBoxSelectionChanged(_, _, _, selectionChanged)
-    ZO_TradingHouse_SearchCriteriaChanged(selectionChanged)
-end
 
 --[[
     Trading House Search Helper
 --]]
 
-ZO_TradingHouseSearch = ZO_Object:Subclass()
+ZO_TradingHouseSearch = ZO_CallbackObject:Subclass()
 
 function ZO_TradingHouseSearch:New(...)
-    local search = ZO_Object.New(self)
+    local search = ZO_CallbackObject.New(self)
     search:Initialize(...)
     return search
 end
 
 function ZO_TradingHouseSearch:Initialize()
-    self.m_setters = {}
-    self.m_filters =
-    {
-        [TRADING_HOUSE_FILTER_TYPE_EQUIP] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_ITEM] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_WEAPON] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_ARMOR] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_TRAIT] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_QUALITY] = { values = {}, isRange = true, },
-        [TRADING_HOUSE_FILTER_TYPE_LEVEL] = { values = {}, isRange = true, },
-        [TRADING_HOUSE_FILTER_TYPE_PRICE] = { values = {}, isRange = true, },
-        [TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS] = { values = {}, isRange = true, },
-        [TRADING_HOUSE_FILTER_TYPE_ENCHANTMENT] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_FURNITURE_CATEGORY] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_FURNITURE_SUBCATEGORY] = { values = {}, isRange = false, },
-        [TRADING_HOUSE_FILTER_TYPE_SPECIALIZED_ITEM] = { values = {}, isRange = false, },
-    }
+    self.hasSearchCooldown = GetTradingHouseCooldownRemaining() > 0
 
     self:ResetAllSearchData()
     self:InitializeOrderingData()
+
+    EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_SEARCH_COOLDOWN_UPDATE, function(_, ...) self:OnSearchCooldownUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_AWAITING_RESPONSE, function(_, ...) self:OnAwaitingResponse(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_RESPONSE_TIMEOUT, function(_, ...) self:OnResponseTimeout(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_RESPONSE_RECEIVED, function(_, ...) self:OnResponseReceived(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_SEARCH_RESULTS_RECEIVED, function(_, ...) self:OnSearchResultsReceived(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_SELECTED_GUILD_CHANGED, function(_, ...) self:OnSelectedGuildChanged(...) end)
+end
+
+function ZO_TradingHouseSearch:AssociateWithSearchFeatures(features)
+    self.features = features
+    local NOT_PERFORMING_SEARCH = false
+    self:ApplyFilters(NOT_PERFORMING_SEARCH)
+end
+
+function ZO_TradingHouseSearch:DisassociateWithSearchFeatures()
+    self:ClearAwaitingResponseType()
+    self:CancelPendingSearch()
+    self:ResetAllSearchData()
+    self.features = nil
+end
+
+function ZO_TradingHouseSearch:OnSearchCooldownUpdate(cooldownMilliseconds)
+    self.hasSearchCooldown = cooldownMilliseconds > 0
+end
+
+function ZO_TradingHouseSearch:OnAwaitingResponse(responseType)
+    self:SetAwaitingResponseType(responseType)
+    self:FireCallbacks("OnAwaitingResponse", responseType)
+end
+
+function ZO_TradingHouseSearch:OnResponseTimeout()
+    self.awaitingResponseTimedOut = true
+    self:FireCallbacks("OnResponseTimeout")
+end
+
+function ZO_TradingHouseSearch:OnResponseReceived(responseType, result)
+    if self:IsWaitingForResponseType(responseType) then
+        self:ClearAwaitingResponseType()
+
+        if responseType == TRADING_HOUSE_RESULT_PURCHASE_PENDING and result == TRADING_HOUSE_RESULT_SUCCESS then
+            if AreAllTradingHouseSearchResultsPurchased() then
+                self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_COMPLETE, TRADING_HOUSE_SEARCH_OUTCOME_ALL_RESULTS_PURCHASED)
+            end
+        elseif responseType == TRADING_HOUSE_RESULT_SEARCH_PENDING and result == TRADING_HOUSE_RESULT_SUCCESS then
+            self.numItemsOnPage, self.page, self.hasMorePages = GetTradingHouseSearchResultsInfo()
+            local searchOutcome = (self.numItemsOnPage == 0) and TRADING_HOUSE_SEARCH_OUTCOME_NO_RESULTS or TRADING_HOUSE_SEARCH_OUTCOME_HAS_RESULTS
+            self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_COMPLETE, searchOutcome)
+        end
+
+        self:FireCallbacks("OnResponseReceived", responseType, result)
+    end
+end
+
+function ZO_TradingHouseSearch:OnSelectedGuildChanged()
+    self:ResetAllSearchData()
+    self:FireCallbacks("OnSelectedGuildChanged")
+end
+
+function ZO_TradingHouseSearch:HandleSearchCriteriaChanged(changedByFeature)
+    if self.features and changedByFeature ~= self.features.nameSearchFeature then
+        -- Update filters so name matching can cross-reference the search text with the non-search features.
+        local NOT_PERFORMING_SEARCH = false
+        self:ApplyFilters(NOT_PERFORMING_SEARCH)
+    end
+    self:FireCallbacks("OnSearchCriteriaChanged", changedByFeature)
+end
+
+function ZO_TradingHouseSearch:GetSearchState()
+    return self.searchState
+end
+
+function ZO_TradingHouseSearch:SetSearchState(searchState, searchOutcome)
+    searchOutcome = searchOutcome or self.searchOutcome
+    if self.searchState ~= searchState or self.searchOutcome ~= searchOutcome then
+        self.searchOutcome = searchOutcome
+        self.searchState  = searchState
+        self:FireCallbacks("OnSearchStateChanged", searchState, searchOutcome)
+    end
+end
+
+function ZO_TradingHouseSearch:GetSearchOutcome()
+    return self.searchOutcome
 end
 
 function ZO_TradingHouseSearch:ResetAllSearchData()
-    self:ResetSearchData()
+    self:ResetAppliedSearchTerms()
     self:ResetPageData()
+    self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_NONE)
 end
 
 function ZO_TradingHouseSearch:InitializeOrderingData()
-    self.m_sortField = TRADING_HOUSE_SORT_SALE_PRICE
-    self.m_sortOrder = ZO_SORT_ORDER_UP
+    self.sortField = TRADING_HOUSE_SORT_SALE_PRICE_PER_UNIT
+    self.sortOrder = ZO_SORT_ORDER_UP
 end
 
-function ZO_TradingHouseSearch:ResetSearchData()
+function ZO_TradingHouseSearch:ResetAppliedSearchTerms()
     ClearAllTradingHouseSearchTerms()
+    self:SetShouldShowGuildSpecificItems(false)
+end
 
-    for _, filter in pairs(self.m_filters) do
-        ZO_ClearNumericallyIndexedTable(filter.values)
+function ZO_TradingHouseSearch:SetFilter(filterType, filterValueArg)
+    if type(filterValueArg) == "table" then
+        local maxExactTerms, numExactTerms = GetMaxTradingHouseFilterExactTerms(filterType), #filterValueArg
+        internalassert(maxExactTerms >= numExactTerms, "Too many filter arguments")
+        SetTradingHouseFilter(filterType, unpack(filterValueArg))
+    else
+        SetTradingHouseFilter(filterType, filterValueArg)
     end
 end
 
-function ZO_TradingHouseSearch:SetPageData(currentPage, hasMorePages)
-    self.m_page = currentPage
-    self.m_hasMorePages = hasMorePages
+function ZO_TradingHouseSearch:SetFilterRange(filterType, minValue, maxValue)
+    SetTradingHouseFilterRange(filterType, minValue, maxValue)
+end
+
+function ZO_TradingHouseSearch:SetShouldShowGuildSpecificItems(includeGuildSpecificItems)
+    self.includeGuildSpecificItems = includeGuildSpecificItems
+end
+
+function ZO_TradingHouseSearch:ShouldShowGuildSpecificItems()
+    return self.includeGuildSpecificItems
+end
+
+function ZO_TradingHouseSearch:LoadSearchTable(searchTable)
+    for _, feature in pairs(self.features) do
+        feature:LoadFromTable(searchTable)
+    end
+end
+
+function ZO_TradingHouseSearch:LoadSearchItem(itemLink)
+    for _, feature in pairs(self.features) do
+        feature:LoadFromItem(itemLink)
+    end
+end
+
+do
+    local function TryInsert(numericallyIndexedTable, valueOrNil)
+        if valueOrNil ~= nil then
+            table.insert(numericallyIndexedTable, valueOrNil)
+        end
+    end
+
+    function ZO_TradingHouseSearch:GenerateSearchTableShortDescription(searchTable)
+        local nameSearchFeature = self.features.nameSearchFeature
+        local categoryFeature = self.features.searchCategoryFeature
+
+        local descriptionStrings = {}
+        TryInsert(descriptionStrings, nameSearchFeature:GetDescriptionFromTable(searchTable))
+        TryInsert(descriptionStrings, categoryFeature:GetCategoryDescriptionFromTable(searchTable))
+
+        return ZO_GenerateCommaSeparatedListWithoutAnd(descriptionStrings)
+    end
+end
+
+do
+    local function AddFeatureDescription(feature, searchTable, featureDescriptions)
+        local description = feature:GetDescriptionFromTable(searchTable)
+        if description ~= nil then
+            table.insert(featureDescriptions, {name = feature:GetDisplayName(), description = description})
+        end
+    end
+
+    function ZO_TradingHouseSearch:GenerateSearchTableDescription(searchTable)
+        local descriptions = {}
+        AddFeatureDescription(self.features.nameSearchFeature, searchTable, descriptions)
+
+        self.features.searchCategoryFeature:AddContextualFeatureDescriptionsFromTable(searchTable, descriptions)
+
+        AddFeatureDescription(self.features.qualityFeature, searchTable, descriptions)
+        AddFeatureDescription(self.features.priceRangeFeature, searchTable, descriptions)
+
+        local descriptionLines = {}
+        for _, descriptionTable in ipairs(descriptions) do
+            table.insert(descriptionLines, zo_strformat(SI_TRADING_HOUSE_SEARCH_DESCRIPTION_LINE, descriptionTable.name, descriptionTable.description))
+        end
+        return ZO_GenerateNewlineSeparatedList(descriptionLines)
+    end
+end
+
+function ZO_TradingHouseSearch:ApplyFilters(isPerformingSearch)
+    self:ResetAppliedSearchTerms()
+
+    for _, feature in pairs(self.features) do
+        feature:ApplyToSearch(self, isPerformingSearch)
+    end
+end
+
+function ZO_TradingHouseSearch:CreateSearchTable()
+    local searchTable = {}
+    for _, feature in pairs(self.features) do
+        feature:SaveToTable(searchTable)
+    end
+    return searchTable
 end
 
 function ZO_TradingHouseSearch:ResetPageData()
-    self:SetPageData(0, false)
+    self.page = 0
+    self.numItemsOnPage = 0
+    self.hasMorePages = false
 end
 
 function ZO_TradingHouseSearch:HasPreviousPage()
-    return self.m_page > 0
+    return self.page > 0
 end
 
 function ZO_TradingHouseSearch:HasNextPage()
-    return self.m_hasMorePages
+    return self.hasMorePages
 end
 
-local function AddData(dataTable, index, ...)
-    -- NOTE: At this point each arg must not be a table!
-    for i = 1, select("#", ...) do
-        dataTable[index] = select(i, ...)
-        index = index + 1
-    end
-
-    return index
+function ZO_TradingHouseSearch:GetNumItemsOnPage()
+    return self.numItemsOnPage
 end
 
-local function SafeUnpack(data)
-    if(type(data) == "table") then
-        return unpack(data)
-    else
-        return data
-    end
+function ZO_TradingHouseSearch:GetPage()
+    return self.page
 end
 
-function ZO_TradingHouseSearch:SetFilter(filterType, ...)
-    local filter = self.m_filters[filterType]
-    if(filter) then
-        local dataTable = filter.values
-        local index = 1
-        for i = 1, select("#", ...) do
-            local data = select(i, ...)
-            index = AddData(dataTable, index, SafeUnpack(data))
-        end
-    end
+function ZO_TradingHouseSearch:GetTargetPage()
+    return self.targetPage
 end
 
-function ZO_TradingHouseSearch:AddSetter(setterObject)
-    self.m_setters[#self.m_setters + 1] = setterObject
+function ZO_TradingHouseSearch:UpdateSortOptions(sortKey, sortOrder)
+    self.sortField = sortKey
+    self.sortOrder = sortOrder
 end
 
-function ZO_TradingHouseSearch:GetActiveFilter()
-    return self.m_activeFilter
-end
-
-function ZO_TradingHouseSearch:SetActiveFilter(filterObject)
-    if(self.m_activeFilter) then
-        self.m_activeFilter:SetHidden(true)
-    end
-
-    if(filterObject) then
-        filterObject:SetHidden(false)
-    end
-
-    self.m_activeFilter = filterObject
-end
-
-function ZO_TradingHouseSearch:DoSearch()
-    self:ResetSearchData()
-    self:ResetPageData()
-
-    for _, setter in ipairs(self.m_setters) do
-        setter:ApplyToSearch(self)
-    end
-
-    if(self.m_activeFilter) then
-        self.m_activeFilter:ApplyToSearch(self)
-    end
-
-    self:InternalExecuteSearch()
+function ZO_TradingHouseSearch:GetSortOptions(sortKey, sortOrder)
+    return self.sortField, self.sortOrder
 end
 
 function ZO_TradingHouseSearch:SearchNextPage()
-    if(self.m_hasMorePages) then
-        self.m_page = self.m_page + 1
-        self.m_hasMorePages = false -- assume there are no more pages after this one, until the search response arrives and updates the data
-
-        self:InternalExecuteSearch()
+    if self.hasMorePages then
+        self.targetPage = self.page + 1
+        self:DoSearch()
     end
 end
 
 function ZO_TradingHouseSearch:SearchPreviousPage()
-    if(self.m_page > 0) then
-        self.m_page = self.m_page - 1
-        -- No need to adjust more pages...if we're going backwards, there must be more pages (unless all the items after this page got bought?)
-
-        self:InternalExecuteSearch()
+    if self.page > 0 then
+        self.targetPage = self.page - 1
+        self:DoSearch()
     end
-end
-
-function ZO_TradingHouseSearch:UpdateSortOption(sortKey, sortOrder)
-    self.m_sortField = sortKey
-    self.m_sortOrder = sortOrder
 end
 
 function ZO_TradingHouseSearch:ChangeSort(sortKey, sortOrder)
-    self:UpdateSortOption(sortKey, sortOrder)
-    self:InternalExecuteSearch()
+    self:UpdateSortOptions(sortKey, sortOrder)
+    self:DoSearch()
 end
 
-function ZO_TradingHouseSearch:InternalExecuteSearch()
-    for filterType, filter in pairs(self.m_filters) do
-        if(filter.isRange) then
-            SetTradingHouseFilterRange(filterType, filter.values[1], filter.values[2])
-        else
-            SetTradingHouseFilter(filterType, unpack(filter.values))
-        end
+function ZO_TradingHouseSearch:DoSearchWhenReady()
+    if not self.waitingToSearch then
+        self.waitingToSearch = true
+        EVENT_MANAGER:RegisterForUpdate("ZO_TradingHouseSearch", 10, function()
+            if self:CanPerformSearch() then
+                self.waitingToSearch = false
+                EVENT_MANAGER:UnregisterForUpdate("ZO_TradingHouseSearch")
+
+                local QUEUED_SEARCH = true
+                self:DoSearch(QUEUED_SEARCH)
+            end
+        end)
+    end
+end
+
+function ZO_TradingHouseSearch:CancelPendingSearch()
+    if self.waitingToSearch then
+        self.waitingToSearch = false
+        EVENT_MANAGER:UnregisterForUpdate("ZO_TradingHouseSearch")
+        self:FireCallbacks("OnSearchRequestCanceled")
+        self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_NONE)
+    end
+end
+
+function ZO_TradingHouseSearch:DoSearch(isQueuedSearch)
+    self:ResetPageData()
+
+    -- Start search visually. This is unnecessary if we're executing a queued search, because we will have already started this search
+    if not isQueuedSearch then
+        self:FireCallbacks("OnSearchRequested")
+        self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_WAITING)
+        PlaySound(SOUNDS.TRADING_HOUSE_SEARCH_INITIATED)
     end
 
-    if self.m_activeFilter and self.m_activeFilter.customSearchFunction then
-        self.m_activeFilter.customSearchFunction()
+    local nameSearchFeature = self.features.nameSearchFeature
+    local isNameMatchValid, searchOutcome = nameSearchFeature:IsNameMatchValid()
+    if not isNameMatchValid then
+        -- This name match could never return any results, early out
+        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+        self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_COMPLETE, searchOutcome)
+        return
+    end
+
+    if nameSearchFeature:IsNameMatchTruncated() then
+        local NO_SOUND = nil
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, NO_SOUND, GetString(SI_TRADING_HOUSE_SEARCH_TRUNCATED))
+    end
+
+    -- This is a valid search, save it. If a search is queued, or we are just
+    -- changing pages, this will actually double-save this entry, but that's okay
+    -- because we deduplicate it anyways
+    TRADING_HOUSE_SEARCH_HISTORY_MANAGER:SaveToHistory(self:CreateSearchTable())
+
+    if self:ShouldShowGuildSpecificItems() then
+        -- Guild specific items are loaded when the trading house is opened, so we can skip directly to the search results without triggering a search
+        local guildItemSearchOutcome = GetNumGuildSpecificItems() == 0 and TRADING_HOUSE_SEARCH_OUTCOME_NO_RESULTS or TRADING_HOUSE_SEARCH_OUTCOME_HAS_RESULTS
+        self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_COMPLETE, guildItemSearchOutcome)
+        return
+    end
+
+    if not self:CanPerformSearch() then
+        self:DoSearchWhenReady()
     else
-        ExecuteTradingHouseSearch(self.m_page, self.m_sortField, self.m_sortOrder)
+        local IS_PERFORMING_SEARCH = true
+        self:ApplyFilters(IS_PERFORMING_SEARCH)
+        local page = self.targetPage or 0
+        ExecuteTradingHouseSearch(page, self.sortField, self.sortOrder)
+        self.targetPage = nil
     end
-
-    PlaySound(SOUNDS.TRADING_HOUSE_SEARCH_INITIATED)
 end
+
+function ZO_TradingHouseSearch:HasSearchCooldown()
+    return self.hasSearchCooldown
+end
+
+function ZO_TradingHouseSearch:IsAtTradingHouse()
+    return GetInteractionType() == INTERACTION_TRADINGHOUSE
+end
+
+function ZO_TradingHouseSearch:CanPerformSearch()
+    return self:CanDoCommonOperation() and not (self:HasSearchCooldown() or self.features.nameSearchFeature:HasPendingNameMatch())
+end
+
+function ZO_TradingHouseSearch:CanDoCommonOperation()
+    return (not self:IsAwaitingResponse() or self.awaitingResponseTimedOut) and self:IsAtTradingHouse()
+end
+
+function ZO_TradingHouseSearch:IsAwaitingResponse()
+    return self.awaitingResponseType ~= nil
+end
+
+function ZO_TradingHouseSearch:IsWaitingForResponseType(responseType)
+    return self.awaitingResponseType == responseType
+end
+
+function ZO_TradingHouseSearch:GetAwaitingResponseType()
+    return self.awaitingResponseType
+end
+
+function ZO_TradingHouseSearch:SetAwaitingResponseType(responseType)
+    self.awaitingResponseType = responseType
+    self.awaitingResponseTimedOut = false
+end
+
+function ZO_TradingHouseSearch:ClearAwaitingResponseType()
+    self.awaitingResponseType = nil
+    self.awaitingResponseTimedOut = false
+end
+
+TRADING_HOUSE_SEARCH = ZO_TradingHouseSearch:New()

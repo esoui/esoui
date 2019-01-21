@@ -35,11 +35,6 @@
         <Button name="ZO_ItemSlot_Shared" virtual="true">
             <Dimensions x="32" y="32" />
 
-            <Textures
-                mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
-                pressedMouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
-            />
-
             <Controls>
                 <Texture name="$(parent)Icon" level="2">
                     <Anchor point="TOPLEFT" />
@@ -55,6 +50,10 @@
 
         <Button name="ZO_ItemSlot" inherits="ZO_ItemSlot_Shared ZO_InventorySlotBehavior_Keyboard" mouseOverBlendMode="ADD" virtual="true">
             <MouseButton button="2" enabled="true" />
+            <Textures
+                mouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
+                pressedMouseOver="EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
+            />
         </Button>
 
         <Button name="ZO_ItemSlot_Gamepad" inherits="ZO_ItemSlot_Shared" virtual="true">

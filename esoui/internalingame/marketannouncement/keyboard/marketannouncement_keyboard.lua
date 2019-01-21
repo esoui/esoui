@@ -13,6 +13,7 @@ function ZO_MarketAnnouncement_Keyboard:Initialize(control)
     self.actionTileControlByType =
     {
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Keyboard_Control",
+        [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = "ZO_ZoneStoriesTile_Keyboard_Control",
     }
 
     local conditionFunction = function() return not IsInGamepadPreferredMode() end

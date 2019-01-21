@@ -4,7 +4,6 @@ function ZO_ConfirmSendGiftDialog_Keyboard_OnInitialized(self)
         local sendButton = self:GetNamedChild("Send")
         local recipientDisplayName = nameEditControl:GetText()
         local result, errorText = IsGiftRecipientNameValid(recipientDisplayName)
-        local errorText
         local sendButtonState, sendButtonStateLocked = BSTATE_NORMAL, false
         if result ~= GIFT_ACTION_RESULT_SUCCESS then
             sendButtonState, sendButtonStateLocked = BSTATE_DISABLED, true

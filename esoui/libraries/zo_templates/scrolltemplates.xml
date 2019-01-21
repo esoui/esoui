@@ -122,7 +122,7 @@
                         ZO_ScrollList_ScrollRelative(self:GetParent(), -delta * 40)
                     </OnMouseWheel>
                 </Scroll>
-                <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
+                <Slider name="$(parent)ScrollBar" hidden="true" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Contents" relativePoint="TOPRIGHT" offsetY="16" />
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Contents" relativePoint="BOTTOMRIGHT" offsetY="-16" />
                     <OnMouseWheel>
@@ -175,7 +175,7 @@
                 <Control name="$(parent)Scroll" override="true">
                     <Controls>
                         <Control name="$(parent)Child" resizeToFitDescendents="true">
-                            <Anchor point="TOPELFT"/>
+                            <Anchor point="TOPLEFT"/>
                         </Control>
                     </Controls>
                 </Control>

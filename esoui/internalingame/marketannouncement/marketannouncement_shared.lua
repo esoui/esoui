@@ -4,15 +4,18 @@
 
 ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X = 315
 ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y = 210
+ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_ASPECT_RATIO = ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X / ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y
 
 ZO_ACTION_TILE_TYPE = 
 {
     DAILY_REWARDS = 1,
+    ZONE_STORIES = 2,
 }
 
 ZO_ACTION_SORTED_TILE_TYPE =
 {
     ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
+    ZO_ACTION_TILE_TYPE.ZONE_STORIES,
 }
 
 ZO_MarketAnnouncement_Shared = ZO_Object:Subclass()
@@ -46,7 +49,7 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
     self.controlContainer = container
 
     self.actionTileList = {}
-    self.actionTileObjectPoolMap = {}
+    self.actionTileControlPoolMap = {}
     for _, tileType in pairs(ZO_ACTION_TILE_TYPE) do
         self:AddTileTypeObjectPoolToMap(tileType)
     end
@@ -70,23 +73,12 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
 end
 
 function ZO_MarketAnnouncement_Shared:AddTileTypeObjectPoolToMap(tileType)
-    local function FactoryFunction(objectPool)
-        return self:CreateActionTile(tileType, objectPool)
-    end
-    local function ResetFunction(tileObject)
-        return tileObject:Reset()
-    end
-    self.actionTileObjectPoolMap[tileType] = ZO_ObjectPool:New(FactoryFunction, ResetFunction)
-end
+    self.actionTileControlPoolMap[tileType] = ZO_ControlPool:New(self.actionTileControlByType[tileType], self.actionTileListControl)
 
-function ZO_MarketAnnouncement_Shared:CreateActionTile(tileType, objectPool)
-    if self.actionTileControlByType[tileType] then
-        local tile = ZO_ObjectPool_CreateControl(self.actionTileControlByType[tileType], objectPool, self.actionTileListControl)
-        tile.owner = self
-        return tile.object
-    else
-        assert(false, "Could not find Control " .. self.actionTileControlByType[tileType] " to create Action Tile " .. tileType)
+    local function ResetFunction(control)
+        control.object:Reset()
     end
+    self.actionTileControlPoolMap[tileType]:SetCustomResetBehavior(ResetFunction)
 end
 
 function ZO_MarketAnnouncement_Shared:OnStateChanged(oldState, newState)
@@ -217,10 +209,34 @@ function ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData(tileInfoList)
     end
 end
 
+function ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData(tileInfoList)
+    local zoneId
+    if IsZoneStoryActivelyTracking() then
+        zoneId = GetTrackedZoneStoryActivityInfo()
+    else
+        local zoneIndex = GetUnitZoneIndex("player")
+        zoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(zoneIndex)
+    end
+
+    if HasZoneStoriesData(zoneId) and not IsZoneStoryComplete(zoneId) then
+        local zoneStoriesTileInfo =
+        {
+            type = ZO_ACTION_TILE_TYPE.ZONE_STORIES,
+            layoutParams = 
+            {
+                zoneId,
+            },
+            visible = true,
+        }
+        table.insert(tileInfoList, zoneStoriesTileInfo)
+    end
+end
+
 do
     ZO_TILE_TYPE_TO_GET_TILE_INFO_FUNCTION = 
     {
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData,
+        [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData,
     }
     function ZO_MarketAnnouncement_Shared:LayoutActionTiles()
         -- Get list of available tile infos 
@@ -232,8 +248,8 @@ do
 
         -- Clear Data from previous show
         self.actionTileList = {}
-        for _, objectPool in pairs(self.actionTileObjectPoolMap) do
-            objectPool:ReleaseAllObjects()
+        for _, controlPool in pairs(self.actionTileControlPoolMap) do
+            controlPool:ReleaseAllObjects()
         end
 
         -- Create display tiles from available tile infos (Limited at 3 as that's the most the display supports)
@@ -246,21 +262,18 @@ do
                 visible = actionTileInfo.visible
             end
 
-            if visible and self.actionTileObjectPoolMap[actionTileInfo.type] then
-                local actionTile = self.actionTileObjectPoolMap[actionTileInfo.type]:AcquireObject()
-                actionTile:Layout(unpack(actionTileInfo.layoutParams))
-                table.insert(self.actionTileList, actionTile)
-
-                local actionTileControl = actionTile:GetControl()
+            if visible and self.actionTileControlPoolMap[actionTileInfo.type] then
+                local actionTileControl = self.actionTileControlPoolMap[actionTileInfo.type]:AcquireObject()
+                actionTileControl.object:Layout(unpack(actionTileInfo.layoutParams))
+                table.insert(self.actionTileList, actionTileControl)
 
                 -- Set Anchors
                 local ACTION_TILE_HORIZONTAL_PADDING = 34
                 if #self.actionTileList > 1 then
-                    actionTileControl:SetAnchor(TOPLEFT, self.actionTileList[i-1].control, TOPRIGHT, ACTION_TILE_HORIZONTAL_PADDING)
+                    actionTileControl:SetAnchor(TOPLEFT, self.actionTileList[i-1], TOPRIGHT, ACTION_TILE_HORIZONTAL_PADDING)
                 else 
                     actionTileControl:SetAnchor(TOPLEFT)
                 end
-                actionTileControl:SetHidden(false)
 
                 if #self.actionTileList == NUM_MAX_DISPLAY_TILES then
                     break

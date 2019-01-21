@@ -690,7 +690,7 @@ function ZO_GamepadPlayerEmote:OnShowing()
     TriggerTutorial(TUTORIAL_TRIGGER_EMOTES_MENU_OPENED)
 end
 
-function ZO_GamepadPlayerEmote:OnHide()
+function ZO_GamepadPlayerEmote:OnHiding()
     self:ChangeCurrentMode(MODE_CATEGORY_INACTIVE)
 end
 

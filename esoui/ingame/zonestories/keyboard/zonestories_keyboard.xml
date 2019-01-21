@@ -1,0 +1,135 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ZoneStoriesTopLevel_Keyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_ZoneStories_Keyboard_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ZoneSelector" inherits="ZO_ScrollableComboBox">
+                    <Dimensions x="300" y="33" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="2" offsetY="-7" />
+                </Control>
+
+                <Control name="$(parent)InfoContainer" inherits="ZO_ZoneStoryInfo_Template">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-108" />
+                    <Controls>
+                        <Texture name="$(parent)Background" color="666666" override="true">
+                            <Dimensions y="512" />
+                            <AnchorFill />
+                            <!-- 1024x512 image cropped to 620x512-->
+                            <TextureCoords left="0" right="ZO_KEYBOARD_ZONE_STORIES_BACKGROUND_TEXTURE_COORD_RIGHT" top="0" bottom="1"/>
+                            <Controls>
+                                <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame" />
+                            </Controls>
+                        </Texture>
+    
+                        <Label name="$(parent)Title" override="true" font="ZoFontWinH2">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+                        </Label>
+
+                        <Label name="$(parent)Description" override="true" font="ZoFontWinH4">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="RIGHT" constrains="X" offsetX="-10"/>
+                        </Label>
+
+                        <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ButtonContainer" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" relativePoint="BOTTOM" />
+                    <Controls>
+                        <Button name="$(parent)PlayStoryButton" inherits="ZO_DefaultButton">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPLEFT" />
+                            <OnClicked>
+                                ZO_ZoneStories_PlayStory_OnClick(self)
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)StopTrackingButton" inherits="ZO_DefaultButton" text="SI_ZONE_STORY_STOP_TRACKING_ZONE_STORY_ACTION">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PlayStoryButton" relativePoint="TOPRIGHT" offsetX="100" />
+                            <OnClicked>
+                                ZO_ZoneStories_StopTracking_OnClick(self)
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)TrackingMessage" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="600" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)ButtonContainer" relativePoint="TOP" offsetY="-10" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ZoneStoryActivityCompletionTooltip" hidden="true" clampedToScreen="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS" resizeToFitDescendents="true">
+            <DimensionConstraints minX="300" maxX="300" />
+            <ResizeToFitPadding width="20" height="20" />
+            
+            <OnInitialized>
+                ZO_ZoneStory_ActivityCompletionTooltip_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Label name="$(parent)Text" font="ZoFontGame" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)CycleKeybind" inherits="ZO_KeybindButton">
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_AchievementTooltip" relativePoint="TOPLEFT" offsetY="-5" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <Control name="ZO_CompletionTypeCheckbox" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Checkbox" textureFile="EsoUI/Art/Cadwell/check.dds" resizeToFitFile="true">
+                    <Anchor point="TOPLEFT" offsetY="2"/>
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="ZO_AchievementsDefaultLabel_Keyboard" inheritAlpha="false">
+                    <Dimensions y="25" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Checkbox" relativePoint="TOPRIGHT" offsetX="3" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CompletionTypeCheckboxColumn" resizeToFitDescendents="true" virtual="true" />
+
+        <TopLevelControl name="ZO_ZoneStoryActivityCompletionListTooltip" hidden="true" clampedToScreen="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS" resizeToFitDescendents="true">
+            <ResizeToFitPadding width="20" height="20" />
+            
+            <OnInitialized>
+                ZO_ZoneStory_ActivityCompletionListTooltip_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Label name="$(parent)Title" font="ZoFontGameBold" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
+                </Label>
+
+                <Control name="$(parent)CheckList" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                </Control>
+
+                <Label name="$(parent)BlockedBranchRequirementText" font="ZoFontGame" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

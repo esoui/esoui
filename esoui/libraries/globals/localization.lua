@@ -123,9 +123,9 @@ function zo_strtrim(str)
 end
 
 do
-    -- Use the English thousands and decimal marks. The grammar library will convert them to the current language.
-    local DIGIT_GROUP_REPLACER = ","
-    local DIGIT_GROUP_DECIMAL_REPLACER = "."
+    -- Before passing to a formatting function, use english separators. zo_strformat() and ZO_FastFormatDecimalNumber() will automatically replace these separators with language-appropriate ones.
+    local ENGLISH_DIGIT_GROUP_REPLACER = ","
+    local ENGLISH_DIGIT_GROUP_DECIMAL_REPLACER = "."
     local DIGIT_GROUP_REPLACER_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
     
     function ZO_CommaDelimitNumber(amount)
@@ -133,27 +133,64 @@ do
             return tostring(amount)
         end
 
-        return FormatIntegerWithDigitGrouping(amount, DIGIT_GROUP_REPLACER, GetDigitGroupingSize())
+        return FormatIntegerWithDigitGrouping(amount, ENGLISH_DIGIT_GROUP_REPLACER, GetDigitGroupingSize())
     end
 
-    function ZO_LocalizeDecimalNumber(amount)
+    function ZO_CommaDelimitDecimalNumber(amount)
         -- Guards against negative 0 as a displayed numeric value
         if amount == 0 then
             amount = 0
         end
 
-        local amountString = tostring(amount)
-
-        if amount >= DIGIT_GROUP_REPLACER_THRESHOLD then
-            -- We have a number like 10000.5, so localize the non-decimal digit group separators (e.g., 10000 becomes 10,000)
-            local decimalSeparatorIndex = zo_strfind(amountString, "%"..DIGIT_GROUP_DECIMAL_REPLACER) -- Look for the literal separator
-            local decimalPartString = decimalSeparatorIndex and zo_strsub(amountString, decimalSeparatorIndex) or ""
-            local wholePartString = zo_strsub(amountString, 1, decimalSeparatorIndex and decimalSeparatorIndex - 1)
-
-            amountString = ZO_CommaDelimitNumber(tonumber(wholePartString))..decimalPartString
+        if amount < DIGIT_GROUP_REPLACER_THRESHOLD then
+            -- No commas needed
+            return tostring(amount)
         end
 
-        return amountString
+        local wholeAmount = zo_floor(amount)
+        if wholeAmount == amount then
+            -- This is an integer, safe to pass to ZO_CommaDelimitNumber
+            return ZO_CommaDelimitNumber(amount)
+        end
+
+        -- Comma delimit whole part and then concatenate the decimal part as-is
+        local amountString = tostring(amount)
+        local LITERAL_MATCH = true
+        local decimalSeparatorIndex = zo_strfind(amountString, ENGLISH_DIGIT_GROUP_DECIMAL_REPLACER, 1, LITERAL_MATCH)
+        local decimalPartString = zo_strsub(amountString, decimalSeparatorIndex)
+        return ZO_CommaDelimitNumber(wholeAmount)..decimalPartString
+    end
+
+    -- This is a replacement for zo_strformat(SI_NUMBER_FORMAT, decimalNumberString) that avoids the slow call to grammar.
+    -- decimalNumberString should be a number string that contains ASCII digits, commas, periods, and/or a negative sign. It can have a non number suffix, so we can continue to support abbreviations, but it really shouldn't contain any more than that.
+    -- The return value should not be used as a component of larger format strings, and an amount string should not be run through it more than once.
+    local ENGLISH_DIGIT_SEPARATOR_PATTERN = "[,.]"
+    local ENGLISH_DIGIT_SEPARATOR_TO_LOCALIZED_SEPARATOR =
+    {
+        [ENGLISH_DIGIT_GROUP_REPLACER] = GetString(SI_DIGIT_GROUP_SEPARATOR),
+        [ENGLISH_DIGIT_GROUP_DECIMAL_REPLACER] = GetString(SI_DIGIT_DECIMAL_SEPARATOR),
+    }
+    function ZO_FastFormatDecimalNumber(decimalNumberString)
+        local firstNonNumberCharacter = zo_strfind(decimalNumberString, "[^%d%.,-]")
+        if firstNonNumberCharacter then
+            local numberPrefix = zo_strsub(decimalNumberString, 1, firstNonNumberCharacter - 1)
+            local nonNumberSuffix = zo_strsub(decimalNumberString, firstNonNumberCharacter, -1)
+            return zo_strgsub(numberPrefix, ENGLISH_DIGIT_SEPARATOR_PATTERN, ENGLISH_DIGIT_SEPARATOR_TO_LOCALIZED_SEPARATOR) .. nonNumberSuffix
+        else
+            return zo_strgsub(decimalNumberString, ENGLISH_DIGIT_SEPARATOR_PATTERN, ENGLISH_DIGIT_SEPARATOR_TO_LOCALIZED_SEPARATOR)
+        end
+    end
+end
+
+do
+    local NON_DIGIT = "%D"
+    function ZO_CountDigitsInNumber(amount)
+        local amountString = tostring(amount)
+        if amountString then
+            amountString = zo_strgsub(amountString, NON_DIGIT, "")
+            return ZoUTF8StringLength(amountString)
+        end
+        return 0
     end
 end
 
@@ -185,6 +222,14 @@ end
 function ZO_GenerateCommaSeparatedListWithoutAnd(argumentTable)
     if argumentTable ~= nil then
         return table.concat(argumentTable, GetString(SI_LIST_COMMA_SEPARATOR))
+    else
+        return ""
+    end
+end
+
+function ZO_GenerateNewlineSeparatedList(argumentTable)
+    if argumentTable ~= nil then
+        return table.concat(argumentTable, "\n")
     else
         return ""
     end

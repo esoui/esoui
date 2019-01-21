@@ -108,7 +108,6 @@ end
 
 function ZO_DailyRewardsTile:Reset()
     self.control:ClearAnchors()
-    self:SetHidden(true)
 end
 
 function ZO_DailyRewardsTile:RefreshLayoutInternal()

@@ -89,9 +89,15 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
             self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_FORMAT_STR_UNKNOWN_RECIPE), GetCraftingSkillName(craftingSkillType))
         end
     elseif itemType == ITEMTYPE_FURNISHING then
-        local furnitureDataId = GetItemLinkFurnitureDataId(itemLink)
-        local categoryId, subcategoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
-        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, specializedItemTypeText, GetFurnitureCategoryName(categoryId))
+        local itemTypeText = GetString("SI_ITEMTYPE", itemType)
+        if specializedItemType ~= SPECIALIZED_ITEMTYPE_FURNISHING_ORNAMENTAL then
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText, specializedItemTypeText)
+        else
+            local furnitureDataId = GetItemLinkFurnitureDataId(itemLink)
+            local categoryId = GetFurnitureDataCategoryInfo(furnitureDataId)
+            local furnitureCategoryText = GetFurnitureCategoryName(categoryId)
+            self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText, furnitureCategoryText)
+        end
     elseif(itemType ~= ITEMTYPE_NONE and equipType ~= EQUIP_TYPE_INVALID) then
         local weaponType = GetItemLinkWeaponType(itemLink)
         if itemType == ITEMTYPE_ARMOR and weaponType == WEAPONTYPE_NONE then
@@ -455,7 +461,7 @@ function ZO_Tooltip:AddTrait(itemLink, extraData)
             end
 
             traitSection:AddLine(formattedTraitName, self:GetStyle("bodyHeader"), additionalTooltipStyle)
-            traitSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_ITEM_TRAIT_DESCRIPTION, traitDescription), self:GetStyle("bodyDescription"), additionalTooltipStyle)
+            traitSection:AddLine(traitDescription, self:GetStyle("bodyDescription"), additionalTooltipStyle)
             self:AddSection(traitSection)
         end
     end
@@ -529,6 +535,15 @@ function ZO_Tooltip:AddItemCombinationText(itemLink)
     if description ~= "" then
         local combinationSection = self:AcquireSection(self:GetStyle("bodySection"))
         combinationSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_COMBINATION, description), self:GetStyle("bodyDescription"))
+        self:AddSection(combinationSection)
+    end
+end
+
+function ZO_Tooltip:AddCollectibleEvolutionText(itemLink)
+    local description = GetItemLinkCollectibleEvolutionDescription(itemLink)
+    if description ~= "" then
+        local combinationSection = self:AcquireSection(self:GetStyle("bodySection"))
+        combinationSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_EVOLUTION, description), self:GetStyle("bodyDescription"))
         self:AddSection(combinationSection)
     end
 end
@@ -619,6 +634,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         self:AddPoisonSystemDescription()
     end
     self:AddItemCombinationText(itemLink)
+    self:AddCollectibleEvolutionText(itemLink)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
     self:AddItemRequiresCollectibleText(itemLink)

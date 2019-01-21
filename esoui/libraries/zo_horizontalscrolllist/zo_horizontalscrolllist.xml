@@ -2,11 +2,7 @@
     <Controls>
         <Control name="ZO_HorizontalScrollListTemplate" mouseEnabled="true" virtual="true">
             <OnMouseWheel>
-                if delta > 0 then
-                    self.horizontalScrollList:MoveLeft()
-                else
-                    self.horizontalScrollList:MoveRight()
-                end
+                ZO_HorizontalScrollList_OnMouseWheel(self, delta)
             </OnMouseWheel>
 
             <Controls>

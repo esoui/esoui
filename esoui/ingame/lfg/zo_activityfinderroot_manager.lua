@@ -1,3 +1,12 @@
+ZO_ACTIVITY_FINDER_SORT_PRIORITY =
+{
+    GROUP = 0,
+    ZONE_STORIES = 100,
+    DUNGEONS = 200,
+    AVA = 300,
+    BATTLEGROUNDS = 400,
+}
+
 local function LFGSort(entry1, entry2)
     if entry1:GetEntryType() ~= entry2:GetEntryType() then
         return entry1:GetEntryType() < entry2:GetEntryType()
@@ -108,10 +117,18 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:MarkDataDirty()
     end
 
-    local function MarkDataDirtyFromCollectible(collectibleId)
-        local updatedCollectible = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        if updatedCollectible:IsStory() then
+    local function OnCollectionUpdated(collectionUpdateType, collectiblesByUnlockState)
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
             self:MarkDataDirty()
+        else
+            for _, unlockStateTable in pairs(collectiblesByUnlockState) do
+                for _, collectibleData in ipairs(unlockStateTable) do
+                    if collectibleData:IsStory() then
+                        self:MarkDataDirty()
+                        return
+                    end
+                end
+            end
         end
     end
 
@@ -152,8 +169,7 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, MarkDataDirty)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", MarkDataDirtyFromCollectible)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", MarkDataDirty)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 
     --We should clear selections when switching filters, but we won't necessarily clear them when closing scenes
     --However, we can't ensure that gamepad and keyboard will stay on the same filter, so we'll clear selections when switching between modes

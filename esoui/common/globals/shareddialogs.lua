@@ -162,14 +162,13 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     {
         [1] =
         {
-            text = SI_DIALOG_LOG_OUT_UPGRADE,
+            text = SI_DIALOG_UPGRADE,
             callback = function(dialog)
                 if IsConsoleUI() then
                     ShowConsoleESOChapterUpgradeUI(dialog.data.chapterId, dialog.data.isCollectorsEdition, dialog.data.chapterUpgradeSource)
                 else
                     OpenChapterUpgradeURL(dialog.data.chapterId, dialog.data.isCollectorsEdition, dialog.data.chapterUpgradeSource)
                 end
-                ZO_Disconnect()
             end,
         },
 

@@ -60,7 +60,7 @@ do
             local text = ""
             if chapterUpgradeData:IsLimitedTime() then
                 style = TIME_LEFT_STYLE
-                local remainingTime = chapterUpgradeData:GetTimeLeftInSeconds()
+                local remainingTime = chapterUpgradeData:GetLTOTimeLeftInSeconds()
                 if remainingTime >= ZO_ONE_DAY_IN_SECONDS then
                     text = zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
                 else

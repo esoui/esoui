@@ -59,7 +59,8 @@ function ZO_HousingBrowserList:GetCategoryInfo(categoryId, categoryObject)
     else
         normalIcon, pressedIcon, mouseoverIcon = GetFurnitureCategoryKeyboardIcons(categoryId)
     end
-    local formattedName = zo_strformat(SI_HOUSING_FURNITURE_CATEGORY_FORMAT, categoryObject:GetName(), categoryObject:GetNumEntryItemsRecursive())
+    -- Avoiding zo_strformat for performance, this will get run for every category every time the number of entries could have changed
+    local formattedName = string.format("%s (%d)", categoryObject:GetName(), categoryObject:GetNumEntryItemsRecursive())
     return formattedName, normalIcon, pressedIcon, mouseoverIcon, isFakedSubcategory
 end
 

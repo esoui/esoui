@@ -50,3 +50,13 @@ function GetLevelOrChampionPointsString(level, championPoints, iconSize)
     
     return iconString .. GetLevelOrChampionPointsStringNoIcon(level, championPoints)
 end
+
+function GetLevelOrChampionPointsRangeString(minLevel, maxLevel, isChampionPoints, iconSize)
+    local iconString = ""
+    
+    if isChampionPoints and iconSize then
+        iconString = GetChampionIconMarkupString(iconSize)
+    end
+
+    return string.format("%s%s-%s", iconString, minLevel, maxLevel)
+end

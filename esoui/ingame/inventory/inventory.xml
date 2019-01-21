@@ -1,29 +1,28 @@
 <GuiXml>
     <Controls>
-        <EditBox name="ZO_InventorySearchBox" font="ZoFontWinT1" inherits="ZO_DefaultEdit ZO_EditDefaultText" virtual="true">
-            <OnInitialized>
-                ZO_EditDefaultText_Initialize(self, GetString(SI_ITEM_FILTER_BY_TEXT))
-            </OnInitialized>
-
-            <OnEscape>
-                ZO_PlayerInventory_EndSearch(self)
-            </OnEscape>
-
-            <OnTextChanged>
-                ZO_EditDefaultText_OnTextChanged(self)
-                ZO_PlayerInventory_OnSearchTextChanged(self)
-            </OnTextChanged>
-
-            <OnEnter>
-                ZO_PlayerInventory_OnSearchEnterKeyPressed(self)
-            </OnEnter>
-
+        <Backdrop name="ZO_InventorySearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
             <Controls>
-                <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
-                    <AnchorFill />
-                </Backdrop>
+                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                    <OnInitialized>
+                        ZO_EditDefaultText_Initialize(self, GetString(SI_ITEM_FILTER_BY_TEXT))
+                    </OnInitialized>
+
+                    <OnEscape>
+                        ZO_PlayerInventory_EndSearch(self)
+                    </OnEscape>
+
+                    <OnTextChanged>
+                        ZO_EditDefaultText_OnTextChanged(self)
+                        ZO_PlayerInventory_OnSearchTextChanged(self)
+                    </OnTextChanged>
+
+                    <OnEnter>
+                        ZO_PlayerInventory_OnSearchEnterKeyPressed(self)
+                    </OnEnter>
+
+                </EditBox>
             </Controls>
-        </EditBox>
+        </Backdrop>
 
         <Control name="ZO_InventoryFilterTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
             <OnMouseEnter>
@@ -117,10 +116,10 @@
 
             <Controls>
                 <!-- Currently not part of the design -->
-                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
-                    <Dimensions x="240"/>
+                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
+                    <Dimensions x="240" />
                     <Anchor point="TOPRIGHT" offsetX="-26" offsetY="68" />
-                </EditBox>
+                </Backdrop>
 
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
 
@@ -168,10 +167,10 @@
 
             <Controls>
                 <!-- Currently not part of the design -->
-                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
+                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
                     <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
                     <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
-                </EditBox>
+                </Backdrop>
 
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
 
@@ -269,10 +268,10 @@
 
             <Controls>
                 <!-- Currently not part of the design -->
-                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
+                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
                     <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
                     <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
-                </EditBox>
+                </Backdrop>
 
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
 
@@ -313,10 +312,10 @@
 
             <Controls>
                 <!-- Currently not part of the design -->
-                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
+                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
                     <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
                     <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
-                </EditBox>
+                </Backdrop>
 
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
 
@@ -375,10 +374,10 @@
 
             <Controls>
                 <!-- Currently not part of the design -->
-                <EditBox name="$(parent)SearchBox" inherits="ZO_InventorySearchBox" hidden="true">
-                    <Dimensions x="240"/>
+                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
+                    <Dimensions x="240" />
                     <Anchor point="TOPRIGHT" offsetX="-26" offsetY="68" />
-                </EditBox>
+                </Backdrop>
 
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
 

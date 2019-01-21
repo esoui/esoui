@@ -87,7 +87,7 @@ end
 
 function ZO_Stable_Gamepad:CanTrainSelected()
     local selectedData = self.list:GetTargetData()
-    return selectedData and selectedData.data.isSkillTrainable
+    return selectedData and selectedData.trainingData.isSkillTrainable
 end
 
 function ZO_Stable_Gamepad:TrainSelected()
@@ -99,24 +99,24 @@ end
 
 local FORCE_VALUE = true
 function ZO_Stable_Gamepad:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)
-    data.isSkillTrainable = data.data.isSkillTrainable
+    local trainingData = data.trainingData
+
+    data.isSkillTrainable = trainingData.isSkillTrainable
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     
-    local trainData = data.data
-    self:SetupRow(control, trainData.trainingType)
-    local bonusLabel = trainData.bonus
-    if trainData.trainingType == RIDING_TRAIN_SPEED then
-        bonusLabel = zo_strformat(SI_MOUNT_ATTRIBUTE_SPEED_FORMAT, trainData.bonus)
+    self:SetupRow(control, trainingData.trainingType)
+    local bonusLabelFormat = SI_MOUNT_ATTRIBUTE_SIMPLE_FORMAT
+    if trainingData.trainingType == RIDING_TRAIN_SPEED then
+        bonusLabelFormat = SI_MOUNT_ATTRIBUTE_SPEED_FORMAT
     end
-    control.value:SetText(bonusLabel)
-    ZO_StatusBar_SmoothTransition(control.bar, trainData.bonus, trainData.maxBonus, FORCE_VALUE)
+    control.value:SetText(zo_strformat(bonusLabelFormat, trainingData.bonus))
 end
 
 function ZO_Stable_Gamepad:OnSelectedItemChanged(data)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
     if data then
-        local trainData = data.data
-        GAMEPAD_TOOLTIPS:LayoutRidingSkill(GAMEPAD_LEFT_TOOLTIP, trainData.trainingType, trainData.bonus, trainData.maxBonus)
+        local trainingData = data.trainingData
+        GAMEPAD_TOOLTIPS:LayoutRidingSkill(GAMEPAD_LEFT_TOOLTIP, trainingData.trainingType, trainingData.bonus, trainingData.maxBonus)
     end
     KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
 end

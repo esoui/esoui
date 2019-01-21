@@ -154,7 +154,6 @@ function Achievement:Show(achievementId)
     end
     
     self.completed = completed
-    self.isExpandable = self:IsExpandable()
 
     if completed then
         self.date:SetHidden(false)
@@ -167,6 +166,9 @@ function Achievement:Show(achievementId)
     
     -- Date strings might overlap the description, so apply dimension constraints after setting the completion date
     self:ApplyCollapsedDescriptionConstraints()
+
+    --Whether we need to expand partly depends on if the description will be truncated in collapsed mode which depends on its constraints being set above.
+    self.isExpandable = self:IsExpandable()
 
     self:SetRewardThumb(achievementId)
     self:UpdateExpandedStateIcon()
@@ -636,7 +638,7 @@ function Achievement:Expand()
     if self.collapsed then
         self.collapsed = false
 
-        self.description:SetDimensionConstraints(0, 0, self:CalculateDescriptionWidth(), 0)
+        self:RemoveCollapsedDescriptionConstraints()
         self:RefreshExpandedView()
         self:UpdateExpandedStateIcon()
         self:PlayExpandCollapseSound()
@@ -649,6 +651,10 @@ function Achievement:ApplyCollapsedDescriptionConstraints()
     else
         self.description:SetDimensionConstraints(0, 0, self:CalculateDescriptionWidth(), ACHIEVEMENT_DESC_COLLAPSED_HEIGHT)
     end
+end
+
+function Achievement:RemoveCollapsedDescriptionConstraints()
+    self.description:SetDimensionConstraints(0, 0, self:CalculateDescriptionWidth(), 0)
 end
 
 function Achievement:Collapse()

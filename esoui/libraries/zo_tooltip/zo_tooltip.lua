@@ -80,12 +80,13 @@ end
 function ZO_TooltipStyledObject:GetFontString(...)
     local fontFace = self:GetProperty("fontFace", ...)
     local fontSize = self:GetProperty("fontSize", ...)
-    local fontStyle = self:GetProperty("fontStyle", ...)
-    if(fontFace and fontSize) then
+    if fontFace and fontSize then
         if type(fontSize) == "number" then
             fontSize = tostring(fontSize)
         end
-        if(fontStyle) then
+
+        local fontStyle = self:GetProperty("fontStyle", ...)
+        if fontStyle then
             return string.format("%s|%s|%s", fontFace, fontSize, fontStyle)
         else
             return string.format("%s|%s", fontFace, fontSize)
@@ -123,11 +124,6 @@ function ZO_TooltipStyledObject:FormatLabel(label, text, ...)
     else
         label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     end
-end
-
---where ... is the list of styles
-function ZO_TooltipStyledObject:FormatTexture(texture, path, ...)
-    texture:SetTexture(path)
 end
 
 --where ... is the list of styles
@@ -626,12 +622,13 @@ end
 
 function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
     control:SetParent(self.contentsControl)
-    local spacing = self:GetNextSpacing(...)
     control:ClearAnchors()
-    if(self:ShouldAdvanceSecondaryCursor(primarySize, spacing)) then
+
+    local spacing = self:GetNextSpacing(...)
+    if self:ShouldAdvanceSecondaryCursor(primarySize, spacing) then
         local advanceAmount = self.maxSecondarySizeOnLine + (self:GetProperty("childSecondarySpacing") or 0)
         self.secondaryCursor = self.secondaryCursor + advanceAmount
-        if(not self:IsSecondaryDimensionFixed()) then
+        if not self:IsSecondaryDimensionFixed() then
             self:AddToSecondaryDimension(advanceAmount)
         end
         self.maxSecondarySizeOnLine = 0
@@ -641,31 +638,38 @@ function ZO_TooltipSection:AddControl(control, primarySize, secondarySize, ...)
     end
     self.primaryCursor = self.primaryCursor + spacing
     self.maxSecondarySizeOnLine = zo_max(self.maxSecondarySizeOnLine, secondarySize)
-    if(not self:IsSecondaryDimensionFixed()) then
-        if(self:IsVertical()) then
+    if not self:IsSecondaryDimensionFixed() then
+        if self:IsVertical() then
             self:SetSecondaryDimension(self.maxSecondarySizeOnLine + self.secondaryCursor + self.paddingLeft + self.paddingRight)
         else
             self:SetSecondaryDimension(self.maxSecondarySizeOnLine + self.secondaryCursor + self.paddingTop + self.paddingBottom)
         end
     end
-    local offsetX = self:IsVertical() and self.secondaryCursor * self.secondaryCursorDirection or self.primaryCursor * self.primaryCursorDirection
-    local offsetY = self:IsVertical() and self.primaryCursor * self.primaryCursorDirection or self.secondaryCursor * self.secondaryCursorDirection
-    control.offsetX = offsetX
-    control.offsetY = offsetY
-    if(not self.isPrimaryDimensionCentered) then
-        control:SetAnchor(self.layoutRootAnchor, nil, self.layoutRootAnchor, offsetX, offsetY)
+
+    if self:IsVertical() then
+        control.offsetX = self.secondaryCursor * self.secondaryCursorDirection
+        control.offsetY = self.primaryCursor * self.primaryCursorDirection
+    else
+        control.offsetX = self.primaryCursor * self.primaryCursorDirection
+        control.offsetY = self.secondaryCursor * self.secondaryCursorDirection
     end
 
-    if(not self:IsPrimaryDimensionFixed()) then
+    if not self.isPrimaryDimensionCentered then
+        control:SetAnchor(self.layoutRootAnchor, nil, self.layoutRootAnchor, control.offsetX, control.offsetY)
+    end
+
+    if not self:IsPrimaryDimensionFixed() then
         self:AddToPrimaryDimension(primarySize + spacing)
     end
+
     self.primaryCursor = self.primaryCursor + primarySize
     self.numControls = self.numControls + 1
     self.firstInLine = false
 
-    if(self.isPrimaryDimensionCentered) then
+    if self.isPrimaryDimensionCentered then
         local centerOffsetPrimary = ((self.innerPrimaryDimension - self.primaryCursor) / 2) * self.primaryCursorDirection
-        for i = 1, self.contentsControl:GetNumChildren() do
+        local numChildren = self.contentsControl:GetNumChildren()
+        for i = 1, numChildren do
             local childControl = self.contentsControl:GetChild(i)
             local childSecondaryOffset = self:IsVertical() and childControl.offsetX or childControl.offsetY
             if childSecondaryOffset == self.secondaryCursor then
@@ -734,6 +738,11 @@ function ZO_TooltipSection:AddSimpleCurrency(currencyType, amount, options, show
         function(label, ...)
             self:FormatLabel(label, "", ...)        -- This is so it uses the correct styling
             ZO_CurrencyControl_SetSimpleCurrency(label, currencyType, amount, options, showAll, notEnough)
+            -- ZO_CurrencyControl_SetSimpleCurrency will set the font in this case so the fontString attribute need to be updated to reflect
+            -- the new font so that the label will be reset correctly when added back into the label pool.
+            if options.font then
+                label.fontString = options.font
+            end
         end
 
     self:AddCustom(customFunction, ...)
@@ -764,7 +773,7 @@ end
 --where ... is the list of styles
 function ZO_TooltipSection:AddTexture(path, ...)
     local texture = self.texturePool:AcquireObject()
-    self:FormatTexture(texture, path, ...)
+    texture:SetTexture(path)
 
     local desaturation = self:GetProperty("desaturation", ...) or 0
     texture:SetDesaturation(desaturation)

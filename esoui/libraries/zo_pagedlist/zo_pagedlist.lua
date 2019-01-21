@@ -15,7 +15,7 @@ function ZO_PagedListPlaySound(type)
 end
 
 function ZO_PagedListSetupFooter(footerControl)
-    footer = {}
+    local footer = {}
     footer.control = footerControl
     footer.previousButton = footerControl:GetNamedChild("PreviousButton")
     footer.nextButton = footerControl:GetNamedChild("NextButton")

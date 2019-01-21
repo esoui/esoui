@@ -1,10 +1,4 @@
 -------------------
---Empty
--------------------
-
-local empty = ZO_Scene:New("empty", SCENE_MANAGER)
-
--------------------
 --Gamma Adjust
 -------------------
 

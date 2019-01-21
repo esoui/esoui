@@ -10,9 +10,9 @@ function ZO_ActivityFinderTemplate_Keyboard:New(...)
     return ZO_ActivityFinderTemplate_Shared.New(self, ...)
 end
 
-function ZO_ActivityFinderTemplate_Keyboard:Initialize(dataManager, categoryData)
+function ZO_ActivityFinderTemplate_Keyboard:Initialize(dataManager, categoryData, categoryPriority)
     local control = CreateControlFromVirtual(dataManager:GetName() .. "_Keyboard", GuiRoot, "ZO_ActivityFinderTemplateTopLevel_Keyboard")
-    ZO_ActivityFinderTemplate_Shared.Initialize(self, control, dataManager, categoryData)
+    ZO_ActivityFinderTemplate_Shared.Initialize(self, control, dataManager, categoryData, categoryPriority)
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
@@ -105,7 +105,7 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
     self.fragment:RegisterCallback("StateChange", OnStateChange)
     self.categoryData.categoryFragment = self.fragment
 
-    GROUP_MENU_KEYBOARD:AddCategory(self.categoryData)
+    GROUP_MENU_KEYBOARD:AddCategory(self.categoryData, self.categoryPriority)
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:RegisterEvents()

@@ -28,6 +28,14 @@ function ZO_SharedInventoryManager:Initialize()
     end 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_ITEM_COMBINATION_RESULT, OnItemCombinationResult)
 
+    local function OnCollectibleEvolutionResult(_, evolutionResult)
+        if evolutionResult == COLLECTIBLE_EVOLUTION_RESULT_SUCCESS then
+            -- Evolutions also play an animation on success, so hide the UI
+            SCENE_MANAGER:SetInUIMode(false)
+        end
+    end 
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_COLLECTIBLE_EVOLUTION_RESULT, OnCollectibleEvolutionResult)
+
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, function() 
         self:RefreshInventory(BAG_BACKPACK) 
         self:RefreshInventory(BAG_WORN)
@@ -205,7 +213,48 @@ function ZO_SharedInventoryManager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_PLAYER_ACTIVATED, OnFullInventoryUpdated)
 
+    self:RegisterForConfirmUseItemEvents(namespace)
+
     self:PerformFullUpdateOnQuestCache()
+end
+
+function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
+    local function OnRequestConfirmUseItem(eventCode, bag, slot)
+        local onUseType = GetItemUseType(bag, slot)
+        if onUseType == ITEM_USE_TYPE_EVOLUTION then
+            local baseCollectibleId, evolvedCollectibleId = GetItemCollectibleEvolutionInformation(bag, slot)
+            local baseCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(baseCollectibleId)
+            local evolvedCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(evolvedCollectibleId)
+            local baseCollectibleName = ZO_WHITE:Colorize(baseCollectibleData:GetName())
+            local evolvedCollectibleName = ZO_WHITE:Colorize(evolvedCollectibleData:GetName())
+
+            local dialogData =
+            {
+                bag = bag,
+                slot = slot,
+                baseCollectibleId = baseCollectibleId,
+                evolvedCollectibleId = evolvedCollectibleId,
+            }
+
+            if IsInGamepadPreferredMode() then
+                ZO_Dialogs_ShowGamepadDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_GAMEPAD", dialogData, { mainTextParams = {baseCollectibleName, evolvedCollectibleName} })
+            else
+                ZO_Dialogs_ShowDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_KEYBOARD", dialogData, { mainTextParams = {baseCollectibleName, evolvedCollectibleName} })
+            end
+        else
+            -- right now only items that evolve collectibles need confirmation
+            -- so if it's not one of those, automatically accept using the item
+            RespondToConfirmUseInventoryItemRequest(true)
+        end
+    end
+
+    local function OnCancelConfirmUseItem()
+        ZO_Dialogs_ReleaseDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_KEYBOARD")
+        ZO_Dialogs_ReleaseDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_GAMEPAD")
+    end
+
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_REQUEST_CONFIRM_USE_ITEM, OnRequestConfirmUseItem)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CANCEL_REQUEST_CONFIRM_USE_ITEM, OnCancelConfirmUseItem)
 end
 
 function ZO_SharedInventoryManager:RefreshInventory(bagId)

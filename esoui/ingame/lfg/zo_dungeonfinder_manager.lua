@@ -14,7 +14,8 @@ local categoryData =
         menuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_Dungeon.dds",
         sceneName = "gamepadDungeonFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_DUNGEON_FINDER),
-    }
+    },
+    priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.DUNGEONS
 }
 
 local DungeonFinder_Manager = ZO_ActivityFinderTemplate_Manager:Subclass()

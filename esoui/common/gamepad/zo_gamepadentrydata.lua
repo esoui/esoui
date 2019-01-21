@@ -15,6 +15,7 @@ function ZO_GamepadEntryData:Initialize(text, icon, selectedIcon, highlight, isN
     self:SetNew(isNew)
     self.fontScaleOnSelection = true
     self.alphaChangeOnSelection = false
+    self.showBarEvenWhenUnselected = true
     self.enabled = true
     self.subLabelTemplate = "ZO_GamepadMenuEntrySubLabelTemplateMain"
 end
@@ -246,9 +247,9 @@ end
 function ZO_GamepadEntryData:GetNameColor(selected)
     if self.enabled then
         if selected then
-            return self.selectedNameColor or ZO_SELECTED_TEXT
+            return self.selectedNameColor or ZO_GAMEPAD_SELECTED_COLOR
         else
-            return self.unselectedNameColor or ZO_DISABLED_TEXT
+            return self.unselectedNameColor or ZO_GAMEPAD_UNSELECTED_COLOR
         end
     else
         return self:GetNameDisabledColor(selected)
@@ -256,14 +257,14 @@ function ZO_GamepadEntryData:GetNameColor(selected)
 end
 
 function ZO_GamepadEntryData:SetIconTintOnSelection(selected)
-    self:SetIconTint(selected and ZO_SELECTED_TEXT, selected and ZO_DISABLED_TEXT)
+    self:SetIconTint(selected and ZO_GAMEPAD_SELECTED_COLOR, selected and ZO_GAMEPAD_UNSELECTED_COLOR)
 end
 
 function ZO_GamepadEntryData:GetSubLabelColor(selected)
     if selected then
-        return self.selectedSubLabelColor or ZO_SELECTED_TEXT
+        return self.selectedSubLabelColor or ZO_GAMEPAD_SELECTED_COLOR
     else
-        return self.unselectedSubLabelColor or ZO_DISABLED_TEXT
+        return self.unselectedSubLabelColor or ZO_GAMEPAD_UNSELECTED_COLOR
     end
 end
 
@@ -364,14 +365,14 @@ end
 
 function ZO_GamepadEntryData:GetNameDisabledColor(selected)
     if selected then
-        return self.selectedNameDisabledColor or ZO_NORMAL_TEXT
+        return self.selectedNameDisabledColor or ZO_GAMEPAD_DISABLED_SELECTED_COLOR
     else
         return self.unselectedNameDisabledColor or ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR
     end
 end
 
 function ZO_GamepadEntryData:SetIconDisabledTintOnSelection(selected)
-    self:SetDisabledIconTint(selected and ZO_NORMAL_TEXT, selected and ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR)
+    self:SetDisabledIconTint(selected and ZO_GAMEPAD_DISABLED_SELECTED_COLOR, selected and ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR)
 end
 
 function ZO_GamepadEntryData:SetModifyTextType(modifyTextType)
@@ -410,4 +411,8 @@ function ZO_GamepadEntryData:SetBarValues(min, max, value)
     self.barMin = min
     self.barMax = max
     self.barValue = value
+end
+
+function ZO_GamepadEntryData:SetShowBarEvenWhenUnselected(showBarEvenWhenUnselected)
+    self.showBarEvenWhenUnselected = showBarEvenWhenUnselected
 end

@@ -253,11 +253,11 @@ function ZO_ActiveSkillProgressionData:IsChainingAbility()
     return self.isChainingAbility
 end
 
-function ZO_ActiveSkillProgressionData:SetKeyboardTooltip(tooltip, showSkillPointCost, showUpgradeText, showAdvised, showBadMorph, overrideRank)
+function ZO_ActiveSkillProgressionData:SetKeyboardTooltip(tooltip, showSkillPointCost, showUpgradeText, showAdvised, showBadMorph, overrideRank, overrideAbilityId)
     local skillType, skillLineIndex, skillIndex = self:GetIndices()
     local isPurchased = self:GetSkillData():GetPointAllocator():IsPurchased()
     local numAvailableSkillPoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
-    tooltip:SetActiveSkill(skillType, skillLineIndex, skillIndex, self:GetMorphSlot(), isPurchased, self:IsAdvised(), self:IsBadMorph(), numAvailableSkillPoints, showSkillPointCost, showUpgradeText, showAdvised, showBadMorph, overrideRank)
+    tooltip:SetActiveSkill(skillType, skillLineIndex, skillIndex, self:GetMorphSlot(), isPurchased, self:IsAdvised(), self:IsBadMorph(), numAvailableSkillPoints, showSkillPointCost, showUpgradeText, showAdvised, showBadMorph, overrideRank, overrideAbilityId)
 end
 
 -------------------------------

@@ -10,15 +10,16 @@ local TOOLTIP_MONEY_FORMAT
 ZO_MapInformationTooltip_Gamepad_Mixin = {}
 
 function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutIconStringLine(baseSection, icon, string, ...)
-    local iconStyle
-    if not icon then
-        iconStyle = self.tooltip:GetStyle("mapLocationTooltipNoIcon")
-    else
-        iconStyle = self.tooltip:GetStyle("mapLocationTooltipIcon")
-    end
-
     local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipContentSection"))
+
+    local iconStyle
+    if icon then
+        iconStyle = self.tooltip:GetStyle("mapLocationTooltipIcon")
+    else
+        iconStyle = self.tooltip:GetStyle("mapLocationTooltipNoIcon")
+    end
     lineSection:AddTexture(icon, iconStyle, ...)
+
     lineSection:AddLine(string, self.tooltip:GetStyle("mapLocationTooltipContentLabel"), ...)
     baseSection:AddSection(lineSection)
 end
@@ -133,7 +134,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AddMoney(baseSection, amount, re
     end
 
     local lineSection = baseSection:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipDoubleContentSection"))
-    lineSection:AddTexture(nil, iconStyle, self.tooltip:GetStyle("mapLocationTooltipNoIcon"))
+    lineSection:AddTexture(nil, self.tooltip:GetStyle("mapLocationTooltipNoIcon"))
     if reason then
         lineSection:AddLine(reason, ...)
     end
@@ -147,14 +148,16 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
     local wayshrineSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipSection"))
 
     local nodeIndex = pin:GetFastTravelNodeIndex()
-    local currentNodeIndex = ZO_Map_GetFastTravelNode()
     local known, name, _, _, icon, glowIcon, poiType, isShown, linkedCollectibleIsLocked = GetFastTravelNodeInfo(nodeIndex) --TODO: Implement a tooltip for linkedCollectibleIsLocked
+
+    self:LayoutIconStringLine(wayshrineSection, icon, zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), self.tooltip:GetStyle("mapLocationTooltipWayshrineHeader"))
+
+    local currentNodeIndex = ZO_Map_GetFastTravelNode()
     local isCurrentLoc = (currentNodeIndex == nodeIndex)
     local isUsingRecall = currentNodeIndex == nil
     local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
     local nodeIsHousePreview = poiType == POI_TYPE_HOUSE and not HasCompletedFastTravelNodePOI(nodeIndex)
 
-    self:LayoutIconStringLine(wayshrineSection, icon, zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), self.tooltip:GetStyle("mapLocationTooltipWayshrineHeader"))
     if isCurrentLoc then --NO BUTTON: Can't travel to origin
         self:LayoutIconStringLine(wayshrineSection, nil, zo_strformat(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC, name), self.tooltip:GetStyle("mapKeepAt"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     elseif isUsingRecall and IsInCampaign() then --NO BUTTON: Can't recall while inside AvA zone
@@ -171,11 +174,11 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
         end
         self:LayoutIconStringLine(wayshrineSection, nil, GetString(cantLeaveStringId), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store/Upgrade Chapter
-        local icon
+        local currencyIcon
         if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_DLC then
-            icon = ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS)
+            currencyIcon = ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS)
         end
-        self:LayoutIconStringLine(wayshrineSection, icon, ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
+        self:LayoutIconStringLine(wayshrineSection, currencyIcon, ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), self.tooltip:GetStyle("mapLocationTooltipWayshrineLinkedCollectibleLockedText"))
     elseif IsUnitDead("player") then -- NO BUTTON: Dead
         local message = GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD)
         self:LayoutIconStringLine(wayshrineSection, nil, message, self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
@@ -184,13 +187,13 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
         local travelStringId = nodeIsHousePreview and SI_GAMEPAD_TOOLTIP_WAYSHRINE_PREVIEW_HOUSE_INTERACT or SI_GAMEPAD_TOOLTIP_WAYSHRINE_RECALL_INTERACT
         local travelText = zo_strformat(travelStringId, keyText)
         self:LayoutIconStringLine(wayshrineSection, nil, travelText, self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+
         local _, premiumTimeLeft = GetRecallCooldown()
         if premiumTimeLeft == 0 then --BUTTON: Recall
             local cost = GetRecallCost(nodeIndex)
-            local currency = GetRecallCurrency(nodeIndex)
-            local hasEnoughMoney = (cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER))
-
             if cost > 0 then
+                local currency = GetRecallCurrency(nodeIndex)
+                local hasEnoughMoney = (cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER))
                 self:AddMoney(wayshrineSection, cost, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_RECALL_COST), not hasEnoughMoney, self.tooltip:GetStyle("mapLocationTooltipContentLeftLabel"), self.tooltip:GetStyle("mapRecallCost"))
             end
         else --NO BUTTON: Waiting on cooldown
@@ -207,9 +210,16 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
     self.tooltip:AddSection(wayshrineSection)
 end
 
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendSuggestionActivity(pin)
+    local shortDescription = pin:GetShortDescription()
+    if shortDescription then
+        self:LayoutIconStringLine(self.tooltip, QUEST_BULLET_ICON, shortDescription, self.tooltip:GetStyle("keepBaseTooltipContent"))
+    end
+end
+
 function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutKeepUpgrade(name, description)
-    local keepUpgradeSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("keepInfoSection"))                
-    self:LayoutStringLine(keepUpgradeSection, name, self.tooltip:GetStyle("mapTitle"))                
+    local keepUpgradeSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("keepInfoSection"))
+    self:LayoutStringLine(keepUpgradeSection, name, self.tooltip:GetStyle("mapTitle"))
     self:LayoutStringLine(keepUpgradeSection, description, self.tooltip:GetStyle("keepUpgradeTooltipContent"))
     self.tooltip:AddSection(keepUpgradeSection)
 end

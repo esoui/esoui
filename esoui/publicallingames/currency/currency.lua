@@ -325,12 +325,13 @@ function ZO_CurrencyControl_SetCurrency(self, options)
                 iconMarkup = zo_iconFormat(currencyTexture, iconSize, iconSize)
             end
 
-            local formattedAmount = ZO_CurrencyControl_FormatCurrency(currencyData.amount, options.useShortFormat, currencyData.obfuscateAmount)
-            formattedAmount = zo_strformat(SI_NUMBER_FORMAT, formattedAmount)
+            local delimitedAmount = ZO_CurrencyControl_FormatCurrency(currencyData.amount, options.useShortFormat, currencyData.obfuscateAmount)
+            local formattedAmount = ZO_FastFormatDecimalNumber(delimitedAmount)
 
             if not currencyData.obfuscateAmount then
                 if currencyData.currencyCapAmount then
-                    local formattedCap = ZO_CurrencyControl_FormatCurrency(currencyData.currencyCapAmount, options.useShortFormat)
+                    local delimitedCap = ZO_CurrencyControl_FormatCurrency(currencyData.currencyCapAmount, options.useShortFormat)
+                    local formattedCap = ZO_FastFormatDecimalNumber(delimitedCap)
                     formattedAmount = formattedAmount .. "/" .. formattedCap
                 end
             end

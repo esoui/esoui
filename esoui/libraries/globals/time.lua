@@ -5,6 +5,7 @@ ZO_ONE_MONTH_IN_DAYS = 30
 ZO_ONE_HOUR_IN_SECONDS = ZO_ONE_HOUR_IN_MINUTES * ZO_ONE_MINUTE_IN_SECONDS -- = 3600
 ZO_ONE_DAY_IN_SECONDS = ZO_ONE_DAY_IN_HOURS * ZO_ONE_HOUR_IN_SECONDS -- = 86400
 ZO_ONE_MONTH_IN_SECONDS = ZO_ONE_MONTH_IN_DAYS * ZO_ONE_DAY_IN_SECONDS -- = 2592000
+ZO_ONE_DAY_IN_MINUTES = ZO_ONE_DAY_IN_HOURS * ZO_ONE_HOUR_IN_MINUTES -- = 1440
 
 ZO_ONE_SECOND_IN_MILLISECONDS = 1000
 ZO_ONE_MINUTE_IN_MILLISECONDS = ZO_ONE_MINUTE_IN_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS -- = 60000
@@ -56,13 +57,9 @@ function ZO_FormatTimeAsDecimalWhenBelowThreshold(seconds, secondsThreshold)
     end
 end
 
-local CLOCK_FORMAT
+local CLOCK_FORMAT = (GetCVar("Language.2") == "en") and TIME_FORMAT_PRECISION_TWELVE_HOUR or TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR
 
 function ZO_FormatClockTime()
-    if(CLOCK_FORMAT == nil) then
-        CLOCK_FORMAT = (GetCVar("Language.2") == "en") and TIME_FORMAT_PRECISION_TWELVE_HOUR or TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR
-    end
-
     local localTimeSinceMidnight = GetSecondsSinceMidnight()
     local text, secondsUntilNextUpdate = ZO_FormatTime(localTimeSinceMidnight, TIME_FORMAT_STYLE_CLOCK_TIME, CLOCK_FORMAT)
     return text, secondsUntilNextUpdate
@@ -70,7 +67,14 @@ end
 
 function ZO_SetClockFormat(clockFormat)
     -- Doesn't currently take effect until the next clock update.
-    CLOCK_FORMAT = clockFormat
+    if CLOCK_FORMAT ~= clockFormat then
+        CLOCK_FORMAT = clockFormat
+        ZO_BuildMinutesSinceMidnightPerHourTable()
+    end
+end
+
+function ZO_GetClockFormat()
+    return CLOCK_FORMAT
 end
 
 local g_normalizationTime = GetFrameTimeSeconds()
@@ -135,5 +139,22 @@ do
         else
             return ZO_FormatTimeMilliseconds(estimatedTimeMs, formatType, precisionType)
         end
+    end
+end
+
+do
+    local minutesSinceMidnightPerHour = {}
+
+    function ZO_BuildMinutesSinceMidnightPerHourTable()
+        minutesSinceMidnightPerHour = {}
+        for i = 0, 23 do
+            table.insert(minutesSinceMidnightPerHour, { value = i * ZO_ONE_HOUR_IN_MINUTES, name = ZO_FormatTime(i * ZO_ONE_HOUR_IN_MINUTES * ZO_ONE_MINUTE_IN_SECONDS, TIME_FORMAT_STYLE_CLOCK_TIME, CLOCK_FORMAT) })
+        end
+    end
+
+    ZO_BuildMinutesSinceMidnightPerHourTable()
+
+    function ZO_GetMinutesSinceMidnightPerHourTable()
+        return minutesSinceMidnightPerHour
     end
 end

@@ -17,7 +17,7 @@ local TARGET_UNIT_FRAME = "ZO_TargetUnitFrame"
 
 local untrackedBarTypes =
 {
-    
+
 }
 
 local NUM_SUBGROUPS = GROUP_SIZE_MAX / SMALL_GROUP_SIZE_THRESHOLD
@@ -497,13 +497,13 @@ local function CreateBarTextControls(baseBarName, parent, style, mechanic)
     local text1, text2
     local textTemplate = barData.textTemplate or "ZO_UnitFrameBarText"
 
-    if(textAnchor1) then
+    if textAnchor1 then
         text1 = CreateControlFromVirtual(baseBarName.."Text1", parent, textTemplate)
         text1:SetFont(GetPlatformBarFont())
         textAnchor1:Set(text1)
     end
 
-    if(textAnchor2) then
+    if textAnchor2 then
         text2 = CreateControlFromVirtual(baseBarName.."Text2", parent, textTemplate)
         text2:SetFont(GetPlatformBarFont())
         textAnchor2:Set(text2)
@@ -523,7 +523,7 @@ function UnitFrameBar:New(baseBarName, parent, showFrameBarText, style, mechanic
         newFrameBar.showBarText = showFrameBarText
         newFrameBar.style = style
         newFrameBar.mechanic = mechanic
-		newFrameBar.resourceNumbersLabel = parent:GetNamedChild("ResourceNumbers")
+        newFrameBar.resourceNumbersLabel = parent:GetNamedChild("ResourceNumbers")
 
         if showFrameBarText ~= HIDE_BAR_TEXT then
             newFrameBar.leftText, newFrameBar.rightText = CreateBarTextControls(baseBarName, parent, style, mechanic)
@@ -536,7 +536,7 @@ function UnitFrameBar:Update(barType, cur, max, forceInit)
     local barCur = cur
     local barMax = max
 
-    if(#self.barControls == 2) then
+    if #self.barControls == 2 then
         barCur = cur / 2
         barMax = max / 2
     end
@@ -550,7 +550,7 @@ function UnitFrameBar:Update(barType, cur, max, forceInit)
     self.currentValue = cur
     self.maxValue = max
 
-    if(barType ~= self.barType) then
+    if barType ~= self.barType then
         updateBarType = true
         self.barType = barType
         self.barTypeName = GetString("SI_COMBATMECHANICTYPE", self.barType)
@@ -567,9 +567,9 @@ local function GetVisibility(self)
 end
 
 function UnitFrameBar:UpdateText(updateBarType, updateValue)
-    if(self.showBarText == SHOW_BAR_TEXT or self.showBarText == SHOW_BAR_TEXT_MOUSE_OVER) then
+    if self.showBarText == SHOW_BAR_TEXT or self.showBarText == SHOW_BAR_TEXT_MOUSE_OVER then
         local visible = GetVisibility(self)
-        if(self.leftText and self.rightText) then
+        if self.leftText and self.rightText then
             self.leftText:SetHidden(not visible)
             self.rightText:SetHidden(not visible)
             if visible then
@@ -580,7 +580,7 @@ function UnitFrameBar:UpdateText(updateBarType, updateValue)
                     self.rightText:SetText(zo_strformat(SI_UNIT_FRAME_BARVALUE, self.currentValue, self.maxValue))
                 end
             end
-        elseif(self.leftText) then
+        elseif self.leftText then
             if visible then
                 self.leftText:SetHidden(false)
                 if updateValue then
@@ -815,7 +815,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
     local baseWindowName = style..unitTag
     local parent = ZO_UnitFrames
 
-    if(ZO_Group_IsGroupUnitTag(unitTag)) then
+    if ZO_Group_IsGroupUnitTag(unitTag) then
         parent = ZO_UnitFramesGroups
     end
 
@@ -838,7 +838,7 @@ function UnitFrame:New(unitTag, anchors, showBarText, style)
 
     newFrame.levelLabel = newFrame:AddFadeComponent("Level")
 
-    if(layoutData.captionControlName) then
+    if layoutData.captionControlName then
         newFrame.captionLabel = newFrame:AddFadeComponent(layoutData.captionControlName)
     end
 
@@ -985,48 +985,48 @@ end
 
 function UnitFrame:RefreshVisible(instant)
     local hidden = self:ComputeHidden()
-    if(hidden ~= self.hidden) then
+    if hidden ~= self.hidden then
         self.hidden = hidden
-        if(not hidden and self.dirty) then
+        if not hidden and self.dirty then
             self.dirty = nil
             self:RefreshControls()
         end
 
-        if(self.animateShowHide and not instant) then
-            if(not self.showHideTimeline) then
+        if self.animateShowHide and not instant then
+            if not self.showHideTimeline then
                 self.showHideTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_UnitFrameFadeAnimation", self.frame)
             end
-            if(hidden) then
-                if(self.showHideTimeline:IsPlaying()) then
+            if hidden then
+                if self.showHideTimeline:IsPlaying() then
                     self.showHideTimeline:PlayBackward()
                 else
                     self.showHideTimeline:PlayFromEnd()
                 end
             else
-                if(self.showHideTimeline:IsPlaying()) then
+                if self.showHideTimeline:IsPlaying() then
                     self.showHideTimeline:PlayForward()
                 else
                     self.showHideTimeline:PlayFromStart()
                 end
             end
         else
-            if(self.showHideTimeline) then
+            if self.showHideTimeline then
                 self.showHideTimeline:Stop()
             end
             self.frame:SetHidden(hidden)
         end
 
-        if(self.buffTracker) then
+        if self.buffTracker then
             self.buffTracker:SetDisabled(hidden)
         end
     end
 end
 
 function UnitFrame:RefreshControls()
-    if(self.hidden) then
+    if self.hidden then
         self.dirty = true
     else
-        if(self.hasTarget) then
+        if self.hasTarget then
             self:UpdateName()
             self:UpdateUnitReaction()
             self:UpdateLevel()
@@ -1049,19 +1049,19 @@ function UnitFrame:RefreshControls()
     end
 end
 
-function UnitFrame:RefreshUnit(unitChanged)            
+function UnitFrame:RefreshUnit(unitChanged)
     local validTarget = DoesUnitExist(self.unitTag)
-    if(validTarget) then
+    if validTarget then
         if(self.unitTag == "reticleovertarget") then
             local localPlayerIsTarget = AreUnitsEqual("player", "reticleover")
             validTarget = UnitFrames:IsTargetOfTargetEnabled() and not localPlayerIsTarget
         end
     end
 
-    if(unitChanged or self.hasTarget ~= validTarget) then
+    if unitChanged or self.hasTarget ~= validTarget then
         MenuOwnerClosed(self.frame)
 
-        if(self.castBar) then
+        if self.castBar then
             self.castBar:UpdateAfterUnitChange()
         end
     end
@@ -1433,7 +1433,7 @@ end
 
 function ZO_UnitFrames_UpdateWindow(unitTag, unitChanged)
     local unitFrame = UnitFrames:GetFrame(unitTag)
-    if(unitFrame) then
+    if unitFrame then
         unitFrame:RefreshUnit(unitChanged)
         unitFrame:RefreshControls()
     end
@@ -1862,7 +1862,7 @@ local function RegisterForEvents()
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
     
-    local function OnUnitFrameUpdate(evt, unitTag)
+    local function OnUnitCharacterNameChanged(evt, unitTag)
         ZO_UnitFrames_UpdateWindow(unitTag)
     end
 
@@ -2036,7 +2036,8 @@ local function RegisterForEvents()
 
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_CHANGED, OnTargetChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
-    ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_FRAME_UPDATE, OnUnitFrameUpdate)
+    ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED, OnUnitCharacterNameChanged)
+    ZO_UnitFrames:AddFilterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
     ZO_UnitFrames:RegisterForEvent(EVENT_RETICLE_TARGET_CHANGED, OnReticleTargetChanged)
     ZO_UnitFrames:RegisterForEvent(EVENT_POWER_UPDATE, OnPowerUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_CREATED, OnUnitCreated)

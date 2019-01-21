@@ -185,14 +185,14 @@ function ZO_KeyboardAssignableActionBarButton:Refresh()
 end
 
 function ZO_KeyboardAssignableActionBarButton:ShowTooltip()
+    self:HideTooltip() -- Hide the old tooltip unconditionally, it may be a different tooltip control
+
     local slotData = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():GetSlotData(self.slotId)
     local tooltip = slotData:GetKeyboardTooltipControl()
     if tooltip then
         InitializeTooltip(tooltip, self.button, BOTTOM, 0, -5, TOP)
         slotData:SetKeyboardTooltip(tooltip)
         self.lastTooltip = tooltip
-    else
-        self:HideTooltip()
     end
 end
 

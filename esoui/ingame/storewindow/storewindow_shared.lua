@@ -145,3 +145,59 @@ end
 function ZO_StoreManager_OnPurchased(eventId, entryName, entryType, entryQuantity, money, specialCurrencyType1, specialCurrencyInfo1, specialCurrencyQuantity1, specialCurrencyType2, specialCurrencyInfo2, specialCurrencyQuantity2, itemSoundCategory)
     PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
 end
+
+ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE = 1
+ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE = 2
+
+function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
+    local entryType = select(14, GetStoreEntryInfo(storeEntryIndex))
+    local itemPreview = SYSTEMS:GetObject("itemPreview")
+
+    local itemLink
+    local collectibleId
+    if entryType == STORE_ENTRY_TYPE_ITEM then
+        itemLink = GetStoreItemLink(storeEntryIndex)        
+        local containerCollectibleId = GetItemLinkContainerCollectibleId(itemLink)
+        if containerCollectibleId ~= 0 then
+            collectibleId = containerCollectibleId
+            itemLink = nil
+        end 
+    elseif entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
+        collectibleId = GetStoreCollectibleInfo(storeEntryIndex)
+    end
+
+    if itemLink then
+        if ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink) then
+            if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
+                return true
+            elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
+                itemPreview:PreviewStoreEntryAsFurniture(storeEntryIndex)
+            end       
+        end 
+    elseif collectibleId then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData  then
+            if collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
+                if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
+                    return true
+                elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
+                    itemPreview:PreviewOutfit(ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex())
+                    local NO_DYE = 0
+                    local REFRESH_IMMEDIATELY = true
+                    local outfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(collectibleData)
+                    itemPreview:AddOutfitSlotPreviewElement(outfitSlot, collectibleId, ZO_OUTFIT_STYLE_DEFAULT_ITEM_MATERIAL_INDEX, NO_DYE, NO_DYE, NO_DYE, REFRESH_IMMEDIATELY)
+                end
+            elseif GetCollectibleFurnitureDataId(collectibleId) ~= 0 then
+                if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
+                    return true
+                elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
+                    itemPreview:PreviewStoreEntryAsFurniture(storeEntryIndex)
+                end
+		    end
+        end
+    end
+
+    if action == ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE then
+        return false
+    end
+end

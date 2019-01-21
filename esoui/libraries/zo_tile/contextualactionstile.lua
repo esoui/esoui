@@ -12,10 +12,9 @@ end
 function ZO_ContextualActionsTile:Initialize(control)
     ZO_Tile.Initialize(self, control)
 
-    self.container = control:GetNamedChild("Container")
-    self.titleLabel = self.container:GetNamedChild("Title")
-    self.iconTexture = self.container:GetNamedChild("Icon")
-    self.highlightControl = self.container:GetNamedChild("Highlight")
+    self.titleLabel = self.control:GetNamedChild("Title")
+    self.iconTexture = self.control:GetNamedChild("Icon")
+    self.highlightControl = self.control:GetNamedChild("Highlight")
 
     self.keybindStripDescriptor = {}
     self.canFocus = true

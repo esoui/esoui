@@ -266,7 +266,7 @@ end
 
 function ZO_SpecializedCollectionsBook_Keyboard:InitializeEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
 end
@@ -346,17 +346,12 @@ function ZO_SpecializedCollectionsBook_Keyboard:BrowseToCollectible(collectibleI
     MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", self.sceneName)
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleUpdated(collectibleId, lockStateChange)
+function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleUpdated(collectibleId)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
     if self:IsCollectibleRelevant(collectibleData) then
-        if lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
-            self.categoryLayoutObject:OnCollectibleLockStateChanged()
-            self:RefreshList()
-        else
-            local node = self.collectibleIdToTreeNode[collectibleId]
-            if node then
-                self:RefreshSingle(collectibleId)
-            end
+        local node = self.collectibleIdToTreeNode[collectibleId]
+        if node then
+            self:RefreshSingle(collectibleId)
         end
     end
 end
@@ -380,8 +375,11 @@ function ZO_SpecializedCollectionsBook_Keyboard:OnCollectibleNewStatusCleared(co
     self:UpdateCollectibleTreeEntry(collectibleId)
 end
 
-function ZO_SpecializedCollectionsBook_Keyboard:OnCollectionUpdated()
-    self:RefreshList()
+function ZO_SpecializedCollectionsBook_Keyboard:OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+    if NonContiguousCount(collectiblesByNewUnlockState) > 0 or collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
+        self.categoryLayoutObject:OnCollectibleLockStateChanged()
+        self:RefreshList()
+    end
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:OnSceneShown()

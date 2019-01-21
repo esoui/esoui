@@ -436,15 +436,10 @@ end
 
 local function SetSelectedStateOnControl(control, selected)
     control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected))
-    local enabled =  control.data.enabled ~= false
-    local color
-    if not enabled then
-        color = selected and ZO_NORMAL_TEXT or ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR
-    else
-        color = selected and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
-    end
+    local enabled = control.data.enabled ~= false
 
-    local r,g,b,a = color:UnpackRGBA()
+    local color = ZO_GamepadMenuEntryTemplate_GetLabelColor(selected, not enabled)
+    local r, g, b, a = color:UnpackRGBA()
 
     local label = GetControl(control, "Name")    
     label:SetColor(r, g, b, 1)
