@@ -113,7 +113,9 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
     elseif(GetItemLinkBookTitle(itemLink)) then
         local itemTypeText = (specializedItemType ~= SPECIALIZED_ITEMTYPE_NONE) and specializedItemTypeText or GetString(SI_ITEM_SUB_TYPE_BOOK)
         self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, itemTypeText)
-    elseif(DoesItemLinkStartQuest(itemLink) or DoesItemLinkFinishQuest(itemLink)) then
+    elseif DoesItemLinkStartQuest(itemLink) then
+        self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_FORMAT_STR_QUEST_STARTER_ITEM))
+    elseif DoesItemLinkFinishQuest(itemLink) then
         self:AddTypeSlotUniqueLine(itemLink, itemType, topSection, GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM))
     else
         local craftingSkillType = GetItemLinkCraftingSkillType(itemLink)

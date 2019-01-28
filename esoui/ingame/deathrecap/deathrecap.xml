@@ -169,7 +169,7 @@
                     </Controls>
                 </Control>
                 <Control name="$(parent)Text">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="20" />
                     <Controls>
                         <Label name="$(grandparent)DamageLabel" font="ZoFontGameBold" modifyTextType="UPPERCASE" text="SI_DEATH_RECAP_DAMAGE_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                             <Anchor point="RIGHT" relativePoint="LEFT" offsetX="485" />

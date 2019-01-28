@@ -362,6 +362,22 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         else
             DoLoginJoinsUserPreferred()
         end
+
+        self.didLoginJoins = true
+
+        --Changing channels before we have initialized our desired channels from saved vars is dangerous because we will end up swapping back out of the group channel when we do the init from
+        --saved vars, or even worse than that, if we try to change channels when there are no saved vars yet (before addon loaded) it will error. So we hold onto this group channel join until
+        --we've set the initial desired channels from saved vars.
+        if self.localPlayerJoinedGroupBeforeLoginJoins then
+            self.localPlayerJoinedGroupBeforeLoginJoins = nil
+            if IsUnitGrouped("player") then
+                local bestGroupChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+                if not bestGroupChannel.isAvailable then
+                    bestGroupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+                end
+                self:SetAndSwapDesiredActiveChannel(bestGroupChannel)
+            end
+        end
     end
 
     local function SwapOnLosingActiveGuildChannel()
@@ -430,18 +446,32 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
     
     local function OnGroupMemberJoined(rawCharacterName)
         if(GetRawUnitName("player") == rawCharacterName) then
-            local bestGroupChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
-			if not bestGroupChannel.isAvailable then
-				bestGroupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-			end
-            self:SetAndSwapDesiredActiveChannel(bestGroupChannel)
+            --Changing channels before we have initialized our desired channels from saved vars is dangerous because we will end up swapping back out of the group channel when we do the init from
+            --saved vars, or even worse than that, if we try to change channels when there are no saved vars yet (before addon loaded) it will error. So we hold onto this group channel join until
+            --we've set the initial desired channels from saved vars.
+            if self.didLoginJoins then
+                local bestGroupChannel = self.channelData[VOICE_CHANNEL_BATTLEGROUP]
+                if not bestGroupChannel.isAvailable then
+                    bestGroupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+                end
+                self:SetAndSwapDesiredActiveChannel(bestGroupChannel)
+            else
+                self.localPlayerJoinedGroupBeforeLoginJoins = true
+            end
         end
     end
 
     local function OnGroupMemberLeft(characterName, reason, isLocalPlayer, isLeader)
         if isLocalPlayer then
-            local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
-            self:ClearAndSwapChannel(groupChannel)
+            --Changing channels before we have initialized our desired channels from saved vars is dangerous because we will end up swapping back out of the group channel when we do the init from
+            --saved vars, or even worse than that, if we try to change channels when there are no saved vars yet (before addon loaded) it will error. So we hold onto this group channel join until
+            --we've set the initial desired channels from saved vars.
+            if self.didLoginJoins then
+                local groupChannel = self.channelData[VOICE_CHANNEL_GROUP]
+                self:ClearAndSwapChannel(groupChannel)
+            else
+                self.localPlayerJoinedGroupBeforeLoginJoins = nil
+            end
         end
     end
 
