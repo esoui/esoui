@@ -34,24 +34,21 @@ function ZO_GamepadSlider:UpdateDirectionalInput()
     end
 end
 
-function ZO_GamepadSlider:MoveLeft()
+function ZO_GamepadSlider:SetValueWithSound(targetValue)
     local oldValue = self:GetValue()
-    local prevValue = oldValue - self:GetValueStep()
-    self:SetValue(prevValue)
+    self:SetValue(targetValue)
     local newValue = self:GetValue()
     if oldValue ~= newValue then
         PlaySound(SOUNDS.DEFAULT_CLICK)
     end
 end
 
+function ZO_GamepadSlider:MoveLeft()
+    self:SetValueWithSound(self:GetValue() - self:GetValueStep())
+end
+
 function ZO_GamepadSlider:MoveRight()
-    local oldValue = self:GetValue()
-    local nextValue = oldValue + self:GetValueStep()
-    self:SetValue(nextValue)
-    local newValue = self:GetValue()
-    if oldValue ~= newValue then
-        PlaySound(SOUNDS.DEFAULT_CLICK)
-    end
+    self:SetValueWithSound(self:GetValue() + self:GetValueStep())
 end
 
 function ZO_GamepadSlider_OnInitialized(control)
@@ -65,45 +62,41 @@ function ZO_GamepadSlider_OnValueChanged(control, value)
     end
 end
 
+--[[ Gamepad Constrained Slider ]]--
 
---[[ Paired Slider ]]--
-
--- Adds functionality that blocks the slider from setting values outside of a specific paired slider's range.
+-- Adds functionality that can constrain a slider from going past a specified min or max, that is independent of the min/max values of the slider itself.
 -- This is useful when having two sliders such as for min/max values, and not wanting them to
 -- Be able to push beyond the other slider's value (Min slider blocks max slider from going to low and vice versa)
 
-ZO_GamepadPairedSlider = {}
+ZO_GamepadConstrainedSlider = {}
 
-function ZO_GamepadPairedSlider:SetMinPair(slider)
-    self.minSlider = slider
+function ZO_GamepadConstrainedSlider:SetValueConstraints(minValueFunction, maxValueFunction)
+    self.minValueFunction = minValueFunction
+    self.maxValueFunction = maxValueFunction
 end
 
-function ZO_GamepadPairedSlider:SetMaxPair(slider)
-    self.maxSlider = slider
-end
-
-function ZO_GamepadPairedSlider:MoveLeft()
+function ZO_GamepadConstrainedSlider:MoveLeft()
     local prevValue = self:GetValue() - self:GetValueStep()
 
-    if self.minSlider then
-        if prevValue < self.minSlider:GetValue() then return end
+    if self.minValueFunction then
+        prevValue = math.max(prevValue, self.minValueFunction())
     end
     
-    self:SetValue(prevValue)
+    self:SetValueWithSound(prevValue)
 end
 
-function ZO_GamepadPairedSlider:MoveRight()
+function ZO_GamepadConstrainedSlider:MoveRight()
     local nextValue = self:GetValue() + self:GetValueStep()
     
-    if self.maxSlider then
-        if nextValue > self.maxSlider:GetValue() then return end
+    if self.maxValueFunction then
+        nextValue = math.min(nextValue, self.maxValueFunction())
     end
     
-    self:SetValue(nextValue)
+    self:SetValueWithSound(nextValue)
 end
 
-function ZO_GamepadPairedSlider_OnInitialized(control)
+function ZO_GamepadConstrainedSlider_OnInitialized(control)
     zo_mixin(control, ZO_GamepadSlider)
-    zo_mixin(control, ZO_GamepadPairedSlider)
+    zo_mixin(control, ZO_GamepadConstrainedSlider)
     control:Initialize()
 end

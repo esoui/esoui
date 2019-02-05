@@ -167,18 +167,18 @@ ZO_GamepadProvisioner.EMBEDDED_SETTINGS =
 }
 
 function ZO_GamepadProvisioner:InitializeSettings()
-    local function GenerateTab(nameStringId, filterType)
+    local function GenerateTab(filterType)
         return {
-            text = GetString(nameStringId),
+            text = GetString("SI_PROVISIONERSPECIALINGREDIENTTYPE", filterType),
             callback = function()
                 self:OnTabFilterChanged(filterType)
             end,
         }
     end
 
-    local foodTab = GenerateTab(SI_PROVISIONER_FILTER_COOK, PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES)
-    local drinkTab = GenerateTab(SI_PROVISIONER_FILTER_BREW, PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING)
-    local furnishingsTab = GenerateTab(SI_PROVISIONER_FILTER_FURNISHINGS, PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
+    local foodTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES)
+    local drinkTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING)
+    local furnishingsTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
 
     local provisioningSettings = ZO_GamepadProvisioner.PROVISIONING_SETTINGS
     provisioningSettings.tabs = {foodTab, drinkTab, furnishingsTab}

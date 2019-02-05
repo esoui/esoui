@@ -155,16 +155,24 @@ end
 
 function ZO_GamepadStoreBuy:CanBuy()
     local selectedData = self.list:GetTargetData()
-    if selectedData then
-        if selectedData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
-            local collectibleId = GetCollectibleIdFromLink(selectedData.itemLink)
-            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-            if collectibleData:IsUnlocked() then
-                return false, GetString("SI_STOREFAILURE", STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE) -- "You already have that collectible"
-            end
-            return true --Always allow the purchase of collectibles, regardless of bag space
+    if selectedData then        
+        if not selectedData.dataSource.meetsRequirementsToBuy then
+            return false, selectedData.dataSource.requiredToBuyErrorText
         end
-        return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
+
+        local enabled, disabledAlertText = STORE_WINDOW_GAMEPAD:CanAfford(selectedData)
+        if not enabled then
+            return false, disabledAlertText
+        end
+
+        if selectedData.entryType ~= STORE_ENTRY_TYPE_COLLECTIBLE then
+            enabled, disabledAlertText = STORE_WINDOW_GAMEPAD:CanCarry(selectedData)
+            if not enabled then
+                return false, disabledAlertText
+            end
+        end
+
+        return true
     else
         return false
     end

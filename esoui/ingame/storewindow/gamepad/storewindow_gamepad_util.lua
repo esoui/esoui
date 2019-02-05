@@ -155,8 +155,8 @@ local function GetBuyItems()
 
         itemData.storeGroup = GetItemStoreGroup(itemData)
         itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
-        if itemData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
-            itemData.locked = select(2, GetStoreCollectibleInfo(itemData.slotIndex))
+        if not itemData.meetsRequirementsToBuy and (itemData.buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE or itemData.buyStoreFailure == STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE) then
+            itemData.locked = true
         end
     end
 

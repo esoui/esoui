@@ -104,17 +104,18 @@ function ZO_TradingHouseSearchCategoryFeature_Keyboard:PopulateCategoryList()
         numCategoriesForHeader[header] = (numCategoriesForHeader[header] or 0) + 1
     end
 
+    local NO_PARENT = nil
     local currentHeaderNode, lastHeader = nil, nil
     for _, categoryParams in ipairs(ZO_TRADING_HOUSE_CATEGORY_PARAMS_LIST) do
         local header = categoryParams:GetHeader()
         if numCategoriesForHeader[header] == 1 then
-            self.categoryListTree:AddNode("ZO_IconChildlessHeader", categoryParams)
+            self.categoryListTree:AddNode("ZO_IconChildlessHeader", categoryParams, NO_PARENT, SOUNDS.TRADING_HOUSE_CATEGORY_SELECTED)
         else
             if lastHeader ~= header then
-                currentHeaderNode = self.categoryListTree:AddNode("ZO_IconHeader", header)
+                currentHeaderNode = self.categoryListTree:AddNode("ZO_IconHeader", header, NO_PARENT, SOUNDS.TRADING_HOUSE_CATEGORY_SELECTED)
             end
 
-            self.categoryListTree:AddNode("ZO_TradingHouse_CategoryLabel", categoryParams, currentHeaderNode)
+            self.categoryListTree:AddNode("ZO_TradingHouse_CategoryLabel", categoryParams, currentHeaderNode, SOUNDS.TRADING_HOUSE_SUB_CATEGORY_SELECTED)
         end
         lastHeader = header
     end

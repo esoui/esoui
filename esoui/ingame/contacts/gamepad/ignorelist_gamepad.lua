@@ -12,7 +12,7 @@ function IgnoreList_Gamepad:Initialize(control)
     ZO_GamepadSocialListPanel.Initialize(self, control, IGNORE_LIST_MANAGER, "ZO_GamepadIgnoreListRow")
     self:SetTitle(GetString(SI_GAMEPAD_CONTACTS_IGNORED_LIST_TITLE))
     self:SetEmptyText(GetString(SI_GAMEPAD_CONTACTS_IGNORE_LIST_NO_ENTRIES_MESSAGE));
-    self:SetupSort(IGNORE_LIST_ENTRY_SORT_KEYS, "displayName", ZO_SORT_ORDER_DOWN)
+    self:SetupSort(IGNORE_LIST_ENTRY_SORT_KEYS, "displayName", ZO_SORT_ORDER_UP)
 
     GAMEPAD_IGNORED_LIST_SCENE = ZO_Scene:New("gamepad_ignored", SCENE_MANAGER)
     GAMEPAD_IGNORED_LIST_SCENE:AddFragment(self:GetListFragment())

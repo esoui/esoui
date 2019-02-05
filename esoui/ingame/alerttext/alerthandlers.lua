@@ -251,8 +251,8 @@ local AlertHandlers = {
         return ERROR, zo_strformat(GetString("SI_MOUNTFAILUREREASON", reason), arg1), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
-    [EVENT_STORE_FAILURE] = function(reason)
-        return ERROR, GetString("SI_STOREFAILURE", reason), SOUNDS.GENERAL_ALERT_ERROR
+    [EVENT_STORE_FAILURE] = function(reason, errorStringId)
+        return ERROR, ZO_StoreManager_GetRequiredToBuyErrorText(reason, errorStringId), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
     [EVENT_HOT_BAR_RESULT] = function(reason)

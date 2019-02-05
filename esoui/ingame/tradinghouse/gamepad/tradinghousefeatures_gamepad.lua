@@ -226,43 +226,48 @@ function ZO_TradingHouseLevelRangeFeature_Gamepad:SetLevelType(levelType)
     end
 end
 
-function ZO_TradingHouseLevelRangeFeature_Gamepad:SetupSlider(control, data, selected)
-    local slider = control:GetNamedChild("Slider")
-    data.slider = slider
-    local sliderNameLabel = control:GetNamedChild("SliderLabel")
-    local sliderValueLabel = control:GetNamedChild("SliderValue")
+do
+    local NO_MIN = nil
+    local NO_MAX = nil
+    function ZO_TradingHouseLevelRangeFeature_Gamepad:SetupSlider(control, data, selected)
+        local slider = control:GetNamedChild("Slider")
+        data.slider = slider
+        local sliderNameLabel = control:GetNamedChild("SliderLabel")
+        local sliderValueLabel = control:GetNamedChild("SliderValue")
 
-    slider:SetValueStep(self:GetLevelStep())
-    slider:SetMinMax(self:GetMinLevelLimit(), self:GetMaxLevelLimit())
+        slider:SetValueStep(self:GetLevelStep())
+        slider:SetMinMax(self:GetMinLevelLimit(), self:GetMaxLevelLimit())
 
-    if data.sliderMode == MIN_LEVEL_SLIDER_MODE then
-        self.minSlider = slider
-        self.minSlider:SetHandler("OnValueChanged", function(minSliderControl, value)
-            self:SetMinLevel(value)
-        end)
-        self.minSlider:SetValue(self.minLevel)
-        self.minLevelValueLabel = sliderValueLabel
-        self.minLevelValueLabel:SetText(self.minLevel)
-        sliderNameLabel:SetText(GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MIN_LEVEL))
-    elseif data.sliderMode == MAX_LEVEL_SLIDER_MODE then
-        self.maxSlider = slider
-        self.maxSlider:SetHandler("OnValueChanged", function(maxSliderControl, value)
-            self:SetMaxLevel(value)
-        end)
-        self.maxSlider:SetValue(self.maxLevel)
-        self.maxLevelValueLabel = sliderValueLabel
-        self.maxLevelValueLabel:SetText(self.maxLevel)
-        sliderNameLabel:SetText(GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MAX_LEVEL))
-    end
+        if data.sliderMode == MIN_LEVEL_SLIDER_MODE then
+            self.minSlider = slider
+            self.minSlider:SetHandler("OnValueChanged", function(minSliderControl, value)
+                self:SetMinLevel(value)
+            end)
+            self.minSlider:SetValueConstraints(NO_MIN, function()
+                return self.maxLevel
+            end)
+            self.minSlider:SetValue(self.minLevel)
+            self.minLevelValueLabel = sliderValueLabel
+            self.minLevelValueLabel:SetText(self.minLevel)
+            sliderNameLabel:SetText(GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MIN_LEVEL))
+        elseif data.sliderMode == MAX_LEVEL_SLIDER_MODE then
+            self.maxSlider = slider
+            self.maxSlider:SetHandler("OnValueChanged", function(maxSliderControl, value)
+                self:SetMaxLevel(value)
+            end)
+            self.maxSlider:SetValueConstraints(function()
+                return self.minLevel
+            end, NO_MAX)
+            self.maxSlider:SetValue(self.maxLevel)
+            self.maxLevelValueLabel = sliderValueLabel
+            self.maxLevelValueLabel:SetText(self.maxLevel)
+            sliderNameLabel:SetText(GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_MAX_LEVEL))
+        end
 
-    local shouldEnableSliders = self:ShouldEnableSliders()
-    slider:SetEnabled(shouldEnableSliders)
-    sliderValueLabel:SetHidden(not shouldEnableSliders)
-    control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, not shouldEnableSliders))
-
-    if self.maxSlider and self.minSlider then
-        self.maxSlider:SetMinPair(self.minSlider)
-        self.minSlider:SetMaxPair(self.maxSlider)
+        local shouldEnableSliders = self:ShouldEnableSliders()
+        slider:SetEnabled(shouldEnableSliders)
+        sliderValueLabel:SetHidden(not shouldEnableSliders)
+        control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, not shouldEnableSliders))
     end
 end
 

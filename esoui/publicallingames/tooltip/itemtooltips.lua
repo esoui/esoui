@@ -1241,24 +1241,11 @@ function ZO_Tooltip:LayoutStoreWindowItem(itemData)
         self:LayoutStoreItemFromLink(itemData.itemLink, itemData.icon)
     end
 
-    local buyable = itemData.dataSource.meetsRequirementsToBuy
-    --itemData.dataSource.slotIndex is the entryIndex
-    local errorStringId = GetStoreEntryBuyRequirementErrorId(itemData.dataSource.slotIndex)
-
-    if errorStringId > 0 then
-        local errorString = GetErrorString(errorStringId)
-        if errorString ~= "" then
-            local style
-            if buyable then
-                style = "requirementPass"
-            else
-                style = "requirementFail"
-            end
-
-            local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
-            styleSection:AddLine(errorString, self:GetStyle(style))
-            self:AddSection(styleSection)
-        end
+    local requiredToBuyErrorText = itemData.dataSource.requiredToBuyErrorText
+    if requiredToBuyErrorText ~= "" then
+        local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
+        styleSection:AddLine(requiredToBuyErrorText, self:GetStyle("requirementFail"))
+        self:AddSection(styleSection)
     end
 end
 

@@ -58,7 +58,7 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)SliderValue" relativePoint="BOTTOMRIGHT" />
 
                     <OnInitialized>
-                        ZO_GamepadPairedSlider_OnInitialized(self)
+                        ZO_GamepadConstrainedSlider_OnInitialized(self)
                     </OnInitialized>
                 </Slider>
             </Controls>

@@ -596,11 +596,6 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     control.moneyCost = data.stackBuyPrice
 
     local meetsReqs = data.meetsRequirementsToBuy and data.meetsRequirementsToEquip
-    local isLocked = false
-    if slotControl.isCollectible then
-        isLocked = select(2, GetStoreCollectibleInfo(slotIndex))
-    end
-    slotControl.locked = isLocked
     ZO_ItemSlot_SetupSlotBase(slotControl, data.stack, data.icon, meetsReqs)
 
     nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, data.name))
@@ -615,7 +610,12 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     else
         nameControl:SetColor(MEET_BUY_REQS_FAIL_COLOR:UnpackRGBA())
     end
-    ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, isLocked)
+
+    local locked = false
+    if not data.meetsRequirementsToBuy and (data.buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE or data.buyStoreFailure == STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE) then
+        locked = true
+    end
+    ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, locked)
     ZO_UpdateTraitInformationControlIcon(control, data)
 
     ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS, CURT_EVENT_TICKETS)

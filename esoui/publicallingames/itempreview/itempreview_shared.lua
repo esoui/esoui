@@ -616,18 +616,9 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
     if self.currentPreviewTypeObject then
         self.currentPreviewTypeObject:ResetStaticParameters()
     end
-    if self.previewCollectionId ~= 0 then
-        RemovePreviewCollection(self.previewCollectionId)
-        self.previewCollectionId = 0
-    end
     self.currentPreviewTypeObject = self:GetPreviewTypeObject(previewType)
     self.currentPreviewTypeObject:SetStaticParameters(...)
     
-    if self.currentPreviewTypeObject:ManagesPreviewCollection() then
-        self.previewCollectionId = AddPreviewCollection()
-        SetPreviewCollectionShown(self.previewCollectionId, true)
-    end
-
     self.previewVariationIndex = 1
 
     if IsCharacterPreviewingAvailable() then
@@ -730,6 +721,14 @@ end
 
 function ZO_ItemPreview_Shared:Apply()
     self.previewAtMS = nil
+    if self.previewCollectionId ~= 0 then
+        RemovePreviewCollection(self.previewCollectionId)
+        self.previewCollectionId = 0
+    end
+    if self.currentPreviewTypeObject:ManagesPreviewCollection() then
+        self.previewCollectionId = AddPreviewCollection()
+        SetPreviewCollectionShown(self.previewCollectionId, true)
+    end
     self.currentPreviewTypeObject:Apply(self.previewVariationIndex)
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
     PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)

@@ -727,15 +727,16 @@ do
             itemCount = actualItemCount
         end
 
-        local itemLink = GetItemLink(bag, slot)
+        local quality = GetItemQuality(bag, slot)
+        local coloredItemName = GetItemQualityColor(quality):Colorize(name)
         if(needsConfirm) then
             local dialogName = "CONFIRM_DESTROY_ITEM_PROMPT"
             if IsInGamepadPreferredMode() then
                 dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG
             end
-            ZO_Dialogs_ShowPlatformDialog(dialogName, nil, {mainTextParams = {itemLink, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION)}})
+            ZO_Dialogs_ShowPlatformDialog(dialogName, nil, {mainTextParams = {coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION)}})
         else
-            ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, {mainTextParams = {itemLink, itemCount}})
+            ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, {mainTextParams = {coloredItemName, itemCount}})
         end
     end
 

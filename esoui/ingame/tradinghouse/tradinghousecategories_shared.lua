@@ -761,11 +761,13 @@ do
     end
 end
 
-local AddAllConsumablesCategory, AddConsumableCategory
+local AddAllConsumablesCategory, AddConsumableCategory, AddRecipeCategory
 do
     local g_allConsumableItemTypes = {}
     local function AddItemTypeToAllConsumables(itemType)
-        table.insert(g_allConsumableItemTypes, itemType)
+        if not ZO_IsElementInNumericallyIndexedTable(g_allConsumableItemTypes, itemType) then
+            table.insert(g_allConsumableItemTypes, itemType)
+        end
     end
 
     local function ApplyAllConsumablesToSearch(search)
@@ -786,18 +788,6 @@ do
 
     local SPECIALIZED_ITEM_TYPES_FOR_CONSUMABLE_ITEM_TYPE = 
     {
-        [ITEMTYPE_RECIPE] =
-        {
-            SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD,
-            SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK,
-            SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING,
-            SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING,
-            SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING,
-            SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING,
-            SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING,
-            SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING,
-            SPECIALIZED_ITEMTYPE_RECIPE_JEWELRYCRAFTING_SKETCH_FURNISHING,
-        },
         [ITEMTYPE_RACIAL_STYLE_MOTIF] =
         {
             SPECIALIZED_ITEMTYPE_RACIAL_STYLE_MOTIF_CHAPTER,
@@ -807,6 +797,29 @@ do
         {
             SPECIALIZED_ITEMTYPE_MASTER_WRIT,
             SPECIALIZED_ITEMTYPE_HOLIDAY_WRIT,
+        },
+    }
+
+    internalassert(PROVISIONER_SPECIAL_INGREDIENT_TYPE_MAX_VALUE == 3, "Update trading house recipe categories")
+    local SPECIALIZED_ITEM_TYPES_FOR_SPECIAL_INGREDIENT_TYPE = 
+    {
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES] =
+        {
+            SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD,
+        },
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING] =
+        {
+            SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK,
+        },
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING] =
+        {
+            SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING,
+            SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING,
+            SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING,
+            SPECIALIZED_ITEMTYPE_RECIPE_ALCHEMY_FORMULA_FURNISHING,
+            SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING,
+            SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING,
+            SPECIALIZED_ITEMTYPE_RECIPE_JEWELRYCRAFTING_SKETCH_FURNISHING,
         },
     }
 
@@ -948,6 +961,41 @@ do
         end
 
         AddItemTypeToAllConsumables(itemType)
+    end
+
+    function AddRecipeCategory(specialIngredientType)
+        local specializedItemTypes = SPECIALIZED_ITEM_TYPES_FOR_SPECIAL_INGREDIENT_TYPE[specialIngredientType]
+        local categoryParams = AddCategory(string.format("ConsumableRecipe%d", specialIngredientType))
+
+        categoryParams:SetName(GetString("SI_PROVISIONERSPECIALINGREDIENTTYPE_TRADINGHOUSERECIPECATEGORY", specialIngredientType))
+        categoryParams:SetHeader(TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES)
+
+        local SUBCATEGORY_ENUM_KEY_PREFIX = "SpecializedItemType"
+        categoryParams:SetApplyToSearchCallback(function(search, specializedItemType)
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_SPECIALIZED_ITEM, specializedItemType)
+        end)
+        categoryParams:SetContainsItemCallback(function(itemLink)
+            local itemLinkItemType, itemLinkSpecializedItemType = GetItemLinkItemType(itemLink)
+            if ZO_IsElementInNumericallyIndexedTable(specializedItemTypes, itemLinkSpecializedItemType) then
+                return true, SUBCATEGORY_ENUM_KEY_PREFIX..itemLinkSpecializedItemType
+            end
+            return false
+        end)
+
+        -- no features
+
+        AddEnumSubcategories(categoryParams,
+        {
+            enumKeyPrefix = SUBCATEGORY_ENUM_KEY_PREFIX,
+            enumStringPrefix = "SI_SPECIALIZEDITEMTYPE",
+            allItemsString = GetString(SI_TRADING_HOUSE_BROWSE_ITEM_TYPE_ALL_RECIPE_TYPES),
+            iconsForEnumValue = ICONS_FOR_CONSUMABLE_SPECIALIZED_ITEM_TYPE,
+            enumValues = specializedItemTypes,
+        })
+
+        -- All recipes are consumables, even though we are only registering a subset of recipes per category.
+        -- this will be called more than once, but that's okay because we deduplicate inside of AddItemTypeToAllConsumables().
+        AddItemTypeToAllConsumables(ITEMTYPE_RECIPE)
     end
 end
 
@@ -1714,11 +1762,13 @@ AddJewelryCategory()
 -- Consumables
 AddAllConsumablesCategory()
 AddConsumableCategory(ITEMTYPE_FOOD)
+AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES)
 AddConsumableCategory(ITEMTYPE_DRINK)
-AddConsumableCategory(ITEMTYPE_RECIPE)
+AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING)
 AddConsumableCategory(ITEMTYPE_POTION)
 AddConsumableCategory(ITEMTYPE_POISON)
 AddConsumableCategory(ITEMTYPE_RACIAL_STYLE_MOTIF)
+AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
 AddConsumableCategory(ITEMTYPE_MASTER_WRIT)
 AddConsumableCategory(ITEMTYPE_CONTAINER)
 AddConsumableCategory(ITEMTYPE_AVA_REPAIR)

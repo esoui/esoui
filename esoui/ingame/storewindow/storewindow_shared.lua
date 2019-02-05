@@ -42,13 +42,27 @@ function ZO_SharedStoreManager:RefreshCurrency()
 end
 
 -- Shared global functions
+function ZO_StoreManager_GetRequiredToBuyErrorText(buyStoreFailure, buyErrorStringId)
+    if buyErrorStringId ~= 0 then
+        local errorString = GetErrorString(buyErrorStringId)
+        if errorString ~= "" then
+            return errorString
+        end
+    end
+    return GetString("SI_STOREFAILURE", buyStoreFailure)
+end
+
 function ZO_StoreManager_GetStoreItems()
     local items = {}
     local usedFilterTypes = {}
 
     for entryIndex = 1, GetNumStoreItems() do
         local icon, name, stack, price, sellPrice, meetsRequirementsToBuy, meetsRequirementsToEquip, quality, questNameColor, currencyType1, currencyQuantity1,
-            currencyType2, currencyQuantity2, entryType = GetStoreEntryInfo(entryIndex)
+            currencyType2, currencyQuantity2, entryType, buyStoreFailure, buyErrorStringId = GetStoreEntryInfo(entryIndex)
+        local requiredToBuyErrorText
+        if not meetsRequirementsToBuy then
+            requiredToBuyErrorText = ZO_StoreManager_GetRequiredToBuyErrorText(buyStoreFailure, buyErrorStringId)
+        end
 
         if stack > 0 then
             local itemLink = GetStoreItemLink(entryIndex)
@@ -64,6 +78,8 @@ function ZO_StoreManager_GetStoreItems()
                 price = price,
                 sellPrice = sellPrice,
                 meetsRequirementsToBuy = meetsRequirementsToBuy,
+                buyStoreFailure = buyStoreFailure,
+                requiredToBuyErrorText = requiredToBuyErrorText,
                 meetsRequirementsToEquip = meetsRequirementsToEquip,
                 quality = quality,
                 questNameColor = questNameColor,

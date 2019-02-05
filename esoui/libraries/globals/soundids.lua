@@ -184,7 +184,6 @@ SOUNDS = {
     JOURNAL_PROGRESS_CATEGORY_SELECTED   = "Journal_Progress_CategorySelected",
     JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED = "Journal_Progress_SubCategorySelected",
 
-
     --Leaderboard sounds
     LEADERBOARD_CATEGORY_SELECTED   = "Leaderboard_CategorySelected",
     LEADERBOARD_SUBCATEGORY_SELECTED= "Leaderboard_SubCategorySelected",
@@ -836,6 +835,8 @@ SOUNDS = {
 
     -- Trading House Sounds
     TRADING_HOUSE_SEARCH_INITIATED          = "TradingHouse_StartSearch",
+    TRADING_HOUSE_CATEGORY_SELECTED         = "TradingHouse_CategorySelected",
+    TRADING_HOUSE_SUB_CATEGORY_SELECTED     = "TradingHouse_SubCategorySelected",
 
     -- Fence Sounds
     FENCE_ITEM_LAUNDERED                    = "Fence_Item_Laundered",

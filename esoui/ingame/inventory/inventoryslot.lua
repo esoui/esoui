@@ -2330,7 +2330,7 @@ function ZO_PlayShowAnimationOnComparisonTooltip(tooltip)
     end
 end
 
-local NoComparisionTooltip =
+local NO_COMPARISON_TOOLTIPS_FOR_SLOT_TYPE =
 {
     [SLOT_TYPE_PENDING_CHARGE] = true,
     [SLOT_TYPE_ENCHANTMENT] = true,
@@ -2345,6 +2345,7 @@ local NoComparisionTooltip =
     [SLOT_TYPE_SMITHING_BOOSTER] = true,
     [SLOT_TYPE_LIST_DIALOG_ITEM] = true,
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] = true,
+    [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] = true,
 }
 
 function ZO_InventorySlot_OnMouseEnter(inventorySlot)
@@ -2364,7 +2365,7 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
 
     local success, tooltipUsed = RunHandlers(InventoryEnter, buttonPart)
     if success then
-        if tooltipUsed == ItemTooltip and not NoComparisionTooltip[ZO_InventorySlot_GetType(buttonPart)] then
+        if tooltipUsed == ItemTooltip and not NO_COMPARISON_TOOLTIPS_FOR_SLOT_TYPE[ZO_InventorySlot_GetType(buttonPart)] then
             tooltipUsed:HideComparativeTooltips()
             tooltipUsed:ShowComparativeTooltips()
             ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
