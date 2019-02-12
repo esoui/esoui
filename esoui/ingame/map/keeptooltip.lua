@@ -87,6 +87,24 @@ local function GetKeepCaptureBonusText(keepId, battlegroundContext, keepAlliance
     return nil
 end
 
+local function GetPassableKeepStatusText(keepId, battlegroundContext, keepType)
+    if IsKeepTypePassable(keepType) then
+        local directionalAccess = GetKeepDirectionalAccess(keepId, battlegroundContext)
+        if directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_BIDIRECTIONAL then
+            local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CAN_PASS)
+            return KEEP_TOOLTIP_ACCESSIBLE:Colorize(statusText)
+        elseif directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_BLOCKED then
+            local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CANNOT_PASS)
+            return KEEP_TOOLTIP_NOT_ACCESSIBLE:Colorize(statusText)
+        elseif directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_UNIDIRECTIONAL then
+            if keepType == KEEPTYPE_MILEGATE then
+                local statusText = GetString(SI_MAP_KEEP_MILEGATE_UNIDIRECTIONALLY_PASSABLE)
+                return KEEP_TOOLTIP_UNIDIRECTIONALLY_ACCESSIBLE:Colorize(statusText)
+            end
+        end
+    end
+end
+
 -- Keep Layout --
 -----------------
 local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPercent)
@@ -198,22 +216,9 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                 end
             end
 
-            if IsKeepTypePassable(keepType) then
-                local directionalAccess = GetKeepDirectionalAccess(keepId, battlegroundContext)
-                local status
-                if directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_BIDIRECTIONAL then
-                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CAN_PASS)
-                    status = KEEP_TOOLTIP_ACCESSIBLE:Colorize(statusText)
-                elseif directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_BLOCKED then
-                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CANNOT_PASS)
-                    status = KEEP_TOOLTIP_NOT_ACCESSIBLE:Colorize(statusText)
-                elseif directionalAccess == KEEP_PIECE_DIRECTIONAL_ACCESS_UNIDIRECTIONAL then
-                    if keepType == KEEPTYPE_MILEGATE then
-                        local statusText = GetString(SI_MAP_KEEP_MILEGATE_UNIDIRECTIONALLY_PASSABLE)
-                        status = KEEP_TOOLTIP_UNIDIRECTIONALLY_ACCESSIBLE:Colorize(statusText)
-                    end
-                end
-                AddLine(self, zo_strformat(SI_TOOLTIP_KEEP_PASSABLE_STATUS, status), KEEP_TOOLTIP_NORMAL_LINE)
+            local statusText = GetPassableKeepStatusText(keepId, battlegroundContext, keepType)
+            if statusText then
+                AddLine(self, zo_strformat(SI_TOOLTIP_KEEP_PASSABLE_STATUS, statusText), KEEP_TOOLTIP_NORMAL_LINE)
             end
 
             --Keep Fast Travel Status
@@ -401,19 +406,11 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                 keepSection:AddSection(weaponsSection)
             end
 
-            if IsKeepTypePassable(keepType) then
-                local passable = IsKeepPassable(keepId, battlegroundContext)
-                local status
-                if passable then
-                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CAN_PASS)
-                    status = KEEP_TOOLTIP_ACCESSIBLE:Colorize(statusText)
-                else
-                    local statusText = GetString(SI_MAP_KEEP_PASSABLE_STATUS_CANNOT_PASS)
-                    status = KEEP_TOOLTIP_NOT_ACCESSIBLE:Colorize(statusText)
-                end
+            local statusText = GetPassableKeepStatusText(keepId, battlegroundContext, keepType)
+            if statusText then
                 local passableSection = keepSection:AcquireSection(self.tooltip:GetStyle("mapKeepGroupSection"))
                 self:LayoutIconStringLine(passableSection, nil, GetString(SI_GAMEPAD_WORLD_MAP_TOOLTIP_KEEP_PASSABLE), self.tooltip:GetStyle("mapLocationTooltipContentHeader"))
-                self:LayoutIconStringLine(passableSection, allianceIcon, status, self.tooltip:GetStyle("mapLocationKeepClaimed"))
+                self:LayoutIconStringLine(passableSection, allianceIcon, statusText, self.tooltip:GetStyle("mapLocationKeepClaimed"))
                 keepSection:AddSection(passableSection)
             end
 

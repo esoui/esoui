@@ -26,6 +26,11 @@ function ZO_TradingHouseNameSearchFeature_Keyboard:AttachToControl(itemNameSearc
     self.nameSearchEdit:RegisterForEvent(EVENT_MATCH_TRADING_HOUSE_ITEM_NAMES_COMPLETE, function(_, ...)
         self:OnNameMatchComplete(...)
     end)
+    self.nameSearchClearButton = itemNameSearchControl:GetNamedChild("Clear")
+    self.nameSearchClearButton:SetEnabled(false)
+    self.nameSearchClearButton:SetHandler("OnClicked", function()
+        self:OnNameSearchClearButtonClicked()
+    end)
 
     self.nameSearchAutoComplete = ZO_TradingHouseNameSearchAutoComplete:New(itemNameSearchAutoCompleteControl, self.nameSearchEdit)
 
@@ -44,7 +49,13 @@ function ZO_TradingHouseNameSearchFeature_Keyboard:OnNameSearchEditTextChanged()
         self.nameSearchAutoComplete:Hide()
     end
 
+    self.nameSearchClearButton:SetEnabled(self.searchText ~= "")
+
     TRADING_HOUSE_SEARCH:HandleSearchCriteriaChanged(self)
+end
+
+function ZO_TradingHouseNameSearchFeature_Keyboard:OnNameSearchClearButtonClicked()
+    self.nameSearchEdit:SetText("")
 end
 
 function ZO_TradingHouseNameSearchFeature_Keyboard:OnNameMatchComplete(nameMatchId, numResults, backgroundDurationMS)

@@ -267,13 +267,16 @@
 
                 <Backdrop name="$(parent)ItemNameSearch" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPRIGHT" offsetX="-21"/>
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
                             <OnInitialized>
                                 ZO_EditDefaultText_Initialize(self, GetString(SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT))
                             </OnInitialized>
                         </EditBox>
+                        <Button name="$(parent)Clear" inherits="ZO_CloseButton">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="2"/>
+                        </Button>
                     </Controls>
                 </Backdrop>
 
@@ -584,21 +587,27 @@
                                     <Dimensions x="338" y="20" />
                                     <Anchor point="LEFT" offsetX="106" />
                                     <OnInitialized>
-                                        ZO_PlayerInventory_InitSortHeader(self, SI_TRADING_HOUSE_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, nil)
+                                        local headerText = GetString("SI_TRADINGHOUSELISTINGSORTTYPE", TRADING_HOUSE_LISTING_SORT_TYPE_NAME)
+                                        local NO_SORT_KEY = nil
+                                        ZO_SortHeader_Initialize(self, headerText, NO_SORT_KEY, ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontHeader")
                                     </OnInitialized>
                                 </Control>
                                 <Control name="$(parent)Price" inherits="ZO_SortHeader" mouseEnabled="false">
                                     <Dimensions x="93" y="20" />
                                     <Anchor point="RIGHT" offsetX="-177" />
                                     <OnInitialized>
-                                        ZO_PlayerInventory_InitSortHeader(self, SI_TRADING_HOUSE_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, nil)
+                                        local headerText = GetString("SI_TRADINGHOUSELISTINGSORTTYPE", TRADING_HOUSE_LISTING_SORT_TYPE_PRICE)
+                                        local NO_SORT_KEY = nil
+                                        ZO_SortHeader_Initialize(self, headerText, NO_SORT_KEY, ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontHeader")
                                     </OnInitialized>
                                 </Control>
                                 <Control name="$(parent)TimeRemaining" inherits="ZO_SortHeader" mouseEnabled="false">
                                     <Dimensions x="140" y="20" />
                                     <Anchor point="RIGHT" relativeTo="$(parent)Price" relativePoint="LEFT" offsetX="-46" />
                                     <OnInitialized>
-                                        ZO_PlayerInventory_InitSortHeader(self, SI_TRADING_HOUSE_SORT_TYPE_TIME, TEXT_ALIGN_LEFT, nil)
+                                        local headerText = GetString("SI_TRADINGHOUSELISTINGSORTTYPE", TRADING_HOUSE_LISTING_SORT_TYPE_TIME)
+                                        local NO_SORT_KEY = nil
+                                        ZO_SortHeader_Initialize(self, headerText, NO_SORT_KEY, ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontHeader")
                                     </OnInitialized>
                                 </Control>
                             </Controls>

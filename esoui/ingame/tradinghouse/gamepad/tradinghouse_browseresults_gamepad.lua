@@ -19,7 +19,7 @@ function ZO_GamepadTradingHouse_BrowseResults:Initialize(control)
     self:InitializePreview()
 
     self:SetTitle(GetString(SI_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_TITLE))
-    ZO_ScrollList_AddDataType(self.list, ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, "ZO_TradingHouse_BrowseResultsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(rowControl, rowData)
+    ZO_ScrollList_AddDataType(self.list, ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, "ZO_TradingHouse_BrowseResultsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_TWO_LINE_ROW_HEIGHT, function(rowControl, rowData)
         self:SetupResultItemRow(rowControl, rowData)
     end)
 

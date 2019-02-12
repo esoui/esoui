@@ -1,6 +1,7 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_TradingHouse_BrowseResultsRow_Gamepad" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_TWO_LINE_ROW_HEIGHT"/>
             <OnInitialized>
                 self.slotIcon = self:GetNamedChild("SlotIcon")
                 self.slotStackCount = self:GetNamedChild("SlotStackCount")

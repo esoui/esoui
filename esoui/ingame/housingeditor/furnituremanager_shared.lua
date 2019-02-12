@@ -48,16 +48,16 @@ function ZO_SharedFurnitureManager:Initialize()
         [ZO_PLACEABLE_TYPE_COLLECTIBLE] = {},
         [ZO_PLACEABLE_TYPE_ITEM] = {},
     }
-    self.placeableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New()
+    self.placeableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New("placeable")
     self.inProgressPlaceableFurnitureTextFilterTaskIds = { }
     self.completePlaceableFurnitureTextFilterTaskIds = { }
     self.placeableTextFilter = ""
 
-    self.retrievableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New()
+    self.retrievableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New("retrievable")
     self.retrievableFurniture = {}
     self.retrievableTextFilter = ""
 
-    self.marketProductCategoryTreeData = ZO_RootFurnitureCategory:New()
+    self.marketProductCategoryTreeData = ZO_RootFurnitureCategory:New("market")
     self.marketProducts = {}
     self.marketProductIdToMarketProduct = {}
     self.marketProductTextFilter = ""
@@ -363,12 +363,24 @@ do
         local categoryId, subcategoryId = furniture:GetCategoryInfo()
         if categoryId and categoryId > 0 then
             local categoryData = categoryTreeData:GetSubcategory(categoryId)
-
-            if subcategoryId and subcategoryId > 0 then
-                local subcategoryData = categoryData:GetSubcategory(subcategoryId)
-                subcategoryData:RemoveEntry(furniture)
+            local couldntFindExpectedCategory = false
+            if categoryData then
+                if subcategoryId and subcategoryId > 0 then
+                    local subcategoryData = categoryData:GetSubcategory(subcategoryId)
+                    if subcategoryData then
+                        subcategoryData:RemoveEntry(furniture)
+                    else
+                        couldntFindExpectedCategory = true
+                    end
+                else
+                    categoryData:RemoveEntry(furniture)
+                end
             else
-                categoryData:RemoveEntry(furniture)
+                couldntFindExpectedCategory = true
+            end
+
+            if couldntFindExpectedCategory then
+                internalassert(false, string.format("Removing non-existant furniture from %s.", categoryTreeData:GetRootCategoryName()))
             end
         else
             local categoryData = categoryTreeData:GetSubcategory(ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY)

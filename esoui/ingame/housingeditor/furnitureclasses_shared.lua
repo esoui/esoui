@@ -662,10 +662,15 @@ function ZO_RootFurnitureCategory:New(...)
     return ZO_FurnitureCategory.New(self, ...)
 end
 
-function ZO_RootFurnitureCategory:Initialize()
+function ZO_RootFurnitureCategory:Initialize(rootCategoryName)
     local NO_PARENT = nil
     local NO_CATEGORY_ID = nil
     ZO_FurnitureCategory.Initialize(self, NO_PARENT, NO_CATEGORY_ID)
+    self.rootCategoryName = rootCategoryName
+end
+
+function ZO_RootFurnitureCategory:GetRootCategoryName()
+    return self.rootCategoryName
 end
 
 -- Override
