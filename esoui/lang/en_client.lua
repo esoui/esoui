@@ -5607,7 +5607,7 @@ SafeAddString(SI_MARKET_GIFTING_SUCCESS_TEXT, "You have successfully purchased <
 SafeAddString(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, "You have successfully purchased <<t:1>><<2[// ($d)]>> as a gift for <<3>>", 0)
 SafeAddString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT, "Gift Bundle", 0)
 SafeAddString(SI_MARKET_GIFT_KEYBIND_TEXT, "Gift", 0)
-SafeAddString(SI_MARKET_INSTANT_UNLOCK_INELIGIBLE_LABEL, "Some requirements not met", 0)
+SafeAddString(SI_MARKET_INSTANT_UNLOCK_INELIGIBLE_LABEL, "Some requirements not met.", 0)
 SafeAddString(SI_MARKET_INSUFFICIENT_FUNDS_CONFIRM_BUTTON_TEXT, "Buy Crowns", 0)
 SafeAddString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT, "The Elder Scrolls Online PC/MAC Store", 2)
 SafeAddString(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, "You do not have enough <<X:1>>Crowns to complete this purchase. You can add additional <<X:1>>Crowns via the Steam® store. This will open a web browser in the Steam® overlay.", 1)
