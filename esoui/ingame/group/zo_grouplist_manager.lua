@@ -91,7 +91,6 @@ function ZO_GroupList_Manager:BuildMasterList()
             local zoneName = ZO_CachedStrFormat(SI_ZONE_NAME, GetUnitZone(unitTag))
             local unitOnline = IsUnitOnline(unitTag)
             local displayName = GetUnitDisplayName(unitTag)
-            local userFacingDisplayName = ZO_FormatUserFacingDisplayName(displayName)
             local status = unitOnline and PLAYER_STATUS_ONLINE or PLAYER_STATUS_OFFLINE
 
             self.masterList[i] = 

@@ -208,7 +208,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeGridListPanel()
     local SPACING_X = 6
     self.gridListPanelList:SetGridEntryTemplate("ZO_OutfitStyle_GridEntry_Template_Gamepad", ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, OutfitStyleGridEntrySetup, HIDE_CALLBACK, OutfitStyleGridEntryReset, SPACING_X, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.gridListPanelList:SetLineBreakAmount(ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
+    self.gridListPanelList:SetHeaderPrePadding(ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnGridListSelectedDataChanged(previousData, newData) end)
 end
 

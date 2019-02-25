@@ -170,14 +170,12 @@ do
         control:SetWidth(0)
     end
 
-    function ZO_HousingPreviewDialog_Shared:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId, getRemainingTimeFunction)
+    function ZO_HousingPreviewDialog_Shared:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, requiredToBuyErrorText, getRemainingTimeFunction)
         control:SetHidden(false)
 
         local priceText = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(priceAfterDiscount, DONT_USE_SHORT_FORMAT, currencyType, IsInGamepadPreferredMode())
         local currencyColor = ZO_SELECTED_TEXT
-        local errorString
-        if errorStringId then
-            errorString = GetErrorString(errorStringId)
+        if requiredToBuyErrorText then
             currencyColor = ZO_DISABLED_TEXT
         elseif (currencyType ~= CURT_CROWNS and currencyType ~= CURT_CROWN_GEMS) and GetCurrencyAmount(currencyType, currencyLocation) < priceAfterDiscount then
             currencyColor = ZO_ERROR_COLOR
@@ -185,7 +183,7 @@ do
 
         priceText = currencyColor:Colorize(priceText)
 
-        local noError = errorStringId == nil
+        local noError = requiredToBuyErrorText == nil
         local onSale = discountPercent > 0
         control.errorLabel:SetHidden(noError)
 
@@ -233,7 +231,7 @@ do
             previousPriceLabel:SetHidden(not onSale)
         end
         buttonControl.price = priceAfterDiscount
-        buttonControl.errorString = errorString
+        buttonControl.errorString = requiredToBuyErrorText
 
         control:SetWidth(self.purchaseOptionSectionWidth)
         control.errorLabel:SetWidth(self.purchaseOptionSectionWidth - (ZO_HOUSING_PREVIEW_ERROR_LABEL_PADDING_X * 2))
@@ -297,7 +295,7 @@ do
             --Setup individual options
             if entryData.goldStoreEntryIndex then
                 local NO_DISCOUNT_PERCENT = 0
-                self:SetupPurchaseOptionControl(self.goldPurchaseOptionControl, CURT_MONEY, CURRENCY_LOCATION_CHARACTER, entryData.goldPrice, entryData.goldPrice, NO_DISCOUNT_PERCENT, entryData.requirementsToBuyErrorId)
+                self:SetupPurchaseOptionControl(self.goldPurchaseOptionControl, CURT_MONEY, CURRENCY_LOCATION_CHARACTER, entryData.goldPrice, entryData.goldPrice, NO_DISCOUNT_PERCENT, entryData.requiredToBuyErrorText)
                 self.goldPurchaseOptionControl.button.goldStoreEntryIndex = entryData.goldStoreEntryIndex
                 self.goldPurchaseOptionControl.button.templateName = entryData.name
             end

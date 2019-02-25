@@ -378,14 +378,13 @@ end
 
 do
     local function CreateCategoryEntryData(categoryData)
-        local gamepadIcon
         local categoryId = categoryData:GetCategoryId()
-        if categoryId == ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
-            gamepadIcon = ZO_NO_TEXTURE_FILE -- TODO: get an icon for this category
-        else
+        local gamepadIcon = ZO_NO_TEXTURE_FILE
+        if categoryId ~= ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
             gamepadIcon = GetFurnitureCategoryGamepadIcon(categoryId)
         end
-        local formattedName = zo_strformat(SI_HOUSING_FURNITURE_CATEGORY_FORMAT, categoryData:GetName(), categoryData:GetNumEntryItemsRecursive())
+        -- Avoiding zo_strformat for performance, this will get run for every category every time the number of entries could have changed
+        local formattedName = string.format("%s (%d)", categoryData:GetName(), categoryData:GetNumEntryItemsRecursive())
         local itemsData = ZO_GamepadEntryData:New(formattedName, gamepadIcon)
         itemsData.categoryId = categoryId
         itemsData.categoryData = categoryData
@@ -546,7 +545,7 @@ function ZO_HousingSettingsList_Gamepad:Initialize(userGroup, control, owner, da
     ZO_SocialOptionsDialogGamepad.Initialize(self)
     ZO_ScrollList_AddDataType(self.list, dataType, "ZO_HousingPermissionsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT, function(control, data) self:SetupRow(control, data) end)
     self:SetEmptyText(GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_NO_ENTRIES))
-    self:SetupSort(ZO_HOUSING_SETTINGS_LIST_ENTRY_SORT_KEYS, "displayName", ZO_SORT_ORDER_DOWN)
+    self:SetupSort(ZO_HOUSING_SETTINGS_LIST_ENTRY_SORT_KEYS, "displayName", ZO_SORT_ORDER_UP)
 end
 
 function ZO_HousingSettingsList_Gamepad:InitializeKeybinds()

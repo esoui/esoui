@@ -264,6 +264,15 @@
                                     clamped="true"
                                     drawLevelOffsetBase="3"
                     />
+                    
+                    <CompassPinType name="QUEST_OFFER_ZONE_STORY"
+                                  pinTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds"
+                                  aboveTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds"
+                                  belowTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds"
+                                  layer="OVERLAY"
+                                  clamped="true"
+                                  drawLevelOffsetBase="3"
+                    />
 
                     <CompassPinType name="QUEST_OFFER_REPEATABLE"
                                     pinTexture="$(COMPASS_PATH)repeatableQuest_available_icon.dds"
@@ -271,20 +280,33 @@
                                     belowTexture="$(COMPASS_PATH)repeatableQuest_available_icon.dds"
                                     layer="OVERLAY"
                                     clamped="true"
-                                    drawLevelOffsetBase="4"
+                                    drawLevelOffsetBase="3"
                     />
                     
                     <!-- These inherit the style depending on the type of condition they are overriding. -->
                     <CompassPinType name="QUEST_COMPLETE"
-                                    drawLevelOffsetBase="5"
+                                    drawLevelOffsetBase="6"
                     />
                     <CompassPinType name="QUEST_INTERACT"
                                     drawLevelOffsetBase="6"
                     />
                     <CompassPinType name="QUEST_TALK_TO" 
-                                    drawLevelOffsetBase="7"
+                                    drawLevelOffsetBase="6"
                     />
                     <CompassPinType name="QUEST_GIVE_ITEM"
+                                    drawLevelOffsetBase="6"
+                    />
+
+                    <CompassPinType name="TRACKED_QUEST_OFFER_ZONE_STORY"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon_door.dds"
+                                    layer="TEXT"
+                                    clamped="true"
+                                    minScale="1.0"
+                                    minAlpha="0.75"
                                     drawLevelOffsetBase="8"
                     />
 
@@ -358,6 +380,41 @@
                                     minAlpha="0.75"
                                     drawLevelOffsetBase="12"
                     />
+                    <CompassPinType name="ASSISTED_QUEST_ZONE_STORY_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    areaTexture="$(COMPASS_PATH)zoneStoryQuest_assistedAreaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door_assisted.dds"
+                                    layer="TEXT"
+                                    clamped="true"
+                                    minScale="1.0"
+                                    minAlpha="0.75"
+                                    drawLevelOffsetBase="13"
+                    />
+                    <CompassPinType name="ASSISTED_QUEST_ZONE_STORY_OPTIONAL_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    areaTexture="$(COMPASS_PATH)zoneStoryQuest_assistedAreaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door_assisted.dds"
+                                    layer="TEXT"
+                                    clamped="true"
+                                    minScale="1.0"
+                                    minAlpha="0.75"
+                                    drawLevelOffsetBase="13"
+                    />
+                    <CompassPinType name="ASSISTED_QUEST_ZONE_STORY_ENDING"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door_assisted.dds"
+                                    layer="TEXT"
+                                    clamped="true"
+                                    minScale="1.0"
+                                    minAlpha="0.75"
+                                    drawLevelOffsetBase="13"
+                    />
                     <CompassPinType name="TRACKED_QUEST_CONDITION"
                                     pinTexture="$(COMPASS_PATH)quest_icon.dds"
                                     aboveTexture="$(COMPASS_PATH)quest_icon.dds"
@@ -407,6 +464,32 @@
                                     aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
                                     belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds"
                                     linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="18"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_ZONE_STORY_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)zoneStoryQuest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="18"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_ZONE_STORY_OPTIONAL_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)zoneStoryQuest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="18"
+                    />
+                    <CompassPinType name="TRACKED_QUEST_ZONE_STORY_ENDING"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds"
                                     layer="TEXT"
                                     drawLevelOffsetBase="18"
                     />
@@ -461,6 +544,38 @@
                                     linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds"
                                     layer="TEXT"
                                     drawLevelOffsetBase="20"
+                    />
+                    <CompassPinType name="QUEST_ZONE_STORY_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)zoneStoryQuest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="20"
+                    />
+                    <CompassPinType name="QUEST_ZONE_STORY_OPTIONAL_CONDITION"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    areaTexture="$(COMPASS_PATH)zoneStoryQuest_areaPin.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="20"
+                    />
+                    <CompassPinType name="QUEST_ZONE_STORY_ENDING"
+                                    pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds"
+                                    linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds"
+                                    layer="TEXT"
+                                    drawLevelOffsetBase="20"
+                    />
+                    <CompassPinType name="POI_SUGGESTED"
+                                    clamped="true"
+                                    minScale="1.0"
+                                    minAlpha="0.75"
+                                    drawLevelOffsetBase="21"
                     />
                     <CompassPinType name="POI_SEEN"
                                     minScale="1.0"
@@ -1599,6 +1714,13 @@
                                     minAlpha="0.75"
                                     layer="OVERLAY"
                                     drawLevelOffsetBase="162"
+                    />
+                    <CompassPinType name="ZONE_STORY_SUGGESTED_AREA"
+                                    pinTexture="$(COMPASS_PATH)suggestedAreaPin.dds"
+                                    clamped="true"
+                                    minScale="1.0"
+                                    minAlpha="0.75"
+                                    drawLevelOffsetBase="200"
                     />
                 </Compass>
             </Controls>

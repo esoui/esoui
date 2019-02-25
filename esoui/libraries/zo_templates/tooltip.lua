@@ -248,6 +248,10 @@ end
 function ZO_Tooltip_AddDivider(tooltipControl)
     if not tooltipControl.dividerPool then
         tooltipControl.dividerPool = ZO_ControlPool:New("ZO_BaseTooltipDivider", tooltipControl, "Divider")
+        tooltipControl.dividerPool:SetCustomResetBehavior(function(divider)
+            --ZO_ItemTooltip_SetStolen swaps out the divider texture so we have to reset it back
+            divider:SetTexture("EsoUI/Art/Miscellaneous/horizontalDivider.dds")
+        end)
     end
 
     local divider = tooltipControl.dividerPool:AcquireObject()

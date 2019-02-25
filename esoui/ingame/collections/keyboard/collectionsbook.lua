@@ -66,7 +66,7 @@ function ZO_CollectionsBook:InitializeEvents()
 
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("UpdateSearchResults", OnUpdateSearchResults)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
 
     self.refreshGroups = ZO_Refresh:New()
@@ -211,7 +211,7 @@ function ZO_CollectionsBook:InitializeGridListPanel()
     local HEADER_HEIGHT = 30
     self.gridListPanelList:SetGridEntryTemplate("ZO_CollectibleTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, CollectibleEntrySetup, HIDE_CALLBACK, CollectibleGridEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.gridListPanelList:SetLineBreakAmount(ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y + (COLLECTIBLE_TILE_GRID_PADDING * 3))
+    self.gridListPanelList:SetHeaderPrePadding(COLLECTIBLE_TILE_GRID_PADDING * 3)
 end
 
 --[[ Refresh ]]--
@@ -348,24 +348,20 @@ end
 
 do
     local function ShouldAddCollectible(filterType, collectibleData)
-        if collectibleData:IsPlaceholder() then
-            return false
-        else
-            if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL then
-                return true
-            end
+        if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_ALL then
+            return true
+        end
 
-            if collectibleData:IsUnlocked() then
-                if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED then
-                    return true
-                elseif filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_USABLE then
-                    return collectibleData:IsValidForPlayer()
-                else
-                    return false
-                end
+        if collectibleData:IsUnlocked() then
+            if filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_UNLOCKED then
+                return true
+            elseif filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_USABLE then
+                return collectibleData:IsValidForPlayer()
             else
-                return filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_LOCKED
+                return false
             end
+        else
+            return filterType == SI_COLLECTIONS_BOOK_FILTER_SHOW_LOCKED
         end
     end
 
@@ -411,13 +407,8 @@ function ZO_CollectionsBook:UpdateCollection()
     self.gridListPanelControl:SetHidden(foundNoMatches)
 end
 
-function ZO_CollectionsBook:OnCollectibleUpdated(collectibleId, lockStateChange)
-    -- Changing lock state re-sorts
-    if lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
-        self:UpdateCollectionLater()
-    else
-        self.refreshGroups:RefreshSingle("CollectibleUpdated", collectibleId)
-    end
+function ZO_CollectionsBook:OnCollectibleUpdated(collectibleId)
+    self.refreshGroups:RefreshSingle("CollectibleUpdated", collectibleId)
 
     RefreshMainMenu()
 end

@@ -214,46 +214,46 @@
             </Action>
 
             <Action name="GAMEPAD_ACTION_BUTTON_3" hideAction="true">
-                <Down>
+                <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
                         OnSlotDownAndUp(3)
                     end
-                </Down>
+                </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_4" hideAction="true">
-                <Down>
+                <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
                         OnSlotDownAndUp(4)
                     end
-                </Down>
+                </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_5" hideAction="true">
-                <Down>
+                <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
                         OnSlotDownAndUp(5)
                     end
-                </Down>
+                </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_6" hideAction="true">
-                <Down>
+                <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
                         OnSlotDownAndUp(6)
                     end
-                </Down>
+                </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_7" hideAction="true">
-                <Down>
+                <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
                         OnSlotDownAndUp(7)
                     end
-                </Down>
+                </Up>
             </Action>
             <Action name="GAMEPAD_ACTION_BUTTON_8" hideAction="true">
-                <Down>
+                <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
                         OnSlotDownAndUp(8)
                     end
-                </Down>
+                </Up>
             </Action>
             <Action name="ACTION_BUTTON_9">
                 <Down>QUICKSLOT_RADIAL_MANAGER:StartInteraction()</Down>
@@ -522,6 +522,10 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+            <Action name="UI_SHORTCUT_QUATERNARY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
             <Action name="UI_SHORTCUT_NEGATIVE">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -536,10 +540,6 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
             <Action name="UI_SHORTCUT_SHOW_QUEST_ON_MAP">
-                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
-                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
-            </Action>
-            <Action name="UI_SHORTCUT_QUATERNARY">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
@@ -1165,6 +1165,10 @@
 
     <Layer name="SI_KEYBINDINGS_LAYER_HOUSING_EDITOR_PLACEMENT_MODE" allowFallthrough="true">
         <Category>
+            <!-- These actions chord with D-Pad button in gamepad. Disable them to prevent waiting on chord resolution.-->
+            <BlockAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
+            <BlockAction name="DISABLE_HOUSING_EDITOR"/>
+                
             <Action name="HOUSING_EDITOR_YAW_LEFT">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>

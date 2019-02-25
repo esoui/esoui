@@ -1,5 +1,4 @@
 local SELL_REASON_COLOR = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_SELLS_FOR) )
-local POPUP_TOOLTIP_PADDING = 24 --Extra padding for the close button
 
 SHOW_BASE_ABILITY = true
 
@@ -14,10 +13,6 @@ local BORDER_TEXTURE_STOLEN = "EsoUI/Art/Tooltips/UI-Border-Red.dds"
 local DIVIDER_TEXTURE_STOLEN = "EsoUI/Art/Miscellaneous/horizontalDividerRed.dds"
 local TOOLTIP_EDGE_WIDTH  = 128
 local TOOLTIP_EDGE_HEIGHT = 16
-
-function ResetGameTooltipToDefaultLocation()
-    GameTooltip:SetOwner(GuiRoot, BOTTOMRIGHT, -8, -8, BOTTOMRIGHT)
-end
 
 local function ClearMouseOverTooltip()
     if g_MouseOverType == MOUSE_OVER_TYPE_FIXTURE then
@@ -39,17 +34,6 @@ function SetTooltipToMountTrain(tooltip, trainType)
     if descriptionStringId then
         SetTooltipText(tooltip, zo_strformat(descriptionStringId, GetMaxRidingTraining(trainType)))
     end
-end
-
-function SetTooltipToActionBarSlot(tooltip, slot)
-    local slotType = GetSlotType(slot)
-
-    if(slotType ~= ACTION_TYPE_NOTHING) 
-    then
-        tooltip:SetAction(slot)
-        return true
-    end
-    return false
 end
 
 local REASON_CURRENCY_SPACING = 3
@@ -232,39 +216,6 @@ function ZO_PopupTooltip_Hide()
 	PopupTooltip.lastLink = nil
 end
 
-function ZO_SkillTooltip_SetSkillUpgrade(tooltipControl, source, dest)
-    if not tooltipControl.upgradePool then
-        tooltipControl.upgradePool = ZO_ControlPool:New("SkillTooltipUpgradeLine", tooltipControl, "SkillUpgrade")
-    end
-
-    local skillUpgradeControl = tooltipControl.upgradePool:AcquireObject()
-
-    if skillUpgradeControl and source and dest then
-        GetControl(skillUpgradeControl, "SourceText"):SetText(source)
-        GetControl(skillUpgradeControl, "DestText"):SetText(dest)
-
-        local useCell = 1
-        local useLastRowAdded = true
-        tooltipControl:AddControl(skillUpgradeControl, useCell, useLastRowAdded)
-        skillUpgradeControl:SetAnchor(CENTER)
-    end
-end
-
-function ZO_SkillTooltip_ClearSkillUpgrades(tooltipControl)
-    if tooltipControl.upgradePool then
-        tooltipControl.upgradePool:ReleaseAllObjects()
-    end
-    ZO_Tooltip_OnCleared(tooltipControl)
-end
-
-function ZO_SkillTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
-    if gameDataType == TOOLTIP_GAME_DATA_SKILL_UPGRADE then
-        ZO_SkillTooltip_SetSkillUpgrade(tooltipControl, ...)
-    else
-        ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
-    end
-end
-
 function ZO_ItemTooltip_SetCharges(tooltipControl, charges, maxCharges)
     local chargeMeterContainer = tooltipControl:GetNamedChild("Charges")
     if chargeMeterContainer then
@@ -319,7 +270,7 @@ function ZO_ItemTooltip_SetStolen(tooltipControl, isItemStolen)
     local borderTexture
     local dividerTexture
 
-    if (isItemStolen) then
+    if isItemStolen then
         borderTexture = BORDER_TEXTURE_STOLEN
         dividerTexture = DIVIDER_TEXTURE_STOLEN
     else
@@ -330,10 +281,78 @@ function ZO_ItemTooltip_SetStolen(tooltipControl, isItemStolen)
     tooltipControl:GetNamedChild("BG"):SetEdgeTexture(borderTexture, TOOLTIP_EDGE_WIDTH, TOOLTIP_EDGE_HEIGHT)
 
     -- Color all dividers 
-    if (tooltipControl.dividerPool) then
+    if tooltipControl.dividerPool then
         local dividers = tooltipControl.dividerPool:GetActiveObjects()
         for _, divider in pairs(dividers) do
             divider:SetTexture(dividerTexture)
         end
+    end
+end
+
+local function SetTooltipActiveSkillProgression(tooltipControl, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph)
+    tooltipControl.xpBar:SetMinMax(lastRankXP, nextRankXP)
+    tooltipControl.xpBar:SetValue(currentXP)
+
+    tooltipControl.progressionIndex = progressionIndex
+
+    tooltipControl:AddControl(tooltipControl.xpBar)
+    tooltipControl.xpBar:SetAnchor(CENTER)
+    tooltipControl.xpBar:SetHidden(false)
+end
+
+local function ClearTooltipActiveSkillProgression(tooltipControl)
+    tooltipControl.xpBar:SetHidden(true)
+    tooltipControl.progressionIndex = nil
+end
+
+local function OnTooltipActiveSkillProgressionXPUpdate(tooltipControl, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph)
+    if not tooltipControl:IsHidden() and tooltipControl.progressionIndex == progressionIndex then
+        tooltipControl.xpBar:SetMinMax(lastRankXP, nextRankXP)
+        tooltipControl.xpBar:SetValue(currentXP)
+    end
+end
+
+function ZO_SkillTooltip_SetSkillUpgrade(tooltipControl, source, dest)
+    if not tooltipControl.upgradePool then
+        tooltipControl.upgradePool = ZO_ControlPool:New("SkillTooltipUpgradeLine", tooltipControl, "SkillUpgrade")
+    end
+
+    local skillUpgradeControl = tooltipControl.upgradePool:AcquireObject()
+
+    if skillUpgradeControl and source and dest then
+        GetControl(skillUpgradeControl, "SourceText"):SetText(source)
+        GetControl(skillUpgradeControl, "DestText"):SetText(dest)
+
+        local useCell = 1
+        local useLastRowAdded = true
+        tooltipControl:AddControl(skillUpgradeControl, useCell, useLastRowAdded)
+        skillUpgradeControl:SetAnchor(CENTER)
+    end
+end
+
+function ZO_SkillTooltip_Initialize(tooltipControl)
+    tooltipControl.xpBar = tooltipControl:GetNamedChild("Progression")
+    ZO_StatusBar_SetGradientColor(tooltipControl.xpBar, ZO_XP_BAR_GRADIENT_COLORS)
+
+    EVENT_MANAGER:RegisterForEvent("SkillTooltip", EVENT_ABILITY_PROGRESSION_XP_UPDATE, function(_, ...)
+        OnTooltipActiveSkillProgressionXPUpdate(tooltipControl, ...)
+    end)
+end
+
+function ZO_SkillTooltip_Cleared(tooltipControl)
+    if tooltipControl.upgradePool then
+        tooltipControl.upgradePool:ReleaseAllObjects()
+    end
+    ClearTooltipActiveSkillProgression(tooltipControl)
+    ZO_Tooltip_OnCleared(tooltipControl)
+end
+
+function ZO_SkillTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+    if gameDataType == TOOLTIP_GAME_DATA_SKILL_UPGRADE then
+        ZO_SkillTooltip_SetSkillUpgrade(tooltipControl, ...)
+    elseif gameDataType == TOOLTIP_GAME_DATA_PROGRESSION then
+        SetTooltipActiveSkillProgression(tooltipControl, ...)
+    else
+        ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
     end
 end

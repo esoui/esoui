@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TradingHouseNameSearchAutoComplete_MenuItem" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_TRADING_HOUSE_NAME_SEARCH_AUTOCOMPLETE_WIDTH" y="ZO_TRADING_HOUSE_NAME_SEARCH_AUTOCOMPLETE_ENTRY_HEIGHT" />
+            <OnMouseEnter>
+                ZO_TradingHouseNameSearchAutoComplete_MenuItem_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_TradingHouseNameSearchAutoComplete_MenuItem_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseDown>
+                IgnoreMouseDownEditFocusLoss()
+            </OnMouseDown>
+
+            <OnMouseUp>
+                if upInside then
+                    ZO_TradingHouseNameSearchAutoComplete_MenuItem_OnMouseClick(self)
+                end
+            </OnMouseUp>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGame" wrapMode="ELLIPSIS" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" offsetX="4"/>
+                    <Anchor point="RIGHT" offsetX="-4"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_TradingHouseNameSearchAutoComplete_Menu" inherits="ZO_ScrollList" virtual="true" clampedToScreen="true" mouseEnabled="true" hidden="true" tier="HIGH">
+            <Dimensions x="ZO_TRADING_HOUSE_NAME_SEARCH_AUTOCOMPLETE_WIDTH" />
+
+            <Controls>
+                <Backdrop name="$(parent)Backdrop">
+                    <Anchor point="TOPLEFT" offsetX="-4" offsetY="-8"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="8"/>
+
+                    <Edge file="EsoUI/Art/Miscellaneous/textEntry_dropDown_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+                    <Center file="EsoUI/Art/Miscellaneous/textEntry_dropDown_center.dds" />
+                    <Insets left="8" top="8" right="-8" bottom="-8" />
+                </Backdrop>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

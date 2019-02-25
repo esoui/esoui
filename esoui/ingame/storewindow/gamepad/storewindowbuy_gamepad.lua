@@ -155,16 +155,24 @@ end
 
 function ZO_GamepadStoreBuy:CanBuy()
     local selectedData = self.list:GetTargetData()
-    if selectedData then
-        if selectedData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
-            local collectibleId = GetCollectibleIdFromLink(selectedData.itemLink)
-            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-            if collectibleData:IsUnlocked() then
-                return false, GetString("SI_STOREFAILURE", STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE) -- "You already have that collectible"
-            end
-            return true --Always allow the purchase of collectibles, regardless of bag space
+    if selectedData then        
+        if not selectedData.dataSource.meetsRequirementsToBuy then
+            return false, selectedData.dataSource.requiredToBuyErrorText
         end
-        return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
+
+        local enabled, disabledAlertText = STORE_WINDOW_GAMEPAD:CanAfford(selectedData)
+        if not enabled then
+            return false, disabledAlertText
+        end
+
+        if selectedData.entryType ~= STORE_ENTRY_TYPE_COLLECTIBLE then
+            enabled, disabledAlertText = STORE_WINDOW_GAMEPAD:CanCarry(selectedData)
+            if not enabled then
+                return false, disabledAlertText
+            end
+        end
+
+        return true
     else
         return false
     end
@@ -203,15 +211,15 @@ function ZO_GamepadStoreBuy:UpdatePreview(selectedData)
     if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
         if self:CanPreviewStoreEntry(selectedData) then
             local storeEntryIndex = ZO_Inventory_GetSlotIndex(selectedData)
-            ITEM_PREVIEW_GAMEPAD:PreviewStoreEntryAsFurniture(storeEntryIndex)
+            ZO_StoreManager_DoPreviewAction(ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE, storeEntryIndex)
         else
-            ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+            ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_STORE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
         end
     end
 end
 
 function ZO_GamepadStoreBuy:TogglePreviewMode()
-    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_STORE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 
     local targetData = self.list:GetTargetData()
     self:UpdatePreview(targetData)
@@ -221,8 +229,7 @@ end
 function ZO_GamepadStoreBuy:CanPreviewStoreEntry(data)
     if data then
         local storeEntryIndex = ZO_Inventory_GetSlotIndex(data)
-        local itemLink = GetStoreItemLink(storeEntryIndex)
-        return ZO_ItemPreview_Shared.CanItemLinkBePreviewedAsFurniture(itemLink)
+        return ZO_StoreManager_DoPreviewAction(ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE, storeEntryIndex)
     end
 
     return false

@@ -114,6 +114,7 @@ do
         [INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_dungeon.dds",
         [INSTANCE_DISPLAY_TYPE_DELVE] = "EsoUI/Art/Icons/mapKey/mapKey_delve.dds",
         [INSTANCE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
+        [INSTANCE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
     }
 
     function GetInstanceDisplayTypeIcon(instanceType)

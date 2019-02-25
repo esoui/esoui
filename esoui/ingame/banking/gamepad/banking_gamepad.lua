@@ -136,7 +136,7 @@ function ZO_GamepadBanking:OnCloseBank()
     end
 end
 
-function ZO_GamepadBanking:OnCollectibleUpdated(collectibleId, lockStateChange)
+function ZO_GamepadBanking:OnCollectibleUpdated(collectibleId)
     if IsBankOpen() and IsHouseBankBag(GetBankingBag()) then
         if GetCollectibleCategoryType(collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE_BANK then
             self:RefreshWithdrawNoItemText()

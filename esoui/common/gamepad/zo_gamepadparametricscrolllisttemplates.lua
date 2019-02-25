@@ -100,6 +100,8 @@ function ZO_GamepadTabBarScrollList:New(control, leftIcon, rightIcon, onActivate
     list.control = control
     list:SetPlaySoundFunction(GamepadParametricScrollListPlaySound)
 
+    control:SetHandler("OnEffectivelyHidden", ZO_ConveyorSceneFragment_ResetMovement)
+
     return list
 end
 
@@ -208,8 +210,10 @@ function ZO_GamepadTabBarScrollList:SetSelectedIndex(selectedIndex, allowEvenIfD
 end
 
 function ZO_GamepadTabBarScrollList:MovePrevious(allowWrapping, suppressFailSound)
-    local succeeded = ZO_ConveyorSceneFragment_ReverseAnimationDirectionForBehavior(ZO_ParametricScrollList.MovePrevious, self)
+    ZO_ConveyorSceneFragment_SetMovingBackward()
+    local succeeded = ZO_ParametricScrollList.MovePrevious(self)
     if not succeeded and allowWrapping then
+        ZO_ConveyorSceneFragment_SetMovingForward()
         self:SetLastIndexSelected() --Wrap
         succeeded = true
     end
@@ -224,9 +228,11 @@ function ZO_GamepadTabBarScrollList:MovePrevious(allowWrapping, suppressFailSoun
 end
 
 function ZO_GamepadTabBarScrollList:MoveNext(allowWrapping, suppressFailSound)
+    ZO_ConveyorSceneFragment_SetMovingForward()
     local succeeded = ZO_ParametricScrollList.MoveNext(self)
     if not succeeded and allowWrapping then
-        ZO_ConveyorSceneFragment_ReverseAnimationDirectionForBehavior(ZO_ParametricScrollList.SetFirstIndexSelected, self) --Wrap
+        ZO_ConveyorSceneFragment_SetMovingBackward()
+        ZO_ParametricScrollList.SetFirstIndexSelected(self)
         succeeded = true
     end
 

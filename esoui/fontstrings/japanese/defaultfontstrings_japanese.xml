@@ -8,9 +8,9 @@
     <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
     <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
 
-    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
-    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
-    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf" />
+    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf" />
+    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf" />
+    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf" />
 
     <!-- Sizes -->
     <String name="KB_8" value="8"/>

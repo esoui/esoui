@@ -1,0 +1,64 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapZoneStoryRow_Keyboard" virtual="true" mouseEnabled="true">
+            <Dimensions x="200" y="ZO_WORLD_MAP_ZONE_STORY_ROW_HEIGHT"/>
+
+            <OnInitialized>
+                ZO_WorldMapZoneStoryRow_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <OnMouseEnter>
+                ZO_WorldMapZoneStoryRow_Keyboard_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_WorldMapZoneStoryRow_Keyboard_OnMouseExit(self)
+            </OnMouseExit>
+            
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+
+                <StatusBar name="$(parent)ProgressStatusBar" inherits="ZO_ArrowProgressBarWithBG" >
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" />
+                    <Anchor point="RIGHT" constrains="X" />
+                </StatusBar>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_WorldMapZoneStoryTopLevel_Keyboard" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="20" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="-40" />
+            
+            <OnInitialized>
+                ZO_WorldMapZoneStory_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)TitleDivider" inherits="ZO_LeftPanel_HorizontalDivider">
+                    <Anchor point="TOPLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" offsetY="20" />
+                </Control>
+
+                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" />
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleDivider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-50" />
+                </Control>
+
+                <Button name="$(parent)ZoneStoriesButton" inherits="ZO_DefaultButton" text="SI_ZONE_STORY_OPEN_FROM_MAP_ACTION">
+                    <Dimensions x="200" />
+                    <Anchor point="CENTER" relativeTo="$(parent)List" relativePoint="BOTTOM" offsetX="-16" offsetY="35" />
+                    <OnClicked>
+                        ZO_WorldMapZoneStory_Keyboard_ZoneStoriesButton_OnClick(self)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

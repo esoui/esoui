@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStoryInfo_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Background" level="2" textureFile="EsoUI/Art/Icons/icon_missing.dds" />
+
+                <Label name="$(parent)Title" modifyTextType="UPPERCASE" />
+
+                <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
+
+                <Control name="$(parent)GridList" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

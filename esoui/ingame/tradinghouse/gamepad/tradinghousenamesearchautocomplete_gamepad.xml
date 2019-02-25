@@ -1,0 +1,8 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadGuildStoreNameMatchEntryTemplate" inherits="ZO_GamepadFullwidthLabelEntryTemplate" virtual="true" />
+
+        <Control name="ZO_TradingHouseNameSearchAutoComplete_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" virtual="true" hidden="true">
+        </Control>
+    </Controls>
+</GuiXml>

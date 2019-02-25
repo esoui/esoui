@@ -36,6 +36,7 @@ EsoUI\PublicAllIngames\Tooltip\MarketTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\RewardTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\Console\VoiceChatTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\SkillBuildTooltips.lua
+EsoUI\PublicAllIngames\Tooltip\CurrencyTooltips.lua
 
 EsoUI\PublicAllIngames\ItemPreview\ItemPreview_Shared.lua
 EsoUI\PublicAllIngames\ItemPreview\Keyboard\ItemPreview_Keyboard.lua

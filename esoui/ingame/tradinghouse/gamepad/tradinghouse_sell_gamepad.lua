@@ -10,23 +10,37 @@ end
 
 function ZO_GamepadTradingHouse_Sell:Initialize(control)
     ZO_GamepadTradingHouse_ItemList.Initialize(self, control)
+end
 
-    GAMEPAD_TRADING_HOUSE_SELL_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
-    self:SetFragment(GAMEPAD_TRADING_HOUSE_SELL_FRAGMENT)
+function ZO_GamepadTradingHouse_Sell:InitializeEvents()
+    ZO_GamepadTradingHouse_ItemList.InitializeEvents(self)
+
+    local function FilterForGamepadEvents(callback)
+        return function(...)
+            if IsInGamepadPreferredMode() then
+                callback(...)
+            end
+        end
+    end
+
+    TRADING_HOUSE_SEARCH:RegisterCallback("OnSelectedGuildChanged", FilterForGamepadEvents(function() self:UpdateForGuildChange() end))
 end
 
 function ZO_GamepadTradingHouse_Sell:UpdateItemSelectedTooltip(selectedData)
-    if selectedData then
-        local bag, index = ZO_Inventory_GetBagAndIndex(selectedData)
-        GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, bag, index)
-    else
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    if self:GetFragment():IsShowing() then
+        if selectedData then
+            local bag, index = ZO_Inventory_GetBagAndIndex(selectedData)
+            GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, bag, index)
+        else
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end
     end
 end
 
 function ZO_GamepadTradingHouse_Sell:SetupSelectedSellItem(selectedItem)
-    local bag, index = ZO_Inventory_GetBagAndIndex(selectedItem)
-    ZO_TradingHouse_CreateListing_Gamepad_BeginCreateListing(selectedItem, bag, index, selectedItem.stackSellPrice)
+    local bagId, slotIndex = ZO_Inventory_GetBagAndIndex(selectedItem)
+    local initialPostPrice = ZO_TradingHouse_CalculateItemSuggestedPostPrice(bagId, slotIndex)
+    ZO_TradingHouse_CreateListing_Gamepad_BeginCreateListing(selectedItem, bagId, slotIndex, initialPostPrice)
 end
 
 function ZO_GamepadTradingHouse_Sell:UpdateForGuildChange()
@@ -43,11 +57,11 @@ function ZO_GamepadTradingHouse_Sell:UpdateListForCurrentGuild()
     else
         local errorMessage
         if not IsPlayerInGuild(guildId) then
-            errorMessage = GetString(SI_GAMEPAD_TRADING_HOUSE_NOT_A_GUILD_MEMBER)
+            errorMessage = GetString(SI_TRADING_HOUSE_POSTING_LOCKED_NOT_A_GUILD_MEMBER)
         elseif not DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_TRADING_HOUSE) then
-            errorMessage = zo_strformat(GetString(SI_GAMEPAD_TRADING_HOUSE_NO_PERMISSION_GUILD), GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE))
-        else
-            errorMessage = GetString(SI_GAMEPAD_TRADING_HOUSE_NO_PERMISSION_PLAYER)
+            errorMessage = zo_strformat(GetString(SI_TRADING_HOUSE_POSTING_LOCKED_NO_PERMISSION_GUILD), GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE))
+        elseif not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_STORE_SELL) then
+            errorMessage = GetString(SI_TRADING_HOUSE_POSTING_LOCKED_NO_PERMISSION_PLAYER)
         end
 
         self.itemList:SetNoItemText(errorMessage)
@@ -84,20 +98,14 @@ function ZO_GamepadTradingHouse_Sell:InitializeList()
                                                     CATEGORIZATION_FUNCTION, SORT_FUNCTION, USE_TRIGGERS, "ZO_TradingHouse_ItemListRow_Gamepad", SellItemSetupFunction)
 
     self.itemList:SetItemFilterFunction(function(slot) 
-                                            return  ZO_InventoryUtils_DoesNewItemMatchFilterType(slot, ITEMFILTERTYPE_TRADING_HOUSE)
-                                        end)
+        return IsItemSellableOnTradingHouse(slot.bagId, slot.slotIndex)
+    end)
     local parametricList = self.itemList:GetParametricList()
     parametricList:SetAlignToScreenCenter(true)
-    parametricList:SetValidateGradient(true)
 end
 
 function ZO_GamepadTradingHouse_Sell:OnShowing()
     self:UpdateListForCurrentGuild()
-    if self.awaitingResponse and self.itemList:IsActive() then
-        -- If returning from the create listing screen the item list will still be active even though we're waiting for a response
-        -- We deactivate here for correct functionality while we wait for that response
-        self:DeactivateForResponse()
-    end
 end
 
 function ZO_GamepadTradingHouse_Sell:OnShown()
@@ -117,7 +125,6 @@ function ZO_GamepadTradingHouse_Sell:InitializeKeybindStripDescriptors()
                 end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
             callback = function()
                 local selectedItem = self.itemList:GetTargetData()
@@ -138,31 +145,32 @@ function ZO_GamepadTradingHouse_Sell:InitializeKeybindStripDescriptors()
         },
 
         {
-            name = GetString(SI_TRADING_HOUSE_GUILD_LABEL),
-            keybind = "UI_SHORTCUT_TERTIARY",
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            callback = function()
-                self:DisplayChangeGuildDialog()
-            end,
+            name = GetString(SI_TRADING_HOUSE_SEARCH_FROM_ITEM),
+
+            keybind = "UI_SHORTCUT_QUATERNARY",
+
             visible = function()
-                return GetSelectedTradingHouseGuildId() ~= nil and GetNumTradingHouseGuilds() > 1
+                return self.itemList:GetTargetData() ~= nil
             end,
-        },
+
+            callback = function()
+                local selectedItem = self.itemList:GetTargetData()
+                local bag, index = ZO_Inventory_GetBagAndIndex(selectedItem)
+                TRADING_HOUSE_GAMEPAD:SearchForItemLink(GetItemLink(bag, index))
+            end,
+        }
     }
 
+    self:AddGuildChangeKeybindDescriptor(self.keybindStripDescriptor)
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
-function ZO_GamepadTradingHouse_Sell:GetFragmentGroup()
-    return {GAMEPAD_TRADING_HOUSE_SELL_FRAGMENT}
+function ZO_GamepadTradingHouse_Sell:GetTradingHouseMode()
+    return ZO_TRADING_HOUSE_MODE_SELL
 end
 
 function ZO_GamepadTradingHouse_Sell:OnHiding()
-    self:UpdateItemSelectedTooltip(nil)
-end
-
-function ZO_GamepadTradingHouse_Sell:DeactivateForResponse()
-    ZO_GamepadTradingHouse_BaseList.DeactivateForResponse(self)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
 end
 
 function ZO_TradingHouse_Sell_Gamepad_OnInitialize(control)

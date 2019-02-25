@@ -85,7 +85,7 @@ local returnValue = ""
     if maximum ~= 0 then
         percent = (current/maximum) * 100
         if percent < 10 then
-            percent = ZO_LocalizeDecimalNumber(zo_roundToNearest(percent, .1))
+            percent = ZO_CommaDelimitDecimalNumber(zo_roundToNearest(percent, .1))
         else
             percent = zo_round(percent)
         end

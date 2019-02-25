@@ -1,16 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="GameStartupLabelEntry" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
-            <OnInitialized>
-                self.GetHeight = function(control)
-                return control:GetNamedChild("Name"):GetTextHeight()
-                end
-                self.label = self:GetNamedChild("Name")
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)Name" inherits="ZO_GamepadFullWidthLabelTemplate"/>
-            </Controls>
-        </Control>
+        <Control name="GameStartupLabelEntry" inherits="ZO_GamepadFullwidthLabelEntryTemplate" virtual="true" />
                
         <TopLevelControl name="GameStartup_GamepadMiddlePane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
             <Controls>

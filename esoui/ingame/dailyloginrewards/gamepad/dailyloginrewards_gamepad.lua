@@ -58,7 +58,7 @@ function ZO_DailyLoginRewards_Gamepad:InitializeGridListPanel()
     local GRID_LIST_TILE_DIMENSIONS_GAMEPAD = ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_GAMEPAD + 1
     self.gridListPanelList:SetGridEntryTemplate("ZO_DailyLoginRewards_GridEntry_Template_Gamepad", GRID_LIST_TILE_DIMENSIONS_GAMEPAD, GRID_LIST_TILE_DIMENSIONS_GAMEPAD, self.dailyLoginRewardsGridEntrySetup, HIDE_CALLBACK, DailyLoginRewardsGridEntryReset, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_GAMEPAD, ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_GAMEPAD, CENTER_ENTRIES)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.gridListPanelList:SetLineBreakAmount(ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_TEMPLATE_DIMENSIONS_GAMEPAD + (ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_GAMEPAD * 3))
+    self.gridListPanelList:SetHeaderPrePadding(ZO_GRID_SCROLL_LIST_DAILY_LOGIN_REWARDS_SPACING_GAMEPAD * 3)
     self.gridListPanelList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnGridListSelectedDataChanged(previousData, newData) end)
 end
 

@@ -56,18 +56,17 @@ end
 function ZO_HousingPreview_Manager:UpdateHouseStoreData()
     ZO_ClearNumericallyIndexedTable(self.houseStoreData)
     for entryIndex = 1, GetNumStoreItems() do
-        local _, name, _, price, _, meetsRequirementsToBuy, _, _, _, _, _, _, _, entryType = GetStoreEntryInfo(entryIndex)
+        local _, name, _, price, _, meetsRequirementsToBuy, _, _, _, _, _, _, _, entryType, buyStoreFailure, buyErrorStringId = GetStoreEntryInfo(entryIndex)
 
         if entryType == STORE_ENTRY_TYPE_HOUSE_WITH_TEMPLATE then
             local houseTemplateId = GetStoreEntryHouseTemplateId(entryIndex)
-            local requirementsToBuyErrorId = not meetsRequirementsToBuy and GetStoreEntryBuyRequirementErrorId(entryIndex) or nil
             local houseTemplateData =
             {
                 goldStoreEntryIndex = entryIndex,
                 houseTemplateId = houseTemplateId,
                 name = name,
                 goldPrice = price,
-                requirementsToBuyErrorId = requirementsToBuyErrorId,
+                requiredToBuyErrorText = not meetsRequirementsToBuy and ZO_StoreManager_GetRequiredToBuyErrorText(buyStoreFailure, buyErrorStringId) or nil,
             }
 
             table.insert(self.houseStoreData, houseTemplateData)

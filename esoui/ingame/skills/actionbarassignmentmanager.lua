@@ -266,7 +266,12 @@ function ZO_SlottableSkill:GetKeyboardTooltipControl()
 end
 
 function ZO_SlottableSkill:SetKeyboardTooltip(tooltipControl)
-    tooltipControl:SetAbilityId(self:GetEffectiveAbilityId())
+    local DONT_SHOW_SKILL_POINT_COST = false
+    local DONT_SHOW_UPGRADE_TEXT = false
+    local DONT_SHOW_ADVISED = false
+    local DONT_SHOW_BAD_MORPH = false
+    local NO_OVERRIDE_RANK = nil
+    self.skillData:GetPointAllocatorProgressionData():SetKeyboardTooltip(tooltipControl, DONT_SHOW_SKILL_POINT_COST, DONT_SHOW_UPGRADE_TEXT, DONT_SHOW_ADVISED, DONT_SHOW_BAD_MORPH, NO_OVERRIDE_RANK, self:GetEffectiveAbilityId())
 end
 
 function ZO_SlottableSkill:TryCursorPickup()
@@ -723,6 +728,7 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_LEVEL_UPDATE, OnLevelUpdate)
 
     local function OnPlayerActivated()
+        self:ResetAllHotbars()
         self:UpdateBackupBarStateInCycle()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)

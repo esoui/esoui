@@ -155,6 +155,8 @@ local function GetKeybindIndexFromActionType(actionType)
         return 1
     elseif actionType == "keybind2" then
         return 2
+    elseif actionType == "keybind3" then
+        return 3
     end
 end
 

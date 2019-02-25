@@ -11,7 +11,7 @@ function ZO_HousingFurnitureSettings_Keyboard:Initialize(...)
     ZO_HousingFurnitureSettings_Base.Initialize(self, ...)
     ZO_HousingBrowserList.Initialize(self, ...)
 
-    self.settingsTreeData = ZO_FurnitureCategory:New()
+    self.settingsTreeData = ZO_RootFurnitureCategory:New()
         
     for name,topLevelSetting in pairs(ZO_FURNITURE_SETTINGS) do
         local subsettingsTreeData = ZO_FurnitureCategory:New(self.settingsTreeData, name)
@@ -36,11 +36,7 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     local generalOptionsScrollChild = GetControl(self.generalOptionsScrollList, "ScrollChild")
 
     local function OnPrimaryResidenceClicked(button)
-        if self.currentHouse ~= self.primaryResidence then
-            local collectibleId = GetCollectibleIdForHouse(self.primaryResidence)
-            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-            ZO_Dialogs_ShowDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = self.currentHouse}, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()} })
-        end
+        self:SetPrimaryResidence()
     end
 
     self.primaryResidenceSetting = self.generalOptionsPanel:GetNamedChild("PrimaryResidence")

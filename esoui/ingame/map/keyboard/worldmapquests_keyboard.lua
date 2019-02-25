@@ -65,6 +65,7 @@ function WorldMapQuests:QuestHeader_OnClicked(header, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local data = header.data
         ZO_WorldMap_PanToQuest(data.questIndex)
+        ZO_ZoneStories_Manager.StopZoneStoryTracking()
         FOCUSED_QUEST_TRACKER:ForceAssist(data.questIndex)
     end
 end

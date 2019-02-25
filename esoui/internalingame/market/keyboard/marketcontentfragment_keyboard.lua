@@ -49,7 +49,7 @@ function ZO_MarketContentFragment_Keyboard:Initialize(owner, control, marketProd
     self.productGridList:AddEntryTemplate("ZO_MarketProduct_Keyboard", ZO_MARKET_PRODUCT_WIDTH, ZO_MARKET_PRODUCT_HEIGHT, MarketProductEntrySetup, HIDE_CALLBACK, MarketProductEntryReset, ZO_MARKET_PRODUCT_COLUMN_PADDING, ROW_PADDING, CENTER_ENTRIES)
     self.productGridList:AddEntryTemplate("ZO_MarketProductBundle_Keyboard", ZO_MARKET_PRODUCT_BUNDLE_WIDTH, ZO_MARKET_PRODUCT_HEIGHT, MarketProductBundleEntrySetup, HIDE_CALLBACK, MarketProductEntryReset, ZO_MARKET_PRODUCT_COLUMN_PADDING, ROW_PADDING, CENTER_ENTRIES)
     self.productGridList:AddHeaderTemplate("ZO_Market_GroupLabel", HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.productGridList:SetLineBreakAmount(ZO_MARKET_PRODUCT_HEIGHT + 30)
+    self.productGridList:SetHeaderPrePadding(30)
 
     self.marketProducts = {}
 

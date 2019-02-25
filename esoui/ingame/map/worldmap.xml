@@ -11,18 +11,19 @@
         <!-- High tier to show over top of the gamepad ragged edge border-->
         <Texture name="ZO_PinBlob" tier="HIGH" virtual="true" level="6" pixelRoundingEnabled="false" shaderEffectType="HALO"/>
 
-        <Control name="ZO_MapPin" mouseEnabled="true" hidden="true" virtual="true">
+        <!-- Higher tier than ZO_PinBlob since the pin icon should always draw above the area circle -->
+        <Control name="ZO_MapPin" mouseEnabled="true" tier="HIGH" level="10" hidden="true" virtual="true">
             <Dimensions x="22" y="22" />
 
             <OnMouseDown>
-                if(not ZO_WorldMap_WouldPinHandleClick(self, button, ctrl, alt, shift)) then
+                if not ZO_WorldMap_WouldPinHandleClick(self, button, ctrl, alt, shift) then
                     ZO_WorldMap_MouseDown(button, ctrl, alt, shift)
                 end
             </OnMouseDown>
 
             <OnMouseUp>
-                if(ZO_WorldMap_WouldPinHandleClick(self, button)) then
-                    if(upInside) then
+                if ZO_WorldMap_WouldPinHandleClick(self, button) then
+                    if upInside then
                         ZO_WorldMap_HandlePinClicked(self, button, ctrl, alt, shift)
                     end
                 else
@@ -40,7 +41,8 @@
 
             <Controls>
                 <Texture name="$(parent)Highlight" textureFile="$(MAP_PIN_PATH)UI-WorldMapPinHighlight.dds" pixelRoundingEnabled="false">
-                    <AnchorFill />
+                    <Anchor point="TOPLEFT" offsetX ="-5" offsetY ="-5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX ="5" offsetY ="5" />
                 </Texture>
 
                 <Texture name="$(parent)Background" pixelRoundingEnabled="false">
@@ -174,6 +176,13 @@
             </Controls>
         </Backdrop>
 
+        <TopLevelControl name="ZO_WorldMapAutoNavigationOverlay" layer="OVERLAY" tier="HIGH" mouseEnabled="true" hidden="true">
+            <AnchorFill />
+
+            <!-- Make sure to consume the mouse wheel input -->
+            <OnMouseWheel />
+        </TopLevelControl>
+
         <TopLevelControl name="ZO_WorldMapZoom" level="1" resizeToFitDescendents="true" hidden="true">
             <OnInitialized>
                 ZO_WorldMapZoom_OnInitialized(self)
@@ -202,6 +211,18 @@
                     <Dimensions x="472"/>
                     <Anchor point="BOTTOM" relativePoint="TOP"/>
                 </Texture>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_WorldMapRespawnTimer" resizeToFitDescendents="true" hidden="true" tier="HIGH">
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="12" offsetY="-12"/>
+            <Controls>
+                <Label name="$(parent)Stat" text="SI_MAP_FORWARD_CAMP_RESPAWN_COOLDOWN" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT"/>
+                </Label>
+                <Label name="$(parent)Value" font="ZoFontKeybindStripDescription">
+                    <Anchor point="LEFT" relativeTo="$(parent)Stat" relativePoint="RIGHT" offsetX="10"/>
+                </Label>
             </Controls>
         </TopLevelControl>
 
@@ -274,6 +295,14 @@
                             <OnMouseWheel>
                                 ZO_WorldMap_MouseWheel(delta)
                             </OnMouseWheel>
+
+                            <OnMouseEnter>
+                                ZO_WorldMap_MouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_WorldMap_MouseExit(self)
+                            </OnMouseExit>
 
                             <Controls>
                                 <Control name="$(parent)KeepLinks">
@@ -416,22 +445,13 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)RespawnTimer" resizeToFitDescendents="true" hidden="true">
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="12" offsetY="-12"/>
-                    <Controls>
-                        <Label name="$(parent)Stat" text="SI_MAP_FORWARD_CAMP_RESPAWN_COOLDOWN" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="LEFT"/>
-                        </Label>
-                        <Label name="$(parent)Value" font="ZoFontKeybindStripDescription">
-                            <Anchor point="LEFT" relativeTo="$(parent)Stat" relativePoint="RIGHT" offsetX="10"/>
-                        </Label>
-                    </Controls>
-                </Control>
-
                 <Label name="$(parent)GamepadInteractKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepadBold34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" hidden="true">
                     <Anchor point="TOP" relativePoint="CENTER" offsetY="40" />
                 </Label>
 
+                <Label name="$(parent)PinPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" >
+                    <DimensionConstraints maxX="290"/>
+                </Label>
             </Controls>
         </TopLevelControl>
 

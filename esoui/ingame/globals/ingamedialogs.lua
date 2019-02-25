@@ -2478,7 +2478,7 @@ ESO_Dialogs["HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG"] =
     {
         text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBMIT_CONFIRMATION), 
     },
-       
+
     buttons =
     {
         {
@@ -2488,6 +2488,41 @@ ESO_Dialogs["HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG"] =
     },
 }
 
+ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    mustChoose = true,
+    title =
+    {
+        text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_FAILED),
+    },
+    mainText =
+    {
+        text = zo_strformat(SI_CUSTOMER_SERVICE_SUBMIT_FAILED_BODY, GetURLTextByType(APPROVED_URL_ESO_HELP))
+    },
+
+    buttons =
+    {
+        {
+            keybind = "DIALOG_PRIMARY",
+            text = SI_CUSTOMER_SERVICE_OPEN_WEB_BROWSER,
+            visible = function()
+                return GetUIPlatform() == UI_PLATFORM_PC
+            end,
+            callback = function(...)
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_HELP }, { mainTextParams = { GetString(SI_CUSTOMER_SERVICE_ESO_HELP_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB) } })
+            end,
+        },
+        {
+            keybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_EXIT,
+        },
+    },
+}
 
 ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] = 
 {

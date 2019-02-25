@@ -68,7 +68,23 @@ end
 
 function ZO_GamepadStoreBuyback:CanBuyBack()
     local selectedData = self.list:GetTargetData()
-    return STORE_WINDOW_GAMEPAD:CanAffordAndCanCarry(selectedData) -- returns enabled, disabledAlertText
+    if selectedData then
+        local enabled, disabledAlertText = STORE_WINDOW_GAMEPAD:CanAfford(selectedData)
+        if not enabled then
+            return false, disabledAlertText
+        end
+
+        if selectedData.entryType ~= STORE_ENTRY_TYPE_COLLECTIBLE then
+            enabled, disabledAlertText = STORE_WINDOW_GAMEPAD:CanCarry(selectedData)
+            if not enabled then
+                return false, disabledAlertText
+            end
+        end
+
+        return true
+    else
+        return false
+    end
 end
 
 function ZO_GamepadStoreBuyback:SetupEntry(control, data, selected, selectedDuringRebuild, enabled, activated)

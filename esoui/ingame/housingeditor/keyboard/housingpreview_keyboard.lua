@@ -33,10 +33,10 @@ function HousingPreviewDialog_Keyboard:InitializePurchaseButton(buttonControl, c
     buttonControl.enabled = true
 end
 
-function HousingPreviewDialog_Keyboard:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId, getRemainingTimeFunction)
-    ZO_HousingPreviewDialog_Shared.SetupPurchaseOptionControl(self, control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, errorStringId, getRemainingTimeFunction)
+function HousingPreviewDialog_Keyboard:SetupPurchaseOptionControl(control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, requiredToBuyErrorText, getRemainingTimeFunction)
+    ZO_HousingPreviewDialog_Shared.SetupPurchaseOptionControl(self, control, currencyType, currencyLocation, price, priceAfterDiscount, discountPercent, requiredToBuyErrorText, getRemainingTimeFunction)
 
-    local buttonEnabled = errorStringId == nil
+    local buttonEnabled = requiredToBuyErrorText == nil
     control.button.enabled = buttonEnabled
 
     if buttonEnabled then

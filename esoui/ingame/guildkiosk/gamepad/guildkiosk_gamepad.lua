@@ -132,7 +132,6 @@ function ZO_GuildKiosk_Purchase_Gamepad:PerformDeferredInitialize()
                 callback =  function()
                     GuildKioskPurchase(self.guildId)
                     PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_GAMEPAD_GUILD_KIOSK_PURCHASED_ALERT)
                     SCENE_MANAGER:PopScenes(NUMBER_OF_KIOSK_SCENES)
                 end
             }
@@ -557,7 +556,7 @@ function ZO_GuildKiosk_Bid_Gamepad:OnGuildsRefreshed(guildEntry)
 
     local resultText = DEBUG_RESULT_TEXT[result]
     local interactType = GetInteractionType()
-    assert(guildBankedMoney ~= nil, string.format("Result [%s]. InteractType [%d]. GuildId [%d]. NumGuilds [%d]", resultText, interactType, guildEntry.guildId, GetNumGuilds()))
+    internalassert(guildBankedMoney ~= nil, string.format("Result [%s]. InteractType [%d]. GuildId [%d]. NumGuilds [%d]", resultText, interactType, guildEntry.guildId, GetNumGuilds()))
 
     guildEntry.guildBankedMoney = guildBankedMoney
     guildEntry.existingBidAmount = existingBidAmount

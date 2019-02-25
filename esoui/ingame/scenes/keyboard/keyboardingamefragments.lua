@@ -65,7 +65,6 @@ RESTYLE_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     dynamicFramingConsumedWidth = 1350,
     dynamicFramingConsumedHeight = 300,
     forcePreparePreview = false,
-    maintainsPreviewCollection = true,
 })
 
 STATS_OUTFIT_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
@@ -74,5 +73,4 @@ STATS_OUTFIT_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     dynamicFramingConsumedWidth = 1250,
     dynamicFramingConsumedHeight = 300,
     forcePreparePreview = false,
-    maintainsPreviewCollection = true,
 })

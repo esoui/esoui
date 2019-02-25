@@ -287,9 +287,9 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
     self.MAX_TRACKED = 1 -- never allow more than this many quests...this is only controlled by the UI, not the client
     self.isMouseInside = false
     self.assistedTexture = GetControl(trackerControl, "Assisted")
-    
+
     local function OnAddOnLoaded(eventCode, addOnName)
-        if(addOnName == "ZO_Ingame") then
+        if addOnName == "ZO_Ingame" then
             self:UpdateVisibility()
 
             local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
@@ -302,18 +302,23 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
 
             trackerPanel:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
 
-            --Events
-            trackerPanel:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED,  function(_, index) self:OnQuestConditionUpdated(index) end)
-            trackerPanel:RegisterForEvent(EVENT_QUEST_ADVANCED,                   function(_, questIndex, questName, isPushed, isComplete, mainStepChanged) self:OnQuestAdvanced(questIndex, questName, isPushed, isComplete, mainStepChanged) end)
-            trackerPanel:RegisterForEvent(EVENT_QUEST_ADDED,                      function(_, questIndex) self:OnQuestAdded(questIndex) end)   
-            trackerPanel:RegisterForEvent(EVENT_QUEST_REMOVED,                    function(_, completed, questIndex, questName, zoneIndex, poiIndex, questID) self:OnQuestRemoved(questIndex, completed, questID) end)
-            trackerPanel:RegisterForEvent(EVENT_LEVEL_UPDATE,                     function(_, tag, level) self:OnLevelUpdated(tag) end)
-            trackerPanel:RegisterForEvent(EVENT_TRACKING_UPDATE,                  function() self:InitialTrackingUpdate() end)
-            trackerPanel:RegisterForEvent(EVENT_QUEST_LIST_UPDATED,               function() self:InitialTrackingUpdate() end)
-            trackerPanel:RegisterForEvent(EVENT_PLAYER_ACTIVATED,                 function() self:InitialTrackingUpdate() end)
+            local function OnZoneStoryQuestActivityTracked(eventId, questIndex)
+                self:ForceAssist(questIndex)
+                ZO_WorldMap_ShowQuestOnMap(questIndex)
+            end
+
+            trackerPanel:RegisterForEvent(EVENT_ZONE_STORY_QUEST_ACTIVITY_TRACKED, OnZoneStoryQuestActivityTracked)
+
+            trackerPanel:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, index) self:OnQuestConditionUpdated(index) end)
+            trackerPanel:RegisterForEvent(EVENT_QUEST_ADVANCED, function(_, questIndex, questName, isPushed, isComplete, mainStepChanged) self:OnQuestAdvanced(questIndex, questName, isPushed, isComplete, mainStepChanged) end)
+            trackerPanel:RegisterForEvent(EVENT_QUEST_ADDED, function(_, questIndex) self:OnQuestAdded(questIndex) end)
+            trackerPanel:RegisterForEvent(EVENT_QUEST_REMOVED, function(_, completed, questIndex, questName, zoneIndex, poiIndex, questID) self:OnQuestRemoved(questIndex, completed, questID) end)
+            trackerPanel:RegisterForEvent(EVENT_LEVEL_UPDATE, function(_, tag, level) self:OnLevelUpdated(tag) end)
+            trackerPanel:RegisterForEvent(EVENT_TRACKING_UPDATE, function() self:OnTrackingUpdate() end)
+
+            trackerPanel:UnregisterForEvent(EVENT_ADD_ON_LOADED)
 
             self:InitialTrackingUpdate()
-            trackerPanel:UnregisterForEvent(EVENT_ADD_ON_LOADED)
         end
     end
 
@@ -323,8 +328,14 @@ function ZO_Tracker:Initialize(trackerPanel, trackerControl)
     self:RegisterCallbacks()
     self:ApplyPlatformStyle()
 
-    FOCUSED_QUEST_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(self.trackerPanel:GetNamedChild("Container"))
-    FOCUSED_QUEST_TRACKER_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState) self:FireCallbacks("QuestTrackerFragmentStateChange", oldState, newState) end)
+    self.fragment = ZO_HUDFadeSceneFragment:New(self.trackerPanel:GetNamedChild("Container"))
+    self.fragment:RegisterCallback("StateChange", function(oldState, newState) self:FireCallbacks("QuestTrackerFragmentStateChange", oldState, newState) end)
+
+    FOCUSED_QUEST_TRACKER_FRAGMENT = self:GetFragment()
+end
+
+function ZO_Tracker:GetFragment()
+    return self.fragment
 end
 
 function ZO_Tracker:RegisterCallbacks()
@@ -392,26 +403,36 @@ function ZO_Tracker:UpdateAssistedVisibility()
     self.assistedTexture:SetAlpha(GetNumJournalQuests() == 1 and 0 or 1)
 end
 
+function ZO_Tracker:OnTrackingUpdate()
+    --Received when we get new tracking data from the server. Even if we were initialized we need to re-init.
+    self.initialized = false
+    self:InitialTrackingUpdate()
+end
+
 function ZO_Tracker:InitialTrackingUpdate()
-    local previouslyAssistedQuestIndex
-    for i = 1, GetNumJournalQuests() do
-        if GetTrackedIsAssisted(TRACK_TYPE_QUEST, i) then
-            previouslyAssistedQuestIndex = i
-            break
+    if not self.initialized and IsTrackingDataAvailable() then
+        self.initialized = true
+
+        local previouslyAssistedQuestIndex
+        for i = 1, GetNumJournalQuests() do
+            if GetTrackedIsAssisted(TRACK_TYPE_QUEST, i) then
+                previouslyAssistedQuestIndex = i
+                break
+            end
         end
-    end
 
-    self:ClearTracker()
+        self:ClearTracker()
     
-    self.disableAudio = true
-    if previouslyAssistedQuestIndex == nil or not self:BeginTracking(TRACK_TYPE_QUEST, previouslyAssistedQuestIndex) then
-        local IGNORE_SCENE_RESTRICTION = true
-        self:AssistNext(IGNORE_SCENE_RESTRICTION)
-    end
-    self.disableAudio = false
+        self.disableAudio = true
+        if previouslyAssistedQuestIndex == nil or not self:BeginTracking(TRACK_TYPE_QUEST, previouslyAssistedQuestIndex) then
+            local IGNORE_SCENE_RESTRICTION = true
+            self:AssistNext(IGNORE_SCENE_RESTRICTION)
+        end
+        self.disableAudio = false
 
-    self:UpdateAssistedVisibility()
-    self:FireCallbacks("QuestTrackerInitialUpdate")
+        self:UpdateAssistedVisibility()
+        self:FireCallbacks("QuestTrackerInitialUpdate")
+    end
 end
 
 function ZO_Tracker:SetEnabled(enabled)

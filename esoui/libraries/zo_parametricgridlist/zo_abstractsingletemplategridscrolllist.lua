@@ -39,11 +39,14 @@ function ZO_AbstractSingleTemplateGridScrollList:AddEntry(data)
         if self.currentHeaderName or #scrollData > 0 then
             -- we're starting a new section, so first make sure to fill out the last row of the previous section
             self:FillRowWithEmptyCells()
-            ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.lineBreakAmount })
+            ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.headerPrePadding })
         end
         self.currentHeaderName = gridHeaderName
         if self.currentHeaderName and self.currentHeaderName ~= "" then
             ZO_ScrollList_AddOperation(self.list, self.headerOperationId, { header = gridHeaderName, data = data })
+            if self.headerPostPadding > 0 then
+                ZO_ScrollList_AddOperation(self.list, ZO_SCROLL_LIST_OPERATION_LINE_BREAK, { lineBreakAmount = self.headerPostPadding, indentX = self.indentAmount })
+            end
         end
     end
     ZO_ScrollList_AddOperation(self.list, self.entryOperationId, data)

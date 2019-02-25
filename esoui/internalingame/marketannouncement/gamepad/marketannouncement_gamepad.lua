@@ -19,6 +19,7 @@ function ZO_MarketAnnouncement_Gamepad:Initialize(control)
     self.actionTileControlByType = 
     {
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Gamepad_Control",
+        [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = "ZO_ZoneStoriesTile_Gamepad_Control",
     }
 
     ZO_MarketAnnouncement_Shared.Initialize(self, control, IsInGamepadPreferredMode)
@@ -34,10 +35,14 @@ function ZO_MarketAnnouncement_Gamepad:Initialize(control)
     self:SetupVerticalNavigation()
 end
 
-function ZO_MarketAnnouncement_Gamepad:CreateActionTile(tileType, objectPool)
-    local tile = ZO_MarketAnnouncement_Shared.CreateActionTile(self, tileType, objectPool)
-    tile:SetKeybindButton(self.selectButton)
-    return tile
+function ZO_MarketAnnouncement_Gamepad:AddTileTypeObjectPoolToMap(tileType)
+    ZO_MarketAnnouncement_Shared.AddTileTypeObjectPoolToMap(self, tileType)
+
+    local function FactoryFunction(control)
+        control.object:SetKeybindButton(self.selectButton)
+    end
+
+    self.actionTileControlPoolMap[tileType]:SetCustomFactoryBehavior(FactoryFunction)
 end
 
 function ZO_MarketAnnouncement_Gamepad:SetupVerticalNavigation()
@@ -110,8 +115,8 @@ end
 
 function ZO_MarketAnnouncement_Gamepad:UpdateActionTileNavigation()
     self.actionTileListFocus:RemoveAllEntries()
-    for _, data in ipairs(self.actionTileList) do
-        local entryData = data:GetFocusEntryData()
+    for _, control in ipairs(self.actionTileList) do
+        local entryData = control.object:GetFocusEntryData()
         self.actionTileListFocus:AddEntry(entryData)
     end
 end

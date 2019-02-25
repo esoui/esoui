@@ -1,7 +1,7 @@
 local g_currentlySelectedCharacterData
 local g_lastSelectedData
 local g_canPlayCharacter = true
-local g_canCreateCharacter = true
+local g_maxCharacters
 
 ZO_CHARACTER_SELECT_DETAILS_VALUE_OFFSET_Y = -14
 ZO_GAMEPAD_CHARACTER_SELECT_LIST_ENTRY_CHAMPION_ICON_X_OFFSET = -20
@@ -29,12 +29,6 @@ local CHARACTER_DELETE_KEY_ICONS = {
                 KEY_GAMEPAD_LEFT_TRIGGER,
                 KEY_GAMEPAD_RIGHT_TRIGGER },
 }
-local CHARACTER_DELETE_TEXT_ANIM = {
-    ".",
-    "..",
-    "...",
-}
-local CHARACTER_DELETE_TEXT_ANIM_SPEED = 0.5
 
 local function ZO_CharacterSelect_Gamepad_GetKeyText(key)
     local path, width, height = ZO_Keybindings_GetTexturePathForKey(key)
@@ -247,11 +241,11 @@ local function CharacterListEntry_OnSetup(control, data, selected, selectedDurin
     data:ClearIcons()
 
     -- we can't set these up at list creation time as the character data isn't fully loaded yet (GetNumClasses() returns 0, which makes GetClassIconGamepad(...) results all nil)
-    icon = ((data.name ~= nil) and data.class) and GetClassIconGamepad(data.class) or data.icon
+    local icon = ((data.name ~= nil) and data.class) and GetClassIconGamepad(data.class) or data.icon
 
     data:AddIcon(icon)
 
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
+    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
 end
 
 local function GamepadCharacterSelectMenuEntryHeader_Setup(headerControl, data, ...)
@@ -437,11 +431,9 @@ local function RefreshServiceHeaderVisibility(self)
     local headerVisible = self.serviceMode ~= SERVICE_TOKEN_NONE
 
     if headerVisible then
-        local tokenCount = 0
+        local tokenCount = GetNumServiceTokens(self.serviceMode)
+
         local instructions = ""
-
-        tokenCount = GetNumServiceTokens(self.serviceMode)
-
         if self.serviceMode ~= SERVICE_TOKEN_NONE then
             instructions = zo_strformat(SI_SERVICE_TOKEN_INSTRUCTIONS, GetString("SI_SERVICETOKENTYPE", self.serviceMode))
         end
@@ -821,11 +813,9 @@ local function InitKeybindingDescriptor(self)
                 if self.serviceMode == SERVICE_TOKEN_NAME_CHANGE then
                     ZO_CharacterSelect_Gamepad_BeginRename()
                 elseif self.serviceMode == SERVICE_TOKEN_RACE_CHANGE then
-                    local DONT_RESET_TO_DEFAULT = false
                     ZO_CHARACTERCREATE_MANAGER:InitializeForRaceChange(g_currentlySelectedCharacterData.dataSource)
                     PregameStateManager_SetState("CharacterCreate_Barbershop")
                 elseif self.serviceMode == SERVICE_TOKEN_APPEARANCE_CHANGE then
-                    local DONT_RESET_TO_DEFAULT = false
                     ZO_CHARACTERCREATE_MANAGER:InitializeForAppearanceChange(g_currentlySelectedCharacterData.dataSource)
                     PregameStateManager_SetState("CharacterCreate_Barbershop")
                 end
@@ -871,10 +861,6 @@ local function ZO_CharacterSelect_Gamepad_GetFormattedAlliance(characterData)
     return zo_strformat(SI_CHARACTER_SELECT_ALLIANCE, allianceName)
 end
 
-local function ZO_CharacterSelect_Gamepad_GetRankIcon(rank)
-    return zo_iconFormat(GetAvARankIcon(rank), 32, 32)
-end
-
 local function ZO_CharacterSelect_Gamepad_GetFormattedLocation(characterData)
     local locationName = characterData.location ~= 0 and GetLocationName(characterData.location) or GetString(SI_UNKNOWN_LOCATION)
 
@@ -884,10 +870,8 @@ end
 local SetupCharacterList
 local SelectedCharacterChanged
 do
-    SetupCharacterList = function (self, eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining)
+    SetupCharacterList = function(self, eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
         ZO_CharacterSelect_OnCharacterListReceivedCommon(eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
-        g_canCreateCharacter = numCharacters < maxCharacters
-
         ZO_CharacterSelect_Gamepad_SetMaxCharacters(maxCharacters)
         RecreateList(self)
     end
@@ -927,7 +911,6 @@ do
             end
 
             -- Change the keybind strip if we have create new selected
-            local self = ZO_CharacterSelect_Gamepad
             g_canPlayCharacter = false
 
             if self.serviceMode ~= SERVICE_TOKEN_NONE then
@@ -1080,7 +1063,6 @@ end
 local g_requestedRename = ""
 
 local function OnCharacterRenamedSuccessCallback()
-    local DONT_RESET_TO_DEFAULT = false
     local self = ZO_CharacterSelect_Gamepad
 
     -- there are multiple ways to rename a character, some of which do not change the servicemode, so we will
@@ -1088,6 +1070,7 @@ local function OnCharacterRenamedSuccessCallback()
     if self.serviceMode == SERVICE_TOKEN_NONE then
         ZO_CharacterSelect_Gamepad_ReturnToCharacterList(ACTIVATE_VIEWPORT)
     else
+        local DONT_RESET_TO_DEFAULT = false
         ZO_CharacterSelect_Gamepad_ChangeServiceMode(SERVICE_TOKEN_NONE, DONT_RESET_TO_DEFAULT)
     end
 end
@@ -1321,18 +1304,6 @@ function ZO_CharacterSelect_Gamepad_ShowLoginScreen()
 
     -- Show the fact that the login has been requested
     ZO_Dialogs_ShowGamepadDialog("CHARACTER_SELECT_LOGIN")
-end
-
-function ZO_CharacterSelect_Gamepad_SetLabelMaxWidth(labelControl, siblingName)
-    local siblingControl = labelControl:GetParent():GetNamedChild(siblingName)
-    local isValid, anchor, _, _, offsetX = labelControl:GetAnchor(0)
-    local maxConstraintX = ZO_GAMEPAD_CONTENT_WIDTH - offsetX
-
-    if siblingControl then
-        maxConstraintX = maxConstraintX - siblingControl:GetWidth()
-    end
-
-    labelControl:SetDimensionConstraints(maxConstraintX, 0)
 end
 
 function ZO_CharacterSelect_Gamepad_GetSelectedServiceMode()

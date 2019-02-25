@@ -6,7 +6,7 @@
                 <AlphaAnimation delay="1500" duration="1000" startAlpha="1" endAlpha="0.5"/>
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="ZO_UnitFrameFadeAnimation">            
+        <AnimationTimeline name="ZO_UnitFrameFadeAnimation">
             <Animations>
                 <AlphaAnimation duration="100" startAlpha="0" endAlpha="1">
                     <OnPlay>

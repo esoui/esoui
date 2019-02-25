@@ -10,7 +10,7 @@ ZO_SKILL_RESPEC_INTERACT_INFO =
     interactTypes = { INTERACTION_SKILL_RESPEC },
 }
 
-SCENE_MANAGER:AddBypassHideSceneConfirmationReason("SKILLS_PLAYER_DEACTIVATED")
+ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("SKILLS_PLAYER_DEACTIVATED")
 
 function ZO_SkillInfoXPBar_OnLevelChanged(xpBar, level)
     xpBar:GetControl():GetParent().rank:SetText(level)

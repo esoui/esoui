@@ -143,7 +143,7 @@ function ZO_RewardsManager:New(...)
 end
 
 function ZO_RewardsManager:Initialize()
-	
+    
 end
 
 do
@@ -223,7 +223,6 @@ function ZO_RewardsManager:GetCurrencyEntryInfo(rewardId, quantity, parentChoice
     local formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER))
     local formattedNameWithStackKeyboard = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
     local formattedNameWithStackGamepad = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatGamepad(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
-    local icon = IsInGamepadPreferredMode() and GetCurrencyLootGamepadIcon(currencyType) or GetCurrencyLootKeyboardIcon(currencyType)
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
     rewardData:SetFormattedName(formattedName)
@@ -278,9 +277,10 @@ function ZO_RewardsManager:GetInstantUnlockEntryInfo(rewardId, parentChoice)
     local instantUnlockId = GetInstantUnlockRewardInstantUnlockId(rewardId)
     local icon = GetInstantUnlockRewardIcon(instantUnlockId)
     local displayName = GetInstantUnlockRewardDisplayName(instantUnlockId)
+    local formattedDisplayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
     
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
-    rewardData:SetFormattedName(displayName)
+    rewardData:SetFormattedName(formattedDisplayName)
     rewardData:SetIcon(icon)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
     
@@ -300,24 +300,24 @@ end
 ------------------
 
 function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo)
-	local rewardData = control.data
-	if rewardData then
+    local rewardData = control.data
+    if rewardData then
         local rewardType = rewardData:GetRewardType()
-		if rewardType and rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
+        if rewardType and rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
             anchorPoint = anchorPoint or LEFT
             anchorPointRelativeTo = anchorPointRelativeTo or RIGHT
-			local rewardId = rewardData:GetRewardId()
+            local rewardId = rewardData:GetRewardId()
             local quantity = rewardData:GetQuantity()
-			InitializeTooltip(ItemTooltip, control, anchorPoint, 0, 0, anchorPointRelativeTo)
-			ItemTooltip:SetReward(rewardId, quantity)
-			if rewardType == REWARD_ENTRY_TYPE_ITEM then
-				ItemTooltip:ShowComparativeTooltips()
-				ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
-				ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
-				ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2)
-			end
-		end
-	end
+            InitializeTooltip(ItemTooltip, control, anchorPoint, 0, 0, anchorPointRelativeTo)
+            ItemTooltip:SetReward(rewardId, quantity)
+            if rewardType == REWARD_ENTRY_TYPE_ITEM then
+                ItemTooltip:ShowComparativeTooltips()
+                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
+                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+                ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2)
+            end
+        end
+    end
 end
 
 function ZO_Rewards_Shared_OnMouseExit(control)

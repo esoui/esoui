@@ -123,7 +123,7 @@
                     <AnchorFill />
                     
                     <Controls>
-                        <Texture name="$(parent)Background" override="true" level="2" alpha="0.64">
+                        <Texture name="$(parent)Background" override="true" level="2" color="a3a3a3">
                             <Dimensions y="512" />
                             <Anchor point="TOPLEFT" />
                             <Anchor point="TOPRIGHT" />

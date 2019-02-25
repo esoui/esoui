@@ -1,20 +1,42 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_TradingHouse_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
+        <TopLevelControl name="ZO_TradingHouse_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>
                 ZO_TradingHouse_Gamepad_Initialize(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
-                <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
+
+                <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
-                        <Control name="$(parent)Container" override="true">
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Control>
+
+                        <Control name="$(parent)Container">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainer" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                             <Controls>
-                                <Label name="$(parent)Text" text="SI_INVENTORY_RETRIEVING_ITEMS" override="true"/>
+                                <Control name="$(parent)Browse" inherits="ZO_TradingHouse_Browse_Gamepad"/>
+                                <Control name="$(parent)SearchHistory" inherits="ZO_TradingHouseSearchHistory_Gamepad"/>
+                                <Control name="$(parent)NameSearchAutoComplete" inherits="ZO_TradingHouseNameSearchAutoComplete_Gamepad"/>
+                                <Control name="$(parent)Sell" inherits="ZO_TradingHouse_Sell_Gamepad"/>
+                                <Control name="$(parent)Listings" inherits="ZO_TradingHouse_Listings_Gamepad"/>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
+                            <Controls>
+                                <Control name="$(parent)Container" override="true">
+                                    <Controls>
+                                        <Label name="$(parent)Text" text="SI_INVENTORY_RETRIEVING_ITEMS" override="true"/>
+                                    </Controls>
+                                </Control>
                             </Controls>
                         </Control>
                     </Controls>
-                </Control>
+                </Scroll>
+
             </Controls>
         </TopLevelControl>
     </Controls>

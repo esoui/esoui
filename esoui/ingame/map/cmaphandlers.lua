@@ -41,7 +41,6 @@ function CMapHandlers:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_GATE_STATE_CHANGED, RefreshKeeps)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEPS_INITIALIZED, RefreshKeeps)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_CURRENT_SUBZONE_LIST_CHANGED, RefreshKeeps)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_PLAYER_ACTIVATED, RefreshKeeps)
 
     EVENT_MANAGER:RegisterForUpdate("CMapHandler", 100, function()
         self.refresh:UpdateRefreshGroups()
@@ -69,8 +68,6 @@ function CMapHandlers:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADDED, RefreshAllQuestPins)   
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_REMOVED, RefreshAllQuestPins)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_LIST_UPDATED, RefreshAllQuestPins)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_PATH_FINDING_NETWORK_LINK_CHANGED, RefreshAllQuestPins)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_LINKED_WORLD_POSITION_CHANGED, RefreshAllQuestPins)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_CONDITION_COUNTER_CHANGED, OnQuestConditionCounterChanged)
 
     local function OnQuestTrackerTrackingStateChanged(questTracker, tracked, trackType, arg1, arg2)
@@ -100,8 +97,31 @@ function CMapHandlers:InitializeEvents()
 
     FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", OnQuestTrackerAssistStateChanged)
     FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerTrackingStateChanged", OnQuestTrackerTrackingStateChanged)
-    
+
     self:RefreshAllQuestPins()
+
+    local function RefreshZoneStory()
+        self:RefreshZoneStory()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ZONE_STORY_ACTIVITY_TRACKING_INIT, RefreshZoneStory)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ZONE_STORY_ACTIVITY_TRACKED, RefreshZoneStory)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ZONE_STORY_ACTIVITY_UNTRACKED, RefreshZoneStory)
+
+    local function RefreshBreadcrumbPins()
+        RefreshAllQuestPins()
+        RefreshZoneStory()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_PATH_FINDING_NETWORK_LINK_CHANGED, RefreshBreadcrumbPins)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_LINKED_WORLD_POSITION_CHANGED, RefreshBreadcrumbPins)
+
+    local function OnPlayerActivated()
+        RefreshKeeps()
+        RefreshZoneStory()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 end
 
 function CMapHandlers:AddKeep(keepId, bgContext)
@@ -172,6 +192,11 @@ function CMapHandlers:RefreshAllQuestPins()
     for i = 1, MAX_JOURNAL_QUESTS do
         self:RefreshSingleQuestPins(i)
     end
+end
+
+function CMapHandlers:RefreshZoneStory()
+    RemoveMapZoneStoryPins()
+    AddMapZoneStoryPins()
 end
 
 C_MAP_HANDLERS = CMapHandlers:New()

@@ -697,6 +697,8 @@ function MainMenu_Keyboard:SetupSceneGroupBar(category, sceneGroupName)
             local sceneName = layoutData.descriptor
             layoutData.callback = function()
                 if not self.ignoreCallbacks then
+                    self.sceneGroupBarLabel:SetText(GetString(layoutData.categoryName))
+
                     if MAIN_MENU_MANAGER:HasBlockingScene() then
                         local CLICKED_BY_MOUSE = true
                         local sceneData = {
@@ -707,7 +709,6 @@ function MainMenu_Keyboard:SetupSceneGroupBar(category, sceneGroupName)
                         MAIN_MENU_MANAGER:ActivatedBlockingScene_Scene(sceneData, CLICKED_BY_MOUSE)
                     else
                         SCENE_MANAGER:Show(sceneName)
-                        self.sceneGroupBarLabel:SetText(GetString(layoutData.categoryName))
                     end
 
                     if sceneGroupBarTutorialTrigger then

@@ -266,6 +266,7 @@ function ZO_Scene:SetState(newState)
         self.state = newState
         if self.state == SCENE_SHOWING then
             self.wasShownInGamepadPreferredMode = IsInGamepadPreferredMode()
+            self:UpdateFragmentsToCurrentSceneManager()
         end
         --We will DetermineIfTransitionIsComplete when calling RefreshFragments below. Allowing DetermineIfTransitionIsComplete before then will not have allowed the fragments to react the scene state change which
         --can cause the scene to finish the transition before some fragments even got a chance to try hiding or showing. The specific case that triggered this was removing a temporary fragment in the scene hiding callback.
@@ -328,6 +329,12 @@ function ZO_Scene:RefreshFragments(asAResultOfSceneStateChange)
     self:RefreshFragmentsHelper(asAResultOfSceneStateChange, unpack(self.fragments))
     self:AllowEvaluateTransitionComplete()
     self:DetermineIfTransitionIsComplete()
+end
+
+function ZO_Scene:UpdateFragmentsToCurrentSceneManager()
+    for _, fragment in ipairs(self.fragments) do
+        fragment:SetSceneManager(self.sceneManager)
+    end
 end
 
 function ZO_Scene:OnSceneFragmentStateChange(fragment, oldState, newState)

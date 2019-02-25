@@ -1,17 +1,12 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_TradingHouse_ItemList_Anchors" virtual="true">
-            <Anchor point="TOPLEFT" offsetY="358" />
-            <Anchor point="BOTTOMRIGHT" />
-        </Control>
-
         <Control name="ZO_TradingHouse_ItemListRow_Gamepad" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true">
             <OnInitialized>
                 ZO_TradingHouse_ItemListRow_Gamepad_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" />
                 </Label>
 
                 <Label name="$(parent)Label" override="true">
@@ -21,38 +16,20 @@
             </Controls>
         </Control>
 
-        <Label name="ZO_TradingHouse_ItemListSubLabelTemplate" font="ZoFontGamepadCondensed34" modifyTextType="UPPERCASE" virtual="true"/>
+        <Label name="ZO_TradingHouse_ItemListSubLabelTemplate" font="ZoFontGamepadCondensed34" modifyTextType="UPPERCASE" virtual="true" />
 
-        <Control name="ZO_TradingHouse_ItemList_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true" virtual="true">
+        <Control name="ZO_TradingHouse_ItemList_Gamepad" hidden="true" virtual="true">
+            <AnchorFill />
             <Controls>
-                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
-                    <Controls>
-                        <Control name="$(grandparent)List" inherits="ZO_VerticalParametricScrollListTemplate ZO_TradingHouse_ItemList_Anchors"/>
-                    </Controls>
+                <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                    <AnchorFill />
                 </Control>
             </Controls>
         </Control>
 
-        <Control name="ZO_TradingHouse_SortPriceHeader" inherits="ZO_SortHeader" virtual="true">
-            <OnInitialized>
-                ZO_SortableParametricList_InitSortHeader(self, SI_TRADING_HOUSE_SORT_TYPE_TIME, TEXT_ALIGN_CENTER, ZO_GamepadTradingHouse_SortableItemList.SORT_KEY_TIME)
-            </OnInitialized>
-            <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
-            <Dimensions x="195" y="40"/>
-            <Controls>
-                <Label name="$(parent)Name" font="ZoFontGamepad27" override="true"/>
-            </Controls>
-        </Control>
-        
-        <Control name="ZO_TradingHouse_SortHeaderGroup" virtual="true">
-            <Anchor point="TOPLEFT" offsetY="300"/>
-            <Anchor point="TOPRIGHT" offsetY="300"/>
-            <Dimensions y="64" />
-        </Control>
-
         <Backdrop name="ZO_Gamepad_TradingHouse_Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="false" virtual="true">
-            <Anchor point="TOPLEFT" offsetY="-8"/>
-            <Anchor point="BOTTOMRIGHT" offsetY="8"/>
+            <Anchor point="TOPLEFT" offsetY="-8" />
+            <Anchor point="BOTTOMRIGHT" offsetY="8" />
         </Backdrop>
     </Controls>
 </GuiXml>

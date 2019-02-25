@@ -8,6 +8,7 @@ local consolePregameStates =
         end,
 
         OnExit = function()
+            TrySaveCharacterListOrder()
         end
     },
 

@@ -47,7 +47,7 @@ function ZO_MapKeepUpgrade_Shared:Initialize(control)
     local params = self.symbolParams
     self.levelsGridList:SetGridEntryTemplate(self.buttonLayout, params.SYMBOL_ICON_SIZE, params.SYMBOL_ICON_SIZE, WorldMapKeepUpgradeGridEntrySetup, HIDE_CALLBACK, ZO_ObjectPool_DefaultResetControl, SPACING_X, params.GRID_DEFAULT_SPACING_Y)
     self.levelsGridList:SetHeaderTemplate(self.labelLayout, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, WorldMapKeepUpgradeGridHeaderEntrySetup)
-    self.levelsGridList:SetLineBreakAmount(params.SYMBOL_PADDING_Y + params.SYMBOL_ICON_SIZE)
+    self.levelsGridList:SetHeaderPrePadding(params.SYMBOL_PADDING_Y)
 
     control:SetHandler("OnUpdate", function(_, timeS)
         if self.nextUpdateS == nil or timeS > self.nextUpdateS then

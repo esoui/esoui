@@ -27,14 +27,26 @@ function ZO_PlayerEmoteManager:OnAddOnLoaded(addOnName)
 	end
 end
 
-function ZO_PlayerEmoteManager:OnCollectionUpdated()
-    self:BuildEmoteList()
-    self:RefreshEmoteSlashCommands()
+function ZO_PlayerEmoteManager:OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+    if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
+        self:BuildEmoteList()
+        self:RefreshEmoteSlashCommands()
+    else
+        for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
+            for _, collectibleData in ipairs(unlockStateTable) do
+                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY) then
+                    self:BuildEmoteList()
+                    self:RefreshEmoteSlashCommands()
+                    return
+                end
+            end
+        end
+    end
 end
 
 function ZO_PlayerEmoteManager:OnCollectibleUpdated(collectibleId)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) then
+    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) or collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_PERSONALITY) then
         self:BuildEmoteList()
         self:RefreshEmoteSlashCommands()
     end

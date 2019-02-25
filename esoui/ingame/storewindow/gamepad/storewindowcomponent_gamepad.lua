@@ -100,7 +100,8 @@ end
 
 function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mode, currencyType)
     local options = self:GetCurrencyOptions()
-    local invalidPrice = not forceValid and price > GetCurrencyAmount(currencyType, CURRENCY_LOCATION_CHARACTER) or false
+    local playerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
+    local invalidPrice = not forceValid and price > GetCurrencyAmount(currencyType, playerStoredLocation) or false
     local priceControl = control:GetNamedChild("Price")
 
     if mode == ZO_MODE_STORE_BUY then 

@@ -30,6 +30,18 @@ function ZO_MouseInputGroup:GetInputTypeGroup(inputType)
     return self.inputTypeGroups[inputType]
 end
 
+function ZO_MouseInputGroup:Contains(control, inputType)
+    if control:IsMouseEnabled() then
+        local groupControls = self:GetInputTypeGroup(inputType)
+        for _, groupControl in pairs(groupControls) do
+            if control == groupControl then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 function ZO_MouseInputGroup:Add(control, inputType)
     if control:IsMouseEnabled() then
         local groupControls = self:GetInputTypeGroup(inputType)

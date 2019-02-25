@@ -12,13 +12,15 @@
             </OnMouseUp>
         </Control>
 
-        <Control name="ZO_SortHeader" inherits="ZO_SortHeaderBehavior" virtual="true">
+        <Control name="ZO_SortHeaderAppearance" virtual="true">
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"  modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
                     <AnchorFill />
                 </Label>
             </Controls>
         </Control>
+
+        <Control name="ZO_SortHeader" inherits="ZO_SortHeaderBehavior ZO_SortHeaderAppearance" virtual="true" />
 
         <Control name="ZO_SortHeaderIcon" inherits="ZO_SortHeaderBehavior" virtual="true">
             <Controls>

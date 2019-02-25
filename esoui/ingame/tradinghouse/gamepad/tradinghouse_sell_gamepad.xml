@@ -1,9 +1,5 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_TradingHouse_Sell_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" hidden="true">
-            <OnInitialized>
-                ZO_TradingHouse_Sell_Gamepad_OnInitialize(self)
-            </OnInitialized>
-        </TopLevelControl>
+        <Control name="ZO_TradingHouse_Sell_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" virtual="true" hidden="true" />
     </Controls>
 </GuiXml>

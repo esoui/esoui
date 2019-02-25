@@ -27,7 +27,7 @@ end
 function GroupList_Gamepad:Initialize(control)
     ZO_GamepadSocialListPanel.Initialize(self, control, GROUP_LIST_MANAGER, "ZO_GroupListRow_Gamepad")
     self:SetEmptyText(GetString(SI_GROUP_LIST_PANEL_NO_GROUP_MESSAGE));
-    self:SetupSort(SORT_KEYS, "displayName", ZO_SORT_ORDER_DOWN)
+    self:SetupSort(SORT_KEYS, "displayName", ZO_SORT_ORDER_UP)
 end
 
 function GroupList_Gamepad:GetBackKeybindCallback()

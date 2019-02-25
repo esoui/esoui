@@ -28,7 +28,7 @@ function ZO_FadingStationaryControlBuffer:Initialize(control, maxDisplayedEntrie
     self.activeEntries = {}
     self.queuedTimedEntries = {}
     self.maxDisplayedEntries = maxDisplayedEntries or DEFAULT_MAX_DISPLAYED_ENTRIES
-    self.maxLinesPerEntry = maxLinesPerEntry
+    self.maxLinesPerEntry = nil
     self.fadeAnimationName = fadeAnimationName
     self.iconAnimationName = iconAnimationName
     self.anchor = anchor or ZO_Anchor:New(TOP)

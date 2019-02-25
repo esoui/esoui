@@ -223,19 +223,20 @@ do
     --Used to allow a conveyor animation to move in the opposite direction it was designed as
     local g_reverseAnimationDirection = false
 
-    --Allows the function below to return a variable number of results while still preforming the reset afterward
-    local function UnreverseAndReturnResults(...)
+    --These functions set a global state that impacts all conveyor fragment animations. They are for the case of manipulating conveyor fragments that are on the same level (when pushing and popping scenes it will use the scene stack
+    --to figure out which direction to move). For our standard conveyor motions, setting moving forward will cause the existing fragment to exit left and the new fragment to enter from the right. This is useful for changing to a fragment
+    --that is conceptually to the right of the current fragment. Setting moving Backward will do the opposite and is useful when changing to a fragment that is conceptually to the left of the current fragment. When the object that is driving
+    --the control of the fragments goes away (for example, the gamepad tab bar being hidden) it should reset the movement state so as not to impact other scenes.
+    function ZO_ConveyorSceneFragment_SetMovingForward()
         g_reverseAnimationDirection = false
-        return ...
     end
 
-    -- Use this function in order to wrap your logic in a closure that will reverse the animation and un-reverse when it's done
-    -- Right now it only supports 3 return values for the behavior, add more as needed.
-    -- This system makes sure we can't accidentally reverse the direction and leave it reversed.  Do not expose the reverse variable globally
-    -- Or allow a global function to set it explicitely
-    function ZO_ConveyorSceneFragment_ReverseAnimationDirectionForBehavior(behavior, ...)
+    function ZO_ConveyorSceneFragment_SetMovingBackward()
         g_reverseAnimationDirection = true
-        return UnreverseAndReturnResults(behavior(...))
+    end
+
+    function ZO_ConveyorSceneFragment_ResetMovement()
+        g_reverseAnimationDirection = false
     end
 
     function ZO_ConveyorSceneFragment:ChooseAnimation()

@@ -16,8 +16,40 @@ function ZO_SceneFragment:Initialize()
     self.allowShowHideTimeUpdates = false
 end
 
-function ZO_SceneFragment:SetSceneManager(sceneManager)
-    self.sceneManager = sceneManager
+function ZO_SceneFragment:IsValidSceneManagerChange(newSceneManager)
+    -- Instead of there being at most 1 scenemanager, there are now N scenemanagers with N active scenes.
+    -- Since a fragment can be owned by only 1 scene manager at a time, we need to make sure we aren't constructing a state where two scenes are both visible and sharing the same fragment.
+    local oldSceneManager = self.sceneManager
+    if oldSceneManager == nil or oldSceneManager == newSceneManager then
+        -- no change
+        return true
+    end
+
+    local oldParentScene = oldSceneManager:GetParentScene()
+    if oldParentScene ~= nil and oldParentScene:GetState() == SCENE_HIDDEN then
+        -- If the old scene manager is parented to a scene, but that scene is hidden, then the subscene is effectively hidden.
+        return true
+    end
+
+    local oldCurrentScene = oldSceneManager:GetCurrentScene()
+    if oldCurrentScene == nil or oldCurrentScene:GetState() == SCENE_HIDDEN then
+        -- the old scene is either hidden or nonexistent, we can safely steal this fragment from it
+        return true
+    end
+
+    if oldCurrentScene:HasFragment(self) then
+        local assertString = "Trying to change scene managers, but the old scene manager (%s, state:%s) still contains this fragment"
+        internalassert(false, string.format(assertString, oldCurrentScene:GetName(), oldCurrentScene:GetState()))
+        return false
+    end
+
+    return true
+end
+
+function ZO_SceneFragment:SetSceneManager(newSceneManager)
+    if self:IsValidSceneManagerChange(newSceneManager) then
+        self.sceneManager = newSceneManager
+    end
 end
 
 function ZO_SceneFragment:GetCategory()
@@ -142,6 +174,11 @@ end
 
 function ZO_SceneFragment:ComputeIfFragmentShouldShow()
     if self.sceneManager then
+        local sceneManagerParentScene = self.sceneManager:GetParentScene()
+        if sceneManagerParentScene and sceneManagerParentScene:IsHiding() then
+            return false
+        end
+
         local currentScene = self.sceneManager:GetCurrentScene()
         local nextScene = self.sceneManager:GetNextScene()
         if currentScene and currentScene:HasFragment(self) then

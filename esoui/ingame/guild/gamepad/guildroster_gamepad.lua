@@ -21,7 +21,7 @@ function ZO_GamepadGuildRosterManager:Initialize(control)
 	--GuildRoster will never be empty unless it was filtered out
 	self:SetEmptyText(GetString(""))
 
-    self:SetupSort(GUILD_ROSTER_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_DOWN)
+    self:SetupSort(GUILD_ROSTER_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_UP)
 
     local function OnGuildMemberNoteChanged(eventId, guildId, displayName, note)
         if GUILD_ROSTER_MANAGER:MatchesGuild(guildId) then 

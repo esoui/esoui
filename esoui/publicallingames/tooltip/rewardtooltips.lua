@@ -15,8 +15,9 @@ do
         -- For some market product types we can just use other tooltip layouts
         if rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
             local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
-            local name, description, icon, _, _, isPurchasable, _, categoryType, hint, isPlaceholder = GetCollectibleInfo(collectibleId)
-            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, isPurchasable, description, BLANK_HINT, isPlaceholder, categoryType, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            local name, description, icon, _, _, isPurchasable, _, categoryType, hint = GetCollectibleInfo(collectibleId)
+            local DEPRECATED_ARG
+            self:LayoutCollectible(collectibleId, NO_CATEGORY_NAME, name, NO_NICKNAME, isPurchasable, description, BLANK_HINT, DEPRECATED_ARG, categoryType, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
             return
         elseif rewardType == REWARD_ENTRY_TYPE_ITEM then
             local stackCount = amount

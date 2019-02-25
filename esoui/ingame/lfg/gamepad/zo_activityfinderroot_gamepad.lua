@@ -50,6 +50,29 @@ function ActivityFinderRoot_Gamepad:InitializeKeybindStripDescriptors()
                 return targetData and targetData.enabled
             end
         },
+        -- More Info
+        {
+            name = GetString(SI_ACTIVITY_FINDER_MORE_INFO_KEYBIND),
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            visible = function()
+                local targetData = self:GetMainList():GetTargetData()
+                if targetData then
+                    local entryData = targetData.data
+                    if entryData.GetHelpIndices then
+                        local helpCategoryIndex, helpIndex = entryData.GetHelpIndices()
+                        return helpCategoryIndex ~= nil
+                    end
+                end
+
+                return false
+            end,
+            callback = function()
+                local targetData = self:GetMainList():GetTargetData()
+                local entryData = targetData.data
+                local helpCategoryIndex, helpIndex = entryData.GetHelpIndices()
+                HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(helpCategoryIndex, helpIndex)
+            end,
+        },
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
@@ -68,6 +91,7 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
     local function CategoryEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         local activityFinderObject = data.data.activityFinderObject
         local isLocked = activityFinderObject and (activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0)
+        isLocked = isLocked or (data.data.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil)
         enabled = enabled and not isLocked
         data.enabled = enabled
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -145,6 +169,13 @@ do
                 end
             end
 
+            if data.isZoneStories then
+                local isLocked = ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
+                if isLocked then
+                    lockedText = zo_strformat(SI_ZONE_STORY_TOOLTIP_UNAVAILABLE_IN_ZONE, LOCK_TEXTURE)
+                end
+            end
+
             GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, data.name, data.tooltipDescription, lockedText)
         end
     end
@@ -162,14 +193,45 @@ function ActivityFinderRoot_Gamepad:AddRolesMenuEntry()
     list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
 end
 
-function ActivityFinderRoot_Gamepad:AddCategory(categoryData)
+function ActivityFinderRoot_Gamepad:AddCategory(categoryData, categoryPriority)
+
+    local function PrioritySort(item1, item2)
+        local item1Data = item1.data
+        local item2Data = item2.data
+        if item1Data.isRoleSelector then
+            return true
+        end
+
+        if item2Data.isRoleSelector then
+            return false
+        end
+
+        if not item1Data.priority and not item2Data.priority then
+            return item1Data.name < item2Data.name
+        end
+
+        if item1Data.priority and not item2Data.priority then
+            return true
+        end
+
+        if not item1Data.priority and item2Data.priority then
+            return false
+        end
+
+        return item1Data.priority < item2Data.priority
+    end
+
     local entryData = ZO_GamepadEntryData:New(categoryData.name, categoryData.menuIcon)
     entryData.data = categoryData
+    entryData.data.priority = categoryPriority
     entryData:SetIconTintOnSelection(true)
 
     local list = self:GetMainList()
+    list:SetSortFunction(PrioritySort)
     list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
-    list:Commit()
+
+    local DONT_RESELECT_SELECTED_INDEX = true
+    list:Commit(DONT_RESELECT_SELECTED_INDEX)
 end
 
 function ActivityFinderRoot_Gamepad:RefreshCategories()

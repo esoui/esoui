@@ -206,11 +206,10 @@ function ZO_GamepadStoreManager:InitializeKeybindStrip()
     self.repairAllKeybind = {
             name = function()
                 local cost = GetRepairAllCost()
-                local gamepadGoldIconMarkup =  ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
                 if GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) >= cost then
-                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_CurrencyControl_FormatCurrency(cost), gamepadGoldIconMarkup)
+                    return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
                 end
-                return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_ERROR_COLOR:Colorize(ZO_CurrencyControl_FormatCurrency(cost)), gamepadGoldIconMarkup)
+                return zo_strformat(SI_REPAIR_ALL_KEYBIND_TEXT, ZO_Currency_FormatGamepad(CURT_MONEY, cost, ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON))
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
             visible = function() return CanStoreRepair() and GetRepairAllCost() > 0 end,
@@ -557,7 +556,7 @@ do
         [CURT_WRIT_VOUCHERS] = STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS,
         [CURT_EVENT_TICKETS] = STORE_FAILURE_NOT_ENOUGH_EVENT_TICKETS,
     }
-    function ZO_GamepadStoreManager:CanAffordAndCanCarry(selectedData)
+    function ZO_GamepadStoreManager:CanAfford(selectedData)
         local currencyType = selectedData.currencyType1
         local currencyQuantity1 = selectedData.currencyQuantity1
         local playerCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
@@ -569,7 +568,13 @@ do
             return false, GetString("SI_STOREFAILURE", STORE_FAILURE_FOR_CURRENCY_TYPE[currencyType])
         elseif selectedData.price > 0 and selectedData.price > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             return false, GetString(SI_NOT_ENOUGH_MONEY)
-        elseif not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
+        else
+            return true
+        end
+    end
+
+    function ZO_GamepadStoreManager:CanCarry(selectedData)
+        if not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
             return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
         else
             return true

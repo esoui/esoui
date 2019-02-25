@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_CraftingResultDialogLabel" font="ZoFontWinH4" virtual="true">
-            <DimensionConstraints maxX="200" />
+            <Dimensions x="200" />
         </Label>
 
         <Control name="ZO_CraftingResultEnchantRow" virtual="true">

@@ -112,7 +112,7 @@ end
 --Character Framing Blur
 ------------------------
 
-local ZO_CharacterFramingBlur = ZO_NormalizedPointFragment:Subclass()
+ZO_CharacterFramingBlur = ZO_NormalizedPointFragment:Subclass()
 
 local function OnNormalizedPointChanged(normalizedX, normalizedY)
     SetFullscreenEffect(FULLSCREEN_EFFECT_CHARACTER_FRAMING_BLUR, normalizedX, normalizedY)
@@ -158,8 +158,43 @@ do
         local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
         return x, y
     end
+
+    ------------------------
+    --Interaction Framing Fragment
+    ------------------------
+
+    local DEFAULT_INTERATION_OFFSET_X, DEFAULT_INTERATION_OFFSET_Y = 0.5, 0.5
+
+    ZO_InteractionFramingFragment = ZO_NormalizedPointFragment:Subclass()
+
+    function ZO_InteractionFramingFragment:New(normalizedPointCallback)
+        local function SetFrameInteractionTargetRelativeToRightPanel(normalizedX, normalizedY)
+            -- interaction camera data is authored assuming the frame offset is (.5, .5) ie. centered, with a manually created offset to make things look good in the UI.
+            -- To re-use our framing target math, we need to undo the manual offset coming from the data.
+            -- This means that a standard right panel fragment should start at (.5, .5) and every other framing fragment is relative to that.
+            -- As a consumer: just use normal normalized screen coords and things will Just Work(tm)
+            local centerOffsetX, centerOffsetY = NormalizeUICanvasPoint(CalculateStandardRightPanelFramingTarget())
+            SetFrameInteractionTarget(.5 - centerOffsetX + normalizedX, .5 - centerOffsetY + normalizedY)
+        end
+
+        local fragment = ZO_NormalizedPointFragment.New(self, normalizedPointCallback, SetFrameInteractionTargetRelativeToRightPanel)
+        fragment:SetHideOnSceneHidden(true)
+        return fragment
+    end
+
+    function ZO_InteractionFramingFragment:Hide()
+        -- Only some interactions define a framing: many others just expect the camera to be framed at the default (.5, .5).
+        -- So those can continue to work we'll just reset the camera here
+        SetFrameInteractionTarget(DEFAULT_INTERATION_OFFSET_X, DEFAULT_INTERATION_OFFSET_Y)
+        ZO_NormalizedPointFragment.Hide(self)
+    end
+
+    --Handles the case when we reload the UI with an interaction framing fragment shown. This guarentees that when we load with no fragments showing it is at the default offsets
+    SetFrameInteractionTarget(DEFAULT_INTERATION_OFFSET_X, DEFAULT_INTERATION_OFFSET_Y)
+
     FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStandardRightPanelFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStandardRightPanelFramingTarget)
+    FRAME_INTERACTION_STANDARD_RIGHT_PANEL_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateStandardRightPanelFramingTarget)
 
     local function CalculateStandardRightPanelMediumLeftPanelFramingTarget()
         local x = zo_lerp(ZO_SharedMediumLeftPanelBackground:GetRight(), ZO_SharedRightBackground:GetLeft(), .45)
@@ -168,6 +203,7 @@ do
     end
     FRAME_TARGET_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStandardRightPanelMediumLeftPanelFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStandardRightPanelMediumLeftPanelFramingTarget)
+    FRAME_INTERACTION_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateStandardRightPanelMediumLeftPanelFramingTarget)
 
     local function CalculateFurnitureBrowserFramingTarget()
         local x = zo_lerp(0, ZO_SharedRightBackground:GetLeft(), .45)
@@ -232,12 +268,12 @@ do
     FRAME_TARGET_LEFT_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadLeftFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_LEFT_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadLeftFramingTarget)
 
-    local function CalculateGamepadTradingHouseFramingTarget()
+    local function CalculateStoreFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
         return .75 * screenWidth, .55 * screenHeight
     end
-    FRAME_TARGET_TRADING_HOUSE_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadTradingHouseFramingTarget, SetFrameLocalPlayerTarget)
-    FRAME_TARGET_TRADING_HOUSE_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadTradingHouseFramingTarget)
+    FRAME_TARGET_STORE_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStoreFramingTarget, SetFrameLocalPlayerTarget)
+    FRAME_TARGET_STORE_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStoreFramingTarget)
 
     local function CalculateGamepadRightFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
@@ -254,6 +290,22 @@ do
         return 2 * screenWidth, 0
     end
     FRAME_TARGET_BLUR_FULLSCREEN_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateOffscreenFramingTarget)
+
+    local function CalculateGamepadQuadrant3FramingTarget()
+        local x = zo_lerp(ZO_SharedGamepadNavQuadrant_3_Background:GetLeft(), ZO_SharedGamepadNavQuadrant_3_Background:GetRight(), .75)
+        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
+        return x, y
+    end
+    FRAME_INTERACTION_QUADRANT_3_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant3FramingTarget)
+    FRAME_TARGET_BLUR_QUADRANT_3_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant3FramingTarget)
+
+    local function CalculateGamepadQuadrant4FramingTarget()
+        local x = zo_lerp(ZO_SharedGamepadNavQuadrant_4_Background:GetLeft(), ZO_SharedGamepadNavQuadrant_4_Background:GetRight(), .7)
+        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
+        return x, y
+    end
+    FRAME_INTERACTION_QUADRANT_4_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant4FramingTarget)
+    FRAME_TARGET_BLUR_QUADRANT_4_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant4FramingTarget)
 end
 
 ------------------------

@@ -900,8 +900,15 @@ ZO_CollectionsUpdateProvider = ZO_NotificationProvider:Subclass()
 function ZO_CollectionsUpdateProvider:New(notificationManager)
     local provider = ZO_NotificationProvider.New(self, notificationManager)
 
+    local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+        -- Typical unlock changes go through a direct notification event flow
+        if collectionUpdateType ~= ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES then
+            provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
+        end
+    end
+
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW) end)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_REMOVED) end)
 
     provider:BuildNotificationList()
@@ -923,13 +930,7 @@ function ZO_CollectionsUpdateProvider:BuildNotificationList()
 end
 
 function ZO_CollectionsUpdateProvider:CreateCollectibleNotificationData(notificationId, collectibleId)
-    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-
-    -- This can be nil if we unlock a collectible without a category, which is a data bug and will assert in the data manager.
-    -- However, this will still try to load the data for the bad id, so skip it.
-    if collectibleData and not collectibleData:IsPlaceholder() then
-        return collectibleData
-    end
+    return ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
 end
 
 function ZO_CollectionsUpdateProvider:AddCollectibleNotification(data)

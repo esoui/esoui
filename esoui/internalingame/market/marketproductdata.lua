@@ -198,19 +198,16 @@ function ZO_MarketProductData:GetSpaceNeededToAcquire()
 end
 
 function ZO_MarketProductData:AreAllCollectiblesUnlocked()
-    local allCollectiblesOwned = false
     local productType = self:GetMarketProductType()
     if productType == MARKET_PRODUCT_TYPE_COLLECTIBLE then
-        local collectibleId, _, name, type, description, owned, isPlaceholder = GetMarketProductCollectibleInfo(self.marketProductId)
-        if not isPlaceholder then
-            allCollectiblesOwned = owned
-        end
+        local owned = select(6, GetMarketProductCollectibleInfo(self.marketProductId))
+        return owned
     elseif productType == MARKET_PRODUCT_TYPE_BUNDLE then
         -- Show bundles that have all their collectibles unlocked as collected
-        allCollectiblesOwned = CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
+        return CouldAcquireMarketProduct(self.marketProductId) == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
     end
 
-    return allCollectiblesOwned
+    return false
 end
 
 function ZO_MarketProductData:IsLimitedTimeProduct()

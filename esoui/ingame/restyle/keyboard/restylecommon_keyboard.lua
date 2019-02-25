@@ -102,7 +102,6 @@ function ZO_RestyleCommon_Keyboard:Initialize(control)
         end
     end
 
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleCategoryNewStatusCleared", function(...) self:OnCollectibleCategoryNewStatusCleared(...) end)
@@ -533,12 +532,6 @@ function ZO_RestyleCommon_Keyboard:OnHidden()
     self:UnregisterForEvents()
 
     self:RemoveKeybinds()
-end
-
-function ZO_RestyleCommon_Keyboard:OnCollectibleUpdated(collectibleId, lockStateChange)
-    if self.fragment:IsShowing() and lockStateChange ~= ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE then
-        self:UpdateCollectibleStatus(collectibleId)
-    end
 end
 
 function ZO_RestyleCommon_Keyboard:OnCollectionUpdated()

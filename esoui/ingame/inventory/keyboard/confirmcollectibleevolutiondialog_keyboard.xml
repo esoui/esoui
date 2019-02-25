@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ConfirmEvolutionDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_ConfirmCollectibleEvolution_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20" />
+
+                    <Controls>
+                        <Texture name="$(parent)BaseIcon">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="64" y="64" />
+                        </Texture>
+
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Inventory/collectible_evolution_arrow.dds">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BaseIcon" relativePoint="TOPRIGHT" offsetX="10" />
+                            <Dimensions x="64" y="64"/>
+                        </Texture>
+
+                        <Texture name="$(parent)EvolvedIcon">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" offsetX="10" />
+                            <Dimensions x="64" y="64"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Text" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="124"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="124"/>
+                </Label>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

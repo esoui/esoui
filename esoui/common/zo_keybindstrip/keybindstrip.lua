@@ -157,7 +157,7 @@ function ZO_KeybindStrip_OnInitialized(control)
             styleInfo.resizeToFitPadding = 0
             keybindControl:SetupStyle(styleInfo)
             keybindControl:AdjustBindingAnchors(false)
-            keybindControl.nameLabel:SetAnchor(RIGHT, keybind, RIGHT, 0)
+            keybindControl.nameLabel:SetAnchor(RIGHT, keybindControl, RIGHT, 0)
 
             keybindControl:SetParent(nil)
             keybindControl:SetHidden(true)

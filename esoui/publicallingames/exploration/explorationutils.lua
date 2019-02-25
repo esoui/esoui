@@ -2,7 +2,7 @@
 -- Exploration Utilities
 -------------------------------
 
-function ZO_ExplorationUtils_GetParentZoneIdByZoneIndex(zoneIndex)
+function ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(zoneIndex)
     local zoneId = GetZoneId(zoneIndex)
-    return GetParentZoneId(zoneId)
+    return GetZoneStoryZoneIdForZoneId(zoneId)
 end

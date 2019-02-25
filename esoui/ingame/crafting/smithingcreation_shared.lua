@@ -322,17 +322,18 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListClass, listSl
         ZO_ItemSlot_SetupSlot(control, 1, icon, meetsTraitRequirement, not enabled)
 
         if selected then
+            listContainer.selectedLabel:SetText(zo_strformat(SI_SMITHING_SELECTED_PATTERN, data.patternName))
             if data.numTraitsRequired > 0 then
-                listContainer.selectedLabel:SetText(self:GetPlatformFormattedTextString(SI_SMITHING_SELECTED_PATTERN, data.patternName, data.numTraitsRequired))
-            else
-                listContainer.selectedLabel:SetText(zo_strformat(SI_SMITHING_SELECTED_PATTERN_NO_TRAITS, data.patternName))
-            end
-
-            self:SetLabelHidden(listContainer.extraInfoLabel, true)
-            if not meetsTraitRequirement then
                 self:SetLabelHidden(listContainer.extraInfoLabel, false)
-                listContainer.extraInfoLabel:SetText(zo_strformat(SI_SMITHING_SET_NOT_ENOUGH_TRAITS_ERROR, data.numTraitsRequired - data.numTraitsKnown))
-                listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+                if not meetsTraitRequirement then
+                    listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+                    listContainer.extraInfoLabel:SetText(zo_strformat(SI_SMITHING_SET_NOT_ENOUGH_TRAITS_ERROR, data.numTraitsRequired - data.numTraitsKnown))
+                else
+                    listContainer.extraInfoLabel:SetText(zo_strformat(SI_SMITHING_SET_ENOUGH_TRAITS, data.numTraitsRequired))
+                    listContainer.extraInfoLabel:SetColor(ZO_SUCCEEDED_TEXT:UnpackRGBA())
+                end
+            else
+                self:SetLabelHidden(listContainer.extraInfoLabel, true)
             end
 
             self.isPatternUsable = meetsTraitRequirement and USABILITY_TYPE_USABLE or USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT

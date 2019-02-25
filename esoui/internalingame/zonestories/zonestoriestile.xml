@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStoriesTile_Control" inherits="ZO_ActionTile_Control" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Background" override="true">
+                            <TextureCoords left="0" right="ZO_ZONE_STORIES_TILE_TEXTURE_COORDS_RIGHT" top="ZO_ZONE_STORIES_TILE_TEXTURE_COORDS_TOP" bottom="ZO_ZONE_STORIES_TILE_TEXTURE_COORDS_BOTTOM" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

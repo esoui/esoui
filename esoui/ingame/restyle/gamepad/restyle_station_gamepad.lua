@@ -13,7 +13,7 @@ end
 function ZO_Restyle_Station_Gamepad:Initialize(control)
     self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
     self.actionMode = ACTION_NONE
-	
+    
     GAMEPAD_RESTYLE_STATION_SCENE = ZO_InteractScene:New("gamepad_restyle_station", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
     SYSTEMS:RegisterGamepadRootScene("restyle_station", GAMEPAD_RESTYLE_STATION_SCENE)
     ZO_Gamepad_MultiFocus_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, nil, GAMEPAD_RESTYLE_STATION_SCENE)
@@ -48,13 +48,13 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
     ZO_OUTFIT_MANAGER:RegisterCallback("PendingDataChanged", OnOutfitPendingDataChanged)
     control:RegisterForEvent(EVENT_CURRENCY_UPDATE, function(eventId, ...) self:OnCurrencyChanged(...) end)
     control:RegisterForEvent(EVENT_WEAPON_PAIR_LOCK_CHANGED, OnWeaponPairLockedChanged)
-	
-	control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
+    
+    control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
 end
 
 do
-	local NEXT_WEAPON_STATE_EVALUATE_TIME_S = .25
-	function ZO_Restyle_Station_Gamepad:OnUpdate(currentFrameTimeSeconds)
+    local NEXT_WEAPON_STATE_EVALUATE_TIME_S = .25
+    function ZO_Restyle_Station_Gamepad:OnUpdate(currentFrameTimeSeconds)
         local targetData = self.outfitSlotList:GetTargetData()
         if targetData then
             local outfitSlot = targetData.outfitSlot
@@ -115,6 +115,8 @@ function ZO_Restyle_Station_Gamepad:OnHide()
     end
 
     self:SwitchToAction(ACTION_NONE)
+
+    KEYBIND_STRIP:RestoreDefaultExit()
 end
 
 function ZO_Restyle_Station_Gamepad:OnFragmentShowing()
@@ -137,7 +139,7 @@ function ZO_Restyle_Station_Gamepad:OnFragmentShowing()
     self:RefreshHeader()
     self:RefreshFooter()
 
-	if self.actionMode == ACTION_STYLES then
+    if self.actionMode == ACTION_STYLES then
         self:UpdateOutfitsPanel()
     end
 end
@@ -152,7 +154,6 @@ function ZO_Restyle_Station_Gamepad:OnFragmentHidden()
         self.currentOutfitManipulator:ClearPendingChanges()
     end
 
-    KEYBIND_STRIP:RestoreDefaultExit()
     if not ArePlayerWeaponsSheathed() then
         TogglePlayerWield()
     end
@@ -169,38 +170,33 @@ function ZO_Restyle_Station_Gamepad:OnDeferredInitialize()
 
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
-    local function UpdateCarriedCurrencyControl(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
-        return true
-    end
-
     local stylesHeaderData = 
-	{
-		text = GetString(SI_GAMEPAD_DYEING_EQUIPMENT_ACTION_STYLES),
-		callback = function() self:SwitchToAction(ACTION_STYLES) end,
+    {
+        text = GetString(SI_GAMEPAD_DYEING_EQUIPMENT_ACTION_STYLES),
+        callback = function() self:SwitchToAction(ACTION_STYLES) end,
         canSelect = true
-	}
+    }
 
     local dyesHeaderData =
     {
-		text = GetString(SI_GAMEPAD_DYEING_EQUIPMENT_ACTION_DYES),
-		callback = function() self:SwitchToAction(ACTION_DYES) end,
+        text = GetString(SI_GAMEPAD_DYEING_EQUIPMENT_ACTION_DYES),
+        callback = function() self:SwitchToAction(ACTION_DYES) end,
         canSelect = true
-	}
+    }
 
     self.outfitHeaderData = 
     {	
-		tabBarEntries =
-		{
-			stylesHeaderData,
+        tabBarEntries =
+        {
+            stylesHeaderData,
             dyesHeaderData
-		}
+        }
     }
 
     self.defaultHeaderData =
     {
         tabBarEntries =
-		{
+        {
             dyesHeaderData
         }
     }
@@ -224,41 +220,41 @@ end
 function ZO_Restyle_Station_Gamepad:CreateApplyKeybind(multiFocusArea)
     return
     {
-		name = function()
+        name = function()
                     if self.currentOutfitManipulator then
-						local slotsCost, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
+                        local slotsCost, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
                         if slotsCost > 0 then
-						    local IS_GAMEPAD = true
-						    local USE_SHORT_FORMAT = false
-						    local formattedSlotsCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(slotsCost, USE_SHORT_FORMAT, CURT_MONEY, IS_GAMEPAD)
-						    local formattedFlatCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(flatCost, USE_SHORT_FORMAT, CURT_STYLE_STONES, IS_GAMEPAD)
-						    return zo_strformat(SI_OUTFIT_COMMIT_SELECTION, formattedSlotsCurrency, formattedFlatCurrency)
+                            local IS_GAMEPAD = true
+                            local USE_SHORT_FORMAT = false
+                            local formattedSlotsCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(slotsCost, USE_SHORT_FORMAT, CURT_MONEY, IS_GAMEPAD)
+                            local formattedFlatCurrency = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(flatCost, USE_SHORT_FORMAT, CURT_STYLE_STONES, IS_GAMEPAD)
+                            return zo_strformat(SI_OUTFIT_COMMIT_SELECTION, formattedSlotsCurrency, formattedFlatCurrency)
                         end
                     end
 
                     return GetString(SI_DYEING_COMMIT)
-				end,
-		keybind = "UI_SHORTCUT_SECONDARY",
-		callback = function() 
+                end,
+        keybind = "UI_SHORTCUT_SECONDARY",
+        callback = function() 
                       self:CommitSelection()
                       multiFocusArea:UpdateActiveFocusKeybinds()
                    end,
-		visible = function() return self:DoesHaveChanges() end,
+        visible = function() return self:DoesHaveChanges() end,
         enabled = function() return self:CanApplyChanges() end,
-	}
+    }
 end
 
 function ZO_Restyle_Station_Gamepad:CreateUndoKeybind(multiFocusArea)
     return
     {
-		name = GetString(SI_DYEING_UNDO),
-		keybind = "UI_SHORTCUT_LEFT_STICK",
-		visible = function() return self:DoesHaveChanges() end,
-		callback = function() 
+        name = GetString(SI_DYEING_UNDO),
+        keybind = "UI_SHORTCUT_LEFT_STICK",
+        visible = function() return self:DoesHaveChanges() end,
+        callback = function() 
                        self:ShowUndoPendingChangesDialog()
                        multiFocusArea:UpdateActiveFocusKeybinds()
                    end,
-	}
+    }
 end
 
 function ZO_Restyle_Station_Gamepad:CreateRandomizeKeybind(multiFocusArea)
@@ -283,11 +279,11 @@ end
 function ZO_Restyle_Station_Gamepad:CreateOptionsKeybind()
     return
     {
-		name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
-		keybind = "UI_SHORTCUT_TERTIARY",
+        name = GetString(SI_GAMEPAD_DYEING_OPTIONS),
+        keybind = "UI_SHORTCUT_TERTIARY",
         visible = function() return not (self.actionMode == ACTION_STYLES and RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_EQUIPMENT) end,
-		callback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_OPTIONS", self:CreateOptionsDialogActions()) end,
-	}
+        callback = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_OPTIONS", self:CreateOptionsDialogActions()) end,
+    }
 end
 
 function ZO_Restyle_Station_Gamepad:CreateSpecialExitKeybind()
@@ -339,14 +335,14 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
                             self:HandleSelectAction()
                        end,
         },
-		
-		apply,
+        
+        apply,
 
-		-- Options
-		self:CreateOptionsKeybind(),
+        -- Options
+        self:CreateOptionsKeybind(),
 
-		-- Undo All
-		self:CreateUndoKeybind(self),
+        -- Undo All
+        self:CreateUndoKeybind(self),
 
         -- Randomize
         self:CreateRandomizeKeybind(self),
@@ -407,14 +403,14 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
         },
 
         -- Use Set
-		{
-			name = GetString(SI_GAMEPAD_DYEING_USE_SAVED_SET),
-			keybind = "UI_SHORTCUT_TERTIARY",
-			callback = function() 
+        {
+            name = GetString(SI_GAMEPAD_DYEING_USE_SAVED_SET),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function() 
                             self:HandleUseSetAction()
                        end,
             visible = function() return not self:ShouldShowAllDyeFoci() and not self:ShouldShowSelectedDyeSet() end,
-		},
+        },
 
         -- Special exit button
         specialExit,
@@ -813,7 +809,7 @@ do
                 template = "ZO_Gamepad_Dropdown_Item_Indented",
                 header = GetString(SI_GAMEPAD_DYEING_SORT_OPTION_HEADER),
                 setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
-                    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+                    ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
                     control.dropdown:SetSortsItems(false)
                     self:UpdateDyeSortingDropdownOptions(control.dropdown)
                 end,
@@ -972,8 +968,8 @@ end
 function ZO_Restyle_Station_Gamepad:PerformUpdate()
     self.outfitSlotList:Clear()
 
-	local restyleMode = RESTYLE_GAMEPAD:GetMode()
-	
+    local restyleMode = RESTYLE_GAMEPAD:GetMode()
+    
     if restyleMode == RESTYLE_MODE_OUTFIT then
         local foundMainWeapons = false
         local foundBackupWeapons = false
@@ -1228,7 +1224,7 @@ end
 
 function ZO_Restyle_Station_Gamepad:OnSlotChanged(oldData, selectedData)
     if self.actionMode == ACTION_STYLES then
-	    self:UpdateOutfitsPanel()
+        self:UpdateOutfitsPanel()
     elseif self.actionMode == ACTION_DYES then
         local oldControl = self.outfitSlotList:GetControlFromData(oldData)
         local newControl = self.outfitSlotList:GetControlFromData(selectedData)
@@ -1474,26 +1470,20 @@ function ZO_Restyle_Station_Gamepad:DeactivateCurrentSelection()
     ZO_GamepadGenericHeader_Activate(self.header)
 end
 
-do
-    local IS_GAMEPAD = true
-    local USE_SHORT_FORMAT = false
-
-    function ZO_Restyle_Station_Gamepad:CommitSelection()
-        local currentMode = RESTYLE_GAMEPAD:GetMode()
-        if currentMode == RESTYLE_MODE_OUTFIT then
-            local slotCosts = self.currentOutfitManipulator:GetTotalSlotCostsForPendingChanges()
-            local currentAmount = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-            if slotCosts > 0 then
-                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY", { outfitManipulator = self.currentOutfitManipulator })
-            else
-                ZO_Dialogs_ShowGamepadDialog("CONFIRM_APPLY_OUTFIT_STYLE", { outfitManipulator = self.currentOutfitManipulator })
-            end
+function ZO_Restyle_Station_Gamepad:CommitSelection()
+    local currentMode = RESTYLE_GAMEPAD:GetMode()
+    if currentMode == RESTYLE_MODE_OUTFIT then
+        local slotCosts = self.currentOutfitManipulator:GetTotalSlotCostsForPendingChanges()
+        if slotCosts > 0 then
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY", { outfitManipulator = self.currentOutfitManipulator })
         else
-            if ZO_Dyeing_AreAllItemsBound(currentMode, ZO_RESTYLE_DEFAULT_SET_INDEX) then
-                self:CompleteDyeChanges()
-            else
-                ZO_Dialogs_ShowGamepadDialog("CONFIRM_APPLY_DYE")
-            end
+            ZO_Dialogs_ShowGamepadDialog("CONFIRM_APPLY_OUTFIT_STYLE", { outfitManipulator = self.currentOutfitManipulator })
+        end
+    else
+        if ZO_Dyeing_AreAllItemsBound(currentMode, ZO_RESTYLE_DEFAULT_SET_INDEX) then
+            self:CompleteDyeChanges()
+        else
+            ZO_Dialogs_ShowGamepadDialog("CONFIRM_APPLY_DYE")
         end
     end
 end
@@ -1654,11 +1644,9 @@ function ZO_Restyle_Station_Gamepad:InitializeConfirmationDialog()
         parametricList = {}, -- Added Dynamically
         parametricListOnSelectionChangedCallback = function(dialog, list, newSelectedData, oldSelectedData)
                                                         if newSelectedData then
-                                                            local slotCosts, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
-                                                            local costToShow = newSelectedData.currencyType == CURT_MONEY and slotCosts or flatCost
                                                             local IS_GAMEPAD = true
-						                                    local USE_SHORT_FORMAT = false
-                                                            balanceData =
+                                                            local USE_SHORT_FORMAT = false
+                                                            local balanceData =
                                                             {
                                                                 data1 = { header = GetString(SI_GAMEPAD_OUTFITS_APPLY_CHANGES_BALANCE), 
                                                                 value = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(GetCurrencyAmount(newSelectedData.currencyType, newSelectedData.currencyLocation), USE_SHORT_FORMAT, newSelectedData.currencyType, IS_GAMEPAD) },

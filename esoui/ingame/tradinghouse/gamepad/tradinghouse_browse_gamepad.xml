@@ -6,7 +6,9 @@
             <Dimensions y="24" />
         </Label>
 
-        <Control name="ZO_GamepadGuildStoreBrowseComboboxTemplate"  inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
+        <Control name="ZO_GamepadGuildStoreBrowseSelectableEntryTemplate" inherits="ZO_GamepadFullwidthLabelEntryTemplate" virtual="true" />
+
+        <Control name="ZO_GamepadGuildStoreBrowseDropdownTemplate"  inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
         
         <Control name="ZO_GamepadPriceSelectorTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>
@@ -18,7 +20,7 @@
                 self.priceAmount = self:GetNamedChild("PriceAmount")
             </OnInitialized>
 
-            <Controls>               
+            <Controls>
                 <Label name="$(parent)PriceAmount" font="ZoFontGamepad36" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                     <Dimensions y="42" />
@@ -56,35 +58,19 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)SliderValue" relativePoint="BOTTOMRIGHT" />
 
                     <OnInitialized>
-                        ZO_GamepadPairedSlider_OnInitialized(self)
+                        ZO_GamepadConstrainedSlider_OnInitialized(self)
                     </OnInitialized>
-
-                    <OnValueChanged>
-                        ZO_GuildStoreBrowse_SliderOnValueChanged(self, value)
-                    </OnValueChanged>
                 </Slider>
             </Controls>
         </Control>
         
-        <TopLevelControl name="ZO_TradingHouse_Browse_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" hidden="true">
-            <OnInitialized>
-                ZO_TradingHouse_Browse_Gamepad_OnInitialize(self)
-            </OnInitialized>
+        <Control name="ZO_TradingHouse_Browse_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" virtual="true" hidden="true">
             <Controls>
                 <Control name="$(parent)PriceSelectorContainer" inherits="ZO_GamepadGoldSpinnerContainerTemplate" hidden="true">
                     <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)ListListScreenCenterIsAlongTop"/>
                     <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="50"/>
                 </Control>
-
-                <Control name="$(parent)Container" override="true">
-                    <Controls>
-                        <Control name="$(grandparent)List" override="true">
-                            <Anchor point="TOPLEFT" offsetY="285"/>
-                            <Anchor point="BOTTOMRIGHT"/>
-                        </Control>
-                    </Controls>
-                </Control>
             </Controls>
-        </TopLevelControl>
+        </Control>
     </Controls>
 </GuiXml>

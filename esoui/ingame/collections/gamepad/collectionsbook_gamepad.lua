@@ -77,7 +77,7 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     end
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function() self:OnCollectionUpdated() end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("PrimaryResidenceSet", OnCollectibleUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
@@ -170,7 +170,7 @@ function ZO_GamepadCollectionsBook:InitializeGridListPanel()
     local SPACING_X = 6
     self.gridListPanelList:SetGridEntryTemplate("ZO_Collections_Outfit_GridEntry_Template_Gamepad", ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS, OutfitStyleGridEntrySetup, HIDE_CALLBACK, RESET_CONTROL_FUNC, SPACING_X, ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_HEIGHT, ZO_DefaultGridHeaderSetup)
-    self.gridListPanelList:SetLineBreakAmount(ZO_GAMEPAD_OUTFIT_GRID_ENTRY_DIMENSIONS + ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
+    self.gridListPanelList:SetHeaderPrePadding(ZO_GRID_SCROLL_LIST_DEFAULT_SPACING_GAMEPAD)
     self.gridListPanelList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnGridListSelectedDataChanged(previousData, newData) end)
 end
 
@@ -508,8 +508,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
                 elseif self:CanUpgradeCurrentTarget() then
-                    local IS_STANDARD_EDITION = false
-                    ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_IN_GAME)
+                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
                 end
             end,
             visible = function()
@@ -836,12 +835,10 @@ function ZO_GamepadCollectionsBook:BuildCollectionList(categoryData, resetSelect
 
     for _, collectibleData in categoryData:SortedCollectibleIterator({ ZO_CollectibleData.IsShownInCollection }) do
         local entryData = self:BuildCollectibleData(collectibleData)
-        if not collectibleData:IsPlaceholder() then
-            if collectibleData:IsUnlocked() then
-                table.insert(unlockedData, entryData)
-            else
-                table.insert(lockedData, entryData)
-            end
+        if collectibleData:IsUnlocked() then
+            table.insert(unlockedData, entryData)
+        else
+            table.insert(lockedData, entryData)
         end
     end
 
@@ -1331,8 +1328,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     text = GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                        local IS_STANDARD_EDITION = false
-                        ZO_ShowChapterUpgradePlatformDialog(IS_STANDARD_EDITION, CHAPTER_UPGRADE_SOURCE_IN_GAME)
+                        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
                     end,
                     visible = function()
                         return self:CanUpgradeCurrentTarget()

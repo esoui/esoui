@@ -1,0 +1,16 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_AchievementTile_Control" inherits="ZO_Tile_Control" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" />
+
+                <Control name ="$(parent)TextContainer" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Title" maxLineCount="1" wrapMode="ELLIPSIS" />
+                        <Label name="$(parent)Status" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

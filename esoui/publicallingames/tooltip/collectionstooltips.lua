@@ -3,7 +3,8 @@ local DEPRECATED_COLLECTION_NAME = nil
 do
     function ZO_Tooltip:LayoutCollectibleFromData(collectibleData, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
         if collectibleData then
-            self:LayoutCollectible(collectibleData:GetId(), DEPRECATED_COLLECTION_NAME, collectibleData:GetName(), collectibleData:GetNickname(), collectibleData:IsPurchasable(), collectibleData:GetDescription(), collectibleData:GetHint(), collectibleData:IsPlaceholder(), collectibleData:GetCategoryType(), showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+            local DEPRECATED_ARG = nil
+            self:LayoutCollectible(collectibleData:GetId(), DEPRECATED_COLLECTION_NAME, collectibleData:GetName(), collectibleData:GetNickname(), collectibleData:IsPurchasable(), collectibleData:GetDescription(), collectibleData:GetHint(), DEPRECATED_ARG, collectibleData:GetCategoryType(), showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
         end
     end
 end
@@ -27,32 +28,28 @@ do
     local COOLDOWN_TEXT = GetString(SI_GAMEPAD_TOOLTIP_COOLDOWN_HEADER)
     local QUALITY_NORMAL = nil
 
-    function ZO_Tooltip:LayoutCollectible(collectibleId, deprecatedCollectionName, collectibleName, collectibleNickname, isPurchasable, description, hint, isPlaceholder, categoryType, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
-        local isActive = false
+    function ZO_Tooltip:LayoutCollectible(collectibleId, deprecatedCollectionName, collectibleName, collectibleNickname, isPurchasable, description, hint, deprecatedArg, categoryType, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+        local isActive = IsCollectibleActive(collectibleId)
 
-        if not isPlaceholder then
-            isActive = IsCollectibleActive(collectibleId)
+        --things added to the collection top section stack downward
+        local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
 
-            --things added to the collection top section stack downward
-            local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
-
-            topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
-            local unlockState = GetCollectibleUnlockStateById(collectibleId)
-            topSection:AddLine(GetString("SI_COLLECTIBLEUNLOCKSTATE", unlockState))
+        topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
+        local unlockState = GetCollectibleUnlockStateById(collectibleId)
+        topSection:AddLine(GetString("SI_COLLECTIBLEUNLOCKSTATE", unlockState))
             
-            if showVisualLayerInfo then
-                local isOutfitStylePresentInEffectivelyEquippedOutfit = categoryType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE and IsCollectiblePresentInEffectivelyEquippedOutfit(collectibleId)
+        if showVisualLayerInfo then
+            local isOutfitStylePresentInEffectivelyEquippedOutfit = categoryType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE and IsCollectiblePresentInEffectivelyEquippedOutfit(collectibleId)
 
-                if isActive or isOutfitStylePresentInEffectivelyEquippedOutfit then
-                    local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
-                    if visualLayerHidden then
-                        topSection:AddLine(ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
-                    end
+            if isActive or isOutfitStylePresentInEffectivelyEquippedOutfit then
+                local visualLayerHidden, highestPriorityVisualLayerThatIsShowing = WouldCollectibleBeHidden(collectibleId)
+                if visualLayerHidden then
+                    topSection:AddLine(ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
                 end
             end
-
-            self:AddSection(topSection)
         end
+
+        self:AddSection(topSection)
 
         local formattedName = ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName)
         self:AddLine(formattedName, QUALITY_NORMAL, self:GetStyle("title"))

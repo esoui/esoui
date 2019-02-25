@@ -224,6 +224,7 @@ function ZO_QuestJournal_Gamepad:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_dungeon.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_delve.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_housing.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_ZONE_STORY,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_zoneStory.dds")
 end
 
 function ZO_QuestJournal_Gamepad:RegisterTooltips()
@@ -236,6 +237,7 @@ function ZO_QuestJournal_Gamepad:RegisterTooltips()
     local groupDelveIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_groupDelve.dds", ICON_SIZE, ICON_SIZE)
     local delveIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_delve.dds", ICON_SIZE, ICON_SIZE)
     local housingIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_housing.dds", ICON_SIZE, ICON_SIZE)
+    local zoneStoryIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_zoneStory.dds", ICON_SIZE, ICON_SIZE)
 
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_SOLO,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DUNGEON,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, dungeonIcon))
@@ -245,6 +247,7 @@ function ZO_QuestJournal_Gamepad:RegisterTooltips()
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_PUBLIC_DUNGEON,   zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_PUBLIC_DUNGEON, publicDungeonIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_DELVE,            zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_DELVE, delveIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_HOUSING,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_HOUSING, housingIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     INSTANCE_DISPLAY_TYPE_ZONE_STORY,       zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ZONE_STORY, zoneStoryIcon))
 end
 
 function ZO_QuestJournal_Gamepad:GetQuestDataString()
@@ -343,11 +346,7 @@ function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
             end,
 
             visible = function()
-                local selectedQuestIndex = self:GetSelectedQuestIndex()
-                if selectedQuestIndex and (self:CanAbandonQuest() or self:CanShareQuest()) then
-                    return true
-                end
-                return false
+                return self:GetSelectedQuestIndex() ~= nil
             end
         },
     }
@@ -594,6 +593,7 @@ function ZO_QuestJournal_Gamepad:FocusQuestWithIndex(index)
     self:FireCallbacks("QuestSelected", index)
     -- The quest tracker performs focus logic on quest/remove/update, only force focus if the player has clicked on the quest through the journal UI
     if SCENE_MANAGER:IsShowing(self.sceneName) then
+        ZO_ZoneStories_Manager.StopZoneStoryTracking()
         FOCUSED_QUEST_TRACKER:ForceAssist(index)
     end
 

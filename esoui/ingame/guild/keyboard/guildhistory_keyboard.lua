@@ -1,9 +1,11 @@
-local GuildHistoryManager = ZO_SortFilterList:Subclass()
+ZO_GUILD_HISTORY_KEYBOARD_CATEGORY_TREE_WIDTH = 240
 
 local GUILD_EVENT_DATA = 1
 local GUILD_EVENT_TWO_LINES_DATA = 2
 local REQUEST_NEWEST_TIME = 5
 local LOAD_CONTROL_TRIGGER_TIME = .5
+
+local GuildHistoryManager = ZO_SortFilterList:Subclass()
 
 function GuildHistoryManager:New(control)
     return ZO_SortFilterList.New(self, control)
@@ -93,28 +95,36 @@ function GuildHistoryManager:InitializeKeybindDescriptors()
 end
 
 function GuildHistoryManager:CreateCategoryTree()
-    self.categoryTree = ZO_Tree:New(GetControl(self.control, "Categories"), 60, -10, 220)
+    self.categoryTree = ZO_Tree:New(GetControl(self.control, "Categories"), 60, -10, ZO_GUILD_HISTORY_KEYBOARD_CATEGORY_TREE_WIDTH)
 
     --Category Header
 
     local function CategoryHeaderSetup(node, control, categoryId, open)
+        -- 62 is the amount of space from the left side of the parent control to the right side of the text label
+        -- 25 is the offset from the icon to the text label
+        local textLabelMaxWidth = ZO_GUILD_HISTORY_KEYBOARD_CATEGORY_TREE_WIDTH - 62 - 25
+        control.text:SetDimensionConstraints(0, 0, textLabelMaxWidth, 0)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(GetString("SI_GUILDHISTORYCATEGORY", categoryId))
 
         local categoryData = GUILD_HISTORY_CATEGORIES[categoryId]
         control.icon:SetTexture(open and categoryData.down or categoryData.up)
         control.iconHighlight:SetTexture(categoryData.over)
-     
+
         ZO_IconHeader_Setup(control, open)
 
-        if(open) then
+        if open then
             self.categoryTree:SelectFirstChild(node)
         end
     end
 
-    --Subcategory Entry
+    local NO_SELECTION_FUNCTION = nil
+    local NO_EQUALITY_FUNCTION = nil
+    local DEFAULT_CHILD_INDENT = nil
+    local childSpacing = 0
+    self.categoryTree:AddTemplate("ZO_IconHeader", CategoryHeaderSetup, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, DEFAULT_CHILD_INDENT, childSpacing)
 
-    self.categoryTree:AddTemplate("ZO_IconHeader", CategoryHeaderSetup, nil, nil, nil, 0)
+    --Subcategory Entry
 
     local function SubcategoryEntrySetup(node, control, data, open)
         control:SetSelected(false)
@@ -123,13 +133,13 @@ function GuildHistoryManager:CreateCategoryTree()
 
     local function SubcategoryEntrySelected(control, data, selected, reselectingDuringRebuild)
         control:SetSelected(selected)
-        if(selected) then
+        if selected then
             local oldSelectedCategory = self.selectedCategory
             self.selectedCategory = data.categoryId
             self.selectedSubcategory = data.subcategoryId
 
             --if it's the same category we can just mess with the filter instead of rebuilding the whole list
-            if(oldSelectedCategory == self.selectedCategory) then
+            if oldSelectedCategory == self.selectedCategory then
                 self:RefreshFilters()
             else
                 self:RequestNewest()
@@ -143,15 +153,15 @@ function GuildHistoryManager:CreateCategoryTree()
     self.categoryTree:AddTemplate("ZO_GuildHistorySubcategoryEntry", SubcategoryEntrySetup, SubcategoryEntrySelected)
 
     --Build Tree
-        
+
     for i = 1, GetNumGuildHistoryCategories() do
         local categoryData = GUILD_HISTORY_CATEGORIES[i]
-        if(categoryData) then        
+        if categoryData then
             local categoryNode = self.categoryTree:AddNode("ZO_IconHeader", i, nil, SOUNDS.GUILD_HISTORY_BLADE_SELECTED)
            --All
             self.categoryTree:AddNode("ZO_GuildHistorySubcategoryEntry", {categoryId = i, name = GetString(SI_GUILD_HISTORY_SUBCATEGORY_ALL)}, categoryNode, SOUNDS.GUILD_HISTORY_ENTRY_SELECTED)
-            
-            if(categoryData.subcategories) then
+
+            if categoryData.subcategories then
                 for subcategoryId, _ in pairs(categoryData.subcategories) do
                     self.categoryTree:AddNode("ZO_GuildHistorySubcategoryEntry", {categoryId = i, subcategoryId = subcategoryId, name = GetString(categoryData.subcategoryEnumName, subcategoryId)}, categoryNode, SOUNDS.GUILD_HISTORY_ENTRY_SELECTED)
                 end
@@ -211,8 +221,8 @@ function GuildHistoryManager:BuildMasterList()
                                                     param2 = param2,
                                                     param3 = param3,
                                                     param4 = param4,
-                                                    param5 = param5,  
-													param6 = param6,                                                  
+                                                    param5 = param5,
+                                                    param6 = param6,
                                                     secsSinceEvent = secsSinceEvent,
                                                     subcategoryId = ComputeGuildHistoryEventSubcategory(eventType, self.selectedCategory),
                                                     timeStamp = GetFrameTimeSeconds(),

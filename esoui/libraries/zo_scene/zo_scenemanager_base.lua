@@ -12,6 +12,8 @@ function ZO_SceneManager_Base:Initialize()
     self.scenes = {}
     self.sceneGroups = {}
     self.callWhen = {}
+        
+    self:SetBaseScene(ZO_Scene:New("empty", self):GetName())
 
     EVENT_MANAGER:RegisterForEvent("SceneManager", EVENT_FOLLOWER_SCENE_FINISHED_FRAGMENT_TRANSITION, function(eventId, ...) self:OnRemoteSceneFinishedFragmentTransition(...) end)
 end
@@ -25,6 +27,40 @@ end
 
 function ZO_SceneManager_Base:GetScene(sceneName)
     return self.scenes[sceneName]
+end
+
+-- Parent scene
+-- Setting a parent scene will constrain the fragments in this scene manager to only show when the parent scene is showing.
+
+function ZO_SceneManager_Base:GetParentScene()
+    return self.parentScene
+end
+
+function ZO_SceneManager_Base:SetParentScene(parentScene)
+    if parentScene ~= self.parentScene then
+        if self.parentScene then
+            self.parentScene:UnregisterCallback("StateChange", self.onParentSceneStateChangedCallback)
+        end
+        if parentScene then
+            if not self.onParentSceneStateChangedCallback then
+                self.onParentSceneStateChangedCallback = function(oldState, newState)
+                    if self.currentScene then
+                        local wasShowing = oldState == SCENE_SHOWING or oldState == SCENE_SHOWN
+                        local isShowing = newState == SCENE_SHOWING or newState == SCENE_SHOWN
+                        if wasShowing ~= isShowing then
+                            --The part of ZO_SceneFragment:ComputeIfFragmentShouldShow() that cares about the parent scene only cares about the broad strokes of showing/shown vs. hiding/hidden.
+                            self.currentScene:RefreshFragments()
+                        end
+                    end
+                end
+            end
+            self.parentScene = parentScene
+            parentScene:RegisterCallback("StateChange", self.onParentSceneStateChangedCallback)
+        end
+        if self.currentScene then
+            self.currentScene:RefreshFragments()
+        end
+    end
 end
 
 -- scene groups

@@ -18,9 +18,9 @@ function ZO_ActivityFinderTemplate_Gamepad:New(...)
     return manager
 end
 
-function ZO_ActivityFinderTemplate_Gamepad:Initialize(dataManager, categoryData)
+function ZO_ActivityFinderTemplate_Gamepad:Initialize(dataManager, categoryData, categoryPriority)
     local control = CreateControlFromVirtual(dataManager:GetName() .. "_Gamepad", GuiRoot, "ZO_ActivityFinderTemplateTopLevel_Gamepad")
-    ZO_ActivityFinderTemplate_Shared.Initialize(self, control, dataManager, categoryData)
+    ZO_ActivityFinderTemplate_Shared.Initialize(self, control, dataManager, categoryData, categoryPriority)
     local ACTIVATE_LIST_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, ACTIVATE_LIST_ON_SHOW, self.scene)
     self:SetListsUseTriggerKeybinds(true)
@@ -42,7 +42,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeFragment()
     self.scene = scene
     self.fragment = fragment
     self.singularFragment = ZO_FadeSceneFragment:New(self.singularSection)
-    ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(categoryData)
+    ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(categoryData, self.categoryPriority)
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:InitializeFilters()

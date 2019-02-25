@@ -115,27 +115,9 @@
                     <AnchorFill/>
                 </Backdrop>
 
-                <Label name="$(parent)Title" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true">
+                <Label name="$(parent)Title" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
                     <Dimensions x="209"/>
-
-                    <OnMouseEnter>
-                        ZO_MarketProductTemplateKeyboard_OnMouseEnter(self:GetParent())
-                    </OnMouseEnter>
-
-                    <OnMouseExit>
-                        ZO_MarketProductTemplateKeyboard_OnMouseExit(self:GetParent())
-                    </OnMouseExit>
-
-                    <OnMouseUp>
-                        if upInside then
-                            self:GetParent().marketProduct:OnClicked(button)
-                        end
-                    </OnMouseUp>
-
-                    <OnMouseDoubleClick>
-                        self:GetParent().marketProduct:OnDoubleClicked(button)
-                    </OnMouseDoubleClick>
                 </Label>
 
                 <Label name="$(parent)PreviousCost" override="true" font="ZoFontWinH4">

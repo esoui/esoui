@@ -363,8 +363,6 @@ end
 function ZO_GamepadInventory:InitializeSplitStackDialog()
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_SPLIT_STACK_DIALOG,
     {
-        blockDirectionalInput = true,
-
         canQueue = true,
 
         gamepadInfo = {
@@ -492,6 +490,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
     self.itemFilterKeybindStripDescriptor = 
     {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
             name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",

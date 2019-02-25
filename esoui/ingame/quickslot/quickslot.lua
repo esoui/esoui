@@ -405,6 +405,7 @@ function ZO_QuickslotManager:ChangeFilter(filterData)
 
     local isNotItemFilter = self.currentFilter.descriptor ~= ITEMFILTERTYPE_QUICKSLOT
     self.sortHeaders:SetHeaderHiddenForKey("stackSellPrice", isNotItemFilter)
+    self.sortHeaders:SetHeaderHiddenForKey("age", isNotItemFilter)
 end
 
 function ZO_QuickslotManager:ShouldAddItemToList(itemData)

@@ -68,15 +68,19 @@
 
                         <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="LEFT" verticalAlignment="BOTTOM">
                             <OnInitialized>
-                                local fonts = 
+                                local fonts =
                                 {
                                     {
-                                        font = "ZoFontGamepad42", 
+                                        font = "ZoFontGamepad42",
                                         lineLimit = 7
                                     },
                                     {
                                         font = "ZoFontGamepad36",
                                         lineLimit = 8
+                                    },
+                                    {
+                                        font = "ZoFontGamepad34",
+                                        lineLimit = 9
                                     },
                                     {
                                         font = "ZoFontGamepad27",

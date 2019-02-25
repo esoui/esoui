@@ -9,9 +9,6 @@ end
 function ZO_SceneManager_Follower:Initialize(...)
     ZO_SceneManager_Base.Initialize(self, ...)
 
-    ZO_Scene:New("empty", self)
-    self:SetBaseScene("empty")
-
     EVENT_MANAGER:RegisterForEvent("SceneManager", EVENT_LEADER_TO_FOLLOWER_SYNC, function(eventId, ...) self:OnLeaderToFollowerSync(...) end)
 end
 

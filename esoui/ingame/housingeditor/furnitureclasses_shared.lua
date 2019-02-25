@@ -529,6 +529,7 @@ function ZO_FurnitureCategory:New(...)
 end
 
 function ZO_FurnitureCategory:Initialize(parent, categoryId)
+    internalassert(parent ~= nil or self:IsRoot(), "Non-root categories must have a parent category")
     self.parentCategory = parent
     self.entriesData = {}
     self.subcategories = {}
@@ -602,9 +603,11 @@ function ZO_FurnitureCategory:RemoveSubcategory(subcategoryId)
 end
 
 function ZO_FurnitureCategory:GetSubcategory(subcategoryId)
-    for i, subcategory in ipairs(self.subcategories) do
-        if subcategory.categoryId == subcategoryId then
-            return subcategory, i
+    local subcategories = self.subcategories
+    -- inlined for performance
+    for subcategoryIndex = 1, #self.subcategories do
+        if subcategories[subcategoryIndex].categoryId == subcategoryId then
+            return subcategories[subcategoryIndex], subcategoryIndex
         end
     end
 end
@@ -614,7 +617,7 @@ function ZO_FurnitureCategory:GetHasSubcategories()
 end
 
 function ZO_FurnitureCategory:IsRoot()
-    return self.parentCategory == nil
+    return false
 end
 
 function ZO_FurnitureCategory:GetNumEntryItemsRecursive(filterFunction)
@@ -647,6 +650,59 @@ do
         for i, subcategory in ipairs(self.subcategories) do
             subcategory:SortCategoriesRecursive()
         end
+    end
+end
+
+--
+--[[ RootFurnitureCategory ]]--
+--
+ZO_RootFurnitureCategory = ZO_FurnitureCategory:Subclass()
+
+function ZO_RootFurnitureCategory:New(...)
+    return ZO_FurnitureCategory.New(self, ...)
+end
+
+function ZO_RootFurnitureCategory:Initialize(rootCategoryName)
+    local NO_PARENT = nil
+    local NO_CATEGORY_ID = nil
+    ZO_FurnitureCategory.Initialize(self, NO_PARENT, NO_CATEGORY_ID)
+    self.rootCategoryName = rootCategoryName
+end
+
+function ZO_RootFurnitureCategory:GetRootCategoryName()
+    return self.rootCategoryName
+end
+
+-- Override
+function ZO_RootFurnitureCategory:IsRoot()
+    return true
+end
+
+function ZO_RootFurnitureCategory:GetOrCreateMostSpecificCategory(categoryId, subcategoryId)
+    if categoryId and categoryId > 0 then
+        local categoryData = self:GetSubcategory(categoryId)
+        if not categoryData then
+            self:AddSubcategory(categoryId, ZO_FurnitureCategory:New(self, categoryId))
+            categoryData = self:GetSubcategory(categoryId)
+        end
+
+        if subcategoryId and subcategoryId > 0 then
+            local subcategoryData = categoryData:GetSubcategory(subcategoryId)
+            if not subcategoryData then
+                categoryData:AddSubcategory(subcategoryId, ZO_FurnitureCategory:New(categoryData, subcategoryId))
+                subcategoryData = categoryData:GetSubcategory(subcategoryId)
+            end
+            return subcategoryData
+        else
+            return categoryData
+        end
+    else
+        local categoryData = self:GetSubcategory(ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY)
+        if not categoryData then
+            self:AddSubcategory(ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY, ZO_FurnitureCategory:New(self, ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY))
+            categoryData = self:GetSubcategory(ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY)
+        end
+        return categoryData
     end
 end
 

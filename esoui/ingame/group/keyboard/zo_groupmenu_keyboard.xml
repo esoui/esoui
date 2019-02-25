@@ -31,49 +31,9 @@
                     <Anchor point="TOPRIGHT" offsetX="-10" />
                 </Control>
 
-                <Control name="$(parent)PreferredRoles" resizeToFitDescendents="true">
+                <Control name="$(parent)PreferredRoles" inherits="ZO_PreferredRoles_Keyboard_Template">
                     <DimensionConstraints minX="265"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="-8" offsetY="-5" />
-                    
-                    <OnInitialized>
-                        ZO_PreferredRoles_OnInitialized(self)
-                    </OnInitialized>
-
-                    <Controls>
-                        <Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_PREFERRED_ROLES_LABEL" font="ZoFontHeader3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
-                            <Anchor point="TOP" />
-                        </Label>
-
-                        <Control name="$(parent)Buttons" resizeToFitDescendents="true">
-                            <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" />
-
-                            <Controls>
-                                <Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton">
-                                    <Anchor point="TOP" />
-
-                                    <OnInitialized>
-                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_HEAL)
-                                    </OnInitialized>
-                                </Button>
-
-                                <Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" offsetX="-5" />
-
-                                    <OnInitialized>
-                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_TANK)
-                                    </OnInitialized>
-                                </Button>
-
-                                <Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton">
-                                    <Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="5" />
-
-                                    <OnInitialized>
-                                        ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_DPS)
-                                    </OnInitialized>
-                                </Button>
-                            </Controls>
-                        </Control>
-                    </Controls>
                 </Control>
 
                 <Control name="$(parent)RolesCategoriesDivider" inherits="ZO_DynamicHorizontalDivider">

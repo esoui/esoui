@@ -39,7 +39,6 @@ function ActionButton:New(slotNum, buttonType, parent, controlTemplate)
         newB.button                 = GetControl(slotCtrl, "Button")
         newB.button.slotNum         = slotNum
         newB.button.slotType        = ABILITY_SLOT_TYPE_ACTIONBAR
-        newB.button.tooltip         = AbilityTooltip
 
         newB.flipCard               = GetControl(slotCtrl, "FlipCard")
         newB.bg                     = GetControl(slotCtrl, "BG")

@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_AchievementTile_Keyboard_Control" inherits="ZO_ZoneStory_AchievementTile_Control ZO_Tile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_Y" />
+
+            <OnInitialized>
+                ZO_ZoneStory_AchievementTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" level="3">
+                    <Dimensions x="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_ICON_DIMENSIONS" />
+                    <Anchor point="TOPLEFT" />
+
+                    <Controls>
+                        <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds" level="2">
+                            <AnchorFill />
+                        </Texture>
+                        
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Control name ="$(parent)TextContainer" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="10" />
+                    <Anchor point="RIGHT" constrains="X" />
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" font="ZoFontWinH4" maxLineCount="2">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Status" override="true" font="ZoFontWinH4">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

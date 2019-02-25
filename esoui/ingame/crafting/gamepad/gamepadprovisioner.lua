@@ -167,18 +167,18 @@ ZO_GamepadProvisioner.EMBEDDED_SETTINGS =
 }
 
 function ZO_GamepadProvisioner:InitializeSettings()
-    local function GenerateTab(nameStringId, filterType)
+    local function GenerateTab(filterType)
         return {
-            text = GetString(nameStringId),
+            text = GetString("SI_PROVISIONERSPECIALINGREDIENTTYPE", filterType),
             callback = function()
                 self:OnTabFilterChanged(filterType)
             end,
         }
     end
 
-    local foodTab = GenerateTab(SI_PROVISIONER_FILTER_COOK, PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES)
-    local drinkTab = GenerateTab(SI_PROVISIONER_FILTER_BREW, PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING)
-    local furnishingsTab = GenerateTab(SI_PROVISIONER_FILTER_FURNISHINGS, PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
+    local foodTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES)
+    local drinkTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING)
+    local furnishingsTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
 
     local provisioningSettings = ZO_GamepadProvisioner.PROVISIONING_SETTINGS
     provisioningSettings.tabs = {foodTab, drinkTab, furnishingsTab}
@@ -488,7 +488,7 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
 end
 
 function ZO_GamepadProvisioner:TogglePreviewMode()
-    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, FURNITURE_BROWSER_GAMEPAD_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+    ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_2_3_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
     if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
         self.control:GetNamedChild("IngredientsBar"):SetHidden(true)
     else

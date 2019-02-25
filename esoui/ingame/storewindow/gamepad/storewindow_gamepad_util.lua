@@ -155,8 +155,8 @@ local function GetBuyItems()
 
         itemData.storeGroup = GetItemStoreGroup(itemData)
         itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
-        if itemData.entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
-            itemData.locked = select(2, GetStoreCollectibleInfo(itemData.slotIndex))
+        if not itemData.meetsRequirementsToBuy and (itemData.buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE or itemData.buyStoreFailure == STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE) then
+            itemData.locked = true
         end
     end
 
@@ -380,8 +380,14 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
 
         local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
         
-        --This is only used by stables        
-        entry.data = itemData.data
+        --This is only used by stables
+        local stableTrainingData = itemData.data
+        if stableTrainingData then
+            entry.trainingData = stableTrainingData
+            local MIN_BONUS = 0
+            entry:SetBarValues(MIN_BONUS, stableTrainingData.maxBonus, stableTrainingData.bonus)
+            entry:SetShowBarEvenWhenUnselected(true)
+        end
         
         if not itemData.ignoreStoreVisualInit then
             entry:InitializeStoreVisualData(itemData)

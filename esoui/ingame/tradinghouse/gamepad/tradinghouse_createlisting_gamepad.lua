@@ -35,6 +35,8 @@ function ZO_GamepadTradingHouse_CreateListing:Initialize(control)
 
     TRADING_HOUSE_CREATE_LISTING_GAMEPAD_SCENE = ZO_InteractScene:New("gamepad_trading_house_create_listing", SCENE_MANAGER, ZO_TRADING_HOUSE_INTERACTION)
     TRADING_HOUSE_CREATE_LISTING_GAMEPAD_SCENE:RegisterCallback("StateChange", function(...) self:OnStateChanged(...) end)
+
+    TRADING_HOUSE_GAMEPAD_SCENE:GetSceneGroup():AddScene("gamepad_trading_house_create_listing")
 end
 
 function ZO_GamepadTradingHouse_CreateListing:PerformDeferredInitialization()
@@ -98,7 +100,7 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeKeybindStripDescriptors(
 end
 
 function ZO_GamepadTradingHouse_CreateListing:InitializeHeader()
-    self.header = self.control:GetNamedChild("HeaderContainer").header
+    self.header = self.control:GetNamedChild("Mask"):GetNamedChild("HeaderContainer").header
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
 
     local function GetGuildTitle(control)
@@ -145,7 +147,8 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeHeader()
 end
 
 function ZO_GamepadTradingHouse_CreateListing:InitializeControls()
-    self.priceSelectorControl = self.control:GetNamedChild("ListingPriceSelectorContainer")
+    local mask = self.control:GetNamedChild("Mask"):GetNamedChild("Container")
+    self.priceSelectorControl = mask:GetNamedChild("ListingPriceSelectorContainer")
     self.priceSelector = ZO_CurrencySelector_Gamepad:New(self.priceSelectorControl:GetNamedChild("Selector"))
     self.priceSelector:SetClampValues(true)
     self.priceSelector:RegisterCallback("OnValueChanged", function() self:ValidatePriceSelectorValue(self.priceSelector:GetValue()) end)
@@ -154,13 +157,16 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeControls()
     self.priceSelector:SetClampValues(CLAMP_VALUES)
     self.priceSelector:SetMaxValue(MAX_PLAYER_CURRENCY)
 
-    self.listingPriceControl = self.control:GetNamedChild("ListingPrice")
+    self.listingPriceControl = mask:GetNamedChild("ListingPrice")
     self.listingPriceAmountLabel = self.listingPriceControl:GetNamedChild("AmountLabel")
-    self.listingFeeControl = self.control:GetNamedChild("ListingFee")
+
+    self.listingFeeControl = mask:GetNamedChild("ListingFee")
     self.listingFeeAmountLabel = self.listingFeeControl:GetNamedChild("AmountLabel")
-    self.listingHouseCutControl = self.control:GetNamedChild("HouseCut")
+
+    self.listingHouseCutControl = mask:GetNamedChild("HouseCut")
     self.listingHouseCutAmountLabel = self.listingHouseCutControl:GetNamedChild("AmountLabel")
-    self.listingProfitControl = self.control:GetNamedChild("Profit")
+
+    self.listingProfitControl = mask:GetNamedChild("Profit")
     self.listingProfitAmountLabel = self.listingProfitControl:GetNamedChild("AmountLabel")   
 end
 
@@ -245,7 +251,7 @@ end
 
 function ZO_GamepadTradingHouse_CreateListing:ShowListItemConfirmation()
     SetPendingItemPost(BAG_BACKPACK, self.selectedData.slotIndex, self.selectedData.stackCount)
-    ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(self.selectedData, "TRADING_HOUSE_CONFIRM_SELL_ITEM", self.listingPrice)
+    ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(self.selectedData, "TRADING_HOUSE_CONFIRM_SELL_ITEM", self.listingPrice, self.selectedData.itemData.iconFile)
 end
 
 --[[ Globals ]]--

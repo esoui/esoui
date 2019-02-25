@@ -6,6 +6,8 @@ local function InitializeKeyboardMorphDialog()
 
     local baseAbility = dialogControl:GetNamedChild("BaseAbility")
     baseAbility.icon = baseAbility:GetNamedChild("Icon")
+    --Hardcoded to four to hide the XP bar: this ability should always be max rank, so no need to show it.
+    baseAbility.overrideRank = 4
     dialogControl.baseAbility = baseAbility
 
     local morphAbility1 = dialogControl:GetNamedChild("MorphAbility1")

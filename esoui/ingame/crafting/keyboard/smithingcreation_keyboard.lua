@@ -223,6 +223,7 @@ end
 
 function ZO_SmithingCreation:InitializeMaterialList(...)
     local listContainer = self.control:GetNamedChild("MaterialList")
+    listContainer.extraInfoLabel:ClearAnchors()
     listContainer.extraInfoLabel:SetAnchor(BOTTOM, listContainer, BOTTOM, 0, 22)
 
     return ZO_SharedSmithingCreation.InitializeMaterialList(self, ...)

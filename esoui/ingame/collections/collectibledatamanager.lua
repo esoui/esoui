@@ -6,11 +6,11 @@ ZO_COLLECTIBLE_DATA_FILTERS =
     EXCLUDE_INVALID_FOR_PLAYER = false,
 }
 
-ZO_COLLECTIBLE_LOCK_STATE_CHANGE =
+ZO_COLLECTION_UPDATE_TYPE =
 {
-    NONE = 0,
-    UNLOCKED = 1,
-    LOCKED = 2,
+    REBUILD = 1,
+    FORCE_REINITIALIZE = 2,
+    UNLOCK_STATE_CHANGES = 3,
 }
 
 ----------------------
@@ -245,10 +245,6 @@ do
         end
         return hint
     end
-end
-
-function ZO_CollectibleData:IsPlaceholder()
-    return IsCollectiblePlaceholder(self.collectibleId)
 end
 
 function ZO_CollectibleData:GetKeyboardBackgroundImage()
@@ -1049,8 +1045,6 @@ end
 -- Data Manager --
 ------------------
 
-local FULL_COLLECTION_UPDATE = 0
-
 ZO_CollectibleDataManager = ZO_CallbackObject:Subclass()
 
 function ZO_CollectibleDataManager:New(...)
@@ -1083,10 +1077,18 @@ function ZO_CollectibleDataManager:Initialize()
     self.subcategoryObjectPool = ZO_ObjectPool:New(CreateSubcategoryData, ResetData)
     self.collectibleObjectPool = ZO_ObjectPool:New(CreateCollectibleData, ResetData)
 
+    --[[
+        EVENT_COLLECTIBLE_UPDATED fires when a nickname changes or a collectible is set as active/inactive. It does not encompass unlock state changes.
+        EVENT_COLLECTION_UPDATED happens on init or when a command forces all collectibles to lock/unlock (re-init). Those cases don't use dirty unlock mappings from C, so we do that delta work here while we refresh everything.
+        EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED can happen at any time, and is an event that tells us to re-evaluate unlock status for everything because anything could be based on that. Like with EVENT_COLLECTION_UPDATED, we handle the delta here, not in C.
+        EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED happens when the client maps out dirty unlock states (collectibles go on trial or ownership changes like crown store or rewards). We consume the dirty mapping from C and broadcast it out.
+        The later 3 all fire the same callback ("OnCollectionUpdated") to all systems registering with the callback manager with info to help determine what happened: collectionUpdateType (ZO_COLLECTION_UPDATE_TYPE), collectiblesByNewUnlockState
+    --]]
+
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_UPDATED, function(_, ...) self:OnCollectibleUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTION_UPDATED, function(_, ...) self:OnCollectionUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLES_UPDATED, function(_, ...) self:OnCollectionUpdated(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, function() self:OnCollectionUpdated() end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, function(_, ...) self:OnESOPlusFreeTrialStatusChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, function(_, ...) self:OnCollectiblesUnlockStateChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NEW_STATUS_CLEARED, function(_, ...) self:OnCollectibleNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_CATEGORY_NEW_STATUS_CLEARED, function(_, ...) self:OnCollectibleCategoryNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(_, ...) self:OnCollectibleNotificationNew(...) end)
@@ -1096,39 +1098,109 @@ function ZO_CollectibleDataManager:Initialize()
     self:RebuildCollection()
 end
 
-function ZO_CollectibleDataManager:OnCollectibleUpdated(collectibleId, justUnlocked)
+function ZO_CollectibleDataManager:OnCollectibleUpdated(collectibleId)
     local collectibleData = self.collectibleIdToDataMap[collectibleId]
     if collectibleData then
         collectibleData:Refresh()
-
-        local lockStateChange = ZO_COLLECTIBLE_LOCK_STATE_CHANGE.NONE
-        if justUnlocked then
-            TriggerTutorial(TUTORIAL_TRIGGER_ACQUIRED_COLLECTIBLE)
-            lockStateChange = ZO_COLLECTIBLE_LOCK_STATE_CHANGE.UNLOCKED
-        elseif collectibleData:IsLocked() then
-            lockStateChange = ZO_COLLECTIBLE_LOCK_STATE_CHANGE.LOCKED
-        end
-        self:FireCallbacks("OnCollectibleUpdated", collectibleId, lockStateChange)
+        self:FireCallbacks("OnCollectibleUpdated", collectibleId)
     else
         local errorString = string.format("EVENT_COLLECTIBLE_UPDATED fired with invalid collectible id (%d)", collectibleId)
         internalassert(false, errorString)
     end
 end
 
-function ZO_CollectibleDataManager:OnCollectionUpdated(numJustUnlocked)
-    numJustUnlocked = numJustUnlocked or FULL_COLLECTION_UPDATE
-    if numJustUnlocked > 0 then
-         self:RefreshCollectionOnlyDirtyCollectibles()
-    else
-        self:RefreshCollection()
-    end
-    
-    if numJustUnlocked > 0 or self:HasAnyUnlockedCollectibles() then
-        TriggerTutorial(TUTORIAL_TRIGGER_ACQUIRED_COLLECTIBLE)
+-- Begin Collection Update Functions --
+
+function ZO_CollectibleDataManager:RebuildCollection()
+    ZO_ClearTable(self.collectibleIdToDataMap)
+    ZO_ClearTable(self.collectibleCategoryIdToDataMap)
+
+    self.categoryObjectPool:ReleaseAllObjects()
+
+    for categoryIndex = 1, GetNumCollectibleCategories() do
+        local categoryData = self.categoryObjectPool:AcquireObject(categoryIndex)
+        categoryData:BuildData(categoryIndex)
     end
 
-    self:FireCallbacks("OnCollectionUpdated", numJustUnlocked)
+    -- No state to track changes for
+    local collectiblesByNewUnlockState = {}
+    self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.REBUILD, collectiblesByNewUnlockState)
 end
+
+do
+    local function ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByUnlockState)
+        local oldUnlockState = collectibleData:GetUnlockState()
+
+        collectibleData:Refresh()
+        collectibleData:SetNotificationId(nil)
+
+        local newUnlockState = collectibleData:GetUnlockState()
+        if oldUnlockState ~= newUnlockState then
+            local unlockStateTable = collectiblesByUnlockState[newUnlockState]
+            if not unlockStateTable then
+                unlockStateTable = {}
+                collectiblesByUnlockState[newUnlockState] = unlockStateTable
+            end
+            table.insert(unlockStateTable, collectibleData)
+        end
+    end
+
+    function ZO_CollectibleDataManager:OnCollectionUpdated()
+        local collectiblesByNewUnlockState = {}
+
+        for _, collectibleData in pairs(self.collectibleIdToDataMap) do
+            ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByNewUnlockState)
+        end
+
+        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.FORCE_REINITIALIZE, collectiblesByNewUnlockState)
+    end
+
+    function ZO_CollectibleDataManager:OnESOPlusFreeTrialStatusChanged()
+        local collectiblesByNewUnlockState = {}
+
+        for _, collectibleData in pairs(self.collectibleIdToDataMap) do
+            ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByNewUnlockState)
+        end
+
+        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES, collectiblesByNewUnlockState)
+    end
+
+    local function GetNextDirtyUnlockStateCollectibleIdIter(_, lastCollectibleId)
+        return GetNextDirtyUnlockStateCollectibleId(lastCollectibleId)
+    end
+
+    function ZO_CollectibleDataManager:OnCollectiblesUnlockStateChanged()
+        local collectiblesByNewUnlockState = {}
+        for collectibleId in GetNextDirtyUnlockStateCollectibleIdIter do
+            local collectibleData = self.collectibleIdToDataMap[collectibleId]
+            if collectibleData then
+                ProcessCollectibleDataForUnlockStateChange(collectibleData, collectiblesByNewUnlockState)
+            else
+                local errorString = string.format("EVENT_COLLECTIBLES_UPDATED fired with invalid dirty collectible id (%d)", collectibleId)
+                internalassert(false, errorString)
+            end
+        end
+
+        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES, collectiblesByNewUnlockState)
+    end
+end
+
+function ZO_CollectibleDataManager:FinalizeCollectionUpdates(collectionUpdateType, collectiblesByNewUnlockState)
+    local hasUnlockStateChanges = NonContiguousCount(collectiblesByNewUnlockState) > 0
+    if hasUnlockStateChanges then
+        if collectiblesByNewUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED] then
+            TriggerTutorial(TUTORIAL_TRIGGER_ACQUIRED_COLLECTIBLE)
+        end
+    end
+
+    if hasUnlockStateChanges or collectionUpdateType ~= ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES then
+        self:MapNotifications()
+
+        self:FireCallbacks("OnCollectionUpdated", collectionUpdateType, collectiblesByNewUnlockState)
+    end
+end
+
+-- End Collection Update Functions --
 
 function ZO_CollectibleDataManager:OnCollectibleNewStatusCleared(collectibleId)
     local collectibleData = self.collectibleIdToDataMap[collectibleId]
@@ -1187,48 +1259,6 @@ function ZO_CollectibleDataManager:OnPrimaryResidenceSet(houseId)
     end
 
     self:FireCallbacks("PrimaryResidenceSet", houseId)
-end
-
-function ZO_CollectibleDataManager:RefreshCollection()
-    for _, collectibleData in pairs(self.collectibleIdToDataMap) do
-        collectibleData:Refresh()
-        collectibleData:SetNotificationId(nil)
-    end
-
-    self:MapNotifications()
-end
-
-function ZO_CollectibleDataManager:RefreshCollectionOnlyDirtyCollectibles()
-    local numCollectiblesUpdated = GetNumCollectiblesUpdatedEventCollectibleIds()
-    for index = 1, numCollectiblesUpdated do
-        local collectibleId = GetCollectiblesUpdatedEventCollectibleId(index)
-        local collectibleData = self.collectibleIdToDataMap[collectibleId]
-        if collectibleData then
-            collectibleData:Refresh()
-            collectibleData:SetNotificationId(nil)
-        else
-            local errorString = string.format("EVENT_COLLECTIBLES_UPDATED fired with invalid dirty collectible id (%d)", collectibleId)
-            internalassert(false, errorString)
-        end
-    end
-
-    self:MapNotifications()
-end
-
-function ZO_CollectibleDataManager:RebuildCollection()
-    ZO_ClearTable(self.collectibleIdToDataMap)
-    ZO_ClearTable(self.collectibleCategoryIdToDataMap)
-
-    self.categoryObjectPool:ReleaseAllObjects()
-
-    for categoryIndex = 1, GetNumCollectibleCategories() do
-        local categoryData = self.categoryObjectPool:AcquireObject(categoryIndex)
-        categoryData:BuildData(categoryIndex)
-    end
-
-    self:MapNotifications()
-
-    self:FireCallbacks("OnCollectionUpdated", FULL_COLLECTION_UPDATE)
 end
 
 function ZO_CollectibleDataManager:MapNotifications()

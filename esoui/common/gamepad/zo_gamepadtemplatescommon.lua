@@ -255,7 +255,12 @@ local function ZO_SharedGamepadEntryBarSetup(control, data, selected)
                 barContainer:SetValue(data.barValue)
             end
         end
-        barContainer:SetHidden(not selected)
+
+        if data.showBarEvenWhenUnselected then
+            barContainer:SetHidden(false)
+        else
+            barContainer:SetHidden(not selected)
+        end
     end
 end
 
@@ -594,6 +599,18 @@ function ZO_GamepadMenuEntryTemplate_GetAlpha(selected, disabled)
         return .64
     else
         return 1
+    end
+end
+
+function ZO_GamepadMenuEntryTemplate_GetLabelColor(selected, disabled)
+    if disabled and selected then
+        return ZO_GAMEPAD_DISABLED_SELECTED_COLOR
+    elseif disabled and not selected then
+        return ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR
+    elseif not disabled and selected then
+        return ZO_GAMEPAD_SELECTED_COLOR
+    elseif not disabled and not selected then
+        return ZO_GAMEPAD_UNSELECTED_COLOR
     end
 end
 

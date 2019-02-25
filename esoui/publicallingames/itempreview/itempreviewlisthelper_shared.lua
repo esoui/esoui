@@ -8,6 +8,8 @@ end
 
 function ZO_ItemPreviewListHelper_Shared:Initialize(control)
     self.control = control
+    self.dontWrap = false
+    self.previewListEntries = {}
 
     self:ClearPreviewData()
 
@@ -32,22 +34,68 @@ function ZO_ItemPreviewListHelper_Shared:Initialize(control)
 end
 
 function ZO_ItemPreviewListHelper_Shared:ClearPreviewData()
+    ZO_ClearNumericallyIndexedTable(self.previewListEntries)
     self.previewType = nil
-    self.previewListEntries = nil
     self.previewIndex = nil
+    self.previewData = nil
 end
 
-function ZO_ItemPreviewListHelper_Shared:PreviewList(previewType, previewListEntries, startingIndex)
+function ZO_ItemPreviewListHelper_Shared:PreviewList(previewType, previewListEntries, startingIndex, dontWrap)
     assert(previewType and previewListEntries and #previewListEntries > 0)
 
+    self:ClearPreviewData()
+    for previewIndex, previewData in ipairs(previewListEntries) do
+        self.previewListEntries[previewIndex] = previewData
+    end
     self.previewType = previewType
-    self.previewListEntries = previewListEntries
-    self.previewIndex = nil -- Effectively resets the "current" preview, so we don't need to worry about "doing the same index again"
     self:SetPreviewIndex(startingIndex or 1)
+    self.dontWrap = dontWrap == true -- coerce to bool
+end
+
+function ZO_ItemPreviewListHelper_Shared:UpdatePreviewList(newPreviewList, dontReselectCurrentEntry)
+    local currentEntryIndex = nil
+    -- Copy new previews over old list
+    ZO_ClearNumericallyIndexedTable(self.previewListEntries)
+    for newPreviewIndex, newPreviewData in ipairs(newPreviewList) do
+        self.previewListEntries[newPreviewIndex] = newPreviewData
+
+        if newPreviewData == self.previewData then
+            currentEntryIndex = newPreviewIndex
+        end
+    end
+
+    -- Select a new entry
+    if dontReselectCurrentEntry then
+        currentEntryIndex = 1
+    end
+
+    if currentEntryIndex == nil then
+        -- try to pick the element in the list closest to the old index.
+        -- If the old entry wasn't at the end of the list or further, that means we pick the next item index-wise. If it is at the end, that means we pick the last item in that list
+        currentEntryIndex = math.min(#self.previewListEntries, self.previewIndex)
+    end
+    
+    self:SetPreviewIndex(currentEntryIndex)
+end
+
+function ZO_ItemPreviewListHelper_Shared:CanPreviewNext()
+    if self.previewType == nil then
+        return false
+    end
+
+    if not self:HasMultiplePreviewDatas() then
+        return false
+    end
+
+    if self.dontWrap then
+        return self.previewIndex < #self.previewListEntries
+    end
+
+    return true
 end
 
 function ZO_ItemPreviewListHelper_Shared:PreviewNext()
-    if self.previewType then
+    if self:CanPreviewNext() then
         local previewIndex = self.previewIndex + 1
 
         if previewIndex > #self.previewListEntries then
@@ -58,8 +106,24 @@ function ZO_ItemPreviewListHelper_Shared:PreviewNext()
     end
 end
 
+function ZO_ItemPreviewListHelper_Shared:CanPreviewPrevious()
+    if self.previewType == nil then
+        return false
+    end
+
+    if not self:HasMultiplePreviewDatas() then
+        return false
+    end
+
+    if self.dontWrap then
+        return self.previewIndex > 1
+    end
+
+    return true
+end
+
 function ZO_ItemPreviewListHelper_Shared:PreviewPrevious()
-    if self.previewType then
+    if self:CanPreviewPrevious() then
         local previewIndex = self.previewIndex - 1
 
         if previewIndex < 1 then
@@ -71,9 +135,11 @@ function ZO_ItemPreviewListHelper_Shared:PreviewPrevious()
 end
 
 function ZO_ItemPreviewListHelper_Shared:SetPreviewIndex(previewIndex)
-    if self:IsValidPreviewIndex(previewIndex) and self.previewIndex ~= previewIndex then
+    local previewData = self.previewListEntries[previewIndex]
+    if self:IsValidPreviewIndex(previewIndex) and self.previewData ~= previewData then
         self.previewIndex = previewIndex
-        local previewData = self.previewListEntries[previewIndex]
+        self.previewData = previewData
+
         if type(previewData) == "table" then
             self:GetPreviewObject():SharedPreviewSetup(self.previewType, unpack(previewData))
         else

@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_ActivityCompletionHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" modifyTextType="UPPERCASE" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ZoneStory_ActivityCompletionTile_Control" inherits="ZO_Tile_Control" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" />
+
+                <Label name="$(parent)Value" />
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

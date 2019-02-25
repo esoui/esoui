@@ -121,7 +121,7 @@ function SkillsAdvisor_Manager:UpdateSkillBuildData()
 end
 
 function SkillsAdvisor_Manager:GetSkillProgressionData(skillBuildId, skillBuildAbilityIndex)
-    local skillType, skillLineIndex, skillIndex, _, skillBuildMorphChoice, skillBuildRankIndex = GetSkillBuildEntryInfo(skillBuildId, skillBuildAbilityIndex)
+    local skillType, skillLineIndex, skillIndex, _, skillBuildMorphChoice, skillBuildRank = GetSkillBuildEntryInfo(skillBuildId, skillBuildAbilityIndex)
 
     local skillData = SKILLS_DATA_MANAGER:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
     if not skillData then
@@ -132,7 +132,7 @@ function SkillsAdvisor_Manager:GetSkillProgressionData(skillBuildId, skillBuildA
         return nil
     end
 
-    local skillProgressionData = skillData:IsPassive() and skillData:GetRankData(skillBuildRankIndex) or skillData:GetMorphData(skillBuildMorphChoice)
+    local skillProgressionData = skillData:IsPassive() and skillData:GetRankData(skillBuildRank) or skillData:GetMorphData(skillBuildMorphChoice)
     return skillProgressionData
 end
 

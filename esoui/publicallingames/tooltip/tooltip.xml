@@ -258,18 +258,28 @@
             </Controls>
         </Control>
 
+        <StatusBar name="SkillTooltipProgressionBar" inherits="ZO_ArrowStatusBarWithBG" virtual="true" />
+
         <TopLevelControl name="SkillTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
                 <Tooltip name="SkillTooltip"  inherits="ZO_BaseTooltip">
                     <ResizeToFitPadding width="32" height="40"/>
                     <DimensionConstraints minX="384" maxX="384" />
+                    <OnInitialized>
+                        ZO_SkillTooltip_Initialize(self)
+                    </OnInitialized>
+
+                    <OnCleared>
+                        ZO_SkillTooltip_Cleared(self)
+                    </OnCleared>
+
                     <OnAddGameData>
                         ZO_SkillTooltip_OnAddGameData(...)
                     </OnAddGameData>
 
-                    <OnCleared>
-                        ZO_SkillTooltip_ClearSkillUpgrades(self)
-                    </OnCleared>
+                    <Controls>
+                        <StatusBar name="$(parent)Progression" inherits="SkillTooltipProgressionBar" hidden="true" />
+                    </Controls>
                 </Tooltip>
             </Controls>
         </TopLevelControl>
@@ -278,7 +288,7 @@
             <Controls>
                 <Tooltip name="KeepUpgradeTooltip" inherits="ZO_BaseTooltip">
                     <ResizeToFitPadding width="32" height="35"/>
-                </Tooltip>                
+                </Tooltip>
             </Controls>
         </TopLevelControl>
     </Controls>

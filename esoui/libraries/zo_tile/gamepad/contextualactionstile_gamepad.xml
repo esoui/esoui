@@ -14,20 +14,16 @@
     <Controls>
         <Control name="ZO_ContextualActionsTile_Gamepad_Control" inherits="ZO_Tile_Gamepad_Control" virtual="true">
             <Controls>
-                <Control name="$(parent)Container" override="true">
-                    <Controls>
-                        <Backdrop name="$(parent)OverlayBorder" override="true">
-                            <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
-                        </Backdrop>
+                <Backdrop name="$(parent)OverlayBorder" override="true">
+                    <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+                </Backdrop>
                         
-                        <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" level="2" blendMode="ADD" alpha="0">
-                            <Anchor point="TOPLEFT"  offsetX="-3" offsetY="-3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
-                        </Backdrop>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" level="2" blendMode="ADD" alpha="0">
+                    <Anchor point="TOPLEFT"  offsetX="-3" offsetY="-3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                </Backdrop>
 
-                        <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
-                    </Controls>
-                </Control>
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
             </Controls>
         </Control>
     </Controls>

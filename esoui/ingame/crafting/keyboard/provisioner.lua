@@ -106,7 +106,8 @@ ZO_Provisioner.EMBEDDED_SETTINGS =
 }
 
 function ZO_Provisioner:InitializeSettings()
-    local function GenerateTab(name, filterType, normal, pressed, highlight, disabled)
+    local function GenerateTab(filterType, normal, pressed, highlight, disabled)
+        local name = GetString("SI_PROVISIONERSPECIALINGREDIENTTYPE", filterType) 
         return {
             activeTabText = name,
             categoryName = name,
@@ -121,9 +122,9 @@ function ZO_Provisioner:InitializeSettings()
     end
 
     local provisioningSettings = ZO_Provisioner.PROVISIONING_SETTINGS
-    local foodTab = GenerateTab(SI_PROVISIONER_FILTER_COOK, PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES, "EsoUI/Art/Crafting/provisioner_indexIcon_meat_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_disabled.dds")
-    local drinkTab = GenerateTab(SI_PROVISIONER_FILTER_BREW, PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING, "EsoUI/Art/Crafting/provisioner_indexIcon_beer_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_disabled.dds")
-    local furnishingsTab = GenerateTab(SI_PROVISIONER_FILTER_FURNISHINGS, PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_disabled.dds")
+    local foodTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES, "EsoUI/Art/Crafting/provisioner_indexIcon_meat_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_disabled.dds")
+    local drinkTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING, "EsoUI/Art/Crafting/provisioner_indexIcon_beer_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_disabled.dds")
+    local furnishingsTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_disabled.dds")
 
     provisioningSettings.tabs = {}
     table.insert(provisioningSettings.tabs, foodTab)
@@ -179,7 +180,7 @@ function ZO_Provisioner:OnTabFilterChanged(filterData)
             self:TogglePreviewMode()
         end
     end
-    self.activeTab:SetText(GetString(filterData.activeTabText))
+    self.activeTab:SetText(filterData.activeTabText)
     self.filterType = filterData.descriptor
     if self.savedVars then
         ZO_CheckButton_SetCheckState(self.haveIngredientsCheckBox, self.savedVars.haveIngredientsChecked)

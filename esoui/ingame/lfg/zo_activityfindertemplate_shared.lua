@@ -14,10 +14,11 @@ function ZO_ActivityFinderTemplate_Shared:New(...)
     return manager
 end
 
-function ZO_ActivityFinderTemplate_Shared:Initialize(control, dataManager, categoryData)
+function ZO_ActivityFinderTemplate_Shared:Initialize(control, dataManager, categoryData, categoryPriority)
     self.control = control
     self.dataManager = dataManager
     self.categoryData = categoryData
+    self.categoryPriority = categoryPriority
     self.categoryData.activityFinderObject = self
 
     self:InitializeControls()

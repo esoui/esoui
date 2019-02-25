@@ -21,12 +21,12 @@
             <Controls>
                 <Texture name="$(parent)1" tier="LOW" layer="BACKGROUND" level="1" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <Anchor point="CENTER" />
-                    <TextureCoords left="0" right="0.8203125" top="0" bottom="0.5126953125"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="0.9980988"/>
                 </Texture>
 
                 <Texture name="$(parent)2" tier="LOW" layer="BACKGROUND" level="0" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <Anchor point="CENTER" />
-                    <TextureCoords left="0" right="0.8203125" top="0" bottom="0.5126953125"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="0.9980988"/>
                 </Texture>
             </Controls>
         </Control>

@@ -742,7 +742,11 @@ function ZO_MenuBarTooltipButton_OnMouseEnter(self)
         if buttonData.CustomTooltipFunction then
             buttonData.CustomTooltipFunction(InformationTooltip)
         else
-            SetTooltipText(InformationTooltip, zo_strformat(SI_MENU_BAR_TOOLTIP, GetString(buttonData.categoryName)))
+            local name = buttonData.categoryName
+            if type(buttonData.categoryName) == "number" then
+                name = GetString(buttonData.categoryName)
+            end
+            SetTooltipText(InformationTooltip, zo_strformat(SI_MENU_BAR_TOOLTIP, name))
         end
     end
 end

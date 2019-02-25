@@ -23,7 +23,7 @@ function ZO_HorizontalScrollList_Gamepad:Commit()
 end
 
 function ZO_HorizontalScrollList_Gamepad:SetActive(active)
-    if (self.active ~= active) or self.dirty then
+    if self.active ~= active or self.dirty then
         self.active = active
         self.dirty = false
 
@@ -42,7 +42,7 @@ function ZO_HorizontalScrollList_Gamepad:SetActive(active)
 end
 
 function ZO_HorizontalScrollList_Gamepad:UpdateArrows()
-    local hideArrows = not self.active
+    local hideArrows = not self.active or not self:CanScroll()
 
     self.leftArrow:SetHidden(hideArrows)
     self.rightArrow:SetHidden(hideArrows)
@@ -77,15 +77,15 @@ function ZO_HorizontalScrollList_Gamepad:Deactivate()
 end
 
 function ZO_HorizontalScrollList_Gamepad:UpdateDirectionalInput()
-    self.hasReleasedStick = self.result == 0
+    local hasReleasedStick = self.result == 0
     self.result = DIRECTIONAL_INPUT:GetX(ZO_DI_LEFT_STICK, ZO_DI_DPAD) 
-    if self.hasReleasedStick then
+    if hasReleasedStick and self:CanScroll() then
         if self.result > 0 then
             self:MoveLeft()
-            self.hasReleasedStick = false
+            hasReleasedStick = false
         elseif self.result < 0 then
             self:MoveRight()
-            self.hasReleasedStick = false
+            hasReleasedStick = false
         end
     end
 end

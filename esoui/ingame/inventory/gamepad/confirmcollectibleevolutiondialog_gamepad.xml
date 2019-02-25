@@ -1,0 +1,36 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ConfirmEvolutionDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase">
+            <OnInitialized>
+                ZO_ConfirmCollectibleEvolution_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI/Art/Inventory/collectible_evolution_arrow.dds">
+                            <Anchor point="TOP" />
+                            <Dimensions x="64" y="64"/>
+                        </Texture>
+
+                        <Texture name="$(parent)BaseIcon">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Arrow" relativePoint="TOPLEFT" offsetX="-10" />
+                            <Dimensions x="64" y="64" />
+                        </Texture>
+
+                        <Texture name="$(parent)EvolvedIcon">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" offsetX="10" />
+                            <Dimensions x="64" y="64"/>
+                        </Texture>
+
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <!-- overriding the anchoring here so we can offset below the icons above -->
+                            <Anchor point="TOPLEFT" offsetY="124" />
+                            <Anchor point="TOPRIGHT" offsetY="124" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

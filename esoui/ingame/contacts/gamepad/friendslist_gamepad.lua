@@ -17,7 +17,7 @@ function FriendsList_Gamepad:Initialize(control)
     ZO_GamepadSocialListPanel.Initialize(self, control, FRIENDS_LIST_MANAGER, "ZO_GamepadFriendsListRow")
     self:SetTitle(GetString(SI_GAMEPAD_CONTACTS_FRIENDS_LIST_TITLE))
     self:SetEmptyText(GetString(SI_GAMEPAD_CONTACTS_FRIENDS_LIST_NO_FRIENDS_MESSAGE));
-        self:SetupSort(FRIENDS_LIST_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_DOWN)
+    self:SetupSort(FRIENDS_LIST_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_UP)
 
     GAMEPAD_FRIENDS_LIST_SCENE = ZO_Scene:New("gamepad_friends", SCENE_MANAGER)
     GAMEPAD_FRIENDS_LIST_SCENE:AddFragment(self:GetListFragment())

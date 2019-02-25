@@ -24,6 +24,7 @@ ESO_Dialogs["DELETE_SELECTED_CHARACTER"] =
             requiresTextInput = true,
             text = SI_DELETE_CHARACTER_CONFIRMATION_BUTTON,
             callback =  function(dialog)
+                            TrySaveCharacterListOrder()
                             DeleteCharacter(dialog.data.characterId)
                             ZO_CharacterSelectDelete:SetState(BSTATE_NORMAL, false)
                             ZO_CharacterSelect_FlagAsDeleting(dialog.data.characterId, true)
@@ -221,6 +222,7 @@ ESO_Dialogs["CHARACTER_SELECT_DELETING"] =
     mustChoose = true,
     setup = function(dialog, data)
         dialog:setupFunc()
+        TrySaveCharacterListOrder()
         DeleteCharacter(data.characterId)
     end,
     canQueue = true,

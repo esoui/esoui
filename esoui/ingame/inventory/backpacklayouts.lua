@@ -90,17 +90,16 @@ BACKPACK_GUILD_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
 
 BACKPACK_TRADING_HOUSE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
     {
-        inventoryTopOffsetY = 3, -- less than default because we are showing a search box not an inventory menu
+        inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-        width = 670,
         backpackOffsetY = 140,
         sortByOffsetY = 110,
-        sortByHeaderWidth = 690,
-        sortByNameWidth = 341,
         emptyLabelOffsetY = 140,
-        selectedTab = ITEMFILTERTYPE_TRADING_HOUSE,
         useSearchBar = true,
-        hideTabBar = true,
+        hiddenFilters = { [ITEMFILTERTYPE_QUEST] = true, [ITEMFILTERTYPE_JUNK] = true },
+        additionalFilter = function(slot)
+            return IsItemSellableOnTradingHouse(slot.bagId, slot.slotIndex)
+        end,
     })
 
 BACKPACK_MAIL_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(

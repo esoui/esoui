@@ -19,6 +19,7 @@ end
 function ZO_MarketProductCarousel_Shared:UpdateSelection(index)
     self.selectionIndicator:SetSelectionByIndex(index)
     self:ResetScrollToTop()
+    self.selectionIndicatorControl:SetHidden(not self:CanScroll())
 end
 
 function ZO_MarketProductCarousel_Shared:EntrySetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
@@ -46,7 +47,6 @@ function ZO_MarketProductCarousel_Shared:Initialize(control, template)
     
     ZO_HorizontalScrollList_Gamepad.Initialize(self, control, template, NUM_VISIBLE_CATEGORIES, function(...) self:EntrySetup(...) end, MenuEntryTemplateEquality)
     self:SetOnTargetDataChangedCallback(OnSelectionChanged)
-    self:SetAllowWrapping(false)
     self:SetDisplayEntryType(ZO_HORIZONTAL_SCROLL_LIST_DISPLAY_FIXED_NUMBER_OF_ENTRIES)
 
     local MOVEMENT_DIRECTION = ZO_HORIZONTALSCROLLLIST_MOVEMENT_TYPES.MOVE_LEFT
