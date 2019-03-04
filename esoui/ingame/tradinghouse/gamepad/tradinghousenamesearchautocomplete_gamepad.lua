@@ -49,9 +49,11 @@ function ZO_TradingHouseNameSearchAutoComplete_Gamepad:RefreshList()
     local nameMatchId = GAMEPAD_TRADING_HOUSE_BROWSE:GetNameSearchFeature():GetCompletedItemNameMatchId()
     if nameMatchId then
         local numResults = GetNumMatchTradingHouseItemNamesResults(nameMatchId)
-        for resultIndex = 1, numResults do
-            local name, _ = GetMatchTradingHouseItemNamesResult(nameMatchId, resultIndex)
-            self.itemList:AddEntry("ZO_GamepadGuildStoreNameMatchEntryTemplate", {name = name})
+        if internalassert(numResults, "match results not available for given nameMatchId") then
+            for resultIndex = 1, numResults do
+                local name, _ = GetMatchTradingHouseItemNamesResult(nameMatchId, resultIndex)
+                self.itemList:AddEntry("ZO_GamepadGuildStoreNameMatchEntryTemplate", {name = name})
+            end
         end
     end
 

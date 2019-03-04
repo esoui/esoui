@@ -99,6 +99,8 @@ function ZO_TradingHouseNameSearchFeature_Gamepad:OnNameMatchComplete(id, numRes
     if id == self.pendingItemNameMatchId then
         -- cache off the current num results for display purposes: this helps us avoid short flickers while the name match is still running
         self.lastCompletedMatchNumResults = numResults
+    else
+        self.lastCompletedMatchNumResults = nil
     end
 
     ZO_TradingHouseNameSearchFeature_Shared.OnNameMatchComplete(self, id, numResults)

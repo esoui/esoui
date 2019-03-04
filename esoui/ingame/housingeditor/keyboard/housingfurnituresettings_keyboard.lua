@@ -87,7 +87,7 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeKeybindStrip()
             keybind = "UI_SHORTCUT_SECONDARY",
         
             callback = function()
-                local data = { activePanel = self.activePanel.list, currentHouse = self.currentHouse }
+                local data = { activePanel = self.activePanel.list, currentHouse = GetCurrentZoneHouseId() }
                 if self.activePanel == self.visitorsOptionsPanel then
                     ZO_Dialogs_ShowDialog("REQUEST_ADD_INDIVIDUAL_PERMISSION", data)
                 elseif self.activePanel == self.banListOptionsPanel then
@@ -122,11 +122,12 @@ end
 
 function ZO_HousingFurnitureSettings_Keyboard:UpdateGeneralSettings()
     self.primaryResidence = GetHousingPrimaryHouse()
+    local currentHouse = GetCurrentZoneHouseId()
 
     self:UpdateButtonSettings(self.primaryResidenceSetting)
-    self.primaryResidenceButton:SetEnabled(self.primaryResidence ~= self.currentHouse)
+    self.primaryResidenceButton:SetEnabled(self.primaryResidence ~= currentHouse)
 
-    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(self.currentHouse)
+    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouse)
     self.comboBox:SetSelectedItemText(GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING", defaultAccess))
 end
 
@@ -181,7 +182,7 @@ do
         local function OnPresetSelected(_, entryText, entry)
             comboBox:SetSelectedItemText(entry.name)
             local canAccess, preset = HOUSE_SETTINGS_MANAGER:GetHousingPermissionsFromDefaultAccess(entry.defaultAccess)
-            AddHousingPermission(self.currentHouse, HOUSE_PERMISSION_USER_GROUP_GENERAL, canAccess, preset, false)
+            AddHousingPermission(GetCurrentZoneHouseId(), HOUSE_PERMISSION_USER_GROUP_GENERAL, canAccess, preset, false)
         end
 
         local allDefaultAccessSettings = HOUSE_SETTINGS_MANAGER:GetAllDefaultAccessSettings()
@@ -220,7 +221,7 @@ do
 end
 
 function ZO_HousingFurnitureSettings_Keyboard:ShowDefaultAccessTooltip(control)
-    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(self.currentHouse)
+    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(GetCurrentZoneHouseId())
     InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
     local r,g,b = ZO_NORMAL_TEXT:UnpackRGB()
     InformationTooltip:AddLine(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_DEFAULT_ACCESS_TOOLTIP_TEXT), "", r, g, b)

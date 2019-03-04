@@ -204,8 +204,10 @@ end
 
 function ZO_TradingHouseSearch:AssociateWithSearchFeatures(features)
     self.features = features
-    local NOT_PERFORMING_SEARCH = false
-    self:ApplyFilters(NOT_PERFORMING_SEARCH)
+
+    -- update search filter/name match state to reflect new features
+    local NOT_CHANGED_BY_FEATURE = nil
+    self:HandleSearchCriteriaChanged(NOT_CHANGED_BY_FEATURE)
 end
 
 function ZO_TradingHouseSearch:DisassociateWithSearchFeatures()

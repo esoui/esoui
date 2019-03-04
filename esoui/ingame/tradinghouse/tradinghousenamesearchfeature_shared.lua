@@ -128,7 +128,7 @@ end
 
 function ZO_TradingHouseNameSearchFeature_Shared:MarkFiltersDirty()
     self:CancelPendingNameMatch()
-    self:ClearNameMatch()
+    self:ClearCompletedNameMatch()
     if self:IsSearchTextLongEnough() then
         self:StartNameMatch()
     end
@@ -145,7 +145,7 @@ function ZO_TradingHouseNameSearchFeature_Shared:CancelPendingNameMatch()
     end
 end
 
-function ZO_TradingHouseNameSearchFeature_Shared:ClearNameMatch()
+function ZO_TradingHouseNameSearchFeature_Shared:ClearCompletedNameMatch()
     self.completedItemNameMatchId = nil
 end
 
@@ -154,5 +154,10 @@ function ZO_TradingHouseNameSearchFeature_Shared:OnNameMatchComplete(id, numResu
         self.pendingItemNameMatchId = nil
         self.completedItemNameMatchId = id
         self:FireCallbacks("OnNameMatchComplete")
+    else
+        -- Clear existing name match: whenever a name match completes we
+        -- destroy the data for the last completed name match, so it's no longer
+        -- valid
+        self:ClearCompletedNameMatch()
     end
 end

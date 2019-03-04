@@ -51,7 +51,6 @@ function ZO_HousingFurnitureSettings_Base:IsCurrentHomeInHomeShow()
 end
 
 function ZO_HousingFurnitureSettings_Base:UpdateLists()
-    self.currentHouse = GetCurrentZoneHouseId()
     self:UpdateGeneralSettings()
     self:UpdateSingleVisitorSettings()
     self:UpdateGuildVisitorSettings()
@@ -60,7 +59,7 @@ end
 
 function ZO_HousingFurnitureSettings_Base:TryShowCopyDialog()
     if GetTotalUnlockedCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_HOUSE) > 1 then
-        local data = { currentHouse = self.currentHouse }
+        local data = { currentHouse = GetCurrentZoneHouseId() }
         self:ShowCopyDialog(data)
     else
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_DIALOG_COPY_HOUSING_PERMISSION_REQUIRES_MORE_HOUSES))
@@ -68,12 +67,13 @@ function ZO_HousingFurnitureSettings_Base:TryShowCopyDialog()
 end
 
 function ZO_HousingFurnitureSettings_Base:SetPrimaryResidence()
+    local currentHouse = GetCurrentZoneHouseId()
     if self.primaryResidence == 0 then
-        SetHousingPrimaryHouse(self.currentHouse)
-    elseif self.currentHouse ~= self.primaryResidence then
+        SetHousingPrimaryHouse(currentHouse)
+    elseif currentHouse ~= self.primaryResidence then
         local collectibleId = GetCollectibleIdForHouse(self.primaryResidence)
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = self.currentHouse}, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()}})
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_PRIMARY_RESIDENCE", { currentHouse = currentHouse }, { mainTextParams = { collectibleData:GetName(), collectibleData:GetNickname()}})
     end
 end
 

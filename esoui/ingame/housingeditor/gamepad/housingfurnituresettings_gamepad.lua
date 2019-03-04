@@ -75,7 +75,7 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                             local targetData = self.mainList:GetTargetData()
                             if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
                                 if targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE] then
-                                    return self.primaryResidence ~= self.currentHouse
+                                    return self.primaryResidence ~= GetCurrentZoneHouseId()
                                 end
                             elseif self.activePanel then
                                 return self.activePanel:GetNumPossibleEntries() > 0
@@ -105,7 +105,7 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                           return self.activePanel ~= nil
                       end,
             callback = function()
-                local data = { activePanel = self.activePanel, currentHouse = self.currentHouse }
+                local data = { activePanel = self.activePanel, currentHouse = GetCurrentZoneHouseId() }
                 if self.activePanel == self.visitorList then
                     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_REQUEST_ADD_INDIVIDUAL_PERMISSION", data)
                 elseif self.activePanel == self.guildVisitorList then
@@ -158,7 +158,14 @@ do
 
             control.horizontalListObject:Clear()
             local horizontalList = control.horizontalListObject
-            local currentHouse = self.currentHouse
+            self.defaultAccessList = horizontalList
+
+            local currentHouse = GetCurrentZoneHouseId()
+            if not currentHouse then
+                return
+            end
+
+            self.horizontalListCurrentHouse = currentHouse
 
             local updateTooltipFunction = function()
                                                 local targetData = self.mainList:GetTargetData()
@@ -190,11 +197,10 @@ do
             horizontalList:Commit()
             horizontalList:SetActive(selected)
 
-            local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(self.currentHouse)
+            local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouse)
 
             horizontalList:SetSelectedDataIndex(defaultAccess + 1, ALLOW_EVEN_IF_DISABLED, NO_ANIMATION) -- plus 1 is for lua index offset
             horizontalList:SetOnSelectedDataChangedCallback(HorizontalScrollListSelectionChanged)
-            self.defaultAccessList = horizontalList
         end
 
         self.mainList:AddDataTemplate("ZO_HousingPermissionsSettingsRow_Gamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
@@ -307,7 +313,15 @@ end
 
 function ZO_HousingFurnitureSettings_Gamepad:UpdateGeneralSettings()
     self.primaryResidence = GetHousingPrimaryHouse()
-    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(self.currentHouse)
+    local currentHouse = GetCurrentZoneHouseId()
+    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouse)
+
+    -- if the horizontal list was not built with the current house Id
+    -- we need to rebuild it so that when we select the current entry it doesn't
+    -- cause us to set the permissions on an old house
+    if self.horizontalListCurrentHouse ~= currentHouse then
+        self.mainList:RefreshVisible()
+    end
 
     local ALLOW_EVEN_IF_DISABLED = true
     local NO_ANIMATION = true
@@ -321,7 +335,7 @@ function ZO_HousingFurnitureSettings_Gamepad:BuildCategories()
 end
 
 function ZO_HousingFurnitureSettings_Gamepad:ShowDefaultAccessTooltip()
-    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(self.currentHouse)
+    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(GetCurrentZoneHouseId())
     GAMEPAD_TOOLTIPS:LayoutDefaultAccessTooltip(GAMEPAD_LEFT_TOOLTIP, defaultAccess)
 end
 
