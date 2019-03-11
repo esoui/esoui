@@ -584,7 +584,7 @@ function ZO_HousingSettingsVisitorList_Keyboard:New(...)
 end
 
 function ZO_HousingSettingsVisitorList_Keyboard:BuildMasterList()
-    self.currentHouse = self.owner.currentHouse
+    self.currentHouse = GetCurrentZoneHouseId()
     self.numPermissions = GetNumHousingPermissions(self.currentHouse, HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL)
     ZO_HousingSettings_BuildMasterList_Visitor(self.currentHouse, self.userGroup, self.numPermissions, self.masterList, ZO_HousingSettingsList_CreateScrollData)
 end
@@ -604,7 +604,7 @@ function ZO_HousingSettingsBanList_Keyboard:New(...)
 end
 
 function ZO_HousingSettingsBanList_Keyboard:BuildMasterList()
-    self.currentHouse = self.owner.currentHouse
+    self.currentHouse = GetCurrentZoneHouseId()
     self.numPermissions = GetNumHousingPermissions(self.currentHouse, HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL)
     ZO_HousingSettings_BuildMasterList_Ban(self.currentHouse, self.userGroup, self.numPermissions, self.masterList, ZO_HousingSettingsList_CreateScrollData)
 end
@@ -624,7 +624,7 @@ function ZO_HousingSettingsGuildVisitorList_Keyboard:New(...)
 end
 
 function ZO_HousingSettingsGuildVisitorList_Keyboard:BuildMasterList()
-    self.currentHouse = self.owner.currentHouse
+    self.currentHouse = GetCurrentZoneHouseId()
     self.numPermissions = GetNumHousingPermissions(self.currentHouse, HOUSE_PERMISSION_USER_GROUP_GUILD)
     ZO_HousingSettings_BuildMasterList_Visitor(self.currentHouse, self.userGroup, self.numPermissions, self.masterList, ZO_HousingSettingsList_CreateScrollData)
 end
@@ -644,7 +644,7 @@ function ZO_HousingSettingsGuildBanList_Keyboard:New(...)
 end
 
 function ZO_HousingSettingsGuildBanList_Keyboard:BuildMasterList()
-    self.currentHouse = self.owner.currentHouse
+    self.currentHouse = GetCurrentZoneHouseId()
     self.numPermissions = GetNumHousingPermissions(self.currentHouse, HOUSE_PERMISSION_USER_GROUP_GUILD)
     ZO_HousingSettings_BuildMasterList_Ban(self.currentHouse, self.userGroup, self.numPermissions, self.masterList, ZO_HousingSettingsList_CreateScrollData)
 end

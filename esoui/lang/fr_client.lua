@@ -6460,7 +6460,7 @@ SafeAddString(SI_REVIVE_COUNTER_UPDATED_LARGE, "|t64:64:<<1>>|tBonus de vitalit�
 SafeAddString(SI_REVIVE_COUNTER_UPDATED_SMALL, "Le bonus a diminué pour atteindre <<1>> points", 0)
 SafeAddString(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, "<<2>> <<t:1>>", 2)
 SafeAddString(SI_RIDINGTRAINTYPE1, "Vitesse", 0)
-SafeAddString(SI_RIDINGTRAINTYPE2, "Capacité", 0)
+SafeAddString(SI_RIDINGTRAINTYPE2, "Capacité de port", 0)
 SafeAddString(SI_RIDINGTRAINTYPE3, "Vigueur", 0)
 SafeAddString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER, "Compétence d'équitation augmentée", 0)
 SafeAddString(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, "Votre compétence d'équitation <<1>> a augmenté de <<X:2>> à <<X:3>>.", 0)

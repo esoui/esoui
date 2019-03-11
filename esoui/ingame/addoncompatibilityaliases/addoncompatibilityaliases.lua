@@ -691,3 +691,12 @@ end
 
 -- Renamed to better reflect behavior: the output isn't localized, it's delimited.
 ZO_LocalizeDecimalNumber = ZO_CommaDelimitDecimalNumber
+
+-- GetCraftingSkillLineIndices removed
+function GetCraftingSkillLineIndices(tradeskillType)
+    local skillLineData = ZO_SkillsDataManager:GetCraftingSkillLineData(tradeskillType)
+    if skillLineData then
+        return skillLineData:GetIndices()
+    end
+    return 0, 0, 0
+end

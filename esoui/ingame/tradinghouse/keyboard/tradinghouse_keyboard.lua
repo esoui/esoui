@@ -758,6 +758,7 @@ function ZO_TradingHouseManager:OnSearchStateChanged(searchState, searchOutcome)
         if searchOutcome == TRADING_HOUSE_SEARCH_OUTCOME_HAS_RESULTS then
             self.searchResultsMessageLabel:SetHidden(true)
             self:RebuildSearchResultsPage()
+            ZO_ScrollList_ResetToTop(self.searchResultsList)
         else
             self.resultCount:SetText(zo_strformat(SI_TRADING_HOUSE_RESULT_COUNT, 0))
             self:ShowSearchResultMessage(GetString("SI_TRADINGHOUSESEARCHOUTCOME", searchOutcome))
@@ -822,7 +823,6 @@ function ZO_TradingHouseManager:RebuildSearchResultsPage(isInitialResults)
     local list = self.searchResultsList
     local scrollData = ZO_ScrollList_GetDataList(list)
     ZO_ScrollList_Clear(list)
-    ZO_ScrollList_ResetToTop(list)
 
     local showingGuildSpecificItems = TRADING_HOUSE_SEARCH:ShouldShowGuildSpecificItems() or isInitialResults
     local numItemsOnPage = 0
