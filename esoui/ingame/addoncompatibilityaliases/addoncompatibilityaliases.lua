@@ -694,9 +694,9 @@ ZO_LocalizeDecimalNumber = ZO_CommaDelimitDecimalNumber
 
 -- GetCraftingSkillLineIndices removed
 function GetCraftingSkillLineIndices(tradeskillType)
-    local skillLineData = ZO_SkillsDataManager:GetCraftingSkillLineData(tradeskillType)
+    local skillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(tradeskillType)
     if skillLineData then
         return skillLineData:GetIndices()
     end
-    return 0, 0, 0
+    return 0, 0
 end
