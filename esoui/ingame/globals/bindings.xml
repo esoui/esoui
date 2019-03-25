@@ -890,9 +890,6 @@
             <Action name="DEATH_RECAP_TOGGLE" hideAction="true" inheritsBindFrom="ASSIST_NEXT_TRACKED_QUEST" rebindable="false">
                 <Down>DEATH_RECAP_TOGGLE:Toggle()</Down>
             </Action>
-            <Action name="DEATH_RECAP_HIDE" hideAction="true" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" rebindable="false">
-                <Down>return DEATH_RECAP_TOGGLE:Hide()</Down>
-            </Action>
         </Category>
     </Layer>
     
