@@ -1606,7 +1606,7 @@ SafeAddString(SI_DAILY_LOGIN_REWARDS_LOCKED_UNTIL_NEW_MONTH, "|cffffff<<1>>|r bi
 SafeAddString(SI_DAILY_LOGIN_REWARDS_MONTH_COMPLETE_TILE_TITLE, "Ein neuer Monat beginnt", 0)
 SafeAddString(SI_DAILY_LOGIN_REWARDS_MONTH_FORMATTER, "Belohnungen <<l:1>> (<<2>>)", 2)
 SafeAddString(SI_DAILY_LOGIN_REWARDS_NEXT_REWARD_CLAIM, "Nächste Belohnung: <<1>>", 0)
-SafeAddString(SI_DAILY_LOGIN_REWARDS_NOT_CLAIMABLE_TOOLTIP, "|t32:32:EsoUI/Art/Miscellaneous/status_locked.dds|t Der Monat endet bevor Ihr dies beanspruchen könnt.", 0)
+SafeAddString(SI_DAILY_LOGIN_REWARDS_NOT_CLAIMABLE_TOOLTIP, "|t32:32:EsoUI/Art/Miscellaneous/status_locked.dds|t Der Monat endet, bevor Ihr dies beanspruchen könnt.", 0)
 SafeAddString(SI_DAILY_LOGIN_REWARDS_PREVIEW_KEYBIND, "Vorschau", 0)
 SafeAddString(SI_DAILY_LOGIN_REWARDS_TILE_HEADER, "Tägliche Belohnungen", 0)
 SafeAddString(SI_DAILY_LOGIN_REWARDS_TILE_VIEW_REWARDS, "Belohnungen anzeigen", 0)
