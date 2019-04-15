@@ -21,6 +21,7 @@ function ZO_ComboBox_Gamepad:Initialize(control)
 
     self:InitializeKeybindStripDescriptors()
     self.m_active = false
+    self.dropdownTemplate = ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD
 
     self.m_dropdown = GAMEPAD_COMBO_BOX_DROPDOWN
     self.m_focus = ZO_GamepadFocus:New(control)
@@ -32,7 +33,6 @@ function ZO_ComboBox_Gamepad:Initialize(control)
     
     self.m_font = ZO_GAMEPAD_COMBO_BOX_FONT
     self.m_highlightFont = ZO_GAMEPAD_COMBO_BOX_HIGHLIGHTED_FONT
-    self.m_itemTemplate = "ZO_ComboBox_Item_Gamepad"
 
     -- find the difference in font size to keep the width of text the same between them
     -- so line wrapping looks consistent between the two fonts
@@ -43,6 +43,7 @@ end
 
 function ZO_ComboBox_Gamepad:ShowDropdownInternal()
     self:ClearMenuItems()
+    self.m_dropdown:SetTemplate(self.dropdownTemplate)
 
     self.m_dropdown:SetPadding(self.m_padding)
 
@@ -57,10 +58,12 @@ end
 function ZO_ComboBox_Gamepad:HideDropdownInternal()
     self:ClearMenuItems()
     self:SetVisible(false)
-    
+
     self.m_container:SetHidden(false)
     self.m_dropdown:Hide()
     self:SetActive(false)
+
+    self:FireCallbacks("OnHideDropdown")
 end
 
 function ZO_ComboBox_Gamepad:OnClearItems()
@@ -84,10 +87,6 @@ function ZO_ComboBox_Gamepad:GetHighlightColor(item)
     return itemColor
 end
 
-function ZO_ComboBox_Gamepad:SetItemTemplate(template)
-    self.m_itemTemplate = template
-end
-
 function ZO_ComboBox_Gamepad:GetHeight()
     if(self.m_selectedItemText) then
         return self.m_selectedItemText:GetTextHeight()
@@ -101,22 +100,8 @@ function ZO_ComboBox_Gamepad:AddMenuItems()
         local item = self.m_sortedItems[i]
         local control = self.m_dropdown:AddItem(item)
         
-        control.nameControl = control:GetNamedChild("Name")
-        control.nameControl:SetText(item.name)
-        control.nameControl:SetColor(self:GetNormalColor(item):UnpackRGBA())
-        ApplyTemplateToControl(control, self.m_itemTemplate)
+        self:SetupMenuItemControl(control, item)
 
-        control.nameControl:SetFont(self.m_highlightFont) -- Use the highlighted font for sizing purposes
-        control.nameControl:SetWidth(self.m_container:GetWidth())
-        local height = control.nameControl:GetTextHeight()
-        control:SetHeight(height)
-        self.m_dropdown:AddHeight(height)
-
-        if self.m_font then
-            control.nameControl:SetFont(self.m_font)
-            control.nameControl:SetWidth(self.m_container:GetWidth() * self.m_fontRatio)
-        end
-        
         local focusEntry = {
             control = control,
             data = item,
@@ -127,6 +112,23 @@ function ZO_ComboBox_Gamepad:AddMenuItems()
     end
 
     self.m_dropdown:AnchorToControl(self.m_container, 0)
+end
+
+function ZO_ComboBox_Gamepad:SetupMenuItemControl(control, item)
+    control.nameControl = control:GetNamedChild("Name")
+    control.nameControl:SetText(item.name)
+    control.nameControl:SetColor(self:GetNormalColor(item):UnpackRGBA())
+
+    control.nameControl:SetFont(self.m_highlightFont) -- Use the highlighted font for sizing purposes
+    control.nameControl:SetWidth(self.m_container:GetWidth())
+    local height = control.nameControl:GetTextHeight()
+    control:SetHeight(height)
+    self.m_dropdown:AddHeight(height)
+
+    if self.m_font then
+        control.nameControl:SetFont(self.m_font)
+        control.nameControl:SetWidth(self.m_container:GetWidth() * self.m_fontRatio)
+    end
 end
 
 function ZO_ComboBox_Gamepad:OnItemSelected(control, data)
@@ -316,6 +318,8 @@ end
 -------------------------------------------------------------------------------
 
 -- ZO_ComboBox_Gamepad_Dropdown is a singleton that is used by the current dropdown to display a list
+ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD = "ZO_ComboBox_Item_Gamepad"
+ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION = "ZO_MultiSelection_ComboBox_Item_Gamepad"
 
 ZO_GamepadComboBoxDropdown = ZO_Object:Subclass()
 
@@ -329,8 +333,12 @@ function ZO_GamepadComboBoxDropdown:Initialize(control)
     self.dropdownControl = control
     self.scrollControl = control:GetNamedChild("Scroll")
     self.backgroundControl = control:GetNamedChild("Background")
-    self.templateName = "ZO_ComboBox_Item_Gamepad"
-    self.pool = ZO_ControlPool:New(self.templateName, self.scrollControl, self.templateName)
+    self.templateName = ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD
+    self.pools = 
+    {
+        [ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD] = ZO_ControlPool:New(ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD, self.scrollControl, ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD),
+        [ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION] = ZO_ControlPool:New(ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION, self.scrollControl, ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION)
+    }
     self.lastControlAdded = nil
     self.height = 0
     self.padding = 0
@@ -386,8 +394,8 @@ end
 function ZO_GamepadComboBoxDropdown:AcquireControl(item, relativeControl)
     local padding = self.padding
 
-    local templateName = self.templateName
-    local control, key = self.pool:AcquireObject()
+    local controlPool = self:GetControlPoolFromTemplate(self.template)
+    local control, key = controlPool:AcquireObject()
 
     control:SetAnchor(RIGHT, self.m_container, RIGHT, 0, padding, ANCHOR_CONSTRAINS_X)
 
@@ -414,12 +422,204 @@ function ZO_GamepadComboBoxDropdown:AddItem(data)
 end
 
 function ZO_GamepadComboBoxDropdown:Clear()
-    self.pool:ReleaseAllObjects()
+    for _, pool in pairs(self.pools) do
+        pool:ReleaseAllObjects()
+    end
     self.lastControlAdded = nil
     self.height = 0
+end
+
+function ZO_GamepadComboBoxDropdown:SetTemplate(template)
+    self.template = template
+end
+
+function ZO_GamepadComboBoxDropdown:GetControlPoolFromTemplate(template)
+    return self.pools[template]
 end
 
 -- This is a control used by all gamepad combo boxes to display the dropdown
 function ZO_ComboBox_Gamepad_Dropdowm_Initialize(control)
     GAMEPAD_COMBO_BOX_DROPDOWN = ZO_GamepadComboBoxDropdown:New(control)
+end
+
+-------------------------------------------------------------------------------
+-- ZO_MultiSelection_ComboBox_Gamepad
+-------------------------------------------------------------------------------
+
+ZO_MultiSelection_ComboBox_Gamepad = ZO_ComboBox_Gamepad:Subclass()
+
+function ZO_MultiSelection_ComboBox_Gamepad:New(...)
+    return ZO_ComboBox_Gamepad.New(self, ...)
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:Initialize(control)
+    ZO_ComboBox_Gamepad.Initialize(self, control)
+
+    self.dropdownTemplate = ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION
+    self.itemDataToControl = {}
+end
+
+-- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:SelectHighlightedItem()
+    local focusItem = self.m_focus:GetFocusItem()
+    local focusIndex = self.m_focus:GetFocus()
+    if focusIndex then
+        self.m_highlightedIndex = focusIndex -- This needs to come before self:SelectItem() otherwise self.m_focus:GetFocus() always returns nil
+    end
+
+    if focusItem then
+        self:SelectItem(focusItem.data)
+        PlaySound(SOUNDS.DEFAULT_CLICK)
+    end
+end
+
+-- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:SelectItem(item, ignoreCallback)
+    self.currentItemData:ToggleItemSelected(item)
+    local newSelectedState = self.currentItemData:IsItemSelected(item)
+    local control = self.itemDataToControl[item]
+    if self.currentItemData:IsItemSelected(item) then
+        ZO_CheckButton_SetChecked(control.checkBox)
+    else
+        ZO_CheckButton_SetUnchecked(control.checkBox)
+    end
+
+    if item.callback and not ignoreCallback then
+        item.callback(self, item.name, item, newSelectedState)
+    end
+    self:RefreshSelectedItemText()
+end
+
+-- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:SetupMenuItemControl(control, item)
+    ZO_ComboBox_Gamepad.SetupMenuItemControl(self, control, item)
+    control.checkBox = control:GetNamedChild("CheckBox")
+
+    if self.currentItemData:IsItemSelected(item) then
+        ZO_CheckButton_SetChecked(control.checkBox)
+    else
+        ZO_CheckButton_SetUnchecked(control.checkBox)
+    end
+
+    self.itemDataToControl[item] = control
+end
+
+-- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:ShowDropdownInternal()
+    self.itemDataToControl = {}
+    ZO_ComboBox_Gamepad.ShowDropdownInternal(self)
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:LoadData(data)
+    self.currentItemData = data
+    self:ClearItems()
+
+    for i, item in ipairs(data.entryItems) do
+        self:AddItem(item, ZO_COMBOBOX_SUPRESS_UPDATE)
+    end
+
+    self:UpdateItems()
+    self:RefreshSelectedItemText()
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:SetNoSelectionText(text)
+    self.noSelectionText = text
+    self:RefreshSelectedItemText()
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:SetMultiSelectionTextFormatter(textFormatter)
+    self.multiSelectionTextFormatter = textFormatter
+    self:RefreshSelectedItemText()
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:RefreshSelectedItemText()
+    local numSelectedEntries = self:GetNumSelectedEntries()
+    if numSelectedEntries > 0 then
+        if self.multiSelectionTextFormatter then
+            self:SetSelectedItemText(zo_strformat(self.multiSelectionTextFormatter, numSelectedEntries))
+        end
+    elseif self.noSelectionText then
+        self:SetSelectedItemText(self.noSelectionText)
+    end
+end
+
+function ZO_MultiSelection_ComboBox_Gamepad:GetNumSelectedEntries()
+    if self.currentItemData then
+        return self.currentItemData:GetNumSelectedItems()
+    end
+
+    return 0
+end
+
+-- ZO_MultiSelection_ComboBox_Data_Gamepad
+-------------------------------------------
+
+ZO_MultiSelection_ComboBox_Data_Gamepad = ZO_Object:Subclass()
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:New()
+    local object = ZO_Object.New(self)
+    object:Initialize()
+    return object
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:Initialize()
+    self.entryItems = {}
+    self.selectedItems = {}
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:Clear()
+    ZO_ClearNumericallyIndexedTable(self.entryItems)
+    ZO_ClearNumericallyIndexedTable(self.selectedItems)
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:AddItem(item)
+    table.insert(self.entryItems, item)
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:GetAllItems()
+    return self.entryItems
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:ToggleItemSelected(item)
+    local newSelectedState = not self:IsItemSelected(item)
+    self:SetItemSelected(item, newSelectedState)
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:SetItemSelected(item, isSelected)
+    if isSelected and not self:IsItemSelected(item) then
+        self:AddItemToSelected(item)
+    else
+        self:RemoveItemFromSelected(item)
+    end
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:SetItemIndexSelected(itemIndex, isSelected)
+    self:SetItemSelected(self.entryItems[itemIndex], isSelected)
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:GetNumSelectedItems()
+    return #self.selectedItems
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:AddItemToSelected(item)
+    table.insert(self.selectedItems, item)
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:RemoveItemFromSelected(item)
+    for i, itemData in ipairs(self.selectedItems) do
+        if itemData == item then
+            table.remove(self.selectedItems, i)
+            return
+        end
+    end
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:IsItemSelected(item)
+    for i, itemData in ipairs(self.selectedItems) do
+        if itemData == item then
+            return true
+        end
+    end
+
+    return false
 end

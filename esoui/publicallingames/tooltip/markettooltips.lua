@@ -57,9 +57,8 @@ do
             self:LayoutInstantUnlock(instantUnlockId)
             --Instant Unlock Restrictions
             if GetMarketProductInstantUnlockType(productId) ~= INSTANT_UNLOCK_NONE then
-                local GET_CACHED_STATE = true
-                local purchaseState = GetMarketProductPurchaseState(productId, GET_CACHED_STATE)
-                if purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE then
+                local expectedClaimResult = CouldAcquireMarketProduct(productId)
+                if expectedClaimResult == MARKET_PURCHASE_RESULT_FAIL_INSTANT_UNLOCK_REQ_LIST then
                     self:AddInstantUnlockEligibilityFailures(GetMarketProductEligibilityErrorStringIds(productId))
                 end
             end
@@ -98,6 +97,22 @@ end
 function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationIndex)
     local DONT_SHOW_AS_PURCHASABLE = false
     self:LayoutMarketProduct(marketProductId, DONT_SHOW_AS_PURCHASABLE)
+
+    local achievementId, completedAchievement = GetMarketProductUnlockedByAchievementInfo(marketProductId)
+    if achievementId ~= 0 then
+        local criteriaSection = self:AcquireSection(self:GetStyle("achievementCriteriaSection"))
+        criteriaSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_REQUIRED_ACHIEVEMENT_HEADER), self:GetStyle("achievementSummaryCriteriaHeader"))
+        local achievementName = GetAchievementName(achievementId)
+        criteriaSection:AddSection(self:GetCheckboxSection(zo_strformat(achievementName), completedAchievement))
+        self:AddSection(criteriaSection)
+    end
+
+    local passesReqList, errorStringId = DoesMarketProductPassPurchasableReqList(marketProductId)
+    if not passesReqList and errorStringId ~= 0 then
+        local ineligibilitySection = self:AcquireSection(self:GetStyle("instantUnlockIneligibilitySection"))
+        ineligibilitySection:AddLine(GetErrorString(errorStringId), self:GetStyle("instantUnlockIneligibilityLine"))
+        self:AddSection(ineligibilitySection)
+    end
 
     local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = GetMarketProductPricingByPresentation(marketProductId, presentationIndex)
     if esoPlusCost then

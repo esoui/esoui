@@ -144,8 +144,8 @@ function ZO_GamepadGuildInfo:InitializeFooter()
 end
 
 function ZO_GamepadGuildInfo:RefreshFooter()
-    local numGuildMembers, numOnline = GetGuildInfo(self.guildId)
-    self.footerData.data1Text = zo_strformat(GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_FORMAT), numOnline, numGuildMembers)
+    local numGuildMembers, numOnline, _, numInvitees = GetGuildInfo(self.guildId)
+    self.footerData.data1Text = zo_strformat(GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_FORMAT), numOnline, numGuildMembers + numInvitees)
 
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
 end

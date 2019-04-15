@@ -17,14 +17,14 @@ function CampaignSelector:Initialize(control)
     self.comboBox:SetSpacing(8)
 
     self.scenesCreated = false
-    self.OnQueryTypeChanged =   function(_, entryText, entry)
-                                        local selectedQueryType = entry.selectedQueryType
-                                        if(selectedQueryType ~= self.selectedQueryType) then
-                                            self.selectedQueryType = selectedQueryType
-                                            self:UpdateCampaignWindows()
-                                            self.dataRegistration:Refresh()
-                                        end                             
-                                    end
+    self.OnQueryTypeChanged = function(_, entryText, entry)
+        local selectedQueryType = entry.selectedQueryType
+        if selectedQueryType ~= self.selectedQueryType then
+            self.selectedQueryType = selectedQueryType
+            self:UpdateCampaignWindows()
+            self.dataRegistration:Refresh()
+        end
+    end
 
     self.campaignWindows =
     {
@@ -38,11 +38,11 @@ function CampaignSelector:Initialize(control)
     EVENT_MANAGER:RegisterForEvent("CampaignSelector", EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() self:OnAssignedCampaignChanged() end)
 
     CAMPAIGN_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    CAMPAIGN_SELECTOR_FRAGMENT:RegisterCallback("StateChange",  function(oldState, state)
-                                                                    if(state == SCENE_FRAGMENT_SHOWING or state == SCENE_FRAGMENT_HIDDEN) then
-                                                                        self.dataRegistration:Refresh()
-                                                                    end
-                                                                end)
+    CAMPAIGN_SELECTOR_FRAGMENT:RegisterCallback("StateChange", function(oldState, state)
+        if state == SCENE_FRAGMENT_SHOWING or state == SCENE_FRAGMENT_HIDDEN then
+            self.dataRegistration:Refresh()
+        end
+    end)
     
     self.dataRegistration = ZO_CampaignDataRegistration:New("CampaignSelectorData", function() return self:NeedsData() end)
 
@@ -50,34 +50,29 @@ function CampaignSelector:Initialize(control)
 end
 
 function CampaignSelector:RefreshQueryTypes()
-    local selectedEntry
     self.comboBox:ClearItems()
 
-    local homeCampaignDescription = GetString("SI_BATTLEGROUNDQUERYCONTEXTTYPE", BGQUERY_ASSIGNED_CAMPAIGN)
-    local homeEntry = self.comboBox:CreateItemEntry(homeCampaignDescription, self.OnQueryTypeChanged)
-    homeEntry.selectedQueryType = BGQUERY_ASSIGNED_CAMPAIGN
-    self.comboBox:AddItem(homeEntry)
-    if(homeEntry.selectedQueryType == self.selectedQueryType) then
-        self.comboBox:SetSelectedItemText(homeCampaignDescription)
-        selectedEntry = homeEntry
+    local homeEntry
+    if self:IsHomeSelectable() then
+        local homeCampaignDescription = GetString("SI_BATTLEGROUNDQUERYCONTEXTTYPE", BGQUERY_ASSIGNED_CAMPAIGN)
+        homeEntry = self.comboBox:CreateItemEntry(homeCampaignDescription, self.OnQueryTypeChanged)
+        homeEntry.selectedQueryType = BGQUERY_ASSIGNED_CAMPAIGN
+        self.comboBox:AddItem(homeEntry)
     end
 
-    local current = GetCurrentCampaignId()
-    local assigned = GetAssignedCampaignId()
-    if(current ~= 0) and (current ~= assigned) then
+    local localEntry
+    if self:IsLocalSelectable() then
         local localCampaignDescription = GetString("SI_BATTLEGROUNDQUERYCONTEXTTYPE", BGQUERY_LOCAL)
-        local localEntry = self.comboBox:CreateItemEntry(localCampaignDescription, self.OnQueryTypeChanged)
+        localEntry = self.comboBox:CreateItemEntry(localCampaignDescription, self.OnQueryTypeChanged)
         localEntry.selectedQueryType = BGQUERY_LOCAL
         self.comboBox:AddItem(localEntry)
-        if(localEntry.selectedQueryType == self.selectedQueryType) then
-            self.comboBox:SetSelectedItemText(localCampaignDescription)
-            selectedEntry = localEntry
-        end
     end
 
-    if(not selectedEntry) then
-        self.comboBox:SetSelectedItemText(homeCampaignDescription)
-        self.OnQueryTypeChanged(nil, homeCampaignDescription, homeEntry)
+    if self.selectedQueryType == nil or not self:IsSelectedQueryStillValid() then
+        self.comboBox:SelectItem(localEntry or homeEntry)
+    else
+        local IGNORE_CALLBACKS = true
+        self.comboBox:SelectItem(self.selectedQueryType == BGQUERY_ASSIGNED_CAMPAIGN and homeEntry or localEntry, IGNORE_CALLBACKS)
     end
 end
 

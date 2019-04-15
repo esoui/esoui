@@ -11,9 +11,6 @@ To print a report out to chat:
     ZO_ScriptProfiler_GenerateReport()
 --]]
 
--- TODO: Someday there will be multiple record types, and they will be delineated by a SCRIPT_PROFILER_RECORD_TYPE enum.
-local SCRIPT_PROFILER_RECORD_TYPE_CLOSURE = 1
-
 local g_generatingReport = false
 function ZO_ScriptProfiler_GenerateReport()
     if g_generatingReport then
@@ -23,62 +20,75 @@ function ZO_ScriptProfiler_GenerateReport()
 
     local numRecords = 0
     local timeSpent = 0
-    local recordDataByRecordType =
+    local recordDataByRecordDataType =
     {
-        [SCRIPT_PROFILER_RECORD_TYPE_CLOSURE] = {},
+        [SCRIPT_PROFILER_RECORD_DATA_TYPE_CLOSURE] = {},
+        [SCRIPT_PROFILER_RECORD_DATA_TYPE_CFUNCTION] = {},
+        [SCRIPT_PROFILER_RECORD_DATA_TYPE_GARBAGE_COLLECTION] = {},
+        [SCRIPT_PROFILER_RECORD_DATA_TYPE_USER_EVENT] = {},
     }
 
-    local function GetOrCreateRecordData(recordType, recordDataIndex)
-        assert(recordDataByRecordType[recordType] ~= nil, "Missing record type")
-        if not recordDataByRecordType[recordType][recordDataIndex] then
+    local function GetOrCreateRecordData(recordDataType, recordDataIndex)
+        assert(recordDataByRecordDataType[recordDataType] ~= nil, "Missing record type")
+        if not recordDataByRecordDataType[recordDataType][recordDataIndex] then
             local data =
             {
+                dataType = recordDataType,
                 count = 0,
                 includeTime = 0,
                 excludeTime = 0,
             }
 
-            if recordType == SCRIPT_PROFILER_RECORD_TYPE_CLOSURE then
+            if recordDataType == SCRIPT_PROFILER_RECORD_DATA_TYPE_CLOSURE then
+                -- Closures are functions defined in Lua. Functions defined in the same file, on the same line, are considered the same function by the profiler.
                 local name, filename, lineDefined = GetScriptProfilerClosureInfo(recordDataIndex)
                 data.name = string.format("%s (%s:%d)", name, filename, lineDefined)
+            elseif recordDataType == SCRIPT_PROFILER_RECORD_DATA_TYPE_CFUNCTION then
+                -- C Functions are functions defined by ZOS as part of the game's API.
+                data.name = GetScriptProfilerCFunctionInfo(recordDataIndex)
+            elseif recordDataType == SCRIPT_PROFILER_RECORD_DATA_TYPE_GARBAGE_COLLECTION then
+                -- At arbitrary times, the lua intepreter will automatically try to reclaim memory you are no longer using. When it does this we generate a GC event to track it.
+                data.name = GetScriptProfilerGarbageCollectionInfo(recordDataIndex) == SCRIPT_PROFILER_GARBAGE_COLLECTION_TYPE_AUTOMATIC and "Lua GC Step" or "Manual collectgarbage() GC step"
+            elseif recordDataType == SCRIPT_PROFILER_RECORD_DATA_TYPE_USER_EVENT then
+                -- You can fire off your own custom events using RecordScriptProfilerUserEvent(myEventString). Events with the same eventString will share a recordDataIndex.
+                data.name = string.format("User event: %q", GetScriptProfilerUserEventInfo(recordDataIndex))
             else
                 assert(false, "Missing record type")
             end
-            recordDataByRecordType[recordType][recordDataIndex] = data
+            recordDataByRecordDataType[recordDataType][recordDataIndex] = data
         end
 
-        return recordDataByRecordType[recordType][recordDataIndex]
+        return recordDataByRecordDataType[recordDataType][recordDataIndex]
     end
 
     local function ParseRecord(frameIndex, recordIndex)
-        local recordType = SCRIPT_PROFILER_RECORD_TYPE_CLOSURE -- TODO
-        local recordDataIndex, startTimeNS, endTimeNS, calledByRecordIndex = GetScriptProfilerRecordInfo(frameIndex, recordIndex)
+        local recordDataIndex, startTimeNS, endTimeNS, calledByRecordIndex, recordDataType = GetScriptProfilerRecordInfo(frameIndex, recordIndex)
         local timeMS = (endTimeNS - startTimeNS) / (1000*1000)
 
-        local source = GetOrCreateRecordData(recordType, recordDataIndex)
+        local source = GetOrCreateRecordData(recordDataType, recordDataIndex)
         source.count = source.count + 1
         source.includeTime = source.includeTime + timeMS
         source.excludeTime = source.excludeTime + timeMS
         timeSpent = timeSpent + timeMS
 
         if calledByRecordIndex then
-            local calledByRecordType = SCRIPT_PROFILER_RECORD_TYPE_CLOSURE -- TODO
-            local calledByRecordDataIndex = GetScriptProfilerRecordInfo(frameIndex, calledByRecordIndex)
-            local calledByData = GetOrCreateRecordData(calledByRecordType, calledByRecordDataIndex)
+            -- get caller, and exclude the current record's time from it. By the end, the only time that will be left is time spent exclusively in the caller and not in the callees.
+            local calledByRecordDataIndex, _, _, _, calledByRecordDataType = GetScriptProfilerRecordInfo(frameIndex, calledByRecordIndex)
+            local calledByData = GetOrCreateRecordData(calledByRecordDataType, calledByRecordDataIndex)
             calledByData.excludeTime = calledByData.excludeTime - timeMS
         end
     end
 
     local function PrintReport()
         local sorted = {}
-        for recordType, recordDatas in pairs(recordDataByRecordType) do
+        for recordDataType, recordDatas in pairs(recordDataByRecordDataType) do
             for recordDataIndex, recordData in pairs(recordDatas) do
                 table.insert(sorted, recordData)
             end
         end
 
         table.sort(sorted, function(a, b)
-            return a.includeTime > b.includeTime
+            return a.excludeTime > b.excludeTime
         end)
 
         -- Print backwards, so the first element is at the bottom of chat

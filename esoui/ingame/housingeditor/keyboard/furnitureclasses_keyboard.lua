@@ -16,9 +16,9 @@ function ZO_HousingBrowserList:Initialize(control, owner)
 
     self.contents = control:GetNamedChild("Contents")
 
-    self.parentCategoryTemplate = "ZO_IconHeader"
-    self.childlessCategoryTemplate = "ZO_IconChildlessHeader"
-    self.subCategoryTemplate = "ZO_HousingFurnitureBrowserSubCategory"
+    self.parentCategoryTemplate = "ZO_FurnitureBrowserCategory"
+    self.childlessCategoryTemplate = "ZO_FurnitureBrowserChildless"
+    self.subCategoryTemplate = "ZO_FurnitureBrowserSubCategory"
 
     self:InitializeCategories(self.contents)
 
@@ -104,8 +104,7 @@ do
             mouseoverIcon = mouseoverIcon,
         }
 
-        local soundId = parent and SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED or SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED
-        local node = tree:AddNode(nodeTemplate, entryData, parent, soundId)
+        local node = tree:AddNode(nodeTemplate, entryData, parent)
         AddNodeLookup(self.nodeLookupData, node, parent, categoryId)
         entryData.node = node
         categoryObject.node = node
@@ -173,7 +172,6 @@ end
 
 function ZO_HousingBrowserList:AddTopLevelCategory(categoryObject)
     local categoryId = categoryObject:GetCategoryId()
-    local parent
     local tree = self.categoryTree
     local nodeTemplate = self.childlessCategoryTemplate
     local hasChildren = categoryObject:GetHasSubcategories()
@@ -197,7 +195,7 @@ end
 
 function ZO_HousingBrowserList:InitializeCategories(control)
     self.categories = control:GetNamedChild("CategoryList")
-    self.categoryTree = ZO_Tree:New(self.categories:GetNamedChild("ScrollChild"), 60, -10, 300)
+    self.categoryTree = ZO_Tree:New(self.categories:GetNamedChild("ScrollChild"), 60, -10, ZO_HOUSING_FURNITURE_BROWSER_CATEGORY_LIST_WIDTH)
     self.noMatchMessageLabel = control:GetNamedChild("NoMatchMessage")
 
     local function BaseTreeHeaderIconSetup(control, data, open)
@@ -211,7 +209,6 @@ function ZO_HousingBrowserList:InitializeCategories(control)
     end
 
     local function BaseTreeHeaderSetup(node, control, data, open)
-        control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(data.name)
         BaseTreeHeaderIconSetup(control, data, open)
     end
@@ -242,11 +239,14 @@ function ZO_HousingBrowserList:InitializeCategories(control)
     end
 
     local function TreeEntrySetup(node, control, data, open)
-        control:SetSelected(false)
+        control:SetSelected(node:IsSelected())
         control:SetText(data.name)
     end
 
-    self.categoryTree:AddTemplate(self.parentCategoryTemplate, TreeHeaderSetup_Child, nil, nil, 60, 0)
+    local NO_SELECTION_FUNCTION = nil
+    local NO_EQUALITY_FUNCTION = nil
+    local childSpacing = 0
+    self.categoryTree:AddTemplate(self.parentCategoryTemplate, TreeHeaderSetup_Child, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, ZO_HOUSING_FURNITURE_BROWSER_SUBCATEGORY_INDENT, childSpacing)
     self.categoryTree:AddTemplate(self.childlessCategoryTemplate, TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
     self.categoryTree:AddTemplate(self.subCategoryTemplate, TreeEntrySetup, TreeEntryOnSelected)
 
@@ -556,11 +556,6 @@ function ZO_HousingSettingsTheme_SetupDropdown(dropdown, callback)
     comboBox:SetSortsItems(false)
     comboBox:SetFont("ZoFontWinT1")
     comboBox:SetSpacing(4)
-    
-    local function OnThemeChanged(comboBox, entryText, entry)
-        dropdown.furnitureTheme = entry.furnitureTheme
-        SHARED_FURNITURE:SetPlacementFurnitureTheme(entry.furnitureTheme)
-    end
 
     for furnitureTheme = FURNITURE_THEME_TYPE_ITERATION_BEGIN, FURNITURE_THEME_TYPE_ITERATION_END do
         if DoesFurnitureThemeShowInBrowser(furnitureTheme) then

@@ -77,19 +77,6 @@ function GetPlatformAllianceSymbolIcon(alliance)
 end
 
 do
-    local ALLIANCE_BANNER_ICONS =
-    {
-        [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Contacts/social_allianceIcon_aldmeri.dds",
-        [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Contacts/social_allianceIcon_ebonheart.dds",
-        [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Contacts/social_allianceIcon_daggerfall.dds",
-    }
-
-    function GetAllianceBannerIcon(alliance)
-        return ALLIANCE_BANNER_ICONS[alliance]
-    end
-end
-
-do
     local ALLIANCE_KEEP_REWARD_ICONS =
     {
         [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Icons/AVA_Siege_UI_006.dds",

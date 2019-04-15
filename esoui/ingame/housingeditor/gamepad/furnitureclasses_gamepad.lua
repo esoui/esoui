@@ -326,7 +326,7 @@ do
                     if furnitureObject.bagId and furnitureObject.slotIndex then
                         GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, furnitureObject.bagId, furnitureObject.slotIndex)
                     elseif furnitureObject.marketProductId then
-                        GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_RIGHT_TOOLTIP, furnitureObject.marketProductId)
+                        GAMEPAD_TOOLTIPS:LayoutMarketProductListing(GAMEPAD_RIGHT_TOOLTIP, furnitureObject.marketProductId, furnitureObject.presentationIndex)
                     elseif furnitureObject.collectibleId then
                         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(furnitureObject.collectibleId)
                         GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_RIGHT_TOOLTIP, collectibleData, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)

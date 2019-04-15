@@ -54,9 +54,13 @@ end
 function ZO_RaidLeaderboardsManager_Keyboard:UpdateRaidScore()
     ZO_RaidLeaderboardsManager_Shared.UpdateRaidScore(self)
 
+    if not self.selectedSubType then
+        return
+    end
+
     local eligible = not self.participating or self.credited
     local currentScoreTextFormat = GetString(eligible and SI_LEADERBOARDS_CURRENT_SCORE or SI_RAID_LEADERBOARDS_CURRENT_SCORE_NOT_ELIGIBLE)
-    self.scoringInfoLabel:SetText(zo_strformat(currentScoreTextFormat, self.currrentScoreData))
+    self.scoringInfoLabel:SetText(zo_strformat(currentScoreTextFormat, self.currentScoreData))
     self.scoringInfoHelpIcon:SetHidden(eligible)
 end
 

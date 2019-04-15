@@ -64,6 +64,15 @@ function ZO_KeyboardGuildRosterManager:InitializeKeybindDescriptor()
                 ZO_Dialogs_ShowDialog("GUILD_INVITE", guildId, {mainTextParams = {name}})
             end,
 
+            enabled = function()
+                local numMembers, _, _, numInvitees = GetGuildInfo(GUILD_ROSTER_MANAGER:GetGuildId())
+                local totalPlayers = numMembers + numInvitees
+                if totalPlayers >= MAX_GUILD_MEMBERS then
+                    return false, GetString("SI_SOCIALACTIONRESULT", SOCIAL_RESULT_GUILD_IS_FULL)
+                end
+                return true
+            end,
+
             visible = function()
                 return DoesPlayerHaveGuildPermission(GUILD_ROSTER_MANAGER:GetGuildId(), GUILD_PERMISSION_INVITE)
             end
@@ -105,7 +114,7 @@ function ZO_KeyboardGuildRosterManager:InitializeKeybindDescriptor()
             visible = function()
                 if IsGroupModificationAvailable() and self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if data.hasCharacter and data.online and not data.isLocalPlayer then
+                    if data.hasCharacter and data.online and not data.isLocalPlayer and data.rankId ~= DEFAULT_INVITED_RANK then
                         return true
                     end
                 end
@@ -136,7 +145,7 @@ function ZO_KeyboardGuildRosterManager:FilterScrollList()
     for i = 1, #masterList do
         local data = masterList[i]
         if searchTerm == "" or GUILD_ROSTER_MANAGER:IsMatch(searchTerm, data) then
-            if not hideOffline or data.online then
+            if not hideOffline or data.online or data.rankId == DEFAULT_INVITED_RANK then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(GUILD_MEMBER_DATA, data))
             end
         end
@@ -183,7 +192,7 @@ function ZO_KeyboardGuildRosterManager:OnSearchTextChanged()
 end
 
 function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_RIGHT and upInside) then
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
         ClearMenu()
 
         local data = ZO_ScrollList_GetData(control)
@@ -198,14 +207,16 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
             local playerData = masterList[playerIndex]
             local playerHasHigherRank = playerData.rankIndex < data.rankIndex
             local playerIsGuildmaster = IsGuildRankGuildMaster(guildId, playerData.rankIndex)
+            local playerIsPendingInvite = data.rankId == DEFAULT_INVITED_RANK
+            local ALLIANCE_ICON_SIZE = 17
 
-            if(DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_PROMOTE)) then
-                if(data.rankIndex > 1) then                
-                    if(playerData.rankIndex < (data.rankIndex - 1)) then
+            if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_PROMOTE) and not playerIsPendingInvite then
+                if data.rankIndex > 1 then                
+                    if playerData.rankIndex < (data.rankIndex - 1) then
                         AddMenuItem(GetString(SI_GUILD_PROMOTE), function() GuildPromote(guildId, data.displayName); PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE) end)
-                    elseif(playerIsGuildmaster) then
+                    elseif playerIsGuildmaster then
                         AddMenuItem(GetString(SI_GUILD_PROMOTE),    function()
-                                                                        local allianceIcon = zo_iconFormat(GetAllianceBannerIcon(guildAlliance), 17, 17)
+                                                                        local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
                                                                         local rankName = GetFinalGuildRankName(guildId, 2)
                                                                         ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", {guildId = guildId, displayName = data.displayName}, { mainTextParams = { data.displayName, allianceIcon, guildName,  rankName}})  
                                                                     end)
@@ -213,9 +224,9 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
                 end
             end
 
-            if(DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_DEMOTE)) then
-                if(data.rankIndex < GetNumGuildRanks(guildId)) then
-                    if(playerHasHigherRank) then
+            if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_DEMOTE) and not playerIsPendingInvite then
+                if data.rankIndex < GetNumGuildRanks(guildId) then
+                    if playerHasHigherRank then
                         AddMenuItem(GetString(SI_GUILD_DEMOTE), function()
                                                                     GuildDemote(guildId, data.displayName)
                                                                     PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
@@ -224,25 +235,32 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
                 end            
             end
 
-            if(DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_REMOVE)) then
-                if(playerHasHigherRank and playerIndex ~= dataIndex) then
-                    local allianceIcon = zo_iconFormat(GetAllianceBannerIcon(guildAlliance), 17, 17)
-                    AddMenuItem(GetString(SI_GUILD_REMOVE), function()
-                                                                ZO_Dialogs_ShowDialog("GUILD_REMOVE_MEMBER", {guildId = guildId,  displayName = data.displayName}, { mainTextParams = { data.displayName, allianceIcon, guildName }})                                                                
-                                                            end)
+            if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_REMOVE) then
+                if playerIsPendingInvite then
+                    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
+                        AddMenuItem(GetString(SI_GUILD_UNINVITE), function()
+                                                                    ZO_Dialogs_ShowDialog("UNINVITE_GUILD_PLAYER", { guildId = guildId,  displayName = data.displayName }, { mainTextParams = { data.displayName, allianceIcon, guildName } })
+                                                                end)
+                else
+                    if playerHasHigherRank and playerIndex ~= dataIndex then
+                        local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
+                        AddMenuItem(GetString(SI_GUILD_REMOVE), function()
+                                                                    ZO_Dialogs_ShowDialog("GUILD_REMOVE_MEMBER_KEYBOARD", { guildId = guildId,  displayName = data.displayName }, { mainTextParams = { data.displayName } })
+                                                                end)
+                    end
                 end
             end
 
-            if(DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_NOTE_EDIT)) then
+            if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_NOTE_EDIT) and not playerIsPendingInvite then
                 AddMenuItem(GetString(SI_SOCIAL_MENU_EDIT_NOTE),    function()
                                                                         ZO_Dialogs_ShowDialog("EDIT_NOTE", {displayName = data.displayName, note = data.note, changedCallback = GUILD_ROSTER_MANAGER:GetNoteEditedFunction()})
                                                                     end)
             end
 
-            if(dataIndex == playerIndex) then
+            if dataIndex == playerIndex then
                 ZO_AddLeaveGuildMenuItem(guildId)
-            else
-                if(data.hasCharacter and data.online) then
+            elseif not playerIsPendingInvite then
+                if data.hasCharacter and data.online then
                     if IsChatSystemAvailableForCurrentPlatform() then
                         AddMenuItem(GetString(SI_SOCIAL_LIST_SEND_MESSAGE), function() StartChatInput("", CHAT_CHANNEL_WHISPER, data.displayName) end)
                     end
@@ -258,7 +276,7 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
                 AddMenuItem(GetString(SI_SOCIAL_MENU_VISIT_HOUSE), function() JumpToHouse(data.displayName) end)
                 AddMenuItem(GetString(SI_SOCIAL_MENU_SEND_MAIL), function() MAIL_SEND:ComposeMailTo(data.displayName) end)
 
-                if(not IsFriend(data.displayName)) then
+                if not IsFriend(data.displayName) then
                     AddMenuItem(GetString(SI_SOCIAL_MENU_ADD_FRIEND), function() ZO_Dialogs_ShowDialog("REQUEST_FRIEND", {name = data.displayName}) end)
                 end
             end
@@ -366,4 +384,71 @@ end
 
 function ZO_KeyboardGuildRoster_ToggleHideOffline(self)
     GUILD_ROSTER_KEYBOARD:HideOffline_OnClicked()
+end
+
+function ZO_ConfirmRemoveGuildMemberDialog_Keyboard_OnInitialized(self)
+    ZO_Dialogs_RegisterCustomDialog("GUILD_REMOVE_MEMBER_KEYBOARD",
+    {
+        title =
+        {
+            text = SI_PROMPT_TITLE_GUILD_REMOVE_MEMBER,
+        },
+        mainText =
+        {
+            text = SI_GUILD_REMOVE_MEMBER_WARNING,
+        },
+        canQueue = true,
+        customControl = self,
+        setup = function(dialog)
+            local checkboxControl = dialog:GetNamedChild("Check")
+            local blacklistMessageControl = dialog:GetNamedChild("BlacklistMessage")
+            local blacklistMessageEdit = blacklistMessageControl:GetNamedChild("Edit")
+
+            -- Setup checkbox
+            ZO_CheckButton_SetUnchecked(checkboxControl)
+            ZO_CheckButton_SetLabelText(checkboxControl, GetString(SI_GUILD_RECRUITMENT_ADD_TO_BLACKLIST_ACTION))
+            ZO_CheckButton_SetToggleFunction(checkboxControl, function() blacklistMessageControl:SetHidden(not ZO_CheckButton_IsChecked(checkboxControl)) end)
+
+            if DoesPlayerHaveGuildPermission(dialog.data.guildId, GUILD_PERMISSION_MANAGE_BLACKLIST) then
+                ZO_CheckButton_Enable(checkboxControl)
+                ZO_CheckButton_SetTooltipEnabledState(checkboxControl, false)
+            else
+                ZO_CheckButton_SetTooltipEnabledState(checkboxControl, true)
+                ZO_CheckButton_SetTooltipAnchor(checkboxControl, RIGHT, checkboxControl.label)
+                ZO_CheckButton_SetTooltipText(checkboxControl, GetString(SI_GUILD_RECRUITMENT_NO_BLACKLIST_PERMISSION))
+
+                ZO_CheckButton_Disable(checkboxControl)
+            end
+
+            -- Set to default values each time dialog is opened
+            blacklistMessageControl:SetHidden(true)
+            blacklistMessageEdit:SetText("")
+        end,
+        buttons =
+        {
+            -- Yes Button
+            {
+                control = self:GetNamedChild("Confirm"),
+                keybind = "DIALOG_PRIMARY",
+                text = GetString(SI_DIALOG_REMOVE),
+                callback = function(dialog)
+
+                    local isChecked = ZO_CheckButton_IsChecked(dialog:GetNamedChild("Check"))
+                    if isChecked then
+                        local blacklistMessageControl = dialog:GetNamedChild("BlacklistMessageEdit")
+                        local blacklistMessage = blacklistMessageControl:GetText()
+                        AddToGuildBlacklist(dialog.data.guildId, dialog.data.displayName, blacklistMessage)
+                    else
+                        GuildRemove(dialog.data.guildId, dialog.data.displayName)
+                    end
+                end,
+            },
+            -- No Button
+            {
+                control = self:GetNamedChild("Cancel"),
+                keybind = "DIALOG_NEGATIVE",
+                text = GetString(SI_DIALOG_CANCEL),
+            },
+        },
+    })
 end

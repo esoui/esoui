@@ -200,7 +200,7 @@ function PlayerEmote_Keyboard:UpdateCategories()
                 over = overIcon,
                 emoteCategory = category,
             }
-            local node = self.categoryTree:AddNode("ZO_IconChildlessHeader", data, nil, SOUNDS.HELP_BLADE_SELECTED)
+            local node = self.categoryTree:AddNode("ZO_IconChildlessHeader", data)
             if oldSelectedCategory and category == oldSelectedCategory then
                 nodeToSelect = node
             end

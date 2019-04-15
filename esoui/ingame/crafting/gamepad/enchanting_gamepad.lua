@@ -452,11 +452,10 @@ function ZO_GamepadEnchanting:SetEnchantingMode(enchantingMode)
             TriggerTutorial(TUTORIAL_TRIGGER_ENCHANTING_CREATION_OPENED)
         elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
             self.inventory:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_GLYPHS))
+            self:ClearSelections()
 
             TriggerTutorial(TUTORIAL_TRIGGER_ENCHANTING_EXTRACTION_OPENED)
         end
-
-        self:ClearSelections()
 
         self.inventory:HandleDirtyEvent()
 

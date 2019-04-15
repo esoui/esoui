@@ -17,6 +17,7 @@ function ZO_Help_GenericTicketSubmission_Manager:Initialize()
     self.websiteText = GetString(SI_GAMEPAD_HELP_WEBSITE)
     self.emailAppendText = zo_strformat(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_SUBMITTED_EMAIL, GetActiveUserEmailAddress())
     self.reportPlayerTicketSubmittedCallback = nil
+    self.reportGuildTicketSubmittedCallback = nil
     self.isAttemptingToSubmitReportPlayerTicket = false
 
     EVENT_MANAGER:RegisterForEvent("ZO_Help_GenericTicketSubmission_Manager", EVENT_CUSTOMER_SERVICE_TICKET_SUBMITTED, function(...) self:OnCustomerServiceTicketSubmitted(...) end)
@@ -28,6 +29,10 @@ function ZO_Help_GenericTicketSubmission_Manager:OnCustomerServiceTicketSubmitte
         self.reportPlayerTicketSubmittedCallback()
     end
 
+    if success and self.reportGuildTicketSubmittedCallback then
+        self.reportGuildTicketSubmittedCallback()
+    end
+
     self:FireCallbacks("CustomerServiceTicketSubmitted", response, success)
 
     ZO_Dialogs_ReleaseDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
@@ -35,6 +40,7 @@ function ZO_Help_GenericTicketSubmission_Manager:OnCustomerServiceTicketSubmitte
 
     self.isAttemptingToSubmitReportPlayerTicket = false
     self.reportPlayerTicketSubmittedCallback = nil
+    self.reportGuildTicketSubmittedCallback = nil
 
     if IsInGamepadPreferredMode() then
         local dialogParams = {}
@@ -114,12 +120,28 @@ function ZO_Help_GenericTicketSubmission_Manager:OpenReportPlayerTicketScene(nam
     self:SetReportPlayerTicketSubmittedCallback(ticketSubmittedCallback)
 end
 
+function ZO_Help_GenericTicketSubmission_Manager:OpenReportGuildTicketScene(name, subCategory, ticketSubmittedCallback)
+    subCategory = subCategory or CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_NONE
+    if IsInGamepadPreferredMode() then
+        SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+        ZO_Help_Customer_Service_Gamepad_SetupReportGuildTicket(name, subCategory)
+    else
+        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD, subCategory, name)
+    end
+
+    self:SetReportGuildTicketSubmittedCallback(ticketSubmittedCallback)
+end
+
 function ZO_Help_GenericTicketSubmission_Manager:MarkAttemptingToSubmitReportPlayerTicket()
     self.isAttemptingToSubmitReportPlayerTicket = true
 end
 
 function ZO_Help_GenericTicketSubmission_Manager:SetReportPlayerTicketSubmittedCallback(reportSubmittedCallback)
     self.reportPlayerTicketSubmittedCallback = reportSubmittedCallback
+end
+
+function ZO_Help_GenericTicketSubmission_Manager:SetReportGuildTicketSubmittedCallback(reportSubmittedCallback)
+    self.reportGuildTicketSubmittedCallback = reportSubmittedCallback
 end
 
 ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER = ZO_Help_GenericTicketSubmission_Manager:New()

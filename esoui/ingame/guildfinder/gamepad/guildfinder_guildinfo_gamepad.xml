@@ -1,0 +1,33 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GuildFinder_GuildInfo_AttributeHeader_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepad27" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Label name="ZO_GuildFinder_GuildInfo_AttributeValue_Gamepad" maxLineCount="1" wrapMode="ELLIPSIS" font="ZoFontGamepad34" virtual="true">
+            <DimensionConstraints maxX="350" />
+        </Label>
+        
+        <Control name="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                self.header = self:GetNamedChild("Header")
+                self.value = self:GetNamedChild("Value")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Header" inherits="ZO_GuildFinder_GuildInfo_AttributeHeader_Gamepad">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)Value" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Gamepad">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="4" offsetY="2" />
+                </Label>
+            </Controls>
+        </Control>
+      
+        <Control name="ZO_GuildFinder_GuildInfo_Attribute_GuildTraderPair_Gamepad" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Value" override="true">
+                    <DimensionConstraints maxX="500" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

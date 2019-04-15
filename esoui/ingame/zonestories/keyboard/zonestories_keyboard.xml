@@ -45,7 +45,7 @@
                     <Anchor point="BOTTOM" relativePoint="BOTTOM" />
                     <Controls>
                         <Button name="$(parent)PlayStoryButton" inherits="ZO_DefaultButton">
-                            <Dimensions x="200" />
+                            <Dimensions x="240" />
                             <Anchor point="TOPLEFT" />
                             <OnClicked>
                                 ZO_ZoneStories_PlayStory_OnClick(self)
@@ -53,7 +53,7 @@
                         </Button>
 
                         <Button name="$(parent)StopTrackingButton" inherits="ZO_DefaultButton" text="SI_ZONE_STORY_STOP_TRACKING_ZONE_STORY_ACTION">
-                            <Dimensions x="200" />
+                            <Dimensions x="240" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)PlayStoryButton" relativePoint="TOPRIGHT" offsetX="100" />
                             <OnClicked>
                                 ZO_ZoneStories_StopTracking_OnClick(self)

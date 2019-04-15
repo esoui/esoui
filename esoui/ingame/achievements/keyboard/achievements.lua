@@ -1813,8 +1813,7 @@ do
             mouseoverIcon = mouseoverIcon,
         }
 
-        local soundId = parent and SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED or SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED
-        local node = tree:AddNode(nodeTemplate, entryData, parent, soundId)
+        local node = tree:AddNode(nodeTemplate, entryData, parent)
         entryData.node = node
         local finalCategoryIndex = isFakedSubcategory and ZO_ACHIEVEMENTS_ROOT_SUBCATEGORY or categoryIndex
         AddNodeLookup(lookup, node, parent, finalCategoryIndex)

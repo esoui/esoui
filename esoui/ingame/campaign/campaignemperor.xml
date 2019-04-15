@@ -16,13 +16,25 @@
         <Control name="ZO_CampaignEmperorLeaderboardsRow" virtual="true">
             <Dimensions y="30"/>
             <Controls>
-                <Label name="$(parent)Rank" inherits="ZO_CampaignEmperorLeaderboardsRowLabel">
+                <Label name="$(parent)Rank" horizontalAlignment="CENTER" inherits="ZO_CampaignEmperorLeaderboardsRowLabel">
                     <Anchor point="LEFT" />
-                    <Dimensions x="100" y="20" />
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_RANK_WIDTH"/>
                 </Label>
-                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" font="ZoFontWinT1" verticalAlignment="CENTER" mouseEnabled="true">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Rank" offsetX="5" />
-                    <Dimensions x="315" y="30" />
+
+                <Label name="$(parent)IsIneligible" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" font="ZoFontWinT1" horizontalAlignment="CENTER" text="SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_SYMBOL" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" />
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_IS_INELIGIBLE_WIDTH"/>
+                    <OnMouseEnter>
+                        ZO_CampaignEmperorIsIneligible_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignEmperorIsIneligible_OnMouseExit(self)
+                    </OnMouseExit>
+                </Label>
+
+                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" font="ZoFontWinT1" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)IsIneligible" relativePoint="RIGHT" />
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_NAME_WIDTH"/>
                     <OnMouseEnter>
                         ZO_CampaignEmperorName_OnMouseEnter(self)
                     </OnMouseEnter>
@@ -30,13 +42,17 @@
                         ZO_CampaignEmperorName_OnMouseExit(self)
                     </OnMouseExit>
                 </Label>
+                <Control name="$(parent)AllianceSpacer">
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_ALLIANCE_WIDTH"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT"/>
+                </Control>
                 <Texture name="$(parent)Alliance" layer="OVERLAY">
                     <Dimensions x="32" y="32"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Name" offsetX="-10"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)AllianceSpacer" offsetX="-10"/>
                 </Texture>
                 <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" horizontalAlignment="RIGHT">
-                    <Anchor point="RIGHT"/>
-                    <Dimensions x="150" y="20"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)AllianceSpacer" relativePoint="RIGHT"/>
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_POINTS_WIDTH"/>
                 </Label>
             </Controls>
         </Control>
@@ -124,17 +140,21 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LeaderboardLabel" relativePoint="BOTTOMLEFT" />
                     <Dimensions y="32"/>
                     <Controls>
-                        <Label name="$(parent)Rank" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_RANK">
-                            <Anchor point="CENTER" relativePoint="LEFT" offsetX="8"/>
+                        <Label name="$(parent)Rank" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" horizontalAlignment="CENTER" text="SI_LEADERBOARDS_HEADER_RANK">
+                            <Anchor point="LEFT" />
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_RANK_WIDTH" />
                         </Label>
                         <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_NAME">
-                            <Anchor point="CENTER" relativePoint="LEFT" offsetX="130"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="ZO_CAMPAIGN_EMPEROR_NAME_HEADER_OFFSETX" />
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_NAME_HEADER_WIDTH" />
                         </Label>
-                        <Label name="$(parent)Alliance" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_ALLIANCE">
-                            <Anchor point="CENTER" relativePoint="LEFT" offsetX="395" />
+                        <Label name="$(parent)Alliance" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" horizontalAlignment="CENTER" text="SI_LEADERBOARDS_HEADER_ALLIANCE">
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT"/>
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_ALLIANCE_WIDTH" />
                         </Label>
-                        <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_POINTS">
-                            <Anchor point="CENTER" relativePoint="LEFT" offsetX="560"/>
+                        <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" horizontalAlignment="RIGHT" text="SI_LEADERBOARDS_HEADER_POINTS">
+                            <Anchor point="LEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT"/>
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_POINTS_WIDTH" />
                         </Label>
                     </Controls>
                 </Control>

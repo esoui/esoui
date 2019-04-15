@@ -13,9 +13,10 @@ function ZO_SortFilterList_Gamepad:Initialize(...)
     self.isActive = false
 end
 
-function ZO_SortFilterList_Gamepad:InitializeSortFilterList(control)
+function ZO_SortFilterList_Gamepad:InitializeSortFilterList(control, highlightTemplate)
     ZO_SortFilterList.InitializeSortFilterList(self, control)
-    ZO_ScrollList_EnableSelection(self.list, "ZO_GamepadInteractiveSortFilterDefaultHighlight", function(oldData, newData) self:OnSelectionChanged(oldData, newData) end)
+    highlightTemplate = highlightTemplate or "ZO_GamepadInteractiveSortFilterDefaultHighlight"
+    ZO_ScrollList_EnableSelection(self.list, highlightTemplate, function(oldData, newData) self:OnSelectionChanged(oldData, newData) end)
 end
 
 function ZO_SortFilterList_Gamepad:SetDirectionalInputEnabled(enabled)

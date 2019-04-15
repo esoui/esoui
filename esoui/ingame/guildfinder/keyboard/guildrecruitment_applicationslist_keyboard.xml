@@ -1,0 +1,112 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_Application_Row_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT"/>
+            <OnMouseEnter>
+                ZO_GuildRecruitment_ApplicationsList_Row_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GuildRecruitment_ApplicationsList_Row_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_GuildRecruitment_ApplicationsList_Row_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_GuildFinder_Application_Keyboard_RowLabel">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_NAME_COLUMN_SIZE" />
+                </Label>
+                <Label name="$(parent)Level" inherits="ZO_GuildFinder_Application_Keyboard_RowLabel" horizontalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_LEVEL_COLUMN_OFFSET_X" />
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_CHAMPION_POINTS_COLUMN_SIZE" />
+                </Label>
+                <Label name="$(parent)Expires" inherits="ZO_GuildFinder_Application_Keyboard_RowLabel" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Level" offsetX="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_EXPIRATION_COLUMN_OFFSET_X" />
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_EXPIRATION_COLUMN_SIZE" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildRecruitment_ApplicationsList_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_ApplicationsList_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildRecruitment_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40"/>
+                    <Dimensions y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT"/>
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_NAME_COLUMN_SIZE" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString("SI_PLATFORMACCOUNTLABEL", ACCOUNT_LABEL_PC), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Level" inherits="ZO_SortHeader">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_LEVEL_COLUMN_OFFSET_X" />
+                            <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_CHAMPION_POINTS_COLUMN_SIZE" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), "level", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+                        <Control name="$(parent)Expires" inherits="ZO_SortHeader">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Level" offsetX="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_EXPIRATION_COLUMN_OFFSET_X" />
+                            <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_EXPIRATION_COLUMN_SIZE" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "durationS", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ConfirmDeclineApplicationDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_ConfirmDeclineApplicationDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
+
+                <Backdrop name="$(parent)DeclineMessage" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_APPLICATION_DECLINE_MESSAGE_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_RECRUITMENT_APPLICATION_DECLINE_DEFAULT_RESPONSE))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Button name="$(parent)Check" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DeclineMessage" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                </Button>
+
+                <Backdrop name="$(parent)BlacklistMessage" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)DeclineMessage" relativePoint="RIGHT" constrains="X" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Check" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_BLACKLIST_MESSAGE_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

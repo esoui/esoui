@@ -25,7 +25,8 @@
             </Controls>
         </Control>
 
-        <Label name="ZO_MarketSubCategory" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+        <Label name="ZO_MarketSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="10" virtual="true">
+            <DimensionConstraints maxX="ZO_MARKET_SUBCATEGORY_LABEL_WIDTH"/>
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
@@ -33,7 +34,7 @@
             <Controls>
                 <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" hidden="true">
                     <Dimensions x="20" y="20"/>
-                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-2"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="-2" offsetY="2" />
                 </Texture>
             </Controls>
         </Label>

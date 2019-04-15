@@ -29,10 +29,20 @@ GAMEPAD_NAV_QUADRANT_2_3_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPrevie
     previewBufferMS = 300
 })
 
+GAMEPAD_NAV_QUADRANT_2_3_4_FURNITURE_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    paddingRight = ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedWidth = ZO_GAMEPAD_UI_REFERENCE_WIDTH - ZO_GAMEPAD_PANEL_WIDTH - (ZO_GAMEPAD_SAFE_ZONE_INSET_X * 2),
+    dynamicFramingConsumedHeight = 400,
+    forcePreparePreview = false,
+    previewInEmptyWorld = true,
+    previewBufferMS = 300
+})
+
 GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
-    paddingLeft = ZO_GAMEPAD_QUADRANT_2_RIGHT_OFFSET,
-    paddingRight = 0,
-    dynamicFramingConsumedWidth = (ZO_GAMEPAD_UI_REFERENCE_WIDTH - ZO_GAMEPAD_QUADRANT_2_RIGHT_OFFSET),
+    paddingLeft = (ZO_GAMEPAD_PANEL_WIDTH * 2) + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    paddingRight = ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedWidth = ZO_GAMEPAD_UI_REFERENCE_WIDTH - (ZO_GAMEPAD_PANEL_WIDTH * 2) - (ZO_GAMEPAD_SAFE_ZONE_INSET_X * 2),
     dynamicFramingConsumedHeight = 400,
     forcePreparePreview = false,
     previewBufferMS = 300,
@@ -190,7 +200,6 @@ GAMEPAD_AVA_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_CampaignBrowser_GamepadTopL
 GAMEPAD_AVA_FRAGMENT:SetHideOnSceneHidden(true)
 GAMEPAD_AVA_CAMPAIGN_INFO_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignBrowser_GamepadTopLevelCampaignInfo)
 GAMPEAD_AVA_RANK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignBrowser_GamepadTopLevelAvaRankFooter)
-GAMEPAD_AVA_NO_INFORMATION_WARNING = ZO_FadeSceneFragment:New(ZO_CampaignBrowser_GamepadTopLevelNoInformationWarning)
 
 GAMEPAD_GROUP_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupMenuGamepad)
 GAMEPAD_GROUP_LFG_OPTIONS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GroupRoleMenu_Gamepad)

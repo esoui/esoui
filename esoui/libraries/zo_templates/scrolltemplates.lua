@@ -549,7 +549,7 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
     local scroll = self.scroll
     local _, verticalOffset = scroll:GetScrollOffsets()
     local _, verticalExtents   = scroll:GetScrollExtents()
-    local scrollEnabled = (verticalExtents > 0 or verticalOffset > 0)
+    local scrollEnabled = verticalExtents > 0 or verticalOffset > 0
     local scrollbar  = self.scrollbar
     local scrollIndicator = self.scrollIndicator
     local scrollbarHidden = not self.useScrollbar or (self.hideScrollBarOnDisabled and not scrollEnabled)
@@ -566,7 +566,10 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
         else
             scrollbar:SetThumbTextureHeight(scrollBarHeight)
         end
-    
+
+        --set mouse input enabled based on scrollability
+        scroll:SetMouseEnabled(scrollEnabled)
+
         --auto scroll bar hiding
         local wasHidden = scrollbar:IsHidden()
         scrollbar:SetHidden(scrollbarHidden)
@@ -1200,11 +1203,14 @@ function ZO_ScrollList_GetMouseOverControl(self)
     end
 end
 
-local function PlayAnimationOnControl(control, controlTemplate, animationFieldName, animateInstantly)
+local function PlayAnimationOnControl(control, controlTemplate, animationFieldName, animateInstantly, overrideEndAlpha)
     if controlTemplate then
         if not control[animationFieldName] then
             local highlight = CreateControlFromVirtual("$(parent)Scroll", control, controlTemplate, animationFieldName)
             control[animationFieldName] = ANIMATION_MANAGER:CreateTimelineFromVirtual("ShowOnMouseOverLabelAnimation", highlight)
+            if overrideEndAlpha then
+                control[animationFieldName]:GetAnimation(1):SetAlphaValues(0, overrideEndAlpha)
+            end
         end
 
         if animateInstantly then
@@ -1226,7 +1232,8 @@ local function RemoveAnimationOnControl(control, animationFieldName, animateInst
 end
 
 local function HighlightControl(self, control)
-    PlayAnimationOnControl(control, self.highlightTemplate, "HighlightAnimation")
+    local ANIMATE_INSTANTLY = false
+    PlayAnimationOnControl(control, self.highlightTemplate, "HighlightAnimation", ANIMATE_INSTANTLY, self.overrideHighlightEndAlpha)
 
     self.highlightedControl = control
     
@@ -1345,13 +1352,14 @@ function ZO_ScrollList_MouseClick(self, control)
     end
 end
 
-function ZO_ScrollList_EnableHighlight(self, highlightTemplate, highlightCallback)
+function ZO_ScrollList_EnableHighlight(self, highlightTemplate, highlightCallback, overrideEndAlpha)
     if not self.highlightTemplate then
         self.highlightTemplate = highlightTemplate
         
         self.highlightLocked = false
         self.pendingHighlightControl = nil
         self.highlightCallback = highlightCallback
+        self.overrideHighlightEndAlpha = overrideEndAlpha
         
         RefreshHighlight(self)
     end
@@ -1685,6 +1693,10 @@ function ZO_ScrollList_ScrollDataIntoView(self, dataIndex, onScrollCompleteCallb
     elseif onScrollCompleteCallback then
         onScrollCompleteCallback(true)
     end
+end
+
+function ZO_ScrollList_GetScrollValue(self)
+    return self.scrollbar:GetValue()
 end
 
 function ZO_ScrollList_ScrollDataToCenter(self, dataIndex, onScrollCompleteCallback, animateInstantly)

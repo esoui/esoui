@@ -113,28 +113,6 @@ function GetDeposeEmperorEventDescription(campaignId, playerCharacterName, playe
     end
 end
 
-local IMPERIAL_CITY_GAINED_SOUND =
-{
-    [ALLIANCE_ALDMERI_DOMINION] = SOUNDS.IMPERIAL_CITY_ACCESS_GAINED_ALDMERI,
-    [ALLIANCE_EBONHEART_PACT] = SOUNDS.IMPERIAL_CITY_ACCESS_GAINED_EBONHEART,
-    [ALLIANCE_DAGGERFALL_COVENANT] = SOUNDS.IMPERIAL_CITY_ACCESS_GAINED_DAGGERFALL,
-}
-
-local IMPERIAL_CITY_LOST_SOUND =
-{
-    [ALLIANCE_ALDMERI_DOMINION] = SOUNDS.IMPERIAL_CITY_LOST_SOUND_ALDMERI,
-    [ALLIANCE_EBONHEART_PACT] = SOUNDS.IMPERIAL_CITY_LOST_SOUND_EBONHEART,
-    [ALLIANCE_DAGGERFALL_COVENANT] = SOUNDS.IMPERIAL_CITY_LOST_SOUND_DAGGERFALL,
-}
-
-function GetImperialCityAccessGainedEventDescription(campaignId, alliance)
-        return zo_strformat(SI_IMPERIAL_CITY_ACCESS_GAINED, GetCampaignName(campaignId), GetColoredAllianceName(alliance)), IMPERIAL_CITY_GAINED_SOUND[alliance]
-end
-
-function GetImperialCityAccessLostEventDescription(campaignId, alliance)
-        return zo_strformat(SI_IMPERIAL_CITY_ACCESS_LOST, GetCampaignName(campaignId), GetColoredAllianceName(alliance)), IMPERIAL_CITY_LOST_SOUND[alliance]
-end
-
 function GetClaimKeepCampaignEventDescription(campaignId, keepId, guildName, playerName)
     return zo_strformat(SI_CAMPAIGN_CLAIM_KEEP_EVENT, GetCampaignName(campaignId), GetKeepName(keepId), guildName, playerName), SOUNDS.GUILD_KEEP_CLAIMED
 end
@@ -484,26 +462,42 @@ local SUPPRESS_SKILL_POINT_CSA_REASONS =
 
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_SKILL_POINTS_CHANGED] = function(oldPoints, newPoints, oldPartialPoints, newPartialPoints, changeReason)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-    if oldPartialPoints ~= newPartialPoints then
+
+    local numSkillPointsGained = newPoints - oldPoints
+    -- check if the skill point change was due to skyshards
+    if oldPartialPoints ~= newPartialPoints or changeReason == SKILL_POINT_CHANGE_REASON_SKYSHARD_INSTANT_UNLOCK then
+        if numSkillPointsGained < 0 then
+            return
+        end
+
+        local numSkyshardsGained = (newPoints * NUM_PARTIAL_SKILL_POINTS_FOR_FULL + newPartialPoints) - (oldPoints * NUM_PARTIAL_SKILL_POINTS_FOR_FULL + oldPartialPoints)
+
         messageParams:SetSound(SOUNDS.SKYSHARD_GAINED)
-        local largeText = GetString(SI_SKYSHARD_GAINED)
-        -- if the new partial points is 0 that means we got enough partials to get a full skill point
-        if newPartialPoints == 0 then
-            if newPoints <= oldPoints then
-                return
-            end
-            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
-            messageParams:SetText(largeText, zo_strformat(SI_SKILL_POINT_GAINED, newPoints - oldPoints))
-        else
+        local largeText = zo_strformat(SI_SKYSHARD_GAINED, numSkyshardsGained)
+
+        -- if only the partial points changed, message out the new count of skyshard pieces
+        if newPoints == oldPoints then
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_PARTIAL_GAINED)
             messageParams:SetText(largeText, zo_strformat(SI_SKYSHARD_GAINED_POINTS, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL))
+        else
+            local messageText
+            -- if there are no leftover skyshard pieces, don't include them in the message
+            if newPartialPoints == 0 then
+                messageText = zo_strformat(SI_SKILL_POINT_GAINED, numSkillPointsGained)
+            else
+                messageText = zo_strformat(SI_SKILL_POINT_AND_SKYSHARD_PIECES_GAINED, numSkillPointsGained, newPartialPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+            end
+
+            messageParams:SetText(largeText, messageText)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
         end
+
         return messageParams
-    elseif newPoints > oldPoints then
+    elseif numSkillPointsGained > 0 then
         if not SUPPRESS_SKILL_POINT_CSA_REASONS[changeReason] then
             messageParams:SetSound(SOUNDS.SKILL_GAINED)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
-            messageParams:SetText(zo_strformat(SI_SKILL_POINT_GAINED, newPoints - oldPoints))
+            messageParams:SetText(zo_strformat(SI_SKILL_POINT_GAINED, numSkillPointsGained))
             return messageParams
         end
     end
@@ -599,16 +593,6 @@ end
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_DEPOSE_EMPEROR_NOTIFICATION] = function(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
     local description, soundId = GetDeposeEmperorEventDescription(campaignId, playerCharacterName, playerAlliance, abdication, playerDisplayName)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR, 5000)
-end
-
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_IMPERIAL_CITY_ACCESS_GAINED_NOTIFICATION] = function(campaignId, alliance)
-    local description, soundId = GetImperialCityAccessGainedEventDescription(campaignId, alliance)
-    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_GAINED)
-end
-
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_IMPERIAL_CITY_ACCESS_LOST_NOTIFICATION] = function(campaignId, alliance)
-    local description, soundId = GetImperialCityAccessLostEventDescription(campaignId, alliance)
-    return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_LOST)
 end
 
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_REVENGE_KILL] = function(killedCharacterName, killedDisplayName)
@@ -1107,8 +1091,6 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_CORONATE_EMPEROR)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR)
-    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_GAINED)
-    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_IMPERIAL_CITY_ACCESS_LOST)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_REVENGE_KILL)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_AVENGE_KILL)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ABILITY_PROGRESSION_RANK_UPDATE)

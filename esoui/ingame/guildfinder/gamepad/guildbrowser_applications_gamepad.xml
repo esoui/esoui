@@ -1,0 +1,58 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildBrowser_Applications_Row_Gamepad" virtual="true">
+            <Dimensions y="ZO_GUILD_BROWSER_APPLICATIONS_GAMEPAD_ENTRY_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad36" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                    <Dimensions x="345" />
+                </Label>
+                <Label name="$(parent)Expires" font="ZoFontGamepad36" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="RIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                    <Dimensions x="75" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildBrowser_Applications_Gamepad_TopLevel" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true">
+            <OnInitialized>
+                ZO_GuildBrowser_Applications_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)PanelName" font="ZoFontGamepadBold54" horizontalAlignment="CENTER" text="SI_GUILD_BROWSER_CATEGORY_APPLICATIONS" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="40" />
+                </Label>
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Controls>
+                        <Control name="$(parent)ContentHeader" override="true" hidden="true" />
+
+                        <Control name="$(parent)Headers" override="true">
+                            <ClearAnchors />
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                            <Controls>
+                                <Label name="$(parent)GuildName" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                                    <Dimensions x="570" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_NAME), "guildName", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Label>
+                                <Label name="$(parent)Expires" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Anchor point="LEFT" relativeTo="$(parent)GuildName" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <Dimensions x="150" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "durationS", TEXT_ALIGN_RIGHT)
+                                    </OnInitialized>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

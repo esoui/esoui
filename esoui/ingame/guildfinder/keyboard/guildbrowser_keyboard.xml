@@ -1,0 +1,24 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildBrowser_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildBrowser_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)PersonalData">
+                    <Anchor point="TOPLEFT" offsetY="10"/>
+                    <Controls>
+                        <Label name="$(parent)ApplicationsTitle" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_BROWSER_PLAYER_APPLICATIONS_TITLE">
+                            <Anchor point="TOPLEFT" relativeTo="ZO_DisplayNameDisplayNameLabel" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                        <Label name="$(parent)ApplicationsLabel" font="ZoFontGameLargeBold">
+                            <Anchor point="LEFT" relativeTo="$(parent)ApplicationsTitle" relativePoint="RIGHT" offsetX="5" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)List" inherits="ZO_GuildFinder_Keyboard_List_Template" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

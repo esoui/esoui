@@ -70,6 +70,13 @@ function ZO_HousingFurnitureProducts_Keyboard:InitializeThemeSelector()
     ZO_HousingSettingsTheme_SetupDropdown(self.purchaseThemeDropdown, OnThemeChanged)
 end
 
+
+function ZO_HousingFurnitureProducts_Keyboard:OnShowing()
+    ZO_HousingFurnitureList.OnShowing(self)
+
+    UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
+end
+
 function ZO_HousingFurnitureProducts_Keyboard:OnSearchTextChanged(editBox)
     ZO_HousingFurnitureList.OnSearchTextChanged(self, editBox)
     SHARED_FURNITURE:SetMarketProductTextFilter(editBox:GetText())

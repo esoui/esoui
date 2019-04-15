@@ -59,7 +59,7 @@ function HelpCustomerService_Keyboard:InitializeHelpDialogs()
 end
 
 function HelpCustomerService_Keyboard:AddCategory(data)
-    local node = self.tree:AddNode("ZO_HelpCustomerService_Type", data, nil, SOUNDS.HELP_BLADE_SELECTED)
+    local node = self.tree:AddNode("ZO_HelpCustomerService_Type", data)
     self.categoryFragmentToNodeLookup[data.categoryFragment] = node
     self.tree:Commit()
 end

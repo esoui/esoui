@@ -76,6 +76,7 @@ do
         self.animation, self.timeline = ZO_CreateScrollAnimation(self)
         self.scrollValue = SLIDER_MIN_VALUE
         self.directionalInputActivated = false
+        self.scrollIndicatorEnabled = true
 
         ZO_UpdateScrollFade(self.useFadeGradient, self.scroll, ZO_SCROLL_DIRECTION_VERTICAL)
     end
@@ -86,6 +87,16 @@ do
         ZO_ScrollAnimation_MoveWindow(self, self.scrollValue)
         ZO_UpdateScrollFade(self.useFadeGradient, self.scroll, ZO_SCROLL_DIRECTION_VERTICAL, ZO_GetScrollMaxFadeGradientSize(self))
     end
+end
+
+function ZO_ScrollContainer_Gamepad:SetScrollIndicatorEnabled(enabled)
+    self.scrollIndicatorEnabled = enabled
+    self:UpdateScrollIndicator()
+end
+
+function ZO_ScrollContainer_Gamepad:UpdateScrollIndicator()
+    local _, verticalExtents = self.scroll:GetScrollExtents()
+    self.scrollIndicator:SetHidden(not (self.scrollIndicatorEnabled and verticalExtents ~= 0))
 end
 
 function ZO_ScrollContainer_Gamepad:EnableUpdateHandler()
@@ -128,9 +139,7 @@ end
 
 function ZO_ScrollContainer_Gamepad:OnScrollExtentsChanged(control, horizontalExtents, verticalExtents)
     self:RefreshDirectionalInputActivation()
-    --Gamepad Mode is a safety check for shared controls between Gamepad/Keyboard that 
-    --use Gamepad Scroll containers such as Death Recap.
-    self.scrollIndicator:SetHidden(not (IsInGamepadPreferredMode() and verticalExtents ~= 0))
+    self:UpdateScrollIndicator()
     ZO_UpdateScrollFade(self.useFadeGradient, self.scroll, ZO_SCROLL_DIRECTION_VERTICAL)
 end
 

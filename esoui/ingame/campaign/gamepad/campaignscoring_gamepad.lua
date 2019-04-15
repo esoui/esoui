@@ -10,12 +10,12 @@ function ZO_CampaignScoringManager_Gamepad:New(control)
     manager.control = control
     CAMPAIGN_SCORING_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignScoring_Gamepad)
     CAMPAIGN_SCORING_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                                    if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                                    if newState == SCENE_FRAGMENT_SHOWN then
                                                                         manager.shown = true
                                                                         QueryCampaignLeaderboardData()
                                                                         manager:UpdateRewardTier()
                                                                         manager:UpdateScores()
-                                                                    elseif(newState == SCENE_FRAGMENT_HIDDEN) then
+                                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
                                                                         manager.shown = false
                                                                     end
                                                                 end)

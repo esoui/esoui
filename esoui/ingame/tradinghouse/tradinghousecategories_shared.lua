@@ -913,19 +913,20 @@ do
         },
     }
 
-    function AddConsumableCategory(itemType)
-        local specializedItemTypes = SPECIALIZED_ITEM_TYPES_FOR_CONSUMABLE_ITEM_TYPE[itemType]
-        local features = FEATURES_FOR_CONSUMABLE_ITEM_TYPE[itemType]
+    function AddConsumableCategory(mainItemType, ...)
+        local allItemTypes = {mainItemType, ...}
+        local specializedItemTypes = SPECIALIZED_ITEM_TYPES_FOR_CONSUMABLE_ITEM_TYPE[mainItemType]
+        local features = FEATURES_FOR_CONSUMABLE_ITEM_TYPE[mainItemType]
         local function ApplyConsumableToSearch(search, specializedItemType)
             if specializedItemType then
                 search:SetFilter(TRADING_HOUSE_FILTER_TYPE_SPECIALIZED_ITEM, specializedItemType)
             else
-                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, itemType)
+                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, allItemTypes)
             end
         end
-        local categoryParams = AddCategory(string.format("Consumable%d", itemType))
+        local categoryParams = AddCategory(string.format("Consumable%d", mainItemType))
 
-        categoryParams:SetName(GetString("SI_ITEMTYPE", itemType))
+        categoryParams:SetName(GetString("SI_ITEMTYPE", mainItemType))
         categoryParams:SetHeader(TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES)
 
         local SUBCATEGORY_ENUM_KEY_PREFIX = "SpecializedItemType"
@@ -960,7 +961,9 @@ do
             })
         end
 
-        AddItemTypeToAllConsumables(itemType)
+        for _, itemType in ipairs(allItemTypes) do
+            AddItemTypeToAllConsumables(itemType)
+        end
     end
 
     function AddRecipeCategory(specialIngredientType)
@@ -1732,11 +1735,12 @@ end
 --[[
     This is a list of search categories in the order they will appear in the UI.
     When adding a new category, create an AddXCategory function and add it to this list, making sure that it's in the same group as the other categories of its header.
+    Any item that could be sold on the trading house should be categorized.
 ]]--
 
-internalassert(ITEMTYPE_MAX_VALUE == 69, "Do you need to update the trading house?")
-internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3100, "Do you need to update the trading house?")
-internalassert(EQUIP_TYPE_MAX_VALUE == 15, "Do you need to update the trading house?")
+internalassert(ITEMTYPE_MAX_VALUE == 70, "Do you need to update the trading house with your new itemtype?")
+internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3100, "Do you need to update the trading house with your new specialized itemtype?")
+internalassert(EQUIP_TYPE_MAX_VALUE == 15, "Do you need to update the trading house with your new equip type?")
 
 -- All Items
 AddAllItemsCategory()
@@ -1770,7 +1774,7 @@ AddConsumableCategory(ITEMTYPE_POISON)
 AddConsumableCategory(ITEMTYPE_RACIAL_STYLE_MOTIF)
 AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
 AddConsumableCategory(ITEMTYPE_MASTER_WRIT)
-AddConsumableCategory(ITEMTYPE_CONTAINER)
+AddConsumableCategory(ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY)
 AddConsumableCategory(ITEMTYPE_AVA_REPAIR)
 
 -- Materials

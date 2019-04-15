@@ -63,14 +63,13 @@ local function ProcessData(control, textData, anchorToBaselineControl, anchorToB
     end
 
     if type(textData) == "string" or type(textData) == "number" then
+        if overrideColor then
+            textData = overrideColor:Colorize(textData)
+        end
         control:SetText(textData)
     end
 
     control:SetHidden(not textData)
-
-    if overrideColor then
-        control:SetColor(overrideColor:UnpackRGBA())
-    end
 
     if anchorToBaselineControl then
         control:ClearAnchorToBaseline(anchorToBaselineControl)

@@ -394,12 +394,12 @@ end
 function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     -- Get the dialog info from the ESO_Dialogs table
     local dialogInfo = ESO_Dialogs[name]
-    if(type(dialogInfo) ~= "table") then
+    if type(dialogInfo) ~= "table" then
         return nil
     end
     
-    if(ZO_Dialogs_IsShowingDialog()) then
-        if(dialogInfo.canQueue) then
+    if ZO_Dialogs_IsShowingDialog() then
+        if dialogInfo.canQueue then
             QueueDialog(name, data, textParams, isGamepad, dialogInfo)
         end
         return nil
@@ -479,7 +479,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     local buttonInfos = dialogInfo.buttons
     local numButtonInfos = buttonInfos and #buttonInfos or 0
     dialog.numButtons = numButtonInfos
-    if(numButtonInfos > 0 and not isGamepadDialog) then
+    if numButtonInfos > 0 and not isGamepadDialog then
         for i = 1, numButtonInfos do
             local buttonInfo = buttonInfos[i]
             local button = GetButtonControl(dialog, i)
@@ -493,24 +493,25 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 end
             end
 
-            if(not buttonVisible) then
+            if not buttonVisible then
                 button:SetHidden(true)
                 button:SetKeybindEnabled(false)
             else
+                local buttonText
                 if textParams and textParams.buttonTextOverrides and textParams.buttonTextOverrides[i] then
-                    button:SetText(textParams.buttonTextOverrides[i])    
-                elseif(type(buttonInfo.text) == "number") then
-                    button:SetText(GetString(buttonInfo.text))
-                elseif(type(buttonInfo.text) == "function") then
-                    button:SetText(buttonInfo.text(dialog))
+                    buttonText = textParams.buttonTextOverrides[i]
+                elseif type(buttonInfo.text) == "number" then
+                    buttonText = GetString(buttonInfo.text)
+                elseif type(buttonInfo.text) == "function" then
+                    buttonText = buttonInfo.text(dialog)
                 else
-                    button:SetText(buttonInfo.text)
+                    buttonText = buttonInfo.text
                 end
-
+                button:SetText(buttonText)
                 button:SetHidden(false)
-                button.m_callback = buttonInfo.callback 
+                button.m_callback = buttonInfo.callback
                 button.m_noReleaseOnClick = buttonInfo.noReleaseOnClick
-                
+
                 local keybind
                 local hasKeybind = true
                 if buttonInfo.keybind then
@@ -520,7 +521,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                         keybind = buttonInfo.keybind
                     end
                 elseif buttonInfo.keybind == nil then
-                    if(i == 1) then
+                    if i == 1 then
                         keybind = "DIALOG_PRIMARY"
                     else
                         keybind = "DIALOG_NEGATIVE"
@@ -529,22 +530,36 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                     hasKeybind = false
                 end
 
-                button:SetKeybindEnabled(hasKeybind)
+                local isButtonEnabled
+                if buttonInfo.enabled ~= nil then
+                    if type(buttonInfo.enabled) == "function" then
+                        isButtonEnabled = buttonInfo.enabled(dialog)
+                    else
+                        isButtonEnabled = buttonInfo.enabled
+                    end
+                end
+
+                if isButtonEnabled ~= nil then
+                    button:SetEnabled(isButtonEnabled)
+                    button:SetKeybindEnabled(hasKeybind and isButtonEnabled)
+                else
+                    button:SetKeybindEnabled(hasKeybind)
+                end
                 button:SetKeybind(keybind)
 
-                if(buttonInfo.clickSound) then
+                if buttonInfo.clickSound then
                     button:SetClickSound(buttonInfo.clickSound)
                 else
-                    if(keybind == "DIALOG_NEGATIVE") then
+                    if keybind == "DIALOG_NEGATIVE" then
                         button:SetClickSound(SOUNDS.DIALOG_DECLINE)
                     else
                         button:SetClickSound(SOUNDS.DIALOG_ACCEPT)
                     end
                 end
 
-                if(buttonInfo.requiresTextInput) then
+                if buttonInfo.requiresTextInput then
                     dialog.requiredTextFields:AddButton(button)
-                end 
+                end
             end
         end
     end
@@ -560,8 +575,8 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
         if not mainText then
             return nil
-        end   
-        
+        end
+
         ZO_Dialogs_SetDialogLoadingIcon(dialog.loadingIcon, textControl, dialogInfo.showLoadingIcon)
 
         local modalUnderlay = dialog:GetNamedChild("ModalUnderlay")
@@ -574,8 +589,8 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
         end
 
         local controlAbove = textControl
-        
-        if(dialogInfo.editBox) then
+
+        if dialogInfo.editBox then
             local editControl = dialog:GetNamedChild("EditBox")
             local editContainer = dialog:GetNamedChild("Edit")
             local editBoxInfo = dialogInfo.editBox
@@ -584,7 +599,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             editContainer:SetAnchor(TOPRIGHT, controlAbove, BOTTOMRIGHT, 0, 10)
             editContainer:SetHidden(false)
 
-            if(editBoxInfo.textType) then
+            if editBoxInfo.textType then
                 editControl:SetTextType(editBoxInfo.textType)
 
                 if editBoxInfo.specialCharacters then
@@ -598,13 +613,13 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 editControl:SetTextType(TEXT_TYPE_ALL)
             end
 
-            if(editBoxInfo.maxInputCharacters) then
+            if editBoxInfo.maxInputCharacters then
                 editControl:SetMaxInputChars(editBoxInfo.maxInputCharacters)
             else
                 editControl:SetMaxInputChars(128)
             end
 
-            if(editBoxInfo.defaultText) then
+            if editBoxInfo.defaultText then
                 ZO_EditDefaultText_Initialize(editControl, GetString(editBoxInfo.defaultText))
             else
                 ZO_EditDefaultText_Disable(editControl)
@@ -641,8 +656,8 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             else
                 editControl.validator = nil
             end
-            
-            if(editBoxInfo.matchingString) then
+
+            if editBoxInfo.matchingString then
                 dialog.requiredTextFields:SetMatchingString(editBoxInfo.matchingString)
             end
 
@@ -658,7 +673,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
         dialog.radioButtonGroup:Clear()
         radioButtonContainer:SetHidden(true)
 
-        if(dialogInfo.radioButtons) then
+        if dialogInfo.radioButtons then
             radioButtonContainer:SetHidden(false)
             radioButtonContainer:SetAnchor(TOPLEFT, controlAbove, BOTTOMLEFT, 0, 15)
             radioButtonContainer:SetAnchor(TOPRIGHT, controlAbove, BOTTOMRIGHT, 0, 15)
@@ -673,7 +688,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 label:SetText(buttonInfo.text)
                 radioButton.data = buttonInfo.data
 
-                if(i == 1) then
+                if i == 1 then
                     dialog.radioButtonGroup:SetClickedButton(radioButton)
                     radioButton:SetAnchor(TOPLEFT, nil, TOPLEFT, 15, 0)
                 else
@@ -691,15 +706,15 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             warningLabel:SetAnchor(TOPRIGHT, controlAbove, BOTTOMRIGHT, 0, 15)
             controlAbove = warningLabel
         end
-            
+
         -- Handle button centering
         local btn1 = dialog:GetNamedChild("Button1")
         local btn2 = dialog:GetNamedChild("Button2")
-        
-        if(numButtonInfos == 0) then -- Hide both buttons
+
+        if numButtonInfos == 0 then -- Hide both buttons
             btn1:SetHidden(true)
             btn2:SetHidden(true)
-        elseif(numButtonInfos == 1) then -- Only show one
+        elseif numButtonInfos == 1 then -- Only show one
             btn2:SetHidden(true)
 
             btn1:ClearAnchors()
@@ -708,7 +723,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             else
                 btn1:SetAnchor(TOPRIGHT, controlAbove, BOTTOMRIGHT, 0, 23)
             end
-        elseif(numButtonInfos == 2) then -- Show both
+        elseif numButtonInfos == 2 then -- Show both
             btn2:ClearAnchors()
             btn1:ClearAnchors()
             if isGamepad then
@@ -721,7 +736,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
         end
 
-        if(dialogInfo.callback) then
+        if dialogInfo.callback then
             -- Pass in the id of the dialog being shown for this purpose.
             -- It can (eventually) be used to track this particular dialog instance.
             dialogInfo.callback(dialog.id)
@@ -731,10 +746,10 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     dialog:SetHandler("OnUpdate", dialogInfo.updateFn)
 
     table.insert(displayedDialogs, {name = name, dialog = dialog})
-    
+
     if not isGamepad then
         if(SCENE_MANAGER.RegisterTopLevel) then
-            SCENE_MANAGER:RegisterTopLevel(dialog, TOPLEVEL_LOCKS_UI_MODE)        
+            SCENE_MANAGER:RegisterTopLevel(dialog, TOPLEVEL_LOCKS_UI_MODE)
             SCENE_MANAGER:ShowTopLevel(dialog)
         else
             dialog:SetHidden(false)
@@ -1050,6 +1065,46 @@ function ZO_Dialogs_GetSelectedRadioButtonData(dialog)
     local clickedButton = dialog.radioButtonGroup:GetClickedButton()
     if(clickedButton) then
         return clickedButton.data
+    end
+end
+
+function ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
+    local buttonInfos = dialog.info.buttons
+    local numButtonInfos = buttonInfos and #buttonInfos or 0
+    dialog.numButtons = numButtonInfos
+    if numButtonInfos > 0 and not isGamepadDialog then
+        for i = 1, numButtonInfos do
+            local buttonInfo = buttonInfos[i]
+            local button = GetButtonControl(dialog, i)
+
+            local buttonVisible = true
+            if buttonInfo.visible ~= nil then
+                if type(buttonInfo.visible) == "function" then
+                    buttonVisible = buttonInfo.visible(dialog)
+                else
+                    buttonVisible = buttonInfo.visible
+                end
+            end
+
+            if not buttonVisible then
+                button:SetHidden(true)
+                button:SetKeybindEnabled(false)
+            else
+                local isButtonEnabled = true
+                if buttonInfo.enabled ~= nil then
+                    if type(buttonInfo.enabled) == "function" then
+                        isButtonEnabled = buttonInfo.enabled(dialog)
+                    else
+                        isButtonEnabled = buttonInfo.enabled
+                    end
+                end
+
+                local hasKeybind = button:GetKeybind() ~= nil
+                button:SetHidden(false)
+                button:SetEnabled(isButtonEnabled)
+                button:SetKeybindEnabled(hasKeybind and isButtonEnabled)
+            end
+        end
     end
 end
 

@@ -6,31 +6,11 @@
             </OnMouseUp>
         </Label>
 
-        <Control name="ZO_Help_Header" virtual="true">
-            <OnInitialized>
-                ZO_IconHeader_OnInitialized(self)
-            </OnInitialized>
-
+        <Control name="ZO_Help_Header" inherits="ZO_IconHeader" virtual="true">
             <Controls>
-                <Texture name="$(parent)Icon" scale=".5" inherits="ZO_IconHeaderMouseArea">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="30" offsetY="24"/>
-
-                    <Controls>
-                        <Texture name="$(parent)Highlight" hidden="true" blendMode="ADD">
-                            <AnchorFill />
-                        </Texture>
-                    </Controls>
-                </Texture>
-                <Label name="$(parent)Text" font="ZoFontHeader3" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea">
-                    <Anchor point="TOPLEFT" offsetX="55" offsetY="9"/>
-                    <DimensionConstraints maxX="300"/>
+                <Label name="$(parent)Text" override="true" modifyTextType="UPPERCASE">
+                    <DimensionConstraints maxX="ZO_HELP_NAVIGATION_CATEGORY_LABEL_WIDTH"/>
                 </Label>
-                <Control name="$(parent)Channel" inherits="ZO_IconHeaderMouseArea">
-                    <Dimensions x="9"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT"/>
-                </Control>
             </Controls>
         </Control>
         
@@ -73,7 +53,7 @@
                 </Label>
                 
                 <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
-                    <Dimensions x="365"/>
+                    <Dimensions x="ZO_HELP_NAVIGATION_CONTAINER_WIDTH"/>
                     <Anchor point="TOPLEFT" offsetY="72" />
                     <Anchor point="BOTTOMLEFT"/>
                 </Control>

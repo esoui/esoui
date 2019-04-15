@@ -441,6 +441,9 @@ local function DepositItem(list)
     local targetData = list:GetTargetData()
     if targetData then
         if GetNumBagUsedSlots(BAG_GUILDBANK) < GetBagSize(BAG_GUILDBANK) then
+            local soundCategory = GetItemSoundCategory(targetData.itemData.bagId, targetData.itemData.slotIndex)
+            PlayItemSound(soundCategory, ITEM_SOUND_ACTION_PICKUP)
+
             TransferToGuildBank(targetData.itemData.bagId, targetData.itemData.slotIndex)
         else
             NotEnoughSpace(SI_GUILDBANKRESULT5)
@@ -452,6 +455,9 @@ local function WithdrawItem(list)
     local targetData = list:GetTargetData()
     if targetData then
         if GetNumBagFreeSlots(BAG_BACKPACK) > 0 then
+            local soundCategory = GetItemSoundCategory(targetData.itemData.bagId, targetData.itemData.slotIndex)
+            PlayItemSound(soundCategory, ITEM_SOUND_ACTION_PICKUP)
+
             TransferFromGuildBank(targetData.itemData.slotIndex)
         else
             NotEnoughSpace(SI_INVENTORY_ERROR_INVENTORY_FULL)

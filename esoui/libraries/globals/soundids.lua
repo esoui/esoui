@@ -6,6 +6,8 @@ SOUNDS = {
     NEGATIVE_CLICK                  = "Click_Negative",
     POSITIVE_CLICK                  = "Click_Positive",
     MENU_BAR_CLICK                  = "Click_MenuBar",
+    TREE_HEADER_CLICK               = "Click_TreeHeader",
+    TREE_SUBCATEGORY_CLICK          = "Click_TreeSubcategory",
 
     -- Window Sounds
     DEFAULT_WINDOW_OPEN             = "Window_Open",
@@ -151,9 +153,6 @@ SOUNDS = {
     GENERAL_FAILED_REQUIREMENTS     = "General_FailedRequirements",
     GENERAL_ALERT_ERROR             = "General_Alert_Error",
 
-    -- Campaign sounds
-    CAMPAIGN_BLADE_SELECTED         = "Campaign_BladeSelected",
-
     -- Notification sounds
     NEW_NOTIFICATION                = "New_Notification",
     QUEST_SHARE_ACCEPTED            = "QuestShare_Accepted",
@@ -175,22 +174,10 @@ SOUNDS = {
 
     -- Achievement sounds
     ACHIEVEMENT_AWARDED             = "Achievement_Awarded",
-    ACHIEVEMENT_CATEGORY_SELECTED   = "Achievement_CategorySelected",
-    ACHIEVEMENT_SUB_CATEGORY_SELECTED = "Achievement_SubCategorySelected",
     ACHIEVEMENT_EXPANDED            = "Achievement_Expanded",
     ACHIEVEMENT_COLLAPSED           = "Achievement_Collapsed",
 
-    --Journal progress summary sounds
-    JOURNAL_PROGRESS_CATEGORY_SELECTED   = "Journal_Progress_CategorySelected",
-    JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED = "Journal_Progress_SubCategorySelected",
-
-    --Leaderboard sounds
-    LEADERBOARD_CATEGORY_SELECTED   = "Leaderboard_CategorySelected",
-    LEADERBOARD_SUBCATEGORY_SELECTED= "Leaderboard_SubCategorySelected",
-
     --Guild Heraldry sounds
-    GUILD_HERALDRY_CATEGORY_SELECTED    = "Guild_Heraldry_CategorySelected",
-    GUILD_HERALDRY_SUBCATEGORY_SELECTED = "Guild_Heraldry_SubCategorySelected",
     GUILD_HERALDRY_STYLE_SELECTED       = "Guild_Heraldry_StyleSelected",
     GUILD_HERALDRY_APPLIED              = "Guild_Heraldry_Applied",
     GUILD_HERALDRY_UNDO_CHANGES         = "Guild_Heraldry_UndoChanges",
@@ -198,7 +185,6 @@ SOUNDS = {
     --Quest sounds
     QUEST_ACCEPTED                  = "Quest_Accept",
     QUEST_ABANDONED                 = "Quest_Abandon",
-    QUEST_BLADE_SELECTED            = "Quest_Blade_Selected",
     QUEST_COMPLETED                 = "Quest_Complete",
     QUEST_OBJECTIVE_STARTED         = "Quest_ObjectivesStarted",
     QUEST_OBJECTIVE_INCREMENT       = "Quest_ObjectivesIncrement",
@@ -211,10 +197,6 @@ SOUNDS = {
     OBJECTIVE_ACCEPTED              = "Objective_Accept",
     OBJECTIVE_COMPLETED             = "Objective_Complete",
     OBJECTIVE_DISCOVERED            = "Objective_Discovered",
-
-    --Help Sounds
-    HELP_BLADE_SELECTED             = "Help_BladeSelected",
-    HELP_ITEM_SELECTED              = "Help_ItemSelected",
 
     --Inventory sounds
     INVENTORY_DESTROY_JUNK          = "Inventory_DestroyJunk",
@@ -345,13 +327,6 @@ SOUNDS = {
     EMPEROR_DEPOSED_DAGGERFALL = "Emperor_Deposed_Daggerfall",
     EMPEROR_ABDICATED = "Emperor_Abdicated",
 
-    IMPERIAL_CITY_ACCESS_GAINED_ALDMERI = "Imperial_City_Access_Gained_Aldmeri",
-    IMPERIAL_CITY_ACCESS_GAINED_EBONHEART = "Imperial_City_Access_Gained_Ebonheart",
-    IMPERIAL_CITY_ACCESS_GAINED_DAGGERFALL = "Imperial_City_Access_Gained_Daggerfall",
-    IMPERIAL_CITY_ACCESS_LOST_ALDMERI = "Imperial_City_Access_Lost_Aldmeri",
-    IMPERIAL_CITY_ACCESS_LOST_EBONHEART = "Imperial_City_Access_Lost_Ebonheart",
-    IMPERIAL_CITY_ACCESS_LOST_DAGGERFALL = "Imperial_City_Access_Lost_Daggerfall",
-
     GUILD_KEEP_CLAIMED = "Guild_Keep_Claimed",
     GUILD_KEEP_RELEASED = "Guild_Keep_Released",
     GUILD_KEEP_LOST = "Guild_Keep_Lost",
@@ -377,8 +352,6 @@ SOUNDS = {
     SCRIPTED_EVENT_COMPLETION       = "ScriptedEvent_Completion",
 
     -- Guild
-    GUILD_HISTORY_BLADE_SELECTED    = "GuildHistory_Blade_Selected",
-    GUILD_HISTORY_ENTRY_SELECTED    = "GuildHistory_Entry_Selected",
     GUILD_RANK_CREATED              = "GuildRank_Created",
     GUILD_RANK_DELETED              = "GuildRank_Deleted",
     GUILD_RANK_SELECTED             = "GuildRank_Selected",
@@ -432,8 +405,6 @@ SOUNDS = {
     BOOK_PAGE_TURN                  = "Book_PageTurn",
     BOOK_OPEN                       = "Book_Open",
     BOOK_CLOSE                      = "Book_Close",
-    LORE_BLADE_SELECTED             = "Lore_BladeSelected",
-    LORE_ITEM_SELECTED              = "Lore_ItemSelected",
     NOTE_PAGE_TURN                  = "Note_PageTurn",
     NOTE_OPEN                       = "Note_Open",
     NOTE_CLOSE                      = "Note_Close",
@@ -443,8 +414,6 @@ SOUNDS = {
     BOOK_METAL_PAGE_TURN            = "Book_Metal_PageTurn",
     BOOK_METAL_OPEN                 = "Book_Metal_Open",
     BOOK_METAL_CLOSE                = "Book_Metal_Close",
-    CADWELL_BLADE_SELECTED          = "Cadwell_BladeSelected",
-    CADWELL_ITEM_SELECTED           = "Cadwell_ItemSelected",
 
     --Active combat tip sounds
     ACTIVE_COMBAT_TIP_SHOWN         = "ActiveCombatTip_Shown",
@@ -484,10 +453,6 @@ SOUNDS = {
     --General Settings Sounds
     SINGLE_SETTING_RESET_TO_DEFAULT = "Single_Setting_Reset",
 
-    --General Menu Sounds
-    MENU_HEADER_SELECTION           = "Menu_Header_Selection",
-    MENU_SUBCATEGORY_SELECTION      = "Menu_Subcategory_Selection",
-
     --Radial Menu Sounds
     RADIAL_MENU_OPEN                = "Radial_Menu_Open",
     RADIAL_MENU_CLOSE               = "Radial_Menu_Close",
@@ -504,17 +469,6 @@ SOUNDS = {
     QUICKSLOT_CLEAR                 = "Quickslot_Clear",
     QUICKSLOT_MOUSEOVER             = "Quickslot_Mouseover",
     QUICKSLOT_USE_EMPTY             = "Quickslot_Use_Empty",
-
-    --Skill Sounds
-    SKILL_TYPE_CLASS                = "SkillType_Class",
-    SKILL_TYPE_WEAPON               = "SkillType_Weapon",
-    SKILL_TYPE_ARMOR                = "SkillType_Armor",
-    SKILL_TYPE_WORLD                = "SkillType_World",
-    SKILL_TYPE_GUILD                = "SkillType_Guild",
-    SKILL_TYPE_AVA                  = "SkillType_AvA",
-    SKILL_TYPE_RACIAL               = "SkillType_Racial",
-    SKILL_TYPE_TRADESKILL			= "SkillType_Tradeskill",
-    SKILL_LINE_SELECT               = "SkillLine_Select",
 
     --Skill XP Sounds
     SKILL_XP_DARK_ANCHOR_CLOSED     = "SkillXP_DarkAnchorClosed",
@@ -654,9 +608,6 @@ SOUNDS = {
     -- Provisioning
     PROVISIONING_OPENED                     = "Provisioning_Opened",
     PROVISIONING_CLOSED                     = "Provisioning_Closed",
-
-    PROVISIONING_BLADE_SELECTED             = "Provisioning_BladeSelected",
-    PROVISIONING_ENTRY_SELECTED             = "Provisioning_EntrySelected",
 
     RECIPE_LEARNED                          = "Recipe_Learned",
     DEFAULT_RECIPE_CRAFTED                  = "Default_Recipe_Crafted",
@@ -835,8 +786,6 @@ SOUNDS = {
 
     -- Trading House Sounds
     TRADING_HOUSE_SEARCH_INITIATED          = "TradingHouse_StartSearch",
-    TRADING_HOUSE_CATEGORY_SELECTED         = "TradingHouse_CategorySelected",
-    TRADING_HOUSE_SUB_CATEGORY_SELECTED     = "TradingHouse_SubCategorySelected",
 
     -- Fence Sounds
     FENCE_ITEM_LAUNDERED                    = "Fence_Item_Laundered",
@@ -868,8 +817,6 @@ SOUNDS = {
     -- Market Sounds
     MARKET_WINDOW_OPENED                = "Market_Opened",
     MARKET_WINDOW_CLOSED                = "Market_Closed",
-    MARKET_CATEGORY_SELECTED            = "Market_CategorySelected",
-    MARKET_SUB_CATEGORY_SELECTED        = "Market_SubCategorySelected",
     MARKET_PURCHASE_SELECTED            = "Market_PurchaseSelected",
     MARKET_PREVIEW_SELECTED             = "Market_PreviewSelected",
     MARKET_GIFT_SELECTED                = "Market_GiftSelected",
@@ -952,4 +899,14 @@ SOUNDS = {
 
     --Zone Stories
     ZONE_STORIES_TRACK_ACTIVITY             = "ZoneStories_TrackActivity",
+
+    --Guild Finder
+    GUILD_FINDER_SELECT_GUILD               = "GuildFinder_SelectGuild",
+    GUILD_FINDER_BACK_FROM_SELECTED_GUILD   = "GuildFinder_BackFromSelectedGuild",
+    GAMEPAD_GUILD_FINDER_TOGGLE_ACTIVITY    = "Gamepad_GuildFinder_ToggleActivity",
+    GAMEPAD_GUILD_FINDER_TOGGLE_ROLE        = "Gamepad_GuildFinder_ToggleRole",
+
+    --Daedric Artifact HUD
+    DAEDRIC_ENERGY_BURST                    = "DaedricEnergy_Burst",
+    DAEDRIC_ENERGY_LOW                      = "DaedricEnergy_Low",
 }

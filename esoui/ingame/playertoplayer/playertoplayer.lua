@@ -156,6 +156,7 @@ function ZO_PlayerToPlayer:InitializeSoulGemResurrectionEvents()
 end
 
 local function GetCampaignQueueData(campaignId, isGroup)
+    local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", GetCampaignRulesetType(GetCampaignRulesetId(campaignId)))
     local campaignName = GetCampaignName(campaignId)
     local remainingSeconds = GetCampaignQueueRemainingConfirmationSeconds(campaignId, isGroup)
     local campaignData = 
@@ -163,8 +164,8 @@ local function GetCampaignQueueData(campaignId, isGroup)
             campaignId = campaignId,
             isGroup = isGroup,
             campaignName = campaignName,
-            messageFormat = isGroup and SI_NOTIFICATION_CAMPAIGN_QUEUE_MESSAGE_GROUP or SI_NOTIFICATION_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL,
-            messageParams = { campaignName },
+            messageFormat = SI_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL,
+            messageParams = { campaignRulesetTypeString, campaignName },
             expiresAtS = GetFrameTimeSeconds() + remainingSeconds,
             dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CAMPAIGN_QUEUE),
         }
@@ -316,7 +317,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
 
         local formattedInviterName = ZO_FormatUserFacingDisplayName(inviterName)
-        local guildNameAlliance = zo_iconTextFormat(GetAllianceBannerIcon(guildAlliance), allianceIconSize, allianceIconSize, ZO_SELECTED_TEXT:Colorize(guildName))
+        local guildNameAlliance = zo_iconTextFormat(GetPlatformAllianceSymbolIcon(guildAlliance), allianceIconSize, allianceIconSize, ZO_SELECTED_TEXT:Colorize(guildName))
         local data = self:AddPromptToIncomingQueue(INTERACT_TYPE_GUILD_INVITE, nil, formattedInviterName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_GUILD_REQUEST, ZO_SELECTED_TEXT:Colorize(formattedInviterName), guildNameAlliance),
             function()
                 AcceptGuildInvite(guildId)
@@ -355,24 +356,24 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_AGENT_CHAT_REQUEST)
     end
 
-    local function OnCampaignQueueStateChanged( _, campaignId, isGroup, state)
+    local function OnCampaignQueueStateChanged(_, campaignId, isGroup, state)
         if state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
             local campaignQueueData = GetCampaignQueueData(campaignId, isGroup)
+
+            local function AcceptCampaignEntry()
+                ConfirmCampaignEntry(campaignId, isGroup, true)
+            end
+
+            local function DeclineCampaignEntry()
+                ConfirmCampaignEntry(campaignId, isGroup, false)
+            end
 
             local function DeferDecisionCallback()
                 self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId)
             end
 
             --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
-            local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId, nil,
-                function()
-                    local campaignBrowser = IsInGamepadPreferredMode() and GAMEPAD_AVA_BROWSER or CAMPAIGN_BROWSER
-                    campaignBrowser:GetCampaignBrowser():ShowCampaignQueueReadyDialog(campaignId, isGroup, campaignQueueData.campaignName)
-                end,
-                function()
-                    ConfirmCampaignEntry(campaignId, isGroup, false)
-                end,
-                DeferDecisionCallback)
+            local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId, nil, AcceptCampaignEntry, DeclineCampaignEntry, DeferDecisionCallback)
 
             promptData.messageFormat = campaignQueueData.messageFormat
             promptData.messageParams = campaignQueueData.messageParams
@@ -829,18 +830,29 @@ do
         end
     end
     
-    -- inviter name is the decorated name that is choosen based on player preferences
-    -- where display and character name are descrete strings that are used to determine the creator of the entry
-    function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, inviterName, targetLabel, displayName, characterName)
-        local data = { incomingType = incomingType, targetLabel = targetLabel, inviterName = inviterName, pendingResponse = true, displayName = displayName, characterName = characterName}
+    function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, targetLabel, displayName, characterName)
+        local formattedInviterName = nil
+        if displayName and characterName then
+            -- displayName and characterName don't always actually correspond with with the display name/character name of another player, but if both are defined they should.
+            -- in that case, inviterName will be defined and should be used to describe the player that caused the event: eg. if we're invited to a group it should represent the inviter.
+            formattedInviterName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
+        end
+
+        local data = {
+            incomingType = incomingType,
+            targetLabel = targetLabel,
+            inviterName = formattedInviterName,
+            pendingResponse = true,
+            displayName = displayName,
+            characterName = characterName,
+        }
         zo_binaryinsert(data, data, self.incomingQueue, IncomingEntryComparator)
         return data
     end
 end
 
 function ZO_PlayerToPlayer:AddPromptToIncomingQueue(interactType, characterName, displayName, targetLabel, acceptCallback, declineCallback, deferDecisionCallback)
-    local name = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-    local data = self:AddIncomingEntry(interactType, name, targetLabel, displayName, characterName)
+    local data = self:AddIncomingEntry(interactType, targetLabel, displayName, characterName)
     data.acceptCallback = acceptCallback
     data.declineCallback = declineCallback
     data.deferDecisionCallback = deferDecisionCallback
@@ -1314,7 +1326,7 @@ function ZO_PlayerToPlayer:OnUpdate()
         end
 
         if incomingEntry.expiresAtS and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
-            -- For time sensitive prompts, if the player can't see them, throw up a dialog before it's too late to respond
+            -- For time sensitive prompts, the player probably won't see them if they are currently in a UI menu. Let's throw up a dialog before it's too late to respond
             ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
             incomingEntry.seen = true
         end
@@ -1342,7 +1354,8 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         local hideSelf, hideTargetLabel
         local isReticleTargetInteractable = self:IsReticleTargetInteractable()
-        if isReticleTargetInteractable and self:TryShowingResurrectLabel() then
+        -- TryShowingResurrectLabel has to be checked first to set the state of the pendingResurrectInfo label
+        if self:TryShowingResurrectLabel() and isReticleTargetInteractable then
             hideSelf = false
             hideTargetLabel = false
         elseif not self.isInteracting and (self.showingGamepadResponseMenu or not IsUnitInCombat("player")) and self:TryShowingResponseLabel() then

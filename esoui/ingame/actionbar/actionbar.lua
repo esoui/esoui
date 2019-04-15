@@ -197,8 +197,8 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
 
     local isGamepad = IsInGamepadPreferredMode()
 
-    if(isSlotUsed) then
-        if(ultimateCount >= g_currentUltimateMax) then
+    if isSlotUsed then
+        if ultimateCount >= g_currentUltimateMax then
             --hide progress bar
             barTexture:SetHidden(true)
             leadingEdge:SetHidden(true)
@@ -224,7 +224,7 @@ local function SetUltimateMeter(ultimateCount, setProgressNoAnim)
             ultimateFillLeftTexture:SetHidden(not isGamepad)
             ultimateFillRightTexture:SetHidden(not isGamepad)
             ultimateFillFrame:SetHidden(not isGamepad)
-        
+
             -- update both platforms progress bars
             local slotHeight = ultimateSlot:GetHeight()
             local percentComplete = ultimateCount / g_currentUltimateMax
@@ -290,7 +290,7 @@ local function HandleSlotChanged(slotNum)
 
         local buttonTemplate = ZO_GetPlatformTemplate(ACTION_BUTTON_TEMPLATE)
 
-        if(slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) then
+        if slotNum == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
             buttonTemplate = ZO_GetPlatformTemplate(ULTIMATE_ABILITY_BUTTON_TEMPLATE)
             UpdateUltimateMeter()
         end
@@ -351,9 +351,9 @@ end
 
 local function ShowHiddenButtons()
     g_showHiddenButtonsRefCount = g_showHiddenButtonsRefCount + 1
-    if(g_showHiddenButtonsRefCount == 1) then
+    if g_showHiddenButtonsRefCount == 1 then
         for _, control in pairs(g_actionBarButtons) do
-            if(control:GetButtonType() == ACTION_BUTTON_TYPE_HIDDEN) then
+            if control:GetButtonType() == ACTION_BUTTON_TYPE_HIDDEN then
                 control.slot:SetHidden(false)
             end
         end
@@ -362,10 +362,10 @@ end
 
 local function HideHiddenButtons()
     g_showHiddenButtonsRefCount = g_showHiddenButtonsRefCount - 1
-    if(g_showHiddenButtonsRefCount == 0) then
+    if g_showHiddenButtonsRefCount == 0 then
         for _, control in pairs(g_actionBarButtons) do
-            if(control:GetButtonType() == ACTION_BUTTON_TYPE_HIDDEN) then
-                if(not control:HasAction()) then
+            if control:GetButtonType() == ACTION_BUTTON_TYPE_HIDDEN then
+                if not control:HasAction() then
                     control.slot:SetHidden(true)
                 end
             end
@@ -387,7 +387,7 @@ local function ShowAppropriateAbilityActionButtonDropCallouts(abilityIndex)
         local isValid = IsValidAbilityForSlot(abilityIndex, i)
         local callout = ZO_ActionBar_GetButton(i).slot:GetNamedChild("DropCallout")
 
-        if(not isValid) then
+        if not isValid then
             callout:SetColor(1, 0, 0, 1)
         else
             callout:SetColor(1, 1, 1, 1)
@@ -488,7 +488,6 @@ local function ApplyStyle(style)
                 local anchorTarget = lastButton and lastButton.slot
                 if not lastButton then
                     anchorTarget = ZO_ActionBar1WeaponSwap
-                    anchorOffsetX = 5
                 end
                 button:ApplyAnchor(anchorTarget, style.abilitySlotOffsetX)
                 lastButton = button
@@ -517,22 +516,22 @@ function ZO_ActionBar_OnInitialized(control)
 
     --Quick Bar Slot
     local quickBarButton = MakeActionButton(ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1, MAIN_BAR_STYLE, QuickslotActionButton)
-    quickBarButton.slot:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)  
+    quickBarButton.slot:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
     quickBarButton:SetupBounceAnimation()
-    
+
     control:GetNamedChild("WeaponSwap"):SetAnchor(LEFT, quickBarButton.slot, RIGHT, 5, 0)
 
     local function OnSwapAnimationHalfDone(animation, button)
         button:HandleSlotChanged()
 
-        if(button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) then
+        if button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
             UpdateUltimateMeter()
         end
     end
 
     local function OnSwapAnimationDone(animation, button)
         button.noUpdates = false
-        if(button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1) then
+        if button:GetSlot() == ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 then
             g_activeWeaponSwapInProgress = false
         end
     end

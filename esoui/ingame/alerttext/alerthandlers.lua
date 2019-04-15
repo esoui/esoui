@@ -271,6 +271,11 @@ local AlertHandlers = {
         return ERROR, zo_strformat(SI_LORE_LIBRARY_ALREADY_KNOW_BOOK, bookTitle)
     end,
 
+    [EVENT_QUEST_SHARE_RESULT] = function(shareTargetCharacterName, shareTargetDisplayName, questName, result)
+        local userFacingName = ZO_GetPrimaryPlayerName(shareTargetDisplayName, shareTargetCharacterName)
+        return ALERT, zo_strformat(GetString("SI_QUESTSHARERESULT", result), userFacingName, questName)
+    end,
+
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         if(response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED) then
             if(ShouldShowGroupErrorInAlert(response)) then
@@ -551,7 +556,8 @@ local AlertHandlers = {
     end,
 
     [EVENT_JUMP_FAILED] = function(result)
-        if result ~= JUMP_RESULT_JUMP_FAILED_ZONE_COLLECTIBLE then -- this result is handled in a dialog
+        -- make sure it's not a result handled by EVENT_ZONE_COLLECTIBLE_REQUIREMENT_FAILED, which will prompt a dialog
+        if result ~= JUMP_RESULT_JUMP_FAILED_ZONE_COLLECTIBLE and result ~= JUMP_RESULT_JUMP_FAILED_SOCIAL_TARGET_ZONE_COLLECTIBLE_LOCKED then
             return ALERT, GetString("SI_JUMPRESULT", result)
         end
     end,

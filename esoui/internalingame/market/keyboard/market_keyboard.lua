@@ -1,7 +1,10 @@
 ZO_MARKET_LIST_ENTRY_HEIGHT = 52
 ZO_MARKET_CATEGORY_CONTAINER_WIDTH = 298
--- 75 is the inset from the multiIcon plus the icon and spacing from ZO_IconHeader, 16 is the offset for the Scroll from ZO_ScrollContainerBase
-ZO_MARKET_CATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - 75 - 16
+local scrollBarOffset = 16
+-- 75 is the inset from the multiIcon plus the icon and spacing from ZO_IconHeader
+ZO_MARKET_CATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - 75 - scrollBarOffset
+ZO_MARKET_SUBCATEGORY_LABEL_INDENT = 76
+ZO_MARKET_SUBCATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - ZO_MARKET_SUBCATEGORY_LABEL_INDENT - scrollBarOffset
 
 --
 --[[ ZO_Market_Keyboard ]]--
@@ -81,7 +84,7 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
     MARKET_CURRENCY_KEYBOARD:SetBuyCrownsCallback(function() self:OnShowBuyCrownsDialog() end)
 end
 
-function ZO_Market_Keyboard:CanPreviewMarketProductPreviewType(previewType)
+function ZO_Market_Keyboard:IsPreviewForMarketProductPreviewTypeVisible(previewType)
     if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
         return not (self.bundleContentFragment:IsShowing() or self.productListFragment:IsShowing())
     elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
@@ -90,6 +93,16 @@ function ZO_Market_Keyboard:CanPreviewMarketProductPreviewType(previewType)
         return true
     else -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
         return self:IsReadyToPreview()
+    end
+end
+
+function ZO_Market_Keyboard:IsPreviewForMarketProductPreviewTypeEnabled(previewType)
+    if previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
+        return ITEM_PREVIEW_KEYBOARD:CanChangePreview()
+    elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
+        return CanJumpToHouseFromCurrentLocation(), GetString(SI_MARKET_PREVIEW_ERROR_CANNOT_JUMP_FROM_LOCATION)
+    else
+        return true
     end
 end
 
@@ -176,7 +189,7 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
                                 local marketProduct = self.selectedMarketProduct
                                 if marketProduct ~= nil then
                                     local previewType = marketProduct:GetMarketProductPreviewType()
-                                    return self:CanPreviewMarketProductPreviewType(previewType)
+                                    return self:IsPreviewForMarketProductPreviewTypeVisible(previewType)
                                 end
                             end
                             return false
@@ -194,11 +207,7 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
             enabled =   function()
                             if not self.productListFragment:IsShowing() and not self:HasActiveCustomPreview()then
                                 local previewType = self.selectedMarketProduct:GetMarketProductPreviewType()
-                                if previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
-                                    return ITEM_PREVIEW_KEYBOARD:CanChangePreview()
-                                else
-                                    return true
-                                end
+                                return self:IsPreviewForMarketProductPreviewTypeEnabled(previewType)
                             else
                                 return true
                             end
@@ -286,7 +295,7 @@ end
 
 function ZO_Market_Keyboard:InitializeCategories()
     self.categories = self.contentsControl:GetNamedChild("Categories")
-    self.categoryTree = ZO_Tree:New(self.categories:GetNamedChild("ScrollChild"), 60, -10, 300)
+    self.categoryTree = ZO_Tree:New(self.categories:GetNamedChild("ScrollChild"), 60, -10, ZO_MARKET_CATEGORY_CONTAINER_WIDTH)
 
     local function BaseTreeHeaderIconSetup(control, data, open)
         local iconTexture = (open and data.pressedIcon or data.normalIcon) or "EsoUI/Art/Icons/icon_missing.dds"
@@ -379,9 +388,8 @@ function ZO_Market_Keyboard:InitializeCategories()
     
     local NO_SELECTION_FUNCTION = nil
     local NO_EQUALITY_FUNCTION = nil
-    local childIndent = 76
     local childSpacing = 0
-    self.categoryTree:AddTemplate("ZO_MarketCategoryWithChildren", TreeHeaderSetup_Child, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, childIndent, childSpacing)
+    self.categoryTree:AddTemplate("ZO_MarketCategoryWithChildren", TreeHeaderSetup_Child, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, ZO_MARKET_SUBCATEGORY_LABEL_INDENT, childSpacing)
     self.categoryTree:AddTemplate("ZO_MarketChildlessCategory", TreeHeaderSetup_Childless, TreeHeaderOnSelected_Childless)
     self.categoryTree:AddTemplate("ZO_MarketSubCategory", TreeEntrySetup, TreeEntryOnSelected)
 
@@ -550,7 +558,8 @@ function ZO_Market_Keyboard:ScrollToMarketProduct(marketProductId, queuePreview)
                 end
             end
         end
-        self.productGridList:ScrollDataToCenter(entryData, OnScrollComplete)
+        local ANIMATE_INSTANTLY = true
+        self.productGridList:ScrollDataToCenter(entryData, OnScrollComplete, ANIMATE_INSTANTLY)
     end
 
     self:ClearQueuedMarketProductId()
@@ -626,8 +635,7 @@ do
             showNewIcon = showNewIcon,
         }
 
-        local soundId = parent and SOUNDS.MARKET_SUB_CATEGORY_SELECTED or SOUNDS.MARKET_CATEGORY_SELECTED
-        local node = tree:AddNode(nodeTemplate, entryData, parent, soundId)
+        local node = tree:AddNode(nodeTemplate, entryData, parent)
         entryData.node = node
 
         local finalCategoryIndex = isFakedSubcategory and "root" or categoryIndex
@@ -784,11 +792,11 @@ function ZO_Market_Keyboard:ShouldAddMarketProduct(filterType, id)
         return true
     end
 
-    local purchaseState = GetMarketProductPurchaseState(id)
-    if purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED then
-        return filterType == MARKET_FILTER_VIEW_NOT_PURCHASED
-    else
+    local isPurchased = IsMarketProductPurchased(id)
+    if isPurchased then
         return filterType == MARKET_FILTER_VIEW_PURCHASED
+    else
+        return filterType == MARKET_FILTER_VIEW_NOT_PURCHASED
     end
 end
 
@@ -935,6 +943,11 @@ end
 function ZO_Market_Keyboard:ShowHousePreviewDialog(marketProductData)
     self:EndCurrentPreview()
 
+    if not CanJumpToHouseFromCurrentLocation() then
+        RequestAlert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString(SI_MARKET_PREVIEW_ERROR_CANNOT_JUMP_FROM_LOCATION))
+        return
+    end
+
     local mainTextParams = {mainTextParams = ZO_MarketDialogs_Shared_GetPreviewHouseDialogMainTextParams(marketProductData:GetId())}
     ZO_Dialogs_ShowDialog("CROWN_STORE_PREVIEW_HOUSE", { marketProductData = marketProductData }, mainTextParams)
 end
@@ -1035,6 +1048,16 @@ function ZO_Market_Keyboard:RequestShowCategory(categoryIndex, subcategoryIndex)
     end
 end
 
+function ZO_Market_Keyboard:RequestShowCategoryById(categoryId)
+    if self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
+        local categoryIndex, subcategoryIndex = GetCategoryIndicesFromMarketProductCategoryId(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryId)
+        self:RequestShowCategory(categoryIndex, subcategoryIndex)
+        self:ClearQueuedCategoryId()
+    else
+        self:SetQueuedCategoryId(categoryId)
+    end
+end
+
 function ZO_Market_Keyboard:SelectCategory(categoryIndex, subcategoryIndex)
     local targetNode = self:GetCategoryData(categoryIndex, subcategoryIndex)
     if targetNode then
@@ -1087,6 +1110,7 @@ end
 function ZO_Market_Keyboard:OnShowing()
     ZO_Market_Shared.OnShowing(self)
     ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", self.refreshActionsCallback)
+    UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_CROWN_STORE)
 end
 
 function ZO_Market_Keyboard:OnShown()

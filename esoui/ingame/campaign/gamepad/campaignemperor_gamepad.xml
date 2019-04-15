@@ -49,8 +49,11 @@
                 <Label name="$(parent)Rank" inherits="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad">
                     <Anchor point="CENTER" relativePoint="LEFT" offsetX="20"/>
                 </Label>
-                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad" font="ZoFontGamepad34" verticalAlignment="CENTER" mouseEnabled="true">
+                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad" font="ZoFontGamepad34" verticalAlignment="CENTER">
                     <Anchor point="LEFT" relativePoint="LEFT" offsetX="100"/>
+                </Label>
+                <Label name="$(parent)IsIneligible" inherits="ZO_CampaignEmperorLeaderboardsRowLabel_Gamepad" font="ZoFontGamepad34" verticalAlignment="CENTER" text="SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_SYMBOL">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="LEFT" offsetX="-5"/>
                 </Label>
                 <Texture name="$(parent)Alliance">
                     <Anchor point="CENTER" relativePoint="LEFT" offsetX="500" />
@@ -90,7 +93,7 @@
             <Controls>
                 <Label name="$(parent)KeepsRequired" inherits="ZO_AvALabelHeaderTemplate">
                     <Anchor point="TOPLEFT" offsetY="20"/>
-                </Label>              
+                </Label>
                 
                 <Label name="$(parent)KeepsRequiredData" inherits="ZO_AvALabelDataTemplate">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepsRequired" relativePoint="BOTTOMRIGHT" offsetX="8" />
@@ -111,7 +114,8 @@
 
                 <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)PlayerRow" relativePoint="BOTTOMLEFT" offsetY="20"/>
-                    <Dimensions x="768" y="375"/>
+                    <Anchor point="BOTTOMLEFT" />
+                    <Dimensions x="768"/>
                 </Control>
 
                 <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" resizeToFitFile="true" hidden="true"/>

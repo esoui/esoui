@@ -82,15 +82,18 @@ function ZO_GuildRosterManager:ColorRow(control, data, textColor, iconColor, tex
     ZO_SocialList_ColorRow(control, data, textColor, iconColor, textColor2)
 
     if not self.lockedForUpdates then
-        local rank = GetControl(control, "RankIcon")
+        local rank = control:GetNamedChild("RankIcon")
         rank:SetColor(iconColor:UnpackRGBA())
+
+        local zone = control:GetNamedChild("Zone")
+        zone:SetColor(textColor2:UnpackRGBA())
     end
 end
 
 function ZO_GuildRosterManager:SetupEntry(control, data, selected)
     ZO_SocialList_SharedSocialSetup(control, data, selected)
 
-    local note = GetControl(control, "Note")
+    local note = control:GetNamedChild("Note")
     if note then
         if data.note ~= "" then
             note:SetHidden(false)
@@ -104,7 +107,7 @@ function ZO_GuildRosterManager:SetupEntry(control, data, selected)
         end
     end
 
-    local rank = GetControl(control, "RankIcon")
+    local rank = control:GetNamedChild("RankIcon")
     local rankTextureFunction = IsInGamepadPreferredMode() and GetFinalGuildRankTextureLarge or GetFinalGuildRankTextureSmall
     local rankTexture = rankTextureFunction(self.guildId, data.rankIndex)
     if rankTexture then
@@ -112,6 +115,18 @@ function ZO_GuildRosterManager:SetupEntry(control, data, selected)
         rank:SetTexture(rankTexture)
     else
         rank:SetHidden(true)
+    end
+
+    -- invited players are treated as always offline, regardless of what they actually are
+    -- so just hide the status icon
+    local isInvited = data.rankId == DEFAULT_INVITED_RANK
+    local statusIcon = control:GetNamedChild("StatusIcon")
+    statusIcon:SetHidden(isInvited)
+    if isInvited then
+        -- the zone textfield is co-opted for invited players to show they are a pending member.
+        local zone = control:GetNamedChild("Zone")
+        zone:SetHidden(false)
+        zone:SetText(data.formattedZone)
     end
 end
 
@@ -150,6 +165,36 @@ function ZO_GuildRosterManager:BuildMasterList()
 
         ZO_SocialList_SetUpOnlineData(data, online, secsSinceLogoff)
         self.masterList[guildMemberIndex] = data
+    end
+
+    local numGuildInvitees = GetNumGuildInvitees(guildId)
+    for guildInviteeIndex = 1, numGuildInvitees do
+        local displayName, rankIndex = GetGuildInviteeInfo(guildId, guildInviteeIndex)
+
+        local data =  {
+                            inviteeIndex = guildInviteeIndex,
+                            displayName = displayName,
+                            hasCharacter = false,
+                            isLocalPlayer = false,
+                            characterName = "",
+                            gender = 0,
+                            level = 0,
+                            championPoints = 0,
+                            class = 0,
+                            formattedZone = GetString(SI_GUILD_INVITED_PLAYER_LOCATION),
+                            alliance = ALLIANCE_NONE,
+                            formattedAllianceName = "",
+                            note = "",
+                            rankIndex = rankIndex,
+                            rankId = DEFAULT_INVITED_RANK,
+                            type = SOCIAL_NAME_SEARCH,
+                            status = PLAYER_STATUS_OFFLINE,
+                        }
+
+        local OFFLINE_PLAYER = false
+        local SECS_SINCE_LOG_OFF = math.huge
+        ZO_SocialList_SetUpOnlineData(data, OFFLINE_PLAYER, SECS_SINCE_LOG_OFF)
+        table.insert(self.masterList, data)
     end
 end
 
@@ -194,7 +239,7 @@ function ZO_GuildRosterManager:OnGuildMemberAdded(guildId, displayName)
     self:RefreshData()
     if DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_INVITE) then
         local data = self:FindDataByDisplayName(displayName)
-        if data then
+        if data and data.rankId ~= DEFAULT_INVITED_RANK then
             local hasCharacter, rawCharacterName, zone, class, alliance, level, championPoints = GetGuildMemberCharacterInfo(self.guildId, data.index)
             local nameToShow = IsInGamepadPreferredMode() and ZO_FormatUserFacingDisplayName(displayName) or rawCharacterName
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.GUILD_ROSTER_ADDED, zo_strformat(SI_GUILD_ROSTER_ADDED, nameToShow, self.guildName))

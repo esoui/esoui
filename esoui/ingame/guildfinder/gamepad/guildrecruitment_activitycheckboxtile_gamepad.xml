@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_ActivityCheckboxTile_Gamepad_Control" inherits="ZO_Tile_Control ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COLUMN_WIDTH" y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_CHECKBOX_HEIGHT"/>
+            <OnInitialized>
+                ZO_GuildRecruitment_ActivityCheckboxTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)SelectorBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" >
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="8" />
+                    <Dimensions x="35" y="37" />
+                </Backdrop>
+                
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadGuildPermissionCheckmark">
+                    <Anchor point="TOPLEFT"  offsetX="12" offsetY="9"/>
+                </Texture>
+
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Icon" offsetX="7" offsetY="-3"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_ActivityCheckboxEndTile_Gamepad_Control" inherits="ZO_GuildRecruitment_ActivityCheckboxTile_Gamepad_Control" virtual="true" />
+    </Controls>
+</GuiXml>

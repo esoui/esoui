@@ -17,12 +17,6 @@
         <TopLevelControl name="ZO_KeepTooltip" inherits="ZO_KeepTooltipBase">
             <OnInitialized>
                 ZO_KeepTooltip_OnInitialized(self)
-            </OnInitialized>    
-        </TopLevelControl>
-
-        <TopLevelControl name="ZO_ImperialCityTooltip" inherits="ZO_KeepTooltipBase">
-            <OnInitialized>
-                ZO_ImperialCityTooltip_OnInitialized(self)
             </OnInitialized>
         </TopLevelControl>
     </Controls>

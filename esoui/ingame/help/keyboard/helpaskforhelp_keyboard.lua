@@ -31,7 +31,32 @@ local HELP_ASK_FOR_HELP_CATEGORY_INFO =
                 value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER,
                 ticketCategory = TICKET_CATEGORY_REPORT_OTHER,
             },
-        },        
+        },
+    },
+    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD] =
+    {
+        detailsTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_GUILD_NAME),
+        detailsRegistrationFunction = SetCustomerServiceTicketPlayerTarget,
+        detailsFormatText = ZO_FormatManualNameEntry,
+        subcategoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY",
+        subcategories =
+        {
+            {
+                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_NONE,
+            },
+            {
+                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_NAME,
+                ticketCategory = TICKET_CATEGORY_REPORT_GUILD_NAME,
+            },
+            {
+                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING,
+                ticketCategory = TICKET_CATEGORY_REPORT_GUILD_LISTING,
+            },
+            {
+                value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE,
+                ticketCategory = TICKET_CATEGORY_REPORT_GUILD_DECLINE_MESSAGE,
+            },
+        },
     },
 }
 
@@ -103,11 +128,14 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
     end
 
     for i = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITERATION_BEGIN, CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_ITERATION_END do
-        local name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", i)
-        if name ~= nil then
-            local entry = ZO_ComboBox:CreateItemEntry(name, OnCategoryChanged)
-            entry.index = i
-            self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        -- Omit Submit Feeback since it's Gamepad only per CS (at least that's how it's been setup previously)
+        if i ~= CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_SUBMIT_FEEDBACK then
+            local name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", i)
+            if name ~= nil then
+                local entry = ZO_ComboBox:CreateItemEntry(name, OnCategoryChanged)
+                entry.index = i
+                self.helpCategoryComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            end
         end
     end
 
@@ -149,7 +177,7 @@ function HelpAskForHelp_Keyboard:InitializeDialogs()
         },
         mainText =
         {
-            text = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_SUBMIT_TICKET_CONFIRMATION), 
+            text = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_SUBMIT_TICKET_CONFIRMATION),
         },
        
         buttons =
@@ -158,7 +186,7 @@ function HelpAskForHelp_Keyboard:InitializeDialogs()
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_EXIT,
             },
-        },        
+        },
     })
 end
 
@@ -168,7 +196,7 @@ function HelpAskForHelp_Keyboard:UpdateSubcategories()
     local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
 
     local mainArray = HELP_ASK_FOR_HELP_CATEGORY_INFO[categoryIndex]
-        
+
     if mainArray == nil then
         self:SetSubcategoryContentHidden(true)
     else
@@ -185,7 +213,7 @@ function HelpAskForHelp_Keyboard:UpdateSubcategories()
                 self.helpSubcategoryComboBox:AddItem(entry, ZO_COMBOBOX_UPDATE_NOW)
             end
 
-            self.helpSubcategoryComboBox:SelectItemByIndex(1)        
+            self.helpSubcategoryComboBox:SelectItemByIndex(1)
         end
     end
 end

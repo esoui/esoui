@@ -772,6 +772,14 @@ GAMEPAD_SETTINGS_DATA =
             settingId = UI_SETTING_ULTIMATE_NUMBER,
         },
 
+        --Encounter Log
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
+            header = SI_INTERFACE_OPTIONS_ENCOUNTER_LOG,
+        },
+
         -- SCT
         {
             panel = SETTING_PANEL_COMBAT,
@@ -868,6 +876,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_COMBAT,
             system = SETTING_TYPE_COMBAT,
             settingId = COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_SHOW_OVER_HEAL,
         },
 
         -- Buff Debuff

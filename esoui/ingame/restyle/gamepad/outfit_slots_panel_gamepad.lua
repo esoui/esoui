@@ -455,7 +455,9 @@ function ZO_Outfit_Slots_Panel_Gamepad:UpdateGridList()
     gridListPanelList:CommitGridList()
 
     if selectedData then
-        gridListPanelList:ScrollDataToCenter(selectedData)
+        local NO_CALLBACK = nil
+        local ANIMATE_INSTANTLY = true
+        gridListPanelList:ScrollDataToCenter(selectedData, NO_CALLBACK, ANIMATE_INSTANTLY)
     end
 end
 

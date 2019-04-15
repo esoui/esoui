@@ -168,6 +168,20 @@ end
 
 UNIT_FRAMES = nil
 
+ZO_MostRecentPowerUpdateHandler = ZO_MostRecentEventHandler:Subclass()
+
+do
+    local function PowerUpdateEqualityFunction(existingEventInfo, unitTag, powerPoolIndex, powerType, powerPool, powerPoolMax)
+        local existingUnitTag = existingEventInfo[1]
+        local existingPowerType = existingEventInfo[3]
+        return existingUnitTag == unitTag and existingPowerType == powerType
+    end
+
+    function ZO_MostRecentPowerUpdateHandler:New(namespace, handlerFunction)
+        return ZO_MostRecentEventHandler.New(self, namespace, EVENT_POWER_UPDATE, PowerUpdateEqualityFunction, handlerFunction)
+    end
+end
+
 --[[
     Local object declarations
 --]]
@@ -1350,12 +1364,15 @@ end
 function UnitFrame:UpdateCaption()
     local captionLabel = self.captionLabel
     if captionLabel then
-        local caption
+        local caption = ""
         local unitTag = self:GetUnitTag()
         if IsUnitPlayer(unitTag) then
             caption = ZO_GetSecondaryPlayerNameWithTitleFromUnitTag(unitTag)
         else
-            caption = zo_strformat(SI_TOOLTIP_UNIT_CAPTION, GetUnitCaption(unitTag))
+            local unitCaption = GetUnitCaption(unitTag)
+            if unitCaption then
+                caption = zo_strformat(SI_TOOLTIP_UNIT_CAPTION, unitCaption)
+            end
         end
 
         local hideCaption = caption == ""
@@ -1871,16 +1888,14 @@ local function RegisterForEvents()
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
 
-    local function OnPowerUpdate(evt, unitTag, powerPoolIndex, powerType, powerPool, powerPoolMax)
+    local function PowerUpdateHandlerFunction(unitTag, powerPoolIndex, powerType, powerPool, powerPoolMax)
         local unitFrame = UnitFrames:GetFrame(unitTag)
-    
         if unitFrame then
             if powerType == POWERTYPE_HEALTH then
-                local oldHealth = unitFrame.healthBar.currentValue
-    
+                local oldHealth = unitFrame.healthBar.currentValue    
                 unitFrame.healthBar:Update(POWERTYPE_HEALTH, powerPool, powerPoolMax)
     
-                if(oldHealth ~= nil and oldHealth == 0) then
+                if oldHealth ~= nil and oldHealth == 0 then
                     -- Unit went from dead to non dead...update reaction
                     unitFrame:UpdateUnitReaction()
                 end
@@ -1889,6 +1904,7 @@ local function RegisterForEvents()
             end
         end
     end
+    ZO_MostRecentPowerUpdateHandler:New("UnitFrames", PowerUpdateHandlerFunction)
 
     local function OnUnitCreated(evt, unitTag)
         if(ZO_Group_IsGroupUnitTag(unitTag)) then
@@ -2039,7 +2055,6 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED, OnUnitCharacterNameChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
     ZO_UnitFrames:RegisterForEvent(EVENT_RETICLE_TARGET_CHANGED, OnReticleTargetChanged)
-    ZO_UnitFrames:RegisterForEvent(EVENT_POWER_UPDATE, OnPowerUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_CREATED, OnUnitCreated)
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_DESTROYED, OnUnitDestroyed)
     ZO_UnitFrames:RegisterForEvent(EVENT_LEVEL_UPDATE, OnLevelUpdate)

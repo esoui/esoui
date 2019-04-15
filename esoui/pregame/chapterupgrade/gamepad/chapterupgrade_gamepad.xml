@@ -4,7 +4,7 @@
 
         <Label name="ZO_ChapterUpgrade_Gamepad_InfoLabel" font="ZoFontGamepadCondensed34" virtual="true" />
         
-        <Button name="ZO_ChapterUpgradeButton_Gamepad" font="ZoFontGamepadBold48"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" tier="HIGH" verticalAlignment="CENTER" virtual="true">
+        <Button name="ZO_ChapterUpgradeButton_Gamepad" font="ZoFontGamepadBold48" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" tier="HIGH" verticalAlignment="CENTER" virtual="true">
             <Dimensions x="295" y="90"/>
 
             <FontColors
@@ -39,7 +39,9 @@
             <Controls>
 
                 <Control name="$(parent)TextContainer" override="true">
-                    <Anchor point="LEFT" relativePoint="CENTER" offsetY="-150" />
+                    <Dimensions x="940" />
+                    <DimensionConstraints minY="350" maxY="735" />
+                    <Anchor point="LEFT" relativePoint="CENTER" offsetY="-150" offsetX="-10" />
                     <Controls>
                         <Label name="$(parent)ChapterSummaryHeader" override="true" inherits="ZO_ChapterUpgrade_Gamepad_HeaderLabel" />
                         <Label name="$(parent)ChapterSummary" override="true" inherits="ZO_ChapterUpgrade_Gamepad_InfoLabel" />
@@ -49,11 +51,11 @@
                 </Control>
 
                 <Button name="$(parent)EnterCodeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" >
-                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="150" constrains="Y" />
-                    <Anchor point="LEFT" relativeTo="$(parent)TextContainerRegistrationSummary" relativePoint="LEFT" constrains="X" />
+                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="80" constrains="Y" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TextContainerRegistrationSummary" relativePoint="LEFT" offsetX="10" constrains="X" />
                 </Button>
                 <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_ChapterUpgradeButton_Gamepad" >
-                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="150" constrains="Y" />
+                    <Anchor point="TOP" relativeTo="$(parent)TextContainer" relativePoint="BOTTOM" offsetY="80" constrains="Y" />
                     <Anchor point="LEFT" relativeTo="$(parent)EnterCodeButton" relativePoint="RIGHT" offsetX="70" constrains="X" />
                 </Button>
             </Controls>

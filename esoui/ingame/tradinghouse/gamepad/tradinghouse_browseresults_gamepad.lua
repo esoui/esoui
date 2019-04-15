@@ -168,18 +168,20 @@ function ZO_GamepadTradingHouse_BrowseResults:OnSearchStateChanged(searchState, 
 
     self:RefreshData()
 
-    if shouldActivateBrowseResults then
-        if self:IsActive() then
-            -- We are already activated, focus on the panel so we start on the first item entry
-            self:ActivatePanelFocus()
-        else
-            TRADING_HOUSE_GAMEPAD:ActivateBrowseResults()
+    if TRADING_HOUSE_GAMEPAD_SCENE:IsShowing() then
+        if shouldActivateBrowseResults then
+            if self:IsActive() then
+                -- We are already activated, focus on the panel so we start on the first item entry
+                self:ActivatePanelFocus()
+            else
+                TRADING_HOUSE_GAMEPAD:ActivateBrowseResults()
+            end
         end
-    end
 
-    if shouldDeactivateBrowseResults then
-        if self:IsActive() then
-            TRADING_HOUSE_GAMEPAD:DeactivateBrowseResults()
+        if shouldDeactivateBrowseResults then
+            if self:IsActive() then
+                TRADING_HOUSE_GAMEPAD:DeactivateBrowseResults()
+            end
         end
     end
 end

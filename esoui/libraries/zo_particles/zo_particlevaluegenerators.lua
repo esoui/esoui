@@ -1,3 +1,6 @@
+local lerp = zo_lerp
+local cos = math.cos
+
 --Particle Value Generator
 
 ZO_ParticleValueGenerator = ZO_Object:Subclass()
@@ -29,6 +32,7 @@ function ZO_UniformRangeGenerator:New(...)
     return ZO_ParticleValueGenerator.New(self, ...)
 end
 
+--where ... is a set of pairs that we interpolate between by the random value
 function ZO_UniformRangeGenerator:Initialize(...)
     for i = 1, select("#", ...) do
         self[i] = select(i, ...)
@@ -39,7 +43,6 @@ function ZO_UniformRangeGenerator:Generate()
     self.randomValue = zo_random()
 end
 
-local lerp = zo_lerp
 
 function ZO_UniformRangeGenerator:GetValue(i)
     return lerp(self[i * 2 - 1], self[i * 2], self.randomValue)
@@ -53,6 +56,7 @@ function ZO_WeightedChoiceGenerator:New(...)
     return ZO_ParticleValueGenerator.New(self, ...)
 end
 
+--where ... is a set of pairs containing a choice and its weight
 function ZO_WeightedChoiceGenerator:Initialize(...)
     self.choices = {}
     self.weights = {}
@@ -84,4 +88,33 @@ function ZO_WeightedChoiceGenerator:GetValue(i)
     else
         return choice
     end
+end
+
+--Smooth Cycle Generator
+
+ZO_SmoothCycleGenerator = ZO_ParticleValueGenerator:Subclass()
+
+function ZO_SmoothCycleGenerator:New(...)
+    return ZO_ParticleValueGenerator.New(self, ...)
+end
+
+--where ... is a set of pairs that we cycle between
+function ZO_SmoothCycleGenerator:Initialize(...)
+    self.cycleDurationS = 1
+    for i = 1, select("#", ...) do
+        self[i] = select(i, ...)
+    end
+end
+
+function ZO_SmoothCycleGenerator:SetCycleDurationS(cycleDurationS)
+    self.cycleDurationS = cycleDurationS
+end
+
+function ZO_SmoothCycleGenerator:Generate()
+    local progress = zo_mod(GetGameTimeSeconds(), self.cycleDurationS) / self.cycleDurationS
+    self.lerpValue = (cos(progress * 2 * math.pi) + 1) / 2
+end
+
+function ZO_SmoothCycleGenerator:GetValue(i)
+    return lerp(self[i * 2 - 1], self[i * 2], self.lerpValue)
 end

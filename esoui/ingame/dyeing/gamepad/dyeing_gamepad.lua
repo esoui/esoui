@@ -331,7 +331,6 @@ do
         self.tooltipSwatch:SetHidden(true)
    
         local titleText = dyeData.dyeName
-        local achievementName = GetAchievementInfo(dyeData.achievementId)
         local bodyText = ZO_Dyeing_GetAchivementText(dyeData.known, dyeData.achievementId)
         ZO_DyeingUtils_SetSlotDyeSwatchDyeId(self.tooltipSwatch, dyeData.dyeId, IS_DYEABLE)
         self.tooltipSwatch:SetHidden(false)
@@ -423,7 +422,9 @@ function ZO_Dyeing_Slots_Panel_Gamepad:SwitchToDyeingWithDyeId(dyeId)
     self:SelectFocusArea(self.gridArea, DONT_ACTIVATE_FOCUS_AREA)
     local dyeDataEntry = self:GetDataEntryForDyeId(dyeId)
     local dyeData = dyeDataEntry.data
-    self.dyeGridList:ScrollDataToCenter(dyeData)
+    local NO_CALLBACK = nil
+    local ANIMATE_INSTANTLY = true
+    self.dyeGridList:ScrollDataToCenter(dyeData, NO_CALLBACK, ANIMATE_INSTANTLY)
     self:LayoutDyeTooltip(dyeData)
     self:FireCallbacks("DyeSelected")
 end

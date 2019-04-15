@@ -152,7 +152,13 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
     end
 
     if showPlayerLocked then
-        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_lock.dds", 24, 24, boundLabel), self:GetStyle("bind"))
+        local lineText
+        if boundLabel then
+            lineText = zo_iconTextFormat("EsoUI/Art/Tooltips/icon_lock.dds", 24, 24, boundLabel)
+        else
+            lineText = zo_iconFormat("EsoUI/Art/Tooltips/icon_lock.dds", 24, 24)
+        end
+        topSubsection:AddLine(lineText, self:GetStyle("bind"))
     elseif boundLabel then
         topSubsection:AddLine(boundLabel, self:GetStyle("bind"))
     end
@@ -624,6 +630,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         self:AddEnchantChargeBar(itemLink, forceFullDurability, previewValueToAdd)
     end
 
+    local isFurniture = IsItemLinkPlaceableFurniture(itemLink)
     local enchantDiffMode
     if extraData then
         enchantDiffMode = extraData.enchantDiffMode
@@ -642,10 +649,13 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     self:AddItemRequiresCollectibleText(itemLink)
     -- We don't want crafted furniture to show who made it, since it will get cleared once placed in a house
     -- TODO: If we implement saving the creator name, add back in LayoutItemCreator call (ESO-495280)
-    if not IsItemLinkPlaceableFurniture(itemLink) then
+    if not isFurniture then
         self:AddCreator(itemLink, creatorName)
     end
     self:AddItemTags(itemLink)
+    if isFurniture then
+        self:LayoutFurnishingLimitType(itemLink)
+    end
     self:LayoutTradeBoPInfo(tradeBoPData)
     self:AddItemValue(itemLink)
     self:AddItemForcedNotDeconstructable(itemLink)
@@ -1757,4 +1767,17 @@ function ZO_Tooltip:LayoutUnknownRetraitTrait(traitName, requiredResearchString)
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     bodySection:AddLine(requiredResearchString, self:GetStyle("bodyDescription"), self:GetStyle("failed"))
     self:AddSection(bodySection)
+end
+
+function ZO_Tooltip:LayoutFurnishingLimitType(itemLink)
+    if GetCurrentZoneHouseId() ~= 0 then
+        local furnishingLimitTypeSection = self:AcquireSection(self:GetStyle("furnishingLimitTypeSection"))
+        furnishingLimitTypeSection:AddLine(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), self:GetStyle("furnishingLimitTypeTitle"))
+
+        local furnishingLimitType = GetItemLinkFurnishingLimitType(itemLink)
+        local furnishingLimitName = GetString("SI_HOUSINGFURNISHINGLIMITTYPE", furnishingLimitType)
+        furnishingLimitTypeSection:AddLine(furnishingLimitName, self:GetStyle("furnishingLimitTypeDescription"))
+
+        self:AddSection(furnishingLimitTypeSection)
+    end
 end

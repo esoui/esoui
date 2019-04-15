@@ -1,0 +1,27 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_RoleSelectorTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_ROLE_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_ROLESELECTOR_KEYBOARD_HEIGHT" />
+            <OnInitialized>
+                ZO_GuildRecruitment_RoleSelectorTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Button name="$(parent)Role" inherits="ZO_PreferredRolesButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+
+                    <OnClicked>
+                        ZO_GuildRecruitment_RoleSelectorTile_Keyboard_OnClicked(self, button)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_RoleSelectorEndTile_Keyboard_Control" inherits="ZO_GuildRecruitment_RoleSelectorTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_ROLE_END_KEYBOARD_WIDTH" />
+        </Control>
+    </Controls>
+</GuiXml>

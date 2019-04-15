@@ -33,6 +33,7 @@ function ZO_HUDFragment:UpdateVisibility()
     RETICLE:RequestHidden(hiddenOrDead)
     HUD_INFAMY_METER:RequestHidden(hiddenOrDead)
     HUD_TELVAR_METER:SetHiddenForReason("hudScene", hiddenOrDead)
+    HUD_DAEDRIC_ENERGY_METER:SetHiddenForReason("hudScene", hiddenOrDead)
 end
 
 function ZO_HUDFragment:Show()
@@ -138,7 +139,6 @@ end
 
 EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_DEAD, UpdateDeathFragments)
 EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ALIVE, UpdateDeathFragments)
-UpdateDeathFragments()
 
 local HOUSING_ONLY_FRAGMENTS =
 {
@@ -176,7 +176,10 @@ local function UpdateLocationSpecificFragments()
     end
 end
 
-EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ACTIVATED, UpdateLocationSpecificFragments)
+EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ACTIVATED, function()
+    UpdateDeathFragments()
+    UpdateLocationSpecificFragments()
+end)
 
 ---------------
 --ZO_HUDScene

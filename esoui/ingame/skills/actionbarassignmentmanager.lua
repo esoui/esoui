@@ -13,6 +13,7 @@ local VIEWABLE_HOTBAR_CATEGORY_SET =
     [HOTBAR_CATEGORY_OVERLOAD] = true,
     [HOTBAR_CATEGORY_WEREWOLF] = true,
     [HOTBAR_CATEGORY_TEMPORARY] = true,
+    [HOTBAR_CATEGORY_DAEDRIC_ARTIFACT] = true,
 }
 
 -- These bars can be edited, and the server will persist those edits
@@ -40,6 +41,7 @@ local HOTBAR_CYCLE_ORDER =
     HOTBAR_CATEGORY_OVERLOAD,
     HOTBAR_CATEGORY_WEREWOLF,
     HOTBAR_CATEGORY_TEMPORARY,
+    HOTBAR_CATEGORY_DAEDRIC_ARTIFACT,
 }
 --------------------------------
 -- Slottable Action Interface --
@@ -408,7 +410,7 @@ function ZO_ActionBarAssignmentManager_Hotbar:ResetSlot(actionSlotIndex)
         local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
         if progressionData then
             self.slots[actionSlotIndex] = ZO_SlottableSkill:New(progressionData:GetSkillData(), self.hotbarCategory)
-        elseif self.hotbarCategory == HOTBAR_CATEGORY_TEMPORARY then
+        elseif not ASSIGNABLE_HOTBAR_CATEGORY_SET[self.hotbarCategory] then
             self.slots[actionSlotIndex] = ZO_SlottableAbility:New(abilityId)
         end
     end
@@ -460,10 +462,10 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedClearSlotResult(actionS
         return HOT_BAR_RESULT_CANNOT_EDIT_SLOT
     end
 
-    if IsUnitInCombat("player") then
-        return HOT_BAR_RESULT_NO_COMBAT_SWAP
+    if IsUnitActivelyEngaged("player") then
+        return HOT_BAR_RESULT_NO_ACTIVELY_ENGAGED_SWAP
     end
-
+    
     return HOT_BAR_RESULT_SUCCESS
 end
 
@@ -495,8 +497,8 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSkillSlotResult(actionS
         return HOT_BAR_RESULT_ABILITY_NOT_KNOWN
     end
 
-    if IsUnitInCombat("player") then
-        return HOT_BAR_RESULT_NO_COMBAT_SWAP
+    if IsUnitActivelyEngaged("player") then
+        return HOT_BAR_RESULT_NO_ACTIVELY_ENGAGED_SWAP
     end
 
     return HOT_BAR_RESULT_SUCCESS

@@ -79,5 +79,11 @@
                 </Control>
             </Controls>
         </Control>
+
+        <Control name="ZO_MultiselectComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true">
+            <OnInitialized>
+                ZO_MultiSelectComboBox:New(self)
+            </OnInitialized>
+        </Control>
     </Controls>
 </GuiXml>

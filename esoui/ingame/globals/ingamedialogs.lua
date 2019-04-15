@@ -1008,46 +1008,6 @@ ESO_Dialogs["GROUP_INVITE"] =
     }
 }
 
-ESO_Dialogs["GUILD_RANK_SAVE_CHANGES"] =
-{
-    title =
-    {
-        text = SI_GUILD_RANKS_CONFIRM_CHANGES_TITLE
-    },
-    mainText =
-    {
-        text = SI_GUILD_RANKS_CONFIRM_CHANGES
-    },
-    buttons =
-    {
-        {
-            text = SI_GUILD_RANKS_SAVE,
-            callback = function(dialog)
-                           local APPLY_CHANGES = true
-                           GUILD_RANKS:ConfirmExit(APPLY_CHANGES)
-                           local data = dialog.data
-                           if data and data.callback then
-                               data.callback(data.params)
-                           end
-                       end
-        },
-        {
-            text = SI_GUILD_RANKS_CANCEL,
-            callback = function(dialog)
-                           local DONT_APPLY_CHANGES = false
-                           GUILD_RANKS:ConfirmExit(DONT_APPLY_CHANGES)
-                           local data = dialog.data
-                           if data and data.callback then
-                               data.callback(data.params)
-                           end
-                       end
-        },
-    },
-    noChoiceCallback = function()
-                           GUILD_RANKS:CancelExit()
-                       end,
-}
-
 ESO_Dialogs["LARGE_GROUP_INVITE_WARNING"] =
 {
     gamepadInfo =
@@ -1079,38 +1039,6 @@ ESO_Dialogs["LARGE_GROUP_INVITE_WARNING"] =
         [2] =
         {
             text =      SI_NO,
-        }
-    }
-}
-
-ESO_Dialogs["GUILD_REMOVE_MEMBER"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    canQueue = true,
-    title =
-    {
-        text = SI_PROMPT_TITLE_GUILD_REMOVE_MEMBER,
-    },
-    mainText =
-    {
-        text = SI_GUILD_REMOVE_MEMBER_WARNING,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text =      SI_DIALOG_REMOVE,
-            callback =  function(dialog)
-                             GuildRemove(dialog.data.guildId, dialog.data.displayName)
-                        end,
-        },
-        
-        [2] =
-        {
-            text =      SI_DIALOG_CANCEL,
         }
     }
 }
@@ -1265,26 +1193,7 @@ ESO_Dialogs["PROMOTE_TO_GUILDMASTER"] =
     }
 }
 
-local function UpdateCampaignQueueReadyTimer(dialog)
-    local frameTimeSeconds = GetFrameTimeSeconds()
-
-    if (not dialog.data.nextUpdateTimeSeconds or frameTimeSeconds > dialog.data.nextUpdateTimeSeconds) then
-        dialog.data.nextUpdateTimeSeconds = zo_floor(frameTimeSeconds + 1)  -- Update on second boundaries
-        local timeLeftSeconds = GetCampaignQueueRemainingConfirmationSeconds(dialog.data.campaignId, dialog.data.isGroup)
-
-        if timeLeftSeconds == 0 then
-            -- Cancel the dialog if we're out of time
-            ZO_Dialogs_ReleaseDialog(dialog)
-        elseif (dialog.data.timeLeftSeconds ~= timeLeftSeconds) then
-            -- Otherwise update the timer
-            dialog.data.timeLeftSeconds = timeLeftSeconds
-            local timeString = ZO_FormatTime(timeLeftSeconds, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
-            ZO_Dialogs_UpdateDialogMainText(dialog, nil, { dialog.textParams.mainTextParams[1], timeString })
-        end
-    end
-end
-
-ESO_Dialogs["CAMPAIGN_QUEUE_READY"] =
+ESO_Dialogs["CAMPAIGN_ALLIANCE_LOCKED"] =
 {
     gamepadInfo =
     {
@@ -1292,52 +1201,74 @@ ESO_Dialogs["CAMPAIGN_QUEUE_READY"] =
     },
     title =
     {
-        text = SI_CAMPAIGN_BROWSER_READY_DIALOG_TITLE,
+        text = SI_ALLIANCE_LOCKED_DIALOG_TITLE,
     },
     mainText =
     {
-        text = SI_CAMPAIGN_BROSWER_READY_DIALOG_PROMPT,
+        text = function(dialog)
+            local data = dialog.data
+            local campaignData = data.campaignData
+            local campaignName = ZO_SELECTED_TEXT:Colorize(campaignData.name)
+            local allianceString = ZO_SELECTED_TEXT:Colorize(ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(campaignData.lockedToAlliance))
+            local campaignEndCooldownString = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(data.secondsUntilCampaignEnd, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
+
+            if data.isLockActivated then
+                return zo_strformat(SI_ALLIANCE_LOCK_ACTIVATED_MESSAGE, campaignName, allianceString, campaignEndCooldownString)
+            end
+
+            local lockedCampaignMessage = zo_strformat(SI_ALLIANCE_LOCKED_DIALOG_CAMPAIGN_MESSAGE, campaignName, allianceString, campaignEndCooldownString)
+
+            local lockedReasonFormatString = GetString("SI_CAMPAIGNALLIANCELOCKREASON_DIALOGMESSAGE", campaignData.allianceLockReason)
+            local lockedReasonMessage
+            if campaignData.allianceLockReason == CAMPAIGN_ALLIANCE_LOCK_REASON_ENTERED_CAMPAIGN then
+                lockedReasonMessage = zo_strformat(lockedReasonFormatString, campaignEndCooldownString)
+            elseif campaignData.allianceLockReason == CAMPAIGN_ALLIANCE_LOCK_REASON_CHARACTER_ASSIGNED then
+                lockedReasonMessage = lockedReasonFormatString
+            elseif campaignData.allianceLockReason == CAMPAIGN_ALLIANCE_LOCK_REASON_CAMPAIGN_ENTERED_AND_ASSIGNED then
+                lockedReasonMessage = zo_strformat(lockedReasonFormatString, campaignEndCooldownString)
+            end
+
+            return ZO_GenerateParagraphSeparatedList({lockedCampaignMessage, lockedReasonMessage})
+        end,
     },
     buttons =
     {
         [1] =
         {
-            text = SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
-                            ConfirmCampaignEntry(dialog.data.campaignId, dialog.data.isGroup, true)
-                        end,
-        },
-        [2] =
-        {
-            text = SI_DIALOG_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_EXIT,
         },
     },
-    updateFn = UpdateCampaignQueueReadyTimer,
+    updateFn = function(dialog)
+        local campaignData = dialog.data.campaignData
+        local _, secondsUntilCampaignEnd = GetSelectionCampaignTimes(campaignData.selectionIndex)
+        if dialog.data.secondsUntilCampaignEnd ~= secondsUntilCampaignEnd then
+            dialog.data.secondsUntilCampaignEnd = secondsUntilCampaignEnd
+            ZO_Dialogs_RefreshDialogText("CAMPAIGN_ALLIANCE_LOCKED", dialog)
+        end
+    end,
 }
 
-ESO_Dialogs["CAMPAIGN_QUEUE"] =
+ESO_Dialogs["CAMPAIGN_ABOUT_TO_ALLIANCE_LOCK"] =
 {
-    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
     title =
     {
-        text = SI_CAMPAIGN_BROWSER_QUEUE_DIALOG_TITLE,
+        text = SI_ABOUT_TO_ALLIANCE_LOCK_DIALOG_TITLE,
     },
     mainText =
     {
-        text = SI_CAMPAIGN_BROSWER_QUEUE_DIALOG_PROMPT,
-    },
-    radioButtons =
-    {
-        [1] =
-        {
-            text = GetString(SI_CAMPAIGN_BROWSER_QUEUE_GROUP),
-            data = true,
-        },
-        [2] =
-        {
-            text = GetString(SI_CAMPAIGN_BROWSER_QUEUE_SOLO),
-            data = false,
-        },
+        text = function(dialog)
+            local data = dialog.data
+            local allianceString = ZO_SELECTED_TEXT:Colorize(ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(GetUnitAlliance("player")))
+
+            local campaignEndCooldownString = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(data.secondsUntilCampaignEnd, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
+
+            return zo_strformat(SI_ABOUT_TO_ALLIANCE_LOCK_CAMPAIGN_WARNING, allianceString, campaignEndCooldownString)
+        end,
     },
     buttons =
     {
@@ -1345,15 +1276,22 @@ ESO_Dialogs["CAMPAIGN_QUEUE"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback =  function(dialog)
-                            local isGroup = ZO_Dialogs_GetSelectedRadioButtonData(dialog)
-                            QueueForCampaign(dialog.data.campaignId, isGroup)
-                        end,
+                CAMPAIGN_BROWSER_MANAGER:ContinueQueueForCampaignFlow(dialog.data.campaignData, ZO_CAMPAIGN_QUEUE_STEP_ALLIANCE_LOCK_CHECK)
+            end,
         },
         [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
-    }
+    },
+    updateFn = function(dialog)
+        local campaignData = dialog.data.campaignData
+        local _, secondsUntilCampaignEnd = GetSelectionCampaignTimes(campaignData.selectionIndex)
+        if dialog.data.secondsUntilCampaignEnd ~= secondsUntilCampaignEnd then
+            dialog.data.secondsUntilCampaignEnd = secondsUntilCampaignEnd
+            ZO_Dialogs_RefreshDialogText("CAMPAIGN_ABOUT_TO_ALLIANCE_LOCK", dialog)
+        end
+    end,
 }
 
 ESO_Dialogs["CONFIRM_RELEASE_KEEP_OWNERSHIP"] =
@@ -2876,8 +2814,8 @@ ESO_Dialogs["CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                            dialog.data.onAcceptCallback()
-                       end,
+                CAMPAIGN_BROWSER_MANAGER:ContinueQueueForCampaignFlow(dialog.data.campaignData, ZO_CAMPAIGN_QUEUE_STEP_LFG_CHECK)
+            end,
             clickSound = SOUNDS.DIALOG_ACCEPT,
         },
         {
@@ -3861,6 +3799,292 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] =
         [2] =
         {
             text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_ACCEPT_APPLICATION"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_GUILD_RECRUITMENT_APPLICATION_ACCEPT_TITLE,
+    },
+    mainText =
+    {
+        text = SI_GUILD_RECRUITMENT_APPLICATION_ACCEPT_DESCRIPTION,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback =  function(dialog)
+                            AcceptGuildApplication(dialog.data.guildId, dialog.data.index)
+                        end,
+        },
+        
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
+
+ESO_Dialogs["GUILD_FINDER_APPLICATION_SUBMITTED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_BROWSER_APPLICATIONS_SUBMITTED_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_GUILD_BROWSER_APPLICATIONS_SUBMITTED_DIALOG_DESCRIPTION,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_GUILD_BROWSER_APPLICATIONS_SUBMITTED_DIALOG_VIEW_APPLICATIONS_BUTTON,
+            callback = function()
+                if IsInGamepadPreferredMode() then
+                    if SCENE_MANAGER:IsSceneOnStack("guildBrowserGamepad") then
+                        GUILD_BROWSER_GAMEPAD:ReturnWithAppliedGuild()
+                        SCENE_MANAGER:HideCurrentScene()
+                    else
+                        SCENE_MANAGER:Show("guildBrowserGamepad")
+                    end
+                else
+                    GUILD_SELECTOR:SelectGuildFinder()
+                    MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "guildBrowserKeyboard")
+                    GUILD_BROWSER_KEYBOARD:ShowApplicationsList()
+                end
+            end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CLOSE,
+            callback = function()
+                if IsInGamepadPreferredMode() then
+                    SCENE_MANAGER:HideCurrentScene()
+                end
+            end
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_FINDER_RESCIND_APPLICATION"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_BROWSER_APPLICATIONS_RESCIND_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_GUILD_BROWSER_APPLICATIONS_RESCIND_DIALOG_DESCRIPTION,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_GUILD_BROWSER_APPLICATIONS_RESCIND_DIALOG_CANCEL_BUTTON,
+            callback = function(dialog)
+                RescindGuildFinderApplication(dialog.data.index)
+            end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CLOSE,
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_FINDER_APPLICATION_FAILED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_BROWSER_GUILD_INFO_APPLICATION_FAILED_TITLE,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CLOSE,
+        },
+    },
+}
+
+ESO_Dialogs["UNINVITE_GUILD_PLAYER"] = 
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_UNINVITE_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_GUILD_UNINVITE_PLAYER_WARNING,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function(dialog)
+                GuildUninvite(dialog.data.guildId, dialog.data.displayName)
+            end,
+        },
+
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_FINDER_BLACKLIST_FAILED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_RECRUITMENT_BLACKLIST_FAILED_TITLE,
+    },
+
+    mainText =
+    {
+        text = function(dialog)
+            return GetString("SI_GUILDBLACKLISTRESPONSE", dialog.textParams.mainTextParams[1])
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CLOSE,
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_FINDER_PROCESS_APPLICATION_FAILED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_RECRUITMENT_ACCEPT_APPLICATION_FAILED_TITLE,
+    },
+
+    mainText =
+    {
+        text = function(dialog)
+            return GetString("SI_GUILDPROCESSAPPLICATIONRESPONSE", dialog.textParams.mainTextParams[1])
+        end,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CLOSE,
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_FINDER_SAVE_FROM_RECRUITMENT_STATUS_LISTED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_RECRUITMENT_LISTED_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_GUILD_RECRUITMENT_LISTED_DIALOG_DESCRIPTION,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CLOSE,
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_FINDER_SAVE_FROM_RECRUITMENT_STATUS_UNLISTED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_RECRUITMENT_UNLISTED_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_GUILD_RECRUITMENT_UNLISTED_DIALOG_DESCRIPTION,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CLOSE,
         },
     },
 }

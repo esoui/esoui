@@ -35,8 +35,8 @@
                         </Texture>
 
                         <Texture name="$(parent)Status" level="3" hidden="true">
-                            <Dimensions x="32" y="32"/>
-                            <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4" />
+                            <Dimensions x="24" y="24"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="3" offsetY="-5" />
                         </Texture>
 
                         <Label name="$(parent)Timer" font="ZoFontGamepad27" horizontalAlignment="LEFT" verticalAlignment="TOP" inheritScale="false">

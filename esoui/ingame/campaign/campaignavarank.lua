@@ -19,7 +19,7 @@ end
 local function GetCurrentRankProgress()
     local rankPoints = GetUnitAvARankPoints("player")
     local _, _, rankStartsAt, nextRankAt = GetAvARankProgress(rankPoints)
-    if(rankPoints >= nextRankAt) then
+    if rankPoints >= nextRankAt then
         local rank = GetUnitAvARank("player")
         local lastRankPoints = GetNumPointsNeededForAvARank(rank - 1)
         local maxRankPoints = GetNumPointsNeededForAvARank(rank)
@@ -41,7 +41,7 @@ function CampaignAvARank:Refresh()
     self.statusBar:SetMinMax(0,max)    
     self.statusBar:SetValue(current)
 
-    if(InformationTooltip:GetOwner() == ZO_CampaignAvARankXPBar) then
+    if InformationTooltip:GetOwner() == ZO_CampaignAvARankXPBar then
         ZO_CampaignAvARankStatusBar_OnMouseEnter(ZO_CampaignAvARankXPBar)
     end
 end

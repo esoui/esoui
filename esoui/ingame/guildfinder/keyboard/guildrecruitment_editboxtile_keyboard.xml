@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_EditBoxTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_HEADLINE_ENTRY_HEIGHT" />
+            <OnInitialized>
+                ZO_GuildRecruitment_EditBoxTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" inherits="ZO_GuildRecruitment_Keyboard_Header_Label">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+                
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_HEADLINE_HEIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_HEADER_MESSAGE_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self)
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_NumericEditBoxTile_Keyboard_Control" inherits="ZO_GuildRecruitment_EditBoxTile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_KEYBOARD_ENTRY_HEIGHT" />
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" override="true">
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_KEYBOARD_HEIGHT" />
+                    <Controls>
+                        <EditBox name="$(parent)Edit" override="true" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

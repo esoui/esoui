@@ -145,7 +145,7 @@ local ZO_OptionsPanel_Combat_ControlData =
             panel = SETTING_PANEL_COMBAT,
             settingId = UI_SETTING_ULTIMATE_NUMBER,
             text = SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER,
-            tooltipText = SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER_TOOLTP,
+            tooltipText = SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER_TOOLTIP,
         },
     },
 
@@ -168,6 +168,15 @@ local ZO_OptionsPanel_Combat_ControlData =
     --Combat
     [SETTING_TYPE_COMBAT] =
     {
+        [COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
+            panel = SETTING_PANEL_COMBAT,
+            text = SI_INTERFACE_OPTIONS_COMBAT_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_ENCOUNTER_LOG_APPEAR_ANONYMOUS_TOOLTIP,
+        },
         [COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED] =
         {
             controlType = OPTIONS_CHECKBOX,
@@ -227,6 +236,20 @@ local ZO_OptionsPanel_Combat_ControlData =
         [COMBAT_SETTING_SCT_INCOMING_PET_DAMAGE_ENABLED] = GenerateSCTIncomingOption("PET_DAMAGE"),
         [COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED] = GenerateSCTIncomingOption("PET_DOT"),
         [COMBAT_SETTING_SCT_INCOMING_STATUS_EFFECTS_ENABLED] = GenerateSCTIncomingOption("STATUS_EFFECTS"),
+        [COMBAT_SETTING_SCT_SHOW_OVER_HEAL] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_SHOW_OVER_HEAL,
+            panel = SETTING_PANEL_COMBAT,
+            text = SI_INTERFACE_OPTIONS_COMBAT_SCT_SHOW_OVER_HEAL,
+            tooltipText = SI_INTERFACE_OPTIONS_COMBAT_SCT_SHOW_OVER_HEAL_TOOLTIP,
+            eventCallbacks =
+            {
+                ["SCTEnabled_Changed"]   = OnSCTEnabledChanged,
+            },
+            gamepadIsEnabledCallback = IsSCTEnabled,
+        }
     },
 
     --Buffs & Debuffs

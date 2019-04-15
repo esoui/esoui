@@ -11,8 +11,8 @@ function ZO_WorldMapCorner_OnInitialized(self)
     end
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", UpdateTitleEventCallback)
+    CALLBACK_MANAGER:RegisterCallback("OnWorldMapCampaignChanged", UpdateTitleEventCallback)
     self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, UpdateTitleEventCallback)
-    self:RegisterForEvent(EVENT_PREFERRED_CAMPAIGN_CHANGED, UpdateTitleEventCallback)
 
     UpdateTitle(titleLabel)
 end

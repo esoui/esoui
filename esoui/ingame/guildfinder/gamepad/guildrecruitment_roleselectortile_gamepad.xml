@@ -1,0 +1,23 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_RoleSelectorTile_Gamepad_Control" inherits="ZO_Tile_Control ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_ROLE_GAMEPAD_WIDTH" y="ZO_GUILD_RECRUITMENT_ROLE_SELECTOR_GAMEPAD_HEIGHT" />
+            <OnInitialized>
+                ZO_GuildRecruitment_RoleSelectorTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_ROLE_SELECTOR_INDENT_X"/>
+                </Label>
+
+                <Control name="$(parent)Role" inherits="ZO_GroupRolesBarRole">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_RoleSelectorEndTile_Gamepad_Control" inherits="ZO_GuildRecruitment_RoleSelectorTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_ROLE_END_GAMEPAD_WIDTH" />
+        </Control>
+    </Controls>
+</GuiXml>

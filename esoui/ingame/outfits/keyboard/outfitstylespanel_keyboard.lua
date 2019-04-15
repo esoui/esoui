@@ -670,7 +670,9 @@ end
 function ZO_OutfitStylesPanel_Keyboard:ScrollToCollectibleData(scrollToCollectibleData)
     local entry = self:GetEntryByCollectibleData(scrollToCollectibleData)
     if entry then
-        self.gridListPanelList:ScrollDataToCenter(entry)
+        local NO_CALLBACK = nil
+        local ANIMATE_INSTANTLY = true
+        self.gridListPanelList:ScrollDataToCenter(entry, NO_CALLBACK, ANIMATE_INSTANTLY)
     end
 end
 

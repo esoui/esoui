@@ -318,8 +318,7 @@ function ZO_RestyleCommon_Keyboard:AddCategory(nodeTemplate, parent, name, refer
         enabled = enabled,
     }
 
-    local soundId = parent and SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED or SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED
-    local node = self.categoryTree:AddNode(nodeTemplate, entryData, parent, soundId)
+    local node = self.categoryTree:AddNode(nodeTemplate, entryData, parent)
     entryData.node = node
     return node
 end

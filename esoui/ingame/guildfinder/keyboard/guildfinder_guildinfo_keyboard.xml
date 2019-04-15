@@ -1,0 +1,7 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
+            <Dimensions x="250" />
+        </Label>
+    </Controls>
+</GuiXml>

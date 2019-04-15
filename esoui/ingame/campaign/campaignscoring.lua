@@ -5,12 +5,12 @@ function ZO_CampaignScoringManager:New(control)
 
     CAMPAIGN_SCORING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignScoring)
     CAMPAIGN_SCORING_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                                    if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                                    if newState == SCENE_FRAGMENT_SHOWN then
                                                                         manager.shown = true
                                                                         QueryCampaignLeaderboardData()
                                                                         manager:UpdateRewardTier()
                                                                         manager:UpdateScores()
-                                                                    elseif(newState == SCENE_FRAGMENT_HIDDEN) then
+                                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
                                                                         manager.shown = false
                                                                     end
                                                                 end)

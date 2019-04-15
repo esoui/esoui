@@ -399,11 +399,6 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
             --Here we determine what fragment to load, but we're going to wait until it loads to decide how to populate it
             --So we'll prevent any further movement and proceed based on what we expect the selected data to be by the time we need it.
             --We may already be in the process of a scroll, so "current data" isn't reliable.
-            if not IsActionBarSlottingAllowed() then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_SKILLS_DISABLED_SPECIAL_ABILITIES)
-                return false
-            end
-            
             local targetData = self.categoryList:GetTargetData()
             if self.assignableActionBar:IsActive() then
                 self:DeactivateCurrentList()
@@ -461,8 +456,13 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
 end
 
 function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
-    local function EnableWhileNotInCombat()
-        return not IsUnitInCombat("player"), GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT)
+    local function EnableWhileNotActivelyEngagedOrSlottingDisallowed()
+        if IsUnitActivelyEngaged("player") then
+            return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_ACTIVELY_ENGAGED)
+        elseif not IsActionBarSlottingAllowed() then
+            return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE)
+        end
+        return true
     end
 
     table.insert(self.lineFilterKeybindStripDescriptor,
@@ -494,7 +494,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotInCombat,
+        enabled = EnableWhileNotActivelyEngagedOrSlottingDisallowed,
 
         callback = function()
             --This is confirm when respecing and assign otherwise
@@ -672,7 +672,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotInCombat,
+        enabled = EnableWhileNotActivelyEngagedOrSlottingDisallowed,
 
         callback = function()
             if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
@@ -941,7 +941,6 @@ function ZO_GamepadSkills:InitializeLineFilterPreviewList()
     lineFilterPreviewList:AddDataTemplateWithHeader("ZO_GamepadSingleLineAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, nil, IsSkillEqual, "ZO_GamepadMenuEntryHeaderTemplate")
 
     self.lineFilterPreviewList = lineFilterPreviewList
-    self.lineFilterPreviewWarning = lineFilterPreviewContainer:GetNamedChild("Warning")
 end
 
 local function MenuEntryHeaderTemplateSetup(control, skillEntry, selected, selectedDuringRebuild, enabled, activated)
@@ -1192,11 +1191,12 @@ function ZO_GamepadSkills:InitializeEvents()
 
     self.control:RegisterForEvent(EVENT_PLAYER_DEACTIVATED, function() self:OnPlayerDeactivated() end)
 
-    local function OnPlayerCombatStateChanged()
+    local function OnPurchaseLockStateChanged()
         -- Refresh state of purchase/morph/assign keybinds
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
     end
-    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnPlayerCombatStateChanged)
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVELY_ENGAGED_STATE, OnPurchaseLockStateChanged)
+    self.control:RegisterForEvent(EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED, OnPurchaseLockStateChanged)
 end
 
 function ZO_GamepadSkills:TryClearSkillUpdatedStatus()
@@ -1276,18 +1276,6 @@ do
         local list = refreshPreviewList and self.lineFilterPreviewList or self.lineFilterList
         list:Clear()
         ZO_ClearTable(g_ShownHeaderTexts)
-
-        --Don't show the preview list if action bar slotting isn't allowed
-        if refreshPreviewList then
-            if not IsActionBarSlottingAllowed() then
-                self.lineFilterPreviewWarning:SetHidden(false)
-                self.lineFilterPreviewWarning:SetText(GetString(SI_SKILLS_DISABLED_SPECIAL_ABILITIES))
-                list:Commit()
-                return
-            else
-                self.lineFilterPreviewWarning:SetHidden(true)
-            end
-        end
 
         local skillLineEntry = self.categoryList:GetTargetData()
         if skillLineEntry.isSkillsAdvisor then

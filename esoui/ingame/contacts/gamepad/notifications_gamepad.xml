@@ -110,11 +110,20 @@
             </OnInitialized>
         </Control>
 
-        <Control name="ZO_GamepadNotificationsGiftingUnlockedRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+        <Control name="ZO_GamepadNotificationsOpenCrownStoreRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
                 ZO_SharedGamepadEntry_SetHeightFromLabels(self)
-                self.acceptText = GetString(SI_NOTIFICATIONS_GIFTING_UNLOCKED_OPEN_CROWN_STORE)
+                self.acceptText = GetString(SI_NOTIFICATIONS_OPEN_CROWN_STORE)
+                self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_GamepadNotificationsMarketProductUnlockedRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_NOTIFICATIONS_LOG_OUT)
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
         </Control>
@@ -124,6 +133,15 @@
                 ZO_SharedGamepadEntry_OnInitialized(self)
                 ZO_SharedGamepadEntry_SetHeightFromLabels(self)
                 self.acceptText = GetString(SI_NOTIFICATIONS_NEW_DAILY_LOGIN_REWARDS_OPEN_REWARDS)
+            </OnInitialized>
+        </Control>
+        
+        <Control name="ZO_GamepadNotificationsGuildNewApplicationsRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_NOTIFICATIONS_GUILD_NEW_APPLICATIONS_BUTTON)
+                self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
         </Control>
 

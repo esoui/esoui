@@ -41,11 +41,13 @@ local GAMEPAD_GUILD_RANKS_PERMISSIONS =
     {   GUILD_PERMISSION_SET_MOTD,                              GUILD_PERMISSION_BANK_WITHDRAW          },
     {   GUILD_PERMISSION_DESCRIPTION_EDIT,                      GUILD_PERMISSION_STORE_SELL             },
     {   GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_MEMBERS),   GUILD_PERMISSION_BANK_WITHDRAW_GOLD     },
-    {   GUILD_PERMISSION_INVITE,                                GUILD_PERMISSION_BANK_VIEW_GOLD         },
-    {   GUILD_PERMISSION_NOTE_READ,                             GUILD_PERMISSION_GUILD_KIOSK_BID        },
+    {   GUILD_PERMISSION_MANAGE_APPLICATIONS,                   GUILD_PERMISSION_BANK_VIEW_GOLD         },
+    {   GUILD_PERMISSION_INVITE,                                GUILD_PERMISSION_GUILD_KIOSK_BID        },
+    {   GUILD_PERMISSION_NOTE_READ,                             nil           },
     {   GUILD_PERMISSION_NOTE_EDIT,                             nil           },
     {   GUILD_PERMISSION_PROMOTE,                               nil           },
     {   GUILD_PERMISSION_DEMOTE,                                nil           },
+    {   GUILD_PERMISSION_MANAGE_BLACKLIST,                      nil           },
     {   GUILD_PERMISSION_REMOVE,                                nil           },
 }
 
@@ -124,7 +126,7 @@ function ZO_GuildRanks_Gamepad:Initialize(control)
                 self:ReloadAndRefreshScreen()
             end
             
-            local OnRefreshMatchGuildId = function(_, guildId) 
+            local OnRefreshMatchGuildId = function(_, guildId)
                 if(self:MatchesGuild(guildId)) then 
                     OnRefresh()
                 end
@@ -135,14 +137,13 @@ function ZO_GuildRanks_Gamepad:Initialize(control)
             self.control:RegisterForEvent(EVENT_GUILD_RANK_CHANGED, OnRefreshMatchGuildId)
             self.control:RegisterForEvent(EVENT_SAVE_GUILD_RANKS_RESPONSE, OnRefreshMatchGuildId)
         elseif newState == SCENE_HIDING then
-
             self:RemoveUnusedFragments()
             self:SetChangePermissionsEnabled(false)
 
             self.iconSelector:Deactivate()
             GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:TakeFocus()
 
-            if(self.currentDropdown) then
+            if self.currentDropdown then
                 self.currentDropdown:Deactivate(true)
             end
             
@@ -155,7 +156,7 @@ function ZO_GuildRanks_Gamepad:Initialize(control)
             self.control:UnregisterForEvent(EVENT_GUILD_RANK_CHANGED)
             self.control:UnregisterForEvent(EVENT_SAVE_GUILD_RANKS_RESPONSE)
 
-            if(self:NeedsSave()) then
+            if self:NeedsSave() then
                 PlaySound(SOUNDS.GUILD_RANK_SAVED)
                 self:Save()
             end
@@ -170,19 +171,19 @@ end
 
 function ZO_GuildRanks_Gamepad:ActivateRankList(refreshScreen)
     self.listDisplayMode = LIST_DISPLAY_MODES.RANKS
-    if(refreshScreen) then
+    if refreshScreen then
         self:RefreshScreen()
     end
     self.owningScreen:SetCurrentList(self.rankList)
 end
 
 function ZO_GuildRanks_Gamepad:ActivateOptionsList(refreshScreen)
-    if(self.selectedRank == nil) then
+    if self.selectedRank == nil then
         return
     end
 
     self.listDisplayMode = LIST_DISPLAY_MODES.OPTIONS
-    if(refreshScreen) then
+    if refreshScreen then
         self:RefreshScreen()
     end
 
@@ -221,22 +222,22 @@ function ZO_GuildRanks_Gamepad:RefreshScreen()
 end
 
 function ZO_GuildRanks_Gamepad:RefreshLists()
-    if(self:IsDisplayingRankList()) then
+    if self:IsDisplayingRankList() then
         self:RefreshRankList()
-    elseif(self:IsDisplayingOptionsList()) then
+    elseif self:IsDisplayingOptionsList() then
         self:RefreshOptionsList()
     end
 end
 
 function ZO_GuildRanks_Gamepad:RefreshContent()
-    if(self:IsDisplayingRankList()) then
+    if self:IsDisplayingRankList() then
         self:ActivateFragment(GUILD_RANKS_PERMISSION_SUMMARY_FRAGMENT)
-    elseif(self:IsDisplayingOptionsList()) then
+    elseif self:IsDisplayingOptionsList() then
         self:ActivateFragment(GUILD_RANKS_PERMISSION_SUMMARY_FRAGMENT)
-    elseif(self:IsDisplayingIconSelector()) then
+    elseif self:IsDisplayingIconSelector() then
         self:ActivateFragment(GUILD_RANKS_ICON_SELECTOR_FRAGMENT)
         self:RefreshIconSelector()
-    elseif(self:IsDisplayingChangePermissions()) then
+    elseif self:IsDisplayingChangePermissions() then
         self:ActivateFragment(GUILD_RANKS_PERMISSION_SUMMARY_FRAGMENT)
         self:RefreshChangePermissions()
     end
@@ -270,7 +271,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
     end
 
     local function UpdateSelectedRankIndex(rank)
-        if(self.selectedRankIndex ~= rank) then
+        if self.selectedRankIndex ~= rank then
             self.selectedRankIndex = rank
         end
     end
@@ -308,7 +309,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                     nameField = true,
                     textChangedCallback = function(control)
                         local newName = control:GetText()
-                        if(self.selectedName ~= newName) then
+                        if self.selectedName ~= newName then
                             UpdateSelectedName(newName)
                             parametricDialog.entryList:RefreshVisible()
                         end
@@ -319,7 +320,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
 
-                        if(self.selectedName == "") then
+                        if self.selectedName == "" then
                             ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GAMEPAD_GUILD_RANK_DIALOG_DEFAULT_TEXT))
                         end
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_RANK_NAME_LENGTH)
@@ -336,7 +337,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                 template = "ZO_GamepadDropdownItem",
 
                 templateData = {
-                    rankSelector = true,  
+                    rankSelector = true,
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.dropdown:SetSortsItems(false)
                         self:SetCurrentDropdown(control.dropdown)
@@ -404,17 +405,17 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
-                    if(targetData.nameField and targetControl) then
+                    if targetData.nameField and targetControl then
                         targetControl.editBoxControl:TakeFocus()
-                    elseif (targetData.rankSelector) then
+                    elseif targetData.rankSelector then
                         self.currentDropdown:Activate()
                         local highlightIndex = 1
-                        if(self.selectedRankIndex ~= nil) then
+                        if self.selectedRankIndex ~= nil then
                             highlightIndex = self.selectedRankIndex
                         end
                         self.currentDropdown:SetHighlightedItem(highlightIndex)
-                    elseif(targetData.finishedSelector) then
-                        if(self.noViolations) then
+                    elseif targetData.finishedSelector then
+                        if self.noViolations then
                             self:AddRank(self.selectedName, self.selectedRankIndex)
                             self:RefreshScreen()
                         end
@@ -426,7 +427,7 @@ function ZO_GuildRanks_Gamepad:InitializeAddRankDialog()
                     local targetData = parametricDialog.entryList:GetTargetData()
                     local enabled = true
 
-                    if(targetData.finishedSelector) then
+                    if targetData.finishedSelector then
                         enabled = self.noViolations
                     end
 
@@ -484,7 +485,7 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
                     nameField = true,
                     textChangedCallback = function(control) 
                         local newName = control:GetText()
-                        if(self.selectedName ~= newName) then
+                        if self.selectedName ~= newName then
                             UpdateSelectedName(newName)
                             parametricDialog.entryList:RefreshVisible()
                         end
@@ -495,7 +496,7 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
 
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
 
-                        if(self.selectedName == "") then
+                        if self.selectedName == "" then
                             ZO_EditDefaultText_Initialize(control.editBoxControl, GetString(SI_GAMEPAD_GUILD_RANK_DIALOG_DEFAULT_TEXT))
                         end
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_RANK_NAME_LENGTH)
@@ -539,10 +540,10 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     local targetControl = dialog.entryList:GetTargetControl()
-                    if(targetData.nameField and targetControl) then
+                    if targetData.nameField and targetControl then
                         targetControl.editBoxControl:TakeFocus()
-                    elseif(targetData.finishedSelector) then
-                        if(self.noViolations) then
+                    elseif targetData.finishedSelector then
+                        if self.noViolations then
                             self.selectedRank:SetName(self.selectedName)
                             self:RefreshScreen()
                         end
@@ -554,7 +555,7 @@ function ZO_GuildRanks_Gamepad:InitializeRenameRankDialog()
                     local targetData = parametricDialog.entryList:GetTargetData()
                     local enabled = true
 
-                    if(targetData.finishedSelector) then
+                    if targetData.finishedSelector then
                         enabled = self.noViolations
                     end
 
@@ -627,18 +628,18 @@ end
 ------------------
 
 function ZO_GuildRanks_Gamepad:IsDisplayingRankList()
-    return (self.listDisplayMode == LIST_DISPLAY_MODES.RANKS)
+    return self.listDisplayMode == LIST_DISPLAY_MODES.RANKS
 end
 
 function ZO_GuildRanks_Gamepad:IsDisplayingOptionsList()
-    return (self.listDisplayMode == LIST_DISPLAY_MODES.OPTIONS)
+    return self.listDisplayMode == LIST_DISPLAY_MODES.OPTIONS
 end
 function ZO_GuildRanks_Gamepad:IsDisplayingIconSelector()
-    return (self.listDisplayMode == LIST_DISPLAY_MODES.SELECT_ICON)
+    return self.listDisplayMode == LIST_DISPLAY_MODES.SELECT_ICON
 end
 
 function ZO_GuildRanks_Gamepad:IsDisplayingChangePermissions()
-    return (self.listDisplayMode == LIST_DISPLAY_MODES.CHANGE_PERMISSIONS)
+    return self.listDisplayMode == LIST_DISPLAY_MODES.CHANGE_PERMISSIONS
 end
 
 -------------------------
@@ -652,7 +653,7 @@ function ZO_GuildRanks_Gamepad:RemoveUnusedFragments(fragmentBeingAdded)
     }
 
     for i, fragment in ipairs(fragments) do
-        if(fragmentBeingAdded ~= fragment) then
+        if fragmentBeingAdded ~= fragment then
             GAMEPAD_GUILD_HOME_SCENE:RemoveFragment(fragment)
         end
     end
@@ -665,7 +666,7 @@ function ZO_GuildRanks_Gamepad:ActivateFragment(fragment)
 end
 
 function ZO_GuildRanks_Gamepad:GetMessageText()
-    if(self:IsEditingRank()) then
+    if self:IsEditingRank() then
         return self.selectedRank:GetName()
     end
 
@@ -723,7 +724,7 @@ function ZO_GuildRanks_Gamepad:InitializeChangePermissions()
 end
 
 function ZO_GuildRanks_Gamepad:UpdateDirectionalInput()
-    if(self:IsDisplayingChangePermissions()) then
+    if self:IsDisplayingChangePermissions() then
         local result = self.horzMovementController:CheckMovement()
         if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
             PlaySound(SOUNDS.HOR_LIST_ITEM_SELECTED)
@@ -822,7 +823,7 @@ function ZO_GuildRanks_Gamepad:GetSelectedPermissionControl()
     for i = 1, #self.permissionControls do
         local permissionControl = self.permissionControls[i]
 
-        if(permissionControl.coord.x == self.selectedPermission.x and permissionControl.coord.y == self.selectedPermission.y) then
+        if permissionControl.coord.x == self.selectedPermission.x and permissionControl.coord.y == self.selectedPermission.y then
             return permissionControl
         end
     end
@@ -831,11 +832,11 @@ function ZO_GuildRanks_Gamepad:GetSelectedPermissionControl()
 end
 
 function ZO_GuildRanks_Gamepad:SetChangePermissionsEnabled(state)
-    if(self.changePermissionsEnabled ~= state) then
-        if(state) then
+    if self.changePermissionsEnabled ~= state then
+        if state then
             self:DeactivateOptionsList()
             DIRECTIONAL_INPUT:Activate(self, self.control)
-        elseif(self.changePermissionsEnabled) then
+        elseif self.changePermissionsEnabled then
             DIRECTIONAL_INPUT:Deactivate(self)
             self:ActivateOptionsList()
         end
@@ -850,10 +851,10 @@ function ZO_GuildRanks_Gamepad:RefreshChangePermissions()
     local selectedPermissionControl = self:GetSelectedPermissionControl()
     if selectedPermissionControl ~= nil then
         local iconControl = selectedPermissionControl:GetNamedChild("Icon")
-        if(iconControl ~= nil) then
+        if iconControl ~= nil then
             self.selectorBoxControl:SetAnchor(CENTER, iconControl, CENTER, 0, 1)
         end
-        
+
         local permission = selectedPermissionControl.permission
         self.selectorBoxControl.selectedRank = self.selectedRank
         self.selectorBoxControl.selectedPermission = permission
@@ -889,14 +890,14 @@ function ZO_GuildRanks_Gamepad:InitializePermissionsFragment()
 
         for columnIndex = 1, GAMEPAD_GUILD_RANKS_PERMISSIONS_NUM_COLUMNS do
             local rowInfo = GAMEPAD_GUILD_RANKS_PERMISSIONS[rowIndex]
-            if(rowInfo[columnIndex] ~= nil) then
+            if rowInfo[columnIndex] ~= nil then
                 permissionId = permissionId + 1
 
                 local permission = rowInfo[columnIndex]
                 local template
 
                 local isHeader = false
-                
+
                 if(type(permission) == "string") then -- this is a header
                     template = "ZO_GuildPermissionHeader_Gamepad"
                     isHeader = true
@@ -913,7 +914,7 @@ function ZO_GuildRanks_Gamepad:InitializePermissionsFragment()
                     permissionControl:SetAnchor(TOPLEFT, nil, TOPLEFT, (columnIndex - 1) * ZO_GAMEPAD_GUILD_RANKS_PERMISSION_COLUMN_WIDTH)
                 end
 
-                if(isHeader) then
+                if isHeader then
                     permissionControl.label:SetText(permission)
                 else
                     permissionControl.coord = {}
@@ -927,9 +928,9 @@ function ZO_GuildRanks_Gamepad:InitializePermissionsFragment()
                     --Chat options have special voice chat related labels for console
                     if IsConsoleUI() then
                         if permission == GUILD_PERMISSION_CHAT then
-                            text = GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_JOIN_GUILD_CHANNEL)    
+                            text = GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_JOIN_GUILD_CHANNEL)
                         elseif permission == GUILD_PERMISSION_OFFICER_CHAT_WRITE then
-                            text = GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_JOIN_OFFICER_CHANNEL)    
+                            text = GetString(SI_GAMEPAD_GUILD_RANK_PERMISSIONS_JOIN_OFFICER_CHANNEL)
                         end
                     end
 
@@ -969,7 +970,7 @@ function ZO_GuildRanks_Gamepad:GetSelectedRankIndex()
 end
 
 function ZO_GuildRanks_Gamepad:IsGuildMasterSelected()
-    if(self.selectedRank ~= nil and self.selectedRank.index ~= nil) then
+    if self.selectedRank ~= nil and self.selectedRank.index ~= nil then
         return IsGuildRankGuildMaster(self.guildId, self.selectedRank.index)
     end
 
@@ -981,15 +982,14 @@ function ZO_GuildRanks_Gamepad:IsLastRankSelected()
 end
 
 function ZO_GuildRanks_Gamepad:InSecondRankSelected()
-
     return self:GetSelectedRankIndex() <= GUILDMASTER_INDEX + 1
 end
 
 function ZO_GuildRanks_Gamepad:ReorderSelectedRank(up)
-    if(self.selectedRank ~= nil) then
+    if self.selectedRank ~= nil then
         local oldIndex = self:GetSelectedRankIndex()
         local newIndex = oldIndex
-        if(up) then
+        if up then
             newIndex = newIndex - 1
         else
             newIndex = newIndex + 1
@@ -997,7 +997,7 @@ function ZO_GuildRanks_Gamepad:ReorderSelectedRank(up)
 
         newIndex = zo_clamp(newIndex, GUILDMASTER_INDEX + 1, #self.ranks)
 
-        if(newIndex ~= oldIndex) then
+        if newIndex ~= oldIndex then
             local tmp = self.ranks[oldIndex]
             self.ranks[oldIndex] = self.ranks[newIndex]
             self.ranks[newIndex] = tmp
@@ -1056,7 +1056,7 @@ function ZO_GuildRanks_Gamepad:InitializeKeybindStrip()
                     end
                 elseif self:IsDisplayingIconSelector() then
                     self:SelectHighlightedIcon()
-                    
+
                     PlaySound(SOUNDS.DIALOG_ACCEPT)
                     self:ActivateOptionsList(REFRESH_SCREEN)
                 elseif self:IsDisplayingChangePermissions() then
@@ -1084,11 +1084,14 @@ function ZO_GuildRanks_Gamepad:InitializeKeybindStrip()
             keybind = "UI_SHORTCUT_NEGATIVE",
 
             callback = function()
-                if(self:IsDisplayingRankList()) then
+                if self:IsDisplayingRankList() then
                     GAMEPAD_GUILD_HUB:SetEnterInSingleGuildList(true)
                     SCENE_MANAGER:Hide(GAMEPAD_GUILD_HOME_SCENE_NAME)
-                elseif(self:IsDisplayingIconSelector() or self:IsDisplayingChangePermissions()) then
-                    PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+                elseif self:IsDisplayingIconSelector() or self:IsDisplayingChangePermissions() then
+                    if self:NeedsSave() then
+                        PlaySound(SOUNDS.GUILD_RANK_SAVED)
+                        self:Save()
+                    end
                     self:ActivateOptionsList(REFRESH_SCREEN)
                     self:RefreshPermissions(self.selectedRank)
                     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
@@ -1113,17 +1116,15 @@ do
     local ICON_REORDER_DOWN = "EsoUI/Art/Guild/Gamepad/gp_guild_options_reorder_down.dds"
     
     function ZO_GuildRanks_Gamepad:RefreshOptionsList()
-        if(self.selectedRank ~= nil) then
+        if self.selectedRank ~= nil then
             local isGuildmasterRankSelected = self:IsGuildMasterSelected()
             self.optionsList:Clear()
-    
+
             local data = nil
-    
             local firstEntry = true
-    
             local function AddEntry(data)
                 data:SetIconTintOnSelection(true)
-                if(firstEntry) then
+                if firstEntry then
                     data:SetHeader(GetString(SI_GAMEPAD_GUILD_RANK_OPTIONS)) 
                     self.optionsList:AddEntryWithHeader(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
                     firstEntry = false
@@ -1131,9 +1132,9 @@ do
                     self.optionsList:AddEntry(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
                 end
             end
-    
+
             local canChangePermissions = DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_PERMISSION_EDIT) and #self.ranks > 0 and (not self:IsGuildMasterSelected())
-            if(canChangePermissions) then
+            if canChangePermissions then
                 data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_CHANGE_PERMISSIONS), ICON_PERMISSIONS)
                 data.callback = function()
                     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
@@ -1142,25 +1143,25 @@ do
                 end
                 AddEntry(data)
             end
-    
+
             data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_RENAME_ENTRY), ICON_RENAME)
             data.callback = function()
                 ZO_Dialogs_ShowGamepadDialog(GUILD_RENAME_RANK_GAMEPAD_DIALOG)
             end
             AddEntry(data)
-    
-            if(not isGuildmasterRankSelected) then
+
+            if not isGuildmasterRankSelected then
                 data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_DELETE_ENTRY), ICON_DELETE)
                 data.callback = function()
-                    if(self:IsRankOccupied(self.selectedRank)) then
-                        ZO_Dialogs_ShowGamepadDialog(GUILD_DELETE_RANK_GAMEPAD_WARNING_DIALOG, nil, { buttonKeybindOverrides = { "DIALOG_PRIMARY" } })
+                    if self:IsRankOccupied(self.selectedRank) then
+                        ZO_Dialogs_ShowGamepadDialog(GUILD_DELETE_RANK_GAMEPAD_WARNING_DIALOG, nil, { buttonKeybindOverrides = { "DIALOG_PRIMARY" }})
                     else
                         ZO_Dialogs_ShowGamepadDialog(GUILD_DELETE_RANK_GAMEPAD_DIALOG)
                     end
                 end
                 AddEntry(data)
             end
-    
+
             data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_CHANGE_ICON), ICON_CHANGE_ICON)
             data.callback = function()
                 PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
@@ -1170,9 +1171,9 @@ do
                 self:RefreshScreen()
             end
             AddEntry(data)
-    
-            if(not isGuildmasterRankSelected) then
-                if(not self:InSecondRankSelected()) then
+
+            if not isGuildmasterRankSelected then
+                if not self:InSecondRankSelected() then
                     data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_REORDER_UP), ICON_REORDER_UP)
                     data.unfadeRankList = true
                     data.callback = function()
@@ -1180,8 +1181,8 @@ do
                     end
                     AddEntry(data)
                 end
-            
-                if(not self:IsLastRankSelected()) then
+
+                if not self:IsLastRankSelected() then
                     data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_REORDER_DOWN), ICON_REORDER_DOWN)
                     data.unfadeRankList= true
                     data.callback = function()
@@ -1190,22 +1191,23 @@ do
                     AddEntry(data)
                 end
             end
-    
+
             self.optionsList:Commit()
         end
     end
 end
+
 ---------------
 -- Add Rank --
 ---------------
 
 function ZO_GuildRanks_Gamepad:AddRank(rankName, copyPermissionsFromRankIndex)
     local rank = ZO_GuildRank_Shared:New(GUILD_RANKS_GAMEPAD, self.guildId, nil, rankName)
-    
+
     local newRankIndex = self:InsertRank(rank, copyPermissionsFromRankIndex)
 
     self:RefreshScreen()
-    
+
     self.rankList:SetSelectedIndexWithoutAnimation(newRankIndex)
 end
 
@@ -1214,12 +1216,12 @@ end
 ---------------
 
 function ZO_GuildRanks_Gamepad:OnTargetChanged(list, selectedData, oldSelectedData)
-    if(selectedData ~= nil) then
-        if(selectedData.addRank) then
+    if selectedData ~= nil then
+        if selectedData.addRank then
             self:RemoveUnusedFragments()
 
             self.selectedRank = nil
-        elseif(selectedData.rankObject ~= nil and self.selectedRank ~= selectedData.rankObject) then
+        elseif selectedData.rankObject ~= nil and self.selectedRank ~= selectedData.rankObject then
             self.selectedRank = selectedData.rankObject
             self:RefreshPermissions(self.selectedRank)
             self:RefreshContent()
@@ -1238,7 +1240,7 @@ function ZO_GuildRanks_Gamepad:PopulateRanks()
 
     self.ranks = {}
 
-    if(self.guildId) then
+    if self.guildId then
         for i = 1, GetNumGuildRanks(self.guildId) do
             local rankObject = ZO_GuildRank_Shared:New(GUILD_RANKS_GAMEPAD, self.guildId, i)
             self.ranks[i] = rankObject
@@ -1250,7 +1252,7 @@ function ZO_GuildRanks_Gamepad:RefreshRankList()
     self.rankList:Clear()
 
     local rankPermission = DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_PERMISSION_EDIT)
-    
+
     for i = 1, #self.ranks do
         local rankObject = self.ranks[i]
 
@@ -1260,10 +1262,10 @@ function ZO_GuildRanks_Gamepad:RefreshRankList()
 
         if i == 1 then
             local headerText = GetString(SI_WINDOW_TITLE_GUILD_RANKS)
-            if(rankPermission) then
+            if rankPermission then
                 headerText = GetString(SI_GAMEPAD_GUILD_RANK_EDIT)
             end
-            data:SetHeader(headerText) 
+            data:SetHeader(headerText)
             self.rankList:AddEntryWithHeader(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
         else
             self.rankList:AddEntry(GAMEPAD_GUILD_RANKS_MENU_ENTRY_TEMPLATE, data)
@@ -1271,7 +1273,7 @@ function ZO_GuildRanks_Gamepad:RefreshRankList()
     end
 
     local addRankEnabled = #self.ranks < MAX_GUILD_RANKS and rankPermission
-    if(addRankEnabled) then
+    if addRankEnabled then
         local data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_RANK_ADD), "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds")
         data:SetIconTintOnSelection(true)
         data.addRank = true

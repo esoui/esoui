@@ -105,14 +105,18 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSortFilterList(control)
 end
 
 function ZO_GamepadInteractiveSortFilterList:SetupFoci()
-    local function FiltersActivateCallback()
-        self.filterSwitcher:Activate()
-    end
+    -- TODO: If we want to turn on filters and searching after initialization foci will have to be re-setup
+    if not self.contentHeader:IsControlHidden() then
+        local function FiltersActivateCallback()
+            self.filterSwitcher:Activate()
+        end
 
-    local function FiltersDeactivateCallback()
-        self.filterSwitcher:Deactivate()
+        local function FiltersDeactivateCallback()
+            self.filterSwitcher:Deactivate()
+        end
+        self.filtersFocalArea = GamepadInteractiveSortFilterFocus_Filters:New(self, FiltersActivateCallback, FiltersDeactivateCallback)
+        self:AddNextFocusArea(self.filtersFocalArea)
     end
-    self.filtersFocalArea = GamepadInteractiveSortFilterFocus_Filters:New(self, FiltersActivateCallback, FiltersDeactivateCallback)
 
     local function HeaderActivateCallback()
         if self.sortHeaderGroup then
@@ -128,6 +132,7 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
         end
     end
     self.headersFocalArea =  GamepadInteractiveSortFilterFocus_Headers:New(self, HeaderActivateCallback, HeaderDeactivateCallback)
+    self:AddNextFocusArea(self.headersFocalArea)
 
     local function PanelActivateCallback()
         local ANIMATE_INSTANTLY = true
@@ -139,8 +144,6 @@ function ZO_GamepadInteractiveSortFilterList:SetupFoci()
     end
     self.panelFocalArea = GamepadInteractiveSortFilterFocus_Panel:New(self, PanelActivateCallback, PanelDeactivateCallback)
 
-    self:AddNextFocusArea(self.filtersFocalArea)
-    self:AddNextFocusArea(self.headersFocalArea)
     self:AddNextFocusArea(self.panelFocalArea)
 end
 
@@ -307,13 +310,17 @@ function ZO_GamepadInteractiveSortFilterList:InitializeKeybinds()
         end,
     }
 
-    self.filtersFocalArea:SetKeybindDescriptor(filterKeybindStripDescriptor)
+    if self.filtersFocalArea then
+        self.filtersFocalArea:SetKeybindDescriptor(filterKeybindStripDescriptor)
+    end
     self.headersFocalArea:SetKeybindDescriptor(headerKeybindStripDescriptor)
     self.panelFocalArea:SetKeybindDescriptor(self.keybindStripDescriptor)
 end
 
 function ZO_GamepadInteractiveSortFilterList:AddUniversalKeybind(keybind)
-    self.filtersFocalArea:AppendKeybind(keybind)
+    if self.filtersFocalArea then
+        self.filtersFocalArea:AppendKeybind(keybind)
+    end
     self.headersFocalArea:AppendKeybind(keybind)
     self.panelFocalArea:AppendKeybind(keybind)
 end
@@ -350,15 +357,20 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:Activate()
     self:SetDirectionalInputEnabled(true)
-    self:ActivateFocusArea(self:HasEntries() and self.panelFocalArea or self.headersFocalArea)
-    self.isActive = true
-    ZO_GamepadOnDefaultActivatedChanged(self.list, self.isActive)
+    local activeFocus = self:HasEntries() and self.panelFocalArea or self.headersFocalArea
+    if not activeFocus then
+        self:Deactivate()
+    else
+        self:ActivateFocusArea(activeFocus)
+        self.isActive = true
+        ZO_GamepadOnDefaultActivatedChanged(self.list, self.isActive)
+    end
 end
 
 function ZO_GamepadInteractiveSortFilterList:Deactivate()
     self:SetDirectionalInputEnabled(false)
 
-    if self.filterDropdown:IsActive() then
+    if self.filterDropdown and self.filterDropdown:IsActive() then
         local BLOCK_CALLBACK = true
         self.filterDropdown:Deactivate(BLOCK_CALLBACK)
     end
@@ -459,7 +471,9 @@ end
 function ZO_GamepadInteractiveSortFilterList:UpdateKeybinds()
     ZO_SortFilterList_Gamepad.UpdateKeybinds(self)
 
-    self.filtersFocalArea:UpdateKeybinds()
+    if self.filtersFocalArea then
+        self.filtersFocalArea:UpdateKeybinds()
+    end
     self.headersFocalArea:UpdateKeybinds()
     self.panelFocalArea:UpdateKeybinds()
 end

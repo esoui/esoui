@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GuildRecruitment_Keyboard_Header_Label" font="ZoFontGameBold" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Control name="ZO_GuildRecruitment_IconChildlessHeader" inherits="ZO_IconHeader" virtual="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_IconChildlessHeader_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="ZO_GUILD_FINDER_KEYBOARD_OPTIONS_TREE_LABEL_WIDTH" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildRecruitment_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_GuildFinder_Keyboard_List_Template" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

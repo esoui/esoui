@@ -60,7 +60,7 @@
                         </Label>
 
                         <Control name="$(parent)ActionArea" resizeToFitDescendents="true">
-                            <Anchor point="TOP" relativeTo="$(parent)Target" relativePoint="BOTTOM" offsetY="2"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Target" relativePoint="BOTTOM" offsetY="12"/>
                             <Controls>
                                 <!-- Standard Action -->
                                 <Control name="$(parent)ActionKeybindButton" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">

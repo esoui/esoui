@@ -1,10 +1,7 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_ComboBox_Gamepad" virtual="true">
+        <Control name="ZO_ComboBox_Gamepad_Base" virtual="true">
             <Dimensions x="150" y="48" />
-            <OnInitialized>
-                ZO_ComboBox_Gamepad:New(self)
-            </OnInitialized>
             <Controls>
                 <Texture name="$(parent)OpenDropdown" textureFile="EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds">
                     <Dimensions x="24" y="24" />
@@ -17,16 +14,42 @@
                 </Label>
             </Controls>
         </Control>
+        
+        <Control name="ZO_ComboBox_Gamepad" inherits="ZO_ComboBox_Gamepad_Base" virtual="true">
+            <OnInitialized>
+                ZO_ComboBox_Gamepad:New(self)
+            </OnInitialized>
+        </Control>
+
+        <Label name="ZO_ComboBox_Item_Gamepad_Text_Template" font="ZoFontGamepad34" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" tier="HIGH" layer="TEXT" verticalAlignment="CENTER" virtual="true" />
 
         <Control name="ZO_ComboBox_Item_Gamepad" virtual="true">
             <Dimensions y="48" />
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontGamepad34" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" tier="HIGH" layer="TEXT" verticalAlignment="CENTER">
+                <Label name="$(parent)Name" inherits="ZO_ComboBox_Item_Gamepad_Text_Template">
                     <Anchor point="LEFT"/>
                 </Label>
             </Controls>
         </Control>
+        
+        <Control name="ZO_MultiSelection_ComboBox_Item_Gamepad" virtual="true">
+            <Dimensions y="48" />
+            <Controls>
+                <Button name="$(parent)CheckBox" inherits="ZO_GamepadCheckButton">
+                    <Anchor point="LEFT" />
+                </Button>
+                
+                <Label name="$(parent)Name" inherits="ZO_ComboBox_Item_Gamepad_Text_Template">
+                    <Anchor point="LEFT" relativeTo="$(parent)CheckBox" relativePoint="RIGHT" />
+                </Label>
+            </Controls>
+        </Control>
 
+        <Control name="ZO_MultiSelection_ComboBox_Gamepad" inherits="ZO_ComboBox_Gamepad_Base"  virtual="true">
+            <OnInitialized>
+                ZO_MultiSelection_ComboBox_Gamepad:New(self)
+            </OnInitialized>
+        </Control>
 
         <TopLevelControl name="ZO_ComboBox_Gamepad_Dropdown" tier="HIGH" level="ZO_HIGH_TIER_GAMEPAD_COMBO_BOX_DROPDOWN" hidden="true">
             <OnInitialized>

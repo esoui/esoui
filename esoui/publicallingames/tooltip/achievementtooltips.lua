@@ -1,5 +1,3 @@
-local NO_ACHIEVEMENT_ICON = "EsoUI/Art/Achievements/Gamepad/Achievement_EmptyIcon.dds"
-
 function ZO_Tooltip:LayoutAchievementFromLink(achievementLink)
     local achievementId = GetAchievementIdFromLink(achievementLink)
     if achievementId > 0 then
@@ -26,8 +24,6 @@ function ZO_Tooltip:LayoutAchievementSummary()
 end
 
 function ZO_Tooltip:LayoutNoAchievement()
-    local completionStyle = self:GetStyle("achievementComplete")
-
     -- Title
     local titleTextSection = self:AcquireSection(self:GetStyle("topSection"))
     titleTextSection:AddLine(GetString(SI_GAMEPAD_ACHIEVEMENTS_NO_ACHIEVEMENT), self:GetStyle("title"))
@@ -83,8 +79,7 @@ function ZO_Tooltip:LayoutAchievementCriteria(achievementId)
         local isComplete = (numCompleted == numRequired)
 
         if numRequired == 1 then -- Checkbox
-            criteriaSection:AddSection(self:GetCheckboxSection(zo_strformat(SI_ACHIEVEMENT_CRITERION_FORMAT, description), isComplete, SI_ACHIEVEMENT_CRITERION_FORMAT))
-
+            criteriaSection:AddSection(self:GetCheckboxSection(zo_strformat(SI_ACHIEVEMENT_CRITERION_FORMAT, description), isComplete))
         else -- Progress bar.
             local entrySection = self:AcquireSection(self:GetStyle("topSection"))
             local statusBar = self:AcquireStatusBar(self:GetStyle("achievementCriteriaBar"))
@@ -150,7 +145,7 @@ function ZO_Tooltip:LayoutAchievementRewards(achievementId)
     if hasRewardDye then
         local rewardsEntrySection = rewardsSection:AcquireSection(self:GetStyle("topSection"))
         local swatchStyle = self:GetStyle("dyeSwatchStyle")
-        local dyeName, known, rarity, hueCategory, achievementId, r, g, b = GetDyeInfoById(dyeId)
+        local dyeName, known, rarity, hueCategory, dyeAchievementId, r, g, b = GetDyeInfoById(dyeId)
         rewardsEntrySection:AddColorAndTextSwatch(r, g, b, 1, dyeName, swatchStyle)
         rewardsEntrySection:AddLine(GetString(SI_GAMEPAD_ACHIEVEMENTS_DYE))
 

@@ -418,7 +418,6 @@ function ZO_SkillsManager:InitializeControls()
     self.skillLineUnlockTitleControl = self.advisedOverlayControl:GetNamedChild("SkillLineUnlockTitle")
     self.skillLineUnlockTextControl = self.advisedOverlayControl:GetNamedChild("SkillLineUnlockText")
     self.skillInfo = control:GetNamedChild("SkillInfo")
-    self.warning = control:GetNamedChild("Warning")
     self.assignableActionBar = ZO_KeyboardAssignableActionBar:New(control:GetNamedChild("AssignableActionBar"))
 end
 
@@ -675,10 +674,11 @@ function ZO_SkillsManager:RegisterForEvents()
     control:RegisterForEvent(EVENT_PLAYER_DEACTIVATED, function() self:OnPlayerDeactivated() end)
     KEYBOARD_SKILLS_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
 
-    local function OnPlayerCombatStateChanged()
+    local function OnPurchaseLockStateChanged()
         self.skillListRefreshGroup:MarkDirty("Visible")
     end
-    control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnPlayerCombatStateChanged)
+    control:RegisterForEvent(EVENT_PLAYER_ACTIVELY_ENGAGED_STATE, OnPurchaseLockStateChanged)
+    control:RegisterForEvent(EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED, OnPurchaseLockStateChanged)
 end
 
 function ZO_SkillsManager:GetSelectedSkillLineData()
@@ -1009,7 +1009,7 @@ do
 
             if increaseTextures then
                 ApplyButtonTextures(increaseButton, increaseTextures)
-                if IsUnitInCombat("player") then
+                if IsUnitActivelyEngaged("player") or not IsActionBarSlottingAllowed() then
                     increaseButton:SetState(BSTATE_DISABLED)
                 else
                     increaseButton:SetState(BSTATE_NORMAL)
@@ -1093,13 +1093,6 @@ do
     function ZO_SkillsManager:RebuildSkillList()
         self:StopSelectedSkillBuildSkillAnimations()
 
-        if not IsActionBarSlottingAllowed() then
-            self.skillList:SetHidden(true)
-            return
-        else
-            self.skillList:SetHidden(false)
-        end
-
         local skillLineData = self:GetSelectedSkillLineData()
         local scrollData = ZO_ScrollList_GetDataList(self.skillList)
         ZO_ScrollList_Clear(self.skillList)
@@ -1139,13 +1132,6 @@ function ZO_SkillsManager:RefreshActionbarState()
 end
 
 function ZO_SkillsManager:RebuildSkillLineList()
-    if IsActionBarSlottingAllowed() then
-        self.warning:SetHidden(true)
-    else
-        self.warning:SetText(GetString(SI_SKILLS_DISABLED_SPECIAL_ABILITIES))
-        self.warning:SetHidden(false)
-    end
-
     self.skillLinesTree:Reset()
     ZO_ClearTable(self.skillLineIdToNode)
     for _, skillTypeData in SKILLS_DATA_MANAGER:SkillTypeIterator() do
@@ -1153,9 +1139,9 @@ function ZO_SkillsManager:RebuildSkillLineList()
         for _, skillLineData in skillTypeData:SkillLineIterator() do
             if skillLineData:IsAvailable() or skillLineData:IsAdvised() then
                 if not parent then
-                    parent = self.skillLinesTree:AddNode("ZO_SkillIconHeader", skillTypeData, nil, skillTypeData:GetMenuClickSound())
+                    parent = self.skillLinesTree:AddNode("ZO_SkillIconHeader", skillTypeData)
                 end
-                local node = self.skillLinesTree:AddNode("ZO_SkillsNavigationEntry", skillLineData, parent, SOUNDS.SKILL_LINE_SELECT)
+                local node = self.skillLinesTree:AddNode("ZO_SkillsNavigationEntry", skillLineData, parent)
                 self.skillLineIdToNode[skillLineData:GetId()] = node
             end
         end
@@ -1321,9 +1307,14 @@ function ZO_Skills_AbilityIncrease_OnClicked(control, shift)
 end
 
 function ZO_Skills_AbilityIncrease_OnMouseEnter(control)
-    if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY and IsUnitInCombat("player") then
-        InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
-        SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT))
+    if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY then
+        if IsUnitActivelyEngaged("player") then
+            InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+            SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_ACTIVELY_ENGAGED))
+        elseif not IsActionBarSlottingAllowed() then
+            InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+            SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE))
+        end
     end
 end
 

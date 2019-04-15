@@ -83,17 +83,13 @@
         </Control>
 
         <Control name="ZO_ScrollingSavingEditBox" virtual="true" inherits="ZO_SavingEditBox" tier="HIGH">
-            <OnInitialized>
-                local display = self:GetNamedChild("Display")
-                display:ClearAnchors()
-                display:SetParent(self:GetNamedChild("PaneScrollChild"))
-                display:SetAnchor(TOPLEFT)
-                display:SetWidth(self:GetWidth() - 34)
-            </OnInitialized>
             <Controls>
                 <Control name="$(parent)Pane" inherits="ZO_ScrollContainer" tier="MEDIUM">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SavingEdit"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SavingEdit"/>
+                    <Controls>
+                        <Scroll name="$(parent)Scroll" override="true" mouseEnabled="false" />
+                    </Controls>
                 </Control>
             </Controls>
         </Control>

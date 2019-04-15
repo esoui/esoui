@@ -166,15 +166,23 @@ function ZO_Tree:AddTemplate(template, setupFunction, selectionFunction, equalit
     }    
 end
 
-function ZO_Tree:AddNode(template, data, parentNode, selectSound, open)
-    if(not parentNode) then
+function ZO_Tree:AddNode(template, data, parentNode, selectSoundOverride, open)
+    if not parentNode then
         parentNode = self.rootNode
     end
 
     local templateInfo = self.templateInfo[template]
 
     local treeNode = ZO_TreeNode:New(self, templateInfo, parentNode, data, templateInfo.childIndent or self.defaultIndent, templateInfo.childSpacing or self.defaultSpacing, open == true)
-	treeNode.selectSound = selectSound
+
+    if selectSoundOverride ~= nil then
+        treeNode.selectSound = selectSoundOverride
+    elseif parentNode == self.rootNode then
+        treeNode.selectSound = SOUNDS.TREE_HEADER_CLICK
+    else
+        treeNode.selectSound = SOUNDS.TREE_SUBCATEGORY_CLICK
+    end
+
     parentNode:AddChild(treeNode)
     
     return treeNode
@@ -858,9 +866,9 @@ function ZO_TreeHeader_OnMouseUp(self, upInside)
         -- Play the selected sound if not already opened
         if not self.node:IsEnabled() then
             PlaySound(SOUNDS.NEGATIVE_CLICK)
-		elseif not self.node.open and self.node.selectSound then
-			PlaySound(self.node.selectSound)
-		end
+        elseif not self.node.open and self.node.selectSound then
+            PlaySound(self.node.selectSound)
+        end
 
         self.node:GetTree():ToggleNode(self.node)
     end

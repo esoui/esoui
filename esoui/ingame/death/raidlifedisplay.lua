@@ -165,7 +165,9 @@ end
 
 function RaidLifeDisplay:OnPlayerActivated()
     self:RefreshApplicable()
-    self:RefreshCountInstantly()
+    if IsPlayerInReviveCounterRaid() then
+        self:RefreshCountInstantly()
+    end
 end
 
 function RaidLifeDisplay:OnRecentlyChangedExpired()

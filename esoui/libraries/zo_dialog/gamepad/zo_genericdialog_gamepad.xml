@@ -5,6 +5,8 @@
         <!-- Parametric List Menu Items -->
         <Control name="ZO_GamepadDropdownItem" inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
         
+        <Control name="ZO_GamepadMultiSelectionDropdownItem" inherits="ZO_Gamepad_MultiSelection_Dropdown_Item_FullWidth" virtual="true"/>
+        
         <Control name="ZO_GamepadIconSelectorItem" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryControlSizedTemplate ZO_GamepadIconSelectorTemplate" virtual="true" />
 
         <Control name="ZO_GamepadTextFieldSubmitItem" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
@@ -106,6 +108,10 @@
                     </Controls>
                 </Backdrop>
             </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_GenericDialog_TextFieldItem_Multiline_Large" inherits="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem_Multiline" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="180"/>
         </Control>
 
         <!-- Static List Item -->

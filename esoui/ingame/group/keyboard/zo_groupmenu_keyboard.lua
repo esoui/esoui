@@ -207,7 +207,7 @@ function GroupMenu_Keyboard:AddCategory(data, priority)
     table.sort(self.nodeList, PrioritySort)
 
     for i, curNodeData in ipairs(self.nodeList) do
-        local node = self.navigationTree:AddNode("ZO_GroupMenuKeyboard_CategoryHeader", curNodeData.data, nil, SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED)
+        local node = self.navigationTree:AddNode("ZO_GroupMenuKeyboard_CategoryHeader", curNodeData.data)
         self.categoryFragmentToNodeLookup[curNodeData.data.categoryFragment] = node
 
         if curNodeData.data.activityFinderObject then

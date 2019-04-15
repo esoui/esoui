@@ -275,8 +275,7 @@ do
 end
 
 function ZO_CollectionsBook:AddCategory(nodeTemplate, categoryData, parentNode)
-    local soundId = parentNode and SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED or SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED
-    local node = self.categoryTree:AddNode(nodeTemplate, categoryData, parentNode, soundId)
+    local node = self.categoryTree:AddNode(nodeTemplate, categoryData, parentNode)
     self.categoryNodeLookupData[categoryData:GetId()] = node
     return node
 end
@@ -470,7 +469,9 @@ function ZO_CollectionsBook:BrowseToCollectible(collectibleId)
 
                 local entryData = self:GetEntryByCollectibleId(collectibleId)
                 if entryData then
-                    self.gridListPanelList:ScrollDataToCenter(entryData)
+                    local NO_CALLBACK = nil
+                    local ANIMATE_INSTANTLY = true
+                    self.gridListPanelList:ScrollDataToCenter(entryData, NO_CALLBACK, ANIMATE_INSTANTLY)
                 end
 
                 MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", "collectionsBook")

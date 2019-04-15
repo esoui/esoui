@@ -119,7 +119,8 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
         self.carouselControl:SetHidden(true)
         self.crownStoreLockedControl:SetHidden(false)
         self.crownStoreLockedTexture:SetTexture(GetMarketAnnouncementCrownStoreLockedBackground())
-    else 
+    else
+        UpdateMarketAnnouncement()
         self:UpdateMarketCarousel()
         self.carousel:Activate()
         self.carouselControl:SetHidden(false)

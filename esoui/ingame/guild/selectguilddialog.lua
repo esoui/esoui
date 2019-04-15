@@ -107,17 +107,17 @@ function ZO_SelectGuildDialog:RefreshGuildList()
         local guildId = GetGuildId(i)
         if(not self.filterFunction or self.filterFunction(guildId)) then
             local guildName = GetGuildName(guildId)
-            local guildAlliance = GetGuildAlliance(guildId) 
-            local guildText = zo_iconTextFormat(GetAllianceBannerIcon(guildAlliance), 24, 24, guildName)
+            local guildAlliance = GetGuildAlliance(guildId)
+            local guildText = zo_iconTextFormat(GetPlatformAllianceSymbolIcon(guildAlliance), 24, 24, guildName)
             local entry = self.guildComboBox:CreateItemEntry(guildText, self.OnGuildSelectedCallback)
             entry.guildId = guildId
             entry.guildText = guildText
-		    self.entries[guildId] = entry
+            self.entries[guildId] = entry
             self.guildComboBox:AddItem(entry)
         end
     end
 
-    if(next(self.entries) == nil) then
+    if next(self.entries) == nil then
         return false
     end
 

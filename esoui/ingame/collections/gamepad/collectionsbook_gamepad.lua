@@ -470,7 +470,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             enabled = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData:IsHouse() then
-                    return true
+                    local cannotJumpString = collectibleData:IsUnlocked() and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+                    return CanJumpToHouseFromCurrentLocation(), cannotJumpString
                 else -- IsUsable
                     local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
                     if collectibleData:IsActive() then
@@ -1024,7 +1025,13 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
     housingPanel.collectedStatusLabel:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData:GetUnlockState()))
     housingPanel.nicknameLabel:SetText(collectibleData:GetFormattedNickname())
 
-    if collectibleData:IsUnlocked() then
+    if not CanJumpToHouseFromCurrentLocation() then
+        local disableReason = isUnlocked and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
+        housingPanel.hintLabel:SetText(ZO_ERROR_COLOR:Colorize(disableReason))
+        housingPanel.hintLabel:SetHidden(false)
+        housingPanel.primaryResidenceHeaderLabel:SetHidden(true)
+        housingPanel.primaryResidenceValueLabel:SetHidden(true)
+    elseif collectibleData:IsUnlocked() then
         local primaryResidenceText = collectibleData:IsPrimaryResidence() and GetString(SI_YES) or GetString(SI_NO)
         housingPanel.primaryResidenceValueLabel:SetText(primaryResidenceText)
         

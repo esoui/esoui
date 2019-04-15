@@ -53,7 +53,8 @@ do
     {
         [CHAPTER_BASE_GAME] = "Video/Opening_Cinematic_$(officialLanguage).bik",
         [CHAPTER_VOLCANO] = "Video/Morrowind_Opener_$(officialLanguage).bik",
-        [CHAPTER_GLACIER] = "Video/Summerset_Opener_$(officialLanguage).bik"
+        [CHAPTER_GLACIER] = "Video/Summerset_Opener_$(officialLanguage).bik",
+        [CHAPTER_MESA] = "Video/Elsweyr_Opener_$(officialLanguage).bik",
     }
 
     function AttemptToPlayIntroCinematic()

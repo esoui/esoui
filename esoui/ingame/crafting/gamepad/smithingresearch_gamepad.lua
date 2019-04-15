@@ -401,8 +401,8 @@ function ZO_GamepadSmithingResearch:Research()
 end
 
 function ZO_GamepadSmithingResearch:GetResearchTimeString(count, time)
-    time = ZO_PrefixIconNameFormatter("timer", time)
-    return zo_strformat(SI_GAMEPAD_SMITHING_RESEARCH_TIME_FOR_NEXT, count, time)
+    local timeWithIcon = zo_iconTextFormatNoSpace("EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds", "100%", "100%", time)
+    return zo_strformat(SI_GAMEPAD_SMITHING_RESEARCH_TIME_FOR_NEXT, count, timeWithIcon)
 end
 
 function ZO_GamepadSmithingResearch:GetExtraInfoColor()

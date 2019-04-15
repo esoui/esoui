@@ -156,11 +156,11 @@ function ZO_CreateGuildDialog_OnInitialized(self)
     local playerAlliance = GetUnitAlliance("player")
 
     for i = 1, NUM_ALLIANCES do
-        local allianceText = zo_iconTextFormat(GetAllianceBannerIcon(i), 24, 24, GetAllianceName(i))
+        local allianceText = zo_iconTextFormat(GetAllianceSymbolIcon(i), 24, 24, GetAllianceName(i))
         local entry = self.allianceComboBox:CreateItemEntry(allianceText, self.OnAllianceSelected)
         entry.alliance = i
         entry.allianceText = allianceText
-		table.insert(self.entries, entry)
+        table.insert(self.entries, entry)
     end
 
     self.allianceComboBox:AddItem(self.entries[playerAlliance])

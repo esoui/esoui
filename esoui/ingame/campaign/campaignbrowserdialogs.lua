@@ -7,83 +7,136 @@ local CURRENCY_OPTIONS =
     iconSide = RIGHT,
 }
 
---Select Guest Campaign
-------------------------
+ZO_CampaignDialogBase = ZO_Object:Subclass()
 
-local SelectGuestCampaign = ZO_TimeLockedDialog:Subclass()
-
-function SelectGuestCampaign:New(control)
-    local timeLockedDialog = ZO_TimeLockedDialog.New(self, "SELECT_GUEST_CAMPAIGN", 
-    {
-        customControl = control,
-        buttons =
-        {
-            [1] =
-            {
-                control =   GetControl(control, "UnlockedAccept"),
-                text =      SI_DIALOG_ACCEPT,
-                keybind =   "DIALOG_PRIMARY",
-                callback =  function(dialogControl)
-                                AssignCampaignToPlayer(dialogControl.timeLockedDialog:GetData().id, CAMPAIGN_REASSIGN_TYPE_GUEST)
-                            end,
-            },
-        
-            [2] =
-            {
-                control =   GetControl(control, "UnlockedExit"),
-                text =      SI_DIALOG_EXIT,
-                keybind =   "DIALOG_NEGATIVE",
-
-            },
-
-            [3] =
-            {
-                control =   GetControl(control, "LockedExit"),
-                text =      SI_DIALOG_EXIT,
-                keybind =   "DIALOG_NEGATIVE",
-            },
-        },
-    }
-    ,GetCampaignGuestCooldown)
-
-    control.timeLockedDialog = timeLockedDialog
-    timeLockedDialog.title = GetControl(control, "Title")
-    timeLockedDialog.lockedMessage = GetControl(control, "LockedMessage")
-    timeLockedDialog.unlockedQuery = GetControl(control, "UnlockedQuery")
-    
-    timeLockedDialog.bulletList = ZO_BulletList:New(GetControl(control, "UnlockedBulletList"))
-    timeLockedDialog.bulletList:AddLine(GetString(SI_SELECT_GUEST_CAMPAIGN_BULLET1))
-    timeLockedDialog.bulletList:AddLine(GetString(SI_SELECT_GUEST_CAMPAIGN_BULLET2))
-    timeLockedDialog.bulletList:AddLine(GetString(SI_SELECT_GUEST_CAMPAIGN_BULLET3))
-
-    return timeLockedDialog
+function ZO_CampaignDialogBase:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
-function SelectGuestCampaign:SetupUnlocked(data)
-    self.title:SetText(GetString(SI_SELECT_GUEST_CAMPAIGN_DIALOG_TITLE))
-    self.unlockedQuery:SetText(zo_strformat(SI_SELECT_GUEST_CAMPAIGN_QUERY, GetCampaignName(data.id)))
+do
+    local function DefaultUnlockedCooldownFunction()
+        return 0
+    end
+
+    function ZO_CampaignDialogBase:Initialize(dialogName, dialogInfo, lockedCooldownFunction, unlockedCooldownFunction)
+        self.control = dialogInfo.customControl
+        self.locked = GetControl(self.control, "Locked")
+        self.unlocked = GetControl(self.control, "Unlocked")
+        self.dialogName = dialogName
+
+        self.lockedCooldownFunction = lockedCooldownFunction
+        self.unlockedCooldownFunction = unlockedCooldownFunction or DefaultUnlockedCooldownFunction
+
+        local function SetupTimeLockedDialog(dialog, data)
+            self:InitializeDialog(data)
+        end
+
+        local function UpdateTimeLockedDialog(dialog, time)
+            self:RefreshTimerState()
+        end
+
+        dialogInfo.setup = SetupTimeLockedDialog
+        dialogInfo.updateFn = UpdateTimeLockedDialog
+
+        ZO_Dialogs_RegisterCustomDialog(dialogName, dialogInfo)
+    end
 end
 
-function SelectGuestCampaign:SetupLocked(data)
-    self.title:SetText(GetString(SI_SELECT_GUEST_CAMPAIGN_LOCKED_DIALOG_TITLE))
-    local timeUntilUnlock = ZO_FormatTime(self:GetSecondsUntilUnlocked(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING)
-    self.lockedMessage:SetText(zo_strformat(SI_SELECT_GUEST_CAMPAIGN_LOCKED_MESSAGE, timeUntilUnlock))
+function ZO_CampaignDialogBase:GetData()
+    return self.data
 end
 
---Global XML
-
-function ZO_SelectGuestCampaignDialog_OnInitialized(self)
-    SELECT_GUEST_CAMPAIGN_DIALOG = SelectGuestCampaign:New(self)
+function ZO_CampaignDialogBase:GetControl()
+    return self.control
 end
 
+function ZO_CampaignDialogBase:Show(data)
+    ZO_Dialogs_ShowDialog(self.dialogName, data)
+end
+
+function ZO_CampaignDialogBase:Hide()
+    self.data = nil
+    ZO_Dialogs_ReleaseDialogOnButtonPress(self.dialogName)
+end
+
+function ZO_CampaignDialogBase:InitializeDialog(data)
+    self.data = data
+
+    self:RefreshTimerState()
+end
+
+function ZO_CampaignDialogBase:RefreshTimerState()
+    local lastLockedCooldownSeconds = self.lockedCooldownSeconds
+    local lastUnlockedCooldownSeconds = self.unlockedCooldownSeconds
+    local wasLocked = self.isLocked
+
+    self.lockedCooldownSeconds = self.lockedCooldownFunction()
+    self.unlockedCooldownSeconds = self.unlockedCooldownFunction()
+    self.isLocked = self.lockedCooldownSeconds > 0
+
+    if self.isLocked ~= wasLocked then
+        self:SetupDialog()
+    elseif self.isLocked and self.lockedCooldownSeconds ~= lastLockedCooldownSeconds then
+        self:SetupLockedTimer(self.data)
+    elseif not self.isLocked and self.unlockedCooldownSeconds ~= lastUnlockedCooldownSeconds then
+        self:SetupUnlockedTimer(self.data)
+    end
+end
+
+function ZO_CampaignDialogBase:IsLocked()
+    return self.isLocked
+end
+
+function ZO_CampaignDialogBase:GetLockedCooldownSeconds()
+    return self.lockedCooldownSeconds
+end
+
+function ZO_CampaignDialogBase:GetUnlockedCooldownSeconds()
+    return self.unlockedCooldownSeconds
+end
+
+function ZO_CampaignDialogBase:SetupDialog()
+    local isLocked = self:IsLocked()
+    if isLocked then
+        self:SetupLockedDialog(self.data)
+    else
+        self:SetupUnlockedDialog(self.data)
+    end
+
+    self.locked:SetHidden(not isLocked)
+    self.unlocked:SetHidden(isLocked)
+end
+
+function ZO_CampaignDialogBase:SetupUnlockedDialog(data)
+    -- override me
+end
+
+function ZO_CampaignDialogBase:SetupUnlockedTimer(data)
+    -- override me
+end
+
+function ZO_CampaignDialogBase:SetupLockedDialog(data)
+    -- override me
+end
+
+function ZO_CampaignDialogBase:SetupLockedTimer(data)
+    -- override me
+end
 
 --Select Home Campaign Dialog
 -----------------------------
 
-local SelectHomeCampaign = ZO_TimeLockedDialog:Subclass()
+local SelectHomeCampaign = ZO_CampaignDialogBase:Subclass()
 
-function SelectHomeCampaign:New(control)
-    local timeLockedDialog = ZO_TimeLockedDialog.New(self, "SELECT_HOME_CAMPAIGN",
+function SelectHomeCampaign:New(...)
+    return ZO_CampaignDialogBase.New(self, ...)
+end
+
+-- Override, and also change function params too
+function SelectHomeCampaign:Initialize(control)
+    local dialogInfo =
     {
         customControl = control,
 
@@ -97,7 +150,7 @@ function SelectHomeCampaign:New(control)
                 callback =  function(dialogControl)
                                 local timeLockedDialog = dialogControl.timeLockedDialog
                                 local forceImmediate = GetAssignedCampaignId() == 0
-                                if(timeLockedDialog.radioButtonGroup:GetClickedButton() == timeLockedDialog.setNowButton or forceImmediate) then
+                                if timeLockedDialog.radioButtonGroup:GetClickedButton() == timeLockedDialog.setNowButton or forceImmediate then
                                     AssignCampaignToPlayer(timeLockedDialog:GetData().id, CAMPAIGN_REASSIGN_TYPE_IMMEDIATE)
                                 else
                                     AssignCampaignToPlayer(timeLockedDialog:GetData().id, CAMPAIGN_REASSIGN_TYPE_ON_END)
@@ -121,40 +174,84 @@ function SelectHomeCampaign:New(control)
             },
         }
     }
-    ,GetCampaignReassignCooldown)
+    local function GetDialogCampaignEndCooldown()
+        local selectionIndex = self:GetData().selectionIndex
+        local _, secondsUntilCampaignEnd = GetSelectionCampaignTimes(selectionIndex)
+        return secondsUntilCampaignEnd
+    end
 
-    control.timeLockedDialog = timeLockedDialog
-    timeLockedDialog.title = GetControl(control, "Title")
-    timeLockedDialog.lockedMessage = GetControl(control, "LockedMessage")
-    timeLockedDialog.unlockedQuery = GetControl(control, "UnlockedQuery")
-    timeLockedDialog.setNowButton = GetControl(control, "UnlockedSetNow")
-    timeLockedDialog.setNowLabel = GetControl(control, "UnlockedSetNowLabel")
-    timeLockedDialog.setOnEndButton = GetControl(control, "UnlockedSetOnEnd")
-    timeLockedDialog.setOnEndLabel = GetControl(control, "UnlockedSetOnEndLabel")
-    timeLockedDialog.free = GetControl(control, "UnlockedCostFree")
-    timeLockedDialog.alliancePoints = GetControl(control, "UnlockedCostAlliancePoints")
-    timeLockedDialog.balance = GetControl(timeLockedDialog.alliancePoints, "Balance")
-    timeLockedDialog.price = GetControl(timeLockedDialog.alliancePoints, "Price")
-    timeLockedDialog.accept = GetControl(control, "UnlockedAccept")
+    ZO_CampaignDialogBase.Initialize(self, "SELECT_HOME_CAMPAIGN", dialogInfo, GetCampaignReassignCooldown, GetDialogCampaignEndCooldown)
 
-    timeLockedDialog.radioButtonGroup = ZO_RadioButtonGroup:New()    
-    timeLockedDialog.radioButtonGroup:Add(timeLockedDialog.setNowButton)
-    timeLockedDialog.radioButtonGroup:Add(timeLockedDialog.setOnEndButton)
+    control.timeLockedDialog = self
+    self.title = GetControl(control, "Title")
+    self.lockedMessage = GetControl(control, "LockedMessage")
+    self.unlockedQuery = GetControl(control, "UnlockedQuery")
+    self.allianceLockWarningLabel = GetControl(control, "UnlockedAllianceLockWarning")
+    self.setNowButton = GetControl(control, "UnlockedSetNow")
+    self.setNowLabel = GetControl(control, "UnlockedSetNowLabel")
+    self.setOnEndButton = GetControl(control, "UnlockedSetOnEnd")
+    self.setOnEndLabel = GetControl(control, "UnlockedSetOnEndLabel")
+    self.cost = GetControl(control, "UnlockedCost")
+    self.free = GetControl(control, "UnlockedCostFree")
+    self.alliancePoints = GetControl(control, "UnlockedCostAlliancePoints")
+    self.balance = GetControl(self.alliancePoints, "Balance")
+    self.price = GetControl(self.alliancePoints, "Price")
+    self.accept = GetControl(control, "UnlockedAccept")
 
-    control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, function() timeLockedDialog:SetupCost() end)
+    self.radioButtonGroup = ZO_RadioButtonGroup:New()
+    self.radioButtonGroup:Add(self.setNowButton)
+    self.radioButtonGroup:Add(self.setOnEndButton)
 
-    return timeLockedDialog
+    control:RegisterForEvent(EVENT_ALLIANCE_POINT_UPDATE, function() self:SetupCost() end)
 end
 
-function SelectHomeCampaign:SetupUnlocked(data)
-    self.title:SetText(GetString(SI_SELECT_HOME_CAMPAIGN_DIALOG_TITLE))
-    self.unlockedQuery:SetText(zo_strformat(SI_SELECT_HOME_CAMPAIGN_QUERY, GetCampaignName(data.id)))
+-- Override
+function SelectHomeCampaign:InitializeDialog(data)
+    ZO_CampaignDialogBase.InitializeDialog(self, data)
     self.radioButtonGroup:SetClickedButton(self.setNowButton)
 end
 
-function SelectHomeCampaign:SetupLocked(data)
+-- Override
+function SelectHomeCampaign:SetupUnlockedDialog(data)
+    self.title:SetText(GetString(SI_SELECT_HOME_CAMPAIGN_DIALOG_TITLE))
+
+    local campaignId = data.id
+    local campaignName = ZO_SELECTED_TEXT:Colorize(data.name)
+    local initialCooldownString = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(GetCampaignReassignInitialCooldown(), TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
+    self.unlockedQuery:SetText(zo_strformat(SI_SELECT_HOME_CAMPAIGN_QUERY, campaignName, initialCooldownString))
+
+    self:SetupUnlockedTimer(data)
+    self:SetupCost()
+end
+
+-- Override
+function SelectHomeCampaign:SetupUnlockedTimer(data)
+    if ZO_CampaignBrowserDialogs_ShouldShowAllianceLockWarning(data) then
+        local playerAlliance = GetUnitAlliance("player")
+        local allianceString = ZO_SELECTED_TEXT:Colorize(ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(playerAlliance))
+        local campaignEndCooldownString = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(self:GetUnlockedCooldownSeconds(), TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
+        self.allianceLockWarningLabel:SetHidden(false)
+        self.allianceLockWarningLabel:SetText(zo_strformat(SI_ABOUT_TO_ALLIANCE_LOCK_CAMPAIGN_WARNING, allianceString, campaignEndCooldownString))
+
+        self.setNowButton:ClearAnchors()
+        self.setNowButton:SetAnchor(TOPLEFT, self.allianceLockWarningLabel, BOTTOMLEFT, 20, 15)
+    else
+        self.allianceLockWarningLabel:SetHidden(true)
+
+        self.setNowButton:ClearAnchors()
+        self.setNowButton:SetAnchor(TOPLEFT, self.unlockedQuery, BOTTOMLEFT, 20, 15)
+    end
+end
+
+-- Override
+function SelectHomeCampaign:SetupLockedDialog(data)
     self.title:SetText(GetString(SI_SELECT_HOME_CAMPAIGN_LOCKED_DIALOG_TITLE))
-    local timeUntilUnlock = ZO_FormatTime(self:GetSecondsUntilUnlocked(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING)
+    self:SetupLockedTimer(data)
+end
+
+-- Override
+function SelectHomeCampaign:SetupLockedTimer(data)
+    local timeUntilUnlock = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(self:GetLockedCooldownSeconds(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
     self.lockedMessage:SetText(zo_strformat(SI_SELECT_HOME_CAMPAIGN_LOCKED_MESSAGE, timeUntilUnlock))
 end
 
@@ -164,7 +261,7 @@ function SelectHomeCampaign:SetupCost()
 
     local nowCost, endCost = ZO_SelectHomeCampaign_GetCost()
 
-    if(now) then
+    if now then
         cost = nowCost
         free = nowCost == 0
     else
@@ -182,14 +279,24 @@ function SelectHomeCampaign:SetupCost()
     self.setOnEndButton:SetHidden(hideJoinOptions)
     self.setOnEndLabel:SetHidden(hideJoinOptions)
 
-    if(not free) then
+    if hideJoinOptions then
+        -- anchor in place of buttons
+        self.cost:ClearAnchors()
+        self.cost:SetAnchor(TOPLEFT, self.setNowButton, TOPLEFT, -20, 0)
+    else
+        -- anchor below buttons
+        self.cost:ClearAnchors()
+        self.cost:SetAnchor(TOPLEFT, self.setOnEndButton, BOTTOMLEFT, -20, 15)
+    end
+
+    if not free then
         local numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
         ZO_CurrencyControl_SetSimpleCurrency(self.balance, CURT_ALLIANCE_POINTS, numAlliancePoints, CURRENCY_OPTIONS)
 
         local notEnough = cost > numAlliancePoints
         ZO_CurrencyControl_SetSimpleCurrency(self.price, CURT_ALLIANCE_POINTS, cost, CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, notEnough)
 
-        if(notEnough) then
+        if notEnough then
             self.accept:SetState(BSTATE_DISABLED, true)
         end
     end
@@ -217,77 +324,13 @@ function ZO_SelectHomeCampaignDialog_OnInitialized(self)
     SELECT_HOME_CAMPAIGN_DIALOG = SelectHomeCampaign:New(self)
 end
 
---Abandon Guest Campaign
--------------------------
-
-local AbandonGuestCampaign = ZO_TimeLockedDialog:Subclass()
-
-function AbandonGuestCampaign:New(control)
-    local timeLockedDialog = ZO_TimeLockedDialog.New(self, "ABANDON_GUEST_CAMPAIGN", 
-    {
-        customControl = control,
-        buttons =
-        {
-            [1] =
-            {
-                control =   GetControl(control, "UnlockedAccept"),
-                text =      SI_DIALOG_ACCEPT,
-                keybind =   "DIALOG_PRIMARY",
-                callback =  function(dialogControl)
-                                UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_GUEST)
-                            end,
-            },
-        
-            [2] =
-            {
-                control =   GetControl(control, "UnlockedExit"),
-                text =      SI_DIALOG_EXIT,
-                keybind =   "DIALOG_NEGATIVE",
-
-            },
-
-            [3] =
-            {
-                control =   GetControl(control, "LockedExit"),
-                text =      SI_DIALOG_EXIT,
-                keybind =   "DIALOG_NEGATIVE",
-            },
-        },
-    }
-    ,GetCampaignGuestCooldown)
-
-    control.timeLockedDialog = timeLockedDialog
-    timeLockedDialog.title = GetControl(control, "Title")
-    timeLockedDialog.lockedMessage = GetControl(control, "LockedMessage")
-    timeLockedDialog.unlockedQuery = GetControl(control, "UnlockedQuery")
-
-    return timeLockedDialog
-end
-
-function AbandonGuestCampaign:SetupUnlocked(data)
-    self.title:SetText(GetString(SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN))
-    self.unlockedQuery:SetText(zo_strformat(SI_ABANDON_GUEST_CAMPAIGN_QUERY, GetCampaignName(data.id)))
-end
-
-function AbandonGuestCampaign:SetupLocked(data)
-    self.title:SetText(GetString(SI_SELECT_GUEST_CAMPAIGN_LOCKED_DIALOG_TITLE))
-    local timeUntilUnlock = ZO_FormatTime(self:GetSecondsUntilUnlocked(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING)
-    self.lockedMessage:SetText(zo_strformat(SI_ABANDON_GUEST_CAMPAIGN_LOCKED_MESSAGE, timeUntilUnlock))
-end
-
---Global XML
-
-function ZO_AbandonGuestCampaignDialog_OnInitialized(self)
-    ABANDON_GUEST_CAMPAIGN_DIALOG = AbandonGuestCampaign:New(self)
-end
-
 --Abandon Home Campaign Dialog
 -------------------------------
 
-local AbandonHomeCampaign = ZO_TimeLockedDialog:Subclass()
+local AbandonHomeCampaign = ZO_CampaignDialogBase:Subclass()
 
 function AbandonHomeCampaign:New(control)
-    local timeLockedDialog = ZO_TimeLockedDialog.New(self, "ABANDON_HOME_CAMPAIGN",
+    local timeLockedDialog = ZO_CampaignDialogBase.New(self, "ABANDON_HOME_CAMPAIGN",
     {
         customControl = control,
         buttons =
@@ -299,7 +342,7 @@ function AbandonHomeCampaign:New(control)
                 keybind =   "DIALOG_PRIMARY",
                 callback =  function(dialogControl)
                                 local timeLockedDialog = dialogControl.timeLockedDialog
-                                if(timeLockedDialog.radioButtonGroup:GetClickedButton() == timeLockedDialog.useAlliancePointsButton) then
+                                if timeLockedDialog.radioButtonGroup:GetClickedButton() == timeLockedDialog.useAlliancePointsButton then
                                     UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_HOME_USE_ALLIANCE_POINTS)
                                 else
                                     UnassignCampaignForPlayer(CAMPAIGN_UNASSIGN_TYPE_HOME_USE_GOLD)
@@ -329,9 +372,9 @@ function AbandonHomeCampaign:New(control)
     timeLockedDialog.title = GetControl(control, "Title")
     timeLockedDialog.lockedMessage = GetControl(control, "LockedMessage")
     timeLockedDialog.unlockedQuery = GetControl(control, "UnlockedQuery")
-    timeLockedDialog.useAlliancePointsButton = GetControl(control, "UnlockedUseAlliancePointsButton")
+    timeLockedDialog.useAlliancePointsButton = GetControl(control, "UnlockedUseAlliancePoints")
     timeLockedDialog.useAlliancePointsLabel = GetControl(control, "UnlockedUseAlliancePointsLabel")
-    timeLockedDialog.useGoldButton = GetControl(control, "UnlockedUseGoldButton")
+    timeLockedDialog.useGoldButton = GetControl(control, "UnlockedUseGold")
     timeLockedDialog.useGoldLabel = GetControl(control, "UnlockedUseGoldLabel")
     timeLockedDialog.free = GetControl(control, "UnlockedCostFree")
     timeLockedDialog.alliancePoints = GetControl(control, "UnlockedCostAlliancePoints")
@@ -339,7 +382,7 @@ function AbandonHomeCampaign:New(control)
     timeLockedDialog.price = GetControl(timeLockedDialog.alliancePoints, "Price")
     timeLockedDialog.accept = GetControl(control, "UnlockedAccept")
 
-    timeLockedDialog.radioButtonGroup = ZO_RadioButtonGroup:New()    
+    timeLockedDialog.radioButtonGroup = ZO_RadioButtonGroup:New()
     timeLockedDialog.radioButtonGroup:Add(timeLockedDialog.useAlliancePointsButton)
     timeLockedDialog.radioButtonGroup:Add(timeLockedDialog.useGoldButton)
 
@@ -349,15 +392,22 @@ function AbandonHomeCampaign:New(control)
     return timeLockedDialog
 end
 
-function AbandonHomeCampaign:SetupUnlocked(data)
+-- Override
+function AbandonHomeCampaign:SetupUnlockedDialog(data)
     self.title:SetText(GetString(SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN))
     self.unlockedQuery:SetText(zo_strformat(SI_ABANDON_HOME_CAMPAIGN_QUERY, GetCampaignName(data.id)))
     self.radioButtonGroup:SetClickedButton(self.useAlliancePointsButton)
 end
 
-function AbandonHomeCampaign:SetupLocked(data)
+-- Override
+function AbandonHomeCampaign:SetupLockedDialog(data)
     self.title:SetText(GetString(SI_SELECT_HOME_CAMPAIGN_LOCKED_DIALOG_TITLE))
-    local timeUntilUnlock = ZO_FormatTime(self:GetSecondsUntilUnlocked(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING)
+    self:SetupLockedTimer(data)
+end
+
+-- Override
+function AbandonHomeCampaign:SetupLockedTimer(data)
+    local timeUntilUnlock = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(self:GetLockedCooldownSeconds(), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
     self.lockedMessage:SetText(zo_strformat(SI_ABANDON_HOME_CAMPAIGN_LOCKED_MESSAGE, timeUntilUnlock))
 end
 
@@ -375,7 +425,7 @@ function AbandonHomeCampaign:SetupCost()
 
     local alliancePointCost, goldCost = ZO_AbandonHomeCampaign_GetCost()
 
-    if(useAlliancePoints) then
+    if useAlliancePoints then
         cost = alliancePointCost
         free = alliancePointCost == 0
     else
@@ -393,10 +443,10 @@ function AbandonHomeCampaign:SetupCost()
     self.alliancePoints:SetHidden(free)
     self.accept:SetState(BSTATE_NORMAL, false)
 
-    if(not free) then
+    if not free then
         local notEnough
 
-        if (useAlliancePoints) then
+        if useAlliancePoints then
             local numAlliancePoints = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
             ZO_CurrencyControl_SetSimpleCurrency(self.balance, CURT_ALLIANCE_POINTS, numAlliancePoints, CURRENCY_OPTIONS)
 
@@ -410,7 +460,7 @@ function AbandonHomeCampaign:SetupCost()
             ZO_CurrencyControl_SetSimpleCurrency(self.price, CURT_MONEY, cost, CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, notEnough)
         end
 
-        if(notEnough) then
+        if notEnough then
             self.accept:SetState(BSTATE_DISABLED, true)
         end
     end
@@ -428,4 +478,101 @@ end
 
 function ZO_AbandonHomeCampaignDialog_OnInitialized(self)
    ABANDON_HOME_CAMPAIGN_DIALOG = AbandonHomeCampaign:New(self)
+end
+
+-- Queue for Campaign Dialog
+
+local function SetupRadioButtonWithBasicTextTooltip(radioButtonGroup, radioButton, isButtonEnabled, anchorToControl, anchorDirection, tooltipText)
+    local function OnMouseEnter()
+        ZO_Tooltips_ShowTextTooltip(anchorToControl, anchorDirection, tooltipText)
+    end
+
+    local function OnMouseExit()
+        ZO_Tooltips_HideTextTooltip()
+    end
+
+    radioButtonGroup:SetButtonIsValidOption(radioButton, isButtonEnabled)
+    radioButton.label:SetHandler("OnMouseEnter", OnMouseEnter)
+    radioButton.label:SetHandler("OnMouseExit", OnMouseExit)
+end
+
+local function SetupRadioButtonAsEnabled(radioButtonGroup, radioButton)
+    local BUTTON_ENABLED = true
+    local NO_HANDLER = nil
+    radioButtonGroup:SetButtonIsValidOption(radioButton, BUTTON_ENABLED)
+    radioButton.label:SetHandler("OnMouseEnter", NO_HANDLER)
+    radioButton.label:SetHandler("OnMouseExit", NO_HANDLER)
+end
+
+local function CampaignQueueDialogSetup(dialog, data)
+    local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", data.campaignData.rulesetType)
+    dialog.promptLabel:SetText(zo_strformat(SI_CAMPAIGN_BROWSER_QUEUE_DIALOG_PROMPT, campaignRulesetTypeString, data.campaignData.name))
+
+    local groupQueueResult = GetExpectedGroupQueueResult()
+    if groupQueueResult ~= QUEUE_FOR_CAMPAIGN_RESULT_SUCCESS then
+        local BUTTON_DISABLED = false
+        local anchorTo = dialog.groupQueueButton.label
+        local tooltipText = GetString("SI_QUEUEFORCAMPAIGNRESPONSETYPE", groupQueueResult)
+        SetupRadioButtonWithBasicTextTooltip(dialog.radioButtonGroup, dialog.groupQueueButton, BUTTON_DISABLED, anchorTo, RIGHT, tooltipText)
+
+        dialog.radioButtonGroup:SetClickedButton(dialog.soloQueueButton)
+    else
+        SetupRadioButtonAsEnabled(dialog.radioButtonGroup, dialog.groupQueueButton)
+        dialog.radioButtonGroup:SetClickedButton(dialog.groupQueueButton)
+    end
+end
+
+function ZO_CampaignQueueDialog_OnInitialized(control)
+    -- Label
+    local promptLabel = control:GetNamedChild("Prompt")
+
+    -- Radio buttons
+    local radioButtonContainer = control:GetNamedChild("RadioButtons")
+
+    local groupQueueButton = radioButtonContainer:GetNamedChild("GroupQueue")
+    groupQueueButton.label = groupQueueButton:GetNamedChild("Label")
+    groupQueueButton.queueType = CAMPAIGN_QUEUE_TYPE_GROUP
+
+    local soloQueueButton = radioButtonContainer:GetNamedChild("SoloQueue")
+    soloQueueButton.label = soloQueueButton:GetNamedChild("Label")
+    soloQueueButton.queueType = CAMPAIGN_QUEUE_TYPE_INDIVIDUAL
+
+    local radioButtonGroup = ZO_RadioButtonGroup:New()
+    radioButtonGroup:Add(soloQueueButton)
+    radioButtonGroup:Add(groupQueueButton)
+
+    control.promptLabel = promptLabel
+    control.radioButtonContainer = radioButtonContainer
+    control.radioButtonGroup = radioButtonGroup
+    control.groupQueueButton = groupQueueButton
+    control.soloQueueButton = soloQueueButton
+
+    ZO_Dialogs_RegisterCustomDialog(
+        "CAMPAIGN_QUEUE",
+        {
+            customControl = control,
+            setup = CampaignQueueDialogSetup,
+            title =
+            {
+                text = SI_CAMPAIGN_BROWSER_QUEUE_DIALOG_TITLE,
+            },
+            canQueue = true,
+            buttons =
+            {
+                {
+                    control = control:GetNamedChild("Confirm"),
+                    text = SI_DIALOG_ACCEPT,
+                    callback = function(dialog)
+                        local queueType = dialog.radioButtonGroup:GetClickedButton().queueType
+                        CAMPAIGN_BROWSER_MANAGER:ContinueQueueForCampaignFlow(dialog.data.campaignData, ZO_CAMPAIGN_QUEUE_STEP_SELECT_QUEUE_TYPE, queueType)
+                    end,
+                },
+
+                {
+                    control = control:GetNamedChild("Cancel"),
+                    text = SI_DIALOG_CANCEL,
+                },
+            },
+        }
+    )
 end

@@ -399,11 +399,6 @@
                     </Controls>
                 </Control>
 
-                <Label name="$(parent)Warning" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                    <Dimensions x="450"/>
-                    <Anchor point="TOP" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOM" offsetY="45" />
-                </Label>
-
                 <Control name="$(parent)AssignableActionBar" inherits="ZO_KeyboardAssignableActionBar">
                     <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetX="-40" offsetY="30" />
                 </Control>

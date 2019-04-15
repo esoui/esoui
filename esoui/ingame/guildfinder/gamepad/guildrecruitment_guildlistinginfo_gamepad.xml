@@ -1,0 +1,106 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GuildRecruitment_GuildListingInfo_MessageText_Gamepad" font="ZoFontGamepadCondensed34" virtual="true" />
+
+        <TopLevelControl name="ZO_GuildRecruitment_GuildListingInfo_Gamepad_TopLevel" inherits="ZO_GuildHomeContentAnchor" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_GuildListingInfo_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)InfoPanel" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+
+                    <Controls>
+                        <Control name="$(parent)TopSection" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" />
+                            <Controls>
+                                <Control name="$(parent)Status" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad">
+                                    <Anchor point="TOPLEFT" />
+                                </Control>
+
+                                <Control name="$(parent)PrimaryFocus" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="TOPRIGHT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_X" />
+                                </Control>
+
+                                <Control name="$(parent)SecondaryFocus" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                </Control>
+
+                                <Control name="$(parent)Playtime" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SecondaryFocus" relativePoint="TOPRIGHT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_X" />
+                                </Control>
+
+                                <Control name="$(parent)Personalities" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SecondaryFocus" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
+                                </Control>
+
+                                <Control name="$(parent)Languages" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Personalities" relativePoint="TOPRIGHT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_X" />
+                                </Control>
+
+                                <Control name="$(parent)Roles" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad" >
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Personalities" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
+                                </Control>
+
+                                <Control name="$(parent)MinCP" inherits="ZO_GuildFinder_GuildInfo_Attribute_LeftPair_Gamepad">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Roles" relativePoint="TOPRIGHT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_X" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
+                            <Anchor point="BOTTOMRIGHT" />
+                            <OnInitialized>
+                                ZO_Scroll_Initialize_Gamepad(self)
+                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
+                            </OnInitialized>
+                            <Controls>
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <AnchorFill />
+                                </Scroll>
+
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                    <Controls>
+                                        <Label name="$(parent)HeaderMessageHeader" inherits="ZO_GuildFinder_GuildInfo_AttributeHeader_Gamepad" text="SI_GUILDMETADATAATTRIBUTE17">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                        </Label>
+                                        
+                                        <Label name="$(parent)HeaderMessage" inherits="ZO_GuildRecruitment_GuildListingInfo_MessageText_Gamepad">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessageHeader" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderMessageHeader" relativePoint="BOTTOMRIGHT" />
+                                        </Label>
+
+                                        <Label name="$(parent)ActivitiesHeader" inherits="ZO_GuildFinder_GuildInfo_AttributeHeader_Gamepad" text="SI_GUILDMETADATAATTRIBUTE5">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMRIGHT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
+                                        </Label>
+
+                                        <Label name="$(parent)Activities" inherits="ZO_GuildRecruitment_GuildListingInfo_MessageText_Gamepad">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ActivitiesHeader" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ActivitiesHeader" relativePoint="BOTTOMRIGHT" />
+                                        </Label>
+
+                                        <Label name="$(parent)RecruitmentMessageHeader" inherits="ZO_GuildFinder_GuildInfo_AttributeHeader_Gamepad" text="SI_GUILDMETADATAATTRIBUTE2">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Activities" relativePoint="BOTTOMRIGHT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
+                                        </Label>
+
+                                        <Label name="$(parent)RecruitmentMessage" inherits="ZO_GuildRecruitment_GuildListingInfo_MessageText_Gamepad">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)RecruitmentMessageHeader" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)RecruitmentMessageHeader" relativePoint="BOTTOMRIGHT" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

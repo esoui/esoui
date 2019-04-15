@@ -1,0 +1,26 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildFinder_Heraldry_Template" virtual="true">
+            <Dimensions x="86" y="128" />
+            <OnInitialized>
+                self.banner = self:GetNamedChild("Banner")
+                self.pattern = self:GetNamedChild("Pattern")
+                self.crest = self:GetNamedChild("Crest")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Banner" level="1">
+                    <TextureCoords top="0" bottom="0.7607" left="0" right="0.5098" />
+                    <AnchorFill />
+                </Texture>
+                <Texture name="$(parent)Pattern" level="2">
+                    <TextureCoords top="0" bottom="0.7607" left="0" right="0.5098" />
+                    <AnchorFill />
+                </Texture>
+                <Texture name="$(parent)Crest" level="3">
+                    <TextureCoords top="0" bottom="0.7607" left="0" right="0.5098" />
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -167,7 +167,6 @@ function ZO_LootPickup_Gamepad:InitializeHeader(title)
         data1HeaderText = GetString(SI_GAMEPAD_LOOT_INVENTORY_CAPACITY),
         data1Text = UpdateCapacityString,
     }
-    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
 --[[ Global Handlers ]]--

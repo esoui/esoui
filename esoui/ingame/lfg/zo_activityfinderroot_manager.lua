@@ -297,8 +297,6 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
 
         local activityRequiresRoles = ZO_DoesActivityTypeRequireRoles(activityType)
         local isGroupRelevant = inAGroup and not isActivityHomeShow
-        local isPlayerInAvAWorld = IsPlayerInAvAWorld()
-        local activityAvailableFromAvAWorld = isActivityAvA or isActivityBattleground
         local CONCISE_COOLDOWN_TEXT = false
 
         for _, location in ipairs(locationsByActivity) do
@@ -313,12 +311,15 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
 
             if cooldownText then
                 location:SetLockReasonText(cooldownText)
-            elseif IsActiveWorldBattleground() then
-                location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
-            elseif isActivityAvA and not isPlayerInAvAWorld then
-                location:SetLockReasonText(SI_LFG_LOCK_REASON_NOT_IN_AVA)
-            elseif not activityAvailableFromAvAWorld and isPlayerInAvAWorld then
-                location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)
+            elseif location:IsLockedByPlayerLocation() then
+                if isActivityAvA then
+                    local zoneName = GetZoneNameById(location:GetZoneId())
+                    location:SetLockReasonText(zo_strformat(SI_LFG_LOCK_REASON_AVA_WRONG_LOCATION, zoneName))
+                elseif IsActiveWorldBattleground() then
+                    location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
+                elseif IsPlayerInAvAWorld() then
+                    location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)
+                end
             elseif location:IsLockedByCollectible() then
                 local collectibleId = location:GetFirstLockingCollectible()
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)

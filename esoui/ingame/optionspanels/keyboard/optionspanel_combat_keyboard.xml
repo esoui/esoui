@@ -49,12 +49,32 @@
             </OnInitialized>
         </Control>
 
-        <!-- Begin Hud Settings -->
+        <!-- End Hud Settings -->
+
+        <!-- Begin Encounter Log Settings -->
+        
+        <Control name="Options_Combat_EncounterLogSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Combat_UltimateNumber" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_COMBAT, SI_INTERFACE_OPTIONS_ENCOUNTER_LOG)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Combat_EncounterLogAppearAnonymous" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Combat_EncounterLogSection" relativePoint="BOTTOMLEFT" offsetY="10" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_COMBAT, SETTING_TYPE_COMBAT, COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <!-- End Encounter Log Settings -->
 
         <!-- Begin SCT -->
 
         <Control name="Options_Combat_SCTSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Combat_UltimateNumber" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Combat_EncounterLogAppearAnonymous" relativePoint="BOTTOMLEFT" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_COMBAT, SI_INTERFACE_OPTIONS_SCT)
                 ZO_OptionsWindow_InitializeControl(self)
@@ -229,12 +249,20 @@
             </OnInitialized>
         </Control>
 
+        <Control name="Options_Combat_SCTShowOverHeal" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Combat_SCTIncomingPetDoTEnabled" relativePoint="BOTTOMLEFT" offsetY="4" offsetX="-20"/>
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_COMBAT, SETTING_TYPE_COMBAT, COMBAT_SETTING_SCT_SHOW_OVER_HEAL)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
         <!-- End SCT -->
         
         <!-- Begin Buff/Debuff -->
 
         <Control name="Options_Combat_BuffsSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Combat_SCTIncomingPetDoTEnabled" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="-20"/>
+            <Anchor point="TOPLEFT" relativeTo="Options_Combat_SCTShowOverHeal" relativePoint="BOTTOMLEFT" offsetY="15"/>
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_COMBAT, SI_BUFFS_OPTIONS_SECTION_TITLE)
                 ZO_OptionsWindow_InitializeControl(self)

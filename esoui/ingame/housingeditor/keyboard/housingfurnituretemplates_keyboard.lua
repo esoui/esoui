@@ -1,4 +1,10 @@
 ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT = 52
+ZO_HOUSING_FURNITURE_BROWSER_CATEGORY_LIST_WIDTH = 310
+local scrollBarOffset = 16
+-- 55 is the inset from the left side of the header to the left side of the text in ZO_IconHeader
+ZO_HOUSING_FURNITURE_BROWSER_CATEGORY_LABEL_WIDTH = ZO_HOUSING_FURNITURE_BROWSER_CATEGORY_LIST_WIDTH - 55 - scrollBarOffset
+ZO_HOUSING_FURNITURE_BROWSER_SUBCATEGORY_INDENT = 60
+ZO_HOUSING_FURNITURE_BROWSER_SUBCATEGORY_LABEL_WIDTH = ZO_HOUSING_FURNITURE_BROWSER_CATEGORY_LIST_WIDTH - ZO_HOUSING_FURNITURE_BROWSER_SUBCATEGORY_INDENT - scrollBarOffset
 
 -------------------
 -- XML Functions
@@ -63,7 +69,7 @@ function ZO_HousingFurnitureTemplates_Keyboard_OnMouseEnter(control)
         if furnitureObject.bagId and furnitureObject.slotIndex then
             ItemTooltip:SetBagItem(furnitureObject.bagId, furnitureObject.slotIndex)
         elseif furnitureObject.marketProductId then
-            ItemTooltip:SetMarketProduct(furnitureObject.marketProductId)
+            ItemTooltip:SetMarketProductListing(furnitureObject.marketProductId, furnitureObject.presentationIndex)
         elseif furnitureObject.collectibleId then
             local SHOW_NICKNAME = true
             ItemTooltip:SetCollectible(furnitureObject.collectibleId, SHOW_NICKNAME)

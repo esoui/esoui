@@ -129,16 +129,20 @@ function ZO_MarketProductData:GetSaleTimeLeftInSeconds()
     return GetMarketProductSaleTimeLeftInSeconds(self.marketProductId)
 end
 
-function ZO_MarketProductData:GetPurchaseState()
-    return GetMarketProductPurchaseState(self.marketProductId)
+function ZO_MarketProductData:GetMarketProductDisplayState()
+    return ZO_GetMarketProductDisplayState(self.marketProductId)
 end
 
 function ZO_MarketProductData:IsPurchaseLocked()
-    return self:GetPurchaseState() ~= MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
+    return self:GetMarketProductDisplayState() ~= MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED
 end
 
 function ZO_MarketProductData:CanBePurchased()
     return not (self:IsPurchaseLocked() or self:IsHouseCollectible() or self:IsPromo())
+end
+
+function ZO_MarketProductData:HasActivationRequirement()
+    return DoesMarketProductHaveActivationRequirement(self.marketProductId)
 end
 
 function ZO_MarketProductData:IsBundle()
@@ -257,10 +261,14 @@ function ZO_MarketProductData:GetMarketProductPreviewType()
         local productType = self:GetMarketProductType()
         if productType == MARKET_PRODUCT_TYPE_CROWN_CRATE then
             return ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE
-        elseif self:IsHouseCollectible() and self:GetPurchaseState() == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED then
+        elseif self:IsHouseCollectible() and self:GetMarketProductDisplayState() == MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED then
             return ZO_MARKET_PREVIEW_TYPE_HOUSE
         else
             return ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
         end
     end
+end
+
+function ZO_MarketProductData:PassesPurchasableReqList()
+    return DoesMarketProductPassPurchasableReqList(self.marketProductId)
 end

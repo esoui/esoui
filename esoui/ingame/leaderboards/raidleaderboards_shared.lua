@@ -336,9 +336,9 @@ function ZO_RaidLeaderboardsManager_Shared:UpdateRaidScore()
     end
 
     if raidInProgress or raidComplete then
-        self.currrentScoreData = GetCurrentRaidScore()
+        self.currentScoreData = GetCurrentRaidScore()
     else
-        self.currrentScoreData = GetString(SI_LEADERBOARDS_NO_CURRENT_SCORE)
+        self.currentScoreData = GetString(SI_LEADERBOARDS_NO_CURRENT_SCORE)
     end
 end
 

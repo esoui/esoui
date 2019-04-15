@@ -1,0 +1,28 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ElsweyrBackgroundShowAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_ELSWEYR_BACKGROUND_FADE_DURATION_MS" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <TopLevelControl name="ZO_ElsweyrBackground" mouseEnabled="true" tier="LOW" layer="BACKGROUND" level="1" hidden="true">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_ElsweyrBackground_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Ground" textureFile="EsoUI\Art\PregameAnimatedBackground\elsweyrGround.dds" pixelRoundingEnabled="false">
+                            <Anchor point="TOP"/>
+                            <Anchor point="BOTTOM"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

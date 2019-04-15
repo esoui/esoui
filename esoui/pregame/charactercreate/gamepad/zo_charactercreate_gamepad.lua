@@ -1,4 +1,3 @@
-local g_controlLookup = {}
 local g_randomizeAppearanceEnabled = true
 
 local CHARACTER_CREATE_GAMEPAD_DIALOG = "CHARACTER_CREATE_GAMEPAD"
@@ -556,7 +555,7 @@ function ZO_CharacterCreate_Gamepad:GetNextFocus(control)
     return control
 end
 
-function ZO_CharacterCreate_Gamepad:GetPreviousFocus(self, control)
+function ZO_CharacterCreate_Gamepad:GetPreviousFocus(control)
     if control == nil then
         return nil
     end
@@ -657,14 +656,12 @@ function ZO_CharacterCreate_Gamepad:InitializeRaceSelectors()
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local selectedAlliance = CharacterCreateGetAlliance(characterMode)
     local position = 1
-    local finalRace
 
     local races = self.characterData:GetRaceInfo()
     for i, race in ipairs(races) do
         if race.alliance == 0 or race.alliance == selectedAlliance or CanPlayAnyRaceAsAnyAlliance() then
             race.position = position
             position = position + 1
-            finalRace = race
         else
             race.position = GAMEPAD_SELECTOR_IGNORE_POSITION
         end
@@ -691,14 +688,14 @@ function ZO_CharacterCreate_Gamepad:InitializeRaceSelectors()
     end
 end
 
-local function SetValidRace()
+function ZO_CharacterCreate_Gamepad:SetValidRace()
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
-    local currentRace = CharacterCreateGetRace(characterMode)
+    local currentRaceId = CharacterCreateGetRace(characterMode)
     local currentAlliance = CharacterCreateGetAlliance(characterMode)
 
-    local race = self.characterData:GetRaceForRaceDef(currentRace)
-    if race then
-        if race.alliance == 0 or race.alliance == currentAlliance or CanPlayAnyRaceAsAnyAlliance() then
+    local currentRace = self.characterData:GetRaceForRaceDef(currentRaceId)
+    if currentRace then
+        if currentRace.alliance == 0 or currentRace.alliance == currentAlliance or CanPlayAnyRaceAsAnyAlliance() then
             return
         end
     end
@@ -960,23 +957,35 @@ end
 
 function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
     local classes = self.characterData:GetClassInfo()
+    local numClasses = #classes
     local layoutTable
     -- TODO: Create these controls dynamically
-    if #classes <= 4 then
+    if numClasses <= 4 then
+        -- 4 is the default number of classes and they are laid out
+        -- so that the fourth class is i nthe middle column
         layoutTable = {
             ZO_CharacterCreate_GamepadClassColumn11,
             ZO_CharacterCreate_GamepadClassColumn21,
             ZO_CharacterCreate_GamepadClassColumn31,
             ZO_CharacterCreate_GamepadClassColumn22,
         }
-    else -- assuming 5 classes
+    elseif numClasses <= 6 then
+        -- if we have 5 or 6 classes, then we can lay them out normally
+        -- from left to right without worrying about centering one
         layoutTable = {
             ZO_CharacterCreate_GamepadClassColumn11,
             ZO_CharacterCreate_GamepadClassColumn21,
             ZO_CharacterCreate_GamepadClassColumn31,
             ZO_CharacterCreate_GamepadClassColumn12,
             ZO_CharacterCreate_GamepadClassColumn22,
+            ZO_CharacterCreate_GamepadClassColumn32,
         }
+    else -- numClasses > CHARACTER_CREATE_MAX_SUPPORTED_CLASSES
+        -- we aren't dynamically creating controls and we are out of controls
+        -- more controls will have to be added to the XML and additional logic to correctly lay them out
+        -- this assert is also duplicated in the keyboard UI so that non-console builds will catch the issue as well
+        local errorString = string.format("The gamepad UI currently only supports up to %d classes, but there are currently %d classes used", CHARACTER_CREATE_MAX_SUPPORTED_CLASSES, numClasses)
+        assert(false, errorString)
     end
 
     -- Hide buttons
@@ -992,7 +1001,7 @@ function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
         AddClassSelectionDataToSelector(classButton, class)
     end
 
-    SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadClass, #classes)
+    SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadClass, numClasses)
 end
 
 local function SetRandomizeAppearanceEnabled(enabled)
@@ -1221,7 +1230,7 @@ function ZO_CharacterCreate_Gamepad:ContainerOnUpdate()
     if self.focusControl and self.focusControl.disableFocusMovementController then
         -- Just do focus update
         if self.focusControl and self.focusControl.FocusUpdate then
-            self.focusControl:FocusUpdate(moveFocus)
+            self.focusControl:FocusUpdate()
         end
         return
     end
@@ -1389,7 +1398,7 @@ function ZO_CharacterCreate_Gamepad_OnSelectorPressed(button)
                             if newButton then
                                 GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(newButton.defId)
                             else
-                                SetValidRace()
+                                GAMEPAD_CHARACTER_CREATE_MANAGER:SetValidRace()
                             end
 
                             GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()

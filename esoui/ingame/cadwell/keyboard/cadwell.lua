@@ -112,7 +112,7 @@ function ZO_CadwellManager:RefreshList()
         end
 
         if numZones > 0 then
-            local parent = self.navigationTree:AddNode("ZO_IconHeader", progressionLevel, nil, SOUNDS.CADWELL_BLADE_SELECTED)
+            local parent = self.navigationTree:AddNode("ZO_IconHeader", progressionLevel)
 
             for zoneIndex = 1, numZones do
                 local zoneName, zoneDescription, zoneOrder = GetCadwellZoneInfo(progressionLevel, zoneIndex)
@@ -140,7 +140,7 @@ function ZO_CadwellManager:RefreshList()
     for i = 1, #zones do
         local zoneInfo = zones[i]
         local parent = zoneInfo.parent
-        self.navigationTree:AddNode("ZO_CadwellNavigationEntry", zoneInfo, parent, SOUNDS.CADWELL_ITEM_SELECTED)
+        self.navigationTree:AddNode("ZO_CadwellNavigationEntry", zoneInfo, parent)
     end
 
     self.navigationTree:Commit()

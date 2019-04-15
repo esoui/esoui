@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_GuildListing_Gamepad_Header_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_INDENT_X" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Backdrop name="ZO_GuildRecruitment_GuildListing_Gamepad_Highlight_Template" centerColor="00000000" virtual="true" />
+
+        <TopLevelControl name="ZO_GuildRecruitment_GuildListing_Gamepad_TopLevel" inherits="ZO_GuildHomeContentAnchor" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_GuildListing_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)InfoPanel" inherits="ZO_GridScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

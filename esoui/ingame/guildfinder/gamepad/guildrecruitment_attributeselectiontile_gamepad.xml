@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_AttributeSelectionTile_Gamepad_Control" inherits="ZO_ActivationTile_Control ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_ENTRY_WIDTH" y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_ENTRY_HEIGHT" />
+
+            <OnInitialized>
+                ZO_GuildRecruitment_AttributeSelectionTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" override="true" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_INDENT_X" />
+                </Label>
+
+                <Backdrop name="$(parent)SelectorBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" >
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_ENTRY_WIDTH" y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_HEIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="-ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_INDENT_X" />
+                </Backdrop>
+
+                <Control name="$(parent)ComboBox" inherits="ZO_ComboBox_Gamepad">
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_WIDTH" y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_TEXT_HEIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SelectorBox" relativePoint="TOPLEFT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_INDENT_X" offsetY="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_INDENT_Y"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_StatusSelectionTile_Gamepad_Control"  inherits="ZO_GuildRecruitment_AttributeSelectionTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_LONG_ENTRY_WIDTH" />
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_StarTimeSelectionTile_Gamepad_Control"  inherits="ZO_GuildRecruitment_AttributeSelectionTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_START_TIME_COMBOBOX_ENTRY_WIDTH" />
+            <Controls>
+                <Label name="$(parent)Dash" override="true" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad" text="SI_GUILD_RECRUITMENT_TIME_ENTRIES_SEPARATOR">
+                    <Dimensions y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_TEXT_HEIGHT" />
+                    <Anchor point="LEFT" relativeTo="$(parent)SelectorBox" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_EndTimeSelectionTile_Gamepad_Control"  inherits="ZO_GuildRecruitment_AttributeSelectionTile_Gamepad_Control" virtual="true" />
+    </Controls>
+</GuiXml>

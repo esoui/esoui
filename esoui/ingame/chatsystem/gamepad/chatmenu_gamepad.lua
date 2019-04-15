@@ -276,6 +276,38 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
             sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
 
+        -- Open Guild Link (super special keybind)
+        {
+            name = GetString(SI_GAMEPAD_GUILD_LINK_KEYBIND),
+
+            keybind = "UI_SHORTCUT_SECONDARY",
+
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+
+            callback = function()
+                local targetData = self.list:GetTargetData()
+                if targetData.data.links then
+                    local currentLink = targetData.data.links[self.currentLinkIndex]
+                    if currentLink then
+                        local text, color, linkType, guildId = ZO_LinkHandler_ParseLink(currentLink.link)
+                        GUILD_BROWSER_GUILD_INFO_GAMEPAD:ShowWithGuild(guildId)
+                    end
+                end
+            end,
+
+            visible = function()
+                local targetData = self.list:GetTargetData()
+                if targetData.data.links then
+                    local currentLink = targetData.data.links[self.currentLinkIndex]
+                    if currentLink then
+                        return currentLink.linkType == GUILD_LINK_TYPE
+                    end
+                end
+                return false
+            end
+        },
+
+        -- cycle tooltip
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
 
@@ -290,6 +322,7 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
                     self.currentLinkIndex = 1
                 end
                 self:RefreshTooltip(targetData)
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.chatEntryListKeybindDescriptor)
             end,
 
             visible = LinkShouldersEnabled,
@@ -448,15 +481,9 @@ do
             local links
             --Only chat channel messages will have raw text, because they're the only ones that could have links in them
             if rawMessageText then
-                for link in zo_strgmatch(rawMessageText, LINK_GMATCH_PATTERN) do
-                    local linkType = zo_strmatch(link, LINK_TYPE_MATCH_PATTERN)
-                    if linkType == ACHIEVEMENT_LINK_TYPE or linkType == ITEM_LINK_TYPE or linkType == COLLECTIBLE_LINK_TYPE then
-                        if not links then
-                            links = {}
-                        end
-                        table.insert(links, { linkType = linkType, link = link })
-                    end
-                end
+                links = {}
+                ZO_ExtractLinksFromText(rawMessageText, ZO_VALID_LINK_TYPES_CHAT, links)
+                links = #links > 0 and links or nil
             end
 
             local messageEntry = ZO_GamepadEntryData:New(message)
@@ -468,7 +495,7 @@ do
                 category = category,
                 targetChannel = targetChannel,
                 rawMessageText = rawMessageText,
-                links = links
+                links = links,
             }
 
             self.nextMessageId = self.nextMessageId + 1
@@ -593,6 +620,8 @@ function ZO_ChatMenu_Gamepad:RefreshTooltip(targetData)
                 GAMEPAD_TOOLTIPS:LayoutAchievementFromLink(GAMEPAD_RIGHT_TOOLTIP, link)
             elseif linkType == ITEM_LINK_TYPE then
                 GAMEPAD_TOOLTIPS:LayoutItem(GAMEPAD_RIGHT_TOOLTIP, link)
+            elseif linkType == GUILD_LINK_TYPE then
+                GAMEPAD_TOOLTIPS:LayoutGuildLink(GAMEPAD_RIGHT_TOOLTIP, link)
             end
 
             return

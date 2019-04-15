@@ -173,9 +173,11 @@ function ZO_DailyLoginRewards_Gamepad:Activate()
         end
     end
 
-    local selectionData = previewData or self.defaultSelectionData 
+    local selectionData = previewData or self.defaultSelectionData
     if selectionData then
-        self.gridListPanelList:ScrollDataToCenter(selectionData)
+        local NO_CALLBACK = nil
+        local ANIMATE_INSTANTLY = true
+        self.gridListPanelList:ScrollDataToCenter(selectionData, NO_CALLBACK, ANIMATE_INSTANTLY)
     end
     self.exitScreenByBackingOutOfPreviewIndex = 0
 end
@@ -190,7 +192,9 @@ function ZO_DailyLoginRewards_Gamepad:CleanDirty()
     ZO_DailyLoginRewards_Base.CleanDirty(self)
 
     if self.gridListPanelList:IsActive() and self.defaultSelectionData then
-        self.gridListPanelList:ScrollDataToCenter(self.defaultSelectionData)
+        local NO_CALLBACK = nil
+        local ANIMATE_INSTANTLY = true
+        self.gridListPanelList:ScrollDataToCenter(self.defaultSelectionData, NO_CALLBACK, ANIMATE_INSTANTLY)
     end
 end
 

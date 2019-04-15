@@ -511,7 +511,12 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true">
+        <Control name="ZO_Gamepad_Dropdown_FullWidth_Template" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>
+        </Control>
+
+        <Control name="ZO_Gamepad_Dropdown_Item_FullWidth" inherits="ZO_Gamepad_Dropdown_FullWidth_Template" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
 
@@ -519,16 +524,14 @@
                     return self.dropdown:GetHeight()
                 end
             </OnInitialized>
-            <Anchor point="TOPLEFT"/>
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>
             <Controls>
                 <Control name="$(parent)Dropdown" inherits="ZO_ComboBox_Gamepad">
-                    <Anchor point="TOPLEFT"/>
-                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                 </Control>
             </Controls>
         </Control>
-
+        
         <Control name="ZO_Gamepad_Dropdown_Item_Indented" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -540,6 +543,22 @@
             <Controls>
                 <Control name="$(parent)Dropdown" inherits="ZO_ComboBox_Gamepad">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Gamepad_MultiSelection_Dropdown_Item_FullWidth" inherits="ZO_Gamepad_Dropdown_FullWidth_Template" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+
+                self.GetHeight = function()
+                    return self.dropdown:GetHeight()
+                end
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_MultiSelection_ComboBox_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                 </Control>
             </Controls>

@@ -71,36 +71,25 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)NoInformationWarning" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
-                    <Controls>
-                        <Label name="$(parent)Message" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" text="SI_GAMEPAD_CAMPAIGN_BROWSER_NO_INFORMATION">
-                            <Anchor point="LEFT"/>
-                            <Anchor point="RIGHT"/>
-                        </Label>
-                    </Controls>
-                </Control>
-                
                 <Control name="$(parent)CampaignInfo" inherits="ZO_CampaignBrowserContentAnchor" hidden="true">
                     <Controls>
                         <Control name="$(parent)Rules" resizeToFitDescendents="true">
+                            <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />
                             <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING_WIDE"/>
                             <Controls>
-                                <Label name="$(parent)QueueMessage" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED" horizontalAlignment="LEFT" hidden="true">
+                                <Label name="$(parent)StateMessage" inherits="ZO_AvALabelCopyTemplate" horizontalAlignment="LEFT" hidden="true">
                                     <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
                                 </Label>
 
-                                <Label name="$(parent)GroupQueueMessage" inherits="ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED" horizontalAlignment="LEFT" hidden="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)QueueMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="RIGHT" offsetX="-32" constrains="X"/>
-                                </Label>
-                                
                                 <Label name="$(parent)RulesContent" inherits="ZO_AvALabelCopyTemplate" horizontalAlignment="LEFT">
-                                    <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)GroupQueueMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)StateMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)StateMessage" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
                                 </Label>
 
                                 <Label name="$(parent)Header" text="SI_GAMEPAD_CAMPAIGN_BROWSER_SERVER_POPULATION" inherits="ZO_AvALabelTitleTemplate">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)RulesContent" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING_WIDE"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RulesContent" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING_WIDE"/>
                                 </Label>
                             </Controls>
                         </Control>

@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GuildFinder_Application_Keyboard_RowLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
+    </Controls>
+</GuiXml>

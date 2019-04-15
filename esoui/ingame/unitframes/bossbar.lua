@@ -25,10 +25,14 @@ function BossBar:Initialize(control)
         self.bossUnitTags["boss"..i] = true
     end
 
+    local function PowerUpdateHandlerFunction(unitTag, powerPoolIndex, powerType, powerPool, powerPoolMax)
+        self:OnPowerUpdate(unitTag, powerType)
+    end
+    local powerUpdateEventHandler = ZO_MostRecentPowerUpdateHandler:New("BossBar", PowerUpdateHandlerFunction)
+    powerUpdateEventHandler:AddFilterForEvent(REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH)
+    powerUpdateEventHandler:AddFilterForEvent(REGISTER_FILTER_UNIT_TAG_PREFIX, "boss")
+
     control:RegisterForEvent(EVENT_BOSSES_CHANGED, function() self:RefreshAllBosses() end)
-    control:RegisterForEvent(EVENT_POWER_UPDATE, function(_, unitTag, powerPoolIndex, powerType) self:OnPowerUpdate(unitTag, powerType) end)
-    control:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH)
-    control:AddFilterForEvent(EVENT_POWER_UPDATE, REGISTER_FILTER_UNIT_TAG_PREFIX, "boss")
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
     control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingSystem, settingId) self:OnInterfaceSettingChanged(settingSystem, settingId) end)
 

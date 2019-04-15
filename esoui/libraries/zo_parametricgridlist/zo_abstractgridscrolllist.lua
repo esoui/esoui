@@ -139,16 +139,27 @@ function ZO_AbstractGridScrollList:GetControlFromData(data)
     return ZO_ScrollList_GetDataControl(self.list, data)
 end
 
-do
-    local ANIMATE_INSTANTLY = true
-
-    function ZO_AbstractGridScrollList:ScrollDataToCenter(data, onScrollCompleteCallback)
-        local dataIndex = ZO_ScrollList_GetDataIndex(self.list, data.dataEntry)
-        if internalassert(dataIndex ~= nil) then
-            ZO_ScrollList_SelectData(self.list, data)
-            ZO_ScrollList_ScrollDataToCenter(self.list, dataIndex, onScrollCompleteCallback, ANIMATE_INSTANTLY)
-        end
+function ZO_AbstractGridScrollList:ScrollDataToCenter(data, onScrollCompleteCallback, animateInstantly)
+    local dataIndex = ZO_ScrollList_GetDataIndex(self.list, data.dataEntry)
+    if internalassert(dataIndex ~= nil) then
+        ZO_ScrollList_SelectData(self.list, data)
+        ZO_ScrollList_ScrollDataToCenter(self.list, dataIndex, onScrollCompleteCallback, animateInstantly)
     end
+end
+
+function ZO_AbstractGridScrollList:SelectData(data)
+    local dataIndex = ZO_ScrollList_GetDataIndex(self.list, data.dataEntry)
+    if internalassert(dataIndex ~= nil) then
+        ZO_ScrollList_SelectData(self.list, data)
+    end
+end
+
+function ZO_AbstractGridScrollList:GetScrollValue()
+    return ZO_ScrollList_GetScrollValue(self.list)
+end
+
+function ZO_AbstractGridScrollList:ScrollToValue(value, onScrollCompleteCallback, animateInstantly)
+    ZO_ScrollList_ScrollRelative(self.list, value, onScrollCompleteCallback, animateInstantly)
 end
 
 function ZO_AbstractGridScrollList:ResetToTop()

@@ -204,5 +204,34 @@
                 </Control>
             </Controls>
         </TopLevelControl>
+
+        <TopLevelControl name="ZO_ConfirmRemoveGuildMemberDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_ConfirmRemoveGuildMemberDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
+
+                <Button name="$(parent)Check" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                </Button>
+
+                <Backdrop name="$(parent)BlacklistMessage" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Text" relativePoint="RIGHT" constrains="X" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Check" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_BLACKLIST_MESSAGE_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

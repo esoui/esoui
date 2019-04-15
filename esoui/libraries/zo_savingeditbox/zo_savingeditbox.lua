@@ -1,36 +1,38 @@
 ZO_SavingEditBox = ZO_CallbackObject:Subclass()
 
-function ZO_SavingEditBox:New(control)
-    local manager = ZO_CallbackObject.New(self)
+function ZO_SavingEditBox:New(...)
+    local object = ZO_CallbackObject.New(self)
+    object:Initialize(...)
+    return object
+end
 
-    manager.control = control
+function ZO_SavingEditBox:Initialize(control)
+    self.control = control
 
-    manager.editBackdrop = GetControl(control, "Saving")
+    self.editBackdrop = control:GetNamedChild("Saving")
 
-    manager.edit = GetControl(control, "SavingEdit")
-    manager.edit:SetHandler("OnTextChanged", function() manager:OnTextChanged() end)
-    manager.edit:SetHandler("OnEnter", function() manager:OnEnter() end)
+    self.edit = control:GetNamedChild("SavingEdit")
+    self.edit:SetHandler("OnTextChanged", function() self:OnTextChanged() end)
+    self.edit:SetHandler("OnEnter", function() self:OnEnter() end)
 
-    manager.modifyButton = GetControl(control, "Modify")
-    manager.modifyButton:SetHandler("OnClicked", function() manager:OnModifyClicked() end)
+    self.modifyButton = control:GetNamedChild("Modify")
+    self.modifyButton:SetHandler("OnClicked", function() self:OnModifyClicked() end)
 
-    manager.saveButton = GetControl(control, "Save")
-    manager.saveButton:SetHandler("OnClicked", function() manager:OnSaveClicked() end)
+    self.saveButton = control:GetNamedChild("Save")
+    self.saveButton:SetHandler("OnClicked", function() self:OnSaveClicked() end)
 
-    manager.cancelButton = GetControl(control, "Cancel")
-    manager.cancelButton:SetHandler("OnClicked", function() manager:OnCancelClicked() end)    
+    self.cancelButton = control:GetNamedChild("Cancel")
+    self.cancelButton:SetHandler("OnClicked", function() self:OnCancelClicked() end)    
 
-    manager.display = GetControl(control, "Display")
-    manager.empty = GetControl(control, "Empty")
+    self.display = control:GetNamedChild("Display")
+    self.empty = control:GetNamedChild("Empty")
 
-    manager.modified = false
-    manager.enabled = true
-    manager.editing = false
-    manager.putTextInQuotes = true
+    self.modified = false
+    self.enabled = true
+    self.editing = false
+    self.putTextInQuotes = true
 
-    manager:RefreshButtons()
-
-    return manager
+    self:RefreshButtons()
 end
 
 function ZO_SavingEditBox:SetDefaultText(defaultText)
@@ -42,18 +44,18 @@ function ZO_SavingEditBox:SetEmptyText(emptyText)
 end
 
 function ZO_SavingEditBox:SetEditing(editing)
-    if(self.editing ~= editing) then
+    if self.editing ~= editing then
         self.editing = editing
-        self.editBackdrop:SetHidden(not editing)        
+        self.editBackdrop:SetHidden(not editing)
         self:RefreshButtons()
 
-        if(editing) then
+        if editing then
             self.edit:TakeFocus()
             self.display:SetHidden(true)
-            self.empty:SetHidden(true)  
+            self.empty:SetHidden(true)
         else
             self.edit:LoseFocus()
-            if(self.resetText == "") then
+            if self.resetText == "" then
                 self.empty:SetHidden(false)
             else
                 self.display:SetHidden(false)
@@ -65,9 +67,9 @@ function ZO_SavingEditBox:SetEditing(editing)
 end
 
 function ZO_SavingEditBox:SetEnabled(enabled)
-    if(enabled ~= self.enabled) then
-        self.enabled = enabled        
-        if(not self.enabled) then
+    if enabled ~= self.enabled then
+        self.enabled = enabled
+        if not self.enabled then
             self:SetEditing(false)
             self:ResetText()
         end
@@ -76,7 +78,7 @@ function ZO_SavingEditBox:SetEnabled(enabled)
 end
 
 function ZO_SavingEditBox:SetHidden(hidden)
-    if(hidden) then
+    if hidden then
         self:Cancel()
         self.modifyButton:SetHidden(true)
     else
@@ -97,8 +99,8 @@ function ZO_SavingEditBox:GetText()
 end
 
 function ZO_SavingEditBox:SetText(text)
-    if(not self.editing) then
-        if(text == "") then
+    if not self.editing then
+        if text == "" then
             self.display:SetHidden(true)
             self.empty:SetHidden(false)
         else
@@ -141,7 +143,7 @@ function ZO_SavingEditBox:OnTextChanged()
             self.validText = true
         end
         self.modified = true
-        self:RefreshButtons()        
+        self:RefreshButtons()
     end
     ZO_EditDefaultText_OnTextChanged(self.edit)
 end
@@ -179,12 +181,12 @@ function ZO_SavingEditBox:OnModifyClicked()
 end
 
 function ZO_SavingEditBox:RefreshButtons()
-    if(self.enabled) then
-        if(self.editing) then
+    if self.enabled then
+        if self.editing then
             self.modifyButton:SetHidden(true)
             self.saveButton:SetHidden(false)
             self.cancelButton:SetHidden(false)
-            if(self.modified and self.validText) then
+            if self.modified and self.validText then
                 self.saveButton:SetState(BSTATE_NORMAL, false)
             else
                 self.saveButton:SetState(BSTATE_DISABLED, true)
@@ -217,9 +219,9 @@ function ZO_SavingEditBoxGroup:New()
     local group = ZO_Object.New(self)
     group.savingEditBoxes = {}
     group.setEditingCallback =  function(savingEditBox, isEditing)
-                                    if(isEditing) then
+                                    if isEditing then
                                         for i = 1, #group.savingEditBoxes do
-                                            if(group.savingEditBoxes[i] ~= savingEditBox) then
+                                            if group.savingEditBoxes[i] ~= savingEditBox then
                                                 group.savingEditBoxes[i]:Cancel()
                                             end
                                         end
@@ -231,4 +233,30 @@ end
 function ZO_SavingEditBoxGroup:Add(savingEditBox)
     table.insert(self.savingEditBoxes, savingEditBox)
     savingEditBox:RegisterCallback("SetEditing", self.setEditingCallback)
+end
+
+-- Scrolling Saving Edit Box
+
+ZO_ScrollingSavingEditBox = ZO_SavingEditBox:Subclass()
+
+function ZO_ScrollingSavingEditBox:New(...)
+    return ZO_SavingEditBox.New(self, ...)
+end
+
+function ZO_ScrollingSavingEditBox:Initialize(control)
+    ZO_SavingEditBox.Initialize(self, control)
+
+    self.pane = control:GetNamedChild("Pane")
+    self.paneScroll = self.pane:GetNamedChild("Scroll")
+
+    self.display:ClearAnchors()
+    self.display:SetParent(self.pane:GetNamedChild("ScrollChild"))
+    self.display:SetAnchor(TOPLEFT)
+    self.display:SetWidth(self.control:GetWidth() - 34)
+end
+
+function ZO_ScrollingSavingEditBox:SetEditing(editing)
+    ZO_SavingEditBox.SetEditing(self, editing)
+
+    self.paneScroll:SetMouseEnabled(editing)
 end
