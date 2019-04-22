@@ -31,11 +31,10 @@ function ZO_GamepadSkills:Initialize(control)
     GAMEPAD_SKILLS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
         if newState == SCENE_SHOWING then
-
             self:SetMode(ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE)
             self:RefreshHeader(GetString(SI_MAIN_MENU_SKILLS))
-            self.assignableActionBar:OnShowing()
             self.categoryListRefreshGroup:TryClean()
+            self.assignableActionBar:Refresh()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.categoryKeybindStripDescriptor)
 
             if self.returnToAdvisor then
@@ -78,7 +77,6 @@ function ZO_GamepadSkills:Initialize(control)
             --Disable now so it's not possible to change the selected skill live/skills advisor entry as the scene is hiding since the line filter list depends on it being a skill line
             self:DisableCurrentList()
         elseif newState == SCENE_HIDDEN then
-            self.assignableActionBar:OnHidden()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
@@ -93,7 +91,7 @@ function ZO_GamepadSkills:Initialize(control)
             local targetSkillLineData = self.categoryList:GetTargetData().skillLineData
             self:SetMode(ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE)
             self:RefreshHeader(targetSkillLineData:GetFormattedName())
-            self.assignableActionBar:OnShowing()
+            self.assignableActionBar:Refresh()
             --To pick up the new skill line that was just selected
             self.lineFilterListRefreshGroup:MarkDirty("List")
             self.lineFilterListRefreshGroup:TryClean()
@@ -121,7 +119,6 @@ function ZO_GamepadSkills:Initialize(control)
         elseif newState == SCENE_HIDDEN then
             local NO_SKILL_LINE_SELECTED = nil
             ACTION_BAR_ASSIGNMENT_MANAGER:UpdateWerewolfBarStateInCycle(NO_SKILL_LINE_SELECTED)
-            self.assignableActionBar:OnHidden()
             self:DisableCurrentList()
             self:TryClearSkillUpdatedStatus()
             self:TryClearSkillLineNewStatus()
@@ -184,6 +181,7 @@ function ZO_GamepadSkills:Initialize(control)
             self:PerformDeferredInitialization()
             self.showAttributeDialog = GetAttributeUnspentPoints() > 0 and not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
         elseif newState == SCENE_GROUP_HIDDEN then
+            self.assignableActionBar:OnSkillsHidden()
             SKILLS_AND_ACTION_BAR_MANAGER:ResetInterface()
         end
     end)

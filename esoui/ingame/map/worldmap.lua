@@ -2771,11 +2771,14 @@ function ZO_MapPin:PlayTextureAnimation(framesWide, framesHigh, framesPerSecond)
         local anim
         local control = GetControl(self:GetControl(), "Background")
         anim, self.m_textureAnimTimeline = CreateSimpleAnimation(ANIMATION_TEXTURE, control)
-        anim:SetImageData(framesWide, framesHigh)
-        anim:SetFramerate(framesPerSecond)
 
         anim:SetHandler("OnStop", function() control:SetTextureCoords(0, 1, 0, 1) end)
     end
+
+    local animation = self.m_textureAnimTimeline:GetAnimation(1)
+    animation:SetImageData(framesWide, framesHigh)
+    animation:SetFramerate(framesPerSecond)
+
     self.m_textureAnimTimeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
     self.m_textureAnimTimeline:PlayFromStart()
 end

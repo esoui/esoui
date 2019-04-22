@@ -109,7 +109,7 @@ end
 
 function ZO_GuildRank_Shared:GetSaveName()
     --we only save custom names
-    if(self.hasCustomName) then
+    if self.hasCustomName then
         return self.name
     else
         return ""
@@ -123,26 +123,26 @@ function ZO_GuildRank_Shared:IsNewRank()
 end
 
 function ZO_GuildRank_Shared:NeedsSave()
-    if(self:IsNewRank()) then
+    if self:IsNewRank() then
         return true
     end
 
-    if(self.iconIndex ~= GetGuildRankIconIndex(self.guildId, self.index)) then
+    if self.iconIndex ~= GetGuildRankIconIndex(self.guildId, self.index) then
         return true
     end
 
     for i = GUILD_PERMISSION_ITERATION_BEGIN, GUILD_PERMISSION_ITERATION_END do
-        if(self.permissionSet[i] ~= DoesGuildRankHavePermission(self.guildId, self.index, i)) then
+        if self.permissionSet[i] ~= DoesGuildRankHavePermission(self.guildId, self.index, i) then
             return true
         end
     end
 
-    if(self.hasCustomName) then
-        if(self.name ~= GetGuildRankCustomName(self.guildId, self.index)) then
+    if self.hasCustomName then
+        if self.name ~= GetGuildRankCustomName(self.guildId, self.index) then
             return true
         end
     else
-        if(GetGuildRankCustomName(self.guildId, self.index) ~= "") then
+        if GetGuildRankCustomName(self.guildId, self.index) ~= "" then
             return true
         end
     end
@@ -321,17 +321,17 @@ function ZO_GuildRanks_Shared:NeedsSave()
     local numRanks = #self.ranks
     local numPrevRanks = GetNumGuildRanks(self.guildId)
 
-    if(numRanks ~= numPrevRanks) then
+    if numRanks ~= numPrevRanks then
         return true
     end
 
     for i = 1, numRanks do
         local rank = self.ranks[i]
-        if(rank:NeedsSave()) then
+        if rank:NeedsSave() then
             needsSave = true
             break
         end
-        if(i ~= rank.index) then
+        if i ~= rank.index then
             needsSave = true
             break
         end

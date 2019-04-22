@@ -580,6 +580,26 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ARTIFACT_CONTROL_STATE] = function(artifactNa
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_SPAWNED_BUT_NOT_REVEALED] = function(daedricArtifactId)
+    local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)
+    local description = zo_strformat(SI_DAEDRIC_ARTIFACT_SPAWNED, daedricArtifactName)
+    return CreateAvAMessageParams(SOUNDS.DAEDRIC_ARTIFACT_SPAWNED, description, CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED] = function(objectiveKeepId, objectiveObjectiveId, battlegroundContext, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, holderRawCharacterName, holderDisplayName, lastHolderRawCharacterName, lastHolderDisplayName, pinType, daedricArtifactId, lastObjectiveControlState)
+    if lastObjectiveControlState == OBJECTIVE_CONTROL_STATE_UNKNOWN and objectiveControlState ~= OBJECTIVE_CONTROL_STATE_UNKNOWN then
+        -- Revealed (UNKNOWN -> !UNKNOWN)
+        local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)
+        local description = zo_strformat(SI_DAEDRIC_ARTIFACT_REVEALED, daedricArtifactName)
+        return CreateAvAMessageParams(SOUNDS.DAEDRIC_ARTIFACT_REVEALED, description, CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
+    elseif lastObjectiveControlState ~= OBJECTIVE_CONTROL_STATE_UNKNOWN and objectiveControlState == OBJECTIVE_CONTROL_STATE_UNKNOWN then
+        -- Despawned (!UNKNOWN -> UNKNOWN)
+        local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)
+        local description = zo_strformat(SI_DAEDRIC_ARTIFACT_DESPAWNED, daedricArtifactName)
+        return CreateAvAMessageParams(SOUNDS.DAEDRIC_ARTIFACT_DESPAWNED, description, CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
+    end
+end
+
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_KEEP_GATE_STATE_CHANGED] = function(keepId, open)
     local description, soundId = GetGateStateChangedDescription(keepId, open)
     return CreateAvAMessageParams(soundId, description, CENTER_SCREEN_ANNOUNCE_TYPE_KEEP_GATE_CHANGED)
@@ -1089,6 +1109,7 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_PLEDGE_OF_MARA_RESULT)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_CORONATE_EMPEROR)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DEPOSE_EMPEROR)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_REVENGE_KILL)

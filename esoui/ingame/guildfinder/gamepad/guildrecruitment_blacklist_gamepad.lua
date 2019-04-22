@@ -35,11 +35,18 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:Initialize(control)
     self:InitializeSelectBlacklistEntryDialog()
 end
 
+function ZO_GuildRecruitment_Blacklist_Gamepad:SetupRow(control, data)
+    ZO_GuildRecruitment_Blacklist_Shared.SetupRow(self, control, data)
+
+    local nameLabel = control:GetNamedChild("Name")
+    nameLabel:SetText(ZO_FormatUserFacingDisplayName(data.name))
+end
+
 function ZO_GuildRecruitment_Blacklist_Gamepad:OnSelectionChanged(previousData, selectedData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
     if selectedData then
-        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, selectedData.name, selectedData.note)
+        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, ZO_FormatUserFacingDisplayName(selectedData.name), selectedData.note)
     end
 end
 
@@ -53,7 +60,7 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeKeybinds()
             callback = function()
                 local selectedData = self:GetSelectedData()
                 if selectedData then
-                    ZO_Dialogs_ShowPlatformDialog(ZO_GUILD_RECRUITMENT_GAMEPAD_SELECT_BLACKLIST_ENTRY_DIALOG_NAME, selectedData, {mainTextParams = { selectedData.name }})
+                    ZO_Dialogs_ShowPlatformDialog(ZO_GUILD_RECRUITMENT_GAMEPAD_SELECT_BLACKLIST_ENTRY_DIALOG_NAME, selectedData, { mainTextParams = { ZO_FormatUserFacingDisplayName(selectedData.name) } })
                 end
             end,
         }
@@ -297,6 +304,19 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeSelectBlacklistEntryDia
                         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_EDIT_NOTE_DIALOG", data)
                     end,
                 },
+            },
+
+            -- View Gamercard
+            {
+                template = "ZO_GamepadTextFieldSubmitItem",
+                templateData =
+                {
+                    text = GetString(GetGamerCardStringId()),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        ZO_ShowGamerCardFromDisplayNameOrFallback(dialog.data.name, ZO_ID_REQUEST_TYPE_GUILD_INFO, self.guildId, dialog.data.index)
+                    end,
+                }
             },
         },
         buttons =

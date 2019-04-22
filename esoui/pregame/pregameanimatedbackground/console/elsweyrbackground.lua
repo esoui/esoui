@@ -44,8 +44,8 @@ function ElsweyrBackground:InitializeAnimations()
     self.showTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ElsweyrBackgroundShowAnimation", self.containerControl)
 end
 
-local STORM_DURATION_S = 8
-local STORM_CYCLE_DURATION_S = 9
+local STORM_DURATION_S = 12
+local STORM_CYCLE_DURATION_S = 12
 
 local SAND_MIN_WIDTH = 200
 local SAND_MAX_WIDTH = 400
@@ -76,8 +76,8 @@ function ElsweyrBackground:CreateSandParticleSystem(waveDurationS, waveMagnitude
     sandParticleSystem:SetParticleParameter("StartScale", SAND_MIN_SCALE)
     sandParticleSystem:SetParticleParameter("EndScale", SAND_MAX_SCALE)
     sandParticleSystem:SetParticleParameter("Texture", "EndAlpha", "DrawLevel", ZO_WeightedChoiceGenerator:New(
-        {"EsoUI/Art/PregameAnimatedBackground/elsweyrSand.dds", 0.07, 1}, 0.7,
-        {"EsoUI/Art/PregameAnimatedBackground/elsweyrSandShadow.dds", 0.14, 0}, 0.3))
+        {"EsoUI/Art/PregameAnimatedBackground/elsweyrSand.dds", 0.08, 1}, 0.7,
+        {"EsoUI/Art/PregameAnimatedBackground/elsweyrSandShadow.dds", 0.16, 0}, 0.3))
     sandParticleSystem:SetParticleParameter("StartAlpha", 0)
     sandParticleSystem:SetParticleParameter("AlphaEasing", AlphaEasing)
     sandParticleSystem:SetParticleParameter("AnchorPoint", RIGHT)
@@ -101,7 +101,7 @@ function ElsweyrBackground:CreateStoneParticleSystem()
     stoneParticleSystem:SetBurst(55 * STORM_DURATION_S, STORM_DURATION_S, 0, STORM_CYCLE_DURATION_S)
     stoneParticleSystem:SetBurstEasing(ZO_EaseInOutQuadratic)
     stoneParticleSystem:SetParticleParameter("Size", ZO_UniformRangeGenerator:New(4, 5))
-    stoneParticleSystem:SetParticleParameter("StartAlpha", 0.38)
+    stoneParticleSystem:SetParticleParameter("StartAlpha", 0.43)
     stoneParticleSystem:SetParticleParameter("Texture", "EsoUI/Art/PregameAnimatedBackground/elsweyrDust.dds")
     stoneParticleSystem:SetParticleParameter("AnchorPoint", CENTER)
     stoneParticleSystem:SetParticleParameter("AnchorRelativePoint", TOPLEFT)
@@ -136,7 +136,7 @@ function ElsweyrBackground:CreateLightParticleSystem(index, offsetX)
     lightParticleSystem:SetParticlesPerSecond(1 / LIGHT_DURATION_S)
     lightParticleSystem:SetStartPrimeS((index / #LIGHT_EMITTERS_CENTER_X) * LIGHT_DURATION_S)
     lightParticleSystem:SetParticleParameter("Width", 80, 140)
-    lightParticleSystem:SetParticleParameter("EndAlpha", 0.8)
+    lightParticleSystem:SetParticleParameter("EndAlpha", 0.85)
     lightParticleSystem:SetParticleParameter("Height", 1400)
     lightParticleSystem:SetParticleParameter("Texture", "EsoUI/Art/PregameAnimatedBackground/lightShaft.dds")
     lightParticleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)
@@ -159,7 +159,7 @@ function ElsweyrBackground:CreateLightParticleSystem(index, offsetX)
 end
 
 local DRAGON_FLIP_BOOK_PLAYBACK_INFO = { playbackType = ANIMATION_PLAYBACK_LOOP, loopCount = LOOP_INDEFINITELY }
-local SECONDS_PER_DRAGON = 12
+local SECONDS_PER_DRAGON = 10
 local FIRST_DRAGON_OFFSET_S = 2
 local DRAGON_EMITTERS =
 {

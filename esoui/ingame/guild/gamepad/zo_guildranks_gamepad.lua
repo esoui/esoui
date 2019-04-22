@@ -122,13 +122,13 @@ function ZO_GuildRanks_Gamepad:Initialize(control)
 
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 
-            local OnRefresh = function() 
+            local OnRefresh = function()
                 self:ReloadAndRefreshScreen()
             end
             
             local OnRefreshMatchGuildId = function(_, guildId)
-                if(self:MatchesGuild(guildId)) then 
-                    OnRefresh()
+                if self:MatchesGuild(guildId) then
+                    self:RefreshScreen()
                 end
             end
 

@@ -291,6 +291,10 @@ local AlertHandlers = {
         end
     end,
 
+    [EVENT_GUILD_INVITE_TO_BLACKLISTED_PLAYER] = function(playerName, guildId)
+        return ALERT, zo_strformat(SI_GUILD_INVITE_BLACKISTED_ALERT, playerName, GetGuildName(guildId))
+    end,
+
     [EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT] = function()
         return ERROR, GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_GENERIC_JOIN_FAILURE), SOUNDS.GENERAL_ALERT_ERROR
     end,
@@ -971,6 +975,12 @@ local AlertHandlers = {
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_COLLECTIBLEEVOLUTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
+
+    [EVENT_NO_DAEDRIC_PICKUP_WHEN_STEALTHED] = function()
+        return ERROR, GetString(SI_NO_DAEDRIC_PICKUP_WHEN_STEALTHED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+
 }
 
 ZO_ClientInteractResultSpecificSound =

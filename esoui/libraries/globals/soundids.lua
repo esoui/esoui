@@ -906,7 +906,10 @@ SOUNDS = {
     GAMEPAD_GUILD_FINDER_TOGGLE_ACTIVITY    = "Gamepad_GuildFinder_ToggleActivity",
     GAMEPAD_GUILD_FINDER_TOGGLE_ROLE        = "Gamepad_GuildFinder_ToggleRole",
 
-    --Daedric Artifact HUD
+    --Daedric Artifacts
     DAEDRIC_ENERGY_BURST                    = "DaedricEnergy_Burst",
     DAEDRIC_ENERGY_LOW                      = "DaedricEnergy_Low",
+    DAEDRIC_ARTIFACT_SPAWNED                = "DaedricArtifact_Spawned",
+    DAEDRIC_ARTIFACT_REVEALED               = "DaedricArtifact_Revealed",
+    DAEDRIC_ARTIFACT_DESPAWNED              = "DaedricArtifact_Despawned",
 }

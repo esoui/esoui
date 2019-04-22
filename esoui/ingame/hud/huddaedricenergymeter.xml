@@ -52,7 +52,7 @@
                 </Texture>
 
                 <StatusBar name="$(parent)Bar" barAlignment="REVERSE" textureFile="EsoUI/Art/HUD/daedricHunger_meter_bar.dds">
-                    <Anchor point="TOPLEFT" offsetX="36" offsetY="96" />
+                    <Anchor point="TOPLEFT" offsetX="35" offsetY="97" />
                     <Dimensions x="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_FULL_WIDTH" y="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_HEIGHT" />
 
                     <TextureCoords left="0" right="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_RIGHT_COORD" top="0" bottom="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_BOTTOM_COORD" />

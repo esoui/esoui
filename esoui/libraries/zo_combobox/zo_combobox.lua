@@ -223,6 +223,9 @@ function ZO_ScrollableComboBox:HideDropdownInternal()
     self.m_dropdown:UnregisterForEvent(EVENT_GLOBAL_MOUSE_UP)
     self.m_dropdown:SetHidden(true)
     self:SetVisible(false)
+    if self.onHideDropdownCallback then
+        self.onHideDropdownCallback()
+    end
 end
 
 function ZO_ScrollableComboBox_Entry_OnMouseEnter(entry)

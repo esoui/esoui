@@ -213,8 +213,9 @@ function ZO_GuildBrowser_GuildList_Keyboard:RefreshAdditionalFilters()
 
     local minCP = tonumber(dialog.minCPEditBox:GetText())
     local maxCP = tonumber(dialog.maxCPEditBox:GetText())
+    local isMinMaxCPDefault = minCP == self.filterManager:GetMinCPDefault() and maxCP == self.filterManager:GetMaxCPDefault()
     SetGuildFinderChampionPointsFilterValues(minCP, maxCP)
-    self.filterManager:SetFilterValueIsDefaultByAttributeType(GUILD_META_DATA_ATTRIBUTE_MINIMUM_CP, minCP == self.filterManager:GetMinCPDefault())
+    self.filterManager:SetFilterValueIsDefaultByAttributeType(GUILD_META_DATA_ATTRIBUTE_MINIMUM_CP, isMinMaxCPDefault)
 
     local startTimeData = dialog.startTimeComboBox:GetSelectedItemData()
     local startTimeHour = startTimeData.value
@@ -238,7 +239,7 @@ function ZO_GuildBrowser_GuildList_Keyboard:RefreshSearchFilters()
     self:RefreshAdditionalFilters()
 end
 
-function ZO_GuildBrowser_GuildList_Shared:ResetFilters()
+function ZO_GuildBrowser_GuildList_Keyboard:ResetFilters()
     ZO_CheckButton_SetCheckState(self.traderCheckBox.checkButton, false)
     self.personalitiesDropdown:ClearAllSelections()
     self.activitiesDropdown:ClearAllSelections()
@@ -259,6 +260,7 @@ function ZO_GuildBrowser_GuildList_Shared:ResetFilters()
         ZO_CheckButton_SetCheckState(button, false)
     end
     dialog.minCPEditBox:SetText(self.filterManager:GetMinCPDefault())
+    dialog.maxCPEditBox:SetText(self.filterManager:GetMaxCPDefault())
 
     local defaultHour = self.filterManager:GetTimeDefault()
     dialog.startTimeComboBox:SelectFirstItem()

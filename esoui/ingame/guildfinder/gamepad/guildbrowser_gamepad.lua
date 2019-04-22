@@ -158,6 +158,16 @@ function ZO_GuildBrowser_Gamepad:InitializeKeybindStripDescriptors()
             end
         },
 
+        -- filters dialog
+        {
+            name = GetString(SI_GAMEPAD_GUILD_BROWSER_FILTERS_KEYBIND),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                local dialogName = "GAMEPAD_GUILD_BROWSER_FILTERS"
+                ZO_Dialogs_ShowGamepadDialog(dialogName)
+            end,
+        },
+
         -- back
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
     }

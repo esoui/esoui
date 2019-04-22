@@ -40,6 +40,13 @@ function ZO_GuildRecruitment_Applications_Gamepad:Initialize(control)
     self:InitializeOptionsDialog()
 end
 
+function ZO_GuildRecruitment_Applications_Gamepad:SetupRow(control, data)
+    ZO_GuildRecruitment_ApplicationsList_Shared.SetupRow(self, control, data)
+
+    local nameLabel = control:GetNamedChild("Name")
+    nameLabel:SetText(ZO_FormatUserFacingDisplayName(data.name))
+end
+
 function ZO_GuildRecruitment_Applications_Gamepad:OnSelectionChanged(previousData, selectedData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
@@ -69,7 +76,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeKeybinds()
             callback = function()
                 local selectedData = self:GetSelectedData()
                 if selectedData then
-                    ZO_Dialogs_ShowPlatformDialog(ZO_GUILD_RECRUITMENT_GAMEPAD_CONFIRM_ACCEPT_DIALOG_NAME, selectedData, {mainTextParams = { selectedData.name }})
+                    ZO_Dialogs_ShowPlatformDialog(ZO_GUILD_RECRUITMENT_GAMEPAD_CONFIRM_ACCEPT_DIALOG_NAME, selectedData, {mainTextParams = { ZO_FormatUserFacingDisplayName(selectedData.name) }})
                 end
             end,
         }
@@ -82,7 +89,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeKeybinds()
             callback = function()
                 local selectedData = self:GetSelectedData()
                 if selectedData then
-                    ZO_Dialogs_ShowPlatformDialog(ZO_GUILD_RECRUITMENT_GAMEPAD_CONFIRM_DECLINE_DIALOG_NAME, selectedData, {mainTextParams = { selectedData.name }})
+                    ZO_Dialogs_ShowPlatformDialog(ZO_GUILD_RECRUITMENT_GAMEPAD_CONFIRM_DECLINE_DIALOG_NAME, selectedData, {mainTextParams = { ZO_FormatUserFacingDisplayName(selectedData.name) }})
                 end
             end,
         }
@@ -371,7 +378,8 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeOptionsDialog()
             -- Send Mail
             {
                 template = "ZO_GamepadTextFieldSubmitItem",
-                templateData = {
+                templateData =
+                {
                     text = GetString(SI_SOCIAL_MENU_SEND_MAIL),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -383,7 +391,8 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeOptionsDialog()
             -- Report
             {
                 template = "ZO_GamepadTextFieldSubmitItem",
-                templateData = {
+                templateData =
+                {
                     text = GetString(SI_GUILD_FINDER_REPORT_ACTION),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -400,6 +409,21 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeOptionsDialog()
                         ReleaseDialog()
                     end,
                 },
+            },
+            -- View Gamercard
+            {
+                template = "ZO_GamepadTextFieldSubmitItem",
+                templateData =
+                {
+                    text = GetString(GetGamerCardStringId()),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function()
+                        local selectedData = self:GetSelectedData()
+                        if selectedData then
+                            ZO_ShowGamerCardFromDisplayNameOrFallback(selectedData.name, ZO_ID_REQUEST_TYPE_GUILD_INFO, selectedData.guildId, selectedData.index)
+                        end
+                    end,
+                }
             },
         },
         buttons =

@@ -263,9 +263,9 @@
                     />
 
                     <CompassPinType name="DRAGON_COMBAT_HEALTHY"
-                                    pinTexture="$(COMPASS_PATH)compass_Dragon.dds"
-                                    aboveTexture="$(COMPASS_PATH)compass_Dragon.dds"
-                                    belowTexture="$(COMPASS_PATH)compass_Dragon.dds"
+                                    pinTexture="$(COMPASS_PATH)compass_Dragon_Combat.dds"
+                                    aboveTexture="$(COMPASS_PATH)compass_Dragon_Combat.dds"
+                                    belowTexture="$(COMPASS_PATH)compass_Dragon_Combat.dds"
                                     maxDistanceM="500"
                                     closeAlpha="1.0"
                                     farAlpha="0.75"
@@ -275,9 +275,9 @@
                                     />
 
                     <CompassPinType name="DRAGON_COMBAT_WEAK"
-                                    pinTexture="$(COMPASS_PATH)compass_Dragon_Damaged.dds"
-                                    aboveTexture="$(COMPASS_PATH)compass_Dragon_Damaged.dds"
-                                    belowTexture="$(COMPASS_PATH)compass_Dragon_Damaged.dds"
+                                    pinTexture="$(COMPASS_PATH)compass_Dragon_Damaged_Combat.dds"
+                                    aboveTexture="$(COMPASS_PATH)compass_Dragon_Damaged_Combat.dds"
+                                    belowTexture="$(COMPASS_PATH)compass_Dragon_Damaged_Combat.dds"
                                     maxDistanceM="500"
                                     closeAlpha="1.0"
                                     farAlpha="0.75"
