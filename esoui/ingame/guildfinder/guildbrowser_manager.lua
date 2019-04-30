@@ -131,11 +131,12 @@ function ZO_GuildBrowser_Manager:BuildApplications()
     ZO_ClearNumericallyIndexedTable(self.currentApplications)
     local numApps = GetGuildFinderNumAccountApplications()
     for i = 1, numApps do
-        local level, championPoints, alliance, classId, guildName, accountName, characterName, achievementPoints, applicationMessage = GetGuildFinderAccountApplicationInfoAt(i)
-        local timeRemainingS = GetGuildFinderGuildApplicationDuration(self.guildId, i)
+        local guildId, level, championPoints, alliance, classId, guildName, accountName, characterName, achievementPoints, applicationMessage = GetGuildFinderAccountApplicationInfoAt(i)
+        local timeRemainingS = GetGuildFinderAccountApplicationDuration(i)
         local applicationData = 
         {
             index = i,
+            guildId = guildId,
             name = accountName,
             characterName = characterName,
             guildName = guildName,
@@ -232,26 +233,13 @@ end
 
 function ZO_GuildBrowser_Manager:RequestGuildData(guildId)
     if not self:GetGuildData(guildId) and not self:IsRequestingGuildData(guildId) then
-        table.insert(self.guildDataRequestQueue, guildId)
-        RequestGuildFinderAttributesForGuilds(guildId)
-        return true
-    end
+        local didRequest = RequestGuildFinderAttributesForGuild(guildId)
 
-    return false
-end
-
-function ZO_GuildBrowser_Manager:RequestDataForGuilds(requestedGuilds)
-    local missingDataGuilds = {}
-    for i, guildId in ipairs(requestedGuilds) do
-        if not self:GetGuildData(guildId) and not self:IsRequestingGuildData(guildId) then
-            table.insert(missingDataGuilds, guildId)
+        if didRequest then
             table.insert(self.guildDataRequestQueue, guildId)
         end
-    end
 
-    if #missingDataGuilds > 0 then
-        RequestGuildFinderAttributesForGuilds(unpack(missingDataGuilds))
-        return true
+        return didRequest
     end
 
     return false
@@ -281,6 +269,15 @@ end
 
 function ZO_GuildBrowser_Manager:GetCurrentApplicationsList()
     return self.currentApplications
+end
+
+function ZO_GuildBrowser_Manager:HasPendingApplicationToGuild(guildId)
+    for i, application in ipairs(self.currentApplications) do
+        if application.guildId == guildId then
+            return true
+        end
+    end
+    return false
 end
 
 function ZO_GuildBrowser_Manager:GetSavedApplicationMessage()

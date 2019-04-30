@@ -43,8 +43,8 @@ function ZO_SavingEditBox:SetEmptyText(emptyText)
     self.empty:SetText(emptyText)
 end
 
-function ZO_SavingEditBox:SetEditing(editing)
-    if self.editing ~= editing then
+function ZO_SavingEditBox:SetEditing(editing, forceUpdate)
+    if forceUpdate or self.editing ~= editing then
         self.editing = editing
         self.editBackdrop:SetHidden(not editing)
         self:RefreshButtons()
@@ -64,6 +64,10 @@ function ZO_SavingEditBox:SetEditing(editing)
 
         self:FireCallbacks("SetEditing", self, editing)
     end
+end
+
+function ZO_SavingEditBox:IsEditing()
+    return self.editing
 end
 
 function ZO_SavingEditBox:SetEnabled(enabled)
@@ -166,7 +170,7 @@ function ZO_SavingEditBox:OnSaveClicked()
 end
 
 function ZO_SavingEditBox:Cancel()
-    if(self.editing) then
+    if self.editing then
         self:SetEditing(false)
         self:ResetText()
     end
@@ -255,8 +259,8 @@ function ZO_ScrollingSavingEditBox:Initialize(control)
     self.display:SetWidth(self.control:GetWidth() - 34)
 end
 
-function ZO_ScrollingSavingEditBox:SetEditing(editing)
-    ZO_SavingEditBox.SetEditing(self, editing)
+function ZO_ScrollingSavingEditBox:SetEditing(editing, forceUpdate)
+    ZO_SavingEditBox.SetEditing(self, editing, forceUpdate)
 
     self.paneScroll:SetMouseEnabled(editing)
 end

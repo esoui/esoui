@@ -51,6 +51,8 @@ function ZO_GuildRecruitment_GuildListingInfo_Gamepad:UpdateAlert(previousData, 
         local numMembers, _, _, numInvitees = GetGuildInfo(self.guildId)
         if numMembers + numInvitees >= MAX_GUILD_MEMBERS then
             GAMEPAD_TOOLTIPS:LayoutGuildAlert(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_GUILD_RECRUITMENT_GUILD_LISTING_FULL_GUILD_ALERT))
+        elseif GetGuildFinderNumGuildApplications(self.guildId) >= MAX_PENDING_APPLICATIONS_PER_GUILD then
+            GAMEPAD_TOOLTIPS:LayoutGuildAlert(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_GUILD_RECRUITMENT_GUILD_LISTING_APPLICATIONS_FULL_GUILD_ALERT))
         end
     end
 end

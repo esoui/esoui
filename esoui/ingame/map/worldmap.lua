@@ -3259,11 +3259,11 @@ function ZO_MapPin:GetFastTravelCost()
     if self:IsFastTravelKeep() then
         local keepId = self:GetFastTravelKeepId()
         local bgContext =  ZO_WorldMap_GetBattlegroundQueryType()
-        return 0, GetKeepAccessible(keepId, bgContext)
+        return 0, CanKeepBeFastTravelledTo(keepId, bgContext)
     elseif self:IsKeepOrDistrict() then
         local keepId = self:GetKeepId()
         local bgContext =  ZO_WorldMap_GetBattlegroundQueryType()
-        return 0, GetKeepAccessible(keepId, bgContext)
+        return 0, CanKeepBeFastTravelledTo(keepId, bgContext)
     elseif self:IsFastTravelWayShrine() then
         local nodeIndex = self:GetFastTravelNodeIndex()
         local isCurrentLoc = (ZO_Map_GetFastTravelNode() == nodeIndex)
@@ -4414,7 +4414,7 @@ do
             if g_mode == MAP_MODE_AVA_KEEP_RECALL then
                 return GetKeepRecallAvailable(keepId, bgContext)
             else
-                return GetKeepAccessible(keepId, bgContext)
+                return CanKeepBeFastTravelledTo(keepId, bgContext)
             end
         end
 
@@ -6079,9 +6079,11 @@ do
             local unitTag = GetWorldEventInstanceUnitTag(worldEventInstanceId, i)
             local pinType = GetWorldEventInstanceUnitPinType(worldEventInstanceId, unitTag)
             if pinType ~= MAP_PIN_TYPE_INVALID then
-                local xLoc, yLoc = GetMapPlayerPosition(unitTag)
-                local tag = ZO_MapPin.CreateWorldEventUnitPinTag(worldEventInstanceId, unitTag)
-                g_mapPinManager:CreatePin(pinType, tag, xLoc, yLoc)
+                local xLoc, yLoc, _, isInCurrentMap = GetMapPlayerPosition(unitTag)
+                if isInCurrentMap then
+                    local tag = ZO_MapPin.CreateWorldEventUnitPinTag(worldEventInstanceId, unitTag)
+                    g_mapPinManager:CreatePin(pinType, tag, xLoc, yLoc)
+                end
             end
         end
     end

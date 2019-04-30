@@ -32,8 +32,12 @@ end
 function ZO_GuildBrowser_GuildInfo_Shared:SetGuildToShow(guildId)
     self.currentGuildId = guildId
     local guildData = GUILD_BROWSER_MANAGER:GetGuildData(guildId)
-    if not guildData and GUILD_BROWSER_MANAGER:RequestGuildData(guildId) then
-        self.guildRequested = guildId
+    if not guildData then
+        if GUILD_BROWSER_MANAGER:RequestGuildData(guildId) then
+            self.guildRequested = guildId
+        else
+            internalassert(false, "can't have no data and can't fetch data simultaneously")
+        end
     end
 end
 

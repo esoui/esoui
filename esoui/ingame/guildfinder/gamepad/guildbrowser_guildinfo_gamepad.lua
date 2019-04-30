@@ -102,8 +102,14 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             enabled = function()
-                if GetNumGuilds() >= MAX_GUILDS then
-                    return false, GetString(SI_GUILD_BROWSER_MAX_GUILDS_CANT_APPLY)
+                if #GUILD_BROWSER_MANAGER:GetCurrentApplicationsList() >= MAX_GUILD_FINDER_APPLICATIONS_PER_ACCOUNT then
+                    return false, GetString("SI_GUILDAPPLICATIONRESPONSE", GUILD_APP_RESPONSE_MAX_APPLICATIONS_PENDING)
+                elseif GUILD_BROWSER_MANAGER:HasPendingApplicationToGuild(self.currentGuildId) then
+                    return false, GetString("SI_GUILDAPPLICATIONRESPONSE", GUILD_APP_RESPONSE_OUTSTANDING_APPLICATION)
+                elseif GetNumGuilds() >= MAX_GUILDS then
+                    return false, GetString("SI_GUILDAPPLICATIONRESPONSE", GUILD_APP_RESPONSE_IN_MAX_GUILDS)
+                elseif IsPlayerInGuild(self.currentGuildId) then
+                    return false, GetString("SI_GUILDAPPLICATIONRESPONSE", GUILD_APP_RESPONSE_ALREADY_MEMBER)
                 end
                 return true
             end,

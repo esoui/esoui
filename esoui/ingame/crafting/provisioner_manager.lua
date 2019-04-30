@@ -22,6 +22,10 @@ function ZO_ProvisionerManager:Initialize()
         self:MarkDirtyFlag(DIRTY.ALL)
     end)
 
+    EVENT_MANAGER:RegisterForEvent("ZO_ProvisionerManager", EVENT_MULTIPLE_RECIPES_LEARNED, function()
+        self:MarkDirtyFlag(DIRTY.ALL)
+    end)
+
     EVENT_MANAGER:RegisterForEvent("ZO_ProvisionerManager", EVENT_INVENTORY_FULL_UPDATE, function()
         self:MarkDirtyFlag(DIRTY.NUM_CREATABLE)
     end)

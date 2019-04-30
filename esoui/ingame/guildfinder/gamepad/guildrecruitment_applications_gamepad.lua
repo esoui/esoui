@@ -420,8 +420,9 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeOptionsDialog()
                     callback = function()
                         local selectedData = self:GetSelectedData()
                         if selectedData then
-                            ZO_ShowGamerCardFromDisplayNameOrFallback(selectedData.name, ZO_ID_REQUEST_TYPE_GUILD_INFO, selectedData.guildId, selectedData.index)
+                            ZO_ShowGamerCardFromDisplayNameOrFallback(selectedData.name, ZO_ID_REQUEST_TYPE_GUILD_APPLICATION_INFO, selectedData.guildId, selectedData.index)
                         end
+                        ReleaseDialog()
                     end,
                 }
             },

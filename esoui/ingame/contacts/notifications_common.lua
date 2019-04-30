@@ -321,7 +321,7 @@ function ZO_CampaignQueueProvider:Decline(data, button, openedFromKeybind)
 end
 
 function ZO_CampaignQueueProvider:CreateMessageFormat(isGroup)
-    return SI_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL
+    return SI_CAMPAIGN_QUEUE_MESSAGE
 end
 
 function ZO_CampaignQueueProvider:CreateLoadText()

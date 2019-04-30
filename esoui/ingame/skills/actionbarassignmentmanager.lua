@@ -730,6 +730,7 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_LEVEL_UPDATE, OnLevelUpdate)
 
     local function OnPlayerActivated()
+        self:ResetCurrentHotbarToActiveBar()
         self:ResetAllHotbars()
         self:UpdateBackupBarStateInCycle()
     end

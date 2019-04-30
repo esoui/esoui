@@ -19,8 +19,8 @@ function ZO_GuildRecruitment_Manager:Initialize()
         RequestGuildBlacklist(guildId)
     end
 
-    local function OnGuildFinderApplicationsRecieved()
-        self:FireCallbacks("GuildApplicationResultsReady")
+    local function OnGuildFinderApplicationsRecieved(event, guildId)
+        self:FireCallbacks("GuildApplicationResultsReady", guildId)
     end
 
     local function OnGuildFinderBlacklistRecieved()
@@ -71,6 +71,7 @@ function ZO_GuildRecruitment_Manager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_APPLICATION_RESULTS_GUILD, OnGuildFinderApplicationsRecieved)
+    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_GUILD_NEW_APPLICATIONS, OnGuildFinderApplicationsRecieved)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_BLACKLIST_RESULTS, OnGuildFinderBlacklistRecieved)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_RANK_CHANGED, OnGuildPermissionsRecieved)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_BLACKLIST_RESPONSE, OnBlacklistResponse)

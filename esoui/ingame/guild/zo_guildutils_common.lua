@@ -140,7 +140,6 @@ function ZO_TryGuildInvite(guildId, displayName)
         local function GuildInviteCallback(success)
             if success then
                 GuildInvite(guildId, displayName)
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, UndecorateDisplayName(displayName), guildName))
             end
         end
 
@@ -151,8 +150,6 @@ function ZO_TryGuildInvite(guildId, displayName)
             return
         end
 
-        if GuildInvite(guildId, displayName) then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, displayName, guildName))
-        end
-    end    
+        GuildInvite(guildId, displayName)
+    end
 end

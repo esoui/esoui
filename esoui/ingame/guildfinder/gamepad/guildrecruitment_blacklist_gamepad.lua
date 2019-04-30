@@ -314,7 +314,8 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeSelectBlacklistEntryDia
                     text = GetString(GetGamerCardStringId()),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                        ZO_ShowGamerCardFromDisplayNameOrFallback(dialog.data.name, ZO_ID_REQUEST_TYPE_GUILD_INFO, self.guildId, dialog.data.index)
+                        ZO_ShowGamerCardFromDisplayNameOrFallback(dialog.data.name, ZO_ID_REQUEST_TYPE_GUILD_BLACKLIST_INFO, self.guildId, dialog.data.index)
+                        ReleaseDialog()
                     end,
                 }
             },

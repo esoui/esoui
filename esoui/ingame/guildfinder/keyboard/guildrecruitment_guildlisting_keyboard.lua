@@ -187,7 +187,17 @@ end
 
 function ZO_GuildRecruitment_GuildListing_Keyboard:UpdateAlert()
     local numMembers, _, _, numInvitees = GetGuildInfo(self.guildId)
-    self.alertControl:SetHidden(numMembers + numInvitees < MAX_GUILD_MEMBERS)
+    local hideAlert = true
+
+    if numMembers + numInvitees >= MAX_GUILD_MEMBERS then
+        self.alertControl:SetText(GetString(SI_GUILD_RECRUITMENT_GUILD_LISTING_FULL_GUILD_ALERT))
+        hideAlert = false
+    elseif GetGuildFinderNumGuildApplications(self.guildId) >= MAX_PENDING_APPLICATIONS_PER_GUILD then
+        self.alertControl:SetText(GetString(SI_GUILD_RECRUITMENT_GUILD_LISTING_APPLICATIONS_FULL_GUILD_ALERT))
+        hideAlert = false
+    end
+
+    self.alertControl:SetHidden(hideAlert)
 end
 
 function ZO_GuildRecruitment_GuildListing_Keyboard:OnShowing()

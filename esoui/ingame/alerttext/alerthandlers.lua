@@ -277,8 +277,8 @@ local AlertHandlers = {
     end,
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
-        if(response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED) then
-            if(ShouldShowGroupErrorInAlert(response)) then
+        if response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED then
+            if ShouldShowGroupErrorInAlert(response) then
                 local nameToUse = ZO_GetPrimaryPlayerName(displayName, characterName)
                 if nameToUse == "" then
                     nameToUse = ZO_GetSecondaryPlayerName(displayName, characterName)
@@ -291,8 +291,27 @@ local AlertHandlers = {
         end
     end,
 
+    [EVENT_GROUP_MEMBER_JOINED] = function(displayName)
+        return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_GROUP_INVITE))
+    end,
+
+    [EVENT_FRIEND_ADDED] = function(displayName)
+        return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_FRIEND_INVITE))
+    end,
+
+    [EVENT_GUILD_SELF_JOINED_GUILD] = function(guildId, displayName)
+        -- Don't show accept notification if the guild was created by the player
+        if not IsPlayerGuildMaster(guildId) then
+            return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_GUILD_INVITE))
+        end
+    end,
+
     [EVENT_GUILD_INVITE_TO_BLACKLISTED_PLAYER] = function(playerName, guildId)
         return ALERT, zo_strformat(SI_GUILD_INVITE_BLACKISTED_ALERT, playerName, GetGuildName(guildId))
+    end,
+
+    [EVENT_GUILD_INVITE_PLAYER_SUCCESSFUL] = function(playerName, guildId)
+        return ALERT, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, playerName, GetGuildName(guildId))
     end,
 
     [EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT] = function()
@@ -527,6 +546,10 @@ local AlertHandlers = {
     [EVENT_RECIPE_LEARNED] = function(recipeListIndex, recipeIndex)
         local _, name = GetRecipeInfo(recipeListIndex, recipeIndex)
         return ALERT, zo_strformat(SI_NEW_RECIPE_LEARNED, name), SOUNDS.RECIPE_LEARNED
+    end,
+
+    [EVENT_MULTIPLE_RECIPES_LEARNED] = function(numLearned)
+        return ALERT, zo_strformat(SI_NEW_RECIPES_LEARNED, numLearned), SOUNDS.RECIPE_LEARNED
     end,
 
     [EVENT_ZONE_CHANGED] = function(zoneName, subzoneName)
@@ -974,6 +997,10 @@ local AlertHandlers = {
         if result ~= COLLECTIBLE_EVOLUTION_RESULT_SUCCESS then
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_COLLECTIBLEEVOLUTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
+    end,
+
+    [EVENT_ACCEPT_SHARED_QUEST_RESPONSE] = function()
+        return ALERT, zo_strformat(GetString(SI_NOTIFICATION_ACCEPTED), GetString(SI_NOTIFICATION_SHARE_QUEST_INVITE))
     end,
 
     [EVENT_NO_DAEDRIC_PICKUP_WHEN_STEALTHED] = function()

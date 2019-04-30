@@ -39,18 +39,18 @@
                     </OnMouseExit>
                 </Button>
 
-                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Dimensions x="265" y="30" />
+                <Label name="$(parent)Name" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
+                    <Dimensions x="265"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Enabled" relativePoint="RIGHT" offsetX="13" offsetY="1" />
                 </Label>
 
-                <Label name="$(parent)Author" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Dimensions x="300" y="30" />
+                <Label name="$(parent)Author" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
+                    <Dimensions x="300"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="20"/>
                 </Label>
 
-                <Label name="$(parent)State" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Dimensions x="220" y="30" />
+                <Label name="$(parent)State" font="ZoFontWinH4"inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
+                    <Dimensions x="220"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Author" relativePoint="RIGHT" offsetX="20" />
                 </Label>
 

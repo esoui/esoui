@@ -222,14 +222,16 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
 
             --Keep Fast Travel Status
             local startingKeep = GetKeepFastTravelInteraction()
-            if startingKeep or ZO_WorldMap_GetMode() == MAP_MODE_AVA_KEEP_RECALL then
+            local isUsingKeepRecallStone = ZO_WorldMap_GetMode() == MAP_MODE_AVA_KEEP_RECALL
+            if startingKeep or isUsingKeepRecallStone then
                 AddVerticalSpace(self, 5)
                 if keepId == startingKeep then
                     AddLine(self, GetString(SI_TOOLTIP_KEEP_STARTING_KEEP), KEEP_TOOLTIP_AT_KEEP)
                 else
-                    local bgContext =  ZO_WorldMap_GetBattlegroundQueryType()
+                    local bgContext = ZO_WorldMap_GetBattlegroundQueryType()
+                    local isKeepAccessible = isUsingKeepRecallStone and GetKeepRecallAvailable(keepId, bgContext) or CanKeepBeFastTravelledTo(keepId, bgContext)
 
-                    if GetKeepAccessible(keepId, bgContext) or GetKeepRecallAvailable(keepId, bgContext) then
+                    if isKeepAccessible then
                         AddLine(self, GetString(SI_TOOLTIP_KEEP_ACCESSIBLE), KEEP_TOOLTIP_ACCESSIBLE)
                     else
                         local playerAlliance = GetUnitAlliance("player")
@@ -237,12 +239,14 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                         elseif playerAlliance ~= alliance then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_WRONG_OWNER), KEEP_TOOLTIP_NOT_ACCESSIBLE)
+                        elseif IsKeepTravelBlockedByDaedricArtifact(keepId) then
+                            AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_CARRYING_DAEDRIC_ARTIFACT), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                         elseif GetKeepUnderAttack(keepId, bgContext) then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_UNDER_ATTACK), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                             showUnderAttackLine = false
                         elseif GetKeepUnderAttack(startingKeep, battlegroundContext) then
                             AddLine(self, GetString(SI_TOOLTIP_KEEP_STARTING_KEEP_UNDER_ATTACK), KEEP_TOOLTIP_NOT_ACCESSIBLE)
-                        elseif ZO_WorldMap_GetMode() == MAP_MODE_AVA_KEEP_RECALL then
+                        elseif isUsingKeepRecallStone then
                             local keepRecallUseResult = CanUseKeepRecallStone()
                             AddLine(self, GetString("SI_KEEPRECALLSTONEUSERESULT", keepRecallUseResult), KEEP_TOOLTIP_NOT_ACCESSIBLE)
                         elseif not GetKeepHasResourcesForTravel(keepId, bgContext) then
@@ -322,14 +326,16 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
                         self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
                     elseif playerAlliance ~= keepAlliance then
                         self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_WRONG_OWNER), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+                    elseif IsKeepTravelBlockedByDaedricArtifact(keepId) then
+                        self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_CARRYING_DAEDRIC_ARTIFACT), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
                     elseif showUnderAttackLine then
                         self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_UNDER_ATTACK), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
                         showUnderAttackLine = false
                     elseif GetKeepUnderAttack(startingKeep, battlegroundContext) then
                         self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_STARTING_KEEP_UNDER_ATTACK), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
-                    elseif(not GetKeepHasResourcesForTravel(keepId, bgContext)) then
+                    elseif not GetKeepHasResourcesForTravel(keepId, bgContext) then
                         self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_RESOURCES), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
-                    elseif(not GetKeepHasResourcesForTravel(startingKeep, bgContext)) then
+                    elseif not GetKeepHasResourcesForTravel(startingKeep, bgContext) then
                         self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_STARTING_KEEP_RESOURCES), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
                     else
                         self:LayoutIconStringLine(keepSection, nil, GetString(SI_TOOLTIP_KEEP_NOT_ACCESSIBLE_NETWORK), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))

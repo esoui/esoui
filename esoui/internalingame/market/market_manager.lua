@@ -122,7 +122,7 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
 end
 
 do
-    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 29, "Update market error flow to handle new purchase result")
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 30, "Update market error flow to handle new purchase result")
     local IS_SIMPLE_MARKET_PURCHASE_ERROR = 
     {
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,
@@ -130,6 +130,7 @@ do
         [MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY] = true,
         [MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS] = true,
         [MARKET_PURCHASE_RESULT_EXCEEDS_CURRENCY_CAP] = true,
+        [MARKET_PURCHASE_RESULT_TEMPORARY_HOTBAR_PROHIBITION] = true,
     }
     function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
         local expectedPurchaseResult = marketProductData:CouldPurchase()

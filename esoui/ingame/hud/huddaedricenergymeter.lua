@@ -225,7 +225,7 @@ end
 
 function ZO_HUDDaedricEnergyMeter:UpdateVisibility()
     local SHOULD_FADE_OUT = true
-    self:SetHiddenForReason("daedricArtifactInactive", GetActiveDaedricArtifactId() == nil, SHOULD_FADE_OUT)
+    self:SetHiddenForReason("daedricArtifactInactive", GetLocalPlayerDaedricArtifactId() == nil, SHOULD_FADE_OUT)
 end
 
 do
@@ -269,7 +269,7 @@ do
         -- set active weapon
         self.activeWeapon:Hide()
 
-        local daedricArtifactId = internalassert(GetActiveDaedricArtifactId())
+        local daedricArtifactId = internalassert(GetLocalPlayerDaedricArtifactId())
         local visualType = GetDaedricArtifactVisualType(daedricArtifactId)
         self.activeWeapon = self.animationsForArtifactVisualType[visualType] 
 

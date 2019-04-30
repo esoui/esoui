@@ -15,15 +15,12 @@ function ZO_GuildBrowser_GuildList_Shared:Initialize(control)
     self.list = control:GetNamedChild("List") 
     self.resultsLabel = control:GetNamedChild("Results")
 
-    self.missingGuildData = {}
-
     local function OnGuildFinderSearchResultsReady()
         if self.fragment:IsShowing() then
-            self:CheckIfCanShowList()
+            self:RefreshList()
         end
     end
 
-    GUILD_BROWSER_MANAGER:RegisterCallback("OnGuildDataReady", function(guildId) self:OnGuildDataReady(guildId) end)
     GUILD_BROWSER_MANAGER:RegisterCallback("OnGuildFinderSearchResultsReady", OnGuildFinderSearchResultsReady)
     GUILD_BROWSER_MANAGER:RegisterCallback("OnSearchStateChanged", function(newState) self:OnSearchStateChanged(newState) end)
 end
@@ -33,7 +30,7 @@ function ZO_GuildBrowser_GuildList_Shared:OnShowing()
 end
 
 function ZO_GuildBrowser_GuildList_Shared:OnHidden()
-    ZO_ClearNumericallyIndexedTable(self.missingGuildData)
+    
 end
 
 function ZO_GuildBrowser_GuildList_Shared:GetAllianceIcon(alliance)
@@ -94,16 +91,6 @@ function ZO_GuildBrowser_GuildList_Shared:GetRowContextualInfo(data)
     end
 end
 
-function ZO_GuildBrowser_GuildList_Shared:OnGuildDataReady(guildId)
-    for i, missingGuildId in ipairs(self.missingGuildData) do
-        if missingGuildId == guildId then
-            table.remove(self.missingGuildData, i)
-        end
-    end
-
-    self:RefreshList()
-end
-
 function ZO_GuildBrowser_GuildList_Shared:OnSearchStateChanged(newState)
     local shouldShowEmptyList = newState == GUILD_FINDER_SEARCH_STATE_WAITING or newState == GUILD_FINDER_SEARCH_STATE_QUEUED
     if shouldShowEmptyList then
@@ -133,23 +120,8 @@ function ZO_GuildBrowser_GuildList_Shared:UpdateResultsLabel()
     end
 end
 
-function ZO_GuildBrowser_GuildList_Shared:CheckIfCanShowList()
-    ZO_ClearNumericallyIndexedTable(self.missingGuildData)
-    for _, guildId in GUILD_BROWSER_MANAGER:CurrentFoundGuildsListIterator() do
-        if GUILD_BROWSER_MANAGER:GetGuildData(guildId) == nil then
-            table.insert(self.missingGuildData, guildId)
-        end
-    end
-
-    if #self.missingGuildData > 0 then
-        GUILD_BROWSER_MANAGER:RequestDataForGuilds(self.missingGuildData)
-    end
-
-    self:RefreshList()
-end
-
 function ZO_GuildBrowser_GuildList_Shared:RefreshList()
-    if self.fragment:IsShowing() and #self.missingGuildData == 0 then
+    if self.fragment:IsShowing() then
         self:PopulateList()
     end
 end

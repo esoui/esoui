@@ -15,10 +15,11 @@
             <Controls>
                 <Control name="$(parent)AlertContainer" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="ZO_GuildRecruitment_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40" />
+                    <Anchor point="RIGHT" relativeTo="RIGHT" constrains="X" offsetX="-20" />
                     <Controls>
-                        <Label name="$(parent)Alert" inherits="ZO_GuildRecruitment_Keyboard_Header_Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" text="SI_GUILD_RECRUITMENT_GUILD_LISTING_FULL_GUILD_ALERT" hide="true">
+                        <Label name="$(parent)Alert" inherits="ZO_GuildRecruitment_Keyboard_Header_Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" hide="true">
                             <Anchor point="TOPLEFT" />
-                            <Dimensions y="40" />
+                            <Anchor point="RIGHT" constrains="X" />
                         </Label>
                     </Controls>
                 </Control>

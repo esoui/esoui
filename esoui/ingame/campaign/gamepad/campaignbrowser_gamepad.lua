@@ -1,4 +1,4 @@
-local GAMEPAD_GUILD_HUB_SCENE_NAME = "gamepad_campaign_root"
+local GAMEPAD_AVA_ROOT_SCENE_NAME = "gamepad_campaign_root"
 
 local CAMPAIGN_BROWSER_MODES = {
     CAMPAIGNS = 1,
@@ -43,7 +43,7 @@ function ZO_CampaignBrowser_Gamepad:New(...)
 end
 
 function ZO_CampaignBrowser_Gamepad:Initialize(control)
-    GAMEPAD_AVA_ROOT_SCENE = ZO_Scene:New(GAMEPAD_GUILD_HUB_SCENE_NAME, SCENE_MANAGER)
+    GAMEPAD_AVA_ROOT_SCENE = ZO_Scene:New(GAMEPAD_AVA_ROOT_SCENE_NAME, SCENE_MANAGER)
 
     local ACTIVATE_LIST_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_LIST_ON_SHOW, GAMEPAD_AVA_ROOT_SCENE)
@@ -581,7 +581,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.CAMPAIGN_RULESET_TYPES)
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                 else
-                    SCENE_MANAGER:Hide(GAMEPAD_GUILD_HUB_SCENE_NAME)
+                    SCENE_MANAGER:Hide(GAMEPAD_AVA_ROOT_SCENE_NAME)
                 end
             end,
         },

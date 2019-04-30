@@ -35,11 +35,25 @@ function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:Layout(data)
     self.editBox:SetEmptyText(data.emptyText)
     self.editBox:RegisterCallback("Save", function(text) data.onEditCallback(self.attribute, text) end)
 
-    if data.currentValue then
+    local displayedText = self:GetEditBoxText()
+    if data.currentValue and data.currentValue ~= displayedText then
         self.editBox:SetText(data.currentValue)
+    elseif self.hiddenWhileEditting then
+        local IS_EDITING = true
+        local FORCE_UPDATE = true
+        self.editBox:SetEditing(IS_EDITING, FORCE_UPDATE)
     end
 
     self.control:SetDimensions(data.dimensionsX, data.dimensionsY)
+    self.hiddenWhileEditting = false
+end
+
+function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:GetEditBoxText()
+    return self.editBox:GetText()
+end
+
+function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:SetControlHidden()
+    self.hiddenWhileEditting = self.editBox:IsEditing()
 end
 
 -- XML functions

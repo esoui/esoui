@@ -16,6 +16,7 @@ local INTERACT_TYPE_LFG_READY_CHECK = 13
 local INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS = 14
 local INTERACT_TYPE_GIFT_RECEIVED = 15
 local INTERACT_TYPE_TRACK_ZONE_STORY = 16
+local INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED = 17
 
 local TIMED_PROMPTS =
 {
@@ -23,6 +24,9 @@ local TIMED_PROMPTS =
     [INTERACT_TYPE_CAMPAIGN_QUEUE] = true,
     [INTERACT_TYPE_WORLD_EVENT_INVITE] = true,
     [INTERACT_TYPE_GROUP_ELECTION] = true,
+    -- Campaign Queue is the only timed prompt without a fixed expiration time; instead it's manually removed when the queue it's a part of pops.
+    -- This means it does not define expiresAtS or expirationCallback, and it refreshes every second without necessarily needing to; it doesn't show a timer.
+    [INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED] = true,
 }
 
 ZO_PlayerToPlayer = ZO_Object:Subclass()
@@ -155,20 +159,35 @@ function ZO_PlayerToPlayer:InitializeSoulGemResurrectionEvents()
     self.control:RegisterForEvent(EVENT_END_SOUL_GEM_RESURRECTION, function(eventCode, ...) self:OnEndSoulGemResurrection(...) end)
 end
 
-local function GetCampaignQueueData(campaignId, isGroup)
+local function GetCampaignConfirmQueueData(campaignId, isGroup)
     local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", GetCampaignRulesetType(GetCampaignRulesetId(campaignId)))
     local campaignName = GetCampaignName(campaignId)
     local remainingSeconds = GetCampaignQueueRemainingConfirmationSeconds(campaignId, isGroup)
-    local campaignData = 
-        {
-            campaignId = campaignId,
-            isGroup = isGroup,
-            campaignName = campaignName,
-            messageFormat = SI_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL,
-            messageParams = { campaignRulesetTypeString, campaignName },
-            expiresAtS = GetFrameTimeSeconds() + remainingSeconds,
-            dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CAMPAIGN_QUEUE),
-        }
+    local campaignData =
+    {
+        campaignId = campaignId,
+        isGroup = isGroup,
+        campaignName = campaignName,
+        messageFormat = SI_CAMPAIGN_QUEUE_MESSAGE,
+        messageParams = { campaignRulesetTypeString, campaignName },
+        expiresAtS = GetFrameTimeSeconds() + remainingSeconds,
+        dialogTitle = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CAMPAIGN_QUEUE),
+    }
+
+    return campaignData
+end
+
+local function GetCampaignQueueJoinedData(campaignId, isAboutToAllianceLock)
+    local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", GetCampaignRulesetType(GetCampaignRulesetId(campaignId)))
+    local campaignName = GetCampaignName(campaignId)
+    local campaignData =
+    {
+        campaignId = campaignId,
+        campaignName = campaignName,
+        messageFormat = isAboutToAllianceLock and SI_CAMPAIGN_QUEUE_JOINED_AS_GROUP_WITH_ALLIANCE_LOCK_MESSAGE or SI_CAMPAIGN_QUEUE_JOINED_AS_GROUP_MESSAGE,
+        messageParams = { campaignRulesetTypeString, ZO_SELECTED_TEXT:Colorize(campaignName) },
+        dialogTitle = SI_CAMPAIGN_QUEUE_JOINED_AS_GROUP_TITLE,
+    }
 
     return campaignData
 end
@@ -358,7 +377,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnCampaignQueueStateChanged(_, campaignId, isGroup, state)
         if state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
-            local campaignQueueData = GetCampaignQueueData(campaignId, isGroup)
+            local campaignQueueData = GetCampaignConfirmQueueData(campaignId, isGroup)
 
             local function AcceptCampaignEntry()
                 ConfirmCampaignEntry(campaignId, isGroup, true)
@@ -386,9 +405,43 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
     end
 
+    local function OnCampaignQueueJoined(_, campaignId, isMemberOfGroup)
+        if not isMemberOfGroup then
+            return
+        end
+
+        local campaignData = CAMPAIGN_BROWSER_MANAGER:GetDataByCampaignId(campaignId)
+        local isAboutToAllianceLock = campaignData and ZO_CampaignBrowserDialogs_ShouldShowAllianceLockWarning(campaignData)
+
+        local campaignQueueData = GetCampaignQueueJoinedData(campaignId, isAboutToAllianceLock)
+
+        local function AcceptCampaignEntry()
+            if IsInGamepadPreferredMode() then
+                SCENE_MANAGER:Show(GAMEPAD_AVA_ROOT_SCENE:GetName())
+            else
+                SCENE_MANAGER:Show(CAMPAIGN_BROWSER_SCENE:GetName())
+            end
+        end
+
+        local function DeclineCampaignEntry()
+            -- Dismiss prompt automatically
+        end
+
+        --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
+        local NO_TARGET_LABEL = nil
+        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED, campaignId, campaignId, NO_TARGET_LABEL, AcceptCampaignEntry, DeclineCampaignEntry)
+
+        promptData.messageFormat = campaignQueueData.messageFormat
+        promptData.messageParams = campaignQueueData.messageParams
+        promptData.dialogTitle = campaignQueueData.dialogTitle
+        promptData.acceptText = GetString(SI_CAMPAIGN_QUEUE_JOINED_AS_GROUP_OPEN_CAMPAIGNS_BUTTON)
+        promptData.declineText = GetString(SI_CAMPAIGN_QUEUE_JOINED_AS_GROUP_DISMISS_BUTTON)
+    end
+
     local function OnCampaignQueueLeft(_, campaignId, group)
         --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
         self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE, campaignId, campaignId)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED, campaignId, campaignId)
     end
 
     local function OnScriptedWorldEventInvite(eventCode, eventId, eventName, inviterName, questName)
@@ -501,6 +554,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_ACCEPTED, OnAgentChatAccepted)
     self.control:RegisterForEvent(EVENT_AGENT_CHAT_DECLINED, OnAgentChatDeclined)
     self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, OnCampaignQueueStateChanged)
+    self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_JOINED, OnCampaignQueueJoined)
     self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_LEFT, OnCampaignQueueLeft)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE, OnScriptedWorldEventInvite)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED, OnScriptedWorldEventInviteRemoved)
@@ -757,7 +811,6 @@ local function NotificationAccepted(data)
         else
             PlaySound(SOUNDS.DIALOG_ACCEPT)
         end
-        DisplayNotificationMessage(GetString(SI_NOTIFICATION_ACCEPTED), data)
     end
 end
 
@@ -1152,7 +1205,7 @@ end
 
 function ZO_PlayerToPlayer:RemoveEntryFromIncomingQueueTable(index)
     local incomingEntry = table.remove(self.incomingQueue, index)
-    if incomingEntry.expiresAtS then
+    if TIMED_PROMPTS[incomingEntry.incomingType] then
         ZO_Dialogs_ReleaseAllDialogsOfName("PTP_TIMED_RESPONSE_PROMPT", function(dialogData) return dialogData == incomingEntry end)
     end
     return incomingEntry
@@ -1325,7 +1378,7 @@ function ZO_PlayerToPlayer:OnUpdate()
             incomingEntry.updateFn(incomingEntry, isActive)
         end
 
-        if incomingEntry.expiresAtS and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
+        if TIMED_PROMPTS[incomingEntry.incomingType] and not incomingEntry.seen and SCENE_MANAGER:IsInUIMode() then
             -- For time sensitive prompts, the player probably won't see them if they are currently in a UI menu. Let's throw up a dialog before it's too late to respond
             ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
             incomingEntry.seen = true

@@ -1325,7 +1325,10 @@ do
         },
         {
             name = GetString(SI_TRADING_HOUSE_BROWSE_PROVISIONING_RARE_INGREDIENTS),
-            value = SPECIALIZED_ITEMTYPE_INGREDIENT_RARE,
+            value =
+            {
+                SPECIALIZED_ITEMTYPE_INGREDIENT_RARE,
+            },
             icons =
             {
                 up = "EsoUI/Art/TradingHouse/Tradinghouse_Materials_Provisioning_Rare_Up.dds",

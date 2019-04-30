@@ -359,6 +359,10 @@ function ZO_IngameSceneManager:SetHUDScene(hudSceneName)
    end
 end
 
+function ZO_IngameSceneManager:GetHUDSceneName()
+   return self.hudSceneName
+end
+
 function ZO_IngameSceneManager:RestoreHUDScene()
     self:SetHUDScene("hud")
 end
