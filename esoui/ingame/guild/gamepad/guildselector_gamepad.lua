@@ -21,7 +21,7 @@ function ZO_GuildSelector_Gamepad:Initialize(...)
         self:RefreshGuildList()
     end
 
-    
+
     self.m_container:SetHandler("OnEffectivelyShown", function()
         EVENT_MANAGER:RegisterForEvent("GuildSelectorGamepad", EVENT_GUILD_DATA_LOADED, RefreshGuildList)
     end)
@@ -33,7 +33,7 @@ function ZO_GuildSelector_Gamepad:Initialize(...)
     self:RefreshGuildList()
 end
 
-function ZO_SelectGuildDialog:SetGuildFilter(filterFunction)
+function ZO_GuildSelector_Gamepad:SetGuildFilter(filterFunction)
     self.filterFunction = filterFunction
 end
 
@@ -53,9 +53,9 @@ function ZO_GuildSelector_Gamepad:RefreshGuildList()
     self:ClearItems()
     for i = 1, GetNumGuilds() do
         local guildId = GetGuildId(i)
-        if(not self.filterFunction or self.filterFunction(guildId)) then
+        if not self.filterFunction or self.filterFunction(guildId) then
             local guildName = GetGuildName(guildId)
-            local guildAlliance = GetGuildAlliance(guildId) 
+            local guildAlliance = GetGuildAlliance(guildId)
             local guildText = zo_iconTextFormat(GetLargeAllianceSymbolIcon(guildAlliance), 32, 32, guildName)
             local entry = self:CreateItemEntry(guildText, self.OnGuildSelected)
             entry.guildId = guildId
@@ -70,7 +70,7 @@ function ZO_GuildSelector_Gamepad:RefreshGuildList()
         end
     end
 
-    if(next(self.entries) == nil) then
+    if next(self.entries) == nil then
         return false
     end
 

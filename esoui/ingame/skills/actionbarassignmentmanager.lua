@@ -670,6 +670,21 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_WEAPON_PAIR_LOCK_CHANGED, UpdateWeaponSwapState)
 
+    local function HandleSlotChangeRequested(_, abilityId, actionSlotIndex, hotbarCategory)
+        local hotbar = self:GetHotbar(hotbarCategory)
+        if abilityId == 0 then
+            if hotbar:ClearSlot(actionSlotIndex) then
+                PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
+            end
+        else
+            local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
+            if progressionData and hotbar:AssignSkillToSlot(actionSlotIndex, progressionData:GetSkillData())then
+                PlaySound(SOUNDS.ABILITY_SLOTTED)
+            end
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_HOTBAR_SLOT_CHANGE_REQUESTED, HandleSlotChangeRequested)
+
     -- Skill point Allocation events
     local function OnSkillPurchaseStateChanged(skillPointAllocator)
         local skillData = skillPointAllocator:GetSkillData()
@@ -952,7 +967,9 @@ function ZO_ActionBarAssignmentManager:TryToSlotNewSkill(skillData)
     -- There is also an encoded assumption here that any empty slot is as good as any other slot for the GetExpectedSkillSlotResult(), so we only need to check one before bailing out.
     if actionSlotIndex and hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
         hotbar:AssignSkillToSlot(actionSlotIndex, skillData)
+        return true
     end
+    return false
 end
 
 function ZO_ActionBarAssignmentManager:ClearAllSlotsWithSkill(skillData)

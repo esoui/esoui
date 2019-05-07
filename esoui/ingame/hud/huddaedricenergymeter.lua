@@ -173,6 +173,10 @@ function ZO_HUDDaedricEnergyMeter:Initialize(control)
     self.warningLoop = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_HUDDaedricEnergyMeter_Warn", control:GetNamedChild("Overlay"))
     self.isWarningActive = false
 
+    local arrow = self.control:GetNamedChild("ArrowRegeneration")
+    arrow.burstAnim = ANIMATION_MANAGER:CreateTimelineFromVirtual("ArrowRegenerationAnimation", arrow)
+    self.arrow = arrow
+
     -- Weapon animations
     internalassert(DAEDRIC_ARTIFACT_VISUAL_TYPE_MAX_VALUE == 1, "Make new weapon animation for visual type")
     self.animationsForArtifactVisualType =
@@ -183,16 +187,45 @@ function ZO_HUDDaedricEnergyMeter:Initialize(control)
     self.activeWeapon = self.animationsForArtifactVisualType[DAEDRIC_ARTIFACT_VISUAL_TYPE_NONE] 
 
     -- Set up platform styles
+    local ARROW_OFFSET_Y = 1
+    local ARROW_END_X_PADDING = 3
+    local ARROW_TEXTURE_WIDTH = 16
     self.keyboardStyle = 
     { 
         template = "ZO_HUDDaedricEnergyMeter_KeyboardTemplate",
+        arrowTemplate = "ZO_ArrowRegeneration_Keyboard_Template",
+        setupArrowCallback = function(barControl, arrow)
+            -- animate from right to left
+            local startOffsetX = barControl:GetWidth() - ARROW_TEXTURE_WIDTH
+            arrow:ClearAnchors()
+
+            arrow:SetAnchor(LEFT, barControl, LEFT, startOffsetX, ARROW_OFFSET_Y)
+            arrow.burstAnim:GetFirstAnimation():SetTranslateDeltas(-startOffsetX - ARROW_END_X_PADDING, 0)
+            arrow:SetTextureCoords(0, 1, 0, 1)
+        end,
     }
     self.gamepadStyle = 
     { 
         template = "ZO_HUDDaedricEnergyMeter_GamepadTemplate",
+        arrowTemplate = "ZO_ArrowRegeneration_Gamepad_Template",
+        setupArrowCallback = function(barControl, arrow)
+            -- animate from left to right
+            local startOffsetX = barControl:GetWidth() - ARROW_TEXTURE_WIDTH
+            arrow:ClearAnchors()
+
+            arrow:SetAnchor(RIGHT, barControl, RIGHT, -startOffsetX, ARROW_OFFSET_Y)
+            arrow.burstAnim:GetFirstAnimation():SetTranslateDeltas(startOffsetX - ARROW_END_X_PADDING, 0)
+            arrow:SetTextureCoords(1, 0, 0, 1)
+        end,
     }
     local function ApplyPlatformStyle(styleTable)
         ApplyTemplateToControl(self.control, styleTable.template)
+        ApplyTemplateToControl(self.arrow, styleTable.arrowTemplate)
+
+        if self.arrow.burstAnim:IsPlaying() then
+            self.arrow.burstAnim:PlayInstantlyToStart()
+        end
+        styleTable.setupArrowCallback(self.barControl, self.arrow)
     end
     self.platformStyle = ZO_PlatformStyle:New(ApplyPlatformStyle, self.keyboardStyle, self.gamepadStyle)
 
@@ -302,6 +335,9 @@ function ZO_HUDDaedricEnergyMeter:UpdateEnergyValues(currentEnergy, maxEnergy, i
     if currentEnergy > oldCurrentEnergy then
         PlaySound(SOUNDS.DAEDRIC_ENERGY_BURST)
         self.activeWeapon:PlayEnergyBurstAnimation()
+        if not self.arrow.burstAnim:IsPlaying() then
+            self.arrow.burstAnim:PlayFromStart()
+        end
     end
 
     -- Warning animation

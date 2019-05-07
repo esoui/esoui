@@ -36,7 +36,7 @@ function ZO_GuildBrowser_Applications_Shared:SetupRow(control, data)
     local guildNameLabel = control:GetNamedChild("Name")
     local expirationLabel = control:GetNamedChild("Expires")
 
-    local guildInfo = ZO_AllianceIconNameFormatter(data.alliance, data.guildName)
+    local guildInfo = ZO_AllianceIconNameFormatter(data.guildAlliance, data.guildName)
     guildNameLabel:SetText(guildInfo)
     local timeRemainingS = GetGuildFinderAccountApplicationDuration(data.index)
     expirationLabel:SetText(ZO_FormatCountdownTimer(timeRemainingS))

@@ -1243,7 +1243,9 @@ end
 function ZO_Skills_AbilitySlot_OnDoubleClick(control)
     local skillData = control.skillProgressionData:GetSkillData()
     if not skillData:IsPassive() and skillData:GetPointAllocator():IsPurchased() then
-        ACTION_BAR_ASSIGNMENT_MANAGER:TryToSlotNewSkill(skillData)
+        if ACTION_BAR_ASSIGNMENT_MANAGER:TryToSlotNewSkill(skillData) then
+            PlaySound(SOUNDS.ABILITY_SLOTTED)
+        end
     end
 end
 
@@ -1256,21 +1258,27 @@ function ZO_Skills_AbilitySlot_OnClick(control)
             local ultimateSlotIndex = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
             if hotbar:GetExpectedSkillSlotResult(ultimateSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
                 AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_ULTIMATE_SLOT), function()
-                    hotbar:AssignSkillToSlot(ultimateSlotIndex, skillData)
+                    if hotbar:AssignSkillToSlot(ultimateSlotIndex, skillData) then
+                        PlaySound(SOUNDS.ABILITY_SLOTTED)
+                    end
                 end)
             end
         else
             local slotId = hotbar:FindEmptySlotForSkill(skillData)
             if slotId then
                 AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_EMPTY_SLOT), function()
-                    hotbar:AssignSkillToSlot(slotId, skillData)
+                    if hotbar:AssignSkillToSlot(slotId, skillData) then
+                        PlaySound(SOUNDS.ABILITY_SLOTTED)
+                    end
                 end)
             end
 
             for actionSlotIndex = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX do
                 if hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
                     AddMenuItem(zo_strformat(SI_SKILL_ABILITY_ASSIGN_TO_SLOT, actionSlotIndex - 2), function()
-                        hotbar:AssignSkillToSlot(actionSlotIndex, skillData)
+                        if hotbar:AssignSkillToSlot(actionSlotIndex, skillData) then
+                            PlaySound(SOUNDS.ABILITY_SLOTTED)
+                        end
                     end)
                 end
             end

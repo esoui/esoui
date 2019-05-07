@@ -114,6 +114,7 @@ function ZO_GuildBrowser_GuildList_Keyboard:InitializeKeybindStripDescriptor()
                 return not self.filterManager:AreFiltersSetToDefault()
             end,
             callback = function()
+                PlaySound(SOUNDS.DIALOG_ACCEPT)
                 self:ResetFilters()
                 GUILD_BROWSER_MANAGER:ExecuteSearch()
             end,

@@ -101,8 +101,10 @@ function ZO_ZoneStories_Keyboard:OnZoneSelectionChanged(comboBox, entryText, ent
 end
 
 function ZO_ZoneStories_Keyboard:UpdatePlayStoryButtonText()
-    local canContinueZone = CanZoneStoryContinueTrackingActivities(self:GetSelectedZoneId())
-    self.playStoryButton:SetEnabled(canContinueZone)
+    local zoneId = self:GetSelectedZoneId()
+    local isZoneAvailable = ZO_ZoneStories_Manager.GetZoneAvailability(zoneId)
+    local canContinueZone = CanZoneStoryContinueTrackingActivities(zoneId)
+    self.playStoryButton:SetEnabled(isZoneAvailable and canContinueZone)
     self.playStoryButton:SetText(self:GetPlayStoryButtonText())
 end
 
@@ -162,10 +164,16 @@ function ZO_ZoneStories_Keyboard:UpdateZoneStory()
     local selectedZoneId = selectedData.id
     self.stopTrackingButton:SetHidden(zoneId ~= selectedZoneId)
 
-    local arePriorityQuestsBlocked, errorStringText = ZO_ZoneStories_Manager. GetZoneCompletionTypeBlockingInfo(selectedZoneId, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
-    local shouldShowBlockingMessage = arePriorityQuestsBlocked and errorStringText ~= nil
+    local isZoneAvailable, zoneAvailableErrorText = ZO_ZoneStories_Manager.GetZoneAvailability(selectedZoneId)
+    local shouldShowBlockingMessage = not isZoneAvailable and zoneAvailableErrorText ~= nil
     if shouldShowBlockingMessage then
-        self.trackingMessageLabel:SetText(errorStringText)
+        self.trackingMessageLabel:SetText(zoneAvailableErrorText)
+    else
+        local arePriorityQuestsBlocked, errorStringText = ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(selectedZoneId, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
+        shouldShowBlockingMessage = arePriorityQuestsBlocked and errorStringText ~= nil
+        if shouldShowBlockingMessage then
+            self.trackingMessageLabel:SetText(errorStringText)
+        end
     end
 
     self.trackingMessageLabel:SetHidden(not shouldShowBlockingMessage)

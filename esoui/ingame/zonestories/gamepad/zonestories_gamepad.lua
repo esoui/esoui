@@ -143,7 +143,10 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
         end,
 
         enabled = function()
-            return CanZoneStoryContinueTrackingActivities(self:GetSelectedZoneId())
+            local zoneId = self:GetSelectedZoneId()
+            local isZoneAvailable = ZO_ZoneStories_Manager.GetZoneAvailability(zoneId)
+            local canContinueZone = CanZoneStoryContinueTrackingActivities(zoneId)
+            return isZoneAvailable and canContinueZone
         end,
 
         visible = function()
@@ -210,6 +213,7 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self.gridList:Deactivate()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_QUAD1_TOOLTIP)
+            self:UpdateInfoTooltip(GAMEPAD_RIGHT_TOOLTIP)
             self:ActivateCurrentList()
         end),
 
@@ -317,15 +321,7 @@ function ZO_ZoneStories_Gamepad:SetFocusOnSelectedZone()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.zoneKeybindStripDescriptor)
 
-    local selectedData = self:GetSelectedStoryData()
-    if selectedData then
-        local selectedZoneId = selectedData.id
-        local arePriorityQuestsBlocked, errorStringText = ZO_ZoneStories_Manager. GetZoneCompletionTypeBlockingInfo(selectedZoneId, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
-        local shouldShowBlockingMessage = arePriorityQuestsBlocked and errorStringText ~= nil
-        if shouldShowBlockingMessage then
-            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_QUAD1_TOOLTIP, errorStringText)
-        end
-    end
+    self:UpdateInfoTooltip(GAMEPAD_QUAD1_TOOLTIP)
 end
 
 function ZO_ZoneStories_Gamepad:UpdatePlayStoryButtonText()
@@ -344,6 +340,35 @@ end
 function ZO_ZoneStories_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
     if selectedData and selectedData.dataSource then
         self:UpdateZoneStory(selectedData.dataSource)
+    end
+end
+
+function ZO_ZoneStories_Gamepad:UpdateZoneStory()
+    ZO_ZoneStories_Shared.UpdateZoneStory(self)
+
+    self:UpdateInfoTooltip(GAMEPAD_RIGHT_TOOLTIP)
+end
+
+function ZO_ZoneStories_Gamepad:UpdateInfoTooltip(tooltipType)
+    GAMEPAD_TOOLTIPS:ClearTooltip(tooltipType)
+
+    if GAMEPAD_ZONE_STORIES_SCENE:IsShowing() then
+        local selectedData = self:GetSelectedStoryData()
+        if selectedData then
+            local selectedZoneId = selectedData.id
+
+            local isZoneAvailable, zoneAvailableErrorText = ZO_ZoneStories_Manager.GetZoneAvailability(selectedZoneId)
+            local shouldShowBlockingMessage = not isZoneAvailable and zoneAvailableErrorText ~= nil
+            if shouldShowBlockingMessage then
+                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(tooltipType, zoneAvailableErrorText)
+            else
+                local arePriorityQuestsBlocked, errorStringText = ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(selectedZoneId, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
+                shouldShowBlockingMessage = arePriorityQuestsBlocked and errorStringText ~= nil
+                if shouldShowBlockingMessage then
+                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(tooltipType, errorStringText)
+                end
+            end
+        end
     end
 end
 

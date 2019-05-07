@@ -330,6 +330,8 @@ function ZO_MultiSelectComboBox:SelectItem(item, ignoreCallback)
     else
         self:RemoveItemFromSelected(item)
     end
+    PlaySound(SOUNDS.COMBO_CLICK)
+
     if item.callback and not ignoreCallback then
         item.callback(self, item.name, item)
     end

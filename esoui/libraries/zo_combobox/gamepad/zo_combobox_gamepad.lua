@@ -264,6 +264,7 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_NEGATIVE",
             name = GetString(SI_GAMEPAD_BACK_OPTION),
             callback = function()
+               PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                self:Deactivate()
             end,
             visible = function() return not ZO_Dialogs_IsShowingDialog() end,

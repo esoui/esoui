@@ -131,6 +131,8 @@
 
                 <StatusBar name="$(parent)Bar" layer="CONTROLS" />
 
+                <Texture name="$(parent)ArrowRegeneration" layer="OVERLAY" inherits="ZO_ArrowRegeneration" />
+
                 <Texture name="$(parent)Overlay" layer="OVERLAY" alpha="0" />
 
                 <Control name="$(parent)Weapon" tier="HIGH">

@@ -361,9 +361,13 @@ function ZO_GamepadAssignableActionBarButton:Refresh()
 end
 
 function ZO_GamepadAssignableActionBarButton:ClearSlot()
-    ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():ClearSlot(self.actionSlotIndex)
+    if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():ClearSlot(self.actionSlotIndex) then
+        PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
+    end
 end
 
 function ZO_GamepadAssignableActionBarButton:AssignSkill(skillData)
-    ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():AssignSkillToSlot(self.actionSlotIndex, skillData)
+    if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():AssignSkillToSlot(self.actionSlotIndex, skillData) then
+        PlaySound(SOUNDS.ABILITY_SLOTTED)
+    end
 end

@@ -132,6 +132,10 @@ function ZO_GuildRecruitment_Keyboard:RefreshGuildPermissionsState()
             data.manager:SetGuildId(self.guildId)
         end
 
+        if self.openApplicationsOnShowing then
+            self:SetSelectedCategory(treeIdToCategoryInfo[ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_APPLICATIONS], ZO_GUILD_RECRUITMENT_APPLICATIONS_SUBCATEGORY_KEYBOARD_RECIEVED)
+        end
+
         self:ShowSelectedCategory()
     end
 end

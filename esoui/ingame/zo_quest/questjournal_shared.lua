@@ -201,7 +201,7 @@ function ZO_QuestJournal_Shared:OnQuestAdvanced(questIndex)
     end
 end
 
-function ZO_QuestJournal_Shared:OnQuestConditionInfoChanged(questIndex, questName, conditionText, conditionType, curCondtionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isQuestComplete, isConditionComplete, isStepHidden, isConditionCompleteStatusChanged)
+function ZO_QuestJournal_Shared:OnQuestConditionInfoChanged(questIndex, questName, conditionText, conditionType, curCondtionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isQuestComplete, isConditionComplete, isStepHidden, isConditionCompleteStatusChanged, isConditionCompletableBySiblingStatusChanged)
     local selectedQuestIndex = self:GetSelectedQuestIndex()
     if questIndex == selectedQuestIndex then
         self:RefreshDetails()

@@ -70,7 +70,7 @@ function ZO_GuildFinder_Keyboard_Base:Initialize(control)
     local CHILD_INDENT = 60
     local CHILD_SPACING = 0
     self.categoryTree:AddTemplate(self.iconChildlessHeaderTemplateName, TreeHeaderSetup_Childless, TreeHeaderSelected_Childless, NO_EQUALITY_FUNCTION, DEFAULT_CHILD_INDENT, CHILD_SPACING)
-    self.categoryTree:AddTemplate("ZO_IconHeader", self.onSetupChildHeader, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, CHILD_INDENT, CHILD_SPACING)
+    self.categoryTree:AddTemplate("ZO_GuildFinder_IconHeader", self.onSetupChildHeader, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, CHILD_INDENT, CHILD_SPACING)
     self.categoryTree:AddTemplate("ZO_GuildFinder_Tree_SubCategory", TreeEntrySetup, TreeEntryOnSelected)
 end
 
@@ -87,7 +87,7 @@ function ZO_GuildFinder_Keyboard_Base:SetupData(categoryData)
 
         if visible then
             if data.subCategories then
-                local parentNode = self.categoryTree:AddNode("ZO_IconHeader", data)
+                local parentNode = self.categoryTree:AddNode("ZO_GuildFinder_IconHeader", data)
                 local nodeLookupData = { node = parentNode }
                 table.insert(self.nodeLookupTable, nodeLookupData)
                 for j, subCategoryData in ipairs(data.subCategories) do

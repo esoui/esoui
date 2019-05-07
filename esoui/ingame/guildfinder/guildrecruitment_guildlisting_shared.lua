@@ -72,14 +72,6 @@ function ZO_GuildRecruitment_GuildListing_Shared:InitializeGridList()
         control.object:Reset()
     end
 
-    local function OnTextEdited(control, data)
-        local attribute = data.dataSource.attribute
-        local editBoxObject = control and control.object
-        local text = editBoxObject:GetEditBoxText()
-        editBoxObject:SetControlHidden()
-        data.dataSource.currentValue = text
-    end
-
     -- NOTE: If you update the number of templates being added to the gridList you must also update 
     --       ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_ENTRY_TEMPLATE in GuildRecruitment_GuildListing_Gamepad.lua
     local HIDE_CALLBACK = nil
@@ -96,8 +88,8 @@ function ZO_GuildRecruitment_GuildListing_Shared:InitializeGridList()
     self.gridList:AddEntryTemplate(attributeSelectionData.endTimeEntryTemplate, attributeSelectionData.dimensionsX, attributeSelectionData.timeDimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, attributeSelectionData.gridPaddingY)
     self.gridList:AddEntryTemplate(activityCheckboxData.entryTemplate, activityCheckboxData.dimensionsX, activityCheckboxData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, activityCheckboxData.gridPaddingX, activityCheckboxData.gridPaddingY)
     self.gridList:AddEntryTemplate(activityCheckboxData.endEntryTemplate, activityCheckboxData.dimensionsX, activityCheckboxData.endDimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, activityCheckboxData.gridPaddingX, activityCheckboxData.gridPaddingY)
-    self.gridList:AddEntryTemplate(headlineData.entryTemplate, headlineData.dimensionsX, headlineData.dimensionsY, GridTileEntrySetup, OnTextEdited, GridEntryReset, GRID_PADDING_X, headlineData.gridPaddingY)
-    self.gridList:AddEntryTemplate(descriptionData.entryTemplate, descriptionData.dimensionsX, descriptionData.dimensionsY, GridTileEntrySetup, OnTextEdited, GridEntryReset, GRID_PADDING_X, descriptionData.gridPaddingY)
+    self.gridList:AddEntryTemplate(headlineData.entryTemplate, headlineData.dimensionsX, headlineData.dimensionsY, GridTileEntrySetup, self.templateData.textEditHideCallback, GridEntryReset, GRID_PADDING_X, headlineData.gridPaddingY)
+    self.gridList:AddEntryTemplate(descriptionData.entryTemplate, descriptionData.dimensionsX, descriptionData.dimensionsY, GridTileEntrySetup, self.templateData.textEditHideCallback, GridEntryReset, GRID_PADDING_X, descriptionData.gridPaddingY)
     self.gridList:AddEntryTemplate(roleSelectorData.entryTemplate, roleSelectorData.dimensionsX, roleSelectorData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, roleSelectorData.gridPaddingY)
     self.gridList:AddEntryTemplate(roleSelectorData.endEntryTemplate, roleSelectorData.endDimensionsX, roleSelectorData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, roleSelectorData.gridPaddingY)
     self.gridList:AddEntryTemplate(minimumCPData.entryTemplate, minimumCPData.dimensionsX, minimumCPData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, minimumCPData.gridPaddingY)

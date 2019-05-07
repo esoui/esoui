@@ -28,7 +28,7 @@ local QUEST_AREA_PIN_TYPES =
     MAP_PIN_TYPE_QUEST_ZONE_STORY_OPTIONAL_CONDITION,
 }
 
-local QUEST_AREA_PIN_TYPES_TO_ANIMATION_PIN_TEXTURE =
+local SHOWN_AREA_PIN_TYPES_TO_ANIMATION_PIN_TEXTURE =
 {
     [MAP_PIN_TYPE_ASSISTED_QUEST_CONDITION] = "EsoUI/Art/Compass/quest_icon_assisted.dds",
     [MAP_PIN_TYPE_ASSISTED_QUEST_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/quest_icon_assisted.dds",
@@ -48,6 +48,12 @@ local QUEST_AREA_PIN_TYPES_TO_ANIMATION_PIN_TEXTURE =
     [MAP_PIN_TYPE_QUEST_REPEATABLE_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/repeatableQuest_icon.dds",
     [MAP_PIN_TYPE_QUEST_ZONE_STORY_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon.dds",
     [MAP_PIN_TYPE_QUEST_ZONE_STORY_OPTIONAL_CONDITION] = "EsoUI/Art/Compass/zoneStoryQuest_icon.dds",
+}
+
+local AREA_PIN_TYPE_NAME =
+{
+    QUEST_PINS = "areaQuestPins",
+    ZONE_STORY_SUGGESTION_PINS = "areaZoneStorySuggestionPins",
 }
 
 local function IsPlayerInsideJournalQuestConditionGoalArea(journalIndex, stepIndex, conditionIndex)
@@ -110,9 +116,19 @@ function Compass:Initialize(control)
 
     self.container:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
+    self.areaAnimationPools = {}
+
     self:InitializeCenterOveredPins()
     self:InitializePoiPins()
     self:InitializeQuestPins()
+    self:InitializeZoneStoryAreaPins()
+
+    local function OnPlayerInPinAreaChanged(...)
+        self:OnPlayerInQuestPinAreaChanged(...)
+        self:OnPlayerInZoneStoryPinAreaChanged(...)
+    end
+
+    self.control:RegisterForEvent(EVENT_PLAYER_IN_PIN_AREA_CHANGED, OnPlayerInPinAreaChanged)
 
     self.nextLabelUpdateTime = 0
 
@@ -155,6 +171,46 @@ function Compass:ApplyTemplateToAreaTexture(texture, template, restingAlpha, pin
     self:SetAreaTexturePlatformTextures(texture, pinType)
 end
 
+function Compass:OnPlayerInZoneStoryPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
+    if pinType == MAP_PIN_TYPE_ZONE_STORY_SUGGESTED_AREA then
+        local trackedZoneId, trackedZoneCompletionType, trackedActivityId = GetTrackedZoneStoryActivityInfo()
+        if trackedZoneId == param1 and trackedZoneCompletionType == param2 and trackedActivityId == param3 then
+            if playerIsInside then
+                self:TryPlayingAnimationOnAreaPin(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId, pinType)
+            else
+                self:StopAreaPinOutAnimation(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId)
+            end
+            self:SetPlayerInside(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId)
+        end
+    end
+end
+
+function Compass:InitializeZoneStoryAreaPins()
+    local areaTexturePinPool
+    local function ResetAreaTexture(areaTexture)
+        Compass.ResetAreaTexture(areaTexture)
+    end
+
+    local function CreateAreaTexture(objectPool)
+        return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, objectPool)
+    end
+    areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+
+    local function OnAreaAnimationStarted(animationTimeline)
+        local IGNORE_PIN_TEXTURE = true
+        self:OnAreaAnimationStarted(animationTimeline, areaTexturePinPool, IGNORE_PIN_TEXTURE)
+    end
+
+    local function OnAreaAnimationStopped(animationTimeline)
+        self:OnAreaAnimationStopped(animationTimeline, self.areaAnimationPools[AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS])
+    end
+
+    local function CreateAreaAnimationTimeline()
+        return self:CreateAreaAnimationTimeline(OnAreaAnimationStarted, OnAreaAnimationStopped)
+    end
+    self.areaAnimationPools[AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
+end
+
 local AREA_TEXTURE_RESTING_ALPHA_GAMEPAD = 1
 local AREA_TEXTURE_RESTING_ALPHA_KEYBOARD = 0.85
 
@@ -175,121 +231,200 @@ function Compass:SetAreaTexturePlatformTextures(areaTexture, pinType)
     end
 end
 
-function Compass:InitializeQuestPins()
-    local function ResetAreaTexture(areaTexture)
-        areaTexture:SetHidden(true)
-        areaTexture:ClearAnchors()
+function Compass:SetPlayerInside(areaPinName, param1, param2, param3, playerIsInside)
+    if not self.playerIsInsidePins then
+        self.playerIsInsidePins = {}
     end
 
-    local areaTexturePinPool
-    local function OnAreaTextureInOnStop(animationOut)
-        areaTexturePinPool:ReleaseObject(animationOut.areaTexture.key)
+    if not self.playerIsInsidePins[areaPinName] then
+        self.playerIsInsidePins[areaPinName] = {}
     end
-    
-    local function CreateAreaTexture(objectPool)
-        local areaTexture = ZO_ObjectPool_CreateControl("ZO_CompassAreaTexture", objectPool, self.control)
 
-        areaTexture.animationIn = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationIn")
-        areaTexture.animationIn:GetAnimation(1):SetAnimatedControl(areaTexture.left)
-        areaTexture.animationIn:GetAnimation(2):SetAnimatedControl(areaTexture.right)
-        areaTexture.animationIn:GetAnimation(3):SetAnimatedControl(areaTexture.center)
-
-        for i=4, areaTexture.animationIn:GetNumAnimations() do
-            areaTexture.animationIn:GetAnimation(i):SetAnimatedControl(areaTexture)
+    for i, pin in pairs(self.playerIsInsidePins[areaPinName]) do
+        if pin.param1 == param1 and pin.param2 == param2 and pin.param3 == param3 then
+            pin.playerIsInside = playerIsInside
+            return
         end
-
-        areaTexture.resetAlphaAnimation = areaTexture.animationIn:GetLastAnimation()
-        areaTexture.resetAlphaAnimation:SetEndAlpha(IsInGamepadPreferredMode() and AREA_TEXTURE_RESTING_ALPHA_GAMEPAD or AREA_TEXTURE_RESTING_ALPHA_KEYBOARD)
-
-        areaTexture.animationOut = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationOut", areaTexture)
-        areaTexture.animationOut:SetHandler("OnStop", OnAreaTextureInOnStop)
-        areaTexture.animationOut.areaTexture = areaTexture
-
-        return areaTexture
     end
-    
-    areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
 
-    local function OnAreaAnimationStarted(animationTimeline)
-        local pin = animationTimeline:GetFirstAnimation():GetAnimatedControl()
-        animationTimeline.pin = pin
+    if param1 and param2 and param3 then
+        table.insert(self.playerIsInsidePins[areaPinName], { param1 = param1, param2 = param2, param3 = param3, playerIsInside = playerIsInside })
+    end
+end
 
-        local areaTexture, key = areaTexturePinPool:AcquireObject()
-        areaTexture.key = key
-        animationTimeline.areaTexture = areaTexture
-        areaTexture.pin = pin
+function Compass:ClearPlayerInside(areaPinName, param1, param2, param3)
+    if self.playerIsInsidePins and self.playerIsInsidePins[areaPinName] then
+        for i, pin in pairs(self.playerIsInsidePins[areaPinName]) do
+            if pin.param1 == param1 and (not param2 or pin.param2 == param2) and (not param3 or pin.param3 == param3) then
+                table.remove(self.playerIsInsidePins[areaPinName], i)
+            end
+        end
+    end
+end
 
-        local NO_RESTING_ALPHA = nil
-        local compassAreaTextureTemplate = IsInGamepadPreferredMode() and "ZO_CompassAreaTexture_Gamepad_Template" or "ZO_CompassAreaTexture_Keyboard_Template"
-        self:ApplyTemplateToAreaTexture(areaTexture, compassAreaTextureTemplate, NO_RESTING_ALPHA, self.currentlyAnimatingAreaPinType)
-        local pinTexture = QUEST_AREA_PIN_TYPES_TO_ANIMATION_PIN_TEXTURE[self.currentlyAnimatingAreaPinType]
+function Compass:IsPlayerInside(areaPinName, param1, param2, param3)
+    if self.playerIsInsidePins and self.playerIsInsidePins[areaPinName] then
+        for i, pin in pairs(self.playerIsInsidePins[areaPinName]) do
+            if pin.param1 == param1 and pin.param2 == param2 and param3 == param3 then
+                return pin.playerIsInside
+            end
+        end
+    end
+
+    return false
+end
+
+function Compass.ResetAreaTexture(areaTexture)
+    areaTexture:SetHidden(true)
+    areaTexture:ClearAnchors()
+end
+
+function Compass:CreateAreaTexture(areaPinName, objectPool)
+    local areaTexture = ZO_ObjectPool_CreateNamedControl(areaPinName, "ZO_CompassAreaTexture", objectPool, self.control)
+
+    areaTexture.animationIn = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationIn")
+    areaTexture.animationIn:GetAnimation(1):SetAnimatedControl(areaTexture.left)
+    areaTexture.animationIn:GetAnimation(2):SetAnimatedControl(areaTexture.right)
+    areaTexture.animationIn:GetAnimation(3):SetAnimatedControl(areaTexture.center)
+
+    for i = 4, areaTexture.animationIn:GetNumAnimations() do
+        areaTexture.animationIn:GetAnimation(i):SetAnimatedControl(areaTexture)
+    end
+
+    areaTexture.resetAlphaAnimation = areaTexture.animationIn:GetLastAnimation()
+    areaTexture.resetAlphaAnimation:SetEndAlpha(IsInGamepadPreferredMode() and AREA_TEXTURE_RESTING_ALPHA_GAMEPAD or AREA_TEXTURE_RESTING_ALPHA_KEYBOARD)
+
+    local function OnAreaTextureInOnStop(animationOut)
+        objectPool:ReleaseObject(animationOut.areaTexture.key)
+    end
+
+    areaTexture.animationOut = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationOut", areaTexture)
+    areaTexture.animationOut:SetHandler("OnStop", OnAreaTextureInOnStop)
+    areaTexture.animationOut.areaTexture = areaTexture
+
+    return areaTexture
+end
+
+function Compass:OnAreaAnimationStarted(animationTimeline, areaTexturePinPool, ignorePinTexture, setAlphaFunction, setStartFrameFunction)
+    local pin = animationTimeline:GetFirstAnimation():GetAnimatedControl()
+    animationTimeline.pin = pin
+
+    local areaTexture, key = areaTexturePinPool:AcquireObject()
+    areaTexture.key = key
+    animationTimeline.areaTexture = areaTexture
+    areaTexture.pin = pin
+
+    local animationPinType = animationTimeline.pinType
+    if not animationPinType then
+        return
+    end
+
+    local NO_RESTING_ALPHA = nil
+    local compassAreaTextureTemplate = IsInGamepadPreferredMode() and "ZO_CompassAreaTexture_Gamepad_Template" or "ZO_CompassAreaTexture_Keyboard_Template"
+    self:ApplyTemplateToAreaTexture(areaTexture, compassAreaTextureTemplate, NO_RESTING_ALPHA, animationPinType)
+    if not ignorePinTexture then
+        local pinTexture = SHOWN_AREA_PIN_TYPES_TO_ANIMATION_PIN_TEXTURE[animationPinType]
         internalassert(pinTexture ~= nil)
         pin:SetTexture(pinTexture)
-
-        areaTexture:SetAlpha(self.refreshingJournalIndex and 1 or pin:GetAlpha())
-        areaTexture:SetHidden(false)
-        areaTexture.animationIn:PlayFromStart(self.refreshingJournalIndex and 350 or 0)
     end
-    local function OnAreaAnimationStopped(animationTimeline)
-        self.areaAnimationPool:ReleaseObject(animationTimeline.key)
-        animationTimeline.areaTexture.animationIn:Stop()
-        animationTimeline.areaTexture.animationOut:PlayFromStart()
-    end
-    local function CreateAreaAnimationTimeline()
-        local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaPinAnimationOut")
-        timeline.owner = self
-        timeline:SetHandler("OnPlay", OnAreaAnimationStarted)
-        timeline:SetHandler("OnStop", OnAreaAnimationStopped)
-        return timeline
-    end
-    self.areaAnimationPool = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
 
-    local function OnQuestAreaGoalStateChanged(journalIndex, stepIndex, conditionIndex, playerIsInside)
-        local _, _, _, isComplete = GetJournalQuestConditionValues(journalIndex, stepIndex, conditionIndex)
-        if not isComplete and playerIsInside == self.playerIsInside then
-            self.refreshingJournalIndex = true
-        end
+    areaTexture:SetAlpha(setAlphaFunction and setAlphaFunction(pin) or pin:GetAlpha())
+    areaTexture:SetHidden(false)
+    areaTexture.animationIn:PlayFromStart(setStartFrameFunction and setStartFrameFunction() or 0)
+end
 
-        if playerIsInside and IsQuestVisible(journalIndex) then
-            self:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
-        else
-            self:StopAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
-            if self.areaOverrideQueue then
-                for i=#self.areaOverrideQueue, 1, -1 do
-                    local nextOverride = self.areaOverrideQueue[i]
-                    if nextOverride.journalIndex == journalIndex and nextOverride.stepIndex == stepIndex and nextOverride.conditionIndex == conditionIndex then
-                        table.remove(self.areaOverrideQueue, i)
-                        if #self.areaOverrideQueue == 0 then
-                            self.areaOverrideQueue = nil
-                        end
-                        break
+function Compass:OnAreaAnimationStopped(animationTimeline, areaAnimationPool)
+    areaAnimationPool:ReleaseObject(animationTimeline.key)
+    animationTimeline.areaTexture.animationIn:Stop()
+    animationTimeline.areaTexture.animationOut:PlayFromStart()
+end
+
+function Compass:CreateAreaAnimationTimeline(OnAreaAnimationStarted, OnAreaAnimationStopped)
+    local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaPinAnimationOut")
+    timeline.owner = self
+    timeline:SetHandler("OnPlay", OnAreaAnimationStarted)
+    timeline:SetHandler("OnStop", OnAreaAnimationStopped)
+    return timeline
+end
+
+function Compass:OnQuestAreaGoalStateChanged(journalIndex, stepIndex, conditionIndex, playerIsInside)
+    local _, _, _, isComplete = GetJournalQuestConditionValues(journalIndex, stepIndex, conditionIndex)
+    if not isComplete and playerIsInside == self:IsPlayerInside(AREA_PIN_TYPE_NAME.QUEST_PINS, journalIndex, stepIndex, conditionIndex) then
+        self.refreshingJournalIndex = true
+    end
+
+    if playerIsInside and IsQuestVisible(journalIndex) then
+        self:PlayQuestAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
+    else
+        self:StopAreaPinOutAnimation(AREA_PIN_TYPE_NAME.QUEST_PINS, journalIndex - 1, stepIndex - 1, conditionIndex - 1)
+        if self.areaOverrideQueue then
+            for i=#self.areaOverrideQueue, 1, -1 do
+                local nextOverride = self.areaOverrideQueue[i]
+                if nextOverride.journalIndex == journalIndex and nextOverride.stepIndex == stepIndex and nextOverride.conditionIndex == conditionIndex then
+                    table.remove(self.areaOverrideQueue, i)
+                    if #self.areaOverrideQueue == 0 then
+                        self.areaOverrideQueue = nil
                     end
+                    break
                 end
             end
         end
-
-        self.playerIsInside = playerIsInside
-        self.refreshingJournalIndex = false
     end
 
-    local function OnPlayerInPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
-        local isAreaPin = ZO_MapPin.QUEST_CONDITION_PIN_TYPES[pinType]
-        if isAreaPin then
-            OnQuestAreaGoalStateChanged(param1 + 1, param2 + 1, param3 + 1, playerIsInside)
+    self:SetPlayerInside(AREA_PIN_TYPE_NAME.QUEST_PINS, journalIndex, stepIndex, conditionIndex, playerIsInside)
+    self.refreshingJournalIndex = false
+end
+
+function Compass:OnPlayerInQuestPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
+    local isAreaPin = ZO_MapPin.QUEST_CONDITION_PIN_TYPES[pinType]
+    if isAreaPin then
+        self:OnQuestAreaGoalStateChanged(param1 + 1, param2 + 1, param3 + 1, playerIsInside)
+    end
+end
+
+function Compass:InitializeQuestPins()
+    local areaTexturePinPool
+    local function ResetAreaTexture(areaTexture)
+        Compass.ResetAreaTexture(areaTexture)
+    end
+
+    local function CreateAreaTexture(objectPool)
+        return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.QUEST_PINS, objectPool)
+    end
+
+    areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+
+    local function OnAreaAnimationStarted(animationTimeline)
+        local USE_PIN_TEXTURE = false
+        local function SetTextureAlpha(pin)
+            return self.refreshingJournalIndex and 1 or pin:GetAlpha()
         end
+
+        local function SetPlayFromFrame()
+            return self.refreshingJournalIndex and 350 or 0
+        end
+
+        self:OnAreaAnimationStarted(animationTimeline, areaTexturePinPool, USE_PIN_TEXTURE, SetTextureAlpha, SetPlayFromFrame)
     end
 
-    self.control:RegisterForEvent(EVENT_PLAYER_IN_PIN_AREA_CHANGED, OnPlayerInPinAreaChanged)
+    local function OnAreaAnimationStopped(animationTimeline)
+        self:OnAreaAnimationStopped(animationTimeline, self.areaAnimationPools[AREA_PIN_TYPE_NAME.QUEST_PINS])
+    end
+
+    local function CreateAreaAnimationTimeline()
+        return self:CreateAreaAnimationTimeline(OnAreaAnimationStarted, OnAreaAnimationStopped)
+    end
+    self.areaAnimationPools[AREA_PIN_TYPE_NAME.QUEST_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
 
     local function OnQuestTrackerTrackingStateChanged()
        local template = IsInGamepadPreferredMode() and "ZO_CompassAreaTexture_Gamepad_Template" or "ZO_CompassAreaTexture_Keyboard_Template"
        local restingAlpha = IsInGamepadPreferredMode() and AREA_TEXTURE_RESTING_ALPHA_GAMEPAD or AREA_TEXTURE_RESTING_ALPHA_KEYBOARD
 
-       if self.areaPinAnimations then
-            for _, journalEntry in pairs(self.areaPinAnimations) do
+       if self[AREA_PIN_TYPE_NAME.QUEST_PINS] then
+            for _, journalEntry in pairs(self[AREA_PIN_TYPE_NAME.QUEST_PINS]) do
                 for _, stepEntry in pairs(journalEntry) do
                     for _, animation in pairs(stepEntry) do
-                        local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, animation.journalIndex)
+                        local trackingLevel = GetTrackingLevel(TRACK_TYPE_QUEST, animation.param1 + 1)
                         local newPinType = GetQuestPinTypeForTrackingLevel(animation.areaTexture.pinType, trackingLevel)
 
                         self:ApplyTemplateToAreaTexture(animation.areaTexture, template, restingAlpha, newPinType)
@@ -301,11 +436,16 @@ function Compass:InitializeQuestPins()
 
     FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerTrackingStateChanged", OnQuestTrackerTrackingStateChanged)
 
-    local function OnQuestRemovedOrChanged(eventCode, journalIndex)
+    local function OnQuestChanged(eventCode, journalIndex)
         self:RemoveAreaPinsByQuest(journalIndex)
     end
-    self.control:RegisterForEvent(EVENT_QUEST_ADVANCED, OnQuestRemovedOrChanged)
-    self.control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestRemovedOrChanged)
+
+    local function OnQuestRemoved(eventCode, isCompleted, journalIndex)
+        self:RemoveAreaPinsByQuest(journalIndex)
+    end
+
+    self.control:RegisterForEvent(EVENT_QUEST_ADVANCED, OnQuestChanged)
+    self.control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestRemoved)
 
     local function OnPlayerActivated()
         self.refreshingJournalIndex = true
@@ -356,9 +496,9 @@ function Compass:PerformFullAreaQuestUpdate()
             for stepIndex = QUEST_MAIN_STEP_INDEX, GetJournalQuestNumSteps(journalIndex) do
                 for conditionIndex = 1, GetJournalQuestNumConditions(journalIndex, stepIndex) do
                     if ShouldShowQuestArea(journalIndex, stepIndex, conditionIndex) then
-                        self:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
+                        self:PlayQuestAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
                     else
-                        self:StopAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
+                        self:StopAreaPinOutAnimation(AREA_PIN_TYPE_NAME.QUEST_PINS, journalIndex - 1, stepIndex - 1, conditionIndex - 1)
                     end
                 end
             end
@@ -398,18 +538,19 @@ function Compass:PlayPoiPinOutAnimation()
 end
 
 local IGNORE_BREADCRUMBS = true
-function Compass:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, pinType)
-    local animation, key = self.areaAnimationPool:AcquireObject()
-    self.currentlyAnimatingAreaPinType = pinType
-    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP_ONLY, CT_COMPASS, pinType, journalIndex - 1, stepIndex - 1, conditionIndex - 1, nil, IGNORE_BREADCRUMBS) then
-        self.areaAnimationPool:ReleaseObject(key)
-        self.currentlyAnimatingAreaPinType = nil
+function Compass:TryPlayingAnimationOnAreaPin(areaPinTypeName, param1, param2, param3, pinType)
+    local animation, key = self.areaAnimationPools[areaPinTypeName]:AcquireObject()
+    animation.pinType = pinType
+
+    if not StartMapPinAnimation(animation, PIN_ANIMATION_TARGET_MAP_ONLY, CT_COMPASS, pinType, param1, param2, param3, nil, IGNORE_BREADCRUMBS) then
+        self.areaAnimationPools[areaPinTypeName]:ReleaseObject(key)
         return false
     else
         animation.key = key
-        animation.journalIndex = journalIndex
-        self:StoreAreaPinAnimation(journalIndex, stepIndex, conditionIndex, animation)
-        self.currentlyAnimatingAreaPinType = nil
+        animation.param1 = param1
+        animation.param2 = param2
+        animation.param3 = param3
+        self:StoreAreaPinAnimation(areaPinTypeName, param1, param2, param3, animation)
         return true
     end
 end
@@ -431,10 +572,10 @@ function Compass:PlayAreaOverrideAnimation(journalIndex, stepIndex, conditionInd
     self.currentOverrideConditionIndex = conditionIndex
 end
 
-function Compass:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
+function Compass:PlayQuestAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
     local playedAnyAnimation = false
     for _, pinType in ipairs(QUEST_AREA_PIN_TYPES) do
-        if self:TryPlayingAnimationOnAreaPin(journalIndex, stepIndex, conditionIndex, pinType) then
+        if self:TryPlayingAnimationOnAreaPin(AREA_PIN_TYPE_NAME.QUEST_PINS, journalIndex - 1, stepIndex - 1, conditionIndex - 1, pinType) then
             playedAnyAnimation = true
         end
     end
@@ -458,11 +599,11 @@ function Compass:PlayAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex
     end
 end
 
-function Compass:StopAreaPinOutAnimation(journalIndex, stepIndex, conditionIndex)
-    local animation = self:GetAreaPinAnimationFromStorage(journalIndex, stepIndex, conditionIndex)
+function Compass:StopAreaPinOutAnimation(areaPinTypeName, param1, param2, param3)
+    local animation = self:GetAreaPinAnimationFromStorage(areaPinTypeName, param1, param2, param3)
     if animation then
         animation:Stop()
-        self:RemoveAreaPinAnimationFromStorage(journalIndex, stepIndex, conditionIndex)
+        self:RemoveAreaPinAnimationFromStorage(areaPinTypeName, param1, param2, param3)
     end
 end
 
@@ -470,7 +611,7 @@ do
     local function CreatePath(t, ...)
         local current = t
 
-        for i=1, select("#", ...) do
+        for i = 1, select("#", ...) do
             local key = select(i, ...)
             if not current[key] then
                 current[key] = {}
@@ -481,42 +622,59 @@ do
         return current
     end
 
-    function Compass:StoreAreaPinAnimation(journalIndex, stepIndex, conditionIndex, animation)
-        local path = CreatePath(self, "areaPinAnimations", journalIndex, stepIndex)
-        path[conditionIndex] = animation
+    function Compass:StoreAreaPinAnimation(areaPinTypeName, param1, param2, param3, animation)
+        local path = CreatePath(self, areaPinTypeName, param1, param2)
+        path[param3] = animation
     end
 
-    function Compass:GetAreaPinAnimationFromStorage(journalIndex, stepIndex, conditionIndex)
-        if self.areaPinAnimations then
-            if self.areaPinAnimations[journalIndex] then
-                if self.areaPinAnimations[journalIndex][stepIndex] then
-                    return self.areaPinAnimations[journalIndex][stepIndex][conditionIndex]
+    function Compass:GetAreaPinAnimationFromStorage(areaPinTypeName, param1, param2, param3)
+        local areaPinAnimations = self[areaPinTypeName]
+        if areaPinAnimations then
+            local areaPinAnimationsParam1 = areaPinAnimations[param1]
+            if areaPinAnimationsParam1 then
+                local areaPinAnimationsParam2 = areaPinAnimationsParam1[param2]
+                if areaPinAnimationsParam2 then
+                    return areaPinAnimationsParam2[param3]
                 end
             end
         end
     end
 
-    function Compass:RemoveAreaPinAnimationFromStorage(journalIndex, stepIndex, conditionIndex)
-        self.areaPinAnimations[journalIndex][stepIndex][conditionIndex] = nil
+    function Compass:RemoveAreaPinAnimationFromStorage(areaPinTypeName, param1, param2, param3)
+        local areaPinAnimations = self[areaPinTypeName]
+        if areaPinAnimations then
+            local areaPinAnimationsParam1 = areaPinAnimations[param1]
+            if areaPinAnimationsParam1 then
+                local areaPinAnimationsParam2 = areaPinAnimationsParam1[param2]
+                if areaPinAnimationsParam2 then
+                    areaPinAnimationsParam2[param3] = nil
+                end
+            end
+        end
     end
 
     function Compass:RemoveAreaPinsByQuest(journalIndex)
-        if self.areaPinAnimations and self.areaPinAnimations[journalIndex] then
-            for i, step in ipairs(self.areaPinAnimations[journalIndex]) do
+        local param1 = journalIndex - 1
+        local questPinAreaAnimationPool = self.areaAnimationPools[AREA_PIN_TYPE_NAME.QUEST_PINS]
+        if questPinAreaAnimationPool and questPinAreaAnimationPool[param1] then
+            for i, step in ipairs(questPinAreaAnimationPool[param1]) do
                 for j, animation in ipairs(step) do
                     animation:Stop()
                 end
             end
-            self.areaPinAnimations[journalIndex] = nil
+            questPinAreaAnimationPool[param1] = nil
+            self:ClearPlayerInside(AREA_PIN_TYPE_NAME.QUEST_PINS, journalIndex)
         end
     end
 
     function Compass:ApplyTemplateToAreaTextures(template, restingAlpha)
-        if self.areaPinAnimations then
-            for _, journalEntry in pairs(self.areaPinAnimations) do
-                for _, stepEntry in pairs(journalEntry) do
-                    for _, animation in pairs(stepEntry) do
-                        self:ApplyTemplateToAreaTexture(animation.areaTexture, template, restingAlpha)
+        for i, name in pairs(AREA_PIN_TYPE_NAME) do
+            if self[name] then
+                for _, param1Entry in pairs(self[name]) do
+                    for _, param2Entry in pairs(param1Entry) do
+                        for _, animation in pairs(param2Entry) do
+                            self:ApplyTemplateToAreaTexture(animation.areaTexture, template, restingAlpha)
+                        end
                     end
                 end
             end

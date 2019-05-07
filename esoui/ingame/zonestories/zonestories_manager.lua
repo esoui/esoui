@@ -150,6 +150,11 @@ function ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionT
     return AreAllZoneStoryActivitiesCompleteForZoneCompletionType(zoneId, completionType)
 end
 
+function ZO_ZoneStories_Manager.GetZoneAvailability(zoneId)
+    local isZoneAvailable, errorString = IsZoneStoryZoneAvailable(zoneId)
+    return isZoneAvailable, errorString
+end
+
 function ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(zoneId, completionType)
     local blockingErrorStringText = nil
 

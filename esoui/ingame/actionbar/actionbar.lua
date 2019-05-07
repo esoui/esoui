@@ -275,14 +275,6 @@ local function OnItemSlotChanged(eventCode, itemSoundCategory)
     PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_SLOT)
 end
 
-local function OnAbilitySlotted(eventCode, newAbilitySlotted, slotNum)
-    if newAbilitySlotted == true then
-        PlaySound(SOUNDS.ABILITY_SLOTTED)
-    else
-        PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
-    end
-end
-
 local function HandleSlotChanged(slotNum)
     local btn = ZO_ActionBar_GetButton(slotNum)
     if btn and not btn.noUpdates then
@@ -404,9 +396,6 @@ local function HandleCursorPickup(eventCode, cursorType, param1, param2, param3)
 
     if cursorType == MOUSE_CONTENT_ACTION and param1 == ACTION_TYPE_ABILITY then
         ShowAppropriateAbilityActionButtonDropCallouts(param3)
-        if param3 ~= 0 then
-            PlaySound(SOUNDS.ABILITY_PICKED_UP)
-        end
     end
 end
 
@@ -420,7 +409,7 @@ local function HandleCursorDropped(eventCode, cursorType)
     end
 end
 
-local function OnActiveQuickslotChanged(eventCode, slotId)
+local function OnActiveQuickslotChanged(eventCode, actionSlotIndex)
     HandleSlotChanged(ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1)
 end
 
@@ -596,7 +585,6 @@ function ZO_ActionBar_OnInitialized(control)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_POWER_UPDATE, OnPowerUpdate)
     EVENT_MANAGER:AddFilterForEvent("ZO_ActionBar", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_ULTIMATE, REGISTER_FILTER_UNIT_TAG, "player")
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ITEM_SLOT_CHANGED, OnItemSlotChanged)
-    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTION_SLOT_ABILITY_SLOTTED, OnAbilitySlotted)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTIVE_QUICKSLOT_CHANGED, OnActiveQuickslotChanged)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_PLAYER_ACTIVATED, UpdateAllSlots)
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)

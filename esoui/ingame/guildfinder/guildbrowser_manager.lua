@@ -131,7 +131,7 @@ function ZO_GuildBrowser_Manager:BuildApplications()
     ZO_ClearNumericallyIndexedTable(self.currentApplications)
     local numApps = GetGuildFinderNumAccountApplications()
     for i = 1, numApps do
-        local guildId, level, championPoints, alliance, classId, guildName, accountName, characterName, achievementPoints, applicationMessage = GetGuildFinderAccountApplicationInfoAt(i)
+        local guildId, level, championPoints, alliance, classId, guildName, guildAlliance, accountName, characterName, achievementPoints, applicationMessage = GetGuildFinderAccountApplicationInfo(i)
         local timeRemainingS = GetGuildFinderAccountApplicationDuration(i)
         local applicationData = 
         {
@@ -140,6 +140,7 @@ function ZO_GuildBrowser_Manager:BuildApplications()
             name = accountName,
             characterName = characterName,
             guildName = guildName,
+            guildAlliance = guildAlliance,
             level = level,
             class = classId,
             alliance = alliance,
@@ -327,7 +328,7 @@ function ZO_GuildBrowser_Manager:IsSearchStateReady()
 end
 
 function ZO_GuildBrowser_Manager:CanSearchGuilds()
-    return not GuildFinderIsSearchOnCooldown() and self:IsSearchStateReady()
+    return not GuildFinderIsSearchOnCooldown()
 end
 
 do

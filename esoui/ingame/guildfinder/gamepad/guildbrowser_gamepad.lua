@@ -137,7 +137,7 @@ function ZO_GuildBrowser_Gamepad:InitializeKeybindStripDescriptors()
                 return true
             end,
             enabled = function()
-                return GUILD_BROWSER_MANAGER:IsSearchStateReady()
+                return GUILD_BROWSER_MANAGER:CanSearchGuilds()
             end,
         },
 
@@ -511,7 +511,7 @@ function ZO_GuildBrowser_Gamepad:BuildAllianceData()
     self.allianceData:Clear()
 
     for i = ALLIANCE_ITERATION_BEGIN, ALLIANCE_ITERATION_END do
-        local newEntry = ZO_ComboBox_Base:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString("SI_ALLIANCE", i)))
+        local newEntry = ZO_ComboBox_Base:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetAllianceName(i)))
         newEntry.alliance = i
         self.allianceData:AddItem(newEntry)
     end

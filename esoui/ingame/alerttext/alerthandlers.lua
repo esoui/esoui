@@ -1007,6 +1007,10 @@ local AlertHandlers = {
         return ERROR, GetString(SI_NO_DAEDRIC_PICKUP_WHEN_STEALTHED), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
+    [EVENT_GUILD_FINDER_LONG_SEARCH_WARNING] = function()
+        return ALERT, GetString(SI_GUILD_BROWSER_LONG_SEARCH_WARNING), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
 
 }
 

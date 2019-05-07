@@ -13,12 +13,21 @@ local function OnBlockingSceneActivated()
 end
 
 function ZO_GuildRecruitment_GuildListing_Keyboard:Initialize(control)
+    local function OnTextEdited(control, data)
+        local attribute = data.dataSource.attribute
+        local editBoxObject = control and control.object
+        local text = editBoxObject:GetEditBoxText()
+        editBoxObject:SetControlHidden()
+        data.dataSource.currentValue = text
+    end
+
     self.templateData =
     {
         gridListClass = ZO_GridScrollList_Keyboard,
         headerTemplate = "ZO_GuildRecruitment_GuildListing_Keyboard_Header_Template",
         headerHeight = 24,
         gridPaddingY = 10,
+        textEditHideCallback = OnTextEdited,
         attributeSelection =
         {
             entryTemplate = "ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_Control",

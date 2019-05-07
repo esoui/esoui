@@ -31,7 +31,7 @@ function ZO_Tooltip:LayoutGuildApplicationDetails(applicationData)
     -- Player Alliance
     statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"), self:GetStyle("fullWidth"))
     statValuePair:SetStat(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ALLIANCE), self:GetStyle("statValuePairStat"))
-    statValuePair:SetValue(GetString("SI_ALLIANCE", applicationData.alliance), self:GetStyle("socialStatsValue"))
+    statValuePair:SetValue(ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(applicationData.alliance)), self:GetStyle("socialStatsValue"))
     statsSection:AddStatValuePair(statValuePair)
 
     -- Player Achievement Points
