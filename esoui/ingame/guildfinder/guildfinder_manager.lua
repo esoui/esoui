@@ -103,7 +103,7 @@ end
 function ZO_GuildFinder_Manager.SetTextForMetaDataAttributeKeyboard(labelControl, metaDataAttribute, attributeStringPrefix, data)
     local labelString = GetString("SI_GUILDMETADATAATTRIBUTE", metaDataAttribute)
     local valueString = GetString(attributeStringPrefix, data)
-    ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(labelControl, labelString, valueString)
+    ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(labelControl, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, labelString), valueString)
 end
 
 function ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(labelControl, labelString, valueString)

@@ -586,7 +586,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_SPAWNED_BUT_NOT_RE
     return CreateAvAMessageParams(SOUNDS.DAEDRIC_ARTIFACT_SPAWNED, description, CENTER_SCREEN_ANNOUNCE_TYPE_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED)
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED] = function(objectiveKeepId, objectiveObjectiveId, battlegroundContext, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, holderRawCharacterName, holderDisplayName, lastHolderRawCharacterName, lastHolderDisplayName, pinType, daedricArtifactId, lastObjectiveControlState)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAEDRIC_ARTIFACT_OBJECTIVE_STATE_CHANGED] = function(objectiveKeepId, objectiveObjectiveId, battlegroundContext, objectiveControlEvent, objectiveControlState, holderAlliance, lastHolderAlliance, pinType, daedricArtifactId, lastObjectiveControlState)
     if lastObjectiveControlState == OBJECTIVE_CONTROL_STATE_UNKNOWN and objectiveControlState ~= OBJECTIVE_CONTROL_STATE_UNKNOWN then
         -- Revealed (UNKNOWN -> !UNKNOWN)
         local daedricArtifactName = GetDaedricArtifactDisplayName(daedricArtifactId)

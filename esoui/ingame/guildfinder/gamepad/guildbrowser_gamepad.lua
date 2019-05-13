@@ -735,7 +735,7 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
                         if self.minCP ~= newCP then
                             self.minCP = newCP
 
-                            local maxAllowedValue = GUILD_FINDER_MANAGER.GetMaxCPAllowedForInput()
+                            local maxAllowedValue = ZO_GuildFinder_Manager.GetMaxCPAllowedForInput()
                             if self.minCP == nil then
                                 self.minCP = self.filterManager:GetMinCPDefault()
                             elseif self.minCP > self.maxCP then
@@ -774,7 +774,7 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
                         if self.maxCP ~= newCP then
                             self.maxCP = newCP
 
-                            local maxAllowedValue = GUILD_FINDER_MANAGER.GetMaxCPAllowedForInput()
+                            local maxAllowedValue = ZO_GuildFinder_Manager.GetMaxCPAllowedForInput()
                             if self.maxCP == nil then
                                 self.maxCP = self.filterManager:GetMaxCPDefault()
                             elseif self.minCP > self.maxCP then

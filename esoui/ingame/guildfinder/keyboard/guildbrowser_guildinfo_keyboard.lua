@@ -124,18 +124,18 @@ function ZO_GuildBrowser_GuildInfo_Keyboard:RefreshInfoPanel()
 
     local guildData = GUILD_BROWSER_MANAGER:GetGuildData(self.currentGuildId)
     if guildData then
-        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.sizeLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_SIZE), guildData.size)
-        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.activitiesLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ACTIVITIES), guildData.activitiesText)
+        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.sizeLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_SIZE)), guildData.size)
+        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.activitiesLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ACTIVITIES)), guildData.activitiesText)
         ZO_GuildFinder_Manager.SetTextForMetaDataAttributeKeyboard(self.personalitiesLabel, GUILD_META_DATA_ATTRIBUTE_PERSONALITIES, "SI_GUILDPERSONALITYATTRIBUTEVALUE", guildData.personality)
         ZO_GuildFinder_Manager.SetTextForMetaDataAttributeKeyboard(self.languagesLabel, GUILD_META_DATA_ATTRIBUTE_LANGUAGES, "SI_GUILDLANGUAGEATTRIBUTEVALUE", guildData.language)
-        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.guildTraderLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_KIOSK), guildData.guildTraderText)
-        ZO_GuildFinder_Manager.SetTextForNoGrammarValuePairKeyboard(self.foundedLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_FOUNDED_DATE), guildData.foundedDateText)
+        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.guildTraderLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_KIOSK)), guildData.guildTraderText)
+        ZO_GuildFinder_Manager.SetTextForNoGrammarValuePairKeyboard(self.foundedLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_FOUNDED_DATE)), guildData.foundedDateText)
 
-        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.rolesLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ROLES), ZO_GuildFinder_Manager.GetRoleIconsText(guildData.roles))
-        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.minCPLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_MINIMUM_CP), guildData.minimumCP)
+        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.rolesLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ROLES)), ZO_GuildFinder_Manager.GetRoleIconsText(guildData.roles))
+        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.minCPLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_MINIMUM_CP)), guildData.minimumCP)
 
         local formattedTimeRange = ZO_GuildFinder_Manager.CreatePlaytimeRangeText(guildData)
-        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.playtimeLabel, GetString(SI_GUILD_FINDER_GUILD_INFO_PLAYTIME_HEADER), formattedTimeRange)
+        ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.playtimeLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString(SI_GUILD_FINDER_GUILD_INFO_PLAYTIME_HEADER)), formattedTimeRange)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 end

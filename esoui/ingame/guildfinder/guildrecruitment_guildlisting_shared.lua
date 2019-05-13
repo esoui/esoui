@@ -213,7 +213,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:OnRoleSelected(role, isSelected
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:OnMinCPFocusLost(editBox)
-    local maxAllowedValue = GUILD_FINDER_MANAGER.GetMaxCPAllowedForInput()
+    local maxAllowedValue = ZO_GuildFinder_Manager.GetMaxCPAllowedForInput()
     local updatedValue = tonumber(editBox:GetText()) or 0
     if updatedValue > maxAllowedValue then
         editBox:SetText(maxAllowedValue)
@@ -320,6 +320,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             headerText = self.templateData.headlineEditBox.headerText,
             defaultText = GetString(SI_GUILD_RECRUITMENT_HEADLINE_DEFAULT_TEXT),
             emptyText = GetString(SI_GUILD_RECRUITMENT_HEADLINE_EMPTY_TEXT),
+            stripMarkup = true,
             onEditCallback = OnTextEdited,
             updateFunction = function(...) SetGuildRecruitmentHeaderMessage(...) end,
         },
@@ -385,7 +386,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             entryTemplate = self.templateData.attributeSelection.startTimeEntryTemplate,
             isTimeSelection = true,
             headerText = self.templateData.attributeSelection.timeRangeHeaderText,
-            onSelectionCallback = OnFocusSelected,
+            onSelectionCallback = OnDropdownSelected,
             updateFunction = function(...) SetGuildRecruitmentStartTime(...) end,
         },
         endTime =
@@ -394,7 +395,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             entryTemplate = self.templateData.attributeSelection.endTimeEntryTemplate,
             isTimeSelection = true,
             headerText = " ",
-            onSelectionCallback = OnFocusSelected,
+            onSelectionCallback = OnDropdownSelected,
             updateFunction = function(...) SetGuildRecruitmentEndTime(...) end,
         },
         activities =

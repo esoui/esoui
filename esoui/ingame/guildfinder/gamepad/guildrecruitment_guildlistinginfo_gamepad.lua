@@ -97,7 +97,7 @@ function ZO_GuildRecruitment_GuildListingInfo_Gamepad:RefreshInfoPanel()
             self.rolesLabelPair.value:SetText(zo_strformat(SI_GAMEPAD_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, rolesText))
             self.minCPLabelPair.value:SetText(zo_strformat(SI_GAMEPAD_GUILD_FINDER_GUILD_INFO_ATTRIBUTE_FORMATTER, currentData.minimumCP))
 
-            self.headerMessageLabel:SetText(currentData.recruitmentHeadline)
+            self.headerMessageLabel:SetText(EscapeMarkup(currentData.recruitmentHeadline, ALLOW_MARKUP_TYPE_COLOR_ONLY))
             self.activitiesLabel:SetText(currentData.activitiesText)
             self.recruitmentMessageLabel:SetText(currentData.description)
 

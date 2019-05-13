@@ -423,7 +423,7 @@ function ZO_ItemPreviewType_Reward:GetVariationName(variationIndex)
 end
 
 function ZO_ItemPreviewType_Reward:Apply(variationIndex)
-    PreviewReward(self.rewardId)
+    PreviewReward(self.rewardId, variationIndex)
 end
 
 --

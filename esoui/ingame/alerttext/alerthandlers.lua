@@ -1011,7 +1011,9 @@ local AlertHandlers = {
         return ALERT, GetString(SI_GUILD_BROWSER_LONG_SEARCH_WARNING), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
-
+    [EVENT_NO_DAEDRIC_PICKUP_AS_EMPEROR] = function()
+        return ERROR, GetString(SI_NO_DAEDRIC_PICKUP_AS_EMPEROR), SOUNDS.GENERAL_ALERT_ERROR
+    end,
 }
 
 ZO_ClientInteractResultSpecificSound =

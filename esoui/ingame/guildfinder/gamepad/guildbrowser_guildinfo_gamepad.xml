@@ -112,7 +112,7 @@
                                             <Anchor point="TOPLEFT" />
                                             <Anchor point="TOPRIGHT" />
                                             <Controls>
-                                                <Label name="$(parent)HeaderMessage" inherits="ZO_GuildBrowser_GuildInfo_MessageText_Gamepad">
+                                                <Label name="$(parent)HeaderMessage" inherits="ZO_GuildBrowser_GuildInfo_MessageText_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                                     <Anchor point="TOPLEFT" />
                                                 </Label>
 
@@ -125,7 +125,7 @@
                                                     <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH" />
                                                 </Label>
 
-                                                <Label name="$(parent)RecruitmentMessage" inherits="ZO_GuildBrowser_GuildInfo_MessageText_Gamepad">
+                                                <Label name="$(parent)RecruitmentMessage" inherits="ZO_GuildBrowser_GuildInfo_MessageText_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_BROWSER_GUILD_INFO_ATTRIBUTE_OFFSET_Y" />
                                                 </Label>
                                             </Controls>

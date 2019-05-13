@@ -111,15 +111,15 @@ function ZO_GuildRecruitment_GuildListingInfo_Keyboard:RefreshInfoPanel()
             ZO_GuildFinder_Manager.SetTextForMetaDataAttributeKeyboard(self.languagesLabel, GUILD_META_DATA_ATTRIBUTE_LANGUAGES, "SI_GUILDLANGUAGEATTRIBUTEVALUE", currentData.language)
 
             local rolesText = ZO_GuildFinder_Manager.GetRoleIconsText(currentData.roles)
-            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.rolesLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ROLES), rolesText)
-            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.minCPLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_MINIMUM_CP), currentData.minimumCP)
+            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.rolesLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ROLES)), rolesText)
+            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.minCPLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_MINIMUM_CP)), currentData.minimumCP)
 
             local formattedTimeRange = ZO_GuildFinder_Manager.CreatePlaytimeRangeText(currentData)
-            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.playtimeLabel, GetString(SI_GUILD_FINDER_GUILD_INFO_PLAYTIME_HEADER), formattedTimeRange)
+            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.playtimeLabel, zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString(SI_GUILD_FINDER_GUILD_INFO_PLAYTIME_HEADER)), formattedTimeRange)
 
-            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.headerMessageLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_HEADER_MESSAGE), currentData.recruitmentHeadline)
-            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.activitiesLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ACTIVITIES), currentData.activitiesText)
-            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.recruitmentMessageLabel, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_RECRUITMENT_MESSAGE), currentData.description)
+            ZO_GuildFinder_Manager.SetTextForNoGrammarValuePairKeyboard(self.headerMessageLabel, ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_HEADER_MESSAGE))), EscapeMarkup(currentData.recruitmentHeadline, ALLOW_MARKUP_TYPE_COLOR_ONLY))
+            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.activitiesLabel,  ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_ACTIVITIES))), currentData.activitiesText)
+            ZO_GuildFinder_Manager.SetTextForValuePairKeyboard(self.recruitmentMessageLabel,  ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_GUILD_FINDER_GUILD_INFO_HEADER_FORMATTER, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_RECRUITMENT_MESSAGE))), currentData.description)
 
             self.primaryFocusLabel:SetHidden(false)
             self.secondaryFocusLabel:SetHidden(false)

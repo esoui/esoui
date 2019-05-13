@@ -47,7 +47,7 @@ function ZO_GuildRecruitment_RoleSelectorTile_Gamepad:OnRoleToggle()
     if not self:CanToggleRoleOff() then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GUILD_RECRUITMENT_MUST_SELECT_ROLE_ALERT))
     else
-        PlaySound(SOUNDS.GAMEPAD_GUILD_FINDER_TOGGLE_ROLE)
+        PlaySound(SOUNDS.GAMEPAD_GUILD_FINDER_TOGGLE_ACTIVITY)
 
         self.isChecked = not self.isChecked
         self.data.currentValues[self.data.role] = self.isChecked

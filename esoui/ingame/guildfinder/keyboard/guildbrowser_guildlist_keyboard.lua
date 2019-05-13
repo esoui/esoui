@@ -584,7 +584,7 @@ function ZO_GuildFinderAdditionalFiltersDialog_OnInitialized(self)
     self.maxCPEditBox:SetText(GUILD_BROWSER_GUILD_LIST_KEYBOARD.filterManager:GetMaxCPDefault())
 
     local function OnMinCPTextEditFocusLost(...)
-        local maxAllowedValue = GUILD_FINDER_MANAGER.GetMaxCPAllowedForInput()
+        local maxAllowedValue = ZO_GuildFinder_Manager.GetMaxCPAllowedForInput()
         local minCP = tonumber(self.minCPEditBox:GetText())
         local maxCP = tonumber(self.maxCPEditBox:GetText())
         if minCP == nil then
@@ -604,7 +604,7 @@ function ZO_GuildFinderAdditionalFiltersDialog_OnInitialized(self)
     end
 
     local function OnMaxCPTextEditFocusLost(...)
-        local maxAllowedValue = GUILD_FINDER_MANAGER.GetMaxCPAllowedForInput()
+        local maxAllowedValue = ZO_GuildFinder_Manager.GetMaxCPAllowedForInput()
         local minCP = tonumber(self.minCPEditBox:GetText())
         local maxCP = tonumber(self.maxCPEditBox:GetText())
         if maxCP == nil then

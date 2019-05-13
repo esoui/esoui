@@ -31,6 +31,7 @@ function ZO_SavingEditBox:Initialize(control)
     self.enabled = true
     self.editing = false
     self.putTextInQuotes = true
+    self.shouldEscapeMarkup = false
 
     self:RefreshButtons()
 end
@@ -68,6 +69,10 @@ end
 
 function ZO_SavingEditBox:IsEditing()
     return self.editing
+end
+
+function ZO_SavingEditBox:SetShouldEscapeNonColorMarkup(shouldEscapeMarkup)
+    self.shouldEscapeMarkup = shouldEscapeMarkup
 end
 
 function ZO_SavingEditBox:SetEnabled(enabled)
@@ -110,10 +115,11 @@ function ZO_SavingEditBox:SetText(text)
         else
             self.empty:SetHidden(true)
             self.display:SetHidden(false)
+            local displayText = self.shouldEscapeMarkup and EscapeMarkup(text, ALLOW_MARKUP_TYPE_COLOR_ONLY) or text
             if self.putTextInQuotes then
-                self.display:SetText(zo_strformat(SI_SAVING_EDIT_BOX_QUOTES, text))
+                self.display:SetText(zo_strformat(SI_SAVING_EDIT_BOX_QUOTES, displayText))
             else
-                self.display:SetText(text)
+                self.display:SetText(displayText)
             end
         end
     end

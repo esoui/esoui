@@ -31,6 +31,7 @@ function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:Layout(data)
     self.defaultValue = data.defaultValue
     self.titleLabel:SetText(data.headerText)
 
+    self.editBox:SetShouldEscapeNonColorMarkup(data.stripMarkup)
     self.editBox:SetDefaultText(data.defaultText)
     self.editBox:SetEmptyText(data.emptyText)
     self.editBox:RegisterCallback("Save", function(text) data.onEditCallback(self.attribute, text) end)
