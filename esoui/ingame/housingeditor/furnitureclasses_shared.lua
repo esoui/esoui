@@ -421,7 +421,7 @@ function ZO_HousingMarketProduct:RefreshInfo(marketProductId, presentationIndex)
     self.marketProductId = marketProductId
     self.presentationIndex = presentationIndex
 
-    self.purchaseState = GetMarketProductPurchaseState(marketProductId)
+    self.displayState = ZO_GetMarketProductDisplayState(marketProductId)
 
     self.rawName = GetMarketProductDisplayName(marketProductId)
     self.formattedName = nil
@@ -514,7 +514,7 @@ function ZO_HousingMarketProduct.SetCalloutBackgroundColor(leftBackground, right
 end
 
 function ZO_HousingMarketProduct:CanBePurchased()
-    return self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
+    return self.displayState == MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED
 end
 
 --

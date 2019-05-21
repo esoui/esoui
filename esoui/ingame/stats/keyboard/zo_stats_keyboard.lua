@@ -397,9 +397,6 @@ function ZO_Stats:UpdateSpendablePoints()
     self:UpdateAttributesHeader()
     self:UpdateSpendAttributePointsTip(SHOW_HIDE_ANIMATED)
 
-    local totalSpendablePoints = self:GetTotalSpendablePoints()
-    self:SetAvailablePoints(totalSpendablePoints)
-
     if self.resetAddedPoints then
         for i, attributeControl in ipairs(self.attributeControls) do
             attributeControl.pointLimitedSpinner:ResetAddedPoints()
@@ -407,12 +404,21 @@ function ZO_Stats:UpdateSpendablePoints()
         self.resetAddedPoints = false
     end
 
+    local totalAddedPoints = 0
     for i, attributeControl in ipairs(self.attributeControls) do
         local addedPoints = attributeControl.pointLimitedSpinner:GetAllocatedPoints()
         attributeControl.pointLimitedSpinner:Reinitialize(attributeControl.attributeType, addedPoints)
-        self:SetAvailablePoints(self:GetAvailablePoints() - addedPoints)
+
+        totalAddedPoints = totalAddedPoints + addedPoints
+    end
+
+    local totalSpendablePoints = self:GetTotalSpendablePoints()
+    local availablePoints = totalSpendablePoints - totalAddedPoints
+    self:SetAvailablePoints(availablePoints)
+
+    for i, attributeControl in ipairs(self.attributeControls) do
         attributeControl.pointLimitedSpinner:SetButtonsHidden(totalSpendablePoints == 0)
-        attributeControl.increaseHighlight:SetHidden(totalSpendablePoints == 0)
+        attributeControl.increaseHighlight:SetHidden(availablePoints == 0)
     end
 end
 
@@ -487,8 +493,6 @@ function ZO_Stats:RefreshAllAttributes()
 end
 
 function ZO_Stats:SetSpinnersEnabled(enabled)
-    local totalSpendablePoints = self:GetTotalSpendablePoints()
-
     for i, attributeControl in ipairs(self.attributeControls) do
         attributeControl.pointLimitedSpinner:SetEnabled(enabled)
         attributeControl.increaseHighlight:SetHidden(true)

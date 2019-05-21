@@ -187,8 +187,8 @@ function ZO_AbstractGridScrollList_Gamepad:RemoveTriggerKeybinds()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.gridListTriggerKeybinds)
 end
 
-function ZO_AbstractGridScrollList_Gamepad:ScrollDataToCenter(data)
-    ZO_AbstractGridScrollList.ScrollDataToCenter(self, data)
+function ZO_AbstractGridScrollList_Gamepad:ScrollDataToCenter(data, onScrollCompleteCallback, animateInstantly)
+    ZO_AbstractGridScrollList.ScrollDataToCenter(self, data, onScrollCompleteCallback, animateInstantly)
     ZO_ScrollList_RefreshLastHoldPosition(self.list)
 end
 

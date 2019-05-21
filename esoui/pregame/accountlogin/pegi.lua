@@ -15,7 +15,6 @@ end
 function ZO_PEGIAgreement:Initialize()
     self.countryToRatingsBoard = {}
     self.countriesPopulated = false
-    self.selectedControl = nil
 
     local function OnLinkClicked(link, button, text, color, linkType, ...)
         if ZO_PEGI_IsDeclineNotificationShowing() and linkType == URL_LINK_TYPE then
@@ -26,21 +25,6 @@ function ZO_PEGIAgreement:Initialize()
 
     CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", function() self:PopulateCountries() end)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked)
-end
-
-function ZO_PEGIAgreement:OnCountrySelected(control)
-    if self.selectedControl then
-        -- Unselect previously selected control
-        self.selectedControl.name:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
-    end
-
-    if control then
-        -- Select newly selected control
-        control.name:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
-    end
-
-    self.selectedControl = control
-    self.countrySelectConfirmButton:SetEnabled(true)
 end
 
 function ZO_PEGIAgreement:PopulateCountries()
@@ -60,11 +44,20 @@ function ZO_PEGIAgreement:PopulateCountries()
 
         local function SetupListItem(rowControl, data)
             rowControl.name:SetText(data.countryName)
+            if ZO_ScrollList_GetSelectedData(self.list) == data then
+                rowControl.name:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+            else
+                rowControl.name:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+            end
         end
 
         ZO_ScrollList_AddDataType(self.list, SCROLL_TYPE_PEGI, "ZO_PEGI_CountrySelectDialog_ListItem", 32, SetupListItem)
 
-        ZO_ScrollList_EnableSelection(self.list, "ZO_ThinListHighlight")
+        local function OnSelectionChanged(previouslySelectedData, selectedData)
+            ZO_ScrollList_RefreshVisible(self.list)
+            self.countrySelectConfirmButton:SetEnabled(selectedData ~= nil)
+        end
+        ZO_ScrollList_EnableSelection(self.list, "ZO_ThinListHighlight", OnSelectionChanged)
         ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
         ZO_ScrollList_SetDeselectOnReselect(self.list, false)
 
@@ -203,20 +196,14 @@ function ZO_PEGI_IsDeclineNotificationShowing()
 end
 
 function ZO_PEGI_CountrySelectDialog_OnMouseEnter(control)
-    control.name:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
     ZO_ScrollList_MouseEnter(PEGI_AGREEMENT.list, control)
 end
 
 function ZO_PEGI_CountrySelectDialog_OnMouseExit(control)
-    if control ~= PEGI_AGREEMENT.selectedControl then
-        control.name:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
-    end
-
     ZO_ScrollList_MouseExit(PEGI_AGREEMENT.list, control)
 end
 
 function ZO_PEGI_CountrySelectDialog_OnMouseUp(control)
-    PEGI_AGREEMENT:OnCountrySelected(control)
     ZO_ScrollList_MouseClick(PEGI_AGREEMENT.list, control)
 end
 

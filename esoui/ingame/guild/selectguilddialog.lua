@@ -26,7 +26,7 @@ function ZO_SelectGuildDialog:Initialize(control, dialogName, acceptFunction, de
                                 acceptFunction(self.selectedGuildId)
                             end,
             },
-        
+
             [2] =
             {
                 control = self.cancelButton,
@@ -60,16 +60,29 @@ end
 function ZO_SelectGuildDialog:OnGuildSelected(entry)
     self.selectedGuildId = entry.guildId
     self.guildComboBox:SetSelectedItemText(entry.guildText)
-    if(self.selectedCallback) then
+    if self.selectedCallback then
         self.selectedCallback(entry.guildId)
     end
+end
+
+function ZO_SelectGuildDialog:SelectGuildById(guildId)
+    local guildEntry = guildId ~= nil and self.entries[guildId]
+    if guildEntry then
+        self.guildComboBox:SelectItem(guildEntry)
+    else
+        self:SelectFirstGuild()
+    end
+end
+
+function ZO_SelectGuildDialog:SelectFirstGuild()
+    self.guildComboBox:SelectFirstItem()
 end
 
 function ZO_SelectGuildDialog:SetTitle(title)
     self.dialogInfo.title =
     {
         text = title,
-    }    
+    }
 end
 
 function ZO_SelectGuildDialog:SetButtonText(index, text)
@@ -105,19 +118,19 @@ function ZO_SelectGuildDialog:RefreshGuildList()
     self.guildComboBox:ClearItems()
     for i = 1, GetNumGuilds() do
         local guildId = GetGuildId(i)
-        if(not self.filterFunction or self.filterFunction(guildId)) then
+        if not self.filterFunction or self.filterFunction(guildId) then
             local guildName = GetGuildName(guildId)
-            local guildAlliance = GetGuildAlliance(guildId) 
-            local guildText = zo_iconTextFormat(GetAllianceBannerIcon(guildAlliance), 24, 24, guildName)
+            local guildAlliance = GetGuildAlliance(guildId)
+            local guildText = zo_iconTextFormat(GetPlatformAllianceSymbolIcon(guildAlliance), 24, 24, guildName)
             local entry = self.guildComboBox:CreateItemEntry(guildText, self.OnGuildSelectedCallback)
             entry.guildId = guildId
             entry.guildText = guildText
-		    self.entries[guildId] = entry
+            self.entries[guildId] = entry
             self.guildComboBox:AddItem(entry)
         end
     end
 
-    if(next(self.entries) == nil) then
+    if next(self.entries) == nil then
         return false
     end
 
@@ -125,15 +138,9 @@ function ZO_SelectGuildDialog:RefreshGuildList()
 end
 
 function ZO_SelectGuildDialog:OnGuildInformationChanged()
-    if(ZO_Dialogs_IsShowing(self.dialogName)) then
-        local lastSelectedGuildId = self.selectedGuildId
-        if(self:RefreshGuildList()) then
-            local lastGuildEntry = self.entries[lastSelectedGuildId]
-            if(lastGuildEntry) then
-                self:OnGuildSelected(lastGuildEntry)
-            else
-                self:OnGuildSelected(self.entries[next(self.entries)])
-            end
+    if ZO_Dialogs_IsShowing(self.dialogName) then
+        if self:RefreshGuildList() then
+            self:SelectGuildById(self.selectedGuildId)
         else
             ZO_Dialogs_ReleaseDialog(self.dialogName)
         end
@@ -141,18 +148,15 @@ function ZO_SelectGuildDialog:OnGuildInformationChanged()
 end
 
 function ZO_SelectGuildDialog:Setup(control)
-    if(self:RefreshGuildList()) then
-        if(self.currentStateFunction) then
+    if self:RefreshGuildList() then
+        if self.currentStateFunction then
             local guildId = self.currentStateFunction()
-            if(guildId) then
-                local guildEntry = self.entries[guildId]
-                if(guildEntry) then
-                    self:OnGuildSelected(guildEntry)
-                    return
-                end
+            if guildId then
+                self:SelectGuildById(guildId)
+                return
             end
         end
 
-        self:OnGuildSelected(self.entries[next(self.entries)])
+        self:SelectFirstGuild()
     end
 end

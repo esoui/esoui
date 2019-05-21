@@ -21,6 +21,7 @@ local CHATTER_OPTION_SHOWS_GOLD_COST =
     [CHATTER_TALK_CHOICE_MONEY]      = true,
     [CHATTER_TALK_CHOICE_PAY_BOUNTY] = true,
     [CHATTER_TALK_CHOICE_BEGIN_SKILL_RESPEC] = true,
+    [CHATTER_TALK_CHOICE_ATTRIBUTE_RESPEC]   = true,
 }
 
 CHATTER_OPTION_ERROR =
@@ -33,6 +34,7 @@ CHATTER_OPTION_ERROR =
     [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED] = SI_ERROR_NEED_CLEMENCY,
     [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN] = SI_ERROR_CLEMENCY_ON_COOLDOWN,
     [CHATTER_TALK_CHOICE_BEGIN_SKILL_RESPEC] = SI_ERROR_CANT_AFFORD_OPTION,
+    [CHATTER_TALK_CHOICE_ATTRIBUTE_RESPEC] = SI_ERROR_CANT_AFFORD_OPTION,
 }
 
 --Event Handlers
@@ -262,6 +264,7 @@ local OPTION_TO_ICON =
     [CHATTER_TALK_CHOICE_CLEMENCY_DISABLED]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_TALK_CHOICE_CLEMENCY_COOLDOWN]     = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_TALK_CHOICE_BEGIN_SKILL_RESPEC]    = "EsoUI/Art/Interaction/ConversationWithCost.dds",
+    [CHATTER_TALK_CHOICE_ATTRIBUTE_RESPEC]      = "EsoUI/Art/Interaction/ConversationWithCost.dds",
     [CHATTER_START_NEW_QUEST_BESTOWAL]          = "EsoUI/Art/Interaction/ConversationAvailable.dds",
     [CHATTER_START_COMPLETE_QUEST]              = "EsoUI/Art/Interaction/QuestCompleteAvailable.dds",
     [CHATTER_START_GIVE_ITEM]                   = "EsoUI/Art/Interaction/ConversationAvailable.dds",

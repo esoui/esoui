@@ -985,6 +985,7 @@ do
             DIALOG_NEGATIVE = 2,
             DIALOG_SECONDARY = 3,
             DIALOG_TERTIARY = 4,
+            DIALOG_RESET = 5,
         }
     local function GamepadSort(buttonLeft, buttonRight)
         local leftKeybindDescriptor = buttonLeft.keybindButtonDescriptor

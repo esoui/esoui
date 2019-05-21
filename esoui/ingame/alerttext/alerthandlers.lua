@@ -271,9 +271,14 @@ local AlertHandlers = {
         return ERROR, zo_strformat(SI_LORE_LIBRARY_ALREADY_KNOW_BOOK, bookTitle)
     end,
 
+    [EVENT_QUEST_SHARE_RESULT] = function(shareTargetCharacterName, shareTargetDisplayName, questName, result)
+        local userFacingName = ZO_GetPrimaryPlayerName(shareTargetDisplayName, shareTargetCharacterName)
+        return ALERT, zo_strformat(GetString("SI_QUESTSHARERESULT", result), userFacingName, questName)
+    end,
+
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
-        if(response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED) then
-            if(ShouldShowGroupErrorInAlert(response)) then
+        if response ~= GROUP_INVITE_RESPONSE_ACCEPTED and response ~= GROUP_INVITE_RESPONSE_CONSIDERING_OTHER and response ~= GROUP_INVITE_RESPONSE_IGNORED then
+            if ShouldShowGroupErrorInAlert(response) then
                 local nameToUse = ZO_GetPrimaryPlayerName(displayName, characterName)
                 if nameToUse == "" then
                     nameToUse = ZO_GetSecondaryPlayerName(displayName, characterName)
@@ -284,6 +289,29 @@ local AlertHandlers = {
                 return ALERT, alertMessage, SOUNDS.GENERAL_ALERT_ERROR
             end
         end
+    end,
+
+    [EVENT_GROUP_MEMBER_JOINED] = function(displayName)
+        return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_GROUP_INVITE))
+    end,
+
+    [EVENT_FRIEND_ADDED] = function(displayName)
+        return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_FRIEND_INVITE))
+    end,
+
+    [EVENT_GUILD_SELF_JOINED_GUILD] = function(guildId, displayName)
+        -- Don't show accept notification if the guild was created by the player
+        if not IsPlayerGuildMaster(guildId) then
+            return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_GUILD_INVITE))
+        end
+    end,
+
+    [EVENT_GUILD_INVITE_TO_BLACKLISTED_PLAYER] = function(playerName, guildId)
+        return ALERT, zo_strformat(SI_GUILD_INVITE_BLACKISTED_ALERT, playerName, GetGuildName(guildId))
+    end,
+
+    [EVENT_GUILD_INVITE_PLAYER_SUCCESSFUL] = function(playerName, guildId)
+        return ALERT, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, playerName, GetGuildName(guildId))
     end,
 
     [EVENT_GROUP_INVITE_ACCEPT_RESPONSE_TIMEOUT] = function()
@@ -520,6 +548,10 @@ local AlertHandlers = {
         return ALERT, zo_strformat(SI_NEW_RECIPE_LEARNED, name), SOUNDS.RECIPE_LEARNED
     end,
 
+    [EVENT_MULTIPLE_RECIPES_LEARNED] = function(numLearned)
+        return ALERT, zo_strformat(SI_NEW_RECIPES_LEARNED, numLearned), SOUNDS.RECIPE_LEARNED
+    end,
+
     [EVENT_ZONE_CHANGED] = function(zoneName, subzoneName)
          if(subzoneName ~= "") then
             return ALERT, zo_strformat(SI_ALERTTEXT_LOCATION_FORMAT, subzoneName)
@@ -551,7 +583,8 @@ local AlertHandlers = {
     end,
 
     [EVENT_JUMP_FAILED] = function(result)
-        if result ~= JUMP_RESULT_JUMP_FAILED_ZONE_COLLECTIBLE then -- this result is handled in a dialog
+        -- make sure it's not a result handled by EVENT_ZONE_COLLECTIBLE_REQUIREMENT_FAILED, which will prompt a dialog
+        if result ~= JUMP_RESULT_JUMP_FAILED_ZONE_COLLECTIBLE and result ~= JUMP_RESULT_JUMP_FAILED_SOCIAL_TARGET_ZONE_COLLECTIBLE_LOCKED then
             return ALERT, GetString("SI_JUMPRESULT", result)
         end
     end,
@@ -964,6 +997,22 @@ local AlertHandlers = {
         if result ~= COLLECTIBLE_EVOLUTION_RESULT_SUCCESS then
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_COLLECTIBLEEVOLUTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
+    end,
+
+    [EVENT_ACCEPT_SHARED_QUEST_RESPONSE] = function()
+        return ALERT, zo_strformat(GetString(SI_NOTIFICATION_ACCEPTED), GetString(SI_NOTIFICATION_SHARE_QUEST_INVITE))
+    end,
+
+    [EVENT_NO_DAEDRIC_PICKUP_WHEN_STEALTHED] = function()
+        return ERROR, GetString(SI_NO_DAEDRIC_PICKUP_WHEN_STEALTHED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_GUILD_FINDER_LONG_SEARCH_WARNING] = function()
+        return ALERT, GetString(SI_GUILD_BROWSER_LONG_SEARCH_WARNING), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_NO_DAEDRIC_PICKUP_AS_EMPEROR] = function()
+        return ERROR, GetString(SI_NO_DAEDRIC_PICKUP_AS_EMPEROR), SOUNDS.GENERAL_ALERT_ERROR
     end,
 }
 

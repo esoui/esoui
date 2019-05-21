@@ -94,3 +94,11 @@ function ZO_Tooltip:LayoutGuildMember(displayName, characterName, class, gender,
     AddNote(self, note)
     TryAddOffline(self, offline, secsSinceLogoff, timeStamp)
 end
+
+function ZO_Tooltip:LayoutGuildInvitee(displayName, characterName)
+    AddHeader(self, displayName)
+
+    local inviteeSection = self:AcquireSection(self:GetStyle("socialStatsSection"))
+    inviteeSection:AddLine(GetString(SI_GUILD_INVITED_PLAYER_LOCATION), self:GetStyle("guildInvitee"))
+    self:AddSection(inviteeSection)
+end

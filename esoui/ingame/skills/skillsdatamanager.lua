@@ -992,24 +992,6 @@ function ZO_SkillTypeData:GetAnnounceIcon()
     return self.announceIcon
 end
 
-do
-    local SKILL_TYPE_TO_MENU_CLICK_SOUND =
-    {
-        [SKILL_TYPE_CLASS] = SOUNDS.SKILL_TYPE_CLASS,
-        [SKILL_TYPE_WEAPON] = SOUNDS.SKILL_TYPE_WEAPON,
-        [SKILL_TYPE_ARMOR] = SOUNDS.SKILL_TYPE_ARMOR,
-        [SKILL_TYPE_WORLD] = SOUNDS.SKILL_TYPE_WORLD,
-        [SKILL_TYPE_GUILD] = SOUNDS.SKILL_TYPE_GUILD,
-        [SKILL_TYPE_AVA] = SOUNDS.SKILL_TYPE_AVA,
-        [SKILL_TYPE_RACIAL] = SOUNDS.SKILL_TYPE_RACIAL,
-        [SKILL_TYPE_TRADESKILL] = SOUNDS.SKILL_TYPE_TRADESKILL,
-    }
-
-    function ZO_SkillTypeData:GetMenuClickSound()
-        return SKILL_TYPE_TO_MENU_CLICK_SOUND[self.skillType]
-    end
-end
-
 function ZO_SkillTypeData:AreAnySkillLinesNew()
     for _, skillLineData in self:SkillLineIterator({ ZO_SkillLineData.IsNew }) do
         return true

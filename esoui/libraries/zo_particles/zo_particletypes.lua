@@ -3,16 +3,19 @@
 local cos = math.cos
 local sin = math.sin
 local atan = math.atan
+local atan2 = math.atan2
 local zo_lerp = zo_lerp
+local zo_floor = zo_floor
+local zo_random = zo_random
 
 function ZO_BentArcParticle_OnUpdate(self, timeS)
     local parameters = self.parameters
     local finalMagnitude = parameters["BentArcFinalMagnitude"]
     local velocity = parameters["BentArcVelocity"]
-    local AzimuthStartRadians = parameters["BentArcAzimuthStartRadians"]
-    local ElevationStartRadians = parameters["BentArcElevationStartRadians"]
-    local AzimuthChangeRadians = parameters["BentArcAzimuthChangeRadians"]
-    local ElevationChangeRadians = parameters["BentArcElevationChangeRadians"]
+    local azimuthStartRadians = parameters["BentArcAzimuthStartRadians"]
+    local elevationStartRadians = parameters["BentArcElevationStartRadians"]
+    local azimuthChangeRadians = parameters["BentArcAzimuthChangeRadians"]
+    local elevationChangeRadians = parameters["BentArcElevationChangeRadians"]
 
     local progress = self:GetProgress(timeS)
 
@@ -33,14 +36,14 @@ function ZO_BentArcParticle_OnUpdate(self, timeS)
     if easing then
         bendProgress = easing(progress)
     end
-    local AzimuthRadians = zo_lerp(AzimuthStartRadians, AzimuthStartRadians + AzimuthChangeRadians, bendProgress)
-    local ElevationRadians = zo_lerp(ElevationStartRadians, ElevationStartRadians + ElevationChangeRadians, bendProgress)
+    local azimuthRadians = zo_lerp(azimuthStartRadians, azimuthStartRadians + azimuthChangeRadians, bendProgress)
+    local elevationRadians = zo_lerp(elevationStartRadians, elevationStartRadians + elevationChangeRadians, bendProgress)
     
     --Spherical coordinates to Cartesian
-    local h = magnitude * cos(ElevationRadians)
-    local z = h * sin(AzimuthRadians)
-    local y = magnitude * sin(ElevationRadians)
-    local x = h * cos(AzimuthRadians)
+    local h = magnitude * cos(elevationRadians)
+    local z = h * sin(azimuthRadians)
+    local y = magnitude * sin(elevationRadians)
+    local x = h * cos(azimuthRadians)
 
     --X is right, Y is up, Z is toward the screen
     return x, y, z
@@ -60,7 +63,21 @@ function ZO_BentArcParticle_Control:OnUpdate(timeS)
     ZO_ControlParticle.OnUpdate(self, timeS)
     local x, y, z = ZO_BentArcParticle_OnUpdate(self, timeS)
     --Control particles expect that Y is down
-    self:SetPosition(x, -y, z)
+    y = -y
+    self:SetPosition(x, y, z)
+
+    local parameters = self.parameters
+    if parameters["BentArcOrientWithMotion"] then
+        --Numerical solution to orient along the spiral. We use the slope between the last two positions to compute the tangent to the spiral. The angle
+        --to orient the texture's right-middle point to the spiral is the 2*PI - the tangent's angle, or alternately minus the tangent's angle.
+        if self.lastX then
+            local angle = atan2(y - self.lastY, x - self.lastX)
+            local offsetRadians = parameters["BentArcOrientWithMotionTextureRotationRadians"] or 0
+            self.textureControl:SetTextureRotation(-angle - offsetRadians)
+        end
+        self.lastX = x
+        self.lastY = y
+    end
 end
 function ZO_BentArcParticle_Control:New(...)
     return ZO_ControlParticle.New(self, ...)
@@ -290,6 +307,59 @@ function ZO_LeafParticle_Control:OnUpdate(timeS)
     local slope = -descent / (cosSectionX * cosSectionX)
     local tumbleRadians = parameters["LeafTumbleRadians"]
     self.textureControl:SetTextureRotation(math.atan(slope) + leafTextureRotationRadians + tumbleRadians * progress)
+
+    self:SetPosition(offsetX, offsetY, 0)
+end
+
+--Flow Particle
+--Sends the particle through a series of "posts" that describe a set of vertical ranges. For example:
+--
+--
+--  *   *       *   *       *           *
+--  *   *   *   *   *   *   *   *   *   *
+--      *   *   *   *   *   *   *   **
+--          *   *       *   *   *
+--
+--Particles will be assigned a normalized vertical offset and travel from post to post across where that normalized offset would lie.
+--For example, if a particle was assigned 50% it would travel through the middle of each post, interpolating from middle to middle inbetween the posts.
+
+ZO_FlowParticle_Control = ZO_ControlParticle:Subclass()
+
+function ZO_FlowParticle_Control:New(...)
+    return ZO_ControlParticle.New(self, ...)
+end
+
+function ZO_FlowParticle_Control:Start(...)
+    ZO_ControlParticle.Start(self, ...)
+
+    self.normalizedY = zo_random()
+end
+
+function ZO_FlowParticle_Control:OnUpdate(timeS)
+    ZO_ControlParticle.OnUpdate(self, timeS)
+
+    local progress = self:GetProgress(timeS)
+    local parameters = self.parameters
+
+    local areaTop = parameters["FlowAreaTop"]
+    local areaBottom = parameters["FlowAreaBottom"]
+    local areaLeft = parameters["FlowAreaLeft"]
+    local areaRight = parameters["FlowAreaRight"]
+    local normalizedPosts = parameters["FlowNormalizedPosts"]
+    local numPosts = #normalizedPosts
+
+    local temp = progress * (numPosts - 1)
+    local progressBetweenPosts = temp % 1
+    local previousPostIndex = zo_floor(temp) + 1
+    local previousPost = normalizedPosts[previousPostIndex]
+    --the or handles the case where progress is exactly 1
+    local nextPost = normalizedPosts[previousPostIndex + 1] or normalizedPosts[numPosts]
+    --index 1 holds the top of the post and index 2 holds the bottom of the post
+    local normalizedFlowTop = zo_lerp(previousPost[1], nextPost[1], progressBetweenPosts)
+    local normalizedFlowBottom = zo_lerp(previousPost[2], nextPost[2], progressBetweenPosts)
+    local normalizedY = zo_lerp(normalizedFlowTop, normalizedFlowBottom, self.normalizedY)
+    local offsetY = zo_lerp(areaTop, areaBottom, normalizedY)
+    local offsetX = zo_lerp(areaLeft, areaRight, progress)
 
     self:SetPosition(offsetX, offsetY, 0)
 end

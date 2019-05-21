@@ -110,8 +110,12 @@ function SkillsAdvisorBuildSelectionRoot_Gamepad:OnShowing()
 
     local list = self:GetMainList()
     local selectedIndex = ZO_SKILLS_ADVISOR_SINGLETON:GetSelectedSkillBuildIndex()
-    list:SetSelectedIndexWithoutAnimation(selectedIndex)
-    
+
+    -- There my be no selected index if no skill builds have been added to data
+    if selectedIndex then
+        list:SetSelectedIndexWithoutAnimation(selectedIndex)
+    end
+
     local selectedData = list:GetSelectedData()
     self:RefreshTooltip(selectedData)
 end

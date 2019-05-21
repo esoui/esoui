@@ -192,6 +192,10 @@ function ZO_ActivityFinderLocation_Base:ShouldForceFullPanelKeyboard()
     return self.forceFullPanelKeyboard
 end
 
+function ZO_ActivityFinderLocation_Base:IsLockedByPlayerLocation()
+    assert(false) -- Must be overrideen
+end
+
 function ZO_ActivityFinderLocation_Base:IsLockedByCollectible()
     assert(false) -- Must be overrideen
 end
@@ -201,6 +205,10 @@ function ZO_ActivityFinderLocation_Base:GetFirstLockingCollectible()
 end
 
 function ZO_ActivityFinderLocation_Base:GetEntryType()
+    assert(false) -- Must be overriden
+end
+
+function ZO_ActivityFinderLocation_Base:GetZoneId()
     assert(false) -- Must be overriden
 end
 
@@ -284,6 +292,7 @@ function ZO_ActivityFinderLocation_Specific:Initialize(activityType, index)
     local descriptionTextureGamepad = GetActivityGamepadDescriptionTexture(activityId)
     self.requiredCollectible = GetRequiredActivityCollectibleId(activityId)
     local forceFullPanelKeyboard = ShouldActivityForceFullPanelKeyboard(activityId)
+    self.zoneId = GetActivityZoneId(activityId)
 
     ZO_ActivityFinderLocation_Base.Initialize(self, activityType, activityId, rawName, description, levelMin, levelMax, championPointsMin, championPointsMax, minGroupSize, maxGroupSize, sortOrder, descriptionTextureSmallKeyboard, descriptionTextureLargeKeyboard, descriptionTextureGamepad, forceFullPanelKeyboard)
 end
@@ -309,6 +318,10 @@ function ZO_ActivityFinderLocation_Specific:DoesGroupMeetLevelRequirements()
     return DoesGroupMeetActivityLevelRequirements(self:GetId())
 end
 
+function ZO_ActivityFinderLocation_Specific:IsLockedByPlayerLocation()
+    return not IsActivityAvailableFromPlayerLocation(self:GetId())
+end
+
 function ZO_ActivityFinderLocation_Specific:IsLockedByCollectible()
     if self.requiredCollectible ~= 0 then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.requiredCollectible)
@@ -331,6 +344,10 @@ end
 
 function ZO_ActivityFinderLocation_Specific:GetEntryType()
     return ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SPECIFIC
+end
+
+function ZO_ActivityFinderLocation_Specific:GetZoneId()
+    return self.zoneId
 end
 
 ------------------
@@ -442,6 +459,16 @@ function ZO_ActivityFinderLocation_Set:DoesGroupMeetLevelRequirements()
     return false
 end
 
+function ZO_ActivityFinderLocation_Set:IsLockedByPlayerLocation()
+    for _, activityId in ipairs(self.activities) do
+        if IsActivityAvailableFromPlayerLocation(activityId) then
+            return false
+        end
+    end
+
+    return true
+end
+
 function ZO_ActivityFinderLocation_Set:IsLockedByCollectible()
     for _, collectibleId in ipairs(self.requiredCollectibles) do
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
@@ -537,4 +564,8 @@ do
         local builderFunction = ACTIVITY_SET_TYPES_LIST_BUILDERS[self:GetActivityType()]
         return builderFunction and builderFunction(self) or ""
     end
+end
+
+function ZO_ActivityFinderLocation_Set:GetZoneId()
+    return 0
 end

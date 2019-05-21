@@ -4,8 +4,17 @@
             <Dimensions x="460" />
         </Label>
 
+        <Control name="ZO_AddOnSectionHeaderRow" virtual="true">
+            <Dimensions y="ZO_ADDON_SECTION_HEADER_ROW_HEIGHT"/>
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontWinH3">
+                    <Anchor point="LEFT" offsetY="5"/>
+                </Label>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_AddOnRow" virtual="true">
-            <Dimensions y="30"/>
+            <Dimensions y="ZO_ADDON_ROW_HEIGHT"/>
             <Controls>
                 <Button name="$(parent)ExpandButton" inherits="ZO_TreeButtonArrow">
                     <Anchor point="TOPLEFT" offsetX="-6" offsetY="2" />
@@ -30,18 +39,18 @@
                     </OnMouseExit>
                 </Button>
 
-                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Dimensions x="265" y="30" />
+                <Label name="$(parent)Name" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
+                    <Dimensions x="265"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Enabled" relativePoint="RIGHT" offsetX="13" offsetY="1" />
                 </Label>
 
-                <Label name="$(parent)Author" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Dimensions x="300" y="30" />
+                <Label name="$(parent)Author" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
+                    <Dimensions x="300"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="20"/>
                 </Label>
 
-                <Label name="$(parent)State" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Dimensions x="220" y="30" />
+                <Label name="$(parent)State" font="ZoFontWinH4"inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
+                    <Dimensions x="220"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Author" relativePoint="RIGHT" offsetX="20" />
                 </Label>
 

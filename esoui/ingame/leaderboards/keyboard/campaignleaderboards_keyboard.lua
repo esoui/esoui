@@ -45,7 +45,7 @@ function ZO_LeaderboardCampaignSelector_Keyboard:Initialize(control)
     end
 
     self.homeTabData = CreateNewTabData(BGQUERY_ASSIGNED_CAMPAIGN, "EsoUI/Art/Journal/leaderboard_tabIcon_home_up.dds", "EsoUI/Art/Journal/leaderboard_tabIcon_home_down.dds", "EsoUI/Art/Journal/leaderboard_tabIcon_home_over.dds")
-    self.guestTabData = CreateNewTabData(BGQUERY_LOCAL, "EsoUI/Art/Journal/leaderboard_tabIcon_guest_up.dds", "EsoUI/Art/Journal/leaderboard_tabIcon_guest_down.dds", "EsoUI/Art/Journal/leaderboard_tabIcon_guest_over.dds")
+    self.localTabData = CreateNewTabData(BGQUERY_LOCAL, "EsoUI/Art/Journal/leaderboard_tabIcon_guest_up.dds", "EsoUI/Art/Journal/leaderboard_tabIcon_guest_down.dds", "EsoUI/Art/Journal/leaderboard_tabIcon_guest_over.dds")
 
     ZO_MenuBar_SetData(self.tabs, MENU_BAR_DATA)
 
@@ -76,10 +76,10 @@ function ZO_LeaderboardCampaignSelector_Keyboard:RefreshQueryTypes()
         end
     end
 
-    if self:IsGuestSelectable() then
-        ZO_MenuBar_AddButton(self.tabs, self.guestTabData)
+    if self:IsLocalSelectable() then
+        ZO_MenuBar_AddButton(self.tabs, self.localTabData)
 
-        if not self.selectedQueryType or (self.guestTabData.queryType == self.selectedQueryType) then
+        if not self.selectedQueryType or (self.localTabData.queryType == self.selectedQueryType) then
             ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_LOCAL)
         end
     end
@@ -89,7 +89,7 @@ end
 
 function ZO_CampaignLeaderboardSelector_ButtonOnMouseEnter(self)
     ZO_MenuBarButtonTemplate_OnMouseEnter(self)
-    InitializeTooltip(InformationTooltip, self, BOTTOMRIGHT, 0, 32)
+    InitializeTooltip(InformationTooltip, self, BOTTOM, 0, 0)
     SetTooltipText(InformationTooltip, ZO_MenuBarButtonTemplate_GetData(self).tooltipText)
 end
 

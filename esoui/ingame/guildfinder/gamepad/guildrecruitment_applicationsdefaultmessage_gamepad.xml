@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildRecruitment_ApplicationsDefaultMessage_Gamepad_TopLevel" inherits="ZO_GuildHomeContentAnchor" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_ApplicationsDefaultMessage_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Panel" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Label name="$(parent)Header" modifyTextType="UPPERCASE" font="ZoFontGamepad42" text="SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_HEADER">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                        <Label name="$(parent)Description" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_DESCRIPTION">
+                            <Dimensions x="780" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                        </Label>
+                        
+                        <Label name="$(parent)Message" font="ZoFontGamepadCondensed42">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="40" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

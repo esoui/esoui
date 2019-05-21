@@ -15,10 +15,10 @@ function ZO_CampaignBonusesManager:New(control)
 
     CAMPAIGN_BONUSES_FRAGMENT = ZO_FadeSceneFragment:New(control)
     CAMPAIGN_BONUSES_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                                    if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                                    if newState == SCENE_FRAGMENT_SHOWN then
                                                                         manager.shown = true
                                                                         manager:RefreshData()
-                                                                    elseif(newState == SCENE_FRAGMENT_HIDDEN) then
+                                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
                                                                         manager.shown = false
                                                                     end
                                                                 end)

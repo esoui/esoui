@@ -72,7 +72,7 @@ function ZO_GuildHeraldryManager_Shared:PopulateStyleCategoryLists()
     self.bgStyleCatList:Clear()
 
     for i = 1, GetNumHeraldryBackgroundCategories() do
-        local catName, upIcon, downIcon, overIcon = GetHeraldryBackgroundCategoryInfo(i)
+        local catName, upIcon = GetHeraldryBackgroundCategoryInfo(i)
         local data = { categoryName = catName, icon = upIcon, categoryIndex = i, categoryList = self.bgStyleCatList }
         self.bgStyleCatList:AddEntry(data)
     end

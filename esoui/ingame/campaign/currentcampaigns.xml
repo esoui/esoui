@@ -13,13 +13,6 @@
                     <Dimensions x="32" y="32"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)Assigned" relativePoint="LEFT"/>
                 </Texture>
-                <Label name="$(parent)Guest" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Assigned" relativePoint="BOTTOMRIGHT" offsetY="2"/>
-                </Label>
-                <Texture name="$(parent)GuestIcon" textureFile="EsoUI/Art/Campaign/campaignBrowser_guestCampaign.dds">
-                    <Dimensions x="32" y="32"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Guest" relativePoint="LEFT"/>
-                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>

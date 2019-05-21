@@ -40,7 +40,10 @@ function ZO_ActivityFinderTemplate_Shared:InitializeFragment()
 end
 
 function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateLocationData", function() self:RefreshView() end)
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnUpdateLocationData", function()
+        self:RefreshFilters()
+        self:RefreshView()
+    end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", function(status) self:OnActivityFinderStatusUpdate(status) end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnHandleLFMPromptResponse", function() self:OnHandleLFMPromptResponse() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", function() self:RefreshFilters() end)

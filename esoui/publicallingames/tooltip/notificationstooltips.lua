@@ -6,7 +6,7 @@ function ZO_Tooltip:LayoutNotification(note, messageText)
     end
 
     if note then
-        bodySection:AddLine(note, self:GetStyle("bodyDescription"))
+        bodySection:AddLine(note, self:GetStyle("notificationNote"))
     end
 
     self:AddSection(bodySection)

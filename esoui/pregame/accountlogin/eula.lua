@@ -222,8 +222,8 @@ function ZO_EULA:ResetDialog()
 
     self.scrolledToBottomOnce = false
     self.agreeButton:SetEnabled(false)
-    ZO_CheckButton_SetEnableState(self.readTextCheckBox, false)
     ZO_CheckButton_SetUnchecked(self.readTextCheckBox)
+    ZO_CheckButton_SetEnableState(self.readTextCheckBox, false)
     self.scroll:SetHandler("OnUpdate", OnUpdate)
 end
 

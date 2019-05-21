@@ -166,6 +166,14 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
         end
     end
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_STATE_UPDATED, function(eventId, ...) OnMarketStateUpdated(...) end)
+
+    local function OnMarketProductAvailabilityUpdated(displayGroup)
+        if displayGroup == MARKET_DISPLAY_GROUP_HOUSE_EDITOR then
+            self:BuildMarketProductCache()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_PRODUCT_AVAILABILITY_UPDATED, function(eventId, ...) OnMarketProductAvailabilityUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_MARKET_PURCHASE_RESULT, function(eventId, ...) self:UpdateMarketProductCache() end)
 
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_BACKGROUND_LIST_FILTER_COMPLETE, function(eventId, ...) self:OnBackgroundListFilterComplete(...) end)

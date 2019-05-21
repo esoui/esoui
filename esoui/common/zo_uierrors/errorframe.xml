@@ -65,7 +65,7 @@
                     <Anchor point="TOPLEFT" offsetY="30"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-40"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" escapeMarkup="false"/>
+                        <EditBox name="$(parent)Edit" allowMarkupType="COLOR_ONLY"/>
                     </Controls>
                 </Backdrop>
 

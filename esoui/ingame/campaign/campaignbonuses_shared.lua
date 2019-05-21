@@ -92,7 +92,7 @@ local function GetEmperorBonusAbilityId(campaignId)
 end
 
 local function GetEmperorBonusScore(campaignId)
-    if(DoesCampaignHaveEmperor(campaignId)) then
+    if DoesCampaignHaveEmperor(campaignId) then
         local alliance = GetCampaignEmperorInfo(campaignId)
         if alliance == GetUnitAlliance("player") then
             return 1

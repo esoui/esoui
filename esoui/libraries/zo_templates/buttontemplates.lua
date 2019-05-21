@@ -130,28 +130,28 @@ local function ZO_ToggleButton_UpdateTextures(toggleButton)
     local type = toggleButton.type
     local textureTable = TOGGLE_BUTTON_TEXTURES[type][toggleButton.state]
 
-    if(textureTable[NORMAL]) then
+    if textureTable[NORMAL]  then
         toggleButton:SetNormalTexture(textureTable[NORMAL])
         toggleButton:SetHidden(false)
     else
         toggleButton:SetHidden(true)
     end
-    if(textureTable[OVER]) then
+    if textureTable[OVER] then
         toggleButton:SetMouseOverTexture(textureTable[OVER])
     end
-    if(textureTable[PRESSED]) then
+    if textureTable[PRESSED] then
         toggleButton:SetPressedTexture(textureTable[PRESSED])
     end
-    if(textureTable[DISABLED]) then
+    if textureTable[DISABLED] then
         toggleButton:SetDisabledTexture(textureTable[DISABLED])
     end
 end
 
 function ZO_ToggleButton_Initialize(toggleButton, type, initialState)
-    if(initialState == nil) then
+    if initialState == nil then
         initialState = TOGGLE_BUTTON_OPEN
     end
-    
+
     toggleButton.type = type
     toggleButton.state = initialState
     ZO_ToggleButton_UpdateTextures(toggleButton)
@@ -171,19 +171,30 @@ function ZO_ToggleButton_GetState(toggleButton)
     return toggleButton.state
 end
 
-function ZO_CheckButtonLabel_SetDefaultColors(label, defaultNormalColor, defaultHighlightColor)
+------------------------
+-- ZO_CheckButton
+------------------------
+
+function ZO_CheckButtonLabel_SetDefaultColors(label, defaultNormalColor, defaultHighlightColor, defaultDisabledColor)
     label.defaultNormalColor = defaultNormalColor
     label.defaultHighlightColor = defaultHighlightColor
+    label.defaultDisabledColor = defaultDisabledColor
 end
 
 function ZO_CheckButtonLabel_ColorText(label, over)
-    local normalColor = label.defaultNormalColor or ZO_NORMAL_TEXT
-    local highlightColor = label.defaultHighlightColor or ZO_HIGHLIGHT_TEXT
-    
-    if(over) then
-        label:SetColor(highlightColor:UnpackRGBA())
+    local button = label:GetParent()
+    if button and ZO_CheckButton_IsEnabled(button) then
+        local normalColor = label.defaultNormalColor or ZO_NORMAL_TEXT
+        local highlightColor = label.defaultHighlightColor or ZO_HIGHLIGHT_TEXT
+
+        if over then
+            label:SetColor(highlightColor:UnpackRGBA())
+        else
+            label:SetColor(normalColor:UnpackRGBA())
+        end
     else
-        label:SetColor(normalColor:UnpackRGBA())      
+        local disabledColor = label.defaultDisabledColor or ZO_DISABLED_TEXT
+        label:SetColor(disabledColor:UnpackRGBA())
     end
 end
 
@@ -193,59 +204,89 @@ function ZO_CheckButtonLabel_SetTextColor(button, r, g, b)
 end
 
 function ZO_CheckButton_SetLabelText(button, labelText)
-    if(not button.label) then
+    if not button.label then
         local label = CreateControlFromVirtual(button:GetName().."Label", button, "ZO_CheckButtonLabel")
         label:SetAnchor(LEFT, button, RIGHT, 5, 0)
-        ZO_PreHookHandler(button, "OnMouseEnter", function() ZO_CheckButtonLabel_ColorText(label, true) end)
-        ZO_PreHookHandler(button, "OnMouseExit", function() ZO_CheckButtonLabel_ColorText(label, false) end)
+
+        local function OnMouseEnter()
+            if ZO_CheckButton_IsTooltipEnabled(button) and button.tooltipText and button.tooltipText ~= "" then
+                local anchorControl = button.tooltipAnchorControl or button
+                local anchorDirection = button.tooltipAnchorDirection or LEFT
+                ZO_Tooltips_ShowTextTooltip(anchorControl, anchorDirection, button.tooltipText)
+            end
+
+            local MOUSED_OVER = true
+            ZO_CheckButtonLabel_ColorText(label, MOUSED_OVER)
+        end
+
+        local function OnMouseExit()
+            ZO_Tooltips_HideTextTooltip()
+
+            local NOT_MOUSED_OVER = false
+            ZO_CheckButtonLabel_ColorText(label, NOT_MOUSED_OVER)
+        end
+
+        ZO_PreHookHandler(button, "OnMouseEnter", OnMouseEnter)
+        ZO_PreHookHandler(button, "OnMouseExit", OnMouseExit)
         ZO_PreHookHandler(label, "OnMouseEnter", function() button:GetHandler("OnMouseEnter")(button) end)
         ZO_PreHookHandler(label, "OnMouseExit", function() button:GetHandler("OnMouseExit")(button) end)
 
         button.label = label
     end
 
-    if(button.label) then
+    if button.label then
         button.label:SetText(labelText)
     end
 end
 
 function ZO_CheckButton_SetLabelWrapMode(button, wrapMode, labelWidth)
-    if(button.label) then
-		button.label:SetHeight(button.label:GetFontHeight())
-		button.label:SetWidth(labelWidth)
+    if button.label then
+        button.label:SetHeight(button.label:GetFontHeight())
+        button.label:SetWidth(labelWidth)
         button.label:SetWrapMode(wrapMode)
     end
 end
 
 function ZO_CheckButton_SetLabelWidth(button, labelWidth)
-    if(button.label) then
+    if button.label then
         button.label:SetWidth(labelWidth)
     end
 end
 
 function ZO_CheckButton_OnClicked(buttonControl)
-    PlaySound(SOUNDS.DEFAULT_CLICK)
-    
-    local bState = buttonControl:GetState()
-    local callToggleFunc = true
-    local checked = true
+    if ZO_CheckButton_IsEnabled(buttonControl) then
+        PlaySound(SOUNDS.DEFAULT_CLICK)
 
-    if bState == BSTATE_NORMAL then
-        ZO_CheckButton_SetChecked(buttonControl)
-    elseif bState == BSTATE_PRESSED then
-        ZO_CheckButton_SetUnchecked(buttonControl)
-        checked = false
-    else
-        callToggleFunc = false
-    end
+        local bState = buttonControl:GetState()
+        local callToggleFunc = true
+        local checked = true
 
-    if (buttonControl.toggleFunction ~= nil) and callToggleFunc then
-        buttonControl:toggleFunction(checked)
+        if bState == BSTATE_NORMAL then
+            ZO_CheckButton_SetChecked(buttonControl)
+        elseif bState == BSTATE_PRESSED then
+            ZO_CheckButton_SetUnchecked(buttonControl)
+            checked = false
+        else
+            callToggleFunc = false
+        end
+
+        if (buttonControl.toggleFunction ~= nil) and callToggleFunc then
+            buttonControl:toggleFunction(checked)
+        end
     end
 end
 
+function ZO_CheckButton_IsEnabled(buttonControl)
+    local currentState = buttonControl:GetState()
+    return currentState ~= BSTATE_DISABLED and currentState ~= BSTATE_DISABLED_PRESSED
+end
+
+function ZO_CheckButton_IsTooltipEnabled(buttonControl)
+    return buttonControl.tooltipEnabled == nil or buttonControl.tooltipEnabled
+end
+
 function ZO_CheckButton_SetEnableState(buttonControl, enabled)
-    if(enabled) then
+    if enabled then
         ZO_CheckButton_Enable(buttonControl)
     else
         ZO_CheckButton_Disable(buttonControl)
@@ -254,38 +295,53 @@ end
 
 function ZO_CheckButton_Disable(buttonControl)
     local currentState = buttonControl:GetState()
-    if(currentState == BSTATE_PRESSED)
-    then
+    if currentState == BSTATE_PRESSED then
         buttonControl:SetState(BSTATE_DISABLED_PRESSED, true)
-    elseif(currentState == BSTATE_NORMAL)
-    then
+    elseif currentState == BSTATE_NORMAL then
         buttonControl:SetState(BSTATE_DISABLED, true)
     end
 
-    buttonControl:SetMouseEnabled(false)
+    local tooltipEnabled = ZO_CheckButton_IsTooltipEnabled(buttonControl)
 
-    if(buttonControl.label) then
-        buttonControl.label:SetMouseEnabled(false)
+    buttonControl:SetMouseEnabled(tooltipEnabled)
+
+    if buttonControl.label then
+        buttonControl.label:SetMouseEnabled(tooltipEnabled)
         buttonControl.label:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
     end
 end
 
 function ZO_CheckButton_Enable(buttonControl)
     local currentState = buttonControl:GetState()
-    if(currentState == BSTATE_DISABLED_PRESSED)
-    then
+    if currentState == BSTATE_DISABLED_PRESSED then
         ZO_CheckButton_SetChecked(buttonControl)
-    elseif(currentState == BSTATE_DISABLED)
-    then
+    elseif currentState == BSTATE_DISABLED then
         ZO_CheckButton_SetUnchecked(buttonControl)
     end
 
     buttonControl:SetMouseEnabled(true)
 
-    if(buttonControl.label) then
+    if buttonControl.label then
         buttonControl.label:SetMouseEnabled(true)
         ZO_CheckButtonLabel_ColorText(buttonControl.label, MouseIsOver(buttonControl.label))
     end
+end
+
+function ZO_CheckButton_SetTooltipEnabledState(buttonControl, enabled)
+    buttonControl.tooltipEnabled = enabled
+end
+
+function ZO_CheckButton_SetTooltipAnchor(buttonControl, anchorDirection, anchorControl)
+    buttonControl.tooltipAnchorControl = anchorControl
+    buttonControl.tooltipAnchorDirection = anchorDirection
+end
+
+function ZO_CheckButton_SetTooltipText(buttonControl, text)
+    if type(text) == "function" then
+        text = text()
+    end
+
+    buttonControl.tooltipText = text
 end
 
 function ZO_CheckButton_SetChecked(buttonControl)
@@ -303,27 +359,23 @@ function ZO_CheckButton_SetUnchecked(buttonControl)
 end
 
 function ZO_CheckButton_IsChecked(buttonControl)
-    local currentState = buttonControl:GetState()    
-    return currentState == BSTATE_PRESSED
+    local currentState = buttonControl:GetState()
+    return currentState == BSTATE_PRESSED or currentState == BSTATE_DISABLED_PRESSED
 end
 
 function ZO_CheckButton_SetCheckState(buttonControl, checkState)
     local checkStateType = type(checkState)
     local isChecked = false
     
-    if(checkStateType == "boolean")
-    then
+    if checkStateType == "boolean" then
         isChecked = checkState
-    elseif(checkStateType == "string")
-    then
+    elseif checkStateType == "string" then
         isChecked = (checkState == "true") or (checkState == "t") or (checkState == "1") or (checkState == "y")
-    elseif(checkStateType == "number")
-    then
+    elseif checkStateType == "number" then
         isChecked = checkState > 0
     end
-    
-    if(isChecked)
-    then
+
+    if isChecked then
         ZO_CheckButton_SetChecked(buttonControl)
     else
         ZO_CheckButton_SetUnchecked(buttonControl)

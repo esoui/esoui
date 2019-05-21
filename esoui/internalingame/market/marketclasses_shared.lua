@@ -23,23 +23,21 @@ ZO_MARKET_PRODUCT_HIGHLIGHT_ANIMATION_DURATION_MS = 255
 do
     local MARKET_PRODUCT_COLOR_MAP_UNFOCUSED =
     {
-        [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_DIMMED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_DIMMED_COLOR,
     }
 
     local MARKET_PRODUCT_COLOR_MAP_FOCUSED =
     {
-        [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_SELECTED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE] = ZO_MARKET_PRODUCT_PURCHASED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_SELECTED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_COLOR,
     }
 
-    function ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(label, isFocused, purchaseState)
+    function ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(label, isFocused, displayState)
         local colorLookup = isFocused and MARKET_PRODUCT_COLOR_MAP_FOCUSED or MARKET_PRODUCT_COLOR_MAP_UNFOCUSED
-        local color = colorLookup[purchaseState]
+        local color = colorLookup[displayState]
         label:SetColor(color:UnpackRGB())
     end
 end
@@ -47,23 +45,21 @@ end
 do
     local UNFOCUSED_COLOR_MAP =
     {
-        [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_DIMMED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_DIMMED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_DIMMED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_DIMMED_COLOR,
     }
 
     local FOCUSED_COLOR_MAP =
     {
-        [MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_COLOR,
-        [MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_COLOR,
     }
 
-    function ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(label, isFocused, purchaseState)
+    function ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(label, isFocused, displayState)
         local colorLookup = isFocused and FOCUSED_COLOR_MAP or UNFOCUSED_COLOR_MAP
-        local color = colorLookup[purchaseState]
+        local color = colorLookup[displayState]
         label:SetColor(color:UnpackRGB())
     end
 end
@@ -153,13 +149,13 @@ function ZO_MarketProductBase:IsGiftable()
     return self.productData:IsGiftable()
 end
 
-function ZO_MarketProductBase:GetPurchaseState()
+function ZO_MarketProductBase:GetMarketProductDisplayState()
     -- may be overridden by child classes that require additional logic
-    return self.productData:GetPurchaseState()
+    return self.productData:GetMarketProductDisplayState()
 end
 
 function ZO_MarketProductBase:IsPurchaseLocked()
-    return self.purchaseState ~= MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
+    return self.displayState ~= MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED
 end
 
 function ZO_MarketProductBase:CanBePurchased()
@@ -239,11 +235,11 @@ function ZO_MarketProductBase:LayoutCostAndText()
     self:SetupPurchaseLabelDisplay()
     self:SetupEsoPlusDealLabelDisplay()
 
-    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.title, self:IsFocused(), self.purchaseState)
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.title, self:IsFocused(), self.displayState)
 end
 
 function ZO_MarketProductBase:ShouldShowCallouts()
-    local purchaseable = self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
+    local purchaseable = self.displayState == MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED
     local purchasedAndNew = self.productData:IsNew() and not (purchaseable or self:IsLimitedTimeProduct() or self:IsOnSale())
     return self:IsPromo() or not purchasedAndNew
 end
@@ -327,7 +323,7 @@ function ZO_MarketProductBase:SetupPricingDisplay()
             control.cost:SetText(GetString(SI_MARKET_FREE_LABEL))
         end
 
-        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.cost, self:IsFocused(), self.purchaseState)
+        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.cost, self:IsFocused(), self.displayState)
         control.cost:SetHidden(self:IsPromo())
     else
         control.cost:SetHidden(true)
@@ -354,7 +350,7 @@ function ZO_MarketProductBase:SetupPricingDisplay()
             control.esoPlusCost:SetText(GetString(SI_MARKET_FREE_LABEL))
         end
 
-        ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(control.esoPlusCost, self:IsFocused(), self.purchaseState)
+        ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(control.esoPlusCost, self:IsFocused(), self.displayState)
     else
         control.esoPlusCost:SetHidden(true)
     end
@@ -367,19 +363,21 @@ function ZO_MarketProductBase:SetupPurchaseLabelDisplay()
         local purchasedString
         if self:IsPromo() then
             purchasedString = ""
-        elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED and self:IsHouseCollectible() then
+        elseif self.displayState == MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED and self:IsHouseCollectible() then
             purchasedString = ""
-        elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_COMPLETE then
-            local errorStringId = GetMarketProductCompleteErrorStringId(self:GetId())
-            purchasedString = GetErrorString(errorStringId)
-        elseif self.purchaseState == MARKET_PRODUCT_PURCHASE_STATE_INSTANT_UNLOCK_INELIGIBLE then
-            purchasedString = GetString(SI_MARKET_INSTANT_UNLOCK_INELIGIBLE_LABEL)
-        else
-            purchasedString = GetString(SI_MARKET_PURCHASED_LABEL)
+        elseif self.displayState == MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE then
+            purchasedString = GetString(SI_MARKET_PURCHASE_REQUIREMENT_INELIGIBLE_LABEL)
+        else -- MARKET_PRODUCT_DISPLAY_STATE_PURCHASED
+            if self.productData:GetMarketProductType() == MARKET_PRODUCT_TYPE_INSTANT_UNLOCK then
+                local errorStringId = GetMarketProductCompleteErrorStringId(self:GetId())
+                purchasedString = GetErrorString(errorStringId)
+            else
+                purchasedString = GetString(SI_MARKET_PURCHASED_LABEL)
+            end
         end
 
         purchaseLabelControl:SetText(purchasedString)
-        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(purchaseLabelControl, self:IsFocused(), self.purchaseState)
+        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(purchaseLabelControl, self:IsFocused(), self.displayState)
 
         self:AnchorPurchaseLabel()
     end
@@ -431,7 +429,7 @@ function ZO_MarketProductBase:SetupEsoPlusDealLabelDisplay()
         end
         local esoPlusDealString = string.format("%s%s", formattedIcon, text)
         esoPlusDealLabelControl:SetText(esoPlusDealString)
-        ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(esoPlusDealLabelControl, self:IsFocused(), self.purchaseState)
+        ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(esoPlusDealLabelControl, self:IsFocused(), self.displayState)
 
         self:AnchorEsoPlusDealLabel()
     end
@@ -509,7 +507,7 @@ function ZO_MarketProductBase:Show(marketProductData)
 
     self:UpdatingPricingInformation()
 
-    self.purchaseState = self:GetPurchaseState()
+    self.displayState = self:GetMarketProductDisplayState()
 
     local name = self.productData:GetDisplayName()
     self:SetTitle(name)

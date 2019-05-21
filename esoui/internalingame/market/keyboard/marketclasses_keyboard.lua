@@ -329,15 +329,15 @@ function MarketProduct_Keyboard:IsActivelyPreviewing()
     -- To Be Overridden
 end
 
-function MarketProduct_Keyboard:GetPurchaseState()
+function MarketProduct_Keyboard:GetMarketProductDisplayState()
     if self.parentMarketProductId then
-        local parentPurchaseState = GetMarketProductPurchaseState(self.parentMarketProductId)
-        if parentPurchaseState == MARKET_PRODUCT_PURCHASE_STATE_PURCHASED then
-            return parentPurchaseState
+        local parentDisplayState = ZO_GetMarketProductDisplayState(self.parentMarketProductId)
+        if parentDisplayState == MARKET_PRODUCT_DISPLAY_STATE_PURCHASED then
+            return parentDisplayState
         end
     end
 
-    return ZO_MarketProductBase.GetPurchaseState(self)
+    return ZO_MarketProductBase.GetMarketProductDisplayState(self)
 end
 
 function MarketProduct_Keyboard:ShowAsChild(marketProductData, parentMarketProductId)

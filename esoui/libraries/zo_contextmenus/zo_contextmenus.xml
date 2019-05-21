@@ -40,6 +40,8 @@
             </OnMouseExit>
         </Button>
 
+        <Backdrop name="ZO_MenuItemHighlight" inherits="ZO_SelectionHighlight" hidden="true" virtual="true" />
+
         <TopLevelControl name="ZO_Menus" tier="HIGH">
             <OnInitialized>
                 ZO_Menu_Initialize()
@@ -56,6 +58,13 @@
                     </OnHide>
 
                     <Controls>
+                        <Texture name="$(parent)Underlay" color="000000" mouseEnabled="true" alpha="0.0" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+
+                            <OnMouseWheel />
+                        </Texture>
+                        
                         <Backdrop name="$(parent)BG">
                             <AnchorFill />
 

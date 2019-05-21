@@ -48,7 +48,9 @@ function ZO_ScreenshotMode_Gamepad:Initialize(control)
 end
 
 function ZO_ScreenshotMode_Gamepad:OnControllerDisconnected()
-    SCENE_MANAGER:RestoreHUDScene()
+    if SCENE_MANAGER:GetHUDSceneName() == "gamepadScreenshotMode" then
+        SCENE_MANAGER:RestoreHUDScene()
+    end
 end
 
 function ZO_ScreenshotMode_Gamepad:Show()

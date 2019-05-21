@@ -160,6 +160,17 @@ do
 
         self:AddSection(restrictionsSection)
 
+        if GetCurrentZoneHouseId() ~= 0 and IsCollectibleCategoryPlaceableFurniture(categoryType) then
+            local furnishingLimitTypeSection = self:AcquireSection(self:GetStyle("furnishingLimitTypeSection"))
+            furnishingLimitTypeSection:AddLine(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), self:GetStyle("furnishingLimitTypeTitle"))
+
+            local furnishingLimitType = GetCollectibleFurnishingLimitType(collectibleId)
+            local furnishingLimitName = GetString("SI_HOUSINGFURNISHINGLIMITTYPE", furnishingLimitType)
+            furnishingLimitTypeSection:AddLine(furnishingLimitName, self:GetStyle("furnishingLimitTypeDescription"))
+
+            self:AddSection(furnishingLimitTypeSection)
+        end
+
         bodySection = self:AcquireSection(self:GetStyle("collectionsInfoSection"))
 
         if failsRestriction then

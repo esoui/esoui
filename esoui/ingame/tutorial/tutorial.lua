@@ -136,6 +136,20 @@ function ZO_Tutorials:ShowHelp()
     return false
 end
 
+function ZO_Tutorials:TriggerTutorialWithDeferredAction(triggerType, tutorialCompletedCallback)
+    local triggerEventTag = "ZO_TutorialTrigger"..triggerType
+
+    local function OnTutorialTriggerCompleted(eventCode, completedTriggerType)
+        if completedTriggerType == triggerType then
+            EVENT_MANAGER:UnregisterForEvent(triggerEventTag, EVENT_TUTORIAL_TRIGGER_COMPLETED)
+            tutorialCompletedCallback()
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent(triggerEventTag, EVENT_TUTORIAL_TRIGGER_COMPLETED, OnTutorialTriggerCompleted)
+
+    TriggerTutorial(triggerType)
+end
+
 function ZO_Tutorial_Initialize(control)
     TUTORIAL_SYSTEM = ZO_Tutorials:New(control)
 end

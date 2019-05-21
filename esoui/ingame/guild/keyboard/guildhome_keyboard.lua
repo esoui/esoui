@@ -22,7 +22,7 @@ function GuildHomeManager:New(control)
 
     manager.savingEditBoxGroup = ZO_SavingEditBoxGroup:New()
 
-    manager.motd = ZO_SavingEditBox:New(GetControl(manager.infoContainer, "MotD"))
+    manager.motd = ZO_ScrollingSavingEditBox:New(GetControl(manager.infoContainer, "MotD"))
     manager.motd:SetDefaultText(GetString(SI_GUILD_MOTD_DEFAULT_TEXT))
     manager.motd:SetEmptyText(GetString(SI_GUILD_MOTD_EMPTY_TEXT))
     manager.savingEditBoxGroup:Add(manager.motd)
@@ -31,7 +31,7 @@ function GuildHomeManager:New(control)
     motdEditControl:SetMaxInputChars(MAX_GUILD_MOTD_LENGTH)
     manager.motd:RegisterCallback("Save", function(text) SetGuildMotD(manager.guildId, text) end)
 
-    manager.description = ZO_SavingEditBox:New(GetControl(manager.infoContainer, "Description"))
+    manager.description = ZO_ScrollingSavingEditBox:New(GetControl(manager.infoContainer, "Description"))
     manager.description:SetDefaultText(GetString(SI_GUILD_DESCRIPTION_DEFAULT_TEXT))
     manager.description:SetEmptyText(GetString(SI_GUILD_DESCRIPTION_EMPTY_TEXT))
     manager.savingEditBoxGroup:Add(manager.description)

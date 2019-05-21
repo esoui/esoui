@@ -1,0 +1,11 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ActivationTile_Control" inherits="ZO_Tile_Control" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

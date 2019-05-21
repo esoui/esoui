@@ -9,7 +9,7 @@
     <Controls>
         <Texture name="ZO_SummersetBackground_LeafShadow" virtual="true" textureFile="EsoUI\Art\PregameAnimatedBackground\leafShadow.dds" alpha="0.1"/>
         <TopLevelControl name="ZO_SummersetBackground" mouseEnabled="true" tier="LOW" layer="BACKGROUND" level="1" hidden="true">
-            <AnchorFill/>>
+            <AnchorFill/>
             <OnInitialized>
                 ZO_SummersetBackground_OnInitialized(self)
             </OnInitialized>

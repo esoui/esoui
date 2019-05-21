@@ -117,7 +117,9 @@ function ZO_CraftingInventory:HandleVisibleDirtyEvent()
         if self.dirty then
             self:PerformFullRefresh()
         else
-            ZO_ScrollList_RefreshVisible(self.list)
+            if not self.performingFullRefresh then
+                ZO_ScrollList_RefreshVisible(self.list)
+            end
         end
     end
 end

@@ -505,7 +505,14 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                         if result == GIFT_ACTION_RESULT_SUCCESS then
                             return true
                         else
-                            local errorText = zo_strformat(GetString("SI_GIFTBOXACTIONRESULT", result), recipientDisplayName)
+                            local errorText
+                            if result == GIFT_ACTION_RESULT_RECIPIENT_EMPTY then
+                                -- avoid issue where we'd pass nil to zo_strformat when no displayName has been set
+                                -- plus this format string doesn't require any arguments
+                                errorText = GetString("SI_GIFTBOXACTIONRESULT", result)
+                            else
+                                errorText = zo_strformat(GetString("SI_GIFTBOXACTIONRESULT", result), recipientDisplayName)
+                            end
                             return false, errorText
                         end
                     else

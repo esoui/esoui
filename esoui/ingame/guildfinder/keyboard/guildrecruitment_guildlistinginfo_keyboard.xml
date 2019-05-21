@@ -1,0 +1,87 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildRecruitment_GuildListingInfo_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_GuildListingInfo_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)AlertContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildRecruitment_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40" />
+                    <Controls>
+                        <Label name="$(parent)Alert" inherits="ZO_GuildRecruitment_Keyboard_Header_Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" text="SI_GUILD_RECRUITMENT_GUILD_LISTING_FULL_GUILD_ALERT" hide="true">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions y="40" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)TopSection" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AlertContainer" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="RIGHT" constrains="X" offsetX="-35"/>
+                    <Controls>
+                        <Label name="$(parent)Status" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)PrimaryFocus" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)SecondaryFocus" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryFocus" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Roles" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SecondaryFocus" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Playtime" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Personalities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Playtime" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Languages" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Personalities" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)MinCP" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Languages" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoPanel" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_RECRUITMENT_GUILD_INFO_RECRUITMENT_MESSAGE_BASE_OFFSET_Y" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-35" />
+                    <Controls>
+                        <Control name="$(parent)Scroll" override="true">
+                            <Controls>
+                                <Control name="$(parent)Child" override="true">
+                                    <Controls>
+                                        <Label name="$(parent)HeaderMessage" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Dimensions x="600" />
+                                            <Anchor point="TOPLEFT" />
+                                        </Label>
+
+                                        <Label name="$(parent)Activities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                                            <Dimensions x="600" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                        </Label>
+
+                                        <Label name="$(parent)RecruitmentMessage" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Dimensions x="600" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

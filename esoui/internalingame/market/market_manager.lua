@@ -19,6 +19,10 @@ function Market_Manager:InitializeEvents()
         self:FireCallbacks("OnMarketStateUpdated", ...)
     end
 
+    local function OnMarketProductAvailabilityUpdated(eventId, ...)
+        self:FireCallbacks("OnMarketProductAvailabilityUpdated", ...)
+    end
+
     local function OnMarketPurchaseResult(eventId, ...)
         self:FireCallbacks("OnMarketPurchaseResult", ...)
     end
@@ -68,6 +72,7 @@ function Market_Manager:InitializeEvents()
     end
 
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
+    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_AVAILABILITY_UPDATED, OnMarketProductAvailabilityUpdated)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_CANCELED, OnMarketSearchResultsCanceled)
@@ -117,7 +122,7 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
 end
 
 do
-    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 28, "Update market error flow to handle new purchase result")
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 30, "Update market error flow to handle new purchase result")
     local IS_SIMPLE_MARKET_PURCHASE_ERROR = 
     {
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,
@@ -125,6 +130,7 @@ do
         [MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY] = true,
         [MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS] = true,
         [MARKET_PURCHASE_RESULT_EXCEEDS_CURRENCY_CAP] = true,
+        [MARKET_PURCHASE_RESULT_TEMPORARY_HOTBAR_PROHIBITION] = true,
     }
     function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
         local expectedPurchaseResult = marketProductData:CouldPurchase()
@@ -188,6 +194,15 @@ function Market_Manager:GetMarketProductGiftErrorInfo(marketProductData)
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
         allowContinue = false
         table.insert(errorStrings, zo_strformat(SI_MARKET_GIFTING_ALREADY_HAVE_GIFT_TEXT, ZO_SELECTED_TEXT:Colorize(displayName)))
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_FAIL_PURCHASE_REQ_LIST then
+        allowContinue = false
+        table.insert(errorStrings, GetString(SI_MARKET_GIFTING_PURCHASE_REQUIREMENT_FAILED_TEXT))
+
+        local passesReqList, errorStringId = marketProductData:PassesPurchasableReqList()
+        if not passesReqList and errorStringId ~= 0 then
+            local errorString = GetErrorString(errorStringId)
+            table.insert(errorStrings, ZO_ERROR_COLOR:Colorize(errorString))
+        end
     end
 
     local dialogParams = {

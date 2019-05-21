@@ -23,10 +23,10 @@ function ZO_CampaignBonusesGamepad:Initialize(control)
 
     CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(control)
     CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                                    if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                                    if newState == SCENE_FRAGMENT_SHOWN then
                                                                         self:RegisterForEvents()
                                                                         self:UpdateBonuses()
-                                                                    elseif(newState == SCENE_FRAGMENT_HIDDEN) then
+                                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
                                                                         self:UnregisterForEvents()
                                                                         self:Deactivate()
                                                                     end
@@ -68,7 +68,7 @@ function ZO_CampaignBonusesGamepad:UpdateToolTip()
 end
 
 function ZO_CampaignBonusesGamepad:SetTooltipHidden(hidden)
-    if(hidden) then
+    if hidden then
         GAMEPAD_TOOLTIPS:HideBg(GAMEPAD_RIGHT_TOOLTIP)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     else
@@ -91,7 +91,7 @@ function ZO_CampaignBonusesGamepad:UpdateBonuses()
         else
             local entryData = ZO_GamepadEntryData:New(data.name, data.icon)
             entryData:SetDataSource(data)
-            if(header) then
+            if header then
                 entryData:SetHeader(header)
                 self.abilityList:AddEntryWithHeader("ZO_CampaignBonusEntryTemplate", entryData)
                 header = nil
@@ -109,7 +109,7 @@ function ZO_CampaignBonuses_Gamepad_OnInitialized(control)
 end
 
 function ZO_CampaignBonusEntryHeaderTemplateSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
-    if(data.header) then
+    if data.header then
         control.text:SetText(data.header)
     end
 end

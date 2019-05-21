@@ -12,8 +12,9 @@
         <Control name="ZO_WorldMapHouseRow" virtual="true">
             <Dimensions x="200" y="60"/>
             <Controls>
-                <Label name="$(parent)Name" inherits="ZO_SelectableLabel" font="ZoFontHeader">
+                <Label name="$(parent)Name" inherits="ZO_SelectableLabel" font="ZoFontHeader" maxLineCount="1" wrapMode="ELLIPSIS">
                     <Anchor point="TOPLEFT" offsetX="ZO_MAP_HOUSES_KEYBOARD_ROW_PADDING_X" />
+                    <Anchor point="TOPRIGHT" />
                     <OnMouseDown>
                         ZO_WorldMapHouseRow_OnMouseDown(self, button)
                     </OnMouseDown>
@@ -21,8 +22,9 @@
                         ZO_WorldMapHouseRow_OnMouseUp(self, button, upInside)
                     </OnMouseUp>
                 </Label>
-                <Label name="$(parent)Location" font="ZoFontHeader">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="10"/>
+                <Label name="$(parent)Location" font="ZoFontHeader" maxLineCount="1" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" />
                 </Label>
             </Controls>
         </Control>

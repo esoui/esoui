@@ -1,0 +1,81 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildBrowser_GuildList_Row_Gamepad" virtual="true">
+            <Dimensions y="ZO_GUILD_BROWSER_GUILD_LIST_GAMEPAD_ENTRY_HEIGHT"/>
+            <OnInitialized>
+                self.guildNameLabel = self:GetNamedChild("Name")
+                self.guildAllianceTexture = self:GetNamedChild("AllianceIcon")
+                self.guildSizeLabel = self:GetNamedChild("Size")
+                self.guildSizeHeaderLabel = self:GetNamedChild("SizeHeader")
+                self.guildHeraldry = self:GetNamedChild("Heraldry")
+                self.guildContextualInfoHeaderLabel = self:GetNamedChild("ContextualInfoHeader")
+                self.guildContextualInfoValueLabel = self:GetNamedChild("ContextualInfoValue")
+                self.guildHeaderMessageLabel = self:GetNamedChild("HeaderMessage")
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_DefaultBackdrop_Gamepad">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                    <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_edge_semiTrans_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_toolTip_center_semiTrans_16.dds" />
+                </Backdrop>
+                
+                <Control name="$(parent)Heraldry" inherits="ZO_GuildFinder_Heraldry_Template">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backdrop" offsetX="10" offsetY="10" />
+                </Control>
+                
+                <Texture name="$(parent)AllianceIcon" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Heraldry" offsetX="10" offsetY="0" />
+                    <Dimensions x="48" y="48"/>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGamepad42" maxLineCount="1" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)AllianceIcon" offsetX="5" />
+                    <Dimensions x="335" />
+                </Label>
+                
+                <Label name="$(parent)Size" font="ZoFontGamepad34" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backdrop" offsetX="-10" offsetY="15" />
+                </Label>
+                
+                <Label name="$(parent)SizeHeader" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Size" relativePoint="TOPLEFT" offsetX="-4" offsetY="5" />
+                </Label>
+                
+                <Label name="$(parent)ContextualInfoHeader" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="BOTTOMLEFT" offsetX="5" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)ContextualInfoValue" font="ZoFontGamepad34">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContextualInfoHeader" relativePoint="TOPRIGHT"  offsetX="5" offsetY="-5" />
+                </Label>
+                
+                <Label name="$(parent)HeaderMessage" font="ZoFontGamepad34" maxLineCount="3" wrapMode="ELLIPSIS">
+                    <Dimensions x="600" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContextualInfoHeader" relativePoint="BOTTOMLEFT" offsetY="2" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildBrowser_GuildList_Gamepad_TopLevel" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_GuildBrowser_GuildList_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)PanelName" font="ZoFontGamepadBold54" horizontalAlignment="CENTER" text="SI_GAMEPAD_GUILD_BROWSER_GUILD_LIST_HEADER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="40" />
+                </Label>
+
+                <Label name="$(parent)Results" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativeTo="$(parent)PanelName" relativePoint="BOTTOM" offsetY="100" />
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetY="50" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

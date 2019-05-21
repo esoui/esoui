@@ -26,7 +26,12 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
 
     local function OnLockReasonLabelUpdate()
         if self.lockReasonTextFunction then
-            self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, self.lockReasonTextFunction()))
+            local lockReasonText = self.lockReasonTextFunction()
+            if lockReasonText then
+                self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, lockReasonText))
+            else
+                self.lockReasonLabel:SetText(zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16))
+            end
         end
     end
     self.lockReasonLabel:SetHandler("OnUpdate", OnLockReasonLabelUpdate)
@@ -144,6 +149,8 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
 
             local modes = self.dataManager:GetFilterModeData()
 
+            local NO_PARENT_NODE = nil
+            local NO_OVERRIDE_SOUND = nil
             local HEADER_OPEN = true
             for _, activityType in ipairs(filterData.activityTypes) do
                 if ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes()) > 0 then
@@ -151,11 +158,11 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
                     if not isLocked then
                         local locationData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
                         local headerText = GetString("SI_LFGACTIVITY", activityType)
-                        local headerNode = self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationHeader_Keyboard", headerText, nil, SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED, HEADER_OPEN)
+                        local headerNode = self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationHeader_Keyboard", headerText, NO_PARENT_NODE, NO_OVERRIDE_SOUND, HEADER_OPEN)
 
                         for _, location in ipairs(locationData) do
                             if modes:IsEntryTypeVisible(location:GetEntryType()) and not location:ShouldForceFullPanelKeyboard() then
-                                self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationEntry_Keyboard", location, headerNode, SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED)
+                                self.navigationTree:AddNode("ZO_ActivityFinderTemplateNavigationEntry_Keyboard", location, headerNode)
                             end
                         end
                     end
@@ -188,71 +195,93 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
     self:RefreshJoinQueueButton()
 end
 
-function ZO_ActivityFinderTemplate_Keyboard:RefreshFilters()
-    local function OnFilterChanged(...)
-        self:OnFilterChanged(...)
+do
+    local function IsEntryNotLocked(entry)
+        return (not entry.data.singular) or (not entry.data:IsLocked())
     end
 
-    local previousSelection = self.filterComboBox:GetSelectedItemData()
-    local reselectedEntry = nil
-    self.filterComboBox:ClearItems()
+    local function ShouldAutoSelectEntry(entry)
+        if not entry.data.singular then
+            -- don't autoselect list views
+            return false
+        end
 
-    local modes = self.dataManager:GetFilterModeData()
-    local activityTypes = modes:GetActivityTypes()
-    
-    local addListViewSubmenuEntry = false
-    
-    -- Add singular panel entries
-    for _, activityType in ipairs(activityTypes) do
-        if ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes()) > 0 then
-            local isLocked = self:GetLevelLockInfoByActivity(activityType)
-            if not isLocked then
-                local locationsData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
-                for _, location in ipairs(locationsData) do
-                    if modes:IsEntryTypeVisible(location:GetEntryType()) and location:DoesPlayerMeetLevelRequirements() then
-                        if location:ShouldForceFullPanelKeyboard() then
-                            local entry = ZO_ComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
-                            location.singular = true
-                            entry.data = location
+        if entry.data:IsLocked() then
+            -- don't autoselect locked locations
+            return false
+        end
 
-                            if previousSelection and previousSelection.name == entry.name then
-                                reselectedEntry = entry
+        return true
+    end
+
+    function ZO_ActivityFinderTemplate_Keyboard:RefreshFilters()
+        local function OnFilterChanged(...)
+            self:OnFilterChanged(...)
+        end
+
+        local previousSelection = self.filterComboBox:GetSelectedItemData()
+        local reselectedEntry = nil
+        self.filterComboBox:ClearItems()
+
+        local modes = self.dataManager:GetFilterModeData()
+        local activityTypes = modes:GetActivityTypes()
+        
+        local addListViewSubmenuEntry = false
+        
+        -- Add singular panel entries
+        for _, activityType in ipairs(activityTypes) do
+            if ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetNumLocationsByActivity(activityType, modes:GetVisibleEntryTypes()) > 0 then
+                local isActivityLocked = self:GetLevelLockInfoByActivity(activityType)
+                if not isActivityLocked then
+                    local locationsData = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetLocationsData(activityType)
+                    for _, location in ipairs(locationsData) do
+                        if modes:IsEntryTypeVisible(location:GetEntryType()) and location:DoesPlayerMeetLevelRequirements() then
+                            if location:ShouldForceFullPanelKeyboard() then
+                                local entry = ZO_ComboBox:CreateItemEntry(location:GetNameKeyboard(), OnFilterChanged)
+                                location.singular = true
+                                entry.data = location
+
+                                if previousSelection and previousSelection.name == entry.name and IsEntryNotLocked(previousSelection) then
+                                    reselectedEntry = entry
+                                end
+
+                                self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                            else
+                                addListViewSubmenuEntry = true
                             end
-
-                            self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-                        else
-                            addListViewSubmenuEntry = true
                         end
                     end
                 end
             end
         end
-    end
 
-    -- Add list view submenu entry
-    if addListViewSubmenuEntry then
-        local entry = ZO_ComboBox:CreateItemEntry(modes:GetSpecificFilterName(), OnFilterChanged)
-        entry.data =
-        {
-            singular = false,
-            activityTypes = activityTypes,
-        }
+        -- Add list view submenu entry
+        if addListViewSubmenuEntry then
+            local entry = ZO_ComboBox:CreateItemEntry(modes:GetSpecificFilterName(), OnFilterChanged)
+            entry.data =
+            {
+                singular = false,
+                activityTypes = activityTypes,
+            }
 
-        if previousSelection and previousSelection.name == entry.name then
-            reselectedEntry = entry
+            if previousSelection and previousSelection.name == entry.name and IsEntryNotLocked(previousSelection) then
+                reselectedEntry = entry
+            end
+
+            self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
         end
 
-        self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-    end
+        if reselectedEntry then
+            local IGNORE_CALLBACK = false
+            self.filterComboBox:SelectItem(reselectedEntry, IGNORE_CALLBACK)
+        else
+            if not self.filterComboBox:SetSelectedItemByEval(ShouldAutoSelectEntry) then
+                self.filterComboBox:SelectFirstItem()
+            end
+        end
 
-    if reselectedEntry then
-        local IGNORE_CALLBACK = false
-        self.filterComboBox:SelectItem(reselectedEntry, IGNORE_CALLBACK)
-    else
-        self.filterComboBox:SelectFirstItem()
+        self.filterControl:SetHidden(self.filterComboBox:GetNumItems() <= 1)
     end
-
-    self.filterControl:SetHidden(self.filterComboBox:GetNumItems() <= 1)
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:RefreshJoinQueueButton()

@@ -43,7 +43,7 @@
                 <Down>ToggleMount()</Down>
             </Action>
 
-            <Action name="GAMEPAD_JUMP_OR_INTERACT" hideAction="true">
+            <Action name="GAMEPAD_JUMP_OR_INTERACT" hideAction="true" holdAndChordInteraction="RUN_ANYWAY">
                 <Down>
                     ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_NOTHING)
                     local interactPromptVisible = RETICLE:GetInteractPromptVisible()
@@ -69,14 +69,14 @@
         </Category>
 
         <Category name="SI_KEYBINDINGS_CATEGORY_COMBAT">
-            <Action name="SPECIAL_MOVE_ATTACK">
+            <Action name="SPECIAL_MOVE_ATTACK" holdAndChordInteraction="RUN_ANYWAY">
                 <Down>
                     PrepareAttack()
                 </Down>
                 <Up>PerformAttack()</Up>
             </Action>
 
-            <Action name="SPECIAL_MOVE_BLOCK">
+            <Action name="SPECIAL_MOVE_BLOCK" holdAndChordInteraction="RUN_ANYWAY">
                 <Down>StartBlock()</Down>
                 <Up>StopBlock()</Up>
             </Action>
@@ -119,88 +119,88 @@
             <Action name="ACTION_BUTTON_3">
                 <Down>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(3)                
+                        OnSlotDown(3)
                         ZO_ActionBar_OnActionButtonDown(3)
                     end
                 </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(3)                
-                        ZO_ActionBar_OnActionButtonUp(3)
+                        OnSlotUp(3)
                     end
+                    ZO_ActionBar_OnActionButtonUp(3)
                 </Up>
             </Action>
             <Action name="ACTION_BUTTON_4">
                 <Down>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(4)                
+                        OnSlotDown(4)
                         ZO_ActionBar_OnActionButtonDown(4)
                     end
                 </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(4)                
-                        ZO_ActionBar_OnActionButtonUp(4)
+                        OnSlotUp(4)
                     end
+                    ZO_ActionBar_OnActionButtonUp(4)
                 </Up>
             </Action>
             <Action name="ACTION_BUTTON_5">
                 <Down>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(5)                
+                        OnSlotDown(5)
                         ZO_ActionBar_OnActionButtonDown(5)
                     end
-                </Down>                
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(5)                
-                        ZO_ActionBar_OnActionButtonUp(5)
+                        OnSlotUp(5)
                     end
+                    ZO_ActionBar_OnActionButtonUp(5)
                 </Up>
             </Action>
             <Action name="ACTION_BUTTON_6">
                 <Down>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(6)                
+                        OnSlotDown(6)
                         ZO_ActionBar_OnActionButtonDown(6)
                     end
-                </Down>                
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(6)                
-                        ZO_ActionBar_OnActionButtonUp(6)
+                        OnSlotUp(6)
                     end
+                    ZO_ActionBar_OnActionButtonUp(6)
                 </Up>
             </Action>
             <Action name="ACTION_BUTTON_7">
                 <Down>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(7)                
+                        OnSlotDown(7)
                         ZO_ActionBar_OnActionButtonDown(7)
                     end
-                </Down>                
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(7)                
-                        ZO_ActionBar_OnActionButtonUp(7)
+                        OnSlotUp(7)
                     end
+                    ZO_ActionBar_OnActionButtonUp(7)
                 </Up>
             </Action>
             <Action name="ACTION_BUTTON_8">
                 <Down>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotDown(8)                
+                        OnSlotDown(8)
                         ZO_ActionBar_OnActionButtonDown(8)
                     end
-                </Down>                
+                </Down>
                 <Up>
                     if ZO_ActionBar_CanUseActionSlots() then
-                        OnSlotUp(8)                
-                        ZO_ActionBar_OnActionButtonUp(8)
+                        OnSlotUp(8)
                     end
+                    ZO_ActionBar_OnActionButtonUp(8)
                 </Up>
             </Action>
-            
+
             <!--These actions exist because they're on a Button that is also chorded for another action,
                 therefore it can only have one handler, sprint is toggled with Gamepad, so this works -->
             <Action name="GAMEPAD_SPECIAL_MOVE_SPRINT" hideAction="true">
@@ -271,7 +271,7 @@
                 <Down>PLAYER_EMOTE_QUICKSLOT:StartInteraction()</Down>
                 <Up>PLAYER_EMOTE_QUICKSLOT:StopInteraction()</Up>
             </Action>
-            
+
             <Action name="SHEATHE_WEAPON_TOGGLE">
                 <Down>TogglePlayerWield()</Down>
             </Action>
@@ -281,7 +281,7 @@
                 <Up>StopCommandPet()</Up>
             </Action>
         </Category>
-        
+
         <Category name="SI_KEYBINDINGS_CATEGORY_TARGETING">
             <Action name="CYCLE_PREFERRED_ENEMY_TARGET">
                 <Down>CycleGameCameraPreferredEnemyTarget()</Down>
@@ -290,16 +290,16 @@
                 <Down>ClearGameCameraPreferredTarget()</Down>
             </Action>
         </Category>
-        
+
         <Category name="SI_KEYBINDINGS_CATEGORY_CAMERA">
             <Action name="CAMERA_ZOOM_OUT">
                 <Down>CameraZoomOut()</Down>
             </Action>
-            
+
             <Action name="CAMERA_ZOOM_IN">
                 <Down>CameraZoomIn()</Down>
             </Action>
-            
+
             <Action name="GAME_CAMERA_MOUSE_FREE_LOOK">
                 <Down>GameCameraMouseFreeLookStart()</Down>
                 <Up>GameCameraMouseFreeLookStop()</Up>
@@ -310,7 +310,7 @@
                 <Up>GameCameraGamepadZoomUp()</Up>
             </Action>
         </Category>
-        
+
         <Category name="SI_KEYBINDINGS_CATEGORY_INTERACTION">
             <Action name="GAME_CAMERA_INTERACT">
                 <Down>if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end</Down>
@@ -322,7 +322,7 @@
                 <Up>PLAYER_TO_PLAYER:StopInteraction()</Up>
             </Action>
         </Category>
-        
+
         <Category name="SI_KEYBINDINGS_CATEGORY_USER_INTERFACE">
             <Action name="TOGGLE_FULLSCREEN">
                 <Down>
@@ -354,7 +354,7 @@
             <Action name="TOGGLE_GAME_CAMERA_UI_MODE">
                 <Down>ZO_SceneManager_ToggleUIModeBinding()</Down>
             </Action>
-            
+
             <Action name="TOGGLE_MARKET">
                 <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_MARKET)</Down>
             </Action>
@@ -382,7 +382,7 @@
             <Action name="TOGGLE_COLLECTIONS_BOOK">
                 <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_COLLECTIONS)</Down>
             </Action>
-            
+
             <Action name="TOGGLE_MAP">
                 <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_MAP)</Down>
             </Action>
@@ -464,7 +464,7 @@
                     end
                 </Down>
             </Action>
-            
+
             <Action name="TOGGLE_HEALTHBARS">
                 <Down>
                     if GetSetting_Bool(SETTING_TYPE_NAMEPLATES, NAMEPLATE_TYPE_ALL_HEALTHBARS) then
@@ -600,7 +600,7 @@
             <Action name="UI_SHORTCUT_RIGHT_STICK" hideAction="true" rebindable="false">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
-            </Action>        
+            </Action>
         </Category>
     </Layer>
     <Layer name="SI_KEYBINDINGS_LAYER_SIEGE" allowFallthrough="false">
@@ -651,7 +651,7 @@
             <Action name="DIALOG_RESET">
                 <Down>ZO_Dialogs_ButtonKeybindPressed(keybind)</Down>
             </Action>
-            
+
             <AllowAction name="START_CHAT_ENTER"/>
             <AllowAction name="START_CHAT_SLASH"/>
             <AllowAction name="TAKE_SCREENSHOT"/>
@@ -721,7 +721,7 @@
             <Action name="CONVERSATION_OPTION_10" hideAction="true" rebindable="false">
                 <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(10)</Down>
             </Action>
-            
+
             <Action name="CONVERSATION_OPTION_PRIMARY" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
                 <Down>INTERACT_WINDOW:SelectChatterOptionByIndex(1)</Down>
             </Action>
@@ -744,15 +744,15 @@
             <Action name="INTERCEPT_TOGGLE_SYSTEM" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SYSTEM">
                 <Down>return true</Down>
             </Action>
-            
+
             <Action name="INTERCEPT_TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE">
                 <Down>return true</Down>
             </Action>
-            
+
             <Action name="INTERCEPT_TOGGLE_MARKET" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MARKET">
                 <Down>return true</Down>
             </Action>
-            
+
             <Action name="INTERCEPT_TOGGLE_INVENTORY" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_INVENTORY">
                 <Down>return true</Down>
             </Action>
@@ -776,7 +776,7 @@
             <Action name="INTERCEPT_TOGGLE_COLLECTIONS_BOOK" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_COLLECTIONS_BOOK">
                 <Down>return true</Down>
             </Action>
-            
+
             <Action name="INTERCEPT_TOGGLE_MAP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MAP">
                 <Down>return true</Down>
             </Action>
@@ -812,7 +812,7 @@
             <Action name="INTERCEPT_TOGGLE_CROWN_CRATES" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CROWN_CRATES">
                 <Down>return true</Down>
             </Action>
-            
+
             <Action name="INTERCEPT_TOGGLE_HELP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_HELP">
                 <Down>return true</Down>
             </Action>
@@ -832,7 +832,7 @@
             <Action name="INTERCEPT_SPECIAL_MOVE_CROUCH" hideAction="true" rebindable="false" inheritsBindFrom="SPECIAL_MOVE_CROUCH">
                 <Down>return true</Down>
             </Action>
-            
+
             <Action name="INTERCEPT_SPECIAL_WEAPON_SWAP" hideAction="true" rebindable="false" inheritsBindFrom="SPECIAL_MOVE_WEAPON_SWAP">
                 <Down>return true</Down>
             </Action>
@@ -890,9 +890,12 @@
             <Action name="DEATH_RECAP_TOGGLE" hideAction="true" inheritsBindFrom="ASSIST_NEXT_TRACKED_QUEST" rebindable="false">
                 <Down>DEATH_RECAP_TOGGLE:Toggle()</Down>
             </Action>
+            <Action name="DEATH_RECAP_HIDE" hideAction="true" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE" rebindable="false">
+                <Down>return DEATH_RECAP_TOGGLE:Hide()</Down>
+            </Action>
         </Category>
     </Layer>
-    
+
     <!-- Not player facing -->
     <Layer name="Loot">
         <Category>
@@ -972,7 +975,7 @@
             </Action>
         </Category>
     </Layer>
-    
+
     <Layer name="SI_KEYBINDINGS_LAYER_HUD_HOUSING">
         <Category>
             <Action name="SHOW_HOUSING_PANEL">
@@ -1002,7 +1005,7 @@
             </Action>
         </Category>
     </Layer>
-    
+
     <!-- The actions in this layer must inherit from an action in SI_KEYBINDINGS_LAYER_BATTLEGROUNDS. This layer is not shown in the keybind window.-->
     <Layer name="BattlegroundHud">
         <Category>
@@ -1069,7 +1072,7 @@
             </Action>
         </Category>
     </Layer>
-    
+
     <Layer name="SI_KEYBINDINGS_LAYER_HOUSING_EDITOR" allowFallthrough="false">
         <Category>
             <!--Movement-->
@@ -1085,7 +1088,7 @@
             <AllowAction name="GAMEPAD_SPECIAL_MOVE_SPRINT" />
             <AllowAction name="SPECIAL_MOVE_CROUCH" />
             <AllowAction name="GAMEPAD_MOVE_JUMPASCEND" />
-            
+
             <!--Camera-->
             <AllowAction name="CAMERA_ZOOM_OUT" />
             <AllowAction name="CAMERA_ZOOM_IN" />
@@ -1097,7 +1100,7 @@
             <AllowAction name="START_CHAT_ENTER" />
             <AllowAction name="START_CHAT_SLASH" />
             <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER" />
-            
+
             <!--Utility-->
             <AllowAction name="TAKE_SCREENSHOT" />
             <AllowAction name="TOGGLE_FULLSCREEN" />
@@ -1147,12 +1150,12 @@
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
-            
+
             <Action name="HOUSING_EDITOR_REDO_ACTION">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
-            
+
             <Action name="HOUSING_EDITOR_BEGIN_FURNITURE_LINKING">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -1165,7 +1168,7 @@
             <!-- These actions chord with D-Pad button in gamepad. Disable them to prevent waiting on chord resolution.-->
             <BlockAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
             <BlockAction name="DISABLE_HOUSING_EDITOR"/>
-                
+
             <Action name="HOUSING_EDITOR_YAW_LEFT">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -1212,6 +1215,6 @@
             </Action>
         </Category>
     </Layer>
-            
-    
+
+
 </Bindings>

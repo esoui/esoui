@@ -252,7 +252,7 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
                 if skillProgressionData:IsAdvised() and not morphSiblingInSelectedSkillBuild then
                     headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
                 end
-            else
+            elseif skillProgressionData:IsAdvised() then
                 headerSection:AddLine(GetString(SI_SKILLS_ADVISOR_GAMEPAD_ADVISED_SKILL), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
             end
         else

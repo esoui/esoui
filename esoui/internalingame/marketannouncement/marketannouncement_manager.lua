@@ -23,7 +23,8 @@ function MarketAnnouncement_Manager:Initialize()
         isDeprioritized = { tiebreaker = "isPromo", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isPromo = { tiebreaker = "isLimitedTime", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isLimitedTime = {tiebreaker = "timeLeft", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
-        timeLeft = {isNumeric = true, tiebreaker = "containsDLC", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        timeLeft = { isNumeric = true, tiebreaker = "hasActivationRequirement", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        hasActivationRequirement = { tiebreaker = "containsDLC", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         containsDLC = { tiebreaker = "isNew", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isNew = { tiebreaker = "isOnSale", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isOnSale = { tiebreaker = "onSaleTimeLeft", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
@@ -52,6 +53,7 @@ function MarketAnnouncement_Manager:Initialize()
                 local isDeprioritized = productData:IsDeprioritizeInAnnouncements()
                 local discountPercent = select(4, productData:GetMarketProductPricingByPresentation())
                 local hasDiscount = discountPercent > 0 or self:HasHouseDiscount(productData)
+                local hasActivationRequirement = productData:HasActivationRequirement()
                 local productInfo = {
                                         productData = productData,
                                         -- for sorting
@@ -65,6 +67,7 @@ function MarketAnnouncement_Manager:Initialize()
                                         onSaleTimeLeft = isSaleTime and productData:GetSaleTimeLeftInSeconds() or 0,
                                         stackCount = productData:GetStackCount(),
                                         isDeprioritized = isDeprioritized,
+                                        hasActivationRequirement = hasActivationRequirement,
                                     }
 
                 table.insert(self.productInfoTable, productInfo)
@@ -74,7 +77,7 @@ function MarketAnnouncement_Manager:Initialize()
         end
 
         self:FireCallbacks("OnMarketAnnouncementDataUpdated")
-        if aShouldShow or GetDailyLoginClaimableRewardIndex() ~= nil then
+        if aShouldShow then
             if not self.scene:IsShowing() and not HasShownMarketAnnouncement() then
                 SCENE_MANAGER:Show("marketAnnouncement")
             end

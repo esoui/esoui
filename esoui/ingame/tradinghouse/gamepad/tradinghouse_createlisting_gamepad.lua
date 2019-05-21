@@ -104,26 +104,26 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeHeader()
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
 
     local function GetGuildTitle(control)
-		local _, guildName = GetCurrentTradingHouseGuildDetails()
-		if guildName ~= "" then
-			return GetString(SI_TRADING_HOUSE_GUILD_HEADER)
-		else
-			return nil
-		end
-	end
+        local _, guildName = GetCurrentTradingHouseGuildDetails()
+        if guildName ~= "" then
+            return GetString(SI_TRADING_HOUSE_GUILD_HEADER)
+        else
+            return nil
+        end
+    end
 
-	local function GetGuildName(control)
-	    local _, guildName = GetCurrentTradingHouseGuildDetails()
-		if guildName ~= "" then
-			return guildName
-		else
-			return nil
-		end
-	end
+    local function GetGuildNameFromControl(control)
+        local _, guildName = GetCurrentTradingHouseGuildDetails()
+        if guildName ~= "" then
+            return guildName
+        else
+            return nil
+        end
+    end
 
     local function UpdateGold(control)
         ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
-		return true
+        return true
     end
 
     local function GetCapacityString()
@@ -131,8 +131,8 @@ function ZO_GamepadTradingHouse_CreateListing:InitializeHeader()
     end
 
     self.headerData = {
-		data1HeaderText = GetGuildTitle,
-		data1Text = GetGuildName,
+        data1HeaderText = GetGuildTitle,
+        data1Text = GetGuildNameFromControl,
 
         data2HeaderText = GetString(SI_GAMEPAD_GUILD_BANK_AVAILABLE_FUNDS),
         data2Text = UpdateGold,

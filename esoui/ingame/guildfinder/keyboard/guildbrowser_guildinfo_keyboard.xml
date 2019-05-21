@@ -1,0 +1,171 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GuildBrowser_GuildInfo_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildBrowser_GuildInfo_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Back" inherits="ZO_IconHeader">
+                    <OnInitialized>
+                        ZO_IconHeader_OnInitialized(self)
+                        self.enabled = true
+                        self.allowIconScaling = false
+                    </OnInitialized>
+
+                    <Anchor point="TOPLEFT" offsetY="80" />
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/large_leftArrow_down.dds" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true" />
+                            </Controls>
+                        </Texture>
+
+                        <Label name="$(parent)Text" text="SI_GUILD_BROWSER_GUILD_INFO_BACK_BUTTON" override="true" />
+                    </Controls>
+                </Control>
+              
+                <Label name="$(parent)RefreshMessage" font="ZoFontGameBold" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" offsetX="180" offsetY="150" />
+                </Label>
+
+                <Control name="$(parent)TopSection" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" offsetX="280" offsetY="55" />
+                    <Controls>
+                        <Control name="$(parent)Heraldry" inherits="ZO_GuildFinder_Heraldry_Template">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+
+                        <Texture name="$(parent)AllianceIcon" >
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Heraldry" relativePoint="TOPRIGHT" offsetX="10" />
+                        </Texture>
+
+                        <Label name="$(parent)GuildName" font="ZoFontHeader4" maxLineCount="1" wrapMode="ELLIPSIS">
+                            <Dimensions x="510" />
+                            <Anchor point="LEFT" relativeTo="$(parent)AllianceIcon" relativePoint="RIGHT" />
+                        </Label>
+                        
+                        <Label name="$(parent)Founded" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Playtime" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Founded" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)GuildTrader" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Playtime" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Roles" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GuildTrader" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)Size" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(grandparent)" offsetX="-15" offsetY="85" />
+                        </Label>
+
+                        <Label name="$(parent)Personalities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Size" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Languages" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Personalities" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)MinCP" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Languages" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoPanel" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopSection" relativePoint="BOTTOMLEFT" offsetY="ZO_GUILD_BROWSER_GUILD_INFO_RECRUITMENT_MESSAGE_BASE_OFFSET_Y" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" />
+                    <Controls>
+                        <Control name="$(parent)Scroll" override="true">
+                            <Controls>
+                                <Control name="$(parent)Child" override="true">
+                                    <Controls>
+                                        <Label name="$(parent)HeaderMessage" font="ZoFontGameBold" linkEnabled="true" mouseEnabled="true">
+                                            <Dimensions x="600" />
+                                            <Anchor point="TOPLEFT" />
+                                            <OnLinkMouseUp>
+                                                ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+                                            </OnLinkMouseUp>
+                                        </Label>
+                                        
+                                        <Label name="$(parent)Activities" inherits="ZO_GuildFinder_GuildInfo_AttributeValue_Keyboard">
+                                            <Dimensions x="600" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderMessage" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                        </Label>
+
+                                        <Label name="$(parent)RecruitmentMessage" font="ZoFontGameBold" linkEnabled="true" mouseEnabled="true">
+                                            <Dimensions x="600" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Activities" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                            <OnLinkMouseUp>
+                                                ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+                                            </OnLinkMouseUp>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_SubmitGuildFinderApplication_Dialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_SubmitGuildFinderApplication_Dialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)GuildName" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
+
+                <Label name="$(parent)CharacterName" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GuildName" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildName" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+
+                <Label name="$(parent)Level" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CharacterName" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CharacterName" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Label name="$(parent)Class" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Label name="$(parent)AchievementPoints" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Class" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Class" relativePoint="BOTTOMRIGHT" />
+                </Label>
+
+                <Label name="$(parent)ApplicationHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AchievementPoints" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AchievementPoints" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+                
+                <Backdrop name="$(parent)ApplicationMessage" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ApplicationHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ApplicationHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_DEFAULT_EDIT_TEXT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Submit" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

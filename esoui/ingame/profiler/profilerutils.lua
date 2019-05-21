@@ -48,3 +48,8 @@ function ZO_DumpControlCreationStacksForSource(searchTerm)
         end
     end
 end
+
+--If this setting is enabled, start the profiler so addons can profile their loading.
+if GetCVar("StartLuaProfilingOnUILoad") == "1" then
+    StartScriptProfiler()
+end

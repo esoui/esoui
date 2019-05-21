@@ -306,10 +306,10 @@ function ZO_SpecializedCollectionsBook_Keyboard:RefreshListInternal()
 
     for _, categorizedList in ipairs(categorizedLists) do
         if #categorizedList.collectibles > 0 then
-            local headerNode = self.navigationTree:AddNode("ZO_StatusIconHeader", categorizedList, nil, SOUNDS.JOURNAL_PROGRESS_CATEGORY_SELECTED)
+            local headerNode = self.navigationTree:AddNode("ZO_StatusIconHeader", categorizedList)
 
             for _, collectibleData in ipairs(categorizedList.collectibles) do
-                local node = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationEntry_Keyboard", collectibleData, headerNode, SOUNDS.JOURNAL_PROGRESS_SUB_CATEGORY_SELECTED)
+                local node = self.navigationTree:AddNode("ZO_SpecializedCollection_Book_NavigationEntry_Keyboard", collectibleData, headerNode)
                 self.collectibleIdToTreeNode[collectibleData:GetId()] = node
                 if not firstNode then
                     firstNode = node

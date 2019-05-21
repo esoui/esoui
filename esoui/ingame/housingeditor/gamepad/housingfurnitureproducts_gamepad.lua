@@ -108,6 +108,8 @@ end
 
 function ZO_HousingFurnitureProducts_Gamepad:OnShowing()
     ZO_HousingFurnitureList_Gamepad.OnShowing(self)
+
+    UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
     MARKET_CURRENCY_GAMEPAD:Show()
     self:OnCurrencyUpdated()
 end

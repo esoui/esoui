@@ -23,9 +23,9 @@ end
 function GuildSharedInfo:Refresh(guildId)
     if(self.guildId and self.guildId == guildId) then
         local count = GetControl(self.control, "Count")
-        local numGuildMembers, numOnline = GetGuildInfo(guildId)
+        local numGuildMembers, numOnline, _, numInvitees = GetGuildInfo(guildId)
 
-        count:SetText(zo_strformat(SI_GUILD_NUM_MEMBERS_ONLINE_FORMAT, numOnline, numGuildMembers))
+        count:SetText(zo_strformat(SI_GUILD_NUM_MEMBERS_ONLINE_FORMAT, numOnline, numGuildMembers + numInvitees))
 
         self.canDepositToBank = DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_BANK_DEPOSIT)
         if(self.canDepositToBank) then

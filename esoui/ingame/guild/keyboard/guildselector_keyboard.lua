@@ -1,3 +1,6 @@
+local COMBO_BOX_ENTRY_GUILD_BROWSER = 1
+local COMBO_BOX_ENTRY_CREATE_GUILD = 2
+
 GuildSelector = ZO_Object:Subclass()
 
 function GuildSelector:New(...)
@@ -26,13 +29,17 @@ function GuildSelector:Initialize(control)
                                 local changeGuildParams = { entry = entry, }
                                 local forcePreviousGuildNameInSelector = true
 
-                                if GUILD_RANKS:CanSave() then
+                                if GUILD_RANKS_SCENE:IsShowing() then
                                     if self.guildId ~= entry.guildId then
                                         GUILD_RANKS:ChangeSelectedGuild(changeGuildCallback, changeGuildParams)
                                     end
                                 elseif GUILD_HERALDRY:CanSave() then
                                     if self.guildId ~= entry.guildId then
                                         GUILD_HERALDRY:ChangeSelectedGuild(changeGuildCallback, changeGuildParams)
+                                    end
+                                elseif GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD:GetFragment():IsShowing() then
+                                    if self.guildId ~= entry.guildId then
+                                        GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD:ChangeSelectedGuild(changeGuildCallback, changeGuildParams)
                                     end
                                 else
                                     forcePreviousGuildNameInSelector = false
@@ -64,6 +71,9 @@ function GuildSelector:Initialize(control)
         GUILD_HISTORY,
         GUILD_SHARED_INFO,
         GUILD_HERALDRY,
+        GUILD_RECRUITMENT_KEYBOARD,
+        GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD,
+        GUILD_RECRUITMENT_BLACKLIST_KEYBOARD,
     }
 
     self.guildRelatedScenes =
@@ -73,6 +83,7 @@ function GuildSelector:Initialize(control)
         "guildRanks",
         "guildHistory",
         "guildHeraldry",
+        "guildRecruitmentKeyboard",
     }
 end
 
@@ -99,39 +110,44 @@ function GuildSelector:InitializeGuilds()
     
     self.guildId = nil
     self.comboBox:ClearItems()
-    
+
     local numGuilds = GetNumGuilds()
     for i = 1, numGuilds do
         local guildId = GetGuildId(i)
         local guildName = GetGuildName(guildId)
         local guildAlliance = GetGuildAlliance(guildId)
-        local entryText = zo_strformat(SI_GUILD_SELECTOR_FORMAT, GetAllianceBannerIcon(guildAlliance), i, guildName)
+        local entryText = zo_strformat(SI_GUILD_SELECTOR_FORMAT, GetAllianceSymbolIcon(guildAlliance), i, guildName)
         local entry = self.comboBox:CreateItemEntry(entryText, self.OnGuildChanged)
         entry.guildId = guildId
         entry.selectedText = guildName
-		self.comboBox:AddItem(entry)
+        self.comboBox:AddItem(entry)
 
         if(not selectedEntry or (lastGuildId and guildId == lastGuildId)) then
             selectedEntry = entry
         end
 
-        if(not playerIsGuildMaster) then
-            local guildPlayerIndex = GetPlayerGuildMemberIndex(guildId)
-            local _, _, rankIndex = GetGuildMemberInfo(guildId, guildPlayerIndex)
-            if(IsGuildRankGuildMaster(guildId, rankIndex)) then
+        if not playerIsGuildMaster then
+            if IsPlayerGuildMaster(guildId) then
                 playerIsGuildMaster = true
             end
         end
     end
 
-    local CREATE_WINDOW_TITLE = GetString(SI_GUILD_CREATE_TITLE)
-    local entry = self.comboBox:CreateItemEntry(CREATE_WINDOW_TITLE, self.OnGuildChanged)
-    entry.selectedText = CREATE_WINDOW_TITLE
-    self.comboBox:AddItem(entry)
+    local GUILD_BROWSER_TITLE = GetString(SI_GUILD_BROWSER_TITLE)
+    local guildBrowserEntry = self.comboBox:CreateItemEntry(GUILD_BROWSER_TITLE, self.OnGuildChanged)
+    guildBrowserEntry.selectedText = GUILD_BROWSER_TITLE 
+    guildBrowserEntry.entryType = COMBO_BOX_ENTRY_GUILD_BROWSER 
+    self.comboBox:AddItem(guildBrowserEntry)
 
-    if(numGuilds == 0) then
-        self.comboBox:SetSelectedItemText(CREATE_WINDOW_TITLE)
-        self.OnGuildChanged(self.comboBox, CREATE_WINDOW_TITLE, entry)
+    local CREATE_WINDOW_TITLE = GetString(SI_GUILD_CREATE_TITLE)
+    local createGuildEntry = self.comboBox:CreateItemEntry(CREATE_WINDOW_TITLE, self.OnGuildChanged)
+    createGuildEntry.selectedText = CREATE_WINDOW_TITLE
+    createGuildEntry.entryType = COMBO_BOX_ENTRY_CREATE_GUILD
+    self.comboBox:AddItem(createGuildEntry)
+
+    if numGuilds == 0 then
+        self.comboBox:SetSelectedItemText(GUILD_BROWSER_TITLE)
+        self.OnGuildChanged(self.comboBox, GUILD_BROWSER_TITLE, guildBrowserEntry)
     else
         self.comboBox:SetSelectedItemText(selectedEntry.selectedText)
         self.OnGuildChanged(self.comboBox, selectedEntry.selectedText, selectedEntry)
@@ -149,27 +165,34 @@ function GuildSelector:SetGuildIcon(guildId)
 end
 
 function GuildSelector:SelectGuild(selectedEntry)
-    if(selectedEntry) then
+    if selectedEntry then
         self.currentGuildText = selectedEntry.selectedText
         self.guildId = selectedEntry.guildId
         self.comboBox:SetSelectedItemText(selectedEntry.selectedText)
         self:SetGuildIcon(selectedEntry.guildId)
 
-        if(self.guildId) then       
-            if(SCENE_MANAGER:IsShowing("guildCreate")) then
+        local isGuildIndepenentKeyboardSceneShown = SCENE_MANAGER:IsShowing("guildCreate") or SCENE_MANAGER:IsShowing("guildBrowserKeyboard")
+        local sceneGroup = SCENE_MANAGER:GetSceneGroup("guildsSceneGroup")
+        if self.guildId then
+            if isGuildIndepenentKeyboardSceneShown then
                 MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "guildHome")
-            else
-                local sceneGroup = SCENE_MANAGER:GetSceneGroup("guildsSceneGroup")
+            elseif sceneGroup:GetActiveScene() == "guildBrowserKeyboard" then
                 sceneGroup:SetActiveScene("guildHome")
             end
-
             self:SetGuildWindowsToId(self.guildId)
         else
-            if(self:IsGuildRelatedSceneShowing()) then
-                MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "guildCreate")
+            if self:IsGuildRelatedSceneShowing() or isGuildIndepenentKeyboardSceneShown then
+                if selectedEntry.entryType == COMBO_BOX_ENTRY_GUILD_BROWSER then
+                    MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "guildBrowserKeyboard")
+                else
+                    MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "guildCreate")
+                end
             else
-                local sceneGroup = SCENE_MANAGER:GetSceneGroup("guildsSceneGroup")
-                sceneGroup:SetActiveScene("guildCreate")
+                if selectedEntry.entryType == COMBO_BOX_ENTRY_GUILD_BROWSER then
+                    sceneGroup:SetActiveScene("guildBrowserKeyboard")
+                else
+                    sceneGroup:SetActiveScene("guildCreate")
+                end
             end
         end
 
@@ -177,11 +200,17 @@ function GuildSelector:SelectGuild(selectedEntry)
     end
 end
 
-function GuildSelector:SelectGuildByIndex(index)    
-    if(index <= GetNumGuilds()) then
+function GuildSelector:SelectGuildByIndex(index)
+    if index <= GetNumGuilds() then
         local entries = self.comboBox:GetItems()
         self:SelectGuild(entries[index])
     end
+end
+
+function GuildSelector:SelectGuildFinder()
+    local guildFinderIndex = GetNumGuilds() + 1 -- first entry after all guilds in the dropdown
+    local entries = self.comboBox:GetItems()
+    self:SelectGuild(entries[guildFinderIndex])
 end
 
 function GuildSelector:OnScenesCreated()

@@ -1,3 +1,7 @@
+ZO_HELP_NAVIGATION_CONTAINER_WIDTH = 365
+-- 55 is the inset from the left side of the header to the left side of the text in ZO_IconHeader, 16 is the offset for the Scroll from ZO_ScrollContainerBase
+ZO_HELP_NAVIGATION_CATEGORY_LABEL_WIDTH = ZO_HELP_NAVIGATION_CONTAINER_WIDTH - 55 - 16
+
 HELP = nil
 
 ZO_HelpManager = ZO_Object:Subclass()
@@ -106,7 +110,6 @@ function ZO_HelpManager:InitializeTree()
     self.navigationTree = ZO_Tree:New(GetControl(self.control, "NavigationContainerScrollChild"), 60, -10, 350)
 
     local function TreeHeaderSetup(node, control, data, open)
-        control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(data.name)
 
         control.icon:SetTexture(open and data.downIcon or data.upIcon)
@@ -163,7 +166,7 @@ function ZO_HelpManager:AddHelpEntry(helpCategoryIndex, helpIndex)
                                         helpCategoryIndex = helpCategoryIndex,
                                     }
 
-            parent = self.navigationTree:AddNode("ZO_Help_Header", categoryData, nil, SOUNDS.HELP_BLADE_SELECTED)
+            parent = self.navigationTree:AddNode("ZO_Help_Header", categoryData)
             self.categoryControls[helpCategoryIndex] = parent
         end
     else
@@ -180,7 +183,7 @@ function ZO_HelpManager:AddHelpEntry(helpCategoryIndex, helpIndex)
                                     helpIndex = helpIndex,
                                 }
 
-            local helpNode = self.navigationTree:AddNode("ZO_Help_NavigationEntry", helpData, parent, SOUNDS.HELP_ITEM_SELECTED)
+            local helpNode = self.navigationTree:AddNode("ZO_Help_NavigationEntry", helpData, parent)
             self.helpControls[helpCategoryIndex][helpIndex] = helpNode.control
             self.activeHelpCount = self.activeHelpCount + 1
         end
@@ -202,7 +205,7 @@ function ZO_HelpManager:AddTrialEntry()
                                         overIcon = "EsoUI/Art/Help/help_tabIcon_trial_over.dds",
                                         helpCategoryIndex = self.trialIndex,
                                     }
-            parent = self.navigationTree:AddNode("ZO_Help_Header", categoryData, nil, SOUNDS.HELP_BLADE_SELECTED)
+            parent = self.navigationTree:AddNode("ZO_Help_Header", categoryData)
             self.categoryControls[self.trialIndex] = parent
         else
             parent = self.categoryControls[self.trialIndex]
@@ -214,7 +217,7 @@ function ZO_HelpManager:AddTrialEntry()
                                     helpCategoryIndex = self.trialIndex,
                                     helpIndex = 1,
                                 }
-            local helpNode = self.navigationTree:AddNode("ZO_Help_NavigationEntry", helpData, parent, SOUNDS.HELP_ITEM_SELECTED)
+            local helpNode = self.navigationTree:AddNode("ZO_Help_NavigationEntry", helpData, parent)
             self.helpControls[self.trialIndex][1] = helpNode.control
             self.activeHelpCount = self.activeHelpCount + 1
         end

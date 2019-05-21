@@ -13,6 +13,8 @@ NOTIFICATIONS_GIFT_CLAIMED_DATA = 12
 NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA = 13
 NOTIFICATIONS_GIFTING_UNLOCKED_DATA = 14
 NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 15
+NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 16
+NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 17
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -251,7 +253,7 @@ end
 
 function ZO_GuildMotDProvider:CreateMessage(guildAlliance, guildName)
     -- Overridden if necessary
-    local allianceIcon = zo_iconFormat(GetAllianceBannerIcon(guildAlliance), 24, 24)
+    local allianceIcon = zo_iconFormat(GetPlatformAllianceSymbolIcon(guildAlliance), 24, 24)
     return zo_strformat(SI_GUILD_MOTD_CHANGED_NOTIFICATION, allianceIcon, guildName)
 end
 
@@ -280,6 +282,7 @@ function ZO_CampaignQueueProvider:BuildNotificationList()
     for i = 1, GetNumCampaignQueueEntries() do
         local campaignId, isGroup = GetCampaignQueueEntry(i)
         local currentState = GetCampaignQueueState(campaignId, isGroup)
+        local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", GetCampaignRulesetType(GetCampaignRulesetId(campaignId)))
         local campaignName = GetCampaignName(campaignId)
         if(currentState == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
             local remainingSeconds = GetCampaignQueueRemainingConfirmationSeconds(campaignId, isGroup)
@@ -293,7 +296,7 @@ function ZO_CampaignQueueProvider:BuildNotificationList()
                                         secsSinceRequest = ZO_NormalizeSecondsSince(secsSinceRequest),
                                         campaignName = campaignName,
                                         messageFormat = self:CreateMessageFormat(isGroup),
-                                        messageParams = { campaignName },
+                                        messageParams = { campaignRulesetTypeString, campaignName },
                                         expiresAt = GetFrameTimeSeconds() + remainingSeconds,
                                         shortDisplayText = campaignName,
                                     })
@@ -309,12 +312,16 @@ function ZO_CampaignQueueProvider:BuildNotificationList()
     end
 end
 
+function ZO_CampaignQueueProvider:Accept(data)
+    ConfirmCampaignEntry(data.campaignId, data.isGroup, true)
+end
+
 function ZO_CampaignQueueProvider:Decline(data, button, openedFromKeybind)
     ConfirmCampaignEntry(data.campaignId, data.isGroup, false)
 end
 
 function ZO_CampaignQueueProvider:CreateMessageFormat(isGroup)
-    return isGroup and SI_CAMPAIGN_QUEUE_MESSAGE_GROUP or SI_CAMPAIGN_QUEUE_MESSAGE_INDIVIDUAL
+    return SI_CAMPAIGN_QUEUE_MESSAGE
 end
 
 function ZO_CampaignQueueProvider:CreateLoadText()
@@ -1316,7 +1323,7 @@ function ZO_GiftingGracePeriodStartedProvider:BuildNotificationList()
     end
 end
 
-function ZO_GiftingGracePeriodStartedProvider:AddNotification(gift)
+function ZO_GiftingGracePeriodStartedProvider:AddNotification()
     local timeLeftS = GetGiftingGracePeriodTime()
     local timeLeftString
     if timeLeftS >= ZO_ONE_DAY_IN_SECONDS then
@@ -1375,7 +1382,7 @@ function ZO_GiftingUnlockedProvider:BuildNotificationList()
     end
 end
 
-function ZO_GiftingUnlockedProvider:AddNotification(gift)
+function ZO_GiftingUnlockedProvider:AddNotification()
     local helpCategoryIndex, helpIndex = GetGiftingUnlockedHelpIndices()
     local hasMoreInfo = helpCategoryIndex ~= nil
     local newListEntry = {
@@ -1425,7 +1432,7 @@ function ZO_DailyLoginRewardsClaimProvider:BuildNotificationList()
     end
 end
 
-function ZO_DailyLoginRewardsClaimProvider:AddNotification(gift)
+function ZO_DailyLoginRewardsClaimProvider:AddNotification()
     local notificationTypeString = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_NEW_DAILY_LOGIN_REWARD)
 
     local newListEntry =
@@ -1448,6 +1455,199 @@ end
 
 function ZO_DailyLoginRewardsClaimProvider:Decline(entryData)
     
+end
+
+-- Guild Finder Guild New Applications Provider
+------------------------------------------------
+
+ZO_GuildNewApplicationsProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_GuildNewApplicationsProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_GUILD_FINDER_GUILD_APPLICATIONS_VIEWED)
+    provider:RegisterUpdateEvent(EVENT_GUILD_FINDER_GUILD_NEW_APPLICATIONS)
+
+    return provider
+end
+
+function ZO_GuildNewApplicationsProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    for i = 1, GetNumGuilds() do
+        local guildId = GetGuildId(i)
+        if DoesGuildHaveNewApplicationsNotification(guildId) then
+            self:AddNotification(guildId, i)
+        end
+    end
+end
+
+function ZO_GuildNewApplicationsProvider:GetAllianceIconNameText(guildAlliance, guildName)
+    return ZO_AllianceIconNameFormatter(guildAlliance, guildName)
+end
+
+function ZO_GuildNewApplicationsProvider:AddNotification(guildId, guildIndex)
+    local notificationTypeString = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS)
+    local numGuildApplications = GetGuildFinderNumGuildApplications(guildId)
+    local guildName = GetGuildName(guildId)
+    local guildAlliance = GetGuildAlliance(guildId)
+    local guildInfo = self:GetAllianceIconNameText(guildAlliance, guildName)
+
+    local newListEntry =
+    {
+        notificationType = NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS,
+        dataType = NOTIFICATIONS_GUILD_NEW_APPLICATIONS,
+        shortDisplayText = GetString(SI_NOTIFICATIONS_GUILD_NEW_APPLICATIONS),
+        message = zo_strformat(SI_NOTIFICATIONS_GUILD_NEW_APPLICATIONS_MESSAGE, numGuildApplications, ZO_WHITE:Colorize(guildInfo)),
+        guildId = guildId,
+        guildIndex = guildIndex,
+
+        --For sorting
+        displayName = notificationTypeString,
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_GuildNewApplicationsProvider:Accept(entryData)
+    ClearGuildHasNewApplicationsNotification(entryData.guildId)
+    -- Show the guild's application page in overridden function
+end
+
+function ZO_GuildNewApplicationsProvider:Decline(entryData)
+    ClearGuildHasNewApplicationsNotification(entryData.guildId)
+end
+
+-- Guild Finder Player Applications Provider
+------------------------------------------------
+
+ZO_PlayerApplicationsProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_PlayerApplicationsProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_GUILD_FINDER_PLAYER_APPLICATIONS_CHANGED)
+
+    return provider
+end
+
+function ZO_PlayerApplicationsProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    for i = 1, GetNumPlayerApplicationNotifications() do
+        self:AddNotification(i)
+    end
+end
+
+do
+    -- These application states should never generate a notification
+    local noNotificationStatusList =
+    {
+        [GUILD_APPLICATION_STATUS_NONE] = true,
+        [GUILD_APPLICATION_STATUS_PENDING] = true,
+        [GUILD_APPLICATION_STATUS_RESCINDED] = true,
+    }
+
+    function ZO_PlayerApplicationsProvider:AddNotification(index)
+        local notificationTypeString = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_PLAYER_APPLICATIONS)
+        local declineText, guildName, guildAlliance, reason = GetPlayerApplicationNotificationInfo(index)
+        local guildInfo = ZO_AllianceIconNameFormatter(guildAlliance, guildName)
+
+        if noNotificationStatusList[reason] == true then
+            return
+        end
+
+        local newListEntry =
+        {
+            notificationType = NOTIFICATION_TYPE_PLAYER_APPLICATIONS,
+            dataType = NOTIFICATIONS_ALERT_DATA,
+            shortDisplayText = GetString(SI_NOTIFICATIONS_PLAYER_APPLICATIONS),
+            message = zo_strformat(GetString("SI_GUILDAPPLICATIONSTATUS", reason), ZO_WHITE:Colorize(guildInfo)),
+            index = index,
+            note = declineText,
+            guildName = guildName,
+            showReportKeybind = reason == GUILD_APPLICATION_STATUS_DECLINED and declineText ~= "",
+
+            --For sorting
+            displayName = notificationTypeString,
+            secsSinceRequest = ZO_NormalizeSecondsSince(0),
+        }
+        table.insert(self.list, newListEntry)
+    end
+end
+
+function ZO_PlayerApplicationsProvider:Decline(entryData)
+    ClearPlayerApplicationNotification(entryData.index)
+end
+
+-- Market Product Unlocked Provider
+-------------------------
+
+ZO_MarketProductUnlockedProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_MarketProductUnlockedProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_MARKET_PRODUCTS_UNLOCKED)
+    provider:RegisterUpdateEvent(EVENT_MARKET_PRODUCTS_UNLOCKED_NOTIFICATIONS_CLEARED)
+
+    return provider
+end
+
+function ZO_MarketProductUnlockedProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    local numNotifications = GetNumMarketProductUnlockNotifications()
+    if numNotifications > 0 then
+        local multipleProductsUnlocked = numNotifications > 1
+        local firstMarketProductId = GetMarketProductUnlockNotificationProductId(1)
+        self:AddNotification(firstMarketProductId, multipleProductsUnlocked)
+    end
+end
+
+function ZO_MarketProductUnlockedProvider:AddNotification(firstMarketProductId, multipleProductsUnlocked)
+    local message
+    -- in the case of multiple market products getting unlocked, we will use the help info off the first one in the list for simplicity
+    local achievementId, completedAchievement, helpCategoryIndex, helpIndex = GetMarketProductUnlockedByAchievementInfo(firstMarketProductId)
+    if multipleProductsUnlocked then
+        message = GetString(SI_NOTIFICATIONS_MULTIPLE_MARKET_PRODUCTS_UNLOCKED_MESSAGE)
+    else
+        local marketProductName = GetMarketProductDisplayName(firstMarketProductId)
+        message = zo_strformat(SI_NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_BY_ACHIEVEMENT_MESSAGE, ZO_WHITE:Colorize(marketProductName))
+    end
+
+    local hasMoreInfo = helpCategoryIndex ~= nil
+
+    local newListEntry =
+    {
+        notificationType = NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE,
+        dataType = NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA,
+        shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE),
+        message = message,
+        moreInfo = hasMoreInfo,
+
+        marketProductId = marketProductId,
+        helpCategoryIndex = helpCategoryIndex,
+        helpIndex = helpIndex,
+
+        --For sorting
+        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+    }
+    table.insert(self.list, newListEntry)
+end
+
+function ZO_MarketProductUnlockedProvider:Accept(entryData)
+    if IsInGamepadPreferredMode() then
+        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT")
+    else
+        ZO_Dialogs_ShowDialog("LOG_OUT")
+    end
+
+    ClearMarketProductUnlockNotifications()
+end
+
+function ZO_MarketProductUnlockedProvider:Decline(entryData)
+    ClearMarketProductUnlockNotifications()
 end
 
 -- Sort List

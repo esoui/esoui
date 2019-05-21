@@ -26,6 +26,9 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RETURNED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_NEW_DAILY_LOGIN_REWARD] = "EsoUI/Art/Notifications/notificationIcon_dailyLoginRewards.dds",
+    [NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
+    [NOTIFICATION_TYPE_PLAYER_APPLICATIONS] = "EsoUI/Art/Notifications/notificationIcon_guild.dds",
+    [NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE] = "EsoUI/Art/Notifications/notificationIcon_crownStore.dds",
 }
 
 -- Provider Overrides
@@ -80,7 +83,7 @@ function ZO_KeyboardGuildInviteProvider:New(notificationManager)
 end
 
 function ZO_KeyboardGuildInviteProvider:CreateMessage(guildAlliance, guildName, inviterDisplayName)
-    local allianceIcon = zo_iconFormat(GetAllianceBannerIcon(guildAlliance), 24, 24)
+    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), 24, 24)
     return zo_strformat(SI_GUILD_INVITE_MESSAGE, allianceIcon, guildName, inviterDisplayName)
 end
 
@@ -106,20 +109,6 @@ function ZO_KeyboardGuildInviteProvider:Decline(data, button, openedFromKeybind)
     else
         self.notificationManager.sortFilterList:ShowMenu(button)
     end
-end
-
---Campaign Queue Provider
--------------------------
-
-ZO_KeyboardCampaignQueueProvider = ZO_CampaignQueueProvider:Subclass()
-
-function ZO_KeyboardCampaignQueueProvider:New(notificationManager)
-    local provider = ZO_CampaignQueueProvider.New(self, notificationManager)
-    return provider
-end
-
-function ZO_KeyboardCampaignQueueProvider:Accept(data)
-    CAMPAIGN_BROWSER:GetCampaignBrowser():ShowCampaignQueueReadyDialog(data.campaignId, data.isGroup, data.campaignName)
 end
 
 -- CS Chat Request Provider
@@ -263,6 +252,46 @@ function ZO_KeyboardGiftingUnlockedProvider:ShowMoreInfo(entryData)
     end
 end
 
+-- ZO_KeyboardGuildNewApplicationsProvider
+-------------------------------------------
+
+ZO_KeyboardGuildNewApplicationsProvider = ZO_GuildNewApplicationsProvider:Subclass()
+
+function ZO_KeyboardGuildNewApplicationsProvider:New(notificationManager)
+    return ZO_GuildNewApplicationsProvider.New(self, notificationManager)
+end
+
+function ZO_KeyboardGuildNewApplicationsProvider:Accept(entryData)
+    ZO_GuildNewApplicationsProvider.Accept(self, entryData)
+
+    GUILD_SELECTOR:SelectGuildByIndex(entryData.guildIndex)
+    MAIN_MENU_KEYBOARD:ToggleSceneGroup("guildsSceneGroup", "guildRecruitmentKeyboard")
+    GUILD_RECRUITMENT_KEYBOARD:ShowApplicationsList()
+end
+
+-- ZO_KeyboardMarketProductUnlockedProvider
+-------------------------
+
+ZO_KeyboardMarketProductUnlockedProvider = ZO_MarketProductUnlockedProvider:Subclass()
+
+function ZO_KeyboardMarketProductUnlockedProvider:New(notificationManager)
+    return ZO_MarketProductUnlockedProvider.New(self, notificationManager)
+end
+
+function ZO_KeyboardMarketProductUnlockedProvider:ShowMoreInfo(entryData)
+    if entryData.moreInfo then
+        HELP:ShowSpecificHelp(entryData.helpCategoryIndex, entryData.helpIndex)
+    end
+end
+
+function ZO_KeyboardMarketProductUnlockedProvider:ShowMessageTooltip(entryData, control)
+    ZO_TooltipIfTruncatedLabel_OnMouseEnter(control)
+end
+
+function ZO_KeyboardMarketProductUnlockedProvider:HideMessageTooltip(entryData, control)
+    ZO_TooltipIfTruncatedLabel_OnMouseExit(control)
+end
+
 --Notification Manager
 -------------------------
 
@@ -278,21 +307,27 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         self:SetupRequest(...)
     end
 
+    local function SetupRequestWithMoreInfoRow(...)
+        self:SetupRequestWithMoreInfoRow(...)
+    end
+
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_REQUEST_DATA, "ZO_NotificationsRequestRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_YES_NO_DATA, "ZO_NotificationsYesNoRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", 50, function(control, data) self:SetupWaiting(control, data) end)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LEADERBOARD_DATA, "ZO_NotificationsLeaderboardRow", 50, function(control, data) self:SetupTwoButtonRow(control, data) end)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ALERT_DATA, "ZO_NotificationsAlertRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_COLLECTIBLE_DATA, "ZO_NotificationsCollectibleRow", 50, function(control, data) self:SetupCollectibleRow(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_COLLECTIBLE_DATA, "ZO_NotificationsCollectibleRow", 50, SetupRequestWithMoreInfoRow)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_READY_CHECK_DATA, "ZO_NotificationsLFGReadyCheckRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA, "ZO_NotificationsLFGFindReplacementRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA, "ZO_NotificationsEsoPlusSubscriptionRow", 50, function(control, data) self:SetupEsoPlusSubscriptionRow(control, data) end)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_ESO_PLUS_SUBSCRIPTION_DATA, "ZO_NotificationsEsoPlusSubscriptionRow", 50, SetupRequestWithMoreInfoRow)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RECEIVED_DATA, "ZO_NotificationsGiftReceivedRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_RETURNED_DATA, "ZO_NotificationsGiftReturnedRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_CLAIMED_DATA, "ZO_NotificationsGiftClaimedRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA, "ZO_NotificationsGiftingUnlockedRow", 50, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_UNLOCKED_DATA, "ZO_NotificationsGiftingUnlockedRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_GRACE_PERIOD_STARTED_DATA, "ZO_NotificationsOpenCrownStoreRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFTING_UNLOCKED_DATA, "ZO_NotificationsOpenCrownStoreRow", 50, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GUILD_NEW_APPLICATIONS, "ZO_NotificationsGuildNewApplicationsRow", 50, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", 50, SetupRequestWithMoreInfoRow)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -304,7 +339,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_KeyboardFriendRequestProvider:New(self),
         ZO_KeyboardGuildInviteProvider:New(self),
         ZO_GuildMotDProvider:New(self),
-        ZO_KeyboardCampaignQueueProvider:New(self),
+        ZO_CampaignQueueProvider:New(self),
         ZO_ResurrectProvider:New(self),
         ZO_GroupInviteProvider:New(self),
         ZO_GroupElectionProvider:New(self),
@@ -323,6 +358,9 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_KeyboardGiftingGracePeriodStartedProvider:New(self),
         ZO_KeyboardGiftingUnlockedProvider:New(self),
         ZO_DailyLoginRewardsClaimProvider:New(self),
+        ZO_KeyboardGuildNewApplicationsProvider:New(self),
+        ZO_PlayerApplicationsProvider:New(self),
+        ZO_KeyboardMarketProductUnlockedProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))
@@ -374,7 +412,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
 
             visible = function()
                 local data = self:GetSelectedData()
-                if(data and data.declineText) then
+                if data and data.declineText then
                     return true
                 end
                 return false
@@ -400,8 +438,35 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
 
             visible = function()
                 local data = self:GetSelectedData()
-                if(data and data.acceptText) then
+                if data and data.acceptText then
                     return true
+                end
+                return false
+            end
+        },
+
+        -- Report Request
+        {
+            name = GetString(SI_GUILD_BROWSER_REPORT_GUILD_KEYBIND),
+
+            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+
+            callback = function()
+                local selectedRow = self:GetSelectedData()
+                if selectedRow then
+                    local data = ZO_ScrollList_GetData(selectedRow)
+                    local function ReportCallback()
+                        -- TODO: Not sure if we need this
+                    end
+                    ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(data.guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE, ReportCallback)
+                end
+            end,
+
+            visible = function()
+                local selectedRow = self:GetSelectedData()
+                if selectedRow then
+                    local data = ZO_ScrollList_GetData(selectedRow)
+                    return data.showReportKeybind
                 end
                 return false
             end
@@ -494,13 +559,7 @@ function ZO_KeyboardNotificationManager:SetupWaiting(control, data)
     loading:Show()
 end
 
-function ZO_KeyboardNotificationManager:SetupCollectibleRow(control, data)
-    self:SetupRequest(control, data)
-    local moreInfoButton = control:GetNamedChild("MoreInfo")
-    moreInfoButton:SetHidden(data.moreInfo ~= true)
-end
-
-function ZO_KeyboardNotificationManager:SetupEsoPlusSubscriptionRow(control, data)
+function ZO_KeyboardNotificationManager:SetupRequestWithMoreInfoRow(control, data)
     self:SetupRequest(control, data)
     local moreInfoButton = control:GetNamedChild("MoreInfo")
     moreInfoButton:SetHidden(data.moreInfo ~= true)
@@ -554,15 +613,15 @@ end
 
 function ZO_KeyboardNotificationManager:Message_OnMouseEnter(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    if data then
+    if data and data.provider.ShowMessageTooltip then
         data.provider:ShowMessageTooltip(data, control)
     end
 end
 
 function ZO_KeyboardNotificationManager:Message_OnMouseExit(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
-    if data then
-        data.provider:HideMessageTooltip(control)
+    if data and data.provider.HideMessageTooltip then
+        data.provider:HideMessageTooltip(data, control)
     end
 end
 

@@ -138,7 +138,7 @@ function LoreLibrary:BuildCategoryList()
     table.sort(categories, NameSorter)
 
     for i, categoryData in ipairs(categories) do
-        local parent = self.navigationTree:AddNode("ZO_LabelHeader", categoryData, nil, SOUNDS.LORE_BLADE_SELECTED)
+        local parent = self.navigationTree:AddNode("ZO_LabelHeader", categoryData)
 
         local categoryIndex = categoryData.categoryIndex
         local numCollections = categoryData.numCollections
@@ -158,7 +158,7 @@ function LoreLibrary:BuildCategoryList()
         table.sort(collections, NameSorter)
         
         for k, collectionData in ipairs(collections) do
-            self.navigationTree:AddNode("ZO_LoreLibraryNavigationEntry", collectionData, parent, SOUNDS.LORE_ITEM_SELECTED)
+            self.navigationTree:AddNode("ZO_LoreLibraryNavigationEntry", collectionData, parent)
         end
     end
 

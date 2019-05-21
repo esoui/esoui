@@ -179,10 +179,10 @@ function ZO_WorldMapQuestBreadcrumbs:OnQuestPositionRequestComplete(taskId, pinT
     end
 end
 
-function ZO_WorldMapQuestBreadcrumbs:OnQuestConditionInfoChanged(questIndex, questName, conditionText, conditionType, curCondtionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isQuestComplete, isConditionComplete, isStepHidden, isConditionCompleteStatusChanged)
+function ZO_WorldMapQuestBreadcrumbs:OnQuestConditionInfoChanged(questIndex, questName, conditionText, conditionType, curCondtionVal, newConditionVal, conditionMax, isFailCondition, stepOverrideText, isPushed, isQuestComplete, isConditionComplete, isStepHidden, isConditionCompleteStatusChanged, isConditionCompletableBySiblingStatusChanged)
     -- Only refresh if the condition completed has changed but the quest is not complete since there is another event for a quest completing.
     -- This will reduce the number of times the pins are refreshed so that they are not refreshed unnecessarily.
-    if not isQuestComplete and isConditionCompleteStatusChanged then
+    if not isQuestComplete and (isConditionCompleteStatusChanged or isConditionCompletableBySiblingStatusChanged) then
         self:RefreshQuest(questIndex)
     end
 end

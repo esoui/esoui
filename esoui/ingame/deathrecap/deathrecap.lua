@@ -71,8 +71,8 @@ function DeathRecap:Initialize(control)
     DEATH_RECAP_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         self:RefreshBossBarVisibility()
         self:RefreshUnitFrameVisibility()
-        if(newState == SCENE_FRAGMENT_SHOWING) then
-            if(self.animateOnShow) then
+        if newState == SCENE_FRAGMENT_SHOWING then
+            if self.animateOnShow then
                 self.animateOnShow = nil
                 self:Animate()
             end
@@ -88,7 +88,7 @@ function DeathRecap:Initialize(control)
         end
     end
     self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-    
+
     self.control:SetHandler("OnEffectivelyShown", function() self:OnEffectivelyShown() end)
     self.control:SetHandler("OnEffectivelyHidden", function() self:OnEffectivelyHidden() end)
 
@@ -287,7 +287,6 @@ function DeathRecap:SetupAttacks()
 
             local attackerNameLine
             if isPlayer then
-                
                 local nameToShow
                 if showBothPlayerNames then
                     nameToShow = ZO_GetPrimaryPlayerNameWithSecondary(attackerDisplayName, attackerRawName)
@@ -311,7 +310,7 @@ function DeathRecap:SetupAttacks()
                     end
                 end
             else
-                if(minionName == "") then
+                if minionName == "" then
                     attackerNameLine = zo_strformat(SI_DEATH_RECAP_ATTACKER_NAME, attackerRawName)
                 else
                     attackerNameLine = zo_strformat(SI_DEATH_RECAP_ATTACKER_NAME_MINION, attackerRawName, minionName)
@@ -434,7 +433,7 @@ end
 function DeathRecap:SetupDeathRecap()
     self.isPlayerDead = IsUnitDead("player")
     local numAttacks = GetNumKillingAttacks()
-    if(numAttacks > 0 and IsUnitDead("player")) then
+    if numAttacks > 0 and IsUnitDead("player") then
         self:SetupAttacks()
         self:SetupHints()
         self:SetupTelvarStoneLoss()
@@ -489,7 +488,7 @@ end
 
 function DeathRecap:OnPlayerDead()
     self.isPlayerDead = true
-    if(not self.waitingToShowPrompt) then
+    if not self.waitingToShowPrompt then
         self.waitingToShowPrompt = true
         EVENT_MANAGER:RegisterForUpdate("DeathRecapUpdate", DEATH_RECAP_DELAY, function()
             self.waitingToShowPrompt = false
@@ -505,6 +504,7 @@ function DeathRecap:OnUnitFramesCreated()
 end
 
 function DeathRecap:ApplyStyle()
+    self.scrollContainer:SetScrollIndicatorEnabled(IsInGamepadPreferredMode())
     ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_DeathRecap"))
     self.attackTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapAttack")
     self.hintTemplate = ZO_GetPlatformTemplate("ZO_DeathRecapHint")

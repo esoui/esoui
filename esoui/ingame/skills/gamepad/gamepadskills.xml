@@ -115,10 +115,6 @@
                     <Controls>
                         <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                             <Controls>
-                                <Label name="$(parent)Warning" horizontalAlignment="CENTER" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
-                                    <Anchor point="LEFT" relativeTo="ZO_GamepadTooltipTopLevelLeftTooltipBgBgScreenCenterIsAlongTop" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
-                                </Label>
                                 <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                                     <Anchor point="TOPLEFT" />
                                     <Anchor point="BOTTOMRIGHT"/>

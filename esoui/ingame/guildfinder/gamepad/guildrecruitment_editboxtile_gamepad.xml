@@ -1,0 +1,51 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_EditBoxTile_Gamepad_Control" inherits="ZO_ActivationTile_Control ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_EDITBOX_GAMEPAD_WIDTH" y="ZO_GUILD_RECRUITMENT_EDITBOX_GAMEPAD_HEADLINE_HEIGHT"/>
+            <OnInitialized>
+                ZO_GuildRecruitment_EditBoxTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" override="true" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_INDENT_X" />
+                </Label>
+                
+                <Backdrop name="$(parent)Backdrop" inherits="ZO_MultiLineEditBackdrop_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_HEADER_MESSAGE_LENGTH" />
+                    </Controls>
+                </Backdrop>
+
+                <Backdrop name="$(parent)SelectorBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backdrop" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backdrop" relativePoint="BOTTOMRIGHT"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_EditBoxTile_Description_Gamepad_Control" inherits="ZO_GuildRecruitment_EditBoxTile_Gamepad_Control" virtual="true">
+            <Dimensions y="ZO_GUILD_RECRUITMENT_EDITBOX_GAMEPAD_DESCRIPTION_HEIGHT"/>
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" override="true">
+                    <Controls>
+                        <EditBox name="$(parent)Edit" override="true" maxInputCharacters="MAX_GUILD_RECRUITMENT_MESSAGE_LENGTH" />
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_NumericEditBoxTile_Gamepad_Control" inherits="ZO_GuildRecruitment_EditBoxTile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_GAMEPAD_WIDTH" y="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_GAMEPAD_ENTRY_HEIGHT" />
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" override="true">
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_GAMEPAD_WIDTH" y="ZO_GUILD_RECRUITMENT_NUMERIC_EDITBOX_GAMEPAD_HEIGHT" />
+                    <Controls>
+                        <EditBox name="$(parent)Edit" override="true" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

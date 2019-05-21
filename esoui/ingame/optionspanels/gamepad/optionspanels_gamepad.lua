@@ -869,6 +869,11 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_COMBAT,
             settingId = COMBAT_SETTING_SCT_INCOMING_PET_DOT_ENABLED,
         },
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_SCT_SHOW_OVER_HEAL,
+        },
 
         -- Buff Debuff
         {
@@ -961,6 +966,13 @@ else
         panel = SETTING_PANEL_VIDEO,
         system = SETTING_TYPE_GRAPHICS,
         settingId = GRAPHICS_SETTING_RESOLUTION,
+    })
+    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_COMBAT], 
+    {
+        panel = SETTING_PANEL_COMBAT,
+        system = SETTING_TYPE_COMBAT,
+        settingId = COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
+        header = SI_INTERFACE_OPTIONS_ENCOUNTER_LOG,
     })
 
     table.insert(interfaceSettingsChatBubbles, {

@@ -17,6 +17,7 @@ function ZO_IngameSceneManager:Initialize(...)
     self.topLevelWindows = {}
     self.restoresBaseSceneOnGameMenuToggle = {}
     self.numTopLevelShown = 0
+    self.numRemoteTopLevelShown = 0
     self.initialized = false
     self.hudSceneName = "hud"
     self.hudUISceneName = "hudui"
@@ -95,7 +96,7 @@ end
 --UI Mode Life Cycle
 
 function ZO_IngameSceneManager:ConsiderExitingUIMode(showingHUDUI)
-    if self.hudUISceneHidesAutomatically and self.numTopLevelShown == 0 and showingHUDUI and DoesGameHaveFocus() and not CHAT_SYSTEM:IsTextEntryOpen() then
+    if self.hudUISceneHidesAutomatically and self.numTopLevelShown == 0 and self.numRemoteTopLevelShown == 0 and showingHUDUI and DoesGameHaveFocus() and not CHAT_SYSTEM:IsTextEntryOpen() then
         return self:SetInUIMode(false)
     end
 end
@@ -234,6 +235,7 @@ do
         ["giftInventoryViewKeyboard"] = true,
         ["dailyLoginRewardsPreview_Gamepad"] = true,
         ["dailyLoginRewards"] = true,
+        ["tradinghouse"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()
@@ -357,6 +359,10 @@ function ZO_IngameSceneManager:SetHUDScene(hudSceneName)
    end
 end
 
+function ZO_IngameSceneManager:GetHUDSceneName()
+   return self.hudSceneName
+end
+
 function ZO_IngameSceneManager:RestoreHUDScene()
     self:SetHUDScene("hud")
 end
@@ -422,8 +428,10 @@ end
 function ZO_IngameSceneManager:ChangeRemoteTopLevel(remoteChangeOrigin, remoteChangeType)
     if remoteChangeOrigin ~= ZO_REMOTE_SCENE_CHANGE_ORIGIN then
         if remoteChangeType == REMOTE_SCENE_REQUEST_TYPE_SHOW then
+            self.numRemoteTopLevelShown = self.numRemoteTopLevelShown + 1
             self:OnShowTopLevel()
         elseif remoteChangeType == REMOTE_SCENE_REQUEST_TYPE_HIDE then
+            self.numRemoteTopLevelShown = zo_max(self.numRemoteTopLevelShown - 1, 0)
             self:OnHideTopLevel()
         end
     end
@@ -489,7 +497,7 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
-    if not IsInGamepadPreferredMode() and GUILD_RANKS:AttemptSaveIfBlocking() then
+    if not IsInGamepadPreferredMode() and GUILD_RANKS:SaveIfBlocking() then
         -- The guild ranks scene was the current blocking scene, so we can return early here.
         return
     end

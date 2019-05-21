@@ -8,6 +8,8 @@ function ZO_LootHistory_Keyboard:New(...)
 end
 
 function ZO_LootHistory_Keyboard:Initialize(control)
+    self.control = control
+
     ZO_LootHistory_Shared.Initialize(self, control)
 end
 

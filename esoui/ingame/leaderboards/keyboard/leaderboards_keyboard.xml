@@ -92,18 +92,20 @@
             </Controls>
         </Control>
 
-        <Label name="ZO_LeaderboardsNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel" wrapMode="ELLIPSIS">
+        <Control name="ZO_LeaderboardsNavigationHeader" virtual="true" inherits="ZO_IconHeader" >
+            <Controls>
+                <Label name="$(parent)Text" override="true" wrapMode="ELLIPSIS" maxLineCount="2">
+                    <Dimensions x="200" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_LeaderboardsNavigationEntry" virtual="true" inherits="ZO_SelectableTooltipIfTruncatedLabel" font="ZoFontHeader" maxLineCount="1">
           <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="RIGHT" />
-          <Dimensions y="22" x="210"/>
-              <OnMouseEnter>
-                  ZO_LeaderboardsNavigationEntry_OnMouseEnter(self)
-              </OnMouseEnter>
-              <OnMouseExit>
-                  ZO_LeaderboardsNavigationEntry_OnMouseExit(self)
-              </OnMouseExit>
-              <OnMouseUp>
-                  ZO_TreeEntry_OnMouseUp(self, upInside)
-              </OnMouseUp>
+          <Dimensions x="200" />
+          <OnMouseUp>
+              ZO_TreeEntry_OnMouseUp(self, upInside)
+          </OnMouseUp>
         </Label>
 
         <Control name="ZO_LeaderboardsDivider" virtual="true">

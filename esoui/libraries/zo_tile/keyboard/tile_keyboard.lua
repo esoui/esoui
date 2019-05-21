@@ -12,7 +12,7 @@ ZO_Tile_Keyboard = ZO_Object:Subclass()
 
 function ZO_Tile_Keyboard:InitializePlatform()
     local control = self:GetControl()
-    
+
     self.isMousedOver = false
     control:SetHandler("OnMouseEnter", function(...) self:OnMouseEnter(...) end)
     control:SetHandler("OnMouseExit", function(...) self:OnMouseExit(...) end)

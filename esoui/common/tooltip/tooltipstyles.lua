@@ -743,7 +743,7 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         uppercase = true,
     },
-    mapUnitName =
+    mapAllyUnitName =
     {
         fontSize = "$(GP_34)",
         fontColorType = INTERFACE_COLOR_TYPE_NAME_PLATE,
@@ -1393,6 +1393,34 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_GREY,
         widthPercent = 100,
         customSpacing = 40,
+    },
+    notificationNote =
+    {
+        customSpacing = 50,
+        fontSize = "$(GP_42)",
+    },
+    guildInvitee =
+    {
+        fontSize = "$(GP_42)",
+        customSpacing = 50,
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+    furnishingLimitTypeSection =
+    {
+        customSpacing = 40,
+        widthPercent = 100,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+    },
+    furnishingLimitTypeTitle =
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        fontSize = "$(GP_34)",
+        uppercase = true,
+    },
+    furnishingLimitTypeDescription =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
+        fontSize = "$(GP_42)",
     },
 }
 

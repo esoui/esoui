@@ -109,13 +109,13 @@ function ZO_TradingHouseSearchCategoryFeature_Keyboard:PopulateCategoryList()
     for _, categoryParams in ipairs(ZO_TRADING_HOUSE_CATEGORY_PARAMS_LIST) do
         local header = categoryParams:GetHeader()
         if numCategoriesForHeader[header] == 1 then
-            self.categoryListTree:AddNode("ZO_IconChildlessHeader", categoryParams, NO_PARENT, SOUNDS.TRADING_HOUSE_CATEGORY_SELECTED)
+            self.categoryListTree:AddNode("ZO_IconChildlessHeader", categoryParams)
         else
             if lastHeader ~= header then
-                currentHeaderNode = self.categoryListTree:AddNode("ZO_IconHeader", header, NO_PARENT, SOUNDS.TRADING_HOUSE_CATEGORY_SELECTED)
+                currentHeaderNode = self.categoryListTree:AddNode("ZO_IconHeader", header)
             end
 
-            self.categoryListTree:AddNode("ZO_TradingHouse_CategoryLabel", categoryParams, currentHeaderNode, SOUNDS.TRADING_HOUSE_SUB_CATEGORY_SELECTED)
+            self.categoryListTree:AddNode("ZO_TradingHouse_CategoryLabel", categoryParams, currentHeaderNode)
         end
         lastHeader = header
     end

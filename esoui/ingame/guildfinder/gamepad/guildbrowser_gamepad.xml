@@ -1,0 +1,24 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildBrowser_ChampionPoint_EditBox_Gamepad" inherits="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)TextField" override="true">
+                    <Controls>
+                        <EditBox name="$(parent)Edit" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" override="true">
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildBrowser_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_GuildBrowser_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

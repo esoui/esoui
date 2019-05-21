@@ -54,7 +54,7 @@ function ActionButton:New(slotNum, buttonType, parent, controlTemplate)
         newB.inCooldown             = false
         newB.showingCooldown        = false
         newB.activationHighlight    = GetControl(slotCtrl,"ActivationHighlight")
-
+        newB.useDesaturation        = false
         newB.cooldownIcon:SetDesaturation(1)
 
         local HIDE_UNBOUND = false
@@ -237,20 +237,25 @@ function ActionButton:UpdateActivationHighlight()
     local slotIsEmpty = (slotType == ACTION_TYPE_NOTHING)
 
     local showHighlight = not slotIsEmpty and HasActivationHighlight(slotnum) and not self.useFailure and not self.showingCooldown
-    local isShowingHighlight = self.activationHighlight:IsHidden() == false
+    local isShowingHighlight = self.activationHighlight:IsControlHidden() == false
 
     if showHighlight ~= isShowingHighlight then
         self.activationHighlight:SetHidden(not showHighlight)
 
         if showHighlight then
-            local _, _, activationAnimation = GetSlotTexture(slotnum)
-            self.activationHighlight:SetTexture(activationAnimation)
+            local _, _, activationAnimationTexture = GetSlotTexture(slotnum)
+            self.activationHighlight:SetTexture(activationAnimationTexture)
 
-            self.activationHighlight.animation = self.activationHighlight.animation or CreateSimpleAnimation(ANIMATION_TEXTURE, self.activationHighlight)
             local anim = self.activationHighlight.animation
+            if not anim then
+                anim = CreateSimpleAnimation(ANIMATION_TEXTURE, self.activationHighlight)
+                anim:SetImageData(64, 1)
+                anim:SetFramerate(30)
+                anim:GetTimeline():SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
 
-            anim:SetImageData(64, 1)
-            anim:SetFramerate(30)
+                self.activationHighlight.animation = anim
+            end
+
             anim:GetTimeline():PlayFromStart()
         else
             local anim = self.activationHighlight.animation
@@ -322,13 +327,13 @@ function ActionButton:UpdateUsable()
             usable = false
         end
     end
-
-    if usable ~= self.usable or isGamepad ~= self.isGamepad or stackEmpty ~= self.stackEmpty then
+    
+    local useDesaturation = isShowingCooldown and not useFailure or stackEmpty
+    
+    if usable ~= self.usable or useDesaturation ~= self.useDesaturation then
         self.usable = usable
-        self.isGamepad = isGamepad
-        self.stackEmpty = stackEmpty
+        self.useDesaturation = useDesaturation
 
-        local useDesaturation = isShowingCooldown and not self.useFailure or self.stackEmpty
         ZO_ActionSlot_SetUnusable(self.icon, not usable, useDesaturation)
     end
 end

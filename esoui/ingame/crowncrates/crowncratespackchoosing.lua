@@ -654,8 +654,9 @@ function ZO_CrownCratesPackChoosing:InitializePackPool()
     self.pageIndicatorContainer = ZO_PackChoosingPageIndicator
     self.pageIndicatorLabel = self.pageIndicatorContainer.pageIndicator
 
-    self:SetNumPages(1)
-    self:SetCurrentPage(1)
+    self.currentPage = 1
+    self.numPages = 1
+    self:RefreshPageIndicator()
 
     ZO_PlatformStyle:New(function() self:RefreshPlatformStyle() end)
 end

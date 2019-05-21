@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_Control" tier="HIGH" layer="OVERLAY" level="5" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COLUMN_WIDTH" y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COMBOBOX_HEIGHT" />
+
+            <OnInitialized>
+                ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Title" inherits="ZO_GuildRecruitment_Keyboard_Header_Label" tier="MEDIUM">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Control name="$(parent)ComboBox" inherits="ZO_ScrollableComboBox">
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COMBOBOX_WIDTH" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_StatusSelectionTile_Keyboard_Control" inherits="ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_Control" level ="10" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COLUMN_LONG_WIDTH" />
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_StartTimeSelectionTile_Keyboard_Control" inherits="ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_Control" level="1" virtual="true">
+            <Controls>
+                <Label name="$(parent)Dash" override="true" inherits="ZO_GuildRecruitment_Keyboard_Header_Label" text="SI_GUILD_RECRUITMENT_TIME_ENTRIES_SEPARATOR">
+                    <Anchor point="LEFT" relativeTo="$(parent)ComboBox" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_EndTimeSelectionTile_Keyboard_Control" inherits="ZO_GuildRecruitment_AttributeSelectionTile_Keyboard_Control" level="1" virtual="true">
+            <Dimensions y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COMBOBOX_TALL_HEIGHT" />
+        </Control>
+    </Controls>
+</GuiXml>

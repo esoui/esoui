@@ -192,11 +192,11 @@ function ZO_GiftInventoryView_Shared:InitializeKeybinds(claimKeybind, previewKey
     self.updateKeybindsCallback = function() KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor) end
 end
 
-internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 28, "Update gift claim dialog to handle new purchase result")
+internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 30, "Update gift claim dialog to handle new purchase result")
 function ZO_GiftInventoryView_Shared:ClaimGift()
     local marketProductId = self.gift:GetMarketProductId()
-    local expectedclaimResult = CouldAcquireMarketProduct(marketProductId)
-    if expectedclaimResult == MARKET_PURCHASE_RESULT_SUCCESS then
+    local expectedClaimResult = CouldAcquireMarketProduct(marketProductId)
+    if expectedClaimResult == MARKET_PURCHASE_RESULT_SUCCESS then
         if ShouldMarketProductShowClaimGiftNotice(marketProductId) then
             local noticeText, helpCategoryIndex, helpIndex = GetMarketProductClaimGiftNoticeInfo(marketProductId)
             self:ShowClaimGiftNoticeDialog(noticeText, helpCategoryIndex, helpIndex)
@@ -206,21 +206,21 @@ function ZO_GiftInventoryView_Shared:ClaimGift()
     else
         -- We can't claim this gift for some reason
         local errorString
-        if expectedclaimResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
+        if expectedClaimResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM then
             local slotsRequired = GetSpaceNeededToAcquireMarketProduct(marketProductId)
             errorString = zo_strformat(SI_UNABLE_TO_CLAIM_GIFT_INSUFFICIENT_SPACE_ERROR_TEXT, slotsRequired)
-        elseif expectedclaimResult == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY then
+        elseif expectedClaimResult == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY then
             errorString = GetString(SI_UNABLE_TO_CLAIM_GIFT_COLLECTIBLE_OWNED_ERROR_TEXT)
-        elseif expectedclaimResult == MARKET_PURCHASE_RESULT_EXCEEDS_CURRENCY_CAP then
+        elseif expectedClaimResult == MARKET_PURCHASE_RESULT_EXCEEDS_CURRENCY_CAP then
             errorString = GetString(SI_UNABLE_TO_CLAIM_GIFT_EXCEEDS_CURRENCY_CAP_ERROR_TEXT)
-        elseif expectedclaimResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK then
+        elseif expectedClaimResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK then
             local unlockType = GetMarketProductInstantUnlockType(marketProductId)
             if unlockType == INSTANT_UNLOCK_WEREWOLF_BITE or unlockType == INSTANT_UNLOCK_VAMPIRE_BITE then
                 errorString = GetString(SI_UNABLE_TO_CLAIM_GIFT_ALREADY_AFFLICTED_ERROR_TEXT)
             else
                 errorString = GetString(SI_UNABLE_TO_CLAIM_GIFT_FULLY_UPGRADED_ERROR_TEXT)
             end
-        elseif expectedclaimResult == MARKET_PURCHASE_RESULT_FAIL_INSTANT_UNLOCK_REQ_LIST then
+        elseif expectedClaimResult == MARKET_PURCHASE_RESULT_FAIL_INSTANT_UNLOCK_REQ_LIST then
             local errorStrings = {}
             local errorStringIds = { GetMarketProductEligibilityErrorStringIds(marketProductId) }
             for i, errorStringId in ipairs(errorStringIds) do
@@ -244,11 +244,11 @@ function ZO_GiftInventoryView_Shared:ClaimGift()
 end
 
 function ZO_GiftInventoryView_Shared:ShowClaimGiftDialog()
-    assert(false) -- Must be overriden
+    assert(false) -- Must be overridden
 end
 
 function ZO_GiftInventoryView_Shared:ShowClaimGiftNoticeDialog(noticeText, helpCategoryIndex, helpIndex)
-    assert(false) -- Must be overriden
+    assert(false) -- Must be overridden
 end
 
 function ZO_GiftInventoryView_Shared:PreviewGift()
@@ -271,7 +271,7 @@ function ZO_GiftInventoryView_Shared:EndCurrentPreview()
 end
 
 function ZO_GiftInventoryView_Shared:DeclineGift()
-    assert(false) -- Must be overriden
+    assert(false) -- Must be overridden
 end
 
 function ZO_GiftInventoryView_Shared:OnShowing()
@@ -314,7 +314,7 @@ function ZO_GiftInventoryView_Shared:GetScene()
 end
 
 function ZO_GiftInventoryView_Shared:GetItemPreviewListHelper()
-    assert(false) -- Must be overriden
+    assert(false) -- Must be overridden
 end
 
 function ZO_GiftInventoryView_Shared:IsReceivedGift()

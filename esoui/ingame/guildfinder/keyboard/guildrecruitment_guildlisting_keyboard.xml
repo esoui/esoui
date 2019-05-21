@@ -1,0 +1,66 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_GuildListing_Keyboard_Header_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_GuildRecruitment_Keyboard_Header_Label">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildRecruitment_GuildListing_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_GuildListing_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)AlertContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildRecruitment_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40" />
+                    <Anchor point="RIGHT" relativeTo="RIGHT" constrains="X" offsetX="-20" />
+                    <Controls>
+                        <Label name="$(parent)Alert" inherits="ZO_GuildRecruitment_Keyboard_Header_Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED" hide="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="RIGHT" constrains="X" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoPanel" inherits="ZO_GridScrollList_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AlertContainer" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GuildRecruitment_GuildListing_NotListedDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_GuildRecruitment_GuildListing_NotListedDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
+
+                <Control name="$(parent)BulletList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetX="-25" offsetY="20"/>
+                </Control>
+
+                <Control name="$(parent)Exit" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GuildRecruitment_GuildListing_UnlistedDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_GuildRecruitment_GuildListing_UnlistedDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
+
+                <Control name="$(parent)BulletList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetX="-25" offsetY="20"/>
+                </Control>
+
+                <Control name="$(parent)Exit" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

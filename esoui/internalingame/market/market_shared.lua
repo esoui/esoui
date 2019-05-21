@@ -56,6 +56,7 @@ end
 function ZO_Market_Shared:RegisterForMarketSingletonCallbacks()
     -- events we need to react to even if we are hiding
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketStateUpdated", function(...) self:OnMarketStateUpdated(...) end)
+    ZO_MARKET_MANAGER:RegisterCallback("OnMarketProductAvailabilityUpdated", function(...) self:OnMarketProductAvailabilityUpdated(...) end)
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketSearchResultsReady", function(...) self:OnMarketSearchResultsReady(...) end)
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketSearchResultsCanceled", function(...) self:OnMarketSearchResultsCanceled(...) end)
 
@@ -120,6 +121,16 @@ function ZO_Market_Shared:OnMarketStateUpdated(displayGroup, marketState)
         if self:IsShowing() then
             self:ResetCategoryData()
             self:UpdateMarket(marketState)
+        end
+    end
+end
+
+function ZO_Market_Shared:OnMarketProductAvailabilityUpdated(displayGroup)
+    if displayGroup == MARKET_DISPLAY_GROUP_CROWN_STORE then
+        if self:IsShowing() then
+            self:BuildCategories()
+        else
+            self:FlagMarketCategoriesForRefresh()
         end
     end
 end
@@ -205,6 +216,11 @@ function ZO_Market_Shared:OnShowChapterUpgrade(chapterUpgradeId)
     self:RequestShowCategory(ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX, chapterUpgradeId) -- the subcategory id for the chapter is the chapterUpdradeId
 end
 
+function ZO_Market_Shared:OnShowMarketProductCategory(marketProductCategoryId)
+    SCENE_MANAGER:Show("show_market")
+    self:RequestShowCategoryById(marketProductCategoryId)
+end
+
 function ZO_Market_Shared:OnEsoPlusSubscriptionStatusChanged()
     self:UpdateCurrentCategory()
 end
@@ -223,6 +239,8 @@ function ZO_Market_Shared:RequestShowMarket(openSource, openBehavior, additional
         self:OnShowEsoPlusPage()
     elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
         self:OnShowChapterUpgrade(additionalData)
+    elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_MARKET_PRODUCT_CATEGORY then
+        self:OnShowMarketProductCategory(additionalData)
     end
 end
 
@@ -437,8 +455,7 @@ do
         visible = CanInteractWithCrownCratesSystem,
         enabled = function()
             local isAllowed, errorStringId = IsPlayerAllowedToOpenCrownCrates()
-            --Internal ingame doesn't have access to ZO_Alert
-            return isAllowed
+            return isAllowed, GetString(errorStringId)
         end,
         GoToUseProductLocation = function()
             if IsInGamepadPreferredMode() then
@@ -637,8 +654,19 @@ function ZO_Market_Shared:ClearQueuedCategoryIndices()
     self:SetQueuedCategoryIndices(nil, nil)
 end
 
+function ZO_Market_Shared:SetQueuedCategoryId(categoryId)
+    self.queuedCategoryId = categoryId
+end
+
+function ZO_Market_Shared:ClearQueuedCategoryId()
+    self:SetQueuedCategoryId(nil)
+end
+
 function ZO_Market_Shared:ProcessQueuedNavigation()
-    if self.queuedCategoryIndex then
+    if self.queuedCategoryId then
+        self:RequestShowCategoryById(self.queuedCategoryId)
+        self:ClearQueuedCategoryIndices()
+    elseif self.queuedCategoryIndex then
         self:RequestShowCategory(self.queuedCategoryIndex, self.queuedSubcategoryIndex)
         -- A request to go to a specific category overrides a request to go to a specific Market Product
         self:ClearQueuedMarketProductId()
@@ -752,11 +780,15 @@ function ZO_Market_Shared:RefreshActions()
 end
 
 function ZO_Market_Shared:RequestShowMarketProduct(id)
-    assert(false)
+    assert(false) -- must be overridden
 end
 
 function ZO_Market_Shared:RequestShowCategory(categoryIndex, subcategoryIndex)
-    assert(false)
+    assert(false) -- must be overridden
+end
+
+function ZO_Market_Shared:RequestShowCategoryById(categoryId)
+    assert(false) -- must be overridden
 end
 
 function ZO_Market_Shared:CanPreviewMarketProductPreviewType(previewType)

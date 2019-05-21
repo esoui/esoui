@@ -20,6 +20,10 @@ GUILD_HISTORY_CATEGORIES =
                     [GUILD_EVENT_GUILD_DEMOTE] = true,
                     [GUILD_EVENT_GUILD_KICKED] = true,
                     [GUILD_EVENT_GUILD_LEAVE] = true,
+                    [GUILD_EVENT_GUILD_APPLICATION_DECLINED] = true,
+                    [GUILD_EVENT_GUILD_APPLICATION_ACCEPTED] = true,
+                    [GUILD_EVENT_REMOVED_FROM_BLACKLIST] = true,
+                    [GUILD_EVENT_ADDED_TO_BLACKLIST] = true,
                 }
             },
             [GUILD_HISTORY_GENERAL_CUSTOMIZATION] =
@@ -30,6 +34,8 @@ GUILD_HISTORY_CATEGORIES =
                     [GUILD_EVENT_HERALDRY_EDITED] = true,
                     [GUILD_EVENT_MOTD_EDITED] = true,
                     [GUILD_EVENT_ABOUT_US_EDITED] = true,
+                    [GUILD_EVENT_GUILD_RECRUITMENT_GUILD_LISTED] = true,
+                    [GUILD_EVENT_GUILD_RECRUITMENT_GUILD_UNLISTED] = true,
                 }
             },
             [GUILD_HISTORY_GENERAL_UNLOCKS] =
@@ -152,14 +158,16 @@ local function IsInvalidParam(param)
     return not param or param == "" or param == GetString(SI_GUILD_HISTORY_DEFAULT_PARSED_TEXT)
 end
 
-local function DefaultEventFormat(eventType, param1, param2, param3, param4, param5)
+local function DefaultEventFormat(eventType, ...)
     local contrastColor = GetContrastTextColor()
     local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
-    return zo_strformat(formatString, param1 and contrastColor:Colorize(param1) or nil,
-                                      param2 and contrastColor:Colorize(param2) or nil,
-                                      param3 and contrastColor:Colorize(param3) or nil,
-                                      param4 and contrastColor:Colorize(param4) or nil,
-                                      param5 and contrastColor:Colorize(param5) or nil)
+    local colorizedParams = {}
+    for i = 1, select('#', ...) do
+        local param = select(i, ...)
+        colorizedParams[i] = contrastColor:Colorize(param)
+    end
+
+    return zo_strformat(formatString, unpack(colorizedParams))
 end
 
 local function DefaultEventFormatWithDisplayName(eventType, displayName, ...)
@@ -182,13 +190,21 @@ local function BankItemEventFormat(eventType, displayName, quantity, itemLink)
                                         itemLink)
 end
 
-local function BankGoldEventFormat(eventType, displayName, gold, kiosk)
+local function BankGoldEventFormat(eventType, displayName, gold)
+    local contrastColor = GetContrastTextColor()
+    local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
+
+    return zo_strformat(formatString,   contrastColor:Colorize(ZO_FormatUserFacingDisplayName(displayName)),
+                                        GetGoldString(gold))
+end
+
+local function KioskBuyOrBidEventFormat(eventType, displayName, gold, kioskName)
     local contrastColor = GetContrastTextColor()
     local formatString = GetString("SI_GUILDEVENTTYPE", eventType)
 
     return zo_strformat(formatString,   contrastColor:Colorize(ZO_FormatUserFacingDisplayName(displayName)),
                                         GetGoldString(gold),
-                                        kiosk and contrastColor:Colorize(kiosk) or nil)
+                                        contrastColor:Colorize(kioskName))
 end
 
 local function KioskRefundEventFormat(eventType, kiosk, gold)
@@ -223,8 +239,8 @@ GUILD_EVENT_EVENT_FORMAT =
     [GUILD_EVENT_BANKGOLD_ADDED] = BankGoldEventFormat,                     -- (eventType, displayName, goldQuantity)
     [GUILD_EVENT_BANKGOLD_REMOVED] = BankGoldEventFormat,                   -- (eventType, displayName, goldQuantity)
     [GUILD_EVENT_BANKGOLD_KIOSK_BID_REFUND] = KioskRefundEventFormat,       -- (eventType, kioskName, goldQuantity)
-    [GUILD_EVENT_BANKGOLD_KIOSK_BID] = BankGoldEventFormat,                 -- (eventType, displayName, goldQuantity, kioskName)
-    [GUILD_EVENT_GUILD_KIOSK_PURCHASED] = BankGoldEventFormat,              -- (eventType, displayName, goldQuantity, kioskName)
+    [GUILD_EVENT_BANKGOLD_KIOSK_BID] = KioskBuyOrBidEventFormat,            -- (eventType, displayName, goldQuantity, kioskName)
+    [GUILD_EVENT_GUILD_KIOSK_PURCHASED] = KioskBuyOrBidEventFormat,         -- (eventType, displayName, goldQuantity, kioskName)
     [GUILD_EVENT_BANKGOLD_GUILD_STORE_TAX] = DefaultEventFormatNoParams,    -- (eventType)
     [GUILD_EVENT_MOTD_EDITED] = DefaultEventFormatWithDisplayName,          -- (eventType, displayName)
     [GUILD_EVENT_ABOUT_US_EDITED] = DefaultEventFormatWithDisplayName,      -- (eventType, displayName)
@@ -242,6 +258,12 @@ GUILD_EVENT_EVENT_FORMAT =
     [GUILD_EVENT_GUILD_KIOSK_LOCKED] = DefaultEventFormatNoParams,          -- (eventType)
     [GUILD_EVENT_GUILD_TABARD_UNLOCKED] = DefaultEventFormatNoParams,       -- (eventType)
     [GUILD_EVENT_GUILD_TABARD_LOCKED] = DefaultEventFormatNoParams,         -- (eventType)
+    [GUILD_EVENT_GUILD_APPLICATION_DECLINED] = DefaultEventFormatWithTwoDisplayNames,     -- (eventType, displayName1, displayName2)
+    [GUILD_EVENT_GUILD_APPLICATION_ACCEPTED] = DefaultEventFormatWithTwoDisplayNames,     -- (eventType, displayName1, displayName2)
+    [GUILD_EVENT_REMOVED_FROM_BLACKLIST] = DefaultEventFormatWithTwoDisplayNames,     -- (eventType, displayName1, displayName2)
+    [GUILD_EVENT_ADDED_TO_BLACKLIST] = DefaultEventFormatWithTwoDisplayNames,     -- (eventType, displayName1, displayName2)
+    [GUILD_EVENT_GUILD_RECRUITMENT_GUILD_LISTED] = DefaultEventFormatWithDisplayName,          -- (eventType, displayName)
+    [GUILD_EVENT_GUILD_RECRUITMENT_GUILD_UNLISTED] = DefaultEventFormatWithDisplayName,          -- (eventType, displayName)
 
     [GUILD_EVENT_ITEM_SOLD] = function(eventType, seller, buyer, quantity, itemLink, price, tax)
         local contrastColor = GetContrastTextColor()

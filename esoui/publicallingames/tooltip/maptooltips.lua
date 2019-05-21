@@ -76,19 +76,34 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutGroupHeader(baseSection, i
 end
 
 function ZO_MapInformationTooltip_Gamepad_Mixin:AppendUnitName(unitTag)
-    -- NOTE: This function currently only supports group members, which are the only
-    --  pins currently shown on the map.
     local icon
-    if IsUnitGroupLeader(unitTag) then
+    local isGrouped = IsUnitGrouped(unitTag)
+    local isPlayer = unitTag == "player"
+    if isGrouped and IsUnitGroupLeader(unitTag) then
         icon = GROUP_LEADER_ICON
-    elseif unitTag == "player" then
+    elseif isPlayer then
         icon = CURRENT_PLAYER_ICON
-    else
+    elseif isGrouped then
         icon = GROUP_MEMBER_ICON
     end
 
+    local colorStyle
+    if isGrouped or isPlayer then
+        colorStyle = self.tooltip:GetStyle("mapAllyUnitName")
+    else
+        colorStyle =
+        {
+            fontColorType = INTERFACE_COLOR_TYPE_UNIT_REACTION_COLOR,
+            fontColorField = GetUnitReactionColor(unitTag),
+        }
+    end
+
     local text = GenerateUnitNameTooltipLine(unitTag)
-    self:LayoutIconStringLine(self.tooltip, icon, ZO_FormatUserFacingDisplayName(text), self.tooltip:GetStyle("mapUnitName"), self.tooltip:GetStyle("keepBaseTooltipContent"))
+    if icon then
+        self:LayoutIconStringLine(self.tooltip, icon, ZO_FormatUserFacingDisplayName(text), colorStyle, self.tooltip:GetStyle("keepBaseTooltipContent"))
+    else
+        self:LayoutStringLine(self.tooltip, ZO_FormatUserFacingDisplayName(text), colorStyle, self.tooltip:GetStyle("keepBaseTooltipContent"))
+    end
 end
 
 function ZO_MapInformationTooltip_Gamepad_Mixin:AppendQuestEnding(questIndex)

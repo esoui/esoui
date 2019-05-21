@@ -34,20 +34,14 @@ function ZO_AssignableActionBar:Initialize(control)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", function(...) self:OnCurrentHotbarUpdated(...) end)
 end
 
-function ZO_AssignableActionBar:OnShowing()
-    self:RefreshAllButtons()
-    self:RefreshHeaderLabel()
-end
-
-function ZO_AssignableActionBar:OnHidden()
+function ZO_AssignableActionBar:OnSkillsHidden()
     self:Deactivate()
     ACTION_BAR_ASSIGNMENT_MANAGER:CancelPendingWeaponSwap()
 end
 
 function ZO_AssignableActionBar:OnCurrentHotbarUpdated()
     if not self.control:IsControlHidden() then
-        self:RefreshAllButtons()
-        self:RefreshHeaderLabel()
+        self:Refresh()
     end
 end
 
@@ -64,6 +58,17 @@ end
 
 function ZO_AssignableActionBar:GetControl()
     return self.control
+end
+
+function ZO_AssignableActionBar:Refresh()
+    self:RefreshAllButtons()
+    self:RefreshHeaderLabel()
+end
+
+function ZO_AssignableActionBar:RefreshAllButtons()
+    for i, button in ipairs(self.buttons) do
+        button:Refresh()
+    end
 end
 
 function ZO_AssignableActionBar:RefreshHeaderLabel()
@@ -93,12 +98,6 @@ function ZO_AssignableActionBar:Deactivate()
         self:ClearTargetSkill()
         DIRECTIONAL_INPUT:Deactivate(self)
         self.active = false
-    end
-end
-
-function ZO_AssignableActionBar:RefreshAllButtons()
-    for i, button in ipairs(self.buttons) do
-        button:Refresh()
     end
 end
 
@@ -362,9 +361,13 @@ function ZO_GamepadAssignableActionBarButton:Refresh()
 end
 
 function ZO_GamepadAssignableActionBarButton:ClearSlot()
-    ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():ClearSlot(self.actionSlotIndex)
+    if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():ClearSlot(self.actionSlotIndex) then
+        PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
+    end
 end
 
 function ZO_GamepadAssignableActionBarButton:AssignSkill(skillData)
-    ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():AssignSkillToSlot(self.actionSlotIndex, skillData)
+    if ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():AssignSkillToSlot(self.actionSlotIndex, skillData) then
+        PlaySound(SOUNDS.ABILITY_SLOTTED)
+    end
 end

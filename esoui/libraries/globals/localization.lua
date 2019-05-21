@@ -1,52 +1,57 @@
 ESO_NumberFormats = {}
 
-local strArgs = {}
+do
+    local g_strArgs = {}
 
-function zo_strformat(formatString, ...)
-    ZO_ClearNumericallyIndexedTable(strArgs)
+    function zo_strformat(formatString, ...)
+        internalassert(formatString ~= nil, "no format string passed to zo_strformat")
+        ZO_ClearNumericallyIndexedTable(g_strArgs)
 
-    for i = 1, select("#", ...) do
-        local currentArg = select(i, ...)
-        if type(currentArg) == "number" then
-            local str = ""
-            local numFmt = "d"
-            local num, frac = zo_decimalsplit(currentArg)
-            
-            local width = 0
-            local digits = 1
-            local unsigned = false
-            if ESO_NumberFormats[formatString] ~= nil and ESO_NumberFormats[formatString][i] ~= nil then
-                width = ESO_NumberFormats[formatString][i].width or width
-                digits = ESO_NumberFormats[formatString][i].digits or digits
-                unsigned = ESO_NumberFormats[formatString][i].unsigned or unsigned
+        for i = 1, select("#", ...) do
+            local currentArg = select(i, ...)
+            local currentArgType = type(currentArg)
+            if currentArgType == "number" then
+                local str = ""
+                local numFmt = "d"
+                local num, frac = zo_decimalsplit(currentArg)
+                
+                local width = 0
+                local digits = 1
+                local unsigned = false
+                if ESO_NumberFormats[formatString] ~= nil and ESO_NumberFormats[formatString][i] ~= nil then
+                    width = ESO_NumberFormats[formatString][i].width or width
+                    digits = ESO_NumberFormats[formatString][i].digits or digits
+                    unsigned = ESO_NumberFormats[formatString][i].unsigned or unsigned
+                end
+
+                if width > 0 then
+                    str = string.format("0%d", width)
+                end
+
+                if frac ~= 0 then
+                    numFmt = "f"
+                    str = str..string.format(".%d", digits)
+                elseif unsigned == true then
+                    numFmt = "u"
+                end
+
+                str = string.format("%%%s%s", str, numFmt)
+
+                g_strArgs[i] = string.format(str, currentArg)
+            elseif currentArgType == "string" then
+                g_strArgs[i] = currentArg
+            else
+                internalassert(false, string.format("Invalid type passed to zo_strformat: %s", currentArgType))
+                g_strArgs[i] = ""
             end
-
-            if width > 0 then
-                str = string.format("0%d", width)
-            end
-
-            if frac ~= 0 then
-                numFmt = "f"
-                str = str..string.format(".%d", digits)
-            elseif unsigned == true then
-                numFmt = "u"
-            end
-
-            str = string.format("%%%s%s", str, numFmt)
-
-            strArgs[i] = string.format(str, currentArg)
-        elseif type(currentArg) == "string" then
-            strArgs[i] = currentArg
-        else
-            strArgs[i] = ""
         end
-    end
 
-    if type(formatString) == "number" then
-        formatString = GetString(formatString)
-    end
+        if type(formatString) == "number" then
+            formatString = GetString(formatString)
+        end
 
-    return LocalizeString(formatString, unpack(strArgs))
+        return LocalizeString(formatString, unpack(g_strArgs))
+    end
 end
 
 do
@@ -230,6 +235,14 @@ end
 function ZO_GenerateNewlineSeparatedList(argumentTable)
     if argumentTable ~= nil then
         return table.concat(argumentTable, "\n")
+    else
+        return ""
+    end
+end
+
+function ZO_GenerateParagraphSeparatedList(argumentTable)
+    if argumentTable ~= nil then
+        return table.concat(argumentTable, "\n\n")
     else
         return ""
     end

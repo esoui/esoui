@@ -1,45 +1,75 @@
-local TICKET_CATEGORIES = 
+local TICKET_CATEGORIES =
 {
     {
         id = TICKET_CATEGORY_CHARACTER_ISSUE,
-        name = GetString(SI_GAMEPAD_HELP_CATEGORY_CHARACTER),
+        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_CHARACTER_ISSUE,
+        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_CHARACTER_ISSUE),
     },
     {
         id = TICKET_CATEGORY_REPORT_DEFAULT,
-        name = GetString(SI_GAMEPAD_HELP_CATEGORY_REPORT),
+        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER,
+        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER),
+    },
+    {
+        id = TICKET_CATEGORY_REPORT_DEFAULT,
+        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD,
+        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD),
     },
     {
         id = TICKET_CATEGORY_OTHER,
-        name = GetString(SI_GAMEPAD_HELP_CATEGORY_OTHER),
+        value = CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_SUBMIT_FEEDBACK,
+        name = GetString("SI_CUSTOMERSERVICEASKFORHELPCATEGORIES", CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_SUBMIT_FEEDBACK),
     },
 }
 
-local TICKET_SUBCATEGORIES = 
+local TICKET_SUBCATEGORIES =
 {
-    [TICKET_CATEGORY_REPORT_DEFAULT] = 
+    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER] =
     {
         {
             id = TICKET_CATEGORY_REPORT_BAD_NAME,
-            name = GetString(SI_GAMEPAD_HELP_SUBCATEGORY_REPORT_BAD_NAME),
+            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_INAPPROPRIATE_NAME,
+            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_INAPPROPRIATE_NAME),
         },
         {
             id = TICKET_CATEGORY_REPORT_HARASSMENT,
-            name = GetString(SI_GAMEPAD_HELP_SUBCATEGORY_REPORT_HARASSMENT),
+            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT,
+            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_HARASSMENT),
         },
         {
             id = TICKET_CATEGORY_REPORT_CHEATING,
-            name = GetString(SI_GAMEPAD_HELP_SUBCATEGORY_REPORT_CHEATING),
+            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING,
+            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING),
         },
         {
             id = TICKET_CATEGORY_REPORT_OTHER,
-            name = GetString(SI_GAMEPAD_HELP_CATEGORY_OTHER),
+            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_CHEATING,
+            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTPLAYERSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_PLAYER_SUBCATEGORY_OTHER),
+        },
+    },
+    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD] =
+    {
+        {
+            id = TICKET_CATEGORY_REPORT_GUILD_NAME,
+            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_NAME,
+            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_NAME),
+        },
+        {
+            id = TICKET_CATEGORY_REPORT_GUILD_LISTING,
+            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING,
+            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_LISTING),
+        },
+        {
+            id = TICKET_CATEGORY_REPORT_GUILD_DECLINE_MESSAGE,
+            value = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE,
+            name = GetString("SI_CUSTOMERSERVICEASKFORHELPREPORTGUILDSUBCATEGORY", CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_SUBCATEGORY_INAPPROPRIATE_DECLINE),
         },
     },
 }
 
-local REQUIRED_FIELD_DEFAULT_TEXTS = 
+local REQUIRED_FIELD_DEFAULT_TEXTS =
 {
-    [TICKET_CATEGORY_REPORT_DEFAULT] = zo_strformat(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_DISPLAY, ZO_GetPlatformAccountLabel()),
+    [CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER] = zo_strformat(SI_GAMEPAD_HELP_TICKET_EDIT_REQUIRED_NAME_DISPLAY, ZO_GetPlatformAccountLabel()),
 }
 
 local ZO_Help_Customer_Service_Gamepad = ZO_Help_GenericTicketSubmission_Gamepad:Subclass()
@@ -105,10 +135,11 @@ function ZO_Help_Customer_Service_Gamepad:GetFieldEntryMessage()
 end
 
 function ZO_Help_Customer_Service_Gamepad:GetTicketCategoryForSubmission()
-    local categoryTicketId = self:GetCurrentCategory()
+    local categoryValue = self:GetCurrentCategoryValue()
+    local categoryTicketId = self:GetTicketIdByValue(categoryValue)
     local subcategoryIndex = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY)
     if subcategoryIndex then
-        local subcategoryInfo = TICKET_SUBCATEGORIES[categoryTicketId]
+        local subcategoryInfo = TICKET_SUBCATEGORIES[categoryValue]
         if subcategoryInfo then
             categoryTicketId = subcategoryInfo[subcategoryIndex].id
         end
@@ -117,17 +148,25 @@ function ZO_Help_Customer_Service_Gamepad:GetTicketCategoryForSubmission()
     return categoryTicketId
 end
 
-function ZO_Help_Customer_Service_Gamepad:GetCurrentCategory()
+function ZO_Help_Customer_Service_Gamepad:GetCurrentCategoryValue()
     local categoryIndex = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY)
     if categoryIndex then
-        return self:GetCategoryIdFromIndex(categoryIndex)
+        return self:GetCategoryValueFromIndex(categoryIndex)
     end
 end
 
-function ZO_Help_Customer_Service_Gamepad:GetCategoryIdFromIndex(categoryIndex)
+function ZO_Help_Customer_Service_Gamepad:GetCategoryValueFromIndex(categoryIndex)
     local categoryInfo = TICKET_CATEGORIES[categoryIndex]
     if categoryInfo then
-        return categoryInfo.id
+        return categoryInfo.value
+    end
+end
+
+function ZO_Help_Customer_Service_Gamepad:GetTicketIdByValue(value)
+    for i, info in ipairs(TICKET_CATEGORIES) do
+        if info.value == value then
+            return info.id
+        end
     end
 end
 
@@ -135,9 +174,10 @@ function ZO_Help_Customer_Service_Gamepad:ValidateTicketFields()
     local result = ZO_HELP_TICKET_VALIDATION_STATUS.SUCCESS
     local details = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
     if details == nil or details == "" then
-        local categoryId = self:GetCurrentCategory()
+        local categoryValue = self:GetCurrentCategoryValue()
+        local ticketId = self:GetTicketIdByValue(categoryValue)
         --"Character" required information is inferred, so nothing is required
-        if categoryId ~= TICKET_CATEGORY_CHARACTER_ISSUE and categoryId ~= TICKET_CATEGORY_OTHER then
+        if ticketId ~= TICKET_CATEGORY_CHARACTER_ISSUE and ticketId ~= TICKET_CATEGORY_OTHER then
             result = ZO_HELP_TICKET_VALIDATION_STATUS.FAILED_NO_DISPLAY_NAME
         end
     end
@@ -149,8 +189,9 @@ function ZO_Help_Customer_Service_Gamepad:SubmitTicket()
     SetCustomerServiceTicketContactEmail(GetActiveUserEmailAddress())
     SetCustomerServiceTicketCategory(self:GetTicketCategoryForSubmission())
     SetCustomerServiceTicketBody(self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION))
-    local categoryId = self:GetCurrentCategory()
-    if categoryId == TICKET_CATEGORY_REPORT_DEFAULT then
+    local categoryValue = self:GetCurrentCategoryValue()
+    local ticketId = self:GetTicketIdByValue(categoryValue)
+    if ticketId == TICKET_CATEGORY_REPORT_DEFAULT then
         SetCustomerServiceTicketPlayerTarget(self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS))
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket()
     end
@@ -161,26 +202,24 @@ function ZO_Help_Customer_Service_Gamepad:SetReportPlayerTargetByDisplayName(dis
     self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS, ZO_FormatUserFacingDisplayName(displayName))
 end
 
-function ZO_Help_Customer_Service_Gamepad:SetCategory(categoryId)
+function ZO_Help_Customer_Service_Gamepad:SetReportGuildTargetByName(guildName)
+    self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS, guildName)
+end
+
+function ZO_Help_Customer_Service_Gamepad:SetCategory(categoryValue)
     for categoryIndex, categoryInfo in ipairs(TICKET_CATEGORIES) do
-        if (categoryInfo.id == categoryId) then
+        if categoryInfo.value == categoryValue then
             self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, categoryIndex)
             break
         end
     end
 end
 
-function ZO_Help_Customer_Service_Gamepad:SetSubcategory(subcategoryId)
-    for categoryIndex, categoryInfo in ipairs(TICKET_CATEGORIES) do
-        local subcategories = TICKET_SUBCATEGORIES[categoryInfo.id]
-        if (subcategories) then
-            for subcategoryIndex, subcategoryInfo in ipairs(subcategories) do
-                if (subcategoryInfo.id == subcategoryId) then
-                    self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, categoryIndex)
-                    self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, subcategoryIndex)
-                    break
-                end
-            end
+function ZO_Help_Customer_Service_Gamepad:SetReportGuildSubcategory(subCategoryValue)
+    for subCategoryIndex, subCategoryInfo in ipairs(TICKET_SUBCATEGORIES[CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD]) do
+        if subCategoryInfo.value == subCategoryValue then
+            self:SetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, subCategoryIndex)
+            break
         end
     end
 end
@@ -223,7 +262,7 @@ function ZO_Help_Customer_Service_Gamepad:SetupList(list)
         end
 
         if data.isRequired and not self.requiredInfoProvidedInternally then
-            local defaultText = REQUIRED_FIELD_DEFAULT_TEXTS[self:GetCurrentCategory()]
+            local defaultText = REQUIRED_FIELD_DEFAULT_TEXTS[self:GetCurrentCategoryValue()]
             ZO_EditDefaultText_Initialize(control.editBox, defaultText)
         else
             ZO_EditDefaultText_Disable(control.editBox)
@@ -352,17 +391,18 @@ function ZO_Help_Customer_Service_Gamepad:BuildList()
 
     -- categories
     self:AddDropdownEntry(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_CATEGORY), TICKET_CATEGORIES)
-        
-    local categoryId = self:GetCurrentCategory()
-    if (categoryId) then
+
+    local categoryValue = self:GetCurrentCategoryValue()
+    if categoryValue then
         -- contextual subcategories
-        local subcategories = TICKET_SUBCATEGORIES[categoryId]
-        if (subcategories) then
+        local subcategories = TICKET_SUBCATEGORIES[categoryValue]
+        if subcategories then
             self:AddDropdownEntry(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_SUBCATEGORY), subcategories)
         end
 
         -- required fields
-        if categoryId ~= TICKET_CATEGORY_CHARACTER_ISSUE and categoryId ~= TICKET_CATEGORY_OTHER then
+        local ticketId = self:GetTicketIdByValue(categoryValue)
+        if ticketId ~= TICKET_CATEGORY_CHARACTER_ISSUE and ticketId ~= TICKET_CATEGORY_OTHER then
             self:AddTextFieldEntry(ZO_HELP_TICKET_FIELD_TYPE.DETAILS, GetString(SI_GAMEPAD_HELP_FIELD_TITLE_REQUIRED_DETAILS), FIELD_IS_REQUIRED, self.requiredInfoProvidedInternally)
         end
     end
@@ -385,6 +425,17 @@ function ZO_Help_Customer_Service_Gamepad:ResetTicket()
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
 end
 
+function ZO_Help_Customer_Service_Gamepad:SetupTicketByCategoryValue(value, autoFillFieldsFunction)
+    self:ResetTicket()
+    self:SetCategory(value)
+    if autoFillFieldsFunction ~= nil then
+        autoFillFieldsFunction()
+    end
+    self:SetRequiredInfoProvidedInternally(true)
+    self:ChangeTicketState(ZO_HELP_TICKET_STATE.FIELD_ENTRY)
+    self:BuildList()
+end
+
 function ZO_Help_Customer_Service_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
     if self.activeEditBox then
         self.activeEditBox:LoseFocus()
@@ -396,10 +447,16 @@ function ZO_Help_Customer_Service_Gamepad_OnInitialize(control)
 end
 
 function ZO_Help_Customer_Service_Gamepad_SetupReportPlayerTicket(displayName)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:ResetTicket()
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetCategory(TICKET_CATEGORY_REPORT_DEFAULT)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportPlayerTargetByDisplayName(displayName)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:SetRequiredInfoProvidedInternally(true)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:ChangeTicketState(ZO_HELP_TICKET_STATE.FIELD_ENTRY)
-    HELP_CUSTOMER_SERVICE_GAMEPAD:BuildList()
+    local function SetDisplayName()
+        HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportPlayerTargetByDisplayName(displayName)
+    end
+    HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicketByCategoryValue(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_PLAYER, SetDisplayName)
+end
+
+function ZO_Help_Customer_Service_Gamepad_SetupReportGuildTicket(guildName, subCategory)
+    local function SetGuildName()
+        HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportGuildTargetByName(guildName)
+        HELP_CUSTOMER_SERVICE_GAMEPAD:SetReportGuildSubcategory(subCategory)
+    end
+    HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicketByCategoryValue(CUSTOMER_SERVICE_ASK_FOR_HELP_CATEGORY_REPORT_GUILD, SetGuildName)
 end

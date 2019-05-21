@@ -14,7 +14,7 @@ end
 
 function ZO_SortFilterList:Initialize(control, ...)
     ZO_SortFilterListBase.Initialize(self, ...)
-    self:InitializeSortFilterList(control)
+    self:InitializeSortFilterList(control, ...)
 end
 
 function ZO_SortFilterList:BuildMasterList()

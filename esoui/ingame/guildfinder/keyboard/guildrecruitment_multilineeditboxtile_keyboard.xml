@@ -1,0 +1,47 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_HEADLINE_ENTRY_HEIGHT" />
+            <OnInitialized>
+                ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" inherits="ZO_GuildRecruitment_Keyboard_Header_Label">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Control name="$(parent)EditText" inherits="ZO_ScrollingSavingEditBox">
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_HEADLINE_HEIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Controls>
+                        <Backdrop name="$(parent)Saving" override="true">
+                            <Controls>
+                                <EditBox name="$(parent)Edit" override="true" maxInputCharacters="MAX_GUILD_HEADER_MESSAGE_LENGTH">
+                                    <Dimensions x="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_HEADLINE_HEIGHT" />
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)Empty" override="true" layer="BACKGROUND" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_MultilineEditBoxTile_Description_Keyboard_Control" inherits="ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard_Control" virtual="true">
+            <Dimensions y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_DESCRIPTION_ENTRY_HEIGHT"/>
+            <Controls>
+                <Control name="$(parent)EditText" override="true">
+                    <Dimensions y="ZO_GUILD_RECRUITMENT_EDITBOX_KEYBOARD_DESCRIPTION_HEIGHT" />
+                    <Controls>
+                        <Backdrop name="$(parent)Saving" override="true">
+                            <Controls>
+                                <EditBox name="$(parent)Edit" override="true" maxInputCharacters="MAX_GUILD_RECRUITMENT_MESSAGE_LENGTH" />
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

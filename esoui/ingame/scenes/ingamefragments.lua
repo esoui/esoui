@@ -221,9 +221,8 @@ do
     FRAME_TARGET_CRAFTING_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCraftingFramingTarget, SetFrameLocalPlayerTarget)
     
     local function CalculateCraftingGamepadFramingTarget()
-        local x = zo_lerp(ZO_SharedGamepadNavQuadrant_1_Background:GetRight(), GuiRoot:GetRight(), .5)
-        local y = zo_lerp(0, ZO_KeybindStripGamepadBackgroundTexture:GetTop(), .45)
-        return x, y
+        local screenWidth, screenHeight = GuiRoot:GetDimensions()
+        return .65 * screenWidth, .55 * screenHeight
     end
     FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCraftingGamepadFramingTarget, SetFrameLocalPlayerTarget)
 
@@ -268,12 +267,12 @@ do
     FRAME_TARGET_LEFT_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadLeftFramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_LEFT_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadLeftFramingTarget)
 
-    local function CalculateStoreFramingTarget()
+    local function CalculateGamepadStoreFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
-        return .75 * screenWidth, .55 * screenHeight
+        return .8 * screenWidth, .55 * screenHeight
     end
-    FRAME_TARGET_STORE_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateStoreFramingTarget, SetFrameLocalPlayerTarget)
-    FRAME_TARGET_STORE_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateStoreFramingTarget)
+    FRAME_TARGET_STORE_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadStoreFramingTarget, SetFrameLocalPlayerTarget)
+    FRAME_TARGET_STORE_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadStoreFramingTarget)
 
     local function CalculateGamepadRightFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
@@ -920,6 +919,8 @@ HELP_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_HELP_TITLE)
 RESTYLE_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_RESTYLE_STATION_MENU_ROOT_TITLE)
 
 CHAMPION_PERKS_CONSTELLATIONS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_ChampionPerks)
+
+GUILD_LINK_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_GUILD_INFO_SCENE_TITLE)
 
 PLAYER_MENU_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_MainMenu_Gamepad)
 PLAYER_MENU_FRAGMENT:SetHideOnSceneHidden(true)

@@ -229,8 +229,7 @@ function ZO_GiftInventory_Keyboard:BuildNavigationTree()
     self.navigationTree:SetOpenAnimation("ZO_TreeOpenAnimation")
 
     local function AddNode(template, categoryData, parentNode)
-        local soundId = parentNode and SOUNDS.MARKET_SUB_CATEGORY_SELECTED or SOUNDS.MARKET_CATEGORY_SELECTED
-        local node = self.navigationTree:AddNode(template, categoryData, parentNode,soundId)
+        local node = self.navigationTree:AddNode(template, categoryData, parentNode)
         local statusIcon = node.control:GetNamedChild("StatusIcon")
         statusIcon:SetTexture(ZO_KEYBOARD_NEW_ICON)
         return node

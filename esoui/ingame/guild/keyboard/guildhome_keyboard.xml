@@ -40,7 +40,7 @@
                 <Label name="$(parent)DescriptionHeader" font="ZoFontHeader2" text="SI_GUILD_DESCRIPTION_HEADER">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BackgroundHeader" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>
                 </Label>
-                <Control name="$(parent)Description" inherits="ZO_SavingEditBox">
+                <Control name="$(parent)Description" inherits="ZO_ScrollingSavingEditBox">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Dimensions x="570" y="175"/>
                 </Control>

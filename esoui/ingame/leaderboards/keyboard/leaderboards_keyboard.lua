@@ -1,4 +1,4 @@
-local CATEGORY_HEADER_TEMPLATE = "ZO_IconHeader"
+local CATEGORY_HEADER_TEMPLATE = "ZO_LeaderboardsNavigationHeader"
 local CATEGORY_ENTRY_TEMPLATE = "ZO_LeaderboardsNavigationEntry"
 
 ZO_LeaderboardsManager_Keyboard = ZO_Object.MultiSubclass(ZO_SortFilterList, ZO_LeaderboardsManager_Shared)
@@ -105,7 +105,7 @@ function ZO_LeaderboardsManager_Keyboard:AddCategory(name, normalIcon, pressedIc
         mouseoverIcon = mouseoverIcon,
     }
 
-    return self.navigationTree:AddNode(CATEGORY_HEADER_TEMPLATE, entryData, nil, SOUNDS.LEADERBOARD_CATEGORY_SELECTED)
+    return self.navigationTree:AddNode(CATEGORY_HEADER_TEMPLATE, entryData)
 end
 
 -- NOTE: Adding a maxRankFunction will require that all data is loaded up right away, instead of as-needed. Use a maxRankFunction ONLY when you want/need that behavior.
@@ -124,7 +124,7 @@ function ZO_LeaderboardsManager_Keyboard:AddEntry(leaderboardObject, name, title
         leaderboardRankType = leaderboardRankType,
     }
 
-    local node = self.navigationTree:AddNode(CATEGORY_ENTRY_TEMPLATE, entryData, parent, SOUNDS.LEADERBOARD_SUBCATEGORY_SELECTED)
+    local node = self.navigationTree:AddNode(CATEGORY_ENTRY_TEMPLATE, entryData, parent)
     
     local previouslySelectedData = self.previouslySelectedData
     if previouslySelectedData then
@@ -301,17 +301,4 @@ end
 
 function ZO_Leaderboards_OnInitialized(self)
     LEADERBOARDS = ZO_LeaderboardsManager_Keyboard:New(self)
-end
-
-function ZO_LeaderboardsNavigationEntry_OnMouseEnter(control)
-    if control:WasTruncated() then
-        InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, 15)
-        SetTooltipText(InformationTooltip, control:GetText())
-    end
-end
-
-function ZO_LeaderboardsNavigationEntry_OnMouseExit(control)
-    if control:WasTruncated() then
-        ClearTooltip(InformationTooltip)
-    end
 end

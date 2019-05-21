@@ -13,6 +13,7 @@ local VIEWABLE_HOTBAR_CATEGORY_SET =
     [HOTBAR_CATEGORY_OVERLOAD] = true,
     [HOTBAR_CATEGORY_WEREWOLF] = true,
     [HOTBAR_CATEGORY_TEMPORARY] = true,
+    [HOTBAR_CATEGORY_DAEDRIC_ARTIFACT] = true,
 }
 
 -- These bars can be edited, and the server will persist those edits
@@ -40,6 +41,7 @@ local HOTBAR_CYCLE_ORDER =
     HOTBAR_CATEGORY_OVERLOAD,
     HOTBAR_CATEGORY_WEREWOLF,
     HOTBAR_CATEGORY_TEMPORARY,
+    HOTBAR_CATEGORY_DAEDRIC_ARTIFACT,
 }
 --------------------------------
 -- Slottable Action Interface --
@@ -408,7 +410,7 @@ function ZO_ActionBarAssignmentManager_Hotbar:ResetSlot(actionSlotIndex)
         local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
         if progressionData then
             self.slots[actionSlotIndex] = ZO_SlottableSkill:New(progressionData:GetSkillData(), self.hotbarCategory)
-        elseif self.hotbarCategory == HOTBAR_CATEGORY_TEMPORARY then
+        elseif not ASSIGNABLE_HOTBAR_CATEGORY_SET[self.hotbarCategory] then
             self.slots[actionSlotIndex] = ZO_SlottableAbility:New(abilityId)
         end
     end
@@ -460,10 +462,10 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedClearSlotResult(actionS
         return HOT_BAR_RESULT_CANNOT_EDIT_SLOT
     end
 
-    if IsUnitInCombat("player") then
-        return HOT_BAR_RESULT_NO_COMBAT_SWAP
+    if IsUnitActivelyEngaged("player") then
+        return HOT_BAR_RESULT_NO_ACTIVELY_ENGAGED_SWAP
     end
-
+    
     return HOT_BAR_RESULT_SUCCESS
 end
 
@@ -495,8 +497,8 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSkillSlotResult(actionS
         return HOT_BAR_RESULT_ABILITY_NOT_KNOWN
     end
 
-    if IsUnitInCombat("player") then
-        return HOT_BAR_RESULT_NO_COMBAT_SWAP
+    if IsUnitActivelyEngaged("player") then
+        return HOT_BAR_RESULT_NO_ACTIVELY_ENGAGED_SWAP
     end
 
     return HOT_BAR_RESULT_SUCCESS
@@ -668,6 +670,21 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_WEAPON_PAIR_LOCK_CHANGED, UpdateWeaponSwapState)
 
+    local function HandleSlotChangeRequested(_, abilityId, actionSlotIndex, hotbarCategory)
+        local hotbar = self:GetHotbar(hotbarCategory)
+        if abilityId == 0 then
+            if hotbar:ClearSlot(actionSlotIndex) then
+                PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
+            end
+        else
+            local progressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
+            if progressionData and hotbar:AssignSkillToSlot(actionSlotIndex, progressionData:GetSkillData())then
+                PlaySound(SOUNDS.ABILITY_SLOTTED)
+            end
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_HOTBAR_SLOT_CHANGE_REQUESTED, HandleSlotChangeRequested)
+
     -- Skill point Allocation events
     local function OnSkillPurchaseStateChanged(skillPointAllocator)
         local skillData = skillPointAllocator:GetSkillData()
@@ -728,6 +745,7 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBarAssignmentManager", EVENT_LEVEL_UPDATE, OnLevelUpdate)
 
     local function OnPlayerActivated()
+        self:ResetCurrentHotbarToActiveBar()
         self:ResetAllHotbars()
         self:UpdateBackupBarStateInCycle()
     end
@@ -949,7 +967,9 @@ function ZO_ActionBarAssignmentManager:TryToSlotNewSkill(skillData)
     -- There is also an encoded assumption here that any empty slot is as good as any other slot for the GetExpectedSkillSlotResult(), so we only need to check one before bailing out.
     if actionSlotIndex and hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
         hotbar:AssignSkillToSlot(actionSlotIndex, skillData)
+        return true
     end
+    return false
 end
 
 function ZO_ActionBarAssignmentManager:ClearAllSlotsWithSkill(skillData)

@@ -884,34 +884,33 @@ do
             return
         end
         
-        local characterName = self.characterDetails:GetNamedChild("Name")
-        local characterRace = self.characterDetails:GetNamedChild("RaceContainer"):GetNamedChild("Race")
-        local characterLevel = self.characterDetails:GetNamedChild("LevelContainer"):GetNamedChild("Level")
-        local characterClass = self.characterDetails:GetNamedChild("ClassContainer"):GetNamedChild("Class")
-        local characterAlliance = self.characterDetails:GetNamedChild("AllianceContainer"):GetNamedChild("Alliance")
-        local characterLocation = self.characterDetails:GetNamedChild("LocationContainer"):GetNamedChild("Location")
-
-        local locationName = ""
-
+        local shouldShowCharacterDetails = false
         if selectedData then
-            characterName:SetText(ZO_CharacterSelect_GetFormattedCharacterName(selectedData))
-            characterRace:SetText(ZO_CharacterSelect_Gamepad_GetFormattedRace(selectedData))
-            characterLevel:SetText(ZO_CharacterSelect_GetFormattedLevel(selectedData))
-            characterClass:SetText(ZO_CharacterSelect_Gamepad_GetFormattedClass(selectedData))
-            characterAlliance:SetText(ZO_CharacterSelect_Gamepad_GetFormattedAlliance(selectedData))
+            g_canPlayCharacter = false
+            if selectedData.type == ENTRY_TYPE_CHARACTER then
+                local characterName = self.characterDetails:GetNamedChild("Name")
+                local characterRace = self.characterDetails:GetNamedChild("RaceContainer"):GetNamedChild("Race")
+                local characterLevel = self.characterDetails:GetNamedChild("LevelContainer"):GetNamedChild("Level")
+                local characterClass = self.characterDetails:GetNamedChild("ClassContainer"):GetNamedChild("Class")
+                local characterAlliance = self.characterDetails:GetNamedChild("AllianceContainer"):GetNamedChild("Alliance")
+                local characterLocation = self.characterDetails:GetNamedChild("LocationContainer"):GetNamedChild("Location")
 
-            -- Location Name isn't always valid
-            locationName = ZO_CharacterSelect_Gamepad_GetFormattedLocation(selectedData)
+                characterName:SetText(ZO_CharacterSelect_GetFormattedCharacterName(selectedData))
+                characterRace:SetText(ZO_CharacterSelect_Gamepad_GetFormattedRace(selectedData))
+                characterLevel:SetText(ZO_CharacterSelect_GetFormattedLevel(selectedData))
+                characterClass:SetText(ZO_CharacterSelect_Gamepad_GetFormattedClass(selectedData))
+                characterAlliance:SetText(ZO_CharacterSelect_Gamepad_GetFormattedAlliance(selectedData))
+                characterLocation:SetText(ZO_CharacterSelect_Gamepad_GetFormattedLocation(selectedData))
 
-            characterLocation:SetText(locationName)
-
-            if selectedData.name then
                 ZO_CharacterSelect_SetPlayerSelectedCharacterId(selectedData.id)
                 SelectCharacter(selectedData)
-            end
+                g_canPlayCharacter = true
 
-            -- Change the keybind strip if we have create new selected
-            g_canPlayCharacter = false
+                -- Only show character details if the character is in a valid location
+                shouldShowCharacterDetails = selectedData.location and selectedData.location ~= 0
+            else
+                ZO_CharacterSelect_SetPlayerSelectedCharacterId(nil)
+            end
 
             if self.serviceMode ~= SERVICE_TOKEN_NONE then
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorUseServiceToken)
@@ -922,15 +921,13 @@ do
             elseif selectedData.type == ENTRY_TYPE_CHAPTER then
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorChapter)
             else
-                g_canPlayCharacter = true
                 ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorDefault)
             end
         else
             ZO_CharacterSelect_SetPlayerSelectedCharacterId(nil)
         end
 
-        -- Only show the character details if the slot is valid
-        ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(not (selectedData and selectedData.name and locationName ~= ""))
+        ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(not shouldShowCharacterDetails)
 
         -- Handle needs rename text
         local needsRename = selectedData and selectedData.needsRename

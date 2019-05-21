@@ -11,52 +11,52 @@ local ENTRY_SORT_KEYS =
     ["alliancePopulation3"] = { tiebreaker = "name", isNumeric = true },
 }
 
-function CampaignBrowser:New(control)
-    local manager = ZO_SortFilterList.New(self, control)
-    self.campaignBrowser = ZO_CampaignBrowser_Shared:New()
+function CampaignBrowser:New(...)
+    return ZO_SortFilterList.New(self, ...)
+end
 
-    manager.rules = GetControl(control, "Rules")
-    manager.numConfirmingQueues = 0
+function CampaignBrowser:Initialize(control)
+    ZO_SortFilterList.Initialize(self, control)
+
+    self.rules = control:GetNamedChild("Rules")
+
+    self.numConfirmingQueues = 0
     
-    ZO_ScrollList_AddDataType(manager.list, self.campaignBrowser:GetCampaignType(), "ZO_CampaignBrowserRow", 30, function(control, data) manager:SetupCampaign(control, data) end)
-    ZO_ScrollList_AddDataType(manager.list, self.campaignBrowser:GetQueueType(), "ZO_CampaignBrowserQueueRow", 30, function(control, data) manager:SetupCampaignQueue(control, data) end)
-    ZO_ScrollList_EnableHighlight(manager.list, "ZO_ThinListHighlight")
-    manager:SetAlternateRowBackgrounds(true)
-    manager.sortFunction = function(listEntry1, listEntry2) return manager:CompareCampaigns(listEntry1, listEntry2) end
+    ZO_ScrollList_AddDataType(self.list, ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN, "ZO_CampaignBrowserRow", 30, function(control, data) self:SetupCampaign(control, data) end)
+    ZO_ScrollList_AddDataType(self.list, ZO_CAMPAIGN_DATA_TYPE_QUEUE, "ZO_CampaignBrowserQueueRow", 30, function(control, data) self:SetupCampaignQueue(control, data) end)
+    ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
+    self:SetAlternateRowBackgrounds(true)
+    self.sortFunction = function(listEntry1, listEntry2) return self:CompareCampaigns(listEntry1, listEntry2) end
+    self.filteredList = {}
 
-    manager:InitializeTree()
-    manager:RefreshData()
+    self:InitializeTree()
+    self:RefreshData()
 
-    manager.sortHeaderGroup:SelectHeaderByKey("name")
+    self.sortHeaderGroup:SelectHeaderByKey("name")
 
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_SELECTION_DATA_CHANGED, function() manager:OnCampaignSelectionDataChanged() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() manager:OnAssignedCampaignChanged() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_GUEST_CAMPAIGN_CHANGED, function() manager:RefreshVisible() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_QUEUE_JOINED, function(_, campaignId, group) manager:OnCampaignQueueJoined(campaignId) end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_QUEUE_LEFT, function(_, campaignId, group) manager:OnCampaignQueueLeft(campaignId) end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, function(_, campaignId) manager:OnCampaignQueueStateChanged(campaignId) end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_QUEUE_POSITION_CHANGED, function() manager:OnCampaignQueuePositionChanged() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_UNIT_CREATED, function(_, unitTag) manager:OnUnitUpdated(unitTag) end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_UNIT_DESTROYED, function(_, unitTag) manager:OnUnitUpdated(unitTag) end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_GROUP_MEMBER_CONNECTED_STATUS, function() manager:RefreshVisible() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_LEADER_UPDATE, function() manager:OnGroupLeaderUpdate() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_PLAYER_DEAD, function() manager:OnPlayerDead() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_PLAYER_ALIVE, function() manager:OnPlayerAlive() end)
+    CAMPAIGN_BROWSER_MANAGER:RegisterCallback("OnCampaignDataUpdated", function() self:OnCampaignSelectionDataChanged() end)
+    CAMPAIGN_BROWSER_MANAGER:RegisterCallback("OnCampaignQueueStateUpdated", function(_, campaignData) self:OnCampaignQueueStateUpdated(campaignData) end)
 
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() self:OnAssignedCampaignChanged() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_CAMPAIGN_QUEUE_POSITION_CHANGED, function() self:OnCampaignQueuePositionChanged() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_UNIT_CREATED, function(_, unitTag) self:OnUnitUpdated(unitTag) end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_UNIT_DESTROYED, function(_, unitTag) self:OnUnitUpdated(unitTag) end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_GROUP_MEMBER_CONNECTED_STATUS, function() self:RefreshVisible() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_LEADER_UPDATE, function() self:OnGroupLeaderUpdate() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_PLAYER_DEAD, function() self:OnPlayerDead() end)
+    EVENT_MANAGER:RegisterForEvent("CampaignBrowser", EVENT_PLAYER_ALIVE, function() self:OnPlayerAlive() end)
 
     CAMPAIGN_BROWSER_SCENE = ZO_Scene:New("campaignBrowser", SCENE_MANAGER)
-    manager:InitializeKeybindDescriptors()
-    CAMPAIGN_BROWSER_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
-                                                                if(newState == SCENE_SHOWING) then
-                                                                    QueryCampaignSelectionData()
-                                                                    manager:SelectAssignedCampainRulesetNode()
-                                                                    KEYBIND_STRIP:AddKeybindButtonGroup(manager.keybindStripDescriptor)
-                                                                elseif(newState == SCENE_HIDDEN) then                                                             
-                                                                    KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.keybindStripDescriptor)
-                                                                end
-                                                            end)
-    
-    return manager
+    self:InitializeKeybindDescriptors()
+    CAMPAIGN_BROWSER_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            QueryCampaignSelectionData()
+            self:SelectAssignedCampainRulesetNode()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        elseif newState == SCENE_HIDDEN then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end)
 end
 
 function CampaignBrowser:InitializeTree()
@@ -67,7 +67,7 @@ function CampaignBrowser:InitializeTree()
         control.text:SetText(GetString("SI_CAMPAIGNRULESETTYPE", rulesetType))
         control.rulesetType = rulesetType
         
-        local icons = ZO_CampaignBrowser_GetIcons(rulesetType)
+        local icons = ZO_CampaignBrowser_GetKeyboardIconsForRulesetType(rulesetType)
         control.icon:SetTexture(down and icons.down or icons.up)
         control.iconHighlight:SetTexture(icons.over)
         
@@ -76,26 +76,14 @@ function CampaignBrowser:InitializeTree()
 
     --Ruleset Type Header
 
-    local function RulesetTypeHeaderSetup(node, control, rulesetType, open)
+    local function RulesetTypeHeaderSetup(node, control, rulesetType, open, userRequested)
         RulesetTypeSetup(control, rulesetType, open)
+
+        if open and userRequested then
+            self.tree:SelectFirstChild(node)
+        end
     end
     self.tree:AddTemplate("ZO_RulesetTypeHeader", RulesetTypeHeaderSetup, nil, nil, nil, 0)
-
-    --Ruleset Type Entry
-
-    local function RulesetTypeEntrySetup(node, control, rulesetType, open)
-        RulesetTypeSetup(control, rulesetType, false)
-    end
-    local function RulesetTypeEntrySelected(control, rulesetType, selected, reselectingDuringRebuild)
-        if(selected and not reselectingDuringRebuild) then
-            self:SetRulesetTypeFilter(rulesetType)
-        end
-        RulesetTypeSetup(control, rulesetType, selected)
-    end
-    local function RulesetTypeEquality(left, right)
-        return left == right
-    end
-    self.tree:AddTemplate("ZO_RulesetTypeEntry", RulesetTypeEntrySetup, RulesetTypeEntrySelected, RulesetTypeEquality)
 
     --Ruleset Entry
 
@@ -103,19 +91,11 @@ function CampaignBrowser:InitializeTree()
         local name = GetCampaignRulesetName(data.rulesetId)
         control:SetSelected(false)
         control.rulesetId = data.rulesetId
-        control:SetHeight(0)
         control:SetText(name)
-
-        if(data.noHeader) then
-            local TEXT_HEIGHT_BUFFER = 10
-            control:SetHeight(control:GetTextHeight() + TEXT_HEIGHT_BUFFER)
-        else
-            control:SetHeight(control:GetTextHeight())
-        end
     end
     local function RulesetEntrySelected(control, data, selected, reselectingDuringRebuild)
         control:SetSelected(selected)
-        if(selected and not reselectingDuringRebuild) then
+        if selected and not reselectingDuringRebuild then
             self:SetRulesetIdFilter(data.rulesetId)
         end
     end
@@ -128,63 +108,29 @@ function CampaignBrowser:InitializeTree()
     self.tree:SetOpenAnimation("ZO_TreeOpenAnimation")
 end
 
-function CampaignBrowser:SetRulesetTypeFilter(rulesetType)
-    self.rulesetTypeFilter = rulesetType
-    self.rulesetIdFilter = nil
-    
-    local rulesetIds = self.rulesetTypes[rulesetType]
-    if(rulesetIds) then
-        local rulesetId = next(rulesetIds)
-        if(rulesetId) then
-            self.rules:SetText(GetCampaignRulesetDescription(rulesetId))
-        end
-    end
-
-    self:RefreshFilters()
-end
-
 function CampaignBrowser:SetRulesetIdFilter(rulesetId)
     self.rulesetIdFilter = rulesetId
-    self.rulesetTypeFilter = nil
     self.rules:SetText(GetCampaignRulesetDescription(rulesetId))
     self:RefreshFilters()
 end
 
-function CampaignBrowser:CanGuest()
-    if(self.mouseOverRow) then
-        return self.campaignBrowser:CanGuest(ZO_ScrollList_GetData(self.mouseOverRow))
+function CampaignBrowser:CanSetHomeCampaign()
+    if self.mouseOverRow then
+        return CAMPAIGN_BROWSER_MANAGER:CanSetHomeCampaign(ZO_ScrollList_GetData(self.mouseOverRow))
     end
 end
 
-function CampaignBrowser:DoGuest()
-    if(self.mouseOverRow) then
-        local data = ZO_ScrollList_GetData(self.mouseOverRow)
-        if(data.type == self.campaignBrowser:GetCampaignType()) then
-            SELECT_GUEST_CAMPAIGN_DIALOG:Show(data)                    
-        end
-    end
-end
-
-function CampaignBrowser:CanHome()
-    if(self.mouseOverRow) then
-        return self.campaignBrowser:CanHome(ZO_ScrollList_GetData(self.mouseOverRow))
-    end
-end
-
-function CampaignBrowser:DoHome()
-    if(self.mouseOverRow) then
-        local data = ZO_ScrollList_GetData(self.mouseOverRow)
-        if(data.type == self.campaignBrowser:GetCampaignType()) then
-            SELECT_HOME_CAMPAIGN_DIALOG:Show(data)
-        end
+function CampaignBrowser:DoSetHomeCampaign()
+    if self.mouseOverRow then
+        return CAMPAIGN_BROWSER_MANAGER:DoSetHomeCampaign(ZO_ScrollList_GetData(self.mouseOverRow))
     end
 end
 
 function CampaignBrowser:CanAbandon()
-    if(self.mouseOverRow) then
+    if self.mouseOverRow then
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
         local isQueued = IsQueuedForCampaign(data.id, data.isGroup)
-        local isCurrentCampaign = data.id == GetAssignedCampaignId() or data.id == GetGuestCampaignId()
+        local isCurrentCampaign = data.id == GetAssignedCampaignId()
         if (isCurrentCampaign and not isQueued) then
             return true
         end
@@ -192,21 +138,19 @@ function CampaignBrowser:CanAbandon()
 end
 
 function CampaignBrowser:DoAbandon()
-    if(self.mouseOverRow) then
+    if self.mouseOverRow then
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
         if (data.id == GetAssignedCampaignId()) then
             ABANDON_HOME_CAMPAIGN_DIALOG:Show(data)
-        elseif (data.id == GetGuestCampaignId()) then
-            ABANDON_GUEST_CAMPAIGN_DIALOG:Show(data)
         end
     end
 end
 
 function CampaignBrowser:CanEnter()
-    if(self.mouseOverRow) then
+    if self.mouseOverRow then
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
-        if(data.type == self.campaignBrowser:GetQueueType()) then
-            if(data.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
+        if data.type == ZO_CAMPAIGN_DATA_TYPE_QUEUE then
+            if data.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
                 return true
             end
         end
@@ -214,53 +158,45 @@ function CampaignBrowser:CanEnter()
 end
 
 function CampaignBrowser:DoEnter()
-    if(self.mouseOverRow) then
+    if self.mouseOverRow then
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
-        if(data.type == self.campaignBrowser:GetQueueType()) then
-            if(data.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING) then
-                self.campaignBrowser:ShowCampaignQueueReadyDialog(data.id, data.isGroup, data.name)
+        if data.type == ZO_CAMPAIGN_DATA_TYPE_QUEUE then
+            if data.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
+                ConfirmCampaignEntry(data.id, data.isGroup, true)
             end
         end
     end
 end
 
-function CampaignBrowser:CanQueue()
-    if(self.mouseOverRow) then
+function CampaignBrowser:CanQueueForCampaign()
+    if self.mouseOverRow then
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
-        if(data.type == self.campaignBrowser:GetCampaignType()) then
-            local canQueueIndividual, canQueueGroup = self.campaignBrowser:CanQueue(data)
+        if data.type == ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN then
+            local canQueueIndividual, canQueueGroup = CAMPAIGN_BROWSER_MANAGER:CanQueueForCampaign(data)
             return canQueueIndividual or canQueueGroup
         end
     end
 end
 
-function CampaignBrowser:DoQueue()
-    if(self.mouseOverRow) then
+function CampaignBrowser:DoQueueForCampaign()
+    if self.mouseOverRow then
         local data = ZO_ScrollList_GetData(self.mouseOverRow)
-        self.campaignBrowser:DoQueue(data)
+        CAMPAIGN_BROWSER_MANAGER:DoQueueForCampaign(data)
     end
 end
 
-function CampaignBrowser:CanLeave()
+function CampaignBrowser:CanLeaveCampaignQueue()
     if self.mouseOverRow then
-        local data = ZO_ScrollList_GetData(self.mouseOverRow)
-        if data then
-            if data.type == self.campaignBrowser:GetQueueType() then
-                return self.campaignBrowser:CanLeave(data.id, data.isGroup)
-            end
-        end
+        return CAMPAIGN_BROWSER_MANAGER:CanLeaveCampaignQueue(ZO_ScrollList_GetData(self.mouseOverRow))
     end
     return false
 end
 
-function CampaignBrowser:DoLeave()
-    if(self.mouseOverRow) then
-        self.campaignBrowser:DoLeave(ZO_ScrollList_GetData(self.mouseOverRow))
+function CampaignBrowser:DoLeaveCampaignQueue()
+    if self.mouseOverRow then
+        local data = ZO_ScrollList_GetData(self.mouseOverRow)
+        CAMPAIGN_BROWSER_MANAGER:DoLeaveCampaignQueue(data)
     end
-end
-
-function CampaignBrowser:GetCampaignBrowser()
-    return self.campaignBrowser
 end
 
 function CampaignBrowser:InitializeKeybindDescriptors()
@@ -271,8 +207,8 @@ function CampaignBrowser:InitializeKeybindDescriptors()
         --Leave/Abandon
         {
             name = function()
-                if(self.mouseOverRow) then
-                    if self:CanLeave() then
+                if self.mouseOverRow then
+                    if self:CanLeaveCampaignQueue() then
                         return GetString(SI_CAMPAIGN_BROWSER_LEAVE_QUEUE)
                     elseif self:CanAbandon() then
                         return GetString(SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN)
@@ -283,9 +219,9 @@ function CampaignBrowser:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_NEGATIVE",
         
             callback = function()
-                if(self.mouseOverRow) then
-                    if self:CanLeave() then
-                        self:DoLeave()
+                if self.mouseOverRow then
+                    if self:CanLeaveCampaignQueue() then
+                        self:DoLeaveCampaignQueue()
                     elseif self:CanAbandon() then
                         self:DoAbandon()
                     end
@@ -293,21 +229,7 @@ function CampaignBrowser:InitializeKeybindDescriptors()
             end,
 
             visible = function()
-                return self:CanLeave() or self:CanAbandon()
-            end
-        },
-
-        -- Guest
-        {
-            name = GetString(SI_CAMPAIGN_BROWSER_CHOOSE_GUEST_CAMPAIGN),
-            keybind = "UI_SHORTCUT_TERTIARY",
-        
-            callback = function()
-                self:DoGuest()
-            end,
-
-            visible = function()                
-                return self:CanGuest()
+                return self:CanLeaveCampaignQueue() or self:CanAbandon()
             end
         },
 
@@ -317,22 +239,22 @@ function CampaignBrowser:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
         
             callback = function()
-                self:DoHome()
+                self:DoSetHomeCampaign()
             end,
 
             visible = function()
-                return self:CanHome()
-            end
+                return self:CanSetHomeCampaign()
+            end,
         },
 
         --Queue/Enter
         {
             name = function()
-                if(self.mouseOverRow) then
+                if self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if(data.type == self.campaignBrowser:GetCampaignType()) then
+                    if data.type == ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN then
                         return GetString(SI_CAMPAIGN_BROWSER_QUEUE_CAMPAIGN)
-                    elseif(data.type == self.campaignBrowser:GetQueueType()) then
+                    elseif data.type == ZO_CAMPAIGN_DATA_TYPE_QUEUE then
                         return GetString(SI_CAMPAIGN_BROWSER_ENTER_CAMPAIGN)
                     end
                 end
@@ -341,19 +263,19 @@ function CampaignBrowser:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
         
             callback = function()
-                if(self.mouseOverRow) then
+                if self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-                    if(data.type == self.campaignBrowser:GetCampaignType()) then
-                        self:DoQueue()
-                    elseif(data.type == self.campaignBrowser:GetQueueType()) then
+                    if data.type == ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN then
+                        self:DoQueueForCampaign()
+                    elseif data.type == ZO_CAMPAIGN_DATA_TYPE_QUEUE then
                         self:DoEnter()
                     end
                 end
             end,
 
             visible = function()
-                return self:CanQueue() or self:CanEnter()
-            end
+                return self:CanQueueForCampaign() or self:CanEnter()
+            end,
         },
     }
 end
@@ -363,45 +285,14 @@ function CampaignBrowser:SetupAllianceControl(control, data)
     control:SetTexture(ZO_CampaignBrowser_GetPopulationIcon(data.population))
 end
 
-function CampaignBrowser:SetupCampaign(control, data)
-    ZO_SortFilterList.SetupRow(self, control, data)    
- 
-    local name = GetControl(control, "Name")
-    name:SetText(data.name)
-
-    local icon = GetControl(control, "Icon")
-    if(data.id == GetGuestCampaignId()) then
-        icon:SetHidden(false)
-        icon:SetTexture("EsoUI/Art/Campaign/campaignBrowser_guestCampaign.dds")
-    elseif(data.id == GetAssignedCampaignId()) then
-        icon:SetHidden(false)
-        icon:SetTexture("EsoUI/Art/Campaign/campaignBrowser_homeCampaign.dds")    
-    else
-        icon:SetHidden(true)
-    end
-
-    local alliancePopulation1 = GetControl(control, "AlliancePopulation1")
-    self:SetupAllianceControl(alliancePopulation1, {population = data.alliancePopulation1, campaignId = data.id, alliance = ALLIANCE_ALDMERI_DOMINION})
-
-    local alliancePopulation2 = GetControl(control, "AlliancePopulation2")
-    self:SetupAllianceControl(alliancePopulation2, {population = data.alliancePopulation2, campaignId = data.id, alliance = ALLIANCE_EBONHEART_PACT})
-
-    local alliancePopulation3 = GetControl(control, "AlliancePopulation3")
-    self:SetupAllianceControl(alliancePopulation3, {population = data.alliancePopulation3, campaignId = data.id, alliance = ALLIANCE_DAGGERFALL_COVENANT})
-
-    GetControl(control, "GroupMembers"):SetHidden(data.numGroupMembers == 0)
-    GetControl(control, "Friends"):SetHidden(data.numFriends == 0)
-    GetControl(control, "GuildMembers"):SetHidden(data.numGuildMembers == 0)    
-end
-
-function CampaignBrowser:SetupCampaignQueue(control, data)
-    ZO_SortFilterList.SetupRow(self, control, data)
+function CampaignBrowser:SetupCampaignQueue(control, queueData)
+    ZO_SortFilterList.SetupRow(self, control, queueData)
 
     local icon = GetControl(control, "Icon")
     local loading = GetControl(control, "Loading")
     local description = GetControl(control, "Description")
     
-    local isLoading, message, messageicon = self.campaignBrowser:GetQueueMessage(data.id, data.isGroup, data.state)
+    local isLoading, message, messageicon = CAMPAIGN_BROWSER_MANAGER:GetQueueMessage(queueData.id, queueData.isGroup, queueData.state)
     icon:SetHidden(isLoading)
     loading:SetHidden(not isLoading)
 
@@ -412,50 +303,15 @@ function CampaignBrowser:SetupCampaignQueue(control, data)
     description:SetText(message)
 end
 
-function CampaignBrowser:AddQueueRow(data, isGroup)
-    local queued = IsQueuedForCampaign(data.id, isGroup)
-    if(queued) then
-        data.queues[isGroup] =
-        {
-            name = data.name,
-            type = self.campaignBrowser:GetQueueType(),
-            id = data.id,
-            state = GetCampaignQueueState(data.id, isGroup),
-            isGroup = isGroup,
-        }
-    end
-end
-
-local function HasQueueState(data, isGroup, state)
-    local queueInfo = data.queues and data.queues[isGroup]
-    if(queueInfo and queueInfo.state == state) then
-        return true
-    end
-end
-
-function CampaignBrowser:RefreshQueueRows(data)
-    local hadConfirmingQueues = self.numConfirmingQueues > 0
-    if(HasQueueState(data, CAMPAIGN_QUEUE_INDIVIDUAL, CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING)) then
-        self.numConfirmingQueues = self.numConfirmingQueues - 1
-    end
-    if(HasQueueState(data, CAMPAIGN_QUEUE_GROUP, CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING)) then
-        self.numConfirmingQueues = self.numConfirmingQueues - 1
-    end
-    
-    data.queues = {}
-    
-    self:AddQueueRow(data, CAMPAIGN_QUEUE_INDIVIDUAL)
-    self:AddQueueRow(data, CAMPAIGN_QUEUE_GROUP)
-
-    if(HasQueueState(data, CAMPAIGN_QUEUE_INDIVIDUAL, CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING)) then
-        self.numConfirmingQueues = self.numConfirmingQueues + 1
-    end
-    if(HasQueueState(data, CAMPAIGN_QUEUE_GROUP, CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING)) then
-        self.numConfirmingQueues = self.numConfirmingQueues + 1
+function CampaignBrowser:CheckForConfirmingQueues()
+    for _, campaignData in ipairs(self.masterList) do
+        if campaignData.queue.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING then
+            hasConfirmingQueues = true
+            break
+        end
     end
 
-    local hasConfirmingQueues = self.numConfirmingQueues > 0
-    if(hasConfirmingQueues and not hadConfirmingQueues) then
+    if hasConfirmingQueues then
         self.control:SetHandler("OnUpdate", function(control, seconds)
                 -- Ensure that refresh only occurs on second boundaries
                 if not self.nextUpdateTimeSeconds or seconds > self.nextUpdateTimeSeconds then
@@ -463,7 +319,7 @@ function CampaignBrowser:RefreshQueueRows(data)
                     self:RefreshVisible()
                 end
             end)
-    elseif(not hasConfirmingQueues and hadConfirmingQueues) then
+    else
         self.control:SetHandler("OnUpdate", nil)
     end
 end
@@ -472,37 +328,25 @@ function CampaignBrowser:BuildMasterList()
     self.control:SetHandler("OnUpdate", nil)
     self.numConfirmingQueues = 0
 
-    self.masterList = self.campaignBrowser:BuildMasterList()
+    -- get master list
+    self.masterList = CAMPAIGN_BROWSER_MANAGER:GetCampaignDataList()
 
-    for i = 1, #self.masterList do
-        self:RefreshQueueRows(self.masterList[i])
-    end
-
-    self:BuildCategories()
-end
-
-function CampaignBrowser:BuildCategories()
-    self.rulesetTypes = self.campaignBrowser:BuildCategoriesList()
+    -- build ruleset categories
+    self.rulesetTypes = CAMPAIGN_BROWSER_MANAGER:GetActiveCampaignRulesetsByType()
 
     self.tree:Reset()
     
     for rulesetType, rulesetIds in pairs(self.rulesetTypes) do
-        local hasEnoughEntriesForAParentCategory = #rulesetIds > 1
-
-        local parentCategory
-        if hasEnoughEntriesForAParentCategory then
-            parentCategory = self.tree:AddNode("ZO_RulesetTypeHeader", rulesetType, nil, SOUNDS.CAMPAIGN_BLADE_SELECTED)
-        end
+        local parentCategory = self.tree:AddNode("ZO_RulesetTypeHeader", rulesetType)
 
         for _, rulesetId in pairs(rulesetIds) do
-            self.tree:AddNode("ZO_RulesetEntry", {rulesetId = rulesetId, noHeader = not hasEnoughEntriesForAParentCategory}, parentCategory, SOUNDS.DEFAULT_CLICK)
+            self.tree:AddNode("ZO_RulesetEntry", {rulesetId = rulesetId}, parentCategory)
         end
     end
 
     self.tree:Commit()
     self:SelectAssignedCampainRulesetNode()
 end
-
 
 function CampaignBrowser:SelectAssignedCampainRulesetNode()
     if self.tree then
@@ -524,15 +368,69 @@ function CampaignBrowser:SelectAssignedCampainRulesetNode()
     end
 end
 
-function CampaignBrowser:FilterScrollList()
-    self.filteredList = {}
-       
-    for i = 1, #self.masterList do
-        local data = self.masterList[i]
-        if((self.rulesetTypeFilter == nil or self.rulesetTypeFilter == data.rulesetType) and
-           (self.rulesetIdFilter == nil or self.rulesetIdFilter == data.rulesetId)) then
-            table.insert(self.filteredList, ZO_ScrollList_CreateDataEntry(self.campaignBrowser:GetCampaignType(), data))
+do
+    internalassert(CAMPAIGN_RULESET_TYPE_MAX_VALUE == 4, "Update Campaign Rulesets")
+    local HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE =
+    {
+        [CAMPAIGN_RULESET_TYPE_CYRODIIL] = {},
+        [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = {["numGroupMembers"] = true, ["numFriends"] = true, ["numGuildMembers"] = true},
+    }
+    function CampaignBrowser:FilterScrollList()
+        -- Apply filter to list
+        ZO_ClearNumericallyIndexedTable(self.filteredList)
+        for _, campaignData in ipairs(self.masterList) do
+            if self.rulesetIdFilter == campaignData.rulesetId then
+                table.insert(self.filteredList, ZO_ScrollList_CreateDataEntry(ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN, campaignData))
+            end
         end
+
+        -- Apply filter to headers
+        local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
+        local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
+        local HIDDEN = true
+        self.sortHeaderGroup:SetHeadersHiddenFromKeyList(hiddenColumns, HIDDEN)
+
+        if hiddenColumns[self.sortHeaderGroup:GetCurrentSortKey()] then
+            -- Table was sorted by a column that is gone now: fallback to name
+            self.sortHeaderGroup:SelectHeaderByKey("name")
+        end
+    end
+
+    function CampaignBrowser:SetupCampaign(control, data)
+        ZO_SortFilterList.SetupRow(self, control, data)
+     
+        local name = GetControl(control, "Name")
+
+        name:SetText(data.name)
+
+        local icon = GetControl(control, "Icon")
+        if data.id == GetAssignedCampaignId() then
+            icon:SetHidden(false)
+            icon:SetTexture("EsoUI/Art/Campaign/campaignBrowser_homeCampaign.dds")
+        elseif not ZO_CampaignBrowser_DoesPlayerMatchAllianceLock(data) then
+            icon:SetHidden(false)
+            icon:SetTexture("EsoUI/Art/Miscellaneous/status_locked.dds")
+        else
+            icon:SetHidden(true)
+        end
+
+        local selectionIndex = data.selectionIndex
+
+        local alliancePopulation1 = control:GetNamedChild("AlliancePopulation1")
+        self:SetupAllianceControl(alliancePopulation1, {population = data.alliancePopulation1, selectionIndex = selectionIndex, alliance = ALLIANCE_ALDMERI_DOMINION})
+
+        local alliancePopulation2 = control:GetNamedChild("AlliancePopulation2")
+        self:SetupAllianceControl(alliancePopulation2, {population = data.alliancePopulation2, selectionIndex = selectionIndex, alliance = ALLIANCE_EBONHEART_PACT})
+
+        local alliancePopulation3 = control:GetNamedChild("AlliancePopulation3")
+        self:SetupAllianceControl(alliancePopulation3, {population = data.alliancePopulation3, selectionIndex = selectionIndex, alliance = ALLIANCE_DAGGERFALL_COVENANT})
+
+        local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
+        local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
+
+        control:GetNamedChild("GroupMembers"):SetHidden(hiddenColumns["numGroupMembers"] or data.numGroupMembers == 0)
+        control:GetNamedChild("Friends"):SetHidden(hiddenColumns["numFriends"] or data.numFriends == 0)
+        control:GetNamedChild("GuildMembers"):SetHidden(hiddenColumns["numGuildMembers"] or data.numGuildMembers == 0)    
     end
 end
 
@@ -542,24 +440,18 @@ end
 
 function CampaignBrowser:SortScrollList()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
-    ZO_ClearNumericallyIndexedTable(scrollData)       
+    ZO_ClearNumericallyIndexedTable(scrollData)
 
-    if(self.currentSortKey ~= nil and self.currentSortOrder ~= nil) then
+    if self.currentSortKey ~= nil and self.currentSortOrder ~= nil then
         local scrollData = ZO_ScrollList_GetDataList(self.list)
         table.sort(self.filteredList, self.sortFunction)
 
         --add the queue rows under the campaign rows
-        for i = 1, #self.filteredList do
-            local entry = self.filteredList[i]
-            table.insert(scrollData, entry)
-            local data = entry.data
-            if(data.queues) then
-                if(data.queues[CAMPAIGN_QUEUE_INDIVIDUAL]) then
-                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(self.campaignBrowser:GetQueueType(), data.queues[CAMPAIGN_QUEUE_INDIVIDUAL]))
-                end
-                if(data.queues[CAMPAIGN_QUEUE_GROUP]) then
-                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(self.campaignBrowser:GetQueueType(), data.queues[CAMPAIGN_QUEUE_GROUP]))
-                end
+        for _, campaignEntry in ipairs(self.filteredList) do
+            table.insert(scrollData, campaignEntry)
+            local data = campaignEntry.data
+            if data.queue.isQueued then
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_CAMPAIGN_DATA_TYPE_QUEUE, data.queue))
             end
         end
     end
@@ -567,16 +459,16 @@ end
 
 function CampaignBrowser:GetRowColors(data, mouseIsOver, control)
     local textColor
-    if(data.type == self.campaignBrowser:GetCampaignType()) then
+    if data.type == ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN then
         textColor = ZO_SECOND_CONTRAST_TEXT
     else
         textColor = ZO_NORMAL_TEXT
     end
 
-    if(mouseIsOver) then
+    if mouseIsOver then
         textColor = ZO_SELECTED_TEXT
     else
-        if(control.normalColor) then
+        if control.normalColor then
             textColor = control.normalColor
         end
     end
@@ -585,7 +477,7 @@ function CampaignBrowser:GetRowColors(data, mouseIsOver, control)
 end
 
 function CampaignBrowser:GetDataByCampaignId(campaignId)
-    return self.campaignBrowser:GetDataByCampaignId(campaignId)
+    return CAMPAIGN_BROWSER_MANAGER:GetDataByCampaignId(campaignId)
 end
 
 --Events
@@ -600,28 +492,9 @@ function CampaignBrowser:OnAssignedCampaignChanged()
     self:RefreshVisible()
 end
 
-function CampaignBrowser:OnCampaignQueueJoined(campaignId)
-    local data = self:GetDataByCampaignId(campaignId)
-    if(data) then
-        self:RefreshQueueRows(data)
-        self:RefreshFilters()
-    end
-end
-
-function CampaignBrowser:OnCampaignQueueLeft(campaignId)
-    local data = self:GetDataByCampaignId(campaignId)
-    if(data) then
-        self:RefreshQueueRows(data)
-        self:RefreshFilters()
-    end
-end
-
-function CampaignBrowser:OnCampaignQueueStateChanged(campaignId)
-    local data = self:GetDataByCampaignId(campaignId)
-    if(data) then
-        self:RefreshQueueRows(data)
-        self:RefreshFilters()
-    end
+function CampaignBrowser:OnCampaignQueueStateUpdated(campaignData)
+    self:CheckForConfirmingQueues()
+    self:RefreshFilters()
 end
 
 function CampaignBrowser:OnCampaignQueuePositionChanged()
@@ -651,7 +524,7 @@ end
 
 local g_nextTimeUpdate
 local function UpdateWaitingTooltip(control, time)
-    if(not g_nextTimeUpdate or time > g_nextTimeUpdate) then
+    if not g_nextTimeUpdate or time > g_nextTimeUpdate then
         g_nextTimeUpdate = time + 1
         CAMPAIGN_BROWSER:QueueRowIcon_OnMouseEnter(control)
     end
@@ -660,7 +533,7 @@ end
 function CampaignBrowser:QueueRowIcon_OnMouseEnter(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
         
-    if(data.state == CAMPAIGN_QUEUE_REQUEST_STATE_WAITING) then
+    if data.state == CAMPAIGN_QUEUE_REQUEST_STATE_WAITING then
         InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
         local timeElapsed = GetSecondsInCampaignQueue(data.id, data.isGroup)
         local text = zo_strformat(SI_CAMPAIGN_BROWSER_TOOLTIP_IN_QUEUE_FOR, ZO_FormatTime(timeElapsed, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR))
@@ -680,13 +553,22 @@ function CampaignBrowser:QueueRowIcon_OnMouseExit(control)
 end
 
 function CampaignBrowser:RowIcon_OnMouseEnter(control)
-    local data = ZO_ScrollList_GetData(control:GetParent())
+    local campaignData = ZO_ScrollList_GetData(control:GetParent())
 
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
-    if(data.id == GetGuestCampaignId()) then
-        SetTooltipText(InformationTooltip, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_GUEST_CAMPAIGN))
-    elseif(data.id == GetAssignedCampaignId()) then
+    if campaignData.id == GetAssignedCampaignId() then
         SetTooltipText(InformationTooltip, GetString(SI_CAMPAIGN_BROWSER_TOOLTIP_HOME_CAMPAIGN))
+    elseif not ZO_CampaignBrowser_DoesPlayerMatchAllianceLock(campaignData) then
+        local lastSecondsUntilCampaignEnd = nil
+        local function UpdateTooltipText()
+            local _, secondsUntilCampaignEnd = GetSelectionCampaignTimes(campaignData.selectionIndex)
+            if lastSecondsUntilCampaignEnd ~= secondsUntilCampaignEnd then
+                InformationTooltip:ClearLines()
+                SetTooltipText(InformationTooltip, CAMPAIGN_BROWSER_MANAGER:GenerateAllianceLockStatusMessage(campaignData))
+            end
+        end
+        control:SetHandler("OnUpdate", UpdateTooltipText)
+        UpdateTooltipText()
     end
     
     self:EnterRow(control:GetParent())
@@ -695,6 +577,7 @@ end
 function CampaignBrowser:RowIcon_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
     self:ExitRow(control:GetParent())
+    control:SetHandler("OnUpdate", nil)
 end
 
 function CampaignBrowser:RowGroupMembers_OnMouseEnter(control)
@@ -745,7 +628,7 @@ function CampaignBrowser:RowAlliancePopulation_OnMouseEnter(control)
     InformationTooltip:AddLine(textPopulation, "", ZO_NORMAL_TEXT:UnpackRGB())
 
     if data.alliance == GetUnitAlliance("player") then
-        local queueWaitSeconds = GetSelectionCampaignQueueWaitTime(data.campaignId)
+        local queueWaitSeconds = GetSelectionCampaignQueueWaitTime(data.selectionIndex)
         if queueWaitSeconds > 0 then
             --We don't want to show an estimate for seconds
             if queueWaitSeconds < 60 then
@@ -767,19 +650,16 @@ function CampaignBrowser:RowAlliancePopulation_OnMouseExit(control)
 end
 
 function CampaignBrowser:Row_OnMouseUp(control, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_RIGHT and upInside) then
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
         ClearMenu()
 
-        if(self:CanQueue()) then
-            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_QUEUE_CAMPAIGN), function() self:DoQueue() end)
+        if self:CanQueueForCampaign() then
+            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_QUEUE_CAMPAIGN), function() self:DoQueueForCampaign() end)
         end
-        if(self:CanHome()) then
-            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN), function() self:DoHome() end)
+        if self:CanSetHomeCampaign() then
+            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN), function() self:DoSetHomeCampaign() end)
         end
-        if(self:CanGuest()) then
-            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_CHOOSE_GUEST_CAMPAIGN), function() self:DoGuest() end)
-        end
-        if(self:CanAbandon()) then
+        if self:CanAbandon() then
             AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_ABANDON_CAMPAIGN), function() self:DoAbandon() end)
         end
         
@@ -788,20 +668,20 @@ function CampaignBrowser:Row_OnMouseUp(control, button, upInside)
 end
 
 function CampaignBrowser:Row_OnMouseDoubleClick(control)
-    if self:CanQueue() then
-        self:DoQueue()
+    if self:CanQueueForCampaign() then
+        self:DoQueueForCampaign()
     end
 end
 
 function CampaignBrowser:QueueRow_OnMouseUp(control, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_RIGHT and upInside) then
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
         ClearMenu()
 
-        if(self:CanEnter()) then
+        if self:CanEnter() then
             AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_ENTER_CAMPAIGN), function() self:DoEnter() end)
         end
-        if(self:CanLeave()) then
-            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_LEAVE_QUEUE), function() self:DoLeave() end)
+        if self:CanLeaveCampaignQueue() then
+            AddMenuItem(GetString(SI_CAMPAIGN_BROWSER_LEAVE_QUEUE), function() self:DoLeaveCampaignQueue() end)
         end
         
         self:ShowMenu(control)

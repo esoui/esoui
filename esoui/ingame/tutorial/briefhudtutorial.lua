@@ -15,12 +15,16 @@ function ZO_BriefHudTutorial:Initialize(parent)
 
     local function UpdateTemplate()
         UpdateDescription()
-        if IsInGamepadPreferredMode() then          
+        if IsInGamepadPreferredMode() then
             self.tutorial:SetWidth(850)
             self.tutorial:SetFont("ZoFontGamepad42")
+            self.tutorial:ClearAnchors()
+            self.tutorial:SetAnchor(BOTTOM, nil, BOTTOM, 0, ZO_COMMON_INFO_DEFAULT_GAMEPAD_BOTTOM_OFFSET_Y)
         else
             self.tutorial:SetWidth(650)
             self.tutorial:SetFont("ZoInteractionPrompt")
+            self.tutorial:ClearAnchors()
+            self.tutorial:SetAnchor(BOTTOM, nil, BOTTOM, 0, ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y)
         end
     end
 

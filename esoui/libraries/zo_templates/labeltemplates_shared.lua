@@ -272,3 +272,22 @@ function ZO_TooltipIfTruncatedLabel_OnMouseExit(self)
         ClearTooltip(InformationTooltip)
     end
 end
+
+--------------------------------
+--PrefixAllianceIconLabel--
+--------------------------------
+do
+    local function GetTexture(allianceId, forceGamepad)
+        if allianceId <= ALLIANCE_MAX_VALUE then
+            if forceGamepad then
+                return GetLargeAllianceSymbolIcon(allianceId)
+            else
+                return GetPlatformAllianceSymbolIcon(allianceId)
+            end
+        end
+    end
+
+    function ZO_AllianceIconNameFormatter(allianceId, name, forceGamepad)
+        return zo_iconTextFormatNoSpace(GetTexture(allianceId, forceGamepad), "100%", "100%", name)
+    end
+end

@@ -76,20 +76,20 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
     local control = self.control
     local isFocused = self:IsFocused()
     local isPurchaseLocked = self:IsPurchaseLocked()
-    local purchaseState = self.purchaseState
+    local displayState = self.displayState
 
-    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.title, isFocused, purchaseState)
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.title, isFocused, displayState)
 
     -- only update the purchased label if we are showing it (which should be if we are purchase locked)
     if isPurchaseLocked then
-        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.purchaseLabelControl, isFocused, purchaseState)
+        ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.purchaseLabelControl, isFocused, displayState)
     elseif self:HasEsoPlusCost() then
-        ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(control.esoPlusDealLabelControl, isFocused, purchaseState)
+        ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(control.esoPlusDealLabelControl, isFocused, displayState)
     end
 
-    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.cost, isFocused, purchaseState)
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.cost, isFocused, displayState)
 
-    ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(control.esoPlusCost, isFocused, purchaseState)
+    ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(control.esoPlusCost, isFocused, displayState)
 
     local textCalloutBackgroundColor
     local textCalloutTextColor

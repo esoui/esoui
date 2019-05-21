@@ -12,6 +12,15 @@ BOOK_LINK_TYPE = "book"
 DISPLAY_NAME_LINK_TYPE = "display"
 URL_LINK_TYPE = "url"
 COLLECTIBLE_LINK_TYPE = "collectible"
+GUILD_LINK_TYPE = "guild"
+
+ZO_VALID_LINK_TYPES_CHAT =
+{
+    [GUILD_LINK_TYPE] = true,
+    [ITEM_LINK_TYPE] = true,
+    [ACHIEVEMENT_LINK_TYPE] = true,
+    [COLLECTIBLE_LINK_TYPE] = true,
+}
 
 function ZO_LinkHandler_InsertLink(link)
     if type(link) == "string" and #link > 0 then
@@ -132,3 +141,15 @@ function ZO_LinkHandler_CreateChatLink(linkFunction, ...)
     return linkFunction(Append(LINK_STYLE_BRACKETS, ...))
 end
 
+do
+    local LINK_GMATCH_PATTERN = "|H.-|h.-|h"
+    local LINK_TYPE_MATCH_PATTERN = "|H%d:(.-):"
+    function ZO_ExtractLinksFromText(text, validLinkTypes, linksTable)
+        for link in zo_strgmatch(text, LINK_GMATCH_PATTERN) do
+            local linkType = zo_strmatch(link, LINK_TYPE_MATCH_PATTERN)
+            if validLinkTypes[linkType] then
+                table.insert(linksTable, { linkType = linkType, link = link })
+            end
+        end
+    end
+end

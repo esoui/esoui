@@ -21,8 +21,8 @@ EsoUI\Pregame\Tooltip\Tooltip.xml
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
-EsoUI\Pregame\PregameAnimatedBackground\Console\SummersetBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\Console\SummersetBackground.xml
+EsoUI\Pregame\PregameAnimatedBackground\Console\ElsweyrBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\Console\ElsweyrBackground.xml
 
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml

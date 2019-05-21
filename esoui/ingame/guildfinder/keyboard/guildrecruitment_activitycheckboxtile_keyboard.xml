@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_ActivityCheckboxTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_COLUMN_WIDTH" y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_CHECKBOX_HEIGHT"/>
+            <OnInitialized>
+                ZO_GuildRecruitment_ActivityCheckboxTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Button name="$(parent)Check" inherits="ZO_CheckButton">
+                    <Anchor point="LEFT" offsetX="10"/>
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_GuildRecruitment_ActivityCheckboxEndTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_GuildRecruitment_ActivityCheckboxTile_Keyboard_Control" virtual="true">
+            <Dimensions y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_CHECKBOX_END_HEIGHT"/>
+        </Control>
+    </Controls>
+</GuiXml>

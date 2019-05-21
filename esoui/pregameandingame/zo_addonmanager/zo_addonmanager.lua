@@ -1,6 +1,11 @@
 local LIST_HEIGHT = 660
-local ROW_HEIGHT = 30
+ZO_ADDON_ROW_HEIGHT = 30
+ZO_ADDON_SECTION_HEADER_ROW_HEIGHT = 50
+
 local ADDON_DATA = 1
+local SECTION_HEADER_DATA = 2
+local IS_LIBRARY = true
+local IS_ADDON = false
 
 local AddOnManager = GetAddOnManager()
 
@@ -17,9 +22,20 @@ function ZO_AddOnManager:Initialize(control, allowReload)
     self.control:SetHandler("OnShow", function() self:OnShow() end)
 
     self.sizerLabel = CreateControlFromVirtual("", self.control, "ZO_AddOn_SizerLabel")
+    self.currentSortKey = "strippedAddOnName"
+    self.currentSortDirection = ZO_SORT_ORDER_UP
+    self.sortKeys =
+    {
+        addOnFileName = { },
+        strippedAddOnName = { tiebreaker = "addOnFileName" },
+    }
+    self.sortCallback = function(entry1, entry2)
+        return ZO_TableOrderingFunction(entry1, entry2, self.currentSortKey, self.sortKeys, self.currentSortDirection)
+    end
 
     ZO_ScrollList_SetHeight(self.list, LIST_HEIGHT)
-    ZO_ScrollList_AddDataType(self.list, ADDON_DATA, "ZO_AddOnRow", ROW_HEIGHT, self:GetRowSetupFunction())
+    ZO_ScrollList_AddDataType(self.list, ADDON_DATA, "ZO_AddOnRow", ZO_ADDON_ROW_HEIGHT, self:GetRowSetupFunction())
+    ZO_ScrollList_AddDataType(self.list, SECTION_HEADER_DATA, "ZO_AddOnSectionHeaderRow", ZO_ADDON_SECTION_HEADER_ROW_HEIGHT, function(...) self:SetupSectionHeaderRow(...) end)
 
     self.characterDropdown = ZO_ComboBox:New(GetControl(self.control, "CharacterSelectDropdown"))
     self.characterDropdown:SetSortsItems(false)
@@ -181,10 +197,10 @@ function ZO_AddOnManager:GetRowSetupFunction()
             description:SetAnchor(TOPLEFT, name, BOTTOMLEFT, 20, 0)
         end
 
-        local showDependencies = data.expanded and data.addonDependencyText ~= ""
+        local showDependencies = data.expanded and data.addOnDependencyText ~= ""
         dependencies:SetHidden(not showDependencies)
         if showDependencies then
-            dependencies:SetText(zo_strformat(SI_ADDON_MANAGER_DEPENDENCIES, data.addonDependencyText))
+            dependencies:SetText(zo_strformat(SI_ADDON_MANAGER_DEPENDENCIES, data.addOnDependencyText))
         else
             dependencies:SetText("")
         end
@@ -215,6 +231,10 @@ function ZO_AddOnManager:GetRowSetupFunction()
 
         SetupNotes(state, data)
     end
+end
+
+function ZO_AddOnManager:SetupSectionHeaderRow(control, data)
+    control:GetNamedChild("Text"):SetText(data.text)
 end
 
 function ZO_AddOnManager:GetCombinedAddOnStates(index)
@@ -284,23 +304,6 @@ function ZO_AddOnManager:GetCharacterInfo(characterIndex)
         local characterDataEntry = self.characterData[characterIndex]
         local characterDatum = characterDataEntry.data
         return characterDatum and GetCharacterNameFromDatum(characterDatum) or nil
-    end
-end
-
-do
-    local ENTRY_SORT_KEYS =
-    {
-        addOnFileName = { },
-        strippedAddOnName = { tiebreaker = "addOnFileName" },
-    }
-
-    function ZO_AddOnManager:SortScrollList()
-        local scrollData = ZO_ScrollList_GetDataList(self.list)
-
-        local function SortEntries(entry1, entry2)
-            return ZO_TableOrderingFunction(entry1.data, entry2.data, "strippedAddOnName", ENTRY_SORT_KEYS, ZO_SORT_ORDER_UP)
-        end
-        table.sort(scrollData, SortEntries)
     end
 end
 
@@ -378,7 +381,7 @@ function ZO_AddOnManager:SetupTypeId(description, dependencyText)
         dependencyHeight = self.sizerLabel:GetTextHeight() + 23
     end
 
-    local useHeight = zo_ceil(ROW_HEIGHT + descriptionHeight + dependencyHeight + 31)
+    local useHeight = zo_ceil(ZO_ADDON_ROW_HEIGHT + descriptionHeight + dependencyHeight + 31)
     local typeId = GetHeightTypeId(useHeight)
 
     local existingDataTypeTable = ZO_ScrollList_GetDataTypeTable(self.list, typeId)
@@ -392,7 +395,7 @@ function ZO_AddOnManager:SetupTypeId(description, dependencyText)
 end
 
 function ZO_AddOnManager:ResetDataTypes()
-    g_currentTypeId = 2
+    g_currentTypeId = 3
     heightIds = {}
 end
 
@@ -401,10 +404,9 @@ local function StripText(text)
 end
 
 function ZO_AddOnManager:BuildMasterList()
-    local scrollData = ZO_ScrollList_GetDataList(self.list)
-    ZO_ClearNumericallyIndexedTable(scrollData)
-
-    self:ResetDataTypes()
+    self.addonTypes = {}
+    self.addonTypes[IS_LIBRARY] = {}
+    self.addonTypes[IS_ADDON] = {}
 
     if self.selectedCharacterEntry and not self.selectedCharacterEntry.allCharacters then
         self.isAllFilterSelected = false
@@ -415,7 +417,7 @@ function ZO_AddOnManager:BuildMasterList()
     end
 
     for i = 1, AddOnManager:GetNumAddOns() do
-        local name, title, author, description, enabled, state, isOutOfDate = AddOnManager:GetAddOnInfo(i)
+        local name, title, author, description, enabled, state, isOutOfDate, isLibrary = AddOnManager:GetAddOnInfo(i)
         local entryData = {
             index = i,
             addOnFileName = name,
@@ -424,7 +426,8 @@ function ZO_AddOnManager:BuildMasterList()
             addOnDescription = description,
             addOnEnabled = enabled,
             addOnState = state,
-            isOutOfDate = isOutOfDate
+            isOutOfDate = isOutOfDate,
+            isLibrary = isLibrary,
         }
 
         if author ~= "" then
@@ -445,22 +448,42 @@ function ZO_AddOnManager:BuildMasterList()
             end
             dependencyText = dependencyText.."\n"..dependencyName
         end
-        entryData.addonDependencyText = dependencyText
+        entryData.addOnDependencyText = dependencyText
 
         entryData.expandable = (description ~= "") or (dependencyText ~= "")
+        
+        table.insert(self.addonTypes[isLibrary], entryData)
+    end
+end
 
-        if entryData.expandable and expandedAddons[i] then
+function ZO_AddOnManager:AddAddonTypeSection(isLibrary, sectionTitleText)
+    local addonEntries = self.addonTypes[isLibrary]
+    table.sort(addonEntries, self.sortCallback)
+
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(SECTION_HEADER_DATA, { text = sectionTitleText })
+    for _, entryData in ipairs(addonEntries) do
+        if entryData.expandable and expandedAddons[entryData.index] then
             entryData.expanded = true
 
-            local useHeight, typeId = self:SetupTypeId(description, dependencyText)
+            local useHeight, typeId = self:SetupTypeId(entryData.addOnDescription, entryData.addOnDependencyText)
 
             entryData.height = useHeight
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(typeId, entryData)
         else
-            entryData.height = ROW_HEIGHT
+            entryData.height = ZO_ADDON_ROW_HEIGHT
             scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(ADDON_DATA, entryData)
         end
     end
+end
+
+function ZO_AddOnManager:SortScrollList()
+    self:ResetDataTypes()
+    local scrollData = ZO_ScrollList_GetDataList(self.list)        
+    ZO_ClearNumericallyIndexedTable(scrollData)
+
+    self:AddAddonTypeSection(IS_ADDON, GetString(SI_WINDOW_TITLE_ADDON_MANAGER))
+    self:AddAddonTypeSection(IS_LIBRARY, GetString(SI_ADDON_MANAGER_SECTION_LIBRARIES))
 end
 
 function ZO_AddOnManager:OnShow()
@@ -513,12 +536,12 @@ function ZO_AddOnManager:OnExpandButtonClicked(row)
         expandedAddons[data.index] = false
 
         data.expanded = false
-        data.height = ROW_HEIGHT
+        data.height = ZO_ADDON_ROW_HEIGHT
         scrollData[data.sortIndex] = ZO_ScrollList_CreateDataEntry(ADDON_DATA, data)
     else
         expandedAddons[data.index] = true
 
-        local useHeight, typeId = self:SetupTypeId(data.addOnDescription, data.addonDependencyText)
+        local useHeight, typeId = self:SetupTypeId(data.addOnDescription, data.addOnDependencyText)
 
         data.expanded = true
         data.height = useHeight

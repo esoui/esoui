@@ -128,7 +128,8 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeSingularPanelControls(rewar
 
     local function OnUpdate()
         if self.lockReasonTextFunction then
-            self:LayoutLockedTooltip(self.lockReasonTextFunction())
+            local lockedReasonText = self.lockReasonTextFunction() or ""
+            self:LayoutLockedTooltip(lockedReasonText)
         end
     end
     self.control:SetHandler("OnUpdate", OnUpdate)

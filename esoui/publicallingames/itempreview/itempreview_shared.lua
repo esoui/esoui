@@ -254,7 +254,7 @@ function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetVariationName(variatio
     return GetProvisionerItemAsFurniturePreviewVariationDisplayName(self.recipeListIndex, self.recipeIndex, variationIndex)
 end
 
---Trading House Furniture
+--Trading House Search Result As Furniture
 
 ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture = ZO_ItemPreviewType:Subclass()
 
@@ -281,6 +281,35 @@ end
 function ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:GetVariationName(variationIndex)
     return GetTradingHouseSearchResultItemAsFurniturePreviewVariationDisplayName(self.tradingHouseIndex, variationIndex)
 end
+
+--Trading House Search Result Item Link As Furniture
+
+ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture = ZO_ItemPreviewType:Subclass()
+
+function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:SetStaticParameters(itemLink)
+    self.itemLink = itemLink
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:ResetStaticParameters()
+    self.itemLink = nil
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:HasStaticParameters(itemLink)
+    return self.itemLink == itemLink
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:Apply(variationIndex)
+    PreviewTradingHouseSearchResultItemLinkAsFurniture(self.itemLink, variationIndex)
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:GetNumVariations()
+    return GetNumTradingHouseSearchResultItemLinkAsFurniturePreviewVariations(self.itemLink)
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:GetVariationName(variationIndex)
+    return GetTradingHouseSearchResultItemLinkAsFurniturePreviewVariationDisplayName(self.itemLink, variationIndex)
+end
+
 
 -- Store
 
@@ -394,7 +423,7 @@ function ZO_ItemPreviewType_Reward:GetVariationName(variationIndex)
 end
 
 function ZO_ItemPreviewType_Reward:Apply(variationIndex)
-    PreviewReward(self.rewardId)
+    PreviewReward(self.rewardId, variationIndex)
 end
 
 --
@@ -408,10 +437,11 @@ ZO_ITEM_PREVIEW_PLACED_FURNITURE = 4
 ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE = 5
 ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT = 6
 ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE = 7
-ZO_ITEM_PREVIEW_STORE_ENTRY = 8
-ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE = 9
-ZO_ITEM_PREVIEW_OUTFIT = 10
-ZO_ITEM_PREVIEW_REWARD = 11
+ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_ITEM_LINK_AS_FURNITURE = 8
+ZO_ITEM_PREVIEW_STORE_ENTRY = 9
+ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE = 10
+ZO_ITEM_PREVIEW_OUTFIT = 11
+ZO_ITEM_PREVIEW_REWARD = 12
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
@@ -443,6 +473,7 @@ function ZO_ItemPreview_Shared:Initialize(control)
         [ZO_ITEM_PREVIEW_PROVISIONER_ITEM_AS_FURNITURE] = ZO_ItemPreviewType_ProvisionerItemAsFurniture:New(),
         [ZO_ITEM_PREVIEW_FURNITURE_MARKET_PRODUCT] = ZO_ItemPreviewType_FurnitureMarketProduct:New(),
         [ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE] = ZO_ItemPreviewType_TradingHouseSearchResultAsFurniture:New(),
+        [ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_ITEM_LINK_AS_FURNITURE] = ZO_ItemPreviewType_TradingHouseSearchResultItemLinkAsFurniture:New(),
         [ZO_ITEM_PREVIEW_STORE_ENTRY] = ZO_ItemPreviewType_StoreEntry:New(),
         [ZO_ITEM_PREVIEW_STORE_ENTRY_AS_FURNITURE] = ZO_ItemPreviewType_StoreEntryAsFurniture:New(),
         [ZO_ITEM_PREVIEW_OUTFIT] = ZO_ItemPreviewType_Outfit:New(),
@@ -674,6 +705,10 @@ end
 
 function ZO_ItemPreview_Shared:PreviewTradingHouseSearchResultAsFurniture(tradingHouseIndex)
     self:SharedPreviewSetup(ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_AS_FURNITURE, tradingHouseIndex)
+end
+
+function ZO_ItemPreview_Shared:PreviewTradingHouseSearchResultItemLinkAsFurniture(itemLink)
+    self:SharedPreviewSetup(ZO_ITEM_PREVIEW_TRADING_HOUSE_SEARCH_RESULT_ITEM_LINK_AS_FURNITURE, itemLink)
 end
 
 function ZO_ItemPreview_Shared:PreviewStoreEntry(storeEntryIndex)

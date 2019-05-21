@@ -3,6 +3,8 @@ ZO_EMPEROR_LEADERBOARD_PLAYER_DATA = 2
 ZO_EMPEROR_LEADERBOARD_ALLIANCE_DATA = 3
 ZO_EMPEROR_LEADERBOARD_EMPTY_DATA = 4
 
+local MAX_ALLOWED_EMPEROR_RANK = 10
+
 CampaignEmperor_Shared = ZO_Object:Subclass()
 
 function CampaignEmperor_Shared:New(control)
@@ -21,7 +23,6 @@ function CampaignEmperor_Shared:Initialize(control)
     self.imperialKeepsRequiredData = GetControl(control, "KeepsRequiredData")
     self.playerRow = GetControl(control, "PlayerRow")
     self.playerRow.dataEntry = {}
-    self.maxAllowedRank = 10
 
     self.UpdateReignDuration = function(control, time)
         local duration = GetCampaignEmperorReignDuration(self.campaignId)
@@ -74,7 +75,7 @@ end
 function CampaignEmperor_Shared:CreateImperialKeepControl(rulesetId, playerAlliance, index, prevKeep)
     local keep = self.imperialKeepPool:AcquireObject()
     keep.keepId = GetCampaignRulesetImperialKeepId(rulesetId, playerAlliance, index)
-    if(prevKeep) then
+    if prevKeep then
         keep:SetAnchor(TOPLEFT, prevKeep, TOPRIGHT, 0, 0)
     else
         keep:SetAnchor(TOPLEFT)
@@ -84,7 +85,7 @@ function CampaignEmperor_Shared:CreateImperialKeepControl(rulesetId, playerAllia
 end
 
 function CampaignEmperor_Shared:BuildImperialKeeps()
-    if(self.campaignId) then
+    if self.campaignId then
         local rulesetId = GetCampaignRulesetId(self.campaignId)
         local playerAlliance = GetUnitAlliance("player")
         local numKeeps = GetCampaignRulesetNumImperialKeeps(rulesetId, playerAlliance)
@@ -108,21 +109,21 @@ function CampaignEmperor_Shared:SetCampaignAndQueryType(campaignId, queryType)
 end
 
 function CampaignEmperor_Shared:SetReignDurationEnabled(enabled)
-    if(self.emperorReignDuration) then
+    if self.emperorReignDuration then
         self.emperorReignDuration:SetHidden(not enabled)
         self.control:SetHandler("OnUpdate", enabled and self.UpdateReignDuration or nil)
     end
 end
 
 function CampaignEmperor_Shared:RefreshEmperor()
-    if(self.campaignId and self.emperorName) then
-        if(DoesCampaignHaveEmperor(self.campaignId)) then
+    if self.campaignId and self.emperorName then
+        if DoesCampaignHaveEmperor(self.campaignId) then
             local alliance, characterName, displayName = GetCampaignEmperorInfo(self.campaignId)
             local userFacingName = ZO_GetPlatformUserFacingName(characterName, displayName)
             self.emperorName:SetText(userFacingName)
-            self.emperorAlliance:SetTexture(GetAllianceSymbolIcon(alliance))
+            self.emperorAlliance:SetTexture(GetPlatformAllianceSymbolIcon(alliance))
             self.emperorAlliance:SetHidden(false)
-            self:SetReignDurationEnabled(true)            
+            self:SetReignDurationEnabled(true)
         else
             self.emperorName:SetText(GetString(SI_CAMPAIGN_NO_EMPEROR))
             self.emperorAlliance:SetHidden(true)
@@ -148,7 +149,7 @@ function CampaignEmperor_Shared:RefreshImperialKeeps()
     for i = 1, numRequired do
         local keep = self.imperialKeeps:GetChild(i)
         local keepAlliance = GetKeepAlliance(keep.keepId, self.queryType)
-        if(keepAlliance ~= ALLIANCE_NONE) then
+        if keepAlliance ~= ALLIANCE_NONE then
             keep:SetHidden(false)
             keep.iconControl:SetTexture(KEEP_ICONS[keepAlliance])
             keep.iconControl:SetDesaturation(0)
@@ -156,7 +157,7 @@ function CampaignEmperor_Shared:RefreshImperialKeeps()
                 keep.nameControl:SetText(keep.name)
                 keep.nameControl:SetColor(ZO_SELECTED_TEXT:UnpackRGB())
             end
-            if(keepAlliance == playerAlliance) then
+            if keepAlliance == playerAlliance then
                 numOwned = numOwned + 1
             end
         else
@@ -164,7 +165,7 @@ function CampaignEmperor_Shared:RefreshImperialKeeps()
         end
     end
 
-    if(self.imperialKeepsRequiredData) then
+    if self.imperialKeepsRequiredData then
         self.imperialKeepsRequired:SetText(GetString(SI_GAMEPAD_CAMPAIGN_EMPEROR_KEEPS_NEEDED))
         self.imperialKeepsRequiredData:SetText(zo_strformat(SI_GAMEPAD_CAMPAIGN_EMPEROR_KEEPS_NEEDED_FORMAT, numOwned, numRequired))
     else
@@ -191,18 +192,26 @@ end
 function CampaignEmperor_Shared:SetupLeaderboardEntry(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
 
-    control.rankLabel = GetControl(control, "Rank")
-    control.nameLabel = GetControl(control, "Name")
-    control.allianceIcon = GetControl(control, "Alliance")
-    control.pointsLabel = GetControl(control, "Points")
+    control.rankLabel = control:GetNamedChild("Rank")
+    control.isIneligibleLabel = control:GetNamedChild("IsIneligible")
+    control.nameLabel = control:GetNamedChild("Name")
+    control.allianceIcon = control:GetNamedChild("Alliance")
+    control.pointsLabel = control:GetNamedChild("Points")
 
-    control.rankLabel:SetText(data.rank)
+    if self:CanLeaderboardCharacterBecomeEmperor(data) then
+        control.rankLabel:SetText(data.emperorRank)
+        control.isIneligibleLabel:SetHidden(true)
+    else
+        control.rankLabel:SetText(GetString(SI_CAMPAIGN_EMPEROR_RANK_NOT_APPLICABLE))
+        control.isIneligibleLabel:SetHidden(false)
+    end
+
     local userFacingName = ZO_GetPlatformUserFacingName(data.name, data.displayName)
     control.nameLabel:SetText(userFacingName)
     control.pointsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(data.points)))
     
-    local allianceTexture = GetAllianceSymbolIcon(data.alliance)
-    if(allianceTexture) then
+    local allianceTexture = GetPlatformAllianceSymbolIcon(data.alliance)
+    if allianceTexture then
         control.allianceIcon:SetHidden(false)
         control.allianceIcon:SetTexture(allianceTexture)
     else
@@ -221,6 +230,10 @@ function CampaignEmperor_Shared:SetupPlayerRow(data)
     self:SetupLeaderboardEntry(self.playerRow, data)
 end
 
+function CampaignEmperor_Shared:GetLocalPlayerLeaderboardEntry()
+    return self.playerRow.dataEntry.data
+end
+
 function CampaignEmperor_Shared:SortScrollList()
     -- No sorting...just leave in rank order
 end
@@ -235,13 +248,11 @@ function CampaignEmperor_Shared:FilterScrollList()
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_EMPEROR_LEADERBOARD_ALLIANCE_DATA, data))
         elseif data.isEmpty then
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_EMPEROR_LEADERBOARD_EMPTY_DATA, data))
-        else
-            if data.rank <= self.maxAllowedRank then
-                if data.isPlayer then
-                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_EMPEROR_LEADERBOARD_PLAYER_DATA, data))
-                else
-                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_EMPEROR_LEADERBOARD_NONPLAYER_DATA, data))
-                end
+        elseif self:CanLeaderboardCharacterBecomeEmperor(data) and data.emperorRank <= MAX_ALLOWED_EMPEROR_RANK then
+            if data.isPlayer then
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_EMPEROR_LEADERBOARD_PLAYER_DATA, data))
+            else
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_EMPEROR_LEADERBOARD_NONPLAYER_DATA, data))
             end
         end
     end
@@ -257,28 +268,45 @@ function CampaignEmperor_Shared:AddAllianceToMasterList(alliance)
     local foundPlayerInLeaderboard = false
     local numEntries = GetNumCampaignAllianceLeaderboardEntries(self.campaignId, alliance)
 
-    for i = 1, numEntries do
-        local isPlayer, rank, name, points, _, displayName = GetCampaignAllianceLeaderboardEntryInfo(self.campaignId, alliance, i)
+    -- emperor rank is distinct from AP rank because some characters can be on the AP leaderboards without being eligible for emperor.
+    -- to handle this, we will just take the top 10 eligible entries sorted by AP rank and number them 1-N.
+    local nextEmperorRank = 1
 
-        local data = {
-                        index = #self.masterList,
-                        isPlayer = isPlayer,
-                        rank = rank,
-                        name = name,
-                        alliance = alliance,
-                        points = points,
-                        displayName = displayName,
-                     }
+    for i = 1, numEntries do
+        -- entry info is guaranteed to be sorted by alliancePointsRank
+        local isPlayer, alliancePointsRank, name, points, _, displayName, achievedEmperorForAlliance = GetCampaignAllianceLeaderboardEntryInfo(self.campaignId, alliance, i)
+
+        local data =
+        {
+            isPlayer = isPlayer,
+            alliancePointsRank = alliancePointsRank,
+            name = name,
+            alliance = alliance,
+            points = points,
+            displayName = displayName,
+            achievedEmperorForAlliance = achievedEmperorForAlliance,
+         }
+
+        if self:CanLeaderboardCharacterBecomeEmperor(data) then
+            data.emperorRank = nextEmperorRank
+            nextEmperorRank = nextEmperorRank + 1
+        end
+
+        data.index = #self.masterList + 1
+        self.masterList[data.index] = data
 
         if isPlayer then
             self:SetupPlayerRow(data)
             foundPlayerInLeaderboard = true
         end
-
-        self.masterList[#self.masterList + 1] = data
     end
 
     return foundPlayerInLeaderboard
+end
+
+function CampaignEmperor_Shared:CanLeaderboardCharacterBecomeEmperor(leaderboardEntry)
+    -- characters are inelgible for emperorship when it has already been achieved on an opposing alliance for this campaign
+    return leaderboardEntry.achievedEmperorForAlliance == ALLIANCE_NONE or leaderboardEntry.achievedEmperorForAlliance == leaderboardEntry.alliance
 end
 
 function CampaignEmperor_Shared:BuildMasterList()
@@ -308,14 +336,13 @@ end
 --Events
 
 function CampaignEmperor_Shared:OnCampaignEmperorChanged(campaignId)
-    if(self.campaignId == campaignId) then
+    if self.campaignId == campaignId then
         self:RefreshEmperor()
     end
 end
 
 function CampaignEmperor_Shared:OnCampaignStateInitialized(campaignId)
-    if(self.campaignId == campaignId) then
+    if self.campaignId == campaignId then
         self:RefreshEmperor()
     end
 end
-

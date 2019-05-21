@@ -1,0 +1,147 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_HUDDaedricEnergyMeter_HammerIdle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation cellsWide="ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_CELLS" cellsHigh="1" framerate="12"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_HUDDaedricEnergyMeter_RotateOnce">
+            <Animations>
+                <TextureRotateAnimation duration="1500" startRotation="6.28318530718" endRotation="-6.28318530718">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </TextureRotateAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_HUDDaedricEnergyMeter_Fade">
+            <Animations>
+                <AlphaAnimation duration="400" startAlpha="0" endAlpha="1">
+                    <OnPlay>
+                        animatingControl:SetHidden(false)
+                    </OnPlay>
+                </AlphaAnimation>
+                <AlphaAnimation duration="600" startAlpha="1" endAlpha="0">
+                    <OnStop>
+                        animatingControl:SetHidden(true)
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_HUDDaedricEnergyMeter_Warn" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseInOutZeroToOneToZero(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_HUDDaedricEnergyMeter_KeyboardTemplate" virtual="true" >
+            <Anchor point="BOTTOMRIGHT" />
+            <Dimensions x="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_FRAME_WIDTH" y="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_FRAME_HEIGHT" />
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/daedricHunger_meter_frame.dds">
+                    <AnchorFill/>
+                </Texture>
+
+                <StatusBar name="$(parent)Bar" barAlignment="REVERSE" textureFile="EsoUI/Art/HUD/daedricHunger_meter_bar.dds">
+                    <Anchor point="TOPLEFT" offsetX="35" offsetY="97" />
+                    <Dimensions x="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_FULL_WIDTH" y="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_HEIGHT" />
+
+                    <TextureCoords left="0" right="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_RIGHT_COORD" top="0" bottom="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_BOTTOM_COORD" />
+                    <LeadingEdge textureFile="EsoUI/Art/HUD/daedricHunger_meter_edge.dds" width="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_EDGE_WIDTH" height="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_HEIGHT" />
+                    <LeadingEdgeTextureCoords left="0" right="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_EDGE_RIGHT_COORD" top="0" bottom="ZO_HUD_KEYBOARD_DAEDRIC_ENERGY_METER_BAR_EDGE_BOTTOM_COORD" />
+                </StatusBar>
+
+                <Texture name="$(parent)Overlay" textureFile="EsoUI/Art/HUD/daedricHunger_meter_barOverlay.dds">
+                    <AnchorFill/>
+                </Texture>
+
+                <Control name="$(parent)Weapon">
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="207" offsetY="79"/>
+                    <Dimensions x="108" y="108" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HUDDaedricEnergyMeter_GamepadTemplate" virtual="true" >
+            <Anchor point="BOTTOMLEFT" />
+            <Dimensions x="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_FRAME_WIDTH" y="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_FRAME_HEIGHT" />
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/HUD/Gamepad/gp_daedricHunger_meter_frame.dds">
+                    <AnchorFill/>
+                </Texture>
+
+                <StatusBar name="$(parent)Bar" barAlignment="NORMAL" textureFile="EsoUI/Art/HUD/Gamepad/gp_daedricHunger_meter_bar.dds">
+                    <Anchor point="TOPRIGHT" offsetX="-13" offsetY="79" />
+                    <Dimensions x="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_FULL_WIDTH" y="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_HEIGHT" />
+
+                    <TextureCoords left="0" right="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_RIGHT_COORD" top="0" bottom="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_BOTTOM_COORD" />
+                    <LeadingEdge textureFile="EsoUI/Art/HUD/Gamepad/gp_daedricHunger_meter_edge.dds" width="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_EDGE_WIDTH" height="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_HEIGHT" />
+                    <LeadingEdgeTextureCoords left="0" right="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_EDGE_RIGHT_COORD" top="0" bottom="ZO_HUD_GAMEPAD_DAEDRIC_ENERGY_METER_BAR_EDGE_BOTTOM_COORD" />
+                </StatusBar>
+
+                <Texture name="$(parent)Overlay" textureFile="EsoUI/Art/HUD/Gamepad/gp_daedricHunger_meter_barOverlay.dds">
+                    <AnchorFill/>
+                </Texture>
+
+                <Control name="$(parent)Weapon">
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="53" offsetY="64"/>
+                    <Dimensions x="128" y="128" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_HUDDaedricEnergyMeter_WeaponContainer" hidden ="true" virtual="true" >
+            <!-- Inherits from weapon anchor, which is defined in platform style -->
+            <AnchorFill/>
+        </Control>
+
+        <Control name="ZO_HUDDaedricEnergyMeter_WeaponLayer" virtual="true" >
+            <!-- Inherits from weapon container -->
+            <AnchorFill/>
+        </Control>
+
+        <Control name="ZO_HUDDaedricEnergyMeter_Volendrung" inherits="ZO_HUDDaedricEnergyMeter_WeaponContainer" virtual="true" >
+            <Controls>
+                <Texture name="$(parent)Glow" inherits="ZO_HUDDaedricEnergyMeter_WeaponLayer" textureFile="EsoUI/Art/HUD/Volendrung/DaedricArtifact_Volendrung_BehindIconGLOW.dds" />
+                <Texture name="$(parent)Empty" inherits="ZO_HUDDaedricEnergyMeter_WeaponLayer" hidden="true" textureFile="EsoUI/Art/HUD/Volendrung/DaedricArtifact_Volendrung_EMPTY.dds" />
+                <Texture name="$(parent)Idle" inherits="ZO_HUDDaedricEnergyMeter_WeaponLayer" textureFile="EsoUI/Art/HUD/Volendrung/DaedricArtifact_Volendrung_ANIM.dds">
+                    <AnchorFill/>
+                    <TextureCoords left="0" right="ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_RIGHT_COORD" />
+                </Texture>
+                <Texture name="$(parent)Burst1" inherits="ZO_HUDDaedricEnergyMeter_WeaponLayer" hidden="true" textureFile="EsoUI/Art/HUD/Volendrung/DaedricArtifact_Volendrung_SINGLE.dds" />
+                <Texture name="$(parent)Burst2" inherits="ZO_HUDDaedricEnergyMeter_WeaponLayer" hidden="true" textureFile="EsoUI/Art/HUD/Volendrung/DaedricArtifact_Volendrung_OnKILL.dds" />
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_HUDDaedricEnergyMeter" tier="MEDIUM" hidden="true">
+            <OnInitialized>
+                ZO_HUDDaedricEnergyMeter_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Frame" layer="BACKGROUND" />
+
+                <StatusBar name="$(parent)Bar" layer="CONTROLS" />
+
+                <Texture name="$(parent)ArrowRegeneration" layer="OVERLAY" inherits="ZO_ArrowRegeneration" />
+
+                <Texture name="$(parent)Overlay" layer="OVERLAY" alpha="0" />
+
+                <Control name="$(parent)Weapon" tier="HIGH">
+                    <Controls>
+                        <!-- Add new daedric weapon animations here and they will be automatically anchored to match the frame -->
+                        <Control name="$(parent)Volendrung" hidden="true" inherits="ZO_HUDDaedricEnergyMeter_Volendrung"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

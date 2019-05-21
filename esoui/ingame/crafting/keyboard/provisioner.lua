@@ -368,9 +368,9 @@ function ZO_Provisioner:RefreshRecipeList()
                     downIcon = recipeList.downIcon,
                     overIcon = recipeList.overIcon,
                     disabledIcon = recipeList.disabledIcon
-                    }, nil, SOUNDS.PROVISIONING_BLADE_SELECTED)
+                    })
                 
-                self.recipeTree:AddNode("ZO_ProvisionerNavigationEntry", recipe, parent, SOUNDS.PROVISIONING_ENTRY_SELECTED)
+                self.recipeTree:AddNode("ZO_ProvisionerNavigationEntry", recipe, parent)
                 hasRecipesWithFilter = true
             end
             knowAnyRecipesInTab = true

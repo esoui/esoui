@@ -102,7 +102,7 @@ function ZO_GameMenuManager:AddEntry(data)
 
         -- Then add the child
         if parent then
-            self.navigationTree:AddNode("ZO_GameMenu_SubCategory", data, parent, SOUNDS.MENU_SUBCATEGORY_SELECTION)
+            self.navigationTree:AddNode("ZO_GameMenu_SubCategory", data, parent)
         end
     else
         -- It's a header...determine what type
@@ -110,13 +110,13 @@ function ZO_GameMenuManager:AddEntry(data)
             if data.callback then
                 -- No children...does it have a selected state?
                 if data.hasSelectedState then
-                    self.headerControls[data.name] = self.navigationTree:AddNode("ZO_GameMenu_ChildlessHeader_WithSelectedState", data, nil, SOUNDS.MENU_HEADER_SELECTION)
+                    self.headerControls[data.name] = self.navigationTree:AddNode("ZO_GameMenu_ChildlessHeader_WithSelectedState", data)
                 else
-                    self.headerControls[data.name] = self.navigationTree:AddNode("ZO_GameMenu_ChildlessHeader", data, nil, SOUNDS.MENU_HEADER_SELECTION)
+                    self.headerControls[data.name] = self.navigationTree:AddNode("ZO_GameMenu_ChildlessHeader", data)
                 end
             else
                 -- It will have children
-                self.headerControls[data.name] = self.navigationTree:AddNode("ZO_GameMenu_LabelHeader", data, nil, SOUNDS.MENU_HEADER_SELECTION)
+                self.headerControls[data.name] = self.navigationTree:AddNode("ZO_GameMenu_LabelHeader", data)
             end
             return self.headerControls[data.name]
         end

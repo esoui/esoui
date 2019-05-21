@@ -249,6 +249,7 @@ function ZO_KeyboardAssignableActionBarButton:TryCursorPlace()
     if progressionData and hotbar:AssignSkillToSlot(self.slotId, progressionData:GetSkillData()) then
         ClearCursor()
         oldSlotData:TryCursorPickup()
+        PlaySound(SOUNDS.ABILITY_SLOTTED)
     end
 end
 
@@ -259,7 +260,9 @@ function ZO_KeyboardAssignableActionBarButton:ShowActionMenu()
     if slotData and not slotData:IsEmpty() then
         ClearMenu()
         AddMenuItem(GetString(SI_ABILITY_ACTION_CLEAR_SLOT), function()
-            hotbar:ClearSlot(self.slotId)
+            if hotbar:ClearSlot(self.slotId) then
+                PlaySound(SOUNDS.ABILITY_SLOT_CLEARED)
+            end
         end)
         ShowMenu(self.button)
     end

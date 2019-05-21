@@ -69,7 +69,7 @@ function ZO_SetClockFormat(clockFormat)
     -- Doesn't currently take effect until the next clock update.
     if CLOCK_FORMAT ~= clockFormat then
         CLOCK_FORMAT = clockFormat
-        ZO_BuildMinutesSinceMidnightPerHourTable()
+        ZO_BuildHoursSinceMidnightPerHourTable()
     end
 end
 
@@ -143,18 +143,39 @@ do
 end
 
 do
-    local minutesSinceMidnightPerHour = {}
+    local hoursSinceMidnightPerHour = {}
 
-    function ZO_BuildMinutesSinceMidnightPerHourTable()
-        minutesSinceMidnightPerHour = {}
+    function ZO_BuildHoursSinceMidnightPerHourTable()
+        hoursSinceMidnightPerHour = {}
         for i = 0, 23 do
-            table.insert(minutesSinceMidnightPerHour, { value = i * ZO_ONE_HOUR_IN_MINUTES, name = ZO_FormatTime(i * ZO_ONE_HOUR_IN_MINUTES * ZO_ONE_MINUTE_IN_SECONDS, TIME_FORMAT_STYLE_CLOCK_TIME, CLOCK_FORMAT) })
+            table.insert(hoursSinceMidnightPerHour, { value = i, name = ZO_FormatTime(i * ZO_ONE_HOUR_IN_MINUTES * ZO_ONE_MINUTE_IN_SECONDS, TIME_FORMAT_STYLE_CLOCK_TIME, CLOCK_FORMAT) })
         end
     end
 
-    ZO_BuildMinutesSinceMidnightPerHourTable()
+    ZO_BuildHoursSinceMidnightPerHourTable()
 
-    function ZO_GetMinutesSinceMidnightPerHourTable()
-        return minutesSinceMidnightPerHour
+    function ZO_GetHoursSinceMidnightPerHourTable()
+        return hoursSinceMidnightPerHour
+    end
+
+    function ZO_PopulateHoursSinceMidnightPerHourComboBox(comboBox, onSelectionCallback, selectedValue)
+        comboBox:ClearItems()
+
+        local selectedEntry
+        for i, data in ipairs(hoursSinceMidnightPerHour) do
+            local entry = comboBox:CreateItemEntry(data.name, onSelectionCallback)
+            entry.value = data.value
+            entry.index = i
+            if data.value == selectedValue then
+                selectedEntry = entry
+            end
+            comboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        end
+
+        local IGNORE_CALLBACK = true
+        if selectedEntry then
+            comboBox:SelectItemByIndex(selectedEntry.index, IGNORE_CALLBACK)
+        end
     end
 end
+

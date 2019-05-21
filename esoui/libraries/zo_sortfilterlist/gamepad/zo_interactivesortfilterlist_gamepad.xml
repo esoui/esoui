@@ -16,6 +16,10 @@
         <Backdrop name="ZO_GamepadInteractiveSortFilterDefaultHighlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" virtual="true">
             <AnchorFill />
         </Backdrop>
+        
+        <Backdrop name="ZO_GamepadInteractiveSortFilterThickHighlight" inherits="ZO_GamepadWhiteOutlineThick" tier="HIGH" layer="OVERLAY" blendMode="ADD" virtual="true">
+            <AnchorFill />
+        </Backdrop>
 
         <Backdrop name="ZO_GamepadInteractiveFilterHighlight" inherits="ZO_GamepadInteractiveSortFilterDefaultHighlight" virtual="true">
             <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" offsetY="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />

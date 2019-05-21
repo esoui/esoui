@@ -157,13 +157,13 @@ function GuildHistoryManager:CreateCategoryTree()
     for i = 1, GetNumGuildHistoryCategories() do
         local categoryData = GUILD_HISTORY_CATEGORIES[i]
         if categoryData then
-            local categoryNode = self.categoryTree:AddNode("ZO_IconHeader", i, nil, SOUNDS.GUILD_HISTORY_BLADE_SELECTED)
+            local categoryNode = self.categoryTree:AddNode("ZO_IconHeader", i)
            --All
-            self.categoryTree:AddNode("ZO_GuildHistorySubcategoryEntry", {categoryId = i, name = GetString(SI_GUILD_HISTORY_SUBCATEGORY_ALL)}, categoryNode, SOUNDS.GUILD_HISTORY_ENTRY_SELECTED)
+            self.categoryTree:AddNode("ZO_GuildHistorySubcategoryEntry", {categoryId = i, name = GetString(SI_GUILD_HISTORY_SUBCATEGORY_ALL)}, categoryNode)
 
             if categoryData.subcategories then
                 for subcategoryId, _ in pairs(categoryData.subcategories) do
-                    self.categoryTree:AddNode("ZO_GuildHistorySubcategoryEntry", {categoryId = i, subcategoryId = subcategoryId, name = GetString(categoryData.subcategoryEnumName, subcategoryId)}, categoryNode, SOUNDS.GUILD_HISTORY_ENTRY_SELECTED)
+                    self.categoryTree:AddNode("ZO_GuildHistorySubcategoryEntry", {categoryId = i, subcategoryId = subcategoryId, name = GetString(categoryData.subcategoryEnumName, subcategoryId)}, categoryNode)
                 end
             end
         end

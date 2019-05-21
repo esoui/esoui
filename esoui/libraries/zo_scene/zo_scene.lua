@@ -262,6 +262,8 @@ function ZO_Scene:SetState(newState)
     if self.state ~= newState then
         self:Log(string.format("Scene %s", newState))
         local oldState = self.state
+        --Making a local for the scene name so it appears in the traceback in case of errors
+        local name = self.name
         self.sceneManager:OnPreSceneStateChange(self, oldState, newState)
         self.state = newState
         if self.state == SCENE_SHOWING then

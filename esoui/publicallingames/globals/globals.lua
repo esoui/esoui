@@ -3,3 +3,24 @@
 function ZO_Disconnect()
     Disconnect()
 end
+
+MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED = 0
+MARKET_PRODUCT_DISPLAY_STATE_PURCHASED = 1
+MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE = 2
+
+function ZO_GetMarketProductDisplayState(marketProductId)
+    local expectedClaimResult = CouldAcquireMarketProduct(marketProductId)
+    if expectedClaimResult == MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
+        or expectedClaimResult == MARKET_PURCHASE_RESULT_HOUSING_ALREADY_OWNED
+        or expectedClaimResult == MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK then
+        return MARKET_PRODUCT_DISPLAY_STATE_PURCHASED
+    elseif expectedClaimResult == MARKET_PURCHASE_RESULT_FAIL_INSTANT_UNLOCK_REQ_LIST then
+        return MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE
+    end
+
+    if not DoesMarketProductPassPurchasableReqList(marketProductId) then
+        return MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE
+    end
+
+    return MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED
+end

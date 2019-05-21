@@ -147,7 +147,7 @@
 
         <Label name="ZO_CheckButtonLabel" virtual="true" mouseEnabled="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold">
             <OnMouseUp>
-                if(upInside) then
+                if upInside then
                     ZO_CheckButton_OnClicked(self:GetParent(), button)
                 end
             </OnMouseUp>

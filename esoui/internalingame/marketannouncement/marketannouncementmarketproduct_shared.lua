@@ -80,8 +80,8 @@ function ZO_MarketAnnouncementMarketProduct_Shared:IsPurchaseLocked()
     return false
 end
 
-function ZO_MarketAnnouncementMarketProduct_Shared:GetPurchaseState()
-    return MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED
+function ZO_MarketAnnouncementMarketProduct_Shared:GetMarketProductDisplayState()
+    return MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED
 end
 
 function ZO_MarketAnnouncementMarketProduct_Shared:GetMarketProductListingsForHouseTemplate(houseTemplateId, displayGroup)
@@ -102,7 +102,7 @@ function ZO_MarketAnnouncementMarketProduct_Shared:LayoutCostAndText()
     self:SetupEsoPlusDealLabelDisplay()
 
     local FOCUSED = true
-    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.control.title, FOCUSED, self.purchaseState)
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(self.control.title, FOCUSED, self.displayState)
 end
 
 function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()

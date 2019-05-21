@@ -62,7 +62,8 @@ local function GetGuildChannelErrorFunction(guildIndex)
         if(GetNumGuilds() < guildIndex) then
             return zo_strformat(SI_CANT_GUILD_CHAT_NOT_IN_GUILD, guildIndex)
         else
-            return zo_strformat(SI_CANT_GUILD_CHAT_NO_PERMISSION, GetGuildName(guildIndex))
+            local guildId = GetGuildId(guildIndex)
+            return zo_strformat(SI_CANT_GUILD_CHAT_NO_PERMISSION, GetGuildName(guildId))
         end
     end
 end
@@ -72,7 +73,8 @@ local function GetOfficerChannelErrorFunction(guildIndex)
         if(GetNumGuilds() < guildIndex) then
             return zo_strformat(SI_CANT_GUILD_CHAT_NOT_IN_GUILD, guildIndex)
         else
-            return zo_strformat(SI_CANT_OFFICER_CHAT_NO_PERMISSION, GetGuildName(guildIndex))
+            local guildId = GetGuildId(guildIndex)
+            return zo_strformat(SI_CANT_OFFICER_CHAT_NO_PERMISSION, GetGuildName(guildId))
         end
     end
 end

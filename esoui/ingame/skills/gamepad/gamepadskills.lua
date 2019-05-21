@@ -31,11 +31,10 @@ function ZO_GamepadSkills:Initialize(control)
     GAMEPAD_SKILLS_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
         if newState == SCENE_SHOWING then
-
             self:SetMode(ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE)
             self:RefreshHeader(GetString(SI_MAIN_MENU_SKILLS))
-            self.assignableActionBar:OnShowing()
             self.categoryListRefreshGroup:TryClean()
+            self.assignableActionBar:Refresh()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.categoryKeybindStripDescriptor)
 
             if self.returnToAdvisor then
@@ -78,7 +77,6 @@ function ZO_GamepadSkills:Initialize(control)
             --Disable now so it's not possible to change the selected skill live/skills advisor entry as the scene is hiding since the line filter list depends on it being a skill line
             self:DisableCurrentList()
         elseif newState == SCENE_HIDDEN then
-            self.assignableActionBar:OnHidden()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)
@@ -93,7 +91,7 @@ function ZO_GamepadSkills:Initialize(control)
             local targetSkillLineData = self.categoryList:GetTargetData().skillLineData
             self:SetMode(ZO_GAMEPAD_SKILLS_ABILITY_LIST_BROWSE_MODE)
             self:RefreshHeader(targetSkillLineData:GetFormattedName())
-            self.assignableActionBar:OnShowing()
+            self.assignableActionBar:Refresh()
             --To pick up the new skill line that was just selected
             self.lineFilterListRefreshGroup:MarkDirty("List")
             self.lineFilterListRefreshGroup:TryClean()
@@ -121,7 +119,6 @@ function ZO_GamepadSkills:Initialize(control)
         elseif newState == SCENE_HIDDEN then
             local NO_SKILL_LINE_SELECTED = nil
             ACTION_BAR_ASSIGNMENT_MANAGER:UpdateWerewolfBarStateInCycle(NO_SKILL_LINE_SELECTED)
-            self.assignableActionBar:OnHidden()
             self:DisableCurrentList()
             self:TryClearSkillUpdatedStatus()
             self:TryClearSkillLineNewStatus()
@@ -184,6 +181,7 @@ function ZO_GamepadSkills:Initialize(control)
             self:PerformDeferredInitialization()
             self.showAttributeDialog = GetAttributeUnspentPoints() > 0 and not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
         elseif newState == SCENE_GROUP_HIDDEN then
+            self.assignableActionBar:OnSkillsHidden()
             SKILLS_AND_ACTION_BAR_MANAGER:ResetInterface()
         end
     end)
@@ -399,11 +397,6 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
             --Here we determine what fragment to load, but we're going to wait until it loads to decide how to populate it
             --So we'll prevent any further movement and proceed based on what we expect the selected data to be by the time we need it.
             --We may already be in the process of a scroll, so "current data" isn't reliable.
-            if not IsActionBarSlottingAllowed() then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_SKILLS_DISABLED_SPECIAL_ABILITIES)
-                return false
-            end
-            
             local targetData = self.categoryList:GetTargetData()
             if self.assignableActionBar:IsActive() then
                 self:DeactivateCurrentList()
@@ -461,8 +454,13 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
 end
 
 function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
-    local function EnableWhileNotInCombat()
-        return not IsUnitInCombat("player"), GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT)
+    local function EnableWhileNotActivelyEngagedOrSlottingDisallowed()
+        if IsUnitActivelyEngaged("player") then
+            return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_ACTIVELY_ENGAGED)
+        elseif not IsActionBarSlottingAllowed() then
+            return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE)
+        end
+        return true
     end
 
     table.insert(self.lineFilterKeybindStripDescriptor,
@@ -494,7 +492,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotInCombat,
+        enabled = EnableWhileNotActivelyEngagedOrSlottingDisallowed,
 
         callback = function()
             --This is confirm when respecing and assign otherwise
@@ -672,7 +670,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotInCombat,
+        enabled = EnableWhileNotActivelyEngagedOrSlottingDisallowed,
 
         callback = function()
             if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
@@ -941,7 +939,6 @@ function ZO_GamepadSkills:InitializeLineFilterPreviewList()
     lineFilterPreviewList:AddDataTemplateWithHeader("ZO_GamepadSingleLineAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, nil, IsSkillEqual, "ZO_GamepadMenuEntryHeaderTemplate")
 
     self.lineFilterPreviewList = lineFilterPreviewList
-    self.lineFilterPreviewWarning = lineFilterPreviewContainer:GetNamedChild("Warning")
 end
 
 local function MenuEntryHeaderTemplateSetup(control, skillEntry, selected, selectedDuringRebuild, enabled, activated)
@@ -1192,11 +1189,12 @@ function ZO_GamepadSkills:InitializeEvents()
 
     self.control:RegisterForEvent(EVENT_PLAYER_DEACTIVATED, function() self:OnPlayerDeactivated() end)
 
-    local function OnPlayerCombatStateChanged()
+    local function OnPurchaseLockStateChanged()
         -- Refresh state of purchase/morph/assign keybinds
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
     end
-    self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, OnPlayerCombatStateChanged)
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVELY_ENGAGED_STATE, OnPurchaseLockStateChanged)
+    self.control:RegisterForEvent(EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED, OnPurchaseLockStateChanged)
 end
 
 function ZO_GamepadSkills:TryClearSkillUpdatedStatus()
@@ -1276,18 +1274,6 @@ do
         local list = refreshPreviewList and self.lineFilterPreviewList or self.lineFilterList
         list:Clear()
         ZO_ClearTable(g_ShownHeaderTexts)
-
-        --Don't show the preview list if action bar slotting isn't allowed
-        if refreshPreviewList then
-            if not IsActionBarSlottingAllowed() then
-                self.lineFilterPreviewWarning:SetHidden(false)
-                self.lineFilterPreviewWarning:SetText(GetString(SI_SKILLS_DISABLED_SPECIAL_ABILITIES))
-                list:Commit()
-                return
-            else
-                self.lineFilterPreviewWarning:SetHidden(true)
-            end
-        end
 
         local skillLineEntry = self.categoryList:GetTargetData()
         if skillLineEntry.isSkillsAdvisor then

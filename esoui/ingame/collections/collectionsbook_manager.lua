@@ -151,6 +151,7 @@ function CollectionsBook_Singleton:RefreshOwnedHouses()
     for _, collectibleData in ipairs(ownedHouses) do
         self.ownedHouses[collectibleData:GetId()] = { houseId = collectibleData:GetReferenceId() }
     end
+    internalassert(#ownedHouses <= MAX_HOUSES_FOR_PERMISSIONS, "There are too many houses for permissions messaging to handle. Have an engineer update cMaxHousesPerAccount.")
 end
 
 function CollectionsBook_Singleton:OnUpdateCooldowns(...)

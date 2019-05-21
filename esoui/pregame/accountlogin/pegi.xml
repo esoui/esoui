@@ -12,9 +12,7 @@
                 ZO_PEGI_CountrySelectDialog_OnMouseExit(self)
             </OnMouseExit>
             <OnMouseUp>
-                if(upInside) then
-                    ZO_PEGI_CountrySelectDialog_OnMouseUp(self)
-                end
+                ZO_PEGI_CountrySelectDialog_OnMouseUp(self)
             </OnMouseUp>
             <OnMouseDoubleClick>
                 ZO_PEGI_CountrySelectDialog_OnDoubleClick()

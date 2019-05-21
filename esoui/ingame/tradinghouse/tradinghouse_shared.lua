@@ -198,7 +198,6 @@ function ZO_TradingHouseSearch:Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_AWAITING_RESPONSE, function(_, ...) self:OnAwaitingResponse(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_RESPONSE_TIMEOUT, function(_, ...) self:OnResponseTimeout(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_RESPONSE_RECEIVED, function(_, ...) self:OnResponseReceived(...) end)
-    EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_SEARCH_RESULTS_RECEIVED, function(_, ...) self:OnSearchResultsReceived(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_TradingHouseSearch", EVENT_TRADING_HOUSE_SELECTED_GUILD_CHANGED, function(_, ...) self:OnSelectedGuildChanged(...) end)
 end
 

@@ -43,16 +43,6 @@ function ZO_LeaderboardCampaignSelector_Shared:OnQueryTypeChanged(tabData)
     end
 end
 
-function ZO_LeaderboardCampaignSelector_Shared:IsHomeSelectable()
-    return GetAssignedCampaignId() ~= 0
-end
-
-function ZO_LeaderboardCampaignSelector_Shared:IsGuestSelectable()
-    local currentId = GetCurrentCampaignId()
-    local assignedId = GetAssignedCampaignId()
-    return currentId ~= 0 and currentId ~= assignedId
-end
-
 -----------------
 -- Campaign Leaderboards Shared
 -----------------

@@ -159,6 +159,8 @@ end
 function GamepadMarket:OnInitialInteraction()
     SetSecureRenderModeEnabled(true)
 
+    UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_CROWN_STORE)
+
     -- ensure that we are in the correct state
     if self.marketState ~= GetMarketState(MARKET_DISPLAY_GROUP_CROWN_STORE) then
         self:UpdateMarket()
@@ -376,6 +378,8 @@ function GamepadMarket:InitializeKeybindDescriptors()
                     local previewType = selectedEntry:GetMarketProductPreviewType()
                     if previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
                         return selectedEntry:HasPreview() and IsCharacterPreviewingAvailable()
+                    elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
+                        return CanJumpToHouseFromCurrentLocation(), GetString(SI_MARKET_PREVIEW_ERROR_CANNOT_JUMP_FROM_LOCATION)
                     else
                         return true
                     end
@@ -1232,6 +1236,16 @@ do
         else
             self:SetQueuedCategoryIndices(categoryIndex, subcategoryIndex)
         end
+    end
+end
+
+function GamepadMarket:RequestShowCategoryById(categoryId)
+    if self.isInitialized and self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
+        local categoryIndex, subcategoryIndex = GetCategoryIndicesFromMarketProductCategoryId(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryId)
+        self:RequestShowCategory(categoryIndex, subcategoryIndex)
+        self:ClearQueuedCategoryId()
+    else
+        self:SetQueuedCategoryId(categoryId)
     end
 end
 

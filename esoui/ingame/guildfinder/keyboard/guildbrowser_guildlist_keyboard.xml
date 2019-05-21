@@ -1,0 +1,267 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildBrowser_GuildList_Row_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_GUILD_BROWSER_GUILD_LIST_KEYBOARD_ENTRY_HEIGHT"/>
+            <OnInitialized>
+                self.guildNameLabel = self:GetNamedChild("Name")
+                self.guildAllianceTexture = self:GetNamedChild("AllianceIcon")
+                self.guildSizeLabel = self:GetNamedChild("Size")
+                self.guildHeraldry = self:GetNamedChild("Heraldry")
+                self.guildContextualInfoLabel = self:GetNamedChild("ContextualInfo")
+                self.guildHeaderMessageLabel = self:GetNamedChild("HeaderMessage")
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_GuildBrowser_GuildList_Row_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GuildBrowser_GuildList_Row_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_GuildBrowser_GuildList_Row_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Control name="$(parent)Heraldry" inherits="ZO_GuildFinder_Heraldry_Template">
+                    <Anchor point="TOPLEFT" offsetX="15" offsetY="10" />
+                </Control>
+                <Texture name="$(parent)AllianceIcon" mouseEnabled="true" layer="OVERLAY">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Heraldry" offsetX="10" />
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GuildBrowser_GuildList_Alliance_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GuildBrowser_GuildList_Alliance_OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                
+                <Label name="$(parent)Name" font="ZoFontWinH2" maxLineCount="1" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)AllianceIcon" offsetX="5" />
+                    <Dimensions x="285" />
+                </Label>
+                <Label name="$(parent)Size" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="15" />
+                </Label>
+                <Label name="$(parent)ContextualInfo" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="BOTTOMLEFT" offsetY="5" />
+                </Label>
+                <Label name="$(parent)HeaderMessage" font="ZoFontGameBold" maxLineCount="3" wrapMode="ELLIPSIS">
+                    <Dimensions x="510" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContextualInfo" relativePoint="BOTTOMLEFT" offsetY="2" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Button name="ZO_AllianceFilterButton" inherits="ZO_CheckButton" virtual="true">
+            <Dimensions x="48" y="48"/>
+            <OnMouseEnter>
+                ZO_AllianceFilterButton_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_AllianceFilterButton_OnMouseExit(self)
+            </OnMouseExit>
+        </Button>
+
+        <TopLevelControl name="ZO_GuildBrowser_GuildList_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildBrowser_GuildList_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildBrowser_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10"/>
+                </Control>
+
+                <Label name="$(parent)Results" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="TOP" offsetY="50" />
+                </Label>
+                
+                <Label name="$(parent)FiltersHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_BROWSER_GUILD_LIST_FILTERS_HEADER">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT" offsetX="80" offsetY="-30" />
+                </Label>
+
+                <Control name="$(parent)TraderCheckBox" resizeToFitDescendents="true" hidden="true">
+                    <OnInitialized>
+                        self.checkButton = self:GetNamedChild("Check")
+                    </OnInitialized>
+                    <Controls>
+                        <Button name="$(parent)Check" inherits="ZO_CheckButton">
+                            <Anchor point="LEFT"/>
+                        </Button>
+                    </Controls>
+                </Control>
+                
+                <Button name="$(parent)AdditionalFilters">
+                    <Dimensions x="48" y="48" />
+                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="20" />
+
+                    <OnClicked>
+                        ZO_GuildBrowser_GuildList_AdditionalFilters_OnClicked(self, button)
+                    </OnClicked>
+                    <OnMouseEnter>
+                        ZO_GuildBrowser_GuildList_AdditionalFilters_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GuildBrowser_GuildList_AdditionalFilters_OnMouseExit(self)
+                    </OnMouseExit>
+
+                    <Textures
+                        normal="EsoUI/Art/GuildFinder/Keyboard/guildBrowser_guildList_additionalFilters_up.dds"
+                        pressed="EsoUI/Art/GuildFinder/Keyboard/guildBrowser_guildList_additionalFilters_down.dds"
+                        mouseOver="EsoUI/Art/GuildFinder/Keyboard/guildBrowser_guildList_additionalFilters_over.dds"
+                    />
+                </Button>
+
+                <Control name="$(parent)Personalities" inherits="ZO_MultiselectComboBox">
+                    <Dimensions x="160" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)AdditionalFilters" relativePoint="LEFT" offsetX="-5" />
+                </Control>
+
+                <Control name="$(parent)Activites" inherits="ZO_MultiselectComboBox">
+                    <Dimensions x="160" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Personalities" relativePoint="LEFT" offsetX="-5" />
+                </Control>
+
+            </Controls>
+        </TopLevelControl>
+    
+        <TopLevelControl name="ZO_GuildFinderAdditionalFiltersDialog" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_GuildFinderAdditionalFiltersDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)RootSpacer" inherits="ZO_DialogContentAnchors" />
+                
+                <Label name="$(parent)AllianceHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Dimensions x="160" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" relativePoint="TOPLEFT" />
+                </Label>
+                
+                <Control name="$(parent)AllianceButtons" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceHeader" relativePoint="BOTTOMLEFT" />
+
+                    <Controls>
+                        <Button name="$(parent)AD" inherits="ZO_AllianceFilterButton">
+                            <Anchor point="TOPLEFT" />
+
+                            <OnInitialized>
+                                ZO_FilterAllianceButton_OnInitialized(self, ALLIANCE_ALDMERI_DOMINION)
+                            </OnInitialized>
+                        </Button>
+
+                        <Button name="$(parent)EP" inherits="ZO_AllianceFilterButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AD" relativePoint="TOPRIGHT" offsetX="5" />
+
+                            <OnInitialized>
+                                ZO_FilterAllianceButton_OnInitialized(self, ALLIANCE_EBONHEART_PACT)
+                            </OnInitialized>
+                        </Button>
+
+                        <Button name="$(parent)DC" inherits="ZO_AllianceFilterButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)EP" relativePoint="TOPRIGHT" offsetX="5" />
+
+                            <OnInitialized>
+                                ZO_FilterAllianceButton_OnInitialized(self, ALLIANCE_DAGGERFALL_COVENANT)
+                            </OnInitialized>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)RolesHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Dimensions x="160" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceHeader" relativePoint="TOPRIGHT" offsetX="20" />
+                </Label>
+
+                <Control name="$(parent)RoleSelector" inherits="ZO_RoleMultiSelector_Keyboard_Template">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RolesHeader" relativePoint="BOTTOMLEFT" />
+                </Control>
+                
+                <Label name="$(parent)LanguageHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Dimensions x="180" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceButtons" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                </Label>
+                
+                <Control name="$(parent)LanguageSelector" inherits="ZO_MultiselectComboBox">
+                    <Dimensions x="170" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LanguageHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
+                </Control>
+                
+                <Label name="$(parent)SizeHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Dimensions x="180" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LanguageHeader" relativePoint="TOPRIGHT" offsetX="10"/>
+                </Label>
+                
+                <Control name="$(parent)SizeSelector" inherits="ZO_MultiselectComboBox">
+                    <Dimensions x="170" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SizeHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
+                </Control>
+                
+                <Label name="$(parent)TimeHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Dimensions x="280" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LanguageSelector" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                </Label>
+
+                <Control name="$(parent)StartTimeSelector" inherits="ZO_ScrollableComboBox" layer="OVERLAY">
+                    <Dimensions x="170" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TimeHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
+
+                    <Controls>
+                        <Control name="$(parent)Dropdown" override="true" excludeFromResizeToFitExtents="true" />
+
+                        <Label name="$(parent)Dash" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_RECRUITMENT_TIME_ENTRIES_SEPARATOR">
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)EndTimeSelector" inherits="ZO_ScrollableComboBox" layer="OVERLAY">
+                    <Dimensions x="170" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)StartTimeSelector" relativePoint="TOPRIGHT" offsetX="20" />
+
+                    <Controls>
+                        <Control name="$(parent)Dropdown" override="true" excludeFromResizeToFitExtents="true" />
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)CPHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                    <Dimensions x="250" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)StartTimeSelector" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)MinCP" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CPHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="60" y="36" />
+                            <Controls>
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Dash" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="-">
+                    <Dimensions x="10" />
+                    <Anchor point="LEFT" relativeTo="$(parent)MinCP" relativePoint="RIGHT" offsetX="5" />
+                </Label>
+                
+                <Control name="$(parent)MaxCP" resizeToFitDescendents="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Dash" relativePoint="RIGHT" />
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="60" y="36" />
+                            <Controls>
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" />
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Reset" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

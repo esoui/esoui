@@ -1,0 +1,145 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GuildRecruitment_Blacklist_Keyboard_RowLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
+        
+        <Control name="ZO_GuildRecruitment_Blacklist_Row_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_GUILD_RECRUITMENT_BLACKLIST_KEYBOARD_ENTRY_HEIGHT"/>
+            <OnMouseEnter>
+                ZO_GuildRecruitment_Blacklist_Keyboard_Row_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_GuildRecruitment_Blacklist_Keyboard_Row_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_GuildRecruitment_Blacklist_Keyboard_Row_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                
+                <Button name="$(parent)Remove">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="26" y="26"/>
+                    <OnMouseEnter>
+                        ZO_Tooltips_ShowTextTooltip(self, TOP, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_REMOVE))
+                        ZO_GuildRecruitment_Blacklist_Keyboard_Row_Remove_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_Tooltips_HideTextTooltip()
+                        ZO_GuildRecruitment_Blacklist_Keyboard_Row_Remove_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                    <OnClicked>
+                        ZO_GuildRecruitment_Blacklist_Keyboard_Remove_OnClicked(self:GetParent())
+                    </OnClicked>
+                    <Textures
+                        normal="EsoUI/Art/Buttons/decline_up.dds"
+                        pressed="EsoUI/Art/Buttons/decline_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/decline_over.dds"
+                    />
+                </Button>
+                <Label name="$(parent)Name" inherits="ZO_GuildRecruitment_Blacklist_Keyboard_RowLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Remove" relativePoint="RIGHT" offsetX="5" />
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_BLACKLIST_KEYBOARD_NAME_COLUMN_SIZE" />
+                    <OnMouseUp>
+                        ZO_GuildRecruitment_Blacklist_Keyboard_Row_OnMouseUp(self:GetParent(), button, upInside)
+                    </OnMouseUp>
+                </Label>
+                <Button name="$(parent)Note">
+                    <Textures
+                        normal="EsoUI/Art/Contacts/social_note_up.dds"
+                        pressed="EsoUI/Art/Contacts/social_note_down.dds"
+                        mouseOver="EsoUI/Art/Contacts/social_note_over.dds"
+                    />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name"/>
+                    <Dimensions x="32" y="32"/>
+                    <OnMouseEnter>
+                        ZO_GuildRecruitment_Blacklist_Keyboard_Row_Note_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_GuildRecruitment_Blacklist_Keyboard_Row_Note_OnMouseExit(self)
+                    </OnMouseExit>
+                    <OnClicked>
+                        ZO_GuildRecruitment_Blacklist_Keyboard_Row_Note_OnClicked(self)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildRecruitment_Blacklist_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_Blacklist_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildRecruitment_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40"/>
+                    <Dimensions y="ZO_GUILD_RECRUITMENT_BLACKLIST_KEYBOARD_ENTRY_HEIGHT"/>
+                    <Controls>
+                        <Control name="$(parent)Name" inherits="ZO_SortHeader">
+                            <Anchor point="TOPLEFT" offsetX="30" />
+                            <Dimensions x="ZO_GUILD_RECRUITMENT_BLACKLIST_KEYBOARD_NAME_COLUMN_SIZE" y="ZO_GUILD_RECRUITMENT_BLACKLIST_KEYBOARD_ENTRY_HEIGHT" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString("SI_PLATFORMACCOUNTLABEL", ACCOUNT_LABEL_PC), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_GuildRecruitment_AddToBlacklistDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_GuildRecruitment_AddToBlacklistDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame">
+                    <OnInitialized>
+                        self:SetText(zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, ZO_GetPlatformAccountLabel()))
+                    </OnInitialized>
+                </Label>
+
+                <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_REQUEST_DISPLAY_NAME_DEFAULT_TEXT))
+                            </OnInitialized>
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                            <OnTab>
+                                ZO_GuildRecruitment_AddToBlacklistDialog_KeyboardNoteEdit:TakeFocus()
+                            </OnTab>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)NoteHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"  text="SI_GUILD_RECRUITMENT_BLACKLIST_DEFAULT_NOTE_TEXT">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+
+                <Backdrop name="$(parent)Note" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NoteHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NoteHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_GUILD_BLACKLIST_MESSAGE_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

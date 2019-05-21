@@ -692,6 +692,21 @@ end
 -- Renamed to better reflect behavior: the output isn't localized, it's delimited.
 ZO_LocalizeDecimalNumber = ZO_CommaDelimitDecimalNumber
 
+-- Removed alliance war guest campaigns. You can now join any campaign, so no need to guest anywhere.
+function GetGuestCampaignId()
+    return 0
+end
+
+function GetCampaignGuestCooldown()
+    return 0
+end
+
+function SwitchGuestCampaign(campaignId)
+    -- do nothing
+end
+
+GetAllianceBannerIcon = GetAllianceSymbolIcon
+
 -- GetCraftingSkillLineIndices removed
 function GetCraftingSkillLineIndices(tradeskillType)
     local skillLineData = SKILLS_DATA_MANAGER:GetCraftingSkillLineData(tradeskillType)

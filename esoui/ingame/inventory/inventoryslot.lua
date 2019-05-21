@@ -590,6 +590,9 @@ local function TryGuildBankDepositItem(sourceBag, sourceSlot)
             return
         end
 
+        local soundCategory = GetItemSoundCategory(sourceBag, sourceSlot)
+        PlayItemSound(soundCategory, ITEM_SOUND_ACTION_PICKUP)
+
         TransferToGuildBank(sourceBag, sourceSlot)
     end
     ClearCursor()
@@ -607,6 +610,9 @@ local function TryGuildBankWithdrawItem(sourceSlotIndex)
             ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_INVENTORY_FULL)
             return
         end
+
+        local soundCategory = GetItemSoundCategory(BAG_GUILDBANK, sourceSlotIndex)
+        PlayItemSound(soundCategory, ITEM_SOUND_ACTION_PICKUP)
 
         TransferFromGuildBank(sourceSlotIndex)
     end

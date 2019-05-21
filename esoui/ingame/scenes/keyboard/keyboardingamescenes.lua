@@ -815,6 +815,46 @@ esoPlusOffersScene:AddFragment(TITLE_FRAGMENT)
 esoPlusOffersScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
 
 -------------------
+-- Guild Finder Scene
+-------------------
+
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(GUILD_SELECTOR_FRAGMENT)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(KEYBOARD_GUILD_RECRUITMENT_FRAGMENT)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(DISPLAY_NAME_FRAGMENT)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(GUILD_SHARED_INFO_FRAGMENT)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(GUILD_WINDOW_SOUNDS)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
+KEYBOARD_GUILD_RECRUITMENT_SCENE:AddFragment(GUILD_SELECTOR_ACTION_LAYER_FRAGMENT)
+
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(DISPLAY_NAME_FRAGMENT)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(GUILD_SELECTOR_FRAGMENT)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(KEYBOARD_GUILD_BROWSER_FRAGMENT)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(GUILD_WINDOW_SOUNDS)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
+KEYBOARD_GUILD_BROWSER_SCENE:AddFragment(GUILD_SELECTOR_ACTION_LAYER_FRAGMENT)
+
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(TREE_UNDERLAY_FRAGMENT)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(TITLE_FRAGMENT)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(GUILD_LINK_TITLE_FRAGMENT)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(DISPLAY_NAME_FRAGMENT)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(KEYBOARD_GUILD_BROWSER_GUILD_INFO_FRAGMENT)
+KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
+
+-------------------
 --Main Menu
 -------------------
 
@@ -1013,6 +1053,14 @@ do
             highlight = "EsoUI/Art/Guild/tabIcon_ranks_over.dds",
         },
         {
+            categoryName = SI_WINDOW_TITLE_GUILD_RECRUITMENT,
+            descriptor = "guildRecruitmentKeyboard",
+            normal = "EsoUI/Art/GuildFinder/tabIcon_recruitment_up.dds",
+            pressed = "EsoUI/Art/GuildFinder/tabIcon_recruitment_down.dds",
+            disabled = "EsoUI/Art/GuildFinder/tabIcon_recruitment_disabled.dds",
+            highlight = "EsoUI/Art/GuildFinder/tabIcon_recruitment_over.dds",
+        },
+        {
             categoryName = SI_WINDOW_TITLE_GUILD_HERALDRY,
             descriptor = "guildHeraldry",
             visible = function() return GUILD_HERALDRY:IsEnabled() end,
@@ -1028,9 +1076,9 @@ do
             pressed = "EsoUI/Art/Guild/tabIcon_history_down.dds",
             disabled = "EsoUI/Art/Guild/tabIcon_history_disabled.dds",
             highlight = "EsoUI/Art/Guild/tabIcon_history_over.dds",
-        }
+        },
     }
-    SCENE_MANAGER:AddSceneGroup("guildsSceneGroup", ZO_SceneGroup:New("guildHome", "guildRoster", "guildRanks", "guildHeraldry", "guildHistory", "guildCreate"))
+    SCENE_MANAGER:AddSceneGroup("guildsSceneGroup", ZO_SceneGroup:New("guildHome", "guildRoster", "guildRanks", "guildHeraldry", "guildHistory", "guildCreate", "guildRecruitmentKeyboard", "guildBrowserKeyboard", "linkGuildInfoKeyboard"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_GUILDS, "guildsSceneGroup", iconData)
     GUILD_SELECTOR:OnScenesCreated()
     MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnCallback("guildsSceneGroup", "OnGuildSelected")
@@ -1093,7 +1141,7 @@ do
         {
             categoryName = SI_WINDOW_TITLE_CAMPAIGN_OVERVIEW,
             descriptor = "campaignOverview",
-            visible = function() return GetCurrentCampaignId() ~= 0 or GetAssignedCampaignId() ~= 0 end,
+            visible = ZO_CampaignSelector_Shared_ShouldShowCampaignSelector,
             normal = "EsoUI/Art/Campaign/campaign_tabIcon_summary_up.dds",
             pressed = "EsoUI/Art/Campaign/campaign_tabIcon_summary_down.dds",
             highlight = "EsoUI/Art/Campaign/campaign_tabIcon_summary_over.dds",

@@ -130,6 +130,11 @@ function ZO_SharedInventoryManager:Initialize()
         self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
     end
 
+    local function RefreshInventoryOnGuildChange()
+        self:RefreshInventory(BAG_BACKPACK)
+        self:RefreshInventory(BAG_WORN)
+    end
+
     local function OnGuildBankUpdated()
         self.refresh:RefreshAll("guild_bank")
         self:FireCallbacks("FullInventoryUpdate", BAG_GUILDBANK)
@@ -137,7 +142,8 @@ function ZO_SharedInventoryManager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_FULL_UPDATE, OnFullInventoryUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventorySlotUpdated)
-
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_SELF_JOINED_GUILD, RefreshInventoryOnGuildChange)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_SELF_LEFT_GUILD, RefreshInventoryOnGuildChange)
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_GUILD_BANK, OnGuildBankUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_GUILD_BANK, OnGuildBankUpdated)
@@ -146,10 +152,15 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_ITEMS_READY, OnGuildBankUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_GUILD_BANK_OPEN_ERROR, OnGuildBankUpdated)
 
-    local function OnGuildBankInventorySlotUpdated(eventCode, slotIndex)
+    local function OnGuildBankInventorySlotUpdated(eventCode, slotIndex, updatedByLocalPlayer, itemSoundCategory)
         local previousSlotData = self:GetPreviousSlotDataInternal(BAG_GUILDBANK, slotIndex)
         self.refresh:RefreshSingle("inventory", BAG_GUILDBANK, slotIndex)
         self.refresh:UpdateRefreshGroups()
+
+        if updatedByLocalPlayer and GetInteractionType() == INTERACTION_GUILDBANK then
+            PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_SLOT)
+        end
+
         self:FireCallbacks("SingleSlotInventoryUpdate", BAG_GUILDBANK, slotIndex, previousSlotData)
     end
 
@@ -443,12 +454,12 @@ function ZO_SharedInventory_SelectAccessibleGuildBank(lastSuccessfulGuildBankId)
             return
         elseif(validId == nil) then
             validId = guildId
-        end            
+        end
     end
 
-    if(validId) then
+    if validId then
         SelectGuildBank(validId)
-    elseif(numGuilds > 0) then
+    elseif numGuilds > 0 then
         SelectGuildBank(GetGuildId(1))
     end
 end

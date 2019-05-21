@@ -642,6 +642,8 @@ do
         -- Custom data templates
         dialog.entryList:AddDataTemplateWithHeader("ZO_GamepadDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryFullWidthHeaderTemplate", nil, nil, nil)
         dialog.entryList:AddDataTemplate("ZO_GamepadDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, nil)
+        dialog.entryList:AddDataTemplateWithHeader("ZO_GamepadMultiSelectionDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryFullWidthHeaderTemplate", nil, nil, nil)
+        dialog.entryList:AddDataTemplate("ZO_GamepadMultiSelectionDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, nil)
     end
 
     -- Valid fields for parametric list entries are:
@@ -651,7 +653,7 @@ do
         --   text - the text that will appear in the list
         --   icon - an optional icon to show next to the entry in the parametric list
         --   entryData - a premade ZO_GamepadEntryData in place of the one created from templateData, text, and icon
-    function ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog, limitNumEntries)
+    function ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog, limitNumEntries, reselect)
         dialog.entryList:Clear()
 
         for i, entryInfoTable in ipairs(dialog.info.parametricList) do
@@ -714,7 +716,11 @@ do
             end
         end
 
-        dialog.entryList:CommitWithoutReselect()
+        if reselect then
+            dialog.entryList:Commit()
+        else
+            dialog.entryList:CommitWithoutReselect()
+        end
     end
 end
 
@@ -848,7 +854,12 @@ function ZO_GenericStaticListGamepadDialogTemplate_Setup(dialog, data)
         listHeaderControl:SetHidden(true)
     end
 
-    for i, itemInfo in ipairs(dialog.info.itemInfo) do
+    local itemInfo = dialog.info.itemInfo
+    if type(itemInfo) == "function" then
+        itemInfo = dialog.info.itemInfo(dialog)
+    end
+
+    for i, itemInfo in ipairs(itemInfo) do
         local entryControl = dialog.entryPool:AcquireObject()
         if listEntryAnchorControl then
             entryControl:SetAnchor(TOPLEFT, listEntryAnchorControl, BOTTOMLEFT, 0, entryRowSpacing) --there is a built in 4 tall spacer

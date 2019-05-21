@@ -93,24 +93,24 @@ function ZO_GamepadSocialListPanel:InitializeKeybinds()
         self:AddUniversalKeybind(addKeybind)
     end
 
-	local hideOfflineKeybind = 
-	{
-		alignment = KEYBIND_STRIP_ALIGN_LEFT,
-		name = function()
-			if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE) then
-				return GetString(SI_SOCIAL_LIST_SHOW_OFFLINE)
-			else
-				return GetString(SI_SOCIAL_LIST_HIDE_OFFLINE)
-			end
-		end,
-		keybind = "UI_SHORTCUT_RIGHT_STICK",
-		callback = function()
-			SetSetting(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE, tostring(not GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)))
-			self:RefreshFilters()
-			self:UpdateKeybinds()
-		end,
-	}
-	self:AddUniversalKeybind(hideOfflineKeybind)
+    local hideOfflineKeybind = 
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        name = function()
+            if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE) then
+                return GetString(SI_SOCIAL_LIST_SHOW_OFFLINE)
+            else
+                return GetString(SI_SOCIAL_LIST_HIDE_OFFLINE)
+            end
+        end,
+        keybind = "UI_SHORTCUT_RIGHT_STICK",
+        callback = function()
+            SetSetting(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE, tostring(not GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)))
+            self:RefreshFilters()
+            self:UpdateKeybinds()
+        end,
+    }
+    self:AddUniversalKeybind(hideOfflineKeybind)
 end
 
 function ZO_GamepadSocialListPanel:InitializeDropdownFilter()
@@ -141,18 +141,22 @@ function ZO_GamepadSocialListPanel:GetAddKeybind()
     -- this function is meant be overridden in a subclass
 end
 
+function ZO_GamepadSocialListPanel:ShouldShowData(data)
+    local hideOffline = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
+
+    return not hideOffline or data.online
+end
+
 function ZO_GamepadSocialListPanel:FilterScrollList()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
     ZO_ClearNumericallyIndexedTable(scrollData)
 
     local searchTerm = self:GetCurrentSearch()
-	local hideOffline = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)
-    
     for _, data in ipairs(self.masterList) do
         if(searchTerm == "" or self:IsMatch(searchTerm, data)) then
-			if not hideOffline or data.online then
-				table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, data))
-			end
+            if self:ShouldShowData(data) then
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, data))
+            end
         end
     end
 end

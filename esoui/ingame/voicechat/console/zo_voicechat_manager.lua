@@ -475,7 +475,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         end
     end
 
-    local function OnSelfJoinedGuild(guildServerId, displayName, guildId)
+    local function OnSelfJoinedGuild(guildId, displayName)
         --We should only automatically join this guild's channel if we're not already in a group or guild channel
         local desiredActiveChannel = self.desiredActiveChannel
         if desiredActiveChannel then
@@ -504,7 +504,7 @@ function ZO_VoiceChat_Manager:RegisterForEvents()
         end
     end
 
-    local function OnSelfLeftGuild(guildServerId, displayName, guildId)
+    local function OnSelfLeftGuild(guildId, displayName)
         if self.desiredActiveChannel and self.desiredActiveChannel.guildId == guildId then
             SwapOnLosingActiveGuildChannel()
         elseif self.desiredPassiveChannel and self.desiredPassiveChannel.guildId == guildId then

@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRecruitment_Blacklist_Row_Gamepad" virtual="true">
+            <Dimensions y="ZO_GUILD_RECRUITMENT_BLACKLIST_GAMEPAD_ENTRY_HEIGHT" />
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad36" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                    <Dimensions x="ZO_GUILD_RECRUITMENT_BLACKLIST_GAMEPAD_NAME_COLUMN_SIZE" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildRecruitment_Blacklist_Gamepad_TopLevel" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true">
+            <OnInitialized>
+                ZO_GuildRecruitment_Blacklist_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)PanelName" font="ZoFontGamepadBold54" horizontalAlignment="CENTER" text="SI_GUILD_RECRUITMENT_CATEGORY_BLACKLIST" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="40" />
+                </Label>
+                <Control name="$(parent)Container" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Controls>
+                        <Control name="$(parent)ContentHeader" override="true" hidden="true" />
+
+                        <Control name="$(parent)Headers" override="true">
+                            <Anchor point="TOPLEFT" />
+                            <Controls>
+                                <Label name="$(parent)Name" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                                    <Dimensions x="ZO_GUILD_RECRUITMENT_BLACKLIST_GAMEPAD_NAME_COLUMN_SIZE" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "name", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

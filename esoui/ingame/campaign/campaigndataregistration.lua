@@ -18,9 +18,9 @@ end
 
 function ZO_CampaignDataRegistration:Refresh()
     local needsData = self.needsDataFunction()
-    if(self.needsData ~= needsData) then
+    if self.needsData ~= needsData then
         self.needsData = needsData
-        if(needsData) then
+        if needsData then
             RegisterForAssignedCampaignData()
         else
             UnregisterForAssignedCampaignData()
@@ -33,7 +33,7 @@ function ZO_CampaignDataRegistration:OnPlayerActivated()
 end
 
 function ZO_CampaignDataRegistration:OnPlayerDeactivated()
-    if(self.needsData) then
+    if self.needsData then
         UnregisterForAssignedCampaignData()
     end
     self.needsData = false    

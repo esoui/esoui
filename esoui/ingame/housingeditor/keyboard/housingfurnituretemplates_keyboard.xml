@@ -1,6 +1,24 @@
 <GuiXml> 
     <Controls>
-        <Label name="ZO_HousingFurnitureBrowserSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true" >
+        <!-- These templates for categories in a ZO_Tree need to have short names or else certain control names will get too long -->
+        <Control name="ZO_FurnitureBrowserCategory" inherits="ZO_IconHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true" modifyTextType="UPPERCASE">
+                    <DimensionConstraints maxX="ZO_HOUSING_FURNITURE_BROWSER_CATEGORY_LABEL_WIDTH"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_FurnitureBrowserChildless" inherits="ZO_FurnitureBrowserCategory" virtual="true">
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.OnMouseUp = ZO_TreeEntry_OnMouseUp
+                self.SetSelected = ZO_IconHeader_Setup
+            </OnInitialized>
+        </Control>
+        
+        <Label name="ZO_FurnitureBrowserSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" virtual="true" >
+            <DimensionConstraints maxX="ZO_HOUSING_FURNITURE_BROWSER_SUBCATEGORY_LABEL_WIDTH"/>
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
@@ -120,7 +138,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-14" />
                     <Controls>
                         <Control name="$(parent)CategoryList" inherits="ZO_ScrollContainer" >
-                            <Dimensions x="310" />
+                            <Dimensions x="ZO_HOUSING_FURNITURE_BROWSER_CATEGORY_LIST_WIDTH" />
                             <Anchor point="TOPLEFT" offsetX="10" offsetY="72" />
                             <Anchor point="BOTTOMLEFT" offsetX="-28" />
                         </Control>

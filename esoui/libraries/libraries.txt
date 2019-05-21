@@ -60,7 +60,6 @@ EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.xml
 
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.lua
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.xml
-EsoUI\Libraries\ZO_Templates\Gamepad\LabelTemplates_Gamepad.lua
 EsoUI\Libraries\ZO_Templates\Gamepad\LabelTemplates_Gamepad.xml
 EsoUI\Libraries\ZO_Templates\TreeTemplates.lua
 EsoUI\Libraries\ZO_Templates\TreeTemplates.xml
@@ -120,7 +119,6 @@ EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.lua
 EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.xml
 EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.lua
 EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.xml
-EsoUI\Libraries\ZO_TimeLockedDialog\ZO_TimeLockedDialog.lua
 
 EsoUI\Libraries\ZO_SavingEditBox\ZO_SavingEditBox.lua
 EsoUI\Libraries\ZO_SavingEditBox\ZO_SavingEditBox.xml
@@ -270,8 +268,12 @@ EsoUI\Libraries\ZO_Tile\Gamepad\ContextualActionsTile_Gamepad.lua
 EsoUI\Libraries\ZO_Tile\Gamepad\ContextualActionsTile_Gamepad.xml
 EsoUI\Libraries\ZO_Tile\Gamepad\ClaimTile_Gamepad.lua
 EsoUI\Libraries\ZO_Tile\Gamepad\ClaimTile_Gamepad.xml
+EsoUI\Libraries\ZO_Tile\ActivationTile.lua
+EsoUI\Libraries\ZO_Tile\ActivationTile.xml
 
 EsoUI\Libraries\ZO_SelectionIndicator\ZO_SelectionIndicator.lua
 EsoUI\Libraries\ZO_SelectionIndicator\ZO_SelectionIndicator.xml
+
+EsoUI\Libraries\ZO_MostRecentEventHandler\ZO_MostRecentEventHandler.lua
 
 EsoUI\Libraries\ZO_ScriptProfiler\ZO_ScriptProfiler.lua

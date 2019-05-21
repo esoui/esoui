@@ -286,7 +286,7 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
 
     for i = 1, #categories do
         local categoryInfo = categories[i]
-        categoryNodes[categoryInfo.name] = self.navigationTree:AddNode("ZO_QuestJournalHeader", categoryInfo.name, nil, SOUNDS.QUEST_BLADE_SELECTED)
+        categoryNodes[categoryInfo.name] = self.navigationTree:AddNode("ZO_QuestJournalHeader", categoryInfo.name)
     end
 
     local firstNode
@@ -295,7 +295,7 @@ function ZO_QuestJournal_Keyboard:RefreshQuestList()
     for i = 1, #quests do
         local questInfo = quests[i]
         local parent = categoryNodes[questInfo.categoryName]
-        local questNode = self.navigationTree:AddNode("ZO_QuestJournalNavigationEntry", questInfo, parent, SOUNDS.QUEST_SELECTED)
+        local questNode = self.navigationTree:AddNode("ZO_QuestJournalNavigationEntry", questInfo, parent)
         firstNode = firstNode or questNode
         self.questIndexToTreeNode[questInfo.questIndex] = questNode
 

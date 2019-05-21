@@ -6,14 +6,14 @@ local function GetGuildDialogFunction(playerGuildId, data, isGamepad)
         showDialogFunc = ZO_Dialogs_ShowGamepadDialog
     end
 
-	local guildName = GetGuildName(playerGuildId)
-	local numGuildMembers = GetNumGuildMembers(playerGuildId)
-	local playerIndex = GetPlayerGuildMemberIndex(playerGuildId)
-	local _,_,rankIndex,_,_ = GetGuildMemberInfo(playerGuildId, playerIndex)
-	local playerIsGuildmaster = IsGuildRankGuildMaster(playerGuildId, rankIndex)
+    local guildName = GetGuildName(playerGuildId)
+    local numGuildMembers = GetNumGuildMembers(playerGuildId)
+    local playerIndex = GetPlayerGuildMemberIndex(playerGuildId)
+    local _,_,rankIndex,_,_ = GetGuildMemberInfo(playerGuildId, playerIndex)
+    local playerIsGuildmaster = IsGuildRankGuildMaster(playerGuildId, rankIndex)
     local guildAlliance = GetGuildAlliance(playerGuildId)
-	local allianceIcon = zo_iconFormat(GetAllianceBannerIcon(guildAlliance), allianceIconSize, allianceIconSize)
-	local isLastMemberOfGuild = (numGuildMembers == 1)
+    local allianceIcon = zo_iconFormat(GetPlatformAllianceSymbolIcon(guildAlliance), allianceIconSize, allianceIconSize)
+    local isLastMemberOfGuild = (numGuildMembers == 1)
 
     if(data == nil) then
         data = {}
@@ -21,12 +21,12 @@ local function GetGuildDialogFunction(playerGuildId, data, isGamepad)
 
     if(isGamepad) then
         allianceIcon = ""
-        guildName = ZO_PrefixIconNameFormatter(ZO_GetAllianceIconUserAreaDataName(guildAlliance), guildName)
+        guildName = ZO_AllianceIconNameFormatter(guildAlliance, guildName)
     end
 
     data.guildId = playerGuildId
 
-	if(isLastMemberOfGuild) then
+    if(isLastMemberOfGuild) then
         return function() showDialogFunc("GUILD_DISBAND", data, { mainTextParams = { allianceIcon, guildName }}) end
     elseif(playerIsGuildmaster) then
         return function() showDialogFunc("GUILD_LEAVE_LEADER", data, { mainTextParams = { allianceIcon, guildName }}) end
@@ -49,10 +49,8 @@ function ZO_CanPlayerCreateGuild()
 
     for i = 1, numGuilds do
         local guildId = GetGuildId(i)
-        if(not playerIsGuildMaster) then
-            local guildPlayerIndex = GetPlayerGuildMemberIndex(guildId)
-            local _, _, rankIndex = GetGuildMemberInfo(guildId, guildPlayerIndex)
-            if(IsGuildRankGuildMaster(guildId, rankIndex)) then
+        if not playerIsGuildMaster then
+            if IsPlayerGuildMaster(guildId) then
                 playerIsGuildMaster = true
                 break
             end
@@ -119,7 +117,7 @@ function ZO_ValidatePlayerGuildId(guildIdToValidate)
     for i = 1, numGuilds do
         local guildId = GetGuildId(i)
 
-        if(guildIdToValidate == guildId) then
+        if guildIdToValidate == guildId then
             return true
         end
     end
@@ -142,7 +140,6 @@ function ZO_TryGuildInvite(guildId, displayName)
         local function GuildInviteCallback(success)
             if success then
                 GuildInvite(guildId, displayName)
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, UndecorateDisplayName(displayName), guildName))
             end
         end
 
@@ -154,6 +151,5 @@ function ZO_TryGuildInvite(guildId, displayName)
         end
 
         GuildInvite(guildId, displayName)
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_ROSTER_INVITED_MESSAGE, displayName, guildName))
-    end    
+    end
 end

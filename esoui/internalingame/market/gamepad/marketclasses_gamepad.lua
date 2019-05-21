@@ -130,13 +130,13 @@ function ZO_GamepadMarketProductBundleAttachment:GetTemplate()
     return ZO_GAMEPAD_MARKET_PRODUCT_BUNDLE_ATTACHMENT_TEMPLATE
 end
 
-function ZO_GamepadMarketProductBundleAttachment:GetPurchaseState()
-    local parentPurchaseState = GetMarketProductPurchaseState(self.bundleMarketProductId)
-    if parentPurchaseState == MARKET_PRODUCT_PURCHASE_STATE_PURCHASED then
-        return parentPurchaseState
+function ZO_GamepadMarketProductBundleAttachment:GetMarketProductDisplayState()
+    local parentDisplayState = ZO_GetMarketProductDisplayState(self.bundleMarketProductId)
+    if parentDisplayState == MARKET_PRODUCT_DISPLAY_STATE_PURCHASED then
+        return parentDisplayState
     end
 
-    return ZO_GamepadMarketProduct.GetPurchaseState(self)
+    return ZO_GamepadMarketProduct.GetMarketProductDisplayState(self)
 end
 
 function ZO_GamepadMarketProductBundleAttachment:Show(...)
@@ -167,7 +167,7 @@ function ZO_GamepadMarketProductBundleAttachment:SetBundleMarketProductId(bundle
 end
 
 function ZO_GamepadMarketProductBundleAttachment:IsPurchaseLocked()
-     return GetMarketProductPurchaseState(self.bundleMarketProductId) ~= MARKET_PRODUCT_PURCHASE_STATE_NOT_PURCHASED or ZO_GamepadMarketProduct.IsPurchaseLocked(self)
+     return ZO_GetMarketProductDisplayState(self.bundleMarketProductId) ~= MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED or ZO_GamepadMarketProduct.IsPurchaseLocked(self)
 end
 
 function ZO_GamepadMarketProductBundleAttachment:Reset()
