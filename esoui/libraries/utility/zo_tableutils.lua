@@ -354,3 +354,13 @@ function ZO_DeepAcyclicTableCompare(t1, t2, maxTablesVisited)
 
     return visit(t1, t2)
 end
+
+function ZO_CreateSetFromArguments(...)
+    local set = {}
+
+    for i = 1, select('#', ...) do
+        set[select(i, ...)] = true
+    end
+    
+    return set
+end

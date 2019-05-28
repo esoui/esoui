@@ -16,9 +16,10 @@ function ZO_GuildRecruitment_GuildListing_Keyboard:Initialize(control)
     local function OnTextEdited(control, data)
         local attribute = data.dataSource.attribute
         local editBoxObject = control and control.object
-        local text = editBoxObject:GetEditBoxText()
         editBoxObject:SetControlHidden()
-        data.dataSource.currentValue = text
+        if editBoxObject:IsEditing() then
+            data.dataSource.currentValue = editBoxObject:GetEditBoxText()
+        end
     end
 
     self.templateData =

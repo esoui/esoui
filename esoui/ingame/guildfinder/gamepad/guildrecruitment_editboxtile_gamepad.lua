@@ -28,10 +28,6 @@ function ZO_GuildRecruitment_EditBoxTile_Gamepad:Initialize(...)
     local function OnTextEditFocusLost()
         ZO_GamepadEditBox_FocusLost(self.edit)
 
-        if self.edit:GetText() == "" and self.defaultValue ~= nil then
-            self.edit:SetText(self.defaultValue)
-        end
-
         if self.onFocusLostFunction then
             self.onFocusLostFunction(self.edit)
         end
@@ -69,7 +65,7 @@ function ZO_GuildRecruitment_EditBoxTile_Gamepad:Layout(data)
     self.titleLabel:SetText(data.headerText)
 
     self.attribute = data.attribute
-    self.defaultValue = data.defaultValue
+    ZO_EditDefaultText_Initialize(self.edit, data.defaultText)
     self.onEditFunction = data.onEditCallback
     self.onFocusLostFunction = data.onFocusLostCallback
     if data.currentValue then

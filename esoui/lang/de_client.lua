@@ -5871,7 +5871,7 @@ SafeAddString(SI_MARKET_PURCHASE_SUCCESS_ESO_PLUS_SAVINGS_TEXT, "Durch Eure ESO 
 SafeAddString(SI_MARKET_PURCHASE_SUCCESS_TEXT, "Ihr habt den <<1>> erfolgreich erstanden.", 2)
 SafeAddString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, "Ihr habt den <<1>> erfolgreich erstanden.\n\nIhr könnt <<acc,p:1>> nun in Eurer Sammlung finden.", 2)
 SafeAddString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, "Ihr habt einen <<2*1>> erfolgreich erstanden.", 2)
-SafeAddString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE, "Ihr habt den <<1>> erfolgreich erstanden.\n\nDiese Wertmarken können nur in der Charakterauswahl eingelöst werden.", 1)
+SafeAddString(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_TOKEN_USAGE, "Ihr habt den <<1>> erfolgreich erstanden.\n\nWertmarken können nur in der Charakterauswahl eingelöst werden.", 1)
 SafeAddString(SI_MARKET_PURCHASING_TEXT, "Ihr erwerbt den <<1>>", 3)
 SafeAddString(SI_MARKET_PURCHASING_TEXT_WITH_QUANTITY, "Ihr erwerbt einen <<2*1>>", 2)
 SafeAddString(SI_MARKET_PURCHASING_TITLE, "Wird erworben", 0)

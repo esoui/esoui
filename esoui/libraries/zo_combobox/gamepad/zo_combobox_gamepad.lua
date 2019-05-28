@@ -587,10 +587,12 @@ function ZO_MultiSelection_ComboBox_Data_Gamepad:ToggleItemSelected(item)
 end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:SetItemSelected(item, isSelected)
-    if isSelected and not self:IsItemSelected(item) then
-        self:AddItemToSelected(item)
-    else
-        self:RemoveItemFromSelected(item)
+    if isSelected ~= self:IsItemSelected(item) then
+        if isSelected then
+            self:AddItemToSelected(item)
+        else
+            self:RemoveItemFromSelected(item)
+        end
     end
 end
 

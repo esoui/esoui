@@ -374,7 +374,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             dimensionsY = self.templateData.minimumCP.dimensionsY,
             headerText = self.templateData.minimumCP.headerText,
             onEditCallback = OnTextEdited,
-            defaultValue = 0,
+            defaultText = "0",
             onFocusLostCallback = OnMinCPFocusLost,
             updateFunction = function(guildId, text)
                 SetGuildRecruitmentMinimumCP(guildId, tonumber(text) or 0)

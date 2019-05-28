@@ -178,6 +178,16 @@ function ZO_GuildBrowser_GuildList_Keyboard:RefreshPersonalitiesFilter()
     self.filterManager:SetFilterValueIsDefaultByAttributeType(GUILD_META_DATA_ATTRIBUTE_PERSONALITIES, self.personalitiesDropdown:GetNumSelectedEntries() <= 0)
 end
 
+local function IsLanguageFilterComboBoxSetToDefault(comboBox)
+    for _, item in ipairs(comboBox:GetItems()) do
+        local isCurrentItemDefault = ZO_GuildBrowser_IsGuildAttributeLanguageFilterDefault(item.value)
+        if isCurrentItemDefault ~= comboBox:IsItemSelected(item) then
+            return false
+        end
+    end
+    return true
+end
+
 function ZO_GuildBrowser_GuildList_Keyboard:RefreshAdditionalFilters()
     local dialog = ZO_GuildFinderAdditionalFiltersDialog
 
@@ -185,7 +195,7 @@ function ZO_GuildBrowser_GuildList_Keyboard:RefreshAdditionalFilters()
     for _, item in ipairs(languageItems) do
         SetGuildFinderLanguageFilterValue(item.value, dialog.languagesComboBox:IsItemSelected(item))
     end
-    self.filterManager:SetFilterValueIsDefaultByAttributeType(GUILD_META_DATA_ATTRIBUTE_LANGUAGES, dialog.languagesComboBox:GetNumSelectedEntries() <= 0)
+    self.filterManager:SetFilterValueIsDefaultByAttributeType(GUILD_META_DATA_ATTRIBUTE_LANGUAGES, IsLanguageFilterComboBoxSetToDefault(dialog.languagesComboBox))
 
     local sizeItems = dialog.sizeComboBox:GetItems()
     for _, item in ipairs(sizeItems) do
@@ -240,6 +250,18 @@ function ZO_GuildBrowser_GuildList_Keyboard:RefreshSearchFilters()
     self:RefreshAdditionalFilters()
 end
 
+local function SetLanguageFiltersComboBoxToDefault(comboBox)
+    comboBox:ClearAllSelections()
+
+    for _, item in ipairs(comboBox:GetItems()) do
+        if ZO_GuildBrowser_IsGuildAttributeLanguageFilterDefault(item.value) then
+            comboBox:AddItemToSelected(item)
+        end
+    end
+
+    comboBox:RefreshSelectedItemText()
+end
+
 function ZO_GuildBrowser_GuildList_Keyboard:ResetFilters()
     ZO_CheckButton_SetCheckState(self.traderCheckBox.checkButton, false)
     self.personalitiesDropdown:ClearAllSelections()
@@ -247,7 +269,7 @@ function ZO_GuildBrowser_GuildList_Keyboard:ResetFilters()
 
     local dialog = ZO_GuildFinderAdditionalFiltersDialog
 
-    dialog.languagesComboBox:ClearAllSelections()
+    SetLanguageFiltersComboBoxToDefault(dialog.languagesComboBox)
     dialog.sizeComboBox:ClearAllSelections()
 
     local allianceButtons = dialog.allianceButtons
@@ -451,6 +473,7 @@ local function SetupLanguageFiltersComboBox(comboBox, iterBegin, iterEnd, string
         entry.value = i
         comboBox:AddItem(entry)
     end
+    SetLanguageFiltersComboBoxToDefault(comboBox)
 end
 
 local function SetupSizeFilterComboBox(comboBox)

@@ -28,7 +28,6 @@ function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:Layout(data)
     ZO_Tile.Layout(self, data)
 
     self.attribute = data.attribute
-    self.defaultValue = data.defaultValue
     self.titleLabel:SetText(data.headerText)
 
     self.editBox:SetShouldEscapeNonColorMarkup(data.stripMarkup)
@@ -36,7 +35,6 @@ function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:Layout(data)
     self.editBox:SetEmptyText(data.emptyText)
     self.editBox:RegisterCallback("Save", function(text) data.onEditCallback(self.attribute, text) end)
 
-    local displayedText = self:GetEditBoxText()
     if self.hiddenWhileEditing then
         local IS_EDITING = true
         local FORCE_UPDATE = true
@@ -49,6 +47,10 @@ function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:Layout(data)
 
     self.control:SetDimensions(data.dimensionsX, data.dimensionsY)
     self.hiddenWhileEditing = false
+end
+
+function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:IsEditing()
+    return self.editBox:IsEditing()
 end
 
 function ZO_GuildRecruitment_MultilineEditBoxTile_Keyboard:GetEditBoxText()

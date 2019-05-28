@@ -136,9 +136,6 @@ function ZO_GuildBrowser_Gamepad:InitializeKeybindStripDescriptors()
                 end
                 return true
             end,
-            enabled = function()
-                return GUILD_BROWSER_MANAGER:CanSearchGuilds()
-            end,
         },
 
         -- view results
@@ -345,7 +342,7 @@ function ZO_GuildBrowser_Gamepad:RefreshSearchFilters()
 end
 
 function ZO_GuildBrowser_Gamepad:ResetFilters()
-   local defaultSelectionValue = self.filterManager:GetComboBoxEntrySelectionDefault()
+    local defaultSelectionValue = self.filterManager:GetComboBoxEntrySelectionDefault()
 
     self.hasGuildTrader = self.filterManager:GetHasGuildTraderDefault()
     self.minCP = self.filterManager:GetMinCPDefault()
@@ -366,10 +363,7 @@ function ZO_GuildBrowser_Gamepad:ResetFilters()
         self.allianceData:SetItemSelected(item, defaultSelectionValue)
     end
 
-    local allLanguages = self.languageData:GetAllItems()
-    for _, item in ipairs(allLanguages) do
-        self.languageData:SetItemSelected(item, defaultSelectionValue)
-    end
+    self:SetLanguageDataToDefault()
 
     local allSizes = self.sizeData:GetAllItems()
     for _, item in ipairs(allSizes) do
@@ -517,13 +511,29 @@ function ZO_GuildBrowser_Gamepad:BuildAllianceData()
     end
 end
 
+function ZO_GuildBrowser_Gamepad:SetLanguageDataToDefault()
+    for _, item in ipairs(self.languageData:GetAllItems()) do
+        self.languageData:SetItemSelected(item, ZO_GuildBrowser_IsGuildAttributeLanguageFilterDefault(item.language))
+    end
+end
+
+function ZO_GuildBrowser_Gamepad:IsLanguageDataSetToDefault()
+    for _, item in ipairs(self.languageData:GetAllItems()) do
+        local isCurrentItemDefault = ZO_GuildBrowser_IsGuildAttributeLanguageFilterDefault(item.language)
+        if isCurrentItemDefault ~= self.languageData:IsItemSelected(item) then
+            return false
+        end
+    end
+    return true
+end
+
 function ZO_GuildBrowser_Gamepad:BuildLanguageData()
     self.languageData:Clear()
-
     for i = GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END do
         local newEntry = ZO_ComboBox_Base:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString("SI_GUILDLANGUAGEATTRIBUTEVALUE", i)))
         newEntry.language = i
         self.languageData:AddItem(newEntry)
+        self.languageData:SetItemSelected(newEntry, ZO_GuildBrowser_IsGuildAttributeLanguageFilterDefault(i))
     end
 end
 
@@ -541,9 +551,15 @@ function ZO_GuildBrowser_Gamepad:BuildRolesData()
     self.roleData:AddItem(healEntry)
 end
 
-function ZO_GuildBrowser_Gamepad:CreateMultiSelectionBasedDropdown(attributeType, multiSelectionText, dropdownData)
+function ZO_GuildBrowser_Gamepad:CreateMultiSelectionBasedDropdown(attributeType, multiSelectionText, dropdownData, isDropdownSetToDefaultFn)
     local function OnComboboxSelectionChanged()
-        self.filterManager:SetFilterValueIsDefaultByAttributeType(attributeType, #dropdownData.selectedItems <= 0)
+        local isDefault = false
+        if isDropdownSetToDefaultFn then
+            isDefault = isDropdownSetToDefaultFn()
+        else
+            isDefault = #dropdownData.selectedItems <= 0
+        end
+        self.filterManager:SetFilterValueIsDefaultByAttributeType(attributeType, isDefault)
     end
 
     return
@@ -646,7 +662,10 @@ function ZO_GuildBrowser_Gamepad:InitializeFiltersDialog()
     local personalitiesDropdownEntry = self:CreateMultiSelectionBasedDropdown(GUILD_META_DATA_ATTRIBUTE_PERSONALITIES, GetString(SI_GUILD_BROWSER_GUILD_LIST_PERSONALITIES_DROPDOWN_TEXT), self.personalityData)
 
     -- Language
-    local languageDropdownEntry = self:CreateMultiSelectionBasedDropdown(GUILD_META_DATA_ATTRIBUTE_LANGUAGES, GetString(SI_GUILD_BROWSER_GUILD_LIST_LANGUAGES_DROPDOWN_TEXT), self.languageData)
+    local function IsLanguageDataSetToDefault()
+        return self:IsLanguageDataSetToDefault()
+    end
+    local languageDropdownEntry = self:CreateMultiSelectionBasedDropdown(GUILD_META_DATA_ATTRIBUTE_LANGUAGES, GetString(SI_GUILD_BROWSER_GUILD_LIST_LANGUAGES_DROPDOWN_TEXT), self.languageData, IsLanguageDataSetToDefault)
 
     -- Alliance
     local allianceDropdownEntry = self:CreateMultiSelectionBasedDropdown(GUILD_META_DATA_ATTRIBUTE_ALLIANCE, GetString(SI_GUILD_BROWSER_GUILD_LIST_ALLIANCES_DROPDOWN_TEXT), self.allianceData)
@@ -871,7 +890,7 @@ function ZO_GuildBrowser_Gamepad:InitializeApplicationMessageDialog()
                                                                         dialog.currentText = control:GetText()
                                                                      end
                         data.control = control
-                        local defaultEditString = GetString(SI_GAMEPAD_GUILD_BROWSER_APPLICATION_MESSAGE_DIALOG_DEFAULT_EDIT_BOX_TEXT)
+                        local defaultEditString = GetString(SI_GUILD_BROWSER_APPLICATIONS_MESSAGE_EMPTY_TEXT)
                         ZO_EditDefaultText_Initialize(control.editBoxControl, defaultEditString)
                         control.editBoxControl:SetMaxInputChars(MAX_GUILD_APPLICATION_MESSAGE_LENGTH)
                         control.editBoxControl:SetText(dialog.currentText)

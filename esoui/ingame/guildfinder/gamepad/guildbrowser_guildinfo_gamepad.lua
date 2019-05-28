@@ -320,8 +320,7 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:InitializeSubmitDialog()
                                                                      end
                         data.control = control
 
-                        if dialog.nameText == "" then
-                            local activePanel = dialog.data.activePanel
+                        if self.applicationSubmissionText == "" then
                             local defaultEditString = GetString(SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_DEFAULT_EDIT_TEXT)
                             ZO_EditDefaultText_Initialize(control.editBoxControl, defaultEditString)
 
