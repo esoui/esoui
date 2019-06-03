@@ -113,10 +113,6 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:ClearSelections()
     end
 
-    local function MarkDataDirty()
-        self:MarkDataDirty()
-    end
-
     local function OnCollectionUpdated(collectionUpdateType, collectiblesByUnlockState)
         if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
             self:MarkDataDirty()
@@ -161,6 +157,11 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:FireCallbacks("OnCooldownsUpdate")
     end
 
+    function OnCurrentCampaignChanged()
+        self:MarkDataDirty()
+        self:FireCallbacks("OnCurrentCampaignChanged")
+    end
+
     function OnPlayerActivate()
         UpdateGroupStatus()
         OnCooldownsUpdate()
@@ -168,7 +169,7 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
 
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
-    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, MarkDataDirty)
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, OnCurrentCampaignChanged)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 
     --We should clear selections when switching filters, but we won't necessarily clear them when closing scenes
@@ -291,9 +292,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
 
     for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
         local isActivityAvA = ZO_IsActivityTypeAvA(activityType)
-        local isActivityDungeon = ZO_IsActivityTypeDungeon(activityType)
         local isActivityHomeShow = ZO_IsActivityTypeHomeShow(activityType)
-        local isActivityBattleground = ZO_IsActivityTypeBattleground(activityType)
 
         local activityRequiresRoles = ZO_DoesActivityTypeRequireRoles(activityType)
         local isGroupRelevant = inAGroup and not isActivityHomeShow

@@ -3661,7 +3661,7 @@ SafeAddString(SI_GUILDKIOSKRESULT13, "Eure Gilde benötigt mindestens <<1>> Mitg
 SafeAddString(SI_GUILDKIOSKRESULT14, "Eure Gilde kann nur einen Gildenhänder zur selben Zeit anstellen.", 0)
 SafeAddString(SI_GUILDKIOSKRESULT3, "Ihr seid kein Mitglied dieser Gilde.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT4, "Es befindet sich nicht genügend Gold in Eurer Gildenbank.", 1)
-SafeAddString(SI_GUILDKIOSKRESULT5, "Eure Gilde hat bereits ein laufendes Gebot auf einen anderen Gildenhändler abgegeben.", 1)
+SafeAddString(SI_GUILDKIOSKRESULT5, "Ihr habt bereits ein Gebot für einen anderen Standort abgegeben.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT6, "Das neue Gebot muss höher sein als das aktuelle Gebot.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT7, "Ihr habt nicht die notwendigen Gildenrechte.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT8, "Ihr seid kein Mitglied einer Gilde.", 1)

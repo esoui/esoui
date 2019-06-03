@@ -1698,7 +1698,7 @@ SafeAddString(SI_GUILDKIOSKRESULT13, "ギルド商人を雇うにはメンバー
 SafeAddString(SI_GUILDKIOSKRESULT14, "ギルド商人は一度に1人しか雇えません。", 0)
 SafeAddString(SI_GUILDKIOSKRESULT3, "そのギルドに所属していません。", 1)
 SafeAddString(SI_GUILDKIOSKRESULT4, "ギルドの銀行にあるゴールドが足りません。", 1)
-SafeAddString(SI_GUILDKIOSKRESULT5, "他の場所ですでに入札しています。", 1)
+SafeAddString(SI_GUILDKIOSKRESULT5, "別の入札をすでに行っています。", 1)
 SafeAddString(SI_GUILDKIOSKRESULT6, "現在の額より高い額を入札する必要があります。", 1)
 SafeAddString(SI_GUILDKIOSKRESULT7, "ギルドの権限がありません。", 1)
 SafeAddString(SI_GUILDKIOSKRESULT8, "ギルドに所属していません。", 1)

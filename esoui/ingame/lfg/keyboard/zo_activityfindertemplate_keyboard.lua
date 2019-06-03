@@ -103,6 +103,10 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
                 self:HidePrimaryControls()
             end
 
+            if self.filtersDirty then
+                self:RefreshFilters()
+            end
+
             self:RefreshView()
         end
     end
@@ -215,6 +219,11 @@ do
     end
 
     function ZO_ActivityFinderTemplate_Keyboard:RefreshFilters()
+        if not self.fragment:IsShowing() then
+            self.filtersDirty = true
+            return
+        end
+
         local function OnFilterChanged(...)
             self:OnFilterChanged(...)
         end
@@ -281,6 +290,8 @@ do
         end
 
         self.filterControl:SetHidden(self.filterComboBox:GetNumItems() <= 1)
+
+        self.filtersDirty = false
     end
 end
 

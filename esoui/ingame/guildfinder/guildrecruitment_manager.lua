@@ -13,12 +13,6 @@ function ZO_GuildRecruitment_Manager:New(...)
 end
 
 function ZO_GuildRecruitment_Manager:Initialize()
-    for i = 1, GetNumGuilds() do
-        local guildId = GetGuildId(i)
-        RequestGuildFinderGuildApplications(guildId)
-        RequestGuildBlacklist(guildId)
-    end
-
     local function OnGuildFinderApplicationsRecieved(event, guildId)
         self:FireCallbacks("GuildApplicationResultsReady", guildId)
     end

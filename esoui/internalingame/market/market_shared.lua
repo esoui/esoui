@@ -645,6 +645,10 @@ function ZO_Market_Shared:GetQueuedMarketProductId()
     return self.queuedMarketProductId
 end
 
+function ZO_Market_Shared:GetQueuedCategoryIndices()
+    return self.queuedCategoryIndex, self.queuedSubcategoryIndex
+end
+
 function ZO_Market_Shared:SetQueuedCategoryIndices(categoryIndex, subcategoryIndex)
     self.queuedCategoryIndex = categoryIndex
     self.queuedSubcategoryIndex = subcategoryIndex

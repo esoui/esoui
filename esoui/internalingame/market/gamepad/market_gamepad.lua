@@ -480,9 +480,14 @@ function GamepadMarket:OnCategorySelected(data)
             OnMarketCategorySelected(MARKET_DISPLAY_GROUP_CROWN_STORE, categoryIndex, subcategoryIndex)
         end
 
-        local queuedMarketProductId = self:GetQueuedMarketProductId()
-        if queuedMarketProductId then
-            self:ScrollToMarketProduct(queuedMarketProductId) -- can't scroll instantly here, cause we just built the scroll
+        local queuedCategoryIndex, queuedSubcategoryIndex = self:GetQueuedCategoryIndices()
+        if queuedCategoryIndex then
+            self:ScrollToSubcategory(queuedCategoryIndex, queuedSubcategoryIndex) -- can't scroll instantly here, cause we just built the scroll
+        else
+            local queuedMarketProductId = self:GetQueuedMarketProductId()
+            if queuedMarketProductId then
+                self:ScrollToMarketProduct(queuedMarketProductId) -- can't scroll instantly here, cause we just built the scroll
+            end
         end
     end
 end
@@ -1228,11 +1233,12 @@ do
             if categoryData then
                 local targetIndex = categoryData.tabIndex
                 if self.header.tabBar:GetSelectedIndex() ~= targetIndex then
+                    self:SetQueuedCategoryIndices(categoryIndex, subcategoryIndex)
                     self.header.tabBar:SetSelectedDataIndex(targetIndex, DONT_ALLOW_IF_DISABLED, SCROLL_INSTANTLY)
+                else
+                    self:ScrollToSubcategory(categoryIndex, subcategoryIndex, SCROLL_INSTANTLY)
                 end
             end
-
-            self:ClearQueuedCategoryIndices()
         else
             self:SetQueuedCategoryIndices(categoryIndex, subcategoryIndex)
         end
@@ -1302,6 +1308,18 @@ function GamepadMarket:GetMarketProductFromCurrentCategoryById(productId)
     end
 end
 
+function GamepadMarket:GetFirstMarketProductInSubcategoryFromCurrentCategory(categoryIndex, subcategoryIndex)
+    for index, entry in ipairs(self.gridEntries) do
+        if entry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
+            local productData = entry:GetMarketProductData()
+            local productCategoryIndex, productSubcategoryIndex = productData:GetCategoryIndicesFromPresentation()
+            if productCategoryIndex == categoryIndex and productSubcategoryIndex == subcategoryIndex then
+                return entry
+            end
+        end
+    end
+end
+
 function GamepadMarket:RequestShowMarketProduct(marketProductId)
     if self.isInitialized and self.marketScene:IsShowing() and self.marketState == MARKET_STATE_OPEN then
         self:ShowMarketProduct(marketProductId)
@@ -1328,15 +1346,27 @@ do
     end
 end
 
+function GamepadMarket:ScrollToMarketProductEntry(marketProduct, scrollInstantly)
+    if self.showScrollbar then
+        self:ScrollToGridEntry(marketProduct:GetFocusData(), scrollInstantly)
+    end
+    local listIndex = marketProduct:GetListIndex()
+    self.focusList:SetFocusByIndex(listIndex)
+end
+
 function GamepadMarket:ScrollToMarketProduct(marketProductId, scrollInstantly)
     local targetMarketProduct = self:GetMarketProductFromCurrentCategoryById(marketProductId)
     if targetMarketProduct then
-        if self.showScrollbar then
-            self:ScrollToGridEntry(targetMarketProduct:GetFocusData(), scrollInstantly)
-        end
-        local listIndex = targetMarketProduct:GetListIndex()
-        self.focusList:SetFocusByIndex(listIndex)
+        self:ScrollToMarketProductEntry(targetMarketProduct, scrollInstantly)
         self:ClearQueuedMarketProductId()
+    end
+end
+
+function GamepadMarket:ScrollToSubcategory(categoryIndex, subcategoryIndex, scrollInstantly)
+    local targetMarketProduct = self:GetFirstMarketProductInSubcategoryFromCurrentCategory(categoryIndex, subcategoryIndex)
+    if targetMarketProduct then
+        self:ScrollToMarketProductEntry(targetMarketProduct, scrollInstantly)
+        self:ClearQueuedCategoryIndices()
     end
 end
 

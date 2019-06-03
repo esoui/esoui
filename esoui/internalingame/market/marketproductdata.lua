@@ -272,3 +272,7 @@ end
 function ZO_MarketProductData:PassesPurchasableReqList()
     return DoesMarketProductPassPurchasableReqList(self.marketProductId)
 end
+
+function ZO_MarketProductData:GetCategoryIndicesFromPresentation()
+    return GetCategoryIndicesFromMarketProductPresentation(self.marketProductId, self.presentationIndex)
+end
