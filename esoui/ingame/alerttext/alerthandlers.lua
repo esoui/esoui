@@ -1014,6 +1014,10 @@ local AlertHandlers = {
     [EVENT_NO_DAEDRIC_PICKUP_AS_EMPEROR] = function()
         return ERROR, GetString(SI_NO_DAEDRIC_PICKUP_AS_EMPEROR), SOUNDS.GENERAL_ALERT_ERROR
     end,
+
+    [EVENT_CANNOT_DO_THAT_WHILE_HIDDEN] = function()
+        return ERROR, GetString(SI_ERROR_NOT_WHILE_HIDDEN), SOUNDS.GENERAL_ALERT_ERROR
+    end,
 }
 
 ZO_ClientInteractResultSpecificSound =

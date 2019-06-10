@@ -1698,7 +1698,7 @@ SafeAddString(SI_GUILDKIOSKRESULT13, "Votre guilde doit comprendre au moins <<1>
 SafeAddString(SI_GUILDKIOSKRESULT14, "Votre guilde ne peut embaucher qu'un marchand de guilde à la fois.", 0)
 SafeAddString(SI_GUILDKIOSKRESULT3, "Vous n'êtes pas membre de cette guilde.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT4, "Vous ne pouvez pas enchérir autant, il n'y a pas assez de fonds disponibles dans votre banque de guilde.", 1)
-SafeAddString(SI_GUILDKIOSKRESULT5, "Une enchère est en attente ailleurs.", 1)
+SafeAddString(SI_GUILDKIOSKRESULT5, "Vous avez déjà placé une enchère ailleurs.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT6, "Votre enchère doit être supérieure à l'enchère actuelle de votre guilde.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT7, "Vous n'avez pas la permission de la guilde.", 1)
 SafeAddString(SI_GUILDKIOSKRESULT8, "Vous devez être membre d'une guilde pour enchérir sur un marchand de guilde.", 1)

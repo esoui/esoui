@@ -213,9 +213,10 @@ function GuildHistoryManager:BuildMasterList()
         ZO_ClearNumericallyIndexedTable(self.masterList)
         
         for i = 1, GetNumGuildEvents(self.guildId, self.selectedCategory) do
-            local eventType, secsSinceEvent, param1, param2, param3, param4, param5, param6 = GetGuildEventInfo(self.guildId, self.selectedCategory, i)
+            local eventType, secsSinceEvent, param1, param2, param3, param4, param5, param6, eventId = GetGuildEventInfo(self.guildId, self.selectedCategory, i)
             if(self:ShouldShowEventType(eventType)) then
                 table.insert(self.masterList,   {
+                                                    eventId = eventId,
                                                     eventType = eventType,
                                                     param1 = param1,
                                                     param2 = param2,
@@ -276,12 +277,12 @@ function GuildHistoryManager:FilterScrollList()
 end
 
 function GuildHistoryManager:CompareGuildEvents(listEntry1, listEntry2)
-    return listEntry1.data.secsSinceEvent < listEntry2.data.secsSinceEvent
+    return listEntry1.data.eventId > listEntry2.data.eventId
 end
 
 function GuildHistoryManager:SortScrollList()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
-    if(#scrollData > 1) then
+    if #scrollData > 1 then
         table.sort(scrollData, self.sortFunction)
     end
 end
@@ -308,7 +309,7 @@ end
 
 function GuildHistoryManager:DecrementRequestCount()
     self.requestCount = self.requestCount - 1
-    if(self.requestCount == 0) then
+    if self.requestCount == 0 then
         self.loading:Hide()
         self.nextLoadControlTrigger = nil
     end

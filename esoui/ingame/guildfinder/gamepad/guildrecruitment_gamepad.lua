@@ -352,7 +352,6 @@ function ZO_GuildRecruitment_Gamepad:InitializeResponseMessageDialog()
                         control.highlight:SetHidden(not selected)
                         local dialog = data.dialog
 
-                        control.editBoxControl:SetMaxInputChars(MAX_GUILD_APPLICATION_MESSAGE_LENGTH)
                         control.editBoxControl.textChangedCallback = function(control)
                                                                         dialog.currentText = control:GetText()
                                                                      end

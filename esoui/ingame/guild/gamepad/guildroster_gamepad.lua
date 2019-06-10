@@ -27,9 +27,10 @@ function ZO_GamepadGuildRosterManager:Initialize(control)
 
     local function OnGuildMemberNoteChanged(eventId, guildId, displayName, note)
         if GUILD_ROSTER_MANAGER:MatchesGuild(guildId) then 
-            self:RefreshTooltip() 
+            self:RefreshTooltip()
         end
     end
+
     control:RegisterForEvent(EVENT_GUILD_MEMBER_NOTE_CHANGED, OnGuildMemberNoteChanged)
 
     self:InitializeConfirmRemoveDialog()
@@ -244,16 +245,9 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
 end
 
 function ZO_GamepadGuildRosterManager:BuildPromoteOption()
-    local callback = function() 
-        GuildPromote(self.guildId, self.socialData.displayName); 
+    local callback = function()
+        GuildPromote(self.guildId, self.socialData.displayName)
         PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
-        local newRank = self.socialData.rankIndex - 1
-        if newRank > 0 then
-            local rankText = GetFinalGuildRankName(self.guildId, newRank)
-            local rankIcon = zo_iconFormat(GetFinalGuildRankTextureSmall(self.guildId, newRank), 24, 24)
-            local alertText = zo_strformat(SI_GAMEPAD_GUILD_NOTIFY_PROMOTED, rankIcon, rankText)
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
-        end
     end
     return self:BuildOptionEntry(nil, SI_GUILD_PROMOTE, callback)
 end
@@ -262,7 +256,7 @@ function ZO_GamepadGuildRosterManager:BuildPromoteToGuildMasterOption()
     local callback = function()
         local guildInfo = ZO_AllianceIconNameFormatter(self.guildAlliance, self.guildName)
         local rankName = GetFinalGuildRankName(self.guildId, 2)
-        ZO_Dialogs_ShowGamepadDialog("PROMOTE_TO_GUILDMASTER", { guildId = self.guildId, displayName = self.socialData.displayName }, { mainTextParams = { ZO_FormatUserFacingDisplayName(self.socialData.displayName), "", guildInfo, rankName } })  
+        ZO_Dialogs_ShowGamepadDialog("PROMOTE_TO_GUILDMASTER", { guildId = self.guildId, displayName = self.socialData.displayName }, { mainTextParams = { ZO_FormatUserFacingDisplayName(self.socialData.displayName), "", guildInfo, rankName } })
     end
     return self:BuildOptionEntry(nil, SI_GUILD_PROMOTE, callback)
 end
@@ -271,13 +265,6 @@ function ZO_GamepadGuildRosterManager:BuildDemoteOption()
     local callback = function()
         GuildDemote(self.guildId, self.socialData.displayName)
         PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
-        local newRank = self.socialData.rankIndex + 1
-        if newRank <= GetNumGuildRanks(self.guildId) then
-            local rankText = GetFinalGuildRankName(self.guildId, newRank)
-            local rankIcon = zo_iconFormat(GetFinalGuildRankTextureSmall(self.guildId, newRank), 24, 24)
-            local alertText = zo_strformat(SI_GAMEPAD_GUILD_NOTIFY_DEMOTED, rankIcon, rankText)
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
-        end
     end
     return self:BuildOptionEntry(nil, SI_GUILD_DEMOTE, callback)
 end

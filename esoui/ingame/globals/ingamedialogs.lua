@@ -1181,7 +1181,7 @@ ESO_Dialogs["PROMOTE_TO_GUILDMASTER"] =
         {
             text =      SI_DIALOG_ACCEPT,
             callback =  function(dialog)
-                             GuildPromote(dialog.data.guildId, dialog.data.displayName)
+                            GuildPromote(dialog.data.guildId, dialog.data.displayName)
                         end,
             clickSound = SOUNDS.GUILD_ROSTER_PROMOTE,
         },

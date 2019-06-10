@@ -385,13 +385,14 @@ function ZO_GuildHistory_Gamepad:PopulateActivityList()
     -- Build and filter the event list.
     ZO_ClearNumericallyIndexedTable(self.guildEvents)
     for eventIndex = 1, GetNumGuildEvents(self.guildId, categoryId) do
-        local eventType, secsSinceEvent, param1, param2, param3, param4, param5, param6 = GetGuildEventInfo(self.guildId, categoryId, eventIndex)
+        local eventType, secsSinceEvent, param1, param2, param3, param4, param5, param6, eventId = GetGuildEventInfo(self.guildId, categoryId, eventIndex)
         local eventSubcategoryID = ComputeGuildHistoryEventSubcategory(eventType, categoryId)
 
         if (subcategoryId == nil) or (subcategoryId == eventSubcategoryID) then
             local formatFunction = GUILD_EVENT_EVENT_FORMAT[eventType]
             if formatFunction then
                 local eventData = {
+                        eventId = eventId,
                         eventType = eventType,
                         formatFunction = formatFunction,
                         secsSinceEvent = secsSinceEvent,
@@ -407,7 +408,7 @@ function ZO_GuildHistory_Gamepad:PopulateActivityList()
         end
     end
 
-    table.sort(self.guildEvents, function(event1, event2) return event1.secsSinceEvent < event2.secsSinceEvent end)
+    table.sort(self.guildEvents, function(event1, event2) return event1.eventId > event2.eventId end)
 
     -- Show the filtered entry list.
     local skipIndexes = self.startIndex - 1

@@ -69,11 +69,11 @@ function ZO_GuildBrowser_Manager:Initialize()
         end
     end
 
-    local function OnGuildFinderSearchComplete(eventId)
-        if self.searchState == GUILD_FINDER_SEARCH_STATE_QUEUED then
-            return -- search results will get squashed by new search once Cooldown timer is done, don't bother showing
+    local function OnGuildFinderSearchComplete(eventId, searchId)
+        if self.searchState == GUILD_FINDER_SEARCH_STATE_QUEUED or searchId ~= self.currentSearchId then
+            return -- Don't update when the search complete is not for our current search or we are waiting to do a new search immediately
         end
-    
+
         self:ClearCurrentFoundGuilds()
 
         local numResults = GuildFinderGetNumSearchResults()
@@ -308,8 +308,9 @@ function ZO_GuildBrowser_Manager:ExecuteSearch()
 end
 
 function ZO_GuildBrowser_Manager:ExecuteSearchInternal()
-    local didRequest = GuildFinderRequestSearch()
-    if didRequest then
+    local searchId = GuildFinderRequestSearch()
+    if searchId ~= nil then
+        self.currentSearchId = searchId
         self:SetSearchState(GUILD_FINDER_SEARCH_STATE_WAITING)
     end
 end

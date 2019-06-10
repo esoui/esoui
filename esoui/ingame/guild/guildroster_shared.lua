@@ -39,6 +39,24 @@ function ZO_GuildRosterManager:Initialize()
         end
     end
 
+    local function OnGuildMemberPromoteSuccessful(eventId, displayName, newRankIndex, guildId)
+        if newRankIndex > 0 then
+            local rankText = GetFinalGuildRankName(guildId, newRankIndex)
+            local rankIcon = zo_iconFormat(GetFinalGuildRankTextureSmall(guildId, newRankIndex), 32, 32)
+            local alertText = zo_strformat(SI_GUILD_NOTIFY_PROMOTED, ZO_FormatUserFacingDisplayName(displayName), rankIcon, rankText)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
+        end
+    end
+
+    local function OnGuildMemberDemoteSuccessful(eventId, displayName, newRankIndex, guildId)
+        if newRankIndex <= GetNumGuildRanks(guildId) then
+            local rankText = GetFinalGuildRankName(guildId, newRankIndex)
+            local rankIcon = zo_iconFormat(GetFinalGuildRankTextureSmall(guildId, newRankIndex), 32, 32)
+            local alertText = zo_strformat(SI_GUILD_NOTIFY_DEMOTED, ZO_FormatUserFacingDisplayName(displayName), rankIcon, rankText)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
+        end
+    end
+
     self:BuildMasterList()
 
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_DATA_LOADED, function() self:OnGuildDataLoaded() end)
@@ -53,6 +71,8 @@ function ZO_GuildRosterManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName, rankIndex) if(self:MatchesGuild(guildId)) then self:OnGuildMemberRankChanged(displayName, rankIndex) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, displayName, oldStatus, newStatus) if(self:MatchesGuild(guildId)) then self:OnGuildMemberPlayerStatusChanged(displayName, oldStatus, newStatus) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_NOTE_CHANGED, function(_, guildId, displayName, note) if(self:MatchesGuild(guildId)) then self:OnGuildMemberNoteChanged(displayName, note) end end)
+    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_PROMOTE_SUCCESSFUL, OnGuildMemberPromoteSuccessful)
+    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_DEMOTE_SUCCESSFUL, OnGuildMemberDemoteSuccessful)
 end
 
 function ZO_GuildRosterManager:MatchesGuild(guildId)

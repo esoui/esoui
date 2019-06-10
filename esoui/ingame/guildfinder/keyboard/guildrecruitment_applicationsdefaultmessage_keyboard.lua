@@ -15,7 +15,7 @@ function ZO_GuildRecruitment_ApplicationsDefaultMessage_Keyboard:Initialize(cont
     self.messageBox:SetDefaultText(GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_DEFAULT_TEXT))
     self.messageBox:SetEmptyText(GetString(SI_GUILD_RECRUITMENT_DEFAULT_RESPONSE_EMPTY_TEXT))
     local editControl = self.messageBox:GetEditControl()
-    editControl:SetMaxInputChars(MAX_GUILD_APPLICATION_MESSAGE_LENGTH)
+    editControl:SetMaxInputChars(MAX_GUILD_APPLICATION_DECLINE_MESSAGE_LENGTH)
     self.messageBox:RegisterCallback("Save", function(text) GUILD_RECRUITMENT_MANAGER:SetSavedApplicationsDefaultMessage(self.guildId, text) end)
 
     self:InitializeDefaultMessageDefaults()

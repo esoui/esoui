@@ -211,15 +211,21 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
             local ALLIANCE_ICON_SIZE = 17
 
             if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_PROMOTE) and not playerIsPendingInvite then
-                if data.rankIndex > 1 then                
-                    if playerData.rankIndex < (data.rankIndex - 1) then
-                        AddMenuItem(GetString(SI_GUILD_PROMOTE), function() GuildPromote(guildId, data.displayName); PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE) end)
+                if data.rankIndex > 1 then
+                    local newRankIndex = data.rankIndex - 1
+                    if playerData.rankIndex < newRankIndex then
+                        AddMenuItem(GetString(SI_GUILD_PROMOTE),
+                                    function()
+                                        GuildPromote(guildId, data.displayName)
+                                        PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
+                                    end)
                     elseif playerIsGuildmaster then
-                        AddMenuItem(GetString(SI_GUILD_PROMOTE),    function()
-                                                                        local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
-                                                                        local rankName = GetFinalGuildRankName(guildId, 2)
-                                                                        ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", {guildId = guildId, displayName = data.displayName}, { mainTextParams = { data.displayName, allianceIcon, guildName,  rankName}})  
-                                                                    end)
+                        AddMenuItem(GetString(SI_GUILD_PROMOTE),
+                                    function()
+                                        local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
+                                        local rankName = GetFinalGuildRankName(guildId, 2)
+                                        ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", { guildId = guildId, displayName = data.displayName}, { mainTextParams = { data.displayName, allianceIcon, guildName, rankName }})
+                                    end)
                     end
                 end
             end
@@ -227,12 +233,13 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
             if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_DEMOTE) and not playerIsPendingInvite then
                 if data.rankIndex < GetNumGuildRanks(guildId) then
                     if playerHasHigherRank then
-                        AddMenuItem(GetString(SI_GUILD_DEMOTE), function()
-                                                                    GuildDemote(guildId, data.displayName)
-                                                                    PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
-                                                                end)
+                        AddMenuItem(GetString(SI_GUILD_DEMOTE),
+                                    function()
+                                        GuildDemote(guildId, data.displayName)
+                                        PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
+                                    end)
                     end
-                end            
+                end
             end
 
             if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_REMOVE) then
