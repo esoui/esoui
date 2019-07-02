@@ -47,14 +47,14 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_LEVEL_COLUMN_OFFSET_X" />
                             <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_CHAMPION_POINTS_COLUMN_SIZE" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), "level", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER, "ZoFontGameLargeBold")
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), "levelPlusChampionPoints", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER, "ZoFontGameLargeBold")
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Expires" inherits="ZO_SortHeader">
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Level" offsetX="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_EXPIRATION_COLUMN_OFFSET_X" />
                             <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD_EXPIRATION_COLUMN_SIZE" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "durationS", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "durationS", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
                             </OnInitialized>
                         </Control>
                     </Controls>

@@ -454,10 +454,11 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
 end
 
 function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
-    local function EnableWhileNotActivelyEngagedOrSlottingDisallowed()
-        if IsUnitActivelyEngaged("player") then
-            return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_ACTIVELY_ENGAGED)
-        elseif not IsActionBarSlottingAllowed() then
+    local function EnableWhileNotActionBarLocked()
+        local lockedReason = GetActionBarLockedReason()
+        if lockedReason == ACTION_BAR_LOCKED_REASON_COMBAT then
+            return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT)
+        elseif lockedReason == ACTION_BAR_LOCKED_REASON_NOT_RESPECCABLE then
             return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE)
         end
         return true
@@ -492,7 +493,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotActivelyEngagedOrSlottingDisallowed,
+        enabled = EnableWhileNotActionBarLocked,
 
         callback = function()
             --This is confirm when respecing and assign otherwise
@@ -670,7 +671,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         end,
 
-        enabled = EnableWhileNotActivelyEngagedOrSlottingDisallowed,
+        enabled = EnableWhileNotActionBarLocked,
 
         callback = function()
             if self.mode == ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE then
@@ -1193,8 +1194,7 @@ function ZO_GamepadSkills:InitializeEvents()
         -- Refresh state of purchase/morph/assign keybinds
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.lineFilterKeybindStripDescriptor)
     end
-    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVELY_ENGAGED_STATE, OnPurchaseLockStateChanged)
-    self.control:RegisterForEvent(EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED, OnPurchaseLockStateChanged)
+    self.control:RegisterForEvent(EVENT_ACTION_BAR_LOCKED_REASON_CHANGED, OnPurchaseLockStateChanged)
 end
 
 function ZO_GamepadSkills:TryClearSkillUpdatedStatus()

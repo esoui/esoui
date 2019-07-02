@@ -57,7 +57,7 @@
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)GuildName" offsetX="250"/>
                             <Dimensions x="75" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "durationS", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "durationS", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
                             </OnInitialized>
                         </Control>
                     </Controls>

@@ -677,8 +677,7 @@ function ZO_SkillsManager:RegisterForEvents()
     local function OnPurchaseLockStateChanged()
         self.skillListRefreshGroup:MarkDirty("Visible")
     end
-    control:RegisterForEvent(EVENT_PLAYER_ACTIVELY_ENGAGED_STATE, OnPurchaseLockStateChanged)
-    control:RegisterForEvent(EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED, OnPurchaseLockStateChanged)
+    control:RegisterForEvent(EVENT_ACTION_BAR_LOCKED_REASON_CHANGED, OnPurchaseLockStateChanged)
 end
 
 function ZO_SkillsManager:GetSelectedSkillLineData()
@@ -1009,7 +1008,7 @@ do
 
             if increaseTextures then
                 ApplyButtonTextures(increaseButton, increaseTextures)
-                if IsUnitActivelyEngaged("player") or not IsActionBarSlottingAllowed() then
+                if GetActionBarLockedReason() == ACTION_BAR_LOCKED_REASON_COMBAT then
                     increaseButton:SetState(BSTATE_DISABLED)
                 else
                     increaseButton:SetState(BSTATE_NORMAL)
@@ -1316,10 +1315,11 @@ end
 
 function ZO_Skills_AbilityIncrease_OnMouseEnter(control)
     if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY then
-        if IsUnitActivelyEngaged("player") then
+        local lockedReason = GetActionBarLockedReason()
+        if lockedReason == ACTION_BAR_LOCKED_REASON_COMBAT then
             InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
-            SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_ACTIVELY_ENGAGED))
-        elseif not IsActionBarSlottingAllowed() then
+            SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT))
+        elseif lockedReason == ACTION_BAR_LOCKED_REASON_NOT_RESPECCABLE then
             InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
             SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE))
         end

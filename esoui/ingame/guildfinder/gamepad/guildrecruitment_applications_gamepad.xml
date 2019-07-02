@@ -49,7 +49,7 @@
                                     <Anchor point="LEFT" relativeTo="$(parent)ApplicantName" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                                     <Dimensions x="ZO_GUILD_RECRUITMENT_APPLICATIONS_GAMEPAD_CHAMPION_POINTS_COLUMN_SIZE" />
                                     <OnInitialized>
-                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), "level", TEXT_ALIGN_RIGHT)
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_SORT_HEADER_LEVEL), "levelPlusChampionPoints", TEXT_ALIGN_RIGHT)
                                     </OnInitialized>
                                 </Label>
                                 <Label name="$(parent)Expires" inherits="ZO_GamepadInteractiveFilterHeader">

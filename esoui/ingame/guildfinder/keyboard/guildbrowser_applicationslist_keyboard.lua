@@ -17,6 +17,7 @@ function ZO_GuildBrowser_ApplicationsList_Keyboard:Initialize(control)
     self:SetEmptyText(GetString(SI_GUILD_BROWSER_APPLICATIONS_EMPTY_LIST_TEXT))
 
     self.sortFunction = function(listEntry1, listEntry2) return self:ComparePlayerApplications(listEntry1, listEntry2) end
+    self.sortHeaderGroup:SelectHeaderByKey("durationS")
 end
 
 function ZO_GuildBrowser_ApplicationsList_Keyboard:BuildMasterList()

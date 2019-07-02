@@ -462,8 +462,8 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedClearSlotResult(actionS
         return HOT_BAR_RESULT_CANNOT_EDIT_SLOT
     end
 
-    if IsUnitActivelyEngaged("player") then
-        return HOT_BAR_RESULT_NO_ACTIVELY_ENGAGED_SWAP
+    if GetActionBarLockedReason() == ACTION_BAR_LOCKED_REASON_COMBAT then
+        return HOT_BAR_RESULT_NO_COMBAT_SWAP
     end
     
     return HOT_BAR_RESULT_SUCCESS
@@ -497,8 +497,8 @@ function ZO_ActionBarAssignmentManager_Hotbar:GetExpectedSkillSlotResult(actionS
         return HOT_BAR_RESULT_ABILITY_NOT_KNOWN
     end
 
-    if IsUnitActivelyEngaged("player") then
-        return HOT_BAR_RESULT_NO_ACTIVELY_ENGAGED_SWAP
+    if GetActionBarLockedReason() == ACTION_BAR_LOCKED_REASON_COMBAT then
+        return HOT_BAR_RESULT_NO_COMBAT_SWAP
     end
 
     return HOT_BAR_RESULT_SUCCESS

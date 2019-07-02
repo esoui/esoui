@@ -5,7 +5,7 @@
 ZO_GUILD_RECRUITMENT_APPLICATIONS_ENTRY_SORT_KEYS =
 {
     ["name"] = { },
-    ["level"] = { tiebreaker = "name" },
+    ["levelPlusChampionPoints"] = { tiebreaker = "name" },
     ["durationS"] = { tiebreaker = "name" },
 }
 
@@ -56,6 +56,7 @@ function ZO_GuildRecruitment_ApplicationsList_Shared:FilterScrollList()
             achievementPoints = achievementPoints,
             message = applicationMessage,
             durationS = timeRemainingS,
+            levelPlusChampionPoints = level + championPoints,
         }
         table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_GUILD_FINDER_APPLICATION_ENTRY_TYPE, data))
     end

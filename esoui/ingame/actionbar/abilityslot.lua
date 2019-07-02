@@ -63,8 +63,12 @@ local function TryPlaceQuickslotAction(abilitySlot)
 end
 
 local function TryPickupAction(abilitySlot)
-    if not IsActionBarSlottingAllowed() then
-        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_SKILLS_DISABLED_SPECIAL_ABILITIES)
+    local lockedReason = GetActionBarLockedReason()
+    if lockedReason == ACTION_BAR_LOCKED_REASON_COMBAT then
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT))
+        return false
+    elseif lockedReason == ACTION_BAR_LOCKED_REASON_NOT_RESPECCABLE then
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, GetString("SI_RESPECRESULT", RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE))
         return false
     end
 

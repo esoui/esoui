@@ -24,7 +24,7 @@ function ZO_GuildBrowser_Applications_Gamepad:Initialize(control)
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
 
     self:SetEmptyText(GetString(SI_GUILD_BROWSER_APPLICATIONS_EMPTY_LIST_TEXT))
-    self:SetupSort(ZO_GUILD_BROWSER_APPLICATIONS_ENTRY_SORT_KEYS, "guildName", ZO_SORT_ORDER_UP)
+    self:SetupSort(ZO_GUILD_BROWSER_APPLICATIONS_ENTRY_SORT_KEYS, "durationS", ZO_SORT_ORDER_DOWN)
 end
 
 function ZO_GuildBrowser_Applications_Gamepad:InitializeKeybinds()

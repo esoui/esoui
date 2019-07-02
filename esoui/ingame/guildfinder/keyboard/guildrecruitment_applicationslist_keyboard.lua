@@ -28,6 +28,7 @@ function ZO_GuildRecruitment_ApplicationsList_Keyboard:Initialize(control)
     self:SetEmptyText(GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_EMPTY_LIST_TEXT))
 
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareGuildApplications(listEntry1, listEntry2) end
+    self.sortHeaderGroup:SelectHeaderByKey("durationS")
 
     self:InitializeKeybindDescriptors()
 end

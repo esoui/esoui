@@ -659,8 +659,11 @@ function GetKeepScoreBonusInfo(index)
     return name, icon, description
 end
 
+
 -- Action slots refactor
 EVENT_ACTION_SLOTS_FULL_UPDATE = EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED
+EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED = EVENT_ACTION_BAR_IS_RESPECCABLE_BAR_STATE_CHANGED
+IsActionBarSlottingAllowed = IsActionBarRespeccable
 
 function GetItemCurrentActionBarSlot(bagId, slotIndex)
     return FindActionSlotMatchingItem(bagId, slotIndex)

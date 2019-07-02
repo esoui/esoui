@@ -25,8 +25,9 @@ function ZO_GuildRecruitment_Blacklist_Keyboard:Initialize(control)
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
 
     self:SetEmptyText(GetString(SI_GUILD_RECRUITMENT_BLACKLIST_EMPTY_LIST_TEXT))
-    
+
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareGuildBlacklistedPlayers(listEntry1, listEntry2) end
+    self.sortHeaderGroup:SelectHeaderByKey("name")
 
     self:InitializeKeybindDescriptors()
 end

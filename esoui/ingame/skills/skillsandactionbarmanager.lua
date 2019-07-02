@@ -89,11 +89,10 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
 end
 
 do
-    internalassert(RESPEC_RESULT_MAX_VALUE == 32, "Update EXPECTED_RESPEC_FAILURES")
+    internalassert(RESPEC_RESULT_MAX_VALUE == 31, "Update EXPECTED_RESPEC_FAILURES")
     local EXPECTED_RESPEC_FAILURES =
     {
         [RESPEC_RESULT_IS_IN_COMBAT] = true,
-        [RESPEC_RESULT_IS_ACTIVELY_ENGAGED] = true,
         [RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE] = true,
     }
     function ZO_SkillsAndActionBarManager:OnSkillRespecResult(result)

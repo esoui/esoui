@@ -33,7 +33,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:Initialize(control)
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
 
     self:SetEmptyText(GetString(SI_GUILD_RECRUITMENT_APPLICATIONS_EMPTY_LIST_TEXT));
-    self:SetupSort(ZO_GUILD_RECRUITMENT_APPLICATIONS_ENTRY_SORT_KEYS, "name", ZO_SORT_ORDER_UP)
+    self:SetupSort(ZO_GUILD_RECRUITMENT_APPLICATIONS_ENTRY_SORT_KEYS, "durationS", ZO_SORT_ORDER_DOWN)
 
     self.onGuildPermissionChangedCallback = nil
     self:InitializeConfirmAcceptDialog()
