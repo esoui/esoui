@@ -90,7 +90,7 @@
 
                 <Control name="$(parent)Trader">
                     <Dimensions x="200"/>
-                    <Anchor point="TOP" relativeTo="$(parent)KeepCampaignName" relativePoint="BOTTOM" />
+                    <Anchor point="TOP" relativeTo="$(parent)KeepCampaignName" relativePoint="BOTTOM" offsetY="40" />
                     <Controls>
                         <Label name="$(parent)Ownership" horizontalAlignment="CENTER" font="ZoFontHeader2" modifyTextType="UPPERCASE" text="SI_GUILD_TRADER_OWNERSHIP_HEADER">
                             <Anchor point="TOPLEFT"/>
@@ -104,6 +104,10 @@
                             <Anchor point="TOPLEFT" offsetY="132"/>
                             <Anchor point="TOPRIGHT" offsetY="132"/>
                         </Label>
+                        <Button name="$(parent)ViewWeeklyBids" inherits="ZO_DefaultButton" text="SI_GUILD_WEEKLY_BIDS_VIEW">
+                            <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10"/>
+                            <Dimensions x="220"/>
+                        </Button>
                     </Controls>
                 </Control>
                 

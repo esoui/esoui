@@ -1270,7 +1270,7 @@ function GamepadMarket:ShowMarketProductContentsAsList(marketProduct, previewTyp
 end
 
 function GamepadMarket:ShowHousePreviewDialog(marketProduct)
-    local mainTextParams = {mainTextParams = ZO_MarketDialogs_Shared_GetPreviewHouseDialogMainTextParams(marketProduct:GetId())}
+    local mainTextParams = { mainTextParams = ZO_MarketDialogs_Shared_GetPreviewHouseDialogMainTextParams(marketProduct:GetId()) }
     ZO_Dialogs_ShowGamepadDialog("CROWN_STORE_PREVIEW_HOUSE", { marketProductData = marketProduct:GetMarketProductData() }, mainTextParams)
 end
 
@@ -1536,11 +1536,34 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                 keybind = "UI_SHORTCUT_SECONDARY",
                 visible = function()
                     if self.selectedGridEntry then
-                        return self.selectedGridEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT and self.selectedGridEntry:HasPreview() and IsCharacterPreviewingAvailable()
+                        return self.selectedGridEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT
                     end
                     return false
                 end,
-                callback = function() self:BeginPreview() end
+                enabled = function()
+                    local selectedEntry = self.selectedGridEntry
+                    if selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
+                        local previewType = selectedEntry:GetMarketProductPreviewType()
+                        if previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
+                            return selectedEntry:HasPreview() and IsCharacterPreviewingAvailable()
+                        elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
+                            return CanJumpToHouseFromCurrentLocation(), GetString(SI_MARKET_PREVIEW_ERROR_CANNOT_JUMP_FROM_LOCATION)
+                        end
+                    end
+        
+                    return false
+                end,
+                callback = function()
+                    local selectedEntry = self.selectedGridEntry
+                    if selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
+                        local previewType = selectedEntry:GetMarketProductPreviewType()
+                        if previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
+                            self:ShowHousePreviewDialog(selectedEntry)
+                        elseif previewType == ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE then
+                            self:BeginPreview()
+                        end
+                    end
+                end,
             },
             MARKET_BUY_CROWNS_BUTTON,
             KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
@@ -1658,6 +1681,11 @@ end
 function GamepadMarketBundleContents:RefreshKeybinds()
     ZO_GamepadMarketKeybindStrip_RefreshStyle()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptors)
+end
+
+function GamepadMarketBundleContents:ShowHousePreviewDialog(marketProduct)
+    local mainTextParams = { mainTextParams = ZO_MarketDialogs_Shared_GetPreviewHouseDialogMainTextParams(marketProduct:GetId()) }
+    ZO_Dialogs_ShowGamepadDialog("CROWN_STORE_PREVIEW_HOUSE", { marketProductData = marketProduct:GetMarketProductData() }, mainTextParams)
 end
 
 -- override from ZO_GamepadMarket_GridScreen

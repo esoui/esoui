@@ -70,8 +70,8 @@ function ZO_GuildBrowser_Gamepad:SetupList(list)
         local dropdown = control.dropdown
         self.focusDropdown = dropdown
 
-        dropdown:SetNormalColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
-        dropdown:SetHighlightedColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.SELECTED_ACTIVE:UnpackRGB())
+        dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+        dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
         dropdown:SetSelectedItemTextColor(selected)
 
         dropdown:SetSortsItems(false)
@@ -436,8 +436,8 @@ function ZO_GuildBrowser_Gamepad:CreateTimeBasedDropdown(attributeType, dataKey)
                 local dropdown = control.dropdown
                 self.dialogDropdowns[attributeType] = dropdown
 
-                dropdown:SetNormalColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
-                dropdown:SetHighlightedColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
                 dropdown:SetSelectedItemTextColor(selected)
 
                 dropdown:SetSortsItems(false)
@@ -572,8 +572,8 @@ function ZO_GuildBrowser_Gamepad:CreateMultiSelectionBasedDropdown(attributeType
                 local dropdown = control.dropdown
                 self.dialogDropdowns[attributeType] = dropdown
 
-                dropdown:SetNormalColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
-                dropdown:SetHighlightedColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.SELECTED_ACTIVE:UnpackRGB())
+                dropdown:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+                dropdown:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
                 dropdown:SetSelectedItemTextColor(selected)
 
                 dropdown:SetSortsItems(false)

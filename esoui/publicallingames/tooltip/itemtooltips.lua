@@ -243,9 +243,8 @@ function ZO_Tooltip:AddBaseStats(itemLink, ignoreLevel)
     self:AddSection(statsSection)
 end
 
-function ZO_Tooltip:AddItemValue(itemLink, ignoreLevel)
+function ZO_Tooltip:AddItemValue(itemLink)
     local statsSection = self:AcquireSection(self:GetStyle("valueStatsSection"))
-    local hideItemLevel = ignoreLevel or ShouldHideTooltipRequiredLevel(itemLink)
 
     --Value
     local CONSIDER_CONDITION = true
@@ -477,18 +476,46 @@ end
 
 function ZO_Tooltip:AddSet(itemLink, equipped)
     local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkSetInfo(itemLink)
-    if(hasSet) then
+    if hasSet then
         local setSection = self:AcquireSection(self:GetStyle("bodySection"))
         setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, numEquipped, maxEquipped), self:GetStyle("bodyHeader"))
-        for i = 1, numBonuses do
-            local numRequired, bonusDescription = GetItemLinkSetBonusInfo(itemLink, equipped, i)
-            if(numEquipped >= numRequired) then
+        for bonusIndex = 1, numBonuses do
+            local numRequired, bonusDescription = GetItemLinkSetBonusInfo(itemLink, equipped, bonusIndex)
+            if numEquipped >= numRequired then
                 setSection:AddLine(bonusDescription, self:GetStyle("activeBonus"), self:GetStyle("bodyDescription"))
             else
                 setSection:AddLine(bonusDescription, self:GetStyle("inactiveBonus"), self:GetStyle("bodyDescription"))
             end
         end
         self:AddSection(setSection)
+    end
+end
+
+function ZO_Tooltip:AddContainerSets(itemLink)
+    local numContainerSets = GetItemLinkNumContainerSetIds(itemLink)
+    for setIndex = 1, numContainerSets do
+        local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkContainerSetInfo(itemLink, setIndex)
+        if hasSet then
+            if setIndex > 1 then
+                local separatorSection = self:AcquireSection(self:GetStyle("itemSetSeparatorSection"))
+                separatorSection:AddTexture(ZO_GAMEPAD_HEADER_DIVIDER_TEXTURE, self:GetStyle("dividerLine"))
+                separatorSection:AddLine(GetString(SI_ITEM_FORMAT_STR_SET_OR_SEPARATOR))
+                separatorSection:AddTexture(ZO_GAMEPAD_HEADER_DIVIDER_TEXTURE, self:GetStyle("dividerLine"))
+                self:AddSection(separatorSection)
+            end
+
+            local setSection = self:AcquireSection(self:GetStyle("bodySection"))
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, numEquipped, maxEquipped), self:GetStyle("bodyHeader"))
+            for bonusIndex = 1, numBonuses do
+                local numRequired, bonusDescription = GetItemLinkContainerSetBonusInfo(itemLink, setIndex, bonusIndex)
+                if numEquipped >= numRequired then
+                    setSection:AddLine(bonusDescription, self:GetStyle("activeBonus"), self:GetStyle("bodyDescription"))
+                else
+                    setSection:AddLine(bonusDescription, self:GetStyle("inactiveBonus"), self:GetStyle("bodyDescription"))
+                end
+            end
+            self:AddSection(setSection)
+        end
     end
 end
 
@@ -515,8 +542,7 @@ function ZO_Tooltip:AddPrioritySellText(itemLink)
     end
 end
 
-function ZO_Tooltip:AddItemRequiresCollectibleText(itemLink)
-    local collectibleId = GetItemLinkTooltipRequiresCollectibleId(itemLink)
+function ZO_Tooltip:GetRequiredCollectibleText(collectibleId)
     if collectibleId ~= 0 then
         local collectibleName = GetCollectibleName(collectibleId)
         if collectibleName ~= "" then
@@ -529,7 +555,18 @@ function ZO_Tooltip:AddItemRequiresCollectibleText(itemLink)
             else
                 formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM
             end
-            local text = zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryName(collectibleId))
+            return zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryName(collectibleId))
+        end
+    end
+
+    return ""
+end
+
+function ZO_Tooltip:AddItemRequiresCollectibleText(itemLink)
+    local collectibleId = GetItemLinkTooltipRequiresCollectibleId(itemLink)
+    if collectibleId ~= 0 then
+        local text = self:GetRequiredCollectibleText(collectibleId)
+        if text ~= "" then
             local section = self:AcquireSection(self:GetStyle("bodySection"))
             local colorStyle = IsCollectibleUnlocked(collectibleId) and self:GetStyle("succeeded") or self:GetStyle("failed")
             section:AddLine(text, self:GetStyle("bodyDescription"), colorStyle)
@@ -547,12 +584,19 @@ function ZO_Tooltip:AddItemCombinationText(itemLink)
     end
 end
 
-function ZO_Tooltip:AddCollectibleEvolutionText(itemLink)
-    local description = GetItemLinkCollectibleEvolutionDescription(itemLink)
-    if description ~= "" then
-        local combinationSection = self:AcquireSection(self:GetStyle("bodySection"))
-        combinationSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_EVOLUTION, description), self:GetStyle("bodyDescription"))
-        self:AddSection(combinationSection)
+function ZO_Tooltip:AddCollectibleOwnedText(itemLink)
+    local grantedCollectibleId = GetItemLinkContainerCollectibleId(itemLink)
+    if grantedCollectibleId > 0 then
+        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+        local collectibleCategory = GetCollectibleCategoryType(grantedCollectibleId)
+        if IsCollectibleOwnedByDefId(grantedCollectibleId) then
+            bodySection:AddLine(GetString(SI_ITEM_FORMAT_STR_ALREADY_IN_COLLECTION), self:GetStyle("bodyDescription"))
+        elseif collectibleCategory == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT and not CanCombinationFragmentBeUnlocked(grantedCollectibleId) then
+            bodySection:AddLine(GetString(SI_ITEM_FORMAT_STR_ALREADY_OWN_COMBINATION_RESULT), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+        else
+            bodySection:AddLine(ZO_SUCCEEDED_TEXT:Colorize(GetString(SI_ITEM_FORMAT_STR_ADD_TO_COLLECTION)), self:GetStyle("bodyDescription"))
+        end
+        self:AddSection(bodySection)
     end
 end
 
@@ -638,15 +682,19 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     self:AddEnchant(itemLink, enchantDiffMode, equipSlot)
     self:AddOnUseAbility(itemLink)
     self:AddTrait(itemLink, extraData)
-    self:AddSet(itemLink, equipped)
+    if IsItemLinkContainer(itemLink) then
+        self:AddContainerSets(itemLink)
+    else
+        self:AddSet(itemLink, equipped)
+    end
     if GetItemLinkItemType(itemLink) == ITEMTYPE_POISON then
         self:AddPoisonSystemDescription()
     end
     self:AddItemCombinationText(itemLink)
-    self:AddCollectibleEvolutionText(itemLink)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
     self:AddItemRequiresCollectibleText(itemLink)
+    self:AddCollectibleOwnedText(itemLink)
     -- We don't want crafted furniture to show who made it, since it will get cleared once placed in a house
     -- TODO: If we implement saving the creator name, add back in LayoutItemCreator call (ESO-495280)
     if not isFurniture then
@@ -851,7 +899,7 @@ function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
         if IsItemLinkBookKnown(itemLink) then
             knownSection:AddLine(GetString(SI_LORE_LIBRARY_IN_LIBRARY), self:GetStyle("bodyDescription"))
         else
-            knownSection:AddLine(GetString(SI_LORE_LIBRARY_USE_TO_LEARN), self:GetStyle("bodyDescription"))
+            knownSection:AddLine(ZO_SUCCEEDED_TEXT:Colorize(GetString(SI_LORE_LIBRARY_USE_TO_LEARN)), self:GetStyle("bodyDescription"))
         end
         self:AddSection(knownSection)
     end
@@ -943,10 +991,10 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData, ex
 
     --Use to learn
     local useToLearnOrKnownSection = self:AcquireSection(self:GetStyle("bodySection"))
-    if(IsItemLinkRecipeKnown(itemLink)) then
+    if IsItemLinkRecipeKnown(itemLink) then
         useToLearnOrKnownSection:AddLine(GetString(SI_RECIPE_ALREADY_KNOWN), self:GetStyle("bodyDescription"))
     else
-        useToLearnOrKnownSection:AddLine(GetString(SI_GAMEPAD_PROVISIONER_USE_TO_LEARN_RECIPE), self:GetStyle("bodyDescription"))
+        useToLearnOrKnownSection:AddLine(ZO_SUCCEEDED_TEXT:Colorize(GetString(SI_USE_TO_LEARN_RECIPE)), self:GetStyle("bodyDescription"))
     end
     self:AddSection(useToLearnOrKnownSection)
     self:AddPrioritySellText(itemLink)
@@ -1286,7 +1334,6 @@ function ZO_Tooltip:LayoutUniversalStyleItem(itemLink)
     self:AddLine(itemName, self:GetStyle("title"))
 
     local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
-    local style = GetItemLinkItemStyle(itemLink)
     styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_TOOLTIP), self:GetStyle("bodyDescription"))
     styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_CROWN_STORE_TOOLTIP), self:GetStyle("bodyDescription"))
     self:AddSection(styleSection)

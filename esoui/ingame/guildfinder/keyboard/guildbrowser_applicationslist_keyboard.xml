@@ -11,10 +11,10 @@
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_GuildFinder_Application_Keyboard_RowLabel">
                     <Anchor point="LEFT" />
-                    <Dimensions x="255" />
+                    <Dimensions x="400" />
                 </Label>
                 <Label name="$(parent)Expires" inherits="ZO_GuildFinder_Application_Keyboard_RowLabel" horizontalAlignment="RIGHT">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="250"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="105"/>
                     <Dimensions x="75" />
                 </Label>
                 <Button name="$(parent)Rescind" inherits="ZO_IgnoreListRowButton">

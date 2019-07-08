@@ -1,0 +1,85 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildWeeklyBidsDialogRow_Keyboard" virtual="true">
+            <Dimensions y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT"/>
+            <Controls>
+                <Label name="$(parent)Order" font="ZoFontGame">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="65" y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+                <Label name="$(parent)Trader" font="ZoFontGame" inherits="ZO_TooltipIfTruncatedLabel">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Order" relativePoint="TOPRIGHT" offsetX="15"/>
+                    <Dimensions x="300" y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+                <Label name="$(parent)PlacedBy" font="ZoFontGame" inherits="ZO_TooltipIfTruncatedLabel">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Trader" relativePoint="TOPRIGHT" offsetX="15"/>
+                    <Dimensions x="200" y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+                <Label name="$(parent)BidAmount" font="ZoFontGame" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PlacedBy" relativePoint="TOPRIGHT" offsetX="15"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Dimensions y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_GuildWeeklyBidsDialogTopLevel_Keyboard" inherits="ZO_CustomDialogBase" hidden="true">
+            <OnInitialized>
+                ZO_GuildWeeklyBidsDialogTopLevel_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" override="true">
+                    <Dimensions x="700"/>
+                </Label>
+                <Label name="$(parent)WeeklyBids" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" horizontalAlignment="CENTER"/>
+                <Label name="$(parent)Instructions" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_GUILD_WEEKLY_BIDS_INSTRUCTIONS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)WeeklyBids" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)WeeklyBids" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                </Label>
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Instructions" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                    <Dimensions y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT"/>
+                    <Controls>
+                        <Control name="$(parent)Order" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_ORDER), "order", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="65" y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                        </Control>
+                        <Control name="$(parent)Trader" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_TRADER), "kioskName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Order" relativePoint="TOPRIGHT" offsetX="15"/>
+                            <Dimensions x="300" y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                        </Control>
+                        <Control name="$(parent)PlacedBy" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_PLACED_BY), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Trader" relativePoint="TOPRIGHT" offsetX="15"/>
+                            <Dimensions x="200" y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                        </Control>
+                        <Control name="$(parent)BidAmount" inherits="ZO_SortHeader">
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_BID_AMOUNT), "bidAmount", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                            </OnInitialized>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PlacedBy" relativePoint="TOPRIGHT" offsetX="15"/>
+                            <Anchor point="TOPRIGHT" offsetX="-16"/>
+                            <Dimensions y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Headers" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                    <Dimensions y="200"/>
+                </Control>
+
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

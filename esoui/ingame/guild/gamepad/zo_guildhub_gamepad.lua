@@ -912,6 +912,13 @@ do
             AddEntry(data)
         end
 
+        if DoesPlayerHaveGuildPermission(self.optionsGuildId, GUILD_PERMISSION_GUILD_KIOSK_BID) then
+            data = ZO_GamepadEntryData:New(GetString(SI_GUILD_WEEKLY_BIDS_VIEW), "EsoUI/Art/Guild/Gamepad/gp_guild_menuIcon_viewBids.dds")
+            data.guildId = self.optionsGuildId
+            data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowWeeklyBids() end, GetString(SI_GUILD_WEEKLY_BIDS_VIEW))
+            AddEntry(data)
+        end
+
         data = ZO_GamepadEntryData:New(GetString(SI_GUILD_LEAVE), ICON_LEAVE)
         data.guildId = self.optionsGuildId
         data.selectCallback = function(optionsSelectedData)
@@ -937,17 +944,18 @@ end
 -- Single Guild List --
 ---------------
 
+function ZO_GamepadGuildHub:GenerateShowGuildSubmenuCallback(callback, title)
+    return function()
+        GAMEPAD_GUILD_HOME:SetGuildId(self.optionsGuildId)
+        GAMEPAD_GUILD_HOME:SetActivateScreenInfo(callback, title)
+        SCENE_MANAGER:Push("gamepad_guild_home")
+    end
+end
+
 function ZO_GamepadGuildHub:RefreshSingleGuildList()
     self.singleGuildList:Clear()
 
     local guildId = self.optionsGuildId
-    local function GenerateShowGuildSubmenuCallback(callback, title)
-        return function()
-            GAMEPAD_GUILD_HOME:SetGuildId(guildId)
-            GAMEPAD_GUILD_HOME:SetActivateScreenInfo(callback, title)
-            SCENE_MANAGER:Push("gamepad_guild_home")
-        end
-    end
 
     -- Guild Submenus
     local showEditRankHeaderTitle = GAMEPAD_GUILD_HOME:ShouldShowEditRankHeaderTitle()
@@ -956,7 +964,7 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
         local data = ZO_GamepadEntryData:New(title)
         data:SetIconTintOnSelection(true)
         data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.ROSTER
-        data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRoster() end)
+        data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRoster() end)
         self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
     end
 
@@ -968,20 +976,20 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
     title = GetString(title)
     local data = ZO_GamepadEntryData:New(title)
     data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.RANK
-    data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRanks() end, title)
+    data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRanks() end, title)
     self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
 
     title = GetString(SI_WINDOW_TITLE_GUILD_RECRUITMENT)
     data = ZO_GamepadEntryData:New(title)
     data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.RECRUITMENT
-    data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRecruitment() end, title)
+    data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRecruitment() end, title)
     self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
 
     if DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_HERALDRY) and IsPlayerAllowedToEditHeraldry(guildId) and not showEditRankHeaderTitle then
         title = GetString(SI_WINDOW_TITLE_GUILD_HERALDRY)
         data = ZO_GamepadEntryData:New(title)
         data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.HERALDRY
-        data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowHeraldry() end, title)
+        data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowHeraldry() end, title)
         self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
     end
 
@@ -989,7 +997,7 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
         title = GetString(SI_WINDOW_TITLE_GUILD_HISTORY)
         data = ZO_GamepadEntryData:New(title)
         data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.HISTORY
-        data.selectCallback = GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowHistory() end, title)
+        data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowHistory() end, title)
         self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
     end
 

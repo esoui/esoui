@@ -121,10 +121,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
         if SCENE_MANAGER:IsShowing("gamepad_smithing_refine") or SCENE_MANAGER:IsShowing("gamepad_smithing_deconstruct") then
-            if not self.extractionSlot:HasItem() then
-                self.tooltip:SetHidden(true)
-            end
-            self:UpdateSelection()
+            self:RefreshTooltip()
             ZO_GamepadGenericHeader_Activate(self.owner.header)
         end
     end)
@@ -140,9 +137,7 @@ function ZO_GamepadSmithingExtraction:SetFilterType(filterType)
 end
 
 function ZO_GamepadSmithingExtraction:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
-    self.extractionSlot:SetItem(nil)
-    self.canExtract = false
-
+    self:ClearSelections()
     self.inventory:HandleDirtyEvent()
 end
 
@@ -160,26 +155,16 @@ function ZO_GamepadSmithingExtraction:InitializeInventory(refinementOnly)
 end
 
 function ZO_GamepadSmithingExtraction:IsCurrentSelected()
-    if self.extractionSlot:HasItem() then
-        local bagId, slotIndex = self.extractionSlot:GetBagAndSlot()
-        local selectedBagId, selectedSlotIndex = self.inventory:CurrentSelectionBagAndSlot()
-        return bagId == selectedBagId and slotIndex == selectedSlotIndex
-    end
+    local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
+    return self.extractionSlot:ContainsBagAndSlot(bagId, slotIndex)
 end
 
 function ZO_GamepadSmithingExtraction:UpdateSelection()
-    local bagId, slotIndex = self.extractionSlot:GetBagAndSlot()
     for _, data in pairs(self.inventory.list.dataList) do
-        if data.bagId == bagId and data.slotIndex == slotIndex then
-            data.isEquippedInCurrentCategory = true
-
-            self.tooltip.tip:ClearLines()
-            self.tooltip.tip:LayoutBagItem(bagId, slotIndex)
-            self.tooltip.icon:SetTexture(GetItemInfo(bagId, slotIndex))
-        else
-            data.isEquippedInCurrentCategory = false
-        end
+        ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
     end
+
+    self:RefreshTooltip()
 
     self.inventory.list:RefreshVisible()
 
@@ -187,71 +172,65 @@ function ZO_GamepadSmithingExtraction:UpdateSelection()
 end
 
 function ZO_GamepadSmithingExtraction:UpdateEmptySlotIcon()
-    if not self.extractionSlot:HasItem() then
-        local slotBG = self.extractionSlot.control:GetNamedChild("Bg")
-        local emptySlotIconControl = self.extractionSlot.control:GetNamedChild("EmptySlotIcon")
-        local iconPath = ZO_GamepadCraftingUtils_GetItemSlotTextureFromSmithingFilter(self:GetFilterType())
-        
-        -- emptySlotIcon stores an icon path, not the control itself
-        self.extractionSlot.emptySlotIcon = iconPath
-        emptySlotIconControl:SetTexture(iconPath)
-        self.extractionSlot:ShowEmptySlotIcon(true)
+    local filterType = self:GetFilterType()
+    if filterType then
+        self.extractionSlot:SetEmptyTexture(ZO_GamepadCraftingUtils_GetItemSlotTextureFromSmithingFilter(filterType))
+    end
+    local deconstructionType = self:GetDeconstructionType()
+    if deconstructionType then
+        self.extractionSlot:SetMultipleItemsTexture(ZO_GamepadCraftingUtils_GetMultipleItemsTextureFromSmithingDeconstructionType(deconstructionType))
+    end
+    
+    -- reanchor slot icon based on special refine "you need 10 of this" text
+    local slotBG = self.extractionSlot.control:GetNamedChild("Bg")
+    local emptySlotIconControl = self.extractionSlot.control:GetNamedChild("EmptySlotIcon")
 
-        -- reanchor slot icon based on special refine "you need 10 of this" text
-        emptySlotIconControl:ClearAnchors()
-
-        local newAnchor = nil
-        if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
-            newAnchor = ZO_Anchor:New(TOP, slotBG, TOP, 0, 10)
-        else
-            newAnchor = ZO_Anchor:New(CENTER, slotBG)
-        end
-
-        newAnchor:AddToControl(emptySlotIconControl)
+    emptySlotIconControl:ClearAnchors()
+    if filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+        emptySlotIconControl:SetAnchor(TOP, slotBG, TOP, 0, 10)
+    else
+        emptySlotIconControl:SetAnchor(CENTER, slotBG)
     end
 end
 
-function ZO_GamepadSmithingExtraction:AddItemToCraft(bagId, slotIndex)
-    ZO_SharedSmithingExtraction.AddItemToCraft(self, bagId, slotIndex)
-    -- rediscover inventory actions since they have changed
-    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-
-    self:UpdateSelection()
-
-    if bagId and slotIndex then
+function ZO_GamepadSmithingExtraction:RefreshTooltip()
+    if self.extractionSlot:HasOneItem() then
+        local bagId, slotIndex = self.extractionSlot:GetItemBagAndSlot(1)
         self.tooltip.tip:ClearLines()
         local SHOW_COMBINED_COUNT = true
         self.tooltip.tip:LayoutBagItem(bagId, slotIndex, SHOW_COMBINED_COUNT)
         self.tooltip.icon:SetTexture(GetItemInfo(bagId, slotIndex))
         self.tooltip:SetHidden(false)
-
-        ZO_GamepadCraftingUtils_PlaySlotBounceAnimation(self.extractionSlot)
+    else
+        self.tooltip:SetHidden(true)
     end
 end
 
-function ZO_GamepadSmithingExtraction:RemoveItemFromCraft()
-    ZO_SharedSmithingExtraction.RemoveItemFromCraft(self)
+function ZO_GamepadSmithingExtraction:AddItemToCraft(bagId, slotIndex)
+    local itemAdded = ZO_SharedSmithingExtraction.AddItemToCraft(self, bagId, slotIndex)
     -- rediscover inventory actions since they have changed
     self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSelection()
 
-    self.tooltip:SetHidden(true)
-end
+    if itemAdded then
+        self:RefreshTooltip()
 
-function ZO_GamepadSmithingExtraction:ConfirmRefineOrDestroy()
-    self:Extract()
-end
-
-function ZO_GamepadSmithingExtraction:HasEnoughToRefine()
-    if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
-        local bagId, slotIndex = self.extractionSlot:GetBagAndSlot()
-        return ZO_SharedSmithingExtraction_DoesItemMeetRefinementStackRequirement(bagId, slotIndex, self.extractionSlot:GetStackCount())
-    else
-        return true
+        ZO_GamepadCraftingUtils_PlaySlotBounceAnimation(self.extractionSlot)
     end
+    return itemAdded
+end
+
+function ZO_GamepadSmithingExtraction:RemoveItemFromCraft(bagId, slotIndex)
+    local itemRemoved = ZO_SharedSmithingExtraction.RemoveItemFromCraft(self, bagId, slotIndex)
+    -- rediscover inventory actions since they have changed
+    self.itemActions:SetInventorySlot(self.inventory:CurrentSelection())
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+
+    self:UpdateSelection()
+
+    return itemRemoved
 end
 
 function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
@@ -269,43 +248,90 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
                 end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
-            visible =   function()
-                            if ZO_CraftingUtils_IsPerformingCraftProcess() then
-                                return false
-                            end
-                            local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
-                            return bagId ~= nil and slotIndex ~= nil
-                        end,
+            visible = function()
+                if ZO_CraftingUtils_IsPerformingCraftProcess() then
+                    return false
+                end
+                local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
+                return bagId ~= nil and slotIndex ~= nil
+            end,
             callback = function()
                 if self:IsCurrentSelected() then
-                    self:RemoveItemFromCraft()
+                    self:RemoveItemFromCraft(self.inventory:CurrentSelectionBagAndSlot())
                 else
                     self:AddItemToCraft(self.inventory:CurrentSelectionBagAndSlot())
                 end
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
+            enabled = function()
+                return self:IsCurrentSelected() or self:CanItemBeAddedToCraft(self.inventory:CurrentSelectionBagAndSlot())
+            end,
         },
 
-        -- Perform craft
+        -- Deconstruct single
         {
             name = function()
-                if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
-                    return GetString(SI_SMITHING_TAB_REFINEMENT)
+                if self:IsInRefineMode() then
+                    return GetString(SI_CRAFTING_PERFORM_REFINE)
                 else
-                    return GetString(SI_SMITHING_TAB_DECONSTRUCTION)
+                    return GetString(SI_CRAFTING_PERFORM_DECONSTRUCT)
                 end
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
-        
-            callback = function() self:ConfirmRefineOrDestroy() end,
+            gamepadOrder = 1010,
+            callback = function()
+                self:ExtractSingle()
+            end,
+            enabled = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsExtractable() and self.extractionSlot:HasOneItem()
+            end,
+        },
 
-            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasEnoughToRefine() and self:HasSelections() end,
+        -- Deconstruct multiple
+        {
+            name = function()
+                if self:IsInRefineMode() then
+                    return GetString(SI_CRAFTING_REFINE_MULTIPLE)
+                else
+                    return GetString(SI_CRAFTING_DECONSTRUCT_MULTIPLE)
+                end
+             end,
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            gamepadOrder = 1010,
+            callback = function()
+                if self.extractionSlot:HasOneItem() then
+                    -- extract partial stack
+                    local bagId, slotIndex = self.extractionSlot:GetItemBagAndSlot(1)
+                    local refineSize = GetRequiredSmithingRefinementStackSize()
+                    local maxIterations = zo_min(zo_floor(self.inventory:GetStackCount(bagId, slotIndex) / refineSize), MAX_ITERATIONS_PER_DECONSTRUCTION)
+                    local function PerformDeconstructPartial(iterations)
+                        self:ExtractPartialStack(iterations * refineSize)
+                    end
+
+                    ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, PerformDeconstructPartial)
+                else
+                    -- extract all
+                    self:ConfirmExtractAll()
+                end
+            end,
+            enabled = function()
+                if ZO_CraftingUtils_IsPerformingCraftProcess() or not self:IsExtractable() then
+                    return false
+                end
+                if self.extractionSlot:HasOneItem() then
+                    -- there should be at least enough materials to refine twice
+                    local bagId, slotIndex = self.extractionSlot:GetItemBagAndSlot(1)
+                    return self:IsInRefineMode() and self.inventory:GetStackCount(bagId, slotIndex) >= GetRequiredSmithingRefinementStackSize() * 2
+                end
+                return true
+            end,
         },
 
         -- Item Options
         {
             name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
+            gamepadOrder = 1020,
             callback = function()
                 self:ShowItemActions()
             end,

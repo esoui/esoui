@@ -106,7 +106,7 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:SetupFoci()
     -- TODO: If we want to turn on filters and searching after initialization foci will have to be re-setup
-    if not self.contentHeader:IsControlHidden() then
+    if not (self.contentHeader:IsControlHidden() or (self.filterControl:IsHidden() and self.searchControl:IsHidden())) then
         local function FiltersActivateCallback()
             self.filterSwitcher:Activate()
         end
@@ -188,8 +188,9 @@ function ZO_GamepadInteractiveSortFilterList:InitializeFilters()
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeDropdownFilter()
-    local filterControl = self.contentHeader:GetNamedChild("DropdownFilter")
-    local filterDropdownControl = filterControl:GetNamedChild("Dropdown")
+    self.filterControl = self.contentHeader:GetNamedChild("DropdownFilter")
+    local filterDropdownControl = self.filterControl:GetNamedChild("Dropdown")
+
     self.filterDropdown = ZO_ComboBox_ObjectFromContainer(filterDropdownControl)
     self.filterDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
     self.filterDropdown:SetSortsItems(false)
@@ -212,15 +213,15 @@ function ZO_GamepadInteractiveSortFilterList:InitializeDropdownFilter()
         deactivate = function()
             self.filterDropdown:SetSelectedColor(ZO_DISABLED_TEXT)
         end,
-        highlight = filterControl:GetNamedChild("Highlight"),
-        canFocus = function() return not filterControl:IsHidden() and not filterDropdownControl:IsHidden() end,
+        highlight = self.filterControl:GetNamedChild("Highlight"),
+        canFocus = function() return not self.filterControl:IsHidden() and not filterDropdownControl:IsHidden() end,
     }
     self.filterSwitcher:AddEntry(filterData)
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
-    local searchControl = self.contentHeader:GetNamedChild("SearchFilter")
-    local searchEdit = searchControl:GetNamedChild("SearchEdit")
+    self.searchControl = self.contentHeader:GetNamedChild("SearchFilter")
+    local searchEdit = self.searchControl:GetNamedChild("SearchEdit")
 
     local function SearchEditFocusLost()
         ZO_GamepadEditBox_FocusLost(searchEdit)
@@ -234,8 +235,8 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
                 searchEdit:TakeFocus()
             end
         end,
-        highlight = searchControl:GetNamedChild("Highlight"),
-        canFocus = function() return not searchControl:IsHidden() and not searchEdit:IsHidden() end
+        highlight = self.searchControl:GetNamedChild("Highlight"),
+        canFocus = function() return not self.searchControl:IsHidden() and not searchEdit:IsHidden() end
     }
     self.filterSwitcher:AddEntry(searchData)
     self.searchEdit = searchEdit

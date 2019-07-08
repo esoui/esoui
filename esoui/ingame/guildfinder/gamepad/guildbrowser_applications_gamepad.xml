@@ -5,7 +5,7 @@
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGamepad36" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
-                    <Dimensions x="345" />
+                    <Dimensions x="600" />
                 </Label>
                 <Label name="$(parent)Expires" font="ZoFontGamepad36" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="RIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>

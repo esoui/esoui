@@ -92,7 +92,16 @@ do
 
 
     function ZO_CraftingResults_Gamepad:InitializeResultBuffer()
-        local templateData = {setup = Setup, equalityCheck = AreItemsEqual, equalitySetup = EqualitySetup, headerTemplateName = "ZO_GamepadCraftingResultsHeaderTemplate", headerSetup = SetupHeader, headerEqualityCheck = AreHeadersEqual}
+        local templateData =
+        {
+            setup = Setup,
+            equalityCheck = AreItemsEqual,
+            equalitySetup = EqualitySetup,
+            headerTemplateName = "ZO_GamepadCraftingResultsHeaderTemplate",
+            headerSetup = SetupHeader,
+            headerEqualityCheck = AreHeadersEqual,
+            displayOlderLinesFirst = true,
+        }
         ZO_AlertAddTemplate_Gamepad(GAMEPAD_CRAFTING_RESULTS_TEMPLATE, templateData)
     end
 end

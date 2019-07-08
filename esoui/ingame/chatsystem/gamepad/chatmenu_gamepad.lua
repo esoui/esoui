@@ -52,7 +52,6 @@ function ZO_ChatMenu_Gamepad:InitializeControls()
     list:SetValidateGradient(true)
     list:AddDataTemplate("ZO_ChatMenu_Gamepad_LogLine", function(...) self:SetupLogMessage(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, function(a, b) return a.data.id == b.data.id end)
 
-    local CONSUME_INPUT = true
     local function HandleListDirectionalInput(result)
         if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
             if list:GetSelectedIndex() == list:GetNumEntries() then
@@ -206,7 +205,6 @@ function ZO_ChatMenu_Gamepad:InitializePassiveFocus()
     end
     self.chatEntryPanelFocalArea = ZO_GamepadMultiFocusArea_Base:New(self, ChatEntryPanelActivateCallback, ChatEntryPanelDeactivateCallback)
 
-    local NO_PREVIOUS, NO_NEXT
     self:AddNextFocusArea(self.chatEntryPanelFocalArea)
     self:AddNextFocusArea(self.textInputAreaFocalArea)
 end
@@ -276,9 +274,17 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
             sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
 
-        -- Open Guild Link (super special keybind)
+        -- Open Link (super special keybind)
         {
-            name = GetString(SI_GAMEPAD_GUILD_LINK_KEYBIND),
+            name = function()
+                local targetData = self.list:GetTargetData()
+                local currentLink = targetData.data.links[self.currentLinkIndex]
+                if currentLink.linkType == GUILD_LINK_TYPE then
+                    return GetString(SI_GAMEPAD_GUILD_LINK_KEYBIND)
+                elseif currentLink.linkType == HELP_LINK_TYPE then
+                    return GetString(SI_GAMEPAD_OPEN_HELP_LINK_KEYBIND)
+                end
+            end,
 
             keybind = "UI_SHORTCUT_SECONDARY",
 
@@ -286,11 +292,14 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
 
             callback = function()
                 local targetData = self.list:GetTargetData()
-                if targetData.data.links then
-                    local currentLink = targetData.data.links[self.currentLinkIndex]
-                    if currentLink then
-                        local text, color, linkType, guildId = ZO_LinkHandler_ParseLink(currentLink.link)
-                        GUILD_BROWSER_GUILD_INFO_GAMEPAD:ShowWithGuild(guildId)
+                local currentLink = targetData.data.links[self.currentLinkIndex]
+                if currentLink.linkType == GUILD_LINK_TYPE then
+                    local text, color, linkType, guildId = ZO_LinkHandler_ParseLink(currentLink.link)
+                    GUILD_BROWSER_GUILD_INFO_GAMEPAD:ShowWithGuild(guildId)
+                elseif currentLink.linkType == HELP_LINK_TYPE then
+                    local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(currentLink.link)
+                    if helpCategoryIndex and helpIndex then
+                        HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(helpCategoryIndex, helpIndex)
                     end
                 end
             end,
@@ -300,7 +309,7 @@ function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
                 if targetData.data.links then
                     local currentLink = targetData.data.links[self.currentLinkIndex]
                     if currentLink then
-                        return currentLink.linkType == GUILD_LINK_TYPE
+                        return currentLink.linkType == GUILD_LINK_TYPE or currentLink.linkType == HELP_LINK_TYPE
                     end
                 end
                 return false
@@ -562,8 +571,6 @@ function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
         --Target means we don't yet have enough info to properly change channels
         if data and not data.target then
             CHAT_SYSTEM:SetChannel(data.id)
-        else
-            --TODO: Fill the chat with something to get the player started
         end
     end
 
@@ -622,6 +629,8 @@ function ZO_ChatMenu_Gamepad:RefreshTooltip(targetData)
                 GAMEPAD_TOOLTIPS:LayoutItem(GAMEPAD_RIGHT_TOOLTIP, link)
             elseif linkType == GUILD_LINK_TYPE then
                 GAMEPAD_TOOLTIPS:LayoutGuildLink(GAMEPAD_RIGHT_TOOLTIP, link)
+            elseif linkType == HELP_LINK_TYPE then
+                GAMEPAD_TOOLTIPS:LayoutHelpLink(GAMEPAD_RIGHT_TOOLTIP, link)
             end
 
             return

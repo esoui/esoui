@@ -68,8 +68,15 @@
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Guild" relativePoint="BOTTOMRIGHT" offsetY="20" />
                     <Dimensions y="115"/>
                     <Controls>
-                        <Label name="$(parent)BiddingCloses" inherits="ZO_CurrencyTemplate">
+                        <Label name="$(parent)WeeklyBids" font="ZoFontGame" horizontalAlignment="RIGHT">
                             <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Label name="$(parent)WeeklyBidsHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_WEEKLY_BIDS_HEADER">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)WeeklyBids" relativePoint="TOPLEFT" offsetX="-10"/>
+                        </Label>
+                        <Label name="$(parent)BiddingCloses" font="ZoFontGame" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)WeeklyBids" relativePoint="BOTTOMRIGHT" offsetY="5" />
                         </Label>
                         <Label name="$(parent)BiddingClosesHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_BIDDING_CLOSES_IN_HEADER">
                             <Anchor point="TOPLEFT"/>
@@ -91,7 +98,7 @@
                         </Label>
                         <Backdrop name="$(parent)NewBid" inherits="ZO_DefaultCurrencyInputField">
                             <Dimensions x="100"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CurrentBid" relativePoint="BOTTOMRIGHT" offsetX="-18" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CurrentBid" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="5" />
                         </Backdrop>
                         <Label name="$(parent)NewBidHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_KIOSK_NEW_BID_HEADER">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentBidHeader" relativePoint="BOTTOMLEFT" offsetY="5" />

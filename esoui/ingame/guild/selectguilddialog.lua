@@ -8,6 +8,7 @@ end
 
 function ZO_SelectGuildDialog:Initialize(control, dialogName, acceptFunction, declineFunction)
     self.control = control
+    self.updateGuildListWhileShown = true
     self.dialogName = dialogName
     self.acceptButton = GetControl(control, "Accept")
     self.cancelButton = GetControl(control, "Cancel")
@@ -87,6 +88,7 @@ end
 
 function ZO_SelectGuildDialog:SetButtonText(index, text)
     self.dialogInfo.buttons[index].text = text
+    self.dialogInfo.buttons[index].control:SetText(text)
 end
 
 function ZO_SelectGuildDialog:SetPrompt(prompt)
@@ -107,6 +109,10 @@ end
 
 function ZO_SelectGuildDialog:SetDialogUpdateFn(updateFunction)
     self.dialogInfo.updateFn = updateFunction
+end
+
+function ZO_SelectGuildDialog:SetUpdateGuildListWhileShown(updateGuildListWhileShown)
+    self.updateGuildListWhileShown = updateGuildListWhileShown
 end
 
 function ZO_SelectGuildDialog:HasEntries()
@@ -138,7 +144,7 @@ function ZO_SelectGuildDialog:RefreshGuildList()
 end
 
 function ZO_SelectGuildDialog:OnGuildInformationChanged()
-    if ZO_Dialogs_IsShowing(self.dialogName) then
+    if ZO_Dialogs_IsShowing(self.dialogName) and self.updateGuildListWhileShown then
         if self:RefreshGuildList() then
             self:SelectGuildById(self.selectedGuildId)
         else

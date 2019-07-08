@@ -233,14 +233,17 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalRe
 end
 
 function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed, isExceptionalResult, craftingType)
-    self.enchantSoundPlayer:ForceStop()
     if not self.craftingProcessCompleted then
-        self.craftingProcessCompleted = true
-
-        if self.playStopTooltipAnimation then
-            self:PlayTooltipAnimation(craftFailed, isExceptionalResult, craftingType)
+        if self.enchantSoundPlayer:IsPlaying() then
+            self.processCompletedArguments = {craftFailed = craftFailed, isExceptionalResult = isExceptionalResult, craftingType = craftingType}
         else
-            self:CheckCraftProcessCompleted()
+            self.craftingProcessCompleted = true
+
+            if self.playStopTooltipAnimation then
+                self:PlayTooltipAnimation(craftFailed, isExceptionalResult, craftingType)
+            else
+                self:CheckCraftProcessCompleted()
+            end
         end
     end
 end
@@ -248,8 +251,8 @@ end
 function ZO_CraftingResults_Base:OnCraftCompleted(craftingType)
     local numItemsGained = GetNumLastCraftingResultItemsAndPenalty()
     local craftFailed = numItemsGained == 0
-    local NOT_EXECTIONAL_RESULT = false
-    self:CompleteCraftProcess(craftFailed, NOT_EXECTIONAL_RESULT, craftingType)
+    local NOT_EXCEPTIONAL_RESULT = false
+    self:CompleteCraftProcess(craftFailed, NOT_EXCEPTIONAL_RESULT, craftingType)
 end
 
 function ZO_CraftingResults_Base:OnRetraitCompleted(result)
@@ -260,8 +263,14 @@ end
 
 function ZO_CraftingResults_Base:OnAllEnchantSoundsFinished()
     if not self.craftingProcessCompleted then
-        self.craftingProcessCompleted = true
-        self:PlayTooltipAnimation()
+        if self.processCompletedArguments then
+            local arguments = self.processCompletedArguments
+            self.processCompletedArguments = nil
+            self:CompleteCraftProcess(arguments.craftFailed, arguments.isExceptionalResult, arguments.craftingType)
+        else
+            self.craftingProcessCompleted = true
+            self:PlayTooltipAnimation()
+        end
     end
 end
 
@@ -342,84 +351,107 @@ function ZO_CraftingResults_Base:RestoreAnchor(control)
     restoredAnchor:Set(control)
 end
 
-function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType)
-    if self:IsActive() and self.craftingProcessCompleted and self.tooltipAnimationCompleted then
-        if GetNumLastCraftingResultLearnedTraits() > 0 then
-            self:DisplayDiscoveredTraits()
-        end
+do
+    local CRAFTING_RESULT_SORT_ORDER =
+    {
+        quality = { tiebreaker = "stack", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        stack = { tiebreaker = "resultIndex", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+        resultIndex = { isNumeric = true },
+    }
+    local function CompareCraftingResultItems(left, right)
+        return ZO_TableOrderingFunction(left, right, "quality", CRAFTING_RESULT_SORT_ORDER, ZO_SORT_ORDER_DOWN)
+    end
 
-        local numItemsGained, penaltyApplied = GetNumLastCraftingResultItemsAndPenalty()
-
-        if penaltyApplied then
-            TriggerTutorial(TUTORIAL_TRIGGER_DECONSTRUCTION_LEVEL_PENALTY)
-        end
-
-        if numItemsGained == 0 then
-            local smithingObject = ZO_Smithing_GetActiveObject()
-            if SYSTEMS:IsShowing("alchemy") then
-                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
-            elseif smithingObject and smithingObject:IsExtracting() then
-                local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
-                if penaltyApplied then
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
-                else
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
-                end
-            elseif ZO_Enchanting_IsSceneShowing() then
-                if not ZO_Enchanting_IsInCreationMode() then
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
-                else
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_GLYPH_CREATED)
-                end
-            end
-        else
-            local shouldDisplayMessages = self:ShouldDisplayMessages()
-            for i = 1, numItemsGained do
-                local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, quality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
-                -- Don't save messages if we can't display them immediately
-                if shouldDisplayMessages then
-                    local itemInfo = {
-                        name = name,
-                        icon = icon,
-                        stack = stack,
-                        sellPrice = sellPrice,
-                        meetsUsageRequirement = meetsUsageRequirement,
-                        equipType = equipType,
-                        itemType = itemType,
-                        itemStyle = itemStyle,
-                        quality = quality,
-                        itemSoundCategory = itemSoundCategory,
-                        itemInstanceId = itemInstanceId,
-                        itemLink = GetLastCraftingResultItemLink(i),
-                    }
-
-                    self:DisplayCraftingResult(itemInfo)
-                end
-
-                if itemSoundCategory ~= ITEM_SOUND_CATEGORY_BOOSTER then
-                    self:PlayCraftedSound(itemSoundCategory)
-                end
+    function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType)
+        if self:IsActive() and self.craftingProcessCompleted and self.tooltipAnimationCompleted then
+            if GetNumLastCraftingResultLearnedTraits() > 0 then
+                self:DisplayDiscoveredTraits()
             end
 
-            local gainedBooster = DidLastCraftGainBooster(numItemsGained)
-            if gainedBooster then
-                PlaySound(GetBoosterFoundSoundForCraftingType())
-            end
+            local numItemsGained, penaltyApplied = GetNumLastCraftingResultItemsAndPenalty()
 
             if penaltyApplied then
-                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
+                TriggerTutorial(TUTORIAL_TRIGGER_DECONSTRUCTION_LEVEL_PENALTY)
             end
-        end
 
-        local totalInspiration = GetLastCraftingResultTotalInspiration()
-        if totalInspiration > 0 then
-            PlaySound(SOUNDS.CRAFTING_GAINED_INSPIRATION)
-        end
+            if numItemsGained == 0 then
+                local smithingObject = ZO_Smithing_GetActiveObject()
+                if SYSTEMS:IsShowing("alchemy") then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
+                elseif smithingObject and smithingObject:IsExtracting() then
+                    local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
+                    if penaltyApplied then
+                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
+                    else
+                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
+                    end
+                elseif ZO_Enchanting_IsSceneShowing() then
+                    if not ZO_Enchanting_IsInCreationMode() then
+                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
+                    else
+                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_GLYPH_CREATED)
+                    end
+                end
+            else
+                local shouldDisplayMessages = self:ShouldDisplayMessages()
+                local finalItemSoundCategory = ITEM_SOUND_CATEGORY_NONE
 
-        CALLBACK_MANAGER:FireCallbacks("CraftingAnimationsStopped")
+                local resultItems = {}
+                for i = 1, numItemsGained do
+                    local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, quality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
+                    -- Don't save messages if we can't display them immediately
+                    if shouldDisplayMessages then
+                        table.insert(resultItems,
+                        {
+                            resultIndex = i,
+                            name = name,
+                            icon = icon,
+                            stack = stack,
+                            sellPrice = sellPrice,
+                            meetsUsageRequirement = meetsUsageRequirement,
+                            equipType = equipType,
+                            itemType = itemType,
+                            itemStyle = itemStyle,
+                            quality = quality,
+                            itemSoundCategory = itemSoundCategory,
+                            itemInstanceId = itemInstanceId,
+                            itemLink = GetLastCraftingResultItemLink(i),
+                        })
+                    end
 
-        if GetNumLastCraftingResultLearnedTranslations() > 0 then
-            self:DisplayTranslatedRunes()
+                    if finalItemSoundCategory == ITEM_SOUND_CATEGORY_NONE then
+                        finalItemSoundCategory = itemSoundCategory
+                    end
+                end
+
+                table.sort(resultItems, CompareCraftingResultItems)
+
+                for _, result in ipairs(resultItems) do
+                    self:DisplayCraftingResult(result)
+                end
+
+                local gainedBooster = DidLastCraftGainBooster(numItemsGained)
+                if gainedBooster then
+                    PlaySound(GetBoosterFoundSoundForCraftingType())
+                else
+                    self:PlayCraftedSound(finalItemSoundCategory)
+                end
+
+                if penaltyApplied then
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
+                end
+            end
+
+            local totalInspiration = GetLastCraftingResultTotalInspiration()
+            if totalInspiration > 0 then
+                PlaySound(SOUNDS.CRAFTING_GAINED_INSPIRATION)
+            end
+
+            CALLBACK_MANAGER:FireCallbacks("CraftingAnimationsStopped")
+
+            if GetNumLastCraftingResultLearnedTranslations() > 0 then
+                self:DisplayTranslatedRunes()
+            end
         end
     end
 end

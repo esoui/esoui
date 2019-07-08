@@ -90,7 +90,7 @@ end
 
 function DLCBook_Keyboard:UseSelectedDLC()
     local collectibleData = self.navigationTree:GetSelectedData()
-    UseCollectible(collectibleData:GetId())
+    collectibleData:Use()
 end
 
 function DLCBook_Keyboard:SearchSelectedDLCInStore()

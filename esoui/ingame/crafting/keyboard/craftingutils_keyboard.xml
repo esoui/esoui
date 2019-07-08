@@ -1,0 +1,55 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CraftingSpinner" inherits="ZO_SpinnerButtons" mouseEnabled="true" virtual="true">
+            <!-- These dimensions are good for up to 3 digits -->
+            <Dimensions x="110" y="32" />
+            <Controls>
+                <Button name="$(parent)Decrease" override="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPLEFT" />
+                    <Textures normal="EsoUI/Art/Buttons/pointsMinus_up.dds"
+                              pressed="EsoUI/Art/Buttons/pointsMinus_down.dds"
+                              mouseOver="EsoUI/Art/Buttons/pointsMinus_over.dds"
+                              disabled="EsoUI/Art/Buttons/pointsMinus_disabled.dds"/>
+                </Button>
+
+
+                <Button name="$(parent)Increase" override="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" />
+                    <Textures normal="EsoUI/Art/Buttons/pointsPlus_up.dds"
+                              pressed="EsoUI/Art/Buttons/pointsPlus_down.dds"
+                              mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds"
+                              disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
+                </Button>
+
+                <Label name="$(parent)Display" font="ZoFontWinH2" modifyTextType="UPPERCASE" maxLineCount="1" horizontalAlignment="CENTER" >
+                    <Anchor point="LEFT" relativeTo="$(parent)Decrease" relativePoint="RIGHT" offsetX="2" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Increase" relativePoint="LEFT" offsetX="-2" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_MultiCraftSpinner" inherits="ZO_CraftingSpinner" mouseEnabled="true" virtual="true">
+            <Dimensions x="120" y="70" />
+            <Controls>
+                <Button name="$(parent)MinMax" inherits="ZO_DefaultButton" text="SI_CRAFTING_QUANTITY_MAX">
+                    <Anchor point="TOP" relativeTo="$(parent)Display" relativePoint="BOTTOM" offsetY="16" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_CraftingContainerHeader" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Texture name="ZO_CraftingContainerBackground" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds" virtual="true">
+            <Dimensions x="512" y="512" />
+            <Anchor point="TOP" />
+        </Texture>
+
+        <Texture name="ZO_CraftingContainerLongBackground" textureFile="EsoUI/Art/Crafting/crafting_multicraft_slottingBG.dds" virtual="true">
+            <Dimensions x="780" y="320" />
+            <Anchor point="TOP" offsetY="-13"/>
+            <TextureCoords left="0" top="0" right="0.76171875" bottom=".625" />
+        </Texture>
+    </Controls>
+</GuiXml>

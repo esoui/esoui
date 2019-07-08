@@ -268,7 +268,7 @@
         </Control>
 
         <Tooltip name="ZO_CraftingTooltip" tier="HIGH" inherits="ZO_ItemIconTooltip ZO_CraftingTooltip_AddBurstAndGlow" mouseEnabled="true" virtual="true">
-            <Anchor point="BOTTOM" offsetY="-245"/>
+            <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-335"/>
 
             <OnInitialized>
                 self:GetNamedChild("BG"):SetDrawTier(DT_MEDIUM)

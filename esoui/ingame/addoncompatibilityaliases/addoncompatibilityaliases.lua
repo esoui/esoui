@@ -718,3 +718,24 @@ function GetCraftingSkillLineIndices(tradeskillType)
     end
     return 0, 0
 end
+
+-- Deconstruction now supports multiple items per deconstruct
+function ExtractOrRefineSmithingItem(bagId, slotIndex)
+    local isRefine = CanItemBeRefined(bagId, slotIndex, GetCraftingInteractionType())
+    PrepareDeconstructMessage()
+    local quantity = isRefine and GetRequiredSmithingRefinementStackSize() or 1
+    if AddItemToDeconstructMessage(bagId, slotIndex, quantity) then
+        SendDeconstructMessage()
+    end
+end
+
+function ExtractEnchantingItem(bagId, slotIndex)
+    PrepareDeconstructMessage()
+    if AddItemToDeconstructMessage(bagId, slotIndex, 1) then
+        SendDeconstructMessage()
+    end
+end
+
+function CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, craftingType)
+    return CanItemBeRefined(bagId, slotIndex, craftingType) or CanItemBeDeconstructed(bagId, slotIndex, craftingType)
+end

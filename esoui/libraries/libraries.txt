@@ -268,6 +268,8 @@ EsoUI\Libraries\ZO_Tile\Gamepad\ContextualActionsTile_Gamepad.lua
 EsoUI\Libraries\ZO_Tile\Gamepad\ContextualActionsTile_Gamepad.xml
 EsoUI\Libraries\ZO_Tile\Gamepad\ClaimTile_Gamepad.lua
 EsoUI\Libraries\ZO_Tile\Gamepad\ClaimTile_Gamepad.xml
+EsoUI\Libraries\ZO_Tile\Gamepad\CheckboxTile_Gamepad.lua
+EsoUI\Libraries\ZO_Tile\Gamepad\CheckboxTile_Gamepad.xml
 EsoUI\Libraries\ZO_Tile\ActivationTile.lua
 EsoUI\Libraries\ZO_Tile\ActivationTile.xml
 

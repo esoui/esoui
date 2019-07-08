@@ -27,22 +27,22 @@ function ZO_ConfirmCollectibleEvolution_Keyboard_OnInitialized(control)
             {
                 keybind = "DIALOG_PRIMARY",
                 control = control:GetNamedChild("Confirm"),
-                text = SI_DIALOG_YES,
+                text = SI_DIALOG_CONFIRM,
                 callback = function(dialog)
-                    RespondToConfirmUseInventoryItemRequest(true)
+                    dialog.data.acceptCallback()
                 end,
             },
             {
                 keybind = "DIALOG_NEGATIVE",
                 control = control:GetNamedChild("Cancel"),
-                text = SI_DIALOG_NO,
+                text = SI_DIALOG_CANCEL,
                 callback = function(dialog)
-                    RespondToConfirmUseInventoryItemRequest(false)
+                    dialog.data.declineCallback()
                 end,
             }
         },
-        noChoiceCallback = function()
-            RespondToConfirmUseInventoryItemRequest(false)
+        noChoiceCallback = function(dialog)
+            dialog.data.declineCallback()
         end,
     })
 end

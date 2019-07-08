@@ -110,7 +110,7 @@ local ChatEventFormatters = {
         if(not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response)) then
             local alertMessage = nameToDisplay ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToDisplay) or GetString(SI_PLAYER_BUSY)
     
-            return alertMessage, nil, diplayName
+            return alertMessage, nil, displayName
         end
     end,
 

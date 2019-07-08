@@ -223,6 +223,9 @@ end
 
 function ZO_GamepadSmithingImprovement:InitializeSlots()
     self.improvementSlot = ZO_SmithingImprovementSlot:New(self, self.slotContainer:GetNamedChild("ImprovementSlot"), SLOT_TYPE_PENDING_CRAFTING_COMPONENT, self.inventory)
+    self.improvementSlot:RegisterCallback("ItemsChanged", function()
+        self:OnSlotChanged()
+    end)
     self.boosterSlot = self.slotContainer:GetNamedChild("BoosterSlot")
     
     ZO_InventorySlot_SetType(self.boosterSlot, SLOT_TYPE_SMITHING_BOOSTER)

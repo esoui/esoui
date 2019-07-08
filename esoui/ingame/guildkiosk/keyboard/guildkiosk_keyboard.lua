@@ -38,6 +38,7 @@ function PurchaseKioskDialog:Initialize(control)
         return DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_GUILD_KIOSK_BID)
     end)
     dialog:SetDialogUpdateFn(function(_, gameTimeSecs) ZO_GuildKiosk_Purchase_OnUpdate(self.descriptionLabel, gameTimeSecs) end)
+    dialog:SetUpdateGuildListWhileShown(false)
     
     control:GetNamedChild("Title"):SetWidth(GUILD_KIOSK_DIALOG_WIDTH)
     self.descriptionLabel = control:GetNamedChild("Description")
@@ -122,20 +123,21 @@ function BidOnKioskDialog:Initialize(control)
     self.dialog:SetTitle(GetString(SI_GUILD_KIOSK_BID_TITLE))
     self.dialog:SetPrompt(GetString(SI_GUILD_KIOSK_BID_GUILD_CHOICE_HEADER))
     self.dialog:SetSelectedCallback(function(guildId) self:OnGuildSelected(guildId) end)
-    self.dialog:SetButtonText(1, GetString(SI_GUILD_KIOSK_BID))
     self.dialog:SetGuildFilter(function(guildId)
         return DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_GUILD_KIOSK_BID)
     end)
     self.dialog:SetDialogUpdateFn(function(_, gameTimeSecs) self:OnUpdate(gameTimeSecs) end)
-    
+    self.dialog:SetUpdateGuildListWhileShown(false)
+
     control:GetNamedChild("Title"):SetWidth(GUILD_KIOSK_DIALOG_WIDTH)
-    control:GetNamedChild("Description"):SetText(GetString(SI_GUILD_KIOSK_BID_DESCRIPTION))
+    control:GetNamedChild("Description"):SetText(zo_strformat(SI_GUILD_KIOSK_BID_DESCRIPTION, GetMaxKioskBidsPerGuild()))
     self.control = control
     self.bidControls = control:GetNamedChild("BidControls")
     self.guildBalanceLabel = self.bidControls:GetNamedChild("GuildBalance")
     self.currentBidLabel = self.bidControls:GetNamedChild("CurrentBid")
     self.currentBidHeaderLabel = self.bidControls:GetNamedChild("CurrentBidHeader")
     self.biddingClosesLabel = self.bidControls:GetNamedChild("BiddingCloses")
+    self.weeklyBidsLabel = self.bidControls:GetNamedChild("WeeklyBids")
     self.newBidInput = self.bidControls:GetNamedChild("NewBid")
 
     self.errorControls = control:GetNamedChild("ErrorControls")
@@ -160,63 +162,84 @@ function BidOnKioskDialog:OnUpdate(gameTimeSecs)
 end
 
 function BidOnKioskDialog:OnGuildSelected(guildId)
-    local guildBankedMoney, existingBidAmount, existingBidIsOnThisKiosk, existingBidKioskName = GetKioskGuildInfo(guildId)
+    local guildBankedMoney, existingBidAmount, numTotalBids = GetKioskGuildInfo(guildId)
+    local maxBidsPerGuild = GetMaxKioskBidsPerGuild()
+    local hasBidOnThisTraderAlready = existingBidAmount > 0
     local guildCanUseTradingHouse = DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_TRADING_HOUSE)
 
     self.bidControls:SetHidden(true)
     self.errorControls:SetHidden(true)
     self.acceptButton:SetEnabled(false)
 
+    self.dialog:SetButtonText(1, ZO_GuildKiosk_Bid_Shared.GetBidActionText(hasBidOnThisTraderAlready))
+
     if not guildCanUseTradingHouse then
         self.errorControls:SetHidden(false)
         self.errorLabel:SetText(zo_strformat(SI_GUILD_KIOSK_BID_ERROR_TRADING_HOUSE_LOCKED, GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE)))
-    elseif not existingBidIsOnThisKiosk and existingBidKioskName then
+    elseif not hasBidOnThisTraderAlready and numTotalBids >= maxBidsPerGuild then
         self.errorControls:SetHidden(false)
-        self.errorLabel:SetText(zo_strformat(SI_GUILD_KIOSK_BID_ERROR_EXISTING_BID, existingBidKioskName))
-    elseif guildBankedMoney and (existingBidAmount == 0 or existingBidIsOnThisKiosk) then
-        local bidAmount = 0
+        self.errorLabel:SetText(GetString("SI_GUILDKIOSKRESULT", GUILD_KIOSK_TOO_MANY_BIDS))
+    elseif guildBankedMoney then
+        local minBidAllowed = 0
 
         ZO_DefaultCurrencyInputField_SetCurrencyMax(self.newBidInput, guildBankedMoney + existingBidAmount)
 
+        local shouldGuildBankGoldShowErrorColor = false
         self.bidControls:SetHidden(false)
-        if(existingBidAmount == 0) then
+        if existingBidAmount == 0 then
             local kioskPurchaseCost = GetKioskPurchaseCost()
 
-            ZO_CurrencyControl_SetSimpleCurrency(self.currentBidLabel, CURT_MONEY, kioskPurchaseCost, CURRENCY_OPTIONS)
             self.currentBidHeaderLabel:SetText(GetString(SI_GUILD_KIOSK_MINIMUM_BID_HEADER))
 
+            local shouldKioskPurchaseCostShowErrorColor = false
             if guildBankedMoney >= kioskPurchaseCost then
-                bidAmount = kioskPurchaseCost
+                minBidAllowed = kioskPurchaseCost
             else
+                shouldKioskPurchaseCostShowErrorColor = true
                 ZO_DefaultCurrencyInputField_SetCurrencyMax(self.newBidInput, 0)
             end
+
+            --Show red on the minimum bid text when making the first bid if you don't have enough (less than the kiosk purchase cost in the guild bank)
+            ZO_CurrencyControl_SetSimpleCurrency(self.currentBidLabel, CURT_MONEY, kioskPurchaseCost, CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, shouldKioskPurchaseCostShowErrorColor)
         else
-            ZO_CurrencyControl_SetSimpleCurrency(self.currentBidLabel, CURT_MONEY, existingBidAmount, CURRENCY_OPTIONS)
             self.currentBidHeaderLabel:SetText(GetString(SI_GUILD_KIOSK_CURRENT_BID_HEADER))
 
             if guildBankedMoney > 0 then
-                bidAmount = existingBidAmount + 1
+                minBidAllowed = existingBidAmount + 1
             else
+                shouldGuildBankGoldShowErrorColor = true
                 ZO_DefaultCurrencyInputField_SetCurrencyMax(self.newBidInput, 0)
             end
+
+            ZO_CurrencyControl_SetSimpleCurrency(self.currentBidLabel, CURT_MONEY, existingBidAmount, CURRENCY_OPTIONS)
         end
         
-        ZO_CurrencyControl_SetSimpleCurrency(self.guildBalanceLabel, CURT_MONEY, guildBankedMoney, CURRENCY_OPTIONS)
-        ZO_DefaultCurrencyInputField_SetCurrencyMin(self.newBidInput, bidAmount)
-        ZO_DefaultCurrencyInputField_SetCurrencyAmount(self.newBidInput, bidAmount)
+        self.weeklyBidsLabel:SetText(ZO_FormatFraction(numTotalBids, maxBidsPerGuild))
+        --Show red on the guild bank money when updating an existing bid if you don't have enough (0 gold in the guild bank)
+        ZO_CurrencyControl_SetSimpleCurrency(self.guildBalanceLabel, CURT_MONEY, guildBankedMoney, CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, shouldGuildBankGoldShowErrorColor)
+        ZO_DefaultCurrencyInputField_SetCurrencyMin(self.newBidInput, minBidAllowed)
+        ZO_DefaultCurrencyInputField_SetCurrencyAmount(self.newBidInput, minBidAllowed)
 
-        self:RefreshUpdateBidEnabled(bidAmount)
+        self:RefreshUpdateBidEnabled(minBidAllowed)
     end
 end
 
 function BidOnKioskDialog:RefreshUpdateBidEnabled(bidAmount)
     local guildId = self.dialog:GetSelectedGuildId()
     if(guildId) then
-        local _, existingBidAmount, existingBidIsOnThisKiosk = GetKioskGuildInfo(guildId)
+        local _, existingBidAmount, numTotalBids = GetKioskGuildInfo(guildId)
         if(existingBidAmount) then
-            local bidOnADifferentKioskAlready = existingBidAmount > 0 and not existingBidIsOnThisKiosk
-            local minBid = GetKioskPurchaseCost()
-            self.acceptButton:SetEnabled(not bidOnADifferentKioskAlready and bidAmount > existingBidAmount and bidAmount >= minBid)
+            local hasBidOnThisTraderAlready = existingBidAmount > 0
+            if hasBidOnThisTraderAlready then
+                self.acceptButton:SetEnabled(bidAmount > existingBidAmount)
+            else
+                if numTotalBids >= GetMaxKioskBidsPerGuild() then
+                    self.acceptButton:SetEnabled(false)
+                else
+                    local minBid = GetKioskPurchaseCost()
+                    self.acceptButton:SetEnabled(bidAmount >= minBid)
+                end
+            end
         else
             self.acceptButton:SetEnabled(false)
         end

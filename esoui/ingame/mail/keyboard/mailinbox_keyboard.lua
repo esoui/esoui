@@ -601,3 +601,53 @@ end
 function ZO_MailInbox_OnInitialized(self)
     MAIL_INBOX = MailInbox:New(self)
 end
+
+function ZO_TakeAttachmentCODDialog_OnInitialized(self)
+    self.confirmTextLabel = self:GetNamedChild("ConfirmText")
+    self.currentGoldContainer = self:GetNamedChild("CurrentGoldContainer")
+    self.codFeeContainer = self:GetNamedChild("CODFeeContainer")
+
+    ZO_Dialogs_RegisterCustomDialog("MAIL_TAKE_ATTACHMENT_COD",
+    {
+        customControl = self,
+        setup = function(dialog, data)
+            local currentGoldLabel = self.currentGoldContainer.currencyAmount
+            local codFeeLabel = self.codFeeContainer.currencyAmount
+            local currentGold = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+            local canAffordCODFee = data.codAmount <= currentGold
+            local confirmStringId = canAffordCODFee and SI_MAIL_CONFIRM_TAKE_ATTACHMENT_COD or SI_MAIL_COD_NOT_ENOUGH_MONEY
+            local CURRENCY_OPTIONS =
+            {
+                showTooltips = true,
+            }
+
+            self.confirmTextLabel:SetText(GetString(confirmStringId))
+            ZO_CurrencyControl_SetSimpleCurrency(currentGoldLabel, CURT_MONEY, currentGold, CURRENCY_OPTIONS, CURRENCY_SHOW_ALL)
+            ZO_CurrencyControl_SetSimpleCurrency(codFeeLabel, CURT_MONEY, data.codAmount, CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, not canAffordCODFee)
+        end,
+        title =
+        {
+            text = SI_PROMPT_TITLE_MAIL_TAKE_ATTACHMENT_COD,
+        },
+        buttons =
+        {
+            [1] =
+            {
+                control = self:GetNamedChild("Accept"),
+                text = SI_DIALOG_ACCEPT,
+                enabled = function(dialog)
+                    local codAmount = dialog.data.codAmount
+                    return codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+                end,
+                callback = function()
+                    MAIL_INBOX:ConfirmAcceptCOD()
+                end,
+            },
+            [2] =
+            {
+                control = self:GetNamedChild("Decline"),
+                text = SI_DIALOG_DECLINE,
+            }
+        },
+    })
+end

@@ -431,6 +431,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     nameStringId = SI_DLC_BOOK_ACTION_ACCEPT_QUEST
                 elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MEMENTO) then
                     nameStringId = SI_COLLECTIBLE_ACTION_USE
+                elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
+                    nameStringId = SI_COLLECTIBLE_ACTION_COMBINE
                 elseif collectibleData:IsHouse() then
                     nameStringId = collectibleData:IsUnlocked() and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
                 elseif collectibleData:IsActive() then
@@ -451,7 +453,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     RequestJumpToHouse(collectibleData:GetReferenceId())
                     SCENE_MANAGER:ShowBaseScene()
                 else
-                    UseCollectible(collectibleData:GetId())
+                    collectibleData:Use()
                 end
             end,
             visible = function()

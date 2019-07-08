@@ -73,6 +73,8 @@ SOUNDS = {
     GAMEPAD_MENU_DOWN               = "Console_Menu_Down",
     GAMEPAD_MENU_JUMP_UP            = "Console_Menu_Jump_Up",
     GAMEPAD_MENU_JUMP_DOWN          = "Console_Menu_Jump_Down",
+    GAMEPAD_MENU_LEFT               = "Console_Menu_Left",
+    GAMEPAD_MENU_RIGHT              = "Console_Menu_Right",
 
     -- Dialog sounds
     DIALOG_SHOW                     = "Dialog_Show",
@@ -233,6 +235,9 @@ SOUNDS = {
     -- Writ voucher sounds
     WRIT_VOUCHER_TRANSACT           = "WritVoucher_Transact",
 
+    -- Undaunted key sounds
+    UNDAUNTED_KEY_TRANSACT           = "Undaunted_Transact",
+
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",
     JUSTICE_NOW_KOS                 = "Justice_NowKOS",
@@ -357,6 +362,7 @@ SOUNDS = {
     GUILD_RANK_SELECTED             = "GuildRank_Selected",
     GUILD_RANK_REORDERED            = "GuildRank_Reordered",
     GUILD_RANK_LOGO_SELECTED        = "GuildRankLogo_Selected",
+    GUILD_RANK_PERMISSION_TOGGLE    = "GuildRank_PermissionToggle",
     GUILD_RANK_SAVED                = "GuildRank_Saved",
     GUILD_ROSTER_ADDED              = "GuildRoster_Added",
     GUILD_ROSTER_REMOVED            = "GuildRoster_Removed",
@@ -364,7 +370,6 @@ SOUNDS = {
     GUILD_SELF_LEFT                 = "Guild_Self_Left",
     GUILD_ROSTER_DEMOTE             = "GuildRoster_Demote",
     GUILD_ROSTER_PROMOTE            = "GuildRoster_Promote",
-
 
     --Ability slotting sounds
     ABILITY_SLOT_MENU_OPEN          = "Ability_Slot_Menu_Open",
@@ -629,6 +634,7 @@ SOUNDS = {
     ENCHANTING_WEAPON_GLYPH_REMOVED         = "Enchanting_WeaponGlyph_Removed",
     ENCHANTING_JEWELRY_GLYPH_PLACED         = "Enchanting_JewelryGlyph_Placed",
     ENCHANTING_JEWELRY_GLYPH_REMOVED        = "Enchanting_JewelryGlyph_Removed",
+    ENCHANTING_GENERIC_GLYPH_REMOVED        = "Enchanting_GenericGlyph_Removed",
 
     ENCHANTING_CREATE_TOOLTIP_GLOW          = "Enchanting_Create_Tooltip_Glow",
     ENCHANTING_EXTRACT_START_ANIM           = "Enchanting_Extract_Start_Anim",

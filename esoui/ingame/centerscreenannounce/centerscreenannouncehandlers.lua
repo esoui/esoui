@@ -1210,9 +1210,9 @@ end
 -- Center Screen Queueable Handlers
 -- Usage: Whenever there is an event type that occurs multiple times within a short timeframe
 -- add another table entry with data to help facilitate the combining of the multiple events into a single call
---      updateTimeDelaySeconds: The time delay from when an event that is marked as queueable is recieved to when the event enters into the regular event queue.
---                              The system will restart the time after each new event is recieved
---      updateParameters:       A table of parameter positions that should be overwritten with the latest data from the newest event recieved.
+--      updateTimeDelaySeconds: The time delay from when an event that is marked as queueable is received to when the event enters into the regular event queue.
+--                              The system will restart the time after each new event is received
+--      updateParameters:       A table of parameter positions that should be overwritten with the latest data from the newest event received.
 --                              The position is derived from the parameters in the event callback function defined in the CENTER_SCREEN_EVENT_HANDLERS table for the same event. 
 --      conditionParameters:    A table of parameter positions that should be unique amoung any given number of eventIds. For example, if you kill a monster that gives
 --                              exp and guild rep, they will both come down as skill xp update events, but their skilltype and skillindex values are different, so they should be added the to system independently

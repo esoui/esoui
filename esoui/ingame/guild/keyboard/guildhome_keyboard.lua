@@ -40,6 +40,9 @@ function GuildHomeManager:New(control)
     descriptionEditControl:SetMaxInputChars(MAX_GUILD_DESCRIPTION_LENGTH)
     manager.description:RegisterCallback("Save", function(text) SetGuildDescription(manager.guildId, text) end)
 
+    manager.viewWeeklyBidsButton = control:GetNamedChild("TraderViewWeeklyBids")
+    manager.viewWeeklyBidsButton:SetHandler("OnClicked", function() ZO_Dialogs_ShowDialog("GUILD_WEEKLY_BIDS_KEYBOARD", { guildId = manager.guildId }) end)
+
     manager:InitializeKeybindDescriptors()
 
     control:RegisterForEvent(EVENT_GUILD_MOTD_CHANGED, function(_, guildId) if(manager.guildId == guildId) then manager:OnGuildMotDChanged() end end)
@@ -121,16 +124,22 @@ function GuildHomeManager:RefreshDescription()
 end
 
 function GuildHomeManager:RefreshPermissions()
-    if(DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_SET_MOTD)) then
+    if DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_SET_MOTD) then
         self.motd:SetHidden(false)
     else
         self.motd:SetHidden(true)
     end
 
-    if(DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_DESCRIPTION_EDIT)) then
+    if DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_DESCRIPTION_EDIT) then
         self.description:SetHidden(false)
     else
         self.description:SetHidden(true)
+    end
+
+    if DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_GUILD_KIOSK_BID) then
+        self.viewWeeklyBidsButton:SetHidden(false)
+    else
+        self.viewWeeklyBidsButton:SetHidden(true)
     end
 
     self:RefreshReleaseKeep()

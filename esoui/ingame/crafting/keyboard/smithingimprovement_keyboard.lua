@@ -47,6 +47,9 @@ end
 function ZO_SmithingImprovement:InitializeSlots()
     local slotContainer = self.control:GetNamedChild("SlotContainer")
     self.improvementSlot = ZO_SmithingImprovementSlot:New(self, slotContainer:GetNamedChild("ImprovementSlot"), SLOT_TYPE_PENDING_CRAFTING_COMPONENT, self.inventory)
+    self.improvementSlot:RegisterCallback("ItemsChanged", function()
+        self:OnSlotChanged()
+    end)
     self.boosterSlot = slotContainer:GetNamedChild("BoosterSlot")
 
     ZO_InventorySlot_SetType(self.boosterSlot, SLOT_TYPE_SMITHING_BOOSTER)
@@ -75,9 +78,6 @@ function ZO_SmithingImprovement:SetCraftingType(craftingType, oldCraftingType, i
 end
 
 function ZO_SmithingImprovement:OnItemReceiveDrag(slotControl, bagId, slotIndex)
-    if self.improvementSlot:HasItem() then
-        PickupInventoryItem(self.improvementSlot:GetBagAndSlot())
-    end
     self:SetImprovementSlotItem(bagId, slotIndex)
 end
 
@@ -99,7 +99,7 @@ function ZO_SmithingImprovement:RefreshImprovementChance()
     local row = self:GetRowForSelection()
     if row then
         self:HighlightBoosterRow(row)
-        self.improvementSlot:RefreshName()
+        self.improvementSlot:Refresh()
     end
 end
 

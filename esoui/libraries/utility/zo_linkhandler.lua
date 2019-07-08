@@ -13,6 +13,7 @@ DISPLAY_NAME_LINK_TYPE = "display"
 URL_LINK_TYPE = "url"
 COLLECTIBLE_LINK_TYPE = "collectible"
 GUILD_LINK_TYPE = "guild"
+HELP_LINK_TYPE = "help"
 
 ZO_VALID_LINK_TYPES_CHAT =
 {
@@ -20,16 +21,17 @@ ZO_VALID_LINK_TYPES_CHAT =
     [ITEM_LINK_TYPE] = true,
     [ACHIEVEMENT_LINK_TYPE] = true,
     [COLLECTIBLE_LINK_TYPE] = true,
+    [HELP_LINK_TYPE] = true,
 }
 
 function ZO_LinkHandler_InsertLink(link)
     if type(link) == "string" and #link > 0 then
         local text, color, linkType = ZO_LinkHandler_ParseLink(link)
 
-        --todo: handle outher link type sound cases
-        if(linkType == ITEM_LINK_TYPE) then
+        --todo: handle other link type sound cases
+        if linkType == ITEM_LINK_TYPE then
             local soundCategory = GetItemSoundCategoryFromLink(link)
-            if(soundCategory) then
+            if soundCategory then
                 PlayItemSound(soundCategory, ITEM_SOUND_ACTION_SLOT)
             end
         end
@@ -117,7 +119,7 @@ function ZO_LinkHandler_CreateCharacterLink(characterName)
 end
 
 function ZO_LinkHandler_CreateChannelLink(channelName)
-	return ZO_LinkHandler_CreateLink(channelName, nil, CHANNEL_LINK_TYPE, channelName)
+    return ZO_LinkHandler_CreateLink(channelName, nil, CHANNEL_LINK_TYPE, channelName)
 end
 
 function ZO_LinkHandler_CreateURLLink(url, displayText)
@@ -127,7 +129,7 @@ end
 local function AppendHelper(thingToAppend, size, nextElement, ...)
     if size == 0 then
         return thingToAppend
-    end 
+    end
 
     return nextElement, AppendHelper(thingToAppend, size - 1, ...) 
 end

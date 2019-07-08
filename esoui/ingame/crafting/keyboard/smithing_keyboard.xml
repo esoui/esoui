@@ -23,7 +23,7 @@
                     <Dimensions x="550"/>
                 </Control>
 
-                <Control name="$(parent)RefinementPanel" inherits="ZO_SmithingExtractionPanel ZO_SmithingPanelAnchors" hidden="true" />
+                <Control name="$(parent)RefinementPanel" inherits="ZO_SmithingRefinementPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)CreationPanel" inherits="ZO_SmithingCreationPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)ImprovementPanel" inherits="ZO_SmithingImprovementPanel ZO_SmithingPanelAnchors" hidden="true" />
                 <Control name="$(parent)DeconstructionPanel" inherits="ZO_SmithingExtractionPanel ZO_SmithingPanelAnchors" hidden="true" />

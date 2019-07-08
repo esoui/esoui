@@ -9,8 +9,7 @@ end
 function ZO_Smithing:Initialize(control)
     ZO_Smithing_Common.Initialize(self, control)
 
-    local REFINEMENT_ONLY = true
-    self.refinementPanel = ZO_SmithingExtraction:New(self.control:GetNamedChild("RefinementPanel"), self, REFINEMENT_ONLY)
+    self.refinementPanel = ZO_SmithingRefinement:New(self.control:GetNamedChild("RefinementPanel"), self)
     self.creationPanel = ZO_SmithingCreation:New(self.control:GetNamedChild("CreationPanel"), self)
     self.improvementPanel = ZO_SmithingImprovement:New(self.control:GetNamedChild("ImprovementPanel"), self)
     self.deconstructionPanel = ZO_SmithingExtraction:New(self.control:GetNamedChild("DeconstructionPanel"), self)
@@ -90,9 +89,9 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                     local cost = GetCostToCraftSmithingItem(self.creationPanel:GetAllCraftingParameters())
                     return ZO_CraftingUtils_GetCostToCraftString(cost)
                 elseif self.mode == SMITHING_MODE_REFINEMENT then
-                    return GetString(SI_SMITHING_REFINE)
+                    return self.refinementPanel:IsMultiExtract() and GetString(SI_CRAFTING_REFINE_MULTIPLE) or  GetString(SI_CRAFTING_PERFORM_REFINE)
                 elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
-                    return GetString(SI_SMITHING_DECONSTRUCT)
+                    return self.deconstructionPanel:IsMultiExtract() and GetString(SI_CRAFTING_DECONSTRUCT_MULTIPLE) or GetString(SI_CRAFTING_PERFORM_DECONSTRUCT)
                 elseif self.mode == SMITHING_MODE_IMPROVEMENT then
                     return GetString(SI_SMITHING_IMPROVE)
                 elseif self.mode == SMITHING_MODE_RESEARCH then
@@ -103,11 +102,11 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
         
             callback = function()
                 if self.mode == SMITHING_MODE_REFINEMENT then
-                    self.refinementPanel:Extract()
+                    self.refinementPanel:ConfirmRefine()
                 elseif self.mode == SMITHING_MODE_CREATION then
-                    self.creationPanel:Create()
+                    self.creationPanel:Create(self.creationPanel:GetMultiCraftNumIterations())
                 elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
-                    self.deconstructionPanel:Extract()
+                    self.deconstructionPanel:ConfirmExtractAll()
                 elseif self.mode == SMITHING_MODE_IMPROVEMENT then
                     self.improvementPanel:Improve()
                 elseif self.mode == SMITHING_MODE_RESEARCH then
@@ -122,7 +121,7 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                 if self.mode == SMITHING_MODE_REFINEMENT then
                     return self.refinementPanel:IsExtractable()
                 elseif self.mode == SMITHING_MODE_CREATION then
-                    return self.creationPanel:IsCraftable()
+                    return self.creationPanel:ShouldCraftButtonBeEnabled()
                 elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
                     return self.deconstructionPanel:IsExtractable()
                 elseif self.mode == SMITHING_MODE_IMPROVEMENT then
@@ -133,7 +132,7 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
             end,
         },
 
-                -- Clear selections / Cancel Research
+        -- Clear selections / Cancel Research
         {
             name = function()
                 if self.mode == SMITHING_MODE_RESEARCH then
@@ -284,6 +283,10 @@ function ZO_Smithing:SetMode(mode)
         local oldMode = self.mode
         self.mode = mode
 
+        if oldMode == SMITHING_MODE_DECONSTRUCTION then
+            self.deconstructionPanel:ClearSelections()
+        end
+
         CRAFTING_RESULTS:SetCraftingTooltip(nil)
 
         if mode == SMITHING_MODE_RECIPES then
@@ -304,6 +307,10 @@ function ZO_Smithing:SetMode(mode)
         self.deconstructionPanel:SetHidden(mode ~= SMITHING_MODE_DECONSTRUCTION)
         self.researchPanel:SetHidden(mode ~= SMITHING_MODE_RESEARCH)
     end
+end
+
+function ZO_Smithing:UpdateSharedKeybindStrip()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_Smithing_Initialize(control)

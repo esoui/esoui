@@ -1,0 +1,39 @@
+<GuiXml>
+    <Controls>
+       <Control name="ZO_GuildRank_RankIconPickerIcon_Keyboard_Control" mouseEndabled="true" virtual="true">
+            <Dimensions x="ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_KEYBOARD_SIZE" y="ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_KEYBOARD_SIZE"/>
+            <Controls>
+                <Control name="$(parent)IconContainer">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_KEYBOARD_OFFSET" offsetY="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_KEYBOARD_OFFSET" />
+                    <Dimensions x="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_KEYBOARD_SIZE" y="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_KEYBOARD_SIZE"/>
+                    <Controls>
+                        <Button name="$(parent)Frame" inherits="ZO_CheckButton" tier="LOW">
+                            <AnchorFill/>
+                            <OnMouseEnter>
+                                ZO_GuildRank_RankIconPickerIcon_Keyboard_OnMouseEnter(self:GetParent():GetParent())
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_GuildRank_RankIconPickerIcon_Keyboard_OnMouseExit(self:GetParent():GetParent())
+                            </OnMouseExit>
+                            <Textures
+                                normal="EsoUI/Art/Guild/guildRanks_iconFrame_normal.dds"
+                                pressed="EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
+                                mouseOver=""
+                                pressedMouseOver=""
+                                disabled="EsoUI/Art/Guild/guildRanks_iconFrame_disabled.dds"
+                                disabledPressed="EsoUI/Art/Guild/guildRanks_iconFrame_disabled.dds"
+                            />
+                        </Button>
+                        <Texture name="$(parent)Icon" tier="MEDIUM">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Guild/guildHeraldry_swatchFrame_overSelect.dds" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="-14" offsetY="-14" />
+                    <Dimensions x="96" y="96"/>
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -48,16 +48,19 @@ end
 function ZO_RetraitStation_Retrait_Keyboard:InitializeSlots()
     local slotContainer = self.control:GetNamedChild("SlotContainer")
     self.retraitSlot = ZO_RetraitStationRetraitSlot:New(self, slotContainer:GetNamedChild("ItemRetraitSlot"), SLOT_TYPE_PENDING_RETRAIT_ITEM, self.inventory)
-    self.retraitCostSlot = slotContainer:GetNamedChild("RetraitCostSlot")
+    self.retraitSlot:RegisterCallback("ItemsChanged", function()
+        self:OnSlotChanged()
+    end)
 
+    self.retraitCostSlot = slotContainer:GetNamedChild("RetraitCostSlot")
     local minRetraitCost = 0
     ZO_ItemSlot_SetAlwaysShowStackCount(self.retraitCostSlot, true, minRetraitCost)
+    self.awaitingLabel = slotContainer:GetNamedChild("AwaitingLabel")
+    self:RefreshCostSlot()
 
     self.slotAnimation = ZO_CraftingCreateSlotAnimation:New("retrait_keyboard_root", function() return not self.control:IsHidden() end)
     self.slotAnimation:AddSlot(self.retraitSlot)
     self.slotAnimation:AddSlot(self.retraitCostSlot)
-
-    self.awaitingLabel = slotContainer:GetNamedChild("AwaitingLabel")
 end
 
 function ZO_RetraitStation_Retrait_Keyboard:UpdateKeybinds()
@@ -115,7 +118,6 @@ function ZO_RetraitStation_Retrait_Keyboard:OnFilterChanged(filterType)
     self.filterType = filterType
     self.awaitingLabel:SetText(GetString("SI_SMITHINGFILTERTYPE_IMPROVEAWAITING", filterType))
 
-
     self.retraitSlot:OnFilterChanged(filterType)
     self:SetRetraitSlotItem()
     ClearCursor()
@@ -123,21 +125,14 @@ end
 
 function ZO_RetraitStation_Retrait_Keyboard:OnInventoryUpdate(validItems)
     self.retraitSlot:ValidateSlottedItem(validItems)
-    if not self.control:IsHidden() then
-        self:OnSlotChanged()
-    end
 end
 
 function ZO_RetraitStation_Retrait_Keyboard:SetRetraitSlotItem(bagId, slotIndex)
     self.retraitSlot:SetItem(bagId, slotIndex)
-    self:OnSlotChanged()
 end
 
-function ZO_RetraitStation_Retrait_Keyboard:OnSlotChanged()
-    local hasItem = self:HasItemSlotted()
-    self.traitContainer:SetHidden(not hasItem)
-
-    if hasItem then
+function ZO_RetraitStation_Retrait_Keyboard:RefreshCostSlot()
+    if self:HasItemSlotted() then
         local retraitCost, retraitCurrency, retraitCurrencyLocation = GetItemRetraitCost()
         local meetsUsageRequirements = retraitCost <= GetCurrencyAmount(retraitCurrency, retraitCurrencyLocation)
         local currencyIcon = ZO_Currency_GetKeyboardCurrencyIcon(retraitCurrency)
@@ -148,15 +143,24 @@ function ZO_RetraitStation_Retrait_Keyboard:OnSlotChanged()
         -- so we don't have to create it every time we mouse over an unknown trait
         local bag, slot = self.retraitSlot:GetBagAndSlot()
         self:UpdateRequireResearchTooltipString(bag, slot)
+
+        self.awaitingLabel:SetHidden(true)
+        self.retraitCostSlot:SetHidden(false)
     else
         self.retraitCostSlot.currencyType = CURT_NONE
         self.requiredResearchTooltipString = nil
+
+        self.awaitingLabel:SetHidden(false)
+        self.retraitCostSlot:SetHidden(true)
     end
+end
 
+function ZO_RetraitStation_Retrait_Keyboard:OnSlotChanged()
+    local hasItem = self:HasItemSlotted()
+    self.traitContainer:SetHidden(not hasItem)
+
+    self:RefreshCostSlot()
     self:RefreshTraitList()
-
-    self.awaitingLabel:SetHidden(hasItem)
-    self.retraitCostSlot:SetHidden(not hasItem)
 
     self:UpdateKeybinds()
     self:UpdateResultTooltip()
@@ -165,9 +169,6 @@ function ZO_RetraitStation_Retrait_Keyboard:OnSlotChanged()
 end
 
 function ZO_RetraitStation_Retrait_Keyboard:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
-    if self:HasItemSlotted() then
-        PickupInventoryItem(self.retraitSlot:GetBagAndSlot())
-    end
     self:SetRetraitSlotItem(bagId, slotIndex)
 end
 

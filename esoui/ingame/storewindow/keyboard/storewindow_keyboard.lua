@@ -49,13 +49,12 @@ function ZO_StoreManager:Initialize(control)
     self:InitializeTabs()
     self:InitializeKeybindStripDescriptors()
 
-    self.currentMoney = 0
     self.currency1Display = GetControl(control, "InfoBarCurrency1")
     self.currency2Display = GetControl(control, "InfoBarCurrency2")
-    self.currenyMoneyDisplay = GetControl(control, "InfoBarMoney")
+    self.currencyMoneyDisplay = GetControl(control, "InfoBarMoney")
     self.freeSlotsLabel = GetControl(control, "InfoBarFreeSlots")
 
-    ZO_CurrencyControl_InitializeDisplayTypes(self.currenyMoneyDisplay, CURT_MONEY)
+    ZO_CurrencyControl_InitializeDisplayTypes(self.currencyMoneyDisplay, CURT_MONEY)
 
     self.activeTab = GetControl(control, "TabsActive")
 
@@ -488,13 +487,12 @@ function ZO_StoreManager:SetCurrencyControl(currencyType, currencyValue, currenc
 end
 
 function ZO_StoreManager:RefreshCurrency()
-    ZO_SharedStoreManager.RefreshCurrency(self)
-
-    local repairAllCost = GetRepairAllCost()
-    local gold = (self.storeUsesMoney or repairAllCost > 0) and self.currentMoney or 0
-
-    ZO_CurrencyControl_SetCurrencyData(self.currenyMoneyDisplay, CURT_MONEY, gold, self.storeUsesMoney)
-    ZO_CurrencyControl_SetCurrency(self.currenyMoneyDisplay, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    local storeUsesGold = ZO_IsElementInNumericallyIndexedTable(self.storeUsedCurrencies, CURT_MONEY)
+    local showPlayerGold = storeUsesGold or GetRepairAllCost() > 0
+    local HIDE_GOLD_AMOUNT = 0 -- if showPlayerGold is false then we pass in 0 as the amount to hide the gold display
+    local shownGoldAmount = showPlayerGold and GetCurrencyAmount(CURT_MONEY, GetCurrencyPlayerStoredLocation(CURT_MONEY)) or HIDE_GOLD_AMOUNT
+    ZO_CurrencyControl_SetCurrencyData(self.currencyMoneyDisplay, CURT_MONEY, shownGoldAmount, showPlayerGold)
+    ZO_CurrencyControl_SetCurrency(self.currencyMoneyDisplay, ZO_KEYBOARD_CURRENCY_OPTIONS)
 
     -- We're laying out the player alternate currency labels this way to ensure that we never display more than two labels, even if 
     -- more than two are applicable to this store, and to ensure that they maintain a consistent priority
@@ -503,21 +501,12 @@ function ZO_StoreManager:RefreshCurrency()
 
     self.currency2Display:SetHidden(true)
     self.currency2Display.isInUse = false
-    
-    if self.storeUsesAP then
-        self:SetCurrencyControl(CURT_ALLIANCE_POINTS, self.currentAP or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
-    end
 
-    if self.storeUsesTelvarStones then
-        self:SetCurrencyControl(CURT_TELVAR_STONES, self.currentTelvarStones or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
-    end 
-
-    if self.storeUsesWritVouchers then
-        self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
-    end 
-
-    if self.storeUsesEventCurrency then
-        self:SetCurrencyControl(CURT_EVENT_TICKETS, self.currentEventCurrency or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    for i, currencyType in ipairs(self.storeUsedCurrencies) do
+        if currencyType ~= CURT_MONEY then
+            local playerHeldCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
+            self:SetCurrencyControl(currencyType, playerHeldCurrencyAmount, ZO_KEYBOARD_CURRENCY_OPTIONS)
+        end
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -618,7 +607,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, locked)
     ZO_UpdateTraitInformationControlIcon(control, data)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS, CURT_EVENT_TICKETS)
+    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, unpack(ZO_VALID_CURRENCY_TYPES))
 
     local currencyType1 = data.currencyType1
     local currencyType2 = data.currencyType2
@@ -631,19 +620,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
 end
 
 function ZO_StoreManager:HasEnoughCurrencyToBuyItem(currencyType, itemCost)
-    if currencyType == CURT_MONEY then
-        return self.currentMoney >= itemCost
-    elseif currencyType == CURT_ALLIANCE_POINTS then
-        return self.currentAP >= itemCost
-    elseif currencyType == CURT_TELVAR_STONES then
-        return self.currentTelvarStones >= itemCost
-    elseif currencyType == CURT_WRIT_VOUCHERS then
-        return self.currentWritVouchers >= itemCost
-    elseif currencyType == CURT_EVENT_TICKETS then
-        return self.currentEventCurrency >= itemCost
-    end
-
-    return false
+    return GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType)) >= itemCost
 end
 
 function ZO_StoreManager:OpenBuyMultiple(entryIndex)
@@ -691,7 +668,7 @@ function ZO_StoreManager:RefreshBuyMultiple()
     end
     ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, meetsRequirementsToBuy and meetsRequirementsToEquip)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS, CURT_EVENT_TICKETS)
+    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, unpack(ZO_VALID_CURRENCY_TYPES))
 
     local total = quantity * price
     local type1Total = quantity * currencyQuantity1

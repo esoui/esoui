@@ -1,21 +1,5 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_MarketPurchaseDialogCurrencyLabelValueContainer" virtual="true">
-            <OnInitialized>
-                self.currencyLabel = self:GetNamedChild("CurrencyLabel")
-                self.currencyAmount = self:GetNamedChild("CurrencyAmount")
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)CurrencyLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" />
-                </Label>
-
-                <Label name="$(parent)CurrencyAmount" font="ZoFontGame">
-                    <Anchor point="TOPRIGHT" />
-                </Label>
-            </Controls>
-        </Control>
-
         <TopLevelControl name="ZO_MarketPurchaseConfirmationDialog" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
@@ -127,7 +111,7 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)BalanceContainer" inherits="ZO_MarketPurchaseDialogCurrencyLabelValueContainer">
+                <Control name="$(parent)BalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMRIGHT" offsetY="20" />
                     <Controls>
@@ -137,12 +121,12 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)CostContainer" inherits="ZO_MarketPurchaseDialogCurrencyLabelValueContainer">
+                <Control name="$(parent)CostContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
                 </Control>
 
-                <Control name="$(parent)EsoPlusCostContainer" inherits="ZO_MarketPurchaseDialogCurrencyLabelValueContainer" hidden="true">
+                <Control name="$(parent)EsoPlusCostContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard" hidden="true">
                     <Controls>
                         <Label name="$(parent)CurrencyLabel" override="true" text="SI_MARKET_CONFIRM_PURCHASE_ESO_PLUS_COST_LABEL" />
 

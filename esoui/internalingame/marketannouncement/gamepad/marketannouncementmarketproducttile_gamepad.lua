@@ -41,12 +41,18 @@ function ZO_MarketAnnouncementMarketProductTile_Gamepad:IsHelpButtonKeybindVisib
     return self.marketProduct:IsPromo() and hasHelpLink
 end
 
-function ZO_MarketAnnouncementMarketProductTile_Gamepad:Layout(marketProduct, selected)
-    ZO_MarketAnnouncementMarketProductTile.Layout(self, marketProduct, selected)
+function ZO_MarketAnnouncementMarketProductTile_Gamepad:Layout(data)
+    ZO_MarketAnnouncementMarketProductTile.Layout(self, data)
 
     local tile = self.control.object
     tile:SetActionCallback(function() ZO_GAMEPAD_MARKET_ANNOUNCEMENT:OnMarketAnnouncementViewCrownStoreKeybind() end)
-    tile:SetSelected(selected)
+end
+
+function ZO_MarketAnnouncementMarketProductTile_Gamepad:LayoutPlatform(data)
+    -- The Tile_Gamepad version of this function calls SetSelected. The overridden SetSelected in this class expects
+    -- the marketProduct to be updated, but that update doesn't happen until after this function is called.
+    -- So if SetSelected is called from this function it will set the wrong marketProduct to have focus.
+    -- We are overriding this function to avoid that.
 end
 
 function ZO_MarketAnnouncementMarketProductTile_Gamepad:SetSelected(isSelected)

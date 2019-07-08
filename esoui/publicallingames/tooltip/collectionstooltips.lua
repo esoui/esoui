@@ -82,6 +82,14 @@ do
             bodySection:AddLine(formattedDescription, descriptionStyle)
         end
 
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
+            local combinationId = GetCollectibleReferenceId(collectibleId)
+            local combinationDescription = GetCombinationDescription(combinationId)
+            if combinationDescription ~= "" then
+                bodySection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_COMBINATION, combinationDescription), descriptionStyle)
+            end
+        end
+
         if isPurchasable then 
             bodySection:AddLine(PURCHASED_TEXT, descriptionStyle)
         end
@@ -134,6 +142,16 @@ do
         elseif  categoryType == COLLECTIBLE_CATEGORY_TYPE_POLYMORPH then
             if isActive and showVisualLayerInfo then
                 bodySection:AddLine(GetString(SI_POLYMORPH_CAN_HIDE_WARNING), descriptionStyle, self:GetStyle("collectionsPolymorphOverrideWarningStyle"))
+            end
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
+            local combinationId = GetCollectibleReferenceId(collectibleId)
+            local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(combinationId)
+            if baseCollectibleId ~= 0 then
+                local text = self:GetRequiredCollectibleText(baseCollectibleId)
+                if text ~= "" then
+                    local colorStyle = IsCollectibleUnlocked(baseCollectibleId) and self:GetStyle("succeeded") or self:GetStyle("failed")
+                    bodySection:AddLine(text, descriptionStyle, colorStyle)
+                end
             end
         end
 

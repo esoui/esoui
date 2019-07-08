@@ -81,7 +81,7 @@ function ZO_GuildFinder_Keyboard_Base:SetupData(categoryData)
     
     for i, data in ipairs(categoryData) do
         local visible = data.visible or true
-        if data.visible and type(data.visible) == "function" then
+        if type(data.visible) == "function" then
             visible = data.visible(self)
         end
 

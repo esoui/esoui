@@ -87,7 +87,7 @@ function ZO_TradingHouseManager:InitializeKeybindDescriptor()
         end,
         keybind = "UI_SHORTCUT_TERTIARY",
         visible = function()
-            return GetSelectedTradingHouseGuildId() ~= nil and GetNumTradingHouseGuilds() > 1
+            return GetNumTradingHouseGuilds() > 1
         end,
         enabled = function()
             return TRADING_HOUSE_SEARCH:CanDoCommonOperation()
@@ -976,7 +976,7 @@ end
 function ZO_TradingHouseManager:UpdateForGuildChange()
     local guildId = GetSelectedTradingHouseGuildId()
 
-    if not guildId then
+    if not IsPlayerInGuild(guildId) then
         -- Player is using a Guild Trader
         self:UpdateListingCounts()
         self:ClearListedItems()
@@ -987,7 +987,7 @@ function ZO_TradingHouseManager:UpdateForGuildChange()
 
         ZO_MenuBar_SetDescriptorEnabled(self.menuBar, ZO_TRADING_HOUSE_MODE_SELL, false)
         ZO_MenuBar_SetDescriptorEnabled(self.menuBar, ZO_TRADING_HOUSE_MODE_LISTINGS, false)
-    elseif guildId > 0 then
+    else
         -- Player is using a regular Guild Store
         local canSell = CanSellOnTradingHouse(guildId)
 
@@ -1236,7 +1236,7 @@ function ZO_TradingHouseManager:BeginSetPendingPostPrice(anchorTo)
     if self:HasValidPendingItemPost() then
         self.invoiceSellPrice:SetHidden(true)
         CURRENCY_INPUT:SetContext(self)
-        CURRENCY_INPUT:Show(SetPostPriceCallback, false, self:GetPendingPostPrice(), CURT_MONEY, anchorTo, 18)
+        CURRENCY_INPUT:Show(SetPostPriceCallback, false, self:GetPendingPostPrice(), CURT_MONEY, anchorTo, 20)
     end
 end
 

@@ -1,46 +1,17 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_GamepadRankChangePermissionRowLabel" font="ZoFontGamepad27" wrapMode="ELLIPSIS" verticalAlignment="CENTER" virtual="true"/>
-
         <Texture name="ZO_GamepadGuildPermissionCheckmark" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" tier="HIGH" virtual="true">
             <Dimensions x="32" y="32"/>
         </Texture>
 
-        <Label name="ZO_GamepadGuildPermissionHeader" font="ZoFontGamepadBold22" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" wrapMode="ELLIPSIS" virtual="true" />
-
         <Control name="ZO_GuildPermissionRow_Gamepad" virtual="true" resizeToFitDescendents="true"/>
-        
-        <Control name="ZO_GuildPermissionHeader_Gamepad" virtual="true">
-            <OnInitialized>
-                self.label = self:GetNamedChild("Label")
-            </OnInitialized>
-            <Dimensions x="350" y="40"/>
+
+        <Backdrop name="ZO_GuildRanks_Permission_Gamepad_Highlight_Template" centerColor="00000000" virtual="true" />
+
+        <Control name="ZO_GuildRanks_Permission_Gamepad_Header_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadGuildPermissionHeader">
-                    <Anchor point="BOTTOMLEFT" offsetX="40"/>
-                </Label>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_GuildPermission_Gamepad" resizeToFitDescendents="true" virtual="true">
-            <OnInitialized>
-                self.label = self:GetNamedChild("Label")
-                self.icon = self:GetNamedChild("Icon")
-            </OnInitialized>
-
-            <Controls>
-                <Control name="$(parent)RootSpacer">
-                    <Anchor point="TOPLEFT"/>
-                    <Dimensions x="ZO_GAMEPAD_GUILD_RANKS_PERMISSION_COLUMN_WIDTH" y="4"/>
-                </Control>
-
-                <Texture name="$(parent)Icon" inherits="ZO_GamepadGuildPermissionCheckmark" hidden="true" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetY="5"/>
-                </Texture>
-
-                <Label name="$(parent)Label" font="ZoFontGamepad34">
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Icon" offsetX="7" offsetY="-9"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
+                    <Anchor point="TOPLEFT" offsetY="5" />
                 </Label>
             </Controls>
         </Control>
@@ -51,31 +22,14 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)PermissionsSummary" inherits="ZO_ScrollContainer_Gamepad">
-                    <AnchorFill/>
-                    <OnInitialized>
-                        ZO_Scroll_Initialize_Gamepad(self)
-                        ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
-                    </OnInitialized>
-                    <Controls>
-                        <Scroll name="$(parent)Scroll" override="true">
-                            <Controls>
-                                <Control name="$(parent)Child" override="true">
-                                    <Controls>
-                                        <Backdrop name="$(parent)SelectorBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" >
-                                            <Anchor point="TOPLEFT" />
-                                            <Dimensions x="35" y="37" />
-                                        </Backdrop>
-                                    </Controls>
-                                </Control>
-                            </Controls>
-                        </Scroll>
-                    </Controls>
+                <Control name="$(parent)PermissionsPanel" inherits="ZO_GridScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
                 </Control>
-                
-                <Control name="$(parent)IconSelector" inherits="ZO_GamepadIconSelectorTemplate" hidden="true">
+
+                <Control name="$(parent)RankIconPicker" inherits="ZO_GridScrollList_Gamepad" hidden="true">
                     <Anchor point="CENTER" />
-                    <Dimensions x="376" y="376" />
+                    <Dimensions x="500" y="500" />
                 </Control>
             </Controls>
         </TopLevelControl>

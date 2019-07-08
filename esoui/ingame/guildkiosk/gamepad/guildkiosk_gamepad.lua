@@ -100,7 +100,7 @@ function ZO_GuildKiosk_Purchase_Gamepad:PerformDeferredInitialize()
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
 	    data1Text = UpdateGuildMoney,
         data2HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_PURCHASE_COST),
-	    data2Text = UpdateHireCost
+	    data2Text = UpdateHireCost,
     }
 
     ZO_Dialogs_RegisterCustomDialog("PURCHASE_KIOSK_GAMEPAD", 
@@ -231,7 +231,7 @@ end
 
 function ZO_GuildKiosk_Purchase_Gamepad:OnShowing()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-    GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_HIRING_LABEL), GetString(SI_GUILD_KIOSK_BID_DESCRIPTION))
+    GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_HIRING_LABEL), zo_strformat(SI_GUILD_KIOSK_BID_DESCRIPTION, GetMaxKioskBidsPerGuild()))
     self.dropDown:RefreshGuildList()
 end
 
@@ -355,7 +355,11 @@ function ZO_GuildKiosk_Bid_Gamepad:CleanDropDown() -- make sure we don't have mu
 end
 
 function ZO_GuildKiosk_Bid_Gamepad:ValidateBidSelectorValue(value)
-    self.validBid = (value >= self.bidCost) and (value <= self.guildBankedMoney)
+    if self.hasBidOnThisTraderAlready then
+        self.validBid = (value >= self.minBidAllowed) and (value <= self.guildBankedMoney + self.existingBidAmount)
+    else
+        self.validBid = (value >= self.minBidAllowed) and (value <= self.guildBankedMoney)
+    end
     self.bidSelector:SetTextColor(self.validBid and ZO_SELECTED_TEXT or ZO_ERROR_COLOR)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.bidSelectorKeybindStripDescriptor)
 end
@@ -398,19 +402,27 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
     local CREATE_BID_SELECTOR = true
     self:RepopulateItemList(CREATE_BID_SELECTOR)
     self.guildBankedMoney = 0
-    self.bidCost = 0
+    self.minBidAllowed = 0
     self:SetBidAmount(0)
-    self.canAffordBidCost = false
+    self.canAffordMinBid = false
     self.hasError = false
     self.selectingGuild = false
 
     local function UpdateGuildMoney(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.guildBankedMoney, ZO_GAMEPAD_CURRENCY_OPTIONS)
+        --Show red on the guild bank money when updating an existing bid if you don't have enough (0 gold in the guild bank)
+        local showErrorColor = not self.canAffordMinBid and self.hasBidOnThisTraderAlready
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.guildBankedMoney, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, showErrorColor)
         return true
     end
 
-    local function UpdateMinimumBid(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.bidCost, ZO_GAMEPAD_CURRENCY_OPTIONS, nil, not self.canAffordBidCost)
+    local function UpdateMinOrCurrentBidText(control)
+        return self.hasBidOnThisTraderAlready and GetString(SI_GAMEPAD_GUILD_KIOSK_CURRENT_BID) or GetString(SI_GAMEPAD_GUILD_KIOSK_MINIMUM_BID)
+    end
+
+    local function UpdateMinOrCurrentBid(control)
+        --Show red on the minimum bid text when making the first bid if you don't have enough (less than the kiosk purchase cost in the guild bank)
+        local showErrorColor = not self.canAffordMinBid and not self.hasBidOnThisTraderAlready
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, self.hasBidOnThisTraderAlready and self.existingBidAmount or self.minBidAllowed, ZO_GAMEPAD_CURRENCY_OPTIONS, CURRENCY_SHOW_ALL, showErrorColor)
         return true
     end
 
@@ -421,13 +433,27 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
         return timeString
     end
 
+    local function UpdateWeeklyBids(control)
+        local maxBids = GetMaxKioskBidsPerGuild()
+        control:SetText(ZO_FormatFraction(self.numTotalBids, maxBids))
+        local noNewBids = not (self.existingBidAmount > 0 or self.numTotalBids < maxBids)
+        if noNewBids then
+            control:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        else
+            control:SetColor(ZO_WHITE:UnpackRGBA())
+        end
+        return true
+    end
+
     self.headerData = 
     {
         titleText = GetString(SI_GUILD_KIOSK_BID_TITLE),
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_GUILD_BANK_BALANCE),
 	    data1Text = UpdateGuildMoney,
-        data2HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_MINIMUM_BID),
-	    data2Text = UpdateMinimumBid,
+        data2HeaderText = UpdateMinOrCurrentBidText,
+	    data2Text = UpdateMinOrCurrentBid,
+        data3HeaderText = GetString(SI_GAMEPAD_GUILD_KIOSK_WEEKLY_BIDS),
+        data3Text = UpdateWeeklyBids,
     }
 
     self.footerData = {
@@ -462,7 +488,9 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
             },
             {
                 keybind = "DIALOG_PRIMARY",
-                text = SI_GAMEPAD_GUILD_KIOSK_BID_UPDATE_KEYBIND,
+                text = function()
+                    return ZO_GuildKiosk_Bid_Shared.GetBidActionText(self.hasBidOnThisTraderAlready)
+                end,
                 callback =  function()
                     GuildKioskBid(self.guildId, self.bidAmount)
                     PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
@@ -519,7 +547,7 @@ function ZO_GuildKiosk_Bid_Gamepad:UnfocusDropDown()
 end
 
 function ZO_GuildKiosk_Bid_Gamepad:FocusBidSelector()
-    self.bidSelector:SetMaxValue(self.guildBankedMoney)
+    self.bidSelector:SetMaxValue(self.hasBidOnThisTraderAlready and self.existingBidAmount + self.guildBankedMoney or self.guildBankedMoney)
     self.bidSelector:SetValue(self.bidAmount)
     self.bidSelectorControl:SetHidden(false)
     self.bidAmountControl:SetHidden(true)
@@ -552,32 +580,30 @@ local DEBUG_RESULT_TEXT =
 }
 
 function ZO_GuildKiosk_Bid_Gamepad:OnGuildsRefreshed(guildEntry)
-    local guildBankedMoney, existingBidAmount, existingBidIsOnThisKiosk, existingBidKioskName, result = GetKioskGuildInfo(guildEntry.guildId)
-
+    local guildBankedMoney, existingBidAmount, numTotalBids, result = GetKioskGuildInfo(guildEntry.guildId)
     local resultText = DEBUG_RESULT_TEXT[result]
     local interactType = GetInteractionType()
     internalassert(guildBankedMoney ~= nil, string.format("Result [%s]. InteractType [%d]. GuildId [%d]. NumGuilds [%d]", resultText, interactType, guildEntry.guildId, GetNumGuilds()))
 
     guildEntry.guildBankedMoney = guildBankedMoney
     guildEntry.existingBidAmount = existingBidAmount
-    guildEntry.existingBidIsOnThisKiosk = existingBidIsOnThisKiosk 
-    guildEntry.existingBidKioskName = existingBidKioskName
+    guildEntry.hasBidOnThisTraderAlready = existingBidAmount > 0
+    guildEntry.numTotalBids = numTotalBids
     guildEntry.guildCanUseTradingHouse = DoesGuildHavePrivilege(guildEntry.guildId, GUILD_PRIVILEGE_TRADING_HOUSE)
-    guildEntry.hasError = not guildEntry.guildCanUseTradingHouse
-
-    if existingBidIsOnThisKiosk then
-        guildEntry.bidCost = existingBidAmount + 1
+    
+    if guildEntry.hasBidOnThisTraderAlready then
+        guildEntry.minBidAllowed = existingBidAmount + 1
+        guildEntry.canAffordMinBid = guildEntry.guildBankedMoney > 0
     else
-        if existingBidKioskName then
-            guildEntry.hasError = true
-        end
-        
-        guildEntry.bidCost = GetKioskPurchaseCost()
+        guildEntry.minBidAllowed = GetKioskPurchaseCost()
+        guildEntry.canAffordMinBid = guildEntry.guildBankedMoney >= guildEntry.minBidAllowed
     end
 
-    guildEntry.canAffordBidCost = guildEntry.guildBankedMoney >= guildEntry.bidCost
-    
-    if not guildEntry.canAffordBidCost then
+    if not guildEntry.guildCanUseTradingHouse then
+        guildEntry.hasError = true
+    elseif not guildEntry.hasBidOnThisTraderAlready and numTotalBids >= GetMaxKioskBidsPerGuild() then
+        guildEntry.hasError = true
+    elseif not guildEntry.canAffordMinBid then
         guildEntry.hasError = true
     end
 
@@ -590,12 +616,12 @@ end
 function ZO_GuildKiosk_Bid_Gamepad:OnGuildSelected(guildEntry)
     self.guildId = guildEntry.guildId
     self.guildBankedMoney = guildEntry.guildBankedMoney
-    self.bidCost = guildEntry.bidCost
-    self:SetBidAmount(self.bidCost)
-    self.canAffordBidCost = guildEntry.canAffordBidCost
+    self.minBidAllowed = guildEntry.minBidAllowed
+    self:SetBidAmount(self.minBidAllowed)
+    self.canAffordMinBid = guildEntry.canAffordMinBid
     self.existingBidAmount = guildEntry.existingBidAmount
-    self.existingBidIsOnThisKiosk = guildEntry.existingBidIsOnThisKiosk
-    self.existingBidKioskName = guildEntry.existingBidKioskName
+    self.hasBidOnThisTraderAlready = guildEntry.hasBidOnThisTraderAlready
+    self.numTotalBids = guildEntry.numTotalBids
     self.guildCanUseTradingHouse = guildEntry.guildCanUseTradingHouse
     self.guildName = guildEntry.name
 
@@ -604,10 +630,10 @@ function ZO_GuildKiosk_Bid_Gamepad:OnGuildSelected(guildEntry)
 
     if not self.guildCanUseTradingHouse then
         GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_BIDDING_LABEL), zo_strformat(SI_GUILD_KIOSK_PURCHASE_ERROR_TRADING_HOUSE_LOCKED, GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_TRADING_HOUSE)))
-    elseif (not self.existingBidIsOnThisKiosk) and self.existingBidKioskName then
-        GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_BIDDING_LABEL), zo_strformat(SI_GUILD_KIOSK_BID_ERROR_EXISTING_BID, self.existingBidKioskName))
+    elseif not self.hasBidOnThisTraderAlready and self.numTotalBids >= GetMaxKioskBidsPerGuild() then
+        GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_BIDDING_LABEL), GetString("SI_GUILDKIOSKRESULT", GUILD_KIOSK_TOO_MANY_BIDS))
     else
-        GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_BIDDING_LABEL), GetString(SI_GUILD_KIOSK_BID_DESCRIPTION))
+        GAMEPAD_TOOLTIPS:LayoutGuildKioskInfo(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_GUILD_KIOSK_BIDDING_LABEL), zo_strformat(SI_GUILD_KIOSK_BID_DESCRIPTION, GetMaxKioskBidsPerGuild()))
     end
 
     if guildEntry.hasError then
@@ -685,13 +711,15 @@ function ZO_GuildKiosk_Bid_Gamepad:InitializeKeybindStripDescriptors()
             end,
         },
         {
-            name = GetString(SI_GAMEPAD_GUILD_KIOSK_BID_UPDATE_KEYBIND),
+            name = function()
+                return ZO_GuildKiosk_Bid_Shared.GetBidActionText(self.hasBidOnThisTraderAlready)
+            end,
             keybind = "UI_SHORTCUT_SECONDARY",
             callback =  function()
                 ZO_Dialogs_ShowGamepadDialog("BID_KIOSK_GAMEPAD")
             end,
             visible = function()
-                return (not self.hasError) and self.guildName and self.bidAmount >= self.bidCost
+                return (not self.hasError) and self.guildName and self.bidAmount >= self.minBidAllowed
             end
         },
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()

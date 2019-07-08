@@ -50,7 +50,7 @@
                 </Label>
 
                 <Label name="$(parent)State" font="ZoFontWinH4"inherits="ZO_TooltipIfTruncatedLabel" maxLineCount="1">
-                    <Dimensions x="220"/>
+                    <Dimensions x="205"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Author" relativePoint="RIGHT" offsetX="20" />
                 </Label>
 

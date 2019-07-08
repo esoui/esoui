@@ -116,7 +116,7 @@ SLASH_COMMANDS[GetString(SI_SLASH_ENCOUNTER_LOG)] = function(args)
         PrintLineTypeInfo("ZONE_INFO", "id", "name", "dungeonDifficulty")
         PrintLineTypeInfo("TRIAL_INIT", "id", "inProgress", "completed", "startTimeMS", "durationMS", "success", "finalScore")
         PrintLineTypeInfo("BEGIN_TRIAL", "id", "startTimeMS")
-        PrintLineTypeInfo("END_TRIAL", "id", "durationMS", "success", "finalScore")
+        PrintLineTypeInfo("END_TRIAL", "id", "durationMS", "success", "finalScore", "finalVitalityBonus")
     elseif args == "verbose" then
         if IsEncounterLogVerboseFormat() then
             CHAT_SYSTEM:AddMessage("Encounter log set to normal format.")

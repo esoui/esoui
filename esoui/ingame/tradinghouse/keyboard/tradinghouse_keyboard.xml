@@ -486,22 +486,15 @@
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)QuantityLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
                                         </Label>
 
-                                        <Backdrop name="$(parent)SellPrice" inherits="ZO_EditBackdrop" mouseEnabled="true">
-                                            <Dimensions x="210" />
+                                        <Backdrop name="$(parent)SellPrice" inherits="ZO_DefaultCurrencyInputField">
+                                            <Dimensions x="207" />
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)SellPriceLabel" relativePoint="BOTTOMLEFT" offsetX="-2" offsetY="5" />
 
                                             <OnMouseUp>
-                                                if(TRADING_HOUSE and upInside and (button == MOUSE_BUTTON_INDEX_LEFT)) then
+                                                if TRADING_HOUSE and upInside and button == MOUSE_BUTTON_INDEX_LEFT then
                                                     TRADING_HOUSE:BeginSetPendingPostPrice(self)
                                                 end
                                             </OnMouseUp>
-
-                                            <Controls>
-                                                <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate">
-                                                    <Anchor point="TOPLEFT" offsetY="3" />
-                                                    <Anchor point="BOTTOMRIGHT" offsetX="18" />
-                                                </Label>
-                                            </Controls>
                                         </Backdrop>
 
                                         <Texture name="$(parent)ListingFeeHelp" inherits="ZO_HelpIcon">

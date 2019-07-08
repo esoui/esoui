@@ -247,3 +247,8 @@ function ZO_GenerateParagraphSeparatedList(argumentTable)
         return ""
     end
 end
+
+
+function ZO_FormatFraction(numerator, denominator)
+    return string.format("%d/%d", numerator, denominator)
+end

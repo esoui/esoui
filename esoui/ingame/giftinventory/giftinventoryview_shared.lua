@@ -192,7 +192,7 @@ function ZO_GiftInventoryView_Shared:InitializeKeybinds(claimKeybind, previewKey
     self.updateKeybindsCallback = function() KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor) end
 end
 
-internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 30, "Update gift claim dialog to handle new purchase result")
+internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 34, "Update gift claim dialog to handle new purchase result")
 function ZO_GiftInventoryView_Shared:ClaimGift()
     local marketProductId = self.gift:GetMarketProductId()
     local expectedClaimResult = CouldAcquireMarketProduct(marketProductId)

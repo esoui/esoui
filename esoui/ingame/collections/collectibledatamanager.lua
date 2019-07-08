@@ -391,6 +391,33 @@ function ZO_CollectibleData:IsUsable()
     return IsCollectibleUsable(self.collectibleId)
 end
 
+function ZO_CollectibleData:Use()
+    -- combination fragment collectibles can consume collectibles on use
+    -- so we want to show a confirmation dialog if it consumes a non-fragment collectible
+    if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
+        if not CheckPlayerCanPerformCombinationAndWarn(self.referenceId) then
+            return
+        end
+        -- this combination might be acting as an "evolution" of a collectible into another collectible
+        -- like the indrik, so find the first non-fragment collectible and treat that as the base collectible
+        local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(self.referenceId)
+        if baseCollectibleId ~= 0 then
+            local function AcceptCombinationCallback()
+                UseCollectible(self.collectibleId)
+            end
+
+            local function DeclineCombinationCallback()
+            end
+
+            local unlockedCollectibleId = GetCombinationUnlockedCollectible(self.referenceId)
+            ZO_CombinationPromptManager_ShowEvolutionPrompt(baseCollectibleId, unlockedCollectibleId, AcceptCombinationCallback, DeclineCombinationCallback)
+            return
+        end
+    end
+
+    UseCollectible(self.collectibleId)
+end
+
 function ZO_CollectibleData:IsPlaceableFurniture()
     return IsCollectibleCategoryPlaceableFurniture(self.categoryType)
 end

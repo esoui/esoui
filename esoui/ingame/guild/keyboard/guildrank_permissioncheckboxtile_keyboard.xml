@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRank_PermissionCheckboxTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_Tile_Keyboard_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RANK_PERMISSON_CHECKBOX_KEYBOARD_WIDTH" y="ZO_GUILD_RANK_PERMISSON_CHECKBOX_KEYBOARD_HEIGHT"/>
+            <OnInitialized>
+                ZO_GuildRank_PermissionCheckboxTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" layer="OVERLAY" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="LEFT"/>
+                </Texture>
+                <Button name="$(parent)Check" inherits="ZO_CheckButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

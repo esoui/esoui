@@ -1720,6 +1720,29 @@ do
         return data
     end
 
+    --where ... are inventory types
+    function ZO_InventoryManager:GenerateAllSlotsInVirtualStackedItem(predicate, specificItemInstanceId, ...)
+        local matchingSlots = {}
+        for i = 1, select("#", ...) do
+            local inventoryType = select(i, ...)
+            local inventory = self.inventories[inventoryType]
+            if inventory.backingBags then
+                for k, bagId in ipairs(inventory.backingBags) do
+                    local slotIndex = ZO_GetNextBagSlotIndex(bagId)
+                    while slotIndex do
+                        local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
+                        if itemInstanceId == specificItemInstanceId and (predicate == nil or predicate(bagId, slotIndex)) then
+                            local _, stackCount = GetItemInfo(bagId, slotIndex)
+                            table.insert(matchingSlots, {bagId = bagId, slotIndex = slotIndex, stackCount = stackCount})
+                        end
+                        slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
+                    end
+                end
+            end
+        end
+        return matchingSlots
+    end
+
     function ZO_InventoryManager:GenerateListOfVirtualStackedItems(inventoryType, predicate, itemIds)
         local inventory = self.inventories[inventoryType]
         itemIds = itemIds or {}

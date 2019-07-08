@@ -291,8 +291,15 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_GROUP_MEMBER_JOINED] = function(displayName)
-        return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_GROUP_INVITE))
+    [EVENT_GROUP_MEMBER_JOINED] = function(characterName, displayName, isLocalPlayer)
+        if isLocalPlayer then
+            return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_GROUP_INVITE))
+        else
+            local primaryNameToShow = ZO_GetPrimaryPlayerName(displayName, characterName)
+            local secondaryNameToShow = ZO_GetSecondaryPlayerName(displayName, characterName)
+
+            return ALERT, zo_strformat(SI_GROUP_ALERT_GROUP_MEMBER_JOINED, primaryNameToShow, secondaryNameToShow)
+        end
     end,
 
     [EVENT_FRIEND_ADDED] = function(displayName)
@@ -990,12 +997,6 @@ local AlertHandlers = {
     [EVENT_ITEM_COMBINATION_RESULT] = function(result)
         if result ~= ITEM_COMBINATION_RESULT_SUCCESS then
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_ITEMCOMBINATIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
-        end
-    end,
-
-    [EVENT_COLLECTIBLE_EVOLUTION_RESULT] = function(result)
-        if result ~= COLLECTIBLE_EVOLUTION_RESULT_SUCCESS then
-            return UI_ALERT_CATEGORY_ERROR, GetString("SI_COLLECTIBLEEVOLUTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 

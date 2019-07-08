@@ -36,19 +36,19 @@ function ZO_ConfirmCollectibleEvolution_Gamepad_OnInitialized(control)
                 keybind = "DIALOG_PRIMARY",
                 text = SI_DIALOG_YES,
                 callback = function(dialog)
-                    RespondToConfirmUseInventoryItemRequest(true)
+                    dialog.data.acceptCallback()
                 end,
             },
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_NO,
                 callback = function(dialog)
-                    RespondToConfirmUseInventoryItemRequest(false)
+                    dialog.data.declineCallback()
                 end,
             }
         },
-        noChoiceCallback = function()
-            RespondToConfirmUseInventoryItemRequest(false)
+        noChoiceCallback = function(dialog)
+            dialog.data.declineCallback()
         end,
     })
 end

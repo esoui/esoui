@@ -34,7 +34,7 @@ do
                         local displayName = control:GetText()
                         if parametricDialog.data.recipientDisplayName ~= displayName then
                             parametricDialog.data.recipientDisplayName = displayName
-                            parametricDialog.entryList:RefreshVisible()
+                            ZO_GenericParametricListGamepadDialogTemplate_RefreshVisibleEntries(parametricDialog)
                         end
                     end,
 

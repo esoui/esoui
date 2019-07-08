@@ -237,8 +237,14 @@ do
         self.notifier:SetHoldTimes(5000)
         self.notifier:SetFadesInImmediately(true)
         self.notifier:SetAdditionalVerticalSpacing(5)
+        self.notifier:SetDisplayOlderEntriesFirst(true)
 
-        local templateData = {setup = SetupItem, equalityCheck = AreLinesEqual, equalitySetup = EntryEqualitySetup}
+        local templateData =
+        {
+            setup = SetupItem,
+            equalityCheck = AreLinesEqual,
+            equalitySetup = EntryEqualitySetup,
+        }
         self.notifier:AddTemplate(CRAFTING_RESULTS_TEMPLATE, templateData)
     end
 end

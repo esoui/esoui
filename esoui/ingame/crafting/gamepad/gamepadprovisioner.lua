@@ -83,9 +83,6 @@ function ZO_GamepadProvisioner:Initialize(control)
 
             KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.optionsKeybindStripDescriptor)
-            
-            self.inOptionsMenu = false
-            self.isCrafting = false
         elseif newState == SCENE_HIDDEN then
             self.optionList:Deactivate()
 
@@ -140,13 +137,7 @@ function ZO_GamepadProvisioner:Initialize(control)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function() 
         if SCENE_MANAGER:IsShowing(self.mainSceneName) then
             self.recipeList:SetActive(true)
-
-            self.isCrafting = false
         end
-    end)
-
-    self.control:RegisterForEvent(EVENT_INVENTORY_IS_FULL, function()
-        self.isCrafting = false
     end)
 
     self:SetDefaultProvisioningSettings()
@@ -245,11 +236,7 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
         end
     }
 
-    local optionsBackButton = ZO_ShallowTableCopy(backButton)
-    optionsBackButton.callback = function()
-        self.inOptionsMenu = false
-        SCENE_MANAGER:HideCurrentScene()
-    end
+    local optionsBackButton = KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor()
 
     -- recipe list keybinds
     self.mainKeybindStripDescriptor =
@@ -266,32 +253,38 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
                 end
                 return ZO_CraftingUtils_GetCostToCraftString(cost)
             end,
-
             keybind = "UI_SHORTCUT_SECONDARY",
-
+            gamepadOrder = 1000,
             callback = function()
-                if not self.inOptionsMenu then
-                    self.isCrafting = true
-                    self:Create()
-                end
+                self:Create(1)
             end,
+            enabled = function()
+                return self:ShouldCraftButtonBeEnabled()
+            end,
+        },
 
-            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
+        -- Craft multiple
+        {
+            name = GetString(SI_GAMEPAD_CRAFT_MULTIPLE),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            gamepadOrder = 1010,
+            callback = function()
+                local itemLink = GetRecipeResultItemLink(self:GetRecipeIndices())
+                ZO_GamepadCraftingUtils_ShowMultiCraftDialog(self, itemLink)
+            end,
+            enabled = function()
+                return self:ShouldMultiCraftButtonBeEnabled()
+            end,
         },
 
         -- Options (filtering)
         {
             name = GetString(SI_CHAT_CONFIG_OPTIONS),
-
             keybind = "UI_SHORTCUT_TERTIARY",
-
+            gamepadOrder = 1020,
             callback = function()
-                if not self.isCrafting then
-                    self.inOptionsMenu = true
-                    self:ShowOptions()
-                end
+                self:ShowOptions()
             end,
-
             visible = function()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess()
             end,
@@ -308,6 +301,7 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
             end,
 
             keybind = "UI_SHORTCUT_RIGHT_STICK",
+            gamepadOrder = 1030,
 
             callback = function()
                 self:TogglePreviewMode()
@@ -423,22 +417,22 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
     -- first construct the full table of filtered recipes
     local recipeDataEntries = {}
 
-    local checkNumCreatable = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].currentValue
-    local checkSkills = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].currentValue
+    local requireIngredients = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].currentValue
+    local requireSkills = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].currentValue
     local craftingInteractionType = GetCraftingInteractionType()
     
     local recipeData = PROVISIONER_MANAGER:GetRecipeData()
     for _, recipeList in pairs(recipeData) do
         for _, recipe in ipairs(recipeList.recipes) do
-            if self:DoesRecipePassFilter(recipe.specialIngredientType, checkNumCreatable, recipe.numCreatable, checkSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
+            if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
                 local dataEntry = ZO_GamepadEntryData:New(zo_strformat(SI_PROVISIONER_RECIPE_NAME_COUNT_NONE, recipe.name), recipe.iconFile, recipe.iconFile)
                 dataEntry:SetDataSource(recipe)
                 dataEntry:SetNameColors(dataEntry:GetColorsBasedOnQuality(recipe.quality))
                 dataEntry:SetSubLabelColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
-                dataEntry:SetStackCount(recipe.numCreatable)
+                dataEntry:SetStackCount(recipe.maxIterationsForIngredients)
                 dataEntry:SetSubLabelTemplate("ZO_ProvisioningSubLabelTemplate")
 
-                if not recipe.passesTradeskillLevelReqs or not recipe.passesQualityLevelReq or recipe.numCreatable == 0 then
+                if not recipe.passesTradeskillLevelReqs or not recipe.passesQualityLevelReq or recipe.maxIterationsForIngredients == 0 then
                     dataEntry:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
                 end
 
@@ -562,19 +556,32 @@ function ZO_GamepadProvisioner:SelectOption()
     self.optionsChanged = true
 end
 
+-- Overrides ZO_CraftingCreateScreenBase
 function ZO_GamepadProvisioner:IsCraftable()
     local targetData = self.recipeList:GetTargetData()
     if targetData then
-        return targetData.numCreatable > 0
+        return targetData.maxIterationsForIngredients > 0
            and targetData.passesTradeskillLevelReqs
            and targetData.passesQualityLevelReq
     end
     return false
 end
 
-function ZO_GamepadProvisioner:Create()
+function ZO_GamepadProvisioner:GetRecipeIndices()
     local targetData = self.recipeList:GetTargetData()
-    CraftProvisionerItem(targetData.recipeListIndex, targetData.recipeIndex)
+    if targetData then
+        return targetData.recipeListIndex, targetData.recipeIndex
+    end
+    return 0, 0
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_GamepadProvisioner:GetAllCraftingParameters(numIterations)
+    local targetData = self.recipeList:GetTargetData()
+    if targetData then
+        return targetData.recipeListIndex, targetData.recipeIndex, numIterations
+    end
+    return 0, 0, numIterations
 end
 
 function ZO_GamepadProvisioner_Initialize(control)

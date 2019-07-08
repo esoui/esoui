@@ -76,7 +76,9 @@ function ZO_SortFilterList:SetAlternateRowBackgrounds(alternate)
 end
 
 function ZO_SortFilterList:SetEmptyText(emptyText)
-    self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Keyboard")
+    if not self.emptyRow then
+        self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Keyboard")
+    end
     GetControl(self.emptyRow, "Message"):SetText(emptyText)
 end
 

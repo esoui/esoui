@@ -19,10 +19,10 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:AddMouseOverElement(ele
     self.mouseInputGroup:Add(element, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
 end
 
-function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(marketProduct, selected)
+function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(data)
     local initializingMarketProduct = not self.marketProduct or not self.marketProduct.control
 
-    ZO_MarketAnnouncementMarketProductTile.Layout(self, marketProduct, selected)
+    ZO_MarketAnnouncementMarketProductTile.Layout(self, data)
 
     if initializingMarketProduct then
         self.control.object:SetActionCallback(function() ZO_KEYBOARD_MARKET_ANNOUNCEMENT:OnMarketAnnouncementViewCrownStoreKeybind() end)

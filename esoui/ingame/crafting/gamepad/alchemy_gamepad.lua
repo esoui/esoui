@@ -5,24 +5,14 @@ local INGREDIENT_SORT_ORDER_POISON = 1000000
 local INGREDIENT_SORT_ORDER_OTHER  = 2000000
 
 ZO_GamepadAlchemyReagentSlot = ZO_AlchemyReagentSlot:Subclass()
-
-do
-    -- purposely throwing out the nil passed in from SharedAlchemy as param 1, we don't need it and we're overriding it when we call it back
-    function ZO_GamepadAlchemyReagentSlot:SetTraits(_, ...)
-        ZO_AlchemyReagentSlot.SetTraits(self, GAMEPAD_UNKNOWN_TRAIT_TEXTURE, ...)
-    end
-
-    function ZO_GamepadAlchemyReagentSlot:ClearTraits()
-        ZO_AlchemyReagentSlot.ClearTraits(self, GAMEPAD_UNKNOWN_TRAIT_TEXTURE)
-    end
+function ZO_GamepadAlchemyReagentSlot:GetUnknownTraitTexture()
+    return GAMEPAD_UNKNOWN_TRAIT_TEXTURE
 end
 
 ZO_GamepadAlchemy = ZO_SharedAlchemy:Subclass()
 
 function ZO_GamepadAlchemy:New(...)
-    local alchemy = ZO_SharedAlchemy.New(self)
-    alchemy:Initialize(...)
-    return alchemy
+    return ZO_SharedAlchemy.New(self, ...)
 end
 
 function ZO_GamepadAlchemy:Initialize(control)
@@ -92,7 +82,7 @@ end
 function ZO_GamepadAlchemy:InitializeSlots()
 
     local slotContainer = self.control:GetNamedChild("SlotContainer")
-    self.craftingBar = ZO_GamepadCraftingIngredientBar:New(slotContainer, ZO_GAMEPAD_CRAFTING_UTILS_SLOT_SPACING)
+    self.craftingBar = ZO_GamepadCraftingIngredientBar:New(slotContainer)
     self.craftingBar:AddDataTemplate("ZO_GamepadAlchemyCraftingSlotWithTraits", ZO_AlchemyCraftingBarSlotTemplateSetup)
     self.craftingBar:AddDataTemplate("ZO_AlchemySolventSlot_Gamepad", ZO_AlchemyCraftingBarSolventSlotTemplateSetup)
 
@@ -112,7 +102,6 @@ end
 function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
 
     self.craftingBar:Clear()
-    local reagents = ZO_Alchemy_IsThirdAlchemySlotUnlocked() and 3 or 2
     local newData = {
         icon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_solvent.dds",
         placedSound = SOUNDS.ALCHEMY_SOLVENT_PLACED, 
@@ -122,8 +111,15 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
         emptySlotIcon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_solvent.dds",
     }
     self.craftingBar:AddEntry("ZO_AlchemySolventSlot_Gamepad", newData)
+    newData.slot:RegisterCallback("ItemsChanged", function()
+        self:OnSlotChanged()
+    end)
+    newData.slot:RegisterCallback("ItemSlotted", function(bagId, slotIndex)
+        self:OnSolventSlotted(bagId, slotIndex)
+    end)
     self.solventSlot = newData.slot
 
+    local reagents = ZO_Alchemy_IsThirdAlchemySlotUnlocked() and 3 or 2
     self.reagentSlots = {}
     for i = 1, reagents do
         local newData = {
@@ -135,6 +131,10 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
             emptySlotIcon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_reagent.dds",
         }
         self.craftingBar:AddEntry("ZO_GamepadAlchemyCraftingSlotWithTraits", newData)
+        newData.slot:RegisterCallback("ItemsChanged", function()
+            self:OnSlotChanged()
+            self:UpdateReagentTraits()
+        end)
         self.reagentSlots[i] = newData.slot
     end
 
@@ -245,26 +245,42 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
                 return ZO_CraftingUtils_GetCostToCraftString(cost)
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
-
+            gamepadOrder = 1000,
             callback = function()
-                PlaySound(SOUNDS.GAMEPAD_ALCHEMY_BEGIN)
-                self:Create()
+                self:Create(1)
             end,
+            enabled = function()
+                return self:ShouldCraftButtonBeEnabled()
+            end,
+            sound = SOUNDS.GAMEPAD_ALCHEMY_BEGIN,
+        },
 
-            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
+        -- Multicraft
+        {
+            name = GetString(SI_GAMEPAD_CRAFT_MULTIPLE),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            gamepadOrder = 1010,
+            callback = function()
+                local itemLink, _ = GetAlchemyResultingItemLink(self:GetAllCraftingBagAndSlots())
+                ZO_GamepadCraftingUtils_ShowMultiCraftDialog(self, itemLink)
+            end,
+            enabled = function()
+                return self:ShouldMultiCraftButtonBeEnabled()
+            end,
         },
 
         -- Clear selections
         {
             name = GetString(SI_CRAFTING_CLEAR_SELECTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
-
+            gamepadOrder = 1020,
             callback = function()
                 self:ClearSelections()
                 self:OnWorkbenchUpdated()
             end,
-
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() end,
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections()
+            end,
         },
     }
 
@@ -315,14 +331,6 @@ function ZO_GamepadAlchemy:IsItemOnWorkbench(selectedBagId, selectedSlotIndex)
     return SlotHasSelection(self.solventSlot)
 end
 
-function ZO_GamepadAlchemy:GetReagentSlotOffset(thirdSlotUnlocked)
-    if thirdSlotUnlocked then
-        return 120
-    else
-        return 60
-    end
-end
-
 function ZO_GamepadAlchemy:OnWorkbenchUpdated()
     for _, data in pairs(self.inventory:GetList().dataList) do
         self:UpdateItemOnWorkbench(data)
@@ -370,7 +378,7 @@ end
 
 function ZO_GamepadAlchemy:UpdateItemOnWorkbench(data)
     data.isOnWorkbench = self:IsItemOnWorkbench(data.bagId, data.slotIndex)
-    data.isEquippedInCurrentCategory = data.isOnWorkbench
+    ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, data.isOnWorkbench)
 end
 
 function ZO_GamepadAlchemy:UpdateTooltip()

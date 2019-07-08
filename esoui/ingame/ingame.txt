@@ -205,6 +205,8 @@ EsoUI\Ingame\Collections\Keyboard\DLCBook_Keyboard.xml
 EsoUI\Ingame\Collections\Keyboard\HousingBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\HousingBook_Keyboard.xml
 
+EsoUI\Ingame\Collections\CombinationPromptManager.lua
+
 EsoUI\Ingame\HUD\HUDTracker_Base.lua
 EsoUI\Ingame\HUD\HUDTracker_Base.xml
 
@@ -687,6 +689,8 @@ EsoUI\Ingame\Lockpick\Lockpick.xml
 
 EsoUI\Ingame\Crafting\CraftingUtils.lua
 EsoUI\Ingame\Crafting\CraftingUtils.xml
+EsoUI\Ingame\Crafting\Keyboard\CraftingUtils_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\CraftingUtils_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\CraftingUtils_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\CraftingUtils_Gamepad.xml
 
@@ -847,9 +851,12 @@ EsoUI\Ingame\Guild\GuildHeraldry_Shared.lua
 EsoUI\Ingame\Guild\GuildRoster_Shared.lua
 EsoUI\Ingame\Guild\GuildHistory_Shared.lua
 
+EsoUI\Ingame\Guild\GuildRanks_Manager.lua
 EsoUI\Ingame\Guild\ZO_GuildUtils_Common.lua
 EsoUI\Ingame\Guild\ZO_GuildRanks_Shared.lua
+EsoUI\Ingame\Guild\GuildWeeklyBids_Shared.lua
 
+EsoUI\Ingame\Guild\GuildRankIconPicker_Shared.lua
 EsoUI\Ingame\Guild\GuildRank.lua
 EsoUI\Ingame\Guild\Keyboard\GuildHome_Keyboard.lua
 EsoUI\Ingame\Guild\Keyboard\GuildHome_Keyboard.xml
@@ -863,9 +870,15 @@ EsoUI\Ingame\Guild\GuildSharedInfo.lua
 EsoUI\Ingame\Guild\GuildSharedInfo.xml
 EsoUI\Ingame\Guild\Keyboard\GuildHeraldry_Keyboard.lua
 EsoUI\Ingame\Guild\Keyboard\GuildHeraldry_Keyboard.xml
+EsoUI\Ingame\Guild\Keyboard\GuildRank_PermissionCheckboxTile_Keyboard.lua
+EsoUI\Ingame\Guild\Keyboard\GuildRank_PermissionCheckboxTile_Keyboard.xml
 
+EsoUI\Ingame\Guild\Keyboard\GuildRankIconPicker_Keyboard.lua
+EsoUI\Ingame\Guild\Keyboard\GuildRankIconPicker_Keyboard.xml
 EsoUI\Ingame\Guild\Keyboard\ZO_GuildRanks_Keyboard.lua
 EsoUI\Ingame\Guild\Keyboard\ZO_GuildRanks_Keyboard.xml
+EsoUI\Ingame\Guild\Keyboard\GuildWeeklyBidsDialog_Keyboard.lua
+EsoUI\Ingame\Guild\Keyboard\GuildWeeklyBidsDialog_Keyboard.xml
 
 EsoUI\Ingame\GuildFinder\GuildFinder_Panel_Shared.lua
 EsoUI\Ingame\GuildFinder\GuildBrowser_Shared.lua
@@ -876,7 +889,6 @@ EsoUI\Ingame\GuildFinder\GuildBrowser_GuildInfo_Shared.xml
 EsoUI\Ingame\GuildFinder\GuildBrowser_ManageFilters_Shared.lua
 EsoUI\Ingame\GuildFinder\GuildRecruitment_Shared.lua
 EsoUI\Ingame\GuildFinder\GuildRecruitment_Panel_Shared.lua
-EsoUI\Ingame\GuildFinder\GuildRecruitment_ActivityCheckboxTile.lua
 EsoUI\Ingame\GuildFinder\GuildRecruitment_ApplicationsList_Shared.lua
 EsoUI\Ingame\GuildFinder\GuildRecruitment_GuildListing_Shared.lua
 EsoUI\Ingame\GuildFinder\GuildRecruitment_GuildListingInfo_Shared.lua
@@ -931,6 +943,8 @@ EsoUI\Ingame\Guild\Keyboard\GuildSelector_Keyboard.xml
 EsoUI\Ingame\Guild\Gamepad\GuildSelector_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\GuildSelector_Gamepad.xml
 
+EsoUI\Ingame\Guild\Gamepad\GuildRankIconPicker_Gamepad.lua
+EsoUI\Ingame\Guild\Gamepad\GuildRankIconPicker_Gamepad.xml
 EsoUI\Ingame\Guild\Gamepad\ZO_GuildHub_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\ZO_GuildHub_Gamepad.xml
 EsoUI\Ingame\Guild\Gamepad\ZO_GuildHome_Gamepad.lua
@@ -945,6 +959,8 @@ EsoUI\Ingame\Guild\Gamepad\GuildRoster_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\GuildRoster_Gamepad.xml
 EsoUI\Ingame\Guild\Gamepad\GuildHistory_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\GuildHistory_Gamepad.xml
+EsoUI\Ingame\Guild\Gamepad\GuildWeeklyBids_Gamepad.lua
+EsoUI\Ingame\Guild\Gamepad\GuildWeeklyBids_Gamepad.xml
 
 EsoUI\Ingame\GuildFinder\Gamepad\GuildFinder_GuildInfo_Gamepad.xml
 EsoUI\Ingame\GuildFinder\Gamepad\GuildBrowser_Gamepad.lua
@@ -961,8 +977,6 @@ EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_Gamepad.lua
 EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_Gamepad.xml
 EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_AttributeSelectionTile_Gamepad.lua
 EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_AttributeSelectionTile_Gamepad.xml
-EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_ActivityCheckboxTile_Gamepad.lua
-EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_ActivityCheckboxTile_Gamepad.xml
 EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_RoleSelectorTile_Gamepad.lua
 EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_RoleSelectorTile_Gamepad.xml
 EsoUI\Ingame\GuildFinder\Gamepad\GuildRecruitment_EditBoxTile_Gamepad.lua

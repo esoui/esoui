@@ -48,7 +48,6 @@ function ZO_CraftingInventory:InitializeList()
     self.list = self.control:GetNamedChild("Backpack")
     self.noItemsLabel = self.control:GetNamedChild("NoItemsLabel")
     self:AddListDataTypes()
-    ZO_ScrollList_AddResizeOnScreenResize(self.list)
 end
 
 function ZO_CraftingInventory:SetNoItemLabelText(text)
@@ -316,5 +315,16 @@ end
 function ZO_CraftingInventory_FilterButtonOnMouseExit(self)
     if ZO_MenuBarButtonTemplate_OnMouseExit(self) then
         ClearTooltip(InformationTooltip)
+    end
+end
+
+function ZO_CraftingInventoryComponentRow_OnMouseUp(control, button, upInside)
+    if upInside then
+        -- The case where mouse content isn't empty is already handled in OnSlotClicked, so fall through to that.
+        if button == MOUSE_BUTTON_INDEX_LEFT and GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+            ZO_InventorySlot_DoPrimaryAction(control)
+        else
+            ZO_InventorySlot_OnSlotClicked(control, button)
+        end
     end
 end

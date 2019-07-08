@@ -244,7 +244,7 @@ function ZO_GuildRecruitment_Gamepad:RefreshRecruitmentList()
 
     for i, data in ipairs(self.categoryData) do
         local visible = data.visible or true
-        if data.visible and type(data.visible) == "function" then
+        if type(data.visible) == "function" then
             visible = data.visible()
         end
 

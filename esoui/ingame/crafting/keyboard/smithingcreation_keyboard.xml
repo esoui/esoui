@@ -91,9 +91,22 @@
                     <!-- The anchor for this is dynamically set  -->
                 </Control>
 
-                <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip">
-                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-245" />
-                </Tooltip>
+                <Control name="$(parent)MultiCraftContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
+                    <Controls>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
+
+                        <Label name="$(parent)SpinnerLabel" inherits="ZO_CraftingContainerHeader" text="SI_CRAFTING_QUANTITY_HEADER">
+                            <Anchor point="TOP" offsetY="64" />
+                        </Label>
+                        <Control name="$(parent)Spinner" inherits="ZO_MultiCraftSpinner">
+                            <Anchor point="TOP" relativeTo="$(parent)SpinnerLabel" relativePoint="BOTTOM" offsetY="30" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip" />
 
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />

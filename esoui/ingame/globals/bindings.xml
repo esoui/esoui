@@ -25,7 +25,7 @@
                 <Up>TurnRightStop()</Up>
             </Action>
 
-            <Action name="MOVE_JUMPASCEND">
+            <Action name="MOVE_JUMPASCEND" holdAndChordInteraction="RUN_ANYWAY">
                 <Down>JumpAscendStart()</Down>
                 <Up>AscendStop()</Up>
             </Action>
@@ -312,7 +312,7 @@
         </Category>
 
         <Category name="SI_KEYBINDINGS_CATEGORY_INTERACTION">
-            <Action name="GAME_CAMERA_INTERACT">
+            <Action name="GAME_CAMERA_INTERACT" holdAndChordInteraction="RUN_ANYWAY">
                 <Down>if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end</Down>
                 <Up>if not FISHING_MANAGER:StopInteraction() then GameCameraInteractStart() end</Up>
             </Action>

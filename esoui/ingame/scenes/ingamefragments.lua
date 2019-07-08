@@ -272,7 +272,6 @@ do
         return .8 * screenWidth, .55 * screenHeight
     end
     FRAME_TARGET_STORE_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadStoreFramingTarget, SetFrameLocalPlayerTarget)
-    FRAME_TARGET_STORE_BLUR_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadStoreFramingTarget)
 
     local function CalculateGamepadRightFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
@@ -866,7 +865,6 @@ INTERACT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_InteractWindow)
 GAMEPAD_INTERACT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_InteractWindow_Gamepad)
 STORE_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_StoreWindowMenu)
 FENCE_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Fence_Keyboard_WindowMenu)
-HELP_TUTORIALS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Help)
 
 WORLD_MAP_CORNER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_WorldMapCorner)
 WORLD_MAP_INFO_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_WorldMapInfoFootPrintBackground)

@@ -13,15 +13,15 @@ function ZO_GuildRecruitment_Manager:New(...)
 end
 
 function ZO_GuildRecruitment_Manager:Initialize()
-    local function OnGuildFinderApplicationsRecieved(event, guildId)
+    local function OnGuildFinderApplicationsReceived(event, guildId)
         self:FireCallbacks("GuildApplicationResultsReady", guildId)
     end
 
-    local function OnGuildFinderBlacklistRecieved()
+    local function OnGuildFinderBlacklistReceived()
         self:FireCallbacks("GuildBlacklistResultsReady")
     end
 
-    local function OnGuildPermissionsRecieved(event, guildId)
+    local function OnGuildPermissionsReceived(event, guildId)
         self:FireCallbacks("GuildPermissionsChanged", guildId)
     end
 
@@ -50,9 +50,11 @@ function ZO_GuildRecruitment_Manager:Initialize()
     local function OnProcessApplicationResponse(event, guildId, accountName, result)
         local guildName = GetGuildName(guildId) or ""
         if result == GUILD_PROCESS_APP_RESPONSE_APPLICATION_PROCESSED_ACCEPT then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_RECRUITMENT_APPLICATION_ACCEPTED_ALERT, accountName, guildName))
+            local displayName = ZO_FormatUserFacingDisplayName(accountName)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_RECRUITMENT_APPLICATION_ACCEPTED_ALERT, displayName, guildName))
         elseif result == GUILD_PROCESS_APP_RESPONSE_APPLICATION_PROCESSED_DECLINE then
-            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_RECRUITMENT_APPLICATION_DECLINED_ALERT, accountName, guildName))
+            local displayName = ZO_FormatUserFacingDisplayName(accountName)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GUILD_RECRUITMENT_APPLICATION_DECLINED_ALERT, displayName, guildName))
         elseif result == GUILD_PROCESS_APP_RESPONSE_APPLICATION_PROCESSED_RESCIND then
             -- No alert needed for rescind
         else
@@ -60,21 +62,21 @@ function ZO_GuildRecruitment_Manager:Initialize()
         end
     end
 
-    local function OnUpdatedGuildInfoRecieved(event, guildId, result)
+    local function OnUpdatedGuildInfoReceived(event, guildId, result)
         self:FireCallbacks("GuildInfoChanged", guildId)
     end
 
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_APPLICATION_RESULTS_GUILD, OnGuildFinderApplicationsRecieved)
-    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_GUILD_NEW_APPLICATIONS, OnGuildFinderApplicationsRecieved)
-    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_BLACKLIST_RESULTS, OnGuildFinderBlacklistRecieved)
-    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_RANK_CHANGED, OnGuildPermissionsRecieved)
+    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_APPLICATION_RESULTS_GUILD, OnGuildFinderApplicationsReceived)
+    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_GUILD_NEW_APPLICATIONS, OnGuildFinderApplicationsReceived)
+    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_BLACKLIST_RESULTS, OnGuildFinderBlacklistReceived)
+    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_RANK_CHANGED, OnGuildPermissionsReceived)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_BLACKLIST_RESPONSE, OnBlacklistResponse)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_MEMBER_ADDED, OnGuildMembershipChanged)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_MEMBER_REMOVED, OnGuildMembershipChanged)
-    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_PLAYER_RANK_CHANGED, OnGuildPermissionsRecieved)
+    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_PLAYER_RANK_CHANGED, OnGuildPermissionsReceived)
     EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_FINDER_PROCESS_APPLICATION_RESPONSE, OnProcessApplicationResponse)
-    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_RECRUITMENT_INFO_UPDATED, OnUpdatedGuildInfoRecieved)
+    EVENT_MANAGER:RegisterForEvent("ZO_GuildRecruitment_Manager", EVENT_GUILD_RECRUITMENT_INFO_UPDATED, OnUpdatedGuildInfoReceived)
 end
 
 function ZO_GuildRecruitment_Manager.IsBlacklistResultSuccessful(result)
@@ -99,7 +101,7 @@ end
 function ZO_GuildRecruitment_Manager.PopulateDropdown(dropDownControl, iterBegin, iterEnd, stringBase, selectionFunction, data, omittedIndex)
     dropDownControl:ClearItems()
 
-    if omittedIndex and type(omittedIndex) == "function" then
+    if type(omittedIndex) == "function" then
         omittedIndex = omittedIndex()
     end
 

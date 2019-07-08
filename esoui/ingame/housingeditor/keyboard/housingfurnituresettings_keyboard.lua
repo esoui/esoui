@@ -43,6 +43,8 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     self.primaryResidenceSetting:SetParent(generalOptionsScrollChild)
     self.primaryResidenceButton = self.primaryResidenceSetting:GetNamedChild("Button")
     self.primaryResidenceButton:SetHandler("OnClicked", OnPrimaryResidenceClicked)
+    local primaryResidenceButtonLabel = self.primaryResidenceButton:GetLabelControl()
+    primaryResidenceButtonLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
 
     self.defaultAccessSetting = self.generalOptionsPanel:GetNamedChild("DefaultAccess")
     self.defaultAccessSetting:SetParent(generalOptionsScrollChild)
@@ -235,7 +237,9 @@ end
 
 function ZO_HousingFurnitureSettings_Keyboard:ShowPrimaryResidenceTooltip(control)
     InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
-    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_TOOLTIP_TEXT))
+
+    InformationTooltip:AddLine(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT))
+    InformationTooltip:AddLine(GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_TOOLTIP_TEXT), "", ZO_NORMAL_TEXT:UnpackRGB())
 end
 
 function ZO_HousingFurnitureSettings_Keyboard:ShowHomeShowTooltip(control)

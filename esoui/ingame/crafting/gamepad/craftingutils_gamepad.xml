@@ -45,6 +45,31 @@
                 </Control>
             </Controls>
         </Control>
+
+        <Control name="ZO_GamepadMultiCraftSpinnerTemplate" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="58" />
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" />
+                </Backdrop>
+
+                <Label name="$(parent)Label" text="SI_GAMEPAD_QUANTITY_SPINNER_TEMPLATE_LABEL" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                    <Anchor point="LEFT" />
+                </Label>
+
+                <Control name="$(parent)Spinner" inherits="ZO_GamepadSpinner">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="110" y="42" />
+                    <Controls>
+                        <Label name="$(parent)Display" font="ZoFontGamepad42" override="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- This alias is so we can use an independent templateData from the multicraft template -->
+        <Control name="ZO_GamepadMultiDeconstructSpinnerTemplate" inherits="ZO_GamepadMultiCraftSpinnerTemplate" virtual="true" />
         
     </Controls>
   

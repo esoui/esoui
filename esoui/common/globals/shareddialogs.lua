@@ -211,9 +211,8 @@ ESO_Dialogs["SHOW_REDEEM_CODE"] =
         {
             text = SI_DIALOG_LOG_OUT_ENTER_CODE,
             callback = function(dialog)
-                            OpenURLByType(APPROVED_URL_ESO_ACCOUNT)
-                            ZO_Disconnect()
-                       end,
+                OpenURLByType(APPROVED_URL_ESO_ACCOUNT)
+            end,
         },
 
         [2] =
@@ -246,9 +245,8 @@ ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] =
         {
             text = SI_DIALOG_LOG_OUT_ENTER_CODE,
             callback = function(dialog)
-                            ShowConsoleRedeemCodeUI()
-                            ZO_Disconnect()
-                       end,
+                ShowConsoleRedeemCodeUI()
+            end,
         },
 
         [2] =

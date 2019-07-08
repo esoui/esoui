@@ -102,3 +102,27 @@ function ZO_Tooltip:LayoutGuildInvitee(displayName, characterName)
     inviteeSection:AddLine(GetString(SI_GUILD_INVITED_PLAYER_LOCATION), self:GetStyle("guildInvitee"))
     self:AddSection(inviteeSection)
 end
+
+function ZO_Tooltip:LayoutHelpLink(helpLink)
+    local headerSection = self:AcquireSection(self:GetStyle("topSection"))
+    headerSection:AddLine(GetString(SI_GAMEPAD_HELP_LINK_TOOLTIP_HEADER), self:GetStyle("title"))
+    self:AddSection(headerSection)
+
+    local keybindString
+    local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromName("UI_SHORTCUT_SECONDARY", IsInGamepadPreferredMode())
+    if key ~= KEY_INVALID then
+        local TEXTURE_SCALE_PERCENT = 100
+        keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT, TEXTURE_SCALE_PERCENT)
+    else
+        keybindString = ZO_Keybindings_GenerateKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
+    end
+
+    local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(helpLink)
+    local helpName = GetHelpInfo(helpCategoryIndex, helpIndex)
+    local name, _, _, _, _, _, gamepadName = GetHelpCategoryInfo(helpCategoryIndex)
+    local helpCategoryName = gamepadName ~= "" and gamepadName or name
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(zo_strformat(SI_GAMEPAD_HELP_LINK_TOOLTIP_DESCRIPTION, keybindString, ZO_WHITE:Colorize(helpCategoryName), ZO_WHITE:Colorize(helpName)), self:GetStyle("flavorText"))
+    self:AddSection(bodySection)
+end

@@ -26,14 +26,18 @@
                     <Dimensions x="550"/>
                 </Control>
 
-                <Control name="$(parent)RuneSlotContainer" inherits="ZO_SharedEnchantingSlotContainer">
+                <Control name="$(parent)RuneSlotContainer">
+                    <Dimensions x="780" y="256" />
+                    <Anchor point="BOTTOM" offsetY="-64"/>
                     <Controls>
-                        <Label name="$(parent)PhraseLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ENCHANTING_PHRASE_HEADER" modifyTextType="UPPERCASE">
-                            <Anchor point="CENTER" offsetY="-44" />
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerLongBackground" />
+
+                        <Label name="$(parent)PhraseLabel" inherits="ZO_CraftingContainerHeader" text="SI_ENCHANTING_PHRASE_HEADER">
+                            <Anchor point="TOP" offsetX="-140" offsetY="64" />
                         </Label>
-                        
+
                         <Button name="$(parent)EssenceRune" inherits="ZO_EnchantingRuneCraftingSlot">
-                            <Anchor point="CENTER" offsetY="30" />
+                            <Anchor point="TOP" relativeTo="$(parent)PhraseLabel" relativePoint="BOTTOM" offsetY="30" />
                         </Button>
 
                         <Button name="$(parent)PotencyRune" inherits="ZO_EnchantingRuneCraftingSlot">
@@ -43,25 +47,44 @@
                         <Button name="$(parent)AspectRune" inherits="ZO_EnchantingRuneCraftingSlot">
                             <Anchor point="LEFT" relativeTo="$(parent)EssenceRune" relativePoint="RIGHT" offsetX="70" />
                         </Button>
+
+                        <Label name="$(parent)QuantityLabel" inherits="ZO_CraftingContainerHeader" text="SI_CRAFTING_QUANTITY_HEADER">
+                            <Anchor point="TOP" offsetX="190" offsetY="64" />
+                        </Label>
+
+                        <Control name="$(parent)Spinner" inherits="ZO_MultiCraftSpinner">
+                            <Anchor point="TOP" relativeTo="$(parent)QuantityLabel" relativePoint="BOTTOM" offsetY="44" />
+                        </Control>
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)ExtractionSlotContainer" inherits="ZO_SharedExtractionEnchantingSlotContainer" hidden="true">
+                <Control name="$(parent)ExtractionSlotContainer" hidden="true">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" offsetY="-64"/>
                     <Controls>
-                        <Label name="$(parent)ExtractionLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ENCHANTING_EXTRACT_HEADER" modifyTextType="UPPERCASE">
-                            <Anchor point="CENTER" offsetY="-44" />
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
+                        <Texture name="$(parent)LandingArea" textureFile="EsoUI/Art/Crafting/crafting_enchanting_extraction_landingArea_overlay.dds">
+                            <Dimensions x="236" y="236" />
+                            <Anchor point="CENTER" offsetY="50" />
+                        </Texture>
+                        <Label name="$(parent)ExtractionLabel" inherits="ZO_CraftingContainerHeader" text="SI_ENCHANTING_EXTRACT_HEADER">
+                            <Anchor point="TOP" offsetY="64" />
                         </Label>
                         <Button name="$(parent)ExtractionSlot" inherits="ZO_CraftingSlot">
                             <Anchor point="CENTER" relativeTo="$(parent)LandingArea" offsetY="-3" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Dimensions x="185" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                            </Controls>
                         </Button>
                     </Controls>
                 </Control>
                 
                 <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate" />
 
-                <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip">
-                    <Anchor point="BOTTOM" offsetY="-285"/>
-                </Tooltip>
+                <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip" />
             </Controls>
         </TopLevelControl>
     </Controls>

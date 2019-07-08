@@ -56,7 +56,7 @@ function ZO_GamepadTradingHouse_BaseList:AddGuildChangeKeybindDescriptor(keybind
             ZO_Dialogs_ShowPlatformDialog("TRADING_HOUSE_CHANGE_ACTIVE_GUILD")
         end,
         visible = function()
-            return GetSelectedTradingHouseGuildId() ~= nil and GetNumTradingHouseGuilds() > 1
+            return GetNumTradingHouseGuilds() > 1
         end,
     })
 end

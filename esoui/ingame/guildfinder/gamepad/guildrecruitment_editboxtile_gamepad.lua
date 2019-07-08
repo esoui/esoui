@@ -68,7 +68,7 @@ function ZO_GuildRecruitment_EditBoxTile_Gamepad:Layout(data)
     ZO_EditDefaultText_Initialize(self.edit, data.defaultText)
     self.onEditFunction = data.onEditCallback
     self.onFocusLostFunction = data.onFocusLostCallback
-    if data.currentValue then
+    if data.currentValue and data.currentValue ~= self.edit:GetText() then
         self.edit:SetText(data.currentValue)
     end
 

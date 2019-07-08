@@ -17,17 +17,17 @@ function ZO_ZoneStoriesTile:New(...)
     return ZO_ActionTile.New(self, ...)
 end
 
-function ZO_ZoneStoriesTile:Layout(zoneId)
-    ZO_Tile.Layout(self, zoneId)
+function ZO_ZoneStoriesTile:Layout(data)
+    ZO_Tile.Layout(self, data)
 
-    self:SetTitle(ZO_CachedStrFormat(SI_ZONE_NAME, GetZoneNameById(zoneId)))
+    self:SetTitle(ZO_CachedStrFormat(SI_ZONE_NAME, GetZoneNameById(data.zoneId)))
 
     -- The tile on all platforms is of a landscape dimension rather than portrait as in gamepad, 
     -- so we want to use the keyboard background on tiles regardless of platform.
-    local backgroundFile = GetZoneStoryKeyboardBackground(zoneId)
+    local backgroundFile = GetZoneStoryKeyboardBackground(data.zoneId)
     self:SetBackground(backgroundFile)
 
     self:SetActionCallback(function()
-        ShowZoneStoriesScene(zoneId)
+        ShowZoneStoriesScene(data.zoneId)
     end)
 end

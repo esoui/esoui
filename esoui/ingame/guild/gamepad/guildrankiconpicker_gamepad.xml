@@ -1,0 +1,27 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildRank_RankIconPickerIcon_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_GAMEPAD_SIZE" y="ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_GAMEPAD_SIZE"/>
+            <Controls>
+                <Texture name="$(parent)Icon" level="3">
+                    <Dimensions x="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_SIZE" y="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_SIZE"/>
+                    <Anchor point="TOPLEFT" offsetX="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_OFFSET" offsetY="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_OFFSET" />
+                </Texture>
+
+                <Control name="$(parent)CurrentIconIndicator" level="2" hidden="true">
+                    <Dimensions x="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_SIZE" y="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_SIZE"/>
+                    <Anchor point="TOPLEFT" offsetX="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_OFFSET" offsetY="ZO_GUILD_RANK_RANK_ICON_PICKER_ICON_GAMEPAD_OFFSET" />
+                    <Controls>
+                        <Texture name="$(parent)Background" color="80FFFFFF" level="2">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Backdrop name="$(parent)Outline" inherits="ZO_GamepadWhiteOutlineHighlight" level="1">
+                            <AnchorFill />
+                        </Backdrop>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

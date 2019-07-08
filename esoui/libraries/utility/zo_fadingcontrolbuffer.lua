@@ -88,6 +88,10 @@ function ZO_FadingControlBuffer:SetPushDirection(pushDirection)
     self.pushDirection = pushDirection
 end
 
+function ZO_FadingControlBuffer:SetDisplayOlderEntriesFirst(displayOlderEntriesFirst)
+    self.displayOlderEntriesFirst = displayOlderEntriesFirst
+end
+
 --[[
     'templateData' must be a table as follows:
         {setup = <function>, equalityCheck = <function>, equalitySetup = <function>, headerTemplateName = <string>, headerSetup = <function>, headerEqualityCheck = <function>})
@@ -199,9 +203,9 @@ function ZO_FadingControlBuffer:TryHandlingExistingEntry(templateName, templateD
                         activeEntryControl.setupTime = GetFrameTimeMilliseconds()
                         handled = true
                     else
-                        -- The headers are equal, but the lines are not equal.  Prepend the lines to the header if there is space.
+                        -- The headers are equal, but the lines are not equal. Add the lines to the header if there is space.
                         if self:CanDisplayEntry(templateName, entry, activeEntryControl) then
-                            self:PrependLinesToExistingEntry(activeEntryControl, entry.lines)
+                            self:AddLinesToExistingEntry(activeEntryControl, entry.lines, templateData.displayOlderLinesFirst)
                             handled = true
                         end
                     end
@@ -594,7 +598,7 @@ do
     
     local HEADER_INDEX = 1
     local PRESERVE_FADE = true
-    function ZO_FadingControlBuffer:SetupItem(hasHeader, item, templateName, setupFn, pools, parent, offsetY, isHeader)
+    function ZO_FadingControlBuffer:SetupItem(hasHeader, item, templateName, setupFn, pools, parent, offsetY, isHeader, shouldAppend)
         if item then
             local control = self:AcquireItemObject(isHeader and "Header" or "Line", templateName, pools, parent, offsetY)
             setupFn(control, item)
@@ -608,12 +612,18 @@ do
             control.fadeInHold = true
             control:SetAlpha(0)
 
-            local insertionIndex = HEADER_INDEX + 1
-            if isHeader or not hasHeader then
-                insertionIndex = HEADER_INDEX
+            local insertionIndex
+            if shouldAppend then
+                -- append after existing lines
+                table.insert(parent.activeLines, control)
+            elseif isHeader or not hasHeader then
+                -- prepend to header location
+                table.insert(parent.activeLines, HEADER_INDEX, control)
+            else
+                -- insert after header, before existing lines
+                table.insert(parent.activeLines, HEADER_INDEX + 1, control)
             end
 
-            table.insert(parent.activeLines, insertionIndex, control)
             AdjustAnchors(control, parent, 0)
             self:MoveEntriesOrLines(parent.activeLines, PRESERVE_FADE)
 
@@ -626,7 +636,7 @@ do
     end
 end
 
-function ZO_FadingControlBuffer:PrependLinesToExistingEntry(entryControl, newLines)
+function ZO_FadingControlBuffer:AddLinesToExistingEntry(entryControl, newLines, shouldAppend)
     local entry = entryControl.entry
     local currentLines = entry.lines
     local offsetY = 0
@@ -638,7 +648,10 @@ function ZO_FadingControlBuffer:PrependLinesToExistingEntry(entryControl, newLin
 
         if totalLines > self.maxLinesPerEntry then
             local numLinesToRemove = zo_min(totalLines - self.maxLinesPerEntry, numCurrentLines)
-            for i = numCurrentLines, numCurrentLines - numLinesToRemove + 1, -1 do
+
+            -- if appending, remove from the front. If prepending, remove from the back
+            local startIndex = shouldAppend and numLinesToRemove or numCurrentLines
+            for i = startIndex, startIndex - numLinesToRemove + 1, -1 do
                 local line = table.remove(currentLines, i)
                 local lineControl = line._control
                 offsetY = offsetY - CalculateControlHeight(lineControl)
@@ -655,12 +668,19 @@ function ZO_FadingControlBuffer:PrependLinesToExistingEntry(entryControl, newLin
     local templateName = entry._templateName
     local templateData = self.templates[templateName]
 
-    -- Insert the new lines at the front of the existing line list.
+    local NOT_HEADER = false
     local hasHeader = (entry.header ~= nil)
     local linePools = self.linePools
-    for i = #newLines, 1, -1 do
-        table.insert(currentLines, 1, newLines[i])
-        offsetY = self:SetupItem(hasHeader, newLines[i], templateName, templateData.setup, linePools, entryControl, offsetY)
+    if shouldAppend then
+        for _, line in ZO_NumericallyIndexedTableIterator(newLines) do
+            table.insert(currentLines, line)
+            offsetY = self:SetupItem(hasHeader, line, templateName, templateData.setup, linePools, entryControl, offsetY, NOT_HEADER, shouldAppend)
+        end
+    else
+        for _, line in ZO_NumericallyIndexedTableReverseIterator(newLines) do
+            table.insert(currentLines, 1, line)
+            offsetY = self:SetupItem(hasHeader, line, templateName, templateData.setup, linePools, entryControl, offsetY, NOT_HEADER, shouldAppend)
+        end
     end
 
     entryControl.height = entryControl.height + offsetY
@@ -704,10 +724,13 @@ function ZO_FadingControlBuffer:DisplayEntry(templateName, entry)
     offsetY = self:SetupItem(HEADER_ITEM, entry.header, templateData.headerTemplateName, templateData.headerSetup, self.headerPools, entryControl, offsetY, HEADER_ITEM)
     local lines = entry.lines
     if lines then
+        local NOT_HEADER = false
+        local shouldAppend = templateData.displayOlderLinesFirst
         local hasHeader = (entry.header ~= nil)
         local linePools = self.linePools
-        for i = #lines, 1, -1 do
-            offsetY = self:SetupItem(hasHeader, lines[i], templateName, templateData.setup, linePools, entryControl, offsetY)
+        local iterator = shouldAppend and ZO_NumericallyIndexedTableIterator or ZO_NumericallyIndexedTableReverseIterator
+        for _, line in iterator(lines) do
+            offsetY = self:SetupItem(hasHeader, line, templateName, templateData.setup, linePools, entryControl, offsetY, NOT_HEADER, shouldAppend)
         end
     end
 
@@ -722,7 +745,13 @@ function ZO_FadingControlBuffer:DisplayEntry(templateName, entry)
     entryControl:SetAlpha(0)
 
     local needsMove = self.activeEntries[1] ~= nil
-    table.insert(self.activeEntries, 1, entryControl)
+    if self.displayOlderEntriesFirst then
+        -- append new entries to end of list
+        table.insert(self.activeEntries, entryControl)
+    else
+        -- prepend new entries to beginning of list, and move rest of list over
+        table.insert(self.activeEntries, 1, entryControl)
+    end
     self.currentNumDisplayedEntries = self.currentNumDisplayedEntries + 1
 
     if needsMove then

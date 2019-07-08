@@ -78,8 +78,30 @@ function ZO_Tile:MarkDirty()
     self.dirty = true
 end
 
-function ZO_Tile:Layout(...)
+function ZO_Tile:Layout(data)
     if self.LayoutPlatform then
-        self:LayoutPlatform(...)
+        self:LayoutPlatform(data)
     end
+end
+
+-------------
+-- Global Tile Function
+-------------
+
+function ZO_DefaultGridTileHeaderSetup(control, data, selected)
+    local label = control:GetNamedChild("Text")
+    if label then
+        label:SetText(data.header)
+    end
+end
+
+function ZO_DefaultGridTileEntrySetup(control, data)
+    if not data.isEmptyCell then
+        control.object:Layout(data.dataSource)
+    end
+end
+
+function ZO_DefaultGridTileEntryReset(control)
+    ZO_ObjectPool_DefaultResetControl(control)
+    control.object:Reset()
 end

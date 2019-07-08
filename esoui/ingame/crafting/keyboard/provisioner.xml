@@ -122,6 +122,21 @@
                 </Control>
 
                 <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip" />
+
+                <Control name="$(parent)MultiCraftContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
+                    <Controls>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
+
+                        <Label name="$(parent)SpinnerLabel" inherits="ZO_CraftingContainerHeader" text="SI_CRAFTING_QUANTITY_HEADER">
+                            <Anchor point="TOP" offsetY="64" />
+                        </Label>
+                        <Control name="$(parent)Spinner" inherits="ZO_MultiCraftSpinner">
+                            <Anchor point="TOP" relativeTo="$(parent)SpinnerLabel" relativePoint="BOTTOM" offsetY="30" />
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

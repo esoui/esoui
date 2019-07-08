@@ -29,6 +29,7 @@ CreateSlotType("SLOT_TYPE_PENDING_REPAIR")
 CreateSlotType("SLOT_TYPE_STACK_SPLIT")
 CreateSlotType("SLOT_TYPE_CRAFTING_COMPONENT")
 CreateSlotType("SLOT_TYPE_PENDING_CRAFTING_COMPONENT")
+CreateSlotType("SLOT_TYPE_MULTIPLE_PENDING_CRAFTING_COMPONENTS")
 CreateSlotType("SLOT_TYPE_SMITHING_MATERIAL")
 CreateSlotType("SLOT_TYPE_SMITHING_STYLE")
 CreateSlotType("SLOT_TYPE_SMITHING_TRAIT")
@@ -116,8 +117,15 @@ end
 
 local USE_LOWERCASE_NUMBER_SUFFIXES = false
 
-function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
-    slotControl:SetHidden(false)
+function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsageRequirement, locked, visible)
+    local showSlot = true
+    if type(visible) == "function" then
+        showSlot = visible()
+    elseif visible ~= nil then
+        showSlot = visible
+    end
+
+    slotControl:SetHidden(not showSlot)
 
     local iconControl = GetControl(slotControl, "Icon")
     if iconControl then
@@ -138,8 +146,8 @@ function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsage
     end
 end
 
-function ZO_ItemSlot_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
-    ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
+function ZO_ItemSlot_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequirement, locked, visible)
+    ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsageRequirement, locked, visible)
 
     -- Looks like this can be combined with the logic above, but certain animations (crafting) cannot
     -- call ZO_ItemSlot_SetupUsableAndLockedColor, so keep that in mind if refactoring.
@@ -1252,9 +1260,18 @@ local function TryRemoveItemFromCraft(inventorySlot)
     UpdateMouseoverCommand(inventorySlot)
 end
 
+local function TryRemoveAllFromCraft()
+    if ZO_Enchanting_IsSceneShowing() then
+       ZO_Enchanting_GetVisibleEnchanting():ClearSelections()
+    elseif ZO_Smithing_IsSceneShowing() then
+        ZO_Smithing_GetActiveObject():ClearSelections()
+    end
+end
+
 local function IsCraftingSlotType(slotType)
     return slotType == SLOT_TYPE_CRAFTING_COMPONENT
         or slotType == SLOT_TYPE_PENDING_CRAFTING_COMPONENT
+        or slotType == SLOT_TYPE_MULTIPLE_PENDING_CRAFTING_COMPONENTS
         or slotType == SLOT_TYPE_SMITHING_MATERIAL
         or slotType == SLOT_TYPE_SMITHING_STYLE
         or slotType == SLOT_TYPE_SMITHING_TRAIT
@@ -1298,7 +1315,7 @@ local function DefaultUseItemFunction(inventorySlot, slotActions)
     if CanUseItem(inventorySlot) then
         local bag, slotIndex = ZO_Inventory_GetBagAndIndex(inventorySlot)
         local onUseType = GetItemUseType(bag, slotIndex)
-        if onUseType == ITEM_USE_TYPE_EVOLUTION then
+        if onUseType == ITEM_USE_TYPE_COMBINATION then
             slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() ZO_InventorySlot_InitiateConfirmUseItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
         else
             slotActions:AddSlotAction(SI_ITEM_ACTION_USE, function() TryUseItem(inventorySlot) end, "primary", nil, {visibleWhenDead = false})
@@ -1331,7 +1348,13 @@ local useActions =
                                             else
                                                 textEnum = SI_COLLECTIBLE_ACTION_SET_ACTIVE
                                             end
-                                            slotActions:AddSlotAction(textEnum, function() UseCollectible(inventorySlot.collectibleId) end, "primary", nil, {visibleWhenDead = false})
+
+                                            local useCollectibleCallback = function()
+                                                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(inventorySlot.collectibleId)
+                                                collectibleData:Use()
+                                            end
+
+                                            slotActions:AddSlotAction(textEnum, useCollectibleCallback, "primary", nil, {visibleWhenDead = false})
                                         end,
 }
 
@@ -1828,6 +1851,10 @@ local actionHandlers =
                                 end
                             end,
 
+    ["remove_all_from_craft"] = function(inventorySlot, slotActions)
+                                slotActions:AddSlotAction(SI_ITEM_ACTION_REMOVE_FROM_CRAFT, TryRemoveAllFromCraft, "primary")
+                            end,
+
     ["buy_guild_specific_item"] = function(inventorySlot, slotActions)
                                 if(TRADING_HOUSE:CanBuyItem(inventorySlot)) then
                                     slotActions:AddSlotAction(SI_TRADING_HOUSE_BUY_ITEM, function() TryBuyingGuildSpecificItem(inventorySlot) end, "primary")
@@ -1873,37 +1900,38 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 -- The order of the rest of the secondary actions in the table determines the order they appear on the context menu
 local potentialActionsForSlotType =
 {
-    [SLOT_TYPE_QUEST_ITEM] =                    { "quickslot", "use", "link_to_chat" },
-    [SLOT_TYPE_ITEM] =                          { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
-    [SLOT_TYPE_EQUIPMENT] =                     { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
-    [SLOT_TYPE_MY_TRADE] =                      { "trade_remove", "link_to_chat", "report_item" },
-    [SLOT_TYPE_THEIR_TRADE] =                   NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_STORE_BUY] =                     { "buy", "buy_multiple", "link_to_chat", "report_item" },
-    [SLOT_TYPE_STORE_BUYBACK] =                 { "buyback", "link_to_chat", "report_item" },
-    [SLOT_TYPE_BUY_MULTIPLE] =                  NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_BANK_ITEM] =                     { "bank_withdraw", "split_stack", "mark_as_locked", "unmark_as_locked", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
-    [SLOT_TYPE_GUILD_BANK_ITEM] =               { "guild_bank_withdraw", "link_to_chat", "report_item" },
-    [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =        { "mail_detach", "link_to_chat", "report_item" },
-    [SLOT_TYPE_MAIL_ATTACHMENT] =               NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_LOOT] =                          { "take_loot", "link_to_chat", "report_item" },
-    [SLOT_TYPE_ACHIEVEMENT_REWARD] =            NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_TRADING_HOUSE_POST_ITEM] =       { "trading_house_remove_pending_post", "link_to_chat", "report_item" },
-    [SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT] =     { "trading_house_buy_item", "link_to_chat", "trading_house_search_from_results" },
-    [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] =    { "trading_house_cancel_listing", "link_to_chat", "trading_house_search_from_listings" },
-    [SLOT_TYPE_REPAIR] =                        { "vendor_repair", "link_to_chat", "destroy", "report_item" },
-    [SLOT_TYPE_PENDING_REPAIR] =                NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_CRAFTING_COMPONENT] =            { "add_to_craft", "remove_from_craft", "mark_as_locked", "unmark_as_locked", "link_to_chat", "report_item" },
-    [SLOT_TYPE_PENDING_CRAFTING_COMPONENT] =    { "remove_from_craft", "link_to_chat", "report_item" },
-    [SLOT_TYPE_SMITHING_MATERIAL] =             NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_SMITHING_STYLE] =                NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_SMITHING_TRAIT] =                NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_SMITHING_BOOSTER] =              NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_DYEABLE_EQUIPMENT] =             NON_INTERACTABLE_ITEM_ACTIONS,
-    [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =           { "buy_guild_specific_item", "link_to_chat" },
-    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =        { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
-    [SLOT_TYPE_COLLECTIONS_INVENTORY] =         { "quickslot", "use", "rename", "link_to_chat" },
-    [SLOT_TYPE_CRAFT_BAG_ITEM] =                { "move_to_inventory", "use", "link_to_chat", "report_item" },
-    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =          { "remove_from_craft", "link_to_chat", "report_item" },
+    [SLOT_TYPE_QUEST_ITEM] =                           { "quickslot", "use", "link_to_chat" },
+    [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "equip", "use", "preview_dye_stamp", "show_map_keep_recall","start_skill_respec", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_EQUIPMENT] =                            { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_MY_TRADE] =                             { "trade_remove", "link_to_chat", "report_item" },
+    [SLOT_TYPE_THEIR_TRADE] =                          NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_STORE_BUY] =                            { "buy", "buy_multiple", "link_to_chat", "report_item" },
+    [SLOT_TYPE_STORE_BUYBACK] =                        { "buyback", "link_to_chat", "report_item" },
+    [SLOT_TYPE_BUY_MULTIPLE] =                         NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_BANK_ITEM] =                            { "bank_withdraw", "split_stack", "mark_as_locked", "unmark_as_locked", "link_to_chat", "mark_as_junk", "unmark_as_junk", "report_item" },
+    [SLOT_TYPE_GUILD_BANK_ITEM] =                      { "guild_bank_withdraw", "link_to_chat", "report_item" },
+    [SLOT_TYPE_MAIL_QUEUED_ATTACHMENT] =               { "mail_detach", "link_to_chat", "report_item" },
+    [SLOT_TYPE_MAIL_ATTACHMENT] =                      NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_LOOT] =                                 { "take_loot", "link_to_chat", "report_item" },
+    [SLOT_TYPE_ACHIEVEMENT_REWARD] =                   NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_TRADING_HOUSE_POST_ITEM] =              { "trading_house_remove_pending_post", "link_to_chat", "report_item" },
+    [SLOT_TYPE_TRADING_HOUSE_ITEM_RESULT] =            { "trading_house_buy_item", "link_to_chat", "trading_house_search_from_results" },
+    [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] =           { "trading_house_cancel_listing", "link_to_chat", "trading_house_search_from_listings" },
+    [SLOT_TYPE_REPAIR] =                               { "vendor_repair", "link_to_chat", "destroy", "report_item" },
+    [SLOT_TYPE_PENDING_REPAIR] =                       NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_CRAFTING_COMPONENT] =                   { "add_to_craft", "remove_from_craft", "mark_as_locked", "unmark_as_locked", "link_to_chat", "report_item" },
+    [SLOT_TYPE_PENDING_CRAFTING_COMPONENT] =           { "remove_from_craft", "link_to_chat", "report_item" },
+    [SLOT_TYPE_MULTIPLE_PENDING_CRAFTING_COMPONENTS] = { "remove_all_from_craft", },
+    [SLOT_TYPE_SMITHING_MATERIAL] =                    NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_SMITHING_STYLE] =                       NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_SMITHING_TRAIT] =                       NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_SMITHING_BOOSTER] =                     NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_DYEABLE_EQUIPMENT] =                    NON_INTERACTABLE_ITEM_ACTIONS,
+    [SLOT_TYPE_GUILD_SPECIFIC_ITEM] =                  { "buy_guild_specific_item", "link_to_chat" },
+    [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] =               { "quickslot", "mail_attach", "mail_detach", "bank_deposit", "guild_bank_deposit", "gamepad_equip", "unequip", "use", "preview_dye_stamp", "start_skill_respec", "show_map_keep_recall", "split_stack", "enchant", "mark_as_locked", "unmark_as_locked", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
+    [SLOT_TYPE_COLLECTIONS_INVENTORY] =                { "quickslot", "use", "rename", "link_to_chat" },
+    [SLOT_TYPE_CRAFT_BAG_ITEM] =                       { "move_to_inventory", "use", "link_to_chat", "report_item" },
+    [SLOT_TYPE_PENDING_RETRAIT_ITEM] =                 { "remove_from_craft", "link_to_chat", "report_item" },
 }
 
 -- Checks to see if a certain slot type should completely disable all actions
@@ -2755,6 +2783,23 @@ local InventoryReceiveDrag =
                     if SYSTEMS:IsShowing("alchemy") then
                         SYSTEMS:GetObject("alchemy"):OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                     elseif SCENE_MANAGER:IsShowing("enchanting") then
+                        ENCHANTING:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                    elseif ZO_Smithing_IsSceneShowing() then
+                        ZO_Smithing_GetActiveObject():OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                    end
+                    return true
+                end
+            end
+        end
+    },
+    [SLOT_TYPE_MULTIPLE_PENDING_CRAFTING_COMPONENTS] =
+    {
+        function(inventorySlot)
+            if not ZO_CraftingUtils_IsPerformingCraftProcess() then
+                local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
+                if bagId and slotIndex then
+                    ClearCursor()
+                    if SCENE_MANAGER:IsShowing("enchanting") then
                         ENCHANTING:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                     elseif ZO_Smithing_IsSceneShowing() then
                         ZO_Smithing_GetActiveObject():OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
