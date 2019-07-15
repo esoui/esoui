@@ -53,16 +53,15 @@ function ZO_GamepadProvisioner:Initialize(control)
 
             -- refresh the recipe details on show, since they were cleared/hidden when the scene hid
             -- and we may not have had a change in our list to trigger a refresh
-            local targetData = self.recipeList:GetTargetData()
-            self:RefreshRecipeDetails(targetData)
+            self:RefreshRecipeDetails(self:GetRecipeData())
         elseif newState == SCENE_HIDDEN then
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(nil)
             ZO_GamepadGenericHeader_Deactivate(self.header)
             self.recipeList:Deactivate()
 
             -- refresh the recipe details passing nil in to appropriately hide/clear the tooltip and ingredient list
-            local NO_SELECTED_DATA = nil
-            self:RefreshRecipeDetails(NO_SELECTED_DATA)
+            local NO_RECIPE = nil
+            self:RefreshRecipeDetails(NO_RECIPE)
 
             self.control:GetNamedChild("IngredientsBar"):SetHidden(false)
 
@@ -247,9 +246,9 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
         {
             name = function()
                 local cost = 0
-                local targetData = self.recipeList:GetTargetData()
-                if targetData then
-                    cost = GetCostToCraftProvisionerItem(targetData.recipeListIndex, targetData.recipeIndex)
+                local recipeData = self:GetRecipeData()
+                if recipeData then
+                    cost = GetCostToCraftProvisionerItem(recipeData.recipeListIndex, recipeData.recipeIndex)
                 end
                 return ZO_CraftingUtils_GetCostToCraftString(cost)
             end,
@@ -308,9 +307,9 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
             end,
 
             visible = function()
-                local targetData = self.recipeList:GetTargetData()
-                if targetData then
-                    return self:CanPreviewRecipe(targetData)
+                local recipeData = self:GetRecipeData()
+                if recipeData then
+                    return self:CanPreviewRecipe(recipeData)
                 else
                     return false
                 end
@@ -488,8 +487,7 @@ function ZO_GamepadProvisioner:TogglePreviewMode()
     else
         self.control:GetNamedChild("IngredientsBar"):SetHidden(false)
     end
-    local targetData = self.recipeList:GetTargetData()
-    self:RefreshRecipeDetails(targetData)
+    self:RefreshRecipeDetails(self:GetRecipeData())
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 
@@ -556,32 +554,8 @@ function ZO_GamepadProvisioner:SelectOption()
     self.optionsChanged = true
 end
 
--- Overrides ZO_CraftingCreateScreenBase
-function ZO_GamepadProvisioner:IsCraftable()
-    local targetData = self.recipeList:GetTargetData()
-    if targetData then
-        return targetData.maxIterationsForIngredients > 0
-           and targetData.passesTradeskillLevelReqs
-           and targetData.passesQualityLevelReq
-    end
-    return false
-end
-
-function ZO_GamepadProvisioner:GetRecipeIndices()
-    local targetData = self.recipeList:GetTargetData()
-    if targetData then
-        return targetData.recipeListIndex, targetData.recipeIndex
-    end
-    return 0, 0
-end
-
--- Overrides ZO_CraftingCreateScreenBase
-function ZO_GamepadProvisioner:GetAllCraftingParameters(numIterations)
-    local targetData = self.recipeList:GetTargetData()
-    if targetData then
-        return targetData.recipeListIndex, targetData.recipeIndex, numIterations
-    end
-    return 0, 0, numIterations
+function ZO_GamepadProvisioner:GetRecipeData()
+    return self.recipeList:GetTargetData()
 end
 
 function ZO_GamepadProvisioner_Initialize(control)

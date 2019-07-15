@@ -106,7 +106,7 @@ end
 
 function ZO_GamepadInteractiveSortFilterList:SetupFoci()
     -- TODO: If we want to turn on filters and searching after initialization foci will have to be re-setup
-    if not (self.contentHeader:IsControlHidden() or (self.filterControl:IsHidden() and self.searchControl:IsHidden())) then
+    if not (self.contentHeader:IsControlHidden() or (self.filterControl:IsControlHidden() and self.searchControl:IsControlHidden())) then
         local function FiltersActivateCallback()
             self.filterSwitcher:Activate()
         end

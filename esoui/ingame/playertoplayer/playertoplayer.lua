@@ -405,15 +405,13 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
     end
 
-    local function OnCampaignQueueJoined(_, campaignId, isMemberOfGroup)
+    local function OnCampaignQueueJoined(_, campaignId, isMemberOfGroup, willBeLockedToAlliance)
         if not isMemberOfGroup then
             return
         end
 
-        local campaignData = CAMPAIGN_BROWSER_MANAGER:GetDataByCampaignId(campaignId)
-        local isAboutToAllianceLock = campaignData and ZO_CampaignBrowserDialogs_ShouldShowAllianceLockWarning(campaignData)
-
-        local campaignQueueData = GetCampaignQueueJoinedData(campaignId, isAboutToAllianceLock)
+        local showAllianceLockWarning = willBeLockedToAlliance ~= ALLIANCE_NONE
+        local campaignQueueData = GetCampaignQueueJoinedData(campaignId, showAllianceLockWarning)
 
         local function AcceptCampaignEntry()
             if IsInGamepadPreferredMode() then

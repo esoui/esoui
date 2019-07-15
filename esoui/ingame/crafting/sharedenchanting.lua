@@ -15,7 +15,7 @@ NO_FILTER = -1
 EXTRACTION_FILTER = -2
 
 function ZO_Enchanting_IsSceneShowing()
-    if ENCHANTING:CanShowScene() then
+    if ENCHANTING and ENCHANTING:CanShowScene() then
         return ENCHANTING:IsSceneShowing()
     elseif GAMEPAD_ENCHANTING:CanShowScene() then
         return GAMEPAD_ENCHANTING:IsSceneShowing()
@@ -24,7 +24,7 @@ function ZO_Enchanting_IsSceneShowing()
 end
 
 function ZO_Enchanting_GetVisibleEnchanting()
-    if ENCHANTING:IsSceneShowing() then
+    if ENCHANTING and ENCHANTING:IsSceneShowing() then
         return ENCHANTING
     else
         return GAMEPAD_ENCHANTING
@@ -32,7 +32,7 @@ function ZO_Enchanting_GetVisibleEnchanting()
 end
 
 function ZO_Enchanting_IsInCreationMode()
-    if ENCHANTING:IsSceneShowing() and ENCHANTING:GetEnchantingMode() == ENCHANTING_MODE_CREATION then
+    if ENCHANTING and ENCHANTING:IsSceneShowing() and ENCHANTING:GetEnchantingMode() == ENCHANTING_MODE_CREATION then
         return true
     elseif SCENE_MANAGER:IsShowing("gamepad_enchanting_creation") then
         return true

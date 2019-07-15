@@ -3216,7 +3216,7 @@ SafeAddString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION, "This toke
 SafeAddString(SI_SERVICE_TOOLTIP_HEADER_FORMATTER, "<<1>>", 0)
 SafeAddString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION, "This token allows you to change the name of |cffffff1|r character.", 0)
 SafeAddString(SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE, "You have no <<1>> Tokens available. You can purchase more from the Crown Store.", 0)
-SafeAddString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION, "This token allows you to change the race and appearance of |cffffff1|r character.", 1)
+SafeAddString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION, "This token allows you to change the race and appearance of |cffffff1|r character. You cannot change to a race you do not own. You cannot change to a race outside of your alliance unless you own |cffffff<<1>> (<<2>>)|r.", 1)
 SafeAddString(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, "You have |cffffff<<1>>|r <<2>> <<1[Token/Tokens]>>.", 0)
 SafeAddString(SI_SERVICE_TOOLTIP_TYPE, "Service", 0)
 SafeAddString(SI_SERVICE_USE_SERVICE_KEYBIND, "Use", 0)

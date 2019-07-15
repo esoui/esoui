@@ -858,6 +858,7 @@ function ZO_GuildRanks_Gamepad:InitializeKeybindStrip()
 
                     self:ActivateOptionsList(REFRESH_SCREEN)
                     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+                    PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                 else
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                     self:ActivateRankList(REFRESH_SCREEN)

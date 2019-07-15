@@ -28,6 +28,14 @@ function ZO_GuildWeeklyBids_Shared:Initialize(bidRowTemplate, bidRowTemplateHeig
     end
 end
 
+local function CompareBids(a, b)
+    if a.bidAmount == b.bidAmount then
+        return a.timeSinceBidAtDataSetupS > b.timeSinceBidAtDataSetupS
+    else
+        return a.bidAmount > b.bidAmount
+    end
+end
+
 function ZO_GuildWeeklyBids_Shared:BuildMasterList()
     self.masterList = {}
     for i = 1, GetNumGuildKioskActiveBids(self.guildId) do
@@ -37,9 +45,10 @@ function ZO_GuildWeeklyBids_Shared:BuildMasterList()
             bidAmount = bidAmount,
             kioskName = kioskName,
             displayName = bidderDisplayName,
+            timeSinceBidAtDataSetupS = timeSinceBidS,
         })
     end
-    table.sort(self.masterList, function(a, b) return a.bidAmount > b.bidAmount end)
+    table.sort(self.masterList, CompareBids)
     for i, bid in ipairs(self.masterList) do
         bid.order = i
     end

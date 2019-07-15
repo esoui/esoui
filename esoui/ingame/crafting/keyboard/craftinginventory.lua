@@ -75,7 +75,7 @@ function ZO_CraftingInventory:GetDefaultTemplateSetupFunction()
         inventorySlot.custom = inventorySlot.custom or rowControl:GetNamedChild("Custom")
 
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
-        inventorySlot.name:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, data.name))
+        inventorySlot.name:SetText(data.name)
         inventorySlot.name:SetColor(r, g, b, 1)
 
         if inventorySlot.custom then

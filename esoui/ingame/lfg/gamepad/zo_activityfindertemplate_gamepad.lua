@@ -436,8 +436,11 @@ function ZO_ActivityFinderTemplate_Gamepad:SetNavigationMode(navigationMode)
 
     --Refresh only if it's not already the current list
     if self.navigationMode ~= navigationMode then
-        self.navigationMode = navigationMode
+        --Order is important because SetCurrentList will Deactivate the old list which can make it change selected data to complete its movement (if it is moving). If the mode has changed before
+        --this it will react incorrectly to the selected data changed callback.
         self:SetCurrentList(targetList)
+        self.navigationMode = navigationMode
+        
         self:RefreshHeaderAndView(targetHeader)
     end
 

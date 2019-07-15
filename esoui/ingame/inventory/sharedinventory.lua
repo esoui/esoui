@@ -356,8 +356,7 @@ function ZO_SharedInventoryManager:RefreshBagTraitInformation(bagId)
     if self:HasBagCache(bagId) then
         local bagCache = self:GetBagCache(bagId)
 
-        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-        while slotIndex do
+        for slotIndex in ZO_IterateBagSlots(bagId) do
             local existingData = bagCache[slotIndex]
             if existingData then
                 local newItemTraitInformation = GetItemTraitInformation(bagId, slotIndex)
@@ -368,7 +367,6 @@ function ZO_SharedInventoryManager:RefreshBagTraitInformation(bagId)
                     self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
                 end
             end
-            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
         end
     end
 end
@@ -471,12 +469,9 @@ end
 
 function ZO_SharedInventoryManager:PerformFullUpdateOnBagCache(bagId)
     local bagCache = self:GetBagCache(bagId)
-    ZO_ClearTable(bagCache)
 
-    local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-    while slotIndex do
+    for slotIndex in ZO_IterateBagSlots(bagId) do
         self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex)
-        slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
     end
 
     self:FireCallbacks("FullInventoryUpdate", bagId)
@@ -548,7 +543,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
         return nil, SHARED_INVENTORY_SLOT_RESULT_NO_CHANGE
     end
 
-    local rawNameBefore = slot.rawName;
+    local rawNameBefore = slot.rawName
     slot.rawName = GetItemName(bagId, slotIndex)
     if rawNameBefore ~= slot.rawName then
         slot.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, slot.rawName)

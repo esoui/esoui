@@ -255,7 +255,7 @@ function ZO_Provisioner:InitializeKeybindStripDescriptors()
             end,
 
             visible = function()
-                return self:CanPreviewRecipe(self.recipeTree:GetSelectedData())
+                return self:CanPreviewRecipe(self:GetRecipeData())
             end,
         },
     }
@@ -412,31 +412,27 @@ function ZO_Provisioner:RefreshRecipeList()
     ZO_CheckButton_SetEnableState(self.haveSkillsCheckBox, knowAnyRecipesInTab)
 end
 
+function ZO_Provisioner:GetRecipeData()
+    return self.recipeTree:GetSelectedData()
+end
+
 function ZO_Provisioner:GetSelectedRecipeListIndex()
-    local selectedData = self.recipeTree:GetSelectedData()
-    if selectedData then
-        return selectedData.recipeListIndex
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.recipeListIndex
     end
 end
 
 function ZO_Provisioner:GetSelectedRecipeIndex()
-    local selectedData = self.recipeTree:GetSelectedData()
-    if selectedData then
-        return selectedData.recipeIndex
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.recipeIndex
     end
-end
-
-function ZO_Provisioner:GetRecipeIndices()
-    local selectedData = self.recipeTree:GetSelectedData()
-    if selectedData then
-        return selectedData.recipeListIndex, selectedData.recipeIndex
-    end
-    return 0, 0
 end
 
 function ZO_Provisioner:RefreshRecipeDetails()
-    local selectedData = self.recipeTree:GetSelectedData()
-    if selectedData then
+    local recipeData = self:GetRecipeData()
+    if recipeData then
         if not ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
             self.resultTooltip:SetHidden(false)
         end
@@ -446,7 +442,7 @@ function ZO_Provisioner:RefreshRecipeDetails()
         self.resultTooltip:ClearLines()
         self.resultTooltip:SetProvisionerResultItem(recipeListIndex, recipeIndex)
 
-        local numIngredients = selectedData.numIngredients 
+        local numIngredients = recipeData.numIngredients 
         for ingredientIndex, ingredientSlot in ipairs(self.ingredientRows) do
             if ingredientIndex > numIngredients then
                 ingredientSlot:ClearItem()
@@ -466,10 +462,10 @@ function ZO_Provisioner:RefreshRecipeDetails()
             end
         end
 
-        CRAFTING_RESULTS:SetTooltipAnimationSounds(selectedData.createSound)
+        CRAFTING_RESULTS:SetTooltipAnimationSounds(recipeData.createSound)
 
-        if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() and self:CanPreviewRecipe(selectedData) then
-            self:PreviewRecipe(selectedData)
+        if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() and self:CanPreviewRecipe(recipeData) then
+            self:PreviewRecipe(recipeData)
         end
     else
         self.resultTooltip:SetHidden(true)
@@ -483,32 +479,12 @@ function ZO_Provisioner:RefreshRecipeDetails()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
 end
 
--- Overrides ZO_CraftingCreateScreenBase
-function ZO_Provisioner:IsCraftable()
-    local selectedData = self.recipeTree:GetSelectedData()
-    if selectedData then
-        return selectedData.maxIterationsForIngredients > 0 
-           and self:PassesTradeskillLevelReqs(selectedData.tradeskillsLevelReqs) 
-           and self:PassesQualityLevelReq(selectedData.qualityReq)
-    end
-    return false
-end
-
--- Overrides ZO_CraftingCreateScreenBase
-function ZO_Provisioner:GetAllCraftingParameters(numIterations)
-    local selectedData = self.recipeTree:GetSelectedData()
-    if selectedData then
-        return selectedData.recipeListIndex, selectedData.recipeIndex, numIterations
-    end
-    return 0, 0, numIterations
-end
-
 function ZO_Provisioner:TogglePreviewMode()
     ITEM_PREVIEW_KEYBOARD:ToggleInteractionCameraPreview(FRAME_TARGET_CRAFTING_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, CRAFTING_PREVIEW_OPTIONS_FRAGMENT)
     if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
         self.resultTooltip:SetHidden(true)
         self:SetMultiCraftHidden(true)
-        self:PreviewRecipe(self.recipeTree:GetSelectedData())
+        self:PreviewRecipe(self:GetRecipeData())
     else
         self.resultTooltip:SetHidden(false)
         self:SetMultiCraftHidden(false)

@@ -119,8 +119,16 @@ function ZO_SharedProvisioner:SetDetailsEnabled(enabled)
     -- meant to be overridden
 end
 
-function ZO_SharedProvisioner:GetRecipeIndices()
+function ZO_SharedProvisioner:GetRecipeData()
     -- meant to be overridden
+end
+
+function ZO_SharedProvisioner:GetRecipeIndices()
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.recipeListIndex, recipeData.recipeIndex
+    end
+    return 0, 0
 end
 
 function ZO_SharedProvisioner:PassesTradeskillLevelReqs(tradeskillsReqs)
@@ -183,9 +191,39 @@ function ZO_SharedProvisioner:CanPreviewRecipe(recipeData)
     return false
 end
 
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedProvisioner:IsCraftable()
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.maxIterationsForIngredients > 0 
+           and self:PassesTradeskillLevelReqs(recipeData.tradeskillsLevelReqs) 
+           and self:PassesQualityLevelReq(recipeData.qualityReq)
+    end
+    return false
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedProvisioner:GetAllCraftingParameters(numIterations)
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.recipeListIndex, recipeData.recipeIndex, numIterations
+    end
+    return 0, 0, numIterations
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
 function ZO_SharedProvisioner:ShouldCraftButtonBeEnabled()
     if ZO_CraftingUtils_IsPerformingCraftProcess() then
         return false
+    end
+
+    local recipeData = self:GetRecipeData()
+    if not recipeData then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_NO_RECIPE)
+    elseif not recipeData.passesTradeskillLevelReqs then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_NEED_RECIPE_RANK)
+    elseif not recipeData.passesQualityLevelReq then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_NEED_RECIPE_QUALITY_RANK)
     end
 
     local maxIterations, craftingResult = GetMaxIterationsPossibleForRecipe(self:GetRecipeIndices())

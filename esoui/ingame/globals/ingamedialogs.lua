@@ -1178,10 +1178,6 @@ ESO_Dialogs["CAMPAIGN_ALLIANCE_LOCKED"] =
             local allianceString = ZO_SELECTED_TEXT:Colorize(ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(campaignData.lockedToAlliance))
             local campaignEndCooldownString = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(data.secondsUntilCampaignEnd, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
 
-            if data.isLockActivated then
-                return zo_strformat(SI_ALLIANCE_LOCK_ACTIVATED_MESSAGE, campaignName, allianceString, campaignEndCooldownString)
-            end
-
             local lockedCampaignMessage = zo_strformat(SI_ALLIANCE_LOCKED_DIALOG_CAMPAIGN_MESSAGE, campaignName, allianceString, campaignEndCooldownString)
 
             local lockedReasonFormatString = GetString("SI_CAMPAIGNALLIANCELOCKREASON_DIALOGMESSAGE", campaignData.allianceLockReason)

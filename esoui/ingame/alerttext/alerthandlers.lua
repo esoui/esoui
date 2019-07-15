@@ -52,7 +52,7 @@ local ExperienceReasonToSoundId =
     [PROGRESS_REASON_SCRIPTED_EVENT] = SOUNDS.SCRIPTED_EVENT_COMPLETION,
 }
 
-local TrialEventMappings = 
+local TrialEventMappings =
 {
     [TRIAL_RESTRICTION_CANNOT_USE_GUILDS] = true,
 }
@@ -111,18 +111,18 @@ local AlertHandlers = {
             end
             local message = GetString("SI_ACTIONRESULT", result)
 
-            if(log and message ~= "") then
+            if log and message ~= "" then
                 return ERROR, zo_strformat(message), soundId
-            elseif(soundId ~= nil) then
+            elseif soundId ~= nil then
                 return ERROR, nil, soundId
             end
         end
     end,
 
     [EVENT_EXPERIENCE_UPDATE] = function(unitTag, exp, maxExp, reason)
-        if(unitTag == "player") then
+        if unitTag == "player" then
             local soundId = ExperienceReasonToSoundId[reason]
-            if(soundId) then
+            if soundId then
                 return ALERT, nil, soundId
             end
         end
@@ -155,8 +155,8 @@ local AlertHandlers = {
     end,
 
     [EVENT_SOCIAL_ERROR] = function(error)
-        if(error ~= SOCIAL_RESULT_NO_ERROR and not IsSocialErrorIgnoreResponse(error)) then
-            if(ShouldShowSocialErrorInAlert(error)) then
+        if error ~= SOCIAL_RESULT_NO_ERROR and not IsSocialErrorIgnoreResponse(error) then
+            if ShouldShowSocialErrorInAlert(error) then
                 return ERROR, zo_strformat(GetString("SI_SOCIALACTIONRESULT", error)), SOUNDS.GENERAL_ALERT_ERROR
             end
         end
@@ -343,7 +343,7 @@ local AlertHandlers = {
     [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote)
         local message = nil
         local sound = nil
-        
+
         local primaryNameToShow = ZO_GetPrimaryPlayerName(displayName, characterName)
         local secondaryNameToShow = ZO_GetSecondaryPlayerName(displayName, characterName)
         local hasValidNames = primaryNameToShow ~= "" and secondaryNameToShow ~= ""
@@ -459,7 +459,7 @@ local AlertHandlers = {
     end,
 
     [EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperience, currentExperience, rank, previousPoints, currentPoints)
-        if(INTERACT_WINDOW:IsShowingInteraction()) then
+        if INTERACT_WINDOW:IsShowingInteraction() then
             return ALERT, zo_strformat(SI_SUBZONE_NOTIFICATION_DISCOVER_WHILE_IN_CONVERSATION, subzoneName), SOUNDS.OBJECTIVE_DISCOVERED
         end
     end,
@@ -514,15 +514,15 @@ local AlertHandlers = {
     end,
 
     [EVENT_GUILD_SELF_LEFT_GUILD] = function(guildId, guildName)
-        if(ShouldDisplaySelfKickedFromGuildAlert(guildId)) then
+        if ShouldDisplaySelfKickedFromGuildAlert(guildId) then
             return ALERT, zo_strformat(SI_GUILD_SELF_KICKED_FROM_GUILD, guildName), SOUNDS.GENERAL_ALERT_ERROR
         end
-        
+
         return ALERT, nil, SOUNDS.GUILD_SELF_LEFT
     end,
 
     [EVENT_PLEDGE_OF_MARA_RESULT] = function(result, characterName, displayName)
-        if(result ~= PLEDGE_OF_MARA_RESULT_PLEDGED and result ~= PLEDGE_OF_MARA_RESULT_BEGIN_PLEDGE) then
+        if result ~= PLEDGE_OF_MARA_RESULT_PLEDGED and result ~= PLEDGE_OF_MARA_RESULT_BEGIN_PLEDGE then
             local userFacingDisplayName = ZO_GetPrimaryPlayerName(displayName, characterName)
             return ERROR, zo_strformat(GetString("SI_PLEDGEOFMARARESULT", result), userFacingDisplayName), SOUNDS.GENERAL_ALERT_ERROR
         end
@@ -560,9 +560,9 @@ local AlertHandlers = {
     end,
 
     [EVENT_ZONE_CHANGED] = function(zoneName, subzoneName)
-         if(subzoneName ~= "") then
+         if subzoneName ~= "" then
             return ALERT, zo_strformat(SI_ALERTTEXT_LOCATION_FORMAT, subzoneName)
-        elseif(zoneName ~= "") then
+        elseif zoneName ~= "" then
             return ALERT, zo_strformat(SI_ALERTTEXT_LOCATION_FORMAT, zoneName)
         end
     end,
@@ -576,15 +576,15 @@ local AlertHandlers = {
     end,
 
     [EVENT_LOGOUT_DISALLOWED] = function(quitGame)
-        if(not quitGame) then
+        if not quitGame then
             return ERROR, GetString(SI_LOGOUT_DISALLOWED), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 
     [EVENT_JUSTICE_BEING_ARRESTED] = function(quitGame)
         local logOutDialogOpen = ZO_Dialogs_FindDialog("LOG_OUT")
-        ZO_Dialogs_ReleaseAllDialogs(true)   
-        if(logOutDialogOpen or quitGame) then
+        ZO_Dialogs_ReleaseAllDialogs(true)
+        if logOutDialogOpen or quitGame then
             return ERROR, GetString(SI_JUSTICE_LOGOUT_DISALLOWED), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
@@ -683,6 +683,13 @@ local AlertHandlers = {
         if responseString ~= "" then
             return ERROR, responseString, SOUNDS.GENERAL_ALERT_ERROR
         end
+    end,
+
+    [EVENT_CAMPAIGN_ALLIANCE_LOCK_ACTIVATED] = function(campaignId, wasLockedToAlliance)
+        local campaignName = GetCampaignName(campaignId)
+        local allianceString = ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(wasLockedToAlliance)
+
+        return ALERT, zo_strformat(SI_ALLIANCE_LOCK_ACTIVATED_MESSAGE, campaignName, allianceString)
     end,
 
     [EVENT_JUSTICE_BOUNTY_PAYOFF_AMOUNT_UPDATED] = function(oldBounty, newBounty, isInitialize)

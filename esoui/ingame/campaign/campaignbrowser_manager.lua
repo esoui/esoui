@@ -44,8 +44,9 @@ function ZO_CampaignBrowser_Manager:Initialize()
 
     local function OnCampaignAllianceLockActivated(_, campaignId, lockedToAlliance)
         local campaignData = self:GetDataByCampaignId(campaignId)
-        campaignData.lockedToAlliance = lockedToAlliance
-        ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_ALLIANCE_LOCKED", { campaignData = campaignData, isLockActivated = true } )
+        if campaignData then
+            campaignData.lockedToAlliance = lockedToAlliance
+        end
     end
     EVENT_MANAGER:RegisterForEvent("ZO_CampaignBrowserManager", EVENT_CAMPAIGN_ALLIANCE_LOCK_ACTIVATED, OnCampaignAllianceLockActivated)
 end
