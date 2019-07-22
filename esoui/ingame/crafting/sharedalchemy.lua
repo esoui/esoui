@@ -513,16 +513,16 @@ function ZO_SharedAlchemy:FindReagentSlotIndexBySlotControl(slotControl)
 end
 
 --
--- ZO_AlchemyReagentSlot
+-- ZO_AlchemySlot
 --
 
-ZO_AlchemyReagentSlot = ZO_CraftingSlotBase:Subclass()
+ZO_AlchemySlot = ZO_CraftingSlotBase:Subclass()
 
-function ZO_AlchemyReagentSlot:New(...)
+function ZO_AlchemySlot:New(...)
     return ZO_CraftingSlotBase.New(self, ...)
 end
 
-function ZO_AlchemyReagentSlot:Initialize(owner, control, emptyTexture, placeSound, removeSound, usabilityPredicate, craftingInventory, emptySlotIcon)
+function ZO_AlchemySlot:Initialize(owner, control, emptyTexture, placeSound, removeSound, usabilityPredicate, craftingInventory, emptySlotIcon)
     ZO_CraftingSlotBase.Initialize(self, owner, control, SLOT_TYPE_PENDING_CRAFTING_COMPONENT, emptyTexture, craftingInventory, emptySlotIcon)
 
     self.createsLevelLabel = self.control:GetNamedChild("CreatesLevel")
@@ -536,11 +536,11 @@ function ZO_AlchemyReagentSlot:Initialize(owner, control, emptyTexture, placeSou
     self:UpdateTraits()
 end
 
-function ZO_AlchemyReagentSlot:ShouldBeVisible()
+function ZO_AlchemySlot:ShouldBeVisible()
     return self:MeetsUsabilityRequirement()
 end
 
-function ZO_AlchemyReagentSlot:ShowDropCallout(isCorrectType)
+function ZO_AlchemySlot:ShowDropCallout(isCorrectType)
     self.dropCallout:SetHidden(false)
 
     if isCorrectType then
@@ -550,7 +550,7 @@ function ZO_AlchemyReagentSlot:ShowDropCallout(isCorrectType)
     end
 end
 
-function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUsabilityRequirement)
+function ZO_AlchemySlot:SetItem(bagId, slotIndex, suppressSound, ignoreUsabilityRequirement)
     if not ignoreUsabilityRequirement then
         if not self:MeetsUsabilityRequirement() then
             return
@@ -560,7 +560,21 @@ function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUs
     self:SetupItem(bagId, slotIndex)
 
     if self:HasItem() then
+        if not suppressSound then
+            PlaySound(self.placeSound)
+        end
+    else
+        if not suppressSound then
+            PlaySound(self.removeSound)
+        end
+    end
+end
+
+function ZO_AlchemySlot:Refresh()
+    ZO_CraftingSlotBase.Refresh(self)
+    if self:HasItem() then
         if self.createsLevelLabel then
+            local bagId, slotIndex = self:GetBagAndSlot()
             local craftingSubItemType, _, resultingItemLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(bagId, slotIndex))
             local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
 
@@ -571,26 +585,16 @@ function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUs
             end
             self.createsLevelLabel:SetHidden(false)
         end
-
-        if not suppressSound then
-            PlaySound(self.placeSound)
-        end
-
         self:ShowSlotTraits(true)
     else
         if self.createsLevelLabel then
             self.createsLevelLabel:SetHidden(true)
         end
-
-        if not suppressSound then
-            PlaySound(self.removeSound)
-        end
-
         self:ShowSlotTraits(false)
     end
 end
 
-function ZO_AlchemyReagentSlot:UpdateTraits()
+function ZO_AlchemySlot:UpdateTraits()
     if self:HasItem() then
         self:SetTraits(GetAlchemyItemTraits(self:GetBagAndSlot()))
     else
@@ -598,11 +602,11 @@ function ZO_AlchemyReagentSlot:UpdateTraits()
     end
 end
 
-function ZO_AlchemyReagentSlot:GetUnknownTraitTexture()
+function ZO_AlchemySlot:GetUnknownTraitTexture()
     return  "EsoUI/Art/Crafting/crafting_alchemy_trait_slot.dds"
 end
 
-function ZO_AlchemyReagentSlot:SetTraits(...)
+function ZO_AlchemySlot:SetTraits(...)
     if self.control.traits then
         local unknownTraitTexture = self:GetUnknownTraitTexture()
         for i, traitTexture in ipairs(self.control.traits) do
@@ -613,7 +617,7 @@ function ZO_AlchemyReagentSlot:SetTraits(...)
     end
 end
 
-function ZO_AlchemyReagentSlot:ClearTraits()
+function ZO_AlchemySlot:ClearTraits()
     if self.control.traits then
         local unknownTraitTexture = self:GetUnknownTraitTexture()
         for i, traitTexture in ipairs(self.control.traits) do
@@ -624,11 +628,11 @@ function ZO_AlchemyReagentSlot:ClearTraits()
     end
 end
 
-function ZO_AlchemyReagentSlot:MeetsUsabilityRequirement()
+function ZO_AlchemySlot:MeetsUsabilityRequirement()
     return self.usabilityPredicate == nil or self.usabilityPredicate()
 end
 
-function ZO_AlchemyReagentSlot:ShowSlotTraits(showTraits)
+function ZO_AlchemySlot:ShowSlotTraits(showTraits)
     if self.emptySlotIcon and self.control.traits then
         for i, trait in ipairs(self.control.traits) do
             trait:SetHidden(not showTraits)

@@ -565,13 +565,11 @@ function ZO_SharedEnchantExtractionSlot:Refresh()
 
     if self:HasOneItem() then
         local bagId, slotIndex = self:GetItemBagAndSlot(1)
-        self.nameLabel:SetHidden(false)
         self.nameLabel:SetText(zo_strformat(ZO_GetSpecializedItemTypeTextBySlot(bagId, slotIndex)))
     elseif self:HasMultipleItems() then
-        self.nameLabel:SetHidden(false)
         self.nameLabel:SetText(zo_strformat(SI_CRAFTING_SLOT_MULTIPLE_SELECTED, ZO_CommaDelimitNumber(self:GetStackCount())))
     else
-        self.nameLabel:SetHidden(true)
+        self.nameLabel:SetText(GetString(SI_ENCHANTING_SELECT_ITEMS_TO_EXTRACT))
     end
 end
 

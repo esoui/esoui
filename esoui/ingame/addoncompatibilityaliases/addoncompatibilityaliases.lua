@@ -739,3 +739,9 @@ end
 function CanItemBeSmithingExtractedOrRefined(bagId, slotIndex, craftingType)
     return CanItemBeRefined(bagId, slotIndex, craftingType) or CanItemBeDeconstructed(bagId, slotIndex, craftingType)
 end
+
+-- The only information you need to determine if a trait is known is the pattern
+function IsSmithingTraitKnownForResult(patternIndex, materialIndex, materialQuantity, styleId, traitIndex)
+    local traitType = traitIndex - 1 -- traitIndex is just the trait type offset by one so it behaves like a lua index, let's just manually convert
+    return IsSmithingTraitKnownForPattern(patternIndex, traitType)
+end

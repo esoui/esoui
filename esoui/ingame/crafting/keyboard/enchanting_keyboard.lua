@@ -31,20 +31,8 @@ function ZO_Enchanting:InitializeEnchantingScenes()
     ENCHANTING_SCENE = ZO_InteractScene:New(self.mainSceneName, SCENE_MANAGER, ENCHANTING_STATION_INTERACTION)
     ENCHANTING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-
-            if self.enchantingMode then
-                local oldEnchantMode = self.enchantingMode
-                self.enchantingMode = nil
-                self:SetEnchantingMode(oldEnchantMode)
-            else
-                ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
-            end
+            self:OnModeUpdated()
         elseif newState == SCENE_HIDDEN then
-            if self.enchantingMode ~= ENCHANTING_MODE_CREATION then
-                self:ClearSelections()
-            end
-
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 
@@ -66,7 +54,11 @@ function ZO_Enchanting:InitializeModes()
             pressed = pressed,
             highlight = highlight,
             disabled = disabled,
-            callback = function(tabData) self.modeBarLabel:SetText(GetString(name)) self:SetEnchantingMode(mode) end,
+            callback = function(tabData)
+                self.modeBarLabel:SetText(GetString(name))
+                self.enchantingMode = mode
+                self:OnModeUpdated()
+            end,
         }
     end
 
@@ -101,6 +93,7 @@ function ZO_Enchanting:InitializeModes()
         GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
     ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 
+    ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
 end
 
@@ -279,25 +272,23 @@ function ZO_Enchanting:InitializeKeybindStripDescriptors()
 end
 
 function ZO_Enchanting:ResetSelectedTab()
+    ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
     self:ClearSelections()
-    self.enchantingMode = nil
 end
 
 function ZO_Enchanting:CanShowScene()
     return not IsInGamepadPreferredMode()
 end
 
-function ZO_Enchanting:SetEnchantingMode(enchantingMode)
-    if self.enchantingMode ~= enchantingMode then
-        if self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
-            self:ClearSelections()
-        end
-
-        local oldEnchantingMode = self.enchantingMode
-        self.enchantingMode = enchantingMode
-
+function ZO_Enchanting:OnModeUpdated()
+    if self:IsSceneShowing() then
+        local enchantingMode = self.enchantingMode
         self.runeSlotContainer:SetHidden(enchantingMode ~= ENCHANTING_MODE_CREATION)
         self.extractionSlotContainer:SetHidden(enchantingMode ~= ENCHANTING_MODE_EXTRACTION)
+
+        if enchantingMode == ENCHANTING_MODE_EXTRACTION then
+            self:ClearSelections()
+        end
 
         if enchantingMode == ENCHANTING_MODE_RECIPES then
             --Make sure we hide the tooltip when going to the Provisioner Scene.
@@ -307,10 +298,8 @@ function ZO_Enchanting:SetEnchantingMode(enchantingMode)
             PROVISIONER:EmbedInCraftingScene()
             self.inventoryControl:SetHidden(true)
         else
-            if oldEnchantingMode == ENCHANTING_MODE_RECIPES then
-                PROVISIONER:RemoveFromCraftingScene()
-                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-            end
+            PROVISIONER:RemoveFromCraftingScene()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self.inventoryControl:SetHidden(false)
             self.inventory:ChangeMode(enchantingMode)
             ClearCursor()
@@ -457,9 +446,10 @@ end
 
 function ZO_EnchantingInventory:Refresh(data)
     local filterType
-    if self.owner:GetEnchantingMode() == ENCHANTING_MODE_CREATION then
+    local enchantingMode = self.owner:GetEnchantingMode()
+    if enchantingMode == ENCHANTING_MODE_CREATION then
         filterType = self.filterType
-    else
+    elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
         filterType = EXTRACTION_FILTER
     end
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(IsEnchantingItem, DoesEnchantingItemPassFilter, filterType, data)

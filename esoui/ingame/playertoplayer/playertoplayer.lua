@@ -17,6 +17,7 @@ local INTERACT_TYPE_CLAIM_LEVEL_UP_REWARDS = 14
 local INTERACT_TYPE_GIFT_RECEIVED = 15
 local INTERACT_TYPE_TRACK_ZONE_STORY = 16
 local INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED = 17
+local INTERACT_TYPE_CAMPAIGN_LOCK_PENDING = 18
 
 local TIMED_PROMPTS =
 {
@@ -24,6 +25,7 @@ local TIMED_PROMPTS =
     [INTERACT_TYPE_CAMPAIGN_QUEUE] = true,
     [INTERACT_TYPE_WORLD_EVENT_INVITE] = true,
     [INTERACT_TYPE_GROUP_ELECTION] = true,
+    [INTERACT_TYPE_CAMPAIGN_LOCK_PENDING] = true,
     -- Campaign Queue is the only timed prompt without a fixed expiration time; instead it's manually removed when the queue it's a part of pops.
     -- This means it does not define expiresAtS or expirationCallback, and it refreshes every second without necessarily needing to; it doesn't show a timer.
     [INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED] = true,
@@ -73,7 +75,7 @@ do
 
         self.container = control:GetNamedChild("PromptContainer")
         self.targetLabel = self.container:GetNamedChild("Target")
-        
+
         self.actionArea = self.container:GetNamedChild("ActionArea")
         self.actionKeybindButton = self.actionArea:GetNamedChild("ActionKeybindButton")
         self.additionalInfo = self.actionArea:GetNamedChild("AdditionalInfo")
@@ -442,6 +444,45 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED, campaignId, campaignId)
     end
 
+    local function OnCampaignLockPending(_, campaignId, alliance, timeLeftS)
+        local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", GetCampaignRulesetType(GetCampaignRulesetId(campaignId)))
+        local colorizedCampaignName = ZO_SELECTED_TEXT:Colorize(GetCampaignName(campaignId))
+        local allianceString = ZO_SELECTED_TEXT:Colorize(ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(alliance))
+
+        local function AcceptCallback()
+            MarkAllianceLockPendingNotificationSeen()
+        end
+
+        local function NotificationExpiredCallback()
+            self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_LOCK_PENDING)
+            MarkAllianceLockPendingNotificationSeen()
+        end
+
+        --Campaign is super hacky and uses the campaignId in the name field. It works because it only uses that field to do comparisons for removing the entry.
+        local NO_TARGET_LABEL = nil
+        local NO_DECLINE_CALLBACK = nil
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_LOCK_PENDING)
+        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_CAMPAIGN_LOCK_PENDING, campaignId, campaignId, NO_TARGET_LABEL, AcceptCallback, NO_DECLINE_CALLBACK)
+
+        promptData.messageFormat = GetString(SI_CAMPAIGN_ALLIANCE_LOCK_PENDING_MESSAGE)
+        -- the time left is added automatically to messageParams in position <<3>>
+        promptData.messageParams = {colorizedCampaignName, allianceString}
+        promptData.dialogTitle = GetString(SI_CAMPAIGN_ALLIANCE_LOCK_PENDING_TITLE)
+        promptData.expiresAtS = GetFrameTimeSeconds() + timeLeftS
+        promptData.expirationCallback = NotificationExpiredCallback
+        promptData.acceptText = GetString(SI_CAMPAIGN_ALLIANCE_LOCK_PENDING_DISMISS_BUTTON)
+    end
+
+    local function OnCampaignLockActivated(_, campaignId)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_LOCK_PENDING)
+        MarkAllianceLockPendingNotificationSeen()
+    end
+
+    local function OnCurrentCampaignChanged(_)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE_CAMPAIGN_LOCK_PENDING)
+        MarkAllianceLockPendingNotificationSeen()
+    end
+
     local function OnScriptedWorldEventInvite(eventCode, eventId, eventName, inviterName, questName)
         PlaySound(SOUNDS.SCRIPTED_WORLD_EVENT_INVITED)
         self:RemoveScriptedWorldEventFromIncomingQueue(eventId)
@@ -554,6 +595,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED, OnCampaignQueueStateChanged)
     self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_JOINED, OnCampaignQueueJoined)
     self.control:RegisterForEvent(EVENT_CAMPAIGN_QUEUE_LEFT, OnCampaignQueueLeft)
+    self.control:RegisterForEvent(EVENT_CAMPAIGN_ALLIANCE_LOCK_PENDING, OnCampaignLockPending)
+    self.control:RegisterForEvent(EVENT_CAMPAIGN_ALLIANCE_LOCK_ACTIVATED, OnCampaignLockActivated)
+    self.control:RegisterForEvent(EVENT_CURRENT_CAMPAIGN_CHANGED, OnCurrentCampaignChanged)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE, OnScriptedWorldEventInvite)
     self.control:RegisterForEvent(EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED, OnScriptedWorldEventInviteRemoved)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
@@ -569,12 +613,12 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         local function DeferDecisionCallback()
             self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
         end
-        
+
         local dungeonName = GetActivityName(activityId)
-        
+
         PlaySound(SOUNDS.LFG_FIND_REPLACEMENT)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT)
-        
+
         local text = zo_strformat(SI_LFG_FIND_REPLACEMENT_TEXT, dungeonName)
         local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_LFG_FIND_REPLACEMENT, nil, nil, text, AcceptActivityFindReplacementNotification, DeclineActivityFindReplacementNotification, DeferDecisionCallback)
         promptData.acceptText = GetString(SI_LFG_FIND_REPLACEMENT_ACCEPT)
@@ -617,10 +661,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             local secondaryName = ZO_GetSecondaryPlayerNameFromUnitTag(targetUnitTag)
             messageParams = { primaryName, secondaryName }
         end
-        
+
         PlaySound(SOUNDS.NEW_TIMED_NOTIFICATION)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_GROUP_ELECTION)
-        
+
         local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_GROUP_ELECTION, nil, nil, nil, AcceptCallback, DeclineCallback, DeferDecisionCallback)
         promptData.acceptText = GetString(SI_YES)
         promptData.declineText = GetString(SI_NO)
@@ -645,7 +689,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY)
 
         local numCompletedActivities, totalActivities, numUnblockedActivities, _, progressText = ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType)
-        
+
         if numCompletedActivities == totalActivities and not CanZoneStoryContinueTrackingActivities(zoneId) then
             return
         end
@@ -659,9 +703,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         local function DeclineCallback()
             self:RemoveFromIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY)
         end
-        
+
         PlaySound(SOUNDS.NEW_TIMED_NOTIFICATION)
-        
+
         local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY, nil, nil, nil, AcceptCallback, DeclineCallback)
         promptData.acceptText = GetString(SI_ZONE_STORY_CONTINUE_EXPLORING_ACTION)
         promptData.declineText = GetString(SI_DIALOG_DISMISS)
@@ -738,6 +782,11 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnLevelUpRewardUpdated()
         end
 
+        if HasAllianceLockPendingNotification() then
+            local NO_EVENT_ID = nil
+            OnCampaignLockPending(NO_EVENT_ID, GetAllianceLockPendingNotificationInfo())
+        end
+
         OnGiftsUpdated()
     end
 
@@ -767,7 +816,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     self.control:RegisterForEvent(EVENT_GAME_CAMERA_UI_MODE_CHANGED, OnGameCameraUIModeChanged)
 
-    self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() 
+    self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         self:StopInteraction()
     end)
 end
@@ -831,29 +880,31 @@ function ZO_PlayerToPlayer:ShowGamepadResponseMenu(data)
     local menu = self:GetRadialMenu()
 
     menu:Clear()
-    if data.deferDecisionCallback then
+    if self:ShouldShowDeferDecision(data) then
         local deferDecisionText = data.deferDecisionText or GetString(SI_GAMEPAD_NOTIFICATIONS_DEFER_OPTION)
-        menu:AddEntry( deferDecisionText, 
+        menu:AddEntry( deferDecisionText,
                         "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
                         "EsoUI/Art/HUD/Gamepad/gp_radialIcon_defer_down.dds",
                         function()
                             NotificationDeferred(data)
                         end)
     end
-    
-    local acceptText = data.acceptText or GetString(SI_GAMEPAD_NOTIFICATIONS_ACCEPT_OPTION)
-    menu:AddEntry( acceptText,
-                    "EsoUI/Art/HUD/Gamepad/gp_radialIcon_accept_down.dds", 
-                    "EsoUI/Art/HUD/Gamepad/gp_radialIcon_accept_down.dds",
-                    function()
-                        NotificationAccepted(data)
-                    end)
 
-    if data.declineCallback then
+    if self:ShouldShowAccept(data) then
+        local acceptText = data.acceptText or GetString(SI_GAMEPAD_NOTIFICATIONS_ACCEPT_OPTION)
+        menu:AddEntry( acceptText,
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_accept_down.dds",
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_accept_down.dds",
+                        function()
+                            NotificationAccepted(data)
+                        end)
+    end
+
+    if self:ShouldShowDecline(data) then
         local declineText = data.declineText or GetString(SI_GAMEPAD_NOTIFICATIONS_DECLINE_OPTION)
         menu:AddEntry( declineText,
-                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds", 
-                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds", 
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
+                        "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
                         function()
                             NotificationDeclined(data)
                         end)
@@ -880,7 +931,7 @@ do
             return -1
         end
     end
-    
+
     function ZO_PlayerToPlayer:AddIncomingEntry(incomingType, targetLabel, displayName, characterName)
         local formattedInviterName = nil
         if displayName and characterName then
@@ -1072,8 +1123,14 @@ function ZO_PlayerToPlayer:TryDisplayingIncomingRequests()
         local incomingEntryToRespondTo = self.incomingQueue[1]
         if ShouldUseGamepadResponseMenu(incomingEntryToRespondTo) then
             --if there is only one option just accept it instead of showing a radial with one option
-            if not incomingEntryToRespondTo.declineCallback and not incomingEntryToRespondTo.deferDecisionCallback then
-                NotificationAccepted(incomingEntryToRespondTo)
+            if self:ShouldShowExactlyOneOption(incomingEntryToRespondTo) then
+                if self:ShouldShowAccept(incomingEntryToRespondTo) then
+                    NotificationAccepted(incomingEntryToRespondTo)
+                elseif self:ShouldShowDecline(incomingEntryToRespondTo) then
+                    NotificationDeclined(incomingEntryToRespondTo)
+                elseif self:ShouldShowDeferDecision(incomingEntryToRespondTo) then
+                    NotificationDeferred(incomingEntryToRespondTo)
+                end
             else
                 LockCameraRotation(true)
                 RETICLE:RequestHidden(true)
@@ -1109,7 +1166,7 @@ function ZO_PlayerToPlayer:StartInteraction()
                     end
                 else
                     local isIgnored = IsUnitIgnored(P2P_UNIT_TAG)
-                    
+
                     self.targetLabel:SetHidden(true)
                     self:ShowPlayerInteractMenu(isIgnored)
                     LockCameraRotation(true)
@@ -1124,7 +1181,7 @@ end
 
 function ZO_PlayerToPlayer:StopInteraction()
     self.targetLabel:SetHidden(false)
-    
+
     if self.isInteracting then
         self.isInteracting = false
         RETICLE:RequestHidden(false)
@@ -1156,6 +1213,10 @@ function ZO_PlayerToPlayer:StopInteraction()
     end
 end
 
+function ZO_PlayerToPlayer:ShouldShowAccept(incomingEntry)
+    return incomingEntry.acceptCallback ~= nil
+end
+
 function ZO_PlayerToPlayer:Accept(incomingEntry)
     local index = self:GetIndexFromIncomingQueue(incomingEntry)
     if index then
@@ -1168,6 +1229,10 @@ function ZO_PlayerToPlayer:Accept(incomingEntry)
     end
 end
 
+function ZO_PlayerToPlayer:ShouldShowDecline(incomingEntry)
+    return incomingEntry.declineCallback ~= nil
+end
+
 function ZO_PlayerToPlayer:Decline(incomingEntry)
     local index = self:GetIndexFromIncomingQueue(incomingEntry)
     if index then
@@ -1177,6 +1242,31 @@ function ZO_PlayerToPlayer:Decline(incomingEntry)
         NotificationDeclined(incomingEntry)
     else
         self:OnPromptDeclined()
+    end
+end
+
+function ZO_PlayerToPlayer:ShouldShowDeferDecision(incomingEntry)
+    return incomingEntry.deferDecisionCallback ~= nil
+end
+
+do
+    local function DoesOnlyOneExist(...)
+        local oneExists = false
+        for i = 1, select('#', ...) do
+            local value = select(i, ...)
+            if value then
+                if oneExists then
+                    return false
+                else
+                    oneExists = true
+                end
+            end
+        end
+        return oneExists
+    end
+
+    function ZO_PlayerToPlayer:ShouldShowExactlyOneOption(incomingEntry)
+        return DoesOnlyOneExist(incomingEntry.acceptCallback, incomingEntry.declineCallback, incomingEntry.deferDecisionCallback)
     end
 end
 
@@ -1229,7 +1319,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
         self.hasResurrectPending = DoesUnitHaveResurrectPending(P2P_UNIT_TAG)
         if self.isBeingResurrected or self.hasResurrectPending then
             self.pendingResurrectInfo:SetHidden(false)
-            if(self.isBeingResurrected) then
+            if self.isBeingResurrected then
                 self.pendingResurrectInfo:SetText(GetString(SI_PLAYER_TO_PLAYER_RESURRECT_BEING_RESURRECTED))
             else
                 self.pendingResurrectInfo:SetText(GetString(SI_PLAYER_TO_PLAYER_RESURRECT_HAS_RESURRECT_PENDING))
@@ -1247,7 +1337,7 @@ function ZO_PlayerToPlayer:TryShowingResurrectLabel()
             self.actionKeybindButton:SetEnabled(self.hasRequiredSoulGem and not self.failedRaidRevives)
 
             local finalText
-            if(ZO_Death_DoesReviveCostRaidLife()) then
+            if ZO_Death_DoesReviveCostRaidLife() then
                 finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_LIFE_FAILED, coloredFilledText, coloredSoulGemIconMarkup, RAID_LIFE_ICON_MARKUP)
             else
                 finalText = zo_strformat(soulGemSuccess and SI_PLAYER_TO_PLAYER_RESURRECT_GEM or SI_PLAYER_TO_PLAYER_RESURRECT_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup)
@@ -1337,15 +1427,26 @@ function ZO_PlayerToPlayer:TryShowingResponseLabel()
 
             if ShouldUseGamepadResponseMenu(incomingEntry) then
                 if not self.showingGamepadResponseMenu then
-                    self:ShowResponseActionKeybind(GetString(SI_GAMEPAD_PLAYER_TO_PLAYER_ACTION_RESPOND))
+                    local responseString = GetString(SI_GAMEPAD_PLAYER_TO_PLAYER_ACTION_RESPOND)
+                    if self:ShouldShowExactlyOneOption(incomingEntry) then
+                        if self:ShouldShowAccept(incomingEntry) then
+                            responseString = incomingEntry.acceptText
+                        elseif self:ShouldShowDecline(incomingEntry) then
+                            responseString = incomingEntry.declineText
+                        elseif self:ShouldShowDeferDecision(incomingEntry) then
+                            responseString = incomingEntry.deferDecisionText
+                        end
+                    end
+
+                    self:ShowResponseActionKeybind(responseString)
                 end
             else
-                if incomingEntry.acceptCallback then
+                if self:ShouldShowAccept(incomingEntry) then
                     local acceptText = incomingEntry.acceptText or GetString(SI_DIALOG_ACCEPT)
                     self.promptKeybindButton1:SetText(acceptText)
                     self.promptKeybindButton1.shouldHide = false
                 end
-                if incomingEntry.declineCallback then
+                if self:ShouldShowDecline(incomingEntry) then
                     local declineText = incomingEntry.declineText or GetString(SI_DIALOG_DECLINE)
                     self.promptKeybindButton2:SetText(declineText)
                     self.promptKeybindButton2.shouldHide = false
@@ -1405,8 +1506,12 @@ function ZO_PlayerToPlayer:OnUpdate()
 
         local hideSelf, hideTargetLabel
         local isReticleTargetInteractable = self:IsReticleTargetInteractable()
-        -- TryShowingResurrectLabel has to be checked first to set the state of the pendingResurrectInfo label
-        if self:TryShowingResurrectLabel() and isReticleTargetInteractable then
+        if ZO_Dialogs_IsShowing("PTP_TIMED_RESPONSE_PROMPT") then
+            -- Dialogs are prioritized above interact labels, so we don't accidentally show the same p2p notification that a dialog is currently showing
+            hideSelf = true
+            hideTargetLabel = true
+        elseif self:TryShowingResurrectLabel() and isReticleTargetInteractable then
+            -- TryShowingResurrectLabel has to be checked first to set the state of the pendingResurrectInfo label
             hideSelf = false
             hideTargetLabel = false
         elseif not self.isInteracting and (self.showingGamepadResponseMenu or not IsUnitInCombat("player")) and self:TryShowingResponseLabel() then
@@ -1422,7 +1527,7 @@ function ZO_PlayerToPlayer:OnUpdate()
             hideSelf = true
             hideTargetLabel = true
         end
-        
+
         -- These must be called after we've determined what state they should be in
         -- Because if we simply hide and re-show them, the Chroma behavior will not function correctly
         self:SetHidden(hideSelf)
@@ -1433,14 +1538,14 @@ function ZO_PlayerToPlayer:OnUpdate()
         local isNotificationLayerShown = IsActionLayerActiveByName(notificationsKeybindLayerName)
 
         if self.shouldShowNotificationKeybindLayer ~= isNotificationLayerShown then
-            if(self.shouldShowNotificationKeybindLayer) then
+            if self.shouldShowNotificationKeybindLayer then
                 PushActionLayerByName(notificationsKeybindLayerName)
             else
                 RemoveActionLayerByName(notificationsKeybindLayerName)
             end
         end
     else
-        if(IsActionLayerActiveByName(notificationsKeybindLayerName)) then
+        if IsActionLayerActiveByName(notificationsKeybindLayerName) then
             RemoveActionLayerByName(notificationsKeybindLayerName)
         end
     end
@@ -1529,7 +1634,7 @@ local GAMEPAD_INTERACT_ICONS =
     {
         enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
         enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_down.dds",
-        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds", 
+        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
         disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_addFriend_disabled.dds",
     },
     [SI_CHAT_PLAYER_CONTEXT_REPORT] =
@@ -1567,7 +1672,7 @@ end
 
 function ZO_PlayerToPlayer:AddMenuEntry(text, icons, enabled, selectedFunction, errorReason)
     local normalIcon = enabled and icons.enabledNormal or icons.disabledNormal
-    local selectedIcon = enabled and icons.enabledSelected or icons.disabledSelected 
+    local selectedIcon = enabled and icons.enabledSelected or icons.disabledSelected
     self:GetRadialMenu():AddEntry(text, normalIcon, selectedIcon, selectedFunction, errorReason)
 end
 
@@ -1620,7 +1725,7 @@ do
             else
                 groupKickFunction = AlertGroupDisabled
             end
-            
+
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_REMOVE_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_REMOVE_GROUP], groupKickEnabled, groupKickFunction)
         else
             local groupInviteEnabled = ENABLED_IF_NOT_IGNORED and isGroupModificationAvailable and isSoloOrLeader
@@ -1641,7 +1746,7 @@ do
 
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_GROUP), platformIcons[SI_PLAYER_TO_PLAYER_ADD_GROUP], groupInviteEnabled, groupInviteFunction)
         end
-        
+
         --Friend--
         if IsFriend(currentTargetCharacterNameRaw) then
             local function AlreadyFriendsWarning() ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_ALREADY_FRIEND) end
@@ -1663,7 +1768,7 @@ do
             ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(nameToReport)
         end
         self:AddMenuEntry(GetString(SI_CHAT_PLAYER_CONTEXT_REPORT), platformIcons[SI_CHAT_PLAYER_CONTEXT_REPORT], ENABLED, ReportCallback)
-        
+
         --Duel--
         local duelState, partnerCharacterName, partnerDisplayName = GetDuelInfo()
         if duelState ~= DUEL_STATE_IDLE then
@@ -1672,7 +1777,7 @@ do
                     local userFacingPartnerName = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
                     local statusString = GetString("SI_DUELSTATE", duelState)
                     statusString = zo_strformat(statusString, userFacingPartnerName)
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)    
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, statusString)
                 end
             end
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], DISABLED, AlreadyDuelingWarning(duelState, partnerCharacterName, partnerDisplayName))

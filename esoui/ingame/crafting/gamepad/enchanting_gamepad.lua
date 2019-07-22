@@ -669,8 +669,7 @@ function ZO_EnchantExtractionSlot_Gamepad:New(...)
 end
 
 function ZO_EnchantExtractionSlot_Gamepad:Initialize(owner, control, multipleItemsTexture, craftingInventory)
-    local USE_EMPTY_SLOT_ICON = true
-    ZO_SharedEnchantExtractionSlot.Initialize(self, owner, control, multipleItemsTexture, craftingInventory, USE_EMPTY_SLOT_ICON)
+    ZO_SharedEnchantExtractionSlot.Initialize(self, owner, control, multipleItemsTexture, craftingInventory)
 end
 
 function ZO_EnchantExtractionSlot_Gamepad:ClearDropCalloutTexture()

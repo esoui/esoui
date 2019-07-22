@@ -434,7 +434,7 @@ do
             self.selectedList = focus
             focus:Activate()
             self:UpdateScrollPanel(focus)
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            self:UpdateKeybindStrip()
             self:UpdateBorderHighlight(focus, ACTIVE)
             self:RefreshUniversalStyleItemTooltip()
         end
@@ -451,7 +451,7 @@ do
             canFocus = function(item) return not item:GetControl():IsHidden() end,
             activate = function(focus, data)
                 self.selectedList = nil
-                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+                self:UpdateKeybindStrip()
                 self:ActivateMaterialQuantitySpinner()
                 self:UpdateScrollPanel(focus)
                 self:UpdateBorderHighlight(focus, ACTIVE)
@@ -734,4 +734,8 @@ function ZO_GamepadSmithingCreation:OnStyleChanged(selectedData)
     ZO_SharedSmithingCreation.OnStyleChanged(selectedData)
 
     self.patternList:RefreshVisible()
+end
+
+function ZO_GamepadSmithingCreation:UpdateKeybindStrip()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end

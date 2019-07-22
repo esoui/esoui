@@ -4,8 +4,8 @@ local INGREDIENT_SORT_ORDER_POTION = 0
 local INGREDIENT_SORT_ORDER_POISON = 1000000
 local INGREDIENT_SORT_ORDER_OTHER  = 2000000
 
-ZO_GamepadAlchemyReagentSlot = ZO_AlchemyReagentSlot:Subclass()
-function ZO_GamepadAlchemyReagentSlot:GetUnknownTraitTexture()
+ZO_GamepadAlchemySlot = ZO_AlchemySlot:Subclass()
+function ZO_GamepadAlchemySlot:GetUnknownTraitTexture()
     return GAMEPAD_UNKNOWN_TRAIT_TEXTURE
 end
 
@@ -65,18 +65,18 @@ function ZO_GamepadAlchemy:InitializeScenes()
     end)
 
     self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if SCENE_MANAGER:IsShowing("gamepad_alchemy_creation") then
+        if self:IsSceneShowing() then
             self:OnSlotChanged()
         end
     end)
 end
 
 function ZO_AlchemyCraftingBarSlotTemplateSetup(control, data)
-    data.slot = ZO_GamepadAlchemyReagentSlot:New(data.owner, control, data.icon, data.placedSound, data.removedSound, nil, data.inventory, data.emptySlotIcon)
+    data.slot = ZO_GamepadAlchemySlot:New(data.owner, control, data.icon, data.placedSound, data.removedSound, nil, data.inventory, data.emptySlotIcon)
 end
 
 function ZO_AlchemyCraftingBarSolventSlotTemplateSetup(control, data)
-    data.slot = ZO_GamepadAlchemyReagentSlot:New(data.owner, control, data.icon, data.placedSound, data.removedSound, nil, data.inventory, data.emptySlotIcon)
+    data.slot = ZO_GamepadAlchemySlot:New(data.owner, control, data.icon, data.placedSound, data.removedSound, nil, data.inventory, data.emptySlotIcon)
 end
 
 function ZO_GamepadAlchemy:InitializeSlots()

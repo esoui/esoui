@@ -129,11 +129,7 @@ end
 
 function ZO_GamepadSmithingExtraction:SetFilterType(filterType)
     self.inventory.filterType = filterType
-
     self.inventory:HandleDirtyEvent()
-    -- used to update extraction slot UI with text / etc., PC does this as well
-    -- note that on gamepad this gives a possibly unwanted side effect of losing the active item when switching filters
-    self:RemoveItemFromCraft()
 end
 
 function ZO_GamepadSmithingExtraction:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
@@ -145,11 +141,12 @@ function ZO_GamepadSmithingExtraction:InitializeInventory(refinementOnly)
     local inventory = self.panelControl:GetNamedChild("Inventory")
     self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, refinementOnly, SLOT_TYPE_CRAFTING_COMPONENT)
 
-    -- turn refinement stacks red if they don't have a large enough quantity in them to be refineable
     self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
         if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+            -- turn refinement stacks red if they don't have a large enough quantity in them to be refineable
             data.meetsUsageRequirement = data.stackCount >= GetRequiredSmithingRefinementStackSize()
         end
+        ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
     end
     )
 end

@@ -12,8 +12,6 @@ function ZO_SmithingExtractionSlot:Initialize(owner, control, craftingInventory)
     ZO_CraftingMultiSlotBase.Initialize(self, owner, control, SLOT_TYPE_PENDING_CRAFTING_COMPONENT, NO_EMPTY_TEXTURE, NO_MULTIPLE_ITEMS_TEXTURE, craftingInventory)
 
     self.nameLabel = control:GetNamedChild("Name")
-    self.needMoreLabel = control:GetNamedChild("NeedMoreLabel")
-    self.needMoreLabel:SetText(zo_strformat(SI_SMITHING_NEED_MORE_TO_EXTRACT, GetRequiredSmithingRefinementStackSize()))
 end
 
 function ZO_SmithingExtractionSlot:AddItem(bagId, slotIndex)
@@ -41,44 +39,31 @@ function ZO_SmithingExtractionSlot:ClearItems()
 end
 
 function ZO_SmithingExtractionSlot:IsInRefineMode()
-    return self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS
+    return self.craftingInventory:GetCurrentFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS
 end
 
 function ZO_SmithingExtractionSlot:Refresh()
     ZO_CraftingMultiSlotBase.Refresh(self)
 
-    self.control.meetsStackRequirement = true
-
-    if self.nameLabel and self.needMoreLabel then
+    if self.nameLabel then
         if self:HasOneItem() then
             local bagId, slotIndex = self:GetItemBagAndSlot(1)
-            local meetsStackRequirement = ZO_SharedSmithingExtraction_DoesItemMeetRefinementStackRequirement(bagId, slotIndex, self:GetStackCount())
-            if meetsStackRequirement then
-                self.nameLabel:SetHidden(false)
-                self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex)))
+            self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex)))
 
-                if not self:HasAnimationRefs() then
-                    local quality = select(8, GetItemInfo(bagId, slotIndex))
-                    self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
-                end
-            else
-                self.nameLabel:SetHidden(true)
-            end
-
-            self.needMoreLabel:SetHidden(meetsStackRequirement)
-            if self:HasAnimationRefs() then
-                self.control.meetsStackRequirement = meetsStackRequirement
-            else
-                ZO_ItemSlot_SetupUsableAndLockedColor(self.control, meetsStackRequirement)
+            if not self:HasAnimationRefs() then
+                local quality = select(8, GetItemInfo(bagId, slotIndex))
+                self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
             end
         elseif self:HasMultipleItems() then
-            self.needMoreLabel:SetHidden(true)
-            self.nameLabel:SetHidden(false)
             self.nameLabel:SetText(zo_strformat(SI_CRAFTING_SLOT_MULTIPLE_SELECTED, ZO_CommaDelimitNumber(self:GetStackCount())))
             self.nameLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
         else
-            self.needMoreLabel:SetHidden(not self:IsInRefineMode())
-            self.nameLabel:SetHidden(true)
+            self.nameLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+            if self:IsInRefineMode() then
+                self.nameLabel:SetText(zo_strformat(SI_SMITHING_NEED_MORE_TO_EXTRACT, GetRequiredSmithingRefinementStackSize()))
+            else
+                self.nameLabel:SetText(GetString(SI_SMITHING_SELECT_ITEMS_TO_DECONSTRUCT))
+            end
         end
     end
 
@@ -91,10 +76,6 @@ function ZO_SmithingExtractionSlot:Refresh()
         local MIN_QUANTITY = 0
         ZO_ItemSlot_SetAlwaysShowStackCount(self.control, AUTO_SHOW_STACK_COUNT, MIN_QUANTITY)
     end
-end
-
-function ZO_SmithingExtractionSlot:OnFilterChanged(filterType)
-    self.filterType = filterType
 end
 
 function ZO_SmithingExtractionSlot:ShowDropCallout()
@@ -336,6 +317,4 @@ function ZO_SharedSmithingExtraction:OnFilterChanged()
     if self.extractLabel then
          self.extractLabel:SetText(GetString("SI_SMITHINGDECONSTRUCTIONTYPE", self:GetDeconstructionType()))
     end
-
-    self.extractionSlot:OnFilterChanged(filterType)
 end

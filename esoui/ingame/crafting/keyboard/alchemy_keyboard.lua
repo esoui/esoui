@@ -63,8 +63,6 @@ function ZO_Alchemy:InitializeScenes()
                 ZO_MenuBar_SelectDescriptor(self.modeBar, oldMode)
             end
         elseif newState == SCENE_HIDDEN then
-            self:ClearSelections()
-
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 
@@ -75,7 +73,7 @@ function ZO_Alchemy:InitializeScenes()
     end)
 
     self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if SCENE_MANAGER:IsShowing(self.sceneName) then
+        if self:IsSceneShowing() then
             self:OnSlotChanged()
         end
     end)
@@ -165,7 +163,7 @@ end
 
 function ZO_Alchemy:InitializeSlots()
     local slotContainer = self.control:GetNamedChild("SlotContainer")
-    self.solventSlot = ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("SolventSlot"), "EsoUI/Art/Crafting/alchemy_emptySlot_solvent.dds", SOUNDS.ALCHEMY_SOLVENT_PLACED, SOUNDS.ALCHEMY_SOLVENT_REMOVED, nil, self.inventory)
+    self.solventSlot = ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("SolventSlot"), "EsoUI/Art/Crafting/alchemy_emptySlot_solvent.dds", SOUNDS.ALCHEMY_SOLVENT_PLACED, SOUNDS.ALCHEMY_SOLVENT_REMOVED, nil, self.inventory)
     self.solventSlot:RegisterCallback("ItemsChanged", function()
         self:OnSlotChanged()
     end)
@@ -176,9 +174,9 @@ function ZO_Alchemy:InitializeSlots()
     local REAGENT_TEXTURE = "EsoUI/Art/Crafting/alchemy_emptySlot_reagent.dds"
     local ALWAYS_USABLE = nil
     self.reagentSlots = {
-        ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("ReagentSlot1"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ALWAYS_USABLE, self.inventory),
-        ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("ReagentSlot2"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ALWAYS_USABLE, self.inventory),
-        ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("ReagentSlot3"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ZO_Alchemy_IsThirdAlchemySlotUnlocked, self.inventory),
+        ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("ReagentSlot1"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ALWAYS_USABLE, self.inventory),
+        ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("ReagentSlot2"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ALWAYS_USABLE, self.inventory),
+        ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("ReagentSlot3"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ZO_Alchemy_IsThirdAlchemySlotUnlocked, self.inventory),
     }
     for _, slot in pairs(self.reagentSlots) do
         slot:RegisterCallback("ItemsChanged", function()
@@ -317,7 +315,6 @@ function ZO_Alchemy:SetMode(mode)
         self:UpdateTooltip()
     end
 end
-
 
 --Alchemy Inventory
 -------------------------

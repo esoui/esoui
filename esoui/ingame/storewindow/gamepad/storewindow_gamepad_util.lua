@@ -102,8 +102,24 @@ local BUY_ITEMS_SORT_KEYS =
     slotIndex = { isId64 = true },
 }
 
+local BUY_ITEMS_SORT_KEYS_VALUE =
+{
+    bestGamepadItemCategoryName = { tiebreaker = "stackBuyPrice" },
+    stackBuyPrice = { tiebreaker = "name" },
+    name = { tiebreaker = "meetsRequirementsToBuy" },
+    meetsRequirementsToBuy = { tiebreaker = "meetsRequirementsToEquip", isNumeric = true },
+    meetsRequirementsToEquip = { tiebreaker = "icon", isNumeric = true },
+    icon = { tiebreaker = "slotIndex" },
+    slotIndex = { isId64 = true },
+}
+
 local function BuySortFunc(data1, data2)
-     return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", BUY_ITEMS_SORT_KEYS, ZO_SORT_ORDER_UP)
+    local keys = BUY_ITEMS_SORT_KEYS
+    local defaultSortField = GetStoreDefaultSortField()
+    if defaultSortField == STORE_DEFAULT_SORT_FIELD_VALUE then
+        keys = BUY_ITEMS_SORT_KEYS_VALUE
+    end
+    return ZO_TableOrderingFunction(data1, data2, "bestGamepadItemCategoryName", keys, ZO_SORT_ORDER_UP)
 end
 
 local BUYBACK_ITEMS_SORT_KEYS =

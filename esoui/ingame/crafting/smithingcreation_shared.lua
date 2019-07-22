@@ -59,9 +59,11 @@ function ZO_SharedSmithingCreation:RefreshAllListsLayer()
         self.performingFullRefresh = true
 
         self:RefreshPatternList()
-        self:RefreshStyleList()
-        self:RefreshTraitList()
-        self:RefreshMaterialList(self.patternList:GetSelectedData())
+        local patternData = self.patternList:GetSelectedData()
+        self:RefreshMaterialList(patternData)
+        self:RefreshStyleList() -- requires a valid pattern and material selection
+        self:RefreshTraitList(patternData)
+
         self:RefreshResultLayer()
 
         self.performingFullRefresh = false
@@ -69,10 +71,12 @@ function ZO_SharedSmithingCreation:RefreshAllListsLayer()
 
     self:OnRefreshAllLists()
 
-    -- Special case on full refreshes, the style list depends on the pattern list, but the pattern list is also dependent on knowing if there's any valid styles.
-    -- If there are no valid styles then none of the patterns can be selected, so clear it out.
-    -- As a extra special case, when we aren't using style items generally, then the above is not true and we should skip this.
-    if not self.styleList:GetSelectedData() and not self:ShouldIgnoreStyleItems() then
+    -- Special case on full refreshes, the style/material list depends on the pattern list, but the pattern list is also dependent on knowing if there's any valid styles/materials for a given pattern
+    -- If there are no valid styles, there's no way for us to select a valid pattern icon for any pattern, so we'll clear them all out.
+    -- because there may be valid materials for some patterns and not for others, that is handled as part of the normal RefreshPatternList().
+    -- This is outside of the performingFullRefresh loop to force a second refresh in this situation.
+    local hasValidStyle = self:ShouldIgnoreStyleItems() or self.styleList:GetSelectedData()
+    if not hasValidStyle then
         self.patternList:Clear()
         self.patternList:Commit()
     end
@@ -195,7 +199,7 @@ function ZO_SharedSmithingCreation:OnSelectedPatternChanged(patternData, selecte
                 self.patternList:RefreshVisible()
             end
             self:RefreshMaterialList(patternData)
-            self:RefreshTraitList()
+            self:RefreshTraitList(patternData)
         end
         self.materialList:RefreshVisible()
 
@@ -527,8 +531,6 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
 
             self.isMaterialUsable = usable and USABILITY_TYPE_USABLE or USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
 
-            self.materialQuantitySpinner:SetMinMax(1, #data.combinations)
-
             local selectedLabelText
             local materialNameText = colorMaterialNameWhite and ZO_WHITE:Colorize(data.name) or data.name
             if data.isChampionPoint then
@@ -541,7 +543,9 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
 
             self:SetLabelHidden(listContainer.extraInfoLabel, false)
 
+            -- using SetMinMax() will constrain any existing values to the new range, so that needs to happen _after_ we pull up the last value; otherwise we might overwrite that last value with a garbage value
             local selectedLastCombinationIndex = self:GetLastListSelection(self:GetMaterialListMemoryKey(data.materialIndex)) or 1
+            self.materialQuantitySpinner:SetMinMax(1, #data.combinations)
             self.materialQuantitySpinner:SetValue(selectedLastCombinationIndex)
 
             --The spinner value changed logic and value format function both depend on the selected material as well. So we have to cause them to update whenever the selected material changes.
@@ -695,11 +699,8 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListClass, traitUnk
         control.traitType = data.traitType
         local stackCount = GetCurrentSmithingTraitItemCount(data.traitIndex)
         local hasEnoughInInventory = stackCount > 0
-        local isTraitKnown = false
-        if self:IsCraftableWithoutTrait() then
-            local patternIndex, materialIndex, materialQty, itemStyleId = self:GetResultCraftingParameters()
-            isTraitKnown = IsSmithingTraitKnownForResult(patternIndex, materialIndex, materialQty, itemStyleId, data.traitIndex)
-        end
+        local patternIndex = self:GetSelectedPatternIndex()
+        local isTraitKnown = patternIndex ~= nil and IsSmithingTraitKnownForPattern(patternIndex, data.traitType)
         ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, isTraitKnown, not enabled)
 
         if selected then
@@ -814,9 +815,9 @@ function ZO_SharedSmithingCreation:CreatePatternList()
     for patternIndex = 1, GetNumSmithingPatterns() do
         local patternName, baseName, _, numMaterials, numTraitsRequired, numTraitsKnown, resultingItemFilterType = GetSmithingPatternInfo(patternIndex)
         if numMaterials > 0 then
-            local data = { craftingType = GetCraftingInteractionType(), patternIndex = patternIndex, patternName = patternName, baseName = baseName, numTraitsRequired = numTraitsRequired, numTraitsKnown = numTraitsKnown, resultingItemFilterType = resultingItemFilterType }
-            if self:DoesPatternPassFilter(data) then
-                self.patternList:AddEntry(data)
+            local patternData = { craftingType = GetCraftingInteractionType(), patternIndex = patternIndex, patternName = patternName, baseName = baseName, numTraitsRequired = numTraitsRequired, numTraitsKnown = numTraitsKnown, resultingItemFilterType = resultingItemFilterType }
+            if self:DoesPatternPassFilter(patternData) then
+                self.patternList:AddEntry(patternData)
             end
         end
     end
@@ -979,7 +980,6 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
 
     self.styleList:Clear()
 
-
     if not self:ShouldIgnoreStyleItems() then
         local craftingInteractionType = GetCraftingInteractionType()
         for itemStyleIndex = 1, GetNumValidItemStyles() do
@@ -1028,19 +1028,13 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
     end
 end
 
-function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType, craftingType)
-    assert(self.typeFilter)
-    if ZO_CraftingUtils_GetSmithingFilterFromTrait(traitType) ~= ZO_CraftingUtils_GetBaseSmithingFilter(self.typeFilter) then
+function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType, craftingType, typeFilter, patternIndex)
+    if ZO_CraftingUtils_GetSmithingFilterFromTrait(traitType) ~= ZO_CraftingUtils_GetBaseSmithingFilter(typeFilter) then
         return false
     end
 
     if self.savedVars.haveKnowledgeChecked then
-        if not self:IsCraftableWithoutTrait() then
-            return false
-        end
-
-        local patternIndex, materialIndex, materialQty, itemStyleId = self:GetResultCraftingParameters()
-        if not IsSmithingTraitKnownForResult(patternIndex, materialIndex, materialQty, itemStyleId, traitIndex) then
+        if patternIndex == nil or not IsSmithingTraitKnownForPattern(patternIndex, traitType) then
             return false
         end
     end
@@ -1054,7 +1048,12 @@ function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType, cr
     return true
 end
 
-function ZO_SharedSmithingCreation:RefreshTraitList()
+function ZO_SharedSmithingCreation:RefreshTraitList(patternData)
+    local patternIndex = nil
+    if patternData then
+        patternIndex = patternData.patternIndex
+    end
+
     self.traitList:Clear()
 
     local traitItems = ZO_CraftingUtils_GetSmithingTraitItemInfo()
@@ -1067,7 +1066,7 @@ function ZO_SharedSmithingCreation:RefreshTraitList()
                 traitType = traitItemInfo.type,
                 icon = "EsoUI/Art/Crafting/crafting_smithing_noTrait.dds",
             })
-        elseif self:DoesTraitPassFilter(traitItemInfo.index, traitItemInfo.type, craftingType) then
+        elseif self:DoesTraitPassFilter(traitItemInfo.index, traitItemInfo.type, craftingType, self.typeFilter, patternIndex) then
             self.traitList:AddEntry({
                 craftingType = craftingType,
                 traitIndex = traitItemInfo.index,
@@ -1134,13 +1133,6 @@ end
 -- Overrides ZO_CraftingCreateScreenBase
 function ZO_SharedSmithingCreation:IsCraftable()
     return self:GetPatternUsability() == USABILITY_TYPE_USABLE and self:GetMaterialUsability() == USABILITY_TYPE_USABLE and self:GetStyleUsability() and self:GetTraitUsability() == USABILITY_TYPE_USABLE
-end
-
-function ZO_SharedSmithingCreation:IsCraftableWithoutTrait()
-    if self:GetSelectedPatternIndex() and self:GetSelectedMaterialIndex() and self:GetSelectedMaterialQuantity() > 0 then
-        return self:GetStyleUsability() ~= USABILITY_TYPE_INVALID
-    end
-    return false
 end
 
 function ZO_SharedSmithingCreation:IsCraftingNonSetItemAtSetStation()

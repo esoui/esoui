@@ -29,6 +29,7 @@ function ZO_StoreManager:Initialize(control)
     STORE_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_FRAGMENT_SHOWING then
                                                         self:RefreshCurrency()
+                                                        self:SetupDefaultSort()
                                                         self:GetStoreItems()
                                                         self:UpdateList()
                                                         self:UpdateFreeSlots()
@@ -99,23 +100,19 @@ function ZO_StoreManager:Initialize(control)
 
     self.landingArea = GetControl(self.list, "SellToVendorArea")
 
-    self.sortHeaders = ZO_SortHeaderGroup:New(control:GetNamedChild("SortBy"), true)
-
-    self.sortOrder = ZO_SORT_ORDER_UP
-    self.sortKey = "name"
+    self.sortHeaderGroup = ZO_SortHeaderGroup:New(control:GetNamedChild("SortBy"), true)
+    self.sortHeaderGroup:SelectHeaderByKey("name")
 
     local function OnSortHeaderClicked(key, order)
-        self.sortKey = key
-        self.sortOrder = order
         self:ApplySort()
     end
 
-    self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
-    self.sortHeaders:AddHeadersFromContainer()
+    self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+    self.sortHeaderGroup:AddHeadersFromContainer()
     -- We are using shared sort headers from the inventory, but store sorts its entries by value
     -- differently, so we need to swap out the sort key
-    self.sortHeaders:ReplaceKey("stackSellPrice", "stackBuyPrice")
-    self.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+    self.sortHeaderGroup:ReplaceKey("stackSellPrice", "stackBuyPrice")
+    self.sortHeaderGroup:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
 
     self.tabs = GetControl(control, "Tabs")
 
@@ -267,6 +264,15 @@ function ZO_StoreManager:Initialize(control)
     end
 
     SHARED_INVENTORY:RegisterCallback("ItemRepaired", OnItemRepaired)
+end
+
+function ZO_StoreManager:SetupDefaultSort()
+    local defaultSortField = GetStoreDefaultSortField()
+    if defaultSortField == STORE_DEFAULT_SORT_FIELD_NAME then
+        self.sortHeaderGroup:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, ZO_SortHeaderGroup.FORCE_RESELECT, ZO_SORT_ORDER_UP)
+    elseif defaultSortField == STORE_DEFAULT_SORT_FIELD_VALUE then
+        self.sortHeaderGroup:SelectHeaderByKey("stackBuyPrice", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, ZO_SortHeaderGroup.FORCE_RESELECT, ZO_SORT_ORDER_UP)
+    end
 end
 
 function ZO_StoreManager:InitializeStore(overrideMode)
@@ -423,13 +429,13 @@ function ZO_StoreManager:ChangeFilter(filterData)
 
     -- Manage hiding columns that show/hide depending on the current filter.  If the sort was on a column that becomes hidden
     -- then the sort needs to pick a new column.  Currently this always falls back to the name key.
-    if self.sortHeaders then
-        self.sortHeaders:SetHeadersHiddenFromKeyList(self.hiddenColumns, true)
+    if self.sortHeaderGroup then
+        self.sortHeaderGroup:SetHeadersHiddenFromKeyList(self.hiddenColumns, true)
 
-        if self.hiddenColumns[self.sortKey] then
+        if self.hiddenColumns[self.sortHeaderGroup:GetCurrentSortKey()] then
             -- User wanted to sort by a column that's gone!
             -- Fallback to name.
-            self.sortHeaders:SelectHeaderByKey("name")
+            self.sortHeaderGroup:SelectHeaderByKey("name")
         end
     end
 
@@ -464,7 +470,7 @@ function ZO_StoreManager:SortData()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
 
     self.sortFunction = self.sortFunction or function(entry1, entry2)
-        return ZO_TableOrderingFunction(entry1.data, entry2.data, self.sortKey, sortKeys, self.sortOrder)
+        return ZO_TableOrderingFunction(entry1.data, entry2.data, self.sortHeaderGroup:GetCurrentSortKey(), sortKeys, self.sortHeaderGroup:GetSortDirection())
     end
 
     table.sort(scrollData, self.sortFunction)
@@ -476,7 +482,7 @@ function ZO_StoreManager:ApplySort()
 end
 
 function ZO_StoreManager:SetCurrencyControl(currencyType, currencyValue, currencyOptions)
-    local control = (not self.currency1Display.isInUse and self.currency1Display) or 
+    local control = (not self.currency1Display.isInUse and self.currency1Display) or
                     (not self.currency2Display.isInUse and self.currency2Display) or nil
 
     if control then

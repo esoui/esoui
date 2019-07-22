@@ -63,6 +63,10 @@ function ZO_HousingFurnitureBrowser_Keyboard:OnDeferredInitialization()
     self.isInitialized = true
 end
 
+function ZO_HousingFurnitureBrowser_Keyboard:IsShowing()
+    return KEYBOARD_HOUSING_FURNITURE_BROWSER_SCENE:IsShowing()
+end
+
 function ZO_HousingFurnitureBrowser_Keyboard:OnShowing()
     ZO_HousingFurnitureBrowser_Base.OnShowing(self)
 

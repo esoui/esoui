@@ -3312,6 +3312,9 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             callback = function(dialog)
                 PLAYER_TO_PLAYER:Accept(dialog.data)
             end,
+            visible = function(dialog)
+                return PLAYER_TO_PLAYER:ShouldShowAccept(dialog.data)
+            end,
         },
         {
             onShowCooldown = 2000,
@@ -3323,6 +3326,9 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             end,
             callback = function(dialog)
                 PLAYER_TO_PLAYER:Decline(dialog.data)
+            end,
+            visible = function(dialog)
+                return PLAYER_TO_PLAYER:ShouldShowDecline(dialog.data)
             end,
         }
     },

@@ -263,6 +263,7 @@ end
 
 function ZO_HousingFurnitureSettings_Gamepad:OnShowing()
     self.owner:SetCurrentList(self.mainList)
+    self:UpdateLists()
     self.mainList:RefreshVisible()
     self:UpdateInfoFromTargetData()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -326,7 +327,7 @@ function ZO_HousingFurnitureSettings_Gamepad:UpdateGeneralSettings()
     local ALLOW_EVEN_IF_DISABLED = true
     local NO_ANIMATION = true
     self.defaultAccessList:SetSelectedDataIndex(defaultAccess + 1, ALLOW_EVEN_IF_DISABLED, NO_ANIMATION) -- plus 1 is for lua index offset
-    
+
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -363,7 +364,7 @@ do
         local data = dialog.entryList:GetTargetData()
         local edit = data.control.editBoxControl
 
-	    edit:TakeFocus()
+        edit:TakeFocus()
     end
 
     local function SetupRequestEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -674,33 +675,33 @@ do
         keybind = "DIALOG_SECONDARY",
         text = SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND,
         callback =  function(dialog)
-			local data = dialog.entryList:GetTargetData()
-			local editbox = data.control.editBoxControl
+            local data = dialog.entryList:GetTargetData()
+            local editbox = data.control.editBoxControl
             local HandleUserIdResult = function(hasResult, displayName, consoleId)
-				if hasResult then
-					editbox:SetText(displayName)
-				end
-			end
-
-			local INCLUDE_ONLINE_FRIENDS = true
-			local INCLUDE_OFFLINE_FRIENDS = true
-			PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestIdFromUserListDialog(HandleUserIdResult, GetString(SI_GAMEPAD_CONSOLE_SELECT_FOR_HOUSE_PERMISSIONS), INCLUDE_ONLINE_FRIENDS, INCLUDE_OFFLINE_FRIENDS)
-        end,
-		visible = function(dialog)
-			local data = dialog.entryList:GetTargetData()
-			if data and data.control and data.control.editBoxControl then
-			    local platform = GetUIPlatform()
-			    if platform == UI_PLATFORM_PS4 then
-				    return true
-			    elseif platform == UI_PLATFORM_XBOX then
-				    if GetNumberConsoleFriends() > 0 then
-					    return true
-				    end
-			    end
+                if hasResult then
+                    editbox:SetText(displayName)
+                end
             end
 
-			return false
-		end
+            local INCLUDE_ONLINE_FRIENDS = true
+            local INCLUDE_OFFLINE_FRIENDS = true
+            PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestIdFromUserListDialog(HandleUserIdResult, GetString(SI_GAMEPAD_CONSOLE_SELECT_FOR_HOUSE_PERMISSIONS), INCLUDE_ONLINE_FRIENDS, INCLUDE_OFFLINE_FRIENDS)
+        end,
+        visible = function(dialog)
+            local data = dialog.entryList:GetTargetData()
+            if data and data.control and data.control.editBoxControl then
+                local platform = GetUIPlatform()
+                if platform == UI_PLATFORM_PS4 then
+                    return true
+                elseif platform == UI_PLATFORM_XBOX then
+                    if GetNumberConsoleFriends() > 0 then
+                        return true
+                    end
+                end
+            end
+
+            return false
+        end
     }
 
     -- Individual Add/Ban Dialog Button Data
