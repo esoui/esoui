@@ -1,7 +1,6 @@
 ZO_GUILD_HISTORY_KEYBOARD_CATEGORY_TREE_WIDTH = 240
 
 local GUILD_EVENT_DATA = 1
-local GUILD_EVENT_TWO_LINES_DATA = 2
 local LOAD_CONTROL_TRIGGER_TIME_S = .5
 
 local GuildHistoryManager = ZO_SortFilterList:Subclass()
@@ -18,12 +17,7 @@ function GuildHistoryManager:Initialize(control)
     self.loading = GetControl(control, "Loading")
     self.masterList = {}
     
-    ZO_ScrollList_AddDataType(self.list, GUILD_EVENT_DATA, "ZO_GuildHistoryRow", 45, function(control, data) self:SetupGuildEvent(control, data) end)
-    ZO_ScrollList_AddDataType(self.list, GUILD_EVENT_TWO_LINES_DATA, "ZO_GuildHistoryRowTwoLines", 60, function(control, data) self:SetupGuildEvent(control, data) end)
-
-    self.dummyRowControl = CreateControlFromVirtual("ZO_GuildHistory_TempRowElement", GuiRoot, "ZO_GuildHistoryRow")
-    self.dummyRowControl:SetHidden(true)
-    self.dummyRowControl:SetAnchor(TOPLEFT)
+    ZO_ScrollList_AddDataType(self.list, GUILD_EVENT_DATA, "ZO_GuildHistoryRow", 60, function(control, data) self:SetupGuildEvent(control, data) end)
 
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareGuildEvents(listEntry1, listEntry2) end
 
@@ -193,14 +187,11 @@ function GuildHistoryManager:SetupGuildEvent(control, data)
     local hidden = data.sortIndex and (data.sortIndex % 2) == 0
     bg:SetHidden(hidden)
 
-    if data.description == nil then
-        data.description = self:FormatEvent(data.eventType, data.param1, data.param2, data.param3, data.param4, data.param5, data.param6)
-    end
-    if data.formattedTime == nil then
-        data.formattedTime = ZO_FormatDurationAgo(data.secsSinceEvent)
-    end
-    GetControl(control, "Description"):SetText(data.description)
-    GetControl(control, "Time"):SetText(data.formattedTime)
+    local description = self:FormatEvent(data.eventType, data.param1, data.param2, data.param3, data.param4, data.param5, data.param6)
+    local formattedTime = ZO_FormatDurationAgo(data.secsSinceEvent + GetGameTimeSeconds() - self.lastEventDataUpdateS)
+
+    GetControl(control, "Description"):SetText(description)
+    GetControl(control, "Time"):SetText(formattedTime)
 end
 
 function GuildHistoryManager:IsShowing()
@@ -221,7 +212,7 @@ end
 function GuildHistoryManager:BuildMasterList()
     if self.guildId and self.selectedCategory then
         ZO_ClearNumericallyIndexedTable(self.masterList)
-        
+        self.lastEventDataUpdateS = GetFrameTimeSeconds()        
         for i = 1, GetNumGuildEvents(self.guildId, self.selectedCategory) do
             local eventType, secsSinceEvent, param1, param2, param3, param4, param5, param6, eventId = GetGuildEventInfo(self.guildId, self.selectedCategory, i)
             if self:ShouldShowEventType(eventType) then
@@ -237,7 +228,6 @@ function GuildHistoryManager:BuildMasterList()
                     param6 = param6,
                     secsSinceEvent = secsSinceEvent,
                     subcategoryId = ComputeGuildHistoryEventSubcategory(eventType, self.selectedCategory),
-                    timeStamp = GetFrameTimeSeconds(),
                 }
                 table.insert(self.masterList, event)
             end
@@ -248,39 +238,12 @@ end
 function GuildHistoryManager:FilterScrollList()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
     local listWidth = self.list:GetNamedChild("Contents"):GetWidth()
-    local descriptionControl = self.dummyRowControl:GetNamedChild("Description")
     
-    self.dummyRowControl:SetWidth(listWidth)
-
     ZO_ClearNumericallyIndexedTable(scrollData)
-
     for i = 1, #self.masterList do
         local data = self.masterList[i]
         if self.selectedSubcategory == nil or self.selectedSubcategory == data.subcategoryId then
-            self:SetupGuildEvent(self.dummyRowControl, data)
-
-            --[[ The dimensions of the description depend on the time label text being rendered 
-                    due to the anchoring scheme. The normal immediate anchor update that happens 
-                    when calling a function that depends on the text being rendered will not trigger 
-                    the time label to render, so we do it manually using Clean. Once that is done, 
-                    the immediate anchor update on the description label will succeed and we can 
-                    do the GetNumLines call. We cache the result of this so we only ever have to
-                    do it once for a guild event.]]--
-            for anchorIndex = 0, MAX_ANCHORS do
-                local isValid, point, relTo, relPoint, offsetX = descriptionControl:GetAnchor(anchorIndex)
-                if isValid and relTo:GetType() == CT_LABEL then
-                    relTo:Clean()
-                end
-            end
-            
-            local template
-            local numLines = descriptionControl:GetNumLines()
-            if numLines > 1 then
-                template = GUILD_EVENT_TWO_LINES_DATA
-            else 
-                template = GUILD_EVENT_DATA
-            end
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(template, data))
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(GUILD_EVENT_DATA, data))
         end
     end
 

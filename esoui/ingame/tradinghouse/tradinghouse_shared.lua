@@ -512,8 +512,11 @@ function ZO_TradingHouseSearch:DoSearch(isQueuedSearch)
     if not self:CanPerformSearch() then
         self:DoSearchWhenReady()
     else
-        local IS_PERFORMING_SEARCH = true
-        self:ApplyFilters(IS_PERFORMING_SEARCH)
+        --Don't need to apply current filters if we are using the last executed filters. Applying filters also wipes the last executed filters so we don't want to do that.
+        if not self.useLastExecutedSearchFilters then
+            local IS_PERFORMING_SEARCH = true
+            self:ApplyFilters(IS_PERFORMING_SEARCH)
+        end
         local page = self.targetPage or 0
         ExecuteTradingHouseSearch(page, self.sortField, self.sortOrder, self.useLastExecutedSearchFilters)
         self.targetPage = nil

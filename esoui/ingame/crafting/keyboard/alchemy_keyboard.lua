@@ -73,7 +73,7 @@ function ZO_Alchemy:InitializeScenes()
     end)
 
     self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if self:IsSceneShowing() then
+        if SYSTEMS:IsShowing("alchemy") then
             self:OnSlotChanged()
         end
     end)

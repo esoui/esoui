@@ -375,21 +375,19 @@ do
             end
 
             if numItemsGained == 0 then
-                local smithingObject = ZO_Smithing_GetActiveObject()
-                if SYSTEMS:IsShowing("alchemy") then
+                if craftingType == CRAFTING_TYPE_ALCHEMY then
+                    -- Crafted inert potion
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
-                elseif smithingObject and smithingObject:IsExtracting() then
+                elseif craftingType == CRAFTING_GAINED_ENCHANTING then
+                    -- No extraction results
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
+                elseif IsSmithingCraftingType(craftingType) then
+                    -- No results from gear deconstruction
                     local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
                     if penaltyApplied then
                         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
                     else
                         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
-                    end
-                elseif ZO_Enchanting_IsSceneShowing() then
-                    if not ZO_Enchanting_IsInCreationMode() then
-                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
-                    else
-                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_GLYPH_CREATED)
                     end
                 end
             else

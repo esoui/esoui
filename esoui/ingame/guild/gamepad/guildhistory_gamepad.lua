@@ -23,8 +23,10 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
     end)
 
     control:RegisterForEvent(EVENT_GUILD_HISTORY_REFRESHED, function()
-        self.categoryList:SetSelectedIndexWithoutAnimation(1)
-        self:RequestInitialEvents()
+        if self:IsShowing() then
+            self.categoryList:SetSelectedIndexWithoutAnimation(1)
+            self:RequestInitialEvents()
+        end
         self.refreshGroup:MarkDirty("EventList")
     end)
 
@@ -45,9 +47,15 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
 
     GUILD_HISTORY_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(self.control, true)
 
+    EVENT_MANAGER:RegisterForUpdate("ZO_GuildHistory_Gamepad", 60000, function()
+        self.refreshGroup:MarkDirty("EventList")
+    end)
+
     GUILD_HISTORY_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:InitializeGuildHistory()
+            --The category list is shared among all the guild screens so it needs to be built each time screen shows
+            self:PopulateCategoryList()
             self.categoryList:SetSelectedIndexWithoutAnimation(1)
             self:RequestInitialEvents()
             self:SelectCategoryList()
@@ -68,7 +76,6 @@ function ZO_GuildHistory_Gamepad:InitializeGuildHistory()
         self:InitializeActivityList()
         self:InitializeKeybindStripDescriptors()
         self:InitializeEvents()
-        self:InitializeCategories()
     end
 end
 
@@ -300,10 +307,13 @@ function ZO_GuildHistory_Gamepad:SelectLogList()
 end
 
 function ZO_GuildHistory_Gamepad:SetGuildId(guildId)
-    self.guildId = guildId
-    if not self.control:IsHidden() then
-        self.categoryList:SetSelectedIndexWithoutAnimation(1)
-        self:RequestInitialEvents()
+    if guildId ~= self.guildId then 
+        self.guildId = guildId
+        if self:IsShowing() then
+            self.categoryList:SetSelectedIndexWithoutAnimation(1)
+            self:RequestInitialEvents()
+        end
+        self.refreshGroup:MarkDirty("EventList")
     end
 end
 
@@ -340,9 +350,14 @@ end
 
 function ZO_GuildHistory_Gamepad:OnGuildHistoryCategoryUpdated(guildId, category)
     if self.guildId == guildId then
-        local targetData = self.categoryList:GetTargetData()
-        if targetData.categoryId == category then
-            self:RefreshKeybinds()
+        if self:IsShowing() then
+            local targetData = self.categoryList:GetTargetData()
+            if targetData.categoryId == category then
+                self:RefreshKeybinds()
+                self.refreshGroup:MarkDirty("EventList")
+            end
+        else
+            --Technically we only need to mark a specific category dirty, but that level of granularity only prevents rebuilding the general category first page on show which probably isn't worth the complexity.
             self.refreshGroup:MarkDirty("EventList")
         end
     end
@@ -423,7 +438,7 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
     self:UpdateLogTriggerButtons()
 end
 
-function ZO_GuildHistory_Gamepad:InitializeCategories()
+function ZO_GuildHistory_Gamepad:PopulateCategoryList()
     self.categoryList:Clear()
 
     for categoryId = 1, GetNumGuildHistoryCategories() do

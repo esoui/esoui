@@ -335,13 +335,10 @@ do
     }
 
     function ZO_GamepadCraftingUtils_ShowMultiCraftDialog(craftingObject, resultItemLink)
-        local itemName = GetItemLinkName(resultItemLink)
         local nameColor = GetItemQualityColor(GetItemLinkQuality(resultItemLink))
-        local itemIcon = GetItemLinkIcon(resultItemLink)
-        
-        local itemNameAndIcon = zo_iconTextFormat(itemIcon, 55, 55, nameColor:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)))
+        local itemName = nameColor:Colorize(GetItemLinkName(resultItemLink))
 
-        ZO_Dialogs_ShowGamepadDialog("CRAFTING_CREATE_MULTIPLE_GAMEPAD", {craftingObject = craftingObject}, {mainTextParams={itemNameAndIcon}})
+        ZO_Dialogs_ShowGamepadDialog("CRAFTING_CREATE_MULTIPLE_GAMEPAD", {craftingObject = craftingObject}, {mainTextParams={itemName}})
     end
 
     ESO_Dialogs["CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD"] =
@@ -456,13 +453,11 @@ do
     }
 
     function ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, deconstructFn)
-        local itemName = GetItemName(bagId, slotIndex)
-        local itemIcon, _, _, _, _, _, _, quality = GetItemInfo(bagId, slotIndex)
+        local quality = GetItemQuality(bagId, slotIndex)
         local nameColor = GetItemQualityColor(quality)
-        
-        local itemNameAndIcon = zo_iconTextFormat(itemIcon, 55, 55, nameColor:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName)))
+        local itemName = nameColor:Colorize(GetItemName(bagId, slotIndex))
 
-        ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", {bagId = bagId, slotIndex = slotIndex, maxIterations = maxIterations, deconstructFn = deconstructFn}, {mainTextParams = {itemNameAndIcon}})
+        ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", {bagId = bagId, slotIndex = slotIndex, maxIterations = maxIterations, deconstructFn = deconstructFn}, {mainTextParams = {itemName}})
     end
 end
 

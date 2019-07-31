@@ -245,7 +245,3 @@ end
 function ZO_SharedProvisioner:Create(numIterations)
     CraftProvisionerItem(self:GetAllCraftingParameters(numIterations))
 end
-
-function ZO_Provisioning_IsSceneShowing()
-    return SCENE_MANAGER:IsShowing("provisioner") or SCENE_MANAGER:IsShowing("gamepad_provisioner_root")
-end

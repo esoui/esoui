@@ -65,7 +65,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
     end)
 
     self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if self:IsSceneShowing() then
+        if SYSTEMS:IsShowing("alchemy") then
             self:OnSlotChanged()
         end
     end)
@@ -414,6 +414,11 @@ end
 
 function ZO_GamepadAlchemy:GetActiveSlot()
     return self:GetSlot(self.activeSlotIndex)
+end
+
+-- Used by ZO_Systems
+function ZO_GamepadAlchemy:IsSystemShowing()
+    return SCENE_MANAGER:IsShowing("gamepad_alchemy_mode") or SCENE_MANAGER:IsShowing("gamepad_alchemy_creation")
 end
 
 ZO_GamepadAlchemyInventory = ZO_GamepadCraftingInventory:Subclass()

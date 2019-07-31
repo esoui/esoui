@@ -109,8 +109,13 @@ function ZO_Systems:HideScene(systemName)
 end
 
 function ZO_Systems:IsShowing(systemName)
+    local object = self:GetObject(systemName)
+    if object and object.IsSystemShowing then
+        return object:IsSystemShowing()
+    end
+
     local sceneName = self:GetRootSceneName(systemName)
-    return sceneName and SCENE_MANAGER:IsShowing(self:GetRootScene(systemName):GetName())
+    return sceneName and SCENE_MANAGER:IsShowing(sceneName)
 end
 
 SYSTEMS = ZO_Systems:New()

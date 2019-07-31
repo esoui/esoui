@@ -713,9 +713,9 @@ do
 end
 
 function ZO_CraftingUtils_IsCraftingWindowOpen()
-    return SCENE_MANAGER:IsShowing("smithing")
+    return ZO_Smithing_IsSceneShowing()
             or SYSTEMS:IsShowing("alchemy")
-            or SCENE_MANAGER:IsShowing("enchanting")
+            or ZO_Enchanting_IsSceneShowing()
             or ZO_Provisioner_IsSceneShowing()
 end
 
