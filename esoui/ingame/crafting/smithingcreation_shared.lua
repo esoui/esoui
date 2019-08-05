@@ -728,13 +728,13 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListClass, traitUnk
             end
 
             if usable then
-                self.isStyleUsable = USABILITY_TYPE_USABLE
+                self.isTraitUsable = USABILITY_TYPE_USABLE
             elseif not isTraitKnown then
-                self.isStyleUsable = USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
+                self.isTraitUsable = USABILITY_TYPE_VALID_BUT_MISSING_REQUIREMENT
             elseif not hasEnoughInInventory then
-                self.isStyleUsable = USABILITY_TYPE_VALID_BUT_MISSING_ITEM
+                self.isTraitUsable = USABILITY_TYPE_VALID_BUT_MISSING_ITEM
             else
-                self.isStyleUsable = USABILITY_TYPE_INVALID
+                self.isTraitUsable = USABILITY_TYPE_INVALID
             end
 
             if not data.localizedName then

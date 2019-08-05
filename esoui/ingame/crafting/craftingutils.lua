@@ -726,7 +726,10 @@ end
 function ZO_CraftingUtils_AddVirtualStackToDeconstructMessageAsRealStacks(virtualBagId, virtualSlotIndex, quantityToAdd)
     local instanceId = GetItemInstanceId(virtualBagId, virtualSlotIndex)
     local ALL_MATCHING_ITEMS = nil
-    local slots = PLAYER_INVENTORY:GenerateAllSlotsInVirtualStackedItem(ALL_MATCHING_ITEMS, instanceId, INVENTORY_BACKPACK, INVENTORY_BANK)
+    -- When there are more slots than items to add, we want to prioritize
+    -- backpack items over bank items. Since the loop that adds these items pops
+    -- from the end, we should generate our slots list so that the end of the list holds all the backpack items
+    local slots = PLAYER_INVENTORY:GenerateAllSlotsInVirtualStackedItem(ALL_MATCHING_ITEMS, instanceId, INVENTORY_BANK, INVENTORY_BACKPACK)
     while quantityToAdd > 0 and slots[1] do
         local slot = table.remove(slots)
         local stackCount = zo_min(slot.stackCount, quantityToAdd)

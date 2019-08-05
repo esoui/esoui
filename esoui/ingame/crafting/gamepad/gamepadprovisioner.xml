@@ -60,6 +60,7 @@
 
                 <Control name="$(parent)IngredientsBar" inherits="ZO_GamepadCraftingIngredientBarTemplate">
                     <Dimensions y="205"/>
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_PROVISIONER_INGREDIENTS_BAR_OFFSET_X" offsetY="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET"/>
                 </Control>
 
                 <Control name="$(parent)Tooltip" inherits="ZO_CraftingTooltip_Gamepad">

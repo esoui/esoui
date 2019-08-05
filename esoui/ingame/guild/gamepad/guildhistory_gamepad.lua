@@ -30,6 +30,14 @@ function ZO_GuildHistory_Gamepad:Initialize(control)
         self.refreshGroup:MarkDirty("EventList")
     end)
 
+    control:SetHandler("OnUpdate", function()
+        if self:IsTryingToGetMoreEvents() then
+            self:ShowLoading()
+        else
+            self:HideLoading()
+        end
+    end)
+
     self.startIndex = 1
     self.displayedItems = 0
     self.guildId = 1
@@ -86,6 +94,12 @@ function ZO_GuildHistory_Gamepad:OnTargetChanged(list, selectedData, oldSelected
     self.refreshGroup:MarkDirty("EventList")
 end
 
+function ZO_GuildHistory_Gamepad:IsTryingToGetMoreEvents()
+    local targetData = self.categoryList:GetTargetData()
+    local categoryId = targetData.categoryId
+    return DoesGuildHistoryCategoryHaveOutstandingRequest(self.guildId, categoryId) or IsGuildHistoryCategoryRequestQueued(self.guildId, categoryId)
+end
+
 function ZO_GuildHistory_Gamepad:CanPageLeft()
     return not (self.startIndex <= 1)
 end
@@ -93,12 +107,12 @@ end
 function ZO_GuildHistory_Gamepad:CanPageRight()
     local targetData = self.categoryList:GetTargetData()
     local categoryId = targetData.categoryId
-    local numEvents = GetNumGuildEvents(self.guildId, categoryId)
+    local numEvents = #self.guildEvents
     local nextStartIndex = self.startIndex + self.itemsPerPage
     if numEvents >= nextStartIndex then
         return true
     else
-        return DoesGuildHistoryCategoryHaveMoreEvents(self.guildId, categoryId)
+        return DoesGuildHistoryCategoryHaveMoreEvents(self.guildId, categoryId) and not self:IsTryingToGetMoreEvents()
     end
 end
 
@@ -111,7 +125,7 @@ function ZO_GuildHistory_Gamepad:NextPage()
 
     local targetData = self.categoryList:GetTargetData()
     local categoryId = targetData.categoryId
-    local numEvents = GetNumGuildEvents(self.guildId, categoryId)
+    local numEvents = #self.guildEvents
     local numEventsRequiredToFillPage = self.startIndex + self.itemsPerPage
     --If we have enough events to fill the next page already or there are no more events to fetch then just show the next page, otherwise request more events.
     if numEvents >= numEventsRequiredToFillPage or not DoesGuildHistoryCategoryHaveMoreEvents(self.guildId, categoryId) then
@@ -330,8 +344,11 @@ function ZO_GuildHistory_Gamepad:RequestMoreEvents()
     if GUILD_HISTORY_GAMEPAD_FRAGMENT:IsShowing() then
         local targetData = self.categoryList:GetTargetData()
         local categoryId = targetData.categoryId
-        if RequestMoreGuildHistoryCategoryEvents(self.guildId, categoryId) then
-            self:ShowLoading()
+        if DoesGuildHistoryCategoryHaveMoreEvents(self.guildId, categoryId) or not HasGuildHistoryCategoryEverBeenRequested(self.guildId, categoryId) then
+            local QUEUE_REQUEST_IF_ON_COOLDOWN = true
+            RequestMoreGuildHistoryCategoryEvents(self.guildId, categoryId, QUEUE_REQUEST_IF_ON_COOLDOWN)
+            self:RefreshKeybinds()
+            self:UpdateLogTriggerButtons()
         end
     end
 end
@@ -364,17 +381,14 @@ function ZO_GuildHistory_Gamepad:OnGuildHistoryCategoryUpdated(guildId, category
 end
 
 function ZO_GuildHistory_Gamepad:OnGuildHistoryResponseReceived()
-    if not HasOutstandingGuildHistoryRequest() then
-        self:HideLoading()
-    end
+    self:RefreshKeybinds()
+    self:UpdateLogTriggerButtons()
 end
 
 function ZO_GuildHistory_Gamepad:PopulateEventList()
     local targetData = self.categoryList:GetTargetData()
     local categoryId = targetData.categoryId
     local subcategoryId = targetData.subcategoryId
-
-    self.currPageNum = math.floor((self.startIndex / self.itemsPerPage) + 1)
 
     -- Build and filter the event list.
     ZO_ClearNumericallyIndexedTable(self.guildEvents)
@@ -402,26 +416,47 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
         end
     end
 
-    table.sort(self.guildEvents, function(event1, event2) return event1.eventId > event2.eventId end)
-
+    self.currPageNum = math.floor((self.startIndex / self.itemsPerPage) + 1)
     self.displayedItems = zo_min(#self.guildEvents - self.startIndex + 1, self.itemsPerPage)
-    for eventIndex = 1, self.itemsPerPage do
-        local displayItem = self.activityListItems[eventIndex]
-        if eventIndex <= self.displayedItems then
-            local eventData = self.guildEvents[self.startIndex + eventIndex - 1]
-            local description = eventData.formatFunction(eventData.eventType, eventData.param1, eventData.param2, eventData.param3, eventData.param4, eventData.param5, eventData.param6)
-            local time = ZO_FormatDurationAgo(eventData.secsSinceEvent)
 
-            displayItem:SetHidden(false)
-            displayItem.text:SetText(description)
-            displayItem.time:SetText(time)
-            displayItem.description = description
+    for eventIndex = 1, self.itemsPerPage do
+        self.activityListItems[eventIndex]:SetHidden(true)
+    end
+
+    --Update keybinds
+    self:RefreshKeybinds()
+
+    -- Update the trigger buttons.
+    self:UpdateLogTriggerButtons()
+
+    --If this page isn't full then we may not have gotten enough new events in this category to fill it...
+    if self.displayedItems < self.itemsPerPage and not self:IsTryingToGetMoreEvents() then
+        if DoesGuildHistoryCategoryHaveMoreEvents(self.guildId, categoryId) then
+            --if we can request more then try that
+            return self:RequestMoreEvents()
         else
-            displayItem:SetHidden(true)
+            --if we can't request more then we need to go back to the previous page since if this page is empty because there will be nothing to fill it
+            if self.displayedItems == 0 and self.startIndex ~= 1 then
+                return self:PreviousPage()
+            end
         end
     end
 
-    if self.displayedItems == 0 and self.startIndex == 1 then
+    table.sort(self.guildEvents, function(event1, event2) return event1.eventId > event2.eventId end)
+
+    for eventIndex = 1, self.displayedItems do
+        local displayItem = self.activityListItems[eventIndex]
+        local eventData = self.guildEvents[self.startIndex + eventIndex - 1]
+        local description = eventData.formatFunction(eventData.eventType, eventData.param1, eventData.param2, eventData.param3, eventData.param4, eventData.param5, eventData.param6)
+        local time = ZO_FormatDurationAgo(eventData.secsSinceEvent)
+
+        displayItem:SetHidden(false)
+        displayItem.text:SetText(description)
+        displayItem.time:SetText(time)
+        displayItem.description = description
+    end
+
+    if self.displayedItems == 0 and self.startIndex == 1 and not self:IsTryingToGetMoreEvents() then
         -- Display a "no items" item if there are truly no items.
         local displayItem = self.activityListItems[1]
         displayItem:SetHidden(false)
@@ -430,12 +465,6 @@ function ZO_GuildHistory_Gamepad:PopulateEventList()
         displayItem.time:SetText("")
         displayItem.description = nil
     end
-
-    --Update keybinds
-    self:RefreshKeybinds()
-
-    -- Update the trigger buttons.
-    self:UpdateLogTriggerButtons()
 end
 
 function ZO_GuildHistory_Gamepad:PopulateCategoryList()

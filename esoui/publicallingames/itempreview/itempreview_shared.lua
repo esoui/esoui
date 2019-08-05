@@ -848,7 +848,7 @@ do
 end
 
 function ZO_ItemPreview_Shared:IsInteractionCameraPreviewEnabled()
-    return not IsInteractionUsingInteractCamera()
+    return GetInteractionType() ~= INTERACTION_NONE and not IsInteractionUsingInteractCamera()
 end
 
 function ZO_ItemPreview_Shared:ToggleInteractionCameraPreview(framingTargetFragment, framingFragment, previewOptionsFragment)

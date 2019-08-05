@@ -105,7 +105,9 @@ local BUY_ITEMS_SORT_KEYS =
 local BUY_ITEMS_SORT_KEYS_VALUE =
 {
     bestGamepadItemCategoryName = { tiebreaker = "stackBuyPrice" },
-    stackBuyPrice = { tiebreaker = "name" },
+    stackBuyPrice = { tiebreaker = "stackBuyPriceCurrency1" , isNumeric = true},
+    stackBuyPriceCurrency1 = { tiebreaker = "stackBuyPriceCurrency2", isNumeric = true },
+    stackBuyPriceCurrency2 = { tiebreaker = "name", isNumeric = true },
     name = { tiebreaker = "meetsRequirementsToBuy" },
     meetsRequirementsToBuy = { tiebreaker = "meetsRequirementsToEquip", isNumeric = true },
     meetsRequirementsToEquip = { tiebreaker = "icon", isNumeric = true },

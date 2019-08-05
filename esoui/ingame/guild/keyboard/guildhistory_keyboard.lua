@@ -23,12 +23,15 @@ function GuildHistoryManager:Initialize(control)
 
     self.updateFunction = function(control, timeS)
         --delay showing the request loading icon by LOAD_CONTROL_TRIGGER_TIME_S
-        if HasOutstandingGuildHistoryRequest() then
+        if DoesGuildHistoryCategoryHaveOutstandingRequest(self.guildId, self.selectedCategory) then
             if not self.nextLoadControlTrigger then
                 self.nextLoadControlTrigger = timeS + LOAD_CONTROL_TRIGGER_TIME_S
             elseif timeS > self.nextLoadControlTrigger then
                 self.loading:Show()
             end
+        else
+            self.nextLoadControlTrigger = nil
+            self.loading:Hide()
         end
     end
 
@@ -51,7 +54,6 @@ function GuildHistoryManager:Initialize(control)
     self:CreateCategoryTree()
     
     control:RegisterForEvent(EVENT_GUILD_HISTORY_CATEGORY_UPDATED, function(_, guildId, category) self:OnGuildHistoryCategoryUpdated(guildId, category) end)
-    control:RegisterForEvent(EVENT_GUILD_HISTORY_RESPONSE_RECEIVED, function() self:OnGuildHistoryResponseReceived() end)
     control:RegisterForEvent(EVENT_GUILD_HISTORY_REFRESHED, function() 
         self.selectedSubcategory = nil
         self.refreshGroup:MarkDirty("EventListData")
@@ -287,13 +289,6 @@ function GuildHistoryManager:OnGuildHistoryCategoryUpdated(guildId, category)
     if self.guildId == guildId and self.selectedCategory == category then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         self.refreshGroup:MarkDirty("EventListData")
-    end
-end
-
-function GuildHistoryManager:OnGuildHistoryResponseReceived()
-    if not HasOutstandingGuildHistoryRequest() then
-        self.loading:Hide()
-        self.nextLoadControlTrigger = nil
     end
 end
 
