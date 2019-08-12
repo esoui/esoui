@@ -6,13 +6,37 @@
                     <Dimensions x="512" y="256" />
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
                     <Controls>
-                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds">
-                            <Dimensions x="512" y="512" />
-                            <Anchor point="TOP" />
-                        </Texture>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
 
-                        <Label name="$(parent)ExtractLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                        <Label name="$(parent)ExtractLabel" inherits="ZO_CraftingContainerHeader">
                             <Anchor point="TOP" offsetY="64" />
+                        </Label>
+
+                        <Button name="$(parent)ExtractionSlot" inherits="ZO_CraftingSlot">
+                            <Anchor point="TOP" relativeTo="$(parent)ExtractLabel" relativePoint="BOTTOM" offsetY="20" />
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontWinH4" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel">
+                                    <Dimensions x="230" />
+                                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                                </Label>
+                            </Controls>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate" />
+            </Controls>
+        </Control>
+        <Control name="ZO_SmithingRefinementPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)SlotContainer">
+                    <Dimensions x="512" y="256" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
+                    <Controls>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
+
+                        <Label name="$(parent)ExtractLabel" inherits="ZO_CraftingContainerHeader">
+                            <Anchor point="TOP" offsetX="-100" offsetY="64" />
                         </Label>
 
                         <Button name="$(parent)ExtractionSlot" inherits="ZO_CraftingSlot">
@@ -27,6 +51,15 @@
                                 </Label>
                             </Controls>
                         </Button>
+
+                        <Label name="$(parent)QuantityLabel" inherits="ZO_CraftingContainerHeader" text="SI_CRAFTING_QUANTITY_HEADER">
+                            <Anchor point="LEFT" relativeTo="$(parent)ExtractLabel" relativePoint="RIGHT" offsetX="100" />
+                        </Label>
+
+                        <Control name="$(parent)Spinner" inherits="ZO_MultiCraftSpinner">
+                            <Anchor point="TOP" relativeTo="$(parent)QuantityLabel" relativePoint="BOTTOM" offsetY="34" />
+                        </Control>
+
                     </Controls>
                 </Control>
 

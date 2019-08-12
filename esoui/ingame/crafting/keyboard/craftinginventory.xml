@@ -10,6 +10,14 @@
                 self.owner:SetMousedOverRow(nil)
                 ZO_InventorySlot_OnMouseExit(self)
             </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_CraftingInventoryComponentRow_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+
+            <OnMouseDoubleClick>
+                -- override to disable double click action
+            </OnMouseDoubleClick>
         </Control>
 
         <Control name="ZO_CraftingInventoryTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">

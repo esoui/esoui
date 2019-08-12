@@ -36,37 +36,12 @@ function ZO_ZoneStories_Shared:InitializeGridList()
     self.gridListControl = gridListControl
     self.gridList = self.templateData.gridListClass:New(gridListControl)
 
-    -- Setup grid template data
-    local function AchievementSetup(control, data)
-        if not data.isEmptyCell then
-            control.object:Layout(data.achievementId)
-        end
-    end
-
-    local function ActivityCompletionSetup(control, data)
-        if not data.isEmptyCell then
-            control.object:Layout(data.zoneData, data.completionType)
-        end
-    end
-
-    local function GridEntryReset(control)
-        ZO_ObjectPool_DefaultResetControl(control)
-        control.object:Reset()
-    end
-
-    local function ActivityCompletionGridHeaderSetup(control, data, selected)
-        local label = control:GetNamedChild("Text")
-        if label then
-            label:SetText(data.header)
-        end
-    end
-
     local HIDE_CALLBACK = nil
     local achievementData = self.templateData.achievements
     local activityCompletionData = self.templateData.activityCompletion
-    self.gridList:AddEntryTemplate(achievementData.entryTemplate, achievementData.dimensionsX, achievementData.dimensionsY, AchievementSetup, HIDE_CALLBACK, GridEntryReset, achievementData.gridPaddingX, achievementData.gridPaddingY)
-    self.gridList:AddEntryTemplate(activityCompletionData.entryTemplate, activityCompletionData.dimensionsX, activityCompletionData.dimensionsY, ActivityCompletionSetup, HIDE_CALLBACK, GridEntryReset, activityCompletionData.gridPaddingX, activityCompletionData.gridPaddingY)
-    self.gridList:AddHeaderTemplate(activityCompletionData.headerTemplate, activityCompletionData.headerHeight, ActivityCompletionGridHeaderSetup)
+    self.gridList:AddEntryTemplate(achievementData.entryTemplate, achievementData.dimensionsX, achievementData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, achievementData.gridPaddingX, achievementData.gridPaddingY)
+    self.gridList:AddEntryTemplate(activityCompletionData.entryTemplate, activityCompletionData.dimensionsX, activityCompletionData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, activityCompletionData.gridPaddingX, activityCompletionData.gridPaddingY)
+    self.gridList:AddHeaderTemplate(activityCompletionData.headerTemplate, activityCompletionData.headerHeight, ZO_DefaultGridTileHeaderSetup)
     self.gridList:SetHeaderPrePadding(self.templateData.headerPrePadding)
 
     self:BuildGridList()

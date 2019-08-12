@@ -56,11 +56,11 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
         },
         activityCheckbox =
         {
-            entryTemplate = "ZO_GuildRecruitment_ActivityCheckboxTile_Gamepad_Control",
+            entryTemplate = "ZO_CheckboxTile_Gamepad_Control",
             dimensionsX = ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COLUMN_WIDTH,
-            dimensionsY = ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_CHECKBOX_HEIGHT,
+            dimensionsY = ZO_CHECKBOX_TILE_GAMEPAD_HEIGHT,
             endEntryTemplate = "ZO_GuildRecruitment_ActivityCheckboxEndTile_Gamepad_Control",
-            endDimensionsY = ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_CHECKBOX_HEIGHT,
+            endDimensionsY = ZO_CHECKBOX_TILE_GAMEPAD_HEIGHT,
             gridPaddingX = 20,
             gridPaddingY = 0,
             headerText = GetString(SI_GAMEPAD_GUILD_RECRUITMENT_ADDITIONAL_ACTIVITIES_HEADER),
@@ -142,7 +142,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:OnGridSelectionChanged(oldSele
         end
     end
 
-    ZO_ScrollList_RefreshVisible(self.gridList.list)
+    self.gridList:RefreshGridList()
 end
 
 function ZO_GuildRecruitment_GuildListing_Gamepad:OnShowing()

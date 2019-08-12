@@ -10,8 +10,7 @@ local SYMBOL_PARAMS = {
 local MapKeepUpgrade = ZO_MapKeepUpgrade_Shared:Subclass()
 
 function MapKeepUpgrade:New(...)
-    local object = ZO_MapKeepUpgrade_Shared.New(self, ...)
-    return object
+    return ZO_MapKeepUpgrade_Shared.New(self, ...)
 end
 
 function MapKeepUpgrade:Initialize(control)
@@ -22,22 +21,6 @@ function MapKeepUpgrade:Initialize(control)
     self.buttonLayout = "ZO_WorldMapKeepUpgradeButton_Keyboard"
 
     ZO_MapKeepUpgrade_Shared.Initialize(self, control)
-
-    self.fragment = ZO_FadeSceneFragment:New(control)
-    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_SHOWN) then
-            self:RefreshAll()
-        elseif(newState == SCENE_FRAGMENT_HIDDEN) then
-            self.keepUpgradeObject = nil
-        end
-    end)
-end
-
-function MapKeepUpgrade:RefreshAll()
-    self:RefreshData()
-    self:RefreshLevels()
-    self:RefreshBarLabel()
-    self:RefreshTimeDependentControls()
 end
 
 function MapKeepUpgrade:RefreshData()

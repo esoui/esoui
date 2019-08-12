@@ -144,7 +144,7 @@ function ZO_Smithing_Common:GetTutorialTrigger(craftingType, mode)
 end
 
 function ZO_Smithing_Common:DirtyAllPanels()
-    self.creationPanel:HandleDirtyEvent()
+    self.creationPanel:DirtyAllLists()
     self.improvementPanel:HandleDirtyEvent()
     self.researchPanel:HandleDirtyEvent()
 end
@@ -189,8 +189,22 @@ function ZO_Smithing_Common:RemoveItemFromCraft(bagId, slotIndex)
     end
 end
 
+function ZO_Smithing_Common:ClearSelections()
+    if self.mode == SMITHING_MODE_REFINEMENT then
+        self.refinementPanel:ClearSelections()
+    elseif self.mode == SMITHING_MODE_IMPROVEMENT then
+        self.improvementPanel:ClearSelections()
+    elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
+        self.deconstructionPanel:ClearSelections()
+    end
+end
+
 function ZO_Smithing_Common:DoesCurrentModeHaveSlotAnimations()
     return self.mode == SMITHING_MODE_IMPROVEMENT or self.mode == SMITHING_MODE_REFINEMENT or self.mode == SMITHING_MODE_DECONSTRUCTION
+end
+
+function ZO_Smithing_Common:IsCreating()
+    return self.mode == SMITHING_MODE_CREATION
 end
 
 function ZO_Smithing_Common:IsImproving()
@@ -205,23 +219,10 @@ function ZO_Smithing_Common:IsDeconstructing()
     return self.mode == SMITHING_MODE_DECONSTRUCTION
 end
 
--- The following functions to update keybinds are only called on the non-gamepad version of the screens.
-function ZO_Smithing_Common:OnSelectedPatternChanged()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
-function ZO_Smithing_Common:OnMaterialChanged()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
-function ZO_Smithing_Common:OnSelectedStyleChanged()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
-function ZO_Smithing_Common:OnSelectedTraitChanged()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
+-- The following functions to update keybinds are called by both
+-- gamepad/keyboard, but only affect the shared keybind strip on keyboard. Where
+-- possible, refactor away from these functions and toward calling UpdateSharedKeybinds directly
+-- on the keyboard side of things
 function ZO_Smithing_Common:OnImprovementSlotChanged()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end

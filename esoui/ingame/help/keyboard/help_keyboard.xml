@@ -19,14 +19,6 @@
                 ZO_Help_Initialize(self)
             </OnInitialized>
 
-            <OnEffectivelyShown>
-                ZO_Help_OnShow(self)
-            </OnEffectivelyShown>
-            
-            <OnHide>
-                ZO_Help_OnHide(self)
-            </OnHide>
-
             <Controls>
                 <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />

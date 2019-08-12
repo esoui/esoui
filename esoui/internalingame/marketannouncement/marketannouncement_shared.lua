@@ -203,7 +203,10 @@ function ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData(tileInfoList)
         local dailyRewardTileInfo = 
         {
             type = ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
-            layoutParams = { dailyRewardIndex },
+            data =
+            {
+                dailyRewardIndex = dailyRewardIndex
+            },
             visible = true,
         }
         table.insert(tileInfoList, dailyRewardTileInfo)
@@ -223,9 +226,9 @@ function ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData(tileInfoList)
         local zoneStoriesTileInfo =
         {
             type = ZO_ACTION_TILE_TYPE.ZONE_STORIES,
-            layoutParams = 
+            data = 
             {
-                zoneId,
+                zoneId = zoneId,
             },
             visible = true,
         }
@@ -265,7 +268,7 @@ do
 
             if visible and self.actionTileControlPoolMap[actionTileInfo.type] then
                 local actionTileControl = self.actionTileControlPoolMap[actionTileInfo.type]:AcquireObject()
-                actionTileControl.object:Layout(unpack(actionTileInfo.layoutParams))
+                actionTileControl.object:Layout(actionTileInfo.data)
                 table.insert(self.actionTileList, actionTileControl)
 
                 -- Set Anchors

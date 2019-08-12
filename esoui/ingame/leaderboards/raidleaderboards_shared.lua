@@ -5,6 +5,8 @@ RAID_LEADERBOARD_SELECT_OPTION_DEFAULT = 0
 RAID_LEADERBOARD_SELECT_OPTION_SKIP_WEEKLY = 1
 RAID_LEADERBOARD_SELECT_OPTION_PREFER_WEEKLY = 2
 
+RAID_LEADERBOARD_MAX_RANK_ALLOWED = 100
+
 RAID_LEADERBOARD_SYSTEM_NAME = "raidLeaderboards"
 
 local HEADER_ICONS =
@@ -161,8 +163,12 @@ do
             return 0
         end
 
+        local function GetMaxRank()
+            return RAID_LEADERBOARD_MAX_RANK_ALLOWED
+        end
+
         local function AddEntry(parent, name, categoryData, leaderboardRankType)
-            local node = self.leaderboardSystem:AddEntry(self, name, GetRaidLeaderboardTitleName, parent, categoryData, GetNumEntries, nil, GetSingleRaidEntryInfo, nil, GetString(SI_LEADERBOARDS_HEADER_SCORE), GetRaidLeaderboardEntryConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_trial.dds", leaderboardRankType)
+            local node = self.leaderboardSystem:AddEntry(self, name, GetRaidLeaderboardTitleName, parent, categoryData, GetNumEntries, GetMaxRank, GetSingleRaidEntryInfo, nil, GetString(SI_LEADERBOARDS_HEADER_SCORE), GetRaidLeaderboardEntryConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_trial.dds", leaderboardRankType)
             if node then
                 local nodeData = node.GetData and node:GetData() or node
                 nodeData.raidId = categoryData.raidId

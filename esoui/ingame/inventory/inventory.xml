@@ -243,7 +243,7 @@
                         
                         <Backdrop name="$(parent)DepositWithdrawCurrency" inherits="ZO_DefaultCurrencyInputField">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Amounts" relativePoint="BOTTOMLEFT" offsetY="20"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Amounts" relativePoint="BOTTOMRIGHT" offsetX="-39" offsetY="20" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Amounts" relativePoint="BOTTOMRIGHT" offsetX="-40" offsetY="20" />
                         </Backdrop>
                     </Controls>
                 </Control>

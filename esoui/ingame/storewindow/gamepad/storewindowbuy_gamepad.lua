@@ -12,6 +12,7 @@ function ZO_GamepadStoreBuy:Initialize(scene)
             self:RegisterEvents()
             self.list:UpdateList()
             STORE_WINDOW_GAMEPAD:UpdateRightTooltip(self.list, ZO_MODE_STORE_BUY)
+            self:SetVendorBlurActive(true)
             self:UpdatePreview(self.list:GetSelectedData())
         elseif newState == SCENE_HIDING then
             self:UnregisterEvents()
@@ -155,7 +156,7 @@ end
 
 function ZO_GamepadStoreBuy:CanBuy()
     local selectedData = self.list:GetTargetData()
-    if selectedData then        
+    if selectedData then
         if not selectedData.dataSource.meetsRequirementsToBuy then
             return false, selectedData.dataSource.requiredToBuyErrorText
         end
@@ -207,18 +208,33 @@ function ZO_GamepadStoreBuy:OnSelectedItemChanged(buyData)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
+function ZO_GamepadStoreBuy:SetVendorBlurActive(shouldActivateVendorBlur)
+    if shouldActivateVendorBlur then
+        SCENE_MANAGER:AddFragment(FRAME_TARGET_BLUR_QUADRANT_3_GAMEPAD_FRAGMENT)
+    else
+        -- As is the case with other item preview fragments, we want to override the
+        -- hideOnSceneHidden behavior the blur fragment normally has, but only
+        -- when toggling preview on/off. if we are hiding the scene normally, we
+        -- should continue using hideOnSceneHidden. More info in ZO_ItemPreview_Shared:SetInteractionCameraPreviewEnabled().
+        ITEM_PREVIEW_GAMEPAD:RemoveFragmentImmediately(FRAME_TARGET_BLUR_QUADRANT_3_GAMEPAD_FRAGMENT)
+    end
+end
+
 function ZO_GamepadStoreBuy:UpdatePreview(selectedData)
     if ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled() then
         if self:CanPreviewStoreEntry(selectedData) then
             local storeEntryIndex = ZO_Inventory_GetSlotIndex(selectedData)
             ZO_StoreManager_DoPreviewAction(ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE, storeEntryIndex)
         else
+            self:SetVendorBlurActive(false)
             ITEM_PREVIEW_GAMEPAD:SetInteractionCameraPreviewEnabled(false, FRAME_TARGET_STORE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
         end
     end
 end
 
 function ZO_GamepadStoreBuy:TogglePreviewMode()
+    local willPreviewBeDisabled = ITEM_PREVIEW_GAMEPAD:IsInteractionCameraPreviewEnabled()
+    self:SetVendorBlurActive(willPreviewBeDisabled)
     ITEM_PREVIEW_GAMEPAD:ToggleInteractionCameraPreview(FRAME_TARGET_STORE_GAMEPAD_FRAGMENT, FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT, GAMEPAD_NAV_QUADRANT_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 
     local targetData = self.list:GetTargetData()

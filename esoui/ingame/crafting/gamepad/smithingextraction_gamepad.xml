@@ -23,12 +23,8 @@
                                     <Anchor point="BOTTOMRIGHT" offsetX="218" offsetY="64" />
                                 </Backdrop>
 
-                                <Label name="$(parent)Name" font="ZoFontGamepad34" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                <Label name="$(parent)Name" font="ZoFontGamepad34" horizontalAlignment="CENTER">
                                     <Dimensions x="400" />
-                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-2" />
-                                </Label>
-                                <Label name="$(parent)NeedMoreLabel" font="ZoFontGamepad34" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                                    <Dimensions x="400"/>
                                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-2" />
                                 </Label>
                             </Controls>

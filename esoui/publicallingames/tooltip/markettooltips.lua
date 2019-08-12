@@ -105,6 +105,12 @@ function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationInde
         local achievementName = GetAchievementName(achievementId)
         criteriaSection:AddSection(self:GetCheckboxSection(zo_strformat(achievementName), completedAchievement))
         self:AddSection(criteriaSection)
+
+        if completedAchievement and IsMarketProductPurchased(marketProductId) then
+            local purchasableOnAltSection = self:AcquireSection(self:GetStyle("bodySection"))
+            purchasableOnAltSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_PURCHASABLE_ON_ALT_CHARACTER_DESCRIPTION), self:GetStyle("bodyDescription"), self:GetStyle("whiteFontColor"))
+            self:AddSection(purchasableOnAltSection)
+        end
     end
 
     local passesReqList, errorStringId = DoesMarketProductPassPurchasableReqList(marketProductId)
@@ -194,22 +200,15 @@ function ZO_Tooltip:LayoutCrownCrate(crateId, stackCount)
 end
 
 do
-    local UPGRADE_HEADER = GetString(SI_MARKET_PRODUCT_TOOLTIP_UPGRADE)
-    local SERVICE_HEADER = GetString(SI_SERVICE_TOOLTIP_TYPE)
     local UNLOCK_LABEL = GetString(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK)
 
     function ZO_Tooltip:LayoutInstantUnlock(instantUnlockId)
         -- things added to the topSection stack upwards
         local topSection = self:AcquireSection(self:GetStyle("topSection"))
 
-        local isServiceToken = IsInstantUnlockRewardServiceToken(instantUnlockId)
-        local isUpgrade = IsInstantUnlockRewardUpgrade(instantUnlockId)
-        if isServiceToken then
-            topSection:AddLine(SERVICE_HEADER)
-        else
-            topSection:AddLine(UPGRADE_HEADER)
-        end
-
+        local instantUnlockCategory = GetInstantUnlockRewardCategory(instantUnlockId)
+        local headerString = GetString("SI_INSTANTUNLOCKREWARDCATEGORY", instantUnlockCategory)
+        topSection:AddLine(headerString)
         self:AddSection(topSection)
 
         -- Name
@@ -218,8 +217,7 @@ do
         self:AddLine(displayName, self:GetStyle("title"))
 
         local tooltipLines = {}
-        local instantUnlockType = GetInstantUnlockRewardType(instantUnlockId)
-        if isUpgrade then
+        if instantUnlockCategory == INSTANT_UNLOCK_REWARD_CATEGORY_UPGRADE then
             local statsSection = self:AcquireSection(self:GetStyle("baseStatsSection"))
             local statValuePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
             statValuePair:SetStat(UNLOCK_LABEL, self:GetStyle("statValuePairStat"))
@@ -227,7 +225,7 @@ do
             local currentUnlock
             local maxUnlock
             local unlockDescription
-
+            local instantUnlockType = GetInstantUnlockRewardType(instantUnlockId)
             if instantUnlockType == INSTANT_UNLOCK_PLAYER_BACKPACK then
                 currentUnlock = GetCurrentBackpackUpgrade()
                 maxUnlock = GetMaxBackpackUpgrade()
@@ -251,24 +249,27 @@ do
             statValuePair:SetValue(zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL, currentUnlock, maxUnlock), self:GetStyle("statValuePairValue"))
             statsSection:AddStatValuePair(statValuePair)
             self:AddSection(statsSection)
-        elseif isServiceToken then
+        elseif instantUnlockCategory == INSTANT_UNLOCK_REWARD_CATEGORY_SERVICE_TOKEN then
             local tokenDescription
-            local tokenUsageRequirement = GetString(SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT) -- All tokens only usable from character select
             local tokenCountString
-
+            local instantUnlockType = GetInstantUnlockRewardType(instantUnlockId)
             if instantUnlockType == INSTANT_UNLOCK_RENAME_TOKEN then
-                tokenDescription = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
+                tokenDescription = GetServiceTokenDescription(SERVICE_TOKEN_NAME_CHANGE)
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_NAME_CHANGE))
             elseif instantUnlockType == INSTANT_UNLOCK_RACE_CHANGE_TOKEN then
-                tokenDescription = GetString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
+                tokenDescription = GetServiceTokenDescription(SERVICE_TOKEN_RACE_CHANGE)
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_RACE_CHANGE))
             elseif instantUnlockType == INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN then
-                tokenDescription = GetString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
+                tokenDescription = GetServiceTokenDescription(SERVICE_TOKEN_APPEARANCE_CHANGE)
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_APPEARANCE_CHANGE))
             end
 
             table.insert(tooltipLines, tokenDescription)
+
+            -- All tokens only usable from character select
+            local tokenUsageRequirement = GetString(SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT)
             table.insert(tooltipLines, tokenUsageRequirement)
+
             table.insert(tooltipLines, tokenCountString)
         else
             table.insert(tooltipLines, GetInstantUnlockRewardDescription(instantUnlockId))

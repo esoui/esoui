@@ -45,7 +45,7 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
         end,
 
         callback = function()
-            UseCollectible(self.collectibleData:GetId())
+            self.collectibleData:Use()
         end,
 
         visible = function()
@@ -124,6 +124,8 @@ function ZO_CollectibleTile_Keyboard:GetPrimaryInteractionStringId()
     elseif self.isCooldownActive ~= true and not collectibleData:IsBlocked() then
         if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MEMENTO) then
             stringId = SI_COLLECTIBLE_ACTION_USE
+        elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
+            stringId = SI_COLLECTIBLE_ACTION_COMBINE
         else
             stringId = SI_COLLECTIBLE_ACTION_SET_ACTIVE
         end
@@ -136,15 +138,15 @@ function ZO_CollectibleTile_Keyboard:ShowMenu()
     if collectibleData then
         ClearMenu()
 
-        local collectibleId = collectibleData:GetId()
-
         --Use
         if collectibleData:IsUsable() then
             local stringId = self:GetPrimaryInteractionStringId()
             if stringId then
-                AddMenuItem(GetString(stringId), function() UseCollectible(collectibleId) end)
+                AddMenuItem(GetString(stringId), function() collectibleData:Use() end)
             end
         end
+
+        local collectibleId = collectibleData:GetId()
 
         if IsChatSystemAvailableForCurrentPlatform() then
             --Link in chat
@@ -287,8 +289,8 @@ end
 
 -- Begin ZO_ContextualActionsTile_Keyboard Overrides --
 
-function ZO_CollectibleTile_Keyboard:LayoutPlatform(collectibleId)
-    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+function ZO_CollectibleTile_Keyboard:LayoutPlatform(data)
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(data.collectibleId)
     internalassert(collectibleData ~= nil)
     self.collectibleData = collectibleData
     self:SetCanFocus(true)
@@ -352,7 +354,7 @@ function ZO_CollectibleTile_Keyboard:OnMouseDoubleClick(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local collectibleData = self.collectibleData
         if collectibleData and collectibleData:IsUsable() then
-            UseCollectible(collectibleData:GetId())
+            collectibleData:Use()
         end
     end
 end

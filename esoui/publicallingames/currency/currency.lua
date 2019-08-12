@@ -10,9 +10,13 @@ local DEFAULT_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GEN
 ZO_CURRENCIES_DATA = {}
 local g_currenciesData = ZO_CURRENCIES_DATA -- These APIs are called a lot, so let's not spam global lookup
 
+ZO_VALID_CURRENCY_TYPES = {}
+
 do
     for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
         if IsCurrencyValid(currencyType) then 
+            table.insert(ZO_VALID_CURRENCY_TYPES, currencyType)
+
             local IS_PLURAL = false
             local IS_UPPER = false
             local currencyInfo =

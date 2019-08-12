@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CheckboxTile_Gamepad_Control" inherits="ZO_Tile_Control ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_CHECKBOX_TILE_GAMEPAD_WIDTH" y="ZO_CHECKBOX_TILE_GAMEPAD_HEIGHT"/>
+            <OnInitialized>
+                ZO_CheckboxTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)SelectorBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" hidden="true" >
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="35" y="37" />
+                </Backdrop>
+
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" tier="HIGH">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+
+                <Label name="$(parent)Text" override="true" font="ZoFontGamepad34">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="-3"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -8,49 +8,12 @@
     </Animations>
     <Controls>
         <Control name="ZO_RankHeader" inherits="ZO_IconHeader" virtual="true"/>
-        
-        <Control name="ZO_GuildPermission" virtual="true">
-            <Dimensions y="30"/>
-            <Controls>
-                <Texture name="$(parent)Icon" layer="OVERLAY" hidden="true">
-                    <Dimensions x="32" y="32"/>
-                    <Anchor point="LEFT"/>
-                </Texture>
-                <Button name="$(parent)Check" inherits="ZO_CheckButton">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
-                    <OnMouseEnter>
-                        ZO_GuildRankPermission_OnMouseEnter(self)
-                    </OnMouseEnter>
-                    <OnMouseExit>
-                        ZO_GuildRankPermission_OnMouseExit(self)
-                    </OnMouseExit>
-                    <OnInitialized>
-                        ZO_CheckButton_SetToggleFunction(self, ZO_GuildPermissionCheck_OnToggled)
-                    </OnInitialized>
-                </Button>
-            </Controls>
-        </Control>
 
-        <Control name="ZO_GuildRankIconSelector" virtual="true" mouseEnabled="true">
-            <Dimensions x="48" y="48"/>
-            <OnMouseEnter>
-                ZO_GuildRankIconSelector_OnMouseEnter(self)
-            </OnMouseEnter>
-            <OnMouseExit>
-                ZO_GuildRankIconSelector_OnMouseExit(self)
-            </OnMouseExit>
-            <OnMouseUp>
-                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
-                    ZO_GuildRankIconSelector_OnMouseClicked(self)
-                end
-            </OnMouseUp>
+        <Control name="ZO_GuildRanks_Keyboard_Header_Template" virtual="true">
             <Controls>
-                <Texture name="$(parent)Frame" tier="LOW">
-                    <AnchorFill/>
-                </Texture>
-                <Texture name="$(parent)Icon" tier="MEDIUM">
-                    <AnchorFill/>
-                </Texture>
+                <Label name="$(parent)Text" font="ZoFontHeader2" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetY="10"/>
+                </Label>
             </Controls>
         </Control>
 
@@ -84,7 +47,7 @@
                 <Control name="$(parent)Add" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-        
+
         <TopLevelControl name="ZO_GuildRanks" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_GuildRanks_OnInitialized(self)
@@ -103,6 +66,9 @@
                     <Dimensions x="64" y="64"/>
                     <Anchor point="TOPLEFT" offsetX="275" offsetY="59"/>
                 </Texture>
+                <Control name="$(parent)RankIconButton" inherits="ZO_GuildRank_RankIconPickerIcon_Keyboard_Control">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RankIcon" relativePoint="TOPLEFT" offsetX="-2" offsetY="-2" />
+                </Control>
                 <Control name="$(parent)RankName">
                     <Anchor point="LEFT" relativeTo="$(parent)RankIcon" relativePoint="RIGHT" offsetX="3"/>
                     <Controls>
@@ -124,33 +90,36 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RankIcon" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="15"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-20"/>
-                </Control>
-
-                <Control name="$(parent)Icons" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT"/>
+                <Control name="$(parent)PermissionsContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RankIcon" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="21" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
-                        <Label name="$(parent)Header" font="ZoFontHeader2" text="SI_GUILD_ICONS_HEADER" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT"/>
-                        </Label>
-                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Guild/guildHeraldry_swatchFrame_overSelect.dds" excludeFromResizeToFitExtents="true" hidden="true">
-                            <Anchor point="TOPLEFT"/>
-                            <Dimensions x="96" y="96"/>
-                        </Texture>
-                    </Controls>
-                </Control>
-                
-                <Control name="$(parent)Permissions" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icons" relativePoint="BOTTOMLEFT" offsetY="15"/>
-                    <Controls>
-                        <Label name="$(parent)Header" font="ZoFontHeader2" text="SI_GUILD_PERMISSIONS_HEADER" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT"/>
-                        </Label>
+                        <Control name="$(parent)PermissionsPanel" inherits="ZO_GridScrollList_Keyboard">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_GuildRanks" />
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>
-    </Controls>    
+
+        <TopLevelControl name="ZO_RankIconPickerDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_RankIconPickerDialog_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)RankIconPickerContainer" inherits="ZO_DialogContentAnchors">
+                    <Controls>
+                        <Control name="$(parent)Panel" inherits="ZO_GridScrollList_Keyboard">
+                            <Dimensions x="264" y="250" />
+                            <Anchor point="TOPLEFT" offsetX="55" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
 </GuiXml>

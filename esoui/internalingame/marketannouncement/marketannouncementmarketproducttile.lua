@@ -24,14 +24,15 @@ function ZO_MarketAnnouncementMarketProductTile:OnInteractWithScroll()
     end
 end
 
-function ZO_MarketAnnouncementMarketProductTile:Layout(marketProduct, selected)
-    ZO_Tile.Layout(self, marketProduct, selected)
+function ZO_MarketAnnouncementMarketProductTile:Layout(data)
+    ZO_Tile.Layout(self, data)
 
+    local marketProduct = data.marketProduct
     if not marketProduct.control or marketProduct.control ~= self.control or self.marketProduct:GetId() ~= marketProduct:GetId() then
         self.marketProduct = marketProduct
         marketProduct:SetControl(self.control)
         marketProduct:Show()
-        marketProduct:SetIsFocused(selected)
+        marketProduct:SetIsFocused(data.isSelected)
 
         local keybindStringId
         local marketProductId = marketProduct:GetId()

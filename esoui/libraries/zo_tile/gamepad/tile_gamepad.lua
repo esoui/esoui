@@ -18,6 +18,13 @@ function ZO_Tile_Gamepad:PostInitializePlatform()
     -- To be overridden
 end
 
+function ZO_Tile_Gamepad:LayoutPlatform(data)
+    if data then
+        local isSelected = data.isSelected or false
+        self:SetSelected(isSelected)
+    end
+end
+
 function ZO_Tile_Gamepad:IsSelected()
     return self.isSelected
 end

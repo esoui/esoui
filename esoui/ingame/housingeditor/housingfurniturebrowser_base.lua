@@ -86,6 +86,11 @@ function ZO_HousingFurnitureBrowser_Base:UpdateProductPanel()
     --Override
 end
 
+function ZO_HousingFurnitureBrowser_Base:IsShowing()
+    -- To be overridden
+    assert(false)
+end
+
 function ZO_HousingFurnitureBrowser_Base:OnShowing()
     PlaySound(SOUNDS.HOUSING_EDITOR_OPEN_BROWSER) 
     if self.placeableListDirty then
@@ -141,6 +146,10 @@ function ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(data)
     local result = HousingEditorRequestRemoveFurniture(data.retrievableFurnitureId)
     ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
     PlaySound(SOUNDS.DEFAULT_CLICK)
+end
+
+function ZO_HousingFurnitureBrowser_Base:GetMode()
+    return self.mode
 end
 
 function ZO_HousingFurnitureBrowser_Base:SetMode(mode)

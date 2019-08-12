@@ -217,6 +217,7 @@ function ZO_CheckButton_SetLabelText(button, labelText)
 
             local MOUSED_OVER = true
             ZO_CheckButtonLabel_ColorText(label, MOUSED_OVER)
+            button:SetShowingHighlight(MOUSED_OVER)
         end
 
         local function OnMouseExit()
@@ -224,6 +225,7 @@ function ZO_CheckButton_SetLabelText(button, labelText)
 
             local NOT_MOUSED_OVER = false
             ZO_CheckButtonLabel_ColorText(label, NOT_MOUSED_OVER)
+            button:SetShowingHighlight(NOT_MOUSED_OVER)
         end
 
         ZO_PreHookHandler(button, "OnMouseEnter", OnMouseEnter)

@@ -10,8 +10,7 @@ local SYMBOL_PARAMS = {
 local MapKeepUpgrade_Gamepad = ZO_MapKeepUpgrade_Shared:Subclass()
 
 function MapKeepUpgrade_Gamepad:New(...)
-    local object = ZO_MapKeepUpgrade_Shared.New(self, ...)
-    return object
+    return ZO_MapKeepUpgrade_Shared.New(self, ...)
 end
 
 function MapKeepUpgrade_Gamepad:Initialize(control)
@@ -30,20 +29,6 @@ function MapKeepUpgrade_Gamepad:Initialize(control)
     ZO_MapKeepUpgrade_Shared.Initialize(self, control)
 
     self.levelsGridList:SetOnSelectedDataChangedCallback(function(previousData, newData) self:OnGridListSelectedDataChanged(previousData, newData) end)
-
-    self.fragment = ZO_FadeSceneFragment:New(control)
-    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWN then
-            self:RefreshAll()
-            SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
-            ZO_WorldMap_UpdateMap()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            self.keepUpgradeObject = nil
-            self.scrollTooltip:ClearLines()
-            SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
-            ZO_WorldMap_UpdateMap()
-        end
-    end)
 end
 
 function MapKeepUpgrade_Gamepad:Activate()
@@ -62,11 +47,17 @@ function MapKeepUpgrade_Gamepad:OnGridListSelectedDataChanged(previousData, newD
     end
 end
 
-function MapKeepUpgrade_Gamepad:RefreshAll()
-    self:RefreshData()
-    self:RefreshLevels()
-    self:RefreshBarLabel()
-    self:RefreshTimeDependentControls()
+function MapKeepUpgrade_Gamepad:OnFragmentShown()
+    ZO_MapKeepUpgrade_Shared.OnFragmentShown(self)
+    SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+    ZO_WorldMap_UpdateMap()
+end
+
+function MapKeepUpgrade_Gamepad:OnFragmentHidden()
+    ZO_MapKeepUpgrade_Shared.OnFragmentHidden(self)
+    self.scrollTooltip:ClearLines()
+    SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_4_BACKGROUND_FRAGMENT)
+    ZO_WorldMap_UpdateMap()
 end
 
 function MapKeepUpgrade_Gamepad:RefreshData()

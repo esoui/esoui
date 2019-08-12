@@ -142,7 +142,7 @@
                             <Anchor point="TOPLEFT" offsetX="20" offsetY="30" />
                         </Label>
 
-                        <Label name="$(parent)Description" override="true" font="ZoFontWinH4">
+                        <Label name="$(parent)Description" override="true" wrapMode="ELLIPSIS" font="ZoFontWinH4">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10" />
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPLEFT" offsetY="-20" />
                         </Label>

@@ -1,9 +1,7 @@
 ZO_Alchemy = ZO_SharedAlchemy:Subclass()
 
 function ZO_Alchemy:New(...)
-    local alchemy = ZO_SharedAlchemy.New(self)
-    alchemy:Initialize(...)
-    return alchemy
+    return ZO_SharedAlchemy.New(self, ...)
 end
 
 function ZO_Alchemy:Initialize(control)
@@ -75,7 +73,7 @@ function ZO_Alchemy:InitializeScenes()
     end)
 
     self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if SCENE_MANAGER:IsShowing(self.sceneName) then
+        if SYSTEMS:IsShowing("alchemy") then
             self:OnSlotChanged()
         end
     end)
@@ -127,14 +125,27 @@ function ZO_Alchemy:InitializeModeBar()
     ZO_MenuBar_SelectDescriptor(self.modeBar, ZO_ALCHEMY_MODE_CREATION)
 end
 
-function ZO_Alchemy:GetReagentSlotOffset(thirdSlotUnlocked)
-    return 20
-end
-
 function ZO_Alchemy:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+        -- Perform craft
+        {
+            name = function()
+                local cost = GetCostToCraftAlchemyItem(self.solventSlot:GetBagAndSlot())
+                return ZO_CraftingUtils_GetCostToCraftString(cost)
+            end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+
+            callback = function()
+                self:Create(self:GetMultiCraftNumIterations())
+            end,
+
+            enabled = function()
+                return self:ShouldCraftButtonBeEnabled()
+            end,
+        },
 
         -- Clear selections
         {
@@ -145,22 +156,49 @@ function ZO_Alchemy:InitializeKeybindStripDescriptors()
 
             visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() end,
         },
-
-        -- Perform craft
-        {
-            name = function()
-                local cost = GetCostToCraftAlchemyItem(self.solventSlot:GetBagAndSlot())
-                return ZO_CraftingUtils_GetCostToCraftString(cost)
-            end,
-            keybind = "UI_SHORTCUT_SECONDARY",
-
-            callback = function() self:Create() end,
-
-            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
-        },
     }
 
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
+end
+
+function ZO_Alchemy:InitializeSlots()
+    local slotContainer = self.control:GetNamedChild("SlotContainer")
+    self.solventSlot = ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("SolventSlot"), "EsoUI/Art/Crafting/alchemy_emptySlot_solvent.dds", SOUNDS.ALCHEMY_SOLVENT_PLACED, SOUNDS.ALCHEMY_SOLVENT_REMOVED, nil, self.inventory)
+    self.solventSlot:RegisterCallback("ItemsChanged", function()
+        self:OnSlotChanged()
+    end)
+    self.solventSlot:RegisterCallback("ItemSlotted", function(bagId, slotIndex)
+        self:OnSolventSlotted(bagId, slotIndex)
+    end)
+
+    local REAGENT_TEXTURE = "EsoUI/Art/Crafting/alchemy_emptySlot_reagent.dds"
+    local ALWAYS_USABLE = nil
+    self.reagentSlots = {
+        ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("ReagentSlot1"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ALWAYS_USABLE, self.inventory),
+        ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("ReagentSlot2"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ALWAYS_USABLE, self.inventory),
+        ZO_AlchemySlot:New(self, slotContainer:GetNamedChild("ReagentSlot3"), REAGENT_TEXTURE, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ZO_Alchemy_IsThirdAlchemySlotUnlocked, self.inventory),
+    }
+    for _, slot in pairs(self.reagentSlots) do
+        slot:RegisterCallback("ItemsChanged", function()
+            self:OnSlotChanged()
+            self:UpdateReagentTraits()
+        end)
+    end
+
+    self.multiCraftSpinner = ZO_MultiCraftSpinner:New(slotContainer:GetNamedChild("Spinner"))
+    ZO_CraftingUtils_ConnectSpinnerToCraftingProcess(self.multiCraftSpinner)
+
+    self.slotAnimation = ZO_CraftingCreateSlotAnimation:New(self.sceneName)
+
+    self.control:RegisterForEvent(EVENT_NON_COMBAT_BONUS_CHANGED, function(eventCode, nonCombatBonusType)
+        if nonCombatBonusType == NON_COMBAT_BONUS_ALCHEMY_THIRD_SLOT then
+            self:UpdateThirdAlchemySlot()
+        elseif nonCombatBonusType == NON_COMBAT_BONUS_ALCHEMY_LEVEL then
+            self.inventory:HandleDirtyEvent()
+        end
+    end)
+
+    self:UpdateThirdAlchemySlot()
 end
 
 function ZO_Alchemy:UpdateTooltip()
@@ -174,15 +212,66 @@ function ZO_Alchemy:UpdateTooltip()
     end
 end
 
+function ZO_Alchemy:UpdateThirdAlchemySlot()
+    local SUPPRESS_SOUND = true
+    local IGNORE_REQUIREMENTS = true
+    self:ClearSelections(SUPPRESS_SOUND, IGNORE_REQUIREMENTS)
+
+    local slotContainer = self.control:GetNamedChild("SlotContainer")
+    local reagentsLabel = slotContainer:GetNamedChild("ReagentsLabel")
+    local reagentSlot3Unlocked = ZO_Alchemy_IsThirdAlchemySlotUnlocked()
+
+    self.slotAnimation:Clear()
+    for i, slot in ipairs(self.reagentSlots) do
+        slot:GetControl():ClearAnchors()
+    end
+
+    local reagentSlot1 = self.reagentSlots[1]
+    local reagentSlot2 = self.reagentSlots[2]
+    local reagentSlot3 = self.reagentSlots[3]
+
+    local reagentSlotControl1 = reagentSlot1:GetControl()
+    local reagentSlotControl2 = reagentSlot2:GetControl()
+    local reagentSlotControl3 = reagentSlot3:GetControl()
+
+    self.slotAnimation:AddSlot(self.solventSlot)
+    self.slotAnimation:AddSlot(reagentSlot1)
+    self.slotAnimation:AddSlot(reagentSlot2)
+
+    local SLOT_OFFSET_X = 20
+    local SLOT_OFFSET_Y = 20
+    if reagentSlot3Unlocked then
+        reagentSlotControl1:SetAnchor(RIGHT, reagentSlotControl2, LEFT, -SLOT_OFFSET_X, 0)
+        reagentSlotControl2:SetAnchor(TOP, reagentsLabel, BOTTOM, 0, SLOT_OFFSET_Y)
+        reagentSlotControl3:SetAnchor(LEFT, reagentSlotControl2, RIGHT, SLOT_OFFSET_X, 0)
+
+        self.slotAnimation:AddSlot(reagentSlot3)
+    else
+        reagentSlotControl1:SetAnchor(TOPRIGHT, reagentsLabel, BOTTOM, -SLOT_OFFSET_X, SLOT_OFFSET_Y)
+        reagentSlotControl2:SetAnchor(TOPLEFT, reagentsLabel, BOTTOM, SLOT_OFFSET_X, SLOT_OFFSET_Y)
+    end
+end
+
+function ZO_Alchemy:ResetSelectedTab()
+    self:ClearSelections()
+    self.mode = nil
+end
+
+function ZO_Alchemy:UpdateMultiCraft()
+    self.multiCraftSpinner:SetMinMax(1, self:GetMultiCraftMaxIterations())
+    self.multiCraftSpinner:UpdateButtons()
+end
+
+function ZO_Alchemy:GetMultiCraftNumIterations()
+    return self.multiCraftSpinner:GetValue()
+end
+
 function ZO_Alchemy:OnItemReceiveDrag(slotControl, bagId, slotIndex)
     local usedInCraftingType, craftingSubItemType, rankRequirement = GetItemCraftingInfo(bagId, slotIndex)
     if usedInCraftingType == CRAFTING_TYPE_ALCHEMY then
         if self.solventSlot:IsSlotControl(slotControl) then
             if IsAlchemySolvent(craftingSubItemType) and rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
                 if not self.solventSlot:IsItemId(GetItemInstanceId(bagId, slotIndex)) then
-                    if self.solventSlot:HasItem() then
-                        PickupInventoryItem(self.solventSlot:GetBagAndSlot())
-                    end
                     self:SetSolventItem(bagId, slotIndex)
                 end
             end
@@ -196,9 +285,6 @@ function ZO_Alchemy:OnItemReceiveDrag(slotControl, bagId, slotIndex)
                 self:SetReagentItem(existingReagentSlotIndex, nil)
             end
 
-            if self.reagentSlots[reagentSlotIndex]:HasItem() then
-                PickupInventoryItem(self.reagentSlots[reagentSlotIndex]:GetBagAndSlot())
-            end
             self:SetReagentItem(reagentSlotIndex, bagId, slotIndex)
         end
     end
@@ -229,7 +315,6 @@ function ZO_Alchemy:SetMode(mode)
         self:UpdateTooltip()
     end
 end
-
 
 --Alchemy Inventory
 -------------------------

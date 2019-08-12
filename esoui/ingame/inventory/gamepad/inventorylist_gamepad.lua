@@ -303,14 +303,12 @@ do
     end
 
     function ZO_GamepadInventoryList:IsEmpty()
-        for k, inventoryType in ipairs(self.inventoryTypes) do
+        for k, bagId in ipairs(self.inventoryTypes) do
             local filterFunction = self.itemFilterFunction
-            local slotIndex = ZO_GetNextBagSlotIndex(inventoryType)
-            while slotIndex do
-                if HasSlotData(inventoryType, slotIndex, filterFunction) then
+            for slotIndex in ZO_IterateBagSlots(bagId) do
+                if HasSlotData(bagId, slotIndex, filterFunction) then
                     return false
                 end
-                slotIndex = ZO_GetNextBagSlotIndex(inventoryType, slotIndex)
             end
         end
 
@@ -410,11 +408,9 @@ end
 function ZO_GamepadInventoryList:GenerateSlotTable()
     local slots = {}
 
-    for k, inventoryType in ipairs(self.inventoryTypes) do
-        local slotIndex = ZO_GetNextBagSlotIndex(inventoryType)
-        while slotIndex do
-            self:AddSlotDataToTable(slots, inventoryType, slotIndex)
-            slotIndex = ZO_GetNextBagSlotIndex(inventoryType, slotIndex)
+    for k, bagId in ipairs(self.inventoryTypes) do
+        for slotIndex in ZO_IterateBagSlots(bagId) do
+            self:AddSlotDataToTable(slots, bagId, slotIndex)
         end
     end
 

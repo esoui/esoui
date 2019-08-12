@@ -173,12 +173,6 @@ function ZO_Spinner:OnButtonUp(direction)
     self.control:SetHandler("OnUpdate", nil)
 end
 
-function ZO_Spinner:AllowUnknownQuantities(unknownCharacter)
-    if unknownCharacter then
-        self.unknownQuantityCharacter = unknownCharacter
-    end
-end
-
 --[[A function responsible to constraining a spinner to a set of valid values.
 The function takes a value and a requested delta. It should return the value
 plus the delta (the target value) if that is in the valid set. Otherwise it should
@@ -251,7 +245,7 @@ function ZO_Spinner:UpdateButtons()
     else
         self.increaseButton:SetHidden(false)
         self.decreaseButton:SetHidden(false)
-        if self.value == nil or not self.enabled then
+        if not self.enabled then
             self.increaseButton:SetEnabled(false)
             self.decreaseButton:SetEnabled(false)
         else
@@ -262,7 +256,7 @@ function ZO_Spinner:UpdateButtons()
 
     if self.display then
         if self.display:GetType() == CT_EDITBOX then
-            if self:GetMax() == self:GetMin() or self.value == nil or not self.enabled then
+            if self:GetMax() == self:GetMin() or not self.enabled then
                 self.display:SetMouseEnabled(false)
             else
                 self.display:SetMouseEnabled(self.mouseEnabled)
@@ -281,25 +275,20 @@ function ZO_Spinner:SetMouseEnabled(mouseEnabled)
 end
 
 function ZO_Spinner:SetValue(value, forceSet)
-    if value == nil then
-        if self.unknownQuantityCharacter and self.value ~= nil then
-            self.value = nil
-            if self.display then
-                self.display:SetText(self.unknownQuantityCharacter)
-            end
-            self:UpdateButtons()
-            self:FireCallbacks("OnValueChanged", value)
-            return true
-        end
-    else
+    if value ~= nil then
         value = self.constrainRangeFunc(value, self:GetMin(), self:GetMax(), self.step)
 
         if self.validValuesFunction then
             value = self.validValuesFunction(value, 0)
         end
 
-        if((value ~= self.value) or forceSet) then
-            self.value = value
+        if (value ~= self.value) or forceSet then
+            if value == 0 then
+                -- protect against -0
+                self.value = 0
+            else
+                self.value = value
+            end
             self:UpdateDisplay()
             self:UpdateButtons()
             self:FireCallbacks("OnValueChanged", value)
@@ -312,7 +301,9 @@ end
 function ZO_Spinner:UpdateDisplay()
     if self.display then
         local valueText
-        if self.valueFormatFunction then
+        if self.displayTextOverride then
+            valueText = self.displayTextOverride
+        elseif self.valueFormatFunction then
             valueText = self.valueFormatFunction(self.value)
         else
             valueText = self.value
@@ -328,6 +319,11 @@ end
 
 function ZO_Spinner:SetValueFormatFunction(valueFormatFunction)
     self.valueFormatFunction = valueFormatFunction
+    self:UpdateDisplay()
+end
+
+function ZO_Spinner:SetDisplayTextOverride(displayTextOverride)
+    self.displayTextOverride = displayTextOverride
     self:UpdateDisplay()
 end
 

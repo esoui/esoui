@@ -218,28 +218,6 @@
                                 </Control>
                             </Controls>
                         </Control>
-
-                        <Control name="$(parent)ExtraInfoDetails" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Container" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Container" />
-                            
-                            <Controls>
-                                <Label name="$(parent)Title" font="ZoFontGamepad45" modifyTextType="UPPERCASE">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
-                                </Label>
-
-                                <Label name="$(parent)Description1" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="50" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="50" />
-                                </Label>
-
-                                <Label name="$(parent)Description2" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description1" relativePoint="BOTTOMLEFT" offsetY="50" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Description1" relativePoint="BOTTOMRIGHT" offsetY="50" />
-                                </Label>
-                            </Controls>
-                        </Control>
                     </Controls>
                 </Control>
             </Controls>

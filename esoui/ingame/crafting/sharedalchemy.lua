@@ -3,6 +3,8 @@ ALCHEMY_TRAIT_STRIDE = 5
 ZO_ALCHEMY_MODE_CREATION = 1
 ZO_ALCHEMY_MODE_RECIPES = 2
 
+local REQUIRED_SLOTTED_REAGENTS = 2
+
 function ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType)
     if filterType == nil then
         return true
@@ -32,11 +34,13 @@ function ZO_Alchemy_IsThirdAlchemySlotUnlocked()
     return GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_THIRD_SLOT) ~= 0
 end
 
-function ZO_Alchemy_IsSceneShowing()
-    return SYSTEMS:IsShowing("alchemy")
-end
+ZO_SharedAlchemy = ZO_CraftingCreateScreenBase:Subclass()
 
-ZO_SharedAlchemy = ZO_Object:Subclass()
+function ZO_SharedAlchemy:New(...)
+    local alchemy = ZO_CraftingCreateScreenBase.New(self)
+    alchemy:Initialize(...)
+    return alchemy
+end
 
 ZO_SharedAlchemy.initializedEvents = false
 
@@ -65,6 +69,7 @@ function ZO_SharedAlchemy:Initialize(control)
     local function OnCraftCompleted()
         if not self.control:IsHidden() then
             self:UpdateTooltip()
+            self:UpdateMultiCraft()
         end
     end
 
@@ -75,8 +80,11 @@ function ZO_SharedAlchemy:InitializeSharedEvents()
     if not ZO_SharedAlchemy.initializedEvents then
         ZO_SharedAlchemy.initializedEvents = true
     
-        EVENT_MANAGER:RegisterForEvent("ZO_SharedAlchemy", EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
+        EVENT_MANAGER:RegisterForEvent("ZO_SharedAlchemy", EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, isCraftingSameAsPrevious)
             if craftingType == CRAFTING_TYPE_ALCHEMY then
+                if not isCraftingSameAsPrevious then
+                    self:ResetSelectedTab()
+                end
                 SYSTEMS:ShowScene("alchemy")
             end
         end)
@@ -105,11 +113,6 @@ function ZO_SharedAlchemy:InitializeScenes()
     -- Should be overridden
 end
 
--- Gets the horizontal offset for reagent slots
-function ZO_SharedAlchemy:GetReagentSlotOffset(thirdSlotUnlocked)
-    -- Should be overriden for screen-specific spacing
-end
-
 function ZO_SharedAlchemy:UpdateTooltip()
     -- Should be overridden
 end
@@ -119,63 +122,47 @@ function ZO_SharedAlchemy:UpdateTooltipLayout()
 end
 
 function ZO_SharedAlchemy:InitializeSlots()
-    local slotContainer = self.control:GetNamedChild("SlotContainer")
-    self.solventSlot = ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("SolventSlot"), "EsoUI/Art/Crafting/alchemy_emptySlot_solvent.dds", SOUNDS.ALCHEMY_SOLVENT_PLACED, SOUNDS.ALCHEMY_SOLVENT_REMOVED, nil, self.inventory)
-
-    local reagentTexture = "EsoUI/Art/Crafting/alchemy_emptySlot_reagent.dds"
-    self.reagentSlots = {
-        ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("ReagentSlot1"), reagentTexture, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, nil, self.inventory),
-        ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("ReagentSlot2"), reagentTexture, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, nil, self.inventory),
-        ZO_AlchemyReagentSlot:New(self, slotContainer:GetNamedChild("ReagentSlot3"), reagentTexture, SOUNDS.ALCHEMY_REAGENT_PLACED, SOUNDS.ALCHEMY_REAGENT_REMOVED, ZO_Alchemy_IsThirdAlchemySlotUnlocked, self.inventory),
-    }
-
-    local reagentsLabel = slotContainer:GetNamedChild("ReagentsLabel")
-
-    self.slotAnimation = ZO_CraftingCreateSlotAnimation:New(self.sceneName)
-
-    self.control:RegisterForEvent(EVENT_NON_COMBAT_BONUS_CHANGED, function(eventCode, nonCombatBonusType)
-        if nonCombatBonusType == NON_COMBAT_BONUS_ALCHEMY_THIRD_SLOT then
-            self:UpdateThirdAlchemySlot()
-        elseif nonCombatBonusType == NON_COMBAT_BONUS_ALCHEMY_LEVEL then
-            self.inventory:HandleDirtyEvent()
-        end
-    end)
-
-    self:UpdateThirdAlchemySlot()
+    -- Should be overridden
 end
 
 function ZO_SharedAlchemy:UpdateThirdAlchemySlot()
-    local SUPPRESS_SOUND = true
-    local IGNORE_REQUIREMENTS = true
-    self:ClearSelections(SUPPRESS_SOUND, IGNORE_REQUIREMENTS)
+    -- Should be overridden
+end
 
-    local slotContainer = self.control:GetNamedChild("SlotContainer")
-    local reagentsLabel = slotContainer:GetNamedChild("ReagentsLabel")
-    local thirdSlotUnlocked = ZO_Alchemy_IsThirdAlchemySlotUnlocked()
-    local slotOffset = self:GetReagentSlotOffset(thirdSlotUnlocked)
+function ZO_SharedAlchemy:ResetSelectedTab()
+    -- Should be overridden
+end
 
-    self.slotAnimation:Clear()
-    for i, slot in ipairs(self.reagentSlots) do
-        slot:GetControl():ClearAnchors()
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedAlchemy:GetMultiCraftMaxIterations()
+    if not self:IsCraftable() then
+        return 0
     end
 
-    self.slotAnimation:AddSlot(self.solventSlot)
-    self.slotAnimation:AddSlot(self.reagentSlots[1])
-    self.slotAnimation:AddSlot(self.reagentSlots[2])
+    local maxIterations = GetMaxIterationsPossibleForAlchemyItem(self:GetAllCraftingBagAndSlots())
+    if maxIterations > 1 then
+        -- If a player doesn't already know all the traits that would go into the
+        -- final effect of this alchemy item, they will need to craft with them at
+        -- least once to learn what the final result will be. Let's restrict them to
+        -- single crafts until they've done that.
+        local _, prospectiveAlchemyResult = GetAlchemyResultingItemLink(self:GetAllCraftingBagAndSlots())
+        if prospectiveAlchemyResult ~= PROSPECTIVE_ALCHEMY_RESULT_KNOWN then
+            return 1
+        end
 
-    if thirdSlotUnlocked then
-        local secondSlotControl = self.reagentSlots[2]:GetControl()
-        secondSlotControl:SetAnchor(TOP, reagentsLabel, BOTTOM, 0, 20)
-
-        self.reagentSlots[1]:GetControl():SetAnchor(RIGHT, secondSlotControl, LEFT, -slotOffset, 0)
-        self.reagentSlots[3]:GetControl():SetAnchor(LEFT, secondSlotControl, RIGHT, slotOffset, 0)
-
-        self.slotAnimation:AddSlot(self.reagentSlots[3])
-    else
-        self.reagentSlots[1]:GetControl():SetAnchor(TOPRIGHT, reagentsLabel, BOTTOM, -slotOffset, 20)
-        self.reagentSlots[2]:GetControl():SetAnchor(TOPLEFT, reagentsLabel, BOTTOM, slotOffset, 20)
+        -- The player may be using a reagent that could have no effect on the final
+        -- craft. For the same reason we prevent multicrafting unknown potions, lets
+        -- prevent multicrafting here too
+        if self:DoesAnyReagentHaveNoKnownTraits() then
+            return 1
+        end
     end
-    self.reagentSlots[3]:SetHidden(not thirdSlotUnlocked)
+
+    return maxIterations
+end
+
+function ZO_SharedAlchemy:UpdateMultiCraft()
+    -- Should be overidden
 end
 
 function ZO_SharedAlchemy:CanItemBeAddedToCraft(bagId, slotIndex)
@@ -235,13 +222,6 @@ end
 
 function ZO_SharedAlchemy:SetSolventItem(bagId, slotIndex)
     self.solventSlot:SetItem(bagId, slotIndex)
-    
-    local _, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
-    if(craftingSubItemType == ITEMTYPE_POISON_BASE) then
-        TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_STATION_OIL_SLOTTED)
-    end
-
-    self:OnSlotChanged()
 end
 
 function ZO_SharedAlchemy:FindNextSlotToInsertReagent()
@@ -262,13 +242,10 @@ function ZO_SharedAlchemy:SetReagentItem(reagentSlot, bagId, slotIndex)
 
     self.reagentSlots[reagentSlot]:SetItem(bagId, slotIndex)
     self.lastReagentIndexAdded = reagentSlot
-    self:OnReagentSlotChanged()
-    self:OnSlotChanged()
 end
 
 local function AddTraitCounts(traitCounts, cancellingTraitCounts, ...)
-    local numTraits = select("#", ...) / ALCHEMY_TRAIT_STRIDE
-    for i = 1, numTraits do
+    for i = 1, NUM_ALCHEMY_TRAITS_PER_REAGENT do
         local traitName, _, _, cancellingTraitName = ZO_Alchemy_GetTraitInfo(i, ...)
         if traitName then
             traitCounts[traitName] = (traitCounts[traitName] or 0) + 1
@@ -279,7 +256,7 @@ local function AddTraitCounts(traitCounts, cancellingTraitCounts, ...)
     end
 end
 
-function ZO_SharedAlchemy:OnReagentSlotChanged()
+function ZO_SharedAlchemy:UpdateReagentTraits()
     self.matchingTraits = {}
     self.cancelledTraits = {}
 
@@ -314,6 +291,25 @@ end
 
 function ZO_SharedAlchemy:HasTraitCancelled(traitName)
     return self.cancelledTraits and self.cancelledTraits[traitName]
+end
+
+function ZO_SharedAlchemy:DoesAnyReagentHaveNoKnownTraits()
+    for i, slot in ipairs(self.reagentSlots) do
+        if slot:HasItem() then
+            local bagId, slotIndex = slot:GetBagAndSlot()
+            local noKnownTraits = true
+            for traitIndex = 1, NUM_ALCHEMY_TRAITS_PER_REAGENT do
+                if IsAlchemyItemTraitKnown(bagId, slotIndex, traitIndex) then
+                    noKnownTraits = false
+                    break
+                end
+            end
+            if noKnownTraits then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 function  ZO_SharedAlchemy:SetupTraitIcon(textureControl, name, icon, matchIcon, conflictIcon, unknownTexture)
@@ -358,18 +354,13 @@ end
 
 function ZO_SharedAlchemy:OnInventoryUpdate(validItemIds)
     local changed = false
-    if not self.solventSlot:ValidateItemId(validItemIds) then
-        changed = true
-    end
+    self.solventSlot:ValidateItemId(validItemIds)
     for i, slot in ipairs(self.reagentSlots) do
-        if not slot:ValidateItemId(validItemIds) then
-            changed = true
-        end
+        slot:ValidateItemId(validItemIds)
     end
-    if changed then
-        self:OnSlotChanged()
-    end
-    self:OnReagentSlotChanged()
+
+    self:UpdateMultiCraft()
+    self:UpdateReagentTraits()
 end
 
 function ZO_SharedAlchemy:IsSlotted(bagId, slotIndex)
@@ -392,9 +383,6 @@ function ZO_SharedAlchemy:ClearSelections(suppressSound, ignoreUsabilityRequirem
     for i, slot in ipairs(self.reagentSlots) do
         slot:SetItem(NO_BAG, NO_INDEX, suppressSound, ignoreUsabilityRequirement)
     end
-
-    self:OnReagentSlotChanged()
-    self:OnSlotChanged()
 end
 
 function ZO_SharedAlchemy:HasSelections()
@@ -409,10 +397,10 @@ function ZO_SharedAlchemy:HasSelections()
     return false
 end
 
+-- Overrides ZO_CraftingCreateScreenBase
 function ZO_SharedAlchemy:IsCraftable()
     if self.solventSlot:HasItem() then
         local numSlotsWithItems = 0
-        local REQUIRED_SLOTTED_REAGENTS = 2
         for i, slot in ipairs(self.reagentSlots) do
             if slot:HasItem() and slot:MeetsUsabilityRequirement() then
                 numSlotsWithItems = numSlotsWithItems + 1
@@ -425,8 +413,39 @@ function ZO_SharedAlchemy:IsCraftable()
     return false
 end
 
-function ZO_SharedAlchemy:Create()
-    CraftAlchemyItem(self:GetAllCraftingBagAndSlots())
+function ZO_SharedAlchemy:ShouldCraftButtonBeEnabled()
+    if ZO_CraftingUtils_IsPerformingCraftProcess() then
+        return false
+    end
+
+    if not self.solventSlot:HasItem() then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_INVALID_BASE)
+    end
+
+    local numSlotsWithItems = 0
+    for i, slot in ipairs(self.reagentSlots) do
+        if slot:HasItem() and slot:MeetsUsabilityRequirement() then
+            numSlotsWithItems = numSlotsWithItems + 1
+        end
+    end
+
+    if numSlotsWithItems < REQUIRED_SLOTTED_REAGENTS then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_TOO_FEW_REAGENTS)
+    end
+
+    local _, prospectiveAlchemyResult = GetAlchemyResultingItemLink(self:GetAllCraftingBagAndSlots())
+    if prospectiveAlchemyResult == PROSPECTIVE_ALCHEMY_RESULT_UNCRAFTABLE then
+        -- allow invalid crafts, even if there isn't inventory space for it
+        return true
+    end
+
+    local maxIterations, craftingResult = GetMaxIterationsPossibleForAlchemyItem(self:GetAllCraftingBagAndSlots())
+    return maxIterations ~= 0, GetString("SI_TRADESKILLRESULT", craftingResult)
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedAlchemy:Create(numIterations)
+    CraftAlchemyItem(self:GetAllCraftingParameters(numIterations))
 end
 
 local function CollapseBagAndSlots(bagId, slotIndex, ...)
@@ -453,9 +472,31 @@ function ZO_SharedAlchemy:GetAllCraftingBagAndSlots()
     return solventBagId, solventSlotIndex, bagId1, slotIndex1, bagId2, slotIndex2, bagId3, slotIndex3
 end
 
-function ZO_SharedAlchemy:OnSlotChanged()
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedAlchemy:GetAllCraftingParameters(numIterations)
+    -- Tricky behavior here: since bag/slot 3 can be nil, you _cannot_ put these crafting parameters into a table safely.
+    local solventBagId, solventSlotIndex = self.solventSlot:GetBagAndSlot()
+    local reagent1BagId, reagent1SlotIndex = self.reagentSlots[1]:GetBagAndSlot()
+    local reagent2BagId, reagent2SlotIndex = self.reagentSlots[2]:GetBagAndSlot()
+    local reagent3BagId, reagent3SlotIndex = nil, nil
+    if #self.reagentSlots >= 3 then
+        reagent3BagId, reagent3SlotIndex = self.reagentSlots[3]:GetBagAndSlot()
+    end
+    local bagId1, slotIndex1, bagId2, slotIndex2, bagId3, slotIndex3 = CollapseBagAndSlots(reagent1BagId, reagent1SlotIndex, reagent2BagId, reagent2SlotIndex, reagent3BagId, reagent3SlotIndex)
+    return solventBagId, solventSlotIndex, bagId1, slotIndex1, bagId2, slotIndex2, bagId3, slotIndex3, numIterations
+end
+
+function ZO_SharedAlchemy:OnSolventSlotted(bagId, slotIndex)
+    local _, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
+    if craftingSubItemType == ITEMTYPE_POISON_BASE then
+        TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_STATION_OIL_SLOTTED)
+    end
+end
+
+function ZO_SharedAlchemy:OnSlotChanged(bagId, slotIndex)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     self:UpdateTooltip()
+    self:UpdateMultiCraft()
     self.inventory:HandleVisibleDirtyEvent()
 end
 
@@ -468,16 +509,16 @@ function ZO_SharedAlchemy:FindReagentSlotIndexBySlotControl(slotControl)
 end
 
 --
--- ZO_AlchemyReagentSlot
+-- ZO_AlchemySlot
 --
 
-ZO_AlchemyReagentSlot = ZO_CraftingSlotBase:Subclass()
+ZO_AlchemySlot = ZO_CraftingSlotBase:Subclass()
 
-function ZO_AlchemyReagentSlot:New(...)
+function ZO_AlchemySlot:New(...)
     return ZO_CraftingSlotBase.New(self, ...)
 end
 
-function ZO_AlchemyReagentSlot:Initialize(owner, control, emptyTexture, placeSound, removeSound, usabilityPredicate, craftingInventory, emptySlotIcon)
+function ZO_AlchemySlot:Initialize(owner, control, emptyTexture, placeSound, removeSound, usabilityPredicate, craftingInventory, emptySlotIcon)
     ZO_CraftingSlotBase.Initialize(self, owner, control, SLOT_TYPE_PENDING_CRAFTING_COMPONENT, emptyTexture, craftingInventory, emptySlotIcon)
 
     self.createsLevelLabel = self.control:GetNamedChild("CreatesLevel")
@@ -488,10 +529,14 @@ function ZO_AlchemyReagentSlot:Initialize(owner, control, emptyTexture, placeSou
     self.usabilityPredicate = usabilityPredicate
 
     self.dropCallout:SetDrawLayer(DL_BACKGROUND)
+    self:UpdateTraits()
 end
 
+function ZO_AlchemySlot:ShouldBeVisible()
+    return self:MeetsUsabilityRequirement()
+end
 
-function ZO_AlchemyReagentSlot:ShowDropCallout(isCorrectType)
+function ZO_AlchemySlot:ShowDropCallout(isCorrectType)
     self.dropCallout:SetHidden(false)
 
     if isCorrectType then
@@ -501,32 +546,7 @@ function ZO_AlchemyReagentSlot:ShowDropCallout(isCorrectType)
     end
 end
 
-function ZO_AlchemyReagentSlot:ValidateItemId(validItemIds)
-    if self.bagId and self.slotIndex then
-        -- An item might have been used up in a physical stack
-        if validItemIds[self.itemInstanceId] then
-            -- An item still exists in a physical stack, but might not exist in the virtual stack any more, update the indices
-            local itemInfo = validItemIds[self.itemInstanceId]
-            if self:IsBagAndSlot(itemInfo.bag, itemInfo.index) then
-                self:SetupItem(itemInfo.bag, itemInfo.index)
-            else
-                self:SetItem(itemInfo.bag, itemInfo.index)
-            end
-
-            self:OnPassedValidation()
-            return true
-        else
-            -- Item doesn't exist in a physical stack
-            local SUPPRESS_SOUND = true
-            self:SetItem(nil, nil, SUPPRESS_SOUND)
-            self:OnFailedValidation()
-            return false
-        end
-    end
-    return true
-end
-
-function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUsabilityRequirement)
+function ZO_AlchemySlot:SetItem(bagId, slotIndex, suppressSound, ignoreUsabilityRequirement)
     if not ignoreUsabilityRequirement then
         if not self:MeetsUsabilityRequirement() then
             return
@@ -536,7 +556,21 @@ function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUs
     self:SetupItem(bagId, slotIndex)
 
     if self:HasItem() then
+        if not suppressSound then
+            PlaySound(self.placeSound)
+        end
+    else
+        if not suppressSound then
+            PlaySound(self.removeSound)
+        end
+    end
+end
+
+function ZO_AlchemySlot:Refresh()
+    ZO_CraftingSlotBase.Refresh(self)
+    if self:HasItem() then
         if self.createsLevelLabel then
+            local bagId, slotIndex = self:GetBagAndSlot()
             local craftingSubItemType, _, resultingItemLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(bagId, slotIndex))
             local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
 
@@ -547,65 +581,54 @@ function ZO_AlchemyReagentSlot:SetItem(bagId, slotIndex, suppressSound, ignoreUs
             end
             self.createsLevelLabel:SetHidden(false)
         end
-
-        if not suppressSound then
-            PlaySound(self.placeSound)
-        end
-
         self:ShowSlotTraits(true)
     else
         if self.createsLevelLabel then
             self.createsLevelLabel:SetHidden(true)
         end
-
-        if not suppressSound then
-            PlaySound(self.removeSound)
-        end
-
         self:ShowSlotTraits(false)
     end
 end
 
-function ZO_AlchemyReagentSlot:UpdateTraits()
-    if self:MeetsUsabilityRequirement() then
-        if self.bagId and self.slotIndex then
-            self:SetTraits(nil, GetAlchemyItemTraits(self.bagId, self.slotIndex))
-        else
-            self:ClearTraits()
-        end
+function ZO_AlchemySlot:UpdateTraits()
+    if self:HasItem() then
+        self:SetTraits(GetAlchemyItemTraits(self:GetBagAndSlot()))
+    else
+        self:ClearTraits()
     end
 end
 
-function ZO_AlchemyReagentSlot:SetTraits(unknownTraitTexture, ...)
+function ZO_AlchemySlot:GetUnknownTraitTexture()
+    return  "EsoUI/Art/Crafting/crafting_alchemy_trait_slot.dds"
+end
+
+function ZO_AlchemySlot:SetTraits(...)
     if self.control.traits then
-        local numTraits = select("#", ...) / ALCHEMY_TRAIT_STRIDE
+        local unknownTraitTexture = self:GetUnknownTraitTexture()
         for i, traitTexture in ipairs(self.control.traits) do
-            if i > numTraits then
-                traitTexture:SetTexture(unknownTraitTexture or "EsoUI/Art/Crafting/crafting_alchemy_trait_slot.dds")
-            else
-                local traitName, traitIcon, traitMatchIcon, _, traitConflictIcon = ZO_Alchemy_GetTraitInfo(i, ...)
-                traitTexture.traitName = traitName
-                self.owner:SetupTraitIcon(traitTexture, traitName, traitIcon, traitMatchIcon, traitConflictIcon, unknownTraitTexture or "EsoUI/Art/Crafting/crafting_alchemy_trait_slot.dds")
-            end
+            local traitName, traitIcon, traitMatchIcon, _, traitConflictIcon = ZO_Alchemy_GetTraitInfo(i, ...)
+            traitTexture.traitName = traitName
+            self.owner:SetupTraitIcon(traitTexture, traitName, traitIcon, traitMatchIcon, traitConflictIcon, unknownTraitTexture)
         end
     end
 end
 
-function ZO_AlchemyReagentSlot:ClearTraits(unknownTraitTexture)
+function ZO_AlchemySlot:ClearTraits()
     if self.control.traits then
+        local unknownTraitTexture = self:GetUnknownTraitTexture()
         for i, traitTexture in ipairs(self.control.traits) do
             traitTexture.traitName = nil
-            traitTexture:SetTexture(unknownTraitTexture or "EsoUI/Art/Crafting/crafting_alchemy_trait_slot.dds")
+            traitTexture:SetTexture(unknownTraitTexture)
             traitTexture:SetAlpha(1)
         end
     end
 end
 
-function ZO_AlchemyReagentSlot:MeetsUsabilityRequirement()
+function ZO_AlchemySlot:MeetsUsabilityRequirement()
     return self.usabilityPredicate == nil or self.usabilityPredicate()
 end
 
-function ZO_AlchemyReagentSlot:ShowSlotTraits(showTraits)
+function ZO_AlchemySlot:ShowSlotTraits(showTraits)
     if self.emptySlotIcon and self.control.traits then
         for i, trait in ipairs(self.control.traits) do
             trait:SetHidden(not showTraits)

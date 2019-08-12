@@ -43,7 +43,8 @@ local function SortByCategory(result1, result2)
 end
 
 function HelpTutorialsCategoriesGamepad:AddListEntry(categoryIndex)
-    local categoryName, description, _, _, _, gamepadIcon = GetHelpCategoryInfo(categoryIndex)
+    local name, description, _, _, _, gamepadIcon, gamepadName = GetHelpCategoryInfo(categoryIndex)
+    local categoryName = gamepadName ~= "" and gamepadName or name
     local entryData = ZO_GamepadEntryData:New(categoryName, gamepadIcon)
     entryData:SetIconTintOnSelection(true)
     entryData.categoryIndex = categoryIndex

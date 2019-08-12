@@ -195,21 +195,9 @@ function ZO_CollectionsBook:InitializeGridListPanel()
     self.gridListPanelList = ZO_SingleTemplateGridScrollList_Keyboard:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local HIDE_CALLBACK = nil
-
-    local function CollectibleEntrySetup(control, data)
-        if not data.isEmptyCell then
-            control.object:Layout(data:GetId())
-        end
-    end
-
-    local function CollectibleGridEntryReset(control)
-        ZO_ObjectPool_DefaultResetControl(control)
-        control.object:Reset()
-    end
-
     local CENTER_ENTRIES = true --TODO: Remove this when it's the default
     local HEADER_HEIGHT = 30
-    self.gridListPanelList:SetGridEntryTemplate("ZO_CollectibleTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, CollectibleEntrySetup, HIDE_CALLBACK, CollectibleGridEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
+    self.gridListPanelList:SetGridEntryTemplate("ZO_CollectibleTile_Keyboard_Control", ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_X, ZO_COLLECTIBLE_TILE_KEYBOARD_DIMENSIONS_Y, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, COLLECTIBLE_TILE_GRID_PADDING, COLLECTIBLE_TILE_GRID_PADDING, CENTER_ENTRIES)
     self.gridListPanelList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetHeaderPrePadding(COLLECTIBLE_TILE_GRID_PADDING * 3)
 end
@@ -426,7 +414,11 @@ function ZO_CollectionsBook:UpdateCollectible(collectibleId)
                 if gridEntry then
                     local tileControl = gridEntry.dataEntry.control
                     if tileControl then
-                        tileControl.object:Layout(collectibleId)
+                        local data =
+                        {
+                            collectibleId = collectibleId,
+                        }
+                        tileControl.object:Layout(data)
                     end
                 else
                     self:BuildContentList(categoryData)

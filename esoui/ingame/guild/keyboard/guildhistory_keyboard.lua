@@ -1,9 +1,7 @@
 ZO_GUILD_HISTORY_KEYBOARD_CATEGORY_TREE_WIDTH = 240
 
 local GUILD_EVENT_DATA = 1
-local GUILD_EVENT_TWO_LINES_DATA = 2
-local REQUEST_NEWEST_TIME = 5
-local LOAD_CONTROL_TRIGGER_TIME = .5
+local LOAD_CONTROL_TRIGGER_TIME_S = .5
 
 local GuildHistoryManager = ZO_SortFilterList:Subclass()
 
@@ -17,55 +15,61 @@ function GuildHistoryManager:Initialize(control)
     self.noEntriesMessageLabel = GetControl(control, "NoEntriesMessage")
     self.control = control
     self.loading = GetControl(control, "Loading")
-    self.requestCount = 0
     self.masterList = {}
     
-    ZO_ScrollList_AddDataType(self.list, GUILD_EVENT_DATA, "ZO_GuildHistoryRow", 45, function(control, data) self:SetupGuildEvent(control, data) end)
-    ZO_ScrollList_AddDataType(self.list, GUILD_EVENT_TWO_LINES_DATA, "ZO_GuildHistoryRowTwoLines", 60, function(control, data) self:SetupGuildEvent(control, data) end)
-
-    self.dummyRowControl = CreateControlFromVirtual("ZO_GuildHistory_TempRowElement", GuiRoot, "ZO_GuildHistoryRow")
-    self.dummyRowControl:SetHidden(true)
-    self.dummyRowControl:SetAnchor(TOPLEFT)
+    ZO_ScrollList_AddDataType(self.list, GUILD_EVENT_DATA, "ZO_GuildHistoryRow", 60, function(control, data) self:SetupGuildEvent(control, data) end)
 
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareGuildEvents(listEntry1, listEntry2) end
-    self.nextRequestNewestTime = 0
 
-    self.updateFunction = function(control, time)
-            local forceUpdate = not time
-            time = time or GetFrameTimeSeconds()
-            if forceUpdate or time > self.nextRequestNewestTime then
-                self.nextRequestNewestTime = time + REQUEST_NEWEST_TIME
-                if forceUpdate then
-                    self.selectedSubcategory = nil
-                    self:RefreshData()   
-                end     
-                if self.selectedCategory and self.guildId then
-                    self:RequestNewest(forceUpdate)
-                end
+    self.updateFunction = function(control, timeS)
+        --delay showing the request loading icon by LOAD_CONTROL_TRIGGER_TIME_S
+        if DoesGuildHistoryCategoryHaveOutstandingRequest(self.guildId, self.selectedCategory) then
+            if not self.nextLoadControlTrigger then
+                self.nextLoadControlTrigger = timeS + LOAD_CONTROL_TRIGGER_TIME_S
+            elseif timeS > self.nextLoadControlTrigger then
+                self.loading:Show()
             end
-            if self.requestCount > 0 then
-                if not self.nextLoadControlTrigger then
-                    self.nextLoadControlTrigger = time + LOAD_CONTROL_TRIGGER_TIME
-                elseif time > self.nextLoadControlTrigger then
-                    self.loading:Show()
-                end
-            end
+        else
+            self.nextLoadControlTrigger = nil
+            self.loading:Hide()
         end
+    end
 
     control:SetHandler("OnUpdate", self.updateFunction)
+    --this update interval has nothing to do with the update handler above
     self:SetUpdateInterval(60)
+
+    self.refreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_IMMEDIATELY)
+    self.refreshGroup:AddDirtyState("EventListData", function()
+        self:RefreshData()
+    end)
+    self.refreshGroup:AddDirtyState("EventListFilters", function()
+        self:RefreshFilters()
+    end)
+    self.refreshGroup:SetActive(function()
+        return self:IsShowing()
+    end)
 
     self:InitializeKeybindDescriptors()
     self:CreateCategoryTree()
     
     control:RegisterForEvent(EVENT_GUILD_HISTORY_CATEGORY_UPDATED, function(_, guildId, category) self:OnGuildHistoryCategoryUpdated(guildId, category) end)
-    control:RegisterForEvent(EVENT_GUILD_HISTORY_RESPONSE_RECEIVED, function() self:OnGuildHistoryResponseReceived() end)
-    control:RegisterForEvent(EVENT_GUILD_HISTORY_REFRESHED, function() self.updateFunction() end)
-    control:RegisterForEvent(EVENT_GUILD_RANK_CHANGED, function() self.updateFunction() end)
+    control:RegisterForEvent(EVENT_GUILD_HISTORY_REFRESHED, function() 
+        self.selectedSubcategory = nil
+        self.refreshGroup:MarkDirty("EventListData")
+        self:RequestInitialEvents()
+    end)
+    control:RegisterForEvent(EVENT_SCREEN_RESIZED, function()
+        --The template used is based on the size of the text which changes slightly relative to the size of the row when the screen resizes. This handles the text being right at the wrap point and either
+        --unwrapping or wrapping at the new size.
+        self.refreshGroup:MarkDirty("EventListData")
+    end)
 
     GUILD_HISTORY_SCENE = ZO_Scene:New("guildHistory", SCENE_MANAGER)
     GUILD_HISTORY_SCENE:RegisterCallback("StateChange",     function(oldState, state)
                                                                 if(state == SCENE_SHOWING) then
+                                                                    self.refreshGroup:TryClean()
+                                                                    self:RequestInitialEvents()
                                                                     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
                                                                 elseif(state == SCENE_HIDDEN) then
                                                                     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -88,7 +92,7 @@ function GuildHistoryManager:InitializeKeybindDescriptors()
             end,
         
             callback = function()
-                self:RequestOlder()
+                self:RequestMoreEvents()
             end,
         },
     }
@@ -140,10 +144,10 @@ function GuildHistoryManager:CreateCategoryTree()
 
             --if it's the same category we can just mess with the filter instead of rebuilding the whole list
             if oldSelectedCategory == self.selectedCategory then
-                self:RefreshFilters()
+                self.refreshGroup:MarkDirty("EventListFilters")
             else
-                self:RequestNewest()
-                self:RefreshData()
+                self:RequestInitialEvents()
+                self.refreshGroup:MarkDirty("EventListData")
             end
             ZO_ScrollList_ResetToTop(self.list)
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -176,10 +180,8 @@ end
 
 function GuildHistoryManager:SetGuildId(guildId)
     self.guildId = guildId
-    if(self.selectedCategory) then
-        self:RequestNewest()
-    end
-    self:RefreshData()
+    self:RequestInitialEvents()
+    self.refreshGroup:MarkDirty("EventListData")
 end
 
 function GuildHistoryManager:SetupGuildEvent(control, data)
@@ -187,14 +189,15 @@ function GuildHistoryManager:SetupGuildEvent(control, data)
     local hidden = data.sortIndex and (data.sortIndex % 2) == 0
     bg:SetHidden(hidden)
 
-    if data.description == nil then
-        data.description = self:FormatEvent(data.eventType, data.param1, data.param2, data.param3, data.param4, data.param5, data.param6)
-    end
-    if data.formattedTime == nil then
-        data.formattedTime = ZO_FormatDurationAgo(data.secsSinceEvent)
-    end
-    GetControl(control, "Description"):SetText(data.description)
-    GetControl(control, "Time"):SetText(data.formattedTime)
+    local description = self:FormatEvent(data.eventType, data.param1, data.param2, data.param3, data.param4, data.param5, data.param6)
+    local formattedTime = ZO_FormatDurationAgo(data.secsSinceEvent + GetGameTimeSeconds() - self.lastEventDataUpdateS)
+
+    GetControl(control, "Description"):SetText(description)
+    GetControl(control, "Time"):SetText(formattedTime)
+end
+
+function GuildHistoryManager:IsShowing()
+    return GUILD_HISTORY_SCENE and GUILD_HISTORY_SCENE:IsShowing()
 end
 
 function GuildHistoryManager:FormatEvent(eventType, ...)
@@ -209,25 +212,26 @@ function GuildHistoryManager:ShouldShowEventType(eventType)
 end
 
 function GuildHistoryManager:BuildMasterList()
-    if(self.guildId and self.selectedCategory) then
+    if self.guildId and self.selectedCategory then
         ZO_ClearNumericallyIndexedTable(self.masterList)
-        
+        self.lastEventDataUpdateS = GetFrameTimeSeconds()        
         for i = 1, GetNumGuildEvents(self.guildId, self.selectedCategory) do
             local eventType, secsSinceEvent, param1, param2, param3, param4, param5, param6, eventId = GetGuildEventInfo(self.guildId, self.selectedCategory, i)
-            if(self:ShouldShowEventType(eventType)) then
-                table.insert(self.masterList,   {
-                                                    eventId = eventId,
-                                                    eventType = eventType,
-                                                    param1 = param1,
-                                                    param2 = param2,
-                                                    param3 = param3,
-                                                    param4 = param4,
-                                                    param5 = param5,
-                                                    param6 = param6,
-                                                    secsSinceEvent = secsSinceEvent,
-                                                    subcategoryId = ComputeGuildHistoryEventSubcategory(eventType, self.selectedCategory),
-                                                    timeStamp = GetFrameTimeSeconds(),
-                                                })
+            if self:ShouldShowEventType(eventType) then
+                local event = 
+                {
+                    eventId = eventId,
+                    eventType = eventType,
+                    param1 = param1,
+                    param2 = param2,
+                    param3 = param3,
+                    param4 = param4,
+                    param5 = param5,
+                    param6 = param6,
+                    secsSinceEvent = secsSinceEvent,
+                    subcategoryId = ComputeGuildHistoryEventSubcategory(eventType, self.selectedCategory),
+                }
+                table.insert(self.masterList, event)
             end
         end
     end
@@ -236,36 +240,12 @@ end
 function GuildHistoryManager:FilterScrollList()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
     local listWidth = self.list:GetNamedChild("Contents"):GetWidth()
-    local descriptionControl = self.dummyRowControl:GetNamedChild("Description")
     
-    self.dummyRowControl:SetWidth(listWidth)
-
     ZO_ClearNumericallyIndexedTable(scrollData)
-
     for i = 1, #self.masterList do
         local data = self.masterList[i]
         if self.selectedSubcategory == nil or self.selectedSubcategory == data.subcategoryId then
-            self:SetupGuildEvent(self.dummyRowControl, data)
-
-            --[[ The dimensions of the description depend on the time label text being rendered 
-                 due to the anchoring scheme. The normal immediate anchor update that happens 
-                 when calling a function that depends on the text being rendered will not trigger 
-                 the time label to render, so we do it manually using Clean. Once that is done, 
-                 the immediate anchor update on the description label will succeed and we can 
-                 do the GetNumLines call.]]--
-            for anchorIndex = 0, MAX_ANCHORS do
-               local isValid, point, relTo, relPoint, offsetX = descriptionControl:GetAnchor(anchorIndex)
-               if isValid and relTo:GetType() == CT_LABEL then
-                    relTo:Clean()
-               end
-            end
-            
-            local numLines = descriptionControl:GetNumLines()
-            if numLines > 1 then
-                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(GUILD_EVENT_TWO_LINES_DATA, data))
-            else 
-                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(GUILD_EVENT_DATA, data))
-            end
+            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(GUILD_EVENT_DATA, data))
         end
     end
 
@@ -287,45 +267,29 @@ function GuildHistoryManager:SortScrollList()
     end
 end
 
-function GuildHistoryManager:RequestNewest(forceUpdate)
-    if (GUILD_HISTORY_SCENE and GUILD_HISTORY_SCENE:IsShowing()) or forceUpdate then
-        if RequestGuildHistoryCategoryNewest(self.guildId, self.selectedCategory) then
-            self:IncrementRequestCount()
+function GuildHistoryManager:RequestInitialEvents()
+    if self.guildId and self.selectedCategory then
+        if not HasGuildHistoryCategoryEverBeenRequested(self.guildId, self.selectedCategory) then
+            self:RequestMoreEvents()
         end
     end
 end
 
-function GuildHistoryManager:RequestOlder(forceUpdate)
-    if (GUILD_HISTORY_SCENE and GUILD_HISTORY_SCENE:IsShowing()) or forceUpdate then
-        if(RequestGuildHistoryCategoryOlder(self.guildId, self.selectedCategory)) then
-            self:IncrementRequestCount()
+function GuildHistoryManager:RequestMoreEvents()
+    if self.guildId and self.selectedCategory then
+        if self:IsShowing() then
+            RequestMoreGuildHistoryCategoryEvents(self.guildId, self.selectedCategory)
         end
-    end
-end
-
-function GuildHistoryManager:IncrementRequestCount()
-    self.requestCount = self.requestCount + 1
-end
-
-function GuildHistoryManager:DecrementRequestCount()
-    self.requestCount = self.requestCount - 1
-    if self.requestCount == 0 then
-        self.loading:Hide()
-        self.nextLoadControlTrigger = nil
     end
 end
 
 --Events
 
 function GuildHistoryManager:OnGuildHistoryCategoryUpdated(guildId, category)
-    if(self.guildId == guildId and self.selectedCategory == category) then
+    if self.guildId == guildId and self.selectedCategory == category then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-        self:RefreshData()
+        self.refreshGroup:MarkDirty("EventListData")
     end
-end
-
-function GuildHistoryManager:OnGuildHistoryResponseReceived()
-    self:DecrementRequestCount()
 end
 
 --Global XML

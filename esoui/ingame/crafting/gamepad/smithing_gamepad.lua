@@ -235,7 +235,7 @@ function ZO_Smithing_Gamepad:SetMode(mode)
         else
             SCENE_MANAGER:Push(g_modeToSceneName[mode])
         end
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        self:UpdateKeybindStrip()
     end
 end
 
@@ -246,6 +246,10 @@ function ZO_Smithing_Gamepad:SetEnableSkillBar(enable)
     else
         ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.skillInfoBar)
     end
+end
+
+function ZO_Smithing_Gamepad:UpdateKeybindStrip()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_Smithing_Gamepad_Initialize(control)

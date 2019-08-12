@@ -523,7 +523,7 @@ function PregameStateManager_AdvanceState()
     else
         -- If there are no transition data, then we're not going anywhere...we'll be locked in the current state.
         -- Do not call this if you're not on a state with transition data
-        assert(false)
+        internalassert(false, string.format("Non-advancable state: %s", tostring(currentState)))
     end
 end
 

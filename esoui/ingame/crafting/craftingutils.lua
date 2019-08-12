@@ -1,33 +1,84 @@
---[[ Crafting Slot Base ]]--
-ZO_CraftingSlotBase = ZO_Object:Subclass()
+--[[ Crafting Create Screen Base ]]--
+ZO_CraftingCreateScreenBase = ZO_Object:Subclass()
 
-function ZO_CraftingSlotBase:New(...)
-    local craftingSlot = ZO_Object.New(self)
+function ZO_CraftingCreateScreenBase:New()
+    return ZO_Object.New(self)
+end
+
+function ZO_CraftingCreateScreenBase:Create(numIterations)
+    assert(false, "Override me")
+end
+
+-- To be used with the C APIs, eg. CreateTradeskillItem(tradeskillObject:GetAllCraftingParameters())
+-- Lua limitation:
+-- writing tradeskillObject:GetAllCraftingParameters(), numIterations would truncate the crafting
+-- parameters to only the first return, so each implementation of
+-- GetAllCraftingParameters should manually place that argument at the end themselves
+function ZO_CraftingCreateScreenBase:GetAllCraftingParameters(numIterations)
+    assert(false, "Override me")
+    -- return implementation defined
+end
+
+function ZO_CraftingCreateScreenBase:IsCraftable()
+    assert(false, "Override me")
+    -- should return bool
+end
+
+function ZO_CraftingCreateScreenBase:GetMultiCraftMaxIterations()
+    -- override me
+    return 1
+end
+
+function ZO_CraftingCreateScreenBase:ShouldCraftButtonBeEnabled()
+    assert(false, "Override me")
+    -- should return bool, errorString
+end
+
+function ZO_CraftingCreateScreenBase:ShouldMultiCraftButtonBeEnabled()
+    local enabled, errorString = self:ShouldCraftButtonBeEnabled()
+    if not enabled then
+        return enabled, errorString
+    end
+
+    return self:GetMultiCraftMaxIterations() > 1
+end
+
+
+--[[ Crafting Multi Slot Base ]]--
+ZO_CraftingMultiSlotBase = ZO_CallbackObject:Subclass()
+
+function ZO_CraftingMultiSlotBase:New(...)
+    local craftingSlot = ZO_CallbackObject.New(self)
     craftingSlot:Initialize(...)
     return craftingSlot
 end
 
-function ZO_CraftingSlotBase:Initialize(owner, control, slotType, emptyTexture, craftingInventory, emptySlotIcon)
+function ZO_CraftingMultiSlotBase:Initialize(owner, control, slotType, emptyTexture, multipleItemsTexture, craftingInventory, emptySlotIconTexture)
     self.owner = owner
     self.control = control
     self.slotType = slotType
     self.emptyTexture = emptyTexture
+    self.multipleItemsTexture = multipleItemsTexture
     self.craftingInventory = craftingInventory
 
-    self.emptySlotIcon = emptySlotIcon
-    if self.emptySlotIcon then
-        self.control:GetNamedChild("EmptySlotIcon"):SetTexture(self.emptySlotIcon)
-        self:ShowEmptySlotIcon(true)
+    if emptySlotIconTexture then
+        self.emptyTexture = emptySlotIconTexture
+        self.useEmptySlotIcon = true
+        self.emptySlotOverrideIcon = self.control:GetNamedChild("EmptySlotIcon")
+        internalassert(self.emptySlotOverrideIcon ~= nil)
     end
 
+    -- required
+    self.inventorySlotIcon = self.control:GetNamedChild("Icon")
+    self.dropCallout = self.control:GetNamedChild("DropCallout")
+    -- optional
     self.iconBg = self.control:GetNamedChild("IconBg")
 
-    self.dropCallout = self.control:GetNamedChild("DropCallout")
-
-    self:SetItem(nil)
+    self.items = {}
+    self:Refresh()
 end
 
-function ZO_CraftingSlotBase:ShowDropCallout(isCorrectType)
+function ZO_CraftingMultiSlotBase:ShowDropCallout(isCorrectType)
     self.dropCallout:SetHidden(false)
 
     if isCorrectType then
@@ -37,57 +88,305 @@ function ZO_CraftingSlotBase:ShowDropCallout(isCorrectType)
     end
 end
 
-function ZO_CraftingSlotBase:HideDropCallout()
+function ZO_CraftingMultiSlotBase:HideDropCallout()
     self.dropCallout:SetHidden(true)
 end
 
-function ZO_CraftingSlotBase:OnPassedValidation()
-    -- intended to be overidden
-end
-
-function ZO_CraftingSlotBase:OnFailedValidation()
-    -- intended to be overidden
-end
-
 -- Use to validate a list of virtually stacked items created from EnumerateInventorySlotsAndAddToScrollData
-function ZO_CraftingSlotBase:ValidateItemId(validItemIds)
-    if self.bagId and self.slotIndex then
-        -- An item might have been used up in a physical stack
-        if validItemIds[self.itemInstanceId] then
-            -- An item still exists in a physical stack, but might not exist in the virtual stack any more, update the indices
-            local itemInfo = validItemIds[self.itemInstanceId]
-            if self:IsBagAndSlot(itemInfo.bag, itemInfo.index) then
-                self:SetupItem(itemInfo.bag, itemInfo.index)
-            else
-                self:SetItem(itemInfo.bag, itemInfo.index)
-            end
+-- validItemFilterFn is optional
+function ZO_CraftingMultiSlotBase:ValidateItemId(validItemIds, validItemFilterFn)
+    local failed = false
+    local itemsChanged = false
 
-            self:OnPassedValidation()
-            return true
+    for idx, item in ZO_NumericallyIndexedTableReverseIterator(self.items) do
+        local bagId, slotIndex, itemInstanceId = item.bagId, item.slotIndex, item.itemInstanceId
+        local itemInfo = validItemIds[itemInstanceId]
+        if itemInfo and (validItemFilterFn == nil or validItemFilterFn(itemInfo.bag, itemInfo.index)) then
+            itemsChanged = itemsChanged or item.bagId ~= itemInfo.bag or item.slotIndex ~= itemInfo.index
+            item.bagId, item.slotIndex = itemInfo.bag, itemInfo.index
         else
-            -- Item doesn't exist in a physical stack
-            self:SetItem(nil)
-            self:OnFailedValidation()
-            return false
+            itemsChanged = true
+            table.remove(self.items, idx)
+            failed = true
         end
     end
+
+    self:Refresh()
+    if itemsChanged then
+        self:FireCallbacks("ItemsChanged")
+    end
+
+    return not failed
+end
+
+do
+    local function MatchesValidItemSlot(item, validItems)
+        for i, validItem in ipairs(validItems) do
+            if item.bagId == validItem.bagId and item.slotIndex == validItem.slotIndex then
+                return true
+            end
+        end
+        return false
+    end
+
+    -- Use to validate a list of slotDatas created from GetIndividualInventorySlotsAndAddToScrollData
+    -- validItemFilterFn is optional
+    function ZO_CraftingMultiSlotBase:ValidateSlottedItem(validItems, validItemFilterFn)
+        local failed = false
+        local needsValidation = {}
+        for i = 1, #self.items do
+            needsValidation[i] = true
+        end
+
+        for idx, item in ipairs(self.items) do
+            if MatchesValidItemSlot(item, validItems) and (validItemFilterFn == nil or validItemFilterFn(item.bagId, item.slotIndex)) then
+                needsValidation[idx] = nil
+            end
+        end
+
+        if next(needsValidation) then
+            -- There are items that were not validated, clear them out
+            failed = true
+            for i = #self.items, 1, -1 do
+                if needsValidation[i] then
+                    table.remove(self.items, i)
+                end
+            end
+        end
+
+
+        self:Refresh()
+        if failed then
+            self:FireCallbacks("ItemsChanged")
+            return false
+        else
+            return true
+        end
+    end
+end
+
+function ZO_CraftingMultiSlotBase:ClearItemsInternal()
+    ZO_ClearNumericallyIndexedTable(self.items)
+end
+
+function ZO_CraftingMultiSlotBase:ClearItems()
+    if self:HasItems() then
+        self:ClearItemsInternal()
+        self:Refresh()
+        self:FireCallbacks("ItemsChanged")
+        return true
+    end
+    return false
+end
+
+-- Crafting slots work off of virtual inventories, so this item is used to represent all items with the instance id that is slotted here, not just this slot
+function ZO_CraftingMultiSlotBase:AddItemInternal(bagId, slotIndex)
+    if bagId and slotIndex and not self:ContainsBagAndSlot(bagId, slotIndex) then
+        local item =
+        {
+            bagId = bagId,
+            slotIndex = slotIndex,
+            itemInstanceId = GetItemInstanceId(bagId, slotIndex),
+        }
+        table.insert(self.items, item)
+        return true
+    end
+    return false
+end
+
+function ZO_CraftingMultiSlotBase:AddItem(bagId, slotIndex)
+    local addedItem = self:AddItemInternal(bagId, slotIndex)
+    self:Refresh()
+    if addedItem then
+        self:FireCallbacks("ItemSlotted", bagId, slotIndex)
+        self:FireCallbacks("ItemsChanged")
+    end
+    return addedItem
+end
+
+function ZO_CraftingMultiSlotBase:RemoveItem(bagId, slotIndex)
+    local removedItem = false
+    for idx, item in ipairs(self.items) do
+        if item.bagId == bagId and item.slotIndex == slotIndex then
+            table.remove(self.items, idx)
+            removedItem = true
+            break
+        end
+    end
+    self:Refresh()
+    if removedItem then
+        self:FireCallbacks("ItemsChanged")
+    end
+    return removedItem
+end
+
+function ZO_CraftingMultiSlotBase:Refresh()
+    local numItems = #self.items
+
+    local isEmpty = numItems == 0
+
+    local icon
+    local quantity
+    if isEmpty then
+        icon = self.emptyTexture
+        quantity = 0
+        ZO_Inventory_BindSlot(self.control, self.slotType, nil, nil)
+    elseif numItems == 1 then
+        local bagId, slotIndex = self:GetItemBagAndSlot(1)
+        icon = GetItemInfo(bagId, slotIndex)
+        quantity = self:GetStackCount()
+        ZO_Inventory_BindSlot(self.control, self.slotType, slotIndex, bagId)
+    else
+        icon = self.multipleItemsTexture
+        quantity = 0 -- hide quantity label
+        ZO_Inventory_BindSlot(self.control, SLOT_TYPE_MULTIPLE_PENDING_CRAFTING_COMPONENTS, nil, nil)
+    end
+
+    local MEETS_REQUIREMENTS = nil
+    local LOCKED = nil
+    if self:HasAnimationRefs() then
+        ZO_ItemSlot_SetupSlotBase(self.control, quantity, icon, MEETS_REQUIREMENTS, LOCKED, self:ShouldBeVisible())
+    else
+        ZO_ItemSlot_SetupSlot(self.control, quantity, icon, MEETS_REQUIREMENTS, LOCKED, self:ShouldBeVisible())
+    end
+
+    if self.iconBg then
+        self.iconBg:SetHidden(not isEmpty)
+    end
+
+    if self.useEmptySlotIcon then
+        if icon == "" then
+            -- Empty string represents no icon, in this case we should just hide both inventory slot icon and our empty slot override
+            self.emptySlotOverrideIcon:SetHidden(true)
+            self.inventorySlotIcon:SetHidden(true)
+        else
+            self.emptySlotOverrideIcon:SetTexture(icon)
+            self.emptySlotOverrideIcon:SetHidden(not isEmpty)
+            self.inventorySlotIcon:SetHidden(isEmpty)
+        end
+    end
+
+    self:UpdateTooltip()
+end
+
+function ZO_CraftingMultiSlotBase:GetStackCount()
+    local quantity = 0
+    if self.craftingInventory then
+        for index = 1, self:GetNumItems() do
+            -- non virtual items will have a stack count of 0, but we know that they represent exactly one in quantity
+            quantity = quantity + zo_max(1, self.craftingInventory:GetStackCount(self:GetItemBagAndSlot(index)))
+        end
+    end
+    return quantity
+end
+
+function ZO_CraftingMultiSlotBase:AddAnimationRef()
+    self.animationRefs = (self.animationRefs or 0) + 1
+end
+
+function ZO_CraftingMultiSlotBase:RemoveAnimationRef()
+    self.animationRefs = self.animationRefs - 1
+    if self.animationRefs == 0 then
+        self:Refresh()
+    end
+end
+
+function ZO_CraftingMultiSlotBase:HasAnimationRefs()
+    return self.animationRefs ~= nil and self.animationRefs > 0
+end
+
+function ZO_CraftingMultiSlotBase:HasItems()
+    return #self.items > 0
+end
+
+function ZO_CraftingMultiSlotBase:HasOneItem()
+    return #self.items == 1
+end
+
+function ZO_CraftingMultiSlotBase:HasMultipleItems()
+    return #self.items > 1
+end
+
+function ZO_CraftingMultiSlotBase:GetNumItems()
+    return #self.items
+end
+
+function ZO_CraftingMultiSlotBase:GetItemBagAndSlot(itemIndex)
+    local item = itemIndex and self.items[itemIndex]
+    if item then
+        return item.bagId, item.slotIndex
+    end
+    return nil
+end
+
+function ZO_CraftingMultiSlotBase:GetItemInstanceId(itemIndex)
+    local item = itemIndex and self.items[itemIndex]
+    if item then
+        return item.itemInstanceId
+    end
+    return nil
+end
+
+function ZO_CraftingMultiSlotBase:ContainsItemId(itemId)
+    for _, item in ipairs(self.items) do
+        if item.itemInstanceId == itemId then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_CraftingMultiSlotBase:ContainsBagAndSlot(bagId, slotIndex)
+    for _, item in ipairs(self.items) do
+        if item.bagId == bagId and item.slotIndex == slotIndex then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_CraftingMultiSlotBase:IsSlotControl(slotControl)
+    return self.control == slotControl
+end
+
+function ZO_CraftingMultiSlotBase:GetControl()
+    return self.control
+end
+
+function ZO_CraftingMultiSlotBase:UpdateTooltip()
+    if self.control == WINDOW_MANAGER:GetMouseOverControl() then
+        ZO_InventorySlot_OnMouseEnter(self.control)
+    end
+end
+
+function ZO_CraftingMultiSlotBase:SetEmptyTexture(emptyTexture)
+    self.emptyTexture = emptyTexture
+    self:Refresh()
+end
+
+function ZO_CraftingMultiSlotBase:SetMultipleItemsTexture(multipleItemsTexture)
+    self.multipleItemsTexture = multipleItemsTexture
+    self:Refresh()
+end
+
+function ZO_CraftingMultiSlotBase:ShouldBeVisible()
+    -- To be overridden if managing the visibility of the slot
     return true
 end
 
--- Use to validate a list of slotDatas created from GetIndividualInventorySlotsAndAddToScrollData
-function ZO_CraftingSlotBase:ValidateSlottedItem(validItems)
-    if self.bagId and self.slotIndex then
-        for i, validItem in ipairs(validItems) do
-            if self:IsBagAndSlot(validItem.bagId, validItem.slotIndex) then
-                self:SetupItem(self.bagId, self.slotIndex)
-                self:OnPassedValidation()
-                return
-            end
-        end
+--[[ Crafting Slot Base ]]--
+-- This is a multislot that only permits single items. The multislot API can
+-- be used, but the old single-slot api has been implemented on top.
+-- Attempting to add multiple items using AddItem() will instead replace the
+-- current item.
+ZO_CraftingSlotBase = ZO_CraftingMultiSlotBase:Subclass()
 
-        self:SetItem(nil)
-        self:OnFailedValidation()
-    end
+function ZO_CraftingSlotBase:New(...)
+    return ZO_CraftingMultiSlotBase.New(self, ...)
+end
+
+function ZO_CraftingSlotBase:Initialize(owner, control, slotType, emptyTexture, craftingInventory, emptySlotIcon)
+    return ZO_CraftingMultiSlotBase.Initialize(self, owner, control, slotType, emptyTexture, "", craftingInventory, emptySlotIcon)
 end
 
 function ZO_CraftingSlotBase:SetItem(bagId, slotIndex)
@@ -96,120 +395,39 @@ function ZO_CraftingSlotBase:SetItem(bagId, slotIndex)
 end
 
 function ZO_CraftingSlotBase:SetupItem(bagId, slotIndex)
-    self.bagId = bagId
-    self.slotIndex = slotIndex
+    local oldBagId, oldSlotIndex = self:GetBagAndSlot()
+    self:ClearItemsInternal()
+    self:AddItemInternal(bagId, slotIndex)
+    self:Refresh()
 
-    self.itemInstanceId = GetItemInstanceId(self.bagId, self.slotIndex)
-
-    if bagId and slotIndex then
-        local icon = GetItemInfo(bagId, slotIndex)
-        local stack = self:GetStackCount()
-        if self:HasAnimationRefs() then
-            ZO_ItemSlot_SetupSlotBase(self.control, stack, icon)
-        else
-            ZO_ItemSlot_SetupSlot(self.control, stack, icon)
-        end
-
-        self:ShowEmptySlotIcon(false)
-    else
-         if self:HasAnimationRefs() then
-            ZO_ItemSlot_SetupSlotBase(self.control, 0, self.emptyTexture)
-        else
-            ZO_ItemSlot_SetupSlot(self.control, 0, self.emptyTexture)
-        end
-
-        self:ShowEmptySlotIcon(true)
-    end
-
-    if self.iconBg then
-        self.iconBg:SetHidden(self:HasItem())
-    end
-
-    ZO_Inventory_BindSlot(self.control, self.slotType, self.slotIndex, self.bagId)
-
-    self:UpdateTooltip()
-end
-
-function ZO_CraftingSlotBase:AddAnimationRef()
-    self.animationRefs = (self.animationRefs or 0) + 1
-end
-
-function ZO_CraftingSlotBase:RemoveAnimationRef()
-    self.animationRefs = self.animationRefs - 1
-    if self.animationRefs == 0 then
-        self:SetItem(self.bagId, self.slotIndex)
+    if oldBagId ~= bagId or oldSlotIndex ~= slotIndex then
+        self:FireCallbacks("ItemsChanged")
     end
 end
 
-function ZO_CraftingSlotBase:HasAnimationRefs()
-    return self.animationRefs ~= nil and self.animationRefs > 0
-end
-
-function ZO_CraftingSlotBase:GetStackCount()
-    if self:HasItem() then
-        if self.craftingInventory then
-            return self.craftingInventory:GetStackCount(self:GetBagAndSlot())
-        end
-        return 1
-    end
-    return 0
+function ZO_CraftingSlotBase:AddItem(bagId, slotIndex)
+    -- instead of adding, replace existing items
+    self:SetItem(bagId, slotIndex)
 end
 
 function ZO_CraftingSlotBase:GetBagAndSlot()
-    return self.bagId, self.slotIndex
+    return self:GetItemBagAndSlot(1)
 end
 
 function ZO_CraftingSlotBase:IsBagAndSlot(bagId, slotIndex)
-    return self.bagId == bagId and self.slotIndex == slotIndex
+    return self:ContainsBagAndSlot(bagId, slotIndex)
 end
 
 function ZO_CraftingSlotBase:HasItem()
-    return self.bagId ~= nil and self.slotIndex ~= nil
+    return self:HasItems()
 end
 
 function ZO_CraftingSlotBase:IsItemId(itemId)
-    if self.bagId and self.slotIndex then
-        return self.itemInstanceId == itemId
-    end
-    return false
+    return self:ContainsItemId(itemId)
 end
 
 function ZO_CraftingSlotBase:GetItemId()
-    if self:HasItem() then
-        return self.itemInstanceId
-    end
-end
-
-function ZO_CraftingSlotBase:IsSlotControl(slotControl)
-    return self.control == slotControl
-end
-
-function ZO_CraftingSlotBase:GetControl()
-    return self.control
-end
-
-function ZO_CraftingSlotBase:UpdateTooltip()
-    if self.control == WINDOW_MANAGER:GetMouseOverControl() then
-        ZO_InventorySlot_OnMouseEnter(self.control)
-    end
-end
-
-function ZO_CraftingSlotBase:SetEmptyTexture(emptyTexture)
-    self.emptyTexture = emptyTexture
-    if not self:HasItem() then
-        self:SetItem(self.bagId, self.slotIndex)
-    end
-end
-
-function ZO_CraftingSlotBase:SetHidden(hidden)
-    self.control:SetHidden(hidden)
-end
-
-function ZO_CraftingSlotBase:ShowEmptySlotIcon(showIcon)
-    if self.emptySlotIcon then
-        self.control:GetNamedChild("EmptySlotIcon"):SetHidden(not showIcon)
-        self.control:GetNamedChild("Icon"):SetHidden(showIcon)
-    end
+    return self:GetItemInstanceId(1)
 end
 
 function ZO_CraftingSlot_OnInitialized(self)
@@ -432,18 +650,6 @@ do
         return SMITHING_FILTER_TO_ITEM_FILTER[smithingFilter]
     end
 
-    local SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE =
-    {
-       [SMITHING_FILTER_TYPE_RAW_MATERIALS] = "EsoUI/Art/Crafting/smithing_refine_emptySlot.dds",
-       [SMITHING_FILTER_TYPE_WEAPONS] = "EsoUI/Art/Crafting/smithing_weaponSlot.dds",
-       [SMITHING_FILTER_TYPE_ARMOR] = "EsoUI/Art/Crafting/smithing_armorSlot.dds",
-       [SMITHING_FILTER_TYPE_JEWELRY] = "EsoUI/Art/Crafting/smithing_jewelrySlot.dds",
-    }
-
-    function ZO_CraftingUtils_GetItemSlotTextureFromSmithingFilter(smithingFilter)
-        return internalassert(SMITHING_FILTER_TO_ITEM_SLOT_TEXTURE[smithingFilter])
-    end
-
     local TRAIT_CATEGORY_TO_SMITHING_FILTER =
     {
        [ITEM_TRAIT_TYPE_CATEGORY_WEAPON] = SMITHING_FILTER_TYPE_WEAPONS,
@@ -507,76 +713,32 @@ do
 end
 
 function ZO_CraftingUtils_IsCraftingWindowOpen()
-    return SCENE_MANAGER:IsShowing("smithing")
+    return ZO_Smithing_IsSceneShowing()
             or SYSTEMS:IsShowing("alchemy")
-            or SCENE_MANAGER:IsShowing("enchanting")
+            or ZO_Enchanting_IsSceneShowing()
             or ZO_Provisioner_IsSceneShowing()
 end
 
---[[ Gamepad Crafting Ingredient Bar ]]--
-ZO_GamepadCraftingIngredientBar = ZO_Object:Subclass()
-
-function ZO_GamepadCraftingIngredientBar:New(...)
-    local ingredientBar = ZO_Object.New(self)
-    ingredientBar:Initialize(...)
-    return ingredientBar
-end
-
-function ZO_GamepadCraftingIngredientBar:Initialize(control, slotSpacing)
-    self.control = control
-    self.slotSpacing = slotSpacing
-
-    self.slotCenterControl = self.control:GetNamedChild("SlotCenter")
-
-    self.dataTypes = {}
-    self:Clear()
-end
-
-function ZO_GamepadCraftingIngredientBar:Clear()
-    self.dataList = {}
-
-    if self.dataTypes then
-        for key, dataTypeInfo in pairs(self.dataTypes) do
-            dataTypeInfo.pool:ReleaseAllObjects()
+-- Crafting screens virtualize each item into stacks, but only refining items
+-- can properly support deconstruction by virtual stack. In all other cases, eg.
+-- enchanting, we need to send a message with each slot represented by the
+-- virtual stack, which is what this function prepares for us.
+function ZO_CraftingUtils_AddVirtualStackToDeconstructMessageAsRealStacks(virtualBagId, virtualSlotIndex, quantityToAdd)
+    local instanceId = GetItemInstanceId(virtualBagId, virtualSlotIndex)
+    local ALL_MATCHING_ITEMS = nil
+    -- When there are more slots than items to add, we want to prioritize
+    -- backpack items over bank items. Since the loop that adds these items pops
+    -- from the end, we should generate our slots list so that the end of the list holds all the backpack items
+    local slots = PLAYER_INVENTORY:GenerateAllSlotsInVirtualStackedItem(ALL_MATCHING_ITEMS, instanceId, INVENTORY_BANK, INVENTORY_BACKPACK)
+    while quantityToAdd > 0 and slots[1] do
+        local slot = table.remove(slots)
+        local stackCount = zo_min(slot.stackCount, quantityToAdd)
+        if not AddItemToDeconstructMessage(slot.bagId, slot.slotIndex, stackCount) then
+            return false
         end
+        quantityToAdd = quantityToAdd - stackCount
     end
-end
-
-function ZO_GamepadCraftingIngredientBar:AddDataTemplate(templateName, setupFunction)
-    if not self.dataTypes[templateName] then
-        local dataTypeInfo = {
-            pool = ZO_ControlPool:New(templateName, self.slotCenterControl),
-            setupFunction = setupFunction,
-        }
-        self.dataTypes[templateName] = dataTypeInfo
-    end
-end
-
-function ZO_GamepadCraftingIngredientBar:AddEntry(templateName, data)
-    local dataTypeInfo = self.dataTypes[templateName]
-    if dataTypeInfo then
-        self.dataList[#self.dataList + 1] = data
-        
-        local control, key = dataTypeInfo.pool:AcquireObject()
-        control.key = key
-        control.templateName = templateName
-
-        data.control = control
-
-        dataTypeInfo.setupFunction(control, data)
-    end
-end
-
-function ZO_GamepadCraftingIngredientBar:Commit()
-    -- alter x offsets based on number of ingredients (so the slots stay centered relative to parent)
-    local numIngredients = #self.dataList  
-    local offsetX = (numIngredients - 1) * -self.slotSpacing * 0.5
-
-    for i, data in ipairs(self.dataList) do
-        -- adjust the x offset
-        data.control:SetAnchor(CENTER, self.slotCenterControl, CENTER, offsetX, 0)
-        offsetX = offsetX + self.slotSpacing
-    end
+    return quantityToAdd == 0 -- did we add as many items as we requested?
 end
 
 ZO_CRAFTING_TOOLTIP_STYLES = ZO_DeepTableCopy(ZO_TOOLTIP_STYLES)

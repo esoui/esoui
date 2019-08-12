@@ -1176,11 +1176,19 @@ function ZO_ScrollList_HasVisibleData(self)
     return #self.visibleData > 0
 end
 
+function ZO_ScrollList_GetSelectedDataIndex(self)
+    if AreSelectionsEnabled(self) then
+        return self.selectedDataIndex
+    end
+
+    return nil
+end
+
 function ZO_ScrollList_GetSelectedData(self)
     if AreSelectionsEnabled(self) then
         return self.selectedData
     end
-    
+
     return nil
 end
 

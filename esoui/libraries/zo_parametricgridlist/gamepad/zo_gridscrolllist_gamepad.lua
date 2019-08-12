@@ -99,7 +99,21 @@ do
 
     function ZO_AbstractGridScrollList_Gamepad:HandleMoveInDirection(moveX, moveY)
         local scrollXDirection, scrollYDirection = MOVE_DIRECTION_TABLE[moveX], MOVE_DIRECTION_TABLE[moveY]
+
+        local currentSelection = ZO_ScrollList_GetSelectedDataIndex(self.list)
         ZO_ScrollList_SelectNextDataInDirection(self.list, scrollXDirection, scrollYDirection)
+
+        if currentSelection ~= ZO_ScrollList_GetSelectedDataIndex(self.list) then
+            if scrollYDirection == ZO_SCROLL_MOVEMENT_DIRECTION_POSITIVE then
+                PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
+            elseif scrollYDirection == ZO_SCROLL_MOVEMENT_DIRECTION_NEGATIVE then
+                PlaySound(SOUNDS.GAMEPAD_MENU_UP)
+            elseif scrollXDirection == ZO_SCROLL_MOVEMENT_DIRECTION_POSITIVE then
+                PlaySound(SOUNDS.GAMEPAD_MENU_RIGHT)
+            elseif scrollXDirection == ZO_SCROLL_MOVEMENT_DIRECTION_NEGATIVE then
+                PlaySound(SOUNDS.GAMEPAD_MENU_LEFT)
+            end
+        end
     end
 end
 

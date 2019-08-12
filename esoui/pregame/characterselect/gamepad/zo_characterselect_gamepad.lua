@@ -353,38 +353,26 @@ local function CreateExtraInfoControls(self)
     if showExtraInfo then
         local data = {}
 
-        local function ServiceTokenTooltipFunction(serviceMode, descriptionTextId)
-            self.extraInfoDetails:SetHidden(false)
-
-            local title = zo_strformat(SI_SERVICE_TOOLTIP_HEADER_FORMATTER, GetString("SI_SERVICETOKENTYPE", serviceMode))
-            local body1 = GetString(descriptionTextId)
-            local body2
-            local body2Color
-
-            local numTokens = GetNumServiceTokens(serviceMode)
-            if numTokens ~= 0 then
-                body2 = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, numTokens, GetString("SI_SERVICETOKENTYPE", serviceMode))
-                body2Color = ZO_SUCCEEDED_TEXT
-            else
-                body2 = zo_strformat(SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE, GetString("SI_SERVICETOKENTYPE", serviceMode))
-                body2Color = ZO_ERROR_COLOR
-            end
-
-            ZO_CharacterSelect_Gamepad_SetExtraInfoDetails(title, body1, nil, body2, body2Color)
+        local function ServiceTokenTooltipFunction(tokenType)
+            ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(true)
+            GAMEPAD_TOOLTIPS:LayoutServiceTokenTooltip(GAMEPAD_LEFT_TOOLTIP, tokenType)
         end
 
-        -- Name Change Tokens
+        local function ServiceTokenHideTooltipFunction()
+            ZO_CharacterSelect_GamepadCharacterDetails:SetHidden(false)
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end
+
+        -- Add the various service tokens
         table.insert(data, {
             keybindStripDesc = self.charListKeybindStripDescriptorServices,
             icon = "EsoUI/Art/Icons/Token_NameChange.dds",
             serviceMode = SERVICE_TOKEN_NAME_CHANGE,
             tokenCount = GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE),
             ShowTooltipFunction = function()
-                    ServiceTokenTooltipFunction(SERVICE_TOKEN_NAME_CHANGE, SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
-                end,
-            HideTooltipFunction = function()
-                    self.extraInfoDetails:SetHidden(true)
-                end,
+                ServiceTokenTooltipFunction(SERVICE_TOKEN_NAME_CHANGE)
+            end,
+            HideTooltipFunction = ServiceTokenHideTooltipFunction,
         })
         table.insert(data, {
             keybindStripDesc = self.charListKeybindStripDescriptorServices,
@@ -392,11 +380,9 @@ local function CreateExtraInfoControls(self)
             serviceMode = SERVICE_TOKEN_RACE_CHANGE,
             tokenCount = GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE),
             ShowTooltipFunction = function()
-                    ServiceTokenTooltipFunction(SERVICE_TOKEN_RACE_CHANGE, SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
-                end,
-            HideTooltipFunction = function()
-                    self.extraInfoDetails:SetHidden(true)
-                end,
+                ServiceTokenTooltipFunction(SERVICE_TOKEN_RACE_CHANGE)
+            end,
+            HideTooltipFunction = ServiceTokenHideTooltipFunction,
         })
         table.insert(data, {
             keybindStripDesc = self.charListKeybindStripDescriptorServices,
@@ -404,15 +390,13 @@ local function CreateExtraInfoControls(self)
             serviceMode = SERVICE_TOKEN_APPEARANCE_CHANGE,
             tokenCount = GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE),
             ShowTooltipFunction = function()
-                    ServiceTokenTooltipFunction(SERVICE_TOKEN_APPEARANCE_CHANGE, SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
-                end,
-            HideTooltipFunction = function()
-                    self.extraInfoDetails:SetHidden(true)
-                end,
+                ServiceTokenTooltipFunction(SERVICE_TOKEN_APPEARANCE_CHANGE)
+            end,
+            HideTooltipFunction = ServiceTokenHideTooltipFunction,
         })
 
         -- Add more extra info controls above this line
-        for i=1, #data do
+        for i = 1, #data do
             local control = CreateExtraInfoEntry(self, data[i])
             AddExtraInfoEntryToFocus(self, control)
         end
@@ -432,37 +416,17 @@ local function RefreshServiceHeaderVisibility(self)
 
     if headerVisible then
         local tokenCount = GetNumServiceTokens(self.serviceMode)
+        self.serviceTokensLabel:SetText(tokenCount)
 
         local instructions = ""
         if self.serviceMode ~= SERVICE_TOKEN_NONE then
             instructions = zo_strformat(SI_SERVICE_TOKEN_INSTRUCTIONS, GetString("SI_SERVICETOKENTYPE", self.serviceMode))
         end
 
-        self.serviceTokensLabel:SetText(tokenCount)
         self.serviceInstructions:SetText(instructions)
     end
 
     self.serviceHeader:SetHidden(not headerVisible)
-end
-
-local function SetExtraInfoLabel(self, labelName, text, color)
-    local label = self.extraInfoDetails:GetNamedChild(labelName)
-    label:SetText(text or "")
-
-    if color then
-        label:SetColor(color:UnpackRGBA())
-    else
-        label:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
-    end
-end
-
-function ZO_CharacterSelect_Gamepad_SetExtraInfoDetails(title, body1, body1Color, body2, body2Color)
-    local self = ZO_CharacterSelect_Gamepad
-
-    self.extraInfoDetails:GetNamedChild("Title"):SetText(title or "")
-
-    SetExtraInfoLabel(self, "Description1", body1, body1Color)
-    SetExtraInfoLabel(self, "Description2", body2, body2Color)
 end
 
 -- End Extra Info functions
@@ -1131,7 +1095,6 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     self.characterList:SetDirectionalInputEnabled(false)
 
     self.characterDetails = self:GetNamedChild("CharacterDetails"):GetNamedChild("Container")
-    self.extraInfoDetails = self:GetNamedChild("CharacterDetails"):GetNamedChild("ExtraInfoDetails")
     self.characterNeedsRename = self:GetNamedChild("CharacterDetails"):GetNamedChild("NeedsRename")
     self.header = self:GetNamedChild("Mask"):GetNamedChild("Characters"):GetNamedChild("HeaderContainer"):GetNamedChild("Header")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)

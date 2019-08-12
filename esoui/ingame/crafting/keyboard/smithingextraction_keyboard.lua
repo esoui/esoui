@@ -14,9 +14,7 @@ function ZO_SmithingExtraction:Initialize(control, owner, refinementOnly)
 end
 
 function ZO_SmithingExtraction:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
-    self.extractionSlot:SetItem(nil)
-    self.canExtract = false
-
+    self:ClearSelections()
     if isCraftingTypeDifferent then
         self.inventory:SetActiveFilterByDescriptor(nil)
     end
@@ -31,7 +29,82 @@ end
 function ZO_SmithingExtraction:OnFilterChanged()
     ZO_SharedSmithingExtraction.OnFilterChanged(self)
 
-    self.extractionSlot:SetEmptyTexture(ZO_CraftingUtils_GetItemSlotTextureFromSmithingFilter(self:GetFilterType()))
+    local filterType = self:GetFilterType()
+    if filterType then
+        self.extractionSlot:SetEmptyTexture(ZO_CraftingUtils_GetItemSlotTextureFromSmithingFilter(filterType))
+    end
+    local deconstructionType = self:GetDeconstructionType()
+    if deconstructionType then
+        self.extractionSlot:SetMultipleItemsTexture(ZO_CraftingUtils_GetMultipleItemsTextureFromSmithingDeconstructionType(deconstructionType))
+    end
+end
+
+ZO_SmithingRefinement = ZO_SmithingExtraction:Subclass()
+
+function ZO_SmithingRefinement:New(...)
+    return ZO_SmithingExtraction.New(self, ...)
+end
+
+function ZO_SmithingRefinement:Initialize(control, owner)
+    local REFINEMENT_ONLY = true
+    ZO_SmithingExtraction.Initialize(self, control, owner, REFINEMENT_ONLY)
+
+    self.multiRefineSpinner = ZO_MultiCraftSpinner:New(control:GetNamedChild("SlotContainerSpinner"))
+
+    -- connect refine spinner to crafting process
+    local function UpdateMultiRefineSpinner()
+        if not self.control:IsHidden() then
+            self:UpdateMultiRefine()
+        end
+    end
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", UpdateMultiRefineSpinner)
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", UpdateMultiRefineSpinner)
+end
+
+function ZO_SmithingRefinement:ConfirmRefine()
+    if self:IsMultiExtract() then
+        self:ConfirmExtractAll()
+    else
+        local iterations = self.multiRefineSpinner:GetValue()
+        self:ExtractPartialStack(iterations * GetRequiredSmithingRefinementStackSize())
+    end
+end
+
+function ZO_SmithingRefinement:UpdateMultiRefine()
+    local shouldEnableSpinner = true
+    local NO_OVERRIDE = nil
+    if self.extractionSlot:HasOneItem() then
+        local bagId, slotIndex = self.extractionSlot:GetItemBagAndSlot(1)
+
+        local refineSize = GetRequiredSmithingRefinementStackSize()
+        local maxIterations = zo_min(zo_floor(self.inventory:GetStackCount(bagId, slotIndex) / refineSize), MAX_ITERATIONS_PER_DECONSTRUCTION)
+
+        self.multiRefineSpinner:SetDisplayTextOverride(NO_OVERRIDE)
+        self.multiRefineSpinner:SetMinMax(1, maxIterations)
+        self.multiRefineSpinner:SetValue(maxIterations)
+    elseif self.extractionSlot:HasMultipleItems() then
+        self.multiRefineSpinner:SetDisplayTextOverride(GetString(SI_CRAFTING_QUANTITY_ALL))
+        shouldEnableSpinner = false
+    else
+        self.multiRefineSpinner:SetDisplayTextOverride(NO_OVERRIDE)
+        self.multiRefineSpinner:SetMinMax(0, 0)
+    end
+
+    if ZO_CraftingUtils_IsPerformingCraftProcess() then
+        shouldEnableSpinner = false
+    end
+    self.multiRefineSpinner:SetEnabled(shouldEnableSpinner)
+    self.multiRefineSpinner:UpdateButtons()
+end
+
+function ZO_SmithingRefinement:OnSlotChanged()
+    ZO_SmithingExtraction.OnSlotChanged(self)
+    self:UpdateMultiRefine()
+end
+
+function ZO_SmithingRefinement:OnInventoryUpdate(validItems, filterType)
+    ZO_SmithingExtraction.OnInventoryUpdate(self, validItems, filterType)
+    self:UpdateMultiRefine()
 end
 
 ZO_SmithingExtractionInventory = ZO_CraftingInventory:Subclass()

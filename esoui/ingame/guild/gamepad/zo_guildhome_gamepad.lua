@@ -217,6 +217,10 @@ function ZO_GamepadGuildHome:ShowRecruitment()
     self:SetCurrentPage(GUILD_RECRUITMENT_GAMEPAD_FRAGMENT, GUILD_RECRUITMENT_GAMEPAD)
 end
 
+function ZO_GamepadGuildHome:ShowWeeklyBids()
+    self:SetCurrentPage(GUILD_WEEKLY_BIDS_GAMEPAD:GetListFragment(), GUILD_WEEKLY_BIDS_GAMEPAD)
+end
+
 --------------------
 
 function ZO_GamepadGuildHome_OnInitialize(control)

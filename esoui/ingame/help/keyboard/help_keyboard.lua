@@ -2,8 +2,6 @@ ZO_HELP_NAVIGATION_CONTAINER_WIDTH = 365
 -- 55 is the inset from the left side of the header to the left side of the text in ZO_IconHeader, 16 is the offset for the Scroll from ZO_ScrollContainerBase
 ZO_HELP_NAVIGATION_CATEGORY_LABEL_WIDTH = ZO_HELP_NAVIGATION_CONTAINER_WIDTH - 55 - 16
 
-HELP = nil
-
 ZO_HelpManager = ZO_Object:Subclass()
 
 function ZO_HelpManager:New(...)
@@ -76,7 +74,49 @@ function ZO_HelpManager:Initialize(control)
     control:RegisterForEvent(EVENT_HELP_SEARCH_RESULTS_READY, OnSearchResultsReady)
     control:RegisterForEvent(EVENT_HELP_SHOW_SPECIFIC_PAGE, OnShowSpecificPage)
 
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, self.OnLinkClicked, self)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, self.OnLinkClicked, self)
+
     UpdateHelp()
+
+    HELP_TUTORIALS_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    HELP_TUTORIALS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:OnShowing()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:OnHidden()
+        end
+    end)
+
+
+    self:InitializeKeybindStripDescriptors()
+end
+
+function ZO_HelpManager:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+        {
+            name = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
+            keybind = "UI_SHORTCUT_SECONDARY",
+
+            callback = function()
+                local selectedData = self.navigationTree:GetSelectedData()
+                local link = ZO_LinkHandler_CreateChatLink(GetHelpLink, selectedData.helpCategoryIndex, selectedData.helpIndex)
+                ZO_LinkHandler_InsertLink(link)
+            end,
+
+            visible = function()
+                local selectedData = self.navigationTree:GetSelectedData()
+                if selectedData and selectedData.helpCategoryIndex and selectedData.helpIndex then
+                    return IsChatSystemAvailableForCurrentPlatform()
+                end
+
+                return false
+            end,
+        },
+    }
 end
 
 function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)
@@ -89,7 +129,7 @@ function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)
     end    
 end
 
-function ZO_HelpManager:OnShow()
+function ZO_HelpManager:OnShowing()
     if self.dirty then
         self:Refresh()
     end
@@ -98,12 +138,16 @@ function ZO_HelpManager:OnShow()
         self.showHelpCategoryIndex = nil
         self.showHelpIndex = nil
     end
+
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_HelpManager:OnHide()
+function ZO_HelpManager:OnHidden()
     if self.searchBox:GetText() ~= "" then
         self.searchBox:SetText("")
     end
+
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_HelpManager:InitializeTree()
@@ -306,6 +350,18 @@ function ZO_HelpManager:SearchStart(searchString)
     StartHelpSearch(searchString)
 end
 
+function ZO_HelpManager:OnLinkClicked(link, button, text, color, linkType, ...)
+    if linkType == HELP_LINK_TYPE and button == MOUSE_BUTTON_INDEX_LEFT then
+        local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(link)
+        if helpCategoryIndex and helpIndex then
+            self:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+        end
+        return true
+    end
+end
+
+-- Global XML functions
+
 function ZO_Help_OnSearchTextChanged(editBox)
     HELP:SearchStart(editBox:GetText())
 end
@@ -325,12 +381,4 @@ end
 
 function ZO_Help_Initialize(control)
     HELP = ZO_HelpManager:New(control)
-end
-
-function ZO_Help_OnShow(control)
-    control.owner:OnShow()
-end
-
-function ZO_Help_OnHide(control)
-    control.owner:OnHide()
 end

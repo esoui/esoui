@@ -11,10 +11,22 @@ end
 
 function ZO_HousingFurnitureSettings_Base:Initialize(control, owner)
     self.control = control
-	self.owner = owner
+    self.owner = owner
 
-    self.control:RegisterForEvent(EVENT_HOUSING_PERMISSIONS_CHANGED, function(...) self:OnPermissionsChanged(...) end)
-    self.control:RegisterForEvent(EVENT_HOUSING_PRIMARY_RESIDENCE_SET, function(...) self:UpdateGeneralSettings() end)
+    local function OnPermissionsChanged(...)
+        if self.owner:IsShowing() and self.owner:GetMode() == HOUSING_BROWSER_MODE.SETTINGS then
+            self:OnPermissionsChanged(...)
+        end
+    end
+
+    local function OnPrimaryResidenceSet()
+        if self.owner:IsShowing() and self.owner:GetMode() == HOUSING_BROWSER_MODE.SETTINGS then
+            self:UpdateGeneralSettings()
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_HOUSING_PERMISSIONS_CHANGED, OnPermissionsChanged)
+    self.control:RegisterForEvent(EVENT_HOUSING_PRIMARY_RESIDENCE_SET, OnPrimaryResidenceSet)
 end
 
 function ZO_HousingFurnitureSettings_Base:OnPermissionsChanged(eventId, userGroup)

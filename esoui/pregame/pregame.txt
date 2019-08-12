@@ -17,6 +17,7 @@ EsoUI\Pregame\Gamepad\PregameTemplates.xml
 EsoUI\Pregame\Scenes\PregameSceneManager.lua
 
 EsoUI\Pregame\Tooltip\Tooltip.xml
+EsoUI\Pregame\Tooltip\CharacterSelectTooltips.lua
 
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml

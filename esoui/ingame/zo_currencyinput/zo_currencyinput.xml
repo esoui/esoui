@@ -28,7 +28,7 @@
             <Controls>
                 <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate">
                     <Anchor point="LEFT"/>
-                    <Anchor point="RIGHT" offsetX="18" />
+                    <Anchor point="RIGHT" offsetX="20" />
                 </Label>
             </Controls>
         </Backdrop>

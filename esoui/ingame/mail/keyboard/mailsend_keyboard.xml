@@ -40,7 +40,7 @@
 
                 <Backdrop name="$(parent)SendCurrency" inherits="ZO_DefaultCurrencyInputField">
                     <Dimensions x="115"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Body" relativePoint="BOTTOMRIGHT" offsetX="-16" offsetY="26" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Body" relativePoint="BOTTOMRIGHT" offsetX="-19" offsetY="26" />
                 </Backdrop>
 
                 <Button name="$(parent)AttachRadio" inherits="ZO_RadioButton">

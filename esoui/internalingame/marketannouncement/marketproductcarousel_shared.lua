@@ -27,7 +27,8 @@ function ZO_MarketProductCarousel_Shared:EntrySetup(control, data, selected, res
         control.canSelect = true
     end
 
-    control.object:Layout(data.marketProduct, selected)
+    data.isSelected = selected
+    control.object:Layout(data)
 
     local function ResetAutoScroll()
         self:ResetAutoScrollTimer()

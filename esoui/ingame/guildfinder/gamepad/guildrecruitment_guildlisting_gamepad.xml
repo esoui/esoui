@@ -10,6 +10,8 @@
 
         <Backdrop name="ZO_GuildRecruitment_GuildListing_Gamepad_Highlight_Template" centerColor="00000000" virtual="true" />
 
+        <Control name="ZO_GuildRecruitment_ActivityCheckboxEndTile_Gamepad_Control" inherits="ZO_CheckboxTile_Gamepad_Control" virtual="true" />
+
         <TopLevelControl name="ZO_GuildRecruitment_GuildListing_Gamepad_TopLevel" inherits="ZO_GuildHomeContentAnchor" hidden="true">
             <OnInitialized>
                 ZO_GuildRecruitment_GuildListing_Gamepad_OnInitialized(self)

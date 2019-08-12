@@ -18,7 +18,7 @@ local function ShouldActionBarShow()
     elseif g_showActionBarSetting == ACTION_BAR_SETTING_CHOICE_OFF then
         return false
     else
-        local actionBarIsRelevant = (g_hasValidTarget or g_isMousedOver or g_actionBarReferences > 0)
+        local actionBarIsRelevant = g_hasValidTarget or g_isMousedOver or g_actionBarReferences > 0
         if g_actionBarHasAnAction and actionBarIsRelevant then
             return true
         else
@@ -48,14 +48,14 @@ local function UpdateFadeState(speed)
     local fadeInTime, fadeOutTime = GetAnimationTimes(speed)
     if ShouldActionBarShow() then
         ACTION_BAR_FRAGMENT:SetHiddenForReason("ShouldntShow", false, fadeInTime, fadeOutTime)
-        if(g_holdingForFadeOut) then
+        if g_holdingForFadeOut then
             g_holdingForFadeOut = false
             EVENT_MANAGER:UnregisterForUpdate("ZO_Contextual")
         end
     else
         --only wait to set the hidden reason if we're animating and the bar is actually showing
-        if(speed == ANIMATED and not ACTION_BAR_FRAGMENT:IsHidden()) then
-            if(not g_holdingForFadeOut) then
+        if speed == ANIMATED and not ACTION_BAR_FRAGMENT:IsHidden() then
+            if not g_holdingForFadeOut then
                 g_holdingForFadeOut = true
                 EVENT_MANAGER:RegisterForUpdate("ZO_Contextual", FADE_OUT_DELAY, SetShouldntShowAnimated)
             end
@@ -92,38 +92,38 @@ end
 local function RefreshHasValidTarget()
     local hadValidTarget = g_hasValidTarget
     g_hasValidTarget = false
-    
-    if(DoesUnitExist("reticleover")) then
+
+    if DoesUnitExist("reticleover") then
         local reaction = GetUnitReaction("reticleover")
-        if(IsUnitAttackable("reticleover") and reaction ~= UNIT_REACTION_NEUTRAL) then
+        if IsUnitAttackable("reticleover") and reaction ~= UNIT_REACTION_NEUTRAL then
             g_hasValidTarget = true
-        else            
-            if(reaction == UNIT_REACTION_FRIENDLY or reaction == UNIT_REACTION_PLAYER_ALLY or IsUnitFriendlyFollower("reticleover")) then
+        else
+            if reaction == UNIT_REACTION_FRIENDLY or reaction == UNIT_REACTION_PLAYER_ALLY or IsUnitFriendlyFollower("reticleover") then
                 local currentHealth, maxHealth = GetUnitPower("reticleover", POWERTYPE_HEALTH)
-                if(currentHealth < maxHealth) then
+                if currentHealth < maxHealth then
                     g_hasValidTarget = true
                 end
             end
         end
     end
 
-    return (hadValidTarget ~= g_hasValidTarget)
+    return hadValidTarget ~= g_hasValidTarget
 end
 
 local function OnReticleTargetChanged()
-    if(RefreshHasValidTarget()) then
+    if RefreshHasValidTarget() then
         UpdateFadeState(ANIMATED)
     end
 end
 
 local function OnPowerUpdate(eventCode, unitTag, powerIndex, powerType)
-    if(RefreshHasValidTarget()) then
+    if RefreshHasValidTarget() then
         UpdateFadeState(ANIMATED)
     end
 end
 
 local function OnSlotsUpdated()
-    if(RefreshActionBarHasAnAction()) then
+    if RefreshActionBarHasAnAction() then
         UpdateFadeState(ANIMATED)
     end
 end
@@ -153,13 +153,14 @@ end
 function ZO_ContextualActionBar_OnInitialized(self)
     CONTEXTUAL_ACTION_BAR_AREA_FRAGMENT = ZO_HUDFadeSceneFragment:New(self)
     ACTION_BAR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_HIDING and g_holdingForFadeOut) then        
+        if(newState == SCENE_FRAGMENT_HIDING and g_holdingForFadeOut) then
             SetShouldntShow(INSTANT)
         end
     end)
 
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_ACTION_SLOT_UPDATED, OnSlotsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED, OnSlotsUpdated)
+    EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED, OnSlotsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_PLAYER_ACTIVATED, OnSlotsUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_Contextual", EVENT_POWER_UPDATE, OnPowerUpdate)
     EVENT_MANAGER:AddFilterForEvent("ZO_Contextual", EVENT_POWER_UPDATE, REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH, REGISTER_FILTER_UNIT_TAG, "reticleover")

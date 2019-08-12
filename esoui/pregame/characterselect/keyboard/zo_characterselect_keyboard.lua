@@ -681,21 +681,20 @@ function ServiceTokenIndicator:OnMouseEnter()
     InitializeTooltip(self.tooltip, self.control, BOTTOM, 0, -10, TOP)
     self.highlight:SetHidden(false)
 
-    local bodyText2
-    local bodyText2Color
-
+    local tokensAvailableText
+    local tokensAvailableTextColor
     local numTokens = GetNumServiceTokens(self.tokenType)
     if numTokens ~= 0 then
-        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, numTokens, GetString("SI_SERVICETOKENTYPE", self.tokenType))
-        bodyText2Color = ZO_SUCCEEDED_TEXT
+        tokensAvailableText = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, numTokens, GetString("SI_SERVICETOKENTYPE", self.tokenType))
+        tokensAvailableTextColor = ZO_SUCCEEDED_TEXT
     else
-        bodyText2 = zo_strformat(SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE, GetString("SI_SERVICETOKENTYPE", self.tokenType))
-        bodyText2Color = ZO_ERROR_COLOR
+        tokensAvailableText = zo_strformat(SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE, GetString("SI_SERVICETOKENTYPE", self.tokenType))
+        tokensAvailableTextColor = ZO_ERROR_COLOR
     end
 
     self:AddHeader(self.tooltipHeaderText)
-    self:AddBodyText(self.tooltipBodyText1)
-    self:AddBodyText(bodyText2, bodyText2Color)
+    self:AddBodyText(self:GetDescription())
+    self:AddBodyText(tokensAvailableText, tokensAvailableTextColor)
 end
 
 local SET_TO_FULL_SIZE = true
@@ -725,7 +724,11 @@ function ServiceTokenIndicator:OnMouseExit()
 end
 
 function ServiceTokenIndicator:OnMouseUp()
-    -- to be overriden by subclasses to perform their action
+    -- to be overridden by subclasses to perform their action
+end
+
+function ServiceTokenIndicator:GetDescription()
+    return GetServiceTokenDescription(self.tokenType)
 end
 
 -- Name Change Tokens
@@ -738,8 +741,6 @@ end
 
 function NameChangeTokenIndicator:Initialize(control)
     ServiceTokenIndicator.Initialize(self, control, SERVICE_TOKEN_NAME_CHANGE, "EsoUI/Art/Icons/Token_NameChange.dds")
-
-    self.tooltipBodyText1 = GetString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION)
 end
 
 function NameChangeTokenIndicator:OnMouseUp()
@@ -768,8 +769,6 @@ end
 
 function RaceChangeTokenIndicator:Initialize(control)
     ServiceTokenIndicator.Initialize(self, control, SERVICE_TOKEN_RACE_CHANGE, "EsoUI/Art/Icons/Token_RaceChange.dds")
-
-    self.tooltipBodyText1 = GetString(SI_SERVICE_TOOLTIP_RACE_CHANGE_TOKEN_DESCRIPTION)
 end
 
 function RaceChangeTokenIndicator:OnMouseUp()
@@ -794,8 +793,6 @@ end
 
 function AppearanceChangeTokenIndicator:Initialize(control)
     ServiceTokenIndicator.Initialize(self, control, SERVICE_TOKEN_APPEARANCE_CHANGE, "EsoUI/Art/Icons/Token_AppearanceChange.dds")
-
-    self.tooltipBodyText1 = GetString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION)
 end
 
 function AppearanceChangeTokenIndicator:OnMouseUp()

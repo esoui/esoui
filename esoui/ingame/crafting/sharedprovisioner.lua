@@ -23,22 +23,25 @@ function ZO_Provisioner_IsSceneShowing()
 end
 
 -- ZO_SharedProvisioner class
-ZO_SharedProvisioner = ZO_Object:Subclass()
+ZO_SharedProvisioner = ZO_CraftingCreateScreenBase:Subclass()
 
 function ZO_SharedProvisioner:New(...)
-    local provisioner = ZO_Object.New(self)
+    local provisioner = ZO_CraftingCreateScreenBase.New(self)
     provisioner:Initialize(...)
     return provisioner
 end
 
 function ZO_SharedProvisioner:Initialize(control)
     ZO_Provisioner_AddSceneName(self.mainSceneName)
-    
+
     self.control = control
     self.resultTooltip = self.control:GetNamedChild("Tooltip")
 
-    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
+    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, isCraftingSameAsPrevious)
         if craftingType == CRAFTING_TYPE_PROVISIONING and self:ShouldShowForControlScheme() then
+            if not isCraftingSameAsPrevious then
+                self:ResetSelectedTab()
+            end
             self:StartInteract()
             SCENE_MANAGER:Show(self.mainSceneName)
         end
@@ -96,20 +99,36 @@ function ZO_SharedProvisioner:DirtyRecipeList()
 end
 
 function ZO_SharedProvisioner:ShouldShowForControlScheme()
-    -- meant to be overriden
+    -- meant to be overridden
     return false
 end
 
+function ZO_SharedProvisioner:ResetSelectedTab()
+    -- meant to be overridden
+end
+
 function ZO_SharedProvisioner:StartInteract()
-    -- meant to be overriden
+    -- meant to be overridden
 end
 
 function ZO_SharedProvisioner:StartHide()
-    -- meant to be overriden
+    -- meant to be overridden
 end
 
 function ZO_SharedProvisioner:SetDetailsEnabled(enabled)
-    -- meant to be overriden
+    -- meant to be overridden
+end
+
+function ZO_SharedProvisioner:GetRecipeData()
+    -- meant to be overridden
+end
+
+function ZO_SharedProvisioner:GetRecipeIndices()
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.recipeListIndex, recipeData.recipeIndex
+    end
+    return 0, 0
 end
 
 function ZO_SharedProvisioner:PassesTradeskillLevelReqs(tradeskillsReqs)
@@ -131,7 +150,7 @@ function ZO_SharedProvisioner:PassesQualityLevelReq(qualityReq)
     end
 end
 
-function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, checkNumCreatable, numCreatable, checkSkills, tradeskillsLevelReqs, qualityReq, craftingInteractionType, requiredCraftingStationType)
+function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, shouldRequireIngredients, maxIterationsForIngredients, shouldRequireSkills, tradeskillsLevelReqs, qualityReq, craftingInteractionType, requiredCraftingStationType)
     if craftingInteractionType ~= requiredCraftingStationType then
         return false
     end
@@ -140,13 +159,13 @@ function ZO_SharedProvisioner:DoesRecipePassFilter(specialIngredientType, checkN
         return false
     end
     
-    if checkNumCreatable then
-        if numCreatable == 0 then
+    if shouldRequireIngredients then
+        if maxIterationsForIngredients == 0 then
             return false
         end 
     end
 
-    if checkSkills then
+    if shouldRequireSkills then
         if not self:PassesTradeskillLevelReqs(tradeskillsLevelReqs) or not self:PassesQualityLevelReq(qualityReq) then
             return false
         end
@@ -172,6 +191,57 @@ function ZO_SharedProvisioner:CanPreviewRecipe(recipeData)
     return false
 end
 
-function ZO_Provisioning_IsSceneShowing()
-    return SCENE_MANAGER:IsShowing("provisioner") or SCENE_MANAGER:IsShowing("gamepad_provisioner_root")
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedProvisioner:IsCraftable()
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.maxIterationsForIngredients > 0 
+           and self:PassesTradeskillLevelReqs(recipeData.tradeskillsLevelReqs) 
+           and self:PassesQualityLevelReq(recipeData.qualityReq)
+    end
+    return false
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedProvisioner:GetAllCraftingParameters(numIterations)
+    local recipeData = self:GetRecipeData()
+    if recipeData then
+        return recipeData.recipeListIndex, recipeData.recipeIndex, numIterations
+    end
+    return 0, 0, numIterations
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedProvisioner:ShouldCraftButtonBeEnabled()
+    if ZO_CraftingUtils_IsPerformingCraftProcess() then
+        return false
+    end
+
+    local recipeData = self:GetRecipeData()
+    if not recipeData then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_NO_RECIPE)
+    elseif not recipeData.passesTradeskillLevelReqs then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_NEED_RECIPE_RANK)
+    elseif not recipeData.passesQualityLevelReq then
+        return false, GetString("SI_TRADESKILLRESULT", CRAFTING_RESULT_NEED_RECIPE_QUALITY_RANK)
+    end
+
+    local maxIterations, craftingResult = GetMaxIterationsPossibleForRecipe(self:GetRecipeIndices())
+    return maxIterations ~= 0, GetString("SI_TRADESKILLRESULT", craftingResult)
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedProvisioner:GetMultiCraftMaxIterations()
+    if not self:IsCraftable() then
+        return 0
+    end
+
+    -- throw away second argument
+    local numIterations = GetMaxIterationsPossibleForRecipe(self:GetRecipeIndices())
+    return numIterations
+end
+
+-- Overrides ZO_CraftingCreateScreenBase
+function ZO_SharedProvisioner:Create(numIterations)
+    CraftProvisionerItem(self:GetAllCraftingParameters(numIterations))
 end

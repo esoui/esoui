@@ -288,6 +288,7 @@ end
 function ZO_TradingHouseSearch:InitializeOrderingData()
     self.sortField = TRADING_HOUSE_SORT_SALE_PRICE_PER_UNIT
     self.sortOrder = ZO_SORT_ORDER_UP
+    self.useLastExecutedSearchFilters = false
 end
 
 function ZO_TradingHouseSearch:ResetAppliedSearchTerms()
@@ -415,11 +416,6 @@ function ZO_TradingHouseSearch:GetTargetPage()
     return self.targetPage
 end
 
-function ZO_TradingHouseSearch:UpdateSortOptions(sortKey, sortOrder)
-    self.sortField = sortKey
-    self.sortOrder = sortOrder
-end
-
 function ZO_TradingHouseSearch:GetSortOptions(sortKey, sortOrder)
     return self.sortField, self.sortOrder
 end
@@ -427,6 +423,7 @@ end
 function ZO_TradingHouseSearch:SearchNextPage()
     if self.hasMorePages then
         self.targetPage = self.page + 1
+        self.useLastExecutedSearchFilters = true
         self:DoSearch()
     end
 end
@@ -434,13 +431,19 @@ end
 function ZO_TradingHouseSearch:SearchPreviousPage()
     if self.page > 0 then
         self.targetPage = self.page - 1
+        self.useLastExecutedSearchFilters = true
         self:DoSearch()
     end
 end
 
 function ZO_TradingHouseSearch:ChangeSort(sortKey, sortOrder)
-    self:UpdateSortOptions(sortKey, sortOrder)
-    self:DoSearch()
+    self.sortField = sortKey
+    self.sortOrder = sortOrder
+    -- Don't search unless we have already searched once
+    if self:GetSearchState() ~= TRADING_HOUSE_SEARCH_STATE_NONE then
+        self.useLastExecutedSearchFilters = true
+        self:DoSearch()
+    end
 end
 
 function ZO_TradingHouseSearch:DoSearchWhenReady()
@@ -491,13 +494,16 @@ function ZO_TradingHouseSearch:DoSearch(isQueuedSearch)
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, NO_SOUND, GetString(SI_TRADING_HOUSE_SEARCH_TRUNCATED))
     end
 
-    -- This is a valid search, save it. If a search is queued, or we are just
-    -- changing pages, this will actually double-save this entry, but that's okay
-    -- because we deduplicate it anyways
-    TRADING_HOUSE_SEARCH_HISTORY_MANAGER:SaveToHistory(self:CreateSearchTable())
+    -- Skip searches where we don't actually use the current filters, or
+    -- searches that have already been saved and queued. In both of these cases
+    -- the player would have already created a history entry when they first did
+    -- the search.
+    if not self.useLastExecutedSearchFilters and not isQueuedSearch then
+        TRADING_HOUSE_SEARCH_HISTORY_MANAGER:SaveToHistory(self:CreateSearchTable())
+    end
 
     if self:ShouldShowGuildSpecificItems() then
-        -- Guild specific items are loaded when the trading house is opened, so we can skip directly to the search results without triggering a search
+        -- Guild specific items are loaded when the trading house is opened, so we can skip directly to the search results without triggering a search request
         local guildItemSearchOutcome = GetNumGuildSpecificItems() == 0 and TRADING_HOUSE_SEARCH_OUTCOME_NO_RESULTS or TRADING_HOUSE_SEARCH_OUTCOME_HAS_RESULTS
         self:SetSearchState(TRADING_HOUSE_SEARCH_STATE_COMPLETE, guildItemSearchOutcome)
         return
@@ -506,11 +512,15 @@ function ZO_TradingHouseSearch:DoSearch(isQueuedSearch)
     if not self:CanPerformSearch() then
         self:DoSearchWhenReady()
     else
-        local IS_PERFORMING_SEARCH = true
-        self:ApplyFilters(IS_PERFORMING_SEARCH)
+        --Don't need to apply current filters if we are using the last executed filters. Applying filters also wipes the last executed filters so we don't want to do that.
+        if not self.useLastExecutedSearchFilters then
+            local IS_PERFORMING_SEARCH = true
+            self:ApplyFilters(IS_PERFORMING_SEARCH)
+        end
         local page = self.targetPage or 0
-        ExecuteTradingHouseSearch(page, self.sortField, self.sortOrder)
+        ExecuteTradingHouseSearch(page, self.sortField, self.sortOrder, self.useLastExecutedSearchFilters)
         self.targetPage = nil
+        self.useLastExecutedSearchFilters = false
     end
 end
 

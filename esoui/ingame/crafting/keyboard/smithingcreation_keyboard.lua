@@ -39,7 +39,7 @@ function ZO_SmithingCreation:Initialize(control, owner)
     if IsChatSystemAvailableForCurrentPlatform() then
         local function OnTooltipMouseUp(control, button, upInside)
             if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
-                local link = ZO_LinkHandler_CreateChatLink(GetSmithingPatternResultLink, self:GetSelectedPatternIndex(), self:GetSelectedMaterialIndex(), 
+                local link = ZO_LinkHandler_CreateChatLink(GetSmithingPatternResultLink, self:GetSelectedPatternIndex(), self:GetSelectedMaterialIndex(),
                     self:GetSelectedMaterialQuantity(), self:GetSelectedItemStyleId(), self:GetSelectedTraitIndex())
                 if link ~= "" then
                     ClearMenu()
@@ -49,7 +49,7 @@ function ZO_SmithingCreation:Initialize(control, owner)
                     end
 
                     AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), AddLink)
-                    
+
                     ShowMenu(self)
                 end
             end
@@ -58,6 +58,9 @@ function ZO_SmithingCreation:Initialize(control, owner)
         self.resultTooltip:SetHandler("OnMouseUp", OnTooltipMouseUp)
         self.resultTooltip:GetNamedChild("Icon"):SetHandler("OnMouseUp", OnTooltipMouseUp)
     end
+
+    self.multiCraftSpinner = ZO_MultiCraftSpinner:New(control:GetNamedChild("MultiCraftContainerSpinner"))
+    ZO_CraftingUtils_ConnectSpinnerToCraftingProcess(self.multiCraftSpinner)
 end
 
 function ZO_SmithingCreation:SetHidden(hidden)
@@ -65,11 +68,9 @@ function ZO_SmithingCreation:SetHidden(hidden)
     if not hidden then
         CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
         CRAFTING_RESULTS:SetTooltipAnimationSounds(self:GetCreateTooltipSound())
-        if self.dirty then
-            self:RefreshAllLists()
-        end
         self:TriggerUSITutorial()
     end
+    self.refreshGroup:TryClean()
 end
 
 function ZO_SmithingCreation:InitializeFilterTypeBar()
@@ -104,7 +105,7 @@ function ZO_SmithingCreation:InitializeFilterTypeBar()
             end,
         }
     end
-        
+
     local function CanCraftWeapons()
         return CanSmithingWeaponPatternsBeCraftedHere()
     end
@@ -172,11 +173,11 @@ function ZO_SmithingCreation:InitializeFilters()
     ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.haveKnowledgeCheckBox)
     ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.useUniversalStyleItemCheckBox)
 
-    -- crappy hack to make sure no one gets in a bad state because we have connected the checkbuttons to the smithing process, 
+    -- crappy hack to make sure no one gets in a bad state because we have connected the checkbuttons to the smithing process,
     -- which means we are going to logically set the state of the check buttons without user input, which will interfere with
     -- the player that tries to mouse down on a checkbutton and then start the craft, resulting in a bad state of being stuck in PRESSED
-    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() ZO_CheckButton_SetCheckState(self.haveMaterialsCheckBox, self.savedVars.haveMaterialChecked) 
-                                                                              ZO_CheckButton_SetCheckState(self.haveKnowledgeCheckBox, self.savedVars.haveKnowledgeChecked) 
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() ZO_CheckButton_SetCheckState(self.haveMaterialsCheckBox, self.savedVars.haveMaterialChecked)
+                                                                              ZO_CheckButton_SetCheckState(self.haveKnowledgeCheckBox, self.savedVars.haveKnowledgeChecked)
                                                                               ZO_CheckButton_SetCheckState(self.useUniversalStyleItemCheckBox, self.savedVars.useUniversalStyleItemChecked)
                                                                               end)
 
@@ -239,6 +240,19 @@ end
 
 function ZO_SmithingCreation:BuyCraftingItems()
     ShowMarketAndSearch(GetString(SI_CROWN_STORE_SEARCH_CRAFT_ITEMS), MARKET_OPEN_OPERATION_UNIVERSAL_STYLE_ITEM)
+end
+
+function ZO_SmithingCreation:GetMultiCraftNumIterations()
+    return self.multiCraftSpinner:GetValue()
+end
+
+function ZO_SmithingCreation:RefreshMultiCraft()
+    self.multiCraftSpinner:SetMinMax(1, self:GetMultiCraftMaxIterations())
+    self.multiCraftSpinner:UpdateButtons()
+end
+
+function ZO_SmithingCreation:UpdateKeybindStrip()
+    self.owner:UpdateSharedKeybindStrip()
 end
 
 function ZO_SmithingCreation_HaveMaterialsOnMouseEnter(control)

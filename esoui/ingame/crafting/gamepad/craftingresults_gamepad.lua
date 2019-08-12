@@ -92,7 +92,16 @@ do
 
 
     function ZO_CraftingResults_Gamepad:InitializeResultBuffer()
-        local templateData = {setup = Setup, equalityCheck = AreItemsEqual, equalitySetup = EqualitySetup, headerTemplateName = "ZO_GamepadCraftingResultsHeaderTemplate", headerSetup = SetupHeader, headerEqualityCheck = AreHeadersEqual}
+        local templateData =
+        {
+            setup = Setup,
+            equalityCheck = AreItemsEqual,
+            equalitySetup = EqualitySetup,
+            headerTemplateName = "ZO_GamepadCraftingResultsHeaderTemplate",
+            headerSetup = SetupHeader,
+            headerEqualityCheck = AreHeadersEqual,
+            displayOlderLinesFirst = true,
+        }
         ZO_AlertAddTemplate_Gamepad(GAMEPAD_CRAFTING_RESULTS_TEMPLATE, templateData)
     end
 end
@@ -101,31 +110,36 @@ function ZO_CraftingResults_Gamepad:IsActive()
     return IsInGamepadPreferredMode()
 end
 
-function ZO_CraftingResults_Gamepad:DisplayCraftingResult(itemInfo)
-    local smithingObject = ZO_Smithing_GetActiveObject()
-    local isSmithingDeconstructing = smithingObject and not smithingObject:IsDeconstructing()
-    local isCreating = isSmithingDeconstructing
-                       or ZO_Enchanting_IsInCreationMode()
-                       or ZO_Provisioning_IsSceneShowing()
-                       or ZO_Alchemy_IsSceneShowing()
-
-    local headerTextId = SI_GAMEPAD_CRAFTING_DECONSTRUCTED_ITEM
-    if isCreating then
-        headerTextId = SI_GAMEPAD_CRAFTING_COMPLETED_ITEM
-    elseif ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
-        headerTextId = SI_GAMEPAD_RETRAIT_COMPLETED_RESULT_HEADER
-    end
-
-    local displayData =
+do
+    local IS_DECONSTRUCTION_SCENE_NAME =
     {
-        header = {text = GetString(headerTextId)},
-        lines =
-        {
-            {text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemInfo.name), icon = itemInfo.icon, stack = itemInfo.stack, color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemInfo.quality)), meetsUsageRequirement = itemInfo.meetsUsageRequirement, quality = itemInfo.quality, itemInstanceId = itemInfo.itemInstanceId}
-        }
+        ["gamepad_enchanting_extraction"] = true,
+        ["gamepad_smithing_deconstruct"] = true,
+        ["gamepad_smithing_refine"] = true,
     }
+    function ZO_CraftingResults_Gamepad:DisplayCraftingResult(itemInfo)
+        local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
 
-    ZO_AlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
+        local headerTextId
+        if ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+            headerTextId = SI_GAMEPAD_RETRAIT_COMPLETED_RESULT_HEADER
+        elseif currentSceneName and IS_DECONSTRUCTION_SCENE_NAME[currentSceneName] then
+            headerTextId = SI_GAMEPAD_CRAFTING_DECONSTRUCTED_ITEM
+        else
+            headerTextId = SI_GAMEPAD_CRAFTING_COMPLETED_ITEM
+        end
+
+        local displayData =
+        {
+            header = {text = GetString(headerTextId)},
+            lines =
+            {
+                {text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemInfo.name), icon = itemInfo.icon, stack = itemInfo.stack, color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemInfo.quality)), meetsUsageRequirement = itemInfo.meetsUsageRequirement, quality = itemInfo.quality, itemInstanceId = itemInfo.itemInstanceId}
+            }
+        }
+
+        ZO_AlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
+    end
 end
 
 function ZO_CraftingResults_Gamepad:ClearAll()

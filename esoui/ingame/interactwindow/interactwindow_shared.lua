@@ -186,9 +186,10 @@ end
 
 function ZO_SharedInteraction:CloseChatterAndDismissAssistant()
     self:CloseChatter()
-    local activeAssistant = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT)
-    if activeAssistant ~= 0 then
-        UseCollectible(activeAssistant)
+    local activeAssistantId = GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT)
+    if activeAssistantId ~= 0 then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(activeAssistantId)
+        collectibleData:Use()
     end
 end
 
@@ -541,6 +542,18 @@ local REWARD_CREATORS =
         function(control, name, amount, icon)
             SetupSkillLineReward(control, name, icon)
         end,
+    [REWARD_TYPE_CHAOTIC_CREATIA] =
+        function(control, name, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_CHAOTIC_CREATIA, amount, currencyOptions)
+        end,
+    [REWARD_TYPE_STYLE_STONES] =
+        function(control, name, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_STYLE_STONES, amount, currencyOptions)
+        end,
+    [REWARD_TYPE_UNDAUNTED_KEYS] =
+        function(control, name, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_UNDAUNTED_KEYS, amount, currencyOptions)
+        end,
 }
 
 local currencyRewards =
@@ -549,7 +562,10 @@ local currencyRewards =
     [REWARD_TYPE_ALLIANCE_POINTS] = true,
     [REWARD_TYPE_TELVAR_STONES] = true,
     [REWARD_TYPE_WRIT_VOUCHERS] = true,
+    [REWARD_TYPE_CHAOTIC_CREATIA] = true,
+    [REWARD_TYPE_STYLE_STONES] = true,
     [REWARD_TYPE_EVENT_TICKETS] = true,
+    [REWARD_TYPE_UNDAUNTED_KEYS] = true,
 }
 
 function ZO_SharedInteraction:IsCurrencyReward(rewardType)
@@ -562,7 +578,10 @@ local currencyRewardToCurrencyType =
     [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
     [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
     [REWARD_TYPE_WRIT_VOUCHERS] = CURT_WRIT_VOUCHERS,
+    [REWARD_TYPE_CHAOTIC_CREATIA] = CURT_CHAOTIC_CREATIA,
+    [REWARD_TYPE_STYLE_STONES] = CURT_STYLE_STONES,
     [REWARD_TYPE_EVENT_TICKETS] = CURT_EVENT_TICKETS,
+    [REWARD_TYPE_UNDAUNTED_KEYS] = CURT_UNDAUNTED_KEYS,
 }
 
 function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)

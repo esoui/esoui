@@ -50,16 +50,9 @@
                 self.label = self
                 self.icon = self:GetNamedChild("Icon")
             </OnInitialized>
-            <OnMouseDoubleClick>
-                if(button == 1) then
-                    ZO_InventorySlot_DoPrimaryAction(self:GetParent())
-                end
-            </OnMouseDoubleClick>
 
             <OnMouseUp>
-                if(upInside) then
-                    ZO_InventorySlot_OnSlotClicked(self:GetParent(), button)
-                end
+                ZO_CraftingInventoryComponentRow_OnMouseUp(self:GetParent(), button, upInside)
             </OnMouseUp>
 
             <OnMouseEnter>
@@ -79,7 +72,7 @@
             </OnMouseExit>
 
             <OnDragStart>
-                if(button == 1) then
+                if button == 1 then
                     ZO_InventorySlot_OnDragStart(self:GetParent())
                 end
             </OnDragStart>
@@ -151,36 +144,15 @@
             </Controls>
         </Control>
 
-        <Texture name="ZO_AlchemySlotContainerBG" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds" virtual="true">
-            <Dimensions x="512" y="512" />
-            <Anchor point="TOP" />
-        </Texture>
-
-        <Label name="ZO_AlchemySlotContainerSolventLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ALCHEMY_SOLVENT_HEADER" modifyTextType="UPPERCASE" virtual="true">
-            <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="110" offsetY="64" />
-        </Label>
-
-        <Label name="ZO_AlchemySlotContainerReagentsLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ALCHEMY_REAGENTS_HEADER" modifyTextType="UPPERCASE" virtual="true">
-            <Anchor point="TOP" relativePoint="TOPRIGHT" offsetX="-165" offsetY="64" />
-        </Label>
-
         <Button name="ZO_AlchemySlotContainerSolventSlot" inherits="ZO_CraftingSlot" virtual="true">
             <Anchor point="TOP" relativeTo="$(parent)SolventLabel" relativePoint="BOTTOM" offsetY="20" />
             <Controls>
-                <Label name="$(parent)CreatesLevel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <DimensionConstraints maxX="135" />
+                <Label name="$(parent)CreatesLevel" font="ZoFontWinH4" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="135" />
                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10" />
                 </Label>
             </Controls>
         </Button>
-
-        <Control name="ZO_AlchemySlotContainer" virtual="true">
-            <Controls>
-                <Label name="$(parent)SolventLabel" inherits="ZO_AlchemySlotContainerSolventLabel" />
-
-                <Label name="$(parent)ReagentsLabel" inherits="ZO_AlchemySlotContainerReagentsLabel" />
-            </Controls>
-        </Control>
 
         <TopLevelControl name="ZO_AlchemyTopLevel" hidden="true">
             <AnchorFill />
@@ -199,26 +171,39 @@
                     <Dimensions x="550"/>
                 </Control>
 
-                <Control name="$(parent)SlotContainer" inherits="ZO_AlchemySlotContainer">
-                    <Dimensions x="512" y="256" />
+                <Control name="$(parent)SlotContainer">
+                    <Dimensions x="640" y="256" />
                     <Anchor point="BOTTOM" offsetY="-100"/>
                     <Controls>
-                        <Texture name="$(parent)Bg" inherits="ZO_AlchemySlotContainerBG" />
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerLongBackground">
+                            <Dimensions x="640"/>
+                        </Texture>
 
-                        <!-- Anchors for these are set in Lua -->
+                        <!-- Anchors for the slots are set in Lua, but are generally centered around their header labels-->
+                        <Label name="$(parent)SolventLabel" inherits="ZO_CraftingContainerHeader" text="SI_ALCHEMY_SOLVENT_HEADER">
+                            <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="120" offsetY="64" />
+                        </Label>
+                        <Button name="$(parent)SolventSlot" inherits="ZO_AlchemySlotContainerSolventSlot" />
+
+                        <Label name="$(parent)ReagentsLabel" inherits="ZO_CraftingContainerHeader" text="SI_ALCHEMY_REAGENTS_HEADER">
+                            <Anchor point="LEFT" relativeTo="$(parent)SolventLabel" relativePoint="RIGHT" offsetX="100" />
+                        </Label>
                         <Button name="$(parent)ReagentSlot1" inherits="ZO_AlchemyCraftingSlotWithTraits" />
                         <Button name="$(parent)ReagentSlot2" inherits="ZO_AlchemyCraftingSlotWithTraits" />
                         <Button name="$(parent)ReagentSlot3" inherits="ZO_AlchemyCraftingSlotWithTraits" />
 
-                        <Button name="$(parent)SolventSlot" inherits="ZO_AlchemySlotContainerSolventSlot" />
+                        <Label name="$(parent)SpinnerLabel" inherits="ZO_CraftingContainerHeader" text="SI_CRAFTING_QUANTITY_HEADER">
+                            <Anchor point="LEFT" relativeTo="$(parent)ReagentsLabel" relativePoint="RIGHT" offsetX="100" />
+                        </Label>
+                        <Control name="$(parent)Spinner" inherits="ZO_MultiCraftSpinner">
+                            <Anchor point="TOP" relativeTo="$(parent)SpinnerLabel" relativePoint="BOTTOM" offsetY="38" />
+                        </Control>
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate" />
 
-                <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip">
-                    <Anchor point="BOTTOM" offsetY="-335" />
-                </Tooltip>
+                <Tooltip name="$(parent)Tooltip" inherits="ZO_CraftingTooltip" />
             </Controls>
         </TopLevelControl>
     </Controls>

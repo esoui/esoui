@@ -29,6 +29,7 @@ function ZO_StoreManager:Initialize(control)
     STORE_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_FRAGMENT_SHOWING then
                                                         self:RefreshCurrency()
+                                                        self:SetupDefaultSort()
                                                         self:GetStoreItems()
                                                         self:UpdateList()
                                                         self:UpdateFreeSlots()
@@ -49,13 +50,12 @@ function ZO_StoreManager:Initialize(control)
     self:InitializeTabs()
     self:InitializeKeybindStripDescriptors()
 
-    self.currentMoney = 0
     self.currency1Display = GetControl(control, "InfoBarCurrency1")
     self.currency2Display = GetControl(control, "InfoBarCurrency2")
-    self.currenyMoneyDisplay = GetControl(control, "InfoBarMoney")
+    self.currencyMoneyDisplay = GetControl(control, "InfoBarMoney")
     self.freeSlotsLabel = GetControl(control, "InfoBarFreeSlots")
 
-    ZO_CurrencyControl_InitializeDisplayTypes(self.currenyMoneyDisplay, CURT_MONEY)
+    ZO_CurrencyControl_InitializeDisplayTypes(self.currencyMoneyDisplay, CURT_MONEY)
 
     self.activeTab = GetControl(control, "TabsActive")
 
@@ -100,23 +100,19 @@ function ZO_StoreManager:Initialize(control)
 
     self.landingArea = GetControl(self.list, "SellToVendorArea")
 
-    self.sortHeaders = ZO_SortHeaderGroup:New(control:GetNamedChild("SortBy"), true)
-
-    self.sortOrder = ZO_SORT_ORDER_UP
-    self.sortKey = "name"
+    self.sortHeaderGroup = ZO_SortHeaderGroup:New(control:GetNamedChild("SortBy"), true)
+    self.sortHeaderGroup:SelectHeaderByKey("name")
 
     local function OnSortHeaderClicked(key, order)
-        self.sortKey = key
-        self.sortOrder = order
         self:ApplySort()
     end
 
-    self.sortHeaders:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
-    self.sortHeaders:AddHeadersFromContainer()
+    self.sortHeaderGroup:RegisterCallback(ZO_SortHeaderGroup.HEADER_CLICKED, OnSortHeaderClicked)
+    self.sortHeaderGroup:AddHeadersFromContainer()
     -- We are using shared sort headers from the inventory, but store sorts its entries by value
     -- differently, so we need to swap out the sort key
-    self.sortHeaders:ReplaceKey("stackSellPrice", "stackBuyPrice")
-    self.sortHeaders:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
+    self.sortHeaderGroup:ReplaceKey("stackSellPrice", "stackBuyPrice")
+    self.sortHeaderGroup:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
 
     self.tabs = GetControl(control, "Tabs")
 
@@ -268,6 +264,15 @@ function ZO_StoreManager:Initialize(control)
     end
 
     SHARED_INVENTORY:RegisterCallback("ItemRepaired", OnItemRepaired)
+end
+
+function ZO_StoreManager:SetupDefaultSort()
+    local defaultSortField = GetStoreDefaultSortField()
+    if defaultSortField == STORE_DEFAULT_SORT_FIELD_NAME then
+        self.sortHeaderGroup:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, ZO_SortHeaderGroup.FORCE_RESELECT, ZO_SORT_ORDER_UP)
+    elseif defaultSortField == STORE_DEFAULT_SORT_FIELD_VALUE then
+        self.sortHeaderGroup:SelectHeaderByKey("stackBuyPrice", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, ZO_SortHeaderGroup.FORCE_RESELECT, ZO_SORT_ORDER_UP)
+    end
 end
 
 function ZO_StoreManager:InitializeStore(overrideMode)
@@ -424,13 +429,13 @@ function ZO_StoreManager:ChangeFilter(filterData)
 
     -- Manage hiding columns that show/hide depending on the current filter.  If the sort was on a column that becomes hidden
     -- then the sort needs to pick a new column.  Currently this always falls back to the name key.
-    if self.sortHeaders then
-        self.sortHeaders:SetHeadersHiddenFromKeyList(self.hiddenColumns, true)
+    if self.sortHeaderGroup then
+        self.sortHeaderGroup:SetHeadersHiddenFromKeyList(self.hiddenColumns, true)
 
-        if self.hiddenColumns[self.sortKey] then
+        if self.hiddenColumns[self.sortHeaderGroup:GetCurrentSortKey()] then
             -- User wanted to sort by a column that's gone!
             -- Fallback to name.
-            self.sortHeaders:SelectHeaderByKey("name")
+            self.sortHeaderGroup:SelectHeaderByKey("name")
         end
     end
 
@@ -465,7 +470,7 @@ function ZO_StoreManager:SortData()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
 
     self.sortFunction = self.sortFunction or function(entry1, entry2)
-        return ZO_TableOrderingFunction(entry1.data, entry2.data, self.sortKey, sortKeys, self.sortOrder)
+        return ZO_TableOrderingFunction(entry1.data, entry2.data, self.sortHeaderGroup:GetCurrentSortKey(), sortKeys, self.sortHeaderGroup:GetSortDirection())
     end
 
     table.sort(scrollData, self.sortFunction)
@@ -477,7 +482,7 @@ function ZO_StoreManager:ApplySort()
 end
 
 function ZO_StoreManager:SetCurrencyControl(currencyType, currencyValue, currencyOptions)
-    local control = (not self.currency1Display.isInUse and self.currency1Display) or 
+    local control = (not self.currency1Display.isInUse and self.currency1Display) or
                     (not self.currency2Display.isInUse and self.currency2Display) or nil
 
     if control then
@@ -488,13 +493,12 @@ function ZO_StoreManager:SetCurrencyControl(currencyType, currencyValue, currenc
 end
 
 function ZO_StoreManager:RefreshCurrency()
-    ZO_SharedStoreManager.RefreshCurrency(self)
-
-    local repairAllCost = GetRepairAllCost()
-    local gold = (self.storeUsesMoney or repairAllCost > 0) and self.currentMoney or 0
-
-    ZO_CurrencyControl_SetCurrencyData(self.currenyMoneyDisplay, CURT_MONEY, gold, self.storeUsesMoney)
-    ZO_CurrencyControl_SetCurrency(self.currenyMoneyDisplay, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    local storeUsesGold = ZO_IsElementInNumericallyIndexedTable(self.storeUsedCurrencies, CURT_MONEY)
+    local showPlayerGold = storeUsesGold or GetRepairAllCost() > 0
+    local HIDE_GOLD_AMOUNT = 0 -- if showPlayerGold is false then we pass in 0 as the amount to hide the gold display
+    local shownGoldAmount = showPlayerGold and GetCurrencyAmount(CURT_MONEY, GetCurrencyPlayerStoredLocation(CURT_MONEY)) or HIDE_GOLD_AMOUNT
+    ZO_CurrencyControl_SetCurrencyData(self.currencyMoneyDisplay, CURT_MONEY, shownGoldAmount, showPlayerGold)
+    ZO_CurrencyControl_SetCurrency(self.currencyMoneyDisplay, ZO_KEYBOARD_CURRENCY_OPTIONS)
 
     -- We're laying out the player alternate currency labels this way to ensure that we never display more than two labels, even if 
     -- more than two are applicable to this store, and to ensure that they maintain a consistent priority
@@ -503,21 +507,12 @@ function ZO_StoreManager:RefreshCurrency()
 
     self.currency2Display:SetHidden(true)
     self.currency2Display.isInUse = false
-    
-    if self.storeUsesAP then
-        self:SetCurrencyControl(CURT_ALLIANCE_POINTS, self.currentAP or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
-    end
 
-    if self.storeUsesTelvarStones then
-        self:SetCurrencyControl(CURT_TELVAR_STONES, self.currentTelvarStones or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
-    end 
-
-    if self.storeUsesWritVouchers then
-        self:SetCurrencyControl(CURT_WRIT_VOUCHERS, self.currentWritVouchers or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
-    end 
-
-    if self.storeUsesEventCurrency then
-        self:SetCurrencyControl(CURT_EVENT_TICKETS, self.currentEventCurrency or 0, ZO_KEYBOARD_CURRENCY_OPTIONS)
+    for i, currencyType in ipairs(self.storeUsedCurrencies) do
+        if currencyType ~= CURT_MONEY then
+            local playerHeldCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
+            self:SetCurrencyControl(currencyType, playerHeldCurrencyAmount, ZO_KEYBOARD_CURRENCY_OPTIONS)
+        end
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -618,7 +613,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, locked)
     ZO_UpdateTraitInformationControlIcon(control, data)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS, CURT_EVENT_TICKETS)
+    ZO_CurrencyControl_InitializeDisplayTypes(priceControl, unpack(ZO_VALID_CURRENCY_TYPES))
 
     local currencyType1 = data.currencyType1
     local currencyType2 = data.currencyType2
@@ -631,19 +626,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
 end
 
 function ZO_StoreManager:HasEnoughCurrencyToBuyItem(currencyType, itemCost)
-    if currencyType == CURT_MONEY then
-        return self.currentMoney >= itemCost
-    elseif currencyType == CURT_ALLIANCE_POINTS then
-        return self.currentAP >= itemCost
-    elseif currencyType == CURT_TELVAR_STONES then
-        return self.currentTelvarStones >= itemCost
-    elseif currencyType == CURT_WRIT_VOUCHERS then
-        return self.currentWritVouchers >= itemCost
-    elseif currencyType == CURT_EVENT_TICKETS then
-        return self.currentEventCurrency >= itemCost
-    end
-
-    return false
+    return GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType)) >= itemCost
 end
 
 function ZO_StoreManager:OpenBuyMultiple(entryIndex)
@@ -691,7 +674,7 @@ function ZO_StoreManager:RefreshBuyMultiple()
     end
     ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, meetsRequirementsToBuy and meetsRequirementsToEquip)
 
-    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, CURT_MONEY, CURT_ALLIANCE_POINTS, CURT_TELVAR_STONES, CURT_WRIT_VOUCHERS, CURT_EVENT_TICKETS)
+    ZO_CurrencyControl_InitializeDisplayTypes(currencyControl, unpack(ZO_VALID_CURRENCY_TYPES))
 
     local total = quantity * price
     local type1Total = quantity * currencyQuantity1

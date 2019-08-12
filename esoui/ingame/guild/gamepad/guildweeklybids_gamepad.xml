@@ -1,0 +1,74 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildWeeklyBidsRow_Gamepad" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <Controls>
+                <Label name="$(parent)Order" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                    <Dimensions x="65"/>
+                </Label>
+                <Label name="$(parent)Trader" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Order" relativePoint="RIGHT" offsetX="15"/>
+                    <Dimensions x="600"/>
+                </Label>
+                <Label name="$(parent)PlacedBy" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Anchor point="LEFT" relativeTo="$(parent)Trader" relativePoint="RIGHT" offsetX="15"/>
+                    <Dimensions x="315"/>
+                </Label>
+                <Label name="$(parent)BidAmount" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativeTo="$(parent)PlacedBy" relativePoint="RIGHT" offsetX="15"/>
+                    <Anchor point="RIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GuildWeeklyBidsTopLevel_Gamepad" hidden="true" inherits="ZO_AnchoredToQuadrant_1_2_3_Background ZO_GamepadInteractiveSortFilterListControl">
+            <OnInitialized>
+                ZO_GuildWeeklyBidsTopLevel_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)ContentHeader" override="true">
+                            <Controls>
+                                <Control name="$(parent)DropdownFilter" override="true" hidden="true"/>
+                                <Control name="$(parent)SearchFilter" override="true" hidden="true"/>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)Order" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="65"/>
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_ORDER), "order", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+                                <Control name="$(parent)Trader" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_TRADER), "kioskName", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Order" relativePoint="TOPRIGHT" offsetX="15"/>
+                                    <Dimensions x="600"/>
+                                </Control>
+                                <Control name="$(parent)PlacedBy" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_PLACED_BY), "displayName", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Trader" relativePoint="TOPRIGHT" offsetX="15"/>
+                                    <Dimensions x="315"/>
+                                </Control>
+                                <Control name="$(parent)BidAmount" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_BID_AMOUNT), "bidAmount", TEXT_ALIGN_RIGHT)
+                                    </OnInitialized>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)PlacedBy" relativePoint="TOPRIGHT" offsetX="15"/>
+                                    <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

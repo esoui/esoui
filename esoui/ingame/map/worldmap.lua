@@ -1029,6 +1029,19 @@ local function SetObjectiveMessage(pinType, pin)
     end
 end
 
+local function GetWayshrineNameFromPin(pin)
+    local nodeIndex = pin:GetFastTravelNodeIndex()
+    local known, name = GetFastTravelNodeInfo(nodeIndex)
+    return name
+end
+
+local function SetWayshrineMessage(pinType, pin)
+    ZO_WorldMapMouseoverName.owner = "fastTravelWayshrine"
+    ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, GetWayshrineNameFromPin(pin)))
+
+    INFORMATION_TOOLTIP:AppendWayshrineTooltip(pin)
+end
+
 local function LayoutMapLocation(pin)
     local locationIndex = pin:GetLocationIndex()
     MAP_LOCATION_TOOLTIP:SetMapLocation(locationIndex)
@@ -1284,12 +1297,6 @@ local function GetUnitNameFromPin(pin)
     return GetUnitName(pin:GetUnitTag())
 end
 
-local function GetWayshrineNameFromPin(pin)
-    local nodeIndex = pin:GetFastTravelNodeIndex()
-    local known, name = GetFastTravelNodeInfo(nodeIndex)
-    return name
-end
-
 local function GetQuestCategoryIcon(pin)
     local questIndex = pin:GetQuestData()
     if GetTrackedIsAssisted(TRACK_TYPE_QUEST, questIndex) then
@@ -1325,7 +1332,7 @@ do
         PLAYER_PIN = { creator = function(pin) INFORMATION_TOOLTIP:AppendUnitName(pin:GetUnitTag()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, categoryId = ZO_MapPin.PIN_ORDERS.PLAYERS, entryName = GetUnitNameFromPin },
         QUEST_CONDITION = { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestCondition(pin:GetQuestData()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, categoryId = ZO_MapPin.PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, entryName = GetQuestConditionFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
         QUEST_ENDING = { creator = function(pin) INFORMATION_TOOLTIP:AppendQuestEnding(pin:GetQuestIndex()) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, gamepadCategory = GetColoredQuestNameFromPin, categoryId = ZO_MapPin.PIN_ORDERS.QUESTS, gamepadCategoryIcon = GetQuestCategoryIcon, entryName = GetQuestEndingFromPin, gamepadCategoryStyleName = "mapQuestTitle" },
-        WAYSHRINE = { creator = function(pin) INFORMATION_TOOLTIP:AppendWayshrineTooltip(pin) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, categoryId = ZO_MapPin.PIN_ORDERS.DESTINATIONS, gamepadSpacing = true, entryName = GetWayshrineNameFromPin },
+        WAYSHRINE = { creator = function(pin) SetWayshrineMessage(MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE, pin) end, tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION, categoryId = ZO_MapPin.PIN_ORDERS.DESTINATIONS, gamepadSpacing = true, entryName = GetWayshrineNameFromPin },
         KEEP = { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, categoryId = ZO_MapPin.PIN_ORDERS.AVA_KEEP, gamepadSpacing = true },
         OUTPOST = { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, categoryId = ZO_MapPin.PIN_ORDERS.AVA_OUTPOST, gamepadSpacing = true },
         RESOURCE = { creator = LayoutKeepTooltip, tooltip = ZO_MAP_TOOLTIP_MODE.KEEP, categoryId = ZO_MapPin.PIN_ORDERS.AVA_RESOURCE, gamepadSpacing = true },
@@ -1658,7 +1665,7 @@ end
 
 local function DoMouseExitForPin(pin)
     local pinType, pinTag = pin:GetPinTypeAndTag()
-    if pin:IsPOI() then
+    if pin:IsPOI() or pin:IsFastTravelWayShrine() then
         --reset the status to show what part of the map we're over (except if it's the name of this zone)
         if(g_mouseoverMapBlobManager.m_currentLocation ~= ZO_WorldMap.zoneName) then
             ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, g_mouseoverMapBlobManager.m_currentLocation))

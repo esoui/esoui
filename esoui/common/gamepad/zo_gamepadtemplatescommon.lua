@@ -349,6 +349,14 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         --multi-icons control their own alpha, don't set it directly on the icon if you're using a multi-icon
         statusIndicator:ClearIcons()
         
+        if data.overrideStatusIndicatorIcons then
+            for _, iconTexture in ipairs(data.overrideStatusIndicatorIcons) do
+                statusIndicator:AddIcon(iconTexture)
+            end
+            statusIndicator:Show()
+            return -- Don't show other multi-icons
+        end
+        
         if data.isEquippedInCurrentCategory then
             statusIndicator:AddIcon(EQUIPPED_THIS_SLOT_TEXTURE)
         elseif data.isEquippedInAnotherCategory then

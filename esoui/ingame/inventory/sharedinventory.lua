@@ -22,19 +22,11 @@ function ZO_SharedInventoryManager:Initialize()
 
     local function OnItemCombinationResult(_, itemCombinationResult)
         if itemCombinationResult == ITEM_COMBINATION_RESULT_SUCCESS then
-            -- Combinations play an animation on success, hide UI so the player can bask in it
+            -- Combinations play an animation on success, hide UI so the player can see it
             SCENE_MANAGER:SetInUIMode(false)
         end
     end 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_ITEM_COMBINATION_RESULT, OnItemCombinationResult)
-
-    local function OnCollectibleEvolutionResult(_, evolutionResult)
-        if evolutionResult == COLLECTIBLE_EVOLUTION_RESULT_SUCCESS then
-            -- Evolutions also play an animation on success, so hide the UI
-            SCENE_MANAGER:SetInUIMode(false)
-        end
-    end 
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_COLLECTIBLE_EVOLUTION_RESULT, OnCollectibleEvolutionResult)
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, function() 
         self:RefreshInventory(BAG_BACKPACK) 
@@ -230,38 +222,33 @@ function ZO_SharedInventoryManager:Initialize()
 end
 
 function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
+    local function AcceptEvolutionCallback()
+        RespondToConfirmUseInventoryItemRequest(true)
+    end
+
+    local function DeclineEvolutionCallback()
+        RespondToConfirmUseInventoryItemRequest(false)
+    end
+
     local function OnRequestConfirmUseItem(eventCode, bag, slot)
         local onUseType = GetItemUseType(bag, slot)
-        if onUseType == ITEM_USE_TYPE_EVOLUTION then
-            local baseCollectibleId, evolvedCollectibleId = GetItemCollectibleEvolutionInformation(bag, slot)
-            local baseCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(baseCollectibleId)
-            local evolvedCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(evolvedCollectibleId)
-            local baseCollectibleName = ZO_WHITE:Colorize(baseCollectibleData:GetName())
-            local evolvedCollectibleName = ZO_WHITE:Colorize(evolvedCollectibleData:GetName())
-
-            local dialogData =
-            {
-                bag = bag,
-                slot = slot,
-                baseCollectibleId = baseCollectibleId,
-                evolvedCollectibleId = evolvedCollectibleId,
-            }
-
-            if IsInGamepadPreferredMode() then
-                ZO_Dialogs_ShowGamepadDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_GAMEPAD", dialogData, { mainTextParams = {baseCollectibleName, evolvedCollectibleName} })
-            else
-                ZO_Dialogs_ShowDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_KEYBOARD", dialogData, { mainTextParams = {baseCollectibleName, evolvedCollectibleName} })
+        if onUseType == ITEM_USE_TYPE_COMBINATION then
+            local combinationId = GetItemCombinationId(bag, slot)
+            local baseCollectibleId = GetCombinationFirstNonFragmentCollectibleComponentId(combinationId)
+            if baseCollectibleId ~= 0 then
+                local unlockedCollectibleId = GetCombinationUnlockedCollectible(combinationId)
+                ZO_CombinationPromptManager_ShowEvolutionPrompt(baseCollectibleId, unlockedCollectibleId, AcceptEvolutionCallback, DeclineEvolutionCallback)
+                return
             end
-        else
-            -- right now only items that evolve collectibles need confirmation
-            -- so if it's not one of those, automatically accept using the item
-            RespondToConfirmUseInventoryItemRequest(true)
         end
+
+        -- right now only items that evolve collectibles need confirmation
+        -- so if it's not one of those, automatically accept using the item
+        RespondToConfirmUseInventoryItemRequest(true)
     end
 
     local function OnCancelConfirmUseItem()
-        ZO_Dialogs_ReleaseDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_KEYBOARD")
-        ZO_Dialogs_ReleaseDialog("CONFIRM_COLLECTIBLE_EVOLUTION_PROMPT_GAMEPAD")
+        ZO_CombinationPromptManager_ClearEvolutionPrompt()
     end
 
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_REQUEST_CONFIRM_USE_ITEM, OnRequestConfirmUseItem)
@@ -369,8 +356,7 @@ function ZO_SharedInventoryManager:RefreshBagTraitInformation(bagId)
     if self:HasBagCache(bagId) then
         local bagCache = self:GetBagCache(bagId)
 
-        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-        while slotIndex do
+        for slotIndex in ZO_IterateBagSlots(bagId) do
             local existingData = bagCache[slotIndex]
             if existingData then
                 local newItemTraitInformation = GetItemTraitInformation(bagId, slotIndex)
@@ -381,7 +367,6 @@ function ZO_SharedInventoryManager:RefreshBagTraitInformation(bagId)
                     self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
                 end
             end
-            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
         end
     end
 end
@@ -484,12 +469,9 @@ end
 
 function ZO_SharedInventoryManager:PerformFullUpdateOnBagCache(bagId)
     local bagCache = self:GetBagCache(bagId)
-    ZO_ClearTable(bagCache)
 
-    local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-    while slotIndex do
+    for slotIndex in ZO_IterateBagSlots(bagId) do
         self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex)
-        slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
     end
 
     self:FireCallbacks("FullInventoryUpdate", bagId)
@@ -561,7 +543,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
         return nil, SHARED_INVENTORY_SLOT_RESULT_NO_CHANGE
     end
 
-    local rawNameBefore = slot.rawName;
+    local rawNameBefore = slot.rawName
     slot.rawName = GetItemName(bagId, slotIndex)
     if rawNameBefore ~= slot.rawName then
         slot.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, slot.rawName)

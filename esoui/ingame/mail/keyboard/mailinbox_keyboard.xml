@@ -175,5 +175,33 @@
                 </Control>
             </Controls>
         </TopLevelControl>
+
+        <TopLevelControl name="ZO_TakeAttachmentCODDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_TakeAttachmentCODDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)ConfirmText" inherits="ZO_DialogContentAnchors" text="SI_MAIL_CONFIRM_TAKE_ATTACHMENT_COD" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Control name="$(parent)CurrentGoldContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_MAIL_ATTACHMENTS_DIALOG_CURRENT_GOLD_LABEL" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)CODFeeContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentGoldContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CurrentGoldContainer" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_MAIL_ATTACHMENTS_DIALOG_COD_FEE_LABEL" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Decline" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

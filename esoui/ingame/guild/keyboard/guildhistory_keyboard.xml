@@ -4,7 +4,7 @@
 
         <Label name="ZO_GuildHistoryLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
         <Control name="ZO_GuildHistoryRow" mouseEnabled="true" virtual="true">
-            <Dimensions y="45"/>
+            <Dimensions y="60"/>
             <Controls>
                 <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
                 
@@ -19,9 +19,6 @@
                     </OnLinkMouseUp>
                 </Label>
             </Controls>
-        </Control>
-        <Control name="ZO_GuildHistoryRowTwoLines" inherits="ZO_GuildHistoryRow" virtual="true">
-            <Dimensions y="60"/>
         </Control>
 
         <TopLevelControl name="ZO_GuildHistory" inherits="ZO_RightPanelFootPrint" hidden="true">

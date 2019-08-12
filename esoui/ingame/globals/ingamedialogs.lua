@@ -654,40 +654,6 @@ ESO_Dialogs["DELETE_MAIL_ATTACHMENTS_AND_MONEY"] =
     }
 }
 
-ESO_Dialogs["MAIL_TAKE_ATTACHMENT_COD"] = 
-{
-    title =
-    {
-        text = SI_PROMPT_TITLE_MAIL_TAKE_ATTACHMENT_COD,
-    },
-    mainText = 
-    {
-        text = SI_MAIL_CONFIRM_TAKE_ATTACHMENT_COD
-    },
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function () MAIL_INBOX:ConfirmAcceptCOD() end,
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-        }
-    },
-     
-    updateFn = function(dialog)
-        local codAmount = dialog.data.codAmount
-        if codAmount > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
-            ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_DISABLED)
-            ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_MAIL_COD_NOT_ENOUGH_MONEY })
-        else
-            ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_NORMAL)
-            ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_MAIL_CONFIRM_TAKE_ATTACHMENT_COD })
-        end
-        ZO_Dialogs_UpdateButtonCost(dialog, 1, codAmount)
-    end,
-}
-
 ESO_Dialogs["GAMEPAD_MAIL_TAKE_ATTACHMENT_COD"] = 
 {
     gamepadInfo =
@@ -1212,10 +1178,6 @@ ESO_Dialogs["CAMPAIGN_ALLIANCE_LOCKED"] =
             local allianceString = ZO_SELECTED_TEXT:Colorize(ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(campaignData.lockedToAlliance))
             local campaignEndCooldownString = ZO_SELECTED_TEXT:Colorize(ZO_FormatTime(data.secondsUntilCampaignEnd, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWELVE_HOUR, TIME_FORMAT_DIRECTION_DESCENDING))
 
-            if data.isLockActivated then
-                return zo_strformat(SI_ALLIANCE_LOCK_ACTIVATED_MESSAGE, campaignName, allianceString, campaignEndCooldownString)
-            end
-
             local lockedCampaignMessage = zo_strformat(SI_ALLIANCE_LOCKED_DIALOG_CAMPAIGN_MESSAGE, campaignName, allianceString, campaignEndCooldownString)
 
             local lockedReasonFormatString = GetString("SI_CAMPAIGNALLIANCELOCKREASON_DIALOGMESSAGE", campaignData.allianceLockReason)
@@ -1519,6 +1481,79 @@ ESO_Dialogs["CONFIRM_CREATE_NONSET_ITEM"] =
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
                 CraftSmithingItem(unpack(dialog.data.craftingParams))
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_REFINE_MULTIPLE_ITEMS"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CRAFTING_REFINE_MULTIPLE,
+    },
+    mainText =
+    {
+        text = SI_CRAFTING_CONFIRM_REFINE_DESCRIPTION,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.refineFn()
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
+ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CRAFTING_EXTRACT_MULTIPLE,
+    },
+    mainText =
+    {
+        text = SI_CRAFTING_CONFIRM_EXTRACT_DESCRIPTION,
+    },
+    setup = function(dialog)
+        local headerData =
+        {
+            data1 =
+            {
+                header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+                value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
+            }
+        }
+        dialog:setupFunc(headerData)
+    end,
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.deconstructFn()
             end,
         },
         [2] =
@@ -3277,6 +3312,9 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             callback = function(dialog)
                 PLAYER_TO_PLAYER:Accept(dialog.data)
             end,
+            visible = function(dialog)
+                return PLAYER_TO_PLAYER:ShouldShowAccept(dialog.data)
+            end,
         },
         {
             onShowCooldown = 2000,
@@ -3288,6 +3326,9 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             end,
             callback = function(dialog)
                 PLAYER_TO_PLAYER:Decline(dialog.data)
+            end,
+            visible = function(dialog)
+                return PLAYER_TO_PLAYER:ShouldShowDecline(dialog.data)
             end,
         }
     },

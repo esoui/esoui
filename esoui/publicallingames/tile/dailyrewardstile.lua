@@ -111,21 +111,28 @@ function ZO_DailyRewardsTile:Reset()
 end
 
 function ZO_DailyRewardsTile:RefreshLayoutInternal()
-    local dailyRewardIndex = ZO_DAILYLOGINREWARDS_MANAGER:GetDailyLoginRewardIndex()
-    self:Layout(dailyRewardIndex)
+    local data =
+    {
+        dailyRewardIndex = ZO_DAILYLOGINREWARDS_MANAGER:GetDailyLoginRewardIndex()
+    }
+
+    self:Layout(data)
 end
 
-function ZO_DailyRewardsTile:Layout(dailyRewardIndex)
-    ZO_Tile.Layout(self, dailyRewardIndex)
+function ZO_DailyRewardsTile:Layout(data)
+    ZO_Tile.Layout(self, data)
 
+    self.data = data
+
+    local dailyRewardIndex = data.dailyRewardIndex
     if dailyRewardIndex and dailyRewardIndex == GetDailyLoginClaimableRewardIndex() then
         self:SetClaimState(ZO_CLAIM_TILE_STATE.UNCLAIMED)
         self:SetActionCallback(function() self:RequestClaim() end)
     else
         self:SetClaimState(ZO_CLAIM_TILE_STATE.CLAIMED)
-        self:SetActionCallback(function() 
+        self:SetActionCallback(function()
                                    if ShowDailyLoginScene then -- called from the announcement panel (internal ingame)
-                                       ShowDailyLoginScene() 
+                                       ShowDailyLoginScene()
                                    else -- called from the logout/quit dialog (ingame)
                                        ZO_Dialogs_ReleaseAllDialogs()
                                        ZO_DAILYLOGINREWARDS_MANAGER:ShowDailyLoginRewardsScene()

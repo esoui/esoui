@@ -28,8 +28,8 @@ function ZO_GuildRecruitment_AttributeSelectionTile_Gamepad:Initialize(...)
     local comboBox = ZO_ComboBox_ObjectFromContainer(comboBoxControl)
     self.comboBox = comboBox
 
-    self.comboBox:SetNormalColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
-    self.comboBox:SetHighlightedColor(ZO_GUILD_FINDER_GAMEPAD_COLORS.SELECTED_ACTIVE:UnpackRGB())
+    self.comboBox:SetNormalColor(ZO_GAMEPAD_COMPONENT_COLORS.UNSELECTED_INACTIVE:UnpackRGB())
+    self.comboBox:SetHighlightedColor(ZO_GAMEPAD_COMPONENT_COLORS.SELECTED_ACTIVE:UnpackRGB())
 end
 
 function ZO_GuildRecruitment_AttributeSelectionTile_Gamepad:OnSelectionChanged()

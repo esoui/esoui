@@ -13,13 +13,13 @@ function ZO_ZoneStory_ActivityCompletionTile:Initialize(...)
     self.valueControl = control:GetNamedChild("Value")
 end
 
-function ZO_ZoneStory_ActivityCompletionTile:Layout(zoneData, completionType)
-    ZO_Tile.Layout(self, zoneData, completionType)
+function ZO_ZoneStory_ActivityCompletionTile:Layout(data)
+    ZO_Tile.Layout(self, data)
 
-    self.zoneData = zoneData
-    self.completionType = completionType
+    self.zoneData = data.zoneData
+    self.completionType = data.completionType
 
-    self.iconControl:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(completionType))
-    local text = ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneData.id, completionType)
+    self.iconControl:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(data.completionType))
+    local text = ZO_ZoneStories_Manager.GetActivityCompletionProgressText(data.zoneData.id, data.completionType)
     self.valueControl:SetText(text)
 end

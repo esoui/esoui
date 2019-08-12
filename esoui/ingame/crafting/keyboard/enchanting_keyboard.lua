@@ -6,6 +6,7 @@ end
 
 function ZO_Enchanting:Initialize(control)
     self.slotCreationAnimationName = "enchanting"
+    self.mainSceneName = "enchanting"
 
     ZO_SharedEnchanting.Initialize(self, control)
 end
@@ -16,27 +17,21 @@ function ZO_Enchanting:InitializeInventory()
 end
 
 function ZO_Enchanting:InitializeEnchantingScenes()
+    ZO_SharedEnchanting.InitializeEnchantingScenes(self)
+
     local ENCHANTING_STATION_INTERACTION =
     {
         type = "Enchanting Station",
         End = function()
-            SCENE_MANAGER:Hide("enchanting")
+            SCENE_MANAGER:Hide(self.mainSceneName)
         end,
         interactTypes = { INTERACTION_CRAFT },
     }
 
-    ENCHANTING_SCENE = ZO_InteractScene:New("enchanting", SCENE_MANAGER, ENCHANTING_STATION_INTERACTION)
+    ENCHANTING_SCENE = ZO_InteractScene:New(self.mainSceneName, SCENE_MANAGER, ENCHANTING_STATION_INTERACTION)
     ENCHANTING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-
-            if self.enchantingMode then
-                local oldEnchantMode = self.enchantingMode
-                self.enchantingMode = nil
-                self:SetEnchantingMode(oldEnchantMode)
-            else
-                ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
-            end
+            self:OnModeUpdated()
         elseif newState == SCENE_HIDDEN then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -46,20 +41,7 @@ function ZO_Enchanting:InitializeEnchantingScenes()
             CRAFTING_RESULTS:SetCraftingTooltip(nil)
         end
     end)
-
-    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
-        if craftingType == CRAFTING_TYPE_ENCHANTING and not IsInGamepadPreferredMode() then
-            SCENE_MANAGER:Show("enchanting")
-        end
-    end)
-
-    self.control:RegisterForEvent(EVENT_END_CRAFTING_STATION_INTERACT, function(eventCode, craftingType)
-        if craftingType == CRAFTING_TYPE_ENCHANTING then
-            SCENE_MANAGER:Hide("enchanting")
-        end
-    end)
 end
-
 
 function ZO_Enchanting:InitializeModes()
     local function CreateButtonData(name, mode, normal, pressed, highlight, disabled)
@@ -72,7 +54,11 @@ function ZO_Enchanting:InitializeModes()
             pressed = pressed,
             highlight = highlight,
             disabled = disabled,
-            callback = function(tabData) self.modeBarLabel:SetText(GetString(name)) self:SetEnchantingMode(mode) end,
+            callback = function(tabData)
+                self.modeBarLabel:SetText(GetString(name))
+                self.enchantingMode = mode
+                self:OnModeUpdated()
+            end,
         }
     end
 
@@ -107,15 +93,101 @@ function ZO_Enchanting:InitializeModes()
         GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
     ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 
+    ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
+end
+
+function ZO_SharedEnchanting:InitializeCreationSlots()
+    self.runeSlotContainer = self.control:GetNamedChild("RuneSlotContainer")
+    self.runeSlots = {
+        [ENCHANTING_RUNE_POTENCY] = ZO_SharedEnchantRuneSlot:New(self,
+            self.runeSlotContainer:GetNamedChild("PotencyRune"),
+            "EsoUI/Art/Crafting/crafting_runestone03_slot.dds",
+            "EsoUI/Art/Crafting/crafting_runestone03_drag.dds",
+            "EsoUI/Art/Crafting/crafting_runestone03_negative.dds",
+            SOUNDS.ENCHANTING_POTENCY_RUNE_PLACED,
+            SOUNDS.ENCHANTING_POTENCY_RUNE_REMOVED,
+            ENCHANTING_RUNE_POTENCY,
+            self.inventory
+        ),
+
+        [ENCHANTING_RUNE_ESSENCE] = ZO_SharedEnchantRuneSlot:New(self,
+            self.runeSlotContainer:GetNamedChild("EssenceRune"),
+            "EsoUI/Art/Crafting/crafting_runestone02_slot.dds",
+            "EsoUI/Art/Crafting/crafting_runestone02_drag.dds",
+            "EsoUI/Art/Crafting/crafting_runestone02_negative.dds",
+            SOUNDS.ENCHANTING_ESSENCE_RUNE_PLACED,
+            SOUNDS.ENCHANTING_ESSENCE_RUNE_REMOVED,
+            ENCHANTING_RUNE_ESSENCE,
+            self.inventory
+        ),
+        [ENCHANTING_RUNE_ASPECT] = ZO_SharedEnchantRuneSlot:New(self,
+            self.runeSlotContainer:GetNamedChild("AspectRune"),
+            "EsoUI/Art/Crafting/crafting_runestone01_slot.dds",
+            "EsoUI/Art/Crafting/crafting_runestone01_drag.dds",
+            "EsoUI/Art/Crafting/crafting_runestone01_negative.dds",
+            SOUNDS.ENCHANTING_ASPECT_RUNE_PLACED,
+            SOUNDS.ENCHANTING_ASPECT_RUNE_REMOVED,
+            ENCHANTING_RUNE_ASPECT,
+            self.inventory
+         ),
+    }
+    for _, slot in pairs(self.runeSlots) do
+        slot:RegisterCallback("ItemsChanged", function()
+            self:OnSlotChanged()
+        end)
+    end
+
+    self.control:RegisterForEvent(EVENT_NON_COMBAT_BONUS_CHANGED, function(eventCode, nonCombatBonusType)
+        if nonCombatBonusType == NON_COMBAT_BONUS_ENCHANTING_LEVEL or nonCombatBonusType == NON_COMBAT_BONUS_ENCHANTING_RARITY_LEVEL then
+            self.inventory:HandleDirtyEvent()
+        elseif nonCombatBonusType == NON_COMBAT_BONUS_ENCHANTING_CRAFT_PERCENT_DISCOUNT then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end)
+    
+    self.resultTooltip = self.control:GetNamedChild("Tooltip")
+    if IsChatSystemAvailableForCurrentPlatform() then
+        local function OnTooltipMouseUp(control, button, upInside)
+            if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
+                local link = ZO_LinkHandler_CreateChatLink(GetEnchantingResultingItemLink, self:GetAllCraftingBagAndSlots())
+                if link ~= "" then
+                    ClearMenu()
+
+                    local function AddLink()
+                        ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
+                    end
+
+                    AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), AddLink)
+                    
+                    ShowMenu(self)
+                end
+            end
+        end
+
+        self.resultTooltip:SetHandler("OnMouseUp", OnTooltipMouseUp)
+        self.resultTooltip:GetNamedChild("Icon"):SetHandler("OnMouseUp", OnTooltipMouseUp)
+    end
+
+    self.creationSlotAnimation = ZO_SharedEnchantingSlotAnimation:New(self.slotCreationAnimationName, function() return self.enchantingMode == ENCHANTING_MODE_CREATION end)
+    self.creationSlotAnimation:AddSlot(self.runeSlots[ENCHANTING_RUNE_POTENCY])
+    self.creationSlotAnimation:AddSlot(self.runeSlots[ENCHANTING_RUNE_ESSENCE])
+    self.creationSlotAnimation:AddSlot(self.runeSlots[ENCHANTING_RUNE_ASPECT])
+
+    self.multiCraftSpinner = ZO_MultiCraftSpinner:New(self.runeSlotContainer:GetNamedChild("Spinner"))
+    ZO_CraftingUtils_ConnectSpinnerToCraftingProcess(self.multiCraftSpinner)
 end
 
 function ZO_Enchanting:InitializeExtractionSlots()
     self.extractionSlotContainer = self.control:GetNamedChild("ExtractionSlotContainer")
 
-    self.extractionSlot = ZO_SharedEnchantExtractionSlot:New(self, self.extractionSlotContainer:GetNamedChild("ExtractionSlot"), self.inventory)
+    local MULTIPLE_ITEMS_TEXTURE = "EsoUI/Art/Crafting/smithing_multiple_enchantingSlot.dds"
+    self.extractionSlot = ZO_EnchantExtractionSlot_Keyboard:New(self, self.extractionSlotContainer:GetNamedChild("ExtractionSlot"), MULTIPLE_ITEMS_TEXTURE, self.inventory)
+    self.extractionSlot:RegisterCallback("ItemsChanged", function()
+        self:OnSlotChanged()
+    end)
 
-    self.extractionSlotAnimation = ZO_CraftingEnchantExtractSlotAnimation:New("enchanting", function() return self.enchantingMode == ENCHANTING_MODE_EXTRACTION end)
+    self.extractionSlotAnimation = ZO_CraftingEnchantExtractSlotAnimation:New(self.slotCreationAnimationName, function() return self.enchantingMode == ENCHANTING_MODE_EXTRACTION end)
     self.extractionSlotAnimation:AddSlot(self.extractionSlot)
 end
 
@@ -124,44 +196,99 @@ function ZO_Enchanting:InitializeKeybindStripDescriptors()
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
-        -- Clear selections
-        {
-            name = GetString(SI_CRAFTING_CLEAR_SELECTIONS),
-            keybind = "UI_SHORTCUT_NEGATIVE",
-        
-            callback = function() self:ClearSelections() end,
-
-            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() end,
-        },
-
-        -- Perform craft
+        -- Create/Deconstruct
         {
             name = function()
                 if self.enchantingMode == ENCHANTING_MODE_CREATION then
                     local cost = GetCostToCraftEnchantingItem(self:GetAllCraftingBagAndSlots())
                     return ZO_CraftingUtils_GetCostToCraftString(cost)
                 elseif self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
-                    return GetString(SI_CRAFTING_PERFORM_EXTRACTION)
+                    if self.extractionSlot:HasMultipleItems() then
+                        return GetString(SI_CRAFTING_EXTRACT_MULTIPLE)
+                    else
+                        return GetString(SI_CRAFTING_PERFORM_EXTRACTION)
+                    end
                 end
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
-        
-            callback = function() self:Create() end,
 
-            enabled = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:IsCraftable() end,
+            callback = function()
+                if self.enchantingMode == ENCHANTING_MODE_CREATION then
+                   self:Create(self:GetMultiCraftNumIterations())
+                elseif self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
+                    if self.extractionSlot:HasOneItem() then
+                        self:ExtractSingle()
+                    else
+                        self:ConfirmExtractAll()
+                    end
+                end
+            end,
+
+            enabled = function()
+                if self.enchantingMode == ENCHANTING_MODE_CREATION then
+                    return self:ShouldCraftButtonBeEnabled()
+                elseif self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
+                    return self:ShouldDeconstructButtonBeEnabled()
+                end
+                return false
+            end,
+        },
+
+        -- Deconstruct single stack
+        {
+            name = GetString(SI_ENCHANTING_EXTRACT_FULL_STACK),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+
+            callback = function()
+                self:ConfirmExtractAll()
+            end,
+
+            visible = function() 
+                return self:IsExtractable() and self.extractionSlot:HasOneItem() and self.extractionSlot:GetStackCount() > 1
+            end,
+
+            enabled = function()
+                if self.enchantingMode == ENCHANTING_MODE_CREATION then
+                    return self:ShouldCraftButtonBeEnabled()
+                elseif self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
+                    return self:ShouldDeconstructButtonBeEnabled()
+                end
+                return false
+            end,
+        },
+
+        -- Clear selections
+        {
+            name = GetString(SI_CRAFTING_CLEAR_SELECTIONS),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+
+            callback = function() self:ClearSelections() end,
+
+            visible = function() return not ZO_CraftingUtils_IsPerformingCraftProcess() and self:HasSelections() end,
         },
     }
 
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 
-function ZO_Enchanting:SetEnchantingMode(enchantingMode)
-    if self.enchantingMode ~= enchantingMode then
-        local oldEnchantingMode = self.enchantingMode
-        self.enchantingMode = enchantingMode
+function ZO_Enchanting:ResetSelectedTab()
+    ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
+    self:ClearSelections()
+end
 
+function ZO_Enchanting:CanShowScene()
+    return not IsInGamepadPreferredMode()
+end
+
+function ZO_Enchanting:OnModeUpdated()
+    if self:IsSceneShowing() then
+        local enchantingMode = self.enchantingMode
         self.runeSlotContainer:SetHidden(enchantingMode ~= ENCHANTING_MODE_CREATION)
         self.extractionSlotContainer:SetHidden(enchantingMode ~= ENCHANTING_MODE_EXTRACTION)
+
+        if enchantingMode == ENCHANTING_MODE_EXTRACTION then
+            self:ClearSelections()
+        end
 
         if enchantingMode == ENCHANTING_MODE_RECIPES then
             --Make sure we hide the tooltip when going to the Provisioner Scene.
@@ -171,10 +298,8 @@ function ZO_Enchanting:SetEnchantingMode(enchantingMode)
             PROVISIONER:EmbedInCraftingScene()
             self.inventoryControl:SetHidden(true)
         else
-            if oldEnchantingMode == ENCHANTING_MODE_RECIPES then
-                PROVISIONER:RemoveFromCraftingScene()
-                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-            end
+            PROVISIONER:RemoveFromCraftingScene()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self.inventoryControl:SetHidden(false)
             self.inventory:ChangeMode(enchantingMode)
             ClearCursor()
@@ -196,7 +321,7 @@ function ZO_Enchanting:SetEnchantingMode(enchantingMode)
 end
 
 function ZO_Enchanting:UpdateTooltip()
-    if self.enchantingMode == ENCHANTING_MODE_CREATION and self:IsCraftable() then
+    if self:IsCraftable() then
         self.resultTooltip:SetHidden(false)
 
         self.resultTooltip:ClearLines()
@@ -213,19 +338,24 @@ function ZO_Enchanting:OnItemReceiveDrag(slotControl, bagId, slotIndex)
             if DoesRunePassRequirements(runeType, rankRequirement, rarityRequirement) then
                 local slot = self.runeSlots[runeType]
                 if slot:IsSlotControl(slotControl) then
-                    if slot:HasItem() then
-                        PickupInventoryItem(slot:GetBagAndSlot())
-                    end
-                    self:SetRuneSlotItem(runeType, bagId, slotIndex)
+                    self:AddItemToCraft(bagId, slotIndex)
                 end
             end
         elseif self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
-            if self.extractionSlot:HasItem() then
-                PickupInventoryItem(self.extractionSlot:GetBagAndSlot())
-            end
-            self:SetExtractionSlotItem(bagId, slotIndex)
+            self:AddItemToCraft(bagId, slotIndex)
         end
     end
+end
+
+function ZO_Enchanting:UpdateMultiCraft()
+    if self.enchantingMode == ENCHANTING_MODE_CREATION then
+        self.multiCraftSpinner:SetMinMax(1, self:GetMultiCraftMaxIterations())
+        self.multiCraftSpinner:UpdateButtons()
+    end
+end
+
+function ZO_Enchanting:GetMultiCraftNumIterations()
+    return self.multiCraftSpinner:GetValue()
 end
 
 ZO_EnchantingInventory = ZO_CraftingInventory:Subclass()
@@ -316,9 +446,10 @@ end
 
 function ZO_EnchantingInventory:Refresh(data)
     local filterType
-    if self.owner:GetEnchantingMode() == ENCHANTING_MODE_CREATION then
+    local enchantingMode = self.owner:GetEnchantingMode()
+    if enchantingMode == ENCHANTING_MODE_CREATION then
         filterType = self.filterType
-    else
+    elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
         filterType = EXTRACTION_FILTER
     end
     local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(IsEnchantingItem, DoesEnchantingItemPassFilter, filterType, data)
@@ -336,6 +467,27 @@ function ZO_EnchantingInventory:HideAllSlotDropCallouts()
     self.owner:HideAllSlotDropCallouts()
 end
 
+ZO_EnchantExtractionSlot_Keyboard = ZO_SharedEnchantExtractionSlot:Subclass()
+
+function ZO_EnchantExtractionSlot_Keyboard:New(...)
+    return ZO_SharedEnchantExtractionSlot.New(self, ...)
+end
+
+function ZO_EnchantExtractionSlot_Keyboard:ClearDropCalloutTexture()
+    self.dropCallout:SetTexture("EsoUI/Art/Crafting/crafting_enchanting_glyphSlot_empty.dds")
+end
+
+function ZO_EnchantExtractionSlot_Keyboard:SetBackdrop(bagId, slotIndex)
+    local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
+
+    if craftingSubItemType == ITEMTYPE_GLYPH_WEAPON then
+        self.dropCallout:SetTexture("EsoUI/Art/Crafting/crafting_enchanting_glyphSlot_pentagon.dds")
+    elseif craftingSubItemType == ITEMTYPE_GLYPH_ARMOR then
+        self.dropCallout:SetTexture("EsoUI/Art/Crafting/crafting_enchanting_glyphSlot_shield.dds")
+    elseif craftingSubItemType == ITEMTYPE_GLYPH_JEWELRY then
+        self.dropCallout:SetTexture("EsoUI/Art/Crafting/crafting_enchanting_glyphSlot_round.dds")
+    end
+end
 
 function ZO_Enchanting_Initialize(control)
     ENCHANTING = ZO_Enchanting:New(control)

@@ -45,20 +45,20 @@ do
 
     local function OnUnitCreated(unitTag)
         if ZO_Group_IsGroupUnitTag(unitTag) then
-            TryShowJumpToGroupLeaderPrompt()     
+            TryShowJumpToGroupLeaderPrompt()
         end
     end
-    local function OnGroupMemberJoined(rawCharacterName)
-        if(GetRawUnitName("player") == rawCharacterName) then
+    local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
+        if isLocalPlayer then
             local groupLeaderUnitTag = GetGroupLeaderUnitTag()
-            if(not AreUnitsEqual(groupLeaderUnitTag, "player")) then
+            if not AreUnitsEqual(groupLeaderUnitTag, "player") then
                 pendingJumpToGroupLeaderPrompt = true
                 TryShowJumpToGroupLeaderPrompt()
             end
         end
     end
     local function OnZoneUpdate(unitTag, newZone)
-        if(ZO_Group_IsGroupUnitTag(unitTag)) then
+        if ZO_Group_IsGroupUnitTag(unitTag) then
             TryShowJumpToGroupLeaderPrompt()
         end
     end

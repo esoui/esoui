@@ -642,12 +642,13 @@ function ZO_HousingSettingsList_Gamepad:RefreshTooltip()
     -- Do nothing, because housing permission list doesn't use a tooltip like other social lists
 end
 
+--ZO_GamepadInteractiveSortFilterList override
 function ZO_HousingSettingsList_Gamepad:InitializeDropdownFilter()
-    -- housing permission list doesn't use a the dropdown
-    local filterControl = self.contentHeader:GetNamedChild("DropdownFilter")
-    local filterDropdownControl = filterControl:GetNamedChild("Dropdown")
+    -- housing permission list doesn't use a dropdown
+    self.filterControl = self.contentHeader:GetNamedChild("DropdownFilter")
+    local filterDropdownControl = self.filterControl:GetNamedChild("Dropdown")
     self.filterDropdown = ZO_ComboBox_ObjectFromContainer(filterDropdownControl)
-    filterControl:SetHidden(true)
+    self.filterControl:SetHidden(true)
 end
 
 function ZO_HousingSettingsList_Gamepad:OnSelectionChanged(oldData, newData)

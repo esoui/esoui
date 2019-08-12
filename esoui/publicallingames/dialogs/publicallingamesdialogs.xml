@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DialogCurrencyLabelValueContainer_Keyboard" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                self.currencyLabel = self:GetNamedChild("CurrencyLabel")
+                self.currencyAmount = self:GetNamedChild("CurrencyAmount")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)CurrencyLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)CurrencyAmount" inherits="ZO_CurrencyTemplate">
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

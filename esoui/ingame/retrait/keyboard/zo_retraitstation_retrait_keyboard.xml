@@ -62,10 +62,7 @@
                     <Dimensions x="512" y="256" />
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100" />
                     <Controls>
-                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds">
-                            <Dimensions x="512" y="512" />
-                            <Anchor point="TOP" />
-                        </Texture>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
 
                         <Label name="$(parent)ItemRetraitLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_RETRAIT_STATION_ITEM_TO_RETRAIT_HEADER" modifyTextType="UPPERCASE">
                             <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="110" offsetY="64" />

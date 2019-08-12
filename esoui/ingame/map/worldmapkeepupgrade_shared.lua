@@ -34,7 +34,7 @@ function ZO_MapKeepUpgrade_Shared:Initialize(control)
 
     local function WorldMapKeepUpgradeGridEntrySetup(control, data, list)
         ZO_DefaultGridEntrySetup(control, data, list)
-        
+
         local level = self.keepUpgradeObject:GetUpgradeLevel()
         local isActive = level >= data.dataSource.level
         local lockControl = control:GetNamedChild("Lock")
@@ -56,6 +56,15 @@ function ZO_MapKeepUpgrade_Shared:Initialize(control)
         end
     end)
 
+    self.fragment = ZO_FadeSceneFragment:New(control)
+    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWN then
+            self:OnFragmentShown()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:OnFragmentHidden()
+        end
+    end)
+
     local function IfShowing(callback)
         if self.fragment:IsShowing() then
             callback(self)
@@ -69,22 +78,35 @@ function ZO_MapKeepUpgrade_Shared:Initialize(control)
     end
 
     control:RegisterForEvent(EVENT_KEEP_ALLIANCE_OWNER_CHANGED, function(_, keepId, bgContext)
-        IfShowingKeep(keepId, bgContext, self.RefreshAll)
-    end)
+            IfShowingKeep(keepId, bgContext, self.RefreshAll)
+        end)
     control:RegisterForEvent(EVENT_KEEP_INITIALIZED, function(_, keepId, bgContext)
-        IfShowingKeep(keepId, bgContext, self.RefreshAll)
-    end)
+            IfShowingKeep(keepId, bgContext, self.RefreshAll)
+        end)
     control:RegisterForEvent(EVENT_KEEPS_INITIALIZED, function()
-        IfShowing(self.RefreshAll)
-    end)
+            IfShowing(self.RefreshAll)
+        end)
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapKeepChanged", function()
-        IfShowing(self.RefreshAll)
-    end)
+            IfShowing(self.RefreshAll)
+        end)
 end
 
 function ZO_MapKeepUpgrade_Shared:GetFragment()
     return self.fragment
+end
+
+function ZO_MapKeepUpgrade_Shared:OnFragmentShown()
+    self:RefreshAll()
+end
+
+function ZO_MapKeepUpgrade_Shared:OnFragmentHidden()
+    self.keepUpgradeObject = nil
+    -- clear the grid list when we hide the fragment because when the screen resizes
+    -- it will refresh the list, but updating the entries relies on self.keepUpgradeObject
+    -- and we just set that to nil
+    self.levelsGridList:ClearGridList()
+    self.levelsGridList:CommitGridList()
 end
 
 function ZO_MapKeepUpgrade_Shared:OnGridListSelectedDataChanged(previousData, newData)
@@ -92,7 +114,10 @@ function ZO_MapKeepUpgrade_Shared:OnGridListSelectedDataChanged(previousData, ne
 end
 
 function ZO_MapKeepUpgrade_Shared:RefreshAll()
-    -- To be overridden
+    self:RefreshData()
+    self:RefreshLevels()
+    self:RefreshBarLabel()
+    self:RefreshTimeDependentControls()
 end
 
 function ZO_MapKeepUpgrade_Shared:RefreshData()
@@ -108,7 +133,7 @@ function ZO_MapKeepUpgrade_Shared:GenerateRemainingTimeLabel(current, forNextLev
         return nil
     elseif resourceRate <= 0 then
         return GetString(SI_KEEP_UPGRADE_INVALID_TIME)
-    else        
+    else
         local timeRemaining = ((forNextLevel - current) / resourceRate) * 60
         return ZO_FormatCountdownTimer(timeRemaining)
     end
@@ -135,11 +160,9 @@ end
 function ZO_MapKeepUpgrade_Shared:RefreshLevels()
     self.levelsGridList:ClearGridList()
 
-    local params = self.symbolParams
     for currentLevel = 0, GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) do
         local numUpgrades = self.keepUpgradeObject:GetNumLevelUpgrades(currentLevel)
         if numUpgrades > 0 then
-            local gridTable = {}
             local levelHeaderText = zo_strformat(SI_KEEP_UPGRADE_LEVEL_SECTION_HEADER, currentLevel)
             for i = 1, numUpgrades do
                 local name, description, icon, atPercent, isActive = self.keepUpgradeObject:GetLevelUpgradeInfo(currentLevel, i)

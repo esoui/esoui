@@ -18,15 +18,15 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
         end
     end)
 
-    self:InitializeHeader()
-
-    self.currentFilter = SMITHING_FILTER_TYPE_WEAPONS
-    self:InitializeTraitList()
-
     self.sourceTooltip = self.control:GetNamedChild("SourceTooltip")
     self.sourceTooltip.tip:SetClearOnHidden(false)
     self.qualityBridge = self.control:GetNamedChild("QualityBridge")
     self.resultTooltip = self.control:GetNamedChild("ResultTooltip")
+
+    self:InitializeHeader()
+
+    self.currentFilter = SMITHING_FILTER_TYPE_WEAPONS
+    self:InitializeTraitList()
 end
 
 function ZO_RetraitStation_Retrait_Gamepad:InitializeInventory()
@@ -37,10 +37,7 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeInventory()
     self.itemActions:SetUseKeybindStrip(false)
 
     self.inventory.list:SetOnTargetDataChangedCallback(function(list, targetData)
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-        self.itemActions:SetInventorySlot(targetData)
-
-        self:LayoutSourceItemTooltip(targetData)
+        self:SetSourceItem(targetData)
     end)
 end
 
@@ -261,6 +258,14 @@ function ZO_RetraitStation_Retrait_Gamepad:OnFilterChanged(filterType)
     self.filterType = filterType
 
     self.inventory:SetFilter(filterType)
+    self:SetSourceItem(self.inventory:CurrentSelection())
+end
+
+function ZO_RetraitStation_Retrait_Gamepad:SetSourceItem(itemData)
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    self.itemActions:SetInventorySlot(itemData)
+
+    self:LayoutSourceItemTooltip(itemData)
 end
 
 function ZO_RetraitStation_Retrait_Gamepad:AddKeybinds()

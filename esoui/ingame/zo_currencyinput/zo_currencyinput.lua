@@ -310,7 +310,7 @@ function ZO_DefaultCurrencyInputField_Initialize(self, onCurrencyChanged, curren
 
     self.OnBeginInput = function()
         self.currencyControl:SetHidden(true)
-        CURRENCY_INPUT:Show(self.OnCurrencyChanged, self.currencyMax or self.usePlayerCurrencyAsMax, self.currentCurrencyAmount or 0, self.currencyType, self, 18)
+        CURRENCY_INPUT:Show(self.OnCurrencyChanged, self.currencyMax or self.usePlayerCurrencyAsMax, self.currentCurrencyAmount or 0, self.currencyType, self, 20)
     end
 end
 

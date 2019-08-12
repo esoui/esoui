@@ -65,6 +65,29 @@ function HelpTutorialsEntriesGamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        -- Link in Chat
+        {
+            name = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
+            keybind = "UI_SHORTCUT_SECONDARY",
+
+            callback = function()
+                local targetData = self.itemList:GetTargetData()
+                local link = ZO_LinkHandler_CreateChatLink(GetHelpLink, self.categoryIndex, targetData.helpIndex)
+                ZO_LinkHandler_InsertLink(link)
+                CHAT_SYSTEM:SubmitTextEntry()
+            end,
+
+            visible = function()
+                local targetData = self.itemList:GetTargetData()
+                if targetData then
+                    return IsChatSystemAvailableForCurrentPlatform()
+                end
+
+                return false
+            end,
+        },
+
         -- Back
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
     }
@@ -107,7 +130,8 @@ function HelpTutorialsEntriesGamepad:PerformUpdate()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     -- Update the header.
-    local categoryName, _, _, _, _ = GetHelpCategoryInfo(self.categoryIndex)
+    local name, _, _, _, _, _, gamepadName = GetHelpCategoryInfo(self.categoryIndex)
+    local categoryName = gamepadName ~= "" and gamepadName or name
     self.headerData.titleText = categoryName
 
     self:SetupSearchHeaderData(self.searchString, self.headerData)

@@ -30,15 +30,7 @@ function ZO_SharedStoreManager:Initialize(control)
 end
 
 function ZO_SharedStoreManager:InitializeStore()
-    self.storeUsesMoney, self.storeUsesAP, self.storeUsesTelvarStones, self.storeUsesWritVouchers, self.storeUsesEventCurrency = GetStoreCurrencyTypes()
-end
-
-function ZO_SharedStoreManager:RefreshCurrency()
-    self.currentMoney = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-    self.currentAP = GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER)
-    self.currentTelvarStones = GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER)
-    self.currentWritVouchers = GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER)
-    self.currentEventCurrency = GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT)
+    self.storeUsedCurrencies = { GetStoreUsedCurrencyTypes() }
 end
 
 -- Shared global functions
@@ -140,11 +132,13 @@ function ZO_StoreManager_IsInventoryStoreMode(mode)
     return DOES_STORE_MODE_REPRESENT_INVENTORY[mode]
 end
 
+internalassert(CURT_MAX_VALUE == 10, "Check if new currency requires unique transaction sound hook")
 local CURRENCY_TYPE_TO_SOUND_ID =
 {
     [CURT_TELVAR_STONES] = SOUNDS.TELVAR_TRANSACT,
     [CURT_ALLIANCE_POINTS] = SOUNDS.ALLIANCE_POINT_TRANSACT,
     [CURT_WRIT_VOUCHERS] = SOUNDS.WRIT_VOUCHER_TRANSACT,
+    [CURT_UNDAUNTED_KEYS] = SOUNDS.UNDAUNTED_KEY_TRANSACT,
 }
 
 local function PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
@@ -172,7 +166,7 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
     local itemLink
     local collectibleId
     if entryType == STORE_ENTRY_TYPE_ITEM then
-        itemLink = GetStoreItemLink(storeEntryIndex)        
+        itemLink = GetStoreItemLink(storeEntryIndex)
         local containerCollectibleId = GetItemLinkContainerCollectibleId(itemLink)
         if containerCollectibleId ~= 0 then
             collectibleId = containerCollectibleId
@@ -188,7 +182,7 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
                 return true
             elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
                 itemPreview:PreviewStoreEntryAsFurniture(storeEntryIndex)
-            end       
+            end
         end 
     elseif collectibleId then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
@@ -209,7 +203,7 @@ function ZO_StoreManager_DoPreviewAction(action, storeEntryIndex)
                 elseif action == ZO_STORE_MANAGER_PREVIEW_ACTION_EXECUTE then
                     itemPreview:PreviewStoreEntryAsFurniture(storeEntryIndex)
                 end
-		    end
+            end
         end
     end
 

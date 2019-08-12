@@ -131,12 +131,10 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         fontFace = "$(GAMEPAD_LIGHT_FONT)",
     },
-
     itemTradeBoPHeader =
     {
         fontColor = ZO_TRADE_BOP_COLOR,
     },
-
     bodyDescription =
     {
         fontSize = "$(GP_42)",
@@ -144,6 +142,10 @@ ZO_TOOLTIP_STYLES =
     enchantIrreplaceable =
     {
         fontSize = "$(GP_34)",
+    },
+    whiteFontColor =
+    {
+        fontColorField = GENERAL_COLOR_WHITE,
     },
 
     --Character Attribute Tooltip
@@ -1421,6 +1423,16 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GENERAL_COLOR_WHITE,
         fontSize = "$(GP_42)",
+    },
+    itemSetSeparatorSection =
+    {
+        customSpacing = 20,
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        uppercase = true,
+        widthPercent = 100,
+        horizontalAlignment = TEXT_ALIGN_CENTER
     },
 }
 

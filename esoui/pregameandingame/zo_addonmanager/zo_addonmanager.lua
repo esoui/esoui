@@ -200,7 +200,7 @@ function ZO_AddOnManager:GetRowSetupFunction()
         local showDependencies = data.expanded and data.addOnDependencyText ~= ""
         dependencies:SetHidden(not showDependencies)
         if showDependencies then
-            dependencies:SetText(zo_strformat(SI_ADDON_MANAGER_DEPENDENCIES, data.addOnDependencyText))
+            dependencies:SetText(GetString(SI_ADDON_MANAGER_DEPENDENCIES)..data.addOnDependencyText)
         else
             dependencies:SetText("")
         end
@@ -441,12 +441,21 @@ function ZO_AddOnManager:BuildMasterList()
 
         local dependencyText = ""
         for j = 1, AddOnManager:GetAddOnNumDependencies(i) do
-            local dependencyName, dependencyActive = AddOnManager:GetAddOnDependencyInfo(i, j)
-            if not self.isAllFilterSelected and not dependencyActive then
+            local dependencyName, dependencyExists, dependencyActive, dependencyMinVersion, dependencyVersion = AddOnManager:GetAddOnDependencyInfo(i, j)
+            local dependencyTooLowVersion = dependencyVersion < dependencyMinVersion
+            local dependencyInfoLine = dependencyName
+            if not self.isAllFilterSelected and (not dependencyActive or not dependencyExists or dependencyTooLowVersion) then
                 entryData.hasDependencyError = true
-                dependencyName = ZO_ERROR_COLOR:Colorize(dependencyName)
+                if not dependencyExists then
+                    dependencyInfoLine = zo_strformat(SI_ADDON_MANAGER_DEPENDENCY_MISSING, dependencyName)
+                elseif not dependencyActive then
+                    dependencyInfoLine = zo_strformat(SI_ADDON_MANAGER_DEPENDENCY_DISABLED, dependencyName)
+                elseif dependencyTooLowVersion then
+                    dependencyInfoLine = zo_strformat(SI_ADDON_MANAGER_DEPENDENCY_TOO_LOW_VERSION, dependencyName)
+                end
+                dependencyInfoLine = ZO_ERROR_COLOR:Colorize(dependencyInfoLine)
             end
-            dependencyText = dependencyText.."\n"..dependencyName
+            dependencyText = string.format("%s\n    %s  %s", dependencyText, GetString(SI_BULLET), dependencyInfoLine)
         end
         entryData.addOnDependencyText = dependencyText
 

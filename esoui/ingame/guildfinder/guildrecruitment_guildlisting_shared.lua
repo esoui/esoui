@@ -49,29 +49,6 @@ function ZO_GuildRecruitment_GuildListing_Shared:InitializeGridList()
     -- Override default highlight template to hide white outline around tiles
     self.gridList = templateData.gridListClass:New(gridListControl, templateData.gridHighlightTemplate)
 
-    -- Setup grid template data
-    local function GridTileEntrySetup(control, data)
-        if not data.isEmptyCell then
-            control.object:Layout(data.dataSource)
-        end
-        if control.object.SetSelected then
-            local isSelected = data.dataSource.isSelected or false
-            control.object:SetSelected(isSelected)
-        end
-    end
-
-    local function GridHeaderSetup(control, data, selected)
-        local label = control:GetNamedChild("Text")
-        if label then
-            label:SetText(data.header)
-        end
-    end
-
-    local function GridEntryReset(control)
-        ZO_ObjectPool_DefaultResetControl(control)
-        control.object:Reset()
-    end
-
     -- NOTE: If you update the number of templates being added to the gridList you must also update 
     --       ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_ENTRY_TEMPLATE in GuildRecruitment_GuildListing_Gamepad.lua
     local HIDE_CALLBACK = nil
@@ -82,18 +59,18 @@ function ZO_GuildRecruitment_GuildListing_Shared:InitializeGridList()
     local descriptionData = templateData.descriptionEditBox
     local roleSelectorData = templateData.roleSelector
     local minimumCPData = templateData.minimumCP
-    self.gridList:AddEntryTemplate(attributeSelectionData.entryTemplate, attributeSelectionData.dimensionsX, attributeSelectionData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, attributeSelectionData.gridPaddingX, attributeSelectionData.gridPaddingY)
-    self.gridList:AddEntryTemplate(attributeSelectionData.statusEntryTemplate, attributeSelectionData.statusDimensionsX, attributeSelectionData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, attributeSelectionData.gridPaddingY)
-    self.gridList:AddEntryTemplate(attributeSelectionData.startTimeEntryTemplate, attributeSelectionData.startTimeDimensionsX, attributeSelectionData.timeDimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, attributeSelectionData.gridPaddingY)
-    self.gridList:AddEntryTemplate(attributeSelectionData.endTimeEntryTemplate, attributeSelectionData.dimensionsX, attributeSelectionData.timeDimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, attributeSelectionData.gridPaddingY)
-    self.gridList:AddEntryTemplate(activityCheckboxData.entryTemplate, activityCheckboxData.dimensionsX, activityCheckboxData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, activityCheckboxData.gridPaddingX, activityCheckboxData.gridPaddingY)
-    self.gridList:AddEntryTemplate(activityCheckboxData.endEntryTemplate, activityCheckboxData.dimensionsX, activityCheckboxData.endDimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, activityCheckboxData.gridPaddingX, activityCheckboxData.gridPaddingY)
-    self.gridList:AddEntryTemplate(headlineData.entryTemplate, headlineData.dimensionsX, headlineData.dimensionsY, GridTileEntrySetup, self.templateData.textEditHideCallback, GridEntryReset, GRID_PADDING_X, headlineData.gridPaddingY)
-    self.gridList:AddEntryTemplate(descriptionData.entryTemplate, descriptionData.dimensionsX, descriptionData.dimensionsY, GridTileEntrySetup, self.templateData.textEditHideCallback, GridEntryReset, GRID_PADDING_X, descriptionData.gridPaddingY)
-    self.gridList:AddEntryTemplate(roleSelectorData.entryTemplate, roleSelectorData.dimensionsX, roleSelectorData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, roleSelectorData.gridPaddingY)
-    self.gridList:AddEntryTemplate(roleSelectorData.endEntryTemplate, roleSelectorData.endDimensionsX, roleSelectorData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, roleSelectorData.gridPaddingY)
-    self.gridList:AddEntryTemplate(minimumCPData.entryTemplate, minimumCPData.dimensionsX, minimumCPData.dimensionsY, GridTileEntrySetup, HIDE_CALLBACK, GridEntryReset, GRID_PADDING_X, minimumCPData.gridPaddingY)
-    self.gridList:AddHeaderTemplate(templateData.headerTemplate, templateData.headerHeight, GridHeaderSetup)
+    self.gridList:AddEntryTemplate(attributeSelectionData.entryTemplate, attributeSelectionData.dimensionsX, attributeSelectionData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, attributeSelectionData.gridPaddingX, attributeSelectionData.gridPaddingY)
+    self.gridList:AddEntryTemplate(attributeSelectionData.statusEntryTemplate, attributeSelectionData.statusDimensionsX, attributeSelectionData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, attributeSelectionData.gridPaddingY)
+    self.gridList:AddEntryTemplate(attributeSelectionData.startTimeEntryTemplate, attributeSelectionData.startTimeDimensionsX, attributeSelectionData.timeDimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, attributeSelectionData.gridPaddingY)
+    self.gridList:AddEntryTemplate(attributeSelectionData.endTimeEntryTemplate, attributeSelectionData.dimensionsX, attributeSelectionData.timeDimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, attributeSelectionData.gridPaddingY)
+    self.gridList:AddEntryTemplate(activityCheckboxData.entryTemplate, activityCheckboxData.dimensionsX, activityCheckboxData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, activityCheckboxData.gridPaddingX, activityCheckboxData.gridPaddingY)
+    self.gridList:AddEntryTemplate(activityCheckboxData.endEntryTemplate, activityCheckboxData.dimensionsX, activityCheckboxData.endDimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, activityCheckboxData.gridPaddingX, activityCheckboxData.gridPaddingY)
+    self.gridList:AddEntryTemplate(headlineData.entryTemplate, headlineData.dimensionsX, headlineData.dimensionsY, ZO_DefaultGridTileEntrySetup, self.templateData.textEditHideCallback, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, headlineData.gridPaddingY)
+    self.gridList:AddEntryTemplate(descriptionData.entryTemplate, descriptionData.dimensionsX, descriptionData.dimensionsY, ZO_DefaultGridTileEntrySetup, self.templateData.textEditHideCallback, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, descriptionData.gridPaddingY)
+    self.gridList:AddEntryTemplate(roleSelectorData.entryTemplate, roleSelectorData.dimensionsX, roleSelectorData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, roleSelectorData.gridPaddingY)
+    self.gridList:AddEntryTemplate(roleSelectorData.endEntryTemplate, roleSelectorData.endDimensionsX, roleSelectorData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, roleSelectorData.gridPaddingY)
+    self.gridList:AddEntryTemplate(minimumCPData.entryTemplate, minimumCPData.dimensionsX, minimumCPData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING_X, minimumCPData.gridPaddingY)
+    self.gridList:AddHeaderTemplate(templateData.headerTemplate, templateData.headerHeight, ZO_DefaultGridTileHeaderSetup)
     self.gridList:SetHeaderPrePadding(templateData.gridPaddingY)
 
     self:BuildAttributeSelectionData()
@@ -176,12 +153,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:OnFocusSelected(attribute, valu
     self:SetDisabledAdditionalActivitiesForFocus(self.attributeSelectionData.primaryFocus.currentValue)
     self:SetDisabledAdditionalActivitiesForFocus(self.attributeSelectionData.secondaryFocus.currentValue)
 
-    for i = GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_END do
-        self.attributeSelectionData.activities.entryData[i].isDisabled = self.attributeSelectionData.activities.isDisabled[i]
-        self.attributeSelectionData.activities.entryData[i].isChecked = self.attributeSelectionData.activities.isChecked[i] or self.attributeSelectionData.activities.isDisabled[i]
-    end
-
-    ZO_ScrollList_RefreshVisible(self.gridList.list)
+    self.gridList:RefreshGridList()
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
@@ -189,7 +161,7 @@ end
 function ZO_GuildRecruitment_GuildListing_Shared:OnDropdownSelected(attribute, value)
     self:UpdateAttributeValue(attribute, value)
 
-    ZO_ScrollList_RefreshVisible(self.gridList.list)
+    self.gridList:RefreshGridList()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -496,8 +468,12 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionEntry(da
     self.gridList:AddEntry(entryData, data.entryTemplate)
 end
 
-function ZO_GuildRecruitment_GuildListing_Shared:OnActivityCheckboxToggle(attributeValue, value)
-    self.attributeSelectionData.activities.isChecked[attributeValue] = value
+function ZO_GuildRecruitment_GuildListing_Shared:OnActivityCheckboxToggle(attribute, isChecked)
+    SetGuildRecruitmentActivityValue(self.guildId, attribute, isChecked)
+
+    self.attributeSelectionData.activities.isChecked[attribute] = isChecked
+
+    self.gridList:RefreshGridList()
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
@@ -510,12 +486,16 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildActivityCheckboxes()
         local entryData = self.entryDataObjectPool:AcquireObject()
         local data =
         {
-            guildId = self.guildId,
             attribute = attribute,
             value = i,
             text = GetString("SI_GUILDACTIVITYATTRIBUTEVALUE", i),
-            isDisabled = self.attributeSelectionData.activities.isDisabled[i],
-            isChecked = self.attributeSelectionData.activities.isChecked[i] or self.attributeSelectionData.activities.isDisabled[i],
+            clickSound = SOUNDS.GAMEPAD_GUILD_FINDER_TOGGLE_ACTIVITY,
+            isDisabled = function()
+                return self.attributeSelectionData.activities.isDisabled[i]
+            end,
+            isChecked = function()
+                return self.attributeSelectionData.activities.isChecked[i] or self.attributeSelectionData.activities.isDisabled[i]
+            end,
             onToggleFunction = function(...) self:OnActivityCheckboxToggle(...) end,
         }
         entryData:SetDataSource(data)

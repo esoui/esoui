@@ -15,12 +15,12 @@ function ZO_ZoneStory_AchievementTile:Initialize(...)
     self.statusControl = contentControl:GetNamedChild("Status")
 end
 
-function ZO_ZoneStory_AchievementTile:Layout(achievementId)
-    ZO_Tile.Layout(self, achievementId)
+function ZO_ZoneStory_AchievementTile:Layout(data)
+    ZO_Tile.Layout(self, data)
 
-    self.achievementId = achievementId
+    self.achievementId = data.achievementId
 
-    local name, _, _, icon, completed, date = GetAchievementInfo(achievementId)
+    local name, _, _, icon, completed, date = GetAchievementInfo(data.achievementId)
 
     self.iconControl:SetTexture(icon)
     self:SetTitle(zo_strformat(name), completed)

@@ -88,7 +88,7 @@ function ZO_GamepadStoreListComponent:SetupStoreItem(control, data, selected, se
     control:SetHidden(selected and self.confirmationMode)
 
     -- Default to CURT_MONEY
-    local useDefaultCurrency = (not data.currencyType1) or (data.currencyType1 == 0)
+    local useDefaultCurrency = (not data.currencyType1) or (data.currencyType1 == CURT_NONE)
     local currencyType = CURT_MONEY
 
     if not useDefaultCurrency then
@@ -103,19 +103,6 @@ function ZO_GamepadStoreListComponent:SetupPrice(control, price, forceValid, mod
     local playerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
     local invalidPrice = not forceValid and price > GetCurrencyAmount(currencyType, playerStoredLocation) or false
     local priceControl = control:GetNamedChild("Price")
-
-    if mode == ZO_MODE_STORE_BUY then 
-        local storeUsesAP, storeUsesTelvarStones, storeUsesWritVouchers, storeUsesEventCurrency = select(2, GetStoreCurrencyTypes())
-        if storeUsesAP and currencyType == CURT_ALLIANCE_POINTS then
-            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_ALLIANCE_POINTS, CURRENCY_LOCATION_CHARACTER) or false
-        elseif storeUsesTelvarStones and currencyType == CURT_TELVAR_STONES then
-            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER) or false
-        elseif storeUsesWritVouchers and currencyType == CURT_WRIT_VOUCHERS then
-            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_WRIT_VOUCHERS, CURRENCY_LOCATION_CHARACTER) or false
-        elseif storeUsesEventCurrency and currencyType == CURT_EVENT_TICKETS then
-            invalidPrice = not forceValid and price > GetCurrencyAmount(CURT_EVENT_TICKETS, CURRENCY_LOCATION_ACCOUNT) or false
-        end
-    end
 
     ZO_CurrencyControl_SetSimpleCurrency(priceControl, currencyType, price, options, CURRENCY_SHOW_ALL, invalidPrice)
 end

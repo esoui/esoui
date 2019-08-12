@@ -81,16 +81,13 @@
                     <Dimensions x="512" y="256" />
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
                     <Controls>
-                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Crafting/crafting_alchemy_slottingBG.dds">
-                            <Dimensions x="512" y="512" />
-                            <Anchor point="TOP" />
-                        </Texture>
+                        <Texture name="$(parent)Bg" inherits="ZO_CraftingContainerBackground" />
 
-                        <Label name="$(parent)ImprovementLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_SMITHING_IMPROVE_ITEM_TO_IMPROVE_HEADER" modifyTextType="UPPERCASE">
+                        <Label name="$(parent)ImprovementLabel" inherits="ZO_CraftingContainerHeader" text="SI_SMITHING_IMPROVE_ITEM_TO_IMPROVE_HEADER">
                             <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="110" offsetY="64" />
                         </Label>
 
-                        <Label name="$(parent)ChanceLabel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_SMITHING_IMPROVE_CHANCE_HEADER" modifyTextType="UPPERCASE">
+                        <Label name="$(parent)ChanceLabel" inherits="ZO_CraftingContainerHeader" text="SI_SMITHING_IMPROVE_CHANCE_HEADER">
                             <Anchor point="TOP" relativePoint="TOPRIGHT" offsetX="-165" offsetY="64" />
                         </Label>
 
@@ -113,33 +110,8 @@
                             <Anchor point="CENTER" relativeTo="$(parent)BoosterSlot" />
                         </Label>
 
-                        <Control name="$(parent)Spinner" mouseEnabled="true">
-                            <Dimensions x="110" y="33" />
+                        <Control name="$(parent)Spinner" inherits="ZO_CraftingSpinner" mouseEnabled="true">
                             <Anchor point="TOP" relativeTo="$(parent)BoosterSlot" relativePoint="BOTTOM" offsetY="20" />
-                            <Controls>
-                                <Button name="$(parent)Decrease">
-                                    <Dimensions x="32" y="32" />
-                                    <Anchor point="LEFT" offsetX="-5" />
-                                    <Textures normal="EsoUI/Art/Buttons/pointsMinus_up.dds"
-                                              pressed="EsoUI/Art/Buttons/pointsMinus_down.dds"
-                                              mouseOver="EsoUI/Art/Buttons/pointsMinus_over.dds"
-                                              disabled="EsoUI/Art/Buttons/pointsMinus_disabled.dds"/>
-                                </Button>
-
-                                <Label name="$(parent)Display" font="ZoFontWinH2" horizontalAlignment="CENTER" >
-                                    <Anchor point="TOPLEFT" offsetX="18" offsetY="4"/>
-                                    <Anchor point="BOTTOMRIGHT" offsetX="-18" offsetY="-4"/>
-                                </Label>
-
-                                <Button name="$(parent)Increase">
-                                    <Dimensions x="32" y="32" />
-                                    <Anchor point="RIGHT" offsetX="5" />
-                                    <Textures normal="EsoUI/Art/Buttons/pointsPlus_up.dds"
-                                              pressed="EsoUI/Art/Buttons/pointsPlus_down.dds"
-                                              mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds"
-                                              disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
-                                </Button>
-                            </Controls>
                         </Control>
                     </Controls>
                 </Control>
@@ -149,9 +121,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-175" />
                 </Control>
                 
-                <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip">
-                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-335" />
-                </Tooltip>
+                <Tooltip name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip" />
             </Controls>
         </Control>
     </Controls>

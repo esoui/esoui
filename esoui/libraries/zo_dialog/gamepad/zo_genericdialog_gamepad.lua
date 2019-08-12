@@ -646,6 +646,10 @@ do
         dialog.entryList:AddDataTemplate("ZO_GamepadMultiSelectionDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, nil)
     end
 
+    function ZO_GenericParametricListGamepadDialogTemplate_RefreshVisibleEntries(dialog)
+        dialog.entryList:RefreshVisible()
+    end
+
     -- Valid fields for parametric list entries are:
         --   visible - a bool or function which determines if we show the entry
         --   template - the template for the gamepad entry data in the parametric list

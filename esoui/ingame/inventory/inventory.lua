@@ -1510,10 +1510,8 @@ function ZO_InventoryManager:RefreshAllInventorySlots(inventoryType)
         self.suppressItemAddedAlert = true
 
         for k, bagId in ipairs(inventory.backingBags) do
-            local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-            while slotIndex do
+            for slotIndex in ZO_IterateBagSlots(bagId) do
                 self:AddInventoryItem(inventoryType, slotIndex, bagId)
-                slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
             end
         end
 
@@ -1600,11 +1598,9 @@ do
         if inventory.backingBags then
             local anyNewStatusCleared = false
             for k, bagId in ipairs(inventory.backingBags) do
-                local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-                while slotIndex do
+                for slotIndex in ZO_IterateBagSlots(bagId) do
                     local newStatusCleared = TryClearNewStatus(inventory, bagId, slotIndex, self)
                     anyNewStatusCleared = anyNewStatusCleared or newStatusCleared
-                    slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
                 end
             end
 
@@ -1706,18 +1702,37 @@ do
             local inventory = self.inventories[inventoryType]
             if inventory.backingBags then
                 for k, bagId in ipairs(inventory.backingBags) do
-                    local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-                    while slotIndex do
+                    for slotIndex in ZO_IterateBagSlots(bagId) do
                         local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
                         if itemInstanceId == specificItemInstanceId then
                             data = UpdateItemTable(bagId, slotIndex, predicate, data)
                         end
-                        slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
                     end
                 end
             end
         end
         return data
+    end
+
+    --where ... are inventory types
+    function ZO_InventoryManager:GenerateAllSlotsInVirtualStackedItem(predicate, specificItemInstanceId, ...)
+        local matchingSlots = {}
+        for i = 1, select("#", ...) do
+            local inventoryType = select(i, ...)
+            local inventory = self.inventories[inventoryType]
+            if inventory.backingBags then
+                for k, bagId in ipairs(inventory.backingBags) do
+                    for slotIndex in ZO_IterateBagSlots(bagId) do
+                        local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
+                        if itemInstanceId == specificItemInstanceId and (predicate == nil or predicate(bagId, slotIndex)) then
+                            local _, stackCount = GetItemInfo(bagId, slotIndex)
+                            table.insert(matchingSlots, {bagId = bagId, slotIndex = slotIndex, stackCount = stackCount})
+                        end
+                    end
+                end
+            end
+        end
+        return matchingSlots
     end
 
     function ZO_InventoryManager:GenerateListOfVirtualStackedItems(inventoryType, predicate, itemIds)
@@ -1734,15 +1749,13 @@ do
     end
 
     function ZO_InventoryManager:GenerateListOfVirtualStackedItemsFromBag(bagId, predicate, itemIds)
-        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
         local itemData
-        while slotIndex do
+        for slotIndex in ZO_IterateBagSlots(bagId) do
             local itemInstanceId = GetItemInstanceId(bagId, slotIndex)
             if itemInstanceId then
                 itemData = itemIds[itemInstanceId]
                 itemIds[itemInstanceId] = UpdateItemTable(bagId, slotIndex, predicate, itemData)
             end
-            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
         end
     end
 end
@@ -2530,10 +2543,8 @@ function ZO_InventoryManager:RefreshAllGuildBankItems()
 
     --Add items
     for k, bagId in ipairs(inventory.backingBags) do
-        local slotIndex = ZO_GetNextBagSlotIndex(bagId)
-        while slotIndex do
+        for slotIndex in ZO_IterateBagSlots(bagId) do
             self:AddInventoryItem(INVENTORY_GUILD_BANK, slotIndex, bagId)
-            slotIndex = ZO_GetNextBagSlotIndex(bagId, slotIndex)
         end
     end
 

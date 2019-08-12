@@ -81,7 +81,7 @@ function ZO_MailInboxShared_TakeAll(mailId)
     TakeMailAttachedMoney(mailId)
 end
 
-function ZO_MailInboxShared_UpdateInbox(mailData, fromControl, subjectControl, expiresControl, recievedControl, bodyControl)
+function ZO_MailInboxShared_UpdateInbox(mailData, fromControl, subjectControl, expiresControl, receivedControl, bodyControl)
     local body = ReadMail(mailData.mailId)
     if body == "" then
         body = GetString(SI_MAIL_READ_NO_BODY)
@@ -101,8 +101,8 @@ function ZO_MailInboxShared_UpdateInbox(mailData, fromControl, subjectControl, e
         expiresControl:SetText(mailData:GetExpiresText())
     end
 
-    if recievedControl then
-        recievedControl:SetText(mailData:GetReceivedText())
+    if receivedControl then
+        receivedControl:SetText(mailData:GetReceivedText())
     end
 
     bodyControl:SetText(body)

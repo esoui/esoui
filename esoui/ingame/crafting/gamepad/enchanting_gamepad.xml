@@ -2,7 +2,7 @@
     <Controls>
         <Button name="ZO_GamepadEnchantingRuneCraftingSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Dimensions x="106" y="80" />
                     <Anchor point="TOP" relativePoint="BOTTOM" />
                 </Label>
@@ -11,7 +11,7 @@
 
         <Button name="ZO_GamepadEnchantingRuneExtractionSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontGamepad27" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="ZO_TooltipIfTruncatedLabel" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                <Label name="$(parent)Name" font="ZoFontGamepad27" verticalAlignment="CENTER" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Dimensions x="106" y="80" />
                     <Anchor point="TOP" relativePoint="BOTTOM" />
                 </Label>

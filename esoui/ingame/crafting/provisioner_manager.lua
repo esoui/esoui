@@ -58,7 +58,7 @@ function ZO_ProvisionerManager:GetRecipeData()
         if self.dirtyFlags[DIRTY.NUM_CREATABLE] then
             for _, recipeList in pairs(self.recipeData) do
                 for _, recipe in ipairs(recipeList.recipes) do
-                    recipe.numCreatable = self:CalculateHowManyCouldBeCreated(recipe.recipeListIndex, recipe.recipeIndex, recipe.numIngredients)
+                    recipe.maxIterationsForIngredients = self:CalculateMaxIterationsForIngredients(recipe.recipeListIndex, recipe.recipeIndex, recipe.numIngredients)
                 end
             end
         end
@@ -76,20 +76,26 @@ function ZO_ProvisionerManager:GetRecipeData()
     return self.recipeData
 end
 
-function ZO_ProvisionerManager:CalculateHowManyCouldBeCreated(recipeListIndex, recipeIndex, numIngredients)
-    local minCount
+-- This calculates the number of times we could perform a craft with the ingredients we currently have, ignoring space or cost or other limits.
+-- To find out how many iterations you can actually do in one go, use GetMaxIterationsPossibleForRecipe() instead.
+function ZO_ProvisionerManager:CalculateMaxIterationsForIngredients(recipeListIndex, recipeIndex, numIngredients)
+    if numIngredients == 0 then
+        return 0
+    end
+
+    local minCount = math.huge
 
     for ingredientIndex = 1, numIngredients do
         local _, _, requiredQuantity = GetRecipeIngredientItemInfo(recipeListIndex, recipeIndex, ingredientIndex)
         local ingredientCount = GetCurrentRecipeIngredientCount(recipeListIndex, recipeIndex, ingredientIndex)
 
-        minCount = zo_min(zo_floor(ingredientCount / requiredQuantity), minCount or math.huge)
+        minCount = zo_min(zo_floor(ingredientCount / requiredQuantity), minCount)
         if minCount == 0 then
             return 0
         end
     end
 
-    return minCount or 0
+    return minCount
 end
 
 function ZO_ProvisionerManager:PassesTradeskillLevelReqs(tradeskillsReqs)
@@ -116,12 +122,12 @@ function ZO_ProvisionerManager:BuildRecipeData()
     self.recipeData = {}
 
     for recipeListIndex = 1, GetNumRecipeLists() do
-        local recipeListName, numRecipes, upIcon, downIcon, overIcon, disabledIcon, recipeListCreateSound = GetRecipeListInfo(recipeListIndex)
+        local recipeListName, numRecipes, upIcon, downIcon, overIcon, _, recipeListCreateSound = GetRecipeListInfo(recipeListIndex)
         for recipeIndex = 1, numRecipes do
             local known, recipeName, numIngredients, _, qualityReq, specialIngredientType, requiredCraftingStationType = GetRecipeInfo(recipeListIndex, recipeIndex)
             local _, resultIcon = GetRecipeResultItemInfo(recipeListIndex, recipeIndex)
             if known then
-                local numCreatable = self:CalculateHowManyCouldBeCreated(recipeListIndex, recipeIndex, numIngredients)
+                local maxIterationsForIngredients = self:CalculateMaxIterationsForIngredients(recipeListIndex, recipeIndex, numIngredients)
                 local tradeskillsLevelReqs = {}
                 for tradeskillIndex = 1, GetNumRecipeTradeskillRequirements(recipeListIndex, recipeIndex) do
                     local tradeskill, levelReq = GetRecipeTradeskillRequirement(recipeListIndex, recipeIndex, tradeskillIndex)
@@ -143,7 +149,7 @@ function ZO_ProvisionerManager:BuildRecipeData()
                     passesQualityLevelReq = self:PassesQualityLevelReq(qualityReq),
                     specialIngredientType = specialIngredientType,
                     numIngredients = numIngredients,
-                    numCreatable = numCreatable,
+                    maxIterationsForIngredients = maxIterationsForIngredients,
                     createSound = createSound,
                     iconFile = resultIcon,
                     quality = quality,
@@ -161,7 +167,6 @@ function ZO_ProvisionerManager:BuildRecipeData()
                         upIcon = upIcon,
                         downIcon = downIcon,
                         overIcon = overIcon,
-                        disabledIcon = disabledIcon,
                         recipes = {}
                     }
                     self.recipeData[recipeListIndex] = recipeList

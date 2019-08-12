@@ -162,7 +162,7 @@ end
 
 function ZO_SharedSmithingImprovement:OnInventoryUpdate(validItems)
     self.improvementSlot:ValidateSlottedItem(validItems)
-    self:OnSlotChanged()
+    self:Refresh()
 end
 
 function ZO_SharedSmithingImprovement:ShowAppropriateSlotDropCallouts()
@@ -238,8 +238,6 @@ end
 
 function ZO_SharedSmithingImprovement:SetImprovementSlotItem(bagId, slotIndex)
     self.improvementSlot:SetItem(bagId, slotIndex)
-
-    self:OnSlotChanged()
 end
 
 function ZO_SharedSmithingImprovement:OnFilterChanged(filterType)
@@ -329,17 +327,17 @@ function ZO_SmithingImprovementSlot:SetItem(bagId, slotIndex)
     elseif hadItem then
         PlaySound(SOUNDS.SMITHING_ITEM_TO_IMPROVE_REMOVED)
     end
-
-    self:RefreshName()
 end
 
-function ZO_SmithingImprovementSlot:RefreshName()
+function ZO_SmithingImprovementSlot:Refresh()
+    ZO_CraftingSlotBase.Refresh(self)
+
     if self.nameLabel then
         if self:HasItem() then
             self.nameLabel:SetHidden(false)
-            self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(self.bagId, self.slotIndex)))
+            self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(self:GetBagAndSlot())))
 
-            local quality = select(8, GetItemInfo(self.bagId, self.slotIndex))
+            local quality = select(8, GetItemInfo(self:GetBagAndSlot()))
             self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
         else
             self.nameLabel:SetHidden(true)

@@ -7,7 +7,7 @@ function ZO_AlertText_Gamepad:New(...)
 end
 
 function ZO_AlertText_Gamepad:InternalPerformAlert(category, soundId, message, template)
-	local color = self:GetAlertColor(category)
+    local color = self:GetAlertColor(category)
 
     local alertData = message
 
@@ -35,7 +35,7 @@ function ZO_AlertText_Gamepad:FadeAll()
 end
 
 local function OnScriptAccessViolation(eventCode, functionName)
-	ZO_Dialogs_ShowGamepadDialog("SCRIPT_ACCESS_VIOLATION", nil, {mainTextParams = {functionName}})
+    ZO_Dialogs_ShowGamepadDialog("SCRIPT_ACCESS_VIOLATION", nil, {mainTextParams = {functionName}})
 end
 
 local function SetupFunction(control, data)
@@ -50,13 +50,14 @@ function ZO_AlertText_Gamepad:Initialize(control)
     ZO_AlertText_Base.Initialize(self)
 
     control:RegisterForEvent(EVENT_SCRIPT_ACCESS_VIOLATION, OnScriptAccessViolation)
-    
+
     local anchor = ZO_Anchor:New(TOPRIGHT, GuiRoot, TOPRIGHT, -15, 4)
 
     local MAX_DISPLAYED_ENTRIES_GAMEPAD = 2
-    local MAX_LINES_PER_ENTRY_GAMEPAD = 4
+    local MAX_HEIGHT_GAMEPAD = 900
+    local NO_MAX_LINES_PER_ENTRY_GAMEPAD = nil
 
-    self.alerts = ZO_FadingControlBuffer:New(control, MAX_DISPLAYED_ENTRIES_GAMEPAD, nil, nil, "AlertFadeGamepad", "AlertTranslateGamepad", anchor)
+    self.alerts = ZO_FadingControlBuffer:New(control, MAX_DISPLAYED_ENTRIES_GAMEPAD, MAX_HEIGHT_GAMEPAD, NO_MAX_LINES_PER_ENTRY_GAMEPAD, "AlertFadeGamepad", "AlertTranslateGamepad", anchor)
     self.alerts:AddTemplate(DEFAULT_GAMEPAD_ALERT_TEMPLATE, {setup = SetupFunction})
 
     self.alerts:SetTranslateDuration(1500)
@@ -79,29 +80,35 @@ end
 
 --[[ Global Alert Functions ]]--
 function ZO_AlertTemplated_Gamepad(category, soundId, message, template, ...)
-    if(not message) then return end
-    if not (type(message) == "table") then
-    	message = zo_strformat(message, ...)
-	end
-    if(message == "") then return end
+    if not message then
+        return
+    end
+    if not type(message) == "table" then
+        message = zo_strformat(message, ...)
+    end
+    if message == "" then
+        return
+    end
 
-	if(ALERT_EVENT_MANAGER:ShouldDisplayMessage(message)) then
-		ALERT_MESSAGES_GAMEPAD:InternalPerformAlert(category, soundId, message, template)
+    if ALERT_EVENT_MANAGER:ShouldDisplayMessage(message) then
+        ALERT_MESSAGES_GAMEPAD:InternalPerformAlert(category, soundId, message, template)
     else
         ZO_SoundAlert(category, soundId)
     end
 end
 
 function ZO_AlertNoSuppressionTemplated_Gamepad(category, soundId, message, template, ...)
-	if(not message) then return end
+    if not message then
+        return
+    end
+    if not type(message) == "table" then
+        message = zo_strformat(message, ...)
+    end
+    if message == "" then
+        return
+    end
 
-    if not (type(message) == "table") then
-    	message = zo_strformat(message, ...)
-	end
-
-    if(message == "") then return end
-
-	ALERT_MESSAGES_GAMEPAD:InternalPerformAlert(category, soundId, message, template)
+    ALERT_MESSAGES_GAMEPAD:InternalPerformAlert(category, soundId, message, template)
 end
 
 function ZO_AlertAddTemplate_Gamepad(template, templateData)
