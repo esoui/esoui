@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 100027
+h1. ESO UI Documentation for API Version 100028
 
 h2. Global Variables
 
@@ -896,6 +896,7 @@ h5. LinkType
 * LINK_TYPE_BOOK
 * LINK_TYPE_COLLECTIBLE
 * LINK_TYPE_GUILD
+* LINK_TYPE_HELP
 * LINK_TYPE_INVALID
 * LINK_TYPE_ITEM
 * LINK_TYPE_QUEST_ITEM
@@ -932,6 +933,7 @@ h5. LootItemType
 * LOOT_TYPE_QUEST_ITEM
 * LOOT_TYPE_STYLE_STONES
 * LOOT_TYPE_TELVAR_STONES
+* LOOT_TYPE_UNDAUNTED_KEYS
 * LOOT_TYPE_WRIT_VOUCHERS
 
 
@@ -1375,14 +1377,16 @@ h5. RewardItemType
 h5. RewardType
 * REWARD_TYPE_ALLIANCE_POINTS
 * REWARD_TYPE_AUTO_ITEM
+* REWARD_TYPE_CHAOTIC_CREATIA
 * REWARD_TYPE_EVENT_TICKETS
 * REWARD_TYPE_INSPIRATION
 * REWARD_TYPE_MONEY
 * REWARD_TYPE_NONE
 * REWARD_TYPE_PARTIAL_SKILL_POINTS
 * REWARD_TYPE_SKILL_LINE
+* REWARD_TYPE_STYLE_STONES
 * REWARD_TYPE_TELVAR_STONES
-* REWARD_TYPE_UNUSED3
+* REWARD_TYPE_UNDAUNTED_KEYS
 * REWARD_TYPE_WRIT_VOUCHERS
 
 
@@ -1421,6 +1425,7 @@ h5. SCTEventType
 * SCT_EVENT_TYPE_FALL_DAMAGE
 * SCT_EVENT_TYPE_FEARED
 * SCT_EVENT_TYPE_HEAL
+* SCT_EVENT_TYPE_HEAL_ABSORBED
 * SCT_EVENT_TYPE_HEAL_CRIT
 * SCT_EVENT_TYPE_HOT_TICK
 * SCT_EVENT_TYPE_HOT_TICK_CRIT
@@ -1516,12 +1521,6 @@ h5. StatBonusOption
 * STAT_BONUS_OPTION_DONT_APPLY_BONUS
 
 
-h5. StatusEffectModType
-* STATUS_EFFECT_MOD_TYPE_DEFAULT
-* STATUS_EFFECT_MOD_TYPE_NECRO
-* STATUS_EFFECT_MOD_TYPE_NONE
-
-
 h5. StatusEffectType
 * STATUS_EFFECT_TYPE_BLEED
 * STATUS_EFFECT_TYPE_BLIND
@@ -1545,16 +1544,6 @@ h5. StatusEffectType
 * STATUS_EFFECT_TYPE_TRAUMA
 * STATUS_EFFECT_TYPE_WEAKNESS
 * STATUS_EFFECT_TYPE_WOUND
-
-
-h5. StoreEntryType
-* STORE_ENTRY_TYPE_COLLECTIBLE
-* STORE_ENTRY_TYPE_HOUSE_WITH_TEMPLATE
-* STORE_ENTRY_TYPE_INTERACTABLE
-* STORE_ENTRY_TYPE_ITEM
-* STORE_ENTRY_TYPE_MONSTER
-* STORE_ENTRY_TYPE_QUEST_ITEM
-* STORE_ENTRY_TYPE_SUBSTORE
 
 
 h5. TooltipGameDataType
@@ -1647,8 +1636,8 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED_9
 * TUTORIAL_TRIGGER_CROWN_STORE_TABS_SHOWN
 * TUTORIAL_TRIGGER_CURRENCY_CHANGED_EVENT_TICKETS
-* TUTORIAL_TRIGGER_CURRENCY_CHANGED_FUTURE_2
 * TUTORIAL_TRIGGER_CURRENCY_CHANGED_FUTURE_3
+* TUTORIAL_TRIGGER_CURRENCY_CHANGED_UNDAUNTED_KEYS
 * TUTORIAL_TRIGGER_DAILY_LOGIN_REWARDS_OPENED
 * TUTORIAL_TRIGGER_DAILY_QUEST_ADDED
 * TUTORIAL_TRIGGER_DAMAGED_EQUIPMENT_REDUCING_EFFECTIVENESS
@@ -1922,7 +1911,6 @@ h5. Globals
 * MAX_GUILD_RANKS
 * MAX_HOUSES_FOR_PERMISSIONS
 * NUM_POWER_POOLS
-* MAX_STORE_WINDOW_STACK_QUANTITY
 * MIN_REQUIRED_LEVEL_TO_CREATE_GUILD
 * NO_POWER_INDEX
 * NUM_ALLIANCES
@@ -1981,6 +1969,8 @@ h5. AbilityType
 * ABILITY_TYPE_FEAR
 * ABILITY_TYPE_FILLSOULGEM
 * ABILITY_TYPE_FIREPROC
+* ABILITY_TYPE_FLIGHT
+* ABILITY_TYPE_FLYINGSTRAFERUN
 * ABILITY_TYPE_FOLLOWWAYPOINTPATH
 * ABILITY_TYPE_FREECAST
 * ABILITY_TYPE_FREEINTERACT
@@ -1993,6 +1983,7 @@ h5. AbilityType
 * ABILITY_TYPE_INTERRUPT
 * ABILITY_TYPE_JUMP
 * ABILITY_TYPE_KNOCKBACK
+* ABILITY_TYPE_LOSMOVEPOSITION
 * ABILITY_TYPE_LEAP
 * ABILITY_TYPE_LEVITATE
 * ABILITY_TYPE_LIGHTHEAVYATTACKOVERRIDE
@@ -2093,6 +2084,8 @@ h5. ActivityQueueResult
 * ACTIVITY_QUEUE_RESULT_NO_ACTIVITIES_SELECTED
 * ACTIVITY_QUEUE_RESULT_NO_GROUP
 * ACTIVITY_QUEUE_RESULT_ON_QUEUE_COOLDOWN
+* ACTIVITY_QUEUE_RESULT_QUEUE_BUSY
+* ACTIVITY_QUEUE_RESULT_QUEUE_FULL
 * ACTIVITY_QUEUE_RESULT_QUEUE_TTL_EXPIRED
 * ACTIVITY_QUEUE_RESULT_SUCCESS
 * ACTIVITY_QUEUE_RESULT_UNSPECIFIED_INTERNAL_ERROR
@@ -2145,7 +2138,6 @@ h5. LFGReadyCheckCancelReason
 
 h5. LFGReadyCheckState
 * LFG_READY_CHECK_STATE_FORM_GROUP
-* LFG_READY_CHECK_STATE_GROUP_TIMEOUT_CANCEL
 * LFG_READY_CHECK_STATE_IN_READY_CHECK
 * LFG_READY_CHECK_STATE_IN_READY_CHECK_BATTLEGROUND_TEST
 * LFG_READY_CHECK_STATE_IN_TRANSIT_TO_BATTLEGROUND
@@ -2154,6 +2146,8 @@ h5. LFGReadyCheckState
 * LFG_READY_CHECK_STATE_PLAYER_ACCEPTED
 * LFG_READY_CHECK_STATE_PLAYER_DECLINED
 * LFG_READY_CHECK_STATE_QUEUEDTEST_BATTLEGROUND_LAUNCH
+* LFG_READY_CHECK_STATE_QUEUE_CANCELED
+* LFG_READY_CHECK_STATE_TIMEOUT_CANCEL
 * LFG_READY_CHECK_STATE_TRANSFER_TO_BATTLEGROUND_INSTANCE
 
 
@@ -2168,12 +2162,6 @@ h5. Globals
 
 
 h5. Globals
-
-
-h5. CameraFollowHeightBehavior
-* CAM_HEIGHT_BONE_OVERRIDE
-* CAM_HEIGHT_HEAD_BONE
-* CAM_HEIGHT_NO_CHANGE
 
 
 h5. OutfitSlot
@@ -2762,6 +2750,7 @@ h5. CollectibleCategoryType
 * COLLECTIBLE_CATEGORY_TYPE_ASSISTANT
 * COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING
 * COLLECTIBLE_CATEGORY_TYPE_CHAPTER
+* COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT
 * COLLECTIBLE_CATEGORY_TYPE_COSTUME
 * COLLECTIBLE_CATEGORY_TYPE_DLC
 * COLLECTIBLE_CATEGORY_TYPE_EMOTE
@@ -3029,6 +3018,7 @@ h5. CurrencyChangeReason
 * CURRENCY_CHANGE_REASON_BOUNTY_PAID_GUARD
 * CURRENCY_CHANGE_REASON_BUYBACK
 * CURRENCY_CHANGE_REASON_CASH_ON_DELIVERY
+* CURRENCY_CHANGE_REASON_CHARACTER_UPGRADE
 * CURRENCY_CHANGE_REASON_COMMAND
 * CURRENCY_CHANGE_REASON_CONSUME_FOOD_DRINK
 * CURRENCY_CHANGE_REASON_CONSUME_POTION
@@ -3111,6 +3101,7 @@ h5. CurrencyType
 * CURT_NONE
 * CURT_STYLE_STONES
 * CURT_TELVAR_STONES
+* CURT_UNDAUNTED_KEYS
 * CURT_WRIT_VOUCHERS
 
 
@@ -3403,6 +3394,11 @@ h5. GuildPersonalityAttributeValue
 * GUILD_PERSONALITY_ATTRIBUTE_VALUE_NONE
 
 
+h5. GuildPlayerSetRankResponse
+* GUILD_PLAYER_SET_RANK_RESPONSE_FAILED
+* GUILD_PLAYER_SET_RANK_RESPONSE_SUCCEEDED
+
+
 h5. GuildPrivilege
 * GUILD_PRIVILEGE_BANK_DEPOSIT
 * GUILD_PRIVILEGE_HERALDRY
@@ -3420,6 +3416,11 @@ h5. GuildProcessApplicationResponse
 * GUILD_PROCESS_APP_RESPONSE_GUILD_FULL
 * GUILD_PROCESS_APP_RESPONSE_NO_APPLICATION_PERMISSION
 * GUILD_PROCESS_APP_RESPONSE_PROCESS_APPLICATION_ERROR
+
+
+h5. GuildRankChangeAction
+* GUILD_RANK_CHANGE_ACTION_DEMOTE
+* GUILD_RANK_CHANGE_ACTION_PROMOTE
 
 
 h5. GuildRanks
@@ -4003,18 +4004,6 @@ h5. BindType
 * BIND_TYPE_UNSET
 
 
-h5. CollectibleEvolutionResult
-* COLLECTIBLE_EVOLUTION_RESULT_ALREADY_OWN_EVOLVED_COLLECTIBLE
-* COLLECTIBLE_EVOLUTION_RESULT_INVALID_EVOLUTION
-* COLLECTIBLE_EVOLUTION_RESULT_IS_IN_COMBAT
-* COLLECTIBLE_EVOLUTION_RESULT_IS_IN_PVP_AREA
-* COLLECTIBLE_EVOLUTION_RESULT_IS_MOUNTED
-* COLLECTIBLE_EVOLUTION_RESULT_IS_MOVING
-* COLLECTIBLE_EVOLUTION_RESULT_MISSING_BASE_COLLECTIBLE
-* COLLECTIBLE_EVOLUTION_RESULT_MISSING_ITEMS
-* COLLECTIBLE_EVOLUTION_RESULT_SUCCESS
-
-
 h5. CollectibleItemType
 * COLLECTIBLE_ITEM_TYPE_FISH
 * COLLECTIBLE_ITEM_TYPE_NONE
@@ -4150,9 +4139,12 @@ h5. ItemCombinationResult
 * ITEM_COMBINATION_RESULT_ALREADY_OWNS_COLLECTIBLE
 * ITEM_COMBINATION_RESULT_INVALID_COMBINATION
 * ITEM_COMBINATION_RESULT_IS_IN_COMBAT
+* ITEM_COMBINATION_RESULT_IS_IN_HIDEY_HOLE
 * ITEM_COMBINATION_RESULT_IS_IN_PVP_AREA
 * ITEM_COMBINATION_RESULT_IS_MOUNTED
 * ITEM_COMBINATION_RESULT_IS_MOVING
+* ITEM_COMBINATION_RESULT_IS_SWIMMING
+* ITEM_COMBINATION_RESULT_MISSING_COLLECTIBLES
 * ITEM_COMBINATION_RESULT_MISSING_ITEMS
 * ITEM_COMBINATION_RESULT_SUCCESS
 
@@ -4417,10 +4409,9 @@ h5. ItemUISoundCategory
 
 
 h5. ItemUseType
+* ITEM_USE_TYPE_COLLECTIBLE_GRANT
 * ITEM_USE_TYPE_COMBINATION
 * ITEM_USE_TYPE_COSTUME_DYE_STAMP
-* ITEM_USE_TYPE_DEPRECATED
-* ITEM_USE_TYPE_EVOLUTION
 * ITEM_USE_TYPE_ITEM_DYE_STAMP
 * ITEM_USE_TYPE_KEEP_RECALL_STONE
 * ITEM_USE_TYPE_MORPH_RESPEC
@@ -4428,7 +4419,15 @@ h5. ItemUseType
 * ITEM_USE_TYPE_PLEDGE_OF_MARA
 * ITEM_USE_TYPE_RECIPE
 * ITEM_USE_TYPE_SKILL_RESPEC
+* ITEM_USE_TYPE_TREASURE_MAP
 * ITEM_USE_TYPE_VANITY_PET
+
+
+h5. SmithingDeconstructionType
+* SMITHING_DECONSTRUCTION_TYPE_ARMOR
+* SMITHING_DECONSTRUCTION_TYPE_JEWELRY
+* SMITHING_DECONSTRUCTION_TYPE_RAW_MATERIALS
+* SMITHING_DECONSTRUCTION_TYPE_WEAPONS_AND_ARMOR
 
 
 h5. SmithingFilterType
@@ -4602,6 +4601,82 @@ h5. StoreItemResult
 * STORE_ITEM_RESULT_SUCCESS
 
 
+h5. TradeskillResult
+* CRAFTING_RESULT_ALREADY_RESEARCHING
+* CRAFTING_RESULT_BUSY
+* CRAFTING_RESULT_CANNOT_AFFORD
+* CRAFTING_RESULT_CANNOT_RESEARCH_RETRAITED_ITEM
+* CRAFTING_RESULT_CANT_DECONSTRUCT_WORN
+* CRAFTING_RESULT_CRAFT_SUCCESS
+* CRAFTING_RESULT_DECONSTRUCT_BAD_QUANTITY
+* CRAFTING_RESULT_DECONSTRUCT_SUCCESS
+* CRAFTING_RESULT_FAILED_TO_ADD_CRAFTING_RESULT
+* CRAFTING_RESULT_FAIL_MATERIAL_REQUIREMENTS
+* CRAFTING_RESULT_FAIL_PATTERN_REQUIREMENTS
+* CRAFTING_RESULT_IMPROVE_FAILED
+* CRAFTING_RESULT_INTERNAL_ERROR
+* CRAFTING_RESULT_INTERRUPTED
+* CRAFTING_RESULT_INVALID_ALCHEMY_INGREDIENT
+* CRAFTING_RESULT_INVALID_BASE
+* CRAFTING_RESULT_INVALID_CRAFTING_RESULT
+* CRAFTING_RESULT_INVALID_MATERIAL
+* CRAFTING_RESULT_INVALID_PATTERN
+* CRAFTING_RESULT_INVALID_REAGENT
+* CRAFTING_RESULT_INVALID_RESEARCH
+* CRAFTING_RESULT_INVALID_RESEARCH_TRADESKILL
+* CRAFTING_RESULT_INVALID_RUNE
+* CRAFTING_RESULT_INVALID_STYLE_MATERIAL
+* CRAFTING_RESULT_INVALID_TRAIT_MATERIAL
+* CRAFTING_RESULT_INVENTORY_FULL
+* CRAFTING_RESULT_ITEM_CRAFT_UNIQUE
+* CRAFTING_RESULT_ITEM_NOT_DECONSTRUCTABLE
+* CRAFTING_RESULT_ITEM_NOT_IMPROVABLE
+* CRAFTING_RESULT_ITEM_NOT_REFINEABLE
+* CRAFTING_RESULT_ITEM_NOT_RESEARCHABLE
+* CRAFTING_RESULT_MUST_LEARN_STYLE
+* CRAFTING_RESULT_MUST_LEARN_TRAIT
+* CRAFTING_RESULT_NEEDS_SMITHING_MATERIAL
+* CRAFTING_RESULT_NEEDS_STYLE_MATERIAL
+* CRAFTING_RESULT_NEEDS_TRAIT_MATERIAL
+* CRAFTING_RESULT_NEED_BASE_RANK
+* CRAFTING_RESULT_NEED_COMPONENTS_FOR_CRAFT
+* CRAFTING_RESULT_NEED_DECONSTRUCT_RANK
+* CRAFTING_RESULT_NEED_ENCHANTING_QUALITY_RANK
+* CRAFTING_RESULT_NEED_ENCHANTING_RANK
+* CRAFTING_RESULT_NEED_ITEM_TO_RESEARCH
+* CRAFTING_RESULT_NEED_RANK_FOR_CRAFT
+* CRAFTING_RESULT_NEED_RECIPE_QUALITY_RANK
+* CRAFTING_RESULT_NEED_RECIPE_RANK
+* CRAFTING_RESULT_NEED_REFINE_RANK
+* CRAFTING_RESULT_NEED_REQUIREMENTS_FOR_CRAFT
+* CRAFTING_RESULT_NEED_UNLOCK_TO_DECONSTRUCT
+* CRAFTING_RESULT_NEED_UNLOCK_TO_RESEARCH
+* CRAFTING_RESULT_NO_ITEM_TO_DECONSTRUCT
+* CRAFTING_RESULT_NO_ITEM_TO_REFINE
+* CRAFTING_RESULT_NO_ITEM_TO_RESEARCH
+* CRAFTING_RESULT_NO_MATCH
+* CRAFTING_RESULT_NO_RECIPE
+* CRAFTING_RESULT_NO_RESULT
+* CRAFTING_RESULT_REFINE_SUCCESS
+* CRAFTING_RESULT_TOO_FEW_REAGENTS
+* CRAFTING_RESULT_TOO_LOW_LEVEL_FOR_STYLE
+* CRAFTING_RESULT_TOO_MANY_CRAFTING_INPUTS
+* CRAFTING_RESULT_TOO_MANY_CRAFTING_ITERATIONS
+* CRAFTING_RESULT_TOO_MANY_CRAFTING_RESULTS
+* CRAFTING_RESULT_TOO_MANY_REAGENTS
+* CRAFTING_RESULT_TOO_MANY_RESEARCH
+* CRAFTING_RESULT_UNKNOWN_RECIPE
+* CRAFTING_RESULT_UNKNOWN_SKILL_DECONSTRUCT
+* CRAFTING_RESULT_UNKNOWN_SKILL_REFINE
+* CRAFTING_RESULT_WRONG_ADDITIVE_CATEGORY
+* CRAFTING_RESULT_WRONG_BOOSTER
+* CRAFTING_RESULT_WRONG_STYLE_CRAFT
+* CRAFTING_RESULT_WRONG_TARGET_CRAFT
+* CRAFTING_RESULT_WRONG_TARGET_DECONSTRUCT
+* CRAFTING_RESULT_WRONG_TARGET_REFINE
+* CRAFTING_RESULT_WRONG_TRADESKILL_FOR_CRAFT
+
+
 h5. VisualArmorType
 * VISUAL_ARMORTYPE_CLOTHING
 * VISUAL_ARMORTYPE_HEAVY
@@ -4659,6 +4734,7 @@ h5. WeaponType
 
 
 h5. Globals
+* NUM_ALCHEMY_TRAITS_PER_REAGENT
 
 
 h5. QuestRemovedType
@@ -5251,6 +5327,13 @@ h5. ClaimRewardResult
 * CLAIM_REWARD_RESULT_SUCCESS
 
 
+h5. InstantUnlockRewardCategory
+* INSTANT_UNLOCK_REWARD_CATEGORY_NONE
+* INSTANT_UNLOCK_REWARD_CATEGORY_QUEST_STARTER
+* INSTANT_UNLOCK_REWARD_CATEGORY_SERVICE_TOKEN
+* INSTANT_UNLOCK_REWARD_CATEGORY_UPGRADE
+
+
 h5. InstantUnlockRewardType
 * INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN
 * INSTANT_UNLOCK_BITE_CURE
@@ -5260,8 +5343,10 @@ h5. InstantUnlockRewardType
 * INSTANT_UNLOCK_OUTFIT
 * INSTANT_UNLOCK_PLAYER_BACKPACK
 * INSTANT_UNLOCK_PLAYER_BANK
+* INSTANT_UNLOCK_QUEST_GRANT
 * INSTANT_UNLOCK_RACE_CHANGE_TOKEN
 * INSTANT_UNLOCK_RENAME_TOKEN
+* INSTANT_UNLOCK_SKILL_LINE
 * INSTANT_UNLOCK_SKYSHARD_ZONE
 * INSTANT_UNLOCK_VAMPIRE_BITE
 * INSTANT_UNLOCK_WEREWOLF_BITE
@@ -5287,6 +5372,12 @@ h5. RewardEntryType
 
 
 h5. Globals
+
+
+h5. ActionBarLockedReason
+* ACTION_BAR_LOCKED_REASON_COMBAT
+* ACTION_BAR_LOCKED_REASON_NONE
+* ACTION_BAR_LOCKED_REASON_NOT_RESPECCABLE
 
 
 h5. HotBarCategory
@@ -5316,7 +5407,6 @@ h5. RespecResult
 * RESPEC_RESULT_HOTBAR_NOT_RESPECCABLE
 * RESPEC_RESULT_INVALID_PROGRESSION_LINE
 * RESPEC_RESULT_INVALID_SKILL_LINE
-* RESPEC_RESULT_IS_ACTIVELY_ENGAGED
 * RESPEC_RESULT_IS_IN_COMBAT
 * RESPEC_RESULT_NOT_AT_SKILL_RESPEC_SHRINE
 * RESPEC_RESULT_NOT_ENOUGH_GOLD
@@ -5452,10 +5542,13 @@ h5. MarketProductType
 
 h5. MarketPurchasableResult
 * MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK
+* MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_QUEST
+* MARKET_PURCHASE_RESULT_ALREADY_HAVE_QUEST
 * MARKET_PURCHASE_RESULT_CANNOT_GIFT_GEM_PRODUCTS
 * MARKET_PURCHASE_RESULT_CANNOT_GIFT_PRODUCT
 * MARKET_PURCHASE_RESULT_CANNOT_GIFT_RECIPIENT_NOT_FOUND
 * MARKET_PURCHASE_RESULT_CANNOT_GIFT_TO_PLAYER
+* MARKET_PURCHASE_RESULT_CANNOT_GRANT_QUEST
 * MARKET_PURCHASE_RESULT_COLLECTIBLE_ALREADY
 * MARKET_PURCHASE_RESULT_COLLECTIBLE_ENTITLEMENT_RESTRICTED
 * MARKET_PURCHASE_RESULT_COLLECTIONS_DISABLED
@@ -5477,6 +5570,7 @@ h5. MarketPurchasableResult
 * MARKET_PURCHASE_RESULT_NOT_ENOUGH_ROOM
 * MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC
 * MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY
+* MARKET_PURCHASE_RESULT_QUEST_JOURNAL_FULL
 * MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS
 * MARKET_PURCHASE_RESULT_SUCCESS
 * MARKET_PURCHASE_RESULT_TEMPORARY_HOTBAR_PROHIBITION
@@ -5707,6 +5801,25 @@ h5. Globals
 * MIN_TRADING_HOUSE_POST_PRICE
 
 
+h5. StoreDefaultSortField
+* STORE_DEFAULT_SORT_FIELD_NAME
+* STORE_DEFAULT_SORT_FIELD_VALUE
+
+
+h5. StoreEntryType
+* STORE_ENTRY_TYPE_COLLECTIBLE
+* STORE_ENTRY_TYPE_HOUSE_WITH_TEMPLATE
+* STORE_ENTRY_TYPE_INTERACTABLE
+* STORE_ENTRY_TYPE_ITEM
+* STORE_ENTRY_TYPE_MONSTER
+* STORE_ENTRY_TYPE_QUEST_ITEM
+* STORE_ENTRY_TYPE_SUBSTORE
+
+
+h5. Globals
+* MAX_STORE_WINDOW_STACK_QUANTITY
+
+
 h5. AbilityProgressionResult
 * ABILITY_PROGRESSION_RESULT_ABILITY_NOT_KNOWN
 * ABILITY_PROGRESSION_RESULT_INVALID_LINE
@@ -5775,6 +5888,7 @@ h5. ActionResult
 * ACTION_RESULT_GRAVEYARD_DISALLOWED_IN_INSTANCE
 * ACTION_RESULT_GRAVEYARD_TOO_CLOSE
 * ACTION_RESULT_HEAL
+* ACTION_RESULT_HEAL_ABSORBED
 * ACTION_RESULT_HOT_TICK
 * ACTION_RESULT_HOT_TICK_CRITICAL
 * ACTION_RESULT_IMMUNE
@@ -6050,13 +6164,13 @@ h5. GuildBankResult
 * GUILD_BANK_NO_SPACE_LEFT
 * GUILD_BANK_NO_WITHDRAW_PERMISSION
 * GUILD_BANK_PARTIAL_SUCCESS
+* GUILD_BANK_QUEUED_DEPOSIT
 * GUILD_BANK_SUCCESS
 * GUILD_BANK_TRANSFER_PENDING
 * GUILD_BANK_UNAVAILABLE
 
 
 h5. GuildKioskResult
-* GUILD_KIOSK_BID_EXISTS_ON_ANOTHER_KIOSK
 * GUILD_KIOSK_BID_INSUFFICIENT
 * GUILD_KIOSK_BID_SUCCESSFUL
 * GUILD_KIOSK_BID_WINDOW_CLOSED
@@ -6069,6 +6183,7 @@ h5. GuildKioskResult
 * GUILD_KIOSK_NOT_IN_A_GUILD
 * GUILD_KIOSK_NO_BID_PERMISSION
 * GUILD_KIOSK_PURCHASE_SUCCESSFUL
+* GUILD_KIOSK_TOO_MANY_BIDS
 * GUILD_KIOSK_UNAVAILABLE
 
 
@@ -6085,7 +6200,6 @@ h5. HotBarResult
 * HOT_BAR_RESULT_IS_NOT_ULTIMATE
 * HOT_BAR_RESULT_ITEM_IN_WEAPON_SLOT
 * HOT_BAR_RESULT_ITEM_NOT_FOUND
-* HOT_BAR_RESULT_NO_ACTIVELY_ENGAGED_SWAP
 * HOT_BAR_RESULT_NO_COMBAT_SWAP
 * HOT_BAR_RESULT_SUCCESS
 
@@ -6093,6 +6207,7 @@ h5. HotBarResult
 h5. InteractTargetType
 * INTERACT_TARGET_TYPE_AOE_LOOT
 * INTERACT_TARGET_TYPE_CLIENT_CHARACTER
+* INTERACT_TARGET_TYPE_COLLECTIBLE
 * INTERACT_TARGET_TYPE_FIXTURE
 * INTERACT_TARGET_TYPE_ITEM
 * INTERACT_TARGET_TYPE_NONE
@@ -6695,6 +6810,7 @@ h5. SocialActionResult
 * SOCIAL_RESULT_INVALID_GUILD_NAME
 * SOCIAL_RESULT_INVALID_GUILD_RANK
 * SOCIAL_RESULT_INVALID_HERALDRY_DATA
+* SOCIAL_RESULT_INVITED_PLAYER_BLACKLISTED_FROM_GUILD
 * SOCIAL_RESULT_JUMPS_EXIT_DISABLED
 * SOCIAL_RESULT_JUMP_ENTRY_DISABLED
 * SOCIAL_RESULT_NAME_ALREADY_TAKEN
@@ -6712,6 +6828,7 @@ h5. SocialActionResult
 * SOCIAL_RESULT_NO_DESCRIPTION_EDIT_PREMISSION
 * SOCIAL_RESULT_NO_ERROR
 * SOCIAL_RESULT_NO_GUILD_BANK_PERMISSION
+* SOCIAL_RESULT_NO_GUILD_BID_PERMISSION
 * SOCIAL_RESULT_NO_GUILD_LEADER_RANK_DEFINED
 * SOCIAL_RESULT_NO_HERALDRY_EDIT_PERMISSION
 * SOCIAL_RESULT_NO_HOUSE_PERMISSION
@@ -6736,10 +6853,10 @@ h5. SocialActionResult
 * SOCIAL_RESULT_NO_STRUCTURE_EDIT_PERMISSION
 * SOCIAL_RESULT_OTHER_ACCOUNT_TOO_MANY_FRIENDS
 * SOCIAL_RESULT_PERMISSION_SAVE_FAILURE
-* SOCIAL_RESULT_PLAYER_BLACKLISTED_FROM_GUILD
 * SOCIAL_RESULT_PLAYER_INVITED_SUCCESSFULLY
 * SOCIAL_RESULT_RATE_LIMIT_EXCEEDED
 * SOCIAL_RESULT_REQUEST_NOT_FOUND
+* SOCIAL_RESULT_REQUEST_ON_COOLDOWN
 * SOCIAL_RESULT_SOCIAL_DATA_UNAVAILABLE
 * SOCIAL_RESULT_SOCIAL_ERROR
 * SOCIAL_RESULT_TOO_FEW_GUILD_RANKS
@@ -6769,6 +6886,7 @@ h5. StoreFailure
 * STORE_FAILURE_NOT_ENOUGH_STABLE_SPACE
 * STORE_FAILURE_NOT_ENOUGH_STYLE_STONES
 * STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES
+* STORE_FAILURE_NOT_ENOUGH_UNDAUNTED_KEYS
 * STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS
 * STORE_FAILURE_NOT_STOLEN
 * STORE_FAILURE_NO_NEED_FOR_QUEST_ITEM
@@ -6813,80 +6931,6 @@ h5. TradeActionResult
 * TRADE_ACTION_RESULT_YOU_HAVE_TOO_MUCH_MONEY
 
 
-h5. TradeskillResult
-* CRAFTING_RESULT_ALREADY_RESEARCHING
-* CRAFTING_RESULT_BUSY
-* CRAFTING_RESULT_CANNOT_RESEARCH_RETRAITED_ITEM
-* CRAFTING_RESULT_CANT_DECONSTRUCT_WORN
-* CRAFTING_RESULT_CRAFT_SUCCESS
-* CRAFTING_RESULT_DECONSTRUCT_BAD_QUANTITY
-* CRAFTING_RESULT_DECONSTRUCT_SUCCESS
-* CRAFTING_RESULT_FAIL_PATTERN_REQUIREMENTS
-* CRAFTING_RESULT_IMPROVE_FAILED
-* CRAFTING_RESULT_INTERRUPTED
-* CRAFTING_RESULT_INVALID_BASE
-* CRAFTING_RESULT_INVALID_MATERIAL
-* CRAFTING_RESULT_INVALID_PATTERN
-* CRAFTING_RESULT_INVALID_REAGENT
-* CRAFTING_RESULT_INVALID_RESEARCH
-* CRAFTING_RESULT_INVALID_RESEARCH_TRADESKILL
-* CRAFTING_RESULT_INVALID_RUNE
-* CRAFTING_RESULT_INVALID_STYLE_MATERIAL
-* CRAFTING_RESULT_INVALID_STYLE_REFORGE
-* CRAFTING_RESULT_INVALID_TRAIT_MATERIAL
-* CRAFTING_RESULT_ITEM_CRAFT_UNIQUE
-* CRAFTING_RESULT_ITEM_NOT_DECONSTRUCTABLE
-* CRAFTING_RESULT_ITEM_NOT_IMPROVABLE
-* CRAFTING_RESULT_ITEM_NOT_REFINEABLE
-* CRAFTING_RESULT_ITEM_NOT_RESEARCHABLE
-* CRAFTING_RESULT_MUST_LEARN_TRAIT
-* CRAFTING_RESULT_NEED_BASE_RANK
-* CRAFTING_RESULT_NEED_COMPONENTS_FOR_CRAFT
-* CRAFTING_RESULT_NEED_COMPONENTS_FOR_REFORGE
-* CRAFTING_RESULT_NEED_DECONSTRUCT_RANK
-* CRAFTING_RESULT_NEED_ENCHANTING_QUALITY_RANK
-* CRAFTING_RESULT_NEED_ENCHANTING_RANK
-* CRAFTING_RESULT_NEED_ITEM_TO_RESEARCH
-* CRAFTING_RESULT_NEED_RANK_FOR_CRAFT
-* CRAFTING_RESULT_NEED_RANK_FOR_REFORGE
-* CRAFTING_RESULT_NEED_RECIPE_QUALITY_RANK
-* CRAFTING_RESULT_NEED_RECIPE_RANK
-* CRAFTING_RESULT_NEED_REFINE_RANK
-* CRAFTING_RESULT_NEED_REQUIREMENTS_FOR_CRAFT
-* CRAFTING_RESULT_NEED_SPACE_TO_CRAFT
-* CRAFTING_RESULT_NEED_SPACE_TO_DECONSTRUCT
-* CRAFTING_RESULT_NEED_SPACE_TO_REFINE
-* CRAFTING_RESULT_NEED_UNLOCK_TO_DECONSTRUCT
-* CRAFTING_RESULT_NEED_UNLOCK_TO_REFORGE
-* CRAFTING_RESULT_NEED_UNLOCK_TO_RESEARCH
-* CRAFTING_RESULT_NEED_VALID_DECONSTRUCTION
-* CRAFTING_RESULT_NO_ITEM_TO_DECONSTRUCT
-* CRAFTING_RESULT_NO_ITEM_TO_REFINE
-* CRAFTING_RESULT_NO_ITEM_TO_RESEARCH
-* CRAFTING_RESULT_NO_MATCH
-* CRAFTING_RESULT_NO_MONEY
-* CRAFTING_RESULT_NO_MONEY_REFORGE
-* CRAFTING_RESULT_REFINE_SUCCESS
-* CRAFTING_RESULT_REFORGE_SUCCESS
-* CRAFTING_RESULT_SAME_STYLE_REFORGE
-* CRAFTING_RESULT_TOO_FEW_REAGENTS
-* CRAFTING_RESULT_TOO_MANY_REAGENTS
-* CRAFTING_RESULT_TOO_MANY_RESEARCH
-* CRAFTING_RESULT_UNKNOWN_RECIPE
-* CRAFTING_RESULT_UNKNOWN_SKILL_DECONSTRUCT
-* CRAFTING_RESULT_UNKNOWN_SKILL_REFINE
-* CRAFTING_RESULT_WRONG_ADDITIVE_CATEGORY
-* CRAFTING_RESULT_WRONG_BOOSTER
-* CRAFTING_RESULT_WRONG_STYLE_CRAFT
-* CRAFTING_RESULT_WRONG_STYLE_REFORGE
-* CRAFTING_RESULT_WRONG_TARGET_CRAFT
-* CRAFTING_RESULT_WRONG_TARGET_DECONSTRUCT
-* CRAFTING_RESULT_WRONG_TARGET_REFINE
-* CRAFTING_RESULT_WRONG_TARGET_REFORGE
-* CRAFTING_RESULT_WRONG_TRADESKILL_FOR_CRAFT
-* CRAFTING_RESULT_WRONG_TRADESKILL_FOR_REFORGE
-
-
 h5. TradingHouseFilterType
 * TRADING_HOUSE_FILTER_TYPE_ARMOR
 * TRADING_HOUSE_FILTER_TYPE_CHAMPION_POINTS
@@ -6929,6 +6973,7 @@ h5. TradingHouseResult
 * TRADING_HOUSE_RESULT_NO_PERMISSION
 * TRADING_HOUSE_RESULT_POST_PENDING
 * TRADING_HOUSE_RESULT_PURCHASE_PENDING
+* TRADING_HOUSE_RESULT_QUEUED_POST
 * TRADING_HOUSE_RESULT_SEARCH_PENDING
 * TRADING_HOUSE_RESULT_SEARCH_RATE_EXCEEDED
 * TRADING_HOUSE_RESULT_SUCCESS
@@ -6968,10 +7013,11 @@ h5. Globals
 * MAX_GUILD_MEMBERS
 * MAX_GUILD_ENTRIES_PER_MESSAGE
 * MAX_GUILDS
+* MAX_ITEM_SLOTS_PER_DECONSTRUCTION
+* MAX_ITERATIONS_PER_DECONSTRUCTION
 * MAIL_MAX_BODY_CHARACTERS
 * MAX_LOCAL_MAILS
 * MAIL_MAX_SUBJECT_CHARACTERS
-* MAX_TEXT_CHAT_INPUT_CHARACTERS
 * NUM_BUG_CATEGORIES
 * MAX_PASSWORD_LENGTH
 * SYSTEM_MAIL_MAX_PARAMETER_CHARACTERS
@@ -8048,6 +8094,9 @@ h2. Game API
 
 * TakeScreenshot()
 
+* GetESOFullVersionString()
+** _Returns:_ *string* _versionString_
+
 * SetSetting(*[SettingSystemType|#SettingSystemType]* _system_, *integer* _settingId_, *string* _value_, *[SetOptions|#SetOptions]* _setOptions_)
 
 * ApplySettings()
@@ -8292,17 +8341,23 @@ h2. Game API
 * DoesGuildHistoryCategoryHaveMoreEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
 ** _Returns:_ *bool* _hasMoreEvents_
 
-* RequestGuildHistoryCategoryNewest(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
-** _Returns:_ *bool* _requested_
+* HasGuildHistoryCategoryEverBeenRequested(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasEverBeenRequested_
 
-* RequestGuildHistoryCategoryOlder(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+* DoesGuildHistoryCategoryHaveOutstandingRequest(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _hasOutstandingRequest_
+
+* IsGuildHistoryCategoryRequestQueued(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
+** _Returns:_ *bool* _isQueued_
+
+* RequestMoreGuildHistoryCategoryEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *bool* _queueRequestIfOnCooldown_)
 ** _Returns:_ *bool* _requested_
 
 * GetNumGuildEvents(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_)
 ** _Returns:_ *integer* _numEvents_
 
 * GetGuildEventInfo(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
-** _Returns:_ *integer* _eventType_, *integer* _secsSinceEvent_, *variant* _param1_, *variant* _param2_, *variant* _param3_, *variant* _param4_, *variant* _param5_, *variant* _param6_
+** _Returns:_ *integer* _eventType_, *integer* _secsSinceEvent_, *variant* _param1_, *variant* _param2_, *variant* _param3_, *variant* _param4_, *variant* _param5_, *variant* _param6_, *integer* _eventId_
 
 * GetGuildEventId(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
 ** _Returns:_ *id64* _guildEventId_
@@ -8374,9 +8429,6 @@ h2. Game API
 * GetNumGuildMembersRequiredForPrivilege(*[GuildPrivilege|#GuildPrivilege]* _privilege_)
 ** _Returns:_ *integer* _numGuildMembers_
 
-* DoesGuildApplicationHaveAttributeValue(*[GuildMetaDataAttribute|#GuildMetaDataAttribute]* _attribute_, *integer* _value_)
-** _Returns:_ *bool* _isUsed_
-
 * SetGuildApplicationAttributeValue(*[GuildMetaDataAttribute|#GuildMetaDataAttribute]* _attribute_, *integer* _value_, *bool* _useValue_)
 
 * HasGuildRecruitmentDataChanged(*integer* _guildId_)
@@ -8429,9 +8481,6 @@ h2. Game API
 * SaveGuildRecruitmentPendingChanges(*integer* _guildId_)
 ** _Uses variable returns..._
 ** _Returns:_ *[GuildMetaDataAttribute|#GuildMetaDataAttribute]* _neededRequiredFields_
-
-* RequestGuildBlacklist(*integer* _guildId_)
-** _Returns:_ *bool* _requested_
 
 * GetNumGuildBlacklistEntries(*integer* _guildId_)
 ** _Returns:_ *integer* _numBlacklistEntries_
@@ -8753,6 +8802,15 @@ h2. Game API
 * IsCollectiblePurchasable(*integer* _collectibleId_)
 ** _Returns:_ *bool* _isPurchasable_
 
+* GetNumServiceTokens(*[ServiceTokenType|#ServiceTokenType]* _tokenType_)
+** _Returns:_ *integer* _numTokens_
+
+* GetServiceTokenDescription(*[ServiceTokenType|#ServiceTokenType]* _tokenType_)
+** _Returns:_ *string* _tokenDescription_
+
+* GetNumOwnedCharacterSlots()
+** _Returns:_ *integer* _numOwnedCharacterSlots_
+
 
 * ExecuteChatCommand(*string* _text_)
 
@@ -9008,6 +9066,12 @@ h2. Game API
 
 * IsUnitInDungeon(*string* _unitTag_)
 ** _Returns:_ *bool* _isInDungeon_
+
+* IsUnitGuildKiosk(*string* _unitTag_)
+** _Returns:_ *bool* _isGuildKiosk_
+
+* GetUnitGuildKioskOwner(*string* _unitTag_)
+** _Returns:_ *integer* _ownerGuildId_
 
 * GetUnitCaption(*string* _unitTag_)
 ** _Returns:_ *string* _caption_
@@ -9988,8 +10052,11 @@ h2. Game API
 * IsSlotLocked(*luaindex* _actionSlotIndex_)
 ** _Returns:_ *bool* _locked_
 
-* IsActionBarSlottingAllowed()
-** _Returns:_ *bool* _isAllowed_
+* IsActionBarRespeccable()
+** _Returns:_ *bool* _isRespeccable_
+
+* GetActionBarLockedReason()
+** _Returns:_ *[ActionBarLockedReason|#ActionBarLockedReason]* _actionBarLockedReason_
 
 * ClearSlot *protected* (*luaindex* _actionSlotIndex_)
 
@@ -10504,7 +10571,10 @@ h2. Game API
 ** _Returns:_ *integer* _secondsRemaining_
 
 * GetKioskGuildInfo(*integer* _guildId_)
-** _Returns:_ *integer:nilable* _bankedMoney_, *integer:nilable* _existingBidAmount_, *bool:nilable* _existingBidIsOnThisKiosk_, *string:nilable* _existingBidKioskName_, *[GuildKioskGuildInfoResult|#GuildKioskGuildInfoResult]* _queryResult_
+** _Returns:_ *integer:nilable* _bankedMoney_, *integer:nilable* _existingBidAmount_, *integer:nilable* _numTotalBids_, *[GuildKioskGuildInfoResult|#GuildKioskGuildInfoResult]* _queryResult_
+
+* GetMaxKioskBidsPerGuild()
+** _Returns:_ *integer* _maxBidsPerGuild_
 
 * GetKioskPurchaseCost()
 ** _Returns:_ *integer* _cost_
@@ -10512,6 +10582,15 @@ h2. Game API
 * GuildKioskBid(*integer* _guildId_, *integer* _bidAmount_)
 
 * GuildKioskPurchase(*integer* _guildId_)
+
+* RequestGuildKioskActiveBids(*integer* _guildId_)
+** _Returns:_ *[SocialActionResult|#SocialActionResult]* _result_
+
+* GetNumGuildKioskActiveBids(*integer* _guildId_)
+** _Returns:_ *integer* _numBids_
+
+* GetGuildKioskActiveBidInfo(*integer* _guildId_, *luaindex* _index_)
+** _Returns:_ *integer* _timeSinceBidS_, *integer* _bidAmount_, *string* _kioskName_, *string* _bidderDisplayName_
 
 * GetNumTradingHouseGuilds()
 ** _Returns:_ *integer* _numGuilds_
@@ -10572,7 +10651,7 @@ h2. Game API
 * GetMaxTradingHouseFilterExactTerms(*[TradingHouseFilterType|#TradingHouseFilterType]* _filterType_)
 ** _Returns:_ *integer* _maxReturns_
 
-* ExecuteTradingHouseSearch(*integer* _page_, *[TradingHouseSortField|#TradingHouseSortField]* _sortField_, *bool* _sortAscending_)
+* ExecuteTradingHouseSearch(*integer* _page_, *[TradingHouseSortField|#TradingHouseSortField]* _sortField_, *bool* _sortAscending_, *bool* _useLastExecutedSearchFilters_)
 
 * GetTradingHouseSearchResultsInfo()
 ** _Returns:_ *integer* _numItemsOnPage_, *integer* _currentPage_, *bool* _hasMorePages_
@@ -11298,9 +11377,6 @@ h2. Game API
 * GetCampaignRulesetDescription(*integer* _rulesetId_)
 ** _Returns:_ *string* _description_
 
-* GetNumCampaignSocialConnections()
-** _Returns:_ *integer* _connectionCount_
-
 * GetCurrentCampaignLoyaltyStreak()
 ** _Returns:_ *integer* _currentLoyaltyStreak_
 
@@ -11350,9 +11426,6 @@ h2. Game API
 * GetKillLocationPinInfo(*luaindex* _index_)
 ** _Returns:_ *integer* _pinType_, *number* _normalizedX_, *number* _normalizedY_
 
-* GetCampaignSocialConnectionInfo(*integer* _connectionIndex_)
-** _Returns:_ *integer* _accountId_, *[Alliance|#Alliance]* _alliance_, *integer* _assignedCampaignId_, *integer* _currentCampaignId_, *bool* _isFriend_, *bool* _isGuildMate_
-
 * GetCampaignHoldings(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_, *[Alliance|#Alliance]* _alliance_, *[Alliance|#Alliance]* _targetAlliance_)
 ** _Returns:_ *integer* _holdingsControlled_
 
@@ -11379,6 +11452,14 @@ h2. Game API
 
 * GetMinLevelForCampaignTutorial()
 ** _Returns:_ *integer* _minLevelForCampaignTutorial_
+
+* HasAllianceLockPendingNotification()
+** _Returns:_ *bool* _hasNotification_
+
+* GetAllianceLockPendingNotificationInfo()
+** _Returns:_ *integer:nilable* _campaignId_, *[Alliance|#Alliance]:nilable* _alliance_, *integer:nilable* _timeLeftS_
+
+* MarkAllianceLockPendingNotificationSeen()
 
 * GetExpectedGroupQueueResult()
 ** _Returns:_ *[QueueForCampaignResponseType|#QueueForCampaignResponseType]* _queueForCampaignResult_
@@ -11417,7 +11498,7 @@ h2. Game API
 ** _Returns:_ *integer* _numSeconds_
 
 * GetStoreEntryInfo(*luaindex* _entryIndex_)
-** _Returns:_ *textureName* _icon_, *string* _name_, *integer* _stack_, *integer* _price_, *integer* _sellPrice_, *bool* _meetsRequirementsToBuy_, *bool* _meetsRequirementsToUse_, *integer* _quality_, *bool* _questNameColor_, *integer* _currencyType1_, *integer* _currencyQuantity1_, *integer* _currencyType2_, *integer* _currencyQuantity2_, *[StoreEntryType|#StoreEntryType]* _entryType_, *[StoreFailure|#StoreFailure]* _buyStoreFailure_, *integer* _buyErrorStringId_
+** _Returns:_ *textureName* _icon_, *string* _name_, *integer* _stack_, *integer* _price_, *integer* _sellPrice_, *bool* _meetsRequirementsToBuy_, *bool* _meetsRequirementsToUse_, *integer* _quality_, *bool* _questNameColor_, *[CurrencyType|#CurrencyType]* _currencyType1_, *integer* _currencyQuantity1_, *[CurrencyType|#CurrencyType]* _currencyType2_, *integer* _currencyQuantity2_, *[StoreEntryType|#StoreEntryType]* _entryType_, *[StoreFailure|#StoreFailure]* _buyStoreFailure_, *integer* _buyErrorStringId_
 
 * GetStoreCollectibleInfo(*luaindex* _entryIndex_)
 ** _Returns:_ *integer* _collectibleId_, *bool* _owned_
@@ -11437,6 +11518,10 @@ h2. Game API
 * GetStoreCurrencyTypes()
 ** _Returns:_ *bool* _usesMoney_, *bool* _usesAlliancePoints_, *bool* _usesTelvarStones_, *bool* _usesWritVouchers_, *bool* _usesEventCurrency_
 
+* GetStoreUsedCurrencyTypes()
+** _Uses variable returns..._
+** _Returns:_ *[CurrencyType|#CurrencyType]* _currencyType_
+
 * GetStoreItemLink(*luaindex* _entryIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
 
@@ -11446,6 +11531,9 @@ h2. Game API
 
 * GetStoreEntryStatValue(*luaindex* _entryIndex_)
 ** _Returns:_ *integer* _statValue_
+
+* GetStoreDefaultSortField()
+** _Returns:_ *[StoreDefaultSortField|#StoreDefaultSortField]* _defaultSortField_
 
 * GetStoreEntryMaxBuyable(*luaindex* _entryIndex_)
 ** _Returns:_ *integer* _quantity_
@@ -12317,7 +12405,7 @@ h2. Game API
 * ReportFeedback(*[CustomerServiceSubmitFeedbackImpacts|#CustomerServiceSubmitFeedbackImpacts]* _impact_, *[CustomerServiceSubmitFeedbackCategories|#CustomerServiceSubmitFeedbackCategories]* _category_, *[CustomerServiceSubmitFeedbackSubcategories|#CustomerServiceSubmitFeedbackSubcategories]* _subcategory_, *string* _details_, *string* _description_, *bool* _takeScreenshot_)
 
 * GetHelpCategoryInfo(*luaindex* _helpCategoryIndex_)
-** _Returns:_ *string* _name_, *string* _description_, *textureName* _upIcon_, *textureName* _downIcon_, *textureName* _overIcon_, *textureName* _gamepadIcon_
+** _Returns:_ *string* _name_, *string* _description_, *textureName* _upIcon_, *textureName* _downIcon_, *textureName* _overIcon_, *textureName* _gamepadIcon_, *string* _gamepadName_
 
 * GetNumHelpCategories()
 ** _Returns:_ *integer* _numHelpCategories_
@@ -12331,6 +12419,9 @@ h2. Game API
 * GetHelpSearchResults()
 ** _Uses variable returns..._
 ** _Returns:_ *luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_
+
+* GetHelpIndicesFromHelpLink(*string* _helpLink_)
+** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
 
 * SubmitCustomerServiceTicket()
 ** _Returns:_ *bool* _success_
@@ -12373,6 +12464,9 @@ h2. Game API
 
 * IsSubmitFeedbackSupported()
 ** _Returns:_ *bool* _isSupported_
+
+* GetHelpLink(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
+** _Returns:_ *string* _link_
 
 * StopSettingChamber *private* ()
 
@@ -12438,16 +12532,29 @@ h2. Game API
 * GetTradeskillRecipeCraftingSystem(*[TradeskillType|#TradeskillType]* _tradeskillType_)
 ** _Returns:_ *[RecipeCraftingSystem|#RecipeCraftingSystem]* _recipeCraftingSystem_
 
+* QueueCraftingErrorAfterResultReceived(*[TradeskillResult|#TradeskillResult]* _craftingResult_)
+
+* PrepareDeconstructMessage()
+
+* AddItemToDeconstructMessage(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *integer* _quantity_)
+** _Returns:_ *bool* _wasItemAdded_
+
+* SendDeconstructMessage()
+** _Returns:_ *bool* _wasMessageSent_
+
 * GetNonCombatBonusLevelTypeForTradeskillType(*[TradeskillType|#TradeskillType]* _tradeskillType_)
 ** _Returns:_ *[NonCombatBonusType|#NonCombatBonusType]* _nonCombatBonusType_
 
 * GetTradeskillTypeForNonCombatBonusLevelType(*[NonCombatBonusType|#NonCombatBonusType]* _nonCombatBonusType_)
 ** _Returns:_ *[TradeskillType|#TradeskillType]* _tradeskillType_
 
-* GetCostToCraftAlchemyItem(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_)
+* GetCostToCraftAlchemyItem(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *integer* _numIterations_)
 ** _Returns:_ *integer* _cost_
 
-* CraftAlchemyItem(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *[Bag|#Bag]* _reagent1BagId_, *integer* _reagent1SlotIndex_, *[Bag|#Bag]* _reagent2BagId_, *integer* _reagent2SlotIndex_, *[Bag|#Bag]:nilable* _reagent3BagId_, *integer:nilable* _reagent3SlotIndex_)
+* GetMaxIterationsPossibleForAlchemyItem(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *[Bag|#Bag]* _reagent1BagId_, *integer* _reagent1SlotIndex_, *[Bag|#Bag]* _reagent2BagId_, *integer* _reagent2SlotIndex_, *[Bag|#Bag]:nilable* _reagent3BagId_, *integer:nilable* _reagent3SlotIndex_)
+** _Returns:_ *integer* _numIterations_, *[TradeskillResult|#TradeskillResult]* _limitReason_
+
+* CraftAlchemyItem(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *[Bag|#Bag]* _reagent1BagId_, *integer* _reagent1SlotIndex_, *[Bag|#Bag]* _reagent2BagId_, *integer* _reagent2SlotIndex_, *[Bag|#Bag]:nilable* _reagent3BagId_, *integer:nilable* _reagent3SlotIndex_, *integer* _numIterations_)
 
 * GetAlchemyResultingItemInfo(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *[Bag|#Bag]* _reagent1BagId_, *integer* _reagent1SlotIndex_, *[Bag|#Bag]* _reagent2BagId_, *integer* _reagent2SlotIndex_, *[Bag|#Bag]:nilable* _reagent3BagId_, *integer:nilable* _reagent3SlotIndex_)
 ** _Returns:_ *string* _name_, *textureName* _icon_, *integer* _stack_, *integer* _sellPrice_, *bool* _meetsUsageRequirement_, *[EquipType|#EquipType]* _equipType_, *integer* _itemStyleId_, *[ItemQuality|#ItemQuality]* _quality_, *[ProspectiveAlchemyResult|#ProspectiveAlchemyResult]* _prospectiveAlchemyResult_
@@ -12458,9 +12565,15 @@ h2. Game API
 * GetAlchemyResultInspiration(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *[Bag|#Bag]* _reagent1BagId_, *integer* _reagent1SlotIndex_, *[Bag|#Bag]* _reagent2BagId_, *integer* _reagent2SlotIndex_, *[Bag|#Bag]:nilable* _reagent3BagId_, *integer:nilable* _reagent3SlotIndex_)
 ** _Returns:_ *integer* _inspiration_
 
+* GetAlchemyResultQuantity(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *integer* _numIterations_)
+** _Returns:_ *integer* _resultQuantity_
+
 * GetAlchemyItemTraits(*[Bag|#Bag]* _reagentBagId_, *integer* _reagentSlotIndex_)
 ** _Uses variable returns..._
 ** _Returns:_ *string:nilable* _trait_, *textureName:nilable* _icon_, *textureName:nilable* _matchIcon_, *string:nilable* _cancellingTrait_, *textureName:nilable* _conflictIcon_
+
+* IsAlchemyItemTraitKnown(*[Bag|#Bag]* _reagentBagId_, *integer* _reagentSlotIndex_, *luaindex* _traitIndex_)
+** _Returns:_ *bool* _isKnown_
 
 * IsAlchemySolvent(*[ItemType|#ItemType]* _itemType_)
 ** _Returns:_ *bool* _isAlchemySolvent_
@@ -12469,7 +12582,7 @@ h2. Game API
 ** _Returns:_ *integer* _numRecipeLists_
 
 * GetRecipeListInfo(*luaindex* _recipeListIndex_)
-** _Returns:_ *string* _name_, *integer* _numRecipes_, *textureName* _upIcon_, *textureName* _downIcon_, *textureName* _overIcon_, *textureName* _disabledIcon_, *string* _createSound_
+** _Returns:_ *string* _name_, *integer* _numRecipes_, *textureName* _upIcon_, *textureName* _downIcon_, *textureName* _overIcon_, *textureName* _deprecatedReturn_, *string* _createSound_
 
 * GetMaxRecipeIngredients()
 ** _Returns:_ *integer* _maxIngredients_
@@ -12495,10 +12608,16 @@ h2. Game API
 * GetRecipeResultItemLink(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
 
-* GetCostToCraftProvisionerItem(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_)
+* GetRecipeResultQuantity(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_, *integer* _numIterations_)
+** _Returns:_ *integer* _quantity_
+
+* GetMaxIterationsPossibleForRecipe(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_)
+** _Returns:_ *integer* _maxIterations_, *[TradeskillResult|#TradeskillResult]* _limitReason_
+
+* GetCostToCraftProvisionerItem(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_, *integer* _numIterations_)
 ** _Returns:_ *integer* _cost_
 
-* CraftProvisionerItem(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_)
+* CraftProvisionerItem(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_, *integer* _numIterations_)
 
 * GetCurrentRecipeIngredientCount(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_, *luaindex* _ingredientIndex_)
 ** _Returns:_ *integer* _count_
@@ -12509,18 +12628,22 @@ h2. Game API
 * GetUpdatedRecipeIndices(*luaindex* _index_)
 ** _Returns:_ *luaindex* _recipeListIndex_, *luaindex* _recipeIndex_
 
-* GetCostToCraftEnchantingItem(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_)
+* GetCostToCraftEnchantingItem(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_, *integer* _numIterations_)
 ** _Returns:_ *integer* _cost_
 
-* CraftEnchantingItem(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_)
+* GetMaxIterationsPossibleForEnchantingItem(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_)
+** _Returns:_ *integer* _numIterations_, *[TradeskillResult|#TradeskillResult]* _limitReason_
 
-* ExtractEnchantingItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+* CraftEnchantingItem(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_, *integer* _numIterations_)
 
 * GetEnchantingResultingItemInfo(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_)
 ** _Returns:_ *string* _name_, *textureName* _icon_, *integer* _stack_, *integer* _sellPrice_, *bool* _meetsUsageRequirement_, *[ItemQuality|#ItemQuality]* _quality_
 
 * GetEnchantingResultingItemLink(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
+
+* AreAllEnchantingRunesKnown(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_)
+** _Returns:_ *bool* _isKnown_
 
 * GetRunestoneTranslatedName(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *string:nilable* _name_
@@ -12543,10 +12666,13 @@ h2. Game API
 * DoesSmithingTypeIgnoreStyleItems(*[TradeskillType|#TradeskillType]* _tradeskillType_)
 ** _Returns:_ *bool* _ignoresStyleItems_
 
-* GetCostToCraftSmithingItem(*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *integer* _itemStyleId_, *luaindex* _traitIndex_)
+* GetCostToCraftSmithingItem(*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *integer* _itemStyleId_, *luaindex* _traitIndex_, *bool* _useUniversalStyleItem_, *integer* _numIterations_)
 ** _Returns:_ *integer* _cost_
 
-* CraftSmithingItem(*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *integer* _itemStyleId_, *luaindex* _traitIndex_, *bool* _useUniversalStyleItem_)
+* GetMaxIterationsPossibleForSmithingItem(*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *integer* _itemStyleId_, *luaindex* _traitIndex_, *bool* _useUniversalStyleItem_)
+** _Returns:_ *integer* _numIterations_, *[TradeskillResult|#TradeskillResult]* _limitReason_
+
+* CraftSmithingItem(*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *integer* _itemStyleId_, *luaindex* _traitIndex_, *bool* _useUniversalStyleItem_, *integer* _numIterations_)
 
 * GetSmithingPatternResultLink(*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *integer* _itemStyleId_, *luaindex* _traitIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
@@ -12617,7 +12743,7 @@ h2. Game API
 * IsSmithingTraitItemValidForPattern(*luaindex* _patternIndex_, *luaindex* _traitItemIndex_)
 ** _Returns:_ *bool* _valid_
 
-* IsSmithingTraitKnownForResult(*luaindex* _patternIndex_, *luaindex* _materialIndex_, *integer* _materialQuantity_, *integer* _itemStyleId_, *luaindex* _traitIndex_)
+* IsSmithingTraitKnownForPattern(*luaindex* _patternIndex_, *[ItemTraitType|#ItemTraitType]* _traitType_)
 ** _Returns:_ *bool* _known_
 
 * GetNumSmithingResearchLines(*[TradeskillType|#TradeskillType]* _craftingSkillType_)
@@ -12648,8 +12774,11 @@ h2. Game API
 
 * CancelSmithingTraitResearch(*[TradeskillType|#TradeskillType]* _tradeskillType_, *luaindex* _researchLineIndex_, *luaindex* _traitIndex_)
 
-* CanItemBeSmithingExtractedOrRefined(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *[TradeskillType|#TradeskillType]* _craftingSkillType_)
-** _Returns:_ *bool* _canItemBeExtractedOrRefined_
+* CanItemBeRefined(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *[TradeskillType|#TradeskillType]* _craftingSkillType_)
+** _Returns:_ *bool* _canItemBeRefined_
+
+* CanItemBeDeconstructed(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *[TradeskillType|#TradeskillType]* _craftingSkillType_)
+** _Returns:_ *bool* _canItemBeDeconstructed_
 
 * GetRequiredSmithingRefinementStackSize()
 ** _Returns:_ *integer* _requiredStackSize_
@@ -12659,8 +12788,6 @@ h2. Game API
 
 * GetSmithingRefinementMaxRawMaterial()
 ** _Returns:_ *integer* _maxRawMaterial_
-
-* ExtractOrRefineSmithingItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 
 * CanItemBeSmithingImproved(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *[TradeskillType|#TradeskillType]* _craftingSkillType_)
 ** _Returns:_ *bool* _canBeImproved_
@@ -14102,7 +14229,7 @@ h2. Game API
 ** _Returns:_ *[MapDisplayPinType|#MapDisplayPinType]* _pinType_
 
 * GuildFinderRequestSearch()
-** _Returns:_ *bool* _requested_
+** _Returns:_ *integer:nilable* _searchId_
 
 * GuildFinderIsSearchOnCooldown()
 ** _Returns:_ *bool* _isOnCooldown_
@@ -14145,9 +14272,6 @@ h2. Game API
 * GetGuildFinderAccountApplicationInfo(*luaindex* _index_)
 ** _Returns:_ *integer* _guildId_, *integer* _level_, *integer* _championPoints_, *[Alliance|#Alliance]* _alliance_, *integer* _classId_, *string* _guildName_, *[Alliance|#Alliance]* _guildAlliance_, *string* _accountName_, *string* _characterName_, *integer* _achievementPoints_, *string* _applicationMessage_
 
-* RequestGuildFinderGuildApplications(*integer* _guildId_)
-** _Returns:_ *bool* _requested_
-
 * GetGuildFinderNumGuildApplications(*integer* _guildId_)
 ** _Returns:_ *integer* _numApplications_
 
@@ -14176,6 +14300,10 @@ h2. Game API
 ** _Returns:_ *string* _declineReason_, *string* _guildName_, *[Alliance|#Alliance]* _alliance_, *[GuildApplicationStatus|#GuildApplicationStatus]* _applicationStatus_
 
 * ClearPlayerApplicationNotification(*luaindex* _index_)
+
+* GetDefaultsForGuildLanguageAttributeFilter()
+** _Uses variable returns..._
+** _Returns:_ *[GuildLanguageAttributeValue|#GuildLanguageAttributeValue]* _language_
 
 * GetLocalPlayerDaedricArtifactId()
 ** _Returns:_ *integer:nilable* _daedricArtifactId_
@@ -14647,6 +14775,15 @@ h2. Game API
 * GetItemLinkSetBonusInfo(*string* _itemLink_, *bool* _equipped_, *luaindex* _index_)
 ** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_
 
+* GetItemLinkNumContainerSetIds(*string* _itemLink_)
+** _Returns:_ *integer* _numSetIds_
+
+* GetItemLinkContainerSetInfo(*string* _itemLink_, *luaindex* _containerSetIndex_)
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numEquipped_, *integer* _maxEquipped_, *integer* _setId_
+
+* GetItemLinkContainerSetBonusInfo(*string* _itemLink_, *luaindex* _containerSetIndex_, *luaindex* _bonusIndex_)
+** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_
+
 * GetItemLinkFlavorText(*string* _itemLink_)
 ** _Returns:_ *string* _flavorText_
 
@@ -14815,17 +14952,17 @@ h2. Game API
 * ShouldHideTooltipRequiredLevel(*string* _itemLink_)
 ** _Returns:_ *bool* _shouldHideLevel_
 
+* GetItemCombinationId(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *integer* _combinationId_
+
+* GetItemLinkCombinationId(*string* _itemLink_)
+** _Returns:_ *integer* _combinationId_
+
 * GetItemLinkCombinationDescription(*string* _itemLink_)
 ** _Returns:_ *string* _combinationDescription_
 
-* GetItemLinkCollectibleEvolutionDescription(*string* _itemLink_)
-** _Returns:_ *string* _description_
-
 * GetItemLinkTradingHouseItemSearchName(*string* _itemLink_)
 ** _Returns:_ *string* _itemName_
-
-* GetItemLinkCollectibleEvolutionInformation(*string* _itemLink_)
-** _Returns:_ *integer* _baseCollectibleId_, *integer* _evolvedCollectibleId_
 
 * GetItemLinkContainerCollectibleId(*string* _itemLink_)
 ** _Returns:_ *integer* _containerCollectibleId_
@@ -14929,8 +15066,23 @@ h2. Game API
 * GetItemLinkSellInformation(*string* _itemLink_)
 ** _Returns:_ *[ItemSellInformation|#ItemSellInformation]* _sellInformation_
 
-* GetItemCollectibleEvolutionInformation(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
-** _Returns:_ *integer* _baseCollectibleId_, *integer* _evolvedCollectibleId_
+* CheckPlayerCanPerformCombinationAndWarn(*integer* _combinationId_)
+** _Returns:_ *bool* _canPerformCombination_
+
+* GetCombinationUnlockedCollectible(*integer* _combinationId_)
+** _Returns:_ *integer* _unlockedCollectibleId_
+
+* GetCombinationNumCollectibleComponents(*integer* _combinationId_)
+** _Returns:_ *integer* _numCollectibleComponents_
+
+* GetCombinationCollectibleComponentId(*integer* _combinationId_, *luaindex* _componentIndex_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetCombinationFirstNonFragmentCollectibleComponentId(*integer* _combinationId_)
+** _Returns:_ *integer* _firstNonFragmentCollectibleId_
+
+* GetCombinationDescription(*integer* _combinationId_)
+** _Returns:_ *string* _combinationDescription_
 
 * GetNumTutorials()
 ** _Returns:_ *integer* _numTutorials_
@@ -15175,6 +15327,9 @@ h2. Game API
 * GetNextDirtyUnlockStateCollectibleId(*integer:nilable* _lastCollectibleId_)
 ** _Returns:_ *integer:nilable* _nextCollectibleId_
 
+* CanCombinationFragmentBeUnlocked(*integer* _collectibleId_)
+** _Returns:_ *bool* _canBeUnlocked_
+
 * UpdateMarketDisplayGroup *private* (*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_)
 
 * GetNumMarketProductCategories *private* (*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_)
@@ -15219,6 +15374,9 @@ h2. Game API
 * GetMarketProductInstantUnlockType *private* (*integer* _marketProductId_)
 ** _Returns:_ *[InstantUnlockRewardType|#InstantUnlockRewardType]* _instantUnlock_
 
+* GetCategoryIndicesFromMarketProductPresentation(*integer* _marketProductId_, *luaindex:nilable* _presentationIndex_)
+** _Returns:_ *luaindex:nilable* _topLevelIndex_, *luaindex:nilable* _categoryIndex_
+
 * CouldPurchaseMarketProduct *private* (*integer* _marketProductId_, *luaindex:nilable* _presentationIndex_)
 ** _Returns:_ *[MarketPurchasableResult|#MarketPurchasableResult]* _expectedPurchaseResult_
 
@@ -15250,7 +15408,7 @@ h2. Game API
 * GetMarketProductType *private* (*integer* _marketProductId_)
 ** _Returns:_ *[MarketProductType|#MarketProductType]* _productType_
 
-* GetMarketProductDisplayName *private* (*integer* _marketProductId_)
+* GetMarketProductDisplayName(*integer* _marketProductId_)
 ** _Returns:_ *string* _displayName_
 
 * GetMarketProductDescription *private* (*integer* _marketProductId_)
@@ -15286,7 +15444,7 @@ h2. Game API
 * GetMarketProductClaimGiftNoticeInfo *private* (*integer* _marketProductId_)
 ** _Returns:_ *string* _noticeText_, *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
 
-* GetMarketProductUnlockedByAchievementInfo *private* (*integer* _marketProductId_)
+* GetMarketProductUnlockedByAchievementInfo(*integer* _marketProductId_)
 ** _Returns:_ *integer* _achievementId_, *bool* _hasCompletedAchievement_, *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
 
 * IsMarketProductNew *private* (*integer* _marketProductId_)
@@ -15884,6 +16042,9 @@ h2. Game API
 * GetInstantUnlockRewardIcon(*integer* _instantUnlockId_)
 ** _Returns:_ *textureName* _icon_
 
+* GetInstantUnlockRewardCategory(*integer* _instantUnlockId_)
+** _Returns:_ *[InstantUnlockRewardCategory|#InstantUnlockRewardCategory]* _instantUnlockCategory_
+
 * IsInstantUnlockRewardServiceToken(*integer* _instantUnlockId_)
 ** _Returns:_ *bool* _isServiceToken_
 
@@ -15980,12 +16141,6 @@ h2. Game API
 * GetNumInventorySlotsNeededForDailyLoginRewardInCurrentMonth(*luaindex* _rewardIndex_)
 ** _Returns:_ *integer* _numSlots_
 
-* GetNumServiceTokens(*[ServiceTokenType|#ServiceTokenType]* _tokenType_)
-** _Returns:_ *integer* _numTokens_
-
-* GetNumOwnedCharacterSlots()
-** _Returns:_ *integer* _numOwnedCharacterSlots_
-
 * GetZoneId(*luaindex* _zoneIndex_)
 ** _Returns:_ *integer* _zoneId_
 
@@ -16029,7 +16184,7 @@ h3. AddOnManager
 * AddRelevantFilter(*string* _relevantFilter_)
 
 * GetAddOnDependencyInfo(*luaindex* _addOnIndex_, *luaindex* _addOnDependencyIndex_)
-** _Returns:_ *string* _name_, *bool* _active_
+** _Returns:_ *string* _name_, *bool* _exists_, *bool* _active_, *integer* _minVersion_, *integer* _version_
 
 * GetAddOnFilter()
 ** _Returns:_ *string* _settingFilter_
@@ -17781,6 +17936,107 @@ h3. WindowManager
 * SetMouseFocusByName(*string* _name_)
 
 
+* GetWindowManager()
+** _Returns:_ *object* _apRetWindowManager_
+
+* MouseIsOver(*object* _control_, *number* _leftOffset_, *number* _topOffset_, *number* _rightOffset_, *number* _bottomOffset_)
+** _Returns:_ *bool* _isOver_
+
+* MouseIsInside(*object* _control_, *number* _leftOffset_, *number* _topOffset_, *number* _rightOffset_, *number* _bottomOffset_)
+** _Returns:_ *bool* _isInside_
+
+* GetUIMousePosition()
+** _Returns:_ *number* _x_, *number* _y_
+
+* GetUIMouseDeltas()
+** _Returns:_ *number* _deltaX_, *number* _deltaY_
+
+* GetUIGlobalScale()
+** _Returns:_ *number* _scale_
+
+* GetUICustomScale()
+** _Returns:_ *number* _scale_
+
+* LocalizeString(*string* _formatString_, *string* _arg1_, *string* _arg2_, *string* _arg3_, *string* _arg4_, *string* _arg5_, *string* _arg6_)
+** _Returns:_ *string* _localizedString_
+
+* GetAnimationManager()
+** _Returns:_ *object* _apRetAnimationManager_
+
+* GetAddOnManager()
+** _Returns:_ *object* _addOnManager_
+
+* RedirectTexture(*string* _originalTexture_, *string* _newTexture_)
+
+* EscapeMarkup(*string* _text_, *[AllowMarkupType|#AllowMarkupType]* _allowMarkupType_)
+** _Returns:_ *string* _escapedText_
+
+* CreateFont(*string* _fontSymbolName_, *string* _fontDescriptor_)
+** _Returns:_ *object* _fontObject_
+
+* GetNumControlCreatingSources()
+** _Returns:_ *integer* _numFiles_
+
+* GetControlCreatingSourceName(*luaindex* _index_)
+** _Returns:_ *string* _sourceName_
+
+* GetNumControlCreatingSourceCallSites(*string* _sourceName_)
+** _Returns:_ *integer* _numCallSites_
+
+* GetControlCreatingSourceCallSiteInfo(*string* _sourceName_, *luaindex* _index_)
+** _Returns:_ *string* _creationStack_, *integer* _count_
+
+* StartScriptProfiler()
+
+* StopScriptProfiler()
+
+* IsScriptProfilerEnabled()
+** _Returns:_ *bool* _enabled_
+
+* GetScriptProfilerNumFrames()
+** _Returns:_ *integer* _numFrames_
+
+* GetScriptProfilerFrameNumRecords(*luaindex* _frameIndex_)
+** _Returns:_ *integer* _numRecords_
+
+* GetScriptProfilerRecordInfo(*luaindex* _frameIndex_, *luaindex* _recordIndex_)
+** _Returns:_ *luaindex* _recordDataIndex_, *number* _startTimeNS_, *number* _endTimeNS_, *luaindex:nilable* _callerRecordIndex_, *[ScriptProfilerRecordDataType|#ScriptProfilerRecordDataType]* _recordDataType_
+
+* GetScriptProfilerNumClosures()
+** _Returns:_ *integer* _numClosures_
+
+* GetScriptProfilerClosureInfo(*luaindex* _recordDataIndex_)
+** _Returns:_ *string* _displayName_, *string* _fileName_, *integer* _fileLineNumber_
+
+* GetScriptProfilerNumCFunctions()
+** _Returns:_ *integer* _numCFunctions_
+
+* GetScriptProfilerCFunctionInfo(*luaindex* _recordDataIndex_)
+** _Returns:_ *string* _functionName_
+
+* GetScriptProfilerNumGarbageCollectionTypes()
+** _Returns:_ *integer* _numGarbageCollectionTypes_
+
+* GetScriptProfilerGarbageCollectionInfo(*luaindex* _recordDataIndex_)
+** _Returns:_ *[ScriptProfilerGarbageCollectionType|#ScriptProfilerGarbageCollectionType]* _GarbageCollectionType_
+
+* RecordScriptProfilerUserEvent(*string* _userEventData_)
+
+* GetScriptProfilerNumUserEvents()
+** _Returns:_ *integer* _numUserEvents_
+
+* GetScriptProfilerUserEventInfo(*luaindex* _recordDataIndex_)
+** _Returns:_ *string* _userEventData_
+
+* GetMinUICanvasWidth()
+** _Returns:_ *number* _minWidth_
+
+* GetMinUICanvasHeight()
+** _Returns:_ *number* _minHeight_
+
+* CopyToClipboard *private* (*string* _text_)
+
+
 h2. Events
 * EVENT_ABILITY_COOLDOWN_UPDATED (*integer* _abilityId_)
 * EVENT_ABILITY_LIST_CHANGED
@@ -17793,7 +18049,8 @@ h2. Events
 * EVENT_ACHIEVEMENTS_UPDATED
 * EVENT_ACHIEVEMENT_AWARDED (*string* _name_, *integer* _points_, *integer* _id_, *string* _link_)
 * EVENT_ACHIEVEMENT_UPDATED (*integer* _id_)
-* EVENT_ACTION_BAR_SLOTTING_ALLOWED_STATE_CHANGED (*bool* _isActionBarSlottingAllowed_)
+* EVENT_ACTION_BAR_IS_RESPECCABLE_BAR_STATE_CHANGED (*bool* _isRepeccableBarState_)
+* EVENT_ACTION_BAR_LOCKED_REASON_CHANGED (*[ActionBarLockedReason|#ActionBarLockedReason]* _actionBarLockedReason_)
 * EVENT_ACTION_SLOTS_ACTIVE_HOTBAR_UPDATED (*bool* _didActiveHotbarChange_, *bool* _shouldUpdateAbilityAssignments_, *[HotBarCategory|#HotBarCategory]* _activeHotbarCategory_)
 * EVENT_ACTION_SLOTS_ALL_HOTBARS_UPDATED
 * EVENT_ACTION_SLOT_ABILITY_USED (*luaindex* _actionSlotIndex_)
@@ -17848,12 +18105,13 @@ h2. Events
 * EVENT_BUYBACK_RECEIPT (*string* _itemLink_, *integer* _itemQuantity_, *integer* _money_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
 * EVENT_BUY_RECEIPT (*string* _entryName_, *[StoreEntryType|#StoreEntryType]* _entryType_, *integer* _entryQuantity_, *integer* _money_, *[CurrencyType|#CurrencyType]* _specialCurrencyType1_, *string* _specialCurrencyInfo1_, *integer* _specialCurrencyQuantity1_, *[CurrencyType|#CurrencyType]* _specialCurrencyType2_, *string* _specialCurrencyInfo2_, *integer* _specialCurrencyQuantity2_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
 * EVENT_CADWELL_PROGRESSION_LEVEL_CHANGED (*integer* _progressionLevel_)
-* EVENT_CAMPAIGN_ALLIANCE_LOCK_ACTIVATED (*integer* _campaignId_, *[Alliance|#Alliance]* _lockedToAlliance_)
+* EVENT_CAMPAIGN_ALLIANCE_LOCK_ACTIVATED (*integer* _campaignId_, *[Alliance|#Alliance]* _wasLockedToAlliance_)
+* EVENT_CAMPAIGN_ALLIANCE_LOCK_PENDING (*integer* _campaignId_, *[Alliance|#Alliance]* _lockedToAlliance_, *integer* _timeLeftS_)
 * EVENT_CAMPAIGN_ASSIGNMENT_RESULT (*[CampaignReassignmentErrorReason|#CampaignReassignmentErrorReason]* _result_)
 * EVENT_CAMPAIGN_EMPEROR_CHANGED (*integer* _campaignId_)
 * EVENT_CAMPAIGN_HISTORY_WINDOW_CHANGED
 * EVENT_CAMPAIGN_LEADERBOARD_DATA_CHANGED
-* EVENT_CAMPAIGN_QUEUE_JOINED (*integer* _campaignId_, *bool* _isGroupMember_)
+* EVENT_CAMPAIGN_QUEUE_JOINED (*integer* _campaignId_, *bool* _isGroupMember_, *[Alliance|#Alliance]* _willLockToAlliance_)
 * EVENT_CAMPAIGN_QUEUE_LEFT (*integer* _campaignId_, *bool* _isGroup_)
 * EVENT_CAMPAIGN_QUEUE_POSITION_CHANGED (*integer* _campaignId_, *bool* _isGroup_, *integer* _position_)
 * EVENT_CAMPAIGN_QUEUE_STATE_CHANGED (*integer* _campaignId_, *bool* _isGroup_, *[CampaignQueueRequestStateType|#CampaignQueueRequestStateType]* _state_)
@@ -17867,6 +18125,7 @@ h2. Events
 * EVENT_CANCEL_REQUEST_CONFIRM_USE_ITEM
 * EVENT_CANNOT_CROUCH_WHILE_CARRYING_ARTIFACT (*string* _artifactName_)
 * EVENT_CANNOT_DO_THAT_WHILE_DEAD
+* EVENT_CANNOT_DO_THAT_WHILE_HIDDEN
 * EVENT_CAPTURE_AREA_SPAWNED (*integer* _objectiveKeepId_, *integer* _objectiveObjectiveId_, *integer* _battlegroundContext_, *[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *bool* _hasMoved_)
 * EVENT_CAPTURE_AREA_STATE_CHANGED (*integer* _objectiveKeepId_, *integer* _objectiveObjectiveId_, *integer* _battlegroundContext_, *string* _objectiveName_, *[ObjectiveControlEvent|#ObjectiveControlEvent]* _objectiveControlEvent_, *[ObjectiveControlState|#ObjectiveControlState]* _objectiveControlState_, *[Alliance|#Alliance]* _owningAlliance_, *[MapDisplayPinType|#MapDisplayPinType]* _pinType_)
 * EVENT_CAPTURE_AREA_STATUS (*integer* _keepId_, *integer* _objectiveId_, *integer* _battlegroundContext_, *integer* _capturePoolValue_, *integer* _capturePoolMax_, *integer* _capturingPlayers_, *integer* _contestingPlayers_, *[Alliance|#Alliance]* _owningAlliance_, *[MapDisplayPinType|#MapDisplayPinType]* _pinType_)
@@ -17893,7 +18152,6 @@ h2. Events
 * EVENT_COLLECTIBLES_SEARCH_RESULTS_READY
 * EVENT_COLLECTIBLE_CATEGORY_NEW_STATUS_CLEARED (*integer* _categoryId_)
 * EVENT_COLLECTIBLE_DYE_DATA_UPDATED (*integer* _collectibleId_)
-* EVENT_COLLECTIBLE_EVOLUTION_RESULT (*[CollectibleEvolutionResult|#CollectibleEvolutionResult]* _evolutionResult_)
 * EVENT_COLLECTIBLE_NEW_STATUS_CLEARED (*integer* _collectibleId_)
 * EVENT_COLLECTIBLE_NOTIFICATION_NEW (*integer* _collectibleId_, *integer* _notificationId_)
 * EVENT_COLLECTIBLE_NOTIFICATION_REMOVED (*integer* _notificationId_, *integer* _collectibleId_)
@@ -18012,7 +18270,7 @@ h2. Events
 * EVENT_GROUP_INVITE_RESPONSE (*string* _inviterName_, *[GroupInviteResponse|#GroupInviteResponse]* _response_, *string* _inviterDisplayName_)
 * EVENT_GROUP_MEMBER_CONNECTED_STATUS (*string* _unitTag_, *bool* _isOnline_)
 * EVENT_GROUP_MEMBER_IN_REMOTE_REGION (*string* _unitTag_, *bool* _isInRemoteRegion_)
-* EVENT_GROUP_MEMBER_JOINED (*string* _memberName_)
+* EVENT_GROUP_MEMBER_JOINED (*string* _memberCharacterName_, *string* _memberDisplayName_, *bool* _isLocalPlayer_)
 * EVENT_GROUP_MEMBER_LEFT (*string* _memberCharacterName_, *[GroupLeaveReason|#GroupLeaveReason]* _reason_, *bool* _isLocalPlayer_, *bool* _isLeader_, *string* _memberDisplayName_, *bool* _actionRequiredVote_)
 * EVENT_GROUP_MEMBER_ROLE_CHANGED (*string* _unitTag_, *[LFGRole|#LFGRole]* _newRole_)
 * EVENT_GROUP_NOTIFICATION_MESSAGE (*integer* _messageId_)
@@ -18039,10 +18297,11 @@ h2. Events
 * EVENT_GUILD_FINDER_LONG_SEARCH_WARNING
 * EVENT_GUILD_FINDER_PLAYER_APPLICATIONS_CHANGED (*integer* _numApplications_)
 * EVENT_GUILD_FINDER_PROCESS_APPLICATION_RESPONSE (*integer* _guildId_, *string* _accountName_, *[GuildProcessApplicationResponse|#GuildProcessApplicationResponse]* _result_)
-* EVENT_GUILD_FINDER_SEARCH_COMPLETE
+* EVENT_GUILD_FINDER_SEARCH_COMPLETE (*integer* _searchId_)
 * EVENT_GUILD_FINDER_SEARCH_COOLDOWN_UPDATE (*integer* _cooldownMs_)
 * EVENT_GUILD_ID_CHANGED (*string* _unitTag_, *integer* _oldGuildId_, *integer* _newGuildId_)
 * EVENT_GUILD_INFO_REQUEST_COMPLETE (*integer* _guildId_)
+* EVENT_GUILD_KIOSK_ACTIVE_BIDS_RESPONSE (*integer* _guildId_, *[SocialActionResult|#SocialActionResult]* _result_)
 * EVENT_GUILD_KIOSK_CONSIDER_BID_START
 * EVENT_GUILD_KIOSK_CONSIDER_BID_STOP
 * EVENT_GUILD_KIOSK_CONSIDER_PURCHASE_START
@@ -18455,8 +18714,10 @@ h2. Events
 * EVENT_GUILD_MEMBER_CHARACTER_LEVEL_CHANGED (*integer* _guildId_, *string* _displayName_, *string* _characterName_, *integer* _level_)
 * EVENT_GUILD_MEMBER_CHARACTER_UPDATED (*integer* _guildId_, *string* _displayName_)
 * EVENT_GUILD_MEMBER_CHARACTER_ZONE_CHANGED (*integer* _guildId_, *string* _displayName_, *string* _characterName_, *string* _zone_)
+* EVENT_GUILD_MEMBER_DEMOTE_SUCCESSFUL (*string* _playerName_, *integer* _newRankIndex_, *integer* _guildId_)
 * EVENT_GUILD_MEMBER_NOTE_CHANGED (*integer* _guildId_, *string* _displayName_, *string* _note_)
 * EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED (*integer* _guildId_, *string* _displayName_, *integer* _oldStatus_, *integer* _newStatus_)
+* EVENT_GUILD_MEMBER_PROMOTE_SUCCESSFUL (*string* _playerName_, *integer* _newRankIndex_, *integer* _guildId_)
 * EVENT_GUILD_MEMBER_RANK_CHANGED (*integer* _guildId_, *string* _displayName_, *luaindex* _rankIndex_)
 * EVENT_GUILD_MEMBER_REMOVED (*integer* _guildId_, *string* _displayName_, *string* _characterName_)
 * EVENT_GUILD_MOTD_CHANGED (*integer* _guildId_)
