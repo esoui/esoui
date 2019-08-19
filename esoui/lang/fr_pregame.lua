@@ -3200,7 +3200,7 @@ SafeAddString(SI_SERVICE_NO_ELIGIBLE_CHARACTERS, "Aucun personnage n'est éligib
 SafeAddString(SI_SERVICE_TOKEN_COUNT_TOKENS_HEADER, "Jetons", 0)
 SafeAddString(SI_SERVICE_TOKEN_INSTRUCTIONS, "Choisissez un personnage sur lequel utiliser un Jeton <<1>>.", 0)
 SafeAddString(SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT, "Ce Jeton ne peut être utilisé que sur l'écran de sélection du personnage.", 0)
-SafeAddString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION, "Ce Jeton vous permet de changer l'apparence de |cffffff1|r personnage.", 0)
+SafeAddString(SI_SERVICE_TOOLTIP_APPEARANCE_CHANGE_TOKEN_DESCRIPTION, "Ce Jeton vous permet de changer l'apparence d'|cffffff1|r personnage.", 0)
 SafeAddString(SI_SERVICE_TOOLTIP_HEADER_FORMATTER, "<<C:1>>", 0)
 SafeAddString(SI_SERVICE_TOOLTIP_NAME_CHANGE_TOKEN_DESCRIPTION, "Ce jeton vous permet de changer le nom de |cffffff1|r personnage.", 0)
 SafeAddString(SI_SERVICE_TOOLTIP_NO_SERVICE_TOKENS_AVAILABLE, "Il ne vous reste plus de Jeton de <<1>>. Vous pouvez en acheter d'avantage dans la Boutique à Couronnes.", 0)
