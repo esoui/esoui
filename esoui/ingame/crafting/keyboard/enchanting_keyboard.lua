@@ -214,7 +214,7 @@ function ZO_Enchanting:InitializeKeybindStripDescriptors()
 
             callback = function()
                 if self.enchantingMode == ENCHANTING_MODE_CREATION then
-                   self:Create(self:GetMultiCraftNumIterations())
+                    ZO_KeyboardCraftingUtils_RequestCraftingCreate(self, self:GetMultiCraftNumIterations())
                 elseif self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
                     if self.extractionSlot:HasOneItem() then
                         self:ExtractSingle()
@@ -304,6 +304,7 @@ function ZO_Enchanting:OnModeUpdated()
             self.inventory:ChangeMode(enchantingMode)
             ClearCursor()
             self:OnSlotChanged()
+            self:ResetMultiCraftNumIterations()
         end
 
         -- This block of code must be done second so the tooltip animation and sounds are reset correctly
@@ -356,6 +357,10 @@ end
 
 function ZO_Enchanting:GetMultiCraftNumIterations()
     return self.multiCraftSpinner:GetValue()
+end
+
+function ZO_Enchanting:ResetMultiCraftNumIterations()
+    return self.multiCraftSpinner:SetValue(1)
 end
 
 ZO_EnchantingInventory = ZO_CraftingInventory:Subclass()

@@ -139,7 +139,7 @@ function ZO_Alchemy:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
-                self:Create(self:GetMultiCraftNumIterations())
+                ZO_KeyboardCraftingUtils_RequestCraftingCreate(self, self:GetMultiCraftNumIterations())
             end,
 
             enabled = function()
@@ -266,6 +266,10 @@ function ZO_Alchemy:GetMultiCraftNumIterations()
     return self.multiCraftSpinner:GetValue()
 end
 
+function ZO_Alchemy:ResetMultiCraftNumIterations()
+    return self.multiCraftSpinner:SetValue(1)
+end
+
 function ZO_Alchemy:OnItemReceiveDrag(slotControl, bagId, slotIndex)
     local usedInCraftingType, craftingSubItemType, rankRequirement = GetItemCraftingInfo(bagId, slotIndex)
     if usedInCraftingType == CRAFTING_TYPE_ALCHEMY then
@@ -308,6 +312,7 @@ function ZO_Alchemy:SetMode(mode)
 
             CRAFTING_RESULTS:SetCraftingTooltip(self.tooltip)
             CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_SUCCESS, SOUNDS.ALCHEMY_CREATE_TOOLTIP_GLOW_FAIL)
+            self:ResetMultiCraftNumIterations()
         end
 
         self.control:GetNamedChild("Inventory"):SetHidden(mode ~= ZO_ALCHEMY_MODE_CREATION)

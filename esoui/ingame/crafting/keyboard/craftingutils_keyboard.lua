@@ -62,3 +62,45 @@ function ZO_MultiCraftSpinner:UpdateButtons()
     self.minMaxButton:SetHidden(self.hideButtons)
     self.minMaxButton:SetEnabled(self.enabled and self:GetMin() < self:GetMax())
 end
+
+ESO_Dialogs["CRAFTING_CREATE_MULTIPLE_KEYBOARD"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_CRAFTING_CONFIRM_CREATE_TITLE,
+    },
+    mainText =
+    {
+        text = SI_CRAFTING_CONFIRM_CREATE_MULTIPLE_DESCRIPTION,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                local craftingObject = dialog.data.craftingObject
+                local numIterations = dialog.data.numIterations
+                craftingObject:Create(numIterations)
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+function ZO_KeyboardCraftingUtils_RequestCraftingCreate(craftingObject, numIterations)
+    if numIterations <= 1 then
+        craftingObject:Create(numIterations)
+        return
+    end
+
+    local resultItemLink = craftingObject:GetResultItemLink()
+    local nameColor = GetItemQualityColor(GetItemLinkQuality(resultItemLink))
+    local colorizedItemName = nameColor:Colorize(GetItemLinkName(resultItemLink))
+    local itemQuantity = craftingObject:GetMultiCraftNumResults(numIterations)
+
+    ZO_Dialogs_ShowDialog("CRAFTING_CREATE_MULTIPLE_KEYBOARD", { craftingObject = craftingObject, numIterations = numIterations }, { mainTextParams = { colorizedItemName, itemQuantity } })
+end

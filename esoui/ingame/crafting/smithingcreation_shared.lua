@@ -1213,6 +1213,14 @@ function ZO_SharedSmithingCreation:GetMultiCraftMaxIterations()
     return numIterations
 end
 
+function ZO_SharedSmithingCreation:GetResultItemLink()
+    return GetSmithingPatternResultLink(self:GetResultCraftingParameters())
+end
+
+function ZO_SharedSmithingCreation:GetMultiCraftNumResults(numIterations)
+    return numIterations -- each iteration creates one item
+end
+
 function ZO_SharedSmithingCreation:RefreshMultiCraft()
     -- Should be overidden
 end

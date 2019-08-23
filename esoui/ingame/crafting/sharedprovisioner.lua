@@ -241,6 +241,15 @@ function ZO_SharedProvisioner:GetMultiCraftMaxIterations()
     return numIterations
 end
 
+function ZO_SharedProvisioner:GetResultItemLink()
+    return GetRecipeResultItemLink(self:GetRecipeIndices())
+end
+
+function ZO_SharedProvisioner:GetMultiCraftNumResults(numIterations)
+    local recipeListIndex, recipeIndex = self:GetRecipeIndices()
+    return GetRecipeResultQuantity(recipeListIndex, recipeIndex, numIterations)
+end
+
 -- Overrides ZO_CraftingCreateScreenBase
 function ZO_SharedProvisioner:Create(numIterations)
     CraftProvisionerItem(self:GetAllCraftingParameters(numIterations))

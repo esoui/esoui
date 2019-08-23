@@ -104,7 +104,7 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                 if self.mode == SMITHING_MODE_REFINEMENT then
                     self.refinementPanel:ConfirmRefine()
                 elseif self.mode == SMITHING_MODE_CREATION then
-                    self.creationPanel:Create(self.creationPanel:GetMultiCraftNumIterations())
+                    self.creationPanel:ConfirmCreate()
                 elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
                     self.deconstructionPanel:ConfirmExtractAll()
                 elseif self.mode == SMITHING_MODE_IMPROVEMENT then

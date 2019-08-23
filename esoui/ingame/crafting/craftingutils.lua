@@ -19,6 +19,16 @@ function ZO_CraftingCreateScreenBase:GetAllCraftingParameters(numIterations)
     -- return implementation defined
 end
 
+function ZO_CraftingCreateScreenBase:GetResultItemLink()
+    assert(false, "Override me")
+    -- should return resultItemLink
+end
+
+function ZO_CraftingCreateScreenBase:GetMultiCraftNumResults(numIterations)
+    assert(false, "Override me")
+    -- should return numResults
+end
+
 function ZO_CraftingCreateScreenBase:IsCraftable()
     assert(false, "Override me")
     -- should return bool

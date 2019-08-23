@@ -69,6 +69,7 @@ function ZO_Provisioner:Initialize(control)
     PROVISIONER_FRAGMENT = ZO_FadeSceneFragment:New(control)
     PROVISIONER_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
+            self:ResetMultiCraftNumIterations()
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(self.resultTooltip)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.mainKeybindStripDescriptor)
         elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -193,6 +194,7 @@ function ZO_Provisioner:OnTabFilterChanged(filterData)
         ZO_CheckButton_SetCheckState(self.haveIngredientsCheckBox, self.savedVars.haveIngredientsChecked)
         ZO_CheckButton_SetCheckState(self.haveSkillsCheckBox, self.savedVars.haveSkillsChecked)
     end
+    self:ResetMultiCraftNumIterations()
     self:DirtyRecipeList()
 end
 
@@ -230,7 +232,7 @@ function ZO_Provisioner:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
         
             callback = function()
-                self:Create(self:GetMultiCraftNumIterations())
+                ZO_KeyboardCraftingUtils_RequestCraftingCreate(self, self:GetMultiCraftNumIterations())
             end,
 
             enabled = function()
@@ -504,6 +506,10 @@ function ZO_Provisioner:GetMultiCraftNumIterations()
         return 1
     end
     return self.multiCraftSpinner:GetValue()
+end
+
+function ZO_Provisioner:ResetMultiCraftNumIterations()
+    self.multiCraftSpinner:SetValue(1)
 end
 
 function ZO_Provisioner:UpdateMultiCraft()

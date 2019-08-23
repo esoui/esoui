@@ -81,7 +81,6 @@ function ZO_SmithingRefinement:UpdateMultiRefine()
 
         self.multiRefineSpinner:SetDisplayTextOverride(NO_OVERRIDE)
         self.multiRefineSpinner:SetMinMax(1, maxIterations)
-        self.multiRefineSpinner:SetValue(maxIterations)
     elseif self.extractionSlot:HasMultipleItems() then
         self.multiRefineSpinner:SetDisplayTextOverride(GetString(SI_CRAFTING_QUANTITY_ALL))
         shouldEnableSpinner = false
@@ -97,9 +96,16 @@ function ZO_SmithingRefinement:UpdateMultiRefine()
     self.multiRefineSpinner:UpdateButtons()
 end
 
+function ZO_SmithingRefinement:SetRefineIterationsToMax()
+    if self.extractionSlot:HasOneItem() then
+        self.multiRefineSpinner:SetValue(self.multiRefineSpinner:GetMax())
+    end
+end
+
 function ZO_SmithingRefinement:OnSlotChanged()
     ZO_SmithingExtraction.OnSlotChanged(self)
     self:UpdateMultiRefine()
+    self:SetRefineIterationsToMax()
 end
 
 function ZO_SmithingRefinement:OnInventoryUpdate(validItems, filterType)

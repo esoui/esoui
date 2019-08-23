@@ -161,6 +161,15 @@ function ZO_SharedAlchemy:GetMultiCraftMaxIterations()
     return maxIterations
 end
 
+function ZO_SharedAlchemy:GetResultItemLink()
+    return GetAlchemyResultingItemLink(self:GetAllCraftingBagAndSlots())
+end
+
+function ZO_SharedAlchemy:GetMultiCraftNumResults(numIterations)
+    local solventBagId, solventSlotIndex = self.solventSlot:GetBagAndSlot()
+    return GetAlchemyResultQuantity(solventBagId, solventSlotIndex, numIterations)
+end
+
 function ZO_SharedAlchemy:UpdateMultiCraft()
     -- Should be overidden
 end

@@ -73,6 +73,11 @@ function ZO_SmithingCreation:SetHidden(hidden)
     self.refreshGroup:TryClean()
 end
 
+function ZO_SmithingCreation:ChangeTypeFilter(filterData)
+    ZO_SharedSmithingCreation.ChangeTypeFilter(self, filterData)
+    self:ResetMultiCraftNumIterations()
+end
+
 function ZO_SmithingCreation:InitializeFilterTypeBar()
     local MENU_BAR_DATA =
     {
@@ -246,6 +251,10 @@ function ZO_SmithingCreation:GetMultiCraftNumIterations()
     return self.multiCraftSpinner:GetValue()
 end
 
+function ZO_SmithingCreation:ResetMultiCraftNumIterations()
+    self.multiCraftSpinner:SetValue(1)
+end
+
 function ZO_SmithingCreation:RefreshMultiCraft()
     self.multiCraftSpinner:SetMinMax(1, self:GetMultiCraftMaxIterations())
     self.multiCraftSpinner:UpdateButtons()
@@ -253,6 +262,10 @@ end
 
 function ZO_SmithingCreation:UpdateKeybindStrip()
     self.owner:UpdateSharedKeybindStrip()
+end
+
+function ZO_SmithingCreation:ConfirmCreate()
+    ZO_KeyboardCraftingUtils_RequestCraftingCreate(self, self:GetMultiCraftNumIterations())
 end
 
 function ZO_SmithingCreation_HaveMaterialsOnMouseEnter(control)

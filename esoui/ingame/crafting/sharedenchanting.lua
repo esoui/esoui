@@ -327,6 +327,14 @@ function ZO_SharedEnchanting:GetMultiCraftMaxIterations()
     return maxIterations
 end
 
+function ZO_SharedEnchanting:GetResultItemLink()
+    return GetEnchantingResultingItemLink(self:GetAllCraftingBagAndSlots())
+end
+
+function ZO_SharedEnchanting:GetMultiCraftNumResults(numIterations)
+    return numIterations -- each iteration creates one item
+end
+
 function ZO_SharedEnchanting:UpdateMultiCraft()
     -- override me
 end
