@@ -86,6 +86,7 @@ local ChannelInfo =
         name = GetString(SI_CHAT_CHANNEL_NAME_SAY),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_SAY),
     },
 
@@ -95,6 +96,7 @@ local ChannelInfo =
         name = GetString(SI_CHAT_CHANNEL_NAME_YELL),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_YELL)
     },
     [CHAT_CHANNEL_ZONE] =
@@ -103,6 +105,7 @@ local ChannelInfo =
         name = GetString(SI_CHAT_CHANNEL_NAME_ZONE),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE)
     },
     [CHAT_CHANNEL_PARTY] =
@@ -111,6 +114,7 @@ local ChannelInfo =
         name = GetString(SI_CHAT_CHANNEL_NAME_PARTY),
         playerLinkable = true,
         channelLinkable = true,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_PARTY),
         requires = function()
             return IsUnitGrouped("player")
@@ -124,6 +128,7 @@ local ChannelInfo =
         name = GetString(SI_CHAT_CHANNEL_NAME_WHISPER),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_WHISPER),
         target = true,
         saveTarget = CHAT_CHANNEL_WHISPER,
@@ -134,6 +139,7 @@ local ChannelInfo =
         format = SI_CHAT_MESSAGE_WHISPER_SENT,
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
     },
     [CHAT_CHANNEL_EMOTE] =
     {
@@ -148,24 +154,28 @@ local ChannelInfo =
         format = SI_CHAT_MONSTER_MESSAGE_SAY,
         playerLinkable = false,
         channelLinkable = false,
+        formatMessage = true,
     },
     [CHAT_CHANNEL_MONSTER_YELL] =
     {
         format = SI_CHAT_MONSTER_MESSAGE_YELL,
         playerLinkable = false,
         channelLinkable = false,
+        formatMessage = true,
     },
     [CHAT_CHANNEL_MONSTER_WHISPER] =
     {
         format = SI_CHAT_MONSTER_MESSAGE_WHISPER,
         playerLinkable = false,
         channelLinkable = false,
+        formatMessage = true,
     },
     [CHAT_CHANNEL_MONSTER_EMOTE] =
     {
         format = SI_CHAT_MONSTER_EMOTE,
         playerLinkable = false,
         channelLinkable = false,
+        formatMessage = true,
     },
     [CHAT_CHANNEL_SYSTEM] =
     {
@@ -293,6 +303,7 @@ if not IsConsoleUI() then
         name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_ENGLISH),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE_ENGLISH)
     }
     ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_2] =
@@ -301,6 +312,7 @@ if not IsConsoleUI() then
         name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_FRENCH),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE_FRENCH)
     }
     ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_3] =
@@ -309,6 +321,7 @@ if not IsConsoleUI() then
         name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_GERMAN),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE_GERMAN)
     }
     ChannelInfo[CHAT_CHANNEL_ZONE_LANGUAGE_4] =
@@ -317,6 +330,7 @@ if not IsConsoleUI() then
         name = GetString(SI_CHAT_CHANNEL_NAME_ZONE_JAPANESE),
         playerLinkable = true,
         channelLinkable = false,
+        supportCSIcon = true,
         switches = GetString(SI_CHANNEL_SWITCH_ZONE_JAPANESE)
     }
 end

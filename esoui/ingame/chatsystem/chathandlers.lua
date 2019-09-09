@@ -39,19 +39,31 @@ local ChatEventFormatters = {
                 userFacingName = fromName
             end
 
+            userFacingName = zo_strformat(SI_CHAT_MESSAGE_PLAYER_FORMATTER, userFacingName)
             local fromLink = channelInfo.playerLinkable and ZO_LinkHandler_CreatePlayerLink(userFacingName) or userFacingName
 
-            -- Channels with links will not have CS messages
-            if channelLink then
-                return zo_strformat(channelInfo.format, channelLink, fromLink, text), channelInfo.saveTarget, fromDisplayName, text
+            if channelInfo.formatMessage then
+                text = zo_strformat(SI_CHAT_MESSAGE_FORMATTER, text)
             end
 
-            return zo_strformat(channelInfo.format, fromLink, text, GetCustomerServiceIcon(isFromCustomerService)), channelInfo.saveTarget, fromDisplayName, text
+            -- Channels with links will not have CS messages
+            local formattedText
+            if channelLink then
+                formattedText = string.format(GetString(channelInfo.format), channelLink, fromLink, text)
+            else
+                if channelInfo.supportCSIcon then
+                    formattedText = string.format(GetString(channelInfo.format), GetCustomerServiceIcon(isFromCustomerService), fromLink, text)
+                else
+                    formattedText = string.format(GetString(channelInfo.format), fromLink, text)
+                end
+            end
+
+            return formattedText, channelInfo.saveTarget, fromDisplayName, text
         end
     end,
 
     [EVENT_BROADCAST] = function(message)
-        return zo_strformat(SI_CHAT_MESSAGE_SYSTEM, GetString("SI_CHATCHANNELCATEGORIES", CHAT_CATEGORY_SYSTEM), message)
+        return string.format(GetString(SI_CHAT_MESSAGE_SYSTEM), GetString("SI_CHATCHANNELCATEGORIES", CHAT_CATEGORY_SYSTEM), message)
     end,
 
     [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = function(displayName, characterName, oldStatus, newStatus)
