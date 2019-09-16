@@ -38,9 +38,10 @@ end
 
 function ZO_FormatDurationAgo(seconds)
     if(seconds < ZO_ONE_MINUTE_IN_SECONDS) then
-        return GetString(SI_TIME_DURATION_NOT_LONG_AGO)
+        return GetString(SI_TIME_DURATION_NOT_LONG_AGO), ZO_ONE_MINUTE_IN_SECONDS - seconds
     else
-        return zo_strformat(SI_TIME_DURATION_AGO, ZO_FormatTime(seconds, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
+        local timeText, nextUpdateTimeInSec = ZO_FormatTime(seconds, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_ASCENDING)
+        return zo_strformat(SI_TIME_DURATION_AGO, timeText), nextUpdateTimeInSec
     end
 end
 

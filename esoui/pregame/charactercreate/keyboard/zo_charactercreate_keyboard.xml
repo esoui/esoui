@@ -113,9 +113,13 @@
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="328"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-430"/>
 
-            <OnInitialized>
-                ZO_PaperdollManipulation_OnInitialized(self)
-            </OnInitialized>
+            <OnEffectivelyShown>
+                ZO_PaperdollManipulation_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+
+            <OnEffectivelyHidden>
+                ZO_PaperdollManipulation_OnEffectivelyHidden(self)
+            </OnEffectivelyHidden>
 
             <OnMouseEnter>
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)

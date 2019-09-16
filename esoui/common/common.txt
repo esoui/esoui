@@ -26,6 +26,8 @@ EsoUI\Common\Console\AutoSaving_Console.xml
 EsoUI\Common\Console\ZO_PlayerConsoleInfoRequestManager.lua
 EsoUI\Common\Console\ZO_PlayerConsoleRequestsUtils.lua
 
+EsoUI\Common\Heron\HeronURLManager.lua
+
 EsoUI\Common\Gamepad\GenericHeaders\GenericHeaders.lua
 EsoUI\Common\Gamepad\GenericHeaders\GenericHeaders.xml
 EsoUI\Common\Gamepad\GenericFooters\GenericFooters.lua
@@ -55,6 +57,7 @@ EsoUI\Common\ZO_ListEntry\ZO_ListEntryTemplates.xml
 
 EsoUI\Common\Globals\AllianceToIcon.lua
 EsoUI\Common\Globals\SharedDialogs.lua
+EsoUI\Common\Globals\PlatformStoreDialogs.lua
 
 EsoUI\Common\ZO_KeybindStrip\KeybindStrip.lua
 EsoUI\Common\ZO_KeybindStrip\KeybindStrip.xml

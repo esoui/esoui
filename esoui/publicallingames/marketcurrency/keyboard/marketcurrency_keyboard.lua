@@ -58,18 +58,6 @@ function ZO_MarketCurrency_Keyboard:OnMouseExitCurrencyLabel(control)
     ClearTooltip(InformationTooltip)
 end
 
-function ZO_MarketCurrency_Keyboard:SetBuyCrownsCallback(callback)
-    self.customBuyCrownsCallback = callback
-end
-
-function ZO_MarketCurrency_Keyboard:OnBuyCrownsClicked(control)
-    if self.customBuyCrownsCallback then
-        self.customBuyCrownsCallback()
-    else
-        ShowBuyCrownsDialog()
-    end
-end
-
 -- XML Handlers
 
 function ZO_MarketCurrency_Keyboard_OnInitialized(control)
@@ -85,5 +73,5 @@ function ZO_MarketCurrency_OnMouseExit(...)
 end
 
 function ZO_MarketCurrencyBuyCrowns_OnClicked(...)
-    MARKET_CURRENCY_KEYBOARD:OnBuyCrownsClicked(...)
+    ZO_ShowBuyCrownsPlatformDialog()
 end

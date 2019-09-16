@@ -7,12 +7,10 @@ end
 
 function ChapterUpgrade_Keyboard:Initialize(control)
     ZO_ChapterUpgrade_Shared.Initialize(self, control, "chapterUpgradeKeyboard")
-    local serviceType = GetPlatformServiceType()
-    if serviceType == PLATFORM_SERVICE_TYPE_DMM or serviceType == PLATFORM_SERVICE_TYPE_STEAM then
+    if not ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[GetPlatformServiceType()] then
         -- We don't have access to any sort of code entry on these platforms, so just hide the controls
         local enterCodeButton = control:GetNamedChild("EnterCodeButton")
         enterCodeButton:SetHidden(true)
-        local textContainer = control:GetNamedChild("TextContainer")
     end
 end
 

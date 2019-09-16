@@ -1,0 +1,97 @@
+<GuiXml>
+    <Controls>
+        <Control name="Options_Account_EmailAddressSection" inherits="ZO_Options_SectionTitle ZO_Options_PanelHeader">
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_ACCOUNT, SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Account_DisplayEmailAddress" inherits="ZO_Options_TextDisplay" resizeToFitDescendents="true" >
+            <Anchor point="TOPLEFT" relativeTo="Options_Account_EmailAddressSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetCustomOptionData(self, SETTING_PANEL_ACCOUNT, SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER, ZO_OptionsPanel_GetAccountEmail, ZO_OptionsPanel_Account_InitializeEmailAddressLabel_Keyboard)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Label" override="true" text="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER" />
+            </Controls>
+        </Control>
+
+        <Control name="Options_Account_ResendActivation" inherits="ZO_Options_InvokeCallback">
+            <Anchor point="TOPLEFT" relativeTo="Options_Account_DisplayEmailAddress" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                ZO_OptionsPanel_Account_InitializeSetting_Keyboard(self, SETTING_TYPE_CUSTOM, OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Account_ChangeEmail" inherits="ZO_Options_InvokeCallback">
+            <Anchor point="TOPLEFT" relativeTo="Options_Account_ResendActivation" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <Dimensions x="490"/>
+            <OnInitialized>
+                ZO_OptionsPanel_Account_InitializeSetting_Keyboard(self, SETTING_TYPE_ACCOUNT, ACCOUNT_SETTING_ACCOUNT_EMAIL)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Account_MarketingPreferencesSection" inherits="ZO_Options_SectionTitle_WithDivider">
+            <Anchor point="TOPLEFT" relativeTo="Options_Account_ChangeEmail" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <OnInitialized>
+                KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_ACCOUNT, SI_INTERFACE_OPTIONS_ACCOUNT_MARKETING_HEADER)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
+        <Control name="Options_Account_GetUpdates" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Account_MarketingPreferencesSection" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                ZO_OptionsPanel_Account_InitializeSetting_Keyboard(self, SETTING_TYPE_ACCOUNT, ACCOUNT_SETTING_GET_UPDATES)
+            </OnInitialized>
+        </Control>
+
+        <TopLevelControl name="ZO_Options_Account_ChangeEmail_Dialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_Options_Account_ChangeEmail_Dialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER" />
+
+                <Backdrop name="$(parent)NewEmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_EMAIL_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT))
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)ConfirmText" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_KEYBOARD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_CONFIRM_ENTRY_TITLE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NewEmailEntry" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)NewEmailEntry" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                </Label>
+
+                <Backdrop name="$(parent)ConfirmNewEmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <Dimensions y="180"/>
+                    <Controls>
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" maxInputCharacters="MAX_EMAIL_LENGTH">
+                            <OnInitialized>
+                                ZO_EditDefaultText_Initialize(self)
+                            </OnInitialized>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

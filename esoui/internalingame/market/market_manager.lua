@@ -51,10 +51,6 @@ function Market_Manager:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnRequestPurchaseMarketProduct(...)
     end
 
-    local function OnShowBuyCrownsDialog(eventId)
-        SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowBuyCrownsDialog()
-    end
-
     local function OnShowEsoPlusPage(eventId)
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowEsoPlusPage()
     end
@@ -80,7 +76,6 @@ function Market_Manager:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_PRODUCT, OnShowMarketProduct)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, OnShowMarketAndSearch)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_BUY_CROWNS_DIALOG, OnShowBuyCrownsDialog)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_ESO_PLUS_PAGE, OnShowEsoPlusPage)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_MARKET_SHOW_CHAPTER_UPGRADE, OnShowChapterUpgrade)
     EVENT_MANAGER:RegisterForEvent(ZO_MARKET_NAME, EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, OnEsoPlusSubscriptionStatusChanged)
@@ -95,18 +90,12 @@ function Market_Manager:InitializePlatformErrors()
     local consoleStoreName
     local platformServiceType = GetPlatformServiceType()
 
-    if platformServiceType == PLATFORM_SERVICE_TYPE_PSN then
-        consoleStoreName = GetString(SI_GAMEPAD_MARKET_PLAYSTATION_STORE)
-    elseif platformServiceType == PLATFORM_SERVICE_TYPE_XBL then
-        consoleStoreName = GetString(SI_GAMEPAD_MARKET_XBOX_STORE)
+    if IsConsoleUI() or IsHeronUI() then
+        self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_STEAM then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
     else -- _ZOS and _DMM
-        self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_WITH_LINK, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT))
-    end
-
-    if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
-        self.insufficientFundsMainText = zo_strformat(SI_GAMEPAD_MARKET_INSUFFICIENT_FUNDS_TEXT_CONSOLE_LABEL, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), consoleStoreName)
+        self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_WEB, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
     end
 end
 

@@ -340,8 +340,6 @@ function HelpAskForHelp_Keyboard:AttemptToSendTicket()
     ResetCustomerServiceTicket()
 
     --Populate the ticket fields
-    SetCustomerServiceTicketContactEmail(GetActiveUserEmailAddress())
-    
     --Category and subcategory values must be valid as they enable the submit button to be clicked On
     local categoryIndex = self.helpCategoryComboBox:GetSelectedItemData().index
     local mainArray = HELP_ASK_FOR_HELP_CATEGORY_INFO[categoryIndex]

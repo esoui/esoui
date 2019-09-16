@@ -1,0 +1,18 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GamepadLoadingIconAndLabelTemplate" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)LoadingIcon" inherits="ZO_LoadingIcon_Gamepad">
+                    <Anchor point="LEFT"/>
+                    <Dimensions x="ZO_GAMEPAD_LOADING_ICON_DEFAULT_SIZE" y="ZO_GAMEPAD_LOADING_ICON_DEFAULT_SIZE"/>
+                </Control>
+
+                <Label name="$(parent)Text" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" relativeTo="$(parent)LoadingIcon" relativePoint="RIGHT" offsetX="10"/>
+                    <Anchor point="RIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

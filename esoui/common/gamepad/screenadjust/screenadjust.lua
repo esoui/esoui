@@ -64,11 +64,7 @@ function ScreenAdjust:InitializeKeybindButtons()
 
     local adjustButton = bindsContainer:GetNamedChild("Adjust")
     adjustButton:SetText(GetString(SI_SCREEN_ADJUST))
-    if GetGamepadType() == GAMEPAD_TYPE_PS4 then
-        adjustButton:SetCustomKeyIcon("EsoUI/Art/Buttons/Gamepad/PS4/Nav_Ps4_LS_Slide_Scroll.dds")
-    else
-        adjustButton:SetCustomKeyIcon("EsoUI/Art/Buttons/Gamepad/XBox/Nav_XBone_LS_Slide_Scroll.dds")
-    end
+    adjustButton:SetCustomKeyIcon(ZO_GAMEPAD_LEFT_SLIDE_SCROLL_ICON)
     adjustButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
 
     self.saveButton = bindsContainer:GetNamedChild("Save")

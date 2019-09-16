@@ -335,15 +335,15 @@
                 <Up>TakeScreenshot()</Up>
             </Action>
 
-            <Action name="START_CHAT_ENTER">
+            <Action name="START_CHAT_ENTER" preventAutomaticInputModeChange="true">
                 <Down>StartChatInput("")</Down>
             </Action>
 
-            <Action name="START_CHAT_SLASH">
+            <Action name="START_CHAT_SLASH" preventAutomaticInputModeChange="true">
                 <Down>StartChatInput("/")</Down>
             </Action>
 
-            <Action name="CHAT_REPLY_TO_LAST_WHISPER">
+            <Action name="CHAT_REPLY_TO_LAST_WHISPER" preventAutomaticInputModeChange="true">
                 <Down>ChatReplyToLastWhisper()</Down>
             </Action>
 
@@ -445,7 +445,7 @@
 
             <Action name="TOGGLE_GAMEPAD_MODE">
                 <Up>
-                    if GetUIPlatform() == UI_PLATFORM_PC then
+                    if IsGamepadUISupported() and IsKeyboardUISupported() then
                         if GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED) then
                             SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "false")
                         else

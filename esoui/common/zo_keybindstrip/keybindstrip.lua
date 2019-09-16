@@ -178,10 +178,7 @@ function ZO_KeybindStrip_OnInitialized(control)
     end
 
     function KEYBIND_STRIP:GenerateGamepadRightScrollButtonDescriptor(text, visibleFunc)
-        local rightScrollIcon = (GetUIPlatform() == UI_PLATFORM_PS4) and "EsoUI/Art/Buttons/Gamepad/PS4/Nav_Ps4_RS_Scroll.dds" or 
-                                "EsoUI/Art/Buttons/Gamepad/Xbox/Nav_XBone_RS_Scroll.dds"
-
-        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, rightScrollIcon, 
+        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, ZO_GAMEPAD_RIGHT_SCROLL_ICON, 
                                                 "$(parent)RightStickControl", "ZO_KeybindStripRightScrollKeybind", self.rightScrollKeybind)
 
         if self.rightScrollKeybind == nil then
@@ -192,10 +189,7 @@ function ZO_KeybindStrip_OnInitialized(control)
     end
 
     function KEYBIND_STRIP:GenerateGamepadLeftSlideButtonDescriptor(text, visibleFunc) 
-        local leftSlideIcon = (GetUIPlatform() == UI_PLATFORM_PS4) and "EsoUI/Art/Buttons/Gamepad/PS4/Nav_Ps4_LS_Slide.dds" or 
-                             "EsoUI/Art/Buttons/Gamepad/Xbox/Nav_XBone_LS_Slide.dds"
-        
-        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, leftSlideIcon, 
+        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, ZO_GAMEPAD_LEFT_SLIDE_ICON, 
                                                 "$(parent)LeftStickSlide","ZO_KeybindStripLeftSlideKeybind", self.leftSlideKeybind)
 
         if self.leftSlideKeybind == nil then

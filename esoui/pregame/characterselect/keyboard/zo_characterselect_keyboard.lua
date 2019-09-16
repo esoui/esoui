@@ -1,6 +1,4 @@
 local CHARACTER_DATA = 1
-local g_currentlySelectedCharacterData
-local g_deletingCharacterIds = {}
 local g_characterOrderDividerHalfHeight
 local g_characterSelectStartDragOrder
 local g_selectedOrderControl
@@ -8,18 +6,37 @@ local g_selectedOrderControl
 local function GetDataForCharacterId(charId)
     local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
     for _, dataEntry in ipairs(dataList) do
-        if(AreId64sEqual(dataEntry.data.id, charId)) then
+        if AreId64sEqual(dataEntry.data.id, charId) then
             return dataEntry
         end
     end
 end
 
+function ZO_CharacterSelect_GetFormattedLevelChampion(characterData)
+    if characterData.championPoints and characterData.championPoints > 0 then
+        return zo_strformat(SI_CHARACTER_SELECT_CHAMPION_CLASS, characterData.championPoints, '')
+    else
+        return zo_strformat(SI_CHARACTER_SELECT_LEVEL_CLASS, characterData.level, '')
+    end
+end
+
+function ZO_CharacterSelect_GetFormattedLevelChampionAndClass(characterData)
+    local className = characterData.class and GetClassName(characterData.gender, characterData.class) or GetString(SI_UNKNOWN_CLASS)
+    if characterData.championPoints and characterData.championPoints > 0 then
+        local keyboardIconString = "EsoUI/Art/Champion/champion_icon.dds"
+        local formattedIcon = zo_iconFormat(keyboardIconString, "100%", "100%")
+        return zo_strformat(SI_CHARACTER_SELECT_LEVEL_CHAMPION_CLASS, characterData.level, formattedIcon, className)
+    else
+        return zo_strformat(SI_CHARACTER_SELECT_LEVEL_CLASS, characterData.level, className)
+    end
+end
+
 local function UpdateSelectedCharacterData(data)
-    if(data) then
-        ZO_CharacterSelectSelectedName:SetText(ZO_CharacterSelect_GetFormattedCharacterName(data))
+    if data then
+        ZO_CharacterSelectSelectedName:SetText(ZO_CharacterSelect_Manager_GetFormattedCharacterName(data))
         ZO_CharacterSelectSelectedRace:SetText(zo_strformat(SI_CHARACTER_SELECT_RACE, GetRaceName(data.gender, data.race)))
         ZO_CharacterSelectSelectedLocation:SetText(zo_strformat(SI_CHARACTER_SELECT_LOCATION, GetLocationName(data.location)))
-        ZO_CharacterSelectSelectedClassLevel:SetText(ZO_CharacterSelect_GetFormattedLevelChampionAndClass(data))
+        ZO_CharacterSelectSelectedClassLevel:SetText(ZO_CharacterSelect_GetFormattedLevelChampion(data))
     else
         ZO_CharacterSelectSelectedName:SetText("")
         ZO_CharacterSelectSelectedRace:SetText("")
@@ -44,7 +61,7 @@ local function SetupCharacterEntry(control, data)
     local characterLocation = GetControl(control, "Location")
     local characterAlliance = GetControl(control, "Alliance")
 
-    characterName:SetText(ZO_CharacterSelect_GetFormattedCharacterName(data))
+    characterName:SetText(ZO_CharacterSelect_Manager_GetFormattedCharacterName(data))
     characterStatus:SetText(ZO_CharacterSelect_GetFormattedLevelChampionAndClass(data))
 
     if data.location ~= 0 then
@@ -64,11 +81,11 @@ local function SetupCharacterEntry(control, data)
         characterOrderUp:SetHidden(true)
         characterOrderDown:SetHidden(true)
 
-        control.orderUpButton = characterOrderUp;
-        control.orderDownButton = characterOrderDown;
+        control.orderUpButton = characterOrderUp
+        control.orderDownButton = characterOrderDown
     end
 
-    local selectedData = ZO_CharacterSelect_GetSelectedCharacterData();
+    local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
     if selectedData == data then
         control.orderUpButton:SetHidden(false)
         control.orderDownButton:SetHidden(false)
@@ -90,130 +107,85 @@ local function SetupCharacterEntry(control, data)
     end
 end
 
-local function SelectCharacter(characterData)
-    ZO_ScrollList_SelectData(ZO_CharacterSelectScrollList, characterData)
+local function SetupScrollList()
+    local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
+    local characterDataList = CHARACTER_SELECT_MANAGER:GetCharacterDataList()
+    if #characterDataList > 0 then
+        for _, dataEntry in ipairs(characterDataList) do
+            table.insert(dataList, ZO_ScrollList_CreateDataEntry(CHARACTER_DATA, dataEntry))
+        end
 
-    if(characterData.needsRename) then
-        ZO_CharacterSelectLogin:SetText(GetString(SI_RENAME_CHARACTER))
-    else
-        ZO_CharacterSelectLogin:SetText(GetString(SI_LOGIN_CHARACTER))
+        ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
     end
 end
 
-local function DoCharacterSelection(index)
-    -- Get character select first random selection loaded in so not waiting for it
-    -- when move to Create
-    SetSuppressCharacterChanges(true)
-    if IsPregameCharacterConstructionReady() then
-        KEYBOARD_CHARACTER_CREATE_MANAGER:GenerateRandomCharacter()
-        SelectClothing(DRESSING_OPTION_STARTING_GEAR)
-    end
-
-    SetCharacterManagerMode(CHARACTER_MODE_SELECTION)
-    SetSuppressCharacterChanges(false)
-    SelectCharacterToView(index)
-    ZO_CharacterSelect_SetChromaColorForCharacterIndex(index)
-end
-
-local SetupCharacterList
-local SelectedCharacterChanged
-local SetupScrollList
-do
-    SetupScrollList = function()
-        local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
-        local characterDataList = ZO_CharacterSelect_GetCharacterDataList()
-        if #characterDataList > 0 then
-            for _, dataEntry in ipairs(characterDataList) do
-                table.insert(dataList, ZO_ScrollList_CreateDataEntry(CHARACTER_DATA, dataEntry))
-            end
-
-            ZO_ScrollList_Commit(ZO_CharacterSelectScrollList)
-        end
-    end
-
-    SetupCharacterList = function(self, eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
-        
-        ZO_CharacterSelect_OnCharacterListReceivedCommon(eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
-
-        ZO_CharacterSelect_ClearList()
-
-        ZO_CharacterSelectCreate:SetEnabled(numCharacters < maxCharacters)
-        ZO_CharacterSelectCharacterSlots:SetText(zo_strformat(SI_CHARACTER_SELECT_SLOTS, numCharacters, maxCharacters))
-
-        local formattedNumDeletes = zo_strformat(SI_DELETE_CHARACTER_NUM_DELETES, numCharacterDeletesRemaining)
-        if(numCharacterDeletesRemaining > 0) then
-            ZO_CharacterSelectDelete:SetText(zo_strformat(SI_DELETE_CHARACTER, ZO_DEFAULT_ENABLED_COLOR:Colorize(formattedNumDeletes)))
-            ZO_CharacterSelectDelete:SetEnabled(true)
-        else
-            ZO_CharacterSelectDelete:SetText(zo_strformat(SI_DELETE_CHARACTER, formattedNumDeletes))
-            ZO_CharacterSelectDelete:SetEnabled(false)
-        end
-
-        -- Sharing data from ZO_CharacterSelectCommon
-        SetupScrollList()
-
-        local characterData = ZO_CharacterSelect_GetBestSelectionData()
-        if characterData then
-            SelectCharacter(characterData)
-            ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.order)
-        end
-
-        local accountChampionPoints = ZO_CharacterSelect_GetAccountChampionPoints()
-        if accountChampionPoints > 0 then
-            ZO_CharacterSelectChampionPoints:SetText(zo_strformat(SI_KEYBOARD_ACCOUNT_CHAMPION_POINTS, accountChampionPoints))
-        else
-            ZO_CharacterSelectChampionPoints:SetHidden(true)
-        end
-    end
-
-    SelectedCharacterChanged = function(self, previouslySelected, selected)
-        if previouslySelected then
-            if previouslySelected.dataEntry.control then
-                previouslySelected.dataEntry.control.orderUpButton:SetHidden(true)
-                previouslySelected.dataEntry.control.orderDownButton:SetHidden(true)
-            end
-        end
-
-        if selected then
-            if g_currentlySelectedCharacterData == nil or g_currentlySelectedCharacterData.index ~= selected.index then
-                g_currentlySelectedCharacterData = selected
-
-                if IsPregameCharacterConstructionReady() then
-                    ZO_CharacterSelect_EnableSelection(g_currentlySelectedCharacterData)
-                    DoCharacterSelection(g_currentlySelectedCharacterData.index)
-                end
-            end
-
-            if selected.dataEntry.control then
-                selected.dataEntry.control.orderUpButton:SetHidden(false)
-                selected.dataEntry.control.orderDownButton:SetHidden(false)
-            end
-        end
-    end
-end
-
-local function CharacterDeleted(eventCode, charId)
-    -- Destroy the existing character list...then request a new one and the server will tell us which state to drop into.
-    -- NOTE: This is actually passed the character id, but we're going to let the server handle the empty list case for now.
+local function SetupCharacterList()
     ZO_CharacterSelect_ClearList()
-    RequestCharacterList()
-    ZO_CharacterSelect_FlagAsDeleting(charId, false)
+
+    ZO_CharacterSelectCreate:SetEnabled(CHARACTER_SELECT_MANAGER:CanCreateNewCharacters())
+    ZO_CharacterSelectCharacterSlots:SetText(zo_strformat(SI_CHARACTER_SELECT_SLOTS, CHARACTER_SELECT_MANAGER:GetNumCharacters(), CHARACTER_SELECT_MANAGER:GetMaxCharacters()))
+
+    local numCharacterDeletesRemaining = CHARACTER_SELECT_MANAGER:GetNumCharacterDeletesRemaining()
+    local formattedNumDeletes = zo_strformat(SI_DELETE_CHARACTER_NUM_DELETES, numCharacterDeletesRemaining)
+    if numCharacterDeletesRemaining > 0 then
+        ZO_CharacterSelectDelete:SetText(zo_strformat(SI_DELETE_CHARACTER, ZO_DEFAULT_ENABLED_COLOR:Colorize(formattedNumDeletes)))
+        ZO_CharacterSelectDelete:SetEnabled(true)
+    else
+        ZO_CharacterSelectDelete:SetText(zo_strformat(SI_DELETE_CHARACTER, formattedNumDeletes))
+        ZO_CharacterSelectDelete:SetEnabled(false)
+    end
+
+    SetupScrollList()
+
+    local characterData = CHARACTER_SELECT_MANAGER:GetSelectedCharacterData()
+    if characterData then
+        ZO_ScrollList_SelectData(ZO_CharacterSelectScrollList, characterData)
+        ZO_ScrollList_ScrollDataToCenter(ZO_CharacterSelectScrollList, characterData.order)
+    end
+
+    local accountChampionPoints = CHARACTER_SELECT_MANAGER:GetAccountChampionPoints()
+    if accountChampionPoints > 0 then
+        ZO_CharacterSelectChampionPoints:SetText(zo_strformat(SI_KEYBOARD_ACCOUNT_CHAMPION_POINTS, accountChampionPoints))
+    else
+        ZO_CharacterSelectChampionPoints:SetHidden(true)
+    end
 end
 
-local g_requestedCharacterRename = ""
+local function SelectedCharacterChanged(self, previouslySelectedCharacterData, selectedCharacterData)
+    if previouslySelectedCharacterData then
+        if previouslySelectedCharacterData.dataEntry.control then
+            previouslySelectedCharacterData.dataEntry.control.orderUpButton:SetHidden(true)
+            previouslySelectedCharacterData.dataEntry.control.orderDownButton:SetHidden(true)
+        end
+    end
 
-local function OnCharacterRenamedErrorCallback()
-    ZO_CharacterSelect_BeginRename(ZO_CharacterSelect_GetSelectedCharacterData())
-end
+    if selectedCharacterData then
+        if IsPregameCharacterConstructionReady() then
+            ZO_CharacterSelect_EnableSelection(selectedCharacterData)
+        end
 
-local function OnCharacterRenamed(eventCode, charId, result)
-    local OnSuccessCallback = nil
+        if selectedCharacterData.dataEntry.control then
+            selectedCharacterData.dataEntry.control.orderUpButton:SetHidden(false)
+            selectedCharacterData.dataEntry.control.orderDownButton:SetHidden(false)
+        end
 
-    ZO_CharacterSelect_OnCharacterRenamedCommon(eventCode, charId, result, g_requestedCharacterRename, OnSuccessCallback, OnCharacterRenamedErrorCallback)
+        if selectedCharacterData.needsRename then
+            ZO_CharacterSelectLogin:SetText(GetString(SI_RENAME_CHARACTER))
+        else
+            ZO_CharacterSelectLogin:SetText(GetString(SI_LOGIN_CHARACTER))
+        end
+
+        if ZO_RZCHROMA_EFFECTS then
+            ZO_RZCHROMA_EFFECTS:SetAlliance(selectedCharacterData.alliance)
+        end
+    end
+    ZO_CharacterSelect_RefreshVisibleList()
 end
 
 function ZO_CharacterSelect_BeginRename(characterData)
-    ZO_Dialogs_ShowDialog("RENAME_CHARACTER_KEYBOARD", { characterData = characterData })
+    if internalassert(characterData) then
+        ZO_Dialogs_ShowDialog("RENAME_CHARACTER_KEYBOARD", { characterData = characterData })
+    end
 end
 
 local function SetupRenameDialog(dialog, data)
@@ -225,10 +197,10 @@ local function SetupRenameDialog(dialog, data)
     dialog.attemptRenameButton = dialog:GetNamedChild("AttemptRename")
     dialog.cancelButton = dialog:GetNamedChild("Cancel")
 
-    if(dialog.renameInstructions == nil) then
+    if dialog.renameInstructions == nil then
         local NAME_INSTRUCTIONS_OFFSET_X = -20
         local NAME_INSTRUCTIONS_OFFSET_Y = 0
-    
+
         dialog.renameInstructions = ZO_ValidNameInstructions:New(dialog:GetNamedChild("RenameInstructions"))
         dialog.renameInstructions:SetPreferredAnchor(RIGHT, dialog, LEFT, NAME_INSTRUCTIONS_OFFSET_X, NAME_INSTRUCTIONS_OFFSET_Y)   -- Attach instructions to left side of the dialog
     end
@@ -238,6 +210,12 @@ local function SetupRenameDialog(dialog, data)
 end
 
 function ZO_RenameCharacterDialog_OnInitialized(self)
+    local function OnRenameResult(success)
+        if not success then
+            -- restart flow
+            ZO_CharacterSelect_BeginRename(ZO_CharacterSelect_GetSelectedCharacterData())
+        end
+    end
     ZO_Dialogs_RegisterCustomDialog("RENAME_CHARACTER_KEYBOARD",
     {
         customControl = self,
@@ -246,69 +224,58 @@ function ZO_RenameCharacterDialog_OnInitialized(self)
         title =
         {
             text = function(dialog)
-                        local titleText = SI_CHARACTER_SELECT_RENAME_CHARACTER_FROM_TOKEN_TITLE
-
-                        if dialog.data.characterData.needsRename then
-                            titleText = SI_CHARACTER_SELECT_RENAME_CHARACTER_TITLE
-                        end
-
-                        return GetString(titleText)
-                   end,
+                local titleText = SI_CHARACTER_SELECT_RENAME_CHARACTER_FROM_TOKEN_TITLE
+    
+                if dialog.data.characterData.needsRename then
+                    titleText = SI_CHARACTER_SELECT_RENAME_CHARACTER_TITLE
+                end
+    
+                return GetString(titleText)
+            end,
         },
         buttons =
         {
             {
-                control =   GetControl(self, "AttemptRename"),
-                text =      SI_CHARACTER_SELECT_RENAME_SAVE_NEW_NAME,
-                callback =  function(dialog)
-                                g_requestedCharacterRename = ZO_RenameCharacterDialogNameEdit:GetText()
-                                AttemptCharacterRename(dialog.data.characterData.id, g_requestedCharacterRename)
-                                
-                                -- Show a loading dialog in its place until the rename request finishes
-                                ZO_Dialogs_ShowDialog("CHARACTER_SELECT_CHARACTER_RENAMING")
-                            end,
+                control = GetControl(self, "AttemptRename"),
+                text = SI_CHARACTER_SELECT_RENAME_SAVE_NEW_NAME,
+                callback = function(dialog)
+                    local requestedName = ZO_RenameCharacterDialogNameEdit:GetText()
+                    CHARACTER_SELECT_MANAGER:AttemptCharacterRename(dialog.data.characterData.id, requestedName, OnRenameResult)
+                end,
             },
             {
-                control =   GetControl(self, "Cancel"),
-                text =      SI_DIALOG_CANCEL,
+                control = GetControl(self, "Cancel"),
+                text = SI_DIALOG_CANCEL,
             },
         },
         updateFn = function(dialog)
-                        local nameText = dialog.nameEdit:GetText()
-                        local nameViolations = { IsValidCharacterName(nameText) }
+            local nameText = dialog.nameEdit:GetText()
+            local nameViolations = { IsValidCharacterName(nameText) }
 
-                        if #nameViolations > 0 then
-                            dialog.renameInstructions:Show(nil, nameViolations)
-                            dialog.attemptRenameButton:SetEnabled(false)
-                        else
-                            dialog.renameInstructions:Hide()
-                            dialog.attemptRenameButton:SetEnabled(true)
-                        end
+            if #nameViolations > 0 then
+                dialog.renameInstructions:Show(nil, nameViolations)
+                dialog.attemptRenameButton:SetEnabled(false)
+            else
+                dialog.renameInstructions:Hide()
+                dialog.attemptRenameButton:SetEnabled(true)
+            end
 
-                        local correctedName = CorrectCharacterNameCase(nameText)
-                        if correctedName ~= nameText then
-                            -- only set the text if it's actually changed
-                            dialog.nameEdit:SetText(correctedName)
-                        end
-                   end,
+            local correctedName = CorrectCharacterNameCase(nameText)
+            if correctedName ~= nameText then
+                -- only set the text if it's actually changed
+                dialog.nameEdit:SetText(correctedName)
+            end
+        end,
     })
 end
 
 local function OnCharacterConstructionReady()
-    ZO_CharacterSelect_RefreshCharacters()
+    ZO_CharacterSelect_RefreshVisibleList()
 
-    if(GetNumCharacters() > 0) then
-        ZO_CharacterSelect_EnableSelection(g_currentlySelectedCharacterData)
-        DoCharacterSelection(g_currentlySelectedCharacterData.index)
-    end
-end
-
-local function ContextFilter(callback)
-    -- This will wrap the callback so that it gets called in the appropriate context
-    return function(...)
-        if not IsConsoleUI() then
-            callback(...)
-        end
+    local selectedCharacterData = CHARACTER_SELECT_MANAGER:GetSelectedCharacterData()
+    if selectedCharacterData then
+        ZO_CharacterSelect_EnableSelection(selectedCharacterData)
+        CHARACTER_SELECT_MANAGER:RefreshConstructedCharacter()
     end
 end
 
@@ -319,10 +286,6 @@ function ZO_CharacterSelect_Initialize(self)
         SelectedCharacterChanged(self, previouslySelected, selected)
     end
 
-    local function OnCharacterListReceived(eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
-        SetupCharacterList(self, eventCode, numCharacters, maxCharacters, mostRecentlyPlayedCharacterId, numCharacterDeletesRemaining, maxCharacterDeletes)
-    end
-
     local function OnCharacterSelectedForPlay(eventCode, charId)
         local data = GetDataForCharacterId(charId)
         -- data will come back as nil on character creation
@@ -331,9 +294,9 @@ function ZO_CharacterSelect_Initialize(self)
     end
 
     local function OnPregameFullyLoaded()
-        if ZO_CharacterSelect_CanShowAdditionalSlotsInfo() then
+        if CHARACTER_SELECT_MANAGER:CanShowAdditionalSlotsInfo() then
             ZO_CharacterSelectExtraCharacterSlots:SetHidden(false)
-            ZO_CharacterSelectExtraCharacterSlots:SetText(zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, ZO_CharacterSelect_GetAdditionalSlotsRemaining()))
+            ZO_CharacterSelectExtraCharacterSlots:SetText(zo_strformat(SI_ADDITIONAL_CHARACTER_SLOTS_DESCRIPTION, CHARACTER_SELECT_MANAGER:GetAdditionalSlotsRemaining()))
             ZO_CharacterSelectCharacterSlots:SetAnchor(TOP, nil, TOP, 0, 10)
         else
             ZO_CharacterSelectExtraCharacterSlots:SetHidden(true)
@@ -360,19 +323,33 @@ function ZO_CharacterSelect_Initialize(self)
 
     ZO_ScrollList_AddResizeOnScreenResize(list)
 
-    self:RegisterForEvent(EVENT_CHARACTER_LIST_RECEIVED, ContextFilter(OnCharacterListReceived))
-    self:RegisterForEvent(EVENT_CHARACTER_DELETED, ContextFilter(CharacterDeleted))
-    self:RegisterForEvent(EVENT_CHARACTER_SELECTED_FOR_PLAY, ContextFilter(OnCharacterSelectedForPlay))
-    self:RegisterForEvent(EVENT_CHARACTER_RENAME_RESULT, ContextFilter(OnCharacterRenamed))
+    self:RegisterForEvent(EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelectedForPlay)
+
+    CHARACTER_SELECT_MANAGER:RegisterCallback("CharacterListUpdated", function()
+        SetupCharacterList()
+    end)
+
+    CHARACTER_SELECT_MANAGER:RegisterCallback("CharacterOrderChanged", function()
+        ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
+        SetupScrollList()
+    end)
+
+    CHARACTER_SELECT_MANAGER:RegisterCallback("SelectedCharacterUpdated", function(characterData)
+        ZO_ScrollList_SelectData(ZO_CharacterSelectScrollList, characterData)
+    end)
 
     self:SetHandler("OnUpdate", function(_, timeS)
         ZO_CharacterSelect_OnUpdate(timeS)
     end)
 
-    CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", ContextFilter(OnCharacterConstructionReady))
-    CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", ContextFilter(OnPregameFullyLoaded))
+    CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", OnCharacterConstructionReady)
+    CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
 
     CHARACTER_SELECT_FRAGMENT = ZO_FadeSceneFragment:New(self, 300)
+end
+
+function ZO_CharacterSelect_IsKeyboardCharacterSelectShowing()
+    return CHARACTER_SELECT_FRAGMENT:IsShowing()
 end
 
 function ZO_CharacterOrderDivider_Initialize()
@@ -389,8 +366,6 @@ function ZO_CharacterSelect_SetupAddonManager()
 end
 
 function ZO_CharacterSelect_ClearList()
-    g_currentlySelectedCharacterData = nil
-    g_currrentSelectionPriority = -1
     ZO_CharacterSelect_DisableSelection()
     ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
     local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
@@ -403,10 +378,10 @@ function ZO_CharacterSelect_Login(option)
     local state = PregameStateManager_GetCurrentState()
     --Entering and returning from a cinematic leaves us in CharacterSelect_FromCinematic. This is not a state, and it should
     --never have been one. It should be a edge back to the character select state.
-    if(state == "CharacterSelect" or state == "CharacterSelect_FromCinematic") then
+    if state == "CharacterSelect" or state == "CharacterSelect_FromCinematic" then
         local selectedData = ZO_ScrollList_GetSelectedData(ZO_CharacterSelectScrollList)
-        if(selectedData) and (not g_deletingCharacterIds[selectedData.id]) then
-            if(selectedData.needsRename) then
+        if selectedData then
+            if selectedData.needsRename then
                 ZO_CharacterSelect_BeginRename(selectedData)
             else
                 PregameStateManager_PlayCharacter(selectedData.id, option)
@@ -462,9 +437,8 @@ local function ChangeSelectedCharacter(direction)
         local nextDataIndex = selectedDataIndex + direction
         if nextDataIndex >= 1 and nextDataIndex <= #dataList then
             local nextDataEntry = dataList[nextDataIndex]
-            ZO_CharacterSelect_SetPlayerSelectedCharacterId(nextDataEntry.data.id)
             ZO_ScrollList_ScrollDataIntoView(list, nextDataIndex)
-            SelectCharacter(nextDataEntry.data)
+            CHARACTER_SELECT_MANAGER:SetPlayerSelectedCharacter(nextDataEntry.data)
         end
     end
 end
@@ -479,60 +453,53 @@ end
 
 function ZO_CharacterSelect_DeleteSelected()
     local data = ZO_ScrollList_GetSelectedData(ZO_CharacterSelectScrollList)
-    if(data and not ZO_Dialogs_IsShowing("DELETE_SELECTED_CHARACTER")) then
+    if data and not ZO_Dialogs_IsShowing("DELETE_SELECTED_CHARACTER") then
         local confirmationString = GetString(SI_DELETE_CHARACTER_CONFIRMATION_TEXT)
         local confirmationButtonName = GetString(SI_DELETE_CHARACTER_CONFIRMATION_BUTTON)
-        local numCharacterDeletesRemaining = GetNumCharacterDeletesRemaining()
-        ZO_Dialogs_ShowDialog("DELETE_SELECTED_CHARACTER", {characterId = data.id}, {mainTextParams = {data.name, confirmationString, confirmationButtonName, numCharacterDeletesRemaining}})
-        ZO_CharacterSelectDelete:SetState(BSTATE_DISABLED, true)
-    end
-end
-
-function ZO_CharacterSelect_FlagAsDeleting(characterId, deleting)
-    if (deleting) then
-        g_deletingCharacterIds[characterId] = true
-    else
-        g_deletingCharacterIds[characterId] = nil
+        local numCharacterDeletesRemaining = CHARACTER_SELECT_MANAGER:GetNumCharacterDeletesRemaining()
+        local textParams =
+        {
+            data.name,
+            confirmationString,
+            confirmationButtonName,
+            numCharacterDeletesRemaining
+        }
+        ZO_Dialogs_ShowDialog("DELETE_SELECTED_CHARACTER", { characterId = data.id }, { mainTextParams = textParams })
     end
 end
 
 function ZO_CharacterEntry_OnMouseClick(self)
-    local data = ZO_ScrollList_GetData(self)
-    ZO_CharacterSelect_SetPlayerSelectedCharacterId(data.id)
-    SelectCharacter(data)
+    local characterData = ZO_ScrollList_GetData(self)
+    CHARACTER_SELECT_MANAGER:SetPlayerSelectedCharacter(characterData)
 end
 
 function ZO_CharacterEntry_OnDragStart(self)
     local data = ZO_ScrollList_GetData(self)
     g_characterSelectStartDragOrder = data.order
-    ZO_CharacterSelect_RefreshCharacters()
+    ZO_CharacterSelect_RefreshVisibleList()
 end
 
 function ZO_CharacterEntry_OnMouseUp(self)
     if g_characterSelectStartDragOrder then
         if g_selectedOrderControl then
             local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
-            local endedOrder = g_selectedOrderControl.dataEntry.data.order
+            local startOrder = g_characterSelectStartDragOrder
+            local endOrder = g_selectedOrderControl.dataEntry.data.order
             local centerX, centerY = g_selectedOrderControl:GetCenter()
             local mouseX, mouseY = GetUIMousePosition()
             -- correct end order based on mouse position and direction we are reordering
-            if endedOrder < g_characterSelectStartDragOrder and mouseY > centerY then
-                endedOrder = endedOrder + 1
-            elseif endedOrder > g_characterSelectStartDragOrder and mouseY <= centerY then
-                endedOrder = endedOrder - 1
+            if endOrder < startOrder and mouseY > centerY then
+                endOrder = endOrder + 1
+            elseif endOrder > endOrder and mouseY <= centerY then
+                endOrder = endOrder - 1
             end
-            ZO_CharacterSelect_ChangeCharacterOrders(g_characterSelectStartDragOrder, endedOrder)
-
             g_selectedOrderControl = nil
             g_characterSelectStartDragOrder = nil
-
-            ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
-            SetupScrollList()
-            SelectCharacter(selectedData)
+            CHARACTER_SELECT_MANAGER:ChangeCharacterOrders(startOrder, endOrder)
         else
             g_characterSelectStartDragOrder = nil
             g_selectedOrderControl = nil
-            ZO_CharacterSelect_RefreshCharacters()
+            ZO_CharacterSelect_RefreshVisibleList()
         end
 
         ZO_CharacterOrderDivider:ClearAnchors()
@@ -565,17 +532,16 @@ function ZO_CharacterEntry_OnMouseExit(self)
     ZO_ScrollList_MouseExit(ZO_CharacterSelectScrollList, self)
 end
 
-function ZO_CharacterSelect_RefreshCharacters()
+function ZO_CharacterSelect_RefreshVisibleList()
     ZO_ScrollList_RefreshVisible(ZO_CharacterSelectScrollList)
 end
 
 function ZO_CharacterSelectDelete_OnMouseEnter(control)
     InitializeTooltip(InformationTooltip, control, BOTTOMRIGHT, 0, -5, TOPRIGHT)
 
-    local numCharacterDeletesRemaining = GetNumCharacterDeletesRemaining()
-    local maxCharacterDeletes = GetMaxCharacterDeletes()
+    local numCharacterDeletesRemaining = CHARACTER_SELECT_MANAGER:GetNumCharacterDeletesRemaining()
 
-    if numCharacterDeletesRemaining == maxCharacterDeletes then
+    if CHARACTER_SELECT_MANAGER:AreAllCharacterDeletesRemaining() then
         InformationTooltip:AddLine(zo_strformat(GetString(SI_DELETE_CHARACTER_MAX_ENABLED_TOOLTIP), numCharacterDeletesRemaining), "", ZO_NORMAL_TEXT:UnpackRGB())
     elseif numCharacterDeletesRemaining > 0 then
         InformationTooltip:AddLine(zo_strformat(GetString(SI_DELETE_CHARACTER_ENABLED_TOOLTIP), numCharacterDeletesRemaining), "", ZO_NORMAL_TEXT:UnpackRGB())
@@ -602,20 +568,14 @@ end
 function ZO_CharacterSelect_Move_Character_Up()
     local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
     if selectedData and selectedData.order > 1 then
-        ZO_CharacterSelect_OrderCharacterUp(selectedData.order)
-        ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
-        SetupScrollList()
-        SelectCharacter(selectedData)
+        CHARACTER_SELECT_MANAGER:SwapCharacterOrderUp(selectedData.order)
     end
 end
 
 function ZO_CharacterSelect_Move_Character_Down()
     local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
-    if selectedData and selectedData.order < GetNumCharacters() then
-        ZO_CharacterSelect_OrderCharacterDown(selectedData.order)
-        ZO_ScrollList_Clear(ZO_CharacterSelectScrollList)
-        SetupScrollList()
-        SelectCharacter(selectedData)
+    if selectedData and selectedData.order < CHARACTER_SELECT_MANAGER:GetNumCharacters() then
+        CHARACTER_SELECT_MANAGER:SwapCharacterOrderDown(selectedData.order)
     end
 end
 
@@ -652,7 +612,7 @@ function ServiceTokenIndicator:Initialize(control, tokenType, iconTexture)
         end
     end
 
-    control:RegisterForEvent(EVENT_SERVICE_TOKENS_UPDATED, ContextFilter(OnTokensUpdated))
+    control:RegisterForEvent(EVENT_SERVICE_TOKENS_UPDATED, OnTokensUpdated)
 
     control:SetHandler("OnMouseUp", function(control, button, upInside)
         if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
@@ -673,7 +633,7 @@ function ServiceTokenIndicator:SetTokenCount(numTokens)
     self.tokenCount:SetText(numTokens)
 
     self.enabled = numTokens ~= 0
-    
+
     self.icon:SetDesaturation(self.enabled and 0 or 1)
 end
 

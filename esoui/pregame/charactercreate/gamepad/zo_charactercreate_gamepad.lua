@@ -55,27 +55,27 @@ end
 
 function CharacterCreateSliderManager:Initialize(parent)
     local CreateSlider =    function(pool)
-                                local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                 return ZO_CharacterCreateSlider_Gamepad:New(control)
                             end
 
     local CreateAppearanceSlider =  function(pool)
-                                        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                         return ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
                                     end
 
     local CreateColorPicker =   function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                     return ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
                                 end
 
     local CreateVoiceSlider =   function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateVoiceSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateVoiceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                     return ZO_CharacterCreateVoiceSlider_Gamepad:New(control)
                                 end
 
     local CreateGenderSlider =  function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                     return ZO_CharacterCreateGenderSlider_Gamepad:New(control)
                                 end
 
@@ -622,6 +622,7 @@ function ZO_CharacterCreate_Gamepad:InitializeAllianceSelectors()
         self:InitializeAllianceSelector(selector, alliance)
     end
 
+    ZO_CharacterCreate_GamepadAlliance.sliderObject:SetButtonControlsByPosition(layoutTable)
     SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadAlliance, #alliances)
 end
 
@@ -667,10 +668,11 @@ function ZO_CharacterCreate_Gamepad:InitializeRaceSelectors()
         end
     end
 
-    local raceObject = ZO_CharacterCreate_GamepadRace
-    raceObject.numButtons = position - 1
+    local raceControl = ZO_CharacterCreate_GamepadRace
+    raceControl.numButtons = position - 1
 
-    SetSelectorsControlSelectedCenterOffset(raceObject, raceObject.numButtons)
+    raceControl.sliderObject:SetButtonControlsByPosition(layoutTable)
+    SetSelectorsControlSelectedCenterOffset(raceControl, raceControl.numButtons)
 
     for i, race in ipairs(races) do
         if race.position == GAMEPAD_SELECTOR_IGNORE_POSITION then
@@ -678,7 +680,7 @@ function ZO_CharacterCreate_Gamepad:InitializeRaceSelectors()
         else
             local raceButton = layoutTable[race.position]
             -- If there are 4 buttons we should center the final button
-            if raceObject.numButtons == 4 and raceObject.numButtons == race.position then
+            if raceControl.numButtons == 4 and raceControl.numButtons == race.position then
                 raceButton = layoutTable[5]
             end
             raceButton:SetHidden(false)
@@ -993,14 +995,17 @@ function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
         button:SetHidden(true)
     end
 
-    for i, class in ipairs(classes) do
-        class.position = i
-        local classButton = layoutTable[i]
-        assert(classButton ~= nil, "Unable to get class button for class #" .. i)
+    local buttonControlsByPosition = {}
+    for position, class in ipairs(classes) do
+        class.position = position
+        local classButton = layoutTable[position]
+        buttonControlsByPosition[position] = classButton
+        assert(classButton ~= nil, "Unable to get class button for class #" .. position)
         self:InitializeSelectorButton(classButton, class, self.classRadioGroup)
         AddClassSelectionDataToSelector(classButton, class)
     end
 
+    ZO_CharacterCreate_GamepadClass.sliderObject:SetButtonControlsByPosition(buttonControlsByPosition)
     SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadClass, numClasses)
 end
 
@@ -1345,15 +1350,11 @@ function ZO_CharacterCreate_Gamepad_ShowFinishScreen()
 end
 
 function ZO_CharacterCreate_Gamepad_Initialize(control)
-    -- Gamepad pregame is only available to consoles or clients set to force the console flow
-    -- so we won't create this on PC for some efficiency
-    if IsInGamepadPreferredMode() then
-        GAMEPAD_CHARACTER_CREATE_MANAGER = ZO_CharacterCreate_Gamepad:New(control)
-        SYSTEMS:RegisterGamepadObject(ZO_CHARACTER_CREATE_SYSTEM_NAME, GAMEPAD_CHARACTER_CREATE_MANAGER)
+    GAMEPAD_CHARACTER_CREATE_MANAGER = ZO_CharacterCreate_Gamepad:New(control)
+    SYSTEMS:RegisterGamepadObject(ZO_CHARACTER_CREATE_SYSTEM_NAME, GAMEPAD_CHARACTER_CREATE_MANAGER)
 
-        local containerBuckets = control:GetNamedChild("ContainerInnerBuckets")
-        GAMEPAD_BUCKET_MANAGER = ZO_CharacterCreateBucketManager_Gamepad:New(containerBuckets)
-    end
+    local containerBuckets = control:GetNamedChild("ContainerInnerBuckets")
+    GAMEPAD_BUCKET_MANAGER = ZO_CharacterCreateBucketManager_Gamepad:New(containerBuckets)
 end
 
 function ZO_CharacterCreate_Gamepad_OnPrimaryButtonPressed()

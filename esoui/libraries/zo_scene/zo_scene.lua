@@ -477,6 +477,14 @@ function ZO_Scene:WasShownInGamepadPreferredMode()
     return self.wasShownInGamepadPreferredMode
 end
 
+function ZO_Scene:WasRequestedToShowInGamepadPreferredMode()
+    return self.wasRequestedToShowInGamepadPreferredMode
+end
+
+function ZO_Scene:SetWasRequestedToShowInGamepadPreferredMode(gamepad)
+    self.wasRequestedToShowInGamepadPreferredMode = gamepad
+end
+
 function ZO_Scene:IsRemoteScene()
     return false
 end

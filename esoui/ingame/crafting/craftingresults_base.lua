@@ -166,6 +166,16 @@ function ZO_CraftingResults_Base:StartCraftProcess(playStopTooltipAnimation)
     self.playStopTooltipAnimation = playStopTooltipAnimation
     self.playStartTooltipAnimation = not playStopTooltipAnimation
 
+	-- Suppress item count-related messaging for Smithing Tradeskills' Improvement and Research actions.
+	if ZO_Smithing_IsSceneShowing() then
+		local mode = ZO_Smithing_GetActiveObject():GetMode()
+		self.craftingProcessProducesItems = not (mode == SMITHING_MODE_IMPROVEMENT or mode == SMITHING_MODE_RESEARCH)
+	elseif SCENE_MANAGER:GetCurrentSceneName() == "gamepad_smithing_research_confirm" then -- Separate case due to ancillary confirmation Scene
+		self.craftingProcessProducesItems = false
+	else
+		self.craftingProcessProducesItems = true
+	end
+
     if ZO_Enchanting_IsInCreationMode() then
         local potencySound, potencyLength, essenceSound, essenceLength, aspectSound, aspectLength = ZO_Enchanting_GetVisibleEnchanting():GetLastRunestoneSoundParams()
 
@@ -242,7 +252,7 @@ function ZO_CraftingResults_Base:CompleteCraftProcess(craftFailed, isExceptional
             if self.playStopTooltipAnimation then
                 self:PlayTooltipAnimation(craftFailed, isExceptionalResult, craftingType)
             else
-                self:CheckCraftProcessCompleted()
+                self:CheckCraftProcessCompleted(craftingType)
             end
         end
     end
@@ -375,21 +385,24 @@ do
             end
 
             if numItemsGained == 0 then
-                if craftingType == CRAFTING_TYPE_ALCHEMY then
-                    -- Crafted inert potion
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
-                elseif craftingType == CRAFTING_GAINED_ENCHANTING then
-                    -- No extraction results
-                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
-                elseif IsSmithingCraftingType(craftingType) then
-                    -- No results from gear deconstruction
-                    local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
-                    if penaltyApplied then
-                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
-                    else
-                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
-                    end
-                end
+				if craftingType == CRAFTING_TYPE_ALCHEMY then
+					-- Crafted inert potion
+					ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
+				elseif craftingType == CRAFTING_TYPE_ENCHANTING then
+					-- No extraction results
+					ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
+				elseif IsSmithingCraftingType(craftingType) then
+					-- Only display extraction-related messaging for operations that produce items.
+					if self.craftingProcessProducesItems then
+						-- No results from gear deconstruction
+						local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
+						if penaltyApplied then
+							ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
+						else
+							ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
+						end
+					end
+				end
             else
                 local shouldDisplayMessages = self:ShouldDisplayMessages()
                 local finalItemSoundCategory = ITEM_SOUND_CATEGORY_NONE

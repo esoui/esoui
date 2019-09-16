@@ -573,11 +573,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             name = GetString(SI_DLC_BOOK_ACTION_GET_SUBSCRIPTION),
             keybind = "UI_SHORTCUT_RIGHT_STICK",
             callback = function()
-                if GetUIPlatform() == UI_PLATFORM_PC then
-                    ZO_Dialogs_ShowGamepadDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION }, { mainTextParams = { GetString(SI_ESO_PLUS_SUBSCRIPTION_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB) } })
-                else
-                    ZO_Dialogs_ShowGamepadDialog("CONSOLE_BUY_ESO_PLUS")
-                end
+                ZO_ShowBuySubscriptionPlatformDialog()
             end,
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()

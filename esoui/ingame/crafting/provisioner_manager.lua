@@ -51,19 +51,20 @@ function ZO_ProvisionerManager:ClearDirtyFlags()
     end
 end
 
-function ZO_ProvisionerManager:GetRecipeData()
-    if self.dirtyFlags[DIRTY.ALL] then
-        self:BuildRecipeData()
+function ZO_ProvisionerManager:GetRecipeListData(currentCraftingStation)
+    if currentCraftingStation ~= self.currentCraftingStationType or self.dirtyFlags[DIRTY.ALL] then
+        self.currentCraftingStationType = currentCraftingStation
+        self:BuildRecipeListData(currentCraftingStation)
     else
         if self.dirtyFlags[DIRTY.NUM_CREATABLE] then
-            for _, recipeList in pairs(self.recipeData) do
+            for _, recipeList in pairs(self.recipeLists) do
                 for _, recipe in ipairs(recipeList.recipes) do
                     recipe.maxIterationsForIngredients = self:CalculateMaxIterationsForIngredients(recipe.recipeListIndex, recipe.recipeIndex, recipe.numIngredients)
                 end
             end
         end
         if self.dirtyFlags[DIRTY.MEETS_REQUIREMENTS] then
-            for _, recipeList in pairs(self.recipeData) do
+            for _, recipeList in pairs(self.recipeLists) do
                 for _, recipe in ipairs(recipeList.recipes) do
                     recipe.passesTradeskillLevelReqs = self:PassesTradeskillLevelReqs(recipe.tradeskillsLevelReqs)
                     recipe.passesQualityLevelReq = self:PassesQualityLevelReq(recipe.qualityReq)
@@ -73,7 +74,7 @@ function ZO_ProvisionerManager:GetRecipeData()
     end
     self:ClearDirtyFlags()
 
-    return self.recipeData
+    return self.recipeLists
 end
 
 -- This calculates the number of times we could perform a craft with the ingredients we currently have, ignoring space or cost or other limits.
@@ -86,7 +87,7 @@ function ZO_ProvisionerManager:CalculateMaxIterationsForIngredients(recipeListIn
     local minCount = math.huge
 
     for ingredientIndex = 1, numIngredients do
-        local _, _, requiredQuantity = GetRecipeIngredientItemInfo(recipeListIndex, recipeIndex, ingredientIndex)
+        local requiredQuantity = GetRecipeIngredientRequiredQuantity(recipeListIndex, recipeIndex, ingredientIndex)
         local ingredientCount = GetCurrentRecipeIngredientCount(recipeListIndex, recipeIndex, ingredientIndex)
 
         minCount = zo_min(zo_floor(ingredientCount / requiredQuantity), minCount)
@@ -117,16 +118,23 @@ function ZO_ProvisionerManager:PassesQualityLevelReq(qualityReq)
     end
 end
 
-local DEFAULT_RECIPE_CREATE_SOUND = SOUNDS.DEFAULT_RECIPE_CRAFTED
-function ZO_ProvisionerManager:BuildRecipeData()
-    self.recipeData = {}
+do
+    local DEFAULT_RECIPE_CREATE_SOUND = SOUNDS.DEFAULT_RECIPE_CRAFTED
 
-    for recipeListIndex = 1, GetNumRecipeLists() do
-        local recipeListName, numRecipes, upIcon, downIcon, overIcon, _, recipeListCreateSound = GetRecipeListInfo(recipeListIndex)
-        for recipeIndex = 1, numRecipes do
-            local known, recipeName, numIngredients, _, qualityReq, specialIngredientType, requiredCraftingStationType = GetRecipeInfo(recipeListIndex, recipeIndex)
-            local _, resultIcon = GetRecipeResultItemInfo(recipeListIndex, recipeIndex)
-            if known then
+    local function IterateKnownRecipes(recipeListIndex, craftingStationType)
+        return function(_, lastIndex)
+            return GetNextKnownRecipeForCraftingStation(recipeListIndex, craftingStationType, lastIndex)
+        end
+    end
+
+    function ZO_ProvisionerManager:BuildRecipeListData(currentCraftingStation)
+        self.recipeLists = {}
+
+        for recipeListIndex = 1, GetNumRecipeLists() do
+            local recipeListName, numRecipes, upIcon, downIcon, overIcon, _, recipeListCreateSound = GetRecipeListInfo(recipeListIndex)
+            for recipeIndex in IterateKnownRecipes(recipeListIndex, currentCraftingStation) do
+                local _, recipeName, numIngredients, _, qualityReq, specialIngredientType, requiredCraftingStationType = GetRecipeInfo(recipeListIndex, recipeIndex)
+                local _, resultIcon = GetRecipeResultItemInfo(recipeListIndex, recipeIndex)
                 local maxIterationsForIngredients = self:CalculateMaxIterationsForIngredients(recipeListIndex, recipeIndex, numIngredients)
                 local tradeskillsLevelReqs = {}
                 for tradeskillIndex = 1, GetNumRecipeTradeskillRequirements(recipeListIndex, recipeIndex) do
@@ -158,7 +166,7 @@ function ZO_ProvisionerManager:BuildRecipeData()
                     requiredCraftingStationType = requiredCraftingStationType,
                 }
 
-                local recipeList = self.recipeData[recipeListIndex]
+                local recipeList = self.recipeLists[recipeListIndex]
                 if not recipeList then
                     recipeList =
                     {
@@ -169,7 +177,7 @@ function ZO_ProvisionerManager:BuildRecipeData()
                         overIcon = overIcon,
                         recipes = {}
                     }
-                    self.recipeData[recipeListIndex] = recipeList
+                    self.recipeLists[recipeListIndex] = recipeList
                 end
 
                 table.insert(recipeList.recipes, recipe)

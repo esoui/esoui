@@ -1,17 +1,18 @@
 -- this table stores everything needed to setup every setting control
 -- each OptionsPanel_Whatever.lua file creates a table and adds itself to this one.
 ZO_SharedOptions_SettingsData  = {} 
-SETTING_TYPE_CUSTOM = 5000 --this must be bigger than EsoGameDataEnums::cSettingSystemTypeSize, currently 16
+SETTING_TYPE_CUSTOM = 5000 --this must be bigger than EsoGameDataEnums::cSettingSystemTypeSize
+internalassert(SETTING_TYPE_CUSTOM > (SETTING_TYPE_MAX_VALUE + 1))
 
 ZO_SharedOptions = ZO_Object:Subclass()
 
-function ZO_SharedOptions:New(control)
+function ZO_SharedOptions:New(...)
     local sharedOptions = ZO_Object.New(self)
-    sharedOptions:Initialize(control)
+    sharedOptions:Initialize(...)
     return sharedOptions
 end
 
-function ZO_SharedOptions:Initialize(control)  
+function ZO_SharedOptions:Initialize()
     self.controlTable = {}
     self.panelNames = {}
     self.isGamepadOptions = false
@@ -112,12 +113,12 @@ do
     }
 
     function ZO_SharedOptions:IsControlTypeAnOption(data)
-	    local controlType = self:GetControlType(data.controlType)
+        local controlType = self:GetControlType(data.controlType)
         return OPTION_CONTROL_TYPES[controlType]
     end
 end
 
-function ZO_SharedOptions:LoadDefaults(control, data) 
+function ZO_SharedOptions:LoadDefaults(control, data)
     if data.customResetToDefaultsFunction then
         data.customResetToDefaultsFunction(control, data)
     elseif self:IsControlTypeAnOption(data) then
@@ -133,7 +134,7 @@ end
 
 function ZO_SharedOptions.AddTableToPanel(panel, table)
     for key, entry in pairs(table) do
-        if(ZO_SharedOptions_SettingsData[panel] == nil) then
+        if ZO_SharedOptions_SettingsData[panel] == nil then
             ZO_SharedOptions_SettingsData[panel] = {}
         end
         ZO_SharedOptions_SettingsData[panel][key] = entry
@@ -142,10 +143,10 @@ end
 
 function ZO_SharedOptions.AddTableToSystem(panel, system, table)
     for key, entry in pairs(table) do
-        if(ZO_SharedOptions_SettingsData[panel] == nil) then
+        if ZO_SharedOptions_SettingsData[panel] == nil then
             ZO_SharedOptions_SettingsData[panel] = {}
         end
-        if(ZO_SharedOptions_SettingsData[panel][system] == nil) then
+        if ZO_SharedOptions_SettingsData[panel][system] == nil then
             ZO_SharedOptions_SettingsData[panel][system] = {}
         end
         ZO_SharedOptions_SettingsData[panel][system][key] = entry
@@ -154,4 +155,15 @@ end
 
 function ZO_SharedOptions.GetColorOptionHighlight()
     -- override in derived classes
+end
+
+do
+    local SETTING_PANEL_DISABLES_SHARE_FEATURES =
+    {
+        [SETTING_PANEL_ACCOUNT] = true,
+    }
+
+    function ZO_SharedOptions.DoesPanelDisableShareFeatures(panel)
+        return SETTING_PANEL_DISABLES_SHARE_FEATURES[panel] == true
+    end
 end

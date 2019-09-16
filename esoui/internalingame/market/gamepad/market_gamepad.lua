@@ -15,7 +15,7 @@ local MARKET_BUY_CROWNS_BUTTON =
     gamepadOrder = 1,
     name = GetString(SI_MARKET_BUY_CROWNS),
     keybind = "UI_SHORTCUT_TERTIARY",
-    callback = function() ZO_GAMEPAD_MARKET:OnShowBuyCrownsDialogInternal() end
+    callback = ZO_ShowBuyCrownsPlatformDialog,
 }
 
 local g_activeMarketScreen = nil
@@ -316,7 +316,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                     self:Deactivate()
                     self:PurchaseMarketProductInternal(self.selectedGridEntry:GetMarketProductData(), RefreshOnPurchase, OnPurchaseEnd)
                 elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MEMBERSHIP_INFO_TILE then
-                    ZO_GamepadMarket_ShowBuyPlusDialog()
+                    ZO_ShowBuySubscriptionPlatformDialog()
                 elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_FREE_TRIAL_TILE then
                     self.isLockedForCategoryRefresh = true
                     self:Deactivate()
@@ -1203,14 +1203,6 @@ do
 
     function GamepadMarket:PurchaseFreeTrialMarketProductInternal(marketProductData, onPurchaseSuccessCallback, onPurchaseEndCallback)
         PURCHASE_MANAGER:BeginFreeTrialPurchase(marketProductData, FROM_CROWN_STORE, onPurchaseSuccessCallback, onPurchaseEndCallback)
-    end
-
-    function GamepadMarket:OnShowBuyCrownsDialog()
-        PURCHASE_MANAGER:ShowBuyCrownsDialog(FROM_INGAME)
-    end
-
-    function GamepadMarket:OnShowBuyCrownsDialogInternal()
-        PURCHASE_MANAGER:ShowBuyCrownsDialog(FROM_CROWN_STORE)
     end
 
     function GamepadMarket:GiftMarketProduct(marketProductData)

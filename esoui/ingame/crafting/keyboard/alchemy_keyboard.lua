@@ -375,12 +375,10 @@ function ZO_AlchemyInventory:AddListDataTypes()
 
         local levelLabel = rowControl:GetNamedChild("Level")
 
-        local usedInCraftingType, craftingSubItemType, rankRequirement = GetItemCraftingInfo(data.bagId, data.slotIndex)
+        local usedInCraftingType, craftingSubItemType, rankRequirement, resultingItemLevel, requiredChampionPoints = GetItemCraftingInfo(data.bagId, data.slotIndex)
 
         if not rankRequirement or rankRequirement <= GetNonCombatBonus(NON_COMBAT_BONUS_ALCHEMY_LEVEL) then
-            local craftingSubItemType, _, resultingItemLevel, requiredChampionPoints = select(2, GetItemCraftingInfo(data.bagId, data.slotIndex))
             local itemTypeString = GetString((craftingSubItemType == ITEMTYPE_POTION_BASE) and SI_ITEM_FORMAT_STR_POTION or SI_ITEM_FORMAT_STR_POISON)
-
             if requiredChampionPoints and requiredChampionPoints > 0 then
                 levelLabel:SetText(zo_strformat(SI_ALCHEMY_CREATES_ITEM_OF_CHAMPION_POINTS, requiredChampionPoints, itemTypeString))
             else

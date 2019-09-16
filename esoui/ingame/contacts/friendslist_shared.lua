@@ -11,6 +11,7 @@ FRIENDS_LIST_ENTRY_SORT_KEYS =
 {
     ["displayName"] = { },
     ["characterName"] = { },
+    ["isHeronUser"] = { tiebreaker = "status" },
     ["status"]  = { tiebreaker = "normalizedLogoffSort", isNumeric = true  },
     ["class"]  = { tiebreaker = "displayName" },
     ["formattedZone"]  = { tiebreaker = "displayName" },
@@ -33,7 +34,7 @@ function ZO_FriendsList:Initialize()
     self.noteEditedFunction = function(displayName, note)
         for i = 1, GetNumFriends() do
             local currentDisplayName = GetFriendInfo(i)
-            if(currentDisplayName == displayName) then
+            if currentDisplayName == displayName then
                 SetFriendNote(i, note)
                 return
             end
@@ -52,6 +53,9 @@ function ZO_FriendsList:Initialize()
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED, function(_, displayName, characterName, championPoints) self:OnFriendCharacterChampionPointsChanged(displayName, characterName, championPoints) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_NOTE_UPDATED, function(_, displayName, note) self:OnFriendNoteUpdated(displayName, note) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnFriendPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
+    if IsHeronUI() then
+        EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_HERON_USER_INFO_UPDATED, function(_, displayName, heronName) self:OnFriendHeronUserInfoUpdated(displayName, heronName) end)
+    end
 end
 
 function ZO_FriendsList:GetNumOnline()
@@ -70,15 +74,20 @@ end
 function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
     local hasCharacter, characterName, zone, class, alliance, level, championPoints = GetFriendCharacterInfo(friendIndex)
 
+    local heronName
+    if IsHeronUI() then
+        heronName = GetFriendHeronName(friendIndex)
+    end
+
     local data =
     {
         friendIndex = friendIndex,
         displayName = displayName,
         hasCharacter = hasCharacter,
-        characterName = ZO_CachedStrFormat(SI_UNIT_NAME, characterName), 
+        characterName = ZO_CachedStrFormat(SI_UNIT_NAME, characterName),
         gender = GetGenderFromNameDescriptor(characterName),
         level = level,
-        championPoints = championPoints, 
+        championPoints = championPoints,
         class = class,
         formattedZone = ZO_CachedStrFormat(SI_ZONE_NAME, zone),
         alliance = alliance,
@@ -86,6 +95,8 @@ function ZO_FriendsList:CreateFriendData(friendIndex, displayName, note, status)
         note = note,
         type = SOCIAL_NAME_SEARCH,
         status = status,
+        heronName = heronName,
+        isHeronUser = heronName ~= nil,
     }
 
     return data
@@ -108,15 +119,15 @@ end
 
 function ZO_FriendsList:BuildMasterList()
     ZO_ClearNumericallyIndexedTable(self.masterList)
-    
+
     self.numOnlineFriends = 0
     local numFriends = GetNumFriends()
 
-    for i=1, numFriends do  
+    for i=1, numFriends do
         local displayName, note, status, secsSinceLogoff = GetFriendInfo(i)
 
         local online = status ~= PLAYER_STATUS_OFFLINE
-        if(online) then
+        if online then
             self.numOnlineFriends = self.numOnlineFriends + 1
         end
 
@@ -132,7 +143,7 @@ end
 function ZO_FriendsList:FindDataByDisplayName(displayName)
     for i = 1, #self.masterList do
         local data = self.masterList[i]
-        if(data.displayName == displayName) then
+        if data.displayName == displayName then
             return data, i
         end
     end
@@ -155,14 +166,14 @@ end
 
 function ZO_FriendsList:OnFriendRemoved(displayName)
     local data, index = self:FindDataByDisplayName(displayName)
-    if(index) then
+    if index then
         -- NOTE: This must stay in sync with the friends list ordering-by-index in the client
         -- TODO: Use displayName as accessor?
         self.masterList[index] = self.masterList[#self.masterList]
         self.masterList[#self.masterList] = nil
         self:OnNumTotalFriendsChanged()
 
-        if(data.online) then
+        if data.online then
             self.numOnlineFriends = self.numOnlineFriends - 1
             self:OnNumOnlineChanged()
         end
@@ -173,7 +184,7 @@ end
 
 function ZO_FriendsList:OnFriendNoteUpdated(displayName, note)
     local data = self:FindDataByDisplayName(displayName)
-    if(data) then
+    if data then
         data.note = note
         self:RefreshFilters()
     end
@@ -181,7 +192,7 @@ end
 
 function ZO_FriendsList:OnFriendCharacterUpdated(displayName)
     local data, friendIndex = self:FindDataByDisplayName(displayName)
-    if(data) then
+    if data then
         self:UpdateFriendData(data, friendIndex)
         self:RefreshFilters()
     end
@@ -189,7 +200,7 @@ end
 
 function ZO_FriendsList:OnFriendDisplayNameChanged(oldDisplayName, newDisplayName)
     local data = self:FindDataByDisplayName(oldDisplayName)
-    if(data) then
+    if data then
         data.displayName = newDisplayName
         self:RefreshSort()
     end
@@ -206,7 +217,7 @@ end
 
 function ZO_FriendsList:OnFriendCharacterLevelChanged(displayName, characterName, level)
     local data = self:FindDataByDisplayName(displayName)
-    if(data) then
+    if data then
         data.level = level
         self:RefreshSort()
     end
@@ -214,7 +225,7 @@ end
 
 function ZO_FriendsList:OnFriendCharacterChampionPointsChanged(displayName, characterName, championPoints)
     local data = self:FindDataByDisplayName(displayName)
-    if(data) then
+    if data then
         data.championPoints = championPoints
         self:RefreshSort()
     end
@@ -222,7 +233,7 @@ end
 
 function ZO_FriendsList:OnFriendPlayerStatusChanged(displayName, characterName, oldStatus, newStatus)
     local data, friendIndex = self:FindDataByDisplayName(displayName)
-    if(data) then
+    if data then
         --Because we may have refreshed the whole list in between when this event happened and when we received it,
         --we must use our conception of whether they were online, not whether they were online or not when the event happened.
         local wasOnline = data.online
@@ -230,11 +241,11 @@ function ZO_FriendsList:OnFriendPlayerStatusChanged(displayName, characterName, 
 
         data.status = newStatus
 
-        if(wasOnline and not isOnline) then
+        if wasOnline and not isOnline then
             ZO_SocialList_SetUpOnlineData(data, false, 0)
             self.numOnlineFriends = self.numOnlineFriends - 1
             self:OnNumOnlineChanged()
-        elseif(not wasOnline and isOnline) then            
+        elseif not wasOnline and isOnline then
             ZO_SocialList_SetUpOnlineData(data, true)
             self:UpdateFriendData(data, friendIndex)
 
@@ -243,6 +254,15 @@ function ZO_FriendsList:OnFriendPlayerStatusChanged(displayName, characterName, 
         end
 
         self:RefreshFilters()
+    end
+end
+
+function ZO_FriendsList:OnFriendHeronUserInfoChanged(displayName, heronName)
+    local data, friendIndex = self:FindDataByDisplayName(displayName)
+    if data then
+        data.heronName = heronName
+        data.isHeronUser = heronName ~= nil
+        self:RefreshSort()
     end
 end
 

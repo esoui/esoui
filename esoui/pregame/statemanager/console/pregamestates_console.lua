@@ -1,176 +1,6 @@
 
 local consolePregameStates =
 {
-    ["CharacterSelect"] =
-    {
-        OnEnter = function()
-            Pregame_ShowScene("gamepadCharacterSelect")
-        end,
-
-        OnExit = function()
-            TrySaveCharacterListOrder()
-        end
-    },
-
-    ["ShowLegalSplashScreen"] =
-    {
-        ShouldAdvance = function()
-            return not(ZO_Pregame_MustPlayVideos() or ZO_Pregame_AllowVideosToPlay())
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("logoSplash")
-        end,
-
-        GetStateTransitionData = function()
-            return "WaitForGuiRender"
-        end,
-
-        OnExit = function()
-        end,
-    },
-
-    ["WaitForGuiRender"] =
-    {
-        ShouldAdvance = function()
-            return IsGuiShaderLoaded()
-        end,
-
-        OnEnter = function()
-            EVENT_MANAGER:RegisterForUpdate("PregameWaitForGuiRender", 0, function()
-                if IsGuiShaderLoaded() then
-                    PregameStateManager_AdvanceState()
-                end
-            end)
-        end,
-
-        OnExit = function()
-            EVENT_MANAGER:UnregisterForUpdate("PregameWaitForGuiRender")
-        end,
-
-        GetStateTransitionData = function()
-            return "AccountLogin"
-        end
-    },
-
-    ["AccountLogin"] =
-    {
-        ShouldAdvance = function()
-            return false
-        end,
-
-        OnEnter = function()
-            PregamePrepareForProfile()
-            PregameLogout()
-            
-            ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY = false
-            ZO_PREGAME_CHARACTER_LIST_RECEIVED = false
-            ZO_PREGAME_CHARACTER_COUNT = 0
-
-            --If we're quick launching, then just register a profile login event that sets the LastPlatform and advances the state.
-            if (GetCVar("QuickLaunch") == "1") then
-                EVENT_MANAGER:RegisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT, function(eventCode, isSuccess, profileError)
-                    EVENT_MANAGER:UnregisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT)
-
-                    if (isSuccess) then
-                        local lastPlat = GetCVar("LastPlatform")
-                        if lastPlat ~= nil then
-                            for platformIndex = 1, GetNumPlatforms() do
-                                local platformName = GetPlatformInfo(platformIndex)            
-                                if platformName == lastPlat then
-                                    SetSelectedPlatform(platformIndex)
-                                end
-                            end
-                        end
-
-                        SetCVar("IsServerSelected", "true")
-                        SetCVar("SelectedServer", CONSOLE_SERVER_NORTH_AMERICA)
-                        PregameStateManager_AdvanceState()
-                    end
-                end)
-
-                PregameSelectProfile()
-            else
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
-                WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
-                WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
-
-                -- Reset screen overscan/gamma and audio settings
-                SetOverscanOffsets(0, 0, 0, 0)
-                SetCVar("GAMMA_ADJUSTMENT", 100)
-                ResetToDefaultSettings(SETTING_TYPE_AUDIO)
-
-                SetCurrentVideoPlaybackVolume(1.0, 4.0)
-
-                SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
-            end
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "InitialGameStartup"
-        end,
-    },
-
-    ["InitialGameStartup"] =
-    {
-        ShouldAdvance = function()
-            return not IsConsoleUI() or GetCVar("IsServerSelected") == "1"
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("InitialGameStartup")
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "GameStartup"
-        end,
-    },
-
-    ["GameStartup"] =
-    {
-        ShouldAdvance = function()
-            return (GetCVar("QuickLaunch") == "1")
-        end,
-
-        OnEnter = function(mustPurchaseGame)
-            GAME_STARTUP_GAMEPAD:SetMustPurchaseGame(mustPurchaseGame)
-            SCENE_MANAGER:Show("GameStartup")
-        end,
-
-        GetStateTransitionData = function()
-            return "ScreenAdjustIntro"
-        end,
-
-        OnExit = function()
-        end,
-    },
-
-    ["ShowEULA"] =
-    {
-        ShouldAdvance = function()
-            return not ZO_ShouldShowEULAScreen()
-        end,
-
-        OnEnter = function()
-            LEGAL_AGREEMENT_SCREEN_CONSOLE:ShowEULA()
-            SCENE_MANAGER:Show("LegalAgreementsScreen_Gamepad")
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "NoCreateLinkAccountLoading"
-        end,
-    },
-
     ["CreateLinkAccount"] =
     {
         ShouldAdvance = function()
@@ -189,37 +19,6 @@ local consolePregameStates =
         end,
     },
 
-    ["NoCreateLinkAccountLoading"] =
-    {
-        ShouldAdvance = function()
-            return false
-        end,
-
-        OnEnter = function()
-            local platform = GetUIPlatform()
-            
-            --Smoke video audio fade out to prevent audio clicking on console due to load time hitches
-            --4 seconds seems to be a good fade out time for here
-            if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
-                SetCurrentVideoPlaybackVolume(0.0, 4.0)
-            end
-            
-            if(IsConsoleUI() and platform == UI_PLATFORM_PC) then
-                -- should only ever hit this on internal builds testing with PC
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_PCBypassConsoleLogin, GetString(SI_CONSOLE_PREGAME_LOADING))
-            else
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", PregameBeginLinkedLogin, GetString(SI_CONSOLE_PREGAME_LOADING))
-            end
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "WorldSelect"
-        end,
-    },
-
     ["LegalAgreements"] =
     {
         ShouldAdvance = function()
@@ -227,8 +26,7 @@ local consolePregameStates =
         end,
 
         OnEnter = function()
-            LEGAL_AGREEMENT_SCREEN_CONSOLE:ShowFetchedDocs()
-            SCENE_MANAGER:Show("LegalAgreementsScreen_Gamepad")
+            LEGAL_AGREEMENT_SCREEN_GAMEPAD:ShowConsoleFetchedDocs()
         end,
 
         OnExit = function()
@@ -246,7 +44,7 @@ local consolePregameStates =
         end,
 
         OnEnter = function()
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", AcceptLegalDocs, GetString(SI_CONSOLE_PREGAME_LOADING))
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", AcceptLegalDocs, GetString(SI_GAMEPAD_PREGAME_LOADING))
         end,
 
         OnExit = function()
@@ -257,47 +55,6 @@ local consolePregameStates =
         end,
     },
 
-    ["WorldSelect"] =
-    {
-        ShouldAdvance = function()
-            return false
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("WorldSelect_Gamepad")
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            local worldIndex, worldName = WORLD_SELECT_GAMEPAD:GetSelectedWorldInformation()
-            return "WorldConnectLoading", worldIndex, worldName
-        end,
-    },
-
-    ["WorldConnectLoading"] =
-    {
-        ShouldAdvance = function()
-            return false
-        end,
-
-        OnEnter = function(worldIndex, worldName)
-            local function LocalSelectWorld()
-                SelectWorld(worldIndex)
-            end
-
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", LocalSelectWorld, zo_strformat(SI_CONNECTING_TO_REALM, worldName))
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "WaitForGameDataLoaded"
-        end,
-    },
-
     ["CreateAccountSetup"] =
     {
         ShouldAdvance = function()
@@ -305,7 +62,7 @@ local consolePregameStates =
         end,
 
         OnEnter = function()
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("CreateLinkAccount", LoadCountryData, GetString(SI_CONSOLE_PREGAME_LOADING))
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("CreateLinkAccount", LoadCountryData, GetString(SI_GAMEPAD_PREGAME_LOADING))
         end,
 
         OnExit = function()
@@ -422,10 +179,10 @@ local consolePregameStates =
 
         OnEnter = function(username, password)
             local function LinkAccount()
-                if(IsConsoleUI() and GetUIPlatform() ~= UI_PLATFORM_PC) then
-                    PregameLinkAccount(username, password)
-                else
+                if ZO_IsForceConsoleOrHeronFlow() then
                     PregameStateManager_AdvanceState()
+                else
+                    PregameLinkAccount(username, password)
                 end
             end
 
@@ -461,7 +218,7 @@ local consolePregameStates =
     },
 }
 
-PregameStateManager_AddStates(consolePregameStates)
+PregameStateManager_AddGamepadStates(consolePregameStates)
 
 --This will probably need to be more robust (similar to non console PregameStates) as more pregame comes online
 local function OnVideoPlaybackComplete()
@@ -524,7 +281,7 @@ function ZO_Gamepad_DisplayServerDisconnectedError()
         errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
     end
 
-    PREGAME_INITIAL_SCREEN_CONSOLE:ShowError(nil, errorString)
+    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(nil, errorString)
 end
 
 local function OnServerDisconnectError(eventCode)
@@ -548,7 +305,7 @@ local function OnProfileLoginResult(event, isSuccess, profileError)
 
         errorString = zo_strformat(errorStringFormat, GetString(SI_HELP_URL))
 
-        PREGAME_INITIAL_SCREEN_CONSOLE:ShowError(GetString(SI_PROFILE_LOAD_FAILED_TITLE), errorString)
+        PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_PROFILE_LOAD_FAILED_TITLE), errorString)
     end
 end
 

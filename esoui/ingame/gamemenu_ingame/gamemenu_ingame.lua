@@ -44,6 +44,10 @@ local function HideAddons()
 end
 
 local function AddAddonsEntry(entryTable)
+    if not AreUserAddOnsSupported() then
+        return
+    end
+
     local function ShouldShowNewIcon()
         return not HasViewedEULA(EULA_TYPE_ADDON_EULA)
     end

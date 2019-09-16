@@ -422,8 +422,8 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
     local requireSkills = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].currentValue
     local craftingInteractionType = GetCraftingInteractionType()
     
-    local recipeData = PROVISIONER_MANAGER:GetRecipeData()
-    for _, recipeList in pairs(recipeData) do
+    local recipeLists = PROVISIONER_MANAGER:GetRecipeListData(craftingInteractionType)
+    for _, recipeList in pairs(recipeLists) do
         for _, recipe in ipairs(recipeList.recipes) do
             if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
                 local dataEntry = ZO_GamepadEntryData:New(zo_strformat(SI_PROVISIONER_RECIPE_NAME_COUNT_NONE, recipe.name), recipe.iconFile, recipe.iconFile)

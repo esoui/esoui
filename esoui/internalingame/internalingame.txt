@@ -11,6 +11,8 @@ EsoUI\InternalIngame\Sounds\SoundEvents.lua
 
 EsoUI\InternalIngame\Scenes\InternalIngameSceneElements.xml
 
+EsoUI\InternalIngame\Tooltip\InternalIngameTooltips.lua
+
 EsoUI\InternalIngame\Rewards\InternalIngame_Rewards_Manager.lua
 
 EsoUI\InternalIngame\Market\MarketDialogs_Shared.lua
@@ -89,6 +91,11 @@ EsoUI\InternalIngame\Gifting\ConfirmSendGift_Shared.lua
 EsoUI\InternalIngame\Gifting\Keyboard\ConfirmSendGift_Keyboard.lua
 EsoUI\InternalIngame\Gifting\Keyboard\ConfirmSendGift_Keyboard.xml
 EsoUI\InternalIngame\Gifting\Gamepad\ConfirmSendGift_Gamepad.lua
+
+EsoUI\InternalIngame\CodeRedemption\Gamepad\CodeRedemption_Gamepad.lua
+EsoUI\InternalIngame\CodeRedemption\Gamepad\CodeRedemption_Gamepad.xml
+EsoUI\InternalIngame\CodeRedemption\Keyboard\CodeRedemption_Keyboard.lua
+EsoUI\InternalIngame\CodeRedemption\Keyboard\CodeRedemption_Keyboard.xml
 
 ; These should remain at the bottom of the file, to ensure functionality of fragments
 EsoUI\InternalIngame\Scenes\InternalIngameFragments.lua

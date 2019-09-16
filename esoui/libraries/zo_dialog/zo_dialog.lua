@@ -619,8 +619,12 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 editControl:SetMaxInputChars(128)
             end
 
-            if editBoxInfo.defaultText then
-                ZO_EditDefaultText_Initialize(editControl, GetString(editBoxInfo.defaultText))
+            local defaultText = editBoxInfo.defaultText
+            if defaultText then
+                if type(defaultText) == "number" then
+                    defaultText = GetString(text)
+                end
+                ZO_EditDefaultText_Initialize(editControl, defaultText)
             else
                 ZO_EditDefaultText_Disable(editControl)
             end

@@ -167,8 +167,6 @@ function ZO_HelpMechanicAssistanceTemplate_Keyboard:AttemptToSendTicket()
     ResetCustomerServiceTicket()
 
     --Populate the ticket fields
-    SetCustomerServiceTicketContactEmail(GetActiveUserEmailAddress())
-    
     --Category value must be valid as it enables the submit button to be clicked on
     local categoryEnumValue = self.helpCategoryComboBox:GetSelectedItemData().categoryEnumValue
     local infoMap = self.mechanicCategoriesData.ticketCategoryMap[categoryEnumValue]

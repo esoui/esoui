@@ -38,6 +38,10 @@ function ZO_SharedProvisioner:Initialize(control)
     self.resultTooltip = self.control:GetNamedChild("Tooltip")
 
     self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, isCraftingSameAsPrevious)
+        if not isCraftingSameAsPrevious then
+            self:DirtyRecipeList()
+        end
+
         if craftingType == CRAFTING_TYPE_PROVISIONING and self:ShouldShowForControlScheme() then
             if not isCraftingSameAsPrevious then
                 self:ResetSelectedTab()

@@ -220,55 +220,58 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
     local currentScene = self.currentScene
     local nextScene = self.scenes[sceneName]
 
-    if nextScene then
-        if nextSceneClearsSceneStack == nil then
-            nextSceneClearsSceneStack = true
-        end
-        if numScenesNextScenePops == nil then
-            numScenesNextScenePops = 0
-        end
-        --if a scene exists
-        if currentScene then
-            if nextScene ~= currentScene then
-                --If we need confirmation to hide this scene go request it unless we've already done that and this is the response
-                if self:WillCurrentSceneConfirmHide(bypassHideSceneConfirmationReason) then
-                    return currentScene:ConfirmHideScene(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
-                end
+    if nextScene == nil then
+        internalassert(false, string.format("Missing scene: %q", sceneName))
+        return
+    end
 
-                if self.nextScene then
-                    if nextScene ~= self.nextScene then
-                        local oldNextScene = self.nextScene
-                        self:SetNextScene(nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)
-                        currentScene:RefreshFragments()
+    if nextSceneClearsSceneStack == nil then
+        nextSceneClearsSceneStack = true
+    end
+    if numScenesNextScenePops == nil then
+        numScenesNextScenePops = 0
+    end
+    --if a scene exists
+    if currentScene then
+        if nextScene ~= currentScene then
+            --If we need confirmation to hide this scene go request it unless we've already done that and this is the response
+            if self:WillCurrentSceneConfirmHide(bypassHideSceneConfirmationReason) then
+                return currentScene:ConfirmHideScene(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
+            end
 
-                        local CURRENT_SCENE_IGNORED = ""
-                        local NO_SEQUENCE_NUMBER = 0
-                        local FRAGMENT_COMPLETE_STATE_IGNORED = false
-                        local nextSceneName = self.nextScene and self.nextScene:GetName() or ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER                        
-                        SendLeaderToFollowerSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_CHANGE_NEXT_SCENE, CURRENT_SCENE_IGNORED, nextSceneName, NO_SEQUENCE_NUMBER, FRAGMENT_COMPLETE_STATE_IGNORED)
-                        
-                        self:OnNextSceneRemovedFromQueue(oldNextScene, nextScene)
-                    end
-                else
+            if self.nextScene then
+                if nextScene ~= self.nextScene then
+                    local oldNextScene = self.nextScene
                     self:SetNextScene(nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)
-                    self:HideScene(currentScene)
+                    currentScene:RefreshFragments()
+
+                    local CURRENT_SCENE_IGNORED = ""
+                    local NO_SEQUENCE_NUMBER = 0
+                    local FRAGMENT_COMPLETE_STATE_IGNORED = false
+                    local nextSceneName = self.nextScene and self.nextScene:GetName() or ZO_REMOTE_SCENE_NO_SCENE_IDENTIFIER                        
+                    SendLeaderToFollowerSync(ZO_REMOTE_SCENE_CHANGE_ORIGIN, REMOTE_SCENE_SYNC_TYPE_CHANGE_NEXT_SCENE, CURRENT_SCENE_IGNORED, nextSceneName, NO_SEQUENCE_NUMBER, FRAGMENT_COMPLETE_STATE_IGNORED)
+                    
+                    self:OnNextSceneRemovedFromQueue(oldNextScene, nextScene)
                 end
             else
-                if currentScene:GetState() == SCENE_HIDING then
-                    local oldNextScene = self.nextScene
-                    self:ClearNextScene()
-                    self:ShowScene(currentScene)
-                    if oldNextScene then
-                        self:OnNextSceneRemovedFromQueue(oldNextScene, self.nextScene)
-                    end
-                end
+                self:SetNextScene(nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)
+                self:HideScene(currentScene)
             end
         else
-            --otherwise, start showing this scene
-            self.previousScene = self.currentScene
-            self:SetCurrentScene(nextScene)
-            self:ShowScene(self.currentScene)
+            if currentScene:GetState() == SCENE_HIDING then
+                local oldNextScene = self.nextScene
+                self:ClearNextScene()
+                self:ShowScene(currentScene)
+                if oldNextScene then
+                    self:OnNextSceneRemovedFromQueue(oldNextScene, self.nextScene)
+                end
+            end
         end
+    else
+        --otherwise, start showing this scene
+        self.previousScene = self.currentScene
+        self:SetCurrentScene(nextScene)
+        self:ShowScene(self.currentScene)
     end
 end
 

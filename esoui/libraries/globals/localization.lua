@@ -41,7 +41,7 @@ do
             elseif currentArgType == "string" then
                 g_strArgs[i] = currentArg
             else
-                internalassert(false, string.format("Invalid type passed to zo_strformat: %s", currentArgType))
+                internalassert(false, string.format("Argument %d with invalid type passed to zo_strformat: %s", i, currentArgType))
                 g_strArgs[i] = ""
             end
         end

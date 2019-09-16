@@ -294,6 +294,30 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_Options_TextDisplay" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Dimensions x="290" y="26" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)Content" font="ZoFontWinH4" mouseEnabled="true">
+                    <Dimensions x="190" />
+                    <Anchor point="RIGHT" />
+
+                    <OnMouseEnter>
+                        ZO_Options_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Label>
+            </Controls>
+        </Control>
+
         <Control name="ZO_Options_PanelHeader" hidden="true" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="ZO_OptionsWindowSettingsScrollChild" />
         </Control>

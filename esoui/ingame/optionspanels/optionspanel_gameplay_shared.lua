@@ -421,6 +421,21 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
         excludeFromResetToDefault = true,
     },
 
+    --Options_Automatic_Input_Mode_Changing_Enabled
+    [GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED] =
+    {
+        controlType = OPTIONS_CHECKBOX,
+        system = SETTING_TYPE_GAMEPAD,
+        settingId = GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED,
+        panel = SETTING_PANEL_GAMEPLAY,
+        text = SI_GAMEPAD_OPTIONS_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED,
+        tooltipText = SI_GAMEPAD_OPTIONS_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED_TOOLTIP,
+        excludeFromResetToDefault = true,
+        visible = function()
+            return DoesPlatformAllowConfiguringAutomaticInputChanging()
+        end
+    },
+
     --Options_Gamepad_Template
     [GAMEPAD_SETTING_GAMEPAD_TEMPLATE] =
     {

@@ -185,9 +185,23 @@ function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
 end
 
 function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
-    --if a scene was already shown when we change input mode, hide it
-    if not self:IsShowingBaseScene() and self.currentScene and self.currentScene:IsShowing() then
-        self:SetInUIMode(false)
+    if self.currentScene then
+        local shouldShowHUD = false
+        --If we are showing a scene, or will be showing a scene after this one hides and that scene was not opened in the current input mode (gamepad/keyboard) then we need to stop it from showing.
+        if self.currentScene:IsShowing() and self.currentScene:WasRequestedToShowInGamepadPreferredMode() ~= IsInGamepadPreferredMode() then
+            shouldShowHUD = true
+        elseif self.nextScene then
+            if self.nextScene:WasRequestedToShowInGamepadPreferredMode() ~= IsInGamepadPreferredMode() then
+                shouldShowHUD = true
+            end
+        end
+        if shouldShowHUD then
+            local FORCE_CLOSE = true
+            ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
+            if not self:IsShowingBaseScene() then
+                self:SetInUIMode(false)
+            end
+        end
     end
 end
 

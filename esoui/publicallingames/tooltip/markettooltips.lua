@@ -216,6 +216,8 @@ do
         displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
         self:AddLine(displayName, self:GetStyle("title"))
 
+        -- Body
+        local instantUnlockDescription = GetInstantUnlockRewardDescription(instantUnlockId)
         local tooltipLines = {}
         if instantUnlockCategory == INSTANT_UNLOCK_REWARD_CATEGORY_UPGRADE then
             local statsSection = self:AcquireSection(self:GetStyle("baseStatsSection"))
@@ -224,55 +226,42 @@ do
 
             local currentUnlock
             local maxUnlock
-            local unlockDescription
             local instantUnlockType = GetInstantUnlockRewardType(instantUnlockId)
             if instantUnlockType == INSTANT_UNLOCK_PLAYER_BACKPACK then
                 currentUnlock = GetCurrentBackpackUpgrade()
                 maxUnlock = GetMaxBackpackUpgrade()
-                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BACKPACK_UPGRADE_DESCRIPTION, GetNumBackpackSlotsPerUpgrade())
             elseif instantUnlockType == INSTANT_UNLOCK_PLAYER_BANK then
                 currentUnlock = GetCurrentBankUpgrade()
                 maxUnlock = GetMaxBankUpgrade()
-                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_BANK_UPGRADE_DESCRIPTION, GetNumBankSlotsPerUpgrade())
             elseif instantUnlockType == INSTANT_UNLOCK_CHARACTER_SLOT then
                 currentUnlock = GetCurrentCharacterSlotsUpgrade()
                 maxUnlock = GetMaxCharacterSlotsUpgrade()
-                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_CHARACTER_SLOT_UPGRADE_DESCRIPTION, GetNumCharacterSlotsPerUpgrade())
             elseif instantUnlockType == INSTANT_UNLOCK_OUTFIT then
                 currentUnlock = GetNumUnlockedOutfits()
                 maxUnlock = MAX_OUTFIT_UNLOCKS
-                unlockDescription = zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_OUTFIT_UPGRADE_DESCRIPTION, NUM_OUTFITS_PER_UPGRADE)
             end
 
-            table.insert(tooltipLines, unlockDescription)
+            table.insert(tooltipLines, instantUnlockDescription)
 
             statValuePair:SetValue(zo_strformat(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK_LEVEL, currentUnlock, maxUnlock), self:GetStyle("statValuePairValue"))
             statsSection:AddStatValuePair(statValuePair)
             self:AddSection(statsSection)
         elseif instantUnlockCategory == INSTANT_UNLOCK_REWARD_CATEGORY_SERVICE_TOKEN then
-            local tokenDescription
             local tokenCountString
             local instantUnlockType = GetInstantUnlockRewardType(instantUnlockId)
             if instantUnlockType == INSTANT_UNLOCK_RENAME_TOKEN then
-                tokenDescription = GetServiceTokenDescription(SERVICE_TOKEN_NAME_CHANGE)
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_NAME_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_NAME_CHANGE))
             elseif instantUnlockType == INSTANT_UNLOCK_RACE_CHANGE_TOKEN then
-                tokenDescription = GetServiceTokenDescription(SERVICE_TOKEN_RACE_CHANGE)
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_RACE_CHANGE))
             elseif instantUnlockType == INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN then
-                tokenDescription = GetServiceTokenDescription(SERVICE_TOKEN_APPEARANCE_CHANGE)
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_APPEARANCE_CHANGE))
             end
 
-            table.insert(tooltipLines, tokenDescription)
-
-            -- All tokens only usable from character select
-            local tokenUsageRequirement = GetString(SI_SERVICE_TOKEN_USAGE_REQUIREMENT_CHARACTER_SELECT)
-            table.insert(tooltipLines, tokenUsageRequirement)
+            table.insert(tooltipLines, instantUnlockDescription)
 
             table.insert(tooltipLines, tokenCountString)
         else
-            table.insert(tooltipLines, GetInstantUnlockRewardDescription(instantUnlockId))
+            table.insert(tooltipLines, instantUnlockDescription)
         end
 
         -- Description

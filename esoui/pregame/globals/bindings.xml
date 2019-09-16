@@ -2,15 +2,27 @@
     <Layer name="Pregame">
         <Category name="Pregame">
             <Action name="NEXT_CHARACTER" rebindable="false">
-                <Down>ZO_CharacterSelect_NextCharacter()</Down>
+                <Down>
+                    if IsKeyboardUISupported() and ZO_CharacterSelect_IsKeyboardCharacterSelectShowing() then
+                        ZO_CharacterSelect_NextCharacter()
+                    end
+                </Down>
             </Action>
 
             <Action name="PREVIOUS_CHARACTER" rebindable="false">
-                <Down>ZO_CharacterSelect_PreviousCharacter()</Down>
+                <Down>
+                    if IsKeyboardUISupported() and ZO_CharacterSelect_IsKeyboardCharacterSelectShowing() then
+                        ZO_CharacterSelect_PreviousCharacter()
+                    end
+                </Down>
             </Action>
 
             <Action name="PLAY_CHARACTER" rebindable="false">
-                <Down>ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)</Down>
+                <Down>
+                    if IsKeyboardUISupported() and ZO_CharacterSelect_IsKeyboardCharacterSelectShowing() then
+                        ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)
+                    end
+                </Down>
             </Action>
 
             <Action name="TOGGLE_FULLSCREEN" rebindable="false">
@@ -19,6 +31,18 @@
 
             <Action name="TAKE_SCREENSHOT" rebindable="false">
                 <Up>TakeScreenshot()</Up>
+            </Action>
+
+            <Action name="TOGGLE_GAMEPAD_MODE">
+                <Up>
+                    if IsGamepadUISupported() and IsKeyboardUISupported() then
+                        if GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED) then
+                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "false")
+                        else
+                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "true")
+                        end
+                    end
+                </Up>
             </Action>
         </Category>
     </Layer>

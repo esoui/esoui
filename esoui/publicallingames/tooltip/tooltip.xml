@@ -93,6 +93,7 @@
 
         <Tooltip name="ZO_ItemIconTooltip" inherits="ItemTooltipBase" virtual="true">
             <Anchor point="BOTTOM" offsetY="-245"/>
+            <ClampedToScreenInsets top="-32"/>
 
             <OnCleared>
                 ZO_ItemIconTooltip_Cleared(self)

@@ -375,8 +375,8 @@ function ZO_Provisioner:RefreshRecipeList()
     local requireSkills = ZO_CheckButton_IsChecked(self.haveSkillsCheckBox)
     local craftingInteractionType = GetCraftingInteractionType()
 
-    local recipeData = PROVISIONER_MANAGER:GetRecipeData()
-    for _, recipeList in pairs(recipeData) do
+    local recipeLists = PROVISIONER_MANAGER:GetRecipeListData(craftingInteractionType)
+    for _, recipeList in pairs(recipeLists) do
         local parent
         for _, recipe in ipairs(recipeList.recipes) do
             if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then

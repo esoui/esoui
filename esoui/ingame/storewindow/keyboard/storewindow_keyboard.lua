@@ -282,11 +282,13 @@ function ZO_StoreManager:InitializeStore(overrideMode)
 
     self:RebuildTabs()
 
-    if IsStoreEmpty() then
-        self.modeBar:SelectFragment(SI_STORE_MODE_SELL)
-    elseif self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL then
-        self.modeBar:SelectFragment(SI_STORE_MODE_BUY)
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    if self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL then
+        if IsStoreEmpty() then
+            self.modeBar:SelectFragment(SI_STORE_MODE_SELL)
+        else
+            self.modeBar:SelectFragment(SI_STORE_MODE_BUY)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        end
     end
 
     ZO_ScrollList_ResetToTop(self.list)

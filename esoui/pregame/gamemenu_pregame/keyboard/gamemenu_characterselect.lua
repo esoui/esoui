@@ -5,33 +5,11 @@ local gameEntries = {}
 -- Characters
 
 local function ShowCharacterSelect()
-    if(IsConsoleUI()) then  -- TODO integrate this with PC gamepad
-        if(IsInGamepadPreferredMode()) then
-            if(CHARACTER_SELECT_GAMEPAD_FRAGMENT ~= nil) then
-                SCENE_MANAGER:AddFragment(CHARACTER_SELECT_GAMEPAD_FRAGMENT)
-                return
-            end
-        end
-    end
-
-    if(CHARACTER_SELECT_FRAGMENT ~= nil) then
-        SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
-    end
+    SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
 end
 
 local function HideCharacterSelect()
-    if(IsConsoleUI()) then  -- TODO integrate this with PC gamepad
-        if(IsInGamepadPreferredMode()) then
-            if(CHARACTER_SELECT_GAMEPAD_FRAGMENT ~= nil) then
-                SCENE_MANAGER:RemoveFragment(CHARACTER_SELECT_GAMEPAD_FRAGMENT)
-                return
-            end
-        end
-    end
-
-    if(CHARACTER_SELECT_FRAGMENT ~= nil) then
-        SCENE_MANAGER:RemoveFragment(CHARACTER_SELECT_FRAGMENT)
-    end
+    SCENE_MANAGER:RemoveFragment(CHARACTER_SELECT_FRAGMENT)
 end
 
 local function AddCharactersEntry(entryTable)
@@ -64,6 +42,10 @@ local function HideAddons()
 end
 
 local function AddAddonsEntry(entryTable)
+    if not AreUserAddOnsSupported() then
+        return
+    end
+
     local function ShouldShowNewIcon()
         return not HasViewedEULA(EULA_TYPE_ADDON_EULA)
     end
@@ -118,7 +100,7 @@ function ZO_GameMenu_CharacterSelect_Initialize(self)
     local gameMenuCharacterSelectFragment = ZO_FadeSceneFragment:New(self)
     local gameMenuCharacterSelectScene = ZO_Scene:New("gameMenuCharacterSelect", SCENE_MANAGER)
     gameMenuCharacterSelectScene:AddFragment(gameMenuCharacterSelectFragment)
- 
+
     gameMenuCharacterSelectScene:RegisterCallback("StateChange",    function(oldState, newState)
                                                                         ZO_UpdatePaperDollManipulationForScene(ZO_CharacterSelectCharacterViewport, newState)
                                                                         if newState == SCENE_SHOWING then

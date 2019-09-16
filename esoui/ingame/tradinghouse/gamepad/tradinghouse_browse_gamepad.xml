@@ -6,7 +6,7 @@
             <Dimensions y="24" />
         </Label>
 
-        <Control name="ZO_GamepadGuildStoreBrowseSelectableEntryTemplate" inherits="ZO_GamepadFullwidthLabelEntryTemplate" virtual="true" />
+        <Control name="ZO_GamepadGuildStoreBrowseSelectableEntryTemplate" inherits="ZO_GamepadFullWidthLabelEntryTemplate" virtual="true" />
 
         <Control name="ZO_GamepadGuildStoreBrowseDropdownTemplate"  inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
         

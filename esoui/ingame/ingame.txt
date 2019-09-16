@@ -14,6 +14,8 @@ EsoUI\Ingame\Globals\CommonInventoryFunctions.lua
 EsoUI\Ingame\Globals\Gamepad\ZO_GamepadSocialLayoutConstants.lua
 EsoUI\Ingame\Globals\ZO_ChampionRankUtils.lua
 
+EsoUI\Ingame\Globals\Console\IngameDialogs_Console.lua
+
 EsoUI\Ingame\Particles\Particles.lua
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
@@ -146,8 +148,8 @@ EsoUI\Ingame\ChatSystem\ChatHandlers.lua
 
 EsoUI\Ingame\ChatSystem\SharedChatSystem.lua
 EsoUI\Ingame\ChatSystem\SharedChatSystem.xml
-EsoUI\Ingame\ChatSystem\PC\ChatSystem.lua
-EsoUI\Ingame\ChatSystem\PC\ChatSystem.xml
+EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.lua
+EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.xml
 EsoUI\Ingame\ChatSystem\Console\GamepadChatSystem.lua
 EsoUI\Ingame\ChatSystem\Console\GamepadChatSystem.xml
 EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.lua
@@ -298,7 +300,6 @@ EsoUI\Ingame\Reticle\Reticle.xml
 
 EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
 EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
-EsoUI\Ingame\SlashCommands\Console\SlashCommands_Console.lua
 EsoUI\Ingame\SlashCommands\SlashCommandAutoComplete.lua
 
 EsoUI\Ingame\SiegeBar\SiegeBar.lua

@@ -2484,7 +2484,7 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
             keybind = "DIALOG_PRIMARY",
             text = SI_CUSTOMER_SERVICE_OPEN_WEB_BROWSER,
             visible = function()
-                return GetUIPlatform() == UI_PLATFORM_PC
+                return not IsConsoleUI()
             end,
             callback = function(...)
                 ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_HELP }, { mainTextParams = { GetString(SI_CUSTOMER_SERVICE_ESO_HELP_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB) } })
@@ -2700,36 +2700,6 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
             text = SI_DIALOG_EXIT,
         },
     },
-}
-
-ESO_Dialogs["CONSOLE_BUY_ESO_PLUS"] = 
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_GAMEPAD_MARKET_BUY_PLUS_TITLE,
-    },
-    mainText = 
-    {
-        text = SI_GAMEPAD_MARKET_BUY_PLUS_TEXT_CONSOLE,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_GAMEPAD_MARKET_BUY_PLUS_DIALOG_KEYBIND_LABEL,
-            callback =  function(dialog)
-                            ShowConsoleESOPlusSubscriptionUI()
-                        end
-        },
-        [2] =
-        {
-            text = SI_DIALOG_EXIT,
-        },
-    }
 }
 
 ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] = 
