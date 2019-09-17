@@ -82,6 +82,14 @@ function GuildHistoryManager:InitializeKeybindDescriptors()
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
 
+        --Dummy
+        {
+            name = "Dummy",
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            visible = function() return false end,
+            callback = function() end,
+        },
+
         -- Show More
         {
             name = GetString(SI_GUILD_HISTORY_SHOW_MORE),
