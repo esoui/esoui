@@ -441,6 +441,11 @@ function ZO_CraftingSlotBase:GetItemId()
 end
 
 function ZO_CraftingSlot_OnInitialized(self)
+	-- Use the double click behavior as the single click behavior for consistency with all
+	-- other aspects of the Crafting UI.
+	self:SetHandler("OnClicked", self:GetHandler("OnMouseDoubleClick"))
+	self:SetHandler("OnMouseDoubleClick", nil)
+
     self.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("CraftingGlowAlphaAnimation", self:GetNamedChild("Glow"))
     local icon = self:GetNamedChild("Icon")
     icon:ClearAnchors()

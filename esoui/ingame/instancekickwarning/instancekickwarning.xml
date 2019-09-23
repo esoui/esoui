@@ -7,7 +7,7 @@
                     <Anchor point="BOTTOM" offsetY="-220"/>
                     <Controls>
                         <Label name="$(parent)Text" text="SI_INSTANCE_KICK_WARNING">
-                            <Anchor point="CENTER" />
+                            <Anchor point="BOTTOM" />
                         </Label>
 
                         <Cooldown name="$(parent)Timer" inherits="ZO_RadialCountdownTimer">

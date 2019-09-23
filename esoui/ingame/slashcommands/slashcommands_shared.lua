@@ -95,9 +95,13 @@ if AreUserAddOnsSupported() or IsInternalBuild() then
 end
 
 SLASH_COMMANDS[GetString(SI_SLASH_GROUP_INVITE)] = function(txt)
-    GroupInviteByName(txt)
-    CHAT_SYSTEM:AddMessage(zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), txt))
-    ZO_Menu_SetLastCommandWasFromMenu(false)
+    if txt == "" then
+        CHAT_SYSTEM:AddMessage(zo_strformat(SI_GROUP_INVITE_REQUEST_EMPTY_MESSAGE, ZO_GetPlatformAccountLabel()))
+    else
+        GroupInviteByName(txt)
+        CHAT_SYSTEM:AddMessage(zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), txt))
+        ZO_Menu_SetLastCommandWasFromMenu(false)
+    end
 end
 
 SLASH_COMMANDS[GetString(SI_SLASH_JUMP_TO_LEADER)] = function(txt)

@@ -86,11 +86,11 @@ function ZO_QuestJournal_Shared:RegisterTooltipText(questType, instanceDisplayTy
     QuestJournal_Shared_RegisterDataInTable(self.tooltips, questType, instanceDisplayType, data)
 end
 
-function ZO_QuestJournal_Shared:GetTooltipText(questType, instanceDisplayType)
+function ZO_QuestJournal_Shared:GetTooltipText(questType, instanceDisplayType, questIndex)
     local data = QuestJournal_Shared_GetDataFromTable(self.tooltips, questType, instanceDisplayType)
     local text = data
     if type(data) == "table" then
-        text = zo_strformat(data.text, data.paramsFunction())
+        text = zo_strformat(data.text, data.paramsFunction(questIndex))
     end
     return text
 end

@@ -497,17 +497,21 @@ function ZO_InventoryManager:Initialize(control)
             filterBar = ZO_PlayerInventoryTabs,
             rowTemplate = "ZO_PlayerInventorySlot",
             activeTab = ZO_PlayerInventoryTabsActive,
-            inventoryEmptyStringId = function(self)
-                    if self:IsGuildBanking() then
-                        local guildId = GetSelectedGuildBankId() 
-                        if not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_BANK_DEPOSIT) then
-                            return GetString(SI_INVENTORY_ERROR_GUILD_BANK_NO_DEPOSIT_PERMISSIONS)
-                        elseif not DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_BANK_DEPOSIT) then
-                            return zo_strformat(SI_INVENTORY_ERROR_GUILD_BANK_NO_DEPOSIT_PRIVILEGES, GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_BANK_DEPOSIT))
-                        end
+            inventoryEmptyStringId = function(self, inventory)
+                if self:IsGuildBanking() then
+                    local guildId = GetSelectedGuildBankId()
+                    if not DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_BANK_DEPOSIT) then
+                        return GetString(SI_INVENTORY_ERROR_GUILD_BANK_NO_DEPOSIT_PERMISSIONS)
+                    elseif not DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_BANK_DEPOSIT) then
+                        return zo_strformat(SI_INVENTORY_ERROR_GUILD_BANK_NO_DEPOSIT_PRIVILEGES, GetNumGuildMembersRequiredForPrivilege(GUILD_PRIVILEGE_BANK_DEPOSIT))
                     end
-                    return GetString(SI_INVENTORY_ERROR_INVENTORY_EMPTY)
                 end
+                if inventory.currentFilter == ITEMFILTERTYPE_ALL then
+                    return GetString(SI_INVENTORY_ERROR_INVENTORY_EMPTY)
+                else
+                    return GetString(SI_INVENTORY_ERROR_FILTER_EMPTY)
+                end
+            end,
         },
         [INVENTORY_QUEST_ITEM] =
         {
@@ -598,8 +602,12 @@ function ZO_InventoryManager:Initialize(control)
             filterBar = ZO_GuildBankTabs,
             rowTemplate = "ZO_PlayerInventorySlot",
             activeTab = ZO_GuildBankTabsActive,
-            inventoryEmptyStringId = function(self) 
-                return GetString(SI_INVENTORY_ERROR_GUILD_BANK_EMPTY)
+            inventoryEmptyStringId = function(self, inventory)
+               if inventory.currentFilter == ITEMFILTERTYPE_ALL then
+                    return GetString(SI_INVENTORY_ERROR_GUILD_BANK_EMPTY)
+                else
+                    return GetString(SI_INVENTORY_ERROR_FILTER_EMPTY)
+                end
             end
         },
         [INVENTORY_CRAFT_BAG] =
@@ -2646,19 +2654,18 @@ function ZO_InventoryManager:UpdateEmptyBagLabel(inventoryType, isEmptyList)
             label = ZO_GuildBank:GetNamedChild("Empty")
         end
 
-        if label then 
+        if label then
             label:SetHidden(not isEmptyList)
-            if inventory.currentFilter == ITEMFILTERTYPE_ALL then
-                -- Quest items are only accessed through the ITEMFILTERTYPE_QUEST filter and do not need a unique string here
-                local emptyListDisplayString
-                if type(inventory.inventoryEmptyStringId) == "function" then
-                    emptyListDisplayString = inventory.inventoryEmptyStringId(self) 
-                else
-                    emptyListDisplayString = GetString(inventory.inventoryEmptyStringId)
-                end  
-                if emptyListDisplayString ~= nil then
-                    label:SetText(emptyListDisplayString)
-                end
+
+            local emptyListDisplayString
+            if type(inventory.inventoryEmptyStringId) == "function" then
+                emptyListDisplayString = inventory.inventoryEmptyStringId(self, inventory)
+            else
+                emptyListDisplayString = GetString(inventory.inventoryEmptyStringId)
+            end
+
+            if emptyListDisplayString ~= nil then
+                label:SetText(emptyListDisplayString)
             else
                 label:SetText(GetString(SI_INVENTORY_ERROR_FILTER_EMPTY))
             end

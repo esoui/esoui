@@ -622,7 +622,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             local defaultText = editBoxInfo.defaultText
             if defaultText then
                 if type(defaultText) == "number" then
-                    defaultText = GetString(text)
+                    defaultText = GetString(defaultText)
                 end
                 ZO_EditDefaultText_Initialize(editControl, defaultText)
             else

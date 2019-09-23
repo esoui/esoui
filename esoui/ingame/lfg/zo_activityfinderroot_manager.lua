@@ -3,7 +3,6 @@ ZO_ACTIVITY_FINDER_SORT_PRIORITY =
     GROUP = 0,
     ZONE_STORIES = 100,
     DUNGEONS = 200,
-    AVA = 300,
     BATTLEGROUNDS = 400,
 }
 
@@ -50,10 +49,6 @@ local function GetLevelOrChampionPointsRequirementText(levelMin, levelMax, point
             return ZO_CachedStrFormat(SI_LFG_LOCK_REASON_PLAYER_MAX_LEVEL_REQUIREMENT, levelMax)
         end
     end
-end
-
-function ZO_IsActivityTypeAvA(activityType)
-    return activityType == LFG_ACTIVITY_AVA
 end
 
 function ZO_IsActivityTypeDungeon(activityType)
@@ -291,7 +286,6 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
     local isLeader = IsUnitGroupLeader("player")
 
     for activityType, locationsByActivity in pairs(self.sortedLocationsData) do
-        local isActivityAvA = ZO_IsActivityTypeAvA(activityType)
         local isActivityHomeShow = ZO_IsActivityTypeHomeShow(activityType)
 
         local activityRequiresRoles = ZO_DoesActivityTypeRequireRoles(activityType)
@@ -311,10 +305,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
             if cooldownText then
                 location:SetLockReasonText(cooldownText)
             elseif location:IsLockedByPlayerLocation() then
-                if isActivityAvA then
-                    local zoneName = GetZoneNameById(location:GetZoneId())
-                    location:SetLockReasonText(zo_strformat(SI_LFG_LOCK_REASON_AVA_WRONG_LOCATION, zoneName))
-                elseif IsActiveWorldBattleground() then
+                if IsActiveWorldBattleground() then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_BATTLEGROUND)
                 elseif IsPlayerInAvAWorld() then
                     location:SetLockReasonText(SI_LFG_LOCK_REASON_IN_AVA)

@@ -151,13 +151,14 @@ function ZO_GuildRanks_Keyboard:Initialize(control)
 
     GUILD_RANKS_SCENE = ZO_Scene:New("guildRanks", SCENE_MANAGER)
     GUILD_RANKS_SCENE:RegisterCallback("StateChange",   function(oldState, newState)
-                                                            if(newState == SCENE_SHOWING) then
+                                                            if newState == SCENE_SHOWING then
                                                                 MAIN_MENU_MANAGER:SetBlockingScene("guildRanks", OnBlockingSceneActivated)
                                                                 KEYBIND_STRIP:RemoveDefaultExit()
                                                                 KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                            elseif(newState == SCENE_HIDING) then
+                                                            elseif newState == SCENE_HIDING then
                                                                 self:StopDragging()
-                                                            elseif(newState == SCENE_HIDDEN) then
+                                                            elseif newState == SCENE_HIDDEN then
+                                                                self:RefreshSaveEnabled()
                                                                 self:Save()
                                                                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                                                                 KEYBIND_STRIP:RestoreDefaultExit()

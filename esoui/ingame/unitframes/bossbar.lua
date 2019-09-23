@@ -77,10 +77,12 @@ function BossBar:RefreshBossHealthBar(smoothAnimate)
     end
 
     local halfHealth = zo_floor(totalHealth / 2)
-    local halfMax = zo_floor(totalMaxHealth / 2)    
+    local halfMax = zo_max(zo_floor(totalMaxHealth / 2), 1)
+
     for i = 1, #self.bars do
         ZO_StatusBar_SmoothTransition(self.bars[i], halfHealth, halfMax, not smoothAnimate)
     end
+    
     self.healthText:SetText(ZO_FormatResourceBarCurrentAndMax(totalHealth, totalMaxHealth))
 
     COMPASS_FRAME:SetBossBarActive(totalHealth > 0)

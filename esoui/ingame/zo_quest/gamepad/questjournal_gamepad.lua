@@ -260,9 +260,7 @@ function ZO_QuestJournal_Gamepad:GetQuestDataString()
             repeatableText = GetString(SI_GAMEPAD_QUEST_JOURNAL_REPEATABLE_TEXT)
         end
 
-        if questData.dataSource then
-            instanceDisplayTypeText = self:GetTooltipText(questData.dataSource.questType, questData.dataSource.displayType)
-        end
+		instanceDisplayTypeText = self:GetTooltipText(questData.questType, questData.displayType, questData.questIndex)
     end
 
     return repeatableText, instanceDisplayTypeText

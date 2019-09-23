@@ -96,7 +96,6 @@ EsoUI\Ingame\Group\Keyboard\ZO_GroupMenu_Keyboard.lua
 EsoUI\Ingame\Group\Keyboard\ZO_GroupMenu_Keyboard.xml
 EsoUI\Ingame\Group\Keyboard\ZO_GroupList_Keyboard.lua
 EsoUI\Ingame\Group\Keyboard\ZO_GroupList_Keyboard.xml
-EsoUI\Ingame\Group\JumpToLeader.lua
 EsoUI\Ingame\TopBar\TopBar.xml
 
 EsoUI\Ingame\ZoneStories\ZoneStories_Manager.lua
@@ -121,7 +120,6 @@ EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderTemplate_Gamepad.xml
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityFinderRoot_Gamepad.xml
 EsoUI\Ingame\LFG\ZO_DungeonFinder_Manager.lua
-EsoUI\Ingame\LFG\ZO_AvAFinder_Manager.lua
 EsoUI\Ingame\LFG\ZO_BattlegroundFinder_Manager.lua
 
 EsoUI\Ingame\LFG\SearchingForGroup.lua

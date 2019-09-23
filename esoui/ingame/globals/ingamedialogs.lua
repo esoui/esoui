@@ -944,12 +944,12 @@ ESO_Dialogs["GROUP_INVITE"] =
     editBox =
     {
         defaultText = SI_REQUEST_NAME_DEFAULT_TEXT,
-        autoComplete = 
+        autoComplete =
         {
-            includeFlags = { AUTO_COMPLETE_FLAG_ALL }, 
-            excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }, 
-            onlineOnly = AUTO_COMPLETION_ONLINE, 
-            maxResults = MAX_AUTO_COMPLETION_RESULTS, 
+            includeFlags = { AUTO_COMPLETE_FLAG_ALL },
+            excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES },
+            onlineOnly = AUTO_COMPLETION_ONLINE,
+            maxResults = MAX_AUTO_COMPLETION_RESULTS,
         },
     },
     buttons =
@@ -2049,68 +2049,6 @@ ESO_Dialogs["GROUP_LEAVE_DIALOG"] =
             text = SI_DIALOG_CANCEL,
         },
     }
-}
-
-ESO_Dialogs["JUMP_TO_GROUP_LEADER_OCCURANCE_PROMPT"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_TITLE,
-    },
-    mainText =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_OCCURANCE_PROMPT,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                local groupLeaderUnitTag = GetGroupLeaderUnitTag()
-                JumpToGroupMember(GetUnitName(groupLeaderUnitTag))
-                SCENE_MANAGER:ShowBaseScene()
-            end,
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-        },
-    },
-}
-
-ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_PROMPT"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_TITLE,
-    },
-    mainText =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_WORLD_PROMPT,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                local groupLeaderUnitTag = GetGroupLeaderUnitTag()
-                JumpToGroupMember(GetUnitName(groupLeaderUnitTag))
-                SCENE_MANAGER:ShowBaseScene()
-            end,
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-        },
-    },
 }
 
 ESO_Dialogs["LFG_LEAVE_QUEUE_CONFIRMATION"] =
