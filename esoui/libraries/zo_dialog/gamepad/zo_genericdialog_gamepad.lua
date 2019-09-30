@@ -644,7 +644,7 @@ do
         local listControl = dialog:GetNamedChild("EntryList"):GetNamedChild("List")
         dialog.entryList = ZO_GamepadVerticalItemParametricScrollList:New(listControl)
         dialog.entryList:SetAlignToScreenCenter(true)
-        dialog.entryList:SetValidateGradient(true)
+        dialog.entryList:SetHandleDynamicViewProperties(true)
 
         -- Custom data templates
         dialog.entryList:AddDataTemplateWithHeader("ZO_GamepadDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryFullWidthHeaderTemplate", nil, nil, nil)

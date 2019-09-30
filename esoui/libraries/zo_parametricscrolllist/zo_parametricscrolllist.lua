@@ -69,7 +69,7 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
     self.animationEnabled = true
     self.soundEnabled = true
     self.directionalInputEnabled = true
-    self.validateGradient = false
+    self.handleDynamicViewProperties = false
     self.validGradientDirty = true
     self.anchorOppositeSide = false
 
@@ -1329,18 +1329,20 @@ function ZO_ParametricScrollList:DoesTemplateHaveEditBox(dataIndex)
     return self.dataTypes[templateName].hasEditControl
 end
 
---Set this to true if the list could have less than ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE UI units from its center control to the scroll top or bottom. Turning this on will
---automatically size the fade gradients to not overlap the center control.
-function ZO_ParametricScrollList:SetValidateGradient(validate)
+--Set this to true if you plan to change the list size or view properties (like center offsets) between commits. For example, if the list is anchored on the top and bottom and changes size when the user resizes the screen.
+function ZO_ParametricScrollList:SetHandleDynamicViewProperties(handleDynamicViewProperties)
     if self.mode == PARAMETRIC_SCROLL_LIST_VERTICAL then
-        if validate ~= self.validateGradient then
-            self.validateGradient = validate
-            if validate then
+        if handleDynamicViewProperties ~= self.handleDynamicViewProperties then
+            self.handleDynamicViewProperties = handleDynamicViewProperties
+            if handleDynamicViewProperties then
                 self.scrollControl:SetHandler("OnRectChanged", function(scrollControl, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
                     --if the edges of the scroll area changed we need to fix up the gradients
                     if not zo_floatsAreEqual(newTop, oldTop) or not zo_floatsAreEqual(newBottom, oldBottom) then
+                        --If the list has less than ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE UI units from its center control to the scroll top or bottom then automatically size the fade gradients to not overlap the center control.
                         self.validGradientDirty = true
-                        self:EnsureValidGradient()
+                        
+                        --If the list changes height we need to update anchors because that function is responsible for hiding controls that went out of view or showing controls that are now in view.
+                        self:RefreshVisible()
                     end
                 end)
             else
@@ -1351,7 +1353,7 @@ function ZO_ParametricScrollList:SetValidateGradient(validate)
 end
 
 function ZO_ParametricScrollList:EnsureValidGradient()
-    if self.validateGradient and self.validGradientDirty then
+    if self.handleDynamicViewProperties and self.validGradientDirty then
         local listStart = GetStartOfControl(self.mode, self.scrollControl)
         local listEnd = GetEndOfControl(self.mode, self.scrollControl)
         local listMid = listStart + (GetControlDimensionForMode(self.mode, self.scrollControl) / 2.0)

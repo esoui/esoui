@@ -342,6 +342,7 @@ function ZO_CharacterCreate_Base:InitializeSelectorButton(buttonControl, data, r
     end
 
     buttonControl:SetHidden(false)
+    buttonControl.selectorData = data
 
     self:InitializeSelectorButtonTextures(buttonControl, data)
 
@@ -431,16 +432,15 @@ function ZO_CharacterCreate_Base:UpdateAllianceSelectorsForTemplate(allianceData
 end
 
 function ZO_CharacterCreate_Base:UpdateSelectorsForTemplate(isEnabledCallback, characterDataTable, templateData, radioGroup, optionalValidIndexTable)
-    for dataIndex, data in ipairs(characterDataTable) do
+    for button in radioGroup:IterateButtons() do
+        local data = button.selectorData
         local enabled = isEnabledCallback(data, templateData)
         data.isRadioEnabled = enabled
 
-        -- this safeguard is necessary for gamepad character create (... another victim of the race selector setup)
-        if data.selectorButton then
-            self:SetSelectorButtonEnabled(data.selectorButton, radioGroup, enabled)
-        end
+        self:SetSelectorButtonEnabled(button, radioGroup, enabled)
 
         if optionalValidIndexTable and enabled then
+            local dataIndex = ZO_IndexOfElementInNumericallyIndexedTable(characterDataTable, data)
             table.insert(optionalValidIndexTable, dataIndex)
         end
     end

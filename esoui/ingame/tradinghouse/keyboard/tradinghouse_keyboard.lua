@@ -211,6 +211,18 @@ function ZO_TradingHouseManager:InitializeMenuBar(control)
         SetTooltipText(tooltip, tooltipText)
     end
 
+    local function LayoutListingTabTooltip(tooltip)
+        local guildId = GetSelectedTradingHouseGuildId()
+        local tooltipText
+        if not IsPlayerInGuild(guildId) then
+            tooltipText = GetString(SI_TRADING_HOUSE_POSTING_LOCKED_NOT_A_GUILD_MEMBER)
+        else
+            tooltipText = GetString(SI_TRADING_HOUSE_MODE_LISTINGS)
+        end
+
+        SetTooltipText(tooltip, tooltipText)
+    end
+
     local iconData =
     {
         {
@@ -241,6 +253,8 @@ function ZO_TradingHouseManager:InitializeMenuBar(control)
             disabled = "EsoUI/Art/TradingHouse/tradinghouse_listings_tabIcon_disabled.dds",
             highlight = "EsoUI/Art/TradingHouse/tradinghouse_listings_tabIcon_over.dds",
             callback = HandleTabSwitch,
+            CustomTooltipFunction = LayoutListingTabTooltip,
+            alwaysShowTooltip = true,
         },
     }
 
@@ -492,7 +506,6 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
     local function SetupBaseSearchResultRow(rowControl, result)
         self.searchResultsControlsList[#self.searchResultsControlsList+1] = rowControl
         self.searchResultsInfoList[#self.searchResultsInfoList+1] = result
-        local slotIndex = result.slotIndex
 
         local nameControl = GetControl(rowControl, "Name")
         nameControl:SetText(ZO_TradingHouse_GetItemDataFormattedName(result))
@@ -1305,7 +1318,6 @@ function ZO_TradingHouse_SearchResult_TraitInfo_OnMouseEnter(control)
         return
     end
 
-    local slotIndex = slotData.slotIndex
     local traitInformation = GetItemTraitInformationFromItemLink(slotData.itemLink)
 
     if traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then

@@ -426,10 +426,13 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
                 callback = function(dialog)
+                                -- release the dialog first to avoid issue where the parametric list can refresh
+                                -- but EndPurchase will wipe out important state, like self.marketProductData
+                                ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
+
                                 OnMarketEndPurchase()
                                 local NOT_NO_CHOICE_CALLBACK = false
                                 self:EndPurchase(NOT_NO_CHOICE_CALLBACK)
-                                ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
                            end,
             },
             --Confirm

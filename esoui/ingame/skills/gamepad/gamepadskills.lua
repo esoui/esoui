@@ -856,7 +856,7 @@ function ZO_GamepadSkills:InitializeCategoryList()
 
     local function SetupCategoryList(list)
         list:SetAdditionalBottomSelectedItemOffsets(0, 20)
-        list:SetValidateGradient(true)
+        list:SetHandleDynamicViewProperties(true)
 
         list:AddDataTemplate("ZO_GamepadSkillLineEntryTemplate", SkillLineEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, AreSkillLineEntriesEqual)
         list:AddDataTemplateWithHeader("ZO_GamepadSkillLineEntryTemplate", SkillLineEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, AreSkillLineEntriesEqual, "ZO_GamepadMenuEntryHeaderTemplate")
@@ -905,7 +905,7 @@ end
 
 function ZO_GamepadSkills:InitializeLineFilterList()
     local function SetupLineFilterList(list)
-        list:SetValidateGradient(true)
+        list:SetHandleDynamicViewProperties(true)
         list:AddDataTemplate("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual)
         list:AddDataTemplateWithHeader("ZO_GamepadAbilityEntryTemplate", MenuAbilityEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, IsSkillEqual, "ZO_GamepadMenuEntryHeaderTemplate")
     end
@@ -953,7 +953,7 @@ function ZO_GamepadSkills:InitializeBuildPlanner()
 
     self.buildPlannerList = ZO_GamepadVerticalParametricScrollList:New(buildPlannerControl)
     self.buildPlannerList:SetAlignToScreenCenter(true)
-    self.buildPlannerList:SetValidateGradient(true)
+    self.buildPlannerList:SetHandleDynamicViewProperties(true)
 
     self.buildPlannerList:SetNoItemText(GetString(SI_GAMEPAD_SKILLS_NO_ABILITIES))
 

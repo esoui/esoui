@@ -1041,7 +1041,7 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     self.characterList:AddDataTemplate("ZO_GamepadMenuEntryTemplateLowercase34", CharacterListEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.characterList:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplateLowercase34", CharacterListEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadCharacterSelectMenuEntryHeaderTemplate", GamepadCharacterSelectMenuEntryHeader_Setup)
     self.characterList:SetAlignToScreenCenter(true)
-    self.characterList:SetValidateGradient(true)
+    self.characterList:SetHandleDynamicViewProperties(true)
 
     self.UpdateDirectionalInput = ZO_CharacterSelect_Gamepad_UpdateDirectionalInput
     self.characterList:SetDirectionalInputEnabled(false)

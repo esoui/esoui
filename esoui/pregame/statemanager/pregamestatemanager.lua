@@ -626,6 +626,7 @@ function UnregisterForLoadingUpdates()
     if loadingUpdates then
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED)
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE)
+        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_LUA_ERROR)
         loadingUpdates = false
     end
 end
@@ -692,10 +693,24 @@ local function OnSubsystemLoadComplete(eventId, subSystem)
     end
 end
 
+local function OnLuaErrorWhileLoading(_)
+    -- Errors triggered during a loading screen will prevent some loading
+    -- subsystems from completing, so the loading screen will never go away unless
+    -- we do something. Let's immediately disconnect and bail back to the initial
+    -- screen to handle this. We're calling lua code to handle errors in lua code,
+    -- so we may still end up in the situation where our error recovery code never
+    -- gets called, but the list of places where that could happen are very low;
+    -- basically just this function.
+    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_LUA_ERROR)
+    ZO_PREGAME_HAD_GLOBAL_ERROR = true
+    PregameDisconnectOnLuaError()
+end
+
 function RegisterForLoadingUpdates()
     if not loadingUpdates then
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED, OnAreaLoadStarted)
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE, OnSubsystemLoadComplete)
+        EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_LUA_ERROR, OnLuaErrorWhileLoading)
         loadingUpdates = true
     end
 end

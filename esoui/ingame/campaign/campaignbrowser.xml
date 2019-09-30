@@ -7,7 +7,10 @@
                 self.OnMouseUp = ZO_TreeEntry_OnMouseUp
             </OnInitialized>
         </Control>
-        <Label name="ZO_RulesetEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel ZO_TreeEntry"/>
+        <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
+        <Label name="ZO_RulesetEntry" inherits="ZO_TreeLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
+            <Dimensions x="200" />
+        </Label>
 
         <Label name="ZO_CampaignBrowserLoadingLabel" virtual="true" inherits="ZO_LoadingText" font="ZoFontGame"/>
         <Label name="ZO_CampaignBrowserLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>

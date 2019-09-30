@@ -255,15 +255,6 @@ function ZO_NumericallyIndexedTableReverseIterator(t)
     end
 end
 
-function ZO_NonContiguousTableIterator(t)
-    local k = nil
-    local v = nil
-    return function()
-        k, v = next(t, k)
-        return k, v
-    end
-end
-
 function ZO_FilteredNumericallyIndexedTableIterator(table, filterFunctions)
     local index = 0
     local count = #table

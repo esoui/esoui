@@ -40,7 +40,7 @@ function ZO_Help_Root_Gamepad:Initialize(control)
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
     local list = self:GetMainList()
-    list:SetValidateGradient(true)
+    list:SetHandleDynamicViewProperties(true)
 end
 
 function ZO_Help_Root_Gamepad:InitializeKeybindStripDescriptors()

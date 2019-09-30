@@ -111,6 +111,13 @@ function ZO_GamepadTradingHouse_Listings:RefreshData(dontReselect)
     end
     itemList:Commit(dontReselect)
 
+    local guildId = GetSelectedTradingHouseGuildId()
+    if not IsPlayerInGuild(guildId) then
+        itemList:SetNoItemText(GetString(SI_TRADING_HOUSE_POSTING_LOCKED_NOT_A_GUILD_MEMBER))
+    else
+        itemList:SetNoItemText(GetString(SI_GUILD_STORE_NO_LISTINGS))
+    end
+
     self:UpdateItemSelectedTooltip(itemList:GetTargetData())
     self:UpdateKeybind()
 end

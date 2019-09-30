@@ -49,7 +49,7 @@ function ZO_ChatMenu_Gamepad:InitializeControls()
     local list = self:GetMainList()
     list:SetSelectedItemOffsets(0, 0)
     list:SetAnchorOppositeSide(true)
-    list:SetValidateGradient(true)
+    list:SetHandleDynamicViewProperties(true)
     list:AddDataTemplate("ZO_ChatMenu_Gamepad_LogLine", function(...) self:SetupLogMessage(...) end, ZO_GamepadMenuEntryTemplateParametricListFunction, function(a, b) return a.data.id == b.data.id end)
 
     local function HandleListDirectionalInput(result)
