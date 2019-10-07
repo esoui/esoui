@@ -27,15 +27,13 @@ end
 function ZO_ContextualActionsTile_Keyboard:OnMouseEnter()
     ZO_Tile_Keyboard.OnMouseEnter(self)
 
-    local IS_FOCUSED = true
-    self:OnFocusChanged(IS_FOCUSED)
+    self:Focus()
 end
 
 function ZO_ContextualActionsTile_Keyboard:OnMouseExit()
     ZO_Tile_Keyboard.OnMouseExit(self)
 
-    local IS_NOT_FOCUSED = false
-    self:OnFocusChanged(IS_NOT_FOCUSED)
+    self:Defocus()
 end
 
 -- End ZO_Tile_Keyboard Overrides --

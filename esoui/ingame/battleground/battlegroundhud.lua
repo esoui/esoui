@@ -100,7 +100,7 @@ do
             if IsCurrentBattlegroundStateTimed() then
                 if self.currentBattlegroundTimeMS <= COUNTDOWN_TIMER_START_MS then
                     text = GetString(SI_BATTLEGROUND_STATE_STARTING_COUNTDOWN)
-                    if previousBattlegroundTime > COUNTDOWN_TIMER_START_MS then
+                    if previousBattlegroundTimeMS > COUNTDOWN_TIMER_START_MS then
                         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_COUNTDOWN_TEXT, SOUNDS.BATTLEGROUND_COUNTDOWN_FINISH )
                         messageParams:SetLifespanMS(COUNTDOWN_TIMER_START_MS)
                         messageParams:SetIconData(GetCountdownBattlegroundAllianceSymbolIcon(GetUnitBattlegroundAlliance("player")))
@@ -118,14 +118,14 @@ do
                 gameTypeString = ZO_NORMAL_TEXT:Colorize(gameTypeString)
                 text = zo_strformat(SI_BATTLEGROUND_STATE_RUNNING, gameTypeString, self:GetFormattedTimer())
 
-                if self.currentBattlegroundTimeMS <= COUNTDOWN_TIMER_END_BATTLEGROUND_MS and previousBattlegroundTime > COUNTDOWN_TIMER_END_BATTLEGROUND_MS then
+                if self.currentBattlegroundTimeMS <= COUNTDOWN_TIMER_END_BATTLEGROUND_MS and previousBattlegroundTimeMS > COUNTDOWN_TIMER_END_BATTLEGROUND_MS then
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.BATTLEGROUND_ONE_MINUTE_WARNING)
                     messageParams:SetText(GetString(SI_BATTLEGROUND_WARNING_ONE_MINUTE_REMAINING))
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_MINUTE_WARNING)
                     CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                 end
             end
-            if previousShutdownTimerMS and self.shutdownTimerMS then                
+            if previousShutdownTimerMS and self.shutdownTimerMS then
                 if previousShutdownTimerMS >= PRE_SHUTDOWN_WARNING_TIME_MS and self.shutdownTimerMS < PRE_SHUTDOWN_WARNING_TIME_MS then
                     local message = zo_strformat(SI_BATTLEGROUND_SHUTDOWN_IMMINENT, PRE_SHUTDOWN_WARNING_TIME_S)
                     CHAT_SYSTEM:AddMessage(message)

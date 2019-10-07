@@ -11,7 +11,7 @@ ZO_Dialogs_RegisterCustomDialog("BUY_CROWNS_FROM_PLATFORM_STORE",
     },
     mainText =
     {
-        text = SI_OPEN_STORE_TO_BUY_CROWNS_TEXT,
+        text = SI_OPEN_STORE_BUY_CROWNS_TEXT,
     },
     buttons =
     {
@@ -41,7 +41,7 @@ end
 function ZO_ShowBuyCrownsPlatformDialog()
     OnMarketPurchaseMoreCrowns()
     if DoesPlatformStoreUseExternalLinks() then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_ACCOUNT_STORE }, { mainTextParams = { GetString(SI_MARKET_INSUFFICIENT_FUNDS_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB) } })
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_ACCOUNT_STORE }, { mainTextParams = { ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB) } })
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_CROWNS_FROM_PLATFORM_STORE", nil, { mainTextParams = { ZO_Currency_FormatKeyboard(CURT_CROWNS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON), ZO_GetPlatformStoreName() } })
     end

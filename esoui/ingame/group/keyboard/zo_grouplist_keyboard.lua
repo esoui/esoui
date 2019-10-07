@@ -103,12 +103,14 @@ function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()
 
             name = GetString(SI_GROUP_LIST_READY_CHECK_BIND),
             keybind = "UI_SHORTCUT_TERTIARY",
-        
+
             callback = ZO_SendReadyCheck,
 
             visible = function()
-                return self.groupSize and self.groupSize > 0
-            end
+                -- GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS matches what ZO_SendReadyCheck uses
+                local expectedResult = GetExpectedGroupElectionResult(GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS)
+                return expectedResult ~= GROUP_ELECTION_FAILURE_NOT_GROUPED and expectedResult ~= GROUP_ELECTION_FAILURE_IN_BATTLEGROUND
+            end,
         },
 
         -- Leave Group

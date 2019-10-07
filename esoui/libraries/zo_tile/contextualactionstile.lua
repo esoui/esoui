@@ -17,7 +17,7 @@ function ZO_ContextualActionsTile:Initialize(control)
     self.highlightControl = self.control:GetNamedChild("Highlight")
 
     self.keybindStripDescriptor = {}
-	self.isFocused = false
+    self.isFocused = false
     self.canFocus = true
 end
 
@@ -54,41 +54,41 @@ function ZO_ContextualActionsTile:CanFocus()
 end
 
 function ZO_ContextualActionsTile:SetCanFocus(canFocus)
-	if self:CanFocus() ~= canFocus then
-		if not canFocus then
-			self:Defocus()
-		end
+    if self:CanFocus() ~= canFocus then
+        if not canFocus then
+            self:Defocus()
+        end
 
-	    self.canFocus = canFocus
-	end
+        self.canFocus = canFocus
+    end
 end
 
 function ZO_ContextualActionsTile:IsFocused()
-	return self.isFocused
+    return self.isFocused
 end
 
 function ZO_ContextualActionsTile:Focus()
-	if self:CanFocus() and not self:IsFocused() then
-		self.isFocused = true
-		self:OnFocusChanged(self.isFocused)
-	end
+    if self:CanFocus() and not self:IsFocused() then
+        self.isFocused = true
+        self:OnFocusChanged(self.isFocused)
+    end
 end
 
 function ZO_ContextualActionsTile:Defocus()
-	if self:CanFocus() and self:IsFocused() then
-		self.isFocused = false
-		self:OnFocusChanged(self.isFocused)
-	end
+    if self:CanFocus() and self:IsFocused() then
+        self.isFocused = false
+        self:OnFocusChanged(self.isFocused)
+    end
 end
 
 function ZO_ContextualActionsTile:OnFocusChanged(isFocused)
-	if isFocused then
-		KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-		self:SetHighlightHidden(false)
-	else
-		KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-		self:SetHighlightHidden(true)
-	end
+    if isFocused then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        self:SetHighlightHidden(false)
+    else
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+        self:SetHighlightHidden(true)
+    end
 end
 
 function ZO_ContextualActionsTile:SetHighlightHidden(hidden, instant)

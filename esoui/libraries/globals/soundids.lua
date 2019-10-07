@@ -918,4 +918,7 @@ SOUNDS = {
     DAEDRIC_ARTIFACT_SPAWNED                = "DaedricArtifact_Spawned",
     DAEDRIC_ARTIFACT_REVEALED               = "DaedricArtifact_Revealed",
     DAEDRIC_ARTIFACT_DESPAWNED              = "DaedricArtifact_Despawned",
+
+    --Code Redemption
+    CODE_REDEMPTION_SUCCESS                 = "CodeRedemption_Success",
 }

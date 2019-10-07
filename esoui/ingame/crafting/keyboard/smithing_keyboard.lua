@@ -89,9 +89,11 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                     local cost = GetCostToCraftSmithingItem(self.creationPanel:GetAllCraftingParameters())
                     return ZO_CraftingUtils_GetCostToCraftString(cost)
                 elseif self.mode == SMITHING_MODE_REFINEMENT then
-                    return self.refinementPanel:IsMultiExtract() and GetString(SI_CRAFTING_REFINE_MULTIPLE) or  GetString(SI_CRAFTING_PERFORM_REFINE)
+                    local action = self.refinementPanel:IsMultiExtract() and "SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE" or "SI_DECONSTRUCTACTIONNAME_PERFORM"
+                    return GetString(action, DECONSTRUCT_ACTION_NAME_REFINE)
                 elseif self.mode == SMITHING_MODE_DECONSTRUCTION then
-                    return self.deconstructionPanel:IsMultiExtract() and GetString(SI_CRAFTING_DECONSTRUCT_MULTIPLE) or GetString(SI_CRAFTING_PERFORM_DECONSTRUCT)
+                    local action = self.deconstructionPanel:IsMultiExtract() and "SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE" or "SI_DECONSTRUCTACTIONNAME_PERFORM"
+                    return GetString(action, DECONSTRUCT_ACTION_NAME_DECONSTRUCT)
                 elseif self.mode == SMITHING_MODE_IMPROVEMENT then
                     return GetString(SI_SMITHING_IMPROVE)
                 elseif self.mode == SMITHING_MODE_RESEARCH then

@@ -258,15 +258,14 @@ function ZO_SharedSmithingExtraction:ConfirmExtractAll()
         return
     end
 
-    local function PerformExtract()
-        self:ExtractAll()
-    end
-
-    if self:IsInRefineMode() then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_REFINE_MULTIPLE_ITEMS", {refineFn = PerformExtract}, {mainTextParams = {ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount())}})
-    else
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS", {deconstructFn = PerformExtract}, {mainTextParams = {ZO_CommaDelimitNumber(self.extractionSlot:GetNumItems())}})
-    end
+    local dialogData =
+    {
+        deconstructFn = function()
+            self:ExtractAll()
+        end,
+        verb = self:IsInRefineMode() and DECONSTRUCT_ACTION_NAME_REFINE or DECONSTRUCT_ACTION_NAME_DECONSTRUCT,
+    }
+    ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS", dialogData, {mainTextParams = {ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount())}})
 end
 
 function ZO_SharedSmithingExtraction:IsExtractable()

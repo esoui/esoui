@@ -90,7 +90,16 @@ ESO_Dialogs["KEYBOARD_CODE_REDEMPTION_COMPLETE_DIALOG"] =
     mainText =
     {
         text = function(dialog)
-            local redeemCodeResult = dialog.data.redeemCodeResult
+            local data = dialog.data
+            if data.success then
+                local rewardNames = REWARDS_MANAGER:GetListOfRewardNamesFromLastCodeRedemption()
+                if #rewardNames > 0 then
+                    local listOfRewardNames = ZO_WHITE:Colorize(ZO_GenerateCommaSeparatedListWithoutAnd(rewardNames))
+                    return zo_strformat(SI_CODE_REDEMPTION_DIALOG_SUCCESS_WITH_REWARD_NAMES_BODY, listOfRewardNames)
+                end
+            end
+
+            local redeemCodeResult = data.redeemCodeResult
             return GetString("SI_REDEEMCODERESULT", redeemCodeResult)
         end,
     },
@@ -136,7 +145,11 @@ local function OnCodeRedemptionComplete(data, success, code, redeemCodeResult)
                         redeemCodeResult = redeemCodeResult,
                     }
                     ZO_Dialogs_ShowDialog("KEYBOARD_CODE_REDEMPTION_COMPLETE_DIALOG", dialogData)
-
+                    if success then
+                        PlaySound(SOUNDS.CODE_REDEMPTION_SUCCESS)
+                    else
+                        PlaySound(SOUNDS.GENERAL_ALERT_ERROR)
+                    end
                 end, LOADING_DELAY_MS)
 end
 

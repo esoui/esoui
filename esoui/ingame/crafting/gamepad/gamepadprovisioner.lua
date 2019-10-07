@@ -421,44 +421,54 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
     local requireIngredients = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].currentValue
     local requireSkills = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].currentValue
     local craftingInteractionType = GetCraftingInteractionType()
-    
+    local hasKnownRecipesInCurrentFilter = false
+
     local recipeLists = PROVISIONER_MANAGER:GetRecipeListData(craftingInteractionType)
     for _, recipeList in pairs(recipeLists) do
         for _, recipe in ipairs(recipeList.recipes) do
-            if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
-                local dataEntry = ZO_GamepadEntryData:New(zo_strformat(SI_PROVISIONER_RECIPE_NAME_COUNT_NONE, recipe.name), recipe.iconFile, recipe.iconFile)
-                dataEntry:SetDataSource(recipe)
-                dataEntry:SetNameColors(dataEntry:GetColorsBasedOnQuality(recipe.quality))
-                dataEntry:SetSubLabelColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
-                dataEntry:SetStackCount(recipe.maxIterationsForIngredients)
-                dataEntry:SetSubLabelTemplate("ZO_ProvisioningSubLabelTemplate")
+            if recipe.requiredCraftingStationType == craftingInteractionType and self.filterType == recipe.specialIngredientType then
+                hasKnownRecipesInCurrentFilter = true
+                if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
+                    local dataEntry = ZO_GamepadEntryData:New(zo_strformat(SI_PROVISIONER_RECIPE_NAME_COUNT_NONE, recipe.name), recipe.iconFile, recipe.iconFile)
+                    dataEntry:SetDataSource(recipe)
+                    dataEntry:SetNameColors(dataEntry:GetColorsBasedOnQuality(recipe.quality))
+                    dataEntry:SetSubLabelColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                    dataEntry:SetStackCount(recipe.maxIterationsForIngredients)
+                    dataEntry:SetSubLabelTemplate("ZO_ProvisioningSubLabelTemplate")
 
-                if not recipe.passesTradeskillLevelReqs or not recipe.passesQualityLevelReq or recipe.maxIterationsForIngredients == 0 then
-                    dataEntry:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
-                end
+                    if not recipe.passesTradeskillLevelReqs or not recipe.passesQualityLevelReq or recipe.maxIterationsForIngredients == 0 then
+                        dataEntry:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                    end
 
-                if not recipe.passesTradeskillLevelReqs then
-                    for tradeskill, levelReq in pairs(recipe.tradeskillsLevelReqs) do
-                        local level = GetNonCombatBonus(GetNonCombatBonusLevelTypeForTradeskillType(tradeskill))
-                        if level < levelReq then
-                            local levelPassiveAbilityId = GetTradeskillLevelPassiveAbilityId(tradeskill)
-                            local levelPassiveAbilityName = GetAbilityName(levelPassiveAbilityId)
-                            dataEntry:AddSubLabel(zo_strformat(SI_RECIPE_REQUIRES_LEVEL_PASSIVE, levelPassiveAbilityName, levelReq))
+                    if not recipe.passesTradeskillLevelReqs then
+                        for tradeskill, levelReq in pairs(recipe.tradeskillsLevelReqs) do
+                            local level = GetNonCombatBonus(GetNonCombatBonusLevelTypeForTradeskillType(tradeskill))
+                            if level < levelReq then
+                                local levelPassiveAbilityId = GetTradeskillLevelPassiveAbilityId(tradeskill)
+                                local levelPassiveAbilityName = GetAbilityName(levelPassiveAbilityId)
+                                dataEntry:AddSubLabel(zo_strformat(SI_RECIPE_REQUIRES_LEVEL_PASSIVE, levelPassiveAbilityName, levelReq))
+                            end
                         end
                     end
+                    --Only items that require only provisioning have a quality check
+                    if not recipe.passesQualityLevelReq then
+                        dataEntry:AddSubLabel(zo_strformat(SI_PROVISIONER_REQUIRES_RECIPE_QUALITY, recipe.qualityReq))
+                    end
+
+                    table.insert(recipeDataEntries, dataEntry)
                 end
-                --Only items that require only provisioning have a quality check
-                if not recipe.passesQualityLevelReq then
-                    dataEntry:AddSubLabel(zo_strformat(SI_PROVISIONER_REQUIRES_RECIPE_QUALITY, recipe.qualityReq))
-                end
-                
-                table.insert(recipeDataEntries, dataEntry)
             end
         end
     end
 
     -- now iterate through the table so we can properly identify header breaks
     local lastRecipeListName = ""
+
+    if hasKnownRecipesInCurrentFilter then
+        self.recipeList:SetNoItemText(GetString(SI_PROVISIONER_NONE_MATCHING_FILTER))
+    else
+        self.recipeList:SetNoItemText(GetString(SI_PROVISIONER_NO_RECIPES))
+    end
 
     for i, recipeData in ipairs(recipeDataEntries) do
         local nextRecipeData = recipeDataEntries[i + 1]

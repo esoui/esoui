@@ -268,11 +268,8 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
         -- Deconstruct single
         {
             name = function()
-                if self:IsInRefineMode() then
-                    return GetString(SI_CRAFTING_PERFORM_REFINE)
-                else
-                    return GetString(SI_CRAFTING_PERFORM_DECONSTRUCT)
-                end
+                local verb = self:IsInRefineMode() and DECONSTRUCT_ACTION_NAME_REFINE or DECONSTRUCT_ACTION_NAME_DECONSTRUCT
+                return GetString("SI_DECONSTRUCTACTIONNAME_PERFORM", verb)
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
             gamepadOrder = 1010,
@@ -287,11 +284,8 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
         -- Deconstruct multiple
         {
             name = function()
-                if self:IsInRefineMode() then
-                    return GetString(SI_CRAFTING_REFINE_MULTIPLE)
-                else
-                    return GetString(SI_CRAFTING_DECONSTRUCT_MULTIPLE)
-                end
+                local verb = self:IsInRefineMode() and DECONSTRUCT_ACTION_NAME_REFINE or DECONSTRUCT_ACTION_NAME_DECONSTRUCT
+                return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", verb)
              end,
             keybind = "UI_SHORTCUT_QUATERNARY",
             gamepadOrder = 1010,
@@ -305,7 +299,7 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
                         self:ExtractPartialStack(iterations * refineSize)
                     end
 
-                    ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, PerformDeconstructPartial)
+                    ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, PerformDeconstructPartial, DECONSTRUCT_ACTION_NAME_REFINE)
                 else
                     -- extract all
                     self:ConfirmExtractAll()

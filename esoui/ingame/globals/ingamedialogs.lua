@@ -1490,37 +1490,6 @@ ESO_Dialogs["CONFIRM_CREATE_NONSET_ITEM"] =
     },
 }
 
-ESO_Dialogs["CONFIRM_REFINE_MULTIPLE_ITEMS"] =
-{
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_CRAFTING_REFINE_MULTIPLE,
-    },
-    mainText =
-    {
-        text = SI_CRAFTING_CONFIRM_REFINE_DESCRIPTION,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                dialog.data.refineFn()
-            end,
-        },
-        [2] =
-        {
-            text = SI_DIALOG_CANCEL,
-        },
-    },
-}
-
 ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
 {
     canQueue = true,
@@ -1530,11 +1499,15 @@ ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
     },
     title =
     {
-        text = SI_CRAFTING_EXTRACT_MULTIPLE,
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
+        end,
     },
     mainText =
     {
-        text = SI_CRAFTING_CONFIRM_EXTRACT_DESCRIPTION,
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE", dialog.data.verb)
+        end,
     },
     setup = function(dialog)
         local headerData =

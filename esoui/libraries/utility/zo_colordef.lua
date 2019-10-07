@@ -130,3 +130,11 @@ function ZO_ColorDef:Lerp(colorToLerpTorwards, amount)
         zo_lerp(self.a, colorToLerpTorwards.a, amount)
     )
 end
+
+function ZO_ColorDef:ToHSL()
+    return ConvertRGBToHSL(self.r, self.g, self.b)
+end
+
+function ZO_ColorDef:ToHSV()
+    return ConvertRGBToHSV(self.r, self.g, self.b)
+end

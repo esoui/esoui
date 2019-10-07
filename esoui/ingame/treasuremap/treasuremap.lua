@@ -1,11 +1,20 @@
 local gamepadKeybindStripDescriptor = nil
+local TREASURE_MAP_INTERACTION =
+{
+    type = "treasure map interact",
+    interactTypes = { INTERACTION_TREASURE_MAP },
+}
 
 local function OnGamepadSceneStateChange(oldState, newState)
     if newState == SCENE_SHOWING then
         if gamepadKeybindStripDescriptor == nil then
             gamepadKeybindStripDescriptor = {
                     alignment = KEYBIND_STRIP_ALIGN_LEFT,
-                    KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
+
+                    KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
+                        INTERACT_WINDOW:OnEndInteraction(TREASURE_MAP_INTERACTION)
+                        SCENE_MANAGER:HideCurrentScene()
+                    end)
                 }
         end
 
@@ -21,7 +30,7 @@ local TreasureMap = ZO_Object:Subclass()
 function TreasureMap:New(...)
     local treasureMap = ZO_Object.New(self)
     treasureMap:Initialize(...)
-    
+
     return treasureMap
 end
 
@@ -31,9 +40,19 @@ function TreasureMap:Initialize(control)
     control:RegisterForEvent(EVENT_SHOW_TREASURE_MAP, function(...) self:OnShowTreasureMap(...) end)
 
     TREASURE_MAP_INVENTORY_SCENE = ZO_Scene:New("treasureMapInventory", SCENE_MANAGER)
+    TREASURE_MAP_INVENTORY_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_HIDDEN then
+            INTERACT_WINDOW:OnEndInteraction(TREASURE_MAP_INTERACTION)
+        end
+    end)
     SYSTEMS:RegisterKeyboardRootScene("treasureMapInventory", TREASURE_MAP_INVENTORY_SCENE)
 
     TREASURE_MAP_QUICK_SLOT_SCENE = ZO_Scene:New("treasureMapQuickSlot", SCENE_MANAGER)
+    TREASURE_MAP_QUICK_SLOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_HIDDEN then
+            INTERACT_WINDOW:OnEndInteraction(TREASURE_MAP_INTERACTION)
+        end
+    end)
     SYSTEMS:RegisterKeyboardRootScene("treasureMapQuickSlot", TREASURE_MAP_QUICK_SLOT_SCENE)
 
     GAMEPAD_TREASURE_MAP_INVENTORY_SCENE = ZO_Scene:New("treasureMapInventoryGamepad", SCENE_MANAGER)
@@ -48,6 +67,8 @@ end
 function TreasureMap:OnShowTreasureMap(eventCode, treasureMapIndex)
     local name, imagePath = GetTreasureMapInfo(treasureMapIndex)
     self.image:SetTexture(imagePath)
+
+    INTERACT_WINDOW:OnBeginInteraction(TREASURE_MAP_INTERACTION)
 
     if SCENE_MANAGER:IsShowingBaseScene() then
         SYSTEMS:ShowScene("treasureMapQuickSlot")

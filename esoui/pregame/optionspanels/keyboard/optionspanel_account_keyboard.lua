@@ -15,8 +15,7 @@ function ZO_Options_Account_ChangeEmail_Dialog_Keyboard_OnInitialized(control)
             local newEmailEdit = dialog:GetNamedChild("NewEmailEntryEdit")
             local confirmNewEmailEdit = dialog:GetNamedChild("ConfirmNewEmailEntryEdit")
 
-            local emailAccountText = ZO_OptionsPanel_GetAccountEmail()
-            newEmailEdit:SetText(emailAccountText)
+            newEmailEdit:SetText("")
             confirmNewEmailEdit:SetText("")
         end,
         buttons =

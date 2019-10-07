@@ -55,26 +55,26 @@ local menuInfo =
 local function AnchorMenuToMouse(menuToAnchor)
     local x, y = GetUIMousePosition()
     local width, height = GuiRoot:GetDimensions()
-    
+
     menuToAnchor:ClearAnchors()
-    
+
     local right = true
-    if(x + ZO_Menu.width > width) then
+    if x + ZO_Menu.width > width then
         right = false
     end
     local bottom = true
-    if(y + ZO_Menu.height > height) then
+    if y + ZO_Menu.height > height then
         bottom = false
     end
 
-    if(right) then
-        if(bottom) then
+    if right then
+        if bottom then
             menuToAnchor:SetAnchor(TOPLEFT, nil, TOPLEFT, x, y)
         else
             menuToAnchor:SetAnchor(BOTTOMLEFT, nil, TOPLEFT, x, y)
         end
     else
-        if(bottom) then
+        if bottom then
             menuToAnchor:SetAnchor(TOPRIGHT, nil, TOPLEFT, x, y)
         else
             menuToAnchor:SetAnchor(BOTTOMRIGHT, nil, TOPLEFT, x, y)
@@ -83,7 +83,7 @@ local function AnchorMenuToMouse(menuToAnchor)
 end
 
 local function UpdateMenuDimensions(menuEntry)
-    if(ZO_Menu.currentIndex > 0) then
+    if ZO_Menu.currentIndex > 0 then
         local textWidth, textHeight = menuEntry.item.nameLabel:GetTextDimensions()
         local checkboxWidth, checkboxHeight = 0, 0
         if menuEntry.checkbox then
@@ -93,12 +93,12 @@ local function UpdateMenuDimensions(menuEntry)
         local entryWidth = textWidth + checkboxWidth + ZO_Menu.menuPad * 2
         local entryHeight = zo_max(textHeight, checkboxHeight)
 
-        if(entryWidth > ZO_Menu.width) then
+        if entryWidth > ZO_Menu.width then
             ZO_Menu.width = entryWidth
         end
-        
+
         ZO_Menu.height = ZO_Menu.height + entryHeight + menuEntry.itemYPad
-        
+
         -- More adjustments will come later...this just needs to set the height
         -- HACK: Because anchor processing doesn't happen right away, and because GetDimensions
         -- does NOT return desired dimensions...this will actually need to remember the height
@@ -110,29 +110,25 @@ end
 
 function ClearMenu()
     local owner = ZO_Menu.owner
-    if(type(owner) == "userdata") then
-        owner:SetHandler("OnEffectivelyHidden", nil)
-    end
 
     ZO_Menu:SetHidden(true)
     SetAddMenuItemCallback(nil) -- just in case this wasn't cleared
     SetMenuHiddenCallback(nil)
     ZO_MenuHighlight:SetHidden(true)
     ZO_Menu_SetSelectedIndex(nil)
-    
-    if(ZO_Menu.itemPool)
-    then
+
+    if ZO_Menu.itemPool then
         ZO_Menu.itemPool:ReleaseAllObjects()
     end
 
-    if(ZO_Menu.checkBoxPool) then
+    if ZO_Menu.checkBoxPool then
         ZO_Menu.checkBoxPool:ReleaseAllObjects()
     end
 
     ZO_Menu.highlightPool:ReleaseAllObjects()
-    
+
     ZO_Menu.nextAnchor = ZO_Menu
-    
+
     ZO_Menu:SetDimensions(0, 0)
     ZO_Menu.currentIndex = 1
     ZO_Menu.width = 0
@@ -160,8 +156,8 @@ function SetMenuPad(menuPad)
 end
 
 local function SetMenuOwner(owner)
-    if(type(owner) == "userdata") then
-        owner:SetHandler("OnEffectivelyHidden", ClearMenu)
+    if type(owner) == "userdata" then
+        ZO_PreHookHandler(owner, "OnEffectivelyHidden", ClearMenu)
     end
 
     ZO_Menu.owner = owner
@@ -173,7 +169,7 @@ function GetMenuOwner(menu)
 end
 
 function MenuOwnerClosed(potentialOwner)
-    if(IsMenuVisisble() and (GetMenuOwner() == potentialOwner)) then
+    if IsMenuVisisble() and (GetMenuOwner() == potentialOwner) then
         ClearMenu()
     end
 end
@@ -181,9 +177,9 @@ end
 -- NOTE: If owner is a valid control, the menu system will use this to install an OnEffectivelyHidden handler
 -- so that if the control is hidden for any reason, the menu will properly close.  The handler is currently
 -- overwritten/removed, so make sure that you account for that if your controls need to have their own
--- effectively hidden handlers.  (Pending ZO_Hook work...)
+-- effectively hidden handlers.
 function ShowMenu(owner, initialRefCount, menuType)
-    if(next(ZO_Menu.items) == nil) then
+    if next(ZO_Menu.items) == nil then
         return false
     end
 
@@ -200,7 +196,7 @@ function ShowMenu(owner, initialRefCount, menuType)
         v.item:SetDimensions(ZO_Menu.width, v.item.storedHeight)
     end
     
-    if(ZO_Menu.menuType ~= menuType) then
+    if ZO_Menu.menuType ~= menuType then
         local menuInfo = menuInfo[menuType]
         ZO_MenuBG:SetCenterTexture(menuInfo.backdropCenter)
         ZO_MenuBG:SetEdgeTexture(menuInfo.backdropEdge, menuInfo.backdropEdgeWidth, menuInfo.backdropEdgeHeight)
@@ -209,7 +205,7 @@ function ShowMenu(owner, initialRefCount, menuType)
     end
 
     ZO_Menu.menuType = menuType
-    
+
     ZO_Menu:SetHidden(false)
     ZO_Menus:BringWindowToTop()
     ZO_Menu.underlayControl:SetHidden(not ZO_Menu.useUnderlay)
@@ -238,13 +234,13 @@ function AnchorMenu(control, offsetY)
     -- The menu must properly contain its contents, but if "control" is
     -- larger than the contents' widths, use "control" to size the menu.
     -- NOTE: Not using padding on purpose since I don't want to redo all the options dropdowns.  If something else breaks this, fix those by increasing their min width
-    if(control:GetWidth() >= ZO_Menu.width) then
+    if control:GetWidth() >= ZO_Menu.width then
         ZO_Menu:SetAnchor(TOPRIGHT, control, BOTTOMRIGHT, 0, offsetY)
     end
 end
 
 function SetAddMenuItemCallback(itemAddedCallback)
-    if(itemAddedCallback and type(itemAddedCallback) == "function") then
+    if itemAddedCallback and type(itemAddedCallback) == "function" then
         currentOnMenuItemAddedCallback = itemAddedCallback
     else
         currentOnMenuItemAddedCallback = nil
@@ -252,7 +248,7 @@ function SetAddMenuItemCallback(itemAddedCallback)
 end
 
 function SetMenuHiddenCallback(menuHiddenCallback)
-    if(menuHiddenCallback and type(menuHiddenCallback) == "function") then
+    if menuHiddenCallback and type(menuHiddenCallback) == "function" then
         currentOnMenuHiddenCallback = menuHiddenCallback
     else
         currentOnMenuHiddenCallback = nil
@@ -277,11 +273,11 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
 
     local addedItemIndex = ZO_Menu.currentIndex
     ZO_Menu.currentIndex = ZO_Menu.currentIndex + 1
-    
+
     itemYPad = itemYPad or 0
 
     table.insert(ZO_Menu.items, { item = menuItemControl, checkbox = checkboxItemControl, itemYPad = itemYPad })
-    
+
     local nameLabel = menuItemControl.nameLabel
 
     menuItemControl:ClearAnchors()
@@ -303,7 +299,7 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
             menuItemControl:SetAnchor(TOPLEFT, ZO_Menu.nextAnchor, TOPLEFT, ZO_Menu.menuPad, ZO_Menu.menuPad + itemYPad)
         end
     else
-        if(checkboxItemControl) then
+        if checkboxItemControl then
             checkboxItemControl:SetAnchor(TOPLEFT, ZO_Menu.nextAnchor, BOTTOMLEFT, 0, ZO_Menu.spacing + itemYPad)
             menuItemControl:SetAnchor(TOPLEFT, checkboxItemControl, TOPRIGHT, 0, 0)
         else
@@ -320,10 +316,10 @@ function AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highligh
             myFont = "ZoFontGamepad22"
         end
     end
-    
+
     nameLabel.normalColor = normalColor or DEFAULT_TEXT_COLOR
     nameLabel.highlightColor = highlightColor or DEFAULT_TEXT_HIGHLIGHT
-    
+
     -- NOTE: Must set text AFTER the current index has been incremented.
     nameLabel:SetFont(myFont)
     nameLabel:SetText(mytext)
@@ -353,7 +349,7 @@ end
 
 function UpdateMenuItemState(item, state)
     local menuEntry = ZO_Menu.items[item]
-    if(menuEntry and menuEntry.checkbox) then
+    if menuEntry and menuEntry.checkbox then
         ZO_CheckButton_SetCheckState(menuEntry.checkbox, state)
     end
 end
@@ -363,9 +359,9 @@ function ZO_Menu_SelectItem(control)
 
     ZO_MenuHighlight:SetAnchor(TOPLEFT, control, TOPLEFT, -2, -2)
     ZO_MenuHighlight:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, 2, 2)
-   
+
     ZO_MenuHighlight:SetHidden(false)
-    
+
     if not control.isHighlighted then
         control.nameLabel:SetColor(control.nameLabel.highlightColor:UnpackRGBA())
     end
@@ -380,18 +376,20 @@ function ZO_Menu_UnselectItem(control)
 end
 
 function ZO_Menu_SetSelectedIndex(index)
-    if(not ZO_Menu.items) then return end
+    if not ZO_Menu.items then
+        return
+    end
 
-    if(index) then
+    if index then
         index = zo_max(zo_min(index, #ZO_Menu.items), 1)
     end
 
-    if(selectedIndex ~= index) then
-        if(selectedIndex) then
+    if selectedIndex ~= index then
+        if selectedIndex then
             local entry = ZO_Menu.items[selectedIndex]
-            if entry then 
+            if entry then
                 local control = entry.item
-                if(control) then
+                if control then
                     ZO_Menu_UnselectItem(control)
                 end
             end
@@ -399,12 +397,12 @@ function ZO_Menu_SetSelectedIndex(index)
 
         selectedIndex = index
 
-        if(selectedIndex) then
+        if selectedIndex then
             local entry = ZO_Menu.items[selectedIndex]
             if entry then
                 local control = entry.item
 
-                if(control) then
+                if control then
                     ZO_Menu_SelectItem(control)
                 end
             end
@@ -422,7 +420,7 @@ end
 
 function ZO_Menu_GetSelectedText()
     local control = ZO_Menu.items[selectedIndex].item
-    if(control) then
+    if control then
         return control.nameLabel:GetText()
     end
 end
@@ -432,8 +430,7 @@ function ZO_Menu_EnterItem(control)
 end
 
 function ZO_Menu_ExitItem(control)
-    if(selectedIndex == control.menuIndex)
-    then
+    if selectedIndex == control.menuIndex then
         ZO_Menu_SetSelectedIndex(nil)
     end
 end
@@ -466,7 +463,7 @@ end
 function ZO_Menu_OnHide(control)
     mouseUpRefCounts[ZO_Menu] = nil
     ZO_Menu.useUnderlay = false
-    if(currentOnMenuHiddenCallback) then
+    if currentOnMenuHiddenCallback then
         currentOnMenuHiddenCallback()
     end
 end
@@ -478,7 +475,7 @@ function ZO_Menu_AcquireAndApplyHighlight(control)
 
     highlight:SetAnchor(TOPLEFT, control, TOPLEFT, -2, -2)
     highlight:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, 2, 2)
-   
+
     highlight:SetHidden(false)
 
     control.nameLabel:SetColor(control.nameLabel.highlightColor:UnpackRGBA())
@@ -496,7 +493,7 @@ local function OnGlobalMouseUp()
         if moc:GetOwningWindow() ~= ZO_Menus or moc == ZO_Menu.underlayControl then
             refCount = refCount - 1
             mouseUpRefCounts[ZO_Menu] = refCount
-            if refCount <= 0 then                
+            if refCount <= 0 then
                 ClearMenu()
             end
         end
@@ -516,7 +513,7 @@ local function ResetCheckbox(checkbox)
     ZO_CheckButton_SetToggleFunction(checkbox, nil)
     ZO_CheckButton_SetUnchecked(checkbox)
 end
-    
+
 local function EntryFactory(pool)
     local control = ZO_ObjectPool_CreateControl("ZO_MenuItem", pool, ZO_Menu)
     control.nameLabel = control:GetNamedChild("Name")

@@ -256,6 +256,11 @@ end
 
 -- Begin ZO_ContextualActionsTile Overrides --
 
+function ZO_CollectibleTile_Keyboard:OnControlHidden()
+    self:OnMouseExit()
+    ZO_ContextualActionsTile.OnControlHidden(self)
+end
+
 function ZO_CollectibleTile_Keyboard:OnFocusChanged(isFocused)
     ZO_ContextualActionsTile.OnFocusChanged(self, isFocused)
 

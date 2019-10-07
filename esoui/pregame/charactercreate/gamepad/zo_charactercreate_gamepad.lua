@@ -66,7 +66,7 @@ function CharacterCreateSliderManager:Initialize(parent)
 
     local CreateColorPicker =   function(pool)
                                     local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
-                                    return ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
+                                    return ZO_CharacterCreateColorSlider_Gamepad:New(control)
                                 end
 
     local CreateVoiceSlider =   function(pool)

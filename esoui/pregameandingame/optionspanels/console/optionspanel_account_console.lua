@@ -21,7 +21,7 @@ function ZO_OptionsGamepad_EmailEditor:Initialize(control)
             allowRightStickPassThrough = true,
         },
         setup = function(dialog, data)
-            self.enteredText = data.currentEmailText
+            self.enteredText = ""
 
             local tooltipText = zo_strformat(SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_4), ZO_GetPlatformStoreName())
             GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)

@@ -79,14 +79,10 @@ local ZO_Panel_Account_ControlData =
                 GAMEPAD_TOOLTIPS:LayoutSettingAccountResendActivation(tooltip, HasActivatedEmail(), ZO_OptionsPanel_GetAccountEmail())
             end,
             callback = function()
-                local data =
-                {
-                    currentEmailText = ZO_OptionsPanel_GetAccountEmail()
-                }
                 if IsConsoleUI() then
-                    ZO_Dialogs_ShowGamepadDialog("ZO_OPTIONS_GAMEPAD_EDIT_EMAIL_DIALOG", data)
+                    ZO_Dialogs_ShowGamepadDialog("ZO_OPTIONS_GAMEPAD_EDIT_EMAIL_DIALOG")
                 else
-                    ZO_Dialogs_ShowDialog("ZO_OPTIONS_KEYBOARD_EDIT_EMAIL_DIALOG", data)
+                    ZO_Dialogs_ShowDialog("ZO_OPTIONS_KEYBOARD_EDIT_EMAIL_DIALOG")
                 end
             end,
         },

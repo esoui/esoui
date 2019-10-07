@@ -802,10 +802,21 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnTravelToLeaderPromptReceived()
         end
     end
+    local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer, amLeader)
+        if isLocalPlayer then
+            for i, incomingEntry in ipairs(self.incomingQueue) do
+                if incomingEntry.incomingType == INTERACT_TYPE_TRAVEL_TO_LEADER then
+                    self:RemoveEntryFromIncomingQueueTable(i)
+                    break
+                end
+            end
+        end
+    end
     self.control:RegisterForEvent(EVENT_UNIT_CREATED, function(event, ...) OnUnitCreated(...) end)
     self.control:RegisterForEvent(EVENT_ZONE_UPDATE, function(event, ...) OnZoneUpdate(...) end)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, function(event, ...) OnGroupMemberJoined(...) end)
     self.control:RegisterForEvent(EVENT_LEADER_UPDATE, function(event, ...) OnGroupMemberJoined(...) end)
+    self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, function(event, ...) OnGroupMemberLeft(...) end)
 
     local function OnPlayerActivated()
         local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()

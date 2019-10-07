@@ -281,7 +281,7 @@ function ZO_SharedEnchanting:ConfirmExtractAll()
     local function PerformExtract()
         self:ExtractAll() 
     end
-    ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS", {deconstructFn = PerformExtract}, {mainTextParams = {ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount())}})
+    ZO_Dialogs_ShowPlatformDialog("CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS", {deconstructFn = PerformExtract, verb = DECONSTRUCT_ACTION_NAME_EXTRACT}, {mainTextParams = {ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount())}})
 end
 
 function ZO_SharedEnchanting:GetAllCraftingBagAndSlots()
