@@ -77,12 +77,9 @@ function ZO_GamepadOptions:InitializeScenes()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.primaryActionDescriptor)
         end
     end)
-    
+
     local function OnScreenResize()
-        if not self:IsAtRoot() then
-            self.optionsList:RefreshVisible()
-            self:OnSelectionChanged(self.optionsList)
-        end
+        self:RefreshOptionsList()
     end
 
     local function RegisterForScreenResizeComplete()
@@ -106,6 +103,13 @@ function ZO_GamepadOptions:InitializeScenes()
             UnregisterForScreenResizeComplete()
         end
     end)
+end
+
+function ZO_GamepadOptions:RefreshOptionsList()
+    if not self:IsAtRoot() then
+        self.optionsList:RefreshVisible()
+        self:OnSelectionChanged(self.optionsList)
+    end
 end
 
 function ZO_GamepadOptions:PerformUpdate()

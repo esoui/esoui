@@ -913,6 +913,22 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         self:StopInteraction()
     end)
+
+    local function OnLogoutDeferred()
+        -- If we're logging out and we have a time sensistive decision, just opt out. Not only does this
+        -- make sure that any other players waiting on a response get it, but it eliminates any dialogs in the way (ESO-635856)
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if TIMED_PROMPTS[incomingEntry.incomingType] then
+                if incomingEntry.declineCallback then
+                    incomingEntry.declineCallback()
+                elseif incomingEntry.deferDecisionCallback then
+                    incomingEntry.deferDecisionCallback()
+                end
+            end
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_LOGOUT_DEFERRED, OnLogoutDeferred)
 end
 
 function ZO_PlayerToPlayer:SetHidden(hidden)

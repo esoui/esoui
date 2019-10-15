@@ -116,7 +116,7 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
             keybind =   "UI_SHORTCUT_NEGATIVE",
             visible =   function()
                                 local isPreviewing = self:GetPreviewState()
-                                return isPreviewing
+                                return isPreviewing and self.selectedMarketProduct == nil
                         end,
             callback =  function()
                             local isPreviewing = self:GetPreviewState()
@@ -134,7 +134,7 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
             visible =   function()
                             local isPreviewing = self:GetPreviewState()
                             local serviceType = GetPlatformServiceType()
-                            return not isPreviewing and serviceType ~= PLATFORM_SERVICE_TYPE_DMM
+                            return not isPreviewing and serviceType ~= PLATFORM_SERVICE_TYPE_DMM and self.selectedMarketProduct == nil
                         end,
             callback =  function()
                             ZO_KeyboardCodeRedemption_StartCodeRedemptionFlow()

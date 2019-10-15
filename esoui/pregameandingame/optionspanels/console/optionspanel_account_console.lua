@@ -8,6 +8,7 @@ end
 
 function ZO_OptionsGamepad_EmailEditor:Initialize(control)
     local function ReleaseDialog()
+        GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
         ZO_Dialogs_ReleaseDialogOnButtonPress("ZO_OPTIONS_GAMEPAD_EDIT_EMAIL_DIALOG")
     end
 
@@ -25,6 +26,8 @@ function ZO_OptionsGamepad_EmailEditor:Initialize(control)
 
             local tooltipText = zo_strformat(SI_GAMEPAD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TOOLTIP, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_4), ZO_GetPlatformStoreName())
             GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
+
+            dialog.info.finishedCallback = data.finishedCallback
 
             dialog:setupFunc()
         end,

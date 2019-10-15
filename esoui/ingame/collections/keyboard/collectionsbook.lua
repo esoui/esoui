@@ -172,7 +172,7 @@ do
 
         self.categoryTree:AddTemplate("ZO_StatusIconHeader", TreeHeaderSetup_Child, nil, nil, CHILD_INDENT, CHILD_SPACING)
         self.categoryTree:AddTemplate("ZO_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
-        self.categoryTree:AddTemplate("ZO_TreeStatusLabelSubCategory", TreeEntrySetup, TreeEntryOnSelected)
+        self.categoryTree:AddTemplate("ZO_CollectionsBook_SubCategory", TreeEntrySetup, TreeEntryOnSelected)
 
         self.categoryTree:SetExclusive(true)
         self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")
@@ -243,7 +243,7 @@ do
             local parentNode = self:AddCategory(nodeTemplate, categoryData)
         
             for _, subcategoryData in categoryData:SubcategoryIterator({ZO_CollectibleCategoryData.HasShownCollectiblesInCollection}) do
-                self:AddCategory("ZO_TreeStatusLabelSubCategory", subcategoryData, parentNode)
+                self:AddCategory("ZO_CollectionsBook_SubCategory", subcategoryData, parentNode)
             end
         else
             local categoryIndex = categoryData:GetCategoryIndicies()
@@ -255,7 +255,7 @@ do
             for subcategoryIndex, _ in pairs(searchResults[categoryIndex]) do
                 if subcategoryIndex ~= ZO_COLLECTIONS_SEARCH_ROOT then
                     local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
-                    self:AddCategory("ZO_TreeStatusLabelSubCategory", subcategoryData, parentNode)
+                    self:AddCategory("ZO_CollectionsBook_SubCategory", subcategoryData, parentNode)
                 end
             end
         end

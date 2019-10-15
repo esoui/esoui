@@ -93,7 +93,7 @@ do
             text = zo_strformat(SI_BATTLEGROUND_STATE_PREGAME, self:GetFormattedTimer())
             if self.currentBattlegroundTimeMS <= PRE_SHUTDOWN_WARNING_TIME_MS and previousBattlegroundTimeMS > PRE_SHUTDOWN_WARNING_TIME_MS then
                 local shutdownImminentMessage = zo_strformat(SI_BATTLEGROUND_SHUTDOWN_IMMINENT, PRE_SHUTDOWN_WARNING_TIME_S)
-                CHAT_ROUTER:AddSystemMessage(shutdownImminentMessage)
+                CHAT_SYSTEM:AddMessage(shutdownImminentMessage)
                 ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, shutdownImminentMessage)
             end 
         elseif battlegroundState == BATTLEGROUND_STATE_STARTING then

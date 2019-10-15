@@ -78,8 +78,6 @@ local function SetupOption(control, data, selected, selectedDuringRebuild, enabl
     end
 end
 
-local MAX_CURRENCY_CONTROLS = 3
-
 local function ReleaseChatterOptionControl(control)
     control:SetHandler("OnUpdate", nil)
 end
@@ -90,17 +88,14 @@ function ZO_GamepadInteraction:InitInteraction()
 
     -- Setup Interaction with parametric scroll list
     local function SetupRewardTitle(control, data, selected, selectedDuringRebuild, enabled, activated)
-        for i = 1, MAX_CURRENCY_CONTROLS do
-            local currencyControl = control:GetNamedChild("Currency" .. i)
-            currencyControl:SetHidden(true)
-        end	
-
-        for i, currencyData in ipairs(data.currencyRewards) do
-            local creatorFunc = self:GetRewardCreateFunc(currencyData.rewardType)
-            local currencyControl = control:GetNamedChild("Currency" .. i)
-            if currencyControl and creatorFunc then
-                creatorFunc(currencyControl, currencyData.name, currencyData.amount, ZO_GAMEPAD_CURRENCY_OPTIONS)
-            end
+        local goldLabel = control:GetNamedChild("Gold")
+        local goldReward = data.goldReward
+        if goldReward and goldReward.amount > 0 then
+            goldLabel:SetHidden(false)
+            local creatorFunc = self:GetRewardCreateFunc(REWARD_TYPE_MONEY)
+            creatorFunc(goldLabel, goldReward.name, goldReward.amount, ZO_GAMEPAD_CURRENCY_OPTIONS)
+        else
+            goldLabel:SetHidden(true)
         end
     end
     
@@ -225,53 +220,65 @@ end
 
 function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
     local IS_GAMEPAD = true
-    local rewardData = self:GetRewardData(journalQuestIndex, IS_GAMEPAD)
+    local rewardDataList = self:GetRewardData(journalQuestIndex, IS_GAMEPAD)
 
-    if #rewardData == 0 then
+    if #rewardDataList == 0 then
         return
     end
 
-    local currencyRewards = {}
-    local itemRewards = {}
+    local parametricListRewards = {}
     local confirmError
-    for i, data in ipairs(rewardData) do
+    local goldReward
+    for i, data in ipairs(rewardDataList) do
         if self:IsCurrencyReward(data.rewardType) then
-            table.insert(currencyRewards, data)
+            if data.rewardType == REWARD_TYPE_MONEY then
+                goldReward = data
+            else
+                table.insert(parametricListRewards, data)
+            end
             --warn the player they aren't going to get their money when they hit complete
             confirmError = self:TryGetMaxCurrencyWarningText(data.rewardType, data.amount)
-        else
-            table.insert(itemRewards, data) 
+        end
+    end
+    for i, data in ipairs(rewardDataList) do
+        if not self:IsCurrencyReward(data.rewardType) then
+            table.insert(parametricListRewards, data) 
         end
     end
 
+
     local titleData = {}
     titleData.canSelect = false
-    titleData.currencyRewards = currencyRewards
+    titleData.goldReward = goldReward
     titleData.header = GetString(SI_INTERACT_REWARDS_GIVEN)
     self.itemList:AddEntryWithHeader("ZO_QuestReward_Title_Gamepad", titleData)
 
-    for i, itemData in ipairs(itemRewards) do
-        if itemData.rewardType == REWARD_TYPE_PARTIAL_SKILL_POINTS then
-            itemData.name = ZO_QuestReward_GetSkillPointText(itemData.amount)
-            itemData.icon = nil
-        elseif itemData.rewardType == REWARD_TYPE_SKILL_LINE then
-            itemData.name = ZO_QuestReward_GetSkillLineEarnedText(itemData.name)
-        elseif itemData.rewardType == REWARD_TYPE_AUTO_ITEM and itemData.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
-            itemData.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
+    for i, rewardData in ipairs(parametricListRewards) do
+        if rewardData.rewardType == REWARD_TYPE_PARTIAL_SKILL_POINTS then
+            rewardData.name = ZO_QuestReward_GetSkillPointText(itemData.amount)
+            rewardData.icon = nil
+        elseif rewardData.rewardType == REWARD_TYPE_SKILL_LINE then
+            rewardData.name = ZO_QuestReward_GetSkillLineEarnedText(itemData.name)
+        elseif rewardData.rewardType == REWARD_TYPE_AUTO_ITEM and rewardData.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
+            rewardData.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
+        elseif self:IsCurrencyReward(rewardData.rewardType) then
+            local currencyType = self:GetCurrencyTypeFromReward(rewardData.rewardType)
+            --Intentionally use the keyboard icon here because we want the graphic look
+            rewardData.icon = ZO_Currency_GetKeyboardCurrencyIcon(currencyType)
         end
 
-        local entry = ZO_GamepadEntryData:New(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, itemData.name))
-        if itemData.rewardType == REWARD_TYPE_AUTO_ITEM and itemData.itemType == REWARD_ITEM_TYPE_ITEM then
-            entry:InitializeInventoryVisualData(itemData)
+        local entry = ZO_GamepadEntryData:New(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, rewardData.name))
+        if rewardData.rewardType == REWARD_TYPE_AUTO_ITEM and rewardData.itemType == REWARD_ITEM_TYPE_ITEM then
+            entry:InitializeInventoryVisualData(rewardData)
         else
             entry:SetFontScaleOnSelection(false)
-            if itemData.icon then
-                entry:AddIcon(itemData.icon)
+            if rewardData.icon then
+                entry:AddIcon(rewardData.icon)
             end
         end
 
-        entry.itemData = itemData
-        entry:SetStackCount(itemData.amount)
+        entry.rewardData = rewardData
+        entry:SetStackCount(rewardData.amount)
 
         self.itemList:AddEntry("ZO_QuestReward_Gamepad", entry)
     end

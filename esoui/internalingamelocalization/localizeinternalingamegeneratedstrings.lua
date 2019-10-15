@@ -585,7 +585,7 @@ EsoStrings =
     "Select |cffffffResend Activation|r to receive a new activation email, or |cffffffChange Email|r to change the email address for your ESO account.", -- SI_INTERFACE_OPTIONS_ACCOUNT_RESEND_ACTIVATION_TOOLTIP_TEXT
     "Get Email Updates", -- SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TITLE
     "Stay connected. Make sure you're signed up to receive the latest news, game updates, giveaways and rewards from Bethesda Softworks – delivered to your inbox.\n\nPlayers in some countries will receive an email to verify their opt-in status.", -- SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TEXT
-    "Requires an activated account.", -- SI_INTERFACE_OPTIONS_ACCOUNT_NEED_ACTIVE_ACCOUNT_WARNING
+    "Your account has not been activated.", -- SI_INTERFACE_OPTIONS_ACCOUNT_NEED_ACTIVE_ACCOUNT_WARNING
     "No email has been set", -- SI_INTERFACE_OPTIONS_ACCOUNT_NO_EMAIL_TEXT
     "Change Email", -- SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_TITLE
     "New Email Address", -- SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_TITLE
@@ -8094,6 +8094,7 @@ SafeAddVersion(SI_CONFIRM_OPEN_URL_TEXT, 1)
 SafeAddVersion(SI_OPEN_ENTER_CODE_PAGE, 3)
 SafeAddVersion(SI_OPEN_CHAPTER_UPGRADE_STEAM, 3)
 SafeAddVersion(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TEXT, 1)
+SafeAddVersion(SI_INTERFACE_OPTIONS_ACCOUNT_NEED_ACTIVE_ACCOUNT_WARNING, 1)
 SafeAddVersion(SI_DERIVEDSTATS2, 1)
 SafeAddVersion(SI_DERIVEDSTATS4, 2)
 SafeAddVersion(SI_DERIVEDSTATS5, 1)

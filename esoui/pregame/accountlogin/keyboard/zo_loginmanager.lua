@@ -21,7 +21,6 @@ function LoginManager_Keyboard:Initialize()
     if IsUsingLinkedLogin() then
         EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_CREATE_LINK_LOADING_ERROR, FilterMethodCallback(self.OnCreateLinkLoadingError))
         EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_ACCOUNT_LINK_SUCCESSFUL, FilterMethodCallback(self.OnCreateLinkAccountSuccessful))
-        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_ACCOUNT_CREATE_SUCCESSFUL, FilterMethodCallback(self.OnCreateLinkAccountSuccessful))
         EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_PROFILE_NOT_LINKED, FilterMethodCallback(self.OnProfileNotLinked))
     end
 
@@ -108,11 +107,12 @@ function LoginManager_Keyboard:OnCreateLinkAccountSuccessful()
 
     local textParams
     if not self.isLinking then
+        local note3 = GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_DMM and SI_CREATEACCOUNT_SUCCESS_NOTE_3_DMM or SI_CREATEACCOUNT_SUCCESS_NOTE_3
         textParams = { mainTextParams = {
                                             GetString(SI_CREATEACCOUNT_SUCCESS_HEADER),
                                             GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_1),
                                             GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_2),
-                                            GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_3),
+                                            GetString(note3),
                                         }
                      }
     end

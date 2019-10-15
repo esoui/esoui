@@ -80,7 +80,13 @@ local ZO_Panel_Account_ControlData =
             end,
             callback = function()
                 if IsConsoleUI() then
-                    ZO_Dialogs_ShowGamepadDialog("ZO_OPTIONS_GAMEPAD_EDIT_EMAIL_DIALOG")
+                    local data =
+                    {
+                        finishedCallback = function()
+                            GAMEPAD_OPTIONS:RefreshOptionsList()
+                        end,
+                    }
+                    ZO_Dialogs_ShowGamepadDialog("ZO_OPTIONS_GAMEPAD_EDIT_EMAIL_DIALOG", data)
                 else
                     ZO_Dialogs_ShowDialog("ZO_OPTIONS_KEYBOARD_EDIT_EMAIL_DIALOG")
                 end

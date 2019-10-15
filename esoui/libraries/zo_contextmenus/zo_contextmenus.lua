@@ -137,6 +137,11 @@ function ClearMenu()
     ZO_Menu.spacing = 0
     ZO_Menu.menuPad = 8
     ZO_Menu.owner = nil
+
+    if type(owner) == "userdata" then
+        owner:SetHandler("OnEffectivelyHidden", ZO_Menu.existingEffectivelyHiddenHandler)
+        ZO_Menu.existingEffectivelyHiddenHandler = nil
+    end
 end
 
 function IsMenuVisisble()
@@ -157,7 +162,8 @@ end
 
 local function SetMenuOwner(owner)
     if type(owner) == "userdata" then
-        ZO_PreHookHandler(owner, "OnEffectivelyHidden", ClearMenu)
+        local existingHandler = ZO_PreHookHandler(owner, "OnEffectivelyHidden", ClearMenu)
+        ZO_Menu.existingEffectivelyHiddenHandler = existingHandler
     end
 
     ZO_Menu.owner = owner

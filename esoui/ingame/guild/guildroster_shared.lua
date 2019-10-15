@@ -57,12 +57,26 @@ function ZO_GuildRosterManager:Initialize()
         end
     end
 
+    local function OnPlayerGuildRankChanged(eventId, guildId, rankIndex, guildRankChangeAction)
+        local rankText = GetFinalGuildRankName(guildId, rankIndex)
+        local rankIcon = zo_iconFormat(GetFinalGuildRankTextureSmall(guildId, rankIndex), 32, 32)
+        local guildName = GetGuildName(guildId)
+        if guildRankChangeAction == GUILD_RANK_CHANGE_ACTION_PROMOTE then
+            local alertText = zo_strformat(SI_GUILD_PLAYER_NOTIFY_PROMOTED, rankIcon, rankText, guildName)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
+        elseif guildRankChangeAction == GUILD_RANK_CHANGE_ACTION_DEMOTE then
+            local alertText = zo_strformat(SI_GUILD_PLAYER_NOTIFY_DEMOTED, rankIcon, rankText, guildName)
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, alertText)
+        end
+    end
+
     self:BuildMasterList()
 
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_DATA_LOADED, function() self:OnGuildDataLoaded() end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_RANKS_CHANGED, function(_, guildId) if self:MatchesGuild(guildId) then self:OnGuildRanksChanged() end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_RANK_CHANGED, function(_, guildId, rankIndex) if self:MatchesGuild(guildId) then self:OnGuildRanksChanged() end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_ADDED, function(_, guildId, displayName) if self:MatchesGuild(guildId) then self:OnGuildMemberAdded(guildId, displayName) end end)
+    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_INVITE_REMOVED, function(_, guildId) self:RefreshData() end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_SELF_JOINED_GUILD, function(_, guildId, displayName) self:OnGuildSelfJoined() end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_REMOVED, function(_, guildId, displayName, characterName) if self:MatchesGuild(guildId) then self:OnGuildMemberRemoved(guildId, characterName, displayName) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_UPDATED, function(_, guildId, displayName) if self:MatchesGuild(guildId) then self:OnGuildMemberCharacterUpdated(displayName) end end)
@@ -70,6 +84,7 @@ function ZO_GuildRosterManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_LEVEL_CHANGED, function(_, guildId, displayName, characterName, level) if self:MatchesGuild(guildId) then self:OnGuildMemberCharacterLevelChanged(displayName, characterName, level) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_CHARACTER_CHAMPION_POINTS_CHANGED, function(_, guildId, displayName, characterName, championPoints) if self:MatchesGuild(guildId) then self:OnGuildMemberCharacterChampionPointsChanged(displayName, characterName, championPoints) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName, rankIndex) if self:MatchesGuild(guildId) then self:OnGuildMemberRankChanged(displayName, rankIndex) end end)
+    EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_PLAYER_RANK_CHANGED, OnPlayerGuildRankChanged)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, guildId, displayName, oldStatus, newStatus) if self:MatchesGuild(guildId) then self:OnGuildMemberPlayerStatusChanged(displayName, oldStatus, newStatus) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_NOTE_CHANGED, function(_, guildId, displayName, note) if self:MatchesGuild(guildId) then self:OnGuildMemberNoteChanged(displayName, note) end end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_GUILD_MEMBER_PROMOTE_SUCCESSFUL, OnGuildMemberPromoteSuccessful)
