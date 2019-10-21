@@ -204,9 +204,9 @@ function ZO_Enchanting:InitializeKeybindStripDescriptors()
                     return ZO_CraftingUtils_GetCostToCraftString(cost)
                 elseif self.enchantingMode == ENCHANTING_MODE_EXTRACTION then
                     if self.extractionSlot:HasMultipleItems() then
-                        return GetString(SI_CRAFTING_EXTRACT_MULTIPLE)
+                        return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", DECONSTRUCT_ACTION_NAME_EXTRACT)
                     else
-                        return GetString(SI_CRAFTING_PERFORM_EXTRACTION)
+                        return GetString("SI_DECONSTRUCTACTIONNAME_PERFORM", DECONSTRUCT_ACTION_NAME_EXTRACT)
                     end
                 end
             end,
@@ -236,7 +236,7 @@ function ZO_Enchanting:InitializeKeybindStripDescriptors()
 
         -- Deconstruct single stack
         {
-            name = GetString(SI_ENCHANTING_EXTRACT_FULL_STACK),
+            name = GetString("SI_DECONSTRUCTACTIONNAME_PERFORMFULLSTACK", DECONSTRUCT_ACTION_NAME_EXTRACT),
             keybind = "UI_SHORTCUT_QUATERNARY",
 
             callback = function()

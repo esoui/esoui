@@ -172,6 +172,13 @@ ZO_TOOLTIP_STYLES =
         customSpacing = 0,
     },
 
+    accountValueStatsSection =
+    {
+        widthPercent = 100,
+        fontSize = "$(GP_42)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
     --Item Tooltip
 
     baseStatsSection =
@@ -1433,6 +1440,23 @@ ZO_TOOLTIP_STYLES =
         uppercase = true,
         widthPercent = 100,
         horizontalAlignment = TEXT_ALIGN_CENTER
+    },
+    redeemCodeBodySection =
+    {
+        -- really push this body section towards the center of the screen
+        paddingTop = 200,
+        customSpacing = 30,
+        childSpacing = 10,
+        widthPercent = 100,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+    },
+    redeemCodeStatsSection =
+    {
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        statValuePairSpacing = 10,
+        widthPercent = 100,
     },
 }
 

@@ -43,7 +43,7 @@ SAVE_CURRENT_VALUES         = 1
 DONT_SAVE_CURRENT_VALUES    = 2
 
 local ENABLED_STATE = 1
-local DISABLED_STATE = .5
+local DISABLED_STATE = 0.5
 
 local function SetupColorOptionActivated(control, activated)
     control:GetNamedChild("Color"):SetAlpha(activated and ENABLED_STATE or DISABLED_STATE)
@@ -212,7 +212,7 @@ function ZO_Options_SetWarningText(control, text)
 end
 
 local function GetValidIndexFromCurrentChoice(valid, currentChoice)
-    for i=1, #valid do
+    for i = 1, #valid do
         if valid[i] == currentChoice then
             return i
         end
@@ -221,8 +221,8 @@ local function GetValidIndexFromCurrentChoice(valid, currentChoice)
     return -1
 end
 
-local function OptionsScrollListSelectionChanged(selectedData, oldData, reselectingDuringRebuild)           
-    if oldData ~= nil and reselectingDuringRebuild ~= true then  
+local function OptionsScrollListSelectionChanged(selectedData, oldData, reselectingDuringRebuild)
+    if oldData ~= nil and reselectingDuringRebuild ~= true then
         local value = selectedData.value
         local control = selectedData.parentControl
         SetSettingFromControl(control, value)
@@ -292,7 +292,7 @@ local updateControlFromSettings =
                                     elseif data.valueStringPrefix then
                                         targetChild:SetText(GetString(data.valueStringPrefix, data.valid[index]))
                                     elseif data.valueStrings then
-                                        targetChild:SetText(GetValueString(data.valueStrings[index]))                             
+                                        targetChild:SetText(GetValueString(data.valueStrings[index]))
                                     else
                                         targetChild:SetText(currentChoice)
                                     end
@@ -311,7 +311,19 @@ local updateControlFromSettings =
 
                                 local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
                                 local nameControl = GetControl(control, "Name")
+
+                                local enabled = control.data.enabled
+                                if type(enabled) == "function" then
+                                    enabled = control.data.enabled()
+                                end
+
                                 if not IsGamepadOption(control) then
+                                    if enabled == false then
+                                        ZO_CheckButton_Disable(checkBoxControl)
+                                    else
+                                        ZO_CheckButton_Enable(checkBoxControl)
+                                    end
+
                                     if currentChoice then
                                         nameControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
                                     elseif mouseOverControl == checkBoxControl or mouseOverControl == control then
@@ -320,24 +332,24 @@ local updateControlFromSettings =
                                         nameControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
                                     end
                                 else
-                                    if control.data.enabled == false then
+                                    if enabled == false then
                                         checkBoxControl:SetText(GetString(SI_CHECK_BUTTON_DISABLED))
                                         ZO_CheckButton_Disable(checkBoxControl)
-                                    else                                 
+                                    else
                                         checkBoxControl.checkedText = GetString(SI_CHECK_BUTTON_ON)
                                         checkBoxControl.uncheckedText = GetString(SI_CHECK_BUTTON_OFF)
                                         ZO_CheckButton_Enable(checkBoxControl)
                                     end
 
-                                    local onLabel = GetControl(control, "On")
-                                    local offLabel = GetControl(control, "Off")
+                                    local onLabel = control:GetNamedChild("On")
+                                    local offLabel = control:GetNamedChild("Off")
                                     onLabel:SetColor((currentChoice and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT):UnpackRGBA())
                                     offLabel:SetColor((currentChoice and ZO_DISABLED_TEXT or ZO_SELECTED_TEXT):UnpackRGBA())
-                                        
+
                                     local selected = checkBoxControl.selected
                                     checkBoxControl:SetHidden(selected)
-                                    onLabel:SetHidden(not selected)   
-                                    offLabel:SetHidden(not selected)    
+                                    onLabel:SetHidden(not selected)
+                                    offLabel:SetHidden(not selected)
                                 end
 
                                 return currentChoice
@@ -357,7 +369,7 @@ local updateControlFromSettings =
                                 slider:SetMinMax(data.minValue, data.maxValue)
 
                                 if IsGamepadOption(control) then
-                                    local stepValue = (data.maxValue - data.minValue) * ((data.gamepadValueStepPercent or DEFAULT_SLIDER_VALUE_STEP_PERCENT) / 100 )
+                                    local stepValue = (data.maxValue - data.minValue) * ((data.gamepadValueStepPercent or DEFAULT_SLIDER_VALUE_STEP_PERCENT) / 100)
                                    slider:SetValueStep(stepValue)
                                 end
 
@@ -424,10 +436,22 @@ function ZO_Options_UpdateOption(control)
     local controlType = GetControlType(control)
     local updateFn = updateControlFromSettings[controlType]
     local currentChoice
-    
+
+    -- Determine the activation state from control's enabled setting before getting the current save state.
+    -- The functionality for managing state is only used on Keyboard and does not have defined behavour on Gamepad
+    if not IsGamepadOption(control) then
+        if control.data.enabled ~= nil then
+            local enabled = control.data.enabled
+            if type(enabled) == "function" then
+                enabled = control.data.enabled()
+            end
+            ZO_SetControlActiveFromPredicate(control, function() return enabled end)
+        end
+    end
+
     -- If the control is inactive, activate it temporarily
     local saveCurrentState = control.state
-    if saveCurrentState == DISABLED_STATE then
+    if saveCurrentState == DISABLED_STATE and not IsGamepadOption(control) then
         ZO_Options_SetOptionActive(control)
     end
 
@@ -438,12 +462,12 @@ function ZO_Options_UpdateOption(control)
     end
 
     -- Restore the control's state
-    if saveCurrentState == DISABLED_STATE then
+    if saveCurrentState == DISABLED_STATE and not IsGamepadOption(control) then
         ZO_Options_SetOptionInactive(control)
     end
 
     -- Fire events
-    if(currentChoice ~= previousChoice) then
+    if currentChoice ~= previousChoice then
         data.currentChoice = currentChoice
 
         if data.events and data.events[currentChoice] then
@@ -456,7 +480,7 @@ end
 
 -- Change the actual settings as they are changed...they are reverted if the player chooses not to save
 local function OptionsDropdown_SelectChoice(control, index)
-    local data = control.data    
+    local data = control.data
     local oldValueString = GetSettingFromControl(control)
     
     local value = data.valid[index]
@@ -609,7 +633,7 @@ function ZO_Options_SetupSlider(control, selected)
     end
 
     data.events = nil -- Sliders don't support events
-        
+
     if data.defaultMarker and not IsGamepadOption(control) then
         local defaultMarkerControl = CreateControlFromVirtual("$(parent)DefaultMarker", slider, "ZO_Options_DefaultMarker")
         local offsetX = zo_clampedPercentBetween(data.minValue, data.maxValue, data.defaultMarker) * slider:GetWidth()
@@ -648,8 +672,8 @@ end
 
 function ZO_Options_InvokeCallback(control)
     local callback = control.data.callback
-    if callback then 
-        callback() 
+    if callback then
+        callback()
     end
 end
 
@@ -661,23 +685,23 @@ function ZO_Options_SetupScrollList(control, selected)
         local hasGamepadStrings = control.optionsManager:IsGamepadOptions() and (control.data.gamepadValidStringOverrides ~= nil)
         local entryText = ""
 
-        if(hasGamepadStrings) then
+        if hasGamepadStrings then
             entryText = GetString(control.data.gamepadValidStringOverrides[i])
-        elseif(control.data.valueStringPrefix) then
+        elseif control.data.valueStringPrefix then
             entryText = GetString(control.data.valueStringPrefix, control.data.valid[i])
-        elseif(control.data.valueStrings) then
+        elseif control.data.valueStrings then
             entryText = GetValueString(control.data.valueStrings[i])
         else
             entryText = control.data.valid[i]
         end
-                          
-        local entryData = 
+
+        local entryData =
         {
             text = entryText,
             value = control.data.valid[i],
             parentControl = control
         }
-        control.horizontalListObject:AddEntry(entryData)         
+        control.horizontalListObject:AddEntry(entryData)
     end
     control.horizontalListObject:SetOnSelectedDataChangedCallback(nil)  -- don't set the callback til after we update the menu to the right setting
     control.horizontalListObject:Commit()
@@ -698,12 +722,11 @@ end
 function ZO_Options_CheckBoxOnMouseEnter(control)
     ZO_Options_OnMouseEnter(control)
 
-    local nameControl = GetControl(control, "Name")
-    local checkBoxControl = GetControl(control, "Checkbox")
+    local nameControl = control:GetNamedChild("Name")
+    local checkBoxControl = control:GetNamedChild("Checkbox")
     if checkBoxControl and nameControl then
         local currentState = checkBoxControl:GetState()
-        if(currentState == BSTATE_NORMAL)
-        then
+        if currentState == BSTATE_NORMAL then
             nameControl:SetColor(ZO_DEFAULT_DISABLED_MOUSEOVER_COLOR:UnpackRGBA())
         end
 
@@ -715,12 +738,11 @@ end
 function ZO_Options_CheckBoxOnMouseExit(control)
     ZO_Options_OnMouseExit(control)
 
-    local nameControl = GetControl(control, "Name")
-    local checkBoxControl = GetControl(control, "Checkbox")
+    local nameControl = control:GetNamedChild("Name")
+    local checkBoxControl = control:GetNamedChild("Checkbox")
     if checkBoxControl and nameControl then
         local currentState = checkBoxControl:GetState()
-        if(currentState == BSTATE_NORMAL)
-        then
+        if currentState == BSTATE_NORMAL then
             nameControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
         end
 
@@ -746,7 +768,7 @@ function ZO_Options_ColorOnClicked(control)
 end
 
 do
-    local categoryChildren = 
+    local categoryChildren =
     {
         [CHAT_CATEGORY_MONSTER_SAY] = {CHAT_CATEGORY_MONSTER_YELL, CHAT_CATEGORY_MONSTER_WHISPER, CHAT_CATEGORY_MONSTER_EMOTE}
     }
@@ -782,7 +804,7 @@ do
 end
 
 function ZO_Options_ColorOnMouseEnter(colorControl)
-    local textureControl = colorControl:GetNamedChild("Color") 
+    local textureControl = colorControl:GetNamedChild("Color")
     local sharedHighlight = SYSTEMS:GetObject("options"):GetColorOptionHighlight()
     if sharedHighlight then
         sharedHighlight:ClearAnchors()
@@ -814,7 +836,7 @@ end
 
 function ZO_Options_SetupInvokeCallback(control, selected, text)
     if IsGamepadOption(control) then
-        GetControl(control, "Name"):SetText(text)
+        control:GetNamedChild("Name"):SetText(text)
     else
         local button = control:GetNamedChild("Button")
         button:SetText(text)
@@ -829,7 +851,7 @@ function ZO_Options_OnMouseEnter(control)
     local tooltipText = data.tooltipText
 
     if tooltipText ~= nil then
-        local tooltipTextType = type(tooltipText) 
+        local tooltipTextType = type(tooltipText)
         if tooltipTextType == "number" then
             tooltipText = GetString(tooltipText)
         elseif tooltipTextType == "function" then

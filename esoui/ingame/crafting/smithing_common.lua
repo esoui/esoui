@@ -251,3 +251,7 @@ function ZO_SmithingHorizontalListTemplate_OnInitialized(control)
         selectedLabel:SetWidth(selectedLabelWidth)
     end)
 end
+
+function ZO_Smithing_Common:GetMode()
+	return self.mode
+end

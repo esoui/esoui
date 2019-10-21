@@ -15,8 +15,9 @@ ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
 
 local QUEUE_VIDEO = false
 
-local currentState = nil
-local previousState = nil
+local g_currentStateName = nil
+local g_currentStateData = nil
+local g_previousState = nil
 
 local loadingUpdates = false
 
@@ -69,7 +70,7 @@ do
     end
 end
 
-local PregameStates =
+local g_sharedPregameStates =
 {
     ["CharacterSelect_FromIngame"] =
     {
@@ -229,7 +230,7 @@ local PregameStates =
         end,
 
         OnEnter = function()
-            if IsConsoleUI() then
+            if IsInGamepadPreferredMode() then
                 Pregame_ShowScene("chapterUpgradeGamepad")
             else
                 Pregame_ShowScene("chapterUpgradeKeyboard")
@@ -255,7 +256,7 @@ local PregameStates =
         end,
 
         OnEnter = function()
-            if IsConsoleUI() then
+            if IsInGamepadPreferredMode() then
                 Pregame_ShowScene("chapterUpgradeGamepad")
             else
                 Pregame_ShowScene("chapterUpgradeKeyboard")
@@ -294,7 +295,7 @@ local PregameStates =
     ["BeginLoadingIntoWorld"] =
     {
         OnEnter = function()
-            if (IsInGamepadPreferredMode() or IsConsoleUI()) then  -- TODO integrate this with PC gamepad
+            if IsInGamepadPreferredMode() then
                 ZO_CharacterSelect_Gamepad_ShowLoginScreen()
             else
                 SCENE_MANAGER:ShowBaseScene()
@@ -358,7 +359,7 @@ local PregameStates =
         end,
 
         GetStateTransitionData = function()
-            if IsConsoleUI() or not DoesPlatformSelectServer() then
+            if IsInGamepadPreferredMode() or not DoesPlatformSelectServer() then
                 return "ShowEULA"
             else
                 return "ServerSelectIntro"
@@ -446,6 +447,7 @@ local PregameStates =
         end,
 
         GetStateTransitionData = function()
+            -- The keyboard and gamepad flows begin to diverge here
             return "ShowLegalSplashScreen"
         end,
 
@@ -465,47 +467,71 @@ local PregameStates =
     }
 }
 
-function PregameStateManager_AddStates(externalStates)
+local g_keyboardPregameStates = {}
+function PregameStateManager_AddKeyboardStates(externalStates)
     for key, value in pairs(externalStates) do
-        PregameStates[key] = value
+        g_keyboardPregameStates[key] = value
     end
 end
 
+local g_gamepadPregameStates = {}
+function PregameStateManager_AddGamepadStates(externalStates)
+    for key, value in pairs(externalStates) do
+        g_gamepadPregameStates[key] = value
+    end
+end
+
+function PregameStateManager_GetState(stateName)
+    local state
+    if IsInGamepadPreferredMode() then
+        state = g_gamepadPregameStates[stateName]
+    else
+        state = g_keyboardPregameStates[stateName]
+    end
+
+    if not state then
+        state = g_sharedPregameStates[stateName]
+    end
+
+    return state
+end
+
 function PregameStateManager_SetState(stateName, ...)
-    local newPregameState = PregameStates[stateName]
+    local newPregameState = PregameStateManager_GetState(stateName)
+    internalassert(newPregameState, "missing state for " .. stateName)
     local stateArgs = { ... }
 
     -- Because GetTransitionData returns the next state as the first argument, insert state name into this table.
     -- The actual arguments passed to OnEnter will be adjusted to account for it.
     table.insert(stateArgs, 1, stateName)
 
-    if(newPregameState) then
-        if(currentState) then
-            PregameStates[currentState].OnExit()
-        end
+    if g_currentStateData then
+        g_currentStateData.OnExit()
+    end
 
-        previousState = currentState
+    g_previousState = g_currentStateName
 
-        local foundState = false
-        while(not foundState) do
-            currentState = stateName
-            local shouldAdvance = (newPregameState.ShouldAdvance == nil) or newPregameState.ShouldAdvance()
-            if(shouldAdvance) then
-                if(newPregameState and newPregameState.GetStateTransitionData) then
-                    stateArgs = { newPregameState.GetStateTransitionData() }
-                    stateName = stateArgs[1]
-                    newPregameState = PregameStates[stateName]
-                else
-                    foundState = true
-                end
+    local foundState = false
+    while not foundState do
+        g_currentStateName = stateName
+        local shouldAdvance = (newPregameState.ShouldAdvance == nil) or newPregameState.ShouldAdvance()
+        if shouldAdvance then
+            if newPregameState and newPregameState.GetStateTransitionData then
+                stateArgs = { newPregameState.GetStateTransitionData() }
+                stateName = stateArgs[1]
+                newPregameState = PregameStateManager_GetState(stateName)
+                internalassert(newPregameState, "missing state for " .. stateName)
             else
                 foundState = true
             end
+        else
+            foundState = true
         end
-
-        newPregameState.OnEnter(select(2, unpack(stateArgs)))
-        CALLBACK_MANAGER:FireCallbacks("OnPregameEnterState", currentState)
     end
+
+    g_currentStateData = newPregameState
+    newPregameState.OnEnter(select(2, unpack(stateArgs)))
+    CALLBACK_MANAGER:FireCallbacks("OnPregameEnterState", g_currentStateName)
 end
 
 function PregameStateManager_ReenterLoginState()
@@ -517,29 +543,29 @@ function PregameStateManager_ReenterLoginState()
 end
 
 function PregameStateManager_AdvanceState()
-    local currentStateData = PregameStates[currentState]
+    local currentStateData = PregameStateManager_GetState(g_currentStateName)
     if(currentStateData and currentStateData.GetStateTransitionData) then
         PregameStateManager_SetState(currentStateData.GetStateTransitionData())
     else
         -- If there are no transition data, then we're not going anywhere...we'll be locked in the current state.
         -- Do not call this if you're not on a state with transition data
-        internalassert(false, string.format("Non-advancable state: %s", tostring(currentState)))
+        internalassert(false, string.format("Non-advancable state: %s", tostring(g_currentStateName)))
     end
 end
 
 -- this will only advance the state if we are currently in the state passed in
 function PregameStateManager_AdvanceStateFromState(state)
-    if currentState == state then
+    if g_currentStateName == state then
         PregameStateManager_AdvanceState()
     end
 end
 
 function PregameStateManager_GetCurrentState()
-    return currentState
+    return g_currentStateName
 end
 
 function PregameStateManager_GetPreviousState()
-    return previousState
+    return g_previousState
 end
 
 local function OnCharacterListReceived(eventCode, characterCount, maxCharacters, mostRecentlyPlayedCharacterId)
@@ -578,6 +604,11 @@ local function OnCharacterListReceived(eventCode, characterCount, maxCharacters,
 
     -- if this hasn't been fired yet, then fire it (could have been a reload or coming from in-game)
     AttemptToFireCharacterConstructionReady()
+
+    if DoesPlatformSupportDisablingShareFeatures() then
+        -- re-enabled when the character list is loaded
+        EnableShareFeatures()
+    end
 end
 
 -- Debugging utility...you must be at character select already to use this.
@@ -595,6 +626,7 @@ function UnregisterForLoadingUpdates()
     if loadingUpdates then
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED)
         EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE)
+        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_LUA_ERROR)
         loadingUpdates = false
     end
 end
@@ -661,10 +693,24 @@ local function OnSubsystemLoadComplete(eventId, subSystem)
     end
 end
 
+local function OnLuaErrorWhileLoading(_)
+    -- Errors triggered during a loading screen will prevent some loading
+    -- subsystems from completing, so the loading screen will never go away unless
+    -- we do something. Let's immediately disconnect and bail back to the initial
+    -- screen to handle this. We're calling lua code to handle errors in lua code,
+    -- so we may still end up in the situation where our error recovery code never
+    -- gets called, but the list of places where that could happen are very low;
+    -- basically just this function.
+    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_LUA_ERROR)
+    ZO_PREGAME_HAD_GLOBAL_ERROR = true
+    PregameDisconnectOnLuaError()
+end
+
 function RegisterForLoadingUpdates()
     if not loadingUpdates then
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_AREA_LOAD_STARTED, OnAreaLoadStarted)
         EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SUBSYSTEM_LOAD_COMPLETE, OnSubsystemLoadComplete)
+        EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_LUA_ERROR, OnLuaErrorWhileLoading)
         loadingUpdates = true
     end
 end
@@ -699,6 +745,19 @@ local function OnDisplayNameReady()
     shouldTryToShowChapterInterstitial = true
 end
 
+local function OnGamepadPreferredModeChanged()
+    if not IsAccountLoggedIn() then
+        PregameStateManager_SetState("AccountLogin")
+    elseif not IsPregameCharacterConstructionReady() then
+        PregameStateManager_SetState("WaitForCharacterDataLoaded")
+    elseif PregameStateManager_GetCurrentState() == "CharacterCreate" or GetNumCharacters() == 0 then
+        PregameStateManager_SetState("CharacterCreate")
+    else
+        MoveCameraToCurrentCharacter()
+        PregameStateManager_SetState("CharacterSelect")
+    end
+end
+
 function ZO_RegisterForSavedVars(systemName, version, defaults, callback)
     local function OnReady()
         local savedVars = ZO_SavedVars:NewAccountWide("ZO_Pregame_SavedVariables", version, systemName, defaults)
@@ -709,8 +768,7 @@ function ZO_RegisterForSavedVars(systemName, version, defaults, callback)
         if name == "ZO_Pregame" then
             EVENT_MANAGER:UnregisterForEvent(systemName, EVENT_ADD_ON_LOADED)
 
-            -- Wait for login
-            if GetDisplayName() ~= "" then
+            if IsAccountLoggedIn() then
                 OnReady()
             end
         end
@@ -725,3 +783,4 @@ EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISPLAY_NAME_READY, 
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_LIST_RECEIVED, OnCharacterListReceived)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SHOW_PREGAME_GUI_IN_STATE, OnShowPregameGuiInState)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelected)
+EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)

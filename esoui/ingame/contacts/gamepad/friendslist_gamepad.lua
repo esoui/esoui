@@ -36,7 +36,7 @@ function FriendsList_Gamepad:GetAddKeybind()
 
             callback = function()
                 local platform = GetUIPlatform()
-                if platform == UI_PLATFORM_PC then
+                if platform == UI_PLATFORM_PC or platform == UI_PLATFORM_HERON then
                     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG")
                 else
                     ZO_ShowConsoleAddFriendDialogFromUserListSelector()

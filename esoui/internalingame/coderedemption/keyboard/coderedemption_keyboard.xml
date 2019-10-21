@@ -1,0 +1,21 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_KeyboardCodeRedemptionPendingDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_KeyboardCodeRedemptionPendingDialog_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)ModalUnderlay" override="true" alpha="0" />
+
+                <Label name="$(parent)Text" inherits="ZO_SmallKeyMarkupLabel ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+
+                <Control name="$(parent)Loading" inherits="ZO_Loading">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                    <OnInitialized>
+                        ZO_Loading_Initialize(self)
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

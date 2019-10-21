@@ -117,7 +117,6 @@ end
 
 function ZO_Help_MechanicAssistance_Gamepad:SubmitTicket()
     ResetCustomerServiceTicket()
-    SetCustomerServiceTicketContactEmail(GetActiveUserEmailAddress())
     SetCustomerServiceTicketCategory(self:GetCurrentTicketCategory())
     self:RegisterDetails()
     local savedDescription = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION)

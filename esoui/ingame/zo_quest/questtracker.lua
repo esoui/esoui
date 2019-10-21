@@ -803,7 +803,7 @@ function ZO_Tracker:OnQuestAdvanced(questIndex, questName, isPushed, isComplete,
         local questHeader = self:GetHeaderForIndex(TRACK_TYPE_QUEST, questIndex)
         if questHeader then
             local questType = GetJournalQuestType(questIndex)
-            local instanceDisplayType = GetJournalInstanceDisplayType(questIndex)
+            local instanceDisplayType = GetJournalQuestInstanceDisplayType(questIndex)
             self:InitializeQuestHeader(questName, questType, questHeader, isComplete, instanceDisplayType)
         end
         

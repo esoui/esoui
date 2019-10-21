@@ -154,6 +154,9 @@ end
 
 function ZO_SceneManager_Base:SetNextScene(nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)
     self.nextScene = nextScene
+    if nextScene then
+        nextScene:SetWasRequestedToShowInGamepadPreferredMode(IsInGamepadPreferredMode())
+    end
 end
 
 function ZO_SceneManager_Base:GetNextScene()

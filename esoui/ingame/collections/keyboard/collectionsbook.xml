@@ -1,10 +1,15 @@
 <GuiXml>
     <Controls>
+        <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
+        <Label name="ZO_CollectionsBook_SubCategory" inherits="ZO_TreeStatusLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
+            <Dimensions x="228" />
+        </Label>
+
         <TopLevelControl name="ZO_CollectionsBook_TopLevel" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_CollectionsBook_OnInitialize(self)
             </OnInitialized>
-            
+
             <Controls>
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
                     <Dimensions x="353" />

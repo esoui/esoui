@@ -10,6 +10,19 @@ function ZO_KeyboardFriendsListManager:New(...)
 end
 
 function ZO_KeyboardFriendsListManager:Initialize(control)
+    local rowTemplate
+    local headersControl
+    if IsHeronUI() then
+        rowTemplate = "ZO_FriendsListRow_Heron"
+        headersControl = CreateControlFromVirtual("$(parent)Headers", control, "ZO_FriendsListHeaders_Heron")
+    else
+        rowTemplate = "ZO_FriendsListRow"
+        headersControl = CreateControlFromVirtual("$(parent)Headers", control, "ZO_FriendsListHeaders")
+    end
+    local listControl = control:GetNamedChild("List")
+    listControl:SetAnchor(TOPLEFT, headersControl, BOTTOMLEFT, 0, 3)
+    listControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -35, -32)
+
     ZO_SocialListKeyboard.Initialize(self, control)
     FRIENDS_LIST_MANAGER:AddList(self)
 
@@ -21,7 +34,7 @@ function ZO_KeyboardFriendsListManager:Initialize(control)
 
     self.emptyRowMessage = GetControl(self.emptyRow, "Message")
 
-    ZO_ScrollList_AddDataType(self.list, FRIEND_DATA, "ZO_FriendsListRow", 30, function(control, data) self:SetupRow(control, data) end)
+    ZO_ScrollList_AddDataType(self.list, FRIEND_DATA, rowTemplate, 30, function(control, data) self:SetupRow(control, data) end)
     ZO_ScrollList_EnableHighlight(self.list, "ZO_ThinListHighlight")
 
     self.searchBox = GetControl(control, "SearchBox")
@@ -264,8 +277,6 @@ function ZO_KeyboardFriendsListManager:UnlockSelection()
     self:RefreshVisible()
 end
 
-
-
 --Global XML
 ---------------
 
@@ -299,6 +310,14 @@ end
 
 function ZO_FriendsListRowDisplayName_OnMouseExit(control)
     FRIENDS_LIST:DisplayName_OnMouseExit(control)
+end
+
+function ZO_FriendsListRowHeronUserInfo_OnMouseEnter(control)
+    FRIENDS_LIST:HeronUserInfo_OnMouseEnter(control)
+end
+
+function ZO_FriendsListRowHeronUserInfo_OnMouseExit(control)
+    FRIENDS_LIST:HeronUserInfo_OnMouseExit(control)
 end
 
 function ZO_FriendsListRowAlliance_OnMouseEnter(control)

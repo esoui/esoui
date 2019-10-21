@@ -261,7 +261,7 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
 
     list:AddEntry(MENU_ENTRY_TEMPLATE, self.menuEntries[MENU_ENTRY_TYPE_CURRENT_GROUP])
     list:AddEntryWithHeader("ZO_GroupMenuGamepadDungeonDifficultyEntry", self.menuEntries[MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY])  
-    
+
     if IsGroupModificationAvailable() and (groupSize == 0 or (playerIsLeader and groupSize < GROUP_SIZE_MAX)) then
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_PLAYER])
         local platform = GetUIPlatform()
@@ -272,7 +272,12 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
 
     if groupSize > 0 then
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_LEAVE_GROUP])
-        table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_READY_CHECK])
+
+        -- GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS matches what ZO_SendReadyCheck uses
+        local expectedResult = GetExpectedGroupElectionResult(GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS)
+        if expectedResult ~= GROUP_ELECTION_FAILURE_IN_BATTLEGROUND then
+            table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_READY_CHECK])
+        end
     end
 
     if playerIsLeader and IsGroupModificationAvailable() and not DoesGroupModificationRequireVote() then

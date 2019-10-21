@@ -93,7 +93,7 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE,
-        },        
+        },
     },
     [SETTING_PANEL_CAMERA] =
     {
@@ -155,11 +155,11 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_VIBRATION,
         },
-		{
+        {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_IN_WORLD,
             settingId = IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS,
-			header = SI_GAMEPLAY_OPTIONS_GENERAL,
+            header = SI_GAMEPLAY_OPTIONS_GENERAL,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -337,120 +337,100 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_LANGUAGE,
             settingId = LANGUAGE_SETTING_USE_PROFANITY_FILTER,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS,
             header = SI_SOCIAL_OPTIONS_NOTIFICATIONS,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_AUTO_DECLINE_DUEL_INVITES,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_AVA_NOTIFICATIONS,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SAY,
             header = SI_SOCIAL_OPTIONS_CHAT_COLORS,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_YELL,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_INC,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_WHISPER_OUT,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GROUP,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_ENG,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_FRA,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_GER,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_NPC,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_EMOTE,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_SYSTEM,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_GUILD1,
             header = Chat_Color_GetGuildText,
             guildIndex = 1,
-
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER1,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
@@ -458,13 +438,11 @@ GAMEPAD_SETTINGS_DATA =
             header = Chat_Color_GetGuildText,
             guildIndex = 2,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER2,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
@@ -472,13 +450,11 @@ GAMEPAD_SETTINGS_DATA =
             header = Chat_Color_GetGuildText,
             guildIndex = 3,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER3,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
@@ -486,13 +462,11 @@ GAMEPAD_SETTINGS_DATA =
             header = Chat_Color_GetGuildText,
             guildIndex = 4,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_OFFICER4,
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
@@ -500,7 +474,6 @@ GAMEPAD_SETTINGS_DATA =
             header = Chat_Color_GetGuildText,
             guildIndex = 5
         },
-
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
@@ -920,6 +893,38 @@ GAMEPAD_SETTINGS_DATA =
     },
 }
 
+local platform = GetUIPlatform()
+if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM and (platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX) then
+    GAMEPAD_SETTINGS_DATA[SETTING_PANEL_ACCOUNT] =
+    {
+        -- Email Address
+        {
+            panel = SETTING_PANEL_ACCOUNT,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION,
+            header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
+        },
+        {
+            panel = SETTING_PANEL_ACCOUNT,
+            system = SETTING_TYPE_ACCOUNT,
+            settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
+            header = function()
+                if not ZO_OptionsPanel_Account_CanResendActivation() then
+                    return GetString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER)
+                end
+                return nil
+            end,
+        },
+        -- Marketing Preferences
+        {
+            panel = SETTING_PANEL_ACCOUNT,
+            system = SETTING_TYPE_ACCOUNT,
+            settingId = ACCOUNT_SETTING_GET_UPDATES,
+            header = SI_INTERFACE_OPTIONS_ACCOUNT_MARKETING_HEADER,
+        },
+    }
+end
+
 --Platform specific settings
 if IsConsoleUI() then
     table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_AUDIO], {
@@ -951,6 +956,13 @@ if IsConsoleUI() then
         settingId = UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED,
     })
 else
+    if DoesPlatformAllowConfiguringAutomaticInputChanging() then
+        table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_GAMEPLAY], 1, {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED,
+        })
+    end
     table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_GAMEPLAY], 1, {
         panel = SETTING_PANEL_GAMEPLAY,
         system = SETTING_TYPE_GAMEPAD,

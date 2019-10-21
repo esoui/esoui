@@ -364,6 +364,8 @@ local function OnDialogHidden(dialog)
     KEYBIND_STRIP:PopKeybindGroupState()
     g_keybindStripDescriptors:ReleaseAllObjects()
 
+    -- store dialog name in a local here because ZO_CompleteReleaseDialogOnDialogHidden will clear it
+    local name = dialog.name
     ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
 
     if dialog.isShowingOnBase then
@@ -376,7 +378,7 @@ local function OnDialogHidden(dialog)
         SCENE_MANAGER:HideCurrentScene()
     end
     GAMEPAD_DIALOG_SHOWING = false
-    CALLBACK_MANAGER:FireCallbacks("OnGamepadDialogHidden")
+    CALLBACK_MANAGER:FireCallbacks("OnGamepadDialogHidden", name)
 end
 
 -- this always gets called
@@ -452,6 +454,17 @@ function ZO_GenericGamepadDialog_RefreshHeaderData(dialog, data)
     return false
 end
 
+function ZO_GenericGamepadDialog_GetDialogFragmentGroup(dialog)
+    local gamepadInfo = dialog.info.gamepadInfo
+    if gamepadInfo.dontEndInWorldInteractions then
+        return ZO_GAMEPAD_DIALOG_DONT_END_IN_WORLD_INTERACTIONS_FRAGMENT_GROUP
+    elseif gamepadInfo.dialogFragmentGroup then
+        return gamepadInfo.dialogFragmentGroup
+    else
+        return ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP
+    end
+end
+
 function ZO_GenericGamepadDialog_OnInitialized(dialog)
     dialog.setupFunc = ZO_GenericGamepadDialog_RefreshHeaderData
 
@@ -472,12 +485,9 @@ function ZO_GenericGamepadDialog_OnInitialized(dialog)
         dialog.releasedFromButton = releasedFromButton
         TryRemoveKeybinds()
 
-        if ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP then -- pregame doesn't have this fragment group
-            if dialog.info.gamepadInfo.dontEndInWorldInteractions then
-                SCENE_MANAGER:RemoveFragmentGroup(ZO_GAMEPAD_DIALOG_DONT_END_IN_WORLD_INTERACTIONS_FRAGMENT_GROUP)
-            else
-                SCENE_MANAGER:RemoveFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
-            end
+        local dialogFragmentGroup = ZO_GenericGamepadDialog_GetDialogFragmentGroup(dialog)
+        if dialogFragmentGroup then -- pregame doesn't have ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP
+            SCENE_MANAGER:RemoveFragmentGroup(dialogFragmentGroup)
         end
         SCENE_MANAGER:RemoveFragment(dialog.fragment)
     end
@@ -527,12 +537,9 @@ function ZO_GenericGamepadDialog_Show(dialog)
     --Attach the dialog fragment to whichever scene is currenty showing
     dialog.isShowingOnBase = false
 
-    if ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP then -- pregame doesn't have this fragment group
-        if dialog.info.gamepadInfo.dontEndInWorldInteractions then
-            SCENE_MANAGER:AddFragmentGroup(ZO_GAMEPAD_DIALOG_DONT_END_IN_WORLD_INTERACTIONS_FRAGMENT_GROUP)
-        else
-            SCENE_MANAGER:AddFragmentGroup(ZO_GAMEPAD_DIALOG_FRAGMENT_GROUP)
-        end
+    local dialogFragmentGroup = ZO_GenericGamepadDialog_GetDialogFragmentGroup(dialog)
+    if dialogFragmentGroup then
+        SCENE_MANAGER:AddFragmentGroup(dialogFragmentGroup)
     end
 
     if SCENE_MANAGER:IsShowingBaseScene() then
@@ -637,7 +644,7 @@ do
         local listControl = dialog:GetNamedChild("EntryList"):GetNamedChild("List")
         dialog.entryList = ZO_GamepadVerticalItemParametricScrollList:New(listControl)
         dialog.entryList:SetAlignToScreenCenter(true)
-        dialog.entryList:SetValidateGradient(true)
+        dialog.entryList:SetHandleDynamicViewProperties(true)
 
         -- Custom data templates
         dialog.entryList:AddDataTemplateWithHeader("ZO_GamepadDropdownItem", ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryFullWidthHeaderTemplate", nil, nil, nil)

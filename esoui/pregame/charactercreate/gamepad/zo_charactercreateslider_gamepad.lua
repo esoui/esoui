@@ -67,6 +67,56 @@ function ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
     return slider
 end
 
+
+-- Character Create Color Slider: This is an appearance slider that sorts its values from lightest color to darkest color
+ZO_CharacterCreateColorSlider_Gamepad = ZO_CharacterCreateSlider_Gamepad:Subclass()
+zo_mixin(ZO_CharacterCreateColorSlider_Gamepad, ZO_CharacterCreateAppearanceSlider)
+
+function ZO_CharacterCreateColorSlider_Gamepad:New(control)
+    local slider = ZO_CharacterCreateSlider_Gamepad.New(self, control)
+    return slider
+end
+
+do
+    local function SortLightestFirst(leftColor, rightColor)
+        return leftColor.lightness > rightColor.lightness
+    end
+
+    -- Override of ZO_CharacterCreateAppearanceSlider
+    function ZO_CharacterCreateColorSlider_Gamepad:SetData(...)
+        ZO_CharacterCreateAppearanceSlider.SetData(self, ...)
+        local colors = {}
+        for paletteIndex = 1, self.numSteps do
+            local r, g, b = GetAppearanceValueInfo(self.category, paletteIndex)
+            local _, _, lightness = ConvertRGBToHSL(r, g, b)
+            colors[paletteIndex] = {paletteIndex = paletteIndex, lightness = lightness}
+        end
+        table.sort(colors, SortLightestFirst)
+        self.sortedColors = colors
+    end
+end
+
+-- Override of ZO_CharacterCreateAppearanceSlider
+function ZO_CharacterCreateColorSlider_Gamepad:GetAppearanceValue()
+    local paletteIndex = ZO_CharacterCreateAppearanceSlider.GetAppearanceValue(self)
+    if self.sortedColors then
+        for sortedIndex, color in ipairs(self.sortedColors) do
+            if color.paletteIndex == paletteIndex then
+                return sortedIndex
+            end
+        end
+    end
+    return 1
+end
+
+-- Override of ZO_CharacterCreateAppearanceSlider
+function ZO_CharacterCreateColorSlider_Gamepad:SetAppearanceValue(sortedIndex)
+    if self.sortedColors and self.sortedColors[sortedIndex] then
+        local paletteIndex = self.sortedColors[sortedIndex].paletteIndex
+        ZO_CharacterCreateAppearanceSlider.SetAppearanceValue(self, paletteIndex)
+    end
+end
+
 -- Voice slider
 ZO_CharacterCreateVoiceSlider_Gamepad = ZO_CharacterCreateAppearanceSlider_Gamepad:Subclass()
 

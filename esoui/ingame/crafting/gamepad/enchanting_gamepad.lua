@@ -381,7 +381,7 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                     local cost = GetCostToCraftEnchantingItem(self:GetAllCraftingBagAndSlots())
                     return ZO_CraftingUtils_GetCostToCraftString(cost)
                 else
-                    return GetString(SI_CRAFTING_PERFORM_EXTRACTION)
+                    return GetString("SI_DECONSTRUCTACTIONNAME_PERFORM", DECONSTRUCT_ACTION_NAME_EXTRACT)
                 end
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
@@ -408,7 +408,7 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                 if self.enchantingMode == ENCHANTING_MODE_CREATION then
                     return GetString(SI_GAMEPAD_CRAFT_MULTIPLE)
                 else
-                    return GetString(SI_CRAFTING_EXTRACT_MULTIPLE)
+                    return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", DECONSTRUCT_ACTION_NAME_EXTRACT)
                 end
             end,
             keybind = "UI_SHORTCUT_QUATERNARY",
@@ -427,7 +427,7 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                             self:ExtractPartialStack(iterations)
                         end
 
-                        ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(virtualBagId, virtualSlotIndex, maxIterations, PerformDeconstructPartial)
+                        ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(virtualBagId, virtualSlotIndex, maxIterations, PerformDeconstructPartial, DECONSTRUCT_ACTION_NAME_EXTRACT)
                     else
                         self:ConfirmExtractAll()
                     end

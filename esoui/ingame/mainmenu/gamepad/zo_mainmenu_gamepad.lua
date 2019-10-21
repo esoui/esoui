@@ -1,5 +1,4 @@
 local MENU_ENTRIES = {}
-local CATEGORY_TO_ENTRY_DATA = {}
 
 local MENU_MAIN_ENTRIES =
 {
@@ -26,6 +25,7 @@ local MENU_CROWN_STORE_ENTRIES =
     CROWN_CRATES        = 3,
     CHAPTERS            = 4,
     GIFT_INVENTORY      = 5,
+    REDEEM_CODE         = 6,
 }
 local MENU_JOURNAL_ENTRIES =
 {
@@ -126,6 +126,16 @@ local MENU_ENTRY_DATA =
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_giftInventory.dds",
                 isNewCallback = function()
                     return GIFT_INVENTORY_MANAGER and GIFT_INVENTORY_MANAGER:HasAnyUnseenGifts()
+                end,
+            },
+            [MENU_CROWN_STORE_ENTRIES.REDEEM_CODE] =
+            {
+                scene = "codeRedemptionGamepad",
+                name = GetString(SI_MAIN_MENU_REDEEM_CODE),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_redeemCode.dds",
+                isVisibleCallback = function()
+                    local serviceType = GetPlatformServiceType()
+                    return serviceType ~= PLATFORM_SERVICE_TYPE_DMM
                 end,
             },
         },

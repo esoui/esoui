@@ -17,6 +17,7 @@ function ZO_ContextualActionsTile:Initialize(control)
     self.highlightControl = self.control:GetNamedChild("Highlight")
 
     self.keybindStripDescriptor = {}
+    self.isFocused = false
     self.canFocus = true
 end
 
@@ -48,12 +49,40 @@ function ZO_ContextualActionsTile:GetKeybindStripDescriptor()
     return self.keybindStripDescriptor
 end
 
+function ZO_ContextualActionsTile:CanFocus()
+    return self.canFocus
+end
+
 function ZO_ContextualActionsTile:SetCanFocus(canFocus)
-    self.canFocus = canFocus
+    if self:CanFocus() ~= canFocus then
+        if not canFocus then
+            self:Defocus()
+        end
+
+        self.canFocus = canFocus
+    end
+end
+
+function ZO_ContextualActionsTile:IsFocused()
+    return self.isFocused
+end
+
+function ZO_ContextualActionsTile:Focus()
+    if self:CanFocus() and not self:IsFocused() then
+        self.isFocused = true
+        self:OnFocusChanged(self.isFocused)
+    end
+end
+
+function ZO_ContextualActionsTile:Defocus()
+    if self:CanFocus() and self:IsFocused() then
+        self.isFocused = false
+        self:OnFocusChanged(self.isFocused)
+    end
 end
 
 function ZO_ContextualActionsTile:OnFocusChanged(isFocused)
-    if isFocused and self.canFocus then
+    if isFocused then
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         self:SetHighlightHidden(false)
     else
@@ -80,8 +109,7 @@ end
 
 function ZO_ContextualActionsTile:OnControlHidden()
     ZO_Tile.OnControlHidden(self)
-    local IS_NOT_FOCUSED = false
-    self:OnFocusChanged(IS_NOT_FOCUSED)
+    self:Defocus()
 end
 
 -- End ZO_Tile Overrides --

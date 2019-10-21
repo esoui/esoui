@@ -107,7 +107,6 @@ function ZO_ServerSelect_SelectWorldForPlay()
                 ZO_ServerSelect_SetSelectionEnabled(false)
                 ZO_Dialogs_ShowDialog("CONNECTING_TO_REALM", nil, {mainTextParams = {serverData.name}})
                 SelectWorld(serverData.worldIndex)
-                ZO_CharacterSelect_ClearDefVersionInfo()
             else
                 ZO_Dialogs_ShowDialog("SERVER_UNAVAILABLE", nil, {mainTextParams = {serverData.name}})
             end

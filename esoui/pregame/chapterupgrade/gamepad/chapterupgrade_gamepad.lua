@@ -11,12 +11,18 @@ function ChapterUpgrade_Gamepad:Initialize(control)
     self.focus = ZO_GamepadFocus:New(control, nil, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     
     local enterCodeButton = control:GetNamedChild("EnterCodeButton")
-    local enterCodeButtonFocusData = 
-    {
-        highlight = enterCodeButton:GetNamedChild("Highlight"),
-        control = enterCodeButton,
-        callback = function() self:EnterCodeButtonClicked() end,
-    }
+    if ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[GetPlatformServiceType()] then
+        enterCodeButton:SetHidden(false)
+        local enterCodeButtonFocusData = 
+        {
+            highlight = enterCodeButton:GetNamedChild("Highlight"),
+            control = enterCodeButton,
+            callback = function() self:EnterCodeButtonClicked() end,
+        }
+        self.focus:AddEntry(enterCodeButtonFocusData)
+    else
+        enterCodeButton:SetHidden(true)
+    end
 
     local upgradeButton = control:GetNamedChild("UpgradeButton")
     local upgradeButtonFocusData = 
@@ -26,7 +32,6 @@ function ChapterUpgrade_Gamepad:Initialize(control)
         callback = function() self:UpgradeButtonClicked() end,
     }
     
-    self.focus:AddEntry(enterCodeButtonFocusData)
     self.focus:AddEntry(upgradeButtonFocusData)
 
     self.keybindStripDescriptor =

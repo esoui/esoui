@@ -1036,8 +1036,20 @@ local function GetWayshrineNameFromPin(pin)
 end
 
 local function SetWayshrineMessage(pinType, pin)
+    local nodeIndex = pin:GetFastTravelNodeIndex()
+    local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
+
+    local known, name = GetFastTravelNodeInfo(nodeIndex)
     ZO_WorldMapMouseoverName.owner = "fastTravelWayshrine"
-    ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, GetWayshrineNameFromPin(pin)))
+    ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name))
+
+    local poiStartDesc, poiFinishedDesc = select(3, GetPOIInfo(zoneIndex, poiIndex))
+
+    if HasCompletedFastTravelNodePOI(nodeIndex) then
+        ZO_WorldMapMouseOverDescription:SetText(poiFinishedDesc)
+    else
+        ZO_WorldMapMouseOverDescription:SetText(poiStartDesc)
+    end
 
     INFORMATION_TOOLTIP:AppendWayshrineTooltip(pin)
 end

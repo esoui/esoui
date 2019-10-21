@@ -25,7 +25,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] =
     },
     buttons =
     {
-        [1] =
         {
             text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
             callback =  function(dialog)
@@ -35,7 +34,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] =
                         end,
             keybind = "DIALOG_PRIMARY",
         },
-        [2] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
@@ -56,13 +54,19 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
     },
     buttons =
     {
-        [1] =
         {
-            text = SI_MARKET_INSUFFICIENT_FUNDS_CONFIRM_BUTTON_TEXT,
-            callback = ZO_MarketDialogs_Shared_OpenURLByType,
+            text = function()
+                if DoesPlatformStoreUseExternalLinks() then
+                    return GetString(SI_MARKET_INSUFFICIENT_FUNDS_CONFIRM_BUTTON_TEXT)
+                else
+                    return zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, ZO_GetPlatformStoreName())
+                end
+            end,
+            callback = function()
+                ZO_ShowBuyCrownsPlatformUI()
+            end,
             keybind = "DIALOG_PRIMARY",
         },
-        [2] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
@@ -86,7 +90,7 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS"] =
         {
             text = SI_MARKET_JOIN_ESO_PLUS_CONFIRM_BUTTON_TEXT,
             callback = function()
-                ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
+                ZO_ShowBuySubscriptionPlatformDialog()
             end,
             keybind = "DIALOG_PRIMARY",
         },
@@ -110,7 +114,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED"] =
     },
     buttons =
     {
-        [1] =
         {
             text = SI_MARKET_GIFTING_LOCKED_HELP_KEYBIND,
             callback = function(dialog)
@@ -118,7 +121,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED"] =
             end,
             keybind = "DIALOG_PRIMARY",
         },
-        [2] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
@@ -142,7 +144,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
     },
     buttons =
     {
-        [1] =
         {
             text = SI_MARKET_GIFTING_LOCKED_HELP_KEYBIND,
             callback = function(dialog)
@@ -150,7 +151,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
             end,
             keybind = "DIALOG_PRIMARY",
         },
-        [2] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
@@ -171,7 +171,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVE
     },
     buttons =
     {
-        [1] =
         {
             text = SI_MARKET_OPEN_GIFT_INVENTORY_KEYBIND_LABEL,
             callback = function(dialog)
@@ -179,7 +178,6 @@ ESO_Dialogs["MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVE
             end,
             keybind = "DIALOG_PRIMARY",
         },
-        [2] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",

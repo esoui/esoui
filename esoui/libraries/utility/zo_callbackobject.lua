@@ -35,6 +35,11 @@ function ZO_CallbackObject:RegisterCallback(eventName, callback, arg)
     --make sure this callback wasn't already registered
     for _, registration in ipairs(registry) do
         if registration[CALLBACK_INDEX] == callback and registration[ARGUMENT_INDEX] == arg then
+            -- If the callback is already registered, make sure it hasn't been flagged for delete
+            -- so it won't be unregistered in self:Clean later
+            -- This can happen if you attempt to unregister and register for a callback
+            -- during a callback, since that will delay the clean until after we have tried to re-register
+            registration[DELETED_INDEX] = false
             return
         end
     end

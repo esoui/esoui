@@ -119,7 +119,7 @@ function ZO_DLCBook_Keyboard_OnUnlockPermanentlyClicked(control)
 end
 
 function ZO_DLCBook_Keyboard_OnSubscribeClicked(control)
-    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION }, { mainTextParams = { GetString(SI_ESO_PLUS_SUBSCRIPTION_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB) } })
+    ZO_ShowBuySubscriptionPlatformDialog()
 end
 
 function ZO_DLCBook_Keyboard_OnChapterUpgradeClicked(control)

@@ -23,8 +23,6 @@ function ZO_CollectibleTile_Keyboard:InitializePlatform()
     self.cooldownTimeLabel = self.control:GetNamedChild("CooldownTime")
     self.cooldownEdgeTexture = self.control:GetNamedChild("CooldownEdge")
 
-    self:SetCanFocus(false)
-
     self.isCooldownActive = false
     self.cooldownDuration = 0
     self.cooldownStartTime = 0
@@ -34,6 +32,8 @@ function ZO_CollectibleTile_Keyboard:InitializePlatform()
 end
 
 function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
+    -- keybindStripDescriptor and canFocus need to be set after initialize, because ZO_ContextualActionsTile
+    -- won't have finished initializing those until after InitializePlatform is called
     ZO_ContextualActionsTile_Keyboard.PostInitializePlatform(self)
 
     table.insert(self.keybindStripDescriptor, 
@@ -67,6 +67,8 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
             return self.collectibleData and self.collectibleData:IsRenameable()
         end,
     })
+
+    self:SetCanFocus(false)
 end
 
 -- End ZO_ContextualActionsTile_Keyboard Overrides --
@@ -253,6 +255,11 @@ end
 -- End ZO_Tile Overrides --
 
 -- Begin ZO_ContextualActionsTile Overrides --
+
+function ZO_CollectibleTile_Keyboard:OnControlHidden()
+    self:OnMouseExit()
+    ZO_ContextualActionsTile.OnControlHidden(self)
+end
 
 function ZO_CollectibleTile_Keyboard:OnFocusChanged(isFocused)
     ZO_ContextualActionsTile.OnFocusChanged(self, isFocused)

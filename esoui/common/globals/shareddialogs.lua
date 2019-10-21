@@ -129,66 +129,6 @@ ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
     end,
 }
 
-ESO_Dialogs["CHAPTER_UPGRADE_STORE"] = 
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-
-    canQueue = true,
-
-    title =
-    {
-        text = function(dialog)
-            return dialog.data.isPreRelease and SI_CHAPTER_PREPURCHASE_DIALOG_TITLE or SI_CHAPTER_UPGRADE_DIALOG_TITLE
-        end,
-    },
-
-    mainText =
-    {
-        text = function()
-            if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
-                return SI_OPEN_CHAPTER_UPGRADE_STEAM
-            elseif IsConsoleUI() then
-                return zo_strformat(SI_OPEN_CHAPTER_UPGRADE_CONSOLE, ZO_GetPlatformStoreName())
-            else
-                return zo_strformat(SI_OPEN_CHAPTER_UPGRADE, ZO_GetPlatformStoreName())
-            end
-        end,
-    },
-
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_DIALOG_UPGRADE,
-            callback = function(dialog)
-                if IsConsoleUI() then
-                    ShowConsoleESOChapterUpgradeUI(dialog.data.chapterId, dialog.data.isCollectorsEdition, dialog.data.chapterUpgradeSource)
-                else
-                    OpenChapterUpgradeURL(dialog.data.chapterId, dialog.data.isCollectorsEdition, dialog.data.chapterUpgradeSource)
-                end
-            end,
-        },
-
-        [2] =
-        {
-            text = SI_DIALOG_CANCEL,
-        },
-    },
-}
-
-function ZO_ShowChapterUpgradePlatformDialog(isCollectorsEdition, chapterUpgradeSource)
-    local data = { chapterId = GetCurrentChapterUpgradeId(), isPreRelease = false, isCollectorsEdition = isCollectorsEdition, chapterUpgradeSource = chapterUpgradeSource }
-    ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE", data)
-end
-
-function ZO_ShowChapterPrepurchasePlatformDialog(chapterId, isCollectorsEdition, chapterUpgradeSource)
-    local data = { chapterId = chapterId, isPreRelease = true, isCollectorsEdition = isCollectorsEdition, chapterUpgradeSource = chapterUpgradeSource}
-    ZO_Dialogs_ShowPlatformDialog("CHAPTER_UPGRADE_STORE", data)
-end
-
 ESO_Dialogs["SHOW_REDEEM_CODE"] = 
 {
     gamepadInfo =

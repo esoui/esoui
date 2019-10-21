@@ -79,6 +79,24 @@ function ZO_SocialListKeyboard:DisplayName_OnMouseExit(control)
     self:ExitRow(row)
 end
 
+function ZO_SocialListKeyboard:HeronUserInfo_OnMouseEnter(control)
+    local row = control:GetParent()
+    local data = ZO_ScrollList_GetData(row)
+    
+    if data.isHeronUser then
+        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
+        SetTooltipText(InformationTooltip, zo_strformat(SI_TOOLTIP_HERON_NAME, data.heronName))
+    end
+
+    self:EnterRow(row)
+end
+
+function ZO_SocialListKeyboard:HeronUserInfo_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+    local row = control:GetParent()
+    self:ExitRow(row)
+end
+
 function ZO_SocialListKeyboard:CharacterName_OnMouseEnter(control)
     local row = control:GetParent()
     local data = ZO_ScrollList_GetData(row)

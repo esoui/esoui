@@ -9,6 +9,8 @@ EsoUI\Pregame\Globals\PreGameDialogs.lua
 EsoUI\Pregame\Globals\OverflowDialog.lua
 EsoUI\Pregame\Globals\OverflowDialog.xml
 
+EsoUI\Pregame\Globals\Console\PreGameDialogs_Console.lua
+
 EsoUI\Pregame\Console\SideImages.xml
 
 EsoUI\Pregame\Gamepad\PregameTemplates.lua
@@ -22,8 +24,8 @@ EsoUI\Pregame\Tooltip\CharacterSelectTooltips.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
-EsoUI\Pregame\PregameAnimatedBackground\Console\ElsweyrBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\Console\ElsweyrBackground.xml
+EsoUI\Pregame\PregameAnimatedBackground\Gamepad\ElsweyrBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\Gamepad\ElsweyrBackground.xml
 
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml
@@ -34,9 +36,18 @@ EsoUI\Pregame\AccountLogin\Keyboard\ZO_CreateLinkAccount.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_CreateLinkAccount.xml
 EsoUI\Pregame\AccountLogin\Keyboard\ServerSelect.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ServerSelect.xml
+EsoUI\Pregame\AccountLogin\Keyboard\EULA.lua
+EsoUI\Pregame\AccountLogin\Keyboard\EULA.xml
 
-EsoUI\Pregame\AccountLogin\EULA.lua
-EsoUI\Pregame\AccountLogin\EULA.xml
+EsoUI\Pregame\AccountLogin\Gamepad\PregameInitialScreen_Gamepad.lua
+EsoUI\Pregame\AccountLogin\Gamepad\PregameInitialScreen_Gamepad.xml
+EsoUI\Pregame\AccountLogin\Gamepad\CreateLinkLoadingScreen_Gamepad.lua
+EsoUI\Pregame\AccountLogin\Gamepad\CreateLinkLoadingScreen_Gamepad.xml
+EsoUI\Pregame\AccountLogin\Gamepad\GameStartup_Gamepad.lua
+EsoUI\Pregame\AccountLogin\Gamepad\GameStartup_Gamepad.xml
+EsoUI\Pregame\AccountLogin\Gamepad\LegalAgreementsScreen_Gamepad.lua
+EsoUI\Pregame\AccountLogin\Gamepad\LegalAgreementsScreen_Gamepad.xml
+
 EsoUI\Pregame\AccountLogin\PEGI.lua
 EsoUI\Pregame\AccountLogin\PEGI.xml
 EsoUI\Pregame\AccountLogin\LogoSplash.lua
@@ -80,8 +91,7 @@ EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreate_Gamepad.lua
 EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreate_Gamepad.xml
 
 ; Character Select
-;
-EsoUI\Pregame\CharacterSelect\ZO_CharacterSelect_Common.lua
+EsoUI\Pregame\CharacterSelect\ZO_CharacterSelect_Manager.lua
 EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.lua
 EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.xml
 EsoUI\Pregame\CharacterSelect\Gamepad\ZO_CharacterSelect_Gamepad.lua
@@ -97,20 +107,8 @@ EsoUI\Pregame\GameMenu_PreGame\Keyboard\GameMenu_CharacterSelect.xml
 EsoUI\Pregame\GameMenu_PreGame\Keyboard\GameMenu_CharacterCreate.lua
 EsoUI\Pregame\GameMenu_PreGame\Keyboard\GameMenu_CharacterCreate.xml
 
-EsoUI\Pregame\Console\GameStartup\GameStartup_Gamepad.lua
-EsoUI\Pregame\Console\GameStartup\GameStartup_Gamepad.xml
-
-EsoUI\Pregame\Console\EmergencyScreen\PregameInitialScreen_Gamepad.lua
-EsoUI\Pregame\Console\EmergencyScreen\PregameInitialScreen_Gamepad.xml
-
-EsoUI\Pregame\Console\LegalAgreements\LegalAgreementsScreen.lua
-EsoUI\Pregame\Console\LegalAgreements\LegalAgreementsScreen.xml
-
 EsoUI\Pregame\Console\CreateLinkAccountScreen\CreateLinkAccountScreen_Gamepad.lua
 EsoUI\Pregame\Console\CreateLinkAccountScreen\CreateLinkAccountScreen_Gamepad.xml
-
-EsoUI\Pregame\Console\CreateLinkAccountScreen\CreateLinkLoadingScreen_Gamepad.lua
-EsoUI\Pregame\Console\CreateLinkAccountScreen\CreateLinkLoadingScreen_Gamepad.xml
 
 EsoUI\Pregame\Gamepad\WorldSelect\WorldSelectScreen_Gamepad.lua
 EsoUI\Pregame\Gamepad\WorldSelect\WorldSelectScreen_Gamepad.xml
@@ -141,7 +139,8 @@ EsoUI\Pregame\GameCredits\Keyboard\GameCredits_Keyboard.lua
 EsoUI\Pregame\GameCredits\Keyboard\GameCredits_Keyboard.xml
 
 EsoUI\Pregame\StateManager\PregameStateManager.lua
-EsoUI\Pregame\StateManager\PC\PregameStates.lua
+EsoUI\Pregame\StateManager\Keyboard\PregameStates_Keyboard.lua
+EsoUI\Pregame\StateManager\Gamepad\PregameStates_Gamepad.lua
 EsoUI\Pregame\StateManager\Console\PregameStates_Console.lua
 
 EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.lua
@@ -159,9 +158,14 @@ EsoUI\Pregame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.lua
 EsoUI\Pregame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.xml
 
 EsoUI\Pregame\Scenes\PregameFragments.lua
+EsoUI\Pregame\Scenes\Gamepad\PregameFragments_Gamepad.lua
 EsoUI\Pregame\Scenes\Console\PregameFragments_Console.lua
-EsoUI\Pregame\Scenes\Console\PregameScenes_Console.lua
+
 EsoUI\Pregame\Scenes\PregameScenes.lua
+EsoUI\Pregame\Scenes\Gamepad\PregameScenes_Gamepad.lua
+EsoUI\Pregame\Scenes\Console\PregameScenes_Console.lua
 
 EsoUI\Pregame\OptionsPanels\Gamepad\OptionsPanels_Gamepad.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Audio_Keyboard.xml
+EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.lua
+EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.xml

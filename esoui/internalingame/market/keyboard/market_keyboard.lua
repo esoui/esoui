@@ -80,8 +80,6 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
     -- ZO_Market_Shared.Initialize needs to be called after the control declarations
     -- This is because several overridden functions such as InitializeCategories and InitializeFilters called during initialization reference them
     ZO_Market_Shared.Initialize(self)
-
-    MARKET_CURRENCY_KEYBOARD:SetBuyCrownsCallback(function() self:OnShowBuyCrownsDialog() end)
 end
 
 function ZO_Market_Keyboard:IsPreviewForMarketProductPreviewTypeVisible(previewType)
@@ -118,13 +116,28 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
             keybind =   "UI_SHORTCUT_NEGATIVE",
             visible =   function()
                                 local isPreviewing = self:GetPreviewState()
-                                return isPreviewing
+                                return isPreviewing and self.selectedMarketProduct == nil
                         end,
             callback =  function()
                             local isPreviewing = self:GetPreviewState()
                             if isPreviewing then
                                 self:EndCurrentPreview()
                             end
+                        end,
+        },
+
+        -- Redeem Code Keybind
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            name =      GetString(SI_KEYBOARD_CODE_REDEMPTION_REDEEM_CODE_KEYBIND_LABEL),
+            keybind =   "UI_SHORTCUT_QUATERNARY",
+            visible =   function()
+                            local isPreviewing = self:GetPreviewState()
+                            local serviceType = GetPlatformServiceType()
+                            return not isPreviewing and serviceType ~= PLATFORM_SERVICE_TYPE_DMM and self.selectedMarketProduct == nil
+                        end,
+            callback =  function()
+                            ZO_KeyboardCodeRedemption_StartCodeRedemptionFlow()
                         end,
         },
 
@@ -1002,19 +1015,19 @@ function ZO_Market_Keyboard:StartPurchaseFlow(marketProductData, errorInfoFuncti
 
     local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(marketProductData)
 
-    local NO_DATA = nil
+    local NO_DIALOG_DATA = nil
     if expectedPurchaseResult == MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DATA, dialogParams)
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DIALOG_DATA, dialogParams)
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", ZO_BUY_CROWNS_URL_TYPE, dialogParams)
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", NO_DIALOG_DATA, dialogParams)
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_GRACE_PERIOD_ACTIVE then
         ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD", {}, dialogParams)
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_NOT_ALLOWED then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED", NO_DATA, dialogParams)
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED", NO_DIALOG_DATA, dialogParams)
     elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY", NO_DATA, dialogParams)
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY", NO_DIALOG_DATA, dialogParams)
     elseif not allowContinue then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DATA, dialogParams)
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DIALOG_DATA, dialogParams)
     elseif hasErrors then
         ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", {marketProductData = marketProductData}, dialogParams)
     else
@@ -1032,11 +1045,6 @@ end
 function ZO_Market_Keyboard:OnCollectiblesUnlockStateChanged()
     ZO_Market_Shared.OnCollectiblesUnlockStateChanged(self)
     self:RefreshCategoryTree()
-end
-
-function ZO_Market_Keyboard:OnShowBuyCrownsDialog()
-    OnMarketPurchaseMoreCrowns()
-    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_CROWNS_URL_TYPE, ZO_BUY_CROWNS_FRONT_FACING_ADDRESS)
 end
 
 function ZO_Market_Keyboard:RequestShowCategory(categoryIndex, subcategoryIndex)
@@ -1257,7 +1265,7 @@ function ZO_Market_OnSearchEnterKeyPressed(editBox)
 end
 
 function ZO_MarketSubscribeButton_OnClicked(control)
-    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ZO_BUY_SUBSCRIPTION_URL_TYPE, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
+    ZO_ShowBuySubscriptionPlatformDialog()
 end
 
 function ZO_MarketFreeTrialButton_OnClicked(control)

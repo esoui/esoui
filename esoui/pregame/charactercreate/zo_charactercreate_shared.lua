@@ -89,8 +89,17 @@ function ZO_CharacterCreate_Manager:Initialize()
     local function OnCharacterConstructionReady()
         self.characterData:PerformDeferredInitialization()
 
-        local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
-        characterCreate:InitializeSelectors()
+        local characterCreateGamepad
+        local characterCreateKeyboard
+        if IsGamepadUISupported() then
+            characterCreateGamepad = SYSTEMS:GetGamepadObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
+            characterCreateGamepad:InitializeSelectors()
+        end
+
+        if IsKeyboardUISupported() then
+            characterCreateKeyboard = SYSTEMS:GetKeyboardObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
+            characterCreateKeyboard:InitializeSelectors()
+        end
 
         -- Nightmare load-ordering dependency...there are probably other ways around this, and they're probably just as bad.
         -- Once game data is loaded, generate a random character for character create just to advance the
@@ -101,7 +110,12 @@ function ZO_CharacterCreate_Manager:Initialize()
             -- in order to load correctly we need to be put into CHARACTER_MODE_CREATION first
             self:SetCharacterMode(CHARACTER_MODE_CREATION)
             -- now reset character create to generate a random character
-            characterCreate:Reset()
+            if characterCreateGamepad then
+                characterCreateGamepad:Reset()
+            end
+            if characterCreateKeyboard then
+                characterCreateKeyboard:Reset()
+            end
             CharacterCreateSetFirstTimePosture()
             SetSuppressCharacterChanges(false)
         end
@@ -328,17 +342,12 @@ function ZO_CharacterCreate_Base:InitializeSelectorButton(buttonControl, data, r
     end
 
     buttonControl:SetHidden(false)
+    buttonControl.selectorData = data
 
     self:InitializeSelectorButtonTextures(buttonControl, data)
 
     radioGroup:Add(buttonControl)
     self:SetSelectorButtonEnabled(buttonControl, radioGroup, data.isSelectable)
-
-    -- There should be a single button that represents this piece of data
-    -- So add the button control to the character data so that if it's needed
-    -- later to update state, there are no insane hoops to jump through to get the button.
-    -- For example, these buttons are now accessible by calling self.characterData:GetRaceInfo()[raceIndex].selectorButton
-    data.selectorButton = buttonControl
 end
 
 function ZO_CharacterCreate_Base:InitializeAllianceSelector(allianceButton, allianceData)
@@ -423,16 +432,15 @@ function ZO_CharacterCreate_Base:UpdateAllianceSelectorsForTemplate(allianceData
 end
 
 function ZO_CharacterCreate_Base:UpdateSelectorsForTemplate(isEnabledCallback, characterDataTable, templateData, radioGroup, optionalValidIndexTable)
-    for dataIndex, data in ipairs(characterDataTable) do
+    for button in radioGroup:IterateButtons() do
+        local data = button.selectorData
         local enabled = isEnabledCallback(data, templateData)
         data.isRadioEnabled = enabled
 
-        -- this safeguard is necessary for gamepad character create (... another victim of the race selector setup)
-        if data.selectorButton then
-            self:SetSelectorButtonEnabled(data.selectorButton, radioGroup, enabled)
-        end
+        self:SetSelectorButtonEnabled(button, radioGroup, enabled)
 
         if optionalValidIndexTable and enabled then
+            local dataIndex = ZO_IndexOfElementInNumericallyIndexedTable(characterDataTable, data)
             table.insert(optionalValidIndexTable, dataIndex)
         end
     end

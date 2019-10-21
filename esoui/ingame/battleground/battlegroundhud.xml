@@ -14,6 +14,7 @@
                 <Label name="$(parent)State" override="true" font="ZoFontGameShadow">
                     <ClearAnchors/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="11" offsetY="2"/>
+                    <Anchor point="RIGHT" constrains="X" offsetX="-5"/>
                 </Label>
                 <Control name="$(parent)BattlegroundScoreHud" override="true">
                     <ClearAnchors/>

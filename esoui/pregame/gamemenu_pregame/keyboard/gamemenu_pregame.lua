@@ -94,7 +94,7 @@ function ZO_GameMenu_PreGame_Initialize(self)
     GAME_MENU_PREGAME = ZO_GameMenu_Initialize(self, OnShow)
 
     local gameMenuPregameFragment = ZO_FadeSceneFragment:New(self)
-    local gameMenuPregameScene = ZO_Scene:New("gameMenuPregame", SCENE_MANAGER)
-    gameMenuPregameScene:AddFragment(gameMenuPregameFragment)
-    gameMenuPregameScene:AddFragment(PREGAME_SLIDE_SHOW_FRAGMENT)
+    GAME_MENU_PREGAME_SCENE = ZO_Scene:New("gameMenuPregame", SCENE_MANAGER)
+    GAME_MENU_PREGAME_SCENE:AddFragment(gameMenuPregameFragment)
+    GAME_MENU_PREGAME_SCENE:AddFragment(PREGAME_SLIDE_SHOW_FRAGMENT)
 end

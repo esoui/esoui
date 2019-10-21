@@ -15,7 +15,6 @@ function ZO_Help_GenericTicketSubmission_Manager:Initialize()
     self.ticketSubmittedFailedMessage = GetString(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_FAILED_TICKET_SUBMISSION)
     self.knowledgeBaseText = GetString(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_FINAL_HEADER_KNOWLEDGE_BASE)
     self.websiteText = GetString(SI_GAMEPAD_HELP_WEBSITE)
-    self.emailAppendText = zo_strformat(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_SUBMITTED_EMAIL, GetActiveUserEmailAddress())
     self.reportPlayerTicketSubmittedCallback = nil
     self.reportGuildTicketSubmittedCallback = nil
     self.isAttemptingToSubmitReportPlayerTicket = false
@@ -49,7 +48,7 @@ function ZO_Help_GenericTicketSubmission_Manager:OnCustomerServiceTicketSubmitte
             dialogParams.titleParams = { self.ticketSubmittedSuccessHeader }
             dialogParams.mainTextParams =
             {
-                string.format("%s%s", response, self.emailAppendText),
+                response,
                 self.knowledgeBaseText,
                 self.websiteText,
             }

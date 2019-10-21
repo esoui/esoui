@@ -375,23 +375,24 @@ function ZO_Provisioner:RefreshRecipeList()
     local requireSkills = ZO_CheckButton_IsChecked(self.haveSkillsCheckBox)
     local craftingInteractionType = GetCraftingInteractionType()
 
-    local recipeData = PROVISIONER_MANAGER:GetRecipeData()
-    for _, recipeList in pairs(recipeData) do
+    local recipeLists = PROVISIONER_MANAGER:GetRecipeListData(craftingInteractionType)
+    for _, recipeList in pairs(recipeLists) do
         local parent
         for _, recipe in ipairs(recipeList.recipes) do
-            if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
-                parent = parent or self.recipeTree:AddNode("ZO_IconHeader", {
-                    recipeListIndex = recipeList.recipeListIndex,
-                    name = recipeList.recipeListName,
-                    upIcon = recipeList.upIcon,
-                    downIcon = recipeList.downIcon,
-                    overIcon = recipeList.overIcon,
-                    })
-                
-                self.recipeTree:AddNode("ZO_ProvisionerNavigationEntry", recipe, parent)
-                hasRecipesWithFilter = true
+            if recipe.requiredCraftingStationType == craftingInteractionType and self.filterType == recipe.specialIngredientType then
+                knowAnyRecipesInTab = true
+                if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
+                    parent = parent or self.recipeTree:AddNode("ZO_IconHeader", {
+                        recipeListIndex = recipeList.recipeListIndex,
+                        name = recipeList.recipeListName,
+                        upIcon = recipeList.upIcon,
+                        downIcon = recipeList.downIcon,
+                        overIcon = recipeList.overIcon,
+                        })
+                    self.recipeTree:AddNode("ZO_ProvisionerNavigationEntry", recipe, parent)
+                    hasRecipesWithFilter = true
+                end
             end
-            knowAnyRecipesInTab = true
         end
     end
 

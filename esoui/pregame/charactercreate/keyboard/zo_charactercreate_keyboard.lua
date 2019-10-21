@@ -1012,8 +1012,8 @@ function ZO_CharacterCreate_OnNameFieldFocusLost(editControl)
     editControl.linkedInstructions:Hide()
 end
 
-function ZO_CharacterCreate_OnSelectorClicked(button)
-    local selectorClickHandlers =
+do
+    local SELECTOR_CLICK_HANDLERS =
     {
         [CHARACTER_CREATE_SELECTOR_RACE] =  function(button)
                         KEYBOARD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
@@ -1031,10 +1031,12 @@ function ZO_CharacterCreate_OnSelectorClicked(button)
                         end,
     }
 
-    local clickHandler = selectorClickHandlers[button.selectorType]
-    if clickHandler then
-        OnCharacterCreateOptionChanged()
-        clickHandler(button)
+    function ZO_CharacterCreate_OnSelectorClicked(button)
+        local clickHandler = SELECTOR_CLICK_HANDLERS[button.selectorType]
+        if clickHandler then
+            OnCharacterCreateOptionChanged()
+            clickHandler(button)
+        end
     end
 end
 
@@ -1116,9 +1118,14 @@ function ZO_CharacterCreate_PreviewClicked(previewButton)
     slider.sliderObject:Preview()
 end
 
-function ZO_PaperdollManipulation_OnInitialized(self)
+function ZO_PaperdollManipulation_OnEffectivelyShown(self)
     --While we need a mouse down over the paper doll area to start spinning, the mouse up may not be delivered to this same control. If we press mouse left to start spinning (which starts
     --mouse tracking) then press mouse right this will release mouse left but it won't stop mouse tracking because tracking is locked when the up is delivered. So we catch it on the event instead
     --when tracking isn't locked. ESO-546877
-    EVENT_MANAGER:RegisterForEvent("PaperDollManipulation", EVENT_GLOBAL_MOUSE_UP, function() CharacterCreateStopMouseSpin() end)
+    self:RegisterForEvent(EVENT_GLOBAL_MOUSE_UP, CharacterCreateStopMouseSpin)
+end
+
+function ZO_PaperdollManipulation_OnEffectivelyHidden(self)
+    CharacterCreateStopMouseSpin()
+    self:UnregisterForEvent(EVENT_GLOBAL_MOUSE_UP)
 end

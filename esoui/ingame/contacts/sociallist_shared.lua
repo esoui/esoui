@@ -14,6 +14,11 @@ function ZO_SocialList_ColorRow(control, data, displayNameTextColor, iconColor, 
     local displayName = GetControl(control, "DisplayName")
     displayName:SetColor(displayNameTextColor:UnpackRGBA())
 
+    local heronUserInfoTexture = GetControl(control, "HeronUserInfo")
+    if heronUserInfoTexture then
+        heronUserInfoTexture:SetColor(iconColor:UnpackRGBA())
+    end
+
     if data.hasCharacter then
         local character = GetControl(control, "CharacterName")
         if character then
@@ -21,7 +26,7 @@ function ZO_SocialList_ColorRow(control, data, displayNameTextColor, iconColor, 
         end
 
         local zone = GetControl(control, "Zone")
-        zone:SetColor(otherTextColor:UnpackRGBA())        
+        zone:SetColor(otherTextColor:UnpackRGBA())
         
         local champion = GetControl(control, "Champion")
         champion:SetColor(iconColor:UnpackRGBA())
@@ -69,11 +74,16 @@ function ZO_SocialList_SharedSocialSetup(control, data, selected)
     local zone = GetControl(control, "Zone")
     local class = GetControl(control, "ClassIcon")
     local alliance = GetControl(control, "AllianceIcon")
+    local heronUserInfoTexture = GetControl(control, "HeronUserInfo")
     local level = GetControl(control, "Level")
     local champion = GetControl(control, "Champion")
 
     if displayName then
         displayName:SetText(ZO_FormatUserFacingDisplayName(data.displayName))
+    end
+
+    if heronUserInfoTexture then
+        heronUserInfoTexture:SetHidden(not data.isHeronUser)
     end
 
     if status then

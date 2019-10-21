@@ -1087,7 +1087,7 @@ function ZO_LFGUpdateProvider:Decline(entryData)
     if entryData.dataType == NOTIFICATIONS_LFG_READY_CHECK_DATA then
         DeclineLFGReadyCheckNotification()
     elseif entryData.dataType == NOTIFICATIONS_LFG_FIND_REPLACEMENT_DATA then
-        DeclineAcceptFindReplacementNotification()
+        DeclineActivityFindReplacementNotification()
     end
 end
 

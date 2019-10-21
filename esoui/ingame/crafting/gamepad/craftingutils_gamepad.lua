@@ -368,23 +368,13 @@ do
         title =
         {
             text = function(dialog)
-                local bagId, slotIndex = dialog.data.bagId, dialog.data.slotIndex
-                if CanItemBeRefined(bagId, slotIndex, GetCraftingInteractionType()) then
-                    return GetString(SI_GAMEPAD_REFINE_MULTIPLE)
-                else
-                    return GetString(SI_GAMEPAD_DECONSTRUCT_MULTIPLE)
-                end
+                return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
             end,
         },
         mainText = 
         {
             text = function(dialog)
-                local bagId, slotIndex = dialog.data.bagId, dialog.data.slotIndex
-                if CanItemBeRefined(bagId, slotIndex, GetCraftingInteractionType()) then
-                    return GetString(SI_GAMEPAD_REFINE_MULTIPLE_DESCRIPTION)
-                else
-                    return GetString(SI_GAMEPAD_DECONSTRUCT_MULTIPLE_DESCRIPTION)
-                end
+                return GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMSTACK", dialog.data.verb)
             end,
         },
         parametricList =
@@ -452,12 +442,12 @@ do
         }
     }
 
-    function ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, deconstructFn)
+    function ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, deconstructFn, verb)
         local quality = GetItemQuality(bagId, slotIndex)
         local nameColor = GetItemQualityColor(quality)
         local itemName = nameColor:Colorize(GetItemName(bagId, slotIndex))
 
-        ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", {bagId = bagId, slotIndex = slotIndex, maxIterations = maxIterations, deconstructFn = deconstructFn}, {mainTextParams = {itemName}})
+        ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", {bagId = bagId, slotIndex = slotIndex, maxIterations = maxIterations, deconstructFn = deconstructFn, verb = verb}, {mainTextParams = {itemName}})
     end
 end
 

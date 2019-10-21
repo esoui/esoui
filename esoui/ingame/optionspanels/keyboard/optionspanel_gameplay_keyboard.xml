@@ -149,9 +149,17 @@
                 ZO_OptionsWindow_InitializeControl(self)
             </OnInitialized>
         </Control>
-        
+
+        <Control name="Options_Automatic_Input_Mode_Changing_Enabled" inherits="ZO_Options_Checkbox">
+            <Anchor point="TOPLEFT" relativeTo="Options_Gamepad_Preferred" relativePoint="BOTTOMLEFT" offsetY="4" />
+            <OnInitialized>
+                self.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_GAMEPLAY, SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED)
+                ZO_OptionsWindow_InitializeControl(self)
+            </OnInitialized>
+        </Control>
+
         <Control name="Options_Gameplay_ItemsSection" inherits="ZO_Options_SectionTitle_WithDivider">
-            <Anchor point="TOPLEFT" relativeTo="Options_Gamepad_Preferred" relativePoint="BOTTOMLEFT" offsetY="15" />
+            <Anchor point="TOPLEFT" relativeTo="Options_Automatic_Input_Mode_Changing_Enabled" relativePoint="BOTTOMLEFT" offsetY="15" />
             <OnInitialized>
                 KEYBOARD_OPTIONS:SetSectionTitleData(self, SETTING_PANEL_GAMEPLAY, SI_GAMEPLAY_OPTIONS_ITEMS)
                 ZO_OptionsWindow_InitializeControl(self)

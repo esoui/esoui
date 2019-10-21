@@ -29,7 +29,7 @@ function ZO_GameMenuManager:InitializeTree()
     local function TreeHeaderSetup_Child(node, control, data, open, userRequested)
         BaseTreeHeaderSetup(node, control, data, open)
 
-        if(open and userRequested) then
+        if open and userRequested then
             self.navigationTree:SelectFirstChild(node)
         end
     end
@@ -76,13 +76,19 @@ function ZO_GameMenuManager:SubmitLists(...)
 
     for i = 1, select("#", ...) do
         local entries = select(i, ...)
-        for j = 1, #entries do
-            self:AddEntry(entries[j])
+        for j, entry in ipairs(entries) do
+            self:AddEntry(entry)
         end
     end
 
-    for i = 1, #outsideEntries do
-        self:AddEntry(outsideEntries[i])
+    for i, entry in ipairs(outsideEntries) do
+        local visible = entry.visible == nil or entry.visible
+        if type(visible) == "function" then
+            visible = visible()
+        end
+        if visible then
+            self:AddEntry(entry)
+        end
     end
 
     self.navigationTree:Commit()
@@ -130,15 +136,15 @@ do
         local isNew = newStateCallback and newStateCallback()
         local newStatusControl = treeNode.control.newStatusControl
 
-        if(isNew) then
-            if(not newStatusControl) then
+        if isNew then
+            if not newStatusControl then
                 newStatusControl = CreateControlFromVirtual(treeNode.control:GetName() .. "NewStatus", treeNode.control, "ZO_GameMenu_NewStatus")
                 newStatusControl:SetAnchor(LEFT, treeNode.control, RIGHT, 10, 0)
                 treeNode.control.newStatusControl = newStatusControl -- treenodes and data are transient, need to hang this off the control
             end
         end
-        
-        if(newStatusControl) then
+
+        if newStatusControl then
             newStatusControl:SetHidden(not isNew)
         end
     end
@@ -149,10 +155,8 @@ do
 end
 
 function ZO_GameMenu_ChildlessHeader_OnMouseUp(self, upInside)
-    if upInside then
-        if self.callback then
-            self.callback(self)
-        end
+    if upInside and self.callback then
+        self.callback(self)
     end
 end
 

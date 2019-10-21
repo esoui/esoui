@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GamepadGuildStoreSearchHistoryEntryTemplate" inherits="ZO_GamepadFullwidthLabelEntryTemplate" virtual="true" />
+        <Control name="ZO_GamepadGuildStoreSearchHistoryEntryTemplate" inherits="ZO_GamepadFullWidthLabelEntryTemplate" virtual="true" />
 
         <Control name="ZO_TradingHouseSearchHistory_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" virtual="true" hidden="true">
         </Control>

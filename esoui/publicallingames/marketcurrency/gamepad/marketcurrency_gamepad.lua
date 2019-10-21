@@ -6,7 +6,7 @@ local MARKET_BUY_CROWNS_BUTTON =
     gamepadOrder = 1,
     name = GetString(SI_MARKET_BUY_CROWNS),
     keybind = "UI_SHORTCUT_SECONDARY",
-    callback = ShowBuyCrownsDialog,
+    callback = ZO_ShowBuyCrownsPlatformDialog,
 }
 
 function ZO_MarketCurrency_Gamepad:New(...)

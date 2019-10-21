@@ -944,12 +944,12 @@ ESO_Dialogs["GROUP_INVITE"] =
     editBox =
     {
         defaultText = SI_REQUEST_NAME_DEFAULT_TEXT,
-        autoComplete = 
+        autoComplete =
         {
-            includeFlags = { AUTO_COMPLETE_FLAG_ALL }, 
-            excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES }, 
-            onlineOnly = AUTO_COMPLETION_ONLINE, 
-            maxResults = MAX_AUTO_COMPLETION_RESULTS, 
+            includeFlags = { AUTO_COMPLETE_FLAG_ALL },
+            excludeFlags = { AUTO_COMPLETE_FLAG_GUILD_NAMES },
+            onlineOnly = AUTO_COMPLETION_ONLINE,
+            maxResults = MAX_AUTO_COMPLETION_RESULTS,
         },
     },
     buttons =
@@ -1490,37 +1490,6 @@ ESO_Dialogs["CONFIRM_CREATE_NONSET_ITEM"] =
     },
 }
 
-ESO_Dialogs["CONFIRM_REFINE_MULTIPLE_ITEMS"] =
-{
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_CRAFTING_REFINE_MULTIPLE,
-    },
-    mainText =
-    {
-        text = SI_CRAFTING_CONFIRM_REFINE_DESCRIPTION,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                dialog.data.refineFn()
-            end,
-        },
-        [2] =
-        {
-            text = SI_DIALOG_CANCEL,
-        },
-    },
-}
-
 ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
 {
     canQueue = true,
@@ -1530,11 +1499,15 @@ ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
     },
     title =
     {
-        text = SI_CRAFTING_EXTRACT_MULTIPLE,
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
+        end,
     },
     mainText =
     {
-        text = SI_CRAFTING_CONFIRM_EXTRACT_DESCRIPTION,
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE", dialog.data.verb)
+        end,
     },
     setup = function(dialog)
         local headerData =
@@ -2051,68 +2024,6 @@ ESO_Dialogs["GROUP_LEAVE_DIALOG"] =
     }
 }
 
-ESO_Dialogs["JUMP_TO_GROUP_LEADER_OCCURANCE_PROMPT"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_TITLE,
-    },
-    mainText =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_OCCURANCE_PROMPT,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                local groupLeaderUnitTag = GetGroupLeaderUnitTag()
-                JumpToGroupMember(GetUnitName(groupLeaderUnitTag))
-                SCENE_MANAGER:ShowBaseScene()
-            end,
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-        },
-    },
-}
-
-ESO_Dialogs["JUMP_TO_GROUP_LEADER_WORLD_PROMPT"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_TITLE,
-    },
-    mainText =
-    {
-        text = SI_JUMP_TO_GROUP_LEADER_WORLD_PROMPT,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                local groupLeaderUnitTag = GetGroupLeaderUnitTag()
-                JumpToGroupMember(GetUnitName(groupLeaderUnitTag))
-                SCENE_MANAGER:ShowBaseScene()
-            end,
-        },
-        {
-            text = SI_DIALOG_DECLINE,
-        },
-    },
-}
-
 ESO_Dialogs["LFG_LEAVE_QUEUE_CONFIRMATION"] =
 {
     gamepadInfo =
@@ -2484,7 +2395,7 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
             keybind = "DIALOG_PRIMARY",
             text = SI_CUSTOMER_SERVICE_OPEN_WEB_BROWSER,
             visible = function()
-                return GetUIPlatform() == UI_PLATFORM_PC
+                return not IsConsoleUI()
             end,
             callback = function(...)
                 ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_HELP }, { mainTextParams = { GetString(SI_CUSTOMER_SERVICE_ESO_HELP_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB) } })
@@ -2702,36 +2613,6 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
     },
 }
 
-ESO_Dialogs["CONSOLE_BUY_ESO_PLUS"] = 
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_GAMEPAD_MARKET_BUY_PLUS_TITLE,
-    },
-    mainText = 
-    {
-        text = SI_GAMEPAD_MARKET_BUY_PLUS_TEXT_CONSOLE,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_GAMEPAD_MARKET_BUY_PLUS_DIALOG_KEYBIND_LABEL,
-            callback =  function(dialog)
-                            ShowConsoleESOPlusSubscriptionUI()
-                        end
-        },
-        [2] =
-        {
-            text = SI_DIALOG_EXIT,
-        },
-    }
-}
-
 ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] = 
 {
     gamepadInfo =
@@ -2825,36 +2706,6 @@ ESO_Dialogs["PROMPT_FOR_LFM_REQUEST"] =
                             local DECLINE = false
                             ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(DECLINE)
                        end,
-        },
-    },
-}
-
-ESO_Dialogs["CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING_TITLE,
-    },
-    mainText =
-    {
-        text = SI_CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING_BODY,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                CAMPAIGN_BROWSER_MANAGER:ContinueQueueForCampaignFlow(dialog.data.campaignData, ZO_CAMPAIGN_QUEUE_STEP_LFG_CHECK)
-            end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
-        },
-        {
-            text = SI_DIALOG_CANCEL,
         },
     },
 }

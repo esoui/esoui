@@ -8,11 +8,10 @@ ZO_CAMPAIGN_DATA_TYPE_QUEUE = 2
 
 ZO_CAMPAIGN_QUEUE_STEP_INITIAL = 1
 ZO_CAMPAIGN_QUEUE_STEP_COLLECTIBLE_CHECK = 2
-ZO_CAMPAIGN_QUEUE_STEP_LFG_CHECK = 3
-ZO_CAMPAIGN_QUEUE_STEP_QUEUED_AS_GUEST_CHECK = 4
-ZO_CAMPAIGN_QUEUE_STEP_ALLIANCE_LOCK_CHECK = 5
-ZO_CAMPAIGN_QUEUE_STEP_SELECT_QUEUE_TYPE = 6
-ZO_CAMPAIGN_QUEUE_STEP_PERFORM_QUEUE = 7
+ZO_CAMPAIGN_QUEUE_STEP_QUEUED_AS_GUEST_CHECK = 3
+ZO_CAMPAIGN_QUEUE_STEP_ALLIANCE_LOCK_CHECK = 4
+ZO_CAMPAIGN_QUEUE_STEP_SELECT_QUEUE_TYPE = 5
+ZO_CAMPAIGN_QUEUE_STEP_PERFORM_QUEUE = 6
 
 ZO_CampaignBrowser_Manager = ZO_CallbackObject:Subclass()
 
@@ -137,18 +136,6 @@ do
                     local message = GetString(SI_COLLECTIBLE_LOCKED_FAILURE_CAUSED_BY_CAMPAIGN_QUEUE)
                     local marketOperation = MARKET_OPEN_OPERATION_DLC_FAILURE_CAMPAIGN_QUEUE
                     ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
-                    return
-                end
-            end
-            currentQueueStep = currentQueueStep + 1
-        end
-
-        if currentQueueStep == ZO_CAMPAIGN_QUEUE_STEP_LFG_CHECK then
-            if IsInLFGGroup() then
-                local activityId = GetCurrentLFGActivityId()
-                local activityType = GetActivityType(activityId)
-                if activityType ~= LFG_ACTIVITY_AVA then
-                    ZO_Dialogs_ShowPlatformDialog("CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING", {campaignData = campaignData})
                     return
                 end
             end

@@ -244,7 +244,7 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_GamepadFullwidthLabelEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+        <Control name="ZO_GamepadFullWidthLabelEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadFullWidthLabelTemplate" />
             </Controls>

@@ -9,13 +9,28 @@ end
 function LoginManager_Keyboard:Initialize()
     self.showCreateLinkAccountFragment = false  -- Always assume we show the regular login screen first
 
-    if IsUsingLinkedLogin() then
-        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_CREATE_LINK_LOADING_ERROR, function(...) self:OnCreateLinkLoadingError(...) end)
-        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_SUCCESSFUL, function(...) self:OnLoginSuccessful(...) end)
-        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_ACCOUNT_LINK_SUCCESSFUL, function(...) self:OnCreateLinkAccountSuccessful(...) end)
-        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_ACCOUNT_CREATE_SUCCESSFUL, function(...) self:OnCreateLinkAccountSuccessful(...) end)
-        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_PROFILE_NOT_LINKED, function(...) self:OnProfileNotLinked(...) end)
+    local function FilterMethodCallback(method)
+        return function(_, ...)
+            if self:IsLoginSceneShowing() then
+                -- calling self.method(self) is the same as calling self:method()
+                return method(self, ...)
+            end
+        end
     end
+
+    if IsUsingLinkedLogin() then
+        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_CREATE_LINK_LOADING_ERROR, FilterMethodCallback(self.OnCreateLinkLoadingError))
+        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_ACCOUNT_LINK_SUCCESSFUL, FilterMethodCallback(self.OnCreateLinkAccountSuccessful))
+        EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_PROFILE_NOT_LINKED, FilterMethodCallback(self.OnProfileNotLinked))
+    end
+
+    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_FAILED_INVALID_CREDENTIALS, FilterMethodCallback(self.OnBadLogin))
+    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_SUCCESSFUL, FilterMethodCallback(self.OnLoginSuccessful))
+    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_QUEUED, FilterMethodCallback(self.OnLoginQueued))
+    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_OVERFLOW_MODE_PROMPT, FilterMethodCallback(self.OnOverflowModeWaiting))
+    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_REQUESTED, FilterMethodCallback(self.OnLoginRequested))
+    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_OTP_PENDING, FilterMethodCallback(self.OnOTPPending))
+    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_BAD_CLIENT_VERSION, FilterMethodCallback(self.OnBadClientVersion))
 end
 
 function LoginManager_Keyboard:ShowRelevantLoginFragment()
@@ -41,6 +56,10 @@ end
 
 function LoginManager_Keyboard:IsShowingCreateLinkAccountFragment()
     return self.showCreateLinkAccountFragment
+end
+
+function LoginManager_Keyboard:IsLoginSceneShowing()
+    return GAME_MENU_PREGAME_SCENE:IsShowing()
 end
 
 function LoginManager_Keyboard:SwitchToLoginFragment()
@@ -88,11 +107,12 @@ function LoginManager_Keyboard:OnCreateLinkAccountSuccessful()
 
     local textParams
     if not self.isLinking then
-        textParams = { mainTextParams = { 
+        local note3 = GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_DMM and SI_CREATEACCOUNT_SUCCESS_NOTE_3_DMM or SI_CREATEACCOUNT_SUCCESS_NOTE_3
+        textParams = { mainTextParams = {
                                             GetString(SI_CREATEACCOUNT_SUCCESS_HEADER),
                                             GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_1),
                                             GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_2),
-                                            GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_3),
+                                            GetString(note3),
                                         }
                      }
     end
@@ -101,12 +121,12 @@ function LoginManager_Keyboard:OnCreateLinkAccountSuccessful()
     self.isLinking = nil
 end
 
-function LoginManager_Keyboard:OnCreateLinkLoadingError(eventId, loginError, linkingError, debugInfo)
+function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError, debugInfo)
     ZO_Dialogs_ReleaseDialog("LINKED_LOGIN_KEYBOARD")
 
     local dialogName
     local dialogText
-    
+
     if loginError ~= LOGIN_AUTH_ERROR_NO_ERROR then
         if loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_LINKED then
             -- User needs to create a link.
@@ -120,7 +140,7 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(eventId, loginError, lin
                 self.mustRelaunch = true
                 LOGIN_KEYBOARD:ShowRelaunchGameLabel()
             end
-            
+
             -- In any case, show the normal login fragment so that the user can attempt to manually login again if a
             -- relaunch isn't necessary.
             self:SwitchToLoginFragment()
@@ -136,7 +156,7 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(eventId, loginError, lin
         else
             dialogText = GetString("SI_ACCOUNTCREATELINKERROR", linkingError)
         end
-        
+
         CREATE_LINK_ACCOUNT_KEYBOARD:GetPasswordEdit():Clear()
 
         -- We need to switch back to the login fragment to refresh session ID, or else the player won't be able to finish
@@ -160,11 +180,95 @@ end
 
 function LoginManager_Keyboard:OnProfileNotLinked()
     ZO_Dialogs_ReleaseDialog("LINKED_LOGIN_KEYBOARD")
-    self:SwitchToCreateLinkAccountFragment()
+    if IsHeronUI() then
+        -- TODO: Heron, prompt the user to link accounts
+        assert(false, "Account linking not implemented")
+    else
+        self:SwitchToCreateLinkAccountFragment()
+    end
 end
 
 function LoginManager_Keyboard:OnLoginSuccessful()
-    self:SwitchToLoginFragment()
+    if IsUsingLinkedLogin() then
+        self:SwitchToLoginFragment()
+    end
+    if PregameStateManager_GetCurrentState() == "AccountLogin" then
+        PregameStateManager_SetState("WorldSelect_Requested")
+    end
+end
+
+local loginQueuedScene
+local currentLoginQueueWaitTime
+local lastQueuePosition
+
+local function GetLoginQueueApproximateWaitTime(waitTime, queuePosition)
+    -- if our position increases, the ETA we have "locked" is no longer valid
+    if not currentLoginQueueWaitTime or queuePosition > lastQueuePosition then
+        currentLoginQueueWaitTime = zo_max(waitTime * 1000, 1000) -- minimum wait time is that last second...
+        lastQueuePosition = queuePosition
+    else
+        currentLoginQueueWaitTime = zo_min(currentLoginQueueWaitTime, zo_max(waitTime * 1000, 1000))
+    end
+
+    return currentLoginQueueWaitTime
+end
+
+function LoginManager_Keyboard:OnLoginQueued(waitTime, queuePosition)
+    if not loginQueuedScene then
+        loginQueuedScene = ZO_Scene:New("loginQueuedScene", SCENE_MANAGER)
+        loginQueuedScene:AddFragment(PREGAME_SLIDE_SHOW_FRAGMENT)
+    end
+
+    SCENE_MANAGER:Show("loginQueuedScene")
+
+    waitTime = GetLoginQueueApproximateWaitTime(waitTime, queuePosition)
+
+    if ZO_Dialogs_IsShowing("LOGIN_QUEUED") then
+        ZO_Dialogs_UpdateDialogMainText(ZO_Dialogs_FindDialog("LOGIN_QUEUED"), nil, { waitTime, queuePosition })
+    else
+        ZO_Dialogs_ReleaseAllDialogs(true)
+        ZO_Dialogs_ShowDialog("LOGIN_QUEUED", nil, { mainTextParams = { waitTime, queuePosition } })
+    end
+end
+
+function LoginManager_Keyboard:OnOverflowModeWaiting(mainServerETASeconds, queuePosition)
+    local waitTime = GetLoginQueueApproximateWaitTime(mainServerETASeconds, queuePosition)
+    ZO_Dialogs_ReleaseAllDialogs(true)
+    ZO_Dialogs_ShowDialog("PROVIDE_OVERFLOW_RESPONSE", {waitTime = waitTime})
+end
+
+function LoginManager_Keyboard:OnBadClientVersion()
+    ZO_Dialogs_ReleaseAllDialogs(true)
+    ZO_Dialogs_ShowDialog("BAD_CLIENT_VERSION")
+end
+
+function LoginManager_Keyboard:OnLoginRequested()
+    PregameStateManager_ShowLoginRequested()
+end
+
+function LoginManager_Keyboard:OnBadLogin(errorCode, accountPageURL)
+    ZO_Dialogs_ReleaseDialog("LOGIN_REQUESTED")
+
+    if errorCode == AUTHENTICATION_ERROR_PAYMENT_EXPIRED then
+        ZO_Dialogs_ShowDialog("BAD_LOGIN_PAYMENT_EXPIRED", {accountPageURL = accountPageURL})
+    else
+        ZO_Dialogs_ShowDialog("BAD_LOGIN", {accountPageURL = accountPageURL})
+    end
+end
+
+function LoginManager_Keyboard:OnOTPPending(otpReason, otpType, otpDurationInSeconds)
+    local otpDurationMs = otpDurationInSeconds * 1000
+    local otpExpirationMs = GetFrameTimeMilliseconds() + otpDurationMs
+    local dialogName, textParams
+    if otpReason == LOGIN_STATUS_OTP_PENDING then
+        dialogName = "PROVIDE_OTP_INITIAL"
+        textParams = { GetString(OTP_DIALOG_SUBMIT), otpDurationMs }
+    elseif otpReason == LOGIN_STATUS_OTP_FAILED then
+        dialogName = "PROVIDE_OTP_SUBSEQUENT"
+        textParams = { otpDurationMs }
+    end
+    ZO_Dialogs_ReleaseAllDialogs(true)
+    ZO_Dialogs_ShowDialog(dialogName, { otpExpirationMs = otpExpirationMs, otpReason = otpReason }, {mainTextParams = textParams})
 end
 
 LOGIN_MANAGER_KEYBOARD = LoginManager_Keyboard:New()

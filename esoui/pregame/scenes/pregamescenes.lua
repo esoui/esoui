@@ -7,4 +7,3 @@ gammaAdjustScene:AddFragment(GAMMA_SCENE_FRAGMENT)
 gammaAdjustScene:AddFragment(PREGAME_GAMMA_ADJUST_INTRO_ADVANCE_FRAGMENT)
 
 SCENE_MANAGER:OnScenesLoaded()
-

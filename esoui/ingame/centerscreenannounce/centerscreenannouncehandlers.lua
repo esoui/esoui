@@ -173,7 +173,7 @@ end
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_QUEST_ADDED] = function(journalIndex, questName, objectiveName)
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.QUEST_ACCEPTED)
     local questType = GetJournalQuestType(journalIndex)
-    local instanceDisplayType = GetJournalInstanceDisplayType(journalIndex)
+    local instanceDisplayType = GetJournalQuestInstanceDisplayType(journalIndex)
     local questJournalObject = SYSTEMS:GetObject("questJournal")
     local iconTexture = questJournalObject:GetIconTexture(questType, instanceDisplayType)
     if iconTexture then

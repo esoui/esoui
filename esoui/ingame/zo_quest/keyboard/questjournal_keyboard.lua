@@ -48,10 +48,9 @@ function ZO_QuestJournal_Keyboard:RegisterIcons()
 end
 
 function ZO_QuestJournal_Keyboard:RegisterTooltips()
-    local function ZoneStoryParamFunction()
-        local questData = self:GetSelectedQuestData()
-        if questData then
-            local zoneId = GetJournalQuestZoneStoryZoneId(questData.questIndex)
+    local function ZoneStoryParamFunction(questIndex)
+        if questIndex then
+            local zoneId = GetJournalQuestZoneStoryZoneId(questIndex)
             return GetZoneNameById(zoneId)
         end
         return ""
@@ -82,7 +81,7 @@ function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected
 
         if texturePath then
             texture:SetTexture(texturePath)
-            texture.tooltipText = self:GetTooltipText(iconData.questType, iconData.displayType)
+            texture.tooltipText = self:GetTooltipText(iconData.questType, iconData.displayType, iconData.questIndex)
 
             texture:SetAlpha(0.50)
             texture:SetHidden(false)
@@ -357,7 +356,7 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
     local texturePath = self:GetIconTexture(questType, instanceDisplayType)
     if texturePath then
         self.questIcon:SetHidden(false)
-        self.questIcon.tooltipText = self:GetTooltipText(questType, instanceDisplayType)
+        self.questIcon.tooltipText = self:GetTooltipText(questType, instanceDisplayType, questIndex)
         self.questIcon:SetTexture(texturePath)
     else
         self.questIcon:SetHidden(true)

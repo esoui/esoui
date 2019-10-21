@@ -56,6 +56,7 @@ do
         ["playerSubmenu"] = true, -- Need this for daily login since this is the scene it exists in
         ["mailManagerGamepad"] = true,
         ["gamepad_market_purchase"] = true,
+        ["codeRedemptionGamepad"] = true,
     }
     function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
         local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()

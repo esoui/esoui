@@ -225,10 +225,6 @@ function ZO_Market_Shared:OnEsoPlusSubscriptionStatusChanged()
     self:UpdateCurrentCategory()
 end
 
-function ZO_Market_Shared:OnShowBuyCrownsDialog()
-    -- To be overridden
-end
-
 function ZO_Market_Shared:RequestShowMarket(openSource, openBehavior, additionalData)
     SetOpenMarketSource(openSource)
     if openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_PRODUCT or openBehavior == OPEN_MARKET_BEHAVIOR_NAVIGATE_TO_OTHER_PRODUCT then

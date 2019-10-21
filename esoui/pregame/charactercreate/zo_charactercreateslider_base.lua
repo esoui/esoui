@@ -162,10 +162,18 @@ function ZO_CharacterCreateAppearanceSlider:SetData(appearanceName, numValues, d
     self:Update()
 end
 
+function ZO_CharacterCreateAppearanceSlider:GetAppearanceValue()
+    return GetAppearanceValue(self.category)
+end
+
+function ZO_CharacterCreateAppearanceSlider:SetAppearanceValue(value)
+    SetAppearanceValue(self.category, value)
+end
+
 function ZO_CharacterCreateAppearanceSlider:SetValue(value)
     if not self.initializing then
         OnCharacterCreateOptionChanged()
-        SetAppearanceValue(self.category, value)
+        self:SetAppearanceValue(value)
         self:UpdateChangeButtons(value)
     end
 end
@@ -199,7 +207,7 @@ end
 
 function ZO_CharacterCreateAppearanceSlider:UpdateChangeButtons(value)
     if value == nil then
-        value = GetAppearanceValue(self.category)
+        value = self:GetAppearanceValue()
     end
 
     self:UpdateChangeButton(self.decrementButton, value > 1)
@@ -208,7 +216,7 @@ end
 
 function ZO_CharacterCreateAppearanceSlider:Update()
     self.initializing = true
-    local currentValue = GetAppearanceValue(self.category)
+    local currentValue = self:GetAppearanceValue()
     self.slider:SetValue(currentValue)
     self.initializing = nil
 

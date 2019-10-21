@@ -23,20 +23,17 @@ ESO_Dialogs["DELETE_SELECTED_CHARACTER"] =
         {
             requiresTextInput = true,
             text = SI_DELETE_CHARACTER_CONFIRMATION_BUTTON,
-            callback =  function(dialog)
-                            TrySaveCharacterListOrder()
-                            DeleteCharacter(dialog.data.characterId)
-                            ZO_CharacterSelectDelete:SetState(BSTATE_NORMAL, false)
-                            ZO_CharacterSelect_FlagAsDeleting(dialog.data.characterId, true)
-                        end
+            callback = function(dialog)
+                CHARACTER_SELECT_MANAGER:AttemptCharacterDelete(dialog.data.characterId)
+            end
         },
         
         [2] =
         {
             text = SI_DIALOG_CANCEL,
-            callback =  function(dialog)
-                            ZO_CharacterSelectDelete:SetState(BSTATE_NORMAL, false)
-                        end
+            callback = function(dialog)
+                -- do nothing
+            end
         }
     }
 }
@@ -220,11 +217,6 @@ ESO_Dialogs["DELETE_SELECTED_CHARACTER_NO_DELETES_LEFT_GAMEPAD"] =
 ESO_Dialogs["CHARACTER_SELECT_DELETING"] =
 {
     mustChoose = true,
-    setup = function(dialog, data)
-        dialog:setupFunc()
-        TrySaveCharacterListOrder()
-        DeleteCharacter(data.characterId)
-    end,
     canQueue = true,
     gamepadInfo =
     {
@@ -242,14 +234,6 @@ ESO_Dialogs["CHARACTER_SELECT_DELETING"] =
     {
         text = GetString(SI_DELETE_CHARACTER_GAMEPAD_DELETING_CHARACTER),
     },
-
-    finishedCallback = function(dialog)
-        if dialog.isGamepad then
-            -- Destroy the existing character list...then request a new one and the server will tell us which state to drop into.
-            -- NOTE: This is actually passed the character id, but we're going to let the server handle the empty list case for now.
-            RequestCharacterList()
-        end
-    end
 }
 
 ESO_Dialogs["CHARACTER_SELECT_LOGIN"] = 
@@ -526,31 +510,6 @@ ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
                             PregameStateManager_ReenterLoginState()
                         end
         },
-    }
-}
-
-ESO_Dialogs["AUTHENTICATION_SERVER_DOWN"] = 
-{
-    title =
-    {
-        text = SI_DIALOG_TITLE_SERVER_UNAVAILABLE,
-    },
-    mainText = 
-    {
-        text = SI_AUTHENTICATION_SERVER_DOWN,
-        align = TEXT_ALIGN_LEFT,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_TRY_AGAIN,
-            keybind = "DIALOG_NEGATIVE",
-            clickSound = SOUNDS.DIALOG_ACCEPT,
-            callback =  function(dialog)
-                            PregameStateManager_ReenterLoginState()
-                        end
-        }
     }
 }
 
@@ -981,10 +940,11 @@ ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_ERROR"] =
             text = SI_RENAME_CHARACTER_BACK_KEYBIND,
             keybind = "DIALOG_NEGATIVE",
             callback = function(dialog)
-                            if dialog.data and dialog.data.callback then
-                                dialog.data.callback()
-                            end
-                        end,
+                if dialog.data and dialog.data.callback then
+                    local FAILURE = false
+                    dialog.data.callback(FAILURE)
+                end
+            end,
         },
     },
 }
@@ -1018,7 +978,8 @@ ESO_Dialogs["CHARACTER_SELECT_RENAME_CHARACTER_SUCCESS"] =
             keybind = "DIALOG_NEGATIVE",
             callback = function(dialog)
                 if dialog.data and dialog.data.callback then
-                    dialog.data.callback()
+                    local SUCCESS = true
+                    dialog.data.callback(SUCCESS)
                 end
             end,
         },
@@ -1279,33 +1240,86 @@ ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] =
     end,
 }
 
-ESO_Dialogs["LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE"] =
+ESO_Dialogs["ACCOUNT_MANAGEMENT_REQUEST_FAILED"] =
 {
-    mustChoose = true,
+    setup = function(dialog)
+        dialog:setupFunc()
+    end,
+    canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
-    mainText = 
+    title =
     {
-        text = SI_CONSOLE_LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE_DIALOG_BODY,
+        text = SI_ACCOUNT_MANAGEMENT_REQUEST_FAILED_TITLE,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            return dialog.data.mainText
+        end,
     },
     buttons =
     {
         {
-            text = SI_CONSOLE_LEGAL_BUTTON_AGREE,
-            keybind = "DIALOG_PRIMARY",
-            callback =  function(dialog)
-                            PregameStateManager_AdvanceState()
-                        end,
-        },
-
-        {
-            text = SI_CONSOLE_LEGAL_BUTTON_DISAGREE,
+            text = SI_DIALOG_CLOSE,
             keybind = "DIALOG_NEGATIVE",
-            callback =  function(dialog)
-                            -- do nothing
-                        end,
         },
     }
 }
+
+ESO_Dialogs["ACCOUNT_MANAGEMENT_ACTIVATION_EMAIL_SENT"] =
+{
+    setup = function(dialog)
+        dialog:setupFunc()
+    end,
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ACCOUNT_MANAGEMENT_ACTIVATION_EMAIL_SENT_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            return zo_strformat(SI_ACCOUNT_MANAGEMENT_ACTIVATION_EMAIL_SENT_DIALOG_BODY, GetUserEmailAddress());
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CLOSE,
+            keybind = "DIALOG_NEGATIVE",
+        },
+    }
+}
+
+ESO_Dialogs["ACCOUNT_MANAGEMENT_EMAIL_CHANGED"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ACCOUNT_MANAGEMENT_EMAIL_CHANGED_SUCCESS_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            return zo_strformat(GetString("SI_ACCOUNTEMAILREQUESTRESULT", ACCOUNT_EMAIL_REQUEST_RESULT_SUCCESS_EMAIL_UPDATED), GetUserEmailAddress());
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_OK,
+        },
+    }
+}
+

@@ -28,9 +28,6 @@ ZO_GAMEPAD_MARKET_CURRENCY_OPTIONS =
 
 ZO_GAMEPAD_MARKET_PURCHASE_SCENE_NAME = "gamepad_market_purchase"
 
-local g_buyCrownsData
-local g_buyCrownsTextParams
-
 local function GetAvailableCurrencyHeaderData(marketCurrencyType)
     return {
                 value = function(control)
@@ -119,79 +116,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         keybind = "DIALOG_NEGATIVE"
     }
 
-    local insufficientFundsButtons = {}
-    local buyCrownsButtons = {}
-    local buyPlusButtons = {}
-
-    local consoleStoreName
-    local buyCrownsMainText
-    local buyPlusMainText
-
-    local uiPlatform = GetUIPlatform()
-    if uiPlatform == UI_PLATFORM_PS4 then
-        consoleStoreName = GetString(SI_GAMEPAD_MARKET_PLAYSTATION_STORE)
-    elseif uiPlatform == UI_PLATFORM_XBOX then
-        consoleStoreName = GetString(SI_GAMEPAD_MARKET_XBOX_STORE)
-    else -- PC Gamepad insufficient crowns and buy crowns dialog data
-        local openURLButton = 
-        {
-            text = SI_MARKET_INSUFFICIENT_FUNDS_CONFIRM_BUTTON_TEXT,
-            callback =  function(...)
-                            ZO_MarketDialogs_Shared_OpenURLByType(...)
-                            EndPurchase()
-                        end,
-        }
-
-        insufficientFundsButtons[1] = openURLButton
-        buyCrownsButtons[1] = openURLButton
-
-        buyCrownsMainText = SI_CONFIRM_OPEN_URL_TEXT
-        g_buyCrownsData = ZO_BUY_CROWNS_URL_TYPE
-        g_buyCrownsTextParams = ZO_BUY_CROWNS_FRONT_FACING_ADDRESS
-
-        buyPlusMainText = nil --no plans for this currently
-    end
-
-    if consoleStoreName then -- PS4/XBox insufficient crowns and buy crowns dialog data
-        buyCrownsMainText = SI_GAMEPAD_MARKET_BUY_CROWNS_TEXT_LABEL
-        local NO_AMOUNT = nil
-        g_buyCrownsTextParams = { mainTextParams = { ZO_Currency_FormatKeyboard(CURT_CROWNS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON), consoleStoreName } }
-        
-        local OpenConsoleStoreToPurchaseCrowns = function()
-            ShowConsoleESOCrownPacksUI()
-            self:EndPurchase()
-        end
-
-        insufficientFundsButtons[1] =
-        {
-            text = zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, consoleStoreName),
-            callback = OpenConsoleStoreToPurchaseCrowns
-        }
-
-        buyCrownsButtons[1] =
-        {
-            text = zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, consoleStoreName),
-            callback = OpenConsoleStoreToPurchaseCrowns
-        }
-
-        local OpenConsoleStoreToBuySubscription = function()
-            ShowConsoleESOPlusSubscriptionUI()
-            self:EndPurchase()
-        end
-
-        buyPlusMainText = SI_GAMEPAD_MARKET_BUY_PLUS_TEXT_CONSOLE
-
-        table.insert(buyPlusButtons,
-        {
-            text = SI_GAMEPAD_MARKET_BUY_PLUS_DIALOG_KEYBIND_LABEL,
-            callback = OpenConsoleStoreToBuySubscription,
-        })
-    end
-
-    insufficientFundsButtons[2] = defaultMarketBackButton
-    buyCrownsButtons[2] = defaultMarketBackButton
-    table.insert(buyPlusButtons, defaultMarketBackButton)
-
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE"] = 
     {
         gamepadInfo =
@@ -208,12 +132,10 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         buttons =
         {
-            [1] =
             {
                 text = SI_MARKET_PURCHASE_ERROR_CONTINUE,
                 callback = function() self.doMoveToNextFlowPosition = true end
             },
-            [2] =
             {
                 text = SI_DIALOG_EXIT,
                 callback = EndPurchase
@@ -247,15 +169,17 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
             {
                 text = SI_MARKET_JOIN_ESO_PLUS_CONFIRM_BUTTON_TEXT,
                 callback = function()
-                    ZO_GamepadMarket_ShowBuyPlusDialog(EndPurchase)
+                    -- Buying crowns should happen before ending the purchase to keep it within this session
+                    ZO_ShowBuySubscriptionPlatformDialog()
+                    EndPurchase()
                 end,
             },
             defaultMarketBackButton,
         },
         noChoiceCallback = EndPurchaseNoChoice,
-        finishedCallback =  function()
-                                OnMarketEndPurchase()
-                            end,
+        finishedCallback = function()
+            OnMarketEndPurchase()
+        end,
     }
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS"] =
@@ -272,12 +196,30 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         {
             text = SI_MARKET_PURCHASE_ERROR_TEXT_FORMATTER
         },
-        buttons = insufficientFundsButtons,
+        buttons =
+        {
+            {
+                text = function()
+                    if DoesPlatformStoreUseExternalLinks() then
+                        return GetString(SI_MARKET_INSUFFICIENT_FUNDS_CONFIRM_BUTTON_TEXT)
+                    else
+                        return zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, ZO_GetPlatformStoreName())
+                    end
+                end,
+                callback = function()
+                    -- Buying crowns should happen before ending the purchase to keep it within this session
+                    ZO_ShowBuyCrownsPlatformUI()
+                    self:EndPurchase()
+                end
+            },
+            defaultMarketBackButton,
+
+        },
         noChoiceCallback = EndPurchaseNoChoice,
-        finishedCallback =  function()
-                                OnMarketEndPurchase()
-                                self:EndPurchaseFromErrorDialog()
-                            end,
+        finishedCallback = function()
+            OnMarketEndPurchase()
+            self:EndPurchaseFromErrorDialog()
+        end,
     }
 
     ESO_Dialogs["GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD"] =
@@ -296,7 +238,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         buttons =
         {
-            [1] =
             {
                 text = SI_MARKET_GIFTING_LOCKED_HELP_KEYBIND,
                 callback = function(dialog)
@@ -305,7 +246,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 end,
                 keybind = "DIALOG_SECONDARY",
             },
-            [2] = defaultMarketBackButton,
+            defaultMarketBackButton,
         },
         noChoiceCallback = EndPurchaseNoChoice,
         finishedCallback = function()
@@ -334,7 +275,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         buttons =
         {
-            [1] =
             {
                 text = SI_MARKET_GIFTING_LOCKED_HELP_KEYBIND,
                 callback = function(dialog)
@@ -343,7 +283,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 end,
                 keybind = "DIALOG_SECONDARY",
             },
-            [2] = defaultMarketBackButton,
+            defaultMarketBackButton,
         },
         noChoiceCallback = EndPurchaseNoChoice,
         finishedCallback = function()
@@ -368,7 +308,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         },
         buttons =
         {
-            [1] =
             {
                 text = SI_MARKET_OPEN_GIFT_INVENTORY_KEYBIND_LABEL,
                 callback = function(dialog)
@@ -377,7 +316,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 end,
                 keybind = "DIALOG_SECONDARY",
             },
-            [2] = defaultMarketBackButton,
+            defaultMarketBackButton,
         },
         noChoiceCallback = EndPurchaseNoChoice,
         finishedCallback = function()
@@ -487,10 +426,13 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL,
                 callback = function(dialog)
+                                -- release the dialog first to avoid issue where the parametric list can refresh
+                                -- but EndPurchase will wipe out important state, like self.marketProductData
+                                ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
+
                                 OnMarketEndPurchase()
                                 local NOT_NO_CHOICE_CALLBACK = false
                                 self:EndPurchase(NOT_NO_CHOICE_CALLBACK)
-                                ZO_Dialogs_ReleaseDialogOnButtonPress(DIALOG_FLOW[FLOW_CONFIRMATION])
                            end,
             },
             --Confirm
@@ -609,42 +551,6 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         finishedCallback =  function(dialog)
                                 self:MoveToNextFlowPosition()
                             end,
-    })
-
-    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_MARKET_BUY_CROWNS",
-    {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-        },
-        title =
-        {
-            text = SI_MARKET_BUY_CROWNS
-        },
-        mainText =
-        {
-            text = buyCrownsMainText
-        },
-        buttons = buyCrownsButtons
-    })
-
-    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_MARKET_BUY_PLUS",
-    {
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-        },
-        canQueue = true,
-        title =
-        {
-            text = SI_GAMEPAD_MARKET_BUY_PLUS_TITLE
-        },
-        mainText =
-        {
-            text = buyPlusMainText
-        },
-        buttons = buyPlusButtons,
-        noChoiceCallback = EndPurchaseNoChoice,
     })
 
     local LOADING_DELAY_MS = 500 -- delay is in milliseconds
@@ -1175,9 +1081,9 @@ do
         local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(self.marketProductData)
 
         if expectedPurchaseResult == MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS then
-            self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DATA, dialogParams)
+            self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DIALOG_DATA, dialogParams)
         elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
-            self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", ZO_BUY_CROWNS_URL_TYPE, dialogParams)
+            self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", NO_DIALOG_DATA, dialogParams)
         elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_GRACE_PERIOD_ACTIVE then
             self:ShowFlowDialog("GAMEPAD_MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD", {}, dialogParams)
         elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_NOT_ALLOWED then
@@ -1288,25 +1194,5 @@ do
             self:SetFlowPosition(nextPosition)
             self.doMoveToNextFlowPosition = false
         end
-    end
-end
-
-function ZO_GamepadMarketPurchaseManager:ShowBuyCrownsDialog(isFromIngame)
-    OnMarketPurchaseMoreCrowns()
-    self.purchaseFromIngame = isFromIngame
-    self:ShowFlowDialog("GAMEPAD_MARKET_BUY_CROWNS", g_buyCrownsData, g_buyCrownsTextParams)
-end
-
-function ZO_GamepadMarket_ShowBuyPlusDialog(finishedCallback)
-    local uiPlatform = GetUIPlatform()
-    if uiPlatform == UI_PLATFORM_PC then
-        local dialogData =
-        {
-            urlType = APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION,
-            finishedCallback = finishedCallback,
-        }
-        ZO_Dialogs_ShowGamepadDialog("CONFIRM_OPEN_URL_BY_TYPE", dialogData, ZO_BUY_SUBSCRIPTION_FRONT_FACING_ADDRESS)
-    else
-        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_MARKET_BUY_PLUS")
     end
 end

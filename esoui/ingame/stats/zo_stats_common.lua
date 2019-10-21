@@ -154,8 +154,8 @@ do
         local lowestEquipSlot
         
         --check if our active weapon is two-handed (for special consideration in weighting weapon equipment bonus value and showing lowest piece in tooltips)
-        local activeWeaponPair = GetActiveWeaponPairInfo()
-        local mainHandSlot = activeWeaponPair == ACTIVE_WEAPON_PAIR_MAIN and EQUIP_SLOT_MAIN_HAND or EQUIP_SLOT_BACKUP_MAIN
+        local heldWeaponPair = GetHeldWeaponPair()
+        local mainHandSlot = heldWeaponPair == ACTIVE_WEAPON_PAIR_BACKUP and EQUIP_SLOT_BACKUP_MAIN or EQUIP_SLOT_MAIN_HAND
         local equipType = select(6, GetItemInfo(BAG_WORN, mainHandSlot))
         local isUsingTwoHanded = equipType == EQUIP_TYPE_TWO_HAND
 

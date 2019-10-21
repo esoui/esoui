@@ -1,16 +1,3 @@
-local NA_STRING = "Live"
-local EU_STRING = "Live-EU"
-
-function ZO_GetLocalizedServerName(serverName)
-    if(serverName == NA_STRING) then
-        serverName = GetString("SI_MEGASERVER", MEGASERVER_NA)
-    elseif (serverName == EU_STRING) then
-        serverName = GetString("SI_MEGASERVER", MEGASERVER_EU)
-    end
-    
-    return serverName
-end
-
 local function InitServerOptions(dialogControl)
     dialogControl.radioButtonGroup = ZO_RadioButtonGroup:New()
     local radioButtonGroupControl = dialogControl:GetNamedChild("RadioButtonContainer")

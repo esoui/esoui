@@ -1,0 +1,22 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_CodeRedemption_Gamepad_RedeemCodeHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-5" />
+            <Dimensions y="24" />
+        </Label>
+
+        <Control name="ZO_CodeRedemption_Gamepad_Submit_Template" inherits="ZO_GamepadFullWidthLabelEntryTemplate" virtual="true">
+            <Anchor point="TOPLEFT" />
+            <Controls>
+                <Label name="$(parent)Label" override="true" horizontalAlignment="LEFT" />
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_CodeRedemption_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_CodeRedemption_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

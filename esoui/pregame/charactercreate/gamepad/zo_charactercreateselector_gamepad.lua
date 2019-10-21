@@ -16,6 +16,7 @@ end
 function ZO_CharacterCreateSelector_Gamepad:Initialize(control)
     control.sliderObject = self
     self.control = control
+    self.activeButtonControls = {}
     self.selectionName = control:GetNamedChild("SelectionName")
     self.highlightControl = CreateControlFromVirtual("$(parent)Highlight", control, "ZO_CharacterCreateSelectorHighlight_Gamepad")
     self.selectedControl = CreateControlFromVirtual("$(parent)Selected", control, "ZO_CharacterCreateSelectorSelected_Gamepad")
@@ -24,6 +25,14 @@ function ZO_CharacterCreateSelector_Gamepad:Initialize(control)
     self.focusEnabled = false
     self.currentHighlight = GAMEPAD_SELECTOR_IGNORE_POSITION -- we start off with no highlight because we have no controls to highlight yet
     self.lastHighlight = 1
+end
+
+function ZO_CharacterCreateSelector_Gamepad:SetActiveButtonControls(activeButtonControls)
+    self.activeButtonControls = activeButtonControls
+end
+
+function ZO_CharacterCreateSelector_Gamepad:GetNumActiveButtons()
+    return #self.activeButtonControls
 end
 
 function ZO_CharacterCreateSelector_Gamepad:SetHighlight(index)
@@ -58,22 +67,23 @@ end
 function ZO_CharacterCreateSelector_Gamepad:UpdateButtons()
     local selectedControl = self.selectedControl
     local bannerText = nil
-    for i, info in ipairs(self:GetSelectionInfo()) do
-        if info.position == GAMEPAD_SELECTOR_IGNORE_POSITION then
+    for _, info in ipairs(self:GetSelectionInfo()) do
+        local button = self:GetButton(info.gamepadPosition)
+        if button == nil then
             -- Ignore
-        elseif info.selectorButton:GetState() == BSTATE_PRESSED then
+        elseif button:GetState() == BSTATE_PRESSED then
             -- If the button is selected
             if bannerText == nil then
-                bannerText = self:GetBannerText(info.selectorButton)
+                bannerText = self:GetBannerText(button)
             end
 
-            selectedControl:SetParent(info.selectorButton)
+            selectedControl:SetParent(button)
             selectedControl:SetAnchor(CENTER, control, CENTER, 0, 0)
             selectedControl:SetHidden(false)
-            self.selectedPosition = info.position
-        elseif info.position == self.currentHighlight and self.buttonHighlighted then
+            self.selectedPosition = info.gamepadPosition
+        elseif info.gamepadPosition == self.currentHighlight and self.buttonHighlighted then
             -- If we have the button highlighted (in focus)
-            bannerText = self:GetBannerText(info.selectorButton)
+            bannerText = self:GetBannerText(button)
         else
             -- Unselected and unhighlighted
         end
@@ -113,9 +123,11 @@ function ZO_CharacterCreateSelector_Gamepad:EnableFocus(enabled)
         -- if we are disabling then we need to make sure the highlight is disabled
         -- and we need to set our selection text to the text of the selected control instead of the highlight
         self.buttonHighlighted = false
-        local buttonInfo = self:GetButtonInfo(self.selectedPosition)
-        local bannerText = self:GetBannerText(buttonInfo.selectorButton)
-        self.selectionName:SetText(bannerText)
+        local button = self:GetButton(self.selectedPosition)
+        if button then
+            local bannerText = self:GetBannerText(button)
+            self.selectionName:SetText(bannerText)
+        end
         self.lastHighlight = self.currentHighlight
         self:SetHighlight(GAMEPAD_SELECTOR_IGNORE_POSITION)
     end
@@ -123,45 +135,39 @@ end
 
 function ZO_CharacterCreateSelector_Gamepad:OnPrimaryButtonPressed()
     local control = self:GetCurrentButton()
-    ZO_CharacterCreate_Gamepad_OnSelectorPressed(control)
+    if control then
+        ZO_CharacterCreate_Gamepad_OnSelectorPressed(control)
+    else
+        local name = self.control and self.control:GetName() or "Unspecified"
+        local numRadioButtons = self:GetNumActiveButtons()
+        local errorString = string.format("ZO_CharacterCreateSelector_Gamepad:OnPrimaryButtonPressed, controlName =  %s, currentHighlight = %d, lastHighlight = %d, totalButtonCount = %d", name, self.currentHighlight, self.lastHighlight, numRadioButtons)
+        internalassert(false, errorString)
+    end
 end
 
-function ZO_CharacterCreateSelector_Gamepad:GetButton(position)
-    if position == GAMEPAD_SELECTOR_IGNORE_POSITION then
+function ZO_CharacterCreateSelector_Gamepad:GetButton(gamepadPosition)
+    if gamepadPosition == GAMEPAD_SELECTOR_IGNORE_POSITION then
         return nil
     end
 
-    for i, info in ipairs(self:GetSelectionInfo()) do
-        if info.position == position then
-            return info.selectorButton
-        end
-    end
-    return nil
+    return self.activeButtonControls[gamepadPosition]
 end
 
 function ZO_CharacterCreateSelector_Gamepad:GetCurrentButton()
     return self:GetButton(self.currentHighlight)
 end
 
-function ZO_CharacterCreateSelector_Gamepad:GetButtonInfo(position)
-    if position == GAMEPAD_SELECTOR_IGNORE_POSITION then
-        return nil
-    end
-
-    for i, info in ipairs(self:GetSelectionInfo()) do
-        if info.position == position then
-            return info
-        end
-    end
-    return nil
+function ZO_CharacterCreateSelector_Gamepad:GetButtonInfo(gamepadPosition)
+    local buttonControl = self:GetButton(gamepadPosition)
+    return buttonControl and buttonControl.selectorData
 end
 
 function ZO_CharacterCreateSelector_Gamepad:MoveNext()
-    local count =  #self:GetSelectionInfo() - self.currentHighlight;
+    local count =  self:GetNumActiveButtons() - self.currentHighlight
     local newHighlight = self.currentHighlight
 
     while count > 0 do
-        newHighlight = math.min(newHighlight + 1, #self:GetSelectionInfo())
+        newHighlight = math.min(newHighlight + 1, self:GetNumActiveButtons())
 
         if self.currentHighlight % self.stride ~= 0 and self:IsValidButtonAtIndex(newHighlight) then
             self:SetHighlight(newHighlight)
@@ -437,17 +443,18 @@ function ZO_CharacterCreateRaceSelector_Gamepad:GetInformationTooltipStrings(but
     local title = ""
     local description = ""
 
-    if buttonInfo then
-        if not buttonInfo.isSelectable then
-            local control = buttonInfo.selectorButton
-            local restrictionReason, restrictingCollectible = GetRaceRestrictionReason(control.defId)
+    if buttonInfo and not buttonInfo.isSelectable then
+        local buttonPosition = buttonInfo.gamepadPosition
+        local buttonControl = self:GetButton(buttonPosition)
+        if internalassert(buttonControl, "missing control for button") then
+            local restrictionReason, restrictingCollectible = GetRaceRestrictionReason(buttonControl.defId)
             description = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
             if description ~= "" then
                 if restrictingCollectible ~= 0 and IsCollectiblePurchasable(restrictingCollectible) then
                     description = string.format("%s\n\n%s", description, GetString(SI_CHARACTER_CREATE_RESTRICTION_COLLECTIBLE_PURCHASABLE))
                 end
 
-                title = self:GetBannerText(control)
+                title = self:GetBannerText(buttonControl)
             end
         end
     end
@@ -494,17 +501,18 @@ function ZO_CharacterCreateClassSelector_Gamepad:GetInformationTooltipStrings(bu
     local title = ""
     local description = ""
 
-    if buttonInfo then
-        if not buttonInfo.isSelectable then
-            local control = buttonInfo.selectorButton
-            local restrictionReason, restrictingCollectible = GetClassRestrictionReason(control.defId)
+    if buttonInfo and not buttonInfo.isSelectable then
+        local buttonPosition = buttonInfo.gamepadPosition
+        local buttonControl = self:GetButton(buttonPosition)
+        if internalassert(buttonControl, "missing control for button") then
+            local restrictionReason, restrictingCollectible = GetClassRestrictionReason(buttonControl.defId)
             description = ZO_CHARACTERCREATE_MANAGER.GetOptionRestrictionString(restrictionReason, restrictingCollectible)
             if description ~= "" then
                 if restrictingCollectible ~= 0 and IsCollectiblePurchasable(restrictingCollectible) then
                     description = string.format("%s\n\n%s", description, GetString(SI_CHARACTER_CREATE_RESTRICTION_COLLECTIBLE_PURCHASABLE))
                 end
 
-                title = self:GetBannerText(control)
+                title = self:GetBannerText(buttonControl)
             end
         end
     end

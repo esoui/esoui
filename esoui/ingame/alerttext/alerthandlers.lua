@@ -1026,6 +1026,12 @@ local AlertHandlers = {
     [EVENT_CANNOT_DO_THAT_WHILE_HIDDEN] = function()
         return ERROR, GetString(SI_ERROR_NOT_WHILE_HIDDEN), SOUNDS.GENERAL_ALERT_ERROR
     end,
+
+    [EVENT_GROUP_OPERATION_RESULT] = function(result)
+        if result ~= GROUP_OPERATION_RESULT_NONE then
+            return UI_ALERT_CATEGORY_ERROR, GetString("SI_GROUPOPERATIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
 }
 
 ZO_ClientInteractResultSpecificSound =

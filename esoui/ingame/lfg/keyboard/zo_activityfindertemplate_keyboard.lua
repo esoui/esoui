@@ -36,6 +36,8 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
     end
     self.lockReasonLabel:SetHandler("OnUpdate", OnLockReasonLabelUpdate)
 
+    self.shouldHideLockReason = false
+
     ZO_ActivityFinderTemplate_Shared.InitializeControls(self, "ZO_ActivityFinderTemplateRewardTemplate_Keyboard")
     
     self:InitializeNavigationList()
@@ -96,15 +98,17 @@ end
 function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
     local function OnStateChange(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWN then
+            -- refresh the filters first since that can cause the primary controls
+            -- to be shown, which we want to hide when we show the LFM prompt
+            if self.filtersDirty then
+                self:RefreshFilters()
+            end
+
             local shouldShowLFMPrompt, lfmPromptActivityName = self:GetLFMPromptInfo()
             if shouldShowLFMPrompt then
                 self.lfmPromptBodyLabel:SetText(zo_strformat(GetString(SI_LFG_FIND_REPLACEMENT_TEXT), lfmPromptActivityName))
                 self.lfmPromptSection:SetHidden(false)
                 self:HidePrimaryControls()
-            end
-
-            if self.filtersDirty then
-                self:RefreshFilters()
             end
 
             self:RefreshView()
@@ -143,6 +147,7 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
         local filterData = selectedData.data
         if filterData.singular then
             ZO_ACTIVITY_FINDER_ROOT_MANAGER:SetLocationSelected(filterData, true)
+            self:RefreshRewards(filterData)
             if filterData:IsLocked() then
                 lockReasonText = filterData:GetLockReasonText()
             end
@@ -183,7 +188,9 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
         lockReasonText = globalLockReasonText
     end
 
-    if lockReasonText then
+    self.shouldHideLockReason = lockReasonText == nil
+
+    if not self.shouldHideLockReason then
         --if the text is a function, that means there's a timer involved that we want to refresh on update
         if type(lockReasonText) == "function" then
             self.lockReasonTextFunction = lockReasonText
@@ -191,10 +198,9 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
             self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, lockReasonText))
             self.lockReasonTextFunction = nil
         end
-        self.lockReasonLabel:SetHidden(false)
-    else
-        self.lockReasonLabel:SetHidden(true)
     end
+
+    self.lockReasonLabel:SetHidden(self.shouldHideLockReason)
 
     self:RefreshJoinQueueButton()
 end
@@ -354,7 +360,7 @@ function ZO_ActivityFinderTemplate_Keyboard:ShowPrimaryControls()
     local filterData = self.filterComboBox:GetSelectedItemData().data
     if filterData.singular then
         self.singularSection:SetHidden(false)
-        self.lockReasonLabel:SetHidden(false)
+        self.lockReasonLabel:SetHidden(self.shouldHideLockReason)
     else
         self.listSection:SetHidden(false)
     end

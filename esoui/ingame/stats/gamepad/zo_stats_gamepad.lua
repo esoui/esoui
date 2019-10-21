@@ -726,7 +726,7 @@ do
     end
 
     function ZO_GamepadStats:SetupList(list)
-        list:SetValidateGradient(true)
+        list:SetHandleDynamicViewProperties(true)
 
         list:AddDataTemplate("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")

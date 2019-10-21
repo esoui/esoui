@@ -183,3 +183,8 @@ end
 function ZO_RadioButtonGroup:SetSelectionChangedCallback(callback)
     self.onSelectionChangedCallback = callback
 end
+
+function ZO_RadioButtonGroup:IterateButtons()
+    -- key: button, value: buttonData
+    return pairs(self.m_buttons)
+end

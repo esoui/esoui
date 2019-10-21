@@ -18,6 +18,7 @@ local INTERACT_TYPE_GIFT_RECEIVED = 15
 local INTERACT_TYPE_TRACK_ZONE_STORY = 16
 local INTERACT_TYPE_CAMPAIGN_QUEUE_JOINED = 17
 local INTERACT_TYPE_CAMPAIGN_LOCK_PENDING = 18
+local INTERACT_TYPE_TRAVEL_TO_LEADER = 19
 
 local TIMED_PROMPTS =
 {
@@ -604,6 +605,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
     self.control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, OnLevelUpRewardUpdated)
 
+
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", OnGiftsUpdated)
 
     --Find member replacement prompt on a member leaving
@@ -725,6 +727,97 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
     self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_TRACKED, function(event, ...) OnZoneStoryActivityTracked(...) end)
 
+    local pendingJumpToGroupLeaderPrompt = nil
+
+    local function OnTravelToLeaderPromptReceived()
+        -- LFG groups use their own jump notification
+        if IsInLFGGroup() then
+            return
+        end
+
+        -- The location of the group leader may not be available immediately
+        if pendingJumpToGroupLeaderPrompt then
+            local groupLeaderUnitTag = GetGroupLeaderUnitTag()
+            local groupLeaderZoneName = GetUnitZone(groupLeaderUnitTag)
+            if groupLeaderZoneName ~= "" then
+                pendingJumpToGroupLeaderPrompt = nil
+                if IsGroupMemberInRemoteRegion(groupLeaderUnitTag) then
+                    local canJump, result = CanJumpToGroupMember(groupLeaderUnitTag)
+                    if canJump then
+                        self:RemoveFromIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER)
+
+                        local function AcceptCallback()
+                            local groupLeaderUnitTag = GetGroupLeaderUnitTag()
+                            JumpToGroupMember(GetUnitName(groupLeaderUnitTag))
+                            self:RemoveFromIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER)
+                        end
+
+                        local function DeclineCallback()
+                            self:RemoveFromIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER)
+                        end
+
+                        local promptData = self:AddPromptToIncomingQueue(INTERACT_TYPE_TRAVEL_TO_LEADER, nil, nil, nil, AcceptCallback, DeclineCallback)
+                        promptData.acceptText = GetString(SI_DIALOG_ACCEPT)
+                        promptData.declineText = GetString(SI_DIALOG_DECLINE)
+
+                        promptData.messageFormat = GetString(GetUnitZone("player") == groupLeaderZoneName and SI_JUMP_TO_GROUP_LEADER_OCCURANCE_PROMPT or SI_JUMP_TO_GROUP_LEADER_WORLD_PROMPT)
+                        promptData.messageParams = { groupLeaderZoneName }
+                        promptData.dialogTitle = GetString("SI_JUMP_TO_GROUP_LEADER_TITLE")
+                    elseif result == JUMP_TO_PLAYER_RESULT_ZONE_COLLECTIBLE_LOCKED then
+                        local zoneIndex = GetUnitZoneIndex(groupLeaderUnitTag)
+                        local collectibleId = GetCollectibleIdForZone(zoneIndex)
+                        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                        local collectibleName = collectibleData:GetName()
+                        local categoryName = collectibleData:GetCategoryData():GetName()
+                        local message = zo_strformat(SI_COLLECTIBLE_LOCKED_FAILURE_CAUSED_BY_JUMP_TO_GROUP_LEADER, groupLeaderZoneName)
+                        local marketOperation = MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP
+                        ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
+                    end
+                end
+            end
+        end
+    end
+
+    local function OnUnitCreated(unitTag)
+        if ZO_Group_IsGroupUnitTag(unitTag) then
+            OnTravelToLeaderPromptReceived()
+        end
+    end
+        local function OnZoneUpdate(unitTag, newZone)
+        if ZO_Group_IsGroupUnitTag(unitTag) then
+            OnTravelToLeaderPromptReceived()
+        end
+    end
+    local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
+        if isLocalPlayer then
+            local groupLeaderUnitTag = GetGroupLeaderUnitTag()
+            if not AreUnitsEqual(groupLeaderUnitTag, "player") then
+                pendingJumpToGroupLeaderPrompt = true
+                OnTravelToLeaderPromptReceived()
+            end
+        end
+    end
+    local function OnPlayerActivateOrLeaderUpdate()
+        if pendingJumpToGroupLeaderPrompt then
+            OnTravelToLeaderPromptReceived()
+        end
+    end
+    local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer, amLeader)
+        if isLocalPlayer then
+            for i, incomingEntry in ipairs(self.incomingQueue) do
+                if incomingEntry.incomingType == INTERACT_TYPE_TRAVEL_TO_LEADER then
+                    self:RemoveEntryFromIncomingQueueTable(i)
+                    break
+                end
+            end
+        end
+    end
+    self.control:RegisterForEvent(EVENT_UNIT_CREATED, function(event, ...) OnUnitCreated(...) end)
+    self.control:RegisterForEvent(EVENT_ZONE_UPDATE, function(event, ...) OnZoneUpdate(...) end)
+    self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, function(event, ...) OnGroupMemberJoined(...) end)
+    self.control:RegisterForEvent(EVENT_LEADER_UPDATE, function(event, ...) OnGroupMemberJoined(...) end)
+    self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, function(event, ...) OnGroupMemberLeft(...) end)
+
     local function OnPlayerActivated()
         local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()
         if duelState == DUEL_STATE_INVITE_CONSIDERING then
@@ -788,6 +881,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
 
         OnGiftsUpdated()
+        OnPlayerActivateOrLeaderUpdate()
     end
 
     local function OnPlayerDeactivated()
@@ -819,6 +913,22 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         self:StopInteraction()
     end)
+
+    local function OnLogoutDeferred()
+        -- If we're logging out and we have a time sensistive decision, just opt out. Not only does this
+        -- make sure that any other players waiting on a response get it, but it eliminates any dialogs in the way (ESO-635856)
+        for i, incomingEntry in ipairs(self.incomingQueue) do
+            if TIMED_PROMPTS[incomingEntry.incomingType] then
+                if incomingEntry.declineCallback then
+                    incomingEntry.declineCallback()
+                elseif incomingEntry.deferDecisionCallback then
+                    incomingEntry.deferDecisionCallback()
+                end
+            end
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_LOGOUT_DEFERRED, OnLogoutDeferred)
 end
 
 function ZO_PlayerToPlayer:SetHidden(hidden)

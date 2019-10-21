@@ -33,16 +33,8 @@
             <Dimensions x="590" y="44"/>
             <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX ="20"/>
             <Controls>
-                <Label name="$(parent)Currency1" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
+                <Label name="$(parent)Gold" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-32" />
-                </Label>
-                
-                <Label name="$(parent)Currency2" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Currency1" relativePoint="BOTTOMRIGHT" offsetY="4" />
-                </Label>
-                
-                <Label name="$(parent)Currency3" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Currency2" relativePoint="BOTTOMRIGHT" offsetY="4" />
                 </Label>
             </Controls>
         </Control>

@@ -55,27 +55,27 @@ end
 
 function CharacterCreateSliderManager:Initialize(parent)
     local CreateSlider =    function(pool)
-                                local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                 return ZO_CharacterCreateSlider_Gamepad:New(control)
                             end
 
     local CreateAppearanceSlider =  function(pool)
-                                        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                         return ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
                                     end
 
     local CreateColorPicker =   function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
-                                    return ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
+                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                    return ZO_CharacterCreateColorSlider_Gamepad:New(control)
                                 end
 
     local CreateVoiceSlider =   function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateVoiceSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateVoiceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                     return ZO_CharacterCreateVoiceSlider_Gamepad:New(control)
                                 end
 
     local CreateGenderSlider =  function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
                                     return ZO_CharacterCreateGenderSlider_Gamepad:New(control)
                                 end
 
@@ -617,15 +617,19 @@ function ZO_CharacterCreate_Gamepad:InitializeAllianceSelectors()
     }
 
     local alliances = self.characterData:GetAllianceInfo()
-    for _, alliance in ipairs(alliances) do
-        local selector = layoutTable[alliance.position]
+    for gamepadPosition, alliance in ipairs(alliances) do
+        alliance.gamepadPosition = gamepadPosition -- TODO: This data is owned by the manager, not us
+        local selector = layoutTable[alliance.gamepadPosition]
         self:InitializeAllianceSelector(selector, alliance)
     end
 
+    ZO_CharacterCreate_GamepadAlliance.sliderObject:SetActiveButtonControls(layoutTable)
     SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadAlliance, #alliances)
 end
 
 function ZO_CharacterCreate_Gamepad:InitializeRaceSelectors()
+    local COLUMN_1_ROW_2_POSITION = 4
+    local COLUMN_2_ROW_2_POSITION = 5
     local layoutTable =
     {
         ZO_CharacterCreate_GamepadRaceColumn11,
@@ -655,37 +659,41 @@ function ZO_CharacterCreate_Gamepad:InitializeRaceSelectors()
     -- 10 if they can play any race any alliance and imperial
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local selectedAlliance = CharacterCreateGetAlliance(characterMode)
-    local position = 1
+    local gamepadPosition = 1
 
     local races = self.characterData:GetRaceInfo()
     for i, race in ipairs(races) do
         if race.alliance == 0 or race.alliance == selectedAlliance or CanPlayAnyRaceAsAnyAlliance() then
-            race.position = position
-            position = position + 1
+            race.gamepadPosition = gamepadPosition -- TODO: This data is owned by the manager, not us
+            gamepadPosition = gamepadPosition + 1
         else
-            race.position = GAMEPAD_SELECTOR_IGNORE_POSITION
+            race.gamepadPosition = GAMEPAD_SELECTOR_IGNORE_POSITION
         end
     end
 
-    local raceObject = ZO_CharacterCreate_GamepadRace
-    raceObject.numButtons = position - 1
+    local raceControl = ZO_CharacterCreate_GamepadRace
+    raceControl.numButtons = gamepadPosition - 1
 
-    SetSelectorsControlSelectedCenterOffset(raceObject, raceObject.numButtons)
-
+    local activeButtonControls = {}
     for i, race in ipairs(races) do
-        if race.position == GAMEPAD_SELECTOR_IGNORE_POSITION then
+        if race.gamepadPosition == GAMEPAD_SELECTOR_IGNORE_POSITION then
             --nothing for now
         else
-            local raceButton = layoutTable[race.position]
-            -- If there are 4 buttons we should center the final button
-            if raceObject.numButtons == 4 and raceObject.numButtons == race.position then
-                raceButton = layoutTable[5]
+            local raceButton = layoutTable[race.gamepadPosition]
+            -- Special case for 4 (3+imperial) buttons: we want the last button to be horizontally centered, to match how the tenth button is horizontally centered when 10 (9+imperial) buttons are visible
+            -- to do that we'll just use the already centered column 2 button
+            if race.gamepadPosition == COLUMN_1_ROW_2_POSITION and raceControl.numButtons == race.gamepadPosition then
+                raceButton = layoutTable[COLUMN_2_ROW_2_POSITION]
             end
             raceButton:SetHidden(false)
             self:InitializeSelectorButton(raceButton, race, self.raceRadioGroup)
             self:AddRaceSelectionDataToSelector(raceButton, race)
+            activeButtonControls[race.gamepadPosition] = raceButton
         end
     end
+
+    raceControl.sliderObject:SetActiveButtonControls(activeButtonControls)
+    SetSelectorsControlSelectedCenterOffset(raceControl, raceControl.numButtons)
 end
 
 function ZO_CharacterCreate_Gamepad:SetValidRace()
@@ -993,14 +1001,17 @@ function ZO_CharacterCreate_Gamepad:InitializeClassSelectors()
         button:SetHidden(true)
     end
 
-    for i, class in ipairs(classes) do
-        class.position = i
-        local classButton = layoutTable[i]
-        assert(classButton ~= nil, "Unable to get class button for class #" .. i)
+    local activeButtonControls = {}
+    for gamepadPosition, class in ipairs(classes) do
+        class.gamepadPosition = gamepadPosition -- TODO: This data is owned by the manager, not us
+        local classButton = layoutTable[gamepadPosition]
+        activeButtonControls[gamepadPosition] = classButton
+        assert(classButton ~= nil, "Unable to get class button for class #" .. gamepadPosition)
         self:InitializeSelectorButton(classButton, class, self.classRadioGroup)
         AddClassSelectionDataToSelector(classButton, class)
     end
 
+    ZO_CharacterCreate_GamepadClass.sliderObject:SetActiveButtonControls(activeButtonControls)
     SetSelectorsControlSelectedCenterOffset(ZO_CharacterCreate_GamepadClass, numClasses)
 end
 
@@ -1345,15 +1356,11 @@ function ZO_CharacterCreate_Gamepad_ShowFinishScreen()
 end
 
 function ZO_CharacterCreate_Gamepad_Initialize(control)
-    -- Gamepad pregame is only available to consoles or clients set to force the console flow
-    -- so we won't create this on PC for some efficiency
-    if IsInGamepadPreferredMode() then
-        GAMEPAD_CHARACTER_CREATE_MANAGER = ZO_CharacterCreate_Gamepad:New(control)
-        SYSTEMS:RegisterGamepadObject(ZO_CHARACTER_CREATE_SYSTEM_NAME, GAMEPAD_CHARACTER_CREATE_MANAGER)
+    GAMEPAD_CHARACTER_CREATE_MANAGER = ZO_CharacterCreate_Gamepad:New(control)
+    SYSTEMS:RegisterGamepadObject(ZO_CHARACTER_CREATE_SYSTEM_NAME, GAMEPAD_CHARACTER_CREATE_MANAGER)
 
-        local containerBuckets = control:GetNamedChild("ContainerInnerBuckets")
-        GAMEPAD_BUCKET_MANAGER = ZO_CharacterCreateBucketManager_Gamepad:New(containerBuckets)
-    end
+    local containerBuckets = control:GetNamedChild("ContainerInnerBuckets")
+    GAMEPAD_BUCKET_MANAGER = ZO_CharacterCreateBucketManager_Gamepad:New(containerBuckets)
 end
 
 function ZO_CharacterCreate_Gamepad_OnPrimaryButtonPressed()
@@ -1375,41 +1382,43 @@ function ZO_CharacterCreate_Gamepad_IsCreating()
     return GAMEPAD_CHARACTER_CREATE_MANAGER.isCreating
 end
 
-function ZO_CharacterCreate_Gamepad_OnSelectorPressed(button)
-    local selectorHandlers =
+do
+    local g_selectorHandlers =
     {
         [CHARACTER_CREATE_SELECTOR_RACE] =  function(button)
-                        GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
-                        GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
-                    end,
+            GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
+            GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
+        end,
 
         [CHARACTER_CREATE_SELECTOR_CLASS] = function(button)
-                        CharacterCreateSetClass(button.defId)
-                        GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
-                    end,
+            CharacterCreateSetClass(button.defId)
+            GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
+        end,
 
         [CHARACTER_CREATE_SELECTOR_ALLIANCE] =  function(button)
-                            GAMEPAD_CHARACTER_CREATE_MANAGER:SetAlliance(button.defId, "preventRaceChange")
-                            local oldPosition = ZO_CharacterCreate_GamepadRace.sliderObject:GetSelectedIndex()
+            GAMEPAD_CHARACTER_CREATE_MANAGER:SetAlliance(button.defId, "preventRaceChange")
+            local oldPosition = ZO_CharacterCreate_GamepadRace.sliderObject:GetSelectedIndex()
 
-                            GAMEPAD_CHARACTER_CREATE_MANAGER:InitializeRaceSelectors()
+            GAMEPAD_CHARACTER_CREATE_MANAGER:InitializeRaceSelectors()
 
-                            local newButton = ZO_CharacterCreate_GamepadRace.sliderObject:GetButton(oldPosition)
-                            if newButton then
-                                GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(newButton.defId)
-                            else
-                                GAMEPAD_CHARACTER_CREATE_MANAGER:SetValidRace()
-                            end
+            local newButton = ZO_CharacterCreate_GamepadRace.sliderObject:GetButton(oldPosition)
+            if newButton then
+                GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(newButton.defId)
+            else
+                GAMEPAD_CHARACTER_CREATE_MANAGER:SetValidRace()
+            end
 
-                            GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
-                        end,
+            GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
+        end,
     }
 
-    local handler = selectorHandlers[button.selectorType]
-    if handler then
-        OnCharacterCreateOptionChanged()
-        handler(button)
-        PlaySound(SOUNDS.CC_GAMEPAD_CHARACTER_CLICK)
+    function ZO_CharacterCreate_Gamepad_OnSelectorPressed(button)
+        local handler = g_selectorHandlers[button.selectorType]
+        if handler then
+            OnCharacterCreateOptionChanged()
+            handler(button)
+            PlaySound(SOUNDS.CC_GAMEPAD_CHARACTER_CLICK)
+        end
     end
 end
 

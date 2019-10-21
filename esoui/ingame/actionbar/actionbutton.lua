@@ -328,7 +328,7 @@ function ActionButton:UpdateUsable()
         end
     end
     
-    local useDesaturation = isShowingCooldown and not useFailure or stackEmpty
+    local useDesaturation = isShowingCooldown and not self.useFailure or stackEmpty
     
     if usable ~= self.usable or useDesaturation ~= self.useDesaturation then
         self.usable = usable

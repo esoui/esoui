@@ -2,20 +2,32 @@ local SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT = -1
 
 ZO_GamepadOptions = ZO_Object.MultiSubclass(ZO_SharedOptions, ZO_Gamepad_ParametricList_Screen)
 
-function ZO_GamepadOptions:New(control)
+function ZO_GamepadOptions:New(...)
     local options = ZO_Object.New(self)
-    options:Initialize(control)
+    options:Initialize(...)
     return options
 end
 
-function ZO_GamepadOptions:Initialize(control) 
-    ZO_SharedOptions.Initialize(self, control)
-    local DONT_ACTIVATE_ON_SHOW =  false
+function ZO_GamepadOptions:Initialize(control)
+    ZO_SharedOptions.Initialize(self)
+    local DONT_ACTIVATE_ON_SHOW = false
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW)
     GAMEPAD_OPTIONS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
 
     self.isGamepadOptions = true
     self.currentCategory = SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT
+
+    local function OnDeferredSettingRequestCompleted(eventId, system, settingId, success, result)
+        if GAMEPAD_OPTIONS_FRAGMENT:IsShowing() and not self:AreDeferredSettingsForPanelLoading(self.currentCategory) then
+            ZO_Dialogs_ReleaseAllDialogsOfName("REQUESTING_ACCOUNT_DATA")
+            if system == SETTING_TYPE_ACCOUNT and settingId == ACCOUNT_SETTING_ACCOUNT_EMAIL and result == ACCOUNT_EMAIL_REQUEST_RESULT_SUCCESS_EMAIL_UPDATED then
+                ZO_Dialogs_ShowPlatformDialog("ACCOUNT_MANAGEMENT_EMAIL_CHANGED")
+            end
+            self:RefreshOptionsList()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("GamepadOptions", EVENT_DEFERRED_SETTING_REQUEST_COMPLETED, OnDeferredSettingRequestCompleted)
 end
 
 function ZO_GamepadOptions:InitializeScenes()
@@ -27,7 +39,7 @@ function ZO_GamepadOptions:InitializeScenes()
             self:RefreshHeader()
             self:SetCurrentList(self.categoryList)
 
-            if(self.inputBlocked) then
+            if self.inputBlocked then
                 self:SetGamepadOptionsInputBlocked(false)
             end
             KEYBIND_STRIP:AddKeybindButtonGroup(self.rootKeybindDescriptor)
@@ -41,11 +53,21 @@ function ZO_GamepadOptions:InitializeScenes()
     GAMEPAD_OPTIONS_PANEL_SCENE = ZO_Scene:New("gamepad_options_panel", SCENE_MANAGER)
     GAMEPAD_OPTIONS_PANEL_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
+            if ZO_SharedOptions.DoesPanelDisableShareFeatures(self.currentCategory) and DoesPlatformSupportDisablingShareFeatures() then
+                DisableShareFeatures()
+            end
+            local isDeferredLoading = self:RequestLoadDeferredSettingsForPanel(self.currentCategory)
+            if isDeferredLoading then
+                ZO_Dialogs_ShowGamepadDialog("REQUESTING_ACCOUNT_DATA")
+            end
             self:RefreshOptionsList()
             self:RefreshHeader()
             self:SetCurrentList(self.optionsList)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.panelKeybindDescriptor)
         elseif newState == SCENE_HIDDEN then
+            if ZO_SharedOptions.DoesPanelDisableShareFeatures(self.currentCategory) and DoesPlatformSupportDisablingShareFeatures() then
+                EnableShareFeatures()
+            end
             self:DisableCurrentList()
             self:DeactivateSelectedControl()
             self:SaveCachedSettings()
@@ -55,12 +77,9 @@ function ZO_GamepadOptions:InitializeScenes()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.primaryActionDescriptor)
         end
     end)
-    
+
     local function OnScreenResize()
-        if not self:IsAtRoot() then
-            self.optionsList:RefreshVisible()
-            self:OnSelectionChanged(self.optionsList)
-        end
+        self:RefreshOptionsList()
     end
 
     local function RegisterForScreenResizeComplete()
@@ -84,6 +103,13 @@ function ZO_GamepadOptions:InitializeScenes()
             UnregisterForScreenResizeComplete()
         end
     end)
+end
+
+function ZO_GamepadOptions:RefreshOptionsList()
+    if not self:IsAtRoot() then
+        self.optionsList:RefreshVisible()
+        self:OnSelectionChanged(self.optionsList)
+    end
 end
 
 function ZO_GamepadOptions:PerformUpdate()
@@ -157,67 +183,74 @@ function ZO_GamepadOptions:Select()
     end
 end
 
-function ZO_GamepadOptions:InitializeKeybindStrip()
-    self.keybindStripDescriptor =
+do
+    local categoriesWithoutDefaults =
     {
-        {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            name = GetString(SI_OPTIONS_DEFAULTS),
-            keybind = "UI_SHORTCUT_SECONDARY",
-            visible = function() return self.currentCategory ~= SETTING_PANEL_CINEMATIC end,
-            callback = function()
-                if not self.inputBlocked then
-                    ZO_Dialogs_ShowGamepadDialog("GAMEPAD_OPTIONS_RESET_TO_DEFAULTS")
-                end
-            end,
-        },
+        [SETTING_PANEL_CINEMATIC] = true,
+        [SETTING_PANEL_ACCOUNT] = true,
     }
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() if not self.inputBlocked then SCENE_MANAGER:HideCurrentScene() end end)
+    function ZO_GamepadOptions:InitializeKeybindStrip()
+        self.keybindStripDescriptor =
+        {
+            {
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
+                name = GetString(SI_OPTIONS_DEFAULTS),
+                keybind = "UI_SHORTCUT_SECONDARY",
+                visible = function() return not categoriesWithoutDefaults[self.currentCategory] end,
+                callback = function()
+                    if not self.inputBlocked then
+                        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_OPTIONS_RESET_TO_DEFAULTS")
+                    end
+                end,
+            },
+        }
+        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() if not self.inputBlocked then SCENE_MANAGER:HideCurrentScene() end end)
     
-    self.rootKeybindDescriptor = 
-    {
+        self.rootKeybindDescriptor = 
         {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
-            keybind = "UI_SHORTCUT_PRIMARY",
-            callback = function()
-                if not self.inputBlocked then
-                    local data = self.categoryList:GetTargetData()
-                    self.currentCategory = data.panelId
-                    SCENE_MANAGER:Push("gamepad_options_panel")
-                end
-            end,
-        },
-    }
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.rootKeybindDescriptor, self.categoryList)
+            {
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
+                name = GetString(SI_GAMEPAD_SELECT_OPTION),
+                keybind = "UI_SHORTCUT_PRIMARY",
+                callback = function()
+                    if not self.inputBlocked then
+                        local data = self.categoryList:GetTargetData()
+                        self.currentCategory = data.panelId
+                        SCENE_MANAGER:Push("gamepad_options_panel")
+                    end
+                end,
+            },
+        }
+        ZO_Gamepad_AddListTriggerKeybindDescriptors(self.rootKeybindDescriptor, self.categoryList)
 
-    self.panelKeybindDescriptor =
-    {
-    }
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.panelKeybindDescriptor, self.optionsList)
-
-    self.primaryActionDescriptor = 
-    {
+        self.panelKeybindDescriptor =
         {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            name = function()
-                local control = self.optionsList:GetSelectedControl()
-                local controlType = self:GetControlTypeFromControl(control)
-                if controlType == OPTIONS_CHECKBOX then
-                    return GetString(SI_GAMEPAD_TOGGLE_OPTION)
-                else
-                    return GetString(SI_GAMEPAD_SELECT_OPTION)
-                end
-            end,
-            keybind = "UI_SHORTCUT_PRIMARY",
-            order = -500,
-            callback = function() 
-                if not self.inputBlocked then
-                    self:Select() 
-                end
-            end,
-        },
-    }
+        }
+        ZO_Gamepad_AddListTriggerKeybindDescriptors(self.panelKeybindDescriptor, self.optionsList)
+
+        self.primaryActionDescriptor = 
+        {
+            {
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
+                name = function()
+                    local control = self.optionsList:GetSelectedControl()
+                    local controlType = self:GetControlTypeFromControl(control)
+                    if controlType == OPTIONS_CHECKBOX then
+                        return GetString(SI_GAMEPAD_TOGGLE_OPTION)
+                    else
+                        return GetString(SI_GAMEPAD_SELECT_OPTION)
+                    end
+                end,
+                keybind = "UI_SHORTCUT_PRIMARY",
+                order = -500,
+                callback = function()
+                    if not self.inputBlocked then
+                        self:Select()
+                    end
+                end,
+            },
+        }
+    end
 end
 
 function ZO_GamepadOptions:HasInfoPanel()
@@ -231,13 +264,11 @@ end
 function ZO_GamepadOptions:InitializeGamepadInfoPanelTable()
     if not self:HasInfoPanel() then return end --no infopanel in pregame
 
-    local showXbox = GetGamepadType() ~= GAMEPAD_TYPE_PS4
-
     local control = self.control:GetNamedChild("InfoPanel")
 
-    control:GetNamedChild("Gamepad"):SetTexture(showXbox and "EsoUI/Art/Buttons/Gamepad/XBox/Console_Art_XB1.dds" or "EsoUI/Art/Buttons/Gamepad/PS4/Console_Art_PS4.dds")
+    control:GetNamedChild("Gamepad"):SetTexture(GetGamepadVisualReferenceArt())
     
-    if showXbox then 
+    if GetGamepadType() == GAMEPAD_TYPE_XBOX then 
         self.keyCodeToLabelGroupControl = 
         {
             [KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right6"),
@@ -257,7 +288,7 @@ function ZO_GamepadOptions:InitializeGamepadInfoPanelTable()
             [KEY_GAMEPAD_START] = control:GetNamedChild("TopRight"),
             [KEY_GAMEPAD_BACK] = control:GetNamedChild("TopLeft"),
         }
-    else
+    elseif GetGamepadType() == GAMEPAD_TYPE_PS4 then
         self.keyCodeToLabelGroupControl = 
         {
             [KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right6"),
@@ -275,8 +306,14 @@ function ZO_GamepadOptions:InitializeGamepadInfoPanelTable()
             [KEY_GAMEPAD_DPAD_LEFT] = control:GetNamedChild("Left4"),
             [KEY_GAMEPAD_DPAD_RIGHT] = control:GetNamedChild("Left6"),
             [KEY_GAMEPAD_START] = control:GetNamedChild("TopRight"),
-            [KEY_GAMEPAD_TOUCHPAD_PRESSED] = control:GetNamedChild("TopLeft"),
         }
+        if GetUIPlatform() == UI_PLATFORM_PS4 then
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_TOUCHPAD_PRESSED] = control:GetNamedChild("TopLeft")
+        else
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_BACK] = control:GetNamedChild("TopLeft")
+        end
+    else
+        internalassert(false, "No control template art for current gamepad type")
     end
 end
 
@@ -313,7 +350,7 @@ end
 function ZO_GamepadOptions:SetupOptionsList(list)
     local function OptionsSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         control.data = data
-        self:InitializeControl(control, selected)     
+        self:InitializeControl(control, selected)
     end
 
     list:SetHeaderPadding(GAMEPAD_HEADER_DEFAULT_PADDING, GAMEPAD_OPTIONS_HEADER_SELECTED_PADDING)
@@ -347,6 +384,7 @@ end
 function ZO_GamepadOptions:InitializeOptionsLists()
     self.categoryList = self:GetMainList()
     self.optionsList = self:AddList("options", function(list) self:SetupOptionsList(list) end)
+    self.optionsLoadingControl = self.control:GetNamedChild("LoadingContainer")
 end
 
 do
@@ -359,10 +397,14 @@ do
     }
 
     function ZO_GamepadOptions:OnSelectionChanged(list)
-        if self:IsAtRoot() then return end
+        if self:IsAtRoot() then
+            return
+        end
 
         local control = list:GetSelectedControl()
-        if control.data == nil then return end
+        if control == nil or control.data == nil then
+            return
+        end
 
         local controlType = self:GetControlTypeFromControl(control)
         local enabled = control.data.enabled
@@ -420,14 +462,19 @@ do
         end
 
         --Tooltip (only shown if there is tooltip text and the controller info isn't shown and we aren't adjusting a camera setting)
-        if not showingInfoPanel and not showingCameraPreview and data.tooltipText then
+        if not showingInfoPanel and not showingCameraPreview and (data.tooltipText or data.gamepadCustomTooltipFunction) then
             local tooltipText
             if type(data.tooltipText) == "number" then
                 tooltipText = GetString(data.tooltipText)
             else
                 tooltipText = data.tooltipText
             end
-            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
+
+            if data.gamepadCustomTooltipFunction then
+                data.gamepadCustomTooltipFunction(GAMEPAD_LEFT_TOOLTIP, data.tooltipText)
+            else
+                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
+            end
         else
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
         end
@@ -441,18 +488,18 @@ local function SetSelectedStateOnControl(control, selected)
     local color = ZO_GamepadMenuEntryTemplate_GetLabelColor(selected, not enabled)
     local r, g, b, a = color:UnpackRGBA()
 
-    local label = GetControl(control, "Name")    
+    local label = control:GetNamedChild("Name")
     label:SetColor(r, g, b, 1)
     SetMenuEntryFontFace(label, selected)
 
-    local slider = GetControl(control, "Slider")
+    local slider = control:GetNamedChild("Slider")
     if slider then
         slider:SetColor(r,g,b,a)
         slider:GetNamedChild("Left"):SetColor(r,g,b,a)
         slider:GetNamedChild("Right"):SetColor(r,g,b,a)
         slider:GetNamedChild("Center"):SetColor(r,g,b,a)
     end
-    local checkBox = GetControl(control, "Checkbox")
+    local checkBox = control:GetNamedChild("Checkbox")
     if checkBox then
         checkBox.selected = selected and enabled
     end
@@ -471,10 +518,10 @@ local function GetTextEntry(text)
 end
 
 function ZO_GamepadOptions:InitializeControl(control, selected)
-    local label = GetControl(control, "Name")
+    local label = control:GetNamedChild("Name")
 
     control.data.enabled = true
-    --determine if this control should be disabled because of a dependency on another control type
+    -- Determine if this control should be disabled because of a dependency
     if control.data.gamepadIsEnabledCallback then
         control.data.enabled = control.data.gamepadIsEnabledCallback()
     end
@@ -483,7 +530,7 @@ function ZO_GamepadOptions:InitializeControl(control, selected)
     local IS_GAMEPAD_CONTROL = false
     ZO_SharedOptions.InitializeControl(self, control, selected, IS_GAMEPAD_CONTROL)
 
-    if(not control.data.enabled and control.data.disabledText) then
+    if not control.data.enabled and control.data.disabledText then
         label:SetText(GetTextEntry(control.data.disabledText))
     else
         if IsConsoleUI() and control.data.consoleTextOverride then
@@ -496,10 +543,6 @@ function ZO_GamepadOptions:InitializeControl(control, selected)
     ZO_Options_UpdateOption(control)
 end
 
-local GAMEPAD_BUTTON_SCALE = .75
-local PS4_ADJUST_POV_ICON = "EsoUI/Art/Buttons/Gamepad/PS4/Nav_PS4_DpadDown_Hold_RS.dds"
-local XBOX_ADJUST_POV_ICON = "EsoUI/Art/Buttons/Gamepad/XBox/Nav_XBone_DpadDown_Hold_RS.dds"
-
 local function SetupGameCameraZoomLabels(control, isHoldKey, labelToUse, linesUsed)
     local formatString = isHoldKey and SI_BINDING_NAME_GAMEPAD_HOLD_LEFT or SI_BINDING_NAME_GAMEPAD_TAP_LEFT
     local localizedToggleCameraName = zo_strformat(formatString, GetString(SI_BINDING_NAME_GAMEPAD_TOGGLE_FIRST_PERSON))
@@ -507,9 +550,7 @@ local function SetupGameCameraZoomLabels(control, isHoldKey, labelToUse, linesUs
     labelToUse = labelToUse + 1 --use an extra label to show Toggle
     linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
     local chordedActionString = control.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
-    local showXbox = GetGamepadType() ~= GAMEPAD_TYPE_PS4
-    local povIcon = showXbox and XBOX_ADJUST_POV_ICON or PS4_ADJUST_POV_ICON
-    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), ZO_Keybinding_GetGamepadActionName("GAME_CAMERA_GAMEPAD_ZOOM"), povIcon))
+    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), ZO_Keybinding_GetGamepadActionName("GAME_CAMERA_GAMEPAD_ZOOM"), ZO_GAMEPAD_POV_ADJUST_ICON))
     return labelToUse, linesUsed
 end
 
@@ -651,6 +692,10 @@ function ZO_GamepadOptions:RefreshCategoryList()
     self:AddCategory(SETTING_PANEL_SOCIAL)
     self:AddCategory(SETTING_PANEL_COMBAT)
 
+    if ZO_SharedOptions_SettingsData[SETTING_PANEL_ACCOUNT] ~= nil then
+        self:AddCategory(SETTING_PANEL_ACCOUNT)
+    end
+
     self.categoryList:Commit()
 end
 
@@ -666,6 +711,7 @@ do
         [SETTING_PANEL_SOCIAL] = "EsoUI/Art/Options/Gamepad/gp_options_social.dds",
         [SETTING_PANEL_NAMEPLATES] = "EsoUI/Art/Options/Gamepad/gp_options_nameplates.dds",
         [SETTING_PANEL_COMBAT] = "EsoUI/Art/Options/Gamepad/gp_options_combat.dds",
+        [SETTING_PANEL_ACCOUNT] = "EsoUI/Art/Options/Gamepad/gp_options_account.dds",
     }
 
     function ZO_GamepadOptions:AddCategory(panelId)
@@ -679,52 +725,131 @@ do
     end
 end
 
+function ZO_GamepadOptions:PanelRequiresDeferredLoading(panelId)
+    local settings = GAMEPAD_SETTINGS_DATA[panelId]
+    if settings then
+        for i, setting in ipairs(settings) do
+            if IsSettingDeferred(setting.system, setting.settingId) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function ZO_GamepadOptions:AreDeferredSettingsForPanelLoading(panelId)
+    local settings = GAMEPAD_SETTINGS_DATA[panelId]
+    if settings then
+        for i, setting in ipairs(settings) do
+            if IsSettingDeferred(setting.system, setting.settingId) and IsDeferredSettingLoading(setting.system, setting.settingId) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function ZO_GamepadOptions:AreDeferredSettingsForPanelLoaded(panelId)
+    local settings = GAMEPAD_SETTINGS_DATA[panelId]
+    if settings then
+        for i, setting in ipairs(settings) do
+            if IsSettingDeferred(setting.system, setting.settingId) and IsDeferredSettingLoaded(setting.system, setting.settingId) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function ZO_GamepadOptions:RequestLoadDeferredSettingsForPanel(panelId)
+    local isDeferredLoading = false
+    local settings = GAMEPAD_SETTINGS_DATA[panelId]
+    if settings then
+        for i, setting in ipairs(settings) do
+            if IsSettingDeferred(setting.system, setting.settingId) then
+                RequestLoadDeferredSetting(setting.system, setting.settingId)
+                isDeferredLoading = true
+            end
+        end
+    end
+
+    return isDeferredLoading
+end
+
 function ZO_GamepadOptions:RefreshOptionsList()
     self.optionsList:Clear()
-    
-    self:AddSettingGroup(self.currentCategory)
 
-    if self.currentCategory ~= self.lastCategory then
-        self.optionsList:CommitWithoutReselect()
+    local panelName = GetString("SI_SETTINGSYSTEMPANEL", self.currentCategory)
+    self.optionsList:SetNoItemText(zo_strformat(SI_INTERFACE_OPTIONS_SETTINGS_PANEL_UNAVAILABLE, panelName))
+
+    local readyToRefresh = true
+    if self:PanelRequiresDeferredLoading(self.currentCategory) then
+        if self:AreDeferredSettingsForPanelLoading(self.currentCategory) then
+            readyToRefresh = false
+        end
+    end
+
+    if readyToRefresh then
+        self:AddSettingGroup(self.currentCategory)
+
+        if self.currentCategory ~= self.lastCategory then
+            self.optionsList:CommitWithoutReselect()
+        else
+            self.optionsList:Commit()
+        end
+        self.lastCategory = self.currentCategory
     else
         self.optionsList:Commit()
     end
-    self.lastCategory = self.currentCategory
 end
 
 function ZO_GamepadOptions:AddSettingGroup(panelId)
     local settings = GAMEPAD_SETTINGS_DATA[panelId]
     if settings then
-        for i = 1, #settings do
-            local setting = settings[i]
-            local header
-            if setting.header then
-                if type(setting.header) == "function" then
-                    header = setting.header(setting)
-                else
-                    header = GetString(setting.header)
-                end
-            end
-
+        for i, setting in ipairs(settings) do
             local data = self:GetSettingsData(setting.panel, setting.system, setting.settingId)
-            local controlType = self:GetControlType(data.controlType)
-            
-            if controlType == OPTIONS_CUSTOM then
-                controlType = data.customControlType
-            end
+            local isVisible = data.visible == nil or data.visible
 
-            local templateName = TEMPLATE_NAMES[controlType]
-            
-            local isHeader = header or data.header
-            
-            if isHeader then 
-                templateName = templateName .. "WithHeader"
-                if not data.header then 
-                    data.header = header 
+            -- If this is a deferred setting and it isn't loaded, then don't show it
+            if IsSettingDeferred(data.system, data.settingId) and not IsDeferredSettingLoaded(data.system, data.settingId) then
+                isVisible = false
+            else
+                if type(isVisible) == "function" then
+                    isVisible = isVisible()
                 end
             end
 
-            self.optionsList:AddEntry(templateName, data)
+            if isVisible then
+                local header
+                if setting.header then
+                    if type(setting.header) == "function" then
+                        -- Clear header data when calling header function so the previous result of function is not retained
+                        data.header = nil
+                        header = setting.header(setting)
+                    else
+                        header = GetString(setting.header)
+                    end
+                end
+
+                local controlType = self:GetControlType(data.controlType)
+                if controlType == OPTIONS_CUSTOM then
+                    controlType = data.customControlType
+                end
+
+                local templateName = TEMPLATE_NAMES[controlType]
+                local isHeader = header or data.header
+                if isHeader then 
+                    templateName = templateName .. "WithHeader"
+                    if not data.header then
+                        data.header = header
+                    end
+                end
+
+                self.optionsList:AddEntry(templateName, data)
+            end
         end
     end
 end

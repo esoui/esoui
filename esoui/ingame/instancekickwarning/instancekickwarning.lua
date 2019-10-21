@@ -12,15 +12,20 @@ do
     local INSTANCE_KICK_KEYBOARD_STYLE =
     {
         font = "ZoFontWinH2",
+        anchorOffsetY = ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y,
     }
 
     local INSTANCE_KICK_GAMEPAD_STYLE =
     {
         font = "ZoFontGamepad34",
+        anchorOffsetY = ZO_COMMON_INFO_DEFAULT_GAMEPAD_BOTTOM_OFFSET_Y,
     }
 
     function ZO_InstanceKickWarning:ApplyPlatformStyle(style)
         self.kickLabel:SetFont(style.font)
+
+        self.container:ClearAnchors()
+        self.container:SetAnchor(BOTTOM, nil, BOTTOM, 0, style.anchorOffsetY)
     end
 
     function ZO_InstanceKickWarning:Initialize(control)
@@ -50,10 +55,10 @@ do
         self.control:RegisterForEvent(EVENT_GROUP_INVITE_RECEIVED, OnGroupInviteUpdate)
         self.control:RegisterForEvent(EVENT_GROUP_INVITE_REMOVED, OnGroupInviteUpdate)
 
-        local container = self.control:GetNamedChild("Container")
-        self.timerCooldown = container:GetNamedChild("Timer")
+        self.container = self.control:GetNamedChild("Container")
+        self.timerCooldown = self.container:GetNamedChild("Timer")
         self.timerCooldown:SetNumWarningSounds(5)
-        self.kickLabel = container:GetNamedChild("Text")
+        self.kickLabel = self.container:GetNamedChild("Text")
         ZO_PlatformStyle:New(function(...) self:ApplyPlatformStyle(...) end, INSTANCE_KICK_KEYBOARD_STYLE, INSTANCE_KICK_GAMEPAD_STYLE)
 
         if IsPlayerActivated() then

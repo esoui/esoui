@@ -226,6 +226,11 @@
             </OnInitialized>
 
             <Controls>
+                <Control name="$(parent)LoadingContainer" hidden="true" inherits="ZO_GamepadLoadingIconAndLabelTemplate">
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)Container"/>
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
+                </Control>
+
                 <Control name="$(parent)InfoPanel" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_4_Anchors">
                     <Controls>
                         <Texture name="$(parent)Gamepad" tier="MEDIUM">
