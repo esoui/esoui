@@ -147,6 +147,7 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
         local filterData = selectedData.data
         if filterData.singular then
             ZO_ACTIVITY_FINDER_ROOT_MANAGER:SetLocationSelected(filterData, true)
+            self:RefreshRewards(filterData)
             if filterData:IsLocked() then
                 lockReasonText = filterData:GetLockReasonText()
             end

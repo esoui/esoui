@@ -1,6 +1,26 @@
 {TOC:maxLevel=3}
 h1. ESO UI Documentation for API Version 100029
 
+h2. VM Functions
+
+* ScriptBuildInfo()
+** _Returns:_ *table* _buildInfo_
+
+* LoadUntrustedString(*string* _script_)
+** _Returns:_ *number* _result_
+
+* SecurePostHook(*table* _targetTable_, *string* _functionName_, *function* _hookingFunction_)
+
+* InsecureNext(*table* table, *type* lastKey)
+** _Returns:_ *type* nextKey, *type* nextValue
+
+* CallSecureProtected(*string* _functionName_, *types* _arguments_)
+** _Returns:_ *bool* _success_, *types* _returns_
+
+* IsTrustedFunction(*function* _function_)
+** _Returns:_ *bool* _isTrusted_
+
+
 h2. Global Variables
 
 h5. AchievementPointValue
@@ -752,6 +772,11 @@ h5. GroupNotificationMessage
 * GROUP_MSG_INVALID_MEMBER
 * GROUP_MSG_YOU_ARE_NOT_IN_A_GROUP
 * GROUP_MSG_YOU_ARE_NOT_THE_LEADER
+
+
+h5. GroupOperationResult
+* GROUP_OPERATION_RESULT_BLOCKED_BY_ACTIVE_READY_CHECK
+* GROUP_OPERATION_RESULT_NONE
 
 
 h5. GroupVoteChoice
@@ -4009,6 +4034,12 @@ h5. CollectibleItemType
 * COLLECTIBLE_ITEM_TYPE_TROPHY
 
 
+h5. DeconstructActionName
+* DECONSTRUCT_ACTION_NAME_DECONSTRUCT
+* DECONSTRUCT_ACTION_NAME_EXTRACT
+* DECONSTRUCT_ACTION_NAME_REFINE
+
+
 h5. EnchantingRuneClassification
 * ENCHANTING_RUNE_ASPECT
 * ENCHANTING_RUNE_ESSENCE
@@ -5827,6 +5858,59 @@ h5. StoreEntryType
 
 h5. Globals
 * MAX_STORE_WINDOW_STACK_QUANTITY
+
+
+h5. AccountEmailRequestResult
+* ACCOUNT_EMAIL_REQUEST_RESULT_EMAIL_ALREADY_TAKEN
+* ACCOUNT_EMAIL_REQUEST_RESULT_ERROR
+* ACCOUNT_EMAIL_REQUEST_RESULT_INVALID_EMAIL_ADDRESS
+* ACCOUNT_EMAIL_REQUEST_RESULT_MESSAGE_RATE_LIMIT
+* ACCOUNT_EMAIL_REQUEST_RESULT_SERVICE_NOT_FOUND
+* ACCOUNT_EMAIL_REQUEST_RESULT_SUCCESS
+* ACCOUNT_EMAIL_REQUEST_RESULT_SUCCESS_EMAIL_UPDATED
+* ACCOUNT_EMAIL_REQUEST_RESULT_TIMEOUT
+
+
+h5. AccountResendActivationResult
+* ACCOUNT_RESEND_ACTIVATION_RESULT_ACCOUNT_ALREADY_ACTIVATED_ERROR
+* ACCOUNT_RESEND_ACTIVATION_RESULT_ERROR
+* ACCOUNT_RESEND_ACTIVATION_RESULT_SUCCESS
+* ACCOUNT_RESEND_ACTIVATION_RESULT_TIMEOUT
+* ACCOUNT_RESEND_ACTIVATION_RESULT_USER_NOT_FOUND_ERROR
+
+
+h5. MarketingPreferencesRequestResult
+* MARKETING_PREFERENCES_REQUEST_RESULT_ACCOUNT_ACCESS_ERROR
+* MARKETING_PREFERENCES_REQUEST_RESULT_ERROR
+* MARKETING_PREFERENCES_REQUEST_RESULT_SUCCESS
+* MARKETING_PREFERENCES_REQUEST_RESULT_TIMEOUT
+
+
+h5. PlatformServiceType
+* PLATFORM_SERVICE_TYPE_DMM
+* PLATFORM_SERVICE_TYPE_HERON
+* PLATFORM_SERVICE_TYPE_PSN
+* PLATFORM_SERVICE_TYPE_STEAM
+* PLATFORM_SERVICE_TYPE_XBL
+* PLATFORM_SERVICE_TYPE_ZOS
+
+
+h5. RedeemCodeResult
+* REDEEM_CODE_RESULT_ACCOUNT_NOT_FOUND
+* REDEEM_CODE_RESULT_CODE_NOT_FOUND
+* REDEEM_CODE_RESULT_CODE_REDEMPTION_FAILED
+* REDEEM_CODE_RESULT_ERROR
+* REDEEM_CODE_RESULT_INVALID_CODE
+* REDEEM_CODE_RESULT_MISSING_ACCOUNT_OR_NO_PROMO
+* REDEEM_CODE_RESULT_NOT_AVAILABLE_ON_PLATFORM
+* REDEEM_CODE_RESULT_SUCCESS
+* REDEEM_CODE_RESULT_TIMEOUT
+* REDEEM_CODE_RESULT_TOO_MANY_REQUESTS
+* REDEEM_CODE_RESULT_USER_CANNOT_REDEEM_CODE
+
+
+h5. Globals
+* MAX_PROMO_CODE_LENGTH
 
 
 h5. AbilityProgressionResult
@@ -9980,6 +10064,9 @@ h2. Game API
 * BeginGroupElection(*[GroupElectionType|#GroupElectionType]* _electionType_, *string* _electionDescriptor_, *string* _targetUnitTag_)
 ** _Returns:_ *bool* _sentSuccessfully_
 
+* GetExpectedGroupElectionResult(*[GroupElectionType|#GroupElectionType]* _electionType_, *string* _targetUnitTag_)
+** _Returns:_ *[GroupElectionFailure|#GroupElectionFailure]* _failureReason_
+
 * GetRaidReviveCountersRemaining()
 ** _Returns:_ *integer:nilable* _currentCounter_
 
@@ -10231,10 +10318,10 @@ h2. Game API
 * GetMountSkinId()
 ** _Returns:_ *integer* _skinId_
 
-* GetRidingStats(*bool* _forDisplay_)
+* GetRidingStats()
 ** _Returns:_ *integer* _inventoryBonus_, *integer* _maxInventoryBonus_, *integer* _staminaBonus_, *integer* _maxStaminaBonus_, *integer* _speedBonus_, *integer* _maxSpeedBonus_
 
-* GetMaxRidingTraining(*[RidingTrainType|#RidingTrainType]* _trainTypeIndex_, *bool* _forDisplay_)
+* GetMaxRidingTraining(*[RidingTrainType|#RidingTrainType]* _trainTypeIndex_)
 ** _Returns:_ *integer* _maxValue_
 
 * GetTimeUntilCanBeTrained()
@@ -11071,6 +11158,9 @@ h2. Game API
 
 * GetFastTravelNodeInfo(*luaindex* _nodeIndex_)
 ** _Returns:_ *bool* _known_, *string* _name_, *number* _normalizedX_, *number* _normalizedY_, *textureName* _icon_, *textureName:nilable* _glowIcon_, *[PointOfInterestType|#PointOfInterestType]* _poiType_, *bool* _isShownInCurrentMap_, *bool* _linkedCollectibleIsLocked_
+
+* GetFastTravelNodePOIIndicies(*luaindex* _nodeIndex_)
+** _Returns:_ *luaindex* _zoneIndex_, *luaindex* _poiIndex_
 
 * GetFastTravelNodeOutboundOnlyInfo(*luaindex* _nodeIndex_)
 ** _Returns:_ *bool* _isOutboundOnly_, *integer* _errorStringId_
@@ -16077,6 +16167,9 @@ h2. Game API
 * GetRewardType(*integer* _rewardId_)
 ** _Returns:_ *[RewardEntryType|#RewardEntryType]:nilable* _rewardType_
 
+* GetRewardListIdFromReward(*integer* _rewardId_)
+** _Returns:_ *integer* _rewardListId_
+
 * GetNumRewardListEntries(*integer* _rewardListId_)
 ** _Returns:_ *integer* _numRewards_
 
@@ -18131,6 +18224,12 @@ h3. WindowManager
 
 * CopyToClipboard *private* (*string* _text_)
 
+* ConvertRGBToHSV(*number* _red_, *number* _green_, *number* _blue_)
+** _Returns:_ *number* _hue_, *number* _saturation_, *number* _value_
+
+* ConvertRGBToHSL(*number* _red_, *number* _green_, *number* _blue_)
+** _Returns:_ *number* _hue_, *number* _saturation_, *number* _lightness_
+
 
 h2. Events
 * EVENT_ABILITY_COOLDOWN_UPDATED (*integer* _abilityId_)
@@ -18369,6 +18468,7 @@ h2. Events
 * EVENT_GROUP_MEMBER_LEFT (*string* _memberCharacterName_, *[GroupLeaveReason|#GroupLeaveReason]* _reason_, *bool* _isLocalPlayer_, *bool* _isLeader_, *string* _memberDisplayName_, *bool* _actionRequiredVote_)
 * EVENT_GROUP_MEMBER_ROLE_CHANGED (*string* _unitTag_, *[LFGRole|#LFGRole]* _newRole_)
 * EVENT_GROUP_NOTIFICATION_MESSAGE (*integer* _messageId_)
+* EVENT_GROUP_OPERATION_RESULT (*[GroupOperationResult|#GroupOperationResult]* _result_)
 * EVENT_GROUP_SUPPORT_RANGE_UPDATE (*string* _unitTag_, *bool* _status_)
 * EVENT_GROUP_TYPE_CHANGED (*bool* _largeGroup_)
 * EVENT_GROUP_UPDATE
@@ -18817,7 +18917,7 @@ h2. Events
 * EVENT_GUILD_MEMBER_REMOVED (*integer* _guildId_, *string* _displayName_, *string* _characterName_)
 * EVENT_GUILD_MOTD_CHANGED (*integer* _guildId_)
 * EVENT_GUILD_NAME_AVAILABLE
-* EVENT_GUILD_PLAYER_RANK_CHANGED (*integer* _guildId_)
+* EVENT_GUILD_PLAYER_RANK_CHANGED (*integer* _guildId_, *luaindex* _rankIndex_, *[GuildRankChangeAction|#GuildRankChangeAction]* _guildRankChangeAction_)
 * EVENT_GUILD_RANKS_CHANGED (*integer* _guildId_)
 * EVENT_GUILD_RANK_CHANGED (*integer* _guildId_, *luaindex* _rankIndex_)
 * EVENT_GUILD_RELEASE_KEEP_CAMPAIGN_NOTIFICATION (*integer* _campaignId_, *integer* _keepId_, *string* _guildName_, *string* _playerName_)

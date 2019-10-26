@@ -255,10 +255,10 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
 
     for i, rewardData in ipairs(parametricListRewards) do
         if rewardData.rewardType == REWARD_TYPE_PARTIAL_SKILL_POINTS then
-            rewardData.name = ZO_QuestReward_GetSkillPointText(itemData.amount)
+            rewardData.name = ZO_QuestReward_GetSkillPointText(rewardData.amount)
             rewardData.icon = nil
         elseif rewardData.rewardType == REWARD_TYPE_SKILL_LINE then
-            rewardData.name = ZO_QuestReward_GetSkillLineEarnedText(itemData.name)
+            rewardData.name = ZO_QuestReward_GetSkillLineEarnedText(rewardData.name)
         elseif rewardData.rewardType == REWARD_TYPE_AUTO_ITEM and rewardData.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
             rewardData.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
         elseif self:IsCurrencyReward(rewardData.rewardType) then

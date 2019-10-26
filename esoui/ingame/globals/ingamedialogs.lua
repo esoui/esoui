@@ -2710,36 +2710,6 @@ ESO_Dialogs["PROMPT_FOR_LFM_REQUEST"] =
     },
 }
 
-ESO_Dialogs["CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = SI_CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING_TITLE,
-    },
-    mainText =
-    {
-        text = SI_CAMPAIGN_QUEUE_KICKING_FROM_LFG_GROUP_WARNING_BODY,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                CAMPAIGN_BROWSER_MANAGER:ContinueQueueForCampaignFlow(dialog.data.campaignData, ZO_CAMPAIGN_QUEUE_STEP_LFG_CHECK)
-            end,
-            clickSound = SOUNDS.DIALOG_ACCEPT,
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-        },
-    },
-}
-
 ESO_Dialogs["KEYBIND_STRIP_DISABLED_DIALOG"] =
 {
     gamepadInfo =

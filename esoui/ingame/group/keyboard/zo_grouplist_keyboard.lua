@@ -151,6 +151,10 @@ function ZO_GroupList_Keyboard:GroupListRow_OnMouseUp(control, button, upInside)
                 AddMenuItem(GetString(SI_SOCIAL_MENU_JUMP_TO_PLAYER), function() JumpToGroupMember(data.characterName) end)
             end
 
+            if not data.isPlayer and not IsFriend(data.displayName) and not IsIgnored(data.displayName) then
+                AddMenuItem(GetString(SI_SOCIAL_MENU_ADD_FRIEND), function() ZO_Dialogs_ShowDialog("REQUEST_FRIEND", { name = data.displayName }) end)
+            end
+
             if IsGroupModificationAvailable() then
                 local modicationRequiresVoting = DoesGroupModificationRequireVote()
                 if self.playerIsLeader then
