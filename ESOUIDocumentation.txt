@@ -1,6 +1,26 @@
 {TOC:maxLevel=3}
 h1. ESO UI Documentation for API Version 100029
 
+h2. VM Functions
+
+* ScriptBuildInfo()
+** _Returns:_ *table* _buildInfo_
+
+* LoadUntrustedString(*string* _script_)
+** _Returns:_ *number* _result_
+
+* SecurePostHook(*table* _targetTable_, *string* _functionName_, *function* _hookingFunction_)
+
+* InsecureNext(*table* table, *type* lastKey)
+** _Returns:_ *type* nextKey, *type* nextValue
+
+* CallSecureProtected(*string* _functionName_, *types* _arguments_)
+** _Returns:_ *bool* _success_, *types* _returns_
+
+* IsTrustedFunction(*function* _function_)
+** _Returns:_ *bool* _isTrusted_
+
+
 h2. Global Variables
 
 h5. AchievementPointValue

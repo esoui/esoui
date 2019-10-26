@@ -790,6 +790,9 @@ local AlertHandlers = {
             --No override found
             if not alertText then
                 local electionType, _, _, targetUnitTag = GetGroupElectionInfo()
+                if not targetUnitTag then
+                    return
+                end
                 if electionType == GROUP_ELECTION_TYPE_KICK_MEMBER then
                     if resultType == GROUP_ELECTION_RESULT_ELECTION_LOST then
                         local primaryName = ZO_GetPrimaryPlayerNameFromUnitTag(targetUnitTag)
