@@ -600,6 +600,7 @@ function ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(dialog)
                                 baseHideFunction(dialog, releasedFromButton)
                                 dialog.entryList:RemoveAllOnSelectedDataChangedCallbacks()
                                 dialog.entryList:Deactivate()
+                                dialog.entryList:Clear()
                             end
 
     GenericParametricListGamepadDialogTemplate_InitializeEntryList(dialog)
