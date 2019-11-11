@@ -599,6 +599,8 @@ function ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(dialog)
     dialog.hideFunction =   function(dialog, releasedFromButton)
                                 baseHideFunction(dialog, releasedFromButton)
                                 dialog.entryList:RemoveAllOnSelectedDataChangedCallbacks()
+                                -- ensure deactivate is called before clear so that the parametricListOnActivatedChangedCallback
+                                -- can act on the selected entry (or anything else in the list) as necessary
                                 dialog.entryList:Deactivate()
                                 dialog.entryList:Clear()
                             end
@@ -628,6 +630,13 @@ do
         end
 
         dialog.entryList:SetOnSelectedDataChangedCallback(onSelectionChangedCallback)
+
+        dialog.entryList:SetOnActivatedChangedFunction(function(...)
+            ZO_GamepadOnDefaultScrollListActivatedChanged(...)
+            if dialog.info.parametricListOnActivatedChangedCallback then
+                dialog.info.parametricListOnActivatedChangedCallback(...)
+            end
+        end)
 
         ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog, limitNumEntries)
     end

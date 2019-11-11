@@ -228,227 +228,228 @@ do
     end
 end
 
-do
-    local function DisableSpinner(dialog)
-        local selectedControl = dialog.entryList:GetSelectedControl()
-        if selectedControl and selectedControl.spinner then
-            selectedControl.spinner:SetActive(false)
+ESO_Dialogs["CRAFTING_CREATE_MULTIPLE_GAMEPAD"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+    },
+    blockDialogReleaseOnPress = true, -- Don't release on Max items pressed
+    setup = function(dialog, data)
+        data.maxIterations = data.craftingObject:GetMultiCraftMaxIterations()
+        data.minIterations = 1
+        data.numIterations = data.minIterations
+        local headerData =
+        {
+            data1 =
+            {
+                header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+                value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
+            }
+        }
+        local NO_LIMIT_NUM_ENTRIES = nil
+        dialog:setupFunc(NO_LIMIT_NUM_ENTRIES, headerData)
+    end,
+    title =
+    {
+        text = GetString(SI_GAMEPAD_CRAFT_MULTIPLE),
+    },
+    mainText = 
+    {
+        text = GetString(SI_GAMEPAD_CRAFT_MULTIPLE_DESCRIPTION),
+    },
+    parametricList =
+    {
+        {
+            template = "ZO_GamepadMultiCraftSpinnerTemplate",
+            templateData = {
+                text = GetString(SI_GAMEPAD_QUANTITY_SPINNER_TEMPLATE_LABEL),
+                setup = function(control, entryData, selected, selectedDuringRebuild, enabled, active)
+                    local dialogData = entryData.dialog.data
+                    if control.spinner == nil then
+                        control.spinner = ZO_Spinner_Gamepad:New(control:GetNamedChild("Spinner"), 1, 1, GAMEPAD_SPINNER_DIRECTION_HORIZONTAL)
+                    end
+                    control.spinner:SetActive(selected)
+                    control.spinner:SetStep(1)
+                    control.spinner:SetMinMax(dialogData.minIterations, dialogData.maxIterations)
+                    control.spinner:SetValue(dialogData.numIterations)
+                    control.spinner:UnregisterAllCallbacks("OnValueChanged")
+                    control.spinner:RegisterCallback("OnValueChanged", function(value)
+                        dialogData.numIterations = value
+                        ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
+                    end)
+                end,
+            },
+        }
+    },
+    parametricListOnActivatedChangedCallback = function(list, isActive)
+        if not isActive then
+            local selectedControl = list:GetSelectedControl()
+            if selectedControl and selectedControl.spinner then
+                selectedControl.spinner:SetActive(false)
+            end
         end
-    end
-
-    ESO_Dialogs["CRAFTING_CREATE_MULTIPLE_GAMEPAD"] =
+    end,
+    buttons =
     {
-        gamepadInfo =
+        -- Craft
         {
-            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+            text = SI_DIALOG_CONFIRM,
+            keybind = "DIALOG_PRIMARY",
+            callback = function(dialog)
+                dialog.data.craftingObject:Create(dialog.data.numIterations)
+                ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
+            end,
         },
-        blockDialogReleaseOnPress = true, -- Don't release on Max items pressed
-        setup = function(dialog, data)
-            data.maxIterations = data.craftingObject:GetMultiCraftMaxIterations()
-            data.minIterations = 1
-            data.numIterations = data.minIterations
-            local headerData =
+        -- Cancel
+        {
+            text = SI_DIALOG_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
+            end,
+        },
+        -- Min/Max Quantity
+        {
+            text = function(dialog)
+                if dialog.data.numIterations < dialog.data.maxIterations then
+                    return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MAX)
+                else
+                    return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MIN)
+                end
+            end,
+            keybind = "DIALOG_TERTIARY",
+            callback = function(dialog)
+                if dialog.data.numIterations < dialog.data.maxIterations then
+                    dialog.data.numIterations = dialog.data.maxIterations
+                else
+                    dialog.data.numIterations = dialog.data.minIterations
+                end
+                ZO_GenericParametricListGamepadDialogTemplate_RefreshVisibleEntries(dialog)
+            end,
+        },
+    }
+}
+
+function ZO_GamepadCraftingUtils_ShowMultiCraftDialog(craftingObject, resultItemLink)
+    local nameColor = GetItemQualityColor(GetItemLinkQuality(resultItemLink))
+    local itemName = nameColor:Colorize(GetItemLinkName(resultItemLink))
+
+    ZO_Dialogs_ShowGamepadDialog("CRAFTING_CREATE_MULTIPLE_GAMEPAD", {craftingObject = craftingObject}, {mainTextParams={itemName}})
+end
+
+ESO_Dialogs["CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+    },
+    blockDialogReleaseOnPress = true, -- Don't release on Max items pressed
+    setup = function(dialog, data)
+        data.minIterations = 1
+        data.iterations = data.maxIterations
+        local headerData =
+        {
+            data1 =
             {
-                data1 =
-                {
-                    header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-                    value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
-                }
+                header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+                value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
             }
-            local NO_LIMIT_NUM_ENTRIES = nil
-            dialog:setupFunc(NO_LIMIT_NUM_ENTRIES, headerData)
+        }
+        local NO_LIMIT_NUM_ENTRIES = nil
+        dialog:setupFunc(NO_LIMIT_NUM_ENTRIES, headerData)
+    end,
+    title =
+    {
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
         end,
-        finishedCallback = function(dialog)
-            DisableSpinner(dialog)
+    },
+    mainText =
+    {
+        text = function(dialog)
+            return GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMSTACK", dialog.data.verb)
         end,
-        title =
+    },
+    parametricList =
+    {
         {
-            text = GetString(SI_GAMEPAD_CRAFT_MULTIPLE),
-        },
-        mainText = 
-        {
-            text = GetString(SI_GAMEPAD_CRAFT_MULTIPLE_DESCRIPTION),
-        },
-        parametricList =
-        {
-            {
-                template = "ZO_GamepadMultiCraftSpinnerTemplate",
-                templateData = {
-                    text = GetString(SI_GAMEPAD_QUANTITY_SPINNER_TEMPLATE_LABEL),
-                    setup = function(control, entryData, selected, selectedDuringRebuild, enabled, active)
-                        local dialogData = entryData.dialog.data
-                        if control.spinner == nil then
-                            control.spinner = ZO_Spinner_Gamepad:New(control:GetNamedChild("Spinner"), 1, 1, GAMEPAD_SPINNER_DIRECTION_HORIZONTAL)
-                        end
-                        control.spinner:SetActive(selected)
-                        control.spinner:SetStep(1)
-                        control.spinner:SetMinMax(dialogData.minIterations, dialogData.maxIterations)
-                        control.spinner:SetValue(dialogData.numIterations)
-                        control.spinner:UnregisterAllCallbacks("OnValueChanged")
-                        control.spinner:RegisterCallback("OnValueChanged", function(value)
-                            dialogData.numIterations = value
-                            ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
-                        end)
-                    end,
-                },
-            }
-        },
-        buttons =
-        {
-            -- Craft
-            {
-                text = SI_DIALOG_CONFIRM,
-                keybind = "DIALOG_PRIMARY",
-                callback = function(dialog)
-                    dialog.data.craftingObject:Create(dialog.data.numIterations)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
-                end,
-            },
-            -- Cancel
-            {
-                text = SI_DIALOG_CANCEL,
-                keybind = "DIALOG_NEGATIVE",
-                callback = function(dialog)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
-                end,
-            },
-            -- Min/Max Quantity
-            {
-                text = function(dialog)
-                    if dialog.data.numIterations < dialog.data.maxIterations then
-                        return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MAX)
-                    else
-                        return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MIN)
+            template = "ZO_GamepadMultiDeconstructSpinnerTemplate",
+            templateData = {
+                text = GetString(SI_GAMEPAD_QUANTITY_SPINNER_TEMPLATE_LABEL),
+                setup = function(control, entryData, selected, selectedDuringRebuild, enabled, active)
+                    local dialogData = entryData.dialog.data
+                    if control.spinner == nil then
+                        control.spinner = ZO_Spinner_Gamepad:New(control:GetNamedChild("Spinner"), 1, 1, GAMEPAD_SPINNER_DIRECTION_HORIZONTAL)
                     end
-                end,
-                keybind = "DIALOG_TERTIARY",
-                callback = function(dialog)
-                    if dialog.data.numIterations < dialog.data.maxIterations then
-                        dialog.data.numIterations = dialog.data.maxIterations
-                    else
-                        dialog.data.numIterations = dialog.data.minIterations
-                    end
-                    ZO_GenericParametricListGamepadDialogTemplate_RefreshVisibleEntries(dialog)
+                    control.spinner:SetActive(selected)
+                    control.spinner:SetMinMax(dialogData.minIterations, dialogData.maxIterations)
+                    control.spinner:SetValue(dialogData.iterations)
+                    control.spinner:UnregisterAllCallbacks("OnValueChanged")
+                    control.spinner:RegisterCallback("OnValueChanged", function(value)
+                        dialogData.iterations = value
+                        ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
+                    end)
                 end,
             },
         }
-    }
-
-    function ZO_GamepadCraftingUtils_ShowMultiCraftDialog(craftingObject, resultItemLink)
-        local nameColor = GetItemQualityColor(GetItemLinkQuality(resultItemLink))
-        local itemName = nameColor:Colorize(GetItemLinkName(resultItemLink))
-
-        ZO_Dialogs_ShowGamepadDialog("CRAFTING_CREATE_MULTIPLE_GAMEPAD", {craftingObject = craftingObject}, {mainTextParams={itemName}})
-    end
-
-    ESO_Dialogs["CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD"] =
+    },
+    parametricListOnActivatedChangedCallback = function(list, isActive)
+        if not isActive then
+            local selectedControl = list:GetSelectedControl()
+            if selectedControl and selectedControl.spinner then
+                selectedControl.spinner:SetActive(false)
+            end
+        end
+    end,
+    buttons =
     {
-        gamepadInfo =
+        -- Deconstruct
         {
-            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
-        },
-        blockDialogReleaseOnPress = true, -- Don't release on Max items pressed
-        setup = function(dialog, data)
-            data.minIterations = 1
-            data.iterations = data.maxIterations
-            local headerData =
-            {
-                data1 =
-                {
-                    header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-                    value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
-                }
-            }
-            local NO_LIMIT_NUM_ENTRIES = nil
-            dialog:setupFunc(NO_LIMIT_NUM_ENTRIES, headerData)
-        end,
-        finishedCallback = function(dialog)
-            DisableSpinner(dialog)
-        end,
-        title =
-        {
-            text = function(dialog)
-                return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
-            end,
-        },
-        mainText = 
-        {
-            text = function(dialog)
-                return GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMSTACK", dialog.data.verb)
-            end,
-        },
-        parametricList =
-        {
-            {
-                template = "ZO_GamepadMultiDeconstructSpinnerTemplate",
-                templateData = {
-                    text = GetString(SI_GAMEPAD_QUANTITY_SPINNER_TEMPLATE_LABEL),
-                    setup = function(control, entryData, selected, selectedDuringRebuild, enabled, active)
-                        local dialogData = entryData.dialog.data
-                        if control.spinner == nil then
-                            control.spinner = ZO_Spinner_Gamepad:New(control:GetNamedChild("Spinner"), 1, 1, GAMEPAD_SPINNER_DIRECTION_HORIZONTAL)
-                        end
-                        control.spinner:SetActive(selected)
-                        control.spinner:SetMinMax(dialogData.minIterations, dialogData.maxIterations)
-                        control.spinner:SetValue(dialogData.iterations)
-                        control.spinner:UnregisterAllCallbacks("OnValueChanged")
-                        control.spinner:RegisterCallback("OnValueChanged", function(value)
-                            dialogData.iterations = value
-                            ZO_GenericGamepadDialog_RefreshKeybinds(entryData.dialog)
-                        end)
-                    end,
-                },
-            }
-        },
-        buttons =
-        {
-            -- Deconstruct
-            {
-                text = SI_DIALOG_CONFIRM,
-                keybind = "DIALOG_PRIMARY",
-                callback = function(dialog)
-                    dialog.data.deconstructFn(dialog.data.iterations)
+            text = SI_DIALOG_CONFIRM,
+            keybind = "DIALOG_PRIMARY",
+            callback = function(dialog)
+                dialog.data.deconstructFn(dialog.data.iterations)
 
-                    ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
-                end,
-            },
-            -- Cancel
-            {
-                text = SI_DIALOG_CANCEL,
-                keybind = "DIALOG_NEGATIVE",
-                callback = function(dialog)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
-                end,
-            },
-            -- Max Quantity
-            {
-                text = function(dialog)
-                    if dialog.data.iterations < dialog.data.maxIterations then
-                        return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MAX)
-                    else
-                        return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MIN)
-                    end
-                end,
-                keybind = "DIALOG_TERTIARY",
-                callback = function(dialog)
-                    if dialog.data.iterations < dialog.data.maxIterations then
-                        dialog.data.iterations = dialog.data.maxIterations
-                    else
-                        dialog.data.iterations = dialog.data.minIterations
-                    end
-                    ZO_GenericParametricListGamepadDialogTemplate_RefreshVisibleEntries(dialog)
-                end,
-            },
-        }
+                ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
+            end,
+        },
+        -- Cancel
+        {
+            text = SI_DIALOG_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
+            end,
+        },
+        -- Max Quantity
+        {
+            text = function(dialog)
+                if dialog.data.iterations < dialog.data.maxIterations then
+                    return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MAX)
+                else
+                    return GetString(SI_GAMEPAD_CRAFTING_QUANTITY_MIN)
+                end
+            end,
+            keybind = "DIALOG_TERTIARY",
+            callback = function(dialog)
+                if dialog.data.iterations < dialog.data.maxIterations then
+                    dialog.data.iterations = dialog.data.maxIterations
+                else
+                    dialog.data.iterations = dialog.data.minIterations
+                end
+                ZO_GenericParametricListGamepadDialogTemplate_RefreshVisibleEntries(dialog)
+            end,
+        },
     }
+}
 
-    function ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, deconstructFn, verb)
-        local quality = GetItemQuality(bagId, slotIndex)
-        local nameColor = GetItemQualityColor(quality)
-        local itemName = nameColor:Colorize(GetItemName(bagId, slotIndex))
+function ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, deconstructFn, verb)
+    local quality = GetItemQuality(bagId, slotIndex)
+    local nameColor = GetItemQualityColor(quality)
+    local itemName = nameColor:Colorize(GetItemName(bagId, slotIndex))
 
-        ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", {bagId = bagId, slotIndex = slotIndex, maxIterations = maxIterations, deconstructFn = deconstructFn, verb = verb}, {mainTextParams = {itemName}})
-    end
+    ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", {bagId = bagId, slotIndex = slotIndex, maxIterations = maxIterations, deconstructFn = deconstructFn, verb = verb}, {mainTextParams = {itemName}})
 end
 
 --[[ Gamepad Crafting Ingredient Bar ]]--
