@@ -1720,7 +1720,7 @@ SafeAddString(SI_DEATH_RECAP_TELVAR_STONE_LOSS_LABEL, "テルバー・ストー�
 SafeAddString(SI_DEATH_RECAP_TELVAR_STONE_LOSS_VALUE, "-<<1>>", 0)
 SafeAddString(SI_DEATH_RECAP_TITLE, "死亡時の詳細情報", 0)
 SafeAddString(SI_DEATH_RECAP_TOGGLE_KEYBIND, "詳細の表示切り替え", 0)
-SafeAddString(SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE0, "選択中の|cffffff<<1>>|r原料を全て加工しますか？", 0)
+SafeAddString(SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE0, "選択した未加工の素材|cffffff<<1>>|rを全て加工しますか？", 0)
 SafeAddString(SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE1, "これらの|cffffff<<1>>|rアイテムを抽出しますか？", 0)
 SafeAddString(SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE2, "|cffffff<<1>>|rアイテムを解体しますか？", 0)
 SafeAddString(SI_DECONSTRUCTACTIONNAME_CONFIRMSTACK0, "<<1>>の加工数を選択する：", 0)
