@@ -420,14 +420,12 @@ function ZO_ChapterUpgrade_Gamepad:InitializeSelectEditionDialog()
                 },
             },
         },
-        blockDialogReleaseOnPress = true,
         buttons =
         {
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_SELECT_OPTION,
                 callback =  function(dialog)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_CHAPTER_UPGRADE_CHOOSE_EDITION")
                     local entryData = dialog.entryList:GetTargetData()
                     if dialog.data.chapterUpgradeData:IsPreRelease() then
                         ZO_ShowChapterPrepurchasePlatformDialog(dialog.data.chapterUpgradeData:GetChapterUpgradeId(), entryData.isCollectorsEdition, CHAPTER_UPGRADE_SOURCE_IN_GAME)
@@ -440,9 +438,6 @@ function ZO_ChapterUpgrade_Gamepad:InitializeSelectEditionDialog()
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_CANCEL,
-                callback =  function(dialog)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_CHAPTER_UPGRADE_CHOOSE_EDITION")
-                end,
             },
         }
     })
