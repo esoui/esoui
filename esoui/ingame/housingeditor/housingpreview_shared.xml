@@ -11,15 +11,6 @@
 
                         <Label name="$(parent)PreviousPrice" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" hidden="true">
                             <Anchor point="CENTER" />
-                            <Controls>
-                                <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY">
-                                    <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
-                                    <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
-                                    <OnInitialized>
-                                        self:SetHeight(2.5)
-                                    </OnInitialized>
-                                </Texture>
-                            </Controls>
                         </Label>
                     </Controls>
                 </Control>

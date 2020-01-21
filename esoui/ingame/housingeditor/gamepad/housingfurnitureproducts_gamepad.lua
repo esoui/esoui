@@ -12,8 +12,6 @@ function ZO_HousingFurnitureProducts_Gamepad:Initialize(owner)
             self:ResetSavedPositions()
         end
     end)
-
-    MARKET_CURRENCY_GAMEPAD:RegisterCallback("OnCurrencyUpdated", function() self:OnCurrencyUpdated() end)
 end
 
 function ZO_HousingFurnitureProducts_Gamepad:InitializeKeybindStripDescriptors()
@@ -99,19 +97,13 @@ function ZO_HousingFurnitureProducts_Gamepad:GetNoItemText()
     end
 end
 
-function ZO_HousingFurnitureProducts_Gamepad:OnCurrencyUpdated()
-    if GAMEPAD_HOUSING_FURNITURE_BROWSER_SCENE:IsShowing() then
-        local currencyStyle = MARKET_CURRENCY_GAMEPAD:ModifyKeybindStripStyleForCurrency(KEYBIND_STRIP_GAMEPAD_STYLE)
-        KEYBIND_STRIP:SetStyle(currencyStyle)
-    end
-end
-
 function ZO_HousingFurnitureProducts_Gamepad:OnShowing()
     ZO_HousingFurnitureList_Gamepad.OnShowing(self)
 
     UpdateMarketDisplayGroup(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
     MARKET_CURRENCY_GAMEPAD:Show()
-    self:OnCurrencyUpdated()
+    local currencyStyle = MARKET_CURRENCY_GAMEPAD:ModifyKeybindStripStyleForCurrency(KEYBIND_STRIP_GAMEPAD_STYLE)
+    KEYBIND_STRIP:SetStyle(currencyStyle)
 end
 
 function ZO_HousingFurnitureProducts_Gamepad:OnHiding()

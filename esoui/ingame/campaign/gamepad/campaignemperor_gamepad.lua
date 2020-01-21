@@ -20,7 +20,6 @@ function CampaignEmperor_Gamepad:Initialize(control)
     CampaignEmperor_Shared.Initialize(self, control)
 
     self.scrollIndicator = GetControl(control, "ScrollIndicator")
-    self.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
     ZO_Scroll_Gamepad_SetScrollIndicatorSide(self.scrollIndicator, ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
     
     self.imperialKeepPool = ZO_ControlPool:New("ZO_CampaignImperialKeep_Gamepad", self.imperialKeeps, "ImperialKeep")

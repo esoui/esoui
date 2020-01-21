@@ -32,7 +32,8 @@ function ZO_PointerBoxTutorial:DisplayTutorial(tutorialIndex)
     local trigger = GetTutorialTrigger(tutorialIndex)
     local layoutInfo = self:GetTriggerLayoutInfo(trigger)
 
-    self.tutorial:SetText(zo_strformat(SI_TUTORIAL_FORMATTER, description))
+
+    self.tutorial:SetText(description)
 
     self.pointerBox = POINTER_BOXES:Acquire()
     self.pointerBox:SetContentsControl(self.tutorial)

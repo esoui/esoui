@@ -29,13 +29,13 @@
         <TopLevelControl name="ZO_CharacterSelectProfile_Gamepad" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="true">
             <AnchorFill />
             <Controls>
-                <Label name="$(parent)Profile" font="ZoFontGamepad42">
+                <Label name="$(parent)ProfileName" font="ZoFontGamepad42">
                     <Dimensions y="46"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-115" offsetY="-64" />
                 </Label>
 
-                <Label name="$(parent)ProfileLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_CHARACTER_SELECT_PROFILE_LABEL" modifyTextType="UPPERCASE">
-                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Profile" offsetX="-10" />
+                <Label name="$(parent)ProfileLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
+                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)ProfileName" offsetX="-10" />
                 </Label>
             </Controls>
         </TopLevelControl>

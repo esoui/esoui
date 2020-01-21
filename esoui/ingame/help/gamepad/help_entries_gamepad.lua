@@ -74,8 +74,7 @@ function HelpTutorialsEntriesGamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 local targetData = self.itemList:GetTargetData()
                 local link = ZO_LinkHandler_CreateChatLink(GetHelpLink, self.categoryIndex, targetData.helpIndex)
-                ZO_LinkHandler_InsertLink(link)
-                CHAT_SYSTEM:SubmitTextEntry()
+                ZO_LinkHandler_InsertLinkAndSubmit(link)
             end,
 
             visible = function()

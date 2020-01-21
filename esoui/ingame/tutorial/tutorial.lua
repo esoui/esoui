@@ -115,7 +115,7 @@ end
 function ZO_Tutorials:OnDisplayTutorial(tutorialIndex)
     local tutorialType = GetTutorialType(tutorialIndex)
     if self.tutorialHandlers[tutorialType] then
-        local _, _, priority = GetTutorialInfo(tutorialIndex)
+        local priority = GetTutorialDisplayPriority(tutorialIndex)
         self.tutorialHandlers[tutorialType]:OnDisplayTutorial(tutorialIndex, priority)
     end
 end

@@ -3,6 +3,12 @@ ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH = 310 - ZO_GAMEPAD_INTERACTIVE_FI
 ZO_GAMEPAD_FRIENDS_LIST_CHARACTER_NAME_WIDTH = 205 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH = 260 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
 
+ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_INFO_WIDTH = 100 - ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X
+-- Remove 100px from existing columns to make room for the heron user info column. These should add up to 100 so the overall layout is the same width whether or not the heron column is visible
+ZO_GAMEPAD_FRIENDS_LIST_HERON_USER_FACING_NAME_WIDTH = ZO_GAMEPAD_FRIENDS_LIST_USER_FACING_NAME_WIDTH - 20
+ZO_GAMEPAD_FRIENDS_LIST_HERON_CHARACTER_NAME_WIDTH = ZO_GAMEPAD_FRIENDS_LIST_CHARACTER_NAME_WIDTH - 20
+ZO_GAMEPAD_FRIENDS_LIST_HERON_ZONE_WIDTH = ZO_GAMEPAD_FRIENDS_LIST_ZONE_WIDTH - 60
+
 -----------------
 -- Friend List
 -----------------
@@ -13,8 +19,8 @@ function FriendsList_Gamepad:New(...)
     return ZO_GamepadSocialListPanel.New(self, ...)
 end
 
-function FriendsList_Gamepad:Initialize(control)
-    ZO_GamepadSocialListPanel.Initialize(self, control, FRIENDS_LIST_MANAGER, "ZO_GamepadFriendsListRow")
+function FriendsList_Gamepad:Initialize(control, rowTemplate)
+    ZO_GamepadSocialListPanel.Initialize(self, control, FRIENDS_LIST_MANAGER, rowTemplate)
     self:SetTitle(GetString(SI_GAMEPAD_CONTACTS_FRIENDS_LIST_TITLE))
     self:SetEmptyText(GetString(SI_GAMEPAD_CONTACTS_FRIENDS_LIST_NO_FRIENDS_MESSAGE));
     self:SetupSort(FRIENDS_LIST_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_UP)
@@ -31,7 +37,7 @@ function FriendsList_Gamepad:GetAddKeybind()
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
             name = GetString(SI_GAMEPAD_CONTACTS_ADD_FRIEND_BUTTON_LABEL),
-            
+
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
@@ -48,7 +54,7 @@ function FriendsList_Gamepad:GetAddKeybind()
 end
 
 function FriendsList_Gamepad:LayoutTooltip(tooltipManager, tooltip, data)
-    tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp)
+    tooltipManager:LayoutFriend(tooltip, ZO_FormatUserFacingDisplayName(data.displayName), data.characterName, data.class, data.gender, data.level, data.championPoints, data.formattedAllianceName, data.formattedZone, not data.online, data.secsSinceLogoff, data.timeStamp, data.heronName)
 end
 
 function FriendsList_Gamepad:OnNumOnlineChanged()
@@ -74,16 +80,16 @@ function FriendsList_Gamepad:OnShowing()
 end
 
 function FriendsList_Gamepad:CommitScrollList()
-	ZO_GamepadSocialListPanel.CommitScrollList(self)
+    ZO_GamepadSocialListPanel.CommitScrollList(self)
 
-	--This just sets the empty text, the visibility of the empty text is contorlled by SortFilterList when the filtered list is empty
-	--The text is reset by GamepadInteractiveSortFilterList.CommitScrollList where it sets the text to No Friends or Filter Returned None as appropriate and this overrides it if the players are offline
-	if #self.masterList > 0 then
-		if self:GetCurrentSearch() == "" and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE) then
-			self.emptyRowMessage:SetText(GetString(SI_FRIENDS_LIST_ALL_FRIENDS_OFFLINE))
-		end
-	end
-end		
+    --This just sets the empty text, the visibility of the empty text is contorlled by SortFilterList when the filtered list is empty
+    --The text is reset by GamepadInteractiveSortFilterList.CommitScrollList where it sets the text to No Friends or Filter Returned None as appropriate and this overrides it if the players are offline
+    if #self.masterList > 0 then
+        if self:GetCurrentSearch() == "" and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE) then
+            self.emptyRowMessage:SetText(GetString(SI_FRIENDS_LIST_ALL_FRIENDS_OFFLINE))
+        end
+    end
+end
 
 function FriendsList_Gamepad:OnHidden()
     if IsConsoleUI() then
@@ -112,5 +118,17 @@ function FriendsList_Gamepad:BuildOptionsList()
 end
 
 function ZO_FriendsList_Gamepad_OnInitialized(self)
-    ZO_FRIENDS_LIST_GAMEPAD = FriendsList_Gamepad:New(self)
+    -- Set up columns before initializing panel
+    local rowTemplate
+    local headersTemplate
+    if IsHeronUI() then
+        rowTemplate = "ZO_GamepadFriendsListRow_Heron"
+        headersTemplate = "ZO_GamepadFriendsListHeaders_Heron"
+    else
+        rowTemplate = "ZO_GamepadFriendsListRow"
+        headersTemplate = "ZO_GamepadFriendsListHeaders"
+    end
+    ApplyTemplateToControl(self:GetNamedChild("ContainerHeaders"), headersTemplate)
+
+    ZO_FRIENDS_LIST_GAMEPAD = FriendsList_Gamepad:New(self, rowTemplate)
 end

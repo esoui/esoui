@@ -443,16 +443,13 @@
                 <Down>SCENE_MANAGER:OnToggleHUDUIBinding()</Down>
             </Action>
 
-            <Action name="TOGGLE_GAMEPAD_MODE">
-                <Up>
+            <Action name="TOGGLE_GAMEPAD_MODE" preventAutomaticInputModeChange="true">
+                <Down>
                     if IsGamepadUISupported() and IsKeyboardUISupported() then
-                        if GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED) then
-                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "false")
-                        else
-                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "true")
-                        end
+                        local mode = IsInGamepadPreferredMode() and INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD or INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
+                        SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE, mode)
                     end
-                </Up>
+                </Down>
             </Action>
 
             <Action name="TOGGLE_NAMEPLATES">
@@ -867,6 +864,42 @@
         </Category>
     </Layer>
     <!-- Not player facing -->
+    <Layer name="SetGuildRankDialog">
+        <Category>
+            <Action name="SET_GUILD_RANK_1" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(1)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_2" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(2)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_3" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(3)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_4" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(4)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_5" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(5)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_6" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(6)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_7" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(7)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_8" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(8)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_9" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(9)</Down>
+            </Action>
+            <Action name="SET_GUILD_RANK_10" hideAction="true" rebindable="false">
+                <Down>GUILD_ROSTER_KEYBOARD:SetRankDialogRank(10)</Down>
+            </Action>
+        </Category>
+    </Layer>
+
+    <!-- Not player facing -->
     <Layer name="RadialMenu">
         <BlockKey key="MOUSE_LEFT" />
         <BlockKey key="MOUSE_RIGHT" />
@@ -915,13 +948,13 @@
     <Layer name="GamepadChatSystem" allowFallthrough="false">
         <Category>
             <Action name="SUBMIT_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
-                <Down>CHAT_SYSTEM:SubmitTextEntry()</Down>
+                <Down>ZO_ChatSystem_SubmitChat()</Down>
             </Action>
             <Action name="CANCEL_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
-                <Down>CHAT_SYSTEM:CloseTextEntry(true)</Down> <!--Retain text-->
+                <Down>ZO_ChatSystem_CancelChat()</Down>
             </Action>
             <Action name="EXIT_CHAT" hideAction="true" inheritsBindFrom="UI_SHORTCUT_EXIT">
-                <Down>CHAT_SYSTEM:CloseTextEntry()</Down>
+                <Down>ZO_ChatSystem_ExitChat()</Down>
             </Action>
             <AllowAction name="START_CHAT_ENTER"/>
         </Category>
@@ -965,13 +998,21 @@
         </Category>
     </Layer>
     <!-- Not player facing-->
-    <Layer name="ScreenAdjust">
+    <Layer name="ScreenAdjustActions">
         <Category>
+            <Action name="SCREEN_ADJUST_GROW" hideAction="true">
+                <Down>ZO_ScreenAdjust_AddToGrowthRate(1)</Down>
+                <Up>ZO_ScreenAdjust_AddToGrowthRate(-1)</Up>
+            </Action>
+            <Action name="SCREEN_ADJUST_SHRINK" hideAction="true">
+                <Down>ZO_ScreenAdjust_AddToGrowthRate(-1)</Down>
+                <Up>ZO_ScreenAdjust_AddToGrowthRate(1)</Up>
+            </Action>
             <Action name="SCREEN_ADJUST_SAVE" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
-                <Down>SCREEN_ADJUST:OnSave()</Down>
+                <Down>ZO_ScreenAdjust_Handle_OnSave()</Down>
             </Action>
             <Action name="SCREEN_ADJUST_CANCEL" hideAction="true" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
-                <Down>SCREEN_ADJUST:OnCancel()</Down>
+                <Down>ZO_ScreenAdjust_Handle_OnCancel()</Down>
             </Action>
         </Category>
     </Layer>

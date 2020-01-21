@@ -75,6 +75,10 @@ function ZO_GuildBrowser_GuildInfo_Keyboard:Initialize(control)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, self.OnLinkClicked, self)
 end
 
+function ZO_GuildBrowser_GuildInfo_Keyboard:IsShown()
+    KEYBOARD_GUILD_BROWSER_GUILD_INFO_FRAGMENT:IsShowing()
+end
+
 function ZO_GuildBrowser_GuildInfo_Keyboard:InitializeKeybindStripDescriptor()
     self.keybindStripDescriptor =
     {
@@ -85,7 +89,17 @@ function ZO_GuildBrowser_GuildInfo_Keyboard:InitializeKeybindStripDescriptor()
             name = GetString(SI_GUILD_BROWSER_GUILD_INFO_APPLY_TO_GUILD),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function()
-                ZO_Dialogs_ShowDialog("SUBMIT_GUILD_FINDER_APPLICATION")
+                local guildData = GUILD_BROWSER_MANAGER:GetGuildData(self.currentGuildId)
+                if guildData then
+                    ZO_Dialogs_ShowDialog("SUBMIT_GUILD_FINDER_APPLICATION")
+                else
+                    local data =
+                    {
+                        guildId = self.currentGuildId,
+                        onCloseFunction = function() self:Close() end,
+                    }
+                    ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_APPLICATION_STALE", data, { mainTextParams = { GetString("SI_GUILDAPPLICATIONRESPONSE", GUILD_APP_RESPONSE_GUILD_DATA_OUT_OF_DATE) } })
+                end
             end,
             enabled = function()
                 if #GUILD_BROWSER_MANAGER:GetCurrentApplicationsList() >= MAX_GUILD_FINDER_APPLICATIONS_PER_ACCOUNT then
@@ -268,7 +282,7 @@ function ZO_SubmitGuildFinderApplication_Dialog_OnInitialized(control)
         title =
         {
             text = SI_GUILD_BROWSER_SUBMIT_APPLICATION_DIALOG_TITLE,
-        },        
+        },
         buttons =
         {
             [1] =
@@ -280,7 +294,6 @@ function ZO_SubmitGuildFinderApplication_Dialog_OnInitialized(control)
                                 GUILD_BROWSER_GUILD_INFO_KEYBOARD:OnApplyToGuildSubmit(message)
                             end,
             },
-        
             [2] =
             {
                 control =   control:GetNamedChild("Cancel"),

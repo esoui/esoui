@@ -120,6 +120,10 @@
                     <DimensionConstraints maxX="250" />
                 </Label>
                 <Control name="$(parent)Points" inherits="ZO_Spinner">
+                    <OnInitialized>
+                        ZO_KeyControl_OnInitialized(self:GetNamedChild("Decrease"))
+                        ZO_KeyControl_OnInitialized(self:GetNamedChild("Increase"))
+                    </OnInitialized>
                     <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="-5"/>
                     <Controls>
                         <Label name="$(parent)Display" font="ZoFontGamepad34" override="true"/>
@@ -151,32 +155,32 @@
         </Control>
         <Texture name="ZO_ConstellationStarSpiral" virtual="true" pixelRoundingEnabled="false" blendMode="COLOR_DODGE" textureFile="EsoUI\Art\Champion\champion_star_spiral.dds"/>
         <Control name="ZO_ConstellationCycleLeftKey" resizeToFitDescendents="true" virtual="true">
-            <OnInitialized>
-                self:GetNamedChild("Key"):SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER))
-            </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Cursor" textureFile="EsoUI/Art/Cursors/Cursor_nextLeft.dds">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="BOTTOMLEFT"/>
                 </Texture>
-                <Texture name="$(parent)Key">
+                <Texture name="$(parent)Key" inherits="ZO_KeyTexture">
                     <Dimensions x="55" y="55"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Cursor" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                    <OnInitialized name="Constellation">
+                        self:SetKeyCode(KEY_GAMEPAD_LEFT_SHOULDER)
+                    </OnInitialized>
                 </Texture>
             </Controls>
         </Control>
         <Control name="ZO_ConstellationCycleRightKey" resizeToFitDescendents="true" virtual="true">
-            <OnInitialized>
-                self:GetNamedChild("Key"):SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER))
-            </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Cursor" textureFile="EsoUI/Art/Cursors/Cursor_nextRight.dds">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
-                <Texture name="$(parent)Key">
+                <Texture name="$(parent)Key" inherits="ZO_KeyTexture">
                     <Dimensions x="55" y="55"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Cursor" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                    <OnInitialized name="Constellation">
+                        self:SetKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER)
+                    </OnInitialized>
                 </Texture>
             </Controls>
         </Control>

@@ -15,7 +15,29 @@ ESO_Dialogs["HERON_PROMPT_USER_TO_VISIT_URL"] =
     },
     buttons =
     {
-        [1] =
+        {
+            text = SI_DIALOG_DISMISS,
+        },
+    },
+}
+
+ESO_Dialogs["HERON_PROMPT_USER_TO_SEND_EMAIL"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_CONFIRM_SEND_EMAIL_TITLE,
+    },
+    mainText =
+    {
+        text = SI_HERON_PROMPT_USER_TO_SEND_EMAIL_TEXT,
+    },
+    buttons =
+    {
         {
             text = SI_DIALOG_DISMISS,
         },
@@ -38,7 +60,13 @@ function ZO_HeronURLManager:Initialize()
 end
 
 function ZO_HeronURLManager:VisitHeronURL(urlString)
-    ZO_Dialogs_ShowPlatformDialog("HERON_PROMPT_USER_TO_VISIT_URL", nil, { mainTextParams = { urlString } })
+    local EMAIL_MATCH_PATTERN = "^mailto:(.+)"
+    local emailAddress = zo_strmatch(urlString, EMAIL_MATCH_PATTERN)
+    if emailAddress then
+        ZO_Dialogs_ShowPlatformDialog("HERON_PROMPT_USER_TO_SEND_EMAIL", nil, { mainTextParams = { emailAddress } })
+    else
+        ZO_Dialogs_ShowPlatformDialog("HERON_PROMPT_USER_TO_VISIT_URL", nil, { mainTextParams = { urlString } })
+    end
 end
 
 HERON_URL_MANAGER = ZO_HeronURLManager:New()

@@ -146,7 +146,7 @@
             <AnchorFill />
 
             <Controls>
-                <Button name="$(parent)LeftArrow">
+                <Button name="$(parent)LeftArrow" inherits="ZO_KeyButton">
                     <Dimensions x="64" y="64" />
                     <Controls>
                         <Texture name="$(parent)GamepadDirectionIndicator" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" hidden="true">
@@ -157,7 +157,7 @@
                     </Controls>
                 </Button>
 
-                <Button name="$(parent)RightArrow">
+                <Button name="$(parent)RightArrow"  inherits="ZO_KeyButton">
                     <Dimensions x="64" y="64" />
                     <Controls>
                         <Texture name="$(parent)GamepadDirectionIndicator" textureFile="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" hidden="true">

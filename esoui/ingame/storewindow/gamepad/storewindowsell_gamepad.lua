@@ -25,12 +25,28 @@ end
 
 function ZO_GamepadStoreSell:RegisterEvents()
     local function OnInventoryFullUpdate()
+        if self.confirmationMode then
+            self:UnselectSellItem()
+        end
         self.list:UpdateList()
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     local function OnInventorySingleSlotUpdate(eventId, bagId, slotId, isNewItem, itemSoundCategory, updateReason)
         if updateReason == INVENTORY_UPDATE_REASON_DEFAULT then
+            --If we are in confirmation mode (picking how many of an item to sell) and part of all of the stack is removed from the inventory then exit confirmation mode.
+            --This can happen if you sell an item and the server is slow enough that you are able to press A to enter confirmation mode again before the server sends
+            --the new inventory information down.
+            if self.confirmationMode then
+                local targetData = self.list:GetTargetData()
+                if targetData then
+                    local confirmingBagId, confirmingSlotId = ZO_Inventory_GetBagAndIndex(targetData)
+                    if confirmingBagId == bagId and confirmingSlotId == slotId then
+                        self:UnselectSellItem()
+                    end
+                end
+            end
+            
             self.list:UpdateList()
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end

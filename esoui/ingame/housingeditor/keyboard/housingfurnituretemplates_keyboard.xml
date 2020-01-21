@@ -101,13 +101,6 @@
 
                 <Label name="$(parent)PreviousCost" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontWinH4" hidden="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)Cost" relativePoint="LEFT" offsetX="-10" />
-                    <Controls>
-                        <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY">
-                            <Dimensions y="2.5" />
-                            <Anchor point="LEFT" offsetX="-2" offsetY="2"/>
-                            <Anchor point="RIGHT" offsetX="2" offsetY="2"/>
-                        </Texture>
-                    </Controls>
                 </Label>
 
                 <Label name="$(parent)TextCallout" inherits="ZO_MarketTextCallout_Keyboard" >

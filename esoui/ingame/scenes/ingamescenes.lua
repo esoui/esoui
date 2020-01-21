@@ -5,6 +5,16 @@
 local gammaAdjustScene = ZO_Scene:New("gammaAdjust", SCENE_MANAGER)
 gammaAdjustScene:AddFragment(GAMMA_SCENE_FRAGMENT)
 
+------------------------
+-- Screen Adjust Scene
+------------------------
+
+local screenAdjustScene = ZO_Scene:New("screenAdjust", SCENE_MANAGER)
+screenAdjustScene:AddFragment(SCREEN_ADJUST_SCENE_FRAGMENT)
+screenAdjustScene:AddFragmentGroup(FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW) -- TODO: Heron, why is this here?
+screenAdjustScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+screenAdjustScene:AddFragment(SCREEN_ADJUST_ACTION_LAYER_FRAGMENT)
+
 -------------------
 --Crown Store Announcement Scene
 -------------------
@@ -98,6 +108,7 @@ GAME_MENU_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_OPTIONS)
 GAME_MENU_SCENE:AddFragment(SYSTEM_WINDOW_SOUNDS)
 GAME_MENU_SCENE:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 GAME_MENU_SCENE:AddFragment(PERFORMANCE_METER_FRAGMENT)
+GAME_MENU_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 
 -----------------------
 --Siege Bar Scene

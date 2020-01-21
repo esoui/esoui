@@ -146,12 +146,15 @@ function ZO_KeybindStrip_OnInitialized(control)
     end
 
     -- This is meant to be a private method and should not be called directly outside of this class.
-    function KEYBIND_STRIP:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, icon, controlName, buttonTemplate, keybindControl)
+    function KEYBIND_STRIP:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, iconCallback, controlName, buttonTemplate, keybindControl)
         if keybindControl == nil then
             keybindControl = CreateControlFromVirtual(controlName, control, buttonTemplate)
-            keybindControl:SetCustomKeyIcon(icon)
             keybindControl:SetKeybindEnabledInEdit(true)
             keybindControl:SetMouseOverEnabled(false)
+            ZO_GamepadTypeBasedControl_OnInitialized(keybindControl)
+            keybindControl:SetUpdateCallback(function(keybindControl)
+                keybindControl:SetCustomKeyIcon(iconCallback())
+            end)
 
             local styleInfo = ZO_ShallowTableCopy(KEYBIND_STRIP_GAMEPAD_STYLE)
             styleInfo.resizeToFitPadding = 0
@@ -178,7 +181,7 @@ function ZO_KeybindStrip_OnInitialized(control)
     end
 
     function KEYBIND_STRIP:GenerateGamepadRightScrollButtonDescriptor(text, visibleFunc)
-        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, ZO_GAMEPAD_RIGHT_SCROLL_ICON, 
+        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, GetGamepadRightStickScrollIcon, 
                                                 "$(parent)RightStickControl", "ZO_KeybindStripRightScrollKeybind", self.rightScrollKeybind)
 
         if self.rightScrollKeybind == nil then
@@ -189,7 +192,7 @@ function ZO_KeybindStrip_OnInitialized(control)
     end
 
     function KEYBIND_STRIP:GenerateGamepadLeftSlideButtonDescriptor(text, visibleFunc) 
-        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, ZO_GAMEPAD_LEFT_SLIDE_ICON, 
+        local keybind, keybindControl = self:GenerateGamepadStickButtonDescriptor_Internal(text, visibleFunc, GetGamepadLeftStickSlideIcon, 
                                                 "$(parent)LeftStickSlide","ZO_KeybindStripLeftSlideKeybind", self.leftSlideKeybind)
 
         if self.leftSlideKeybind == nil then

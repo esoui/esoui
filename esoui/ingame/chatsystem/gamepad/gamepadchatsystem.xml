@@ -1,0 +1,53 @@
+<GuiXml>
+    <Controls>
+        <TextBuffer name="ZO_GamepadChatBuffer" inherits="ZO_ChatBufferLinkTemplate" virtual="true" />
+
+        <Control name="ZO_GamepadChatWindowTemplate" hidden="true" virtual="true">
+            <Controls>
+                <TextBuffer name="$(parent)Buffer" inherits="ZO_GamepadChatBuffer" linkEnabled="true"/>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_GamepadTextChat" inherits="ZO_ChatWindowTopLevelTemplate" hidden="true">
+            <OnInitialized>
+                ZO_GamepadTextChat_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)Bg" override="true">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-25" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    
+                    <Edge file="EsoUI/Art/ChatWindow/Gamepad/gp_HUD_chatWindowBG_edge.dds" edgeFileWidth="512" edgeFileHeight="64" />
+                    <Center file="EsoUI/Art/ChatWindow/Gamepad/gp_HUD_chatWindowBG_center.dds" />
+                    <Insets left="64" top="64" right="-64" bottom="-64" />
+                </Backdrop>
+
+                <Control name="$(parent)TextEntry" override="true">
+                    <Anchor point="BOTTOMLEFT" offsetY="-13"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-37" offsetY="-13"/>
+                    
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" font="ZoFontGamepad34" />
+
+                        <Backdrop name="$(parent)Edit" override="true" inherits="ZO_SingleLineEditBackdrop_Gamepad">
+                            <Controls>
+                                <EditBox name="$(parent)Box" override="true" inherits="ZO_DefaultEditForBackdrop_Gamepad ZO_ChatWindowTextEntryEditBoxEvents">
+                                    <OnFocusGained>
+                                        GAMEPAD_CHAT_SYSTEM:OnTextEntryFocusGained()
+                                    </OnFocusGained>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+                
+                <Texture name="$(parent)ChatBubble" textureFile="EsoUI/Art/HUD/Gamepad/gp_HUDNotification_notification.dds" inheritAlpha="false">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TextEntry" relativePoint="RIGHT" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>
+

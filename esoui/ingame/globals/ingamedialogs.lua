@@ -1147,7 +1147,8 @@ ESO_Dialogs["PROMOTE_TO_GUILDMASTER"] =
         {
             text =      SI_DIALOG_ACCEPT,
             callback =  function(dialog)
-                            GuildPromote(dialog.data.guildId, dialog.data.displayName)
+                            local GUILD_MASTER_RANK = 1
+                            GuildSetRank(dialog.data.guildId, dialog.data.displayName, GUILD_MASTER_RANK)
                         end,
             clickSound = SOUNDS.GUILD_ROSTER_PROMOTE,
         },
@@ -2395,10 +2396,10 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
             keybind = "DIALOG_PRIMARY",
             text = SI_CUSTOMER_SERVICE_OPEN_WEB_BROWSER,
             visible = function()
-                return not IsConsoleUI()
+                return not IsConsoleUI() and not IsHeronUI()
             end,
             callback = function(...)
-                ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_HELP }, { mainTextParams = { GetString(SI_CUSTOMER_SERVICE_ESO_HELP_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB) } })
+                ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_HELP, GetString(SI_CUSTOMER_SERVICE_ESO_HELP_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB))
             end,
         },
         {
@@ -3839,6 +3840,45 @@ ESO_Dialogs["GUILD_FINDER_APPLICATION_FAILED"] =
         [1] =
         {
             text = SI_DIALOG_CLOSE,
+        },
+    },
+}
+
+ESO_Dialogs["GUILD_FINDER_APPLICATION_STALE"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = SI_GUILD_BROWSER_GUILD_INFO_APPLICATION_FAILED_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_GUILD_FINDER_ERROR_DIALOG_BODY_FORMATTER,
+    },
+
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_GUILD_BROWSER_APPLICATION_DIALOG_REFRESH_GUILD,
+            callback = function(dialog)
+                GUILD_BROWSER_MANAGER:RequestGuildData(dialog.data.guildId)
+            end
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CLOSE,
+            callback = function(dialog)
+                if dialog.data.onCloseFunction then
+                    dialog.data.onCloseFunction()
+                end
+            end
         },
     },
 }

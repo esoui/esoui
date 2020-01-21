@@ -81,26 +81,53 @@ function ZO_Options_Account_ChangeEmail_Dialog_Keyboard_OnInitialized(control)
     end)
 end
 
-function ZO_OptionsPanel_Account_InitializeEmailAddressLabel_Keyboard(control)
-    ZO_OptionsPanel_Account_UpdateEmailAddressLabel_Keyboard()
-end
-
-function ZO_OptionsPanel_Account_UpdateEmailAddressLabel_Keyboard()
-    local labelControl = Options_Account_DisplayEmailAddress:GetNamedChild("Content")
-
+function ZO_OptionsPanel_Account_SetupEmailLabel_Keyboard(control)
     local emailText = ZO_OptionsPanel_GetAccountEmail()
     if emailText == "" then
         emailText = GetString(SI_INTERFACE_OPTIONS_ACCOUNT_NO_EMAIL_TEXT)
     end
 
-    labelControl:SetText(emailText)
+    control:SetText(emailText)
 end
 
-function ZO_OptionsPanel_Account_InitializeSetting_Keyboard(control, settingType, settingId)
-    if ZO_SharedOptions_SettingsData[SETTING_PANEL_ACCOUNT] ~= nil then
-        control.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_ACCOUNT, settingType, settingId)
-        ZO_OptionsWindow_InitializeControl(control)
-    else
-        control:SetHidden(true)
+function ZO_OptionsPanel_Account_ShowEmailTooltip_Keyboard(control)
+    local emailText = ZO_OptionsPanel_GetAccountEmail()
+    if emailText ~= "" then
+        InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+        SetTooltipText(InformationTooltip, emailText)
     end
 end
+
+function ZO_OptionsPanel_Account_HideEmailTooltip_Keyboard(control)
+    ClearTooltip(InformationTooltip)
+end
+
+local panelBuilder = ZO_KeyboardOptionsPanelBuilder:New(SETTING_PANEL_ACCOUNT)
+
+------------------------------
+-- Account -> Email Address --
+------------------------------
+panelBuilder:AddSetting({
+    controlName = "Options_Account_ChangeEmail",
+    template = "ZO_Options_Account_InvokeCallback_WithEmail",
+    settingType = SETTING_TYPE_ACCOUNT,
+    settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
+    header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Account_ResendActivation",
+    settingType = SETTING_TYPE_CUSTOM,
+    settingId = OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION,
+    header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
+})
+
+--------------------------------------
+-- Account -> Marketing Preferences --
+--------------------------------------
+panelBuilder:AddSetting({
+    controlName = "Options_Account_GetUpdates",
+    settingType = SETTING_TYPE_ACCOUNT,
+    settingId = ACCOUNT_SETTING_GET_UPDATES,
+    header = SI_INTERFACE_OPTIONS_ACCOUNT_MARKETING_HEADER,
+})

@@ -1,12 +1,10 @@
 local function EmitMessage(text)
-    if(CHAT_SYSTEM)
-    then
-        if(text == "")
-        then
+    if CHAT_ROUTER then
+        if text == "" then
             text = "[Empty String]"
         end
         
-        CHAT_SYSTEM:AddMessage(text)
+        CHAT_ROUTER:AddDebugMessage(text)
     end
 end
 

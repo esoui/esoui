@@ -80,39 +80,22 @@ function ZO_OptionsPanel_Video_CustomScale_RefreshEnabled(control)
     end
 end
 
-function ZO_OptionsPanel_Video_CustomScale_OnShow(control)
-    if ZO_GameMenu_PreGame then
-        ZO_OptionsPanel_Video_CustomScale_RefreshEnabled(control)
-        GetControl(control, "WarningIcon"):SetHidden(false)
-    end
-end
-
-function ZO_OptionsPanel_Video_UseCustomScale_OnShow(control)
-    if ZO_GameMenu_PreGame then
-        ZO_Options_SetOptionInactive(control)
-        GetControl(control, "WarningIcon"):SetHidden(false)
-    end
-end
-
-function ZO_OptionsPanel_Video_ActiveDisplay_OnInitialize(control)
-    if IsActiveDisplayEnabledOnPlatform() then
-        control.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY)
-        ZO_OptionsPanel_Video_InitializeDisplays(control)
-
-        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_AVAILABLE_DISPLAY_DEVICES_CHANGED, function() ZO_OptionsPanel_Video_OnActiveDisplayChanged(control) end)
-    else
-        control:SetHidden(true)
-    end
-end
-
-function ZO_OptionsPanel_Video_Resolution_OnInitialize(control)
-    if not IsActiveDisplayEnabledOnPlatform() then
-        control:SetAnchor(TOPLEFT, Options_Video_DisplayMode, BOTTOMLEFT, 0, 10)
+function ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting()
+    if IsConsoleUI() then
+        local numValidOptions = 0
+        for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_BEGIN, CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_END do
+            if DoesSystemSupportConsoleEnhancedRenderQuality(settingValue) then
+                numValidOptions = numValidOptions + 1
+                if numValidOptions > 1 then
+                    return true
+                end
+            end
+        end
     end
 
-    control.data = KEYBOARD_OPTIONS:GetSettingsData(SETTING_PANEL_VIDEO, SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_RESOLUTION)
-    ZO_OptionsPanel_Video_InitializeResolution(control)
+    return false
 end
+
 
 local ZO_OptionsPanel_Video_ControlData =
 {
@@ -130,7 +113,8 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_DISPLAY_MODE_TOOLTIP,
             valid = {FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE, FULLSCREEN_MODE_WINDOWED, FULLSCREEN_MODE_FULLSCREEN_WINDOWED, },
             valueStringPrefix = "SI_FULLSCREENMODE",
-            
+            exists = ZO_IsPCUI,
+
             events = {[FULLSCREEN_MODE_WINDOWED] = "DisplayModeNonExclusive", [FULLSCREEN_MODE_FULLSCREEN_WINDOWED] = "DisplayModeNonExclusive", [FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE] = "DisplayModeExclusive",},
         },
         --Options_Video_ActiveDisplay
@@ -142,6 +126,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_TOOLTIP,
+            exists = IsActiveDisplayEnabledOnPlatform,
 
             eventCallbacks =
             {
@@ -158,6 +143,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_RESOLUTION,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_RESOLUTION_TOOLTIP,
+            exists = ZO_IsPCUI,
 
             eventCallbacks =
             {
@@ -179,16 +165,20 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_VSYNC,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_VSYNC_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
-        --Options_Video_Anti_Aliasing
-        [GRAPHICS_SETTING_ANTI_ALIASING] =
+        --Options_Video_AntiAliasing_Type
+        [GRAPHICS_SETTING_ANTIALIASING_TYPE] =
         {
-            controlType = OPTIONS_CHECKBOX,
+            controlType = OPTIONS_FINITE_LIST,
             system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_ANTI_ALIASING,
+            settingId = GRAPHICS_SETTING_ANTIALIASING_TYPE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING_TOOLTIP,
+            valid = { ANTIALIASING_TYPE_NONE, ANTIALIASING_TYPE_FXAA, },
+            valueStringPrefix = "SI_ANTIALIASINGTYPE",
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Gamma_Adjustment
         [GRAPHICS_SETTING_GAMMA_ADJUSTMENT] =
@@ -206,20 +196,21 @@ local ZO_OptionsPanel_Video_ControlData =
         --Options_Video_Graphics_Quality
         [GRAPHICS_SETTING_PRESETS] =
         {
-                controlType = OPTIONS_FINITE_LIST,
-                system = SETTING_TYPE_GRAPHICS,
-                settingId = GRAPHICS_SETTING_PRESETS,
-                panel = SETTING_PANEL_VIDEO,
-                text = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS,
-                tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS_TOOLTIP,
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_PRESETS,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS_TOOLTIP,
+            exists = ZO_IsPCUI,
 
-                valid = IsMinSpecMachine() 
-                        and {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_CUSTOM}
-                        or {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_HIGH, GRAPHICS_PRESETS_ULTRA, GRAPHICS_PRESETS_CUSTOM},
+            valid = IsMinSpecMachine() 
+                    and {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_CUSTOM}
+                    or {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_HIGH, GRAPHICS_PRESETS_ULTRA, GRAPHICS_PRESETS_CUSTOM},
 
-                valueStringPrefix = "SI_GRAPHICSPRESETS",
-                mustReloadSettings = true,
-                mustPushApply = true,
+            valueStringPrefix = "SI_GRAPHICSPRESETS",
+            mustReloadSettings = true,
+            mustPushApply = true,
         },
         --Options_Video_Texture_Resolution
         [GRAPHICS_SETTING_MIP_LOAD_SKIP_LEVELS] =
@@ -230,6 +221,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_TEXTURE_RES,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_TEXTURE_RES_TOOLTIP,
+            exists = ZO_IsPCUI,
 
             valid = IsMinSpecMachine() 
                     and {TEX_RES_CHOICE_LOW, TEX_RES_CHOICE_MEDIUM}
@@ -249,6 +241,7 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_SUB_SAMPLING_TOOLTIP,
             valid = {SUB_SAMPLING_MODE_LOW, SUB_SAMPLING_MODE_MEDIUM, SUB_SAMPLING_MODE_NORMAL},
             valueStringPrefix = "SI_SUBSAMPLINGMODE",
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Shadows
         [GRAPHICS_SETTING_SHADOWS] =
@@ -262,6 +255,7 @@ local ZO_OptionsPanel_Video_ControlData =
             valid = {SHADOWS_CHOICE_OFF, SHADOWS_CHOICE_LOW, SHADOWS_CHOICE_MEDIUM, SHADOWS_CHOICE_HIGH, SHADOWS_CHOICE_ULTRA},
             valueStringPrefix = "SI_SHADOWSCHOICE",
             mustPushApply = true,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Reflection_Quality
         [GRAPHICS_SETTING_REFLECTION_QUALITY] =
@@ -275,6 +269,7 @@ local ZO_OptionsPanel_Video_ControlData =
             valid = {REFLECTION_QUALITY_OFF, REFLECTION_QUALITY_LOW, REFLECTION_QUALITY_MEDIUM, REFLECTION_QUALITY_HIGH},
             valueStringPrefix = "SI_REFLECTIONQUALITY",
             mustPushApply = true,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Maximum_Particle_Systems
         [GRAPHICS_SETTING_PFX_GLOBAL_MAXIMUM] =
@@ -291,6 +286,7 @@ local ZO_OptionsPanel_Video_ControlData =
             showValue = true,
             showValueMin = 768,
             showValueMax = 2048,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Particle_Suppression_Distance
         [GRAPHICS_SETTING_PFX_SUPPRESS_DISTANCE] =
@@ -307,6 +303,7 @@ local ZO_OptionsPanel_Video_ControlData =
             showValue = true,
             showValueMin = 35,
             showValueMax = 100,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_View_Distance
         [GRAPHICS_SETTING_VIEW_DISTANCE] =
@@ -323,6 +320,7 @@ local ZO_OptionsPanel_Video_ControlData =
             showValue = true,
             showValueMin = 0,
             showValueMax = 100,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Ambient_Occlusion
         [GRAPHICS_SETTING_AMBIENT_OCCLUSION_TYPE] =
@@ -336,6 +334,7 @@ local ZO_OptionsPanel_Video_ControlData =
             valid = {AMBIENT_OCCLUSION_TYPE_NONE, AMBIENT_OCCLUSION_TYPE_SSAO, AMBIENT_OCCLUSION_TYPE_HBAO},
             valueStringPrefix = "SI_AMBIENTOCCLUSIONTYPE",
             mustPushApply = true,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Bloom
         [GRAPHICS_SETTING_BLOOM] =
@@ -346,6 +345,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_BLOOM,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_BLOOM_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Depth_Of_Field
         [GRAPHICS_SETTING_DEPTH_OF_FIELD] =
@@ -356,6 +356,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_DEPTH_OF_FIELD,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_DEPTH_OF_FIELD_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Distortion
         [GRAPHICS_SETTING_DISTORTION] =
@@ -366,6 +367,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_DISTORTION,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_DISTORTION_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_God_Rays
         [GRAPHICS_SETTING_GOD_RAYS] =
@@ -376,6 +378,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_GOD_RAYS,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_GOD_RAYS_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Video_Clutter_2D
         [GRAPHICS_SETTING_CLUTTER_2D] =
@@ -386,6 +389,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         [GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY] =
         {
@@ -397,6 +401,7 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP,
             --valid = dynamically determined based on the system below,
             valueStringPrefix = "SI_CONSOLEENHANCEDRENDERQUALITY",
+            exists = ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting,
         },
         [GRAPHICS_SETTING_HDR_BRIGHTNESS] =
         {
@@ -409,9 +414,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 0,
             maxValue = 1,
             valueFormat = "%.2f",
-            showValue = true,
-            showValueMin = 0,
-            showValueMax = 100,
+            visible = IsSystemUsingHDR,
         },
         [GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS] =
         {
@@ -421,6 +424,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_SHOW_ADDITIONAL_ALLY_EFFECTS,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_SHOW_ADDITIONAL_ALLY_EFFECTS_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
     },
 
@@ -436,6 +440,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE,
             tooltipText = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP,
+            exists = ZO_IsIngameUI,
             events = {
                 [true] = "UseCustomScaleToggled",
                 [false] = "UseCustomScaleToggled",
@@ -456,6 +461,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE,
             tooltipText = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP,
+            exists = ZO_IsIngameUI,
             valueFormat = "%.6f",
             minValue = 0.64,
             maxValue = 1.1,
@@ -476,6 +482,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
             text = SI_SETTING_SHOW_SCREEN_ADJUST,
+            exists = ZO_IsConsoleOrHeronUI,
             gamepadIsEnabledCallback = function() 
                                             -- only allow resizing once the previous one has been completed.
                                             return not IsGUIResizing()
@@ -492,14 +499,14 @@ local ZO_OptionsPanel_Video_ControlData =
             system = SETTING_TYPE_CUSTOM,
             panel = SETTING_PANEL_VIDEO,
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
-            text = SI_SETTING_SHOW_GAMMA_ADJUST,
+            text = SI_VIDEO_OPTIONS_CALIBRATE_GAMMA,
             gamepadTextOverride = SI_GAMMA_MAIN_TEXT,
             callback = function()
-                            SCENE_MANAGER:Push("gammaAdjust")
-                        end,
+                SCENE_MANAGER:Push("gammaAdjust")
+            end,
             customResetToDefaultsFunction = function()
-                                                ResetSettingToDefault(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GAMMA_ADJUSTMENT)
-                                            end
+                ResetSettingToDefault(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GAMMA_ADJUSTMENT)
+            end
         },
 
         [OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE] =
@@ -516,21 +523,6 @@ local ZO_OptionsPanel_Video_ControlData =
         },
     },
 }
-
-function ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting()
-    local numValidOptions = 0
-    for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_BEGIN, CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_END do
-        if DoesSystemSupportConsoleEnhancedRenderQuality(settingValue) then
-            numValidOptions = numValidOptions + 1
-        end
-    end
-
-    if numValidOptions > 1 then
-        return true
-    end
-
-    return false
-end
 
 --Dynamically determine which console render quality settings are allowed on this system
 local renderQualitySetting = ZO_OptionsPanel_Video_ControlData[SETTING_TYPE_GRAPHICS][GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY]

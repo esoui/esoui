@@ -52,15 +52,18 @@ function ZO_SharedFurnitureManager:Initialize()
     self.inProgressPlaceableFurnitureTextFilterTaskIds = { }
     self.completePlaceableFurnitureTextFilterTaskIds = { }
     self.placeableTextFilter = ""
+	self.isPlaceableFiltered = false
 
     self.retrievableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New("retrievable")
     self.retrievableFurniture = {}
     self.retrievableTextFilter = ""
+	self.isRetrievableFiltered = false
 
     self.marketProductCategoryTreeData = ZO_RootFurnitureCategory:New("market")
     self.marketProducts = {}
     self.marketProductIdToMarketProduct = {}
     self.marketProductTextFilter = ""
+	self.isMarketFiltered = false
 
     self.placementFurnitureTheme = FURNITURE_THEME_TYPE_ALL
     self.purchaseFurnitureTheme = FURNITURE_THEME_TYPE_ALL
@@ -388,7 +391,14 @@ do
             end
 
             if couldntFindExpectedCategory then
-                internalassert(false, string.format("Removing non-existant furniture from %s.", categoryTreeData:GetRootCategoryName()))
+				local isFiltered = (categoryTreeData == self.placeableFurnitureCategoryTreeData and self.isPlaceableFiltered)
+								or (categoryTreeData == self.retrievableFurnitureCategoryTreeData and self.isRetrievableFiltered)
+								or (categoryTreeData == self.marketProductCategoryTreeData and self.isMarketFiltered)
+
+				-- Only assert if the category or subcategory genuinely does not exist or if there is no filter currently being applied to the relevant category tree.
+	            if not isFiltered or not GetFurnitureCategoryInfo(categoryId) or not GetFurnitureCategoryInfo(subcategoryId) then
+					internalassert(false, string.format("Removing non-existent furniture from %s.", categoryTreeData:GetRootCategoryName()))
+				end
             end
         else
             local categoryData = categoryTreeData:GetSubcategory(ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY)
@@ -687,6 +697,8 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         
     --If we have filter text than create the tasks
     if self:CanFilterByText(self.placeableTextFilter) then
+		self.isPlaceableFiltered = true
+
         --Inventory Items
         local itemTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, self.placeableTextFilter)
         self.inProgressPlaceableFurnitureTextFilterTaskIds[ZO_PLACEABLE_TYPE_ITEM] = itemTaskId
@@ -712,6 +724,8 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         StartBackgroundListFilter(collectibleTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
+		self.isPlaceableFiltered = false
+
         --Inventory Items
         for bagId, slots in pairs(self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]) do
             for slotId, slotData in pairs(slots) do
@@ -739,6 +753,8 @@ function ZO_SharedFurnitureManager:RequestApplyRetrievableTextFilterToData()
 
     --If we have filter text than create the task
     if self:CanFilterByText(self.retrievableTextFilter) then
+		self.isRetrievableFiltered = true
+
         local furnitureTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID, self.retrievableTextFilter)
         self.inProgressRetrievableFurnitureTextFilterTaskId = furnitureTaskId
         AddBackgroundListFilterType(furnitureTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
@@ -750,6 +766,8 @@ function ZO_SharedFurnitureManager:RequestApplyRetrievableTextFilterToData()
         StartBackgroundListFilter(furnitureTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
+		self.isRetrievableFiltered = false
+
         for _, furnitureData in pairs(self.retrievableFurniture) do
             furnitureData:SetPassesTextFilter(true)
         end
@@ -767,6 +785,8 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
 
     --If we have filter text than create the task
     if self:CanFilterByText(self.marketProductTextFilter) then
+		self.isMarketFiltered = true
+
         local marketProductTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID, self.marketProductTextFilter)
         self.inProgressMarketProductTextFilterTaskId = marketProductTaskId
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
@@ -780,6 +800,8 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
         StartBackgroundListFilter(marketProductTaskId)
     --If we have no search text then everything passes, so set everything to true now.
     else
+		self.isMarketFiltered = false
+
         for i, marketProductData in ipairs(self.marketProducts) do
             marketProductData:SetPassesTextFilter(true)
         end

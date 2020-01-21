@@ -33,16 +33,13 @@
                 <Up>TakeScreenshot()</Up>
             </Action>
 
-            <Action name="TOGGLE_GAMEPAD_MODE">
-                <Up>
+            <Action name="TOGGLE_GAMEPAD_MODE" preventAutomaticInputModeChange="true">
+                <Down>
                     if IsGamepadUISupported() and IsKeyboardUISupported() then
-                        if GetSetting_Bool(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED) then
-                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "false")
-                        else
-                            SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_GAMEPAD_PREFERRED, "true")
-                        end
+                        local mode = IsInGamepadPreferredMode() and INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD or INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
+                        SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE, mode)
                     end
-                </Up>
+                </Down>
             </Action>
         </Category>
     </Layer>
@@ -186,8 +183,16 @@
             </Action>
         </Category>
     </Layer>
-    <Layer name="ScreenAdjust">
+    <Layer name="ScreenAdjustActions">
         <Category>
+            <Action name="SCREEN_ADJUST_GROW" hideAction="true">
+                <Down>ZO_ScreenAdjust_AddToGrowthRate(1)</Down>
+                <Up>ZO_ScreenAdjust_AddToGrowthRate(-1)</Up>
+            </Action>
+            <Action name="SCREEN_ADJUST_SHRINK" hideAction="true">
+                <Down>ZO_ScreenAdjust_AddToGrowthRate(-1)</Down>
+                <Up>ZO_ScreenAdjust_AddToGrowthRate(1)</Up>
+            </Action>
             <Action name="SCREEN_ADJUST_SAVE" hideAction="true" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
                 <Down>ZO_ScreenAdjust_Handle_OnSave()</Down>
             </Action>

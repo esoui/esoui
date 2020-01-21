@@ -96,7 +96,7 @@ end
 --UI Mode Life Cycle
 
 function ZO_IngameSceneManager:ConsiderExitingUIMode(showingHUDUI)
-    if self.hudUISceneHidesAutomatically and self.numTopLevelShown == 0 and self.numRemoteTopLevelShown == 0 and showingHUDUI and DoesGameHaveFocus() and not CHAT_SYSTEM:IsTextEntryOpen() then
+    if self.hudUISceneHidesAutomatically and self.numTopLevelShown == 0 and self.numRemoteTopLevelShown == 0 and showingHUDUI and DoesGameHaveFocus() and not SYSTEMS:GetObject("ChatSystem"):IsTextEntryOpen() then
         return self:SetInUIMode(false)
     end
 end

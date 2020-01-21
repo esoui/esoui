@@ -42,21 +42,6 @@ WORLD_SELECT_GAMEPAD_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)
 WORLD_SELECT_GAMEPAD_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
 
-------------------------
---Screen Adjust Scene
-------------------------
-
-local screenAdjustScene = SCENE_MANAGER:GetScene("screenAdjust")
-screenAdjustScene:AddFragment(GAMEPAD_SCREEN_ADJUST_ACTION_LAYER_FRAGMENT)
-
--------------------
---Screen Adjust for the Intro Sequence
--------------------
-
-local screenAdjustSceneIntro = SCENE_MANAGER:GetScene("screenAdjustIntro")
-screenAdjustSceneIntro:AddFragment(PREGAME_SCREEN_ADJUST_INTRO_ADVANCE_FRAGMENT)
-screenAdjustSceneIntro:AddFragment(GAMEPAD_SCREEN_ADJUST_ACTION_LAYER_FRAGMENT)
-
 -----------------------
 --Character Select
 -----------------------

@@ -11,7 +11,7 @@ function ZO_EsoPlusMembershipInfoDialog_Gamepad:Initialize(control)
 
     self:InitializeDialog(control)
 
-    local keybindLabelText = string.format("%s %s", ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_2), zo_strformat(SI_GAMEPAD_BACK_OPTION))
+    local keybindLabelText = string.format("%s %s", ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_2), zo_strformat(SI_GAMEPAD_BACK_OPTION))
     self.control:GetNamedChild("BackKeybind"):SetText(keybindLabelText)
     self:BuildDialogInfo()
 

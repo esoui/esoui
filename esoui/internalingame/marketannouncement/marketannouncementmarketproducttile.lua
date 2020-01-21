@@ -34,15 +34,6 @@ function ZO_MarketAnnouncementMarketProductTile:Layout(data)
         marketProduct:Show()
         marketProduct:SetIsFocused(data.isSelected)
 
-        local keybindStringId
-        local marketProductId = marketProduct:GetId()
-        local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
-        if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
-            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CHAPTER_UPGRADE
-        else
-            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE
-        end
-        self.control.object:SetActionText(GetString(keybindStringId))
     end
 end
 

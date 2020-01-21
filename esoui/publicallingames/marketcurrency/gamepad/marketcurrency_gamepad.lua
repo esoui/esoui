@@ -43,19 +43,22 @@ function ZO_MarketCurrency_Gamepad:Hide()
 end
 
 function ZO_MarketCurrency_Gamepad:OnCrownsUpdated(currentCurrency, difference)
-    self.crownAmountControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentCurrency)))
+    local crownAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatGamepad(CURT_CROWNS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    self.crownAmountControl:SetText(crownAmount)
     self:FireCallbacks("OnCurrencyUpdated")
 end
 
 function ZO_MarketCurrency_Gamepad:OnCrownGemsUpdated(currentCurrency, difference, reason)
-    self.gemAmountControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentCurrency)))
+    local gemAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatGamepad(CURT_CROWN_GEMS, currentCurrency, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+    self.gemAmountControl:SetText(gemAmount)
     self:FireCallbacks("OnCurrencyUpdated")
 end
 
 function ZO_MarketCurrency_Gamepad:ModifyKeybindStripStyleForCurrency(originalStyle)
     local style = ZO_ShallowTableCopy(originalStyle)
-    local crownsFooterWidth = self.control:GetWidth()
-    style.rightAnchorOffset = -(crownsFooterWidth + ZO_GAMEPAD_SCREEN_PADDING)
+    style.rightAnchorRelativeToControl = self.control
+    style.rightAnchorRelativePoint = LEFT
+    style.rightAnchorOffset = 0
     return style
 end
 

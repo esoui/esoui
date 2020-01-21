@@ -116,12 +116,9 @@
                                 <Button name="$(parent)Button" inherits="ZO_CheckButton">
                                     <Anchor point="TOPLEFT"/>
                                     <OnInitialized>
-                                        ZO_Login_SetupCheckButton(self, "RememberAccountName")
+                                        ZO_Login_SetupCheckButton(self, "RememberAccountName", GetString(SI_REMEMBER_ACCOUNT))
                                     </OnInitialized>
                                 </Button>
-                                <Label name="$(parent)Text" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_REMEMBER_ACCOUNT">
-                                    <Anchor point="LEFT" relativeTo="$(parent)Button" relativePoint="RIGHT" offsetX="10" offsetY="1"/>
-                                </Label>
                             </Controls>
                         </Control>
 

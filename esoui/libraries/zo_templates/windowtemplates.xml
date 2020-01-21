@@ -820,5 +820,17 @@
                 </Texture>
             </Controls>
         </Control>
+
+        <Texture name="ZO_KeyTexture" virtual="true">
+            <OnInitialized>
+                ZO_KeyControl_OnInitialized(self)
+            </OnInitialized>
+        </Texture>
+
+        <Button name="ZO_KeyButton" virtual="true">
+            <OnInitialized>
+                ZO_KeyControl_OnInitialized(self)
+            </OnInitialized>
+        </Button>
     </Controls>
 </GuiXml>

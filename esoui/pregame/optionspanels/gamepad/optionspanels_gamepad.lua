@@ -39,6 +39,12 @@ GAMEPAD_SETTINGS_DATA =
     {
         {
             panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
         },
@@ -46,6 +52,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
         },
     },
     [SETTING_PANEL_AUDIO] =
@@ -96,29 +107,32 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_FOOTSTEPS_VOLUME,
         },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_BACKGROUND_AUDIO,
+            header = SI_AUDIO_OPTIONS_OUTPUT,
+        },
     },
-}
-
-if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM then
-    GAMEPAD_SETTINGS_DATA[SETTING_PANEL_ACCOUNT] =
+    [SETTING_PANEL_ACCOUNT] =
     {
         -- Email Address
+        {
+            panel = SETTING_PANEL_ACCOUNT,
+            system = SETTING_TYPE_ACCOUNT,
+            settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
+            header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
+        },
         {
             panel = SETTING_PANEL_ACCOUNT,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION,
             header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
-        },
-        {
-            panel = SETTING_PANEL_ACCOUNT,
-            system = SETTING_TYPE_ACCOUNT,
-            settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
-            header = function()
-                if not ZO_OptionsPanel_Account_CanResendActivation() then
-                    return GetString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER)
-                end
-                return nil
-            end,
         },
         -- Marketing Preferences
         {
@@ -127,23 +141,8 @@ if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM then
             settingId = ACCOUNT_SETTING_GET_UPDATES,
             header = SI_INTERFACE_OPTIONS_ACCOUNT_MARKETING_HEADER,
         },
-    }
-end
-
-if IsConsoleUI() then
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_AUDIO], {
-        panel = SETTING_PANEL_AUDIO,
-        system = SETTING_TYPE_AUDIO,
-        settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
-    })
-    if ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting() then
-        table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], 1, {
-            panel = SETTING_PANEL_VIDEO,
-            system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
-        })
-    end
-end
+    },
+}
 
 local ZO_OptionsPanel_Gamepad_Pregame_ControlData =
 {
@@ -178,13 +177,5 @@ local ZO_OptionsPanel_Gamepad_Pregame_ControlData =
 
     }
 }
-
-if IsSystemUsingHDR() then
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
-        panel = SETTING_PANEL_VIDEO,
-        system = SETTING_TYPE_GRAPHICS,
-        settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
-    })
-end
 
 ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_CINEMATIC, ZO_OptionsPanel_Gamepad_Pregame_ControlData)

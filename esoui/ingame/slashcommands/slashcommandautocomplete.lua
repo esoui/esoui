@@ -1,15 +1,13 @@
 SlashCommandAutoComplete = ZO_AutoComplete:Subclass()
 
 function SlashCommandAutoComplete:New(...)
-	return ZO_AutoComplete.New(self, ...)
+    return ZO_AutoComplete.New(self, ...)
 end
 
-function SlashCommandAutoComplete:Initialize(...)
-    ZO_AutoComplete.Initialize(self, ...)
+function SlashCommandAutoComplete:Initialize(editControl, ...)
+    ZO_AutoComplete.Initialize(self, editControl, ...)
 
     self.possibleMatches = {}
-
-    local editControl = CHAT_SYSTEM:GetEditControl()
 
     self:SetUseCallbacks(true)
     self:SetAnchorStyle(AUTO_COMPLETION_ANCHOR_BOTTOM)
@@ -41,6 +39,11 @@ function SlashCommandAutoComplete:Initialize(...)
             end
         end
     end)
+
+    local function OnEmoteSlashCommandsUpdated()
+        self:InvalidateSlashCommandCache()
+    end
+    PLAYER_EMOTE_MANAGER:RegisterCallback("EmoteSlashCommandsUpdated", OnEmoteSlashCommandsUpdated)
 end
 
 function SlashCommandAutoComplete:InvalidateSlashCommandCache()
@@ -81,6 +84,11 @@ function SlashCommandAutoComplete:GetAutoCompletionResults(text)
                 end
             end
         end
+
+        local switchLookup = ZO_ChatSystem_GetChannelSwitchLookupTable()
+        for channelId, switchString in ipairs(switchLookup) do
+            self.possibleMatches[switchString:lower()] = switchString
+        end
     end
 
     local results = GetTopMatchesByLevenshteinSubStringScore(self.possibleMatches, text, 2, self.maxResults)
@@ -89,6 +97,3 @@ function SlashCommandAutoComplete:GetAutoCompletionResults(text)
     end
     return nil
 end
-
-local editControl = CHAT_SYSTEM:GetEditControl()
-SLASH_COMMAND_AUTO_COMPLETE = SlashCommandAutoComplete:New(editControl, nil, nil, nil, 8, AUTO_COMPLETION_AUTOMATIC_MODE, AUTO_COMPLETION_DONT_USE_ARROWS)

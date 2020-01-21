@@ -152,12 +152,12 @@ local ZO_OptionsPanel_Combat_ControlData =
     [SETTING_TYPE_ACTIVE_COMBAT_TIP] =
     {
         --Options_Interface_ActiveCombatTips
-        [0] =   --[[only one id right now]]
+        [0] =
         {
             controlType = OPTIONS_FINITE_LIST,
             system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
             panel = SETTING_PANEL_COMBAT,
-            settingId = 0, --[[only one id right now]]
+            settingId = 0, -- TODO: make an enum for this, or merge it with another setting type
             text = SI_INTERFACE_OPTIONS_ACT_SETTING_LABEL,
             tooltipText = SI_INTERFACE_OPTIONS_ACT_SETTING_LABEL_TOOLTIP,
             valid = {ACT_SETTING_OFF, ACT_SETTING_AUTO, ACT_SETTING_ALWAYS,},
@@ -176,6 +176,7 @@ local ZO_OptionsPanel_Combat_ControlData =
             panel = SETTING_PANEL_COMBAT,
             text = SI_INTERFACE_OPTIONS_COMBAT_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
             tooltipText = SI_INTERFACE_OPTIONS_COMBAT_ENCOUNTER_LOG_APPEAR_ANONYMOUS_TOOLTIP,
+            exists = ZO_IsPCOrHeronUI,
         },
         [COMBAT_SETTING_SCROLLING_COMBAT_TEXT_ENABLED] =
         {

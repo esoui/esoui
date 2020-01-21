@@ -119,7 +119,7 @@
                 </Control>
                 <Control name="$(parent)DisplayName" inherits="ZO_SortHeader">
                     <OnInitialized>
-                        ZO_SortHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_DISPLAY_NAME), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                        ZO_SortHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                     </OnInitialized>
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Alliance" offsetX="32"/>
                     <Dimensions x="225" y="32"/>
@@ -152,7 +152,7 @@
 
         <Control name="ZO_FriendsListRow_Heron" virtual="true" inherits="ZO_FriendsListRow">
             <Controls>
-                <Texture name="$(parent)HeronUserInfo" mouseEnabled="true" textureFile="EsoUI/Art/AvA/AvA_HUD_emblem_ebonheart.dds" layer="OVERLAY">
+                <Texture name="$(parent)HeronUserInfoIcon" mouseEnabled="true" textureFile="EsoUI/Art/Contacts/social_heronIcon.dds" layer="OVERLAY">
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)AllianceIcon" offsetX="6" />
                     <Dimensions x="32" y="32"/>
                     <OnMouseEnter>
@@ -163,7 +163,8 @@
                     </OnMouseExit>
                 </Texture>
                 <Label name="$(parent)DisplayName" override="true">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HeronUserInfo" offsetX="21"/>
+                    <ClearAnchors/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HeronUserInfoIcon" offsetX="21"/>
                     <Dimensions x="225" y="30"/>
                 </Label>
             </Controls>
@@ -173,13 +174,14 @@
             <Controls>
                 <Control name="$(parent)HeronUserInfo" inherits="ZO_SortHeaderIcon">
                     <OnInitialized>
-                        ZO_SortHeader_InitializeArrowHeader(self, "isHeronUser", ZO_SORT_ORDER_UP)
+                        ZO_SortHeader_InitializeArrowHeader(self, "isHeronUser", ZO_SORT_ORDER_DOWN)
                         ZO_SortHeader_SetTooltip(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_HERON_USER_INFO))
                     </OnInitialized>
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Alliance" offsetX="23"/>
                     <Dimensions x="16" y="32" />
                 </Control>
                 <Control name="$(parent)DisplayName" override="true">
+                    <ClearAnchors/>
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)HeronUserInfo" offsetX="28"/>
                     <Dimensions x="225" y="32"/>
                 </Control>

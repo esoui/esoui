@@ -164,6 +164,8 @@ local ZO_CROWN_CRATES_GEM_FRAME_TEXTURE = "EsoUI/Art/CrownCrates/crownCrate_card
 local ZO_CROWN_CRATES_WHITE_CARD_TEXTURE = "EsoUI/Art/CrownCrates/crownCrate_whiteCard.dds"
 local ZO_CROWN_CRATES_REWARD_GEMS_TEXTURE = "EsoUI/Art/CrownCrates/Rewards/crownCrate_reward_gems.dds"
 
+local ZO_CROWN_CRATES_KEYBOARD_TOOLTIP_INDICATOR_TEXTURE = "EsoUI/Art/CrownCrates/Keyboard/crownCrate_card_info_up.dds"
+
 local CARD_STATES = 
 {
     START = "START", --1
@@ -186,6 +188,7 @@ ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_COLOR_TINT = 5
 ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_COLOR_FLASH = 6
 ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_GEM_OVERLAY = 7
 ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_MOUSE_AREA = 8
+ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_KEYBOARD_TOOLTIP_INDICATOR = 9
 
 ZO_CrownCratesCard = ZO_CrownCratesAnimatable:Subclass()
 
@@ -223,6 +226,8 @@ function ZO_CrownCratesCard:Initialize(control, owner)
     self.gemOverlayTextureControl = self:CreateTextureControl(ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_GEM_OVERLAY)
     self.gemOverlayTextureControl:SetTexture(ZO_CROWN_CRATES_REWARD_GEMS_TEXTURE)
     self.mouseAreaControl = self:CreateTextureControl(ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_MOUSE_AREA)
+    self.keyboardTooltipIndictorControl = self:CreateTextureControl(ZO_CROWN_CRATES_CARD_TEXTURE_LEVEL_KEYBOARD_TOOLTIP_INDICATOR)
+    self.keyboardTooltipIndictorControl:SetTexture(ZO_CROWN_CRATES_KEYBOARD_TOOLTIP_INDICATOR_TEXTURE)
 
     self.nameAreaControl = control:GetNamedChild("NameArea")
     self.nameLabel = self.nameAreaControl:GetNamedChild("Text")
@@ -231,6 +236,19 @@ function ZO_CrownCratesCard:Initialize(control, owner)
     self.gemGainLabelPool = ZO_ControlPool:New("ZO_CrownCrateCardCrownGemsText", self.rewardTypeAreaControl)
     self.activateCollectibleAreaControl = control:GetNamedChild("SetCollectibleActiveArea")
     self.activateCollectibleKeybindControl = self.activateCollectibleAreaControl:GetNamedChild("Keybind")
+    self.keyboardTooltipMouseoverAreaControl = control:GetNamedChild("KeyboardTooltipMouseoverArea")
+    self.keyboardTooltipMouseoverAreaControl:SetHandler("OnMouseEnter", function()
+        if self.visualSlotIndex < GetNumCurrentCrownCrateTotalRewards() then
+            InitializeTooltip(ItemTooltip, self.keyboardTooltipMouseoverAreaControl, BOTTOMLEFT, 10, 0, BOTTOMRIGHT)
+        else
+            InitializeTooltip(ItemTooltip, self.keyboardTooltipMouseoverAreaControl, BOTTOMRIGHT, -10, 0, BOTTOMLEFT)
+        end
+
+        ItemTooltip:SetCrownCrateReward(self.rewardIndex)
+    end)
+    self.keyboardTooltipMouseoverAreaControl:SetHandler("OnMouseExit", function()
+        ClearTooltip(ItemTooltip)
+    end)
 
     local function ActivateCollectibleCallback()
         if not self.activateCollectibleAreaControl:IsHidden() then
@@ -251,6 +269,7 @@ function ZO_CrownCratesCard:Initialize(control, owner)
 
     self.mouseInputGroup = ZO_MouseInputGroup:New(self.mouseAreaControl)
     self.mouseInputGroup:Add(self.activateCollectibleKeybindControl, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
+    self.mouseInputGroup:Add(self.keyboardTooltipMouseoverAreaControl, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
 
     self.colorTintOverlayTextureControl:SetColor(ZO_CROWN_CRATES_GEMIFY_TINT_COLOR:UnpackRGB())
     self.colorFlashOverlayTextureControl:SetColor(ZO_CROWN_CRATES_GEMIFY_COLOR_FLASH:UnpackRGB())
@@ -826,6 +845,7 @@ function ZO_CrownCratesCard:Reveal()
                 self.owner:OnCardFlipComplete()
                 self:StartTierSpecificParticleEffects(ZO_CROWN_CRATES_PARTICLE_TYPE_LIFECYCLE, CROWN_CRATE_TIERED_PARTICLES_REVEALED)
                 self:RefreshActivateCollectibleKeybind()
+                self:RefreshKeyboardTooltipIndicator()
             else
                 self:SetState(CARD_STATES.GEMIFY)
                 self:Gemify()
@@ -957,6 +977,7 @@ function ZO_CrownCratesCard:StartFinalGemAndTextAnimation()
             self.gemOverlayTextureControl:SetAlpha(1)
             self.singleGemPool:ReleaseObject(finalObjectKey)
             self:RefreshActivateCollectibleKeybind()
+            self:RefreshKeyboardTooltipIndicator()
         end
     end
 
@@ -993,6 +1014,7 @@ function ZO_CrownCratesCard:RevealedSelect()
         self:StartAnimation(animationTimeline, FORWARD)
     end
     self:RefreshActivateCollectibleKeybind()
+    self:RefreshKeyboardTooltipIndicator()
 end
 
 function ZO_CrownCratesCard:RevealedDeselect()
@@ -1003,6 +1025,7 @@ function ZO_CrownCratesCard:RevealedDeselect()
         self:StartAnimation(animationTimeline, BACKWARD)
     end
     self:RefreshActivateCollectibleKeybind()
+    self:RefreshKeyboardTooltipIndicator()
 end
 
 function ZO_CrownCratesCard:ShowInfo()
@@ -1084,6 +1107,12 @@ end
 function ZO_CrownCratesCard:RefreshActivateCollectibleKeybind()
     local hideKeybind = not (self:IsSelected() and self:IsRevealed() and self:CanActivateCollectible())
     self.activateCollectibleAreaControl:SetHidden(hideKeybind)
+end
+
+function ZO_CrownCratesCard:RefreshKeyboardTooltipIndicator()
+    local hideIndicator = not (self:IsSelected() and self:IsRevealed() and not IsInGamepadPreferredMode() and not self:IsGemified())
+    self.keyboardTooltipIndictorControl:SetAlpha(hideIndicator and 0 or 1)
+    self.keyboardTooltipMouseoverAreaControl:SetHidden(hideIndicator)
 end
 
 function ZO_CrownCratesCard:IsMystery()
@@ -1317,8 +1346,32 @@ function ZO_CrownCratesPackOpening:InitializeKeybinds()
     local revealedSelectedKeybindDescriptors = { 
         CreateRevealedSelectedKeybindDescriptor("UI_SHORTCUT_RIGHT_SHOULDER"),
         CreateRevealedSelectedKeybindDescriptor("UI_SHORTCUT_LEFT_SHOULDER"),
-        CreateRevealedSelectedKeybindDescriptor("UI_SHORTCUT_LEFT_TRIGGER"),
         CreateRevealedSelectedKeybindDescriptor("UI_SHORTCUT_RIGHT_TRIGGER"),
+    }
+
+    local viewTooltipDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+        name = GetString(SI_GAMEPAD_CROWN_CRATE_VIEW_TOOLTIP_KEYBIND),
+        handlesKeyUp = true,
+        visible = function()
+            local card = self:GetSelectedCard()
+            if card and card:IsRevealed() and not card:IsGemified() then
+                return true
+            else
+                self:ClearGamepadTooltip()
+                return false
+            end
+        end,
+        callback = function(up)
+            if up then
+                self.gamepadTooltipKeybindHeld = false
+            else
+                self.gamepadTooltipKeybindHeld = true
+            end
+            self:RefreshGamepadTooltip()
+        end,
     }
 
     self.gamepadHandManipulationKeybindStripDescriptor =
@@ -1349,6 +1402,8 @@ function ZO_CrownCratesPackOpening:InitializeKeybinds()
 
         activateCollectibleKeybind,
 
+        viewTooltipDescriptor,
+
         unpack(revealedSelectedKeybindDescriptors)
     }
 
@@ -1357,7 +1412,11 @@ function ZO_CrownCratesPackOpening:InitializeKeybinds()
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
         activateCollectibleKeybind,
+
+        viewTooltipDescriptor,
+
         ZO_CROWN_CRATES_BUY_CRATES_KEYBIND_GAMEPAD,
+
         unpack(revealedSelectedKeybindDescriptors),
     }
 
@@ -1382,6 +1441,21 @@ function ZO_CrownCratesPackOpening:RefreshKeybindings()
     end
 end
 
+function ZO_CrownCratesPackOpening:RefreshGamepadTooltip()
+    if SCENE_MANAGER:IsCurrentSceneGamepad() then
+        local card = self:GetSelectedCard()
+        if card and self.gamepadTooltipKeybindHeld then
+            GAMEPAD_TOOLTIPS:LayoutCrownCrateReward(GAMEPAD_RIGHT_TOOLTIP, card.rewardIndex)
+        else
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+        end
+    end
+end
+
+function ZO_CrownCratesPackOpening:ClearGamepadTooltip()
+    self.gamepadTooltipKeybindHeld = false
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+end
 
 function ZO_CrownCratesPackOpening:GetCard(cardIndex)
     local card = self.cardPool:AcquireObject(cardIndex)
@@ -1560,6 +1634,7 @@ function ZO_CrownCratesPackOpening:StartLeaveAnimation()
             card:Leave()
             card:SetState(CARD_STATES.LEAVING)
             card:RefreshActivateCollectibleKeybind()
+            card:RefreshKeyboardTooltipIndicator()
         end, leavingIndex * ZO_CROWN_CRATES_LEAVE_SPACING_MS)
         leavingIndex = leavingIndex + 1
     end
@@ -1600,6 +1675,7 @@ function ZO_CrownCratesPackOpening:RemoveAllRevealedKeybinds()
     if self.initialized then
         if SCENE_MANAGER:IsCurrentSceneGamepad() then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.gamepadAllRevealedKeybindStripDescriptor)
+            self:ClearGamepadTooltip()
         else
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keyboardAllRevealedKeybindStripDescriptor)
         end
@@ -1625,6 +1701,7 @@ function ZO_CrownCratesPackOpening:HandleDirectionalInput(selectedDirection)
         end
         self:SetSelectedCard(nextCard)
         self:RefreshKeybindings()
+        self:RefreshGamepadTooltip()
     end
 end
 

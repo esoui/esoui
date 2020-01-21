@@ -114,8 +114,7 @@ end
 function ZO_UiInfoBoxTutorial:DisplayTutorial(tutorialIndex)
     self.title, self.description = GetTutorialInfo(tutorialIndex)
 
-    self.title = zo_strformat(SI_TUTORIAL_FORMATTER, self.title)
-    self.description = zo_strformat(SI_TUTORIAL_FORMATTER, self.description)
+
 
     self:SetCurrentlyDisplayedTutorialIndex(tutorialIndex)
     self.gamepadMode = IsInGamepadPreferredMode()

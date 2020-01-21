@@ -81,9 +81,7 @@ function ZO_PlayerEmoteManager:RefreshEmoteSlashCommands()
             self:AddOrRemoveEmoteSlashCommand(emoteIndex, ADD, zo_strsplit(" ", slashName))
         end
 	end
-    if SLASH_COMMAND_AUTO_COMPLETE then
-        SLASH_COMMAND_AUTO_COMPLETE:InvalidateSlashCommandCache()
-    end
+    self:FireCallbacks("EmoteSlashCommandsUpdated")
 end
 
 function ZO_PlayerEmoteManager:CompareEmotes(emoteA, emoteB)

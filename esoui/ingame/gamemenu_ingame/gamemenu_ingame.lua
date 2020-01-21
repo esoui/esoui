@@ -108,25 +108,14 @@ local function RebuildTree(gameMenu)
     gameMenu:SubmitLists(gameEntries)
 end
 
-local wasChatMaximized
-
-local function OnShow(gameMenu)
-    RebuildTree(gameMenu)
-    wasChatMaximized = not CHAT_SYSTEM:IsMinimized()
-    if wasChatMaximized then
-        CHAT_SYSTEM:Minimize()
-    end
-end
-
-local function OnHide(gameMenu)
-    if wasChatMaximized and CHAT_SYSTEM:IsMinimized()then
-        CHAT_SYSTEM:Maximize()
-    end
-
-    wasChatMaximized = nil
-end
-
 function ZO_GameMenu_InGame_Initialize(self)
+    local function OnShow(gameMenu)
+        RebuildTree(gameMenu)
+    end
+
+    local function OnHide(gameMenu)
+        -- do nothing
+    end
     local GAME_MENU_INGAME = ZO_GameMenu_Initialize(self, OnShow, OnHide)
 
     local gameMenuIngameFragment = ZO_FadeSceneFragment:New(self)

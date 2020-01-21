@@ -167,7 +167,7 @@
                         </Control>
                         <Control name="$(parent)DisplayName" inherits="ZO_SortHeader">
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_DISPLAY_NAME), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                ZO_SortHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Rank" offsetX="32"/>
                             <Dimensions x="225" y="32"/>
@@ -233,5 +233,40 @@
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
+
+        <Control name="ZO_GuildSetRankDialogRank_Keyboard" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Bind" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGame">
+                    <Anchor point="TOPLEFT" offsetX="5" />
+                </Label>
+                <Button name="$(parent)Button" inherits="ZO_LabeledRadioButton">
+                    <Anchor point="LEFT" relativeTo="$(parent)Bind" relativePoint="RIGHT" offsetX="20"/>
+                    <Controls>
+                        <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" override="true"/>
+                    </Controls>
+                </Button>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_GuildSetRankDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_GuildSetRankDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontWinH3">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="46" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                </Label>
+
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-46" offsetY="15"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="15"/>
+                </Control>
+                
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
     </Controls>
 </GuiXml>

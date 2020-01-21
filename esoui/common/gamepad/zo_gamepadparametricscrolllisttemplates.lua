@@ -83,12 +83,12 @@ function ZO_GamepadTabBarScrollList:New(control, leftIcon, rightIcon, onActivate
     list:SetDirectionalInputEnabled(false)
     list:SetHideUnselectedControls(true)
 
-    local function CreateButtonIcon(name, parent, keycode, anchor)
-        local buttonIcon = CreateControl(name, parent, CT_BUTTON)
-        buttonIcon:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(keycode))
-        buttonIcon:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        buttonIcon:SetAnchor(anchor, control, anchor)
-        return buttonIcon
+    local function CreateIconTexture(name, parent, keyCode, anchor)
+        local iconTexture = CreateControlFromVirtual(name, parent, "ZO_KeyTexture")
+        iconTexture:SetKeyCode(keyCode)
+        iconTexture:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
+        iconTexture:SetAnchor(anchor, control, anchor)
+        return iconTexture
     end
 
     list.leftIcon = leftIcon or CreateButtonIcon("$(parent)LeftIcon", control, KEY_GAMEPAD_LEFT_SHOULDER, LEFT)

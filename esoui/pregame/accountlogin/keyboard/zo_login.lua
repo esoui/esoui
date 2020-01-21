@@ -10,7 +10,12 @@ end
 
 local function OnLinkClicked(link, button, text, color, linkType, ...)
     if not ZO_PEGI_IsDeclineNotificationShowing() and linkType == URL_LINK_TYPE then
-        RequestOpenURL(zo_strjoin(':', ...), text)
+        local url = table.concat({...}, ':')
+        if IsHeronUI() then
+            ConfirmOpenURL(url)
+        else
+            RequestOpenURL(url, text)
+        end
         return true
     end
 end
@@ -183,6 +188,9 @@ function Login_Keyboard:Initialize(control)
                                                         if(newState == SCENE_FRAGMENT_SHOWN) then
                                                             self:InitializeLoginButtonState()
                                                             self:AttemptAutomaticLogin()
+                                                            if ZO_RZCHROMA_EFFECTS then
+                                                                ZO_RZCHROMA_EFFECTS:SetAlliance(ALLIANCE_NONE)
+                                                            end
                                                         end
                                                     end)
 
@@ -422,7 +430,8 @@ function ZO_Login_LoginButton_OnClicked()
     LOGIN_KEYBOARD:DoLogin()
 end
 
-function ZO_Login_SetupCheckButton(control, cvarName)
+function ZO_Login_SetupCheckButton(control, cvarName, labelText)
+    ZO_CheckButton_SetLabelText(control, labelText)
     ZO_CheckButton_SetCheckState(control, GetCVar(cvarName))
 
     ZO_CheckButton_SetToggleFunction(control,  function()

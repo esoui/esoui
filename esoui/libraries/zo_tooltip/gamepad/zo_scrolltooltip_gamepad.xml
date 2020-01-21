@@ -19,7 +19,13 @@
                 </Scroll>
 
                 <!-- Anchors for the ScrollIndicator are setup when tooltip initializes -->
-                <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" resizeToFitFile="true" hidden="true" />
+                <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" hidden="true" >
+                    <Dimensions x="64" y="64"/>
+                    <OnInitialized>
+                        ZO_GamepadTypeBasedControl_OnInitialized(self)
+                        self:SetTextureSource(GetGamepadRightStickScrollIcon)
+                    </OnInitialized>
+                </Texture>
             </Controls>
         </Control>
 

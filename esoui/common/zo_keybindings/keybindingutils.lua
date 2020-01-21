@@ -38,16 +38,15 @@ function ZO_Keybindings_DoesActionMatchInput(actionName, key, ctrl, alt, shift, 
     return false
 end
 
-function ZO_Keybindings_GetTexturePathForKey(keyCode)
+function ZO_Keybindings_GetTexturePathForKey(keyCode, disabled)
+    if disabled == nil then
+        disabled = false
+    end
     local mouseIcon, mouseWidth, mouseHeight = GetMouseIconPathForKeyCode(keyCode)
     if mouseIcon then
         return mouseIcon, mouseWidth, mouseHeight
     end
-    return GetGamepadIconPathForKeyCode(keyCode)
-end
-
-function ZO_Keybindings_HasTexturePathForKey(keyCode)
-    return ZO_Keybindings_GetTexturePathForKey(keyCode) ~= nil
+    return GetGamepadIconPathForKeyCode(keyCode, disabled)
 end
 
 KEYBIND_TEXT_OPTIONS_ABBREVIATED_NAME = 1
@@ -57,16 +56,21 @@ KEYBIND_TEXT_OPTIONS_FULL_NAME_SEPARATE_MODS = 3
 KEYBIND_TEXTURE_OPTIONS_NONE = 1
 KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP = 2
 
-function ZO_Keybindings_GenerateKeyMarkup(name)
+function ZO_Keybindings_ShouldUseTextKeyMarkup(key)
+    return IsKeyCodeKeyboardKey(key)
+end
+
+function ZO_Keybindings_GenerateTextKeyMarkup(name)
     return ("|u25%%:25%%:key:%s|u"):format(name)
 end
 
-function ZO_Keybindings_GetKeyText(key, widthPercent, heightPercent)
-    local path, width, height = ZO_Keybindings_GetTexturePathForKey(key)
-    if path then
-        return ("|t%f%%:%f%%:%s|t"):format(widthPercent or 100, heightPercent or 100, path)
-    end
-    return ""
+--Gamepad and mouse keys use icons instead of text (with the exception of mouse button 4 and 5)
+function ZO_Keybindings_ShouldUseIconKeyMarkup(key)
+    return (IsKeyCodeMouseKey(key) and not (key == KEY_MOUSE_4 or key == KEY_MOUSE_5)) or IsKeyCodeGamepadKey(key)
+end
+
+function ZO_Keybindings_GenerateIconKeyMarkup(key, scalePercent)
+    return ("|k%.1f%%:%s|k"):format(scalePercent or 100, key)
 end
 
 do
@@ -74,17 +78,15 @@ do
     local EXPECTED_ICON_SIZE = 64
     local DEFAULT_SCALE_PERCENT = 180
 
-    local function GetKeyOrTexture(keyCode, textureOptions, textureWidthPercent, textureHeightPercent)
+    local function GetKeyOrTexture(keyCode, textureOptions, scalePercent)
         if textureOptions == KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP then
-            local path, width, height = ZO_Keybindings_GetTexturePathForKey(keyCode)
-            if path then
-                local widthPercent = (width / EXPECTED_ICON_SIZE) * (textureWidthPercent or DEFAULT_SCALE_PERCENT);
-                local heightPercent = (height / EXPECTED_ICON_SIZE) * (textureHeightPercent or DEFAULT_SCALE_PERCENT);
-                return ("|t%f%%:%f%%:%s|t"):format(widthPercent, heightPercent, path)
+            if ZO_Keybindings_ShouldUseIconKeyMarkup(keyCode) then
+                return ZO_Keybindings_GenerateIconKeyMarkup(keyCode, scalePercent or DEFAULT_SCALE_PERCENT)
             end
-            return ZO_Keybindings_GenerateKeyMarkup(GetKeyName(keyCode))
+            return ZO_Keybindings_GenerateTextKeyMarkup(GetKeyName(keyCode))
+        else
+            return GetKeyName(keyCode)
         end
-        return GetKeyName(keyCode)
     end
 
     local function TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent)
@@ -159,7 +161,7 @@ function ZO_Keybindings_RegisterLabelForBindingUpdate(label, actionName, showUnb
         end
 
         if showUnbound or showUnbound == nil then
-            bindingText = bindingText or ZO_Keybindings_GenerateKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
+            bindingText = bindingText or ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
         else
             label:SetHidden(bindingText == nil)
             bindingText = bindingText or ""

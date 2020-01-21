@@ -26,8 +26,6 @@ local function GetChannelSetting(control)
 end
 
 function ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized(self)
-    self.data.panel = SETTING_PANEL_INTERFACE
-
     self.data.SetSettingOverride = SetChannelSetting
     self.data.GetSettingOverride = GetChannelSetting
 
@@ -37,7 +35,6 @@ function ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized(self)
         ["ChatBubbles_On"]    = ZO_Options_SetOptionActive,
     }
 
-    self:GetNamedChild("Checkbox"):SetAnchor(RIGHT, nil, RIGHT, -20, 0)
     ZO_OptionsWindow_InitializeControl(self)
 end
 
@@ -288,6 +285,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_SAY,
             tooltipText = SI_INTERFACE_OPTIONS_SAY_TOOLTIP,
+            exists = ZO_IsPCOrHeronUI,
             
             channelCategories = { CHAT_CATEGORY_SAY },
         },
@@ -298,6 +296,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_YELL,
             tooltipText = SI_INTERFACE_OPTIONS_YELL_TOOLTIP,
+            exists = ZO_IsPCOrHeronUI,
             
             channelCategories = { CHAT_CATEGORY_YELL },
         },
@@ -308,6 +307,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_TELL,
             tooltipText = SI_INTERFACE_OPTIONS_TELL_TOOLTIP,
+            exists = ZO_IsPCOrHeronUI,
             
             channelCategories = { CHAT_CATEGORY_WHISPER_INCOMING, CHAT_CATEGORY_WHISPER_OUTGOING },
         },
@@ -318,6 +318,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_GROUP,
             tooltipText = SI_INTERFACE_OPTIONS_GROUP_TOOLTIP,
+            exists = ZO_IsPCOrHeronUI,
             
             channelCategories = { CHAT_CATEGORY_PARTY },
         },
@@ -328,8 +329,21 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_CHAT_EMOTE,
             tooltipText = SI_INTERFACE_OPTIONS_EMOTE_TOOLTIP,
+            exists = ZO_IsPCOrHeronUI,
             
             channelCategories = { CHAT_CATEGORY_EMOTE },
+        },
+        --Options_Interface_FramerateLatencyResetPosition
+        [OPTIONS_CUSTOM_SETTING_FRAMERATE_LATENCY_RESET_POSITION] =
+        {
+            controlType = OPTIONS_INVOKE_CALLBACK,
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_FRAMERATE_LATENCY_RESET_POSITION,
+            text = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_POSITION_RESET,
+            callback = function()
+                PERFORMANCE_METERS:ResetPosition()
+            end,
         },
     },
 }

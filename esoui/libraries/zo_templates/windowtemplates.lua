@@ -402,3 +402,58 @@ function ZO_ScalableBackgroundWithEdge_SetSize(background, width, height)
     background.bottom:SetTextureCoords(textureCoordLeft, 1, ZO_SCALABLE_BACKGROUND_CENTER_TEXTURE_BOTTOM_COORD, 1)
     background.center:SetTextureCoords(textureCoordLeft, 1, ZO_SCALABLE_BACKGROUND_CENTER_TEXTURE_TOP_COORD, ZO_SCALABLE_BACKGROUND_CENTER_TEXTURE_BOTTOM_COORD)
 end
+
+do
+    local function RefreshTexture(self)
+        if self.keyCode then
+            local DISABLED = true
+            local ENABLED = false
+            local path = ZO_Keybindings_GetTexturePathForKey(self.keyCode, ENABLED)
+            if self.SetTexture then
+                self:SetTexture(path)
+            else
+                self:SetNormalTexture(path)
+                self:SetPressedTexture(path)
+                self:SetMouseOverTexture(path)
+                path = ZO_Keybindings_GetTexturePathForKey(self.keyCode, DISABLED)
+                self:SetDisabledTexture(path)
+            end
+        end
+    end
+
+    local function SetKeyCode(self, keyCode)
+        self.keyCode = keyCode
+        RefreshTexture(self)
+    end
+
+    function ZO_KeyControl_OnInitialized(self)
+        self.SetKeyCode = SetKeyCode
+        self:RegisterForEvent(EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED, function() RefreshTexture(self) end)
+    end
+end
+
+do
+    local function RefreshTexture(self)
+        if self.textureSourceCallback then
+            self:SetTexture(self.textureSourceCallback())
+        elseif self.updateCallback then
+            self:updateCallback()
+        end
+    end
+
+    local function SetTextureSource(self, textureSourceCallback)
+        self.textureSourceCallback = textureSourceCallback
+        RefreshTexture(self)
+    end
+
+    local function SetUpdateCallback(self, updateCallback)
+        self.updateCallback = updateCallback
+        RefreshTexture(self)
+    end
+
+    function ZO_GamepadTypeBasedControl_OnInitialized(self)
+        self.SetTextureSource = SetTextureSource
+        self.SetUpdateCallback = SetUpdateCallback
+        self:RegisterForEvent(EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED, function() RefreshTexture(self) end)
+    end
+end

@@ -174,6 +174,10 @@ function ZO_CharacterSelect_Manager:RefreshConstructedCharacter()
         local selectedCharacterData = self:GetSelectedCharacterData()
         if selectedCharacterData then
             SelectCharacterToView(selectedCharacterData.index)
+            -- Generating the random character for pregame may have changed the alliance color
+            if ZO_RZCHROMA_EFFECTS then
+                ZO_RZCHROMA_EFFECTS:SetAlliance(selectedCharacterData.alliance)
+            end
         end
     end
 end

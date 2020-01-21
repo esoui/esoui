@@ -758,30 +758,26 @@ do
         },
     }
 
-    local LEFT_SHOULDER_TEXTURE = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER)
-    local RIGHT_SHOULDER_TEXTURE = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER)
-
     local GAMEPAD_ARROW_BUTTON_TEXTURES =
     {
         LEFT = {
-            NORMAL = LEFT_SHOULDER_TEXTURE,
-            PRESSED = LEFT_SHOULDER_TEXTURE,
-            MOUSEOVER = LEFT_SHOULDER_TEXTURE,
-            DISABLED = LEFT_SHOULDER_TEXTURE,
+            KEY_CODE = KEY_GAMEPAD_LEFT_SHOULDER,
         },
         RIGHT = {
-            NORMAL = RIGHT_SHOULDER_TEXTURE,
-            PRESSED = RIGHT_SHOULDER_TEXTURE,
-            MOUSEOVER = RIGHT_SHOULDER_TEXTURE,
-            DISABLED = RIGHT_SHOULDER_TEXTURE,
+            KEY_CODE = KEY_GAMEPAD_RIGHT_SHOULDER,
         },
     }
 
     local function SetButtonTextures(btn, textures)
-        btn:SetNormalTexture(textures.NORMAL)
-        btn:SetPressedTexture(textures.PRESSED)
-        btn:SetMouseOverTexture(textures.MOUSEOVER)
-        btn:SetDisabledTexture(textures.DISABLED)
+        if textures.KEY_CODE then
+            btn:SetKeyCode(textures.KEY_CODE)
+        else
+            btn:SetKeyCode(nil)
+            btn:SetNormalTexture(textures.NORMAL)
+            btn:SetPressedTexture(textures.PRESSED)
+            btn:SetMouseOverTexture(textures.MOUSEOVER)
+            btn:SetDisabledTexture(textures.DISABLED)
+        end
     end
 
     function ZO_CrownCratesPackChoosing:RefreshPlatformStyle()

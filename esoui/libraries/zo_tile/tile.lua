@@ -97,7 +97,7 @@ end
 
 function ZO_DefaultGridTileEntrySetup(control, data)
     if not data.isEmptyCell then
-        control.object:Layout(data.dataSource)
+        control.object:Layout(data)
     end
 end
 

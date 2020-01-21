@@ -122,7 +122,7 @@ function ZO_Dyeing_GetAchivementText(dyeKnown, achievementId, nonPlayerDye)
     assert(false)
 end
 
-function ZO_Dyeing_InitializeSwatchPool(owner, sharedHighlight, parentControl, template, canSelectLocked, highlightDimensions)
+function ZO_Dyeing_InitializeSwatchPool(owner, parentControl, template, canSelectLocked)
     local function OnClicked(swatchControl, button, upInside)
         if upInside then
             local swatchObject = swatchControl.object
@@ -145,7 +145,7 @@ function ZO_Dyeing_InitializeSwatchPool(owner, sharedHighlight, parentControl, t
     local function Factory(objectPool)
         local swatchControl = ZO_ObjectPool_CreateControl(template, objectPool, parentControl)
         swatchControl:SetHandler("OnMouseUp", OnClicked)
-        local swatchObject = ZO_DyeingSwatch_Shared:New(swatchControl, owner, canSelectLocked, sharedHighlight, highlightDimensions)
+        local swatchObject = ZO_DyeingSwatch_Shared:New(swatchControl, owner, canSelectLocked)
         swatchObject:SetControl(swatchControl)
         return swatchObject
     end
@@ -560,21 +560,20 @@ function ZO_DyeingSwatch_Shared:New(...)
     return object
 end
 
-function ZO_DyeingSwatch_Shared:Initialize(owner, canSelectLocked, sharedHighlight, highlightDimensions)
+function ZO_DyeingSwatch_Shared:Initialize(owner, canSelectLocked)
     self.owner = owner
-    self.sharedHighlight = sharedHighlight
     self.canSelectLocked = canSelectLocked
-    self.highlightDimensions = highlightDimensions
     self.swatchInterpolator = ZO_SimpleControlScaleInterpolator:New(1.0, ZO_DYEING_SWATCH_SELECTION_SCALE)
 end
 
 function ZO_DyeingSwatch_Shared:SetControl(control)
     self.control = control
     control.object = self
+    self.highlightControl = self.control:GetNamedChild("Highlight")
 end
 
-function ZO_DyeingSwatch_Shared:UpdateSelectedState(skipAnim)
-    if (self.canSelectLocked or not self.locked) and (self.mousedOver or self.selected) then
+function ZO_DyeingSwatch_Shared:UpdateSelectedState(skipAnim, isChecked)
+    if (self.canSelectLocked or not self.locked) and (self.mousedOver or self.selected or isChecked) then
         if skipAnim then
             self.swatchInterpolator:ResetToMax(self.control)
         else
@@ -588,12 +587,7 @@ function ZO_DyeingSwatch_Shared:UpdateSelectedState(skipAnim)
         end
     end
 
-    if self.selected and self.sharedHighlight then
-        self.sharedHighlight:ClearAnchors()
-        self.sharedHighlight:SetAnchor(TOPLEFT, self.control, TOPLEFT, -self.highlightDimensions, -self.highlightDimensions)
-        self.sharedHighlight:SetAnchor(BOTTOMRIGHT, self.control, BOTTOMRIGHT, self.highlightDimensions, self.highlightDimensions)
-        self.sharedHighlight:SetHidden(false)
-    end
+    self.highlightControl:SetHidden(not self.selected)
 end
 
 function ZO_DyeingSwatch_Shared:SetSelected(selected, skipAnim, skipSound)

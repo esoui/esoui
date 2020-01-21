@@ -261,7 +261,7 @@ function BindKeyDialog:UpdateCurrentKeyLabel()
         self.control.currentBindLabel:SetHidden(false)
         local key, mod1, mod2, mod3, mod4 = self:GetCurrentKeys()
         local bindingString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP)
-        if ZO_Keybindings_HasTexturePathForKey(key) then
+        if ZO_Keybindings_ShouldUseIconKeyMarkup(key) then
             self.control.currentBindLabel:SetFont("ZoFontHeader4")
         else
             self.control.currentBindLabel:SetFont("ZoFontCallout")

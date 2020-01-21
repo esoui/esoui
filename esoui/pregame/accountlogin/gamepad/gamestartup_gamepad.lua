@@ -91,17 +91,16 @@ end
 function ZO_ConsoleServerSelector:OnDeferredInitialize()
     local entries = {}
 
-    local entryData = ZO_GamepadEntryData:New(GetString("SI_CONSOLESERVERCHOICE", CONSOLE_SERVER_NORTH_AMERICA))
-    entryData.serverChoice = CONSOLE_SERVER_NORTH_AMERICA
-    table.insert(entries, entryData)
+    for choice = CONSOLE_SERVER_ITERATION_BEGIN, CONSOLE_SERVER_ITERATION_END do
+        local entryData = ZO_GamepadEntryData:New(GetString("SI_CONSOLESERVERCHOICE", choice))
+        entryData.serverChoice = choice
+        table.insert(entries, entryData)
+    end
 
-    local entryData = ZO_GamepadEntryData:New(GetString("SI_CONSOLESERVERCHOICE", CONSOLE_SERVER_EUROPE))
-    entryData.serverChoice = CONSOLE_SERVER_EUROPE
-    table.insert(entries, entryData)
     self.entries = entries
 
     local function OnPlatformsListLoaded(_, serverChoice)
-        self:OnConsolePlatformsListLoaded(server)
+        self:OnConsolePlatformsListLoaded(serverChoice)
     end
     EVENT_MANAGER:RegisterForEvent("ConsoleServerSelector", EVENT_PLATFORMS_LIST_LOADED, OnPlatformsListLoaded)
 
@@ -109,7 +108,9 @@ function ZO_ConsoleServerSelector:OnDeferredInitialize()
 end
 
 function ZO_ConsoleServerSelector:OnShowing()
-    self.selectedServerChoice = tonumber(GetCVar("SelectedServer"))
+    if not self.selectedServerChoice then
+        self.selectedServerChoice = tonumber(GetCVar("SelectedServer"))
+    end
 end
 
 function ZO_ConsoleServerSelector:GetServerEntries()
@@ -418,10 +419,6 @@ end
 function ZO_GameStartup_Gamepad:InitializeLists()
     local function OnServerSelectListChanged(selectedData, oldData, reselectingDuringRebuild)
         self.serverSelector:OnSelected(selectedData)
-    end
-
-    local function EntryDataMatchesPlatformName(platformName, entryData)
-        return platformName == entryData.platformName
     end
 
     local function ServerSelectListSetup(control, data, selected, reselectingDuringRebuild, enabled, active)

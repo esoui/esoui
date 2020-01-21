@@ -105,6 +105,8 @@ ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY =
     [QUEST_TYPE_CRAFTING] = true,
     [QUEST_TYPE_HOLIDAY_EVENT] = true,
     [QUEST_TYPE_BATTLEGROUND] = true,
+    [QUEST_TYPE_PROLOGUE] = true,
+    [QUEST_TYPE_UNDAUNTED_PLEDGE] = true,
 }
 
 function ZO_QuestJournal_Manager:GetQuestCategoryNameAndType(questType, zone)

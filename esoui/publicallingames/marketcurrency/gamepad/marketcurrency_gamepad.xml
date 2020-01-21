@@ -2,14 +2,11 @@
     <Controls>
         <Control name="ZO_MarketCurrencyLabel_Gamepad" resizeToFitDescendents="true" virtual="true">
             <Controls>
-                <Texture name="$(parent)Icon">
-                    <Anchor point="BOTTOMRIGHT"/>
-                    <Dimensions x="32" y="32"/>
-                </Texture>
                 <Label name="$(parent)Amount" font="ZoFontGamepad42" inherits="ZO_GamepadHeaderDataTextTemplate">
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="-2" relativeTo="$(parent)Icon"/>
+                    <Anchor point="BOTTOMRIGHT" />
                     <Dimensions y="42"/>
                 </Label>
+            
                 <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate">
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10"/>
                     <Dimensions y="27"/>
@@ -29,7 +26,6 @@
                 <Control name="$(parent)Crowns" inherits="ZO_MarketCurrencyLabel_Gamepad">
                     <OnInitialized>
                         self:GetNamedChild("Label"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWNS))
-                        self:GetNamedChild("Icon"):SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS))
                     </OnInitialized>
                     <Anchor point="BOTTOMRIGHT"/>
                 </Control>
@@ -37,11 +33,9 @@
                 <Control name="$(parent)Gems" inherits="ZO_MarketCurrencyLabel_Gamepad">
                     <OnInitialized>
                         self:GetNamedChild("Label"):SetText(ZO_Currency_GetAmountLabel(CURT_CROWN_GEMS))
-                        self:GetNamedChild("Icon"):SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWN_GEMS))
                     </OnInitialized>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Crowns" relativePoint="BOTTOMLEFT" offsetX="-10" />
                 </Control>
-
             </Controls>
         </TopLevelControl>
     </Controls>

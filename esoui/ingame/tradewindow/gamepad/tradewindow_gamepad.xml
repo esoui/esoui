@@ -21,7 +21,7 @@
                                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerSimple" />
                                                     <OnInitialized>
                                                         local accent = self:GetNamedChild("Accent")
-                                                        accent:SetTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_LEFT_TRIGGER))
+                                                        accent:SetKeyCode(KEY_GAMEPAD_LEFT_TRIGGER)
                                                     </OnInitialized>
                                                     <Controls>
                                                         <Texture name="$(parent)Accent" override="true">
@@ -60,7 +60,7 @@
                                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerSimple" />
                                                     <OnInitialized>
                                                         local accent = self:GetNamedChild("Accent")
-                                                        accent:SetTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_RIGHT_TRIGGER))
+                                                        accent:SetKeyCode(KEY_GAMEPAD_RIGHT_TRIGGER)
                                                     </OnInitialized>
                                                     <Controls>
                                                         <Texture name="$(parent)Accent" override="true">

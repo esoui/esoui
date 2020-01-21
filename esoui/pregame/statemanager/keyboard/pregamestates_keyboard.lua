@@ -1,5 +1,24 @@
 local pregameStates =
 {
+    ["AccountLoginEntryPoint"] =
+    {
+        ShouldAdvance = function()
+            return true
+        end,
+
+        OnEnter = function()
+            -- do nothing
+        end,
+
+        OnExit = function()
+            -- do nothing
+        end,
+
+        GetStateTransitionData = function()
+            return "ScreenAdjustIntro"
+        end,
+    },
+
     ["CharacterSelect"] =
     {
         OnEnter = function()
@@ -44,7 +63,7 @@ local pregameStates =
             PregameLogout()
             RegisterForLoadingUpdates()
 
-            if(ZO_PREGAME_HAD_GLOBAL_ERROR) then
+            if ZO_PREGAME_HAD_GLOBAL_ERROR then
                 AbortVideoPlayback()
             end
 
@@ -54,8 +73,8 @@ local pregameStates =
 
             Pregame_ShowScene("gameMenuPregame")
 
-            if(ZO_ServerSelectCancel ~= nil) then
-                ZO_ServerSelectCancel.gameStateString = "AccountLogin"
+            if ZO_WorldSelectCancel ~= nil then
+                ZO_WorldSelectCancel.gameStateString = "AccountLogin"
             end
 
             AttemptQuickLaunch()
@@ -64,7 +83,7 @@ local pregameStates =
         OnExit = function()
         end
     },
-    
+
     ["WorldSelect_Requested"] =
     {
         OnEnter = function()
@@ -79,8 +98,8 @@ local pregameStates =
     ["WorldSelect_ShowList"] =
     {
         OnEnter = function()
-            ZO_ServerSelect_SetSelectionEnabled(true)
-            Pregame_ShowScene("serverSelect")
+            ZO_WorldSelect_SetSelectionEnabled(true)
+            Pregame_ShowScene("worldSelect")
         end,
 
         OnExit = function()
@@ -94,7 +113,11 @@ local pregameStates =
         end,
 
         OnEnter = function()
-            ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", {isIntro = true})
+            SCENE_MANAGER:ShowBaseScene()
+            ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", { onSelectedCallback = function()
+                SetCVar("IsServerSelected", "1")
+                PregameStateManager_AdvanceStateFromState("ServerSelectIntro")
+            end })
         end,
 
         OnExit = function()
@@ -117,7 +140,7 @@ local function OnServerLocked()
 end
 
 local function OnWorldListReceived()
-    if(PregameStateManager_GetCurrentState() == "WorldSelect_Requested") then
+    if PregameStateManager_GetCurrentState() == "WorldSelect_Requested" then
         PregameStateManager_SetState("WorldSelect_ShowList")
     end
 end
@@ -136,11 +159,11 @@ local function GlobalError(eventCode, errorCode, helpLinkURL, ...)
 
     local errorString, errorStringFormat
 
-    if(errorCode ~= nil) then
+    if errorCode ~= nil then
         errorStringFormat = GetString("SI_GLOBALERRORCODE", errorCode)
 
-        if(errorStringFormat ~= "") then
-            if(select("#", ...) > 0) then
+        if errorStringFormat ~= "" then
+            if select("#", ...) > 0 then
                 errorString = zo_strformat(errorStringFormat, ...)
             else
                 errorString = errorStringFormat
@@ -148,11 +171,11 @@ local function GlobalError(eventCode, errorCode, helpLinkURL, ...)
         end
     end
 
-    if(not errorString or errorString == "") then
+    if not errorString or errorString == "" then
         errorString = GetString(SI_UNKNOWN_ERROR)
     end
 
-    if(errorCodeToStateChange[errorCode]) then
+    if errorCodeToStateChange[errorCode] then
         PregameStateManager_SetState(errorCodeToStateChange[errorCode])
     else
         PregameStateManager_ReenterLoginState()
@@ -167,7 +190,7 @@ local function GlobalError(eventCode, errorCode, helpLinkURL, ...)
     end
 end
 
-local function ServerDisconnectError(eventCode)
+function ZO_Keyboard_DisplayServerDisconnectedError(eventCode)
     local logoutError, globalErrorCode = GetErrorQueuedFromIngame()
 
     ZO_PREGAME_HAD_GLOBAL_ERROR = true
@@ -182,7 +205,7 @@ local function ServerDisconnectError(eventCode)
             errorString = zo_strformat(errorStringFormat, GetGameURL())
         end
     elseif globalErrorCode ~= nil and globalErrorCode ~= GLOBAL_ERROR_CODE_NO_ERROR then
-        -- if the error code is not in LogoutReason then it is probably in the GlobalErrorCode enum 
+        -- if the error code is not in LogoutReason then it is probably in the GlobalErrorCode enum
         errorStringFormat = GetString("SI_GLOBALERRORCODE", globalErrorCode)
 
         if errorStringFormat ~= ""  then
@@ -190,36 +213,13 @@ local function ServerDisconnectError(eventCode)
         end
     end
 
-    if(not errorString or errorString == "") then
+    if not errorString or errorString == "" then
         errorString = GetString(SI_UNKNOWN_ERROR)
     end
 
     PregameStateManager_ReenterLoginState()
 
-    local force = true
-    ZO_Dialogs_ReleaseAllDialogs(force)
-
     ZO_Dialogs_ShowDialog("HANDLE_ERROR", nil, {mainTextParams = {errorString}})
-end
-
-local function OnVideoPlaybackComplete()
-    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE)
-    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR)
-
-    if not ZO_PREGAME_HAD_GLOBAL_ERROR then
-        if IsPlayingChapterOpeningCinematic() then
-            ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
-            AttemptToAdvancePastChapterOpeningCinematic()
-        else
-            PregameStateManager_AdvanceState()
-        end
-    end
-end
-
-function ZO_PlayVideoAndAdvance(...)
-    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
-    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
-    PlayVideo(...)
 end
 
 local LOGIN_REQUEST_TIME_MAX = 60
@@ -234,11 +234,10 @@ end
 local function PregameStateManager_Initialize()
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SERVER_LOCKED,                      OnServerLocked)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_WORLD_LIST_RECEIVED,                OnWorldListReceived)
-    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER,           ServerDisconnectError)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GLOBAL_ERROR,                       GlobalError)
 
     local function OnPregameUILoaded(eventId, addOnName)
-        if(addOnName == "ZO_Pregame") then
+        if addOnName == "ZO_Pregame" then
             RegisterForLoadingUpdates()
             EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED)
         end

@@ -359,8 +359,8 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             settingId = OPTIONS_CUSTOM_SETTING_RESET_TUTORIALS,
             text = SI_INTERFACE_OPTIONS_RESET_TUTORIALS,
             callback = function()
-                            ZO_Dialogs_ShowGamepadDialog("CONFIRM_RESET_TUTORIALS")
-                        end,
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_RESET_TUTORIALS")
+            end,
         },
     },
 
@@ -409,31 +409,18 @@ local ZO_OptionsPanel_Gameplay_ControlData =
 
 local ZO_SharedOptions_Gameplay_GamepadSettingsData = 
 {
-    --Options_Gamepad_Preferred
-    [GAMEPAD_SETTING_GAMEPAD_PREFERRED] =
+    --Options_Gameplay_InputModePreferred
+    [GAMEPAD_SETTING_INPUT_PREFERRED_MODE] =
     {
-        controlType = OPTIONS_CHECKBOX,
+        controlType = OPTIONS_FINITE_LIST,
         system = SETTING_TYPE_GAMEPAD,
-        settingId = GAMEPAD_SETTING_GAMEPAD_PREFERRED,
         panel = SETTING_PANEL_GAMEPLAY,
+        settingId = GAMEPAD_SETTING_INPUT_PREFERRED_MODE,
         text = SI_GAMEPAD_OPTIONS_GAMEPAD_MODE,
         tooltipText = SI_GAMEPAD_OPTIONS_GAMEPAD_MODE_TOOLTIP,
-        excludeFromResetToDefault = true,
-    },
-
-    --Options_Automatic_Input_Mode_Changing_Enabled
-    [GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED] =
-    {
-        controlType = OPTIONS_CHECKBOX,
-        system = SETTING_TYPE_GAMEPAD,
-        settingId = GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED,
-        panel = SETTING_PANEL_GAMEPLAY,
-        text = SI_GAMEPAD_OPTIONS_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED,
-        tooltipText = SI_GAMEPAD_OPTIONS_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED_TOOLTIP,
-        excludeFromResetToDefault = true,
-        visible = function()
-            return DoesPlatformAllowConfiguringAutomaticInputChanging()
-        end
+        valid = {INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD, INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD, INPUT_PREFERRED_MODE_AUTOMATIC},
+        exists = DoesPlatformAllowConfiguringAutomaticInputChanging,
+        valueStringPrefix = "SI_INPUTPREFERREDMODE",
     },
 
     --Options_Gamepad_Template
@@ -447,8 +434,6 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
         valid = {GAMEPAD_TEMPLATE_DEFAULT, GAMEPAD_TEMPLATE_ALTERNATE_INTERACT, GAMEPAD_TEMPLATE_WEAPON_TRICKS,},
         valueStringPrefix = "SI_GAMEPADTEMPLATE",
         gamepadShowsControllerInfo = true,
-
-        scrollListChangedCallback = ZO_GamepadOptions_RefreshGamepadInfoPanel,
     },
 }
 

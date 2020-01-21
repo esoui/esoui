@@ -16,7 +16,7 @@ function ChatContainer:Initialize(control, windowPool, tabPool)
     self.overflowTab:SetAnchor(LEFT, self.newWindowTab, RIGHT, 0, 0)
 
     self:SetAllowSaveSettings(true)
-    self:InitializeWindowManagement(control, windowPool, tabPool)    
+    self:InitializeWindowManagement(control, windowPool, tabPool)
     self:InitializeScrolling(control)
     self:FadeOut()
 end
@@ -45,7 +45,7 @@ function ChatContainer:UpdateNewWindowTab()
 end
 
 function ChatContainer:ShowRemoveTabDialog(index)
-	SharedChatContainer.ShowRemoveTabDialog(self, index, "CHAT_TAB_REMOVE")
+    SharedChatContainer.ShowRemoveTabDialog(self, index, "CHAT_TAB_REMOVE")
 end
 
 function ChatContainer:LoadSettings(settings)
@@ -67,7 +67,7 @@ end
 ZO_ChatSystem = SharedChatSystem:Subclass()
 
 function ZO_ChatSystem:New(...)
-	return SharedChatSystem.New(self, ...)
+    return SharedChatSystem.New(self, ...)
 end
 
 local PC_SETTINGS =
@@ -82,15 +82,16 @@ local PC_SETTINGS =
 }
 
 function ZO_ChatSystem:Initialize(control)
-	SharedChatSystem.Initialize(self, control, PC_SETTINGS)
+    SharedChatSystem.Initialize(self, control, PC_SETTINGS)
+    self.currentNumNotifications = 0
 end
 
 local function NewContainerHelper(chat, control, windowPool, tabPool)
-	return ChatContainer:New(chat, control, windowPool, tabPool)
+    return ChatContainer:New(chat, control, windowPool, tabPool)
 end
 
 function ZO_ChatSystem:LoadChatFromSettings()
-	local defaults = {
+    local defaults = {
         containers = {
             ["*"] = {
                 point = BOTTOMLEFT,
@@ -104,11 +105,11 @@ function ZO_ChatSystem:LoadChatFromSettings()
         },
     }
 
-	SharedChatSystem.LoadChatFromSettings(self, NewContainerHelper, defaults)
+    SharedChatSystem.LoadChatFromSettings(self, NewContainerHelper, defaults)
 end
 
 function ZO_ChatSystem:SetupSavedVars(defaults)
-	self.sv = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 4, "Chat", defaults)
+    self.sv = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 4, "Chat", defaults)
 end
 
 function ZO_ChatSystem:SaveLocalContainerSettings(container, containerControl)
@@ -120,7 +121,7 @@ function ZO_ChatSystem:SaveLocalContainerSettings(container, containerControl)
 end
 
 function ZO_ChatSystem:InitializeSharedControlManagement(control)
-	SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper)
+    SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper, "ZO_KeyboardChatWindowTemplate", "Keyboard")
 
     self.friendsButton = control:GetNamedChild("Friends")
     self.friendsLabel = control:GetNamedChild("NumOnlineFriends")
@@ -143,27 +144,27 @@ function ZO_ChatSystem:InitializeSharedControlManagement(control)
     self.mailBurstTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("NotificationAddedBurst", mailBurst)
     self.mailBurstTimeline:SetHandler("OnStop", function() mailBurst:SetAlpha(0) end)
 
-	-- Setup the minmizied bar
-	self.minBar = control:GetNamedChild("MinBar")
-	self.minBar:SetInheritAlpha(false)
+    -- Setup the minmizied bar
+    self.minBar = control:GetNamedChild("MinBar")
+    self.minBar:SetInheritAlpha(false)
     self.minBar.maxButton = self.minBar:GetNamedChild("Maximize")
     self.minBar.bgHighlight = self.minBar:GetNamedChild("BGHighlight")
     self.newChatFadeAnim = ZO_AlphaAnimation:New(self.minBar.bgHighlight)
 end
 
 function ZO_ChatSystem:TryNotificationAndMailBursts()
-    if(self.currentNumNotifications > 0) then
+    if self.currentNumNotifications > 0 then
         self.notificationBurstTimeline:PlayFromStart()
     end
-        
-    if(self.numUnreadMails > 0) then
+
+    if self.numUnreadMails > 0 then
         self.mailBurstTimeline:PlayFromStart()
     end
 end
 
 function ZO_ChatSystem:ResetContainerPositionAndSize(container)
-	self.sv.containers[container.id] = nil
-	container:LoadSettings(self.sv.containers[container.id])
+    self.sv.containers[container.id] = nil
+    container:LoadSettings(self.sv.containers[container.id])
 end
 
 function ZO_ChatSystem:RemoveSavedContainer(container)
@@ -177,31 +178,31 @@ function ZO_ChatSystem:SetupNotifications(numNotifications)
 
     if numNotifications == 0 then
         self.notificationsGlow:SetHidden(true)
-		       
-        if(self.notificationPulseTimeline:IsPlaying()) then
+
+        if self.notificationPulseTimeline:IsPlaying() then
             self.notificationPulseTimeline:Stop()
         end
 
-    else      
-		self.notificationsGlow:SetHidden(false)
-		if(not self.notificationPulseTimeline:IsPlaying()) then
-			self.notificationPulseTimeline:PlayFromStart()
-		end
+    else
+        self.notificationsGlow:SetHidden(false)
+        if not self.notificationPulseTimeline:IsPlaying() then
+            self.notificationPulseTimeline:PlayFromStart()
+        end
     end
 end
 
 function ZO_ChatSystem:OnNumNotificationsChanged(numNotifications)
-    if(numNotifications > self.currentNumNotifications and IsPlayerActivated()) then
+    if numNotifications > self.currentNumNotifications and IsPlayerActivated() then
         self.notificationBurstTimeline:PlayFromStart()
     end
 
-    SharedChatSystem.OnNumNotificationsChanged(self, numNotifications)
+    self.currentNumNotifications = numNotifications
 
     self:SetupNotifications(numNotifications)
 end
 
 function ZO_ChatSystem:OnNumUnreadMailChanged(numUnread)
-    if(numUnread > self.numUnreadMails and IsPlayerActivated()) then
+    if numUnread > self.numUnreadMails and IsPlayerActivated() then
         self.mailBurstTimeline:PlayFromStart()
     end
 
@@ -211,181 +212,200 @@ function ZO_ChatSystem:OnNumUnreadMailChanged(numUnread)
     self.mailGlow:SetHidden(numUnread == 0)
 end
 
-function ZO_ChatSystem:OnNumOnlineFriendsChanged(numOnline)
+function ZO_ChatSystem:SetNumOnlineFriends(numOnline)
     self.friendsLabel:SetText(numOnline)
 
-    if(InformationTooltip:GetOwner() == self.friendsButton) then
+    if InformationTooltip:GetOwner() == self.friendsButton then
         FRIENDS_LIST:FriendsButton_OnMouseEnter(self.friendsButton)
     end
 end
 
+function ZO_ChatSystem:InitializeEventManagement()
+    self:InitializeSharedEvents("KeyboardChatSystem")
+
+    local function OnNumOnlineFriendsChanged(numOnline)
+        self:SetNumOnlineFriends(numOnline)
+    end
+    CALLBACK_MANAGER:RegisterCallback("NumOnlineFriendsChanged", OnNumOnlineFriendsChanged)
+    self:SetNumOnlineFriends(FRIENDS_LIST_MANAGER:GetNumOnline())
+end
+
 function ZO_ChatSystem:ShowMinBar()
-	--clear the anchors
-	self.mailButton:ClearAnchors()
-	self.mailLabel:ClearAnchors()
-	self.friendsButton:ClearAnchors()
-	self.friendsLabel:ClearAnchors()
-	self.notificationsButton:ClearAnchors()
-	self.notificationsLabel:ClearAnchors()
+    --clear the anchors
+    self.mailButton:ClearAnchors()
+    self.mailLabel:ClearAnchors()
+    self.friendsButton:ClearAnchors()
+    self.friendsLabel:ClearAnchors()
+    self.notificationsButton:ClearAnchors()
+    self.notificationsLabel:ClearAnchors()
     self.minBar.maxButton:ClearAnchors()
     self.agentChatButton:ClearAnchors()
 
-	--reset the parentage for fading purposes
-	self.mailButton:SetParent(self.minBar)
-	self.mailLabel:SetParent(self.minBar)
-	self.friendsButton:SetParent(self.minBar)
-	self.friendsLabel:SetParent(self.minBar)
-	self.notificationsButton:SetParent(self.minBar)
-	self.notificationsLabel:SetParent(self.minBar)
+    --reset the parentage for fading purposes
+    self.mailButton:SetParent(self.minBar)
+    self.mailLabel:SetParent(self.minBar)
+    self.friendsButton:SetParent(self.minBar)
+    self.friendsLabel:SetParent(self.minBar)
+    self.notificationsButton:SetParent(self.minBar)
+    self.notificationsLabel:SetParent(self.minBar)
     self.agentChatButton:SetParent(self.minBar)
 
-	--reanchor everything
-	self.mailButton:SetAnchor(TOPLEFT, nil, nil, -4, 265)
-	self.mailLabel:SetAnchor(TOPLEFT, self.mailButton, BOTTOMLEFT, 0, -5)
-	self.mailLabel:SetAnchor(TOPRIGHT, self.mailButton, BOTTOMRIGHT, 0, -5)
-	self.friendsButton:SetAnchor(TOPLEFT, self.mailLabel, BOTTOMLEFT)
-	self.friendsLabel:SetAnchor(TOPLEFT, self.friendsButton, BOTTOMLEFT, 0, -5)
-	self.friendsLabel:SetAnchor(TOPRIGHT, self.friendsButton, BOTTOMRIGHT, 0, -5)
-	self.notificationsButton:SetAnchor(TOPLEFT, self.friendsLabel, BOTTOMLEFT)
-	self.notificationsLabel:SetAnchor(TOPLEFT, self.notificationsButton, BOTTOMLEFT, 0, -5)
-	self.notificationsLabel:SetAnchor(TOPRIGHT, self.notificationsButton, BOTTOMRIGHT, 0, -5)
+    --reanchor everything
+    self.mailButton:SetAnchor(TOPLEFT, nil, nil, -4, 265)
+    self.mailLabel:SetAnchor(TOPLEFT, self.mailButton, BOTTOMLEFT, 0, -5)
+    self.mailLabel:SetAnchor(TOPRIGHT, self.mailButton, BOTTOMRIGHT, 0, -5)
+    self.friendsButton:SetAnchor(TOPLEFT, self.mailLabel, BOTTOMLEFT)
+    self.friendsLabel:SetAnchor(TOPLEFT, self.friendsButton, BOTTOMLEFT, 0, -5)
+    self.friendsLabel:SetAnchor(TOPRIGHT, self.friendsButton, BOTTOMRIGHT, 0, -5)
+    self.notificationsButton:SetAnchor(TOPLEFT, self.friendsLabel, BOTTOMLEFT)
+    self.notificationsLabel:SetAnchor(TOPLEFT, self.notificationsButton, BOTTOMLEFT, 0, -5)
+    self.notificationsLabel:SetAnchor(TOPRIGHT, self.notificationsButton, BOTTOMRIGHT, 0, -5)
     self.agentChatButton:SetAnchor(TOPLEFT, self.notificationsLabel, BOTTOMLEFT)
     self.minBar.maxButton:SetAnchor(TOPLEFT, self.agentChatButton, BOTTOMLEFT)
 
-	--center the labels
-	self.mailLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-	self.friendsLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-	self.notificationsLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    --center the labels
+    self.mailLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    self.friendsLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    self.notificationsLabel:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-	self.minBar:SetHidden(false)
-	self.isMinimized = true
+    self.minBar:SetHidden(false)
+    self.isMinimized = true
 end
 
 function ZO_ChatSystem:HideMinBar()
-	--clear the anchors
-	self.mailButton:ClearAnchors()
-	self.mailLabel:ClearAnchors()
-	self.friendsButton:ClearAnchors()
-	self.friendsLabel:ClearAnchors()
-	self.notificationsButton:ClearAnchors()
-	self.notificationsLabel:ClearAnchors()
+    --clear the anchors
+    self.mailButton:ClearAnchors()
+    self.mailLabel:ClearAnchors()
+    self.friendsButton:ClearAnchors()
+    self.friendsLabel:ClearAnchors()
+    self.notificationsButton:ClearAnchors()
+    self.notificationsLabel:ClearAnchors()
     self.agentChatButton:ClearAnchors()
 
-	--reset the parentage for fading purposes
-	self.mailButton:SetParent(self.control)
-	self.mailLabel:SetParent(self.control)
-	self.friendsButton:SetParent(self.control)
-	self.friendsLabel:SetParent(self.control)
-	self.notificationsButton:SetParent(self.control)
-	self.notificationsLabel:SetParent(self.control)
+    --reset the parentage for fading purposes
+    self.mailButton:SetParent(self.control)
+    self.mailLabel:SetParent(self.control)
+    self.friendsButton:SetParent(self.control)
+    self.friendsLabel:SetParent(self.control)
+    self.notificationsButton:SetParent(self.control)
+    self.notificationsLabel:SetParent(self.control)
     self.agentChatButton:SetParent(self.control)
 
-	--reanchor everything
-	self.mailButton:SetAnchor(TOPLEFT, nil, TOPLEFT, 20, 7)
-	self.mailLabel:SetAnchor(LEFT, self.mailButton, RIGHT, 2)
-	self.friendsButton:SetAnchor(LEFT, self.mailLabel, RIGHT, 10)
-	self.friendsLabel:SetAnchor(LEFT, self.friendsButton, RIGHT, 2)
-	self.notificationsButton:SetAnchor(LEFT, self.friendsLabel, RIGHT, 10)
-	self.notificationsLabel:SetAnchor(LEFT, self.notificationsButton, RIGHT, 2)
+    --reanchor everything
+    self.mailButton:SetAnchor(TOPLEFT, nil, TOPLEFT, 20, 7)
+    self.mailLabel:SetAnchor(LEFT, self.mailButton, RIGHT, 2)
+    self.friendsButton:SetAnchor(LEFT, self.mailLabel, RIGHT, 10)
+    self.friendsLabel:SetAnchor(LEFT, self.friendsButton, RIGHT, 2)
+    self.notificationsButton:SetAnchor(LEFT, self.friendsLabel, RIGHT, 10)
+    self.notificationsLabel:SetAnchor(LEFT, self.notificationsButton, RIGHT, 2)
     self.agentChatButton:SetAnchor(LEFT, self.notificationsLabel, RIGHT, 10)
 
-	--left align the labels
-	self.mailLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-	self.friendsLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-	self.notificationsLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
-	
-	self.isMinimized = false
-	self.minBar:SetHidden(true)
+    --left align the labels
+    self.mailLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    self.friendsLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    self.notificationsLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+
+    self.isMinimized = false
+    self.minBar:SetHidden(true)
 end
 
 local function CreateSlideAnimations(container, maximizeAnimation)
-	if not container.slideAnim then
-		container.slideAnim = ANIMATION_MANAGER:CreateTimelineFromVirtual("ChatMinMaxAnim", container.control)
-	end
+    if not container.slideAnim then
+        container.slideAnim = ANIMATION_MANAGER:CreateTimelineFromVirtual("ChatMinMaxAnim", container.control)
+    end
 
-	if(maximizeAnimation) then
-		container.slideAnim:SetHandler("OnStop", function(animation) container.control:SetClampedToScreen(true) end)
+    if maximizeAnimation then
+        container.slideAnim:SetHandler("OnStop", function(animation) container.control:SetClampedToScreen(true) end)
     else
         container.slideAnim:SetHandler("OnStop", nil)
-	end
+    end
 end
 
 function ZO_ChatSystem:Minimize()
-	if(not self.isMinimized) then
-		-- slide all chat windows off the left side of the screen
-		for i,container in pairs(self.containers) do
-			CreateSlideAnimations(container)
+    if not self.isMinimized then
+        -- slide all chat windows off the left side of the screen
+        for i,container in pairs(self.containers) do
+            CreateSlideAnimations(container)
 
-			-- If the animation is still playing keep the same positions, otherwise save off the current position and calculate the minimize distance
+            -- If the animation is still playing keep the same positions, otherwise save off the current position and calculate the minimize distance
             local minimizeDistance
-            if(not container.slideAnim:IsPlaying()) then
-			    minimizeDistance = container.control:GetRight()
-			    container.originalPosition = minimizeDistance
+            if not container.slideAnim:IsPlaying() then
+                minimizeDistance = container.control:GetRight()
+                container.originalPosition = minimizeDistance
             else
                 minimizeDistance = container.originalPosition
             end
 
-			minimizeDistance = minimizeDistance + 40 --need a buffer to get the edge offscreen
+            minimizeDistance = minimizeDistance + 40 --need a buffer to get the edge offscreen
 
-			-- Set the animation distance
-			container.slideAnim:GetAnimation(1):SetTranslateDeltas(-minimizeDistance, 0)
-			container.control:SetClampedToScreen(false)
+            -- Set the animation distance
+            container.slideAnim:GetAnimation(1):SetTranslateDeltas(-minimizeDistance, 0)
+            container.control:SetClampedToScreen(false)
 
-			-- fire the animation
-			container.slideAnim:PlayFromStart()
+            -- fire the animation
+            container.slideAnim:PlayFromStart()
 
 
-			-- hide all the tabs at the top
-			for j, tab in pairs(container.tabGroup.m_Buttons) do
-				tab:SetHidden(true)
-			end
+            -- hide all the tabs at the top
+            for j, tab in pairs(container.tabGroup.m_Buttons) do
+                tab:SetHidden(true)
+            end
 
-            --hide the oveflow tab 
+            --hide the oveflow tab
             container.overflowTab:SetHidden(true)
 
-			container.newWindowTab:SetHidden(true)
-		end
+            container.newWindowTab:SetHidden(true)
+        end
 
-		--move the buttons to and show the minimized bar
-		PlaySound(SOUNDS.CHAT_MINIMIZED)
-		self:ShowMinBar()
-	end
+        --move the buttons to and show the minimized bar
+        PlaySound(SOUNDS.CHAT_MINIMIZED)
+        self:ShowMinBar()
+    end
 end
 
 function ZO_ChatSystem:Maximize()
-	if(self.isMinimized) then
-		for i, container in pairs(self.containers) do
-			-- calculate the distance to the original position
-			local maximizeDistance = container.originalPosition - container.control:GetRight()
-			
-			-- setup the animation and fire it
-			CreateSlideAnimations(container, true)
-			container.slideAnim:GetAnimation(1):SetTranslateDeltas(maximizeDistance, 0)		
-			container.slideAnim:PlayFromStart()
+    if self.isMinimized then
+        for i, container in pairs(self.containers) do
+            -- calculate the distance to the original position
+            local maximizeDistance = container.originalPosition - container.control:GetRight()
 
-			--show the tabs that haven't overflowed
+            -- setup the animation and fire it
+            CreateSlideAnimations(container, true)
+            container.slideAnim:GetAnimation(1):SetTranslateDeltas(maximizeDistance, 0)
+            container.slideAnim:PlayFromStart()
+
+            --show the tabs that haven't overflowed
             for j, tab in pairs(container.tabGroup.m_Buttons) do
                 if tab.index < container.hiddenTabStartIndex then
                     tab:SetHidden(false)
                 else
                     container.overflowTab:SetHidden(false)
                 end
-			end
-			container.newWindowTab:SetHidden(false)
+            end
+            container.newWindowTab:SetHidden(false)
 
-			--fade back in
-			container:FadeIn()
-		end
+            --fade back in
+            container:FadeIn()
+        end
 
         --hide the minimized bar, fade in the windows
         PlaySound(SOUNDS.CHAT_MAXIMIZED)
         self:HideMinBar()
 
-        if(self.newChatFadeAnim and self.newChatFadeAnim:IsPlaying()) then
+        if self.newChatFadeAnim and self.newChatFadeAnim:IsPlaying() then
             self.newChatFadeAnim:Stop()
             self.minBar.bgHighlight:SetAlpha(0)
         end
-	end
+    end
+end
+
+function ZO_ChatSystem:OnFormattedChatMessage(message, category, ...)
+    SharedChatSystem.OnFormattedChatMessage(self, message, category, ...)
+
+    if category == CHAT_CATEGORY_WHISPER_INCOMING then
+        local NUM_FLASHES_BEFORE_SOLID = 7
+        FlashTaskbarWindow("WHISPER", NUM_FLASHES_BEFORE_SOLID)
+    end
 end
 
 function ZO_ChatSystem:GetFont()
@@ -400,18 +420,108 @@ function ZO_ChatSystem:GetFontSizeFromSetting()
     return GetChatFontSize()
 end
 
---[[ XML Functions ]]--
+-- override
+function ZO_ChatSystem:ShouldOnlyShowOnHUD()
+    return false
+end
 
+-- override
+function ZO_ChatSystem:IsHidden()
+    if not IsChatSystemAvailableForCurrentPlatform() then
+        return true
+    end
+
+    -- On platforms with both chat systems (currently only heron), hide on the opposite UI mode
+    if ZO_ChatSystem_DoesPlatformUseGamepadChatSystem() and IsInGamepadPreferredMode() then
+        return true
+    end
+
+    return false
+end
 
 --[[ Global/XML Handlers ]]--
-function ZO_ChatSystem_OnMinMaxClicked()
-    if CHAT_SYSTEM:IsMinimized() then
-        CHAT_SYSTEM:Maximize()
+
+function ZO_ChatSystem_ShowOptions(control)
+    control.container:ShowContextMenu()
+end
+
+function ZO_ChatSystem_OnFriendsEnter(control)
+    FRIENDS_LIST:FriendsButton_OnMouseEnter(control)
+end
+
+function ZO_ChatSystem_OnFriendsExit(control)
+    FRIENDS_LIST:FriendsButton_OnMouseExit(control)
+end
+
+function ZO_ChatSystem_OnFriendsClicked(control)
+    if IsInGamepadPreferredMode() then
+        SCENE_MANAGER:Show("gamepad_friends")
     else
-        CHAT_SYSTEM:Minimize()
+        SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CONTACTS)
+    end
+end
+
+function ZO_ChatSystem_OnMailEnter(control)
+    local numUnreadMail = GetNumUnreadMail()
+    InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
+    if numUnreadMail == 0 then
+        SetTooltipText(InformationTooltip, GetString(SI_MAIL_NO_UNREAD_MAIL))
+    else
+        SetTooltipText(InformationTooltip, zo_strformat(SI_MAIL_UNREAD_MAIL, numUnreadMail))
+    end
+end
+
+function ZO_ChatSystem_OnMailExit(control)
+    ClearTooltip(InformationTooltip)
+end
+
+function ZO_ChatSystem_OnMailClicked(control)
+    SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_MAIL)
+end
+
+function ZO_ChatSystem_OnAgentChatEnter(control)
+    InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
+    SetTooltipText(InformationTooltip, GetString(SI_AGENT_CHAT_ACTIVE_TOOLTIP))
+end
+
+function ZO_ChatSystem_OnAgentChatExit(control)
+    ClearTooltip(InformationTooltip)
+end
+
+function ZO_ChatSystem_OnAgentChatClicked()
+    local isChatRequested = GetAgentChatRequestInfo()
+    if isChatRequested then
+        AcceptAgentChat()
+    end
+end
+
+function ZO_ChatSystem_OnNotificationsClicked(control)
+    SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_NOTIFICATIONS)
+end
+
+function ZO_ChatSystem_OnNotificationsEnter(control)
+    NOTIFICATIONS:OnNotificationsChatButtonEnter(control)
+end
+
+function ZO_ChatSystem_OnNotificationsExit(control)
+    NOTIFICATIONS:OnNotificationsChatButtonExit(control)
+end
+
+function ZO_ChatSystem_OnMinMaxClicked()
+    if KEYBOARD_CHAT_SYSTEM:IsMinimized() then
+        KEYBOARD_CHAT_SYSTEM:Maximize()
+    else
+        KEYBOARD_CHAT_SYSTEM:Minimize()
     end
 end
 
 function ZO_ChatSystem_OnInitialized(control)
-    CHAT_SYSTEM = ZO_ChatSystem:New(control)
+    KEYBOARD_CHAT_SYSTEM = ZO_ChatSystem:New(control)
+    SYSTEMS:RegisterKeyboardObject("ChatSystem", KEYBOARD_CHAT_SYSTEM)
+
+    if not ZO_ChatSystem_DoesPlatformUseGamepadChatSystem() then
+        -- On PC platforms, we do not load a gamepad chat system. Let's reuse the keyboard system instead.
+        GAMEPAD_CHAT_SYSTEM = KEYBOARD_CHAT_SYSTEM
+        SYSTEMS:RegisterGamepadObject("ChatSystem", KEYBOARD_CHAT_SYSTEM)
+    end
 end

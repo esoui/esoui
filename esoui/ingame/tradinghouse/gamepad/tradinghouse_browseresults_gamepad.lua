@@ -152,6 +152,7 @@ function ZO_GamepadTradingHouse_BrowseResults:OnSearchStateChanged(searchState, 
     local shouldDeactivateBrowseResults = false
     if searchState == TRADING_HOUSE_SEARCH_STATE_NONE then
         self:SetEmptyText("")
+        self:RefreshPagingControls()
     elseif searchState == TRADING_HOUSE_SEARCH_STATE_WAITING then
         self:SetEmptyText(GetString("SI_TRADINGHOUSESEARCHSTATE", searchState))
     elseif searchState == TRADING_HOUSE_SEARCH_STATE_COMPLETE then
@@ -194,6 +195,7 @@ function ZO_GamepadTradingHouse_BrowseResults:OnResponseReceived(responseType, r
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:RefreshPagingControls()
+    --IsPanelFocused ignores activated or not which matters here
     local enablePrevious = self:IsPanelFocused() and TRADING_HOUSE_SEARCH:HasPreviousPage()
     local enableNext = self:IsPanelFocused() and TRADING_HOUSE_SEARCH:HasNextPage()
     local hideButtons = not (TRADING_HOUSE_SEARCH:HasPreviousPage() or TRADING_HOUSE_SEARCH:HasNextPage())

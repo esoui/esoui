@@ -9,6 +9,7 @@ end
 function ZO_HorizontalScrollList_Gamepad:Initialize(control, templateName, numVisibleEntries, setupFunction, equalityFunction, onCommitWithItemsFunction, onClearedFunction)
     ZO_HorizontalScrollList.Initialize(self, control, templateName, numVisibleEntries, setupFunction, equalityFunction, onCommitWithItemsFunction, onClearedFunction)
     self:SetActive(false)
+    self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
 end
 
 function ZO_HorizontalScrollList_Gamepad:SetOnActivatedChangedFunction(onActivatedChangedFunction)
@@ -77,15 +78,21 @@ function ZO_HorizontalScrollList_Gamepad:Deactivate()
 end
 
 function ZO_HorizontalScrollList_Gamepad:UpdateDirectionalInput()
-    local hasReleasedStick = self.result == 0
-    self.result = DIRECTIONAL_INPUT:GetX(ZO_DI_LEFT_STICK, ZO_DI_DPAD) 
-    if hasReleasedStick and self:CanScroll() then
-        if self.result > 0 then
-            self:MoveLeft()
-            hasReleasedStick = false
-        elseif self.result < 0 then
-            self:MoveRight()
-            hasReleasedStick = false
-        end
+    local result = self.movementController:CheckMovement()
+
+    if self.customDirectionalInputHandler and self.customDirectionalInputHandler(result) then
+        return
     end
+
+    if result == MOVEMENT_CONTROLLER_MOVE_NEXT then
+        self:MoveLeft()
+    elseif result == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+        self:MoveRight()
+    end
+end
+
+-- Will fire a callback with the directional input result
+-- Optionally you can return true to consume the result before the list processes it
+function ZO_HorizontalScrollList_Gamepad:SetCustomDirectionInputHandler(handler)
+    self.customDirectionalInputHandler = handler
 end

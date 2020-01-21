@@ -108,7 +108,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self.modeList:Activate()
 
-            local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(GetCraftingInteractionType())
+            local titleString = ZO_GamepadCraftingUtils_GetLineNameForCraftingType(craftingType)
 
             ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
             ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
@@ -136,8 +136,9 @@ function ZO_Smithing_Gamepad:Initialize(control)
         if ZO_Smithing_IsSmithingStation(craftingType) and IsInGamepadPreferredMode() then
             -- make sure that we are, in fact, on a smithing scene before we try to show the base scene
             -- certain times, such as going to the crown store from crafting, can get squashed without this
+            local nextScene = SCENE_MANAGER:GetNextScene()
             for _, smithingSceneName in ipairs(self.smithingRelatedSceneNames) do
-                if SCENE_MANAGER:IsShowing(smithingSceneName) then
+                if SCENE_MANAGER:IsShowing(smithingSceneName) or (nextScene ~= nil and nextScene:GetName() == smithingSceneName) then
                     SCENE_MANAGER:ShowBaseScene()
                     break
                 end

@@ -1,7 +1,7 @@
 local MainMenu_Keyboard = ZO_CallbackObject:Subclass()
 
 -- If you disable a category in MainMenu.lua you should also disable it in PlayerMenu.lua
-local CATEGORY_LAYOUT_INFO =
+ZO_CATEGORY_LAYOUT_INFO =
 {
     [MENU_CATEGORY_MARKET] =
     {
@@ -320,8 +320,8 @@ local CATEGORY_LAYOUT_INFO =
 }
 
 function MainMenu_Keyboard:SetCategoriesEnabled(categoryFilterFunction, shouldBeEnabled)
-    for i = 1, #CATEGORY_LAYOUT_INFO do
-        local categoryInfo = CATEGORY_LAYOUT_INFO[i]
+    for i = 1, #ZO_CATEGORY_LAYOUT_INFO do
+        local categoryInfo = ZO_CATEGORY_LAYOUT_INFO[i]
         if categoryFilterFunction(categoryInfo) then
             if not shouldBeEnabled and self:IsShowing() and (self.lastCategory == i) then
                 self:Hide()
@@ -415,8 +415,8 @@ function MainMenu_Keyboard:AddCategories()
     self.sceneGroupInfo = {}
     self.categoryAreaFragments = {}
 
-    for i = 1, #CATEGORY_LAYOUT_INFO do
-        local categoryLayoutInfo = CATEGORY_LAYOUT_INFO[i]
+    for i = 1, #ZO_CATEGORY_LAYOUT_INFO do
+        local categoryLayoutInfo = ZO_CATEGORY_LAYOUT_INFO[i]
         categoryLayoutInfo.callback = function() self:OnCategoryClicked(i) end
         ZO_MenuBar_AddButton(self.categoryBar, categoryLayoutInfo)
 
@@ -442,7 +442,7 @@ end
 function MainMenu_Keyboard:AddRawScene(sceneName, category, categoryInfo, sceneGroupName)
     local scene = SCENE_MANAGER:GetScene(sceneName)
 
-    local hideCategoryBar = CATEGORY_LAYOUT_INFO[category].hideCategoryBar
+    local hideCategoryBar = ZO_CATEGORY_LAYOUT_INFO[category].hideCategoryBar
     if hideCategoryBar == nil or hideCategoryBar == false then
         scene:AddFragment(categoryInfo.subcategoryBarFragment)
         for i, categoryAreaFragment in ipairs(self.categoryAreaFragments) do
@@ -602,7 +602,7 @@ function MainMenu_Keyboard:EvaluateSceneGroupVisibilityOnCallback(sceneGroupName
 end
 
 function MainMenu_Keyboard:RefreshCategoryIndicators()
-    for i, categoryLayoutData in ipairs(CATEGORY_LAYOUT_INFO) do
+    for i, categoryLayoutData in ipairs(ZO_CATEGORY_LAYOUT_INFO) do
         local indicators = categoryLayoutData.indicators
         if indicators then
             local buttonControl = ZO_MenuBar_GetButtonControl(self.categoryBar, categoryLayoutData.descriptor)
@@ -814,10 +814,10 @@ end
 
 function MainMenu_Keyboard:ShowCategory(category)
     --Keyboard and gamepad aren't always one-to-one, so sometimes we might need a binding to do the exact same thing as a different binding
-    local categoryLayoutInfo = CATEGORY_LAYOUT_INFO[category]
+    local categoryLayoutInfo = ZO_CATEGORY_LAYOUT_INFO[category]
     if categoryLayoutInfo.alias then
         category = categoryLayoutInfo.alias
-        categoryLayoutInfo = CATEGORY_LAYOUT_INFO[category]
+        categoryLayoutInfo = ZO_CATEGORY_LAYOUT_INFO[category]
     end
 
     if(categoryLayoutInfo.visible == nil or categoryLayoutInfo.visible()) then
@@ -848,7 +848,7 @@ do
     end
 
     local function ZO_MainMenuManager_ToggleCategoryInternal(self, category)
-        local categoryLayoutInfo = CATEGORY_LAYOUT_INFO[category]
+        local categoryLayoutInfo = ZO_CATEGORY_LAYOUT_INFO[category]
         local categoryState = GetCategoryState(categoryLayoutInfo)
 
         if categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_DEAD then
@@ -875,7 +875,7 @@ do
 
     function MainMenu_Keyboard:ToggleCategory(category)
         --Keyboard and gamepad aren't always one-to-one, so sometimes we might need a binding to do the exact same thing as a different binding
-        local categoryLayoutInfo = CATEGORY_LAYOUT_INFO[category]
+        local categoryLayoutInfo = ZO_CATEGORY_LAYOUT_INFO[category]
         if categoryLayoutInfo.alias then
             category = categoryLayoutInfo.alias
         end
@@ -891,7 +891,7 @@ do
     end
 
     function MainMenu_Keyboard:ShowLastCategory()
-        local categoryLayoutInfo = CATEGORY_LAYOUT_INFO[self.lastCategory]
+        local categoryLayoutInfo = ZO_CATEGORY_LAYOUT_INFO[self.lastCategory]
         local categoryState = GetCategoryState(categoryLayoutInfo)
 
         if categoryState == MAIN_MENU_CATEGORY_ENABLED then
@@ -902,8 +902,8 @@ do
     end
 
     function MainMenu_Keyboard:UpdateCategories()
-        for i = 1, #CATEGORY_LAYOUT_INFO do
-            local categoryInfo = CATEGORY_LAYOUT_INFO[i]
+        for i = 1, #ZO_CATEGORY_LAYOUT_INFO do
+            local categoryInfo = ZO_CATEGORY_LAYOUT_INFO[i]
             local shouldBeEnabled = GetCategoryState(categoryInfo) == MAIN_MENU_CATEGORY_ENABLED
             if not shouldBeEnabled and (self.lastCategory == i) and SCENE_MANAGER:IsShowing(categoryInfo.scene) then
                 self:Hide()

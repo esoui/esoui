@@ -722,6 +722,7 @@ function ZO_TradingHouseManager:ClearPendingPost()
     self.pendingItemBG:SetHidden(true)
     self.invoice:SetHidden(true)
     self:SetPendingPostPrice(0)
+    SetPendingItemPost(BAG_BACKPACK, 0, 0)
     ZO_InventorySlot_HandleInventoryUpdate(self.pendingItem)
 end
 

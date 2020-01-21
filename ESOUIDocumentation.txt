@@ -1,25 +1,17 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 100029
-
+h1. ESO UI Documentation for API Version 100030
 h2. VM Functions
-
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
-
 * LoadUntrustedString(*string* _script_)
 ** _Returns:_ *number* _result_
-
 * SecurePostHook(*table* _targetTable_, *string* _functionName_, *function* _hookingFunction_)
-
-* InsecureNext(*table* table, *type* lastKey)
-** _Returns:_ *type* nextKey, *type* nextValue
-
+* InsecureNext(*table* _table_, *type* _lastKey_)
+** _Returns:_ *type* _nextKey_, *type* _nextValue_
 * CallSecureProtected(*string* _functionName_, *types* _arguments_)
 ** _Returns:_ *bool* _success_, *types* _returns_
-
 * IsTrustedFunction(*function* _function_)
 ** _Returns:_ *bool* _isTrusted_
-
 
 h2. Global Variables
 
@@ -699,8 +691,11 @@ h5. GamepadTemplate
 
 
 h5. GamepadType
+* GAMEPAD_TYPE_HERON
 * GAMEPAD_TYPE_NONE
 * GAMEPAD_TYPE_PS4
+* GAMEPAD_TYPE_PS4_NO_TOUCHPAD
+* GAMEPAD_TYPE_SWITCH
 * GAMEPAD_TYPE_XBOX
 
 
@@ -712,77 +707,6 @@ h5. GamepadVibrationTrigger
 * GAMEPAD_VIBRATION_TRIGGER_KNOCKED_BACK
 * GAMEPAD_VIBRATION_TRIGGER_STAGGERED
 * GAMEPAD_VIBRATION_TRIGGER_STUNNED
-
-
-h5. GroupDifficultyChangeReason
-* GROUP_DIFFICULTY_CHANGE_REASON_IN_DUNGEON
-* GROUP_DIFFICULTY_CHANGE_REASON_IN_LFG_GROUP
-* GROUP_DIFFICULTY_CHANGE_REASON_NOT_GROUP_LEADER
-* GROUP_DIFFICULTY_CHANGE_REASON_NOT_UNLOCKED
-* GROUP_DIFFICULTY_CHANGE_REASON_NO_UNIT
-* GROUP_DIFFICULTY_CHANGE_REASON_SUCCESS
-
-
-h5. GroupElectionFailure
-* GROUP_ELECTION_FAILURE_ALREADY_VOTED
-* GROUP_ELECTION_FAILURE_ANOTHER_IN_PROGRESS
-* GROUP_ELECTION_FAILURE_INITIATOR_CANNOT_VOTE
-* GROUP_ELECTION_FAILURE_INITIATOR_NOT_FOUND
-* GROUP_ELECTION_FAILURE_IN_BATTLEGROUND
-* GROUP_ELECTION_FAILURE_NONE
-* GROUP_ELECTION_FAILURE_NOT_GROUPED
-* GROUP_ELECTION_FAILURE_NO_CURRENT_ELECTION
-* GROUP_ELECTION_FAILURE_SAME_INITIATOR_AND_TARGET
-* GROUP_ELECTION_FAILURE_SERVER_ERROR
-* GROUP_ELECTION_FAILURE_TARGET_NOT_FOUND
-* GROUP_ELECTION_FAILURE_TOO_FEW_MEMBERS
-* GROUP_ELECTION_FAILURE_TOO_SOON
-* GROUP_ELECTION_FAILURE_UNKNOWN_CHOICE
-
-
-h5. GroupElectionResult
-* GROUP_ELECTION_RESULT_ABANDONED
-* GROUP_ELECTION_RESULT_ELECTION_LOST
-* GROUP_ELECTION_RESULT_ELECTION_WON
-* GROUP_ELECTION_RESULT_IN_PROGRESS
-* GROUP_ELECTION_RESULT_NOT_APPLICABLE
-* GROUP_ELECTION_RESULT_TIED
-* GROUP_ELECTION_RESULT_TIMED_OUT
-
-
-h5. GroupElectionType
-* GROUP_ELECTION_TYPE_GENERIC_SIMPLEMAJORITY
-* GROUP_ELECTION_TYPE_GENERIC_SUPERMAJORITY
-* GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS
-* GROUP_ELECTION_TYPE_KICK_MEMBER
-* GROUP_ELECTION_TYPE_NEW_LEADER
-
-
-h5. GroupLeaveReason
-* GROUP_LEAVE_REASON_DESTROYED
-* GROUP_LEAVE_REASON_DISBAND
-* GROUP_LEAVE_REASON_KICKED
-* GROUP_LEAVE_REASON_LEFT_BATTLEGROUND
-* GROUP_LEAVE_REASON_VOLUNTARY
-
-
-h5. GroupNotificationMessage
-* GROUP_MSG_CANT_KICK_YOURSELF
-* GROUP_MSG_CANT_PROMOTE_YOURSELF
-* GROUP_MSG_INVALID_MEMBER
-* GROUP_MSG_YOU_ARE_NOT_IN_A_GROUP
-* GROUP_MSG_YOU_ARE_NOT_THE_LEADER
-
-
-h5. GroupOperationResult
-* GROUP_OPERATION_RESULT_BLOCKED_BY_ACTIVE_READY_CHECK
-* GROUP_OPERATION_RESULT_NONE
-
-
-h5. GroupVoteChoice
-* GROUP_VOTE_CHOICE_ABSTAIN
-* GROUP_VOTE_CHOICE_AGAINST
-* GROUP_VOTE_CHOICE_FOR
 
 
 h5. HealthWarningStage
@@ -1047,15 +971,6 @@ h5. MouseDestroyItemFailedReason
 * MOUSE_DESTROY_ITEM_FAIL_REASON_PLAYER_LOCKED
 
 
-h5. MultiLocalizedEnumTest
-* MLET_EXP_VAL_MULTI_LOC
-* MLET_EXP_VAL_NO_LOC
-* MLET_EXP_VAL_STD_LOC
-* MLET_IMP_VAL_MULTI_DESC_NO_PRIMARY
-* MLET_IMP_VAL_MULTI_LOC
-* MLET_IMP_VAL_STD_LOC
-
-
 h5. NonCombatBonusType
 * NON_COMBAT_BONUS_ALCHEMY_CREATE_EXTRA
 * NON_COMBAT_BONUS_ALCHEMY_CREATE_PERCENT_DISCOUNT
@@ -1232,6 +1147,7 @@ h5. PickpocketDifficultyType
 
 
 h5. PlatformAccountLabel
+* ACCOUNT_LABEL_HERON
 * ACCOUNT_LABEL_PC
 * ACCOUNT_LABEL_PS4
 * ACCOUNT_LABEL_XBOX
@@ -1718,6 +1634,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_GUILD_CHAT
 * TUTORIAL_TRIGGER_HELP_CUSTOMER_SUPPORT_OPENED
 * TUTORIAL_TRIGGER_HELP_TUTORIALS_OPENED
+* TUTORIAL_TRIGGER_HERON_THIRD_PARTY_CONTROLLER_SHOWING
 * TUTORIAL_TRIGGER_HOME_STORAGE_OPENED
 * TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_LINK_MODE
 * TUTORIAL_TRIGGER_IMPORTANT_DIALOGUE
@@ -1764,7 +1681,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_POISON_EQUIPPED
 * TUTORIAL_TRIGGER_PROVISIONING_OPENED
 * TUTORIAL_TRIGGER_PURCHASED_ABILITY
-* TUTORIAL_TRIGGER_PURCHASED_CRIMINAL_NECROMANTIC_ABILITY
+* TUTORIAL_TRIGGER_PURCHASED_CRIMINAL_ABILITY
 * TUTORIAL_TRIGGER_PURCHASED_PASSIVE_ABILITY
 * TUTORIAL_TRIGGER_PURCHASED_ULTIMATE_ABILITY
 * TUTORIAL_TRIGGER_PVE_FAST_TRAVEL
@@ -1925,7 +1842,6 @@ h5. Globals
 * ACTION_BAR_ULTIMATE_SLOT_INDEX
 * ACTION_BAR_UTILITY_BAR_SIZE
 * DISPLAY_NAME_PREFIX_BYTE
-* GROUP_SIZE_MAX
 * MAIL_MAX_ATTACHED_ITEMS
 * MAX_BOSSES
 * MAXIMUM_CHAMPION_RANK
@@ -1941,8 +1857,6 @@ h5. Globals
 * NUM_LOCKPICK_CHAMBER_STATES
 * NUM_LOCKPICK_CHAMBERS
 * TRADE_NUM_SLOTS
-* RAID_GROUP_SIZE_THRESHOLD
-* SMALL_GROUP_SIZE_THRESHOLD
 * TRADE_DELAY_TIME
 * TUTORIAL_ENABLED_SETTING_ID
 * VOICE_CHAT_REQUEST_DELAY
@@ -2827,6 +2741,7 @@ h5. CollectibleUsageBlockReason
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_COLLECTIBLE
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_GENDER
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_RACE
+* COLLECTIBLE_USAGE_BLOCK_REASON_IN_AIR
 * COLLECTIBLE_USAGE_BLOCK_REASON_IN_WATER
 * COLLECTIBLE_USAGE_BLOCK_REASON_NOT_BLOCKED
 * COLLECTIBLE_USAGE_BLOCK_REASON_ON_COOLDOWN
@@ -3198,6 +3113,7 @@ h5. GuildApplicationResponse
 * GUILD_APP_RESPONSE_APPLICATION_ERROR
 * GUILD_APP_RESPONSE_APPLICATION_MESSAGE_TOO_LONG
 * GUILD_APP_RESPONSE_APPLICATION_SENT
+* GUILD_APP_RESPONSE_GUILD_DATA_OUT_OF_DATE
 * GUILD_APP_RESPONSE_GUILD_FULL
 * GUILD_APP_RESPONSE_GUILD_MAX_APPLICATIONS_PENDING
 * GUILD_APP_RESPONSE_IN_MAX_GUILDS
@@ -4338,6 +4254,7 @@ h5. ItemType
 * ITEMTYPE_GLYPH_ARMOR
 * ITEMTYPE_GLYPH_JEWELRY
 * ITEMTYPE_GLYPH_WEAPON
+* ITEMTYPE_GROUP_REPAIR
 * ITEMTYPE_INGREDIENT
 * ITEMTYPE_JEWELRYCRAFTING_BOOSTER
 * ITEMTYPE_JEWELRYCRAFTING_MATERIAL
@@ -4545,6 +4462,7 @@ h5. SpecializedItemType
 * SPECIALIZED_ITEMTYPE_GLYPH_ARMOR
 * SPECIALIZED_ITEMTYPE_GLYPH_JEWELRY
 * SPECIALIZED_ITEMTYPE_GLYPH_WEAPON
+* SPECIALIZED_ITEMTYPE_GROUP_REPAIR
 * SPECIALIZED_ITEMTYPE_HOLIDAY_WRIT
 * SPECIALIZED_ITEMTYPE_INGREDIENT_ALCOHOL
 * SPECIALIZED_ITEMTYPE_INGREDIENT_DRINK_ADDITIVE
@@ -4805,7 +4723,9 @@ h5. QuestType
 * QUEST_TYPE_HOLIDAY_EVENT
 * QUEST_TYPE_MAIN_STORY
 * QUEST_TYPE_NONE
+* QUEST_TYPE_PROLOGUE
 * QUEST_TYPE_RAID
+* QUEST_TYPE_UNDAUNTED_PLEDGE
 
 
 h5. TrackedDataType
@@ -4847,6 +4767,11 @@ h5. AmbientOcclusionType
 * AMBIENT_OCCLUSION_TYPE_HBAO
 * AMBIENT_OCCLUSION_TYPE_NONE
 * AMBIENT_OCCLUSION_TYPE_SSAO
+
+
+h5. AntiAliasingType
+* ANTIALIASING_TYPE_FXAA
+* ANTIALIASING_TYPE_NONE
 
 
 h5. AudioSetting
@@ -4983,13 +4908,13 @@ h5. GamepadChatTextSizeSetting
 
 
 h5. GamepadSetting
-* GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED
 * GAMEPAD_SETTING_CAMERA_SENSITIVITY
-* GAMEPAD_SETTING_GAMEPAD_PREFERRED
 * GAMEPAD_SETTING_GAMEPAD_TEMPLATE
+* GAMEPAD_SETTING_INPUT_PREFERRED_MODE
 * GAMEPAD_SETTING_INVERT_X
 * GAMEPAD_SETTING_INVERT_Y
 * GAMEPAD_SETTING_VIBRATION
+* GAMEPAD_SETTING_WAS_LAST_INPUT_GAMEPAD
 
 
 h5. InWorldUISetting
@@ -5085,6 +5010,7 @@ h5. OptionsCustomSetting
 * OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_SAY_ENABLED
 * OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_WHISPER_ENABLED
 * OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_YELL_ENABLED
+* OPTIONS_CUSTOM_SETTING_FRAMERATE_LATENCY_RESET_POSITION
 * OPTIONS_CUSTOM_SETTING_GAMEPAD_PREGAME_PLAY_CINEMATIC
 * OPTIONS_CUSTOM_SETTING_GAMEPAD_PREGAME_SERVER_SELECT
 * OPTIONS_CUSTOM_SETTING_GAMEPAD_PREGAME_VIEW_CREDITS
@@ -5911,6 +5837,87 @@ h5. RedeemCodeResult
 
 h5. Globals
 * MAX_PROMO_CODE_LENGTH
+
+
+h5. GroupDifficultyChangeReason
+* GROUP_DIFFICULTY_CHANGE_REASON_IN_DUNGEON
+* GROUP_DIFFICULTY_CHANGE_REASON_IN_LFG_GROUP
+* GROUP_DIFFICULTY_CHANGE_REASON_NOT_GROUP_LEADER
+* GROUP_DIFFICULTY_CHANGE_REASON_NOT_UNLOCKED
+* GROUP_DIFFICULTY_CHANGE_REASON_NO_UNIT
+* GROUP_DIFFICULTY_CHANGE_REASON_SUCCESS
+
+
+h5. GroupElectionFailure
+* GROUP_ELECTION_FAILURE_ALREADY_VOTED
+* GROUP_ELECTION_FAILURE_ANOTHER_IN_PROGRESS
+* GROUP_ELECTION_FAILURE_INITIATOR_CANNOT_VOTE
+* GROUP_ELECTION_FAILURE_INITIATOR_NOT_FOUND
+* GROUP_ELECTION_FAILURE_IN_BATTLEGROUND
+* GROUP_ELECTION_FAILURE_NONE
+* GROUP_ELECTION_FAILURE_NOT_GROUPED
+* GROUP_ELECTION_FAILURE_NO_CURRENT_ELECTION
+* GROUP_ELECTION_FAILURE_SAME_INITIATOR_AND_TARGET
+* GROUP_ELECTION_FAILURE_SERVER_ERROR
+* GROUP_ELECTION_FAILURE_TARGET_NOT_FOUND
+* GROUP_ELECTION_FAILURE_TOO_FEW_MEMBERS
+* GROUP_ELECTION_FAILURE_TOO_SOON
+* GROUP_ELECTION_FAILURE_UNKNOWN_CHOICE
+
+
+h5. GroupElectionResult
+* GROUP_ELECTION_RESULT_ABANDONED
+* GROUP_ELECTION_RESULT_ELECTION_LOST
+* GROUP_ELECTION_RESULT_ELECTION_WON
+* GROUP_ELECTION_RESULT_IN_PROGRESS
+* GROUP_ELECTION_RESULT_NOT_APPLICABLE
+* GROUP_ELECTION_RESULT_TIED
+* GROUP_ELECTION_RESULT_TIMED_OUT
+
+
+h5. GroupElectionType
+* GROUP_ELECTION_TYPE_GENERIC_SIMPLEMAJORITY
+* GROUP_ELECTION_TYPE_GENERIC_SUPERMAJORITY
+* GROUP_ELECTION_TYPE_GENERIC_UNANIMOUS
+* GROUP_ELECTION_TYPE_KICK_MEMBER
+* GROUP_ELECTION_TYPE_NEW_LEADER
+
+
+h5. GroupLeaveReason
+* GROUP_LEAVE_REASON_DESTROYED
+* GROUP_LEAVE_REASON_DISBAND
+* GROUP_LEAVE_REASON_KICKED
+* GROUP_LEAVE_REASON_LEFT_BATTLEGROUND
+* GROUP_LEAVE_REASON_VOLUNTARY
+
+
+h5. GroupNotificationMessage
+* GROUP_MSG_CANT_KICK_YOURSELF
+* GROUP_MSG_CANT_PROMOTE_MEMBER_IS_OFFLINE
+* GROUP_MSG_CANT_PROMOTE_YOURSELF
+* GROUP_MSG_INVALID_MEMBER
+* GROUP_MSG_YOU_ARE_NOT_IN_A_GROUP
+* GROUP_MSG_YOU_ARE_NOT_THE_LEADER
+
+
+h5. GroupOperationResult
+* GROUP_OPERATION_RESULT_BLOCKED_BY_ACTIVE_READY_CHECK
+* GROUP_OPERATION_RESULT_NONE
+
+
+h5. GroupVoteChoice
+* GROUP_VOTE_CHOICE_ABSTAIN
+* GROUP_VOTE_CHOICE_AGAINST
+* GROUP_VOTE_CHOICE_FOR
+
+
+h5. Globals
+* GROUP_SIZE_MAX
+* RAID_GROUP_SIZE_THRESHOLD
+* SMALL_GROUP_SIZE_THRESHOLD
+
+
+h5. Globals
 
 
 h5. AbilityProgressionResult
@@ -6807,6 +6814,7 @@ h5. QueueForCampaignResponseType
 * QUEUE_FOR_CAMPAIGN_RESULT_INVALID_WORLD
 * QUEUE_FOR_CAMPAIGN_RESULT_IN_LFG_GROUP
 * QUEUE_FOR_CAMPAIGN_RESULT_IS_DEAD
+* QUEUE_FOR_CAMPAIGN_RESULT_LOGIN_WOULD_LOCK
 * QUEUE_FOR_CAMPAIGN_RESULT_NOT_GROUP_LEADER
 * QUEUE_FOR_CAMPAIGN_RESULT_NOT_ONLINE
 * QUEUE_FOR_CAMPAIGN_RESULT_NO_PERMISSION
@@ -7202,6 +7210,12 @@ h5. ControlAccessControl
 * CONTROL_ACCESS_PUBLIC
 
 
+h5. ControlHandlerOrder
+* CONTROL_HANDLER_ORDER_AFTER
+* CONTROL_HANDLER_ORDER_BEFORE
+* CONTROL_HANDLER_ORDER_NONE
+
+
 h5. ControlOrientation
 * ORIENTATION_HORIZONTAL
 * ORIENTATION_VERTICAL
@@ -7278,6 +7292,12 @@ h5. GuiRender3DSpaceSystem
 h5. InputDeviceType
 * INPUT_DEVICE_TYPE_KEYBOARD
 * INPUT_DEVICE_TYPE_MOUSE
+
+
+h5. InputPreferredMode
+* INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
+* INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD
+* INPUT_PREFERRED_MODE_AUTOMATIC
 
 
 h5. KeyCode
@@ -7914,6 +7934,7 @@ h5. FullscreenMode
 
 h5. GraphicsPresets
 * GRAPHICS_PRESETS_CUSTOM
+* GRAPHICS_PRESETS_HERON
 * GRAPHICS_PRESETS_HIGH
 * GRAPHICS_PRESETS_LOW
 * GRAPHICS_PRESETS_MEDIUM
@@ -8076,17 +8097,11 @@ h2. Game API
 
 * SaveLoadDialogResult(*[SaveLoadDialogError|#SaveLoadDialogError]* _errorType_, *[SaveLoadDialogAnswer|#SaveLoadDialogAnswer]* _result_)
 
-* GetSecondsSinceMidnight()
-** _Returns:_ *integer* _secondsSinceMidnight_
-
 * GetFrameTimeSeconds()
 ** _Returns:_ *number* _frameTimeInSeconds_
 
 * GetFrameDeltaTimeSeconds()
 ** _Returns:_ *number* _frameDeltaTimeInSeconds_
-
-* GetFrameTimeMilliseconds()
-** _Returns:_ *integer* _frameTimeInMilliseconds_
 
 * GetFrameDeltaTimeMilliseconds()
 ** _Returns:_ *integer* _frameDeltaTimeInMilliseconds_
@@ -8109,20 +8124,8 @@ h2. Game API
 * GetFramerate()
 ** _Returns:_ *number* _currentFramerate_
 
-* GetTimeString()
-** _Returns:_ *string* _currentTimeString_
-
-* GetDate()
-** _Returns:_ *integer* _currentTime_
-
-* GetTimeStamp()
-** _Returns:_ *id64* _timestamp_
-
 * GetDiffBetweenTimeStamps(*id64* _laterTime_, *id64* _earlierTime_)
 ** _Returns:_ *number* _difference_
-
-* GetFormattedTime()
-** _Returns:_ *integer* _formattedTime_
 
 * FormatTimeSeconds(*number* _timeValueInSeconds_, *[TimeFormatStyleCode|#TimeFormatStyleCode]* _formatType_, *[TimeFormatPrecisionCode|#TimeFormatPrecisionCode]* _precisionType_, *[TimeFormatDirectionCode|#TimeFormatDirectionCode]* _direction_)
 ** _Returns:_ *string* _formattedTimeString_, *number* _nextUpdateTimeInSec_
@@ -8160,8 +8163,8 @@ h2. Game API
 * DoesCurrentLanguageRequireIME()
 ** _Returns:_ *bool* _requiresIME_
 
-* IsVirtualKeyboardOnscreen()
-** _Returns:_ *bool* _vkeyboardShowing_
+* IsVirtualKeyboardOnScreen()
+** _Returns:_ *bool* _isVirtualKeyboardOnScreen_
 
 * HashString(*string* _text_)
 ** _Returns:_ *integer* _hashValue_
@@ -8270,8 +8273,42 @@ h2. Game API
 * DoesPlatformStoreUseExternalLinks()
 ** _Returns:_ *bool* _usesExternalLinks_
 
+* FlashTaskbarWindow *private* (*string* _reason_, *integer* _flashCount_, *integer* _flashRateMs_)
+
+* CancelTaskbarWindowFlash *private* (*string* _reason_)
+
 * GetFrameDeltaNormalizedForTargetFramerate(*number* _targetFramesPerSecond_)
 ** _Returns:_ *number* _frameDeltaNormalizedForTargetFramerate_
+
+* GetSecondsSinceMidnight()
+** _Returns:_ *integer* _secondsSinceMidnight_
+
+* GetFrameTimeMilliseconds()
+** _Returns:_ *integer* _frameTimeInMilliseconds_
+
+* GetTimeStamp()
+** _Returns:_ *id64* _timestamp_
+
+* GetDate()
+** _Returns:_ *integer* _currentTime_
+
+* GetTimeString()
+** _Returns:_ *string* _currentTimeString_
+
+* GetDateElementsFromTimestamp(*id64* _timestamp_)
+** _Returns:_ *integer* _year_, *integer* _month_, *integer* _day_
+
+* GetTimestampForStartOfDate(*integer* _year_, *integer* _month_, *integer* _day_, *bool* _inLocalTime_)
+** _Returns:_ *id64* _timestamp_
+
+* GetFormattedTime()
+** _Returns:_ *integer* _formattedTime_
+
+* GetDayOfTheWeekIndex(*id64* _timestamp_)
+** _Returns:_ *integer* _weekdayIndex_
+
+* GetNumDaysInMonth(*integer* _year_, *integer* _month_)
+** _Returns:_ *integer* _numDays_
 
 * GetDisplayName()
 ** _Returns:_ *string* _displayName_
@@ -8292,7 +8329,7 @@ h2. Game API
 ** _Returns:_ *string* _displayName_, *string* _note_, *integer* _playerStatus_, *integer* _secsSinceLogoff_
 
 * GetFriendCharacterInfo(*luaindex* _friendIndex_)
-** _Returns:_ *bool* _hasCharacter_, *string* _characterName_, *string* _zoneName_, *integer* _classType_, *[Alliance|#Alliance]* _alliance_, *integer* _level_, *integer* _championRank_, *integer* _zoneId_
+** _Returns:_ *bool* _hasCharacter_, *string* _characterName_, *string* _zoneName_, *integer* _classType_, *[Alliance|#Alliance]* _alliance_, *integer* _level_, *integer* _championRank_, *integer* _zoneId_, *id64* _consoleId_
 
 * GetFriendHeronName(*luaindex* _friendIndex_)
 ** _Returns:_ *string:nilable* _heronName_
@@ -8376,7 +8413,7 @@ h2. Game API
 ** _Returns:_ *string* _name_, *string* _note_, *luaindex* _rankIndex_, *[PlayerStatus|#PlayerStatus]* _playerStatus_, *integer* _secsSinceLogoff_
 
 * GetGuildMemberCharacterInfo(*integer* _guildId_, *luaindex* _memberIndex_)
-** _Returns:_ *bool* _hasCharacter_, *string* _characterName_, *string* _zoneName_, *integer* _classType_, *[Alliance|#Alliance]* _alliance_, *integer* _level_, *integer* _championRank_, *integer* _zoneId_
+** _Returns:_ *bool* _hasCharacter_, *string* _characterName_, *string* _zoneName_, *integer* _classType_, *[Alliance|#Alliance]* _alliance_, *integer* _level_, *integer* _championRank_, *integer* _zoneId_, *id64* _consoleId_
 
 * GetGuildInviteeInfo(*integer* _guildId_, *luaindex* _inviteeIndex_)
 ** _Returns:_ *string* _name_, *luaindex* _rankIndex_
@@ -8405,6 +8442,8 @@ h2. Game API
 * GuildPromote(*integer* _guildId_, *string* _displayName_)
 
 * GuildDemote(*integer* _guildId_, *string* _displayName_)
+
+* GuildSetRank(*integer* _guildId_, *string* _displayName_, *luaindex* _rankIndex_)
 
 * ShouldDisplayGuildMemberRemoveAlert(*string* _characterName_)
 ** _Returns:_ *bool* _shouldDisplay_
@@ -8691,6 +8730,9 @@ h2. Game API
 * GetGamepadType()
 ** _Returns:_ *[GamepadType|#GamepadType]* _gamepadType_
 
+* GetMostRecentGamepadType()
+** _Returns:_ *[GamepadType|#GamepadType]* _mostRecentGamepadType_
+
 * GetGamepadVisualReferenceArt()
 ** _Returns:_ *string* _referenceArt_
 
@@ -8947,6 +8989,11 @@ h2. Game API
 
 * PlayVideo(*string* _filename_, *bool* _playImmediately_, *[VideoSkipMode|#VideoSkipMode]* _skipMode_, *integer* _subtitleId_, *bool* _playInBackground_, *bool* _loopPlayback_, *bool* _mutePlayback_)
 
+* PlayVideoById(*integer* _videoDataId_, *bool* _playImmediately_, *[VideoSkipMode|#VideoSkipMode]* _skipMode_)
+
+* IsAnyVideoPlaying()
+** _Returns:_ *bool* _isPlaying_
+
 * AbortVideoPlayback()
 
 * CancelCurrentVideoPlayback()
@@ -8956,6 +9003,9 @@ h2. Game API
 * ResetVideoCancelConfirmation()
 
 * SetCurrentVideoPlaybackVolume(*number* _volume_, *number* _lerpTime_)
+
+* GetOpeningCinematicVideoDataId()
+** _Returns:_ *integer* _openingCinematicVideoDataId_
 
 * GetCollectibleName(*integer* _collectibleId_)
 ** _Returns:_ *string* _name_
@@ -9203,6 +9253,12 @@ h2. Game API
 
 * IsUnitSwimming(*string* _unitTag_)
 ** _Returns:_ *bool* _isSwimming_
+
+* IsUnitFalling(*string* _unitTag_)
+** _Returns:_ *bool* _isFalling_
+
+* IsUnitInAir(*string* _unitTag_)
+** _Returns:_ *bool* _isInAir_
 
 * IsUnitResurrectableByPlayer(*string* _unitTag_)
 ** _Returns:_ *bool* _isResurrectable_
@@ -10059,7 +10115,7 @@ h2. Game API
 ** _Returns:_ *bool* _canChange_, *[GroupDifficultyChangeReason|#GroupDifficultyChangeReason]* _reason_
 
 * GetGroupElectionInfo()
-** _Returns:_ *[GroupElectionType|#GroupElectionType]* _electionType_, *integer* _timeRemainingSeconds_, *string* _electionDescriptor_, *string* _targetUnitTag_
+** _Returns:_ *[GroupElectionType|#GroupElectionType]* _electionType_, *integer* _timeRemainingSeconds_, *string* _electionDescriptor_, *string:nilable* _targetUnitTag_
 
 * BeginGroupElection(*[GroupElectionType|#GroupElectionType]* _electionType_, *string* _electionDescriptor_, *string* _targetUnitTag_)
 ** _Returns:_ *bool* _sentSuccessfully_
@@ -13946,8 +14002,6 @@ h2. Game API
 * GetHousingEditorConstants()
 ** _Returns:_ *number* _pushSpeedPerSecond_, *number* _rotationStepSizeRadians_, *integer* _numTicksPerSecondForRotationChange_
 
-* HousingEditorApplyTemplate(*integer* _houseTemplateId_)
-
 * GetCurrentHousePreviewTemplateId()
 ** _Returns:_ *integer* _houseTemplateId_
 
@@ -14070,6 +14124,9 @@ h2. Game API
 
 * GetActiveCutsceneVideoPath()
 ** _Returns:_ *string* _videoPath_
+
+* GetActiveCutsceneVideoDataId()
+** _Returns:_ *integer* _videoDataId_
 
 * RequestEndCutscene()
 
@@ -14715,6 +14772,9 @@ h2. Game API
 * IsItemNonCrownRepairKit(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _isNonCrownRepairKit_
 
+* IsItemNonGroupRepairKit(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *bool* _isNonGroupRepairKit_
+
 * GetRepairKitTier(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *integer* _tier_
 
@@ -15283,6 +15343,9 @@ h2. Game API
 * GetTutorialInfo(*luaindex* _tutorialIndex_)
 ** _Returns:_ *string* _title_, *string* _description_, *integer* _displayPriority_
 
+* GetTutorialDisplayPriority(*luaindex* _tutorialIndex_)
+** _Returns:_ *integer* _displayPriority_
+
 * GetTutorialLinkedHelpInfo(*luaindex* _tutorialIndex_)
 ** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
 
@@ -15643,6 +15706,9 @@ h2. Game API
 * IsMarketProductGiftable *private* (*integer* _marketProductId_, *luaindex:nilable* _presentationIndex_)
 ** _Returns:_ *bool* _isGiftable_
 
+* GetMarketProductAnnounceSortOrder *private* (*integer* _marketProductId_)
+** _Returns:_ *integer* _announceSortOrder_
+
 * GetMarketProductNumCollectibles *private* (*integer* _marketProductId_)
 ** _Returns:_ *integer* _numCollectibles_
 
@@ -15786,6 +15852,12 @@ h2. Game API
 
 * GetCrownCrateRewardProductReferenceData(*luaindex* _rewardIndex_)
 ** _Returns:_ *[MarketProductType|#MarketProductType]* _rewardProductType_, *integer* _referenceDataId_
+
+* GetCrownCrateRewardStackCount(*luaindex* _rewardIndex_)
+** _Returns:_ *integer* _stackCount_
+
+* GetCrownCrateRewardItemLink(*luaindex* _rewardIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
+** _Returns:_ *string* _link_
 
 * GetCrownCrateNPCBoneWorldPosition(*string* _boneName_)
 ** _Returns:_ *bool* _success_, *number* _positionX_, *number* _positionY_, *number* _positionZ_
@@ -16432,8 +16504,8 @@ Objects that inherit behavior from *AnimationObject*
 * GetEasingFunction()
 ** _Returns:_ *function* _functionRef_
 
-* GetHandler(*string* _EventName_)
-** _Returns:_ *function* _FunctionRef_
+* GetHandler(*string* _eventName_, *string* _name_)
+** _Returns:_ *function* _functionRef_
 
 * GetTimeline()
 ** _Returns:_ *object* _owningTimeline_
@@ -16454,7 +16526,7 @@ Objects that inherit behavior from *AnimationObject*
 
 * SetEnabled(*bool* _enabled_)
 
-* SetHandler(*string* _EventName_, *function* _FunctionRef_)
+* SetHandler(*string* _eventName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
 
 h3. AnimationObject3DRotate
@@ -16748,8 +16820,8 @@ h3. AnimationTimeline
 * GetFullProgress()
 ** _Returns:_ *number* _progress_
 
-* GetHandler(*string* _EventName_)
-** _Returns:_ *function* _FunctionRef_
+* GetHandler(*string* _eventName_, *string* _name_)
+** _Returns:_ *function* _functionRef_
 
 * GetLastAnimation()
 ** _Returns:_ *object* _animation_
@@ -16831,7 +16903,7 @@ h3. AnimationTimeline
 
 * SetEnabled(*bool* _enabled_)
 
-* SetHandler(*string* _EventName_, *function* _FunctionRef_)
+* SetHandler(*string* _eventName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
 * SetMinDuration(*integer* _minDuration_)
 
@@ -17107,7 +17179,7 @@ Objects that inherit behavior from *Control*
 * GetExcludeFromResizeToFitExtents()
 ** _Returns:_ *bool* _excludes_
 
-* GetHandler(*string* _handlerName_)
+* GetHandler(*string* _handlerName_, *string* _name_)
 ** _Returns:_ *function* _functionRef_
 
 * GetHeight()
@@ -17176,7 +17248,7 @@ Objects that inherit behavior from *Control*
 * IsControlHidden()
 ** _Returns:_ *bool* _hidden_
 
-* IsHandlerSet(*string* _handlerName_)
+* IsHandlerSet(*string* _handlerName_, *string* _name_)
 ** _Returns:_ *bool* _isSet_
 
 * IsHidden()
@@ -17230,7 +17302,7 @@ Objects that inherit behavior from *Control*
 
 * SetExcludeFromResizeToFitExtents *protected-attributes* (*bool* _exclude_)
 
-* SetHandler(*string* _handlerName_, *function* _functionRef_)
+* SetHandler(*string* _handlerName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
 * SetHeight *protected-attributes* (*number* _height_)
 
@@ -17395,6 +17467,8 @@ h3. EditControl
 * SetCopyEnabled(*bool* _enabled_)
 
 * SetCursorPosition(*integer* _cursorPosition_)
+
+* SetDefaultTextForVirtualKeyboard(*string* _aText_)
 
 * SetEditEnabled(*bool* _enabled_)
 
@@ -17952,6 +18026,8 @@ h3. TooltipControl
 
 * SetCollectible(*integer* _collectibleId_, *bool* _addNickname_, *bool* _showPurchasableHint_, *bool* _showBlockReason_)
 
+* SetCrownCrateReward(*luaindex* _rewardIndex_)
+
 * SetCurrency(*[CurrencyType|#CurrencyType]* _currencyType_, *integer* _quantity_)
 
 * SetDailyLoginRewardEntry(*luaindex* _rewardIndex_)
@@ -18085,7 +18161,7 @@ h3. WindowManager
 * GetFocusControl()
 ** _Returns:_ *object* _focusControl_
 
-* GetHandler(*string* _handlerName_)
+* GetHandler(*string* _handlerName_, *string* _name_)
 ** _Returns:_ *function* _functionRef_
 
 * GetIMECandidate(*luaindex* _index_)
@@ -18117,7 +18193,7 @@ h3. WindowManager
 
 * SetFocusByName(*string* _name_)
 
-* SetHandler(*string* _handlerName_, *function* _functionRef_)
+* SetHandler(*string* _handlerName_, *function* _functionRef_, *string* _name_, *[ControlHandlerOrder|#ControlHandlerOrder]* _controlHandlerOrder_, *string* _targetName_)
 
 * SetMouseCursor(*integer* _cursorType_)
 
@@ -18332,9 +18408,7 @@ h2. Events
 * EVENT_CHAMPION_SYSTEM_UNLOCKED
 * EVENT_CHATTER_BEGIN (*integer* _optionCount_)
 * EVENT_CHATTER_END
-* EVENT_CHAT_CHANNEL_INVITE (*string* _channelName_, *string* _playerName_)
-* EVENT_CHAT_CHANNEL_JOIN (*integer* _channelId_, *integer* _customChannelId_, *string* _channelName_)
-* EVENT_CHAT_CHANNEL_LEAVE (*integer* _channelId_, *integer* _customChannelId_, *string* _channelName_)
+* EVENT_CHAT_CATEGORY_COLOR_CHANGED (*integer* _categoryId_, *number* _red_, *number* _green_, *number* _blue_)
 * EVENT_CHAT_LOG_TOGGLED (*bool* _opened_)
 * EVENT_CHAT_MESSAGE_CHANNEL (*[MsgChannelType|#MsgChannelType]* _channelType_, *string* _fromName_, *string* _text_, *bool* _isCustomerService_, *string* _fromDisplayName_)
 * EVENT_CLAIM_REWARD_RESULT (*[ClaimRewardResult|#ClaimRewardResult]* _result_)
@@ -18547,7 +18621,7 @@ h2. Events
 * EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG
 * EVENT_INVENTORY_ITEM_DESTROYED (*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
 * EVENT_INVENTORY_ITEM_USED (*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
-* EVENT_INVENTORY_SINGLE_SLOT_UPDATE (*[Bag|#Bag]* _bagId_, *integer* _slotId_, *bool* _isNewItem_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_, *integer* _inventoryUpdateReason_, *integer* _stackCountChange_)
+* EVENT_INVENTORY_SINGLE_SLOT_UPDATE (*[Bag|#Bag]* _bagId_, *integer* _slotId_, *bool* _isNewItem_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_, *integer* _inventoryUpdateReason_, *integer* _stackCountChange_, *string:nilable* _triggeredByCharacterName_, *string:nilable* _triggeredByDisplayName_)
 * EVENT_INVENTORY_SLOT_LOCKED (*[Bag|#Bag]* _bagId_, *integer* _slotId_)
 * EVENT_INVENTORY_SLOT_UNLOCKED (*[Bag|#Bag]* _bagId_, *integer* _slotId_)
 * EVENT_ITEM_COMBINATION_RESULT (*[ItemCombinationResult|#ItemCombinationResult]* _itemCombinationResult_)
@@ -18888,6 +18962,7 @@ h2. Events
 * EVENT_FRIEND_PLAYER_STATUS_CHANGED (*string* _displayName_, *string* _characterName_, *[PlayerStatus|#PlayerStatus]* _oldStatus_, *[PlayerStatus|#PlayerStatus]* _newStatus_)
 * EVENT_FRIEND_REMOVED (*string* _displayName_)
 * EVENT_FULLSCREEN_MODE_CHANGED
+* EVENT_GAMEPAD_TYPE_CHANGED (*[GamepadType|#GamepadType]* _gamepadType_)
 * EVENT_GAME_CREDITS_READY
 * EVENT_GUILD_CLAIM_KEEP_CAMPAIGN_NOTIFICATION (*integer* _campaignId_, *integer* _keepId_, *string* _guildName_, *string* _playerName_)
 * EVENT_GUILD_CLAIM_KEEP_RESPONSE (*[ClaimKeepResultType|#ClaimKeepResultType]* _response_, *integer* _keepId_)
@@ -18936,6 +19011,7 @@ h2. Events
 * EVENT_INTERFACE_SETTING_CHANGED (*[SettingSystemType|#SettingSystemType]* _settingSystemType_, *integer* _settingId_)
 * EVENT_JUMP_FAILED (*[JumpResult|#JumpResult]* _reason_)
 * EVENT_LEADER_TO_FOLLOWER_SYNC (*[SceneManagerMessageOrigin|#SceneManagerMessageOrigin]* _messageOrigin_, *[RemoteSceneSyncType|#RemoteSceneSyncType]* _syncType_, *string* _currentSceneName_, *string* _nextSceneName_, *integer* _sequenceNumber_, *bool* _currentSceneFragmentsComplete_)
+* EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED (*[GamepadType|#GamepadType]* _mostRecentGamepadType_)
 * EVENT_OUTGOING_FRIEND_INVITE_ADDED (*string* _displayName_)
 * EVENT_OUTGOING_FRIEND_INVITE_REMOVED (*string* _displayName_)
 * EVENT_PLAYER_STATUS_CHANGED (*[PlayerStatus|#PlayerStatus]* _oldStatus_, *[PlayerStatus|#PlayerStatus]* _newStatus_)
@@ -19198,6 +19274,11 @@ h5. BackgroundTop
 * _attribute:_ *number* _bottom_
 * _attribute:_ *number* _right_
 
+h5. BackupFont
+* _attribute:_ *string* _originalFont_
+* _attribute:_ *string* _backupFont_
+* _attribute:_ *number* _backupFontSizeModifier_
+
 h5. Browser
 * [Inherits: Control|#Control]
 * [Child: OnLoadFinished|#OnLoadFinished]
@@ -19457,6 +19538,7 @@ h5. FontColors
 
 h5. GuiXml
 * [Child: Animations|#Animations]
+* [Child: BackupFont|#BackupFont]
 * [Child: Controls|#Controls]
 * [Child: Font|#Font]
 * [Child: String|#String]
@@ -19767,10 +19849,19 @@ h5. OnScrollOffsetChanged
 h5. OnSetAnimationEaseFunction
 
 h5. OnSetAnimationEventHandler
+* _attribute:_ *string* _name_
+* _attribute:_ *[ControlHandlerOrder|#ControlHandlerOrder]* _order_
+* _attribute:_ *string* _targetName_
 
 h5. OnSetAnimationTimelineEventHandler
+* _attribute:_ *string* _name_
+* _attribute:_ *[ControlHandlerOrder|#ControlHandlerOrder]* _order_
+* _attribute:_ *string* _targetName_
 
 h5. OnSetControlEventHandler
+* _attribute:_ *string* _name_
+* _attribute:_ *[ControlHandlerOrder|#ControlHandlerOrder]* _order_
+* _attribute:_ *string* _targetName_
 
 h5. OnSetUpdateFunction
 

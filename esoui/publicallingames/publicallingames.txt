@@ -18,26 +18,11 @@ EsoUI\PublicAllIngames\Currency\Gamepad\CurrencySelector_Gamepad.xml
 EsoUI\PublicAllIngames\Tooltip\Tooltip.lua
 EsoUI\PublicAllIngames\Tooltip\Tooltip.xml
 EsoUI\PublicAllIngames\Tooltip\AchievementTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\CadwellsTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\ItemTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\MapTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\AbilityTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\AvATooltips.lua
-EsoUI\PublicAllIngames\Tooltip\NotificationsTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\CollectionsTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\SocialTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\StableTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\GuildKioskTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\GroupTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\ChampionTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\CharacterTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\HousingTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\MarketTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\RewardTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\Console\VoiceChatTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\SkillBuildTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\CurrencyTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\GuildTooltips.lua
 
 EsoUI\PublicAllIngames\Dialogs\PublicAllIngamesDialogs.xml
 

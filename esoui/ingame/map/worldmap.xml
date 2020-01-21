@@ -55,7 +55,7 @@
             </Controls>
         </Control>
 
-        <Button name="ZO_DungeonFloorSelect" virtual="true">
+        <Button name="ZO_DungeonFloorSelect" inherits="ZO_KeyButton" virtual="true">
             <OnClicked>
                 ZO_WorldMap_ChangeFloor(self)
             </OnClicked>
@@ -76,12 +76,12 @@
                     <Anchor point="TOPRIGHT" />
                 </Label>
 
-                <Button name="$(parent)Down" mouseEnabled="false">
+                <Button name="$(parent)Down" inherits="ZO_KeyButton" mouseEnabled="false">
                     <Dimensions x="42" y="42" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX ="-5" />
                 </Button>
 
-                <Button name="$(parent)Up" mouseEnabled="false">
+                <Button name="$(parent)Up" inherits="ZO_KeyButton" mouseEnabled="false">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Down" relativePoint="TOPLEFT" />
                     <Dimensions x="42" y="42" />
                 </Button>
@@ -130,6 +130,7 @@
 
                 <Button name="$(parent)Up" inherits="ZO_DungeonFloorSelect">
                     <OnInitialized>
+                        ZO_KeyControl_OnInitialized(self)
                         self.floorDirection = -1
                         self.tooltipFormatString = GetString(SI_DUNGEON_FLOOR_UP_TOOLTIP)
                     </OnInitialized>
@@ -137,6 +138,7 @@
 
                 <Button name="$(parent)Down" inherits="ZO_DungeonFloorSelect">
                     <OnInitialized>
+                        ZO_KeyControl_OnInitialized(self)
                         self.floorDirection = 1
                         self.tooltipFormatString = GetString(SI_DUNGEON_FLOOR_DOWN_TOOLTIP)
                     </OnInitialized>

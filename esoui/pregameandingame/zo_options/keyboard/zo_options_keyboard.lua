@@ -222,6 +222,19 @@ function ZO_KeyboardOptions:UpdatePanelVisibilityIfShowing(panelId)
     end
 end
 
+local function IsSettingVisible(data)
+    local isVisible = data.visible == nil or data.visible
+    if type(isVisible) == "function" then
+        isVisible = isVisible()
+    end
+    if isVisible and data.system and data.settingId then
+        if IsSettingDeferred(data.system, data.settingId) and not IsDeferredSettingLoaded(data.system, data.settingId) then
+            isVisible = false
+        end
+    end
+    return isVisible
+end
+
 function ZO_KeyboardOptions:UpdatePanelVisibility(panelId)
     local panelControls = self.controlTable[panelId]
     if panelControls then
@@ -231,42 +244,36 @@ function ZO_KeyboardOptions:UpdatePanelVisibility(panelId)
         local hasAnyVisibleSetting = false
         for index, control in ipairs(panelControls) do
             local data = control.data
-            local isVisible = data.visible == nil or data.visible
-
-            -- If this is a deferred setting and it isn't loaded, then don't show it
-            if IsSettingDeferred(data.system, data.settingId) and not IsDeferredSettingLoaded(data.system, data.settingId) then
-                isVisible = false
-            else
-                if type(isVisible) == "function" then
-                    isVisible = isVisible()
-                end
-            end
-
+            local isVisible = IsSettingVisible(data)
             control:SetHidden(not isVisible)
 
             if isVisible and data.system ~= nil then
                 hasAnyVisibleSetting = true
             end
         end
-
+        
         if hasAnyVisibleSetting then
             -- Set anchors in separate loop in case controls in panel are not processed in the order they appear on the screen.
             for index, control in ipairs(panelControls) do
                 local isValid, point, relTo, relPoint, offsetX, offsetY = control:GetAnchor(0)
-                if isValid and relTo and relTo.data then
-                    if relTo.data.visible then
-                        if not control.originalPoint then
-                            control.originalOffsetX = offsetX
-                            control.originalOffsetY = offsetY
-                            control.originalPoint = point
-                            control.originalRelativePoint = relPoint
-                        end
-                        control:ClearAnchors()
-                        if relTo:IsHidden() then
-                            control:SetAnchor(TOPLEFT, relTo, TOPLEFT, 0, 0)
-                        else
-                            control:SetAnchor(control.originalPoint, relTo, control.originalRelativePoint, control.originalOffsetX, control.originalOffsetY)
-                        end
+                -- If the previous element can be dynamically hidden, then we need to update our anchors to reflect its hidden state
+                if isValid and relTo and relTo.data and relTo.data.visible ~= nil then
+                    -- TODO: headers are still visible, even when every setting
+                    -- under that header isn't. We should keep track when a setting is
+                    -- visible underneath a header, and then for any header with 0
+                    -- visible settings, we should mark them as not visible
+                    -- like any other setting control.
+                    if not control.originalPoint then
+                        control.originalOffsetX = offsetX
+                        control.originalOffsetY = offsetY
+                        control.originalPoint = point
+                        control.originalRelativePoint = relPoint
+                    end
+                    control:ClearAnchors()
+                    if relTo:IsHidden() then
+                        control:SetAnchor(TOPLEFT, relTo, TOPLEFT, 0, 0)
+                    else
+                        control:SetAnchor(control.originalPoint, relTo, control.originalRelativePoint, control.originalOffsetX, control.originalOffsetY)
                     end
                 end
             end
@@ -336,17 +343,6 @@ function ZO_KeyboardOptions:SetSectionTitleData(control, panel, text)
         panel = panel,
         controlType = OPTIONS_SECTION_TITLE,
         text = text,
-    }
-end
-
-function ZO_KeyboardOptions:SetCustomOptionData(control, panel, text, tooltipText, customSetupFunction)
-    control.data =
-    {
-        panel = panel,
-        controlType = OPTIONS_CUSTOM,
-        customSetupFunction = customSetupFunction,
-        text = text,
-        tooltipText = tooltipText,
     }
 end
 

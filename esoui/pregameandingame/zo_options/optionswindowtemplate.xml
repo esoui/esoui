@@ -1,0 +1,338 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_Options_Divider" textureFile="EsoUI\Art\Login\login_divider.dds" virtual="true">
+            <Dimensions x="512" y="4" />
+        </Texture>
+
+        <Texture name="ZO_Options_WarningIcon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" mouseEnabled="true" virtual="true">
+            <Dimensions x="24" y="24" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+
+        <Button name="ZO_Options_DefaultMarker" virtual="true">
+            <Dimensions x="16" y="16" />
+            <PressedOffset x="1" y="1" />
+            <Textures
+                normal="EsoUI\Art\Miscellaneous\slider_marker_up.dds"
+                pressed="EsoUI\Art\Miscellaneous\slider_marker_down.dds"
+                mouseOver="EsoUI\Art\Miscellaneous\slider_marker_over.dds"
+            />
+            <OnInitialized>
+                self.data = { tooltipText = SI_INTERFACE_OPTIONS_RESET_TO_DEFAULT_TOOLTIP }
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Button>
+
+        <Label name="ZO_Options_SectionTitleLabel" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="512" />
+        </Label>
+
+        <Control name="ZO_Options_SectionTitle" resizeToFitDescendents="true" hidden="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_Options_SectionTitleLabel">
+                    <Anchor point="TOPLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_SectionTitle_WithDivider" resizeToFitDescendents="true" hidden="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Divider" inherits="ZO_Options_Divider">
+                    <Anchor point="TOPLEFT" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="ZO_Options_SectionTitleLabel">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_SectionTitle_PanelHeader" virtual="true" inherits="ZO_Options_SectionTitle">
+            <Anchor point="TOPLEFT" relativeTo="ZO_OptionsWindowSettingsScrollChild" />
+        </Control>
+
+        <Control name="ZO_Options_Checkbox" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_CheckBoxOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_CheckBoxOnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                local checkboxControl = GetControl(self, "Checkbox")
+                checkboxControl:GetHandler("OnClicked")(checkboxControl, button)
+            </OnMouseUp>
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Dimensions x="290" y="26" />
+                    <Anchor point="LEFT" />
+                </Label>
+                
+                <Button name="$(parent)Checkbox" inherits="ZO_CheckButton_Text" horizontalAlignment="LEFT" font="ZoFontWinH4" modifyTextType="UPPERCASE">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+                    <FontColors
+                        normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                        pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                        mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                        disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+                    />
+                    <OnMouseEnter>
+                        ZO_Options_CheckBoxOnMouseEnter(self:GetParent())
+                        self:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_Options_CheckBoxOnMouseExit(self:GetParent())
+                        self:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
+                    </OnMouseExit>
+                </Button>
+            </Controls>
+        </Control>
+      
+        <Control name="ZO_Options_Dropdown" mouseEnabled="true" hidden="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+                    <OnMouseEnter>
+                        ZO_Options_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Control>
+
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" >
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Video_Dropdown_IncludeApplyScreenWarning" inherits="ZO_Options_Dropdown" virtual="true">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_OPTIONS_APPLY_WARNING }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Dropdown_DynamicWarning" inherits="ZO_Options_Dropdown" virtual="true">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        -- Set using ZO_Options_SetWarningText, ZO_Options_ShowOrHideAssociatedWarning, etc.
+                        self.data = { tooltipText = "" }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Slider" mouseEnabled="true" hidden="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <OnMouseEnter>
+                ZO_Options_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnShow>
+                ZO_Options_OnShow(self)
+            </OnShow>
+            
+            <Controls>
+                <Slider name="$(parent)Slider" inherits="ZO_Slider">
+                    <Dimensions x="190" y="16" />
+                    <Anchor point="RIGHT" offsetX="-10" />
+
+                    <OnValueChanged>
+                        ZO_Options_SliderOnValueChanged(self, value, eventReason)
+                    </OnValueChanged>
+
+                    <OnSliderReleased>
+                        ZO_Options_SliderOnSliderReleased(self, value)
+                    </OnSliderReleased>
+
+                    <OnMouseEnter>
+                        ZO_Options_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                </Slider>
+
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                    <Dimensions y="26" />
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)LowLabel" relativePoint="LEFT" />
+                </Label>
+
+                <Label name="$(parent)ValueLabel" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="75" y="26" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Slider" relativePoint="RIGHT" offsetX="10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Video_Slider_IncludeMaxParticleSystemsWarning" virtual="true" inherits="ZO_Options_Slider">
+            <Controls>
+                <Texture name="$(parent)WarningIcon" inherits="ZO_Options_WarningIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Slider" relativePoint="LEFT" offsetX="-5" />
+                    <OnInitialized>
+                        self.data = { tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_MAXIMUM_PARTICLE_SYSTEMS_RESTRICTION }
+                    </OnInitialized>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Slider_VerticalLabel" virtual="true" inherits="ZO_Options_Slider">
+            <Dimensions x="510" y="52" />
+            <Controls>
+                <Slider name="$(parent)Slider" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPRIGHT" offsetX="-10" />
+                </Slider>
+
+                <Label name="$(parent)Name" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)ValueLabel" horizontalAlignment="CENTER" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Slider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Slider" relativePoint="BOTTOMRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Color" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            
+            <OnMouseEnter>
+                ZO_Options_ColorOnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_ColorOnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" />
+                </Label>
+                <Control name="$(parent)ColorSection" mouseEnabled="true">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+
+                    <OnMouseEnter>
+                        ZO_Options_ColorOnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Options_ColorOnMouseExit(self:GetParent())
+                    </OnMouseExit>
+
+                    <OnMouseUp>
+                        ZO_Options_ColorOnMouseUp(self:GetParent(), upInside)
+                    </OnMouseUp>
+                </Control>
+                <Texture name="$(parent)Color">
+                    <Dimensions x="36" y="22" />
+                    <Anchor point="LEFT" relativeTo="$(parent)ColorSection" offsetX="4" />
+                </Texture>
+                <Texture name="$(parent)Border" textureFile="EsoUI/Art/ChatWindow/chatOptions_bgColSwatch_frame.dds">
+                    <TextureCoords left="0" right="0.625" top="0" bottom="0.8125"/>
+                    <Dimensions x="40" y="26" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Color" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <Label name="ZO_Options_Social_GuildLabel" font="ZoFontWinH3" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="510" y="26" />
+        </Label>
+
+        <Control name="ZO_Options_Social_ChatColor" inherits="ZO_Options_Color" virtual="true">
+            <Controls>
+                <Control name="$(parent)ColorSection" override="true">
+                    <OnMouseUp>
+                        ZO_Options_Social_ChatColorOnMouseUp(self:GetParent(), upInside)
+                    </OnMouseUp>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_InvokeCallback" mouseEnabled="true" virtual="true">
+            <Dimensions x="510" y="26" />
+            <Controls>
+                <Button name="$(parent)Button" inherits="ZO_DefaultButton" mouseEnabled="true">
+                    <Dimensions x="200" y="26" />
+                    <Anchor point="RIGHT" />
+                </Button>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Options_Account_InvokeCallback_WithEmail" virtual="true" resizeToFitDescendents="true" >
+            <Dimensions x="510" />
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontWinH4" text="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER">
+                    <Dimensions x="290" y="26" />
+                    <Anchor point="TOPLEFT" />
+                </Label>
+
+                <Label name="$(parent)Email" font="ZoFontWinH4" mouseEnabled="true">
+                    <Dimensions x="190" />
+                    <Anchor point="TOPRIGHT" />
+                    <OnEffectivelyShown>
+                        ZO_OptionsPanel_Account_SetupEmailLabel_Keyboard(self)
+                    </OnEffectivelyShown>
+                    <OnMouseEnter>
+                        ZO_OptionsPanel_Account_ShowEmailTooltip_Keyboard(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_OptionsPanel_Account_HideEmailTooltip_Keyboard(self)
+                    </OnMouseExit>
+                </Label>
+
+                <Button name="$(parent)Button" inherits="ZO_DefaultButton" mouseEnabled="true">
+                    <Dimensions x="200" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Email" relativePoint="BOTTOMRIGHT" offsetY="4" />
+                </Button>
+            </Controls>
+        </Control>
+
+    </Controls>
+</GuiXml>

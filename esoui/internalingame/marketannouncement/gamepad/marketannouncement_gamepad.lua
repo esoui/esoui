@@ -100,7 +100,10 @@ function ZO_MarketAnnouncement_Gamepad:InitializeKeybindButtons()
     self.scrollButton = self.controlContainer:GetNamedChild("TertiaryAction")
     self.scrollButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
     local WIDE_SPACING = false
-    self.scrollButton:SetCustomKeyIcon(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
+    ZO_GamepadTypeBasedControl_OnInitialized(self.scrollButton)
+    self.scrollButton:SetUpdateCallback(function(keybindButton)
+        keybindButton:SetCustomKeyIcon(GetGamepadRightStickScrollIcon())
+    end)
     self.scrollButton:AdjustBindingAnchors(WIDE_SPACING)
     self.closeButton:SetupStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
 end

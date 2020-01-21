@@ -220,79 +220,6 @@ local consolePregameStates =
 
 PregameStateManager_AddGamepadStates(consolePregameStates)
 
---This will probably need to be more robust (similar to non console PregameStates) as more pregame comes online
-local function OnVideoPlaybackComplete()
-    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE)
-    EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR)
-
-    if not ZO_PREGAME_HAD_GLOBAL_ERROR then
-        if ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING then
-            ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
-            AttemptToAdvancePastChapterOpeningCinematic()
-        elseif ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING then
-            ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
-            AttemptToAdvancePastCharacterSelectCinematic()
-        else
-            if not IsInCharacterCreateState() then
-                PregameStateManager_AdvanceState()
-            end
-        end
-    else
-        -- error cases just reset the flags
-        ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
-        ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
-    end
-end
-
-function ZO_PlayVideoAndAdvance(...)
-    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
-    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
-    PlayVideo(...)
-end
-
-function ZO_Gamepad_DisplayServerDisconnectedError()
-    if not IsErrorQueuedFromIngame() then
-        return
-    end
-
-    local logoutError, globalErrorCode = GetErrorQueuedFromIngame()
-
-    ZO_PREGAME_HAD_GLOBAL_ERROR = true
-
-    local errorString
-    local errorStringFormat
-
-    if logoutError ~= nil and logoutError ~= LOGOUT_ERROR_UNKNOWN_ERROR then
-        errorStringFormat = GetString("SI_LOGOUTERROR", logoutError)
-
-        if errorStringFormat ~= ""  then
-            errorString = zo_strformat(errorStringFormat, GetGameURL())
-        end
-    elseif globalErrorCode ~= nil and globalErrorCode ~= GLOBAL_ERROR_CODE_NO_ERROR then
-        -- if the error code is not in LogoutReason then it is probably in the GlobalErrorCode enum 
-        errorStringFormat = GetString("SI_GLOBALERRORCODE", globalErrorCode)
-
-        if errorStringFormat ~= ""  then
-            errorString = zo_strformat(errorStringFormat, globalErrorCode)
-        end
-    end
-
-    if errorString == nil or errorString == "" then
-        errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
-    end
-
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(nil, errorString)
-end
-
-local function OnServerDisconnectError(eventCode)
-    if IsErrorQueuedFromIngame() then
-        ZO_Gamepad_DisplayServerDisconnectedError()
-
-        local FORCE = true
-        ZO_Dialogs_ReleaseAllDialogs(FORCE)
-    end
-end
-
 local function OnProfileLoginResult(event, isSuccess, profileError)
     --Don't return to IIS if we're on Server Select and NO_PROFILE was returned because they probably cancelled the selection
     if isSuccess == false and not (profileError == PROFILE_LOGIN_ERROR_NO_PROFILE and SCENE_MANAGER:IsShowing("GameStartup"))  then
@@ -310,7 +237,6 @@ local function OnProfileLoginResult(event, isSuccess, profileError)
 end
 
 local function PregameStateManager_Initialize()
-    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnServerDisconnectError)
     EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_PROFILE_LOGIN_RESULT, OnProfileLoginResult)
 end
 

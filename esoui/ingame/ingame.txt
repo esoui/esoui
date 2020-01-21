@@ -3,6 +3,12 @@
 
 ## SavedVariables: ZO_Ingame_SavedVariables
 
+EsoUI\Ingame\ChatSystem\ChatOptions.lua
+EsoUI\Ingame\ChatSystem\ChatOptions.xml
+
+EsoUI\Ingame\ChatSystem\ChatData.lua
+EsoUI\Ingame\ChatSystem\ChatHandlers.lua
+
 EsoUI\Ingame\NameChange\NameChange.lua
 
 EsoUI\Ingame\Globals\strings.lua
@@ -20,7 +26,24 @@ EsoUI\Ingame\Particles\Particles.lua
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
+EsoUI\Ingame\Tooltip\AbilityTooltips.lua
+EsoUI\Ingame\Tooltip\AvATooltips.lua
+EsoUI\Ingame\Tooltip\CadwellsTooltips.lua
+EsoUI\Ingame\Tooltip\ChampionTooltips.lua
+EsoUI\Ingame\Tooltip\CharacterTooltips.lua
 EsoUI\Ingame\Tooltip\GiftTooltips.lua
+EsoUI\Ingame\Tooltip\GroupTooltips.lua
+EsoUI\Ingame\Tooltip\GuildKioskTooltips.lua
+EsoUI\Ingame\Tooltip\GuildTooltips.lua
+EsoUI\Ingame\Tooltip\HousingTooltips.lua
+EsoUI\Ingame\Tooltip\MapTooltips.lua
+EsoUI\Ingame\Tooltip\NotificationsTooltips.lua
+EsoUI\Ingame\Tooltip\OutfitTooltips.lua
+EsoUI\Ingame\Tooltip\SkillBuildTooltips.lua
+EsoUI\Ingame\Tooltip\SocialTooltips.lua
+EsoUI\Ingame\Tooltip\StableTooltips.lua
+EsoUI\Ingame\Tooltip\CrownCrateTooltips.lua
+EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
 
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.xml
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.lua
@@ -138,37 +161,22 @@ EsoUI\Ingame\SharedInformationArea\SharedInformationArea.lua
 EsoUI\Ingame\GameMenu_Ingame\GameMenu_Ingame.lua
 EsoUI\Ingame\GameMenu_Ingame\GameMenu_Ingame.xml
 
-EsoUI\Ingame\ChatSystem\ChatOptions.lua
-EsoUI\Ingame\ChatSystem\ChatOptions.xml
-
-EsoUI\Ingame\ChatSystem\ChatData.lua
-EsoUI\Ingame\ChatSystem\ChatHandlers.lua
-
-EsoUI\Ingame\ChatSystem\SharedChatSystem.lua
-EsoUI\Ingame\ChatSystem\SharedChatSystem.xml
-EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.lua
-EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.xml
-EsoUI\Ingame\ChatSystem\Console\GamepadChatSystem.lua
-EsoUI\Ingame\ChatSystem\Console\GamepadChatSystem.xml
-EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.lua
-EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.xml
-
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanels_Keyboard.lua
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Audio_Keyboard.xml
-EsoUI\Ingame\OptionsPanels\Gamepad\OptionsPanels_Gamepad.lua
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Camera_Shared.lua
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Camera_Keyboard.xml
-EsoUI\Ingame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Gameplay_Keyboard.xml
-EsoUI\Ingame\OptionsPanels\OptionsPanel_Interface_Shared.lua
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Interface_Keyboard.xml
-EsoUI\Ingame\OptionsPanels\OptionsPanel_Nameplates_Shared.lua
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Nameplates_Keyboard.xml
-EsoUI\Ingame\OptionsPanels\OptionsPanel_Social_Shared.lua
-EsoUI\Ingame\OptionsPanels\Console\OptionsPanel_Social_Console.lua
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Social_Keyboard.xml
 EsoUI\Ingame\OptionsPanels\OptionsPanel_Combat_Shared.lua
-EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Combat_Keyboard.xml
+EsoUI\Ingame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
+EsoUI\Ingame\OptionsPanels\OptionsPanel_Interface_Shared.lua
+EsoUI\Ingame\OptionsPanels\OptionsPanel_Nameplates_Shared.lua
+EsoUI\Ingame\OptionsPanels\OptionsPanel_Social_Shared.lua
+
+EsoUI\Ingame\OptionsPanels\Keyboard\IngameOptionsPanels_Keyboard.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Camera_Keyboard.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Combat_Keyboard.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Gameplay_Keyboard.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Interface_Keyboard.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Nameplates_Keyboard.lua
+EsoUI\Ingame\OptionsPanels\Keyboard\OptionsPanel_Social_Keyboard.lua
+
+EsoUI\Ingame\OptionsPanels\Gamepad\OptionsPanels_Gamepad.lua
 
 EsoUI\Ingame\ZO_CurrencyInput\ZO_CurrencyInput.lua
 EsoUI\Ingame\ZO_CurrencyInput\ZO_CurrencyInput.xml
@@ -295,10 +303,6 @@ EsoUI\Ingame\Map\Keyboard\WorldMapCorner_Keyboard.xml
 
 EsoUI\Ingame\Reticle\Reticle.lua
 EsoUI\Ingame\Reticle\Reticle.xml
-
-EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
-EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
-EsoUI\Ingame\SlashCommands\SlashCommandAutoComplete.lua
 
 EsoUI\Ingame\SiegeBar\SiegeBar.lua
 
@@ -1141,9 +1145,6 @@ EsoUI\Ingame\Vibration\Vibration.lua
 EsoUI\Ingame\Performance\PerformanceMeter.lua
 EsoUI\Ingame\Performance\PerformanceMeter.xml
 
-EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.lua
-EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.xml
-
 EsoUI\Ingame\QuickChat\QuickChatManager.lua
 
 EsoUI\Ingame\SCT\SCTAnimations.xml
@@ -1331,6 +1332,19 @@ EsoUI\Ingame\ScreenshotMode\Gamepad\ScreenshotMode_Gamepad.lua
 EsoUI\Ingame\ScreenshotMode\Gamepad\ScreenshotMode_Gamepad.xml
 
 ; Keeping these towards the bottom so that we can register to any callback objects we want
+
+EsoUI\Ingame\SlashCommands\SlashCommandAutoComplete.lua
+EsoUI\Ingame\ChatSystem\SharedChatSystem.lua
+EsoUI\Ingame\ChatSystem\SharedChatSystem.xml
+EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.lua
+EsoUI\Ingame\ChatSystem\Keyboard\KeyboardChatSystem.xml
+EsoUI\Ingame\ChatSystem\Gamepad\GamepadChatSystem.lua
+EsoUI\Ingame\ChatSystem\Gamepad\GamepadChatSystem.xml
+EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.lua
+EsoUI\Ingame\ChatSystem\Gamepad\ChatMenu_Gamepad.xml
+
+EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
+EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
 EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.lua
 EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.xml
 
@@ -1347,8 +1361,8 @@ EsoUI\Ingame\Subtitles\Subtitles.xml
 EsoUI\Ingame\Profiler\ProfilerUtils.lua
 
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
-EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.lua
-EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases.xml
+EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases.lua
+EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases.xml
 
 ; These should remain at the bottom of the file, to ensure functionality of fragments
 EsoUI\Ingame\Scenes\IngameFragments.lua

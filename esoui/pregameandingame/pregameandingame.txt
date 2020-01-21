@@ -4,6 +4,8 @@
 
 EsoUI\PregameAndIngame\Gamepad\GamepadTemplates.xml
 
+EsoUI\PregameAndIngame\ZO_Options\OptionsWindowTemplate.lua
+EsoUI\PregameAndIngame\ZO_Options\OptionsWindowTemplate.xml
 EsoUI\PregameAndIngame\ZO_Options\ZO_SharedOptions.lua
 EsoUI\PregameAndIngame\ZO_Options\Keyboard\ZO_Options_Keyboard.lua
 EsoUI\PregameAndIngame\ZO_Options\Keyboard\ZO_Options_Keyboard.xml
@@ -18,15 +20,17 @@ EsoUI\PregameAndIngame\Gamepad\ControllerDisconnect\ControllerDisconnect.xml
 EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.lua
 EsoUI\PregameAndIngame\GammaAdjust\GammaAdjust.xml
 
-EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
-EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Camera_Shared.lua
-EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanels_Keyboard.lua
-EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Audio_Shared.lua
-EsoUI\PregameAndIngame\OptionsPanels\Console\OptionsPanel_Audio_Console.lua
-EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Video_Shared.lua
-EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Video_Keyboard.xml
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Account_Shared.lua
-EsoUI\PregameAndIngame\OptionsPanels\Console\OptionsPanel_Account_Console.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Audio_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Camera_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Video_Shared.lua
+
+EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanelBuilder_Keyboard.lua
+EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Audio_Keyboard.lua
+EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Video_Keyboard.lua
+
+EsoUI\PregameAndIngame\OptionsPanels\Gamepad\OptionsPanel_Account_Gamepad.lua
 
 EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnEula.lua
 EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnEula.xml
@@ -37,3 +41,6 @@ EsoUI\PregameAndIngame\Globals\Presence.lua
 
 EsoUI\PregameAndIngame\Globals\Console\Dialogs_Console.lua
 EsoUI\PregameAndIngame\Globals\Gamepad\GamepadEventHandlers.lua
+
+EsoUI\PregameAndIngame\ScreenAdjust\ScreenAdjust.lua
+EsoUI\PregameAndIngame\ScreenAdjust\ScreenAdjust.xml

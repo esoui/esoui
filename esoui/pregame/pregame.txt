@@ -38,6 +38,8 @@ EsoUI\Pregame\AccountLogin\Keyboard\ServerSelect.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ServerSelect.xml
 EsoUI\Pregame\AccountLogin\Keyboard\EULA.lua
 EsoUI\Pregame\AccountLogin\Keyboard\EULA.xml
+EsoUI\Pregame\AccountLogin\Keyboard\WorldSelect.lua
+EsoUI\Pregame\AccountLogin\Keyboard\WorldSelect.xml
 
 EsoUI\Pregame\AccountLogin\Gamepad\PregameInitialScreen_Gamepad.lua
 EsoUI\Pregame\AccountLogin\Gamepad\PregameInitialScreen_Gamepad.xml
@@ -50,10 +52,10 @@ EsoUI\Pregame\AccountLogin\Gamepad\LegalAgreementsScreen_Gamepad.xml
 
 EsoUI\Pregame\AccountLogin\PEGI.lua
 EsoUI\Pregame\AccountLogin\PEGI.xml
-EsoUI\Pregame\AccountLogin\LogoSplash.lua
-EsoUI\Pregame\AccountLogin\LogoSplash.xml
-EsoUI\Pregame\AccountLogin\HavokSplash.lua
-EsoUI\Pregame\AccountLogin\HavokSplash.xml
+EsoUI\Pregame\AccountLogin\CopyrightLogosSplash.lua
+EsoUI\Pregame\AccountLogin\CopyrightLogosSplash.xml
+EsoUI\Pregame\AccountLogin\SimpleLogoSplash.lua
+EsoUI\Pregame\AccountLogin\SimpleLogoSplash.xml
 
 EsoUI\Pregame\KeybindStrip\PregameKeybindStripFragments.lua
 EsoUI\Pregame\Globals\bindings.xml
@@ -96,9 +98,6 @@ EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.lua
 EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.xml
 EsoUI\Pregame\CharacterSelect\Gamepad\ZO_CharacterSelect_Gamepad.lua
 EsoUI\Pregame\CharacterSelect\Gamepad\ZO_CharacterSelect_Gamepad.xml
-
-EsoUI\Pregame\ServerSelect\Keyboard\ZO_ServerSelect.lua
-EsoUI\Pregame\ServerSelect\Keyboard\ZO_ServerSelect.xml
 
 EsoUI\Pregame\GameMenu_PreGame\Keyboard\GameMenu_PreGame.lua
 EsoUI\Pregame\GameMenu_PreGame\Keyboard\GameMenu_PreGame.xml
@@ -143,9 +142,6 @@ EsoUI\Pregame\StateManager\Keyboard\PregameStates_Keyboard.lua
 EsoUI\Pregame\StateManager\Gamepad\PregameStates_Gamepad.lua
 EsoUI\Pregame\StateManager\Console\PregameStates_Console.lua
 
-EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.lua
-EsoUI\Common\Gamepad\ScreenAdjust\ScreenAdjust.xml
-
 EsoUI\Pregame\RzChroma\PregameRzChroma_Manager.lua
 EsoUI\Pregame\RzChroma\PregameRzChroma_Effects.lua
 
@@ -166,6 +162,7 @@ EsoUI\Pregame\Scenes\Gamepad\PregameScenes_Gamepad.lua
 EsoUI\Pregame\Scenes\Console\PregameScenes_Console.lua
 
 EsoUI\Pregame\OptionsPanels\Gamepad\OptionsPanels_Gamepad.lua
-EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Audio_Keyboard.xml
+
+EsoUI\Pregame\OptionsPanels\Keyboard\PregameOptionsPanels_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.xml

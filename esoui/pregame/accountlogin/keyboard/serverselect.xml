@@ -14,7 +14,7 @@
             </OnEffectivelyShown>
 
             <OnInitialized>
-                ZO_ServerSelect_Initialize(self)
+                ZO_ServerSelectDialog_Initialize(self)
             </OnInitialized>
 
             <Controls>

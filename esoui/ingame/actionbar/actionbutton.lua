@@ -516,9 +516,10 @@ function ActionButton:ApplyStyle(template)
                 self.icon:SetDesaturation(0)
             end
         else
-            self.bounceAnimation:Stop()
-            self.iconBounceAnimation:Stop()
+            self:ResetBounceAnimation()
         end
+    else
+        self:ResetBounceAnimation()
     end
 
     self:UpdateUsable()
@@ -597,6 +598,11 @@ function ActionButton:SetupBounceAnimation()
     self.glowAnimation:SetMinMaxAlpha(0, 1)
 
     self.needsAnimationParameterUpdate = true
+end
+
+function ActionButton:ResetBounceAnimation()
+    self.bounceAnimation:Stop()
+    self.iconBounceAnimation:Stop()
 end
 
 function ActionButton:PlayAbilityUsedBounce(offset)

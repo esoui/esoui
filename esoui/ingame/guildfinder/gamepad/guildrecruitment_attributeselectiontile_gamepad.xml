@@ -28,7 +28,7 @@
             <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_LONG_ENTRY_WIDTH" />
         </Control>
 
-        <Control name="ZO_GuildRecruitment_StarTimeSelectionTile_Gamepad_Control"  inherits="ZO_GuildRecruitment_AttributeSelectionTile_Gamepad_Control" virtual="true">
+        <Control name="ZO_GuildRecruitment_StartTimeSelectionTile_Gamepad_Control"  inherits="ZO_GuildRecruitment_AttributeSelectionTile_Gamepad_Control" virtual="true">
             <Dimensions x="ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_START_TIME_COMBOBOX_ENTRY_WIDTH" />
             <Controls>
                 <Label name="$(parent)Dash" override="true" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad" text="SI_GUILD_RECRUITMENT_TIME_ENTRIES_SEPARATOR">

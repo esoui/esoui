@@ -60,9 +60,6 @@ local HELP_ASK_FOR_HELP_CATEGORY_INFO =
     },
 }
 
-local ESO_FORUMS_URL_TYPE = {urlType = APPROVED_URL_ESO_FORUMS}
-local ESO_FORUMS_FRONT_FACING_ADDRESS = {mainTextParams = {GetString(SI_CUSTOMER_SERVICE_ESO_FORUMS_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB)}}
-
 local HelpAskForHelp_Keyboard = ZO_HelpScreenTemplate_Keyboard:Subclass()
 
 function HelpAskForHelp_Keyboard:New(...)
@@ -392,5 +389,5 @@ function ZO_HelpAskForHelp_Keyboard_AttemptToSendTicket()
 end
 
 function ZO_HelpAskForHelp_OnForumLinkClicked()
-    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL_BY_TYPE", ESO_FORUMS_URL_TYPE, ESO_FORUMS_FRONT_FACING_ADDRESS)
+    ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_FORUMS, GetString(SI_CUSTOMER_SERVICE_ESO_FORUMS_LINK_TEXT), GetString(SI_URL_APPLICATION_WEB))
 end

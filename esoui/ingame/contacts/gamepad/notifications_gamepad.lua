@@ -320,9 +320,7 @@ end
 
 function ZO_GamepadCollectionsUpdateProvider:GetMessage(hasMoreInfo, categoryName, collectibleName)
     if hasMoreInfo then
-        local icon = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_STICK)
-        local iconMarkup = zo_iconFormat(icon, 48, 48)
-        return zo_strformat(SI_COLLECTIONS_UPDATED_NOTIFICATION_MESSAGE_MORE_INFO_GAMEPAD, categoryName, collectibleName, iconMarkup)
+        return zo_strformat(SI_COLLECTIONS_UPDATED_NOTIFICATION_MESSAGE_MORE_INFO_GAMEPAD, categoryName, collectibleName, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_RIGHT_STICK))
     else
         return zo_strformat(SI_COLLECTIONS_UPDATED_NOTIFICATION_MESSAGE, categoryName, collectibleName)
     end

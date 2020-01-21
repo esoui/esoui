@@ -64,7 +64,7 @@ function ZO_TutorialHandlerBase:CanShowTutorial()
 end
 
 local function BinaryInsertComparer(priority, otherTutorialIndex)
-    return priority - select(3, GetTutorialInfo(otherTutorialIndex))
+    return priority - GetTutorialDisplayPriority(tutorialIndex)
 end
 
 function ZO_TutorialHandlerBase:OnDisplayTutorial(tutorialIndex, priority)

@@ -24,7 +24,7 @@ end
 function ZO_DPSLog:OutputResults()
     local timeSpentTakingDamage = self:GetTimeSpentTakingDamage()
     local dps = self:GetDPS()
-    CHAT_SYSTEM:AddMessage(zo_strformat(SI_TARGET_DUMMY_DPS_RESULT_FORMAT, dps, ZO_FormatTimeAsDecimalWhenBelowThreshold(timeSpentTakingDamage), self.unitName))
+    CHAT_ROUTER:AddSystemMessage(zo_strformat(SI_TARGET_DUMMY_DPS_RESULT_FORMAT, dps, ZO_FormatTimeAsDecimalWhenBelowThreshold(timeSpentTakingDamage), self.unitName))
 end
 
 function ZO_DPSLog:Reset()

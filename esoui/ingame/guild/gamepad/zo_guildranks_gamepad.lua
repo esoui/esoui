@@ -57,17 +57,7 @@ function ZO_GuildRanks_Gamepad:SetOwningScreen(owningScreen)
 end
 
 function ZO_GuildRanks_Gamepad:Initialize(control)
-    ZO_GuildRanks_Shared.Initialize(self, control)
-
-    -- Initialize grid list object
-    local ALWAYS_ANIMATE = true
-    self.permissionsGridListControl = self.control:GetNamedChild("PermissionsPanel")
-    GUILD_RANKS_PERMISSION_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(self.permissionsGridListControl, ALWAYS_ANIMATE)
-
-    self.rankIconPickerGridListControl = self.control:GetNamedChild("RankIconPicker")
-    GUILD_RANK_ICON_PICKER_FRAGMENT = ZO_FadeSceneFragment:New(self.rankIconPickerGridListControl, ALWAYS_ANIMATE)
-
-    self.templateData =
+    local templateData =
     {
         gridListClass = ZO_GridScrollList_Gamepad,
         entryTemplate = "ZO_CheckboxTile_Gamepad_Control",
@@ -77,6 +67,15 @@ function ZO_GuildRanks_Gamepad:Initialize(control)
         headerHeight = ZO_GUILD_RANK_PERMISSON_HEADER_TEMPLATE_GAMEPAD_HEIGHT,
         highlightTemplate = "ZO_GuildRanks_Permission_Gamepad_Highlight_Template",
     }
+
+    ZO_GuildRanks_Shared.Initialize(self, control, templateData)
+
+    -- Initialize grid list object
+    local ALWAYS_ANIMATE = true
+    GUILD_RANKS_PERMISSION_PANEL_FRAGMENT = ZO_FadeSceneFragment:New(self.permissionsGridListControl, ALWAYS_ANIMATE)
+
+    self.rankIconPickerGridListControl = self.control:GetNamedChild("RankIconPicker")
+    GUILD_RANK_ICON_PICKER_FRAGMENT = ZO_FadeSceneFragment:New(self.rankIconPickerGridListControl, ALWAYS_ANIMATE)
 
     self:InitializePermissionsGridList()
 
@@ -141,6 +140,10 @@ function ZO_GuildRanks_Gamepad:Initialize(control)
     end)
 end
 
+function ZO_GuildRanks_Gamepad:InitializePermissionsGridListControl()
+    self.permissionsGridListControl = self.control:GetNamedChild("PermissionsPanel")
+end
+
 function ZO_GuildRanks_Gamepad:InitializePermissionsGridList()
     ZO_GuildRanks_Shared.InitializePermissionsGridList(self)
 
@@ -150,19 +153,19 @@ end
 function ZO_GuildRanks_Gamepad:OnPermissionsGridSelectionChanged(oldSelectedData, selectedData)
     -- Deselect previous tile
     if oldSelectedData and oldSelectedData.dataEntry then
-        oldSelectedData.dataSource.isSelected = false
+        oldSelectedData.isSelected = false
     end
 
     -- Select newly selected tile.
     if selectedData and selectedData.dataEntry then
-        selectedData.dataSource.isSelected = true
+        selectedData.isSelected = true
     end
 
     self.permissionsGridList:RefreshGridList()
 
     local currentSelectedData = self.permissionsGridList:GetSelectedData()
     if currentSelectedData then
-        local permission = currentSelectedData.dataSource.value
+        local permission = currentSelectedData.value
         local permissionInfo = ZO_GuildRanks_Shared.GetToolTipInfoForPermission(permission)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         if permissionInfo then

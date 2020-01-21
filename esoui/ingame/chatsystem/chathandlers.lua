@@ -1,13 +1,5 @@
 local ChannelInfo = ZO_ChatSystem_GetChannelInfo()
 
-local function FormatShutdownTime(timeRemaining)
-    if timeRemaining == 0 then
-        return GetString(SI_CHAT_SHUTDOWN_NOW)
-    end
-
-    return zo_strformat(SI_CHAT_SHUTDOWN_TIME, ZO_FormatTime(timeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE))
-end
-
 local function CreateChannelLink(channelInfo, overrideName)
     if channelInfo.channelLinkable then
         local channelName = overrideName or GetChannelName(channelInfo.id)
@@ -16,11 +8,19 @@ local function CreateChannelLink(channelInfo, overrideName)
 end
 
 local function GetCustomerServiceIcon(isCustomerServiceAccount)
-    if(isCustomerServiceAccount) then
+    if isCustomerServiceAccount then
         return "|t16:16:EsoUI/Art/ChatWindow/csIcon.dds|t"
     end
 
     return ""
+end
+
+local function ShouldShowSocialErrorInChat(error)
+    return not ShouldShowSocialErrorInAlert(error)
+end
+
+local function ShouldShowGroupErrorInChat(error)
+    return not ShouldShowGroupErrorInAlert(error)
 end
 
 local ChatEventFormatters = {
@@ -113,21 +113,21 @@ local ChatEventFormatters = {
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
         -- Only one name will be sent here, so use that and do not use special formatting since this appears in chat
         local nameToDisplay
-        if characterName ~= "" then 
+        if characterName ~= "" then
             nameToDisplay = IsConsoleUI() and ZO_FormatUserFacingCharacterName(characterName) or characterName
         else
             nameToDisplay = ZO_FormatUserFacingDisplayName(displayName)
         end
 
-        if(not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response)) then
+        if not IsGroupErrorIgnoreResponse(response) and ShouldShowGroupErrorInChat(response) then
             local alertMessage = nameToDisplay ~= "" and zo_strformat(GetString("SI_GROUPINVITERESPONSE", response), nameToDisplay) or GetString(SI_PLAYER_BUSY)
-    
+
             return alertMessage, nil, displayName
         end
     end,
 
-	[EVENT_SOCIAL_ERROR] = function(error)
-        if(not IsSocialErrorIgnoreResponse(error) and ShouldShowSocialErrorInChat(error)) then
+    [EVENT_SOCIAL_ERROR] = function(error)
+        if not IsSocialErrorIgnoreResponse(error) and ShouldShowSocialErrorInChat(error) then
             return zo_strformat(GetString("SI_SOCIALACTIONRESULT", error))
         end
     end,
@@ -149,31 +149,121 @@ local ChatEventFormatters = {
     end,
 }
 
+-----------------
+-- Chat Router --
+-----------------
+
+--[[
+    The chat router's job is to format chat events and route them to the multiple chat subsystems that exist.
+    All methods should be safely callable without checking if the chat system is available or not
+]]--
+
+local ZO_ChatRouter = ZO_CallbackObject:Subclass()
+function ZO_ChatRouter:New(...)
+    local object = ZO_CallbackObject.New(self)
+    object:Initialize(...)
+    return object
+end
+
+function ZO_ChatRouter:Initialize()
+    if not IsChatSystemAvailableForCurrentPlatform() then
+        return
+    end
+
+    self.registeredEventHandlers = {}
+    for eventId, eventFormatter in pairs(ChatEventFormatters) do
+        self:AddEventFormatter(eventId, eventFormatter)
+    end
+
+    local function OnTryInsertLink(...)
+        return SYSTEMS:GetObject("ChatSystem"):HandleTryInsertLink(...)
+    end
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.INSERT_LINK_EVENT, OnTryInsertLink)
+
+    local function OnLinkClicked(...)
+        return SYSTEMS:GetObject("ChatSystem"):OnLinkClicked(...)
+    end
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked)
+end
+
+do
+    local MultiLevelEventToCategoryMappings, SimpleEventToCategoryMappings = ZO_ChatSystem_GetEventCategoryMappings()
+    function ZO_ChatRouter:AddEventFormatter(eventCode, eventFormatter)
+        if not IsChatSystemAvailableForCurrentPlatform() then
+            return
+        end
+
+        local function OnChatEvent(_, ...)
+            local eventCategory = nil
+            if SimpleEventToCategoryMappings[eventCode] then
+                eventCategory = SimpleEventToCategoryMappings[eventCode]
+            elseif MultiLevelEventToCategoryMappings[eventCode] then
+                local messageType = select(1, ...)
+                eventCategory = MultiLevelEventToCategoryMappings[eventCode][messageType]
+            end
+
+            local formattedEventText, targetChannel, fromDisplayName, rawMessageText = eventFormatter(...)
+            if formattedEventText then
+                if targetChannel then
+                    local target = select(2, ...)
+                    self:FireCallbacks("TargetAddedToChannel", targetChannel, target)
+                end
+
+                self:FireCallbacks("FormattedChatMessage", formattedEventText, eventCategory, targetChannel, fromDisplayName, rawMessageText)
+            end
+        end
+
+        self.registeredEventHandlers[eventCode] = OnChatEvent
+        EVENT_MANAGER:RegisterForEvent("ChatRouter", eventCode, OnChatEvent)
+    end
+end
+
+function ZO_ChatRouter:EmitChatEvent(eventCode, ...)
+    if not IsChatSystemAvailableForCurrentPlatform() then
+        return
+    end
+
+    local onChatEventCallback = self.registeredEventHandlers[eventCode]
+    return onChatEventCallback(eventCode, ...)
+end
+
+function ZO_ChatRouter:AddSystemMessage(messageText)
+    if not IsChatSystemAvailableForCurrentPlatform() then
+        return
+    end
+
+    self:FireCallbacks("FormattedChatMessage", messageText, CHAT_CATEGORY_SYSTEM)
+end
+
+function ZO_ChatRouter:AddDebugMessage(messageText)
+    self:AddSystemMessage(messageText)
+end
+
+
+function ZO_ChatRouter:AddCommandPrefix(prefixCharacter, callback)
+    self:FireCallbacks("AddCommandPrefix", prefixCharacter, callback)
+end
+
+CHAT_ROUTER = ZO_ChatRouter:New()
+
+--- Global functions ---
+function ZO_ChatSystem_DoesPlatformUseGamepadChatSystem()
+    return IsHeronUI() or IsConsoleUI()
+end
+
+function ZO_ChatSystem_DoesPlatformUseKeyboardChatSystem()
+    return IsKeyboardUISupported()
+end
+
 function ZO_ChatSystem_GetEventHandlers()
     return ChatEventFormatters
 end
 
-local function OnChatEvent(...)
-    CHAT_SYSTEM:OnChatEvent(...)
-end
-
 function ZO_ChatEvent(eventId, ...)
-    if IsChatSystemAvailableForCurrentPlatform() then
-        OnChatEvent(eventId, ...)
-    end
+    CHAT_ROUTER:EmitChatEvent(eventId, ...)
 end
 
-function ZO_ChatSystem_AddEventHandler(eventId, handler)
-    if IsChatSystemAvailableForCurrentPlatform() then
-        ChatEventFormatters[eventId] = handler
-        EVENT_MANAGER:RegisterForEvent("ChatSystem_OnEventId" .. eventId, eventId, OnChatEvent)
-    end
-end
-
-function ShouldShowSocialErrorInChat(error)
-    return not ShouldShowSocialErrorInAlert(error)
-end
-
-function ShouldShowGroupErrorInChat(error)
-    return not ShouldShowGroupErrorInAlert(error)
+function ZO_ChatSystem_AddEventHandler(eventId, eventFormatter)
+    CHAT_ROUTER:AddEventFormatter(eventId, eventFormatter)
 end

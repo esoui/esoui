@@ -112,10 +112,10 @@ ESO_Dialogs["CONFIRM_OPEN_URL_BY_TYPE"] =
         [1] =
         {
             text = SI_URL_DIALOG_OPEN,
-            callback =  function(dialog)
-                            OpenURLByType(dialog.data.urlType)
-                            dialog.data.confirmed = true
-                        end,
+            callback = function(dialog)
+                OpenURLByType(dialog.data.urlType)
+                dialog.data.confirmed = true
+            end,
         },
         [2] =
         {

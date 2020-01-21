@@ -40,8 +40,8 @@ end
 
 function ZO_ShowBuyCrownsPlatformDialog()
     OnMarketPurchaseMoreCrowns()
-    if DoesPlatformStoreUseExternalLinks() then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_ACCOUNT_STORE }, { mainTextParams = { ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB) } })
+    if DoesPlatformStoreUseExternalLinks() then 
+        ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_STORE, ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB))
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_CROWNS_FROM_PLATFORM_STORE", nil, { mainTextParams = { ZO_Currency_FormatKeyboard(CURT_CROWNS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON), ZO_GetPlatformStoreName() } })
     end
@@ -80,7 +80,7 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
 
 function ZO_ShowBuySubscriptionPlatformDialog()
     if DoesPlatformStoreUseExternalLinks() then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION }, { mainTextParams = { ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB) } })
+        ZO_PlatformOpenApprovedURL(APPROVED_URL_ESO_ACCOUNT_SUBSCRIPTION, ZO_GetPlatformStoreName(), GetString(SI_URL_APPLICATION_WEB))
     else
         ZO_Dialogs_ShowPlatformDialog("BUY_ESO_PLUS_FROM_PLATFORM_STORE")
     end

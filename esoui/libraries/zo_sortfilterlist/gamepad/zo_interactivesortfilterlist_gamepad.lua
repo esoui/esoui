@@ -376,7 +376,7 @@ function ZO_GamepadInteractiveSortFilterList:Deactivate()
         self.filterDropdown:Deactivate(BLOCK_CALLBACK)
     end
 
-    self:DeactivateCurrentFocus()
+    self:ActivateFocusArea(nil)
 
     self.isActive = false
     ZO_GamepadOnDefaultActivatedChanged(self.list, self.isActive)

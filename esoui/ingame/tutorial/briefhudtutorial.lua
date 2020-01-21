@@ -9,7 +9,7 @@ function ZO_BriefHudTutorial:Initialize(parent)
         local tutorialIndex = self:GetCurrentlyDisplayedTutorialIndex()
         if tutorialIndex then
             local title, description = GetTutorialInfo(tutorialIndex) --Grab the Gamepad/Keyboard binding
-            self.tutorial:SetText(zo_strformat(SI_TUTORIAL_FORMATTER, description))
+            self.tutorial:SetText(description)
         end
     end
 
@@ -67,7 +67,7 @@ function ZO_BriefHudTutorial:DisplayTutorial(tutorialIndex)
     self.tutorialIndex = tutorialIndex
     local title, description = GetTutorialInfo(tutorialIndex)
     SetTutorialSeen(tutorialIndex)
-    self.tutorial:SetText(zo_strformat(SI_TUTORIAL_FORMATTER, description))
+    self.tutorial:SetText(description)
     self.tutorialAnimation:PlayBackward()
     self:SetCurrentlyDisplayedTutorialIndex(tutorialIndex)
 

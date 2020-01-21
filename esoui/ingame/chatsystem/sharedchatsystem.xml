@@ -47,12 +47,6 @@
             </OnLinkMouseUp>
         </TextBuffer>
 
-        <Control name="ZO_ChatWindowTemplate" hidden="true" virtual="true">
-            <Controls>
-                <TextBuffer name="$(parent)Buffer" inherits="ZO_ChatBuffer" linkEnabled="true"/>
-             </Controls>
-        </Control>
-
         <Control name="ZO_ChatWindowTabTemplate" inherits="ZO_ResizableTextTabButton" clampedToScreen="true" mouseEnabled="true" virtual="true">
             <OnDragStart>
                 ZO_ChatSystem_OnDragStart(self)

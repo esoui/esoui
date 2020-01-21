@@ -114,16 +114,6 @@
                             <Anchor point="TOPLEFT" offsetY="25" />
                             <Anchor point="TOPRIGHT" offsetY="25" />
                         </Label>
-
-                        <Control name="$(parent)Scroll" override="true">
-                            <Controls>
-                                <Control name="$(parent)Child" override="true">
-                                    <Controls>
-                                        <Texture name="$(parent)SharedHighlight" tier="HIGH" textureFile="EsoUI/Art/Dye/dye_swatch_highlight.dds" inheritScale="false" blendMode="ADD" hidden="true" />
-                                    </Controls>
-                                </Control>
-                            </Controls>
-                        </Control>
                     </Controls>
                 </Control>
             </Controls>

@@ -20,7 +20,7 @@ end
 function ZO_EULAFragment:OnHidden()
     ZO_FadeSceneFragment.OnHidden(self)
     ZO_Dialogs_ReleaseDialog("SHOW_EULA")
-    PregameStateManager_AdvanceState()
+    PregameStateManager_AdvanceStateFromState("ShowEULA")
 end
 
 
@@ -133,19 +133,19 @@ function ZO_EULA:InitializeDialog(dialogControl)
                 control = GetControl(dialogControl, "Agree"),
                 text = SI_EULA_BUTTON_AGREE,
                 noReleaseOnClick = true, -- Don't release because the scene needs to fade out, will release later
-                callback =  function(dialog)
-                                self:AcceptCurrentEULA()
-                                self:ShowNextEULA()
-                            end,
+                callback = function(dialog)
+                    self:AcceptCurrentEULA()
+                    self:ShowNextEULA()
+                end,
             },
 
             [2] =
             {
-                control =   GetControl(dialogControl, "Disagree"),
-                text =      SI_EULA_BUTTON_DISAGREE,
-                callback =  function(dialog)
-                                PregameQuit()
-                            end,
+                control = GetControl(dialogControl, "Disagree"),
+                text = SI_EULA_BUTTON_DISAGREE,
+                callback = function(dialog)
+                    ZO_Dialogs_ShowDialog("EULA_DECLINED")
+                end,
             }
         }
     }

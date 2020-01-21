@@ -1,9 +1,16 @@
 <GuiXml>
+
     <Controls>        
-        <TextBuffer name="ZO_ChatBuffer" font="ZoFontChat" inherits="ZO_ChatBufferLinkTemplate" virtual="true">
+        <TextBuffer name="ZO_KeyboardChatBuffer" font="ZoFontChat" inherits="ZO_ChatBufferLinkTemplate" virtual="true">
             <LineFade fadeBegin="25" fadeDuration="2" />
         </TextBuffer>
-        
+
+        <Control name="ZO_KeyboardChatWindowTemplate" hidden="true" virtual="true">
+            <Controls>
+                <TextBuffer name="$(parent)Buffer" inherits="ZO_KeyboardChatBuffer" linkEnabled="true"/>
+            </Controls>
+        </Control>
+
         <!--This is the only XML chat container, the rest are created dynamically as needed-->
         <TopLevelControl name="ZO_ChatWindow" inherits="ZO_ChatWindowTopLevelTemplate">
             <OnInitialized>

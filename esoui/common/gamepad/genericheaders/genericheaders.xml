@@ -56,7 +56,7 @@
         <Control name="ZO_GamepadHeaderHorizontalDividerWithAccent" virtual="true">
             <Dimensions y="ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT" />
             <Controls>
-                <Texture name="$(parent)Accent">
+                <Texture name="$(parent)Accent" inherits="ZO_KeyTexture">
                     <Anchor point="CENTER" />
                 </Texture>
                 <Control name="$(parent)LeftDivider" inherits="ZO_GamepadHeaderHorizontalDivider">
@@ -73,20 +73,20 @@
         <Control name="ZO_GamepadHeaderHorizontalDividerWithTabs" virtual="true">
             <Dimensions y="ZO_GAMEPAD_CONTENT_DIVIDER_HEIGHT" />
             <Controls>
-                <Button name="$(parent)LeftIcon">
+                <Texture name="$(parent)LeftIcon" inherits="ZO_KeyTexture">
                     <Anchor point="LEFT" />
                     <Dimensions x="50" y="50" />
-                    <OnInitialized>
-                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_LEFT_SHOULDER))
+                    <OnInitialized name="GamepadHeaderDivider">
+                        self:SetKeyCode(KEY_GAMEPAD_LEFT_SHOULDER)
                     </OnInitialized>
-                </Button>
-                <Button name="$(parent)RightIcon">
+                </Texture>
+                <Texture name="$(parent)RightIcon" inherits="ZO_KeyTexture">
                     <Anchor point="RIGHT" />
                     <Dimensions x="50" y="50" />
-                    <OnInitialized>
-                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_RIGHT_SHOULDER))
+                    <OnInitialized name="GamepadHeaderDivider">
+                        self:SetKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER)
                     </OnInitialized>
-                </Button>
+                </Texture>
                 <Control name="$(parent)Pips" resizeToFitDescendents="true">
                     <Anchor point="CENTER" />
                 </Control>

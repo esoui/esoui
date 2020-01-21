@@ -975,7 +975,13 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
     },
 
-    charaterNameSection =
+    characterNameSection =
+    {
+        customSpacing = 5,
+        widthPercent = 100,
+    },
+
+    heronNameSection =
     {
         customSpacing = 5,
         widthPercent = 100,

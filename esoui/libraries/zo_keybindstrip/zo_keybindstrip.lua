@@ -763,10 +763,21 @@ end
         nameFont = "ZoFontKeybindStripDescription",
         nameFontColor = ZO_NORMAL_TEXT,
         keyFont = "ZoFontKeybindStripKey",
+        modifyTextType = MODIFY_TEXT_TYPE_UPPERCASE,
+        alwaysPreferGamepadMode = false,
         resizeToFitPadding = 40,
+        yAnchorOffset = 0,
+        leftAnchorRelativeToControl = GuiRoot,
+        leftAnchorRelativePoint = LEFT,
         leftAnchorOffset = 0,
         centerAnchorOffset = 0,
         rightAnchorOffset = 0,
+        rightAnchorRelativeToControl = GuiRoot,
+        rightAnchorRelativePoint = RIGHT,
+        drawTier = DT_HIGH,
+        drawLevel = ZO_HIGH_TIER_GAMEPAD_KEYBIND_STRIP,
+        backgroundDrawTier = DT_HIGH,
+        backgroundDrawLevel = ZO_HIGH_TIER_GAMEPAD_KEYBIND_STRIP_BG,
     }
 ]]
 
@@ -1000,7 +1011,7 @@ do
         return leftOrder < rightOrder
     end
 
-    function ZO_KeybindStrip:UpdateAnchorsInternal(anchorTable, anchor, relativeAnchor, parent, startOffset, yOffset)
+    function ZO_KeybindStrip:UpdateAnchorsInternal(anchorTable, parent, initialConstrainXAnchor, initialConstrainYAnchor, subsequentAnchor)
         if anchorTable and #anchorTable > 0 then
             if IsInGamepadPreferredMode() then
                 table.sort(anchorTable, GamepadSort)
@@ -1023,24 +1034,65 @@ do
                 if isVisible then
                     button:SetParent(parent)
                     if prevButton then
-                        button:SetAnchor(anchor, prevButton, relativeAnchor)
+                        subsequentAnchor:SetTarget(prevButton)
+                        subsequentAnchor:AddToControl(button)
                     else
-                        button:SetAnchor(anchor, nil, anchor, startOffset, yOffset)
+                        initialConstrainXAnchor:AddToControl(button)
+                        initialConstrainYAnchor:AddToControl(button)
                     end
                     prevButton = button
                 end
             end
-                        
+
             return anchorTable
         end
         return nil
     end
 
     function ZO_KeybindStrip:UpdateAnchors()
-        local yOffset = self.styleInfo and self.styleInfo.yAnchorOffset or 0
-        self.leftButtons = self:UpdateAnchorsInternal(self.leftButtons, LEFT, RIGHT, self.control, self.styleInfo and self.styleInfo.leftAnchorOffset or 0, yOffset)
-        self.rightButtons = self:UpdateAnchorsInternal(self.rightButtons, RIGHT, LEFT, self.control, self.styleInfo and self.styleInfo.rightAnchorOffset or 0, yOffset)
+        local hasCustomStyle = self.styleInfo ~= nil
+        local yOffset = hasCustomStyle and self.styleInfo.yAnchorOffset or 0
 
-        self.centerButtons = self:UpdateAnchorsInternal(self.centerButtons, LEFT, RIGHT, self.centerParent, self.styleInfo and self.styleInfo.centerAnchorOffset or 0, yOffset)
+        local firstAnchor = ZO_Anchor:New()
+        firstAnchor:SetFromControlAnchor(self.control, 0)
+
+        local secondAnchor = ZO_Anchor:New()
+        secondAnchor:SetFromControlAnchor(self.control, 1)
+
+        self.control:ClearAnchors()
+
+        firstAnchor:SetOffsets(nil, yOffset)
+        secondAnchor:SetOffsets(nil, yOffset)
+
+        firstAnchor:AddToControl(self.control)
+        secondAnchor:AddToControl(self.control)
+
+        -- layout the KEYBIND_STRIP_ALIGN_LEFT buttons
+        local leftAnchorRelativeToControl = hasCustomStyle and self.styleInfo.leftAnchorRelativeToControl or nil
+        local leftAnchorRelativePoint = hasCustomStyle and self.styleInfo.leftAnchorRelativePoint or LEFT
+        local leftAnchorOffsetX = hasCustomStyle and self.styleInfo.leftAnchorOffset or 0
+        local leftInitialConstrainXAnchor = ZO_Anchor:New(LEFT, leftAnchorRelativeToControl, leftAnchorRelativePoint, leftAnchorOffsetX, 0, ANCHOR_CONSTRAINS_X)
+        local leftInitialConstrainYAnchor = ZO_Anchor:New(LEFT, nil, LEFT, 0, 0, ANCHOR_CONSTRAINS_Y)
+        local leftSubsequentAnchor = ZO_Anchor:New(LEFT, nil, RIGHT)
+
+        self.leftButtons = self:UpdateAnchorsInternal(self.leftButtons, self.control, leftInitialConstrainXAnchor, leftInitialConstrainYAnchor, leftSubsequentAnchor)
+
+        -- layout the KEYBIND_STRIP_ALIGN_RIGHT buttons
+        local rightAnchorRelativeToControl = hasCustomStyle and self.styleInfo.rightAnchorRelativeToControl or nil
+        local rightAnchorRelativePoint = hasCustomStyle and self.styleInfo.rightAnchorRelativePoint or RIGHT
+        local rightAnchorOffsetX = hasCustomStyle and self.styleInfo.rightAnchorOffset or 0
+        local rightInitialConstrainXAnchor = ZO_Anchor:New(RIGHT, rightAnchorRelativeToControl, rightAnchorRelativePoint, rightAnchorOffsetX, 0, ANCHOR_CONSTRAINS_X)
+        local rightInitialConstrainYAnchor = ZO_Anchor:New(RIGHT, nil, RIGHT, 0, 0, ANCHOR_CONSTRAINS_Y)
+        local rightSubsequentAnchor = ZO_Anchor:New(RIGHT, nil, LEFT)
+
+        self.rightButtons = self:UpdateAnchorsInternal(self.rightButtons, self.control, rightInitialConstrainXAnchor, rightInitialConstrainYAnchor, rightSubsequentAnchor)
+
+        -- layout the KEYBIND_STRIP_ALIGN_CENTER buttons
+        local centerAnchorOffsetX = hasCustomStyle and self.styleInfo.centerAnchorOffset or 0
+        local centerInitialConstrainXAnchor = ZO_Anchor:New(LEFT, nil, LEFT, centerAnchorOffsetX, 0, ANCHOR_CONSTRAINS_X)
+        local centerInitialConstrainYAnchor = ZO_Anchor:New(LEFT, nil, LEFT, 0, 0, ANCHOR_CONSTRAINS_Y)
+        local centerSubsequentAnchor = ZO_Anchor:New(LEFT, nil, RIGHT)
+
+        self.centerButtons = self:UpdateAnchorsInternal(self.centerButtons, self.centerParent, centerInitialConstrainXAnchor, centerInitialConstrainYAnchor, centerSubsequentAnchor)
     end
 end

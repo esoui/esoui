@@ -23,7 +23,6 @@ function ZO_Dyeing_Keyboard:Initialize(control)
     self.pane = control:GetNamedChild("Pane")
     self.noDyesLabel = self.pane:GetNamedChild("NoDyesLabel")
     self.paneScrollChild = self.pane:GetNamedChild("ScrollChild")
-    self.sharedHighlight = self.paneScrollChild:GetNamedChild("SharedHighlight")
     self.dyeIdToSwatch = {} -- Create it now so the APIs have a table to index even if we never view the fragment
 
     self.savedSetInterpolator = ZO_SimpleControlScaleInterpolator:New(.9, 1.0)
@@ -235,7 +234,7 @@ local HIGHLIGHT_DIMENSIONS = 5
 
 function ZO_Dyeing_Keyboard:InitializeSwatchPool()
     local CANNOT_SELECT_LOCKED = false
-    self.swatchPool = ZO_Dyeing_InitializeSwatchPool(self, self.sharedHighlight, self.paneScrollChild, "ZO_DyeingSwatch", CANNOT_SELECT_LOCKED, HIGHLIGHT_DIMENSIONS)
+    self.swatchPool = ZO_Dyeing_InitializeSwatchPool(self, self.paneScrollChild, "ZO_DyeingSwatch", CANNOT_SELECT_LOCKED)
 end
 
 function ZO_Dyeing_Keyboard:InitializeHeaderPool()
@@ -398,8 +397,6 @@ function ZO_Dyeing_Keyboard:SetSelectedDyeId(dyeId, becauseOfRebuild, becauseToo
             local skipAnim = becauseOfRebuild
             local skipSound = becauseOfRebuild or becauseToolChange
             newSwatchObject:SetSelected(true, skipAnim, skipSound)
-        else
-            self.sharedHighlight:SetHidden(true)
         end
     end
 end

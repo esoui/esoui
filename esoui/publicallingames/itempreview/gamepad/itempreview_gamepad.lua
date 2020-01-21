@@ -10,17 +10,17 @@ function ZO_ItemPreview_Gamepad:Initialize(control)
     control.owner = self
     self.control = control
 
-    local function CreateButtonIcon(name, parent, keycode)
-        local buttonIcon = CreateControl(name, parent, CT_BUTTON)
-        buttonIcon:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(keycode))
-        buttonIcon:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        buttonIcon:SetHidden(true)
-        return buttonIcon
+    local function CreateIconTexture(name, parent, keyCode)
+        local iconTexture = CreateControlFromVirtual(name, parent, "ZO_KeyTexture")
+        iconTexture:SetKeyCode(keyCode)
+        iconTexture:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
+        iconTexture:SetHidden(true)
+        return iconTexture
     end
 
     self.variationLabel = control:GetNamedChild("VariationLabel")
-    self.previewVariationLeftIcon = CreateButtonIcon("$(parent)PreviewLeftIcon", control, KEY_GAMEPAD_DPAD_LEFT)
-    self.previewVariationRightIcon = CreateButtonIcon("$(parent)PreviewRightIcon", control, KEY_GAMEPAD_DPAD_RIGHT)
+    self.previewVariationLeftIcon = CreateIconTexture("$(parent)PreviewLeftIcon", control, KEY_GAMEPAD_DPAD_LEFT)
+    self.previewVariationRightIcon = CreateIconTexture("$(parent)PreviewRightIcon", control, KEY_GAMEPAD_DPAD_RIGHT)
 
     self.previewVariationLeftIcon:SetAnchor(RIGHT, self.variationLabel, LEFT, -32)
     self.previewVariationRightIcon:SetAnchor(LEFT, self.variationLabel, RIGHT, 32)

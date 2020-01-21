@@ -1,73 +1,5 @@
 --Ingame Options table
 
-local interfaceSettingsHUD = {
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD,
-        header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_RAID_LIVES,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_QUEST_TRACKER,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_COMPASS_QUEST_GIVERS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_COMPASS_ACTIVE_QUESTS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_SHOW_ARMOR_INDICATOR,
-    },
-}
-
-local interfaceSettingsChatBubbles = {
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CHAT_BUBBLE,
-        settingId = CHAT_BUBBLE_SETTING_ENABLED,
-        header = IsConsoleUI() and SI_INTERFACE_OPTIONS_QUICK_CHAT or SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CHAT_BUBBLE,
-        settingId = CHAT_BUBBLE_SETTING_SPEED_MODIFIER,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CHAT_BUBBLE,
-        settingId = CHAT_BUBBLE_SETTING_ENABLED_ONLY_FROM_CONTACTS,
-    },
-    {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CHAT_BUBBLE,
-        settingId = CHAT_BUBBLE_SETTING_ENABLED_FOR_LOCAL_PLAYER,
-    },
-}
-
 local function Chat_Color_GetGuildText(data)
     local guildID = GetGuildId(data.guildIndex)
     local guildName = GetGuildName(guildID)
@@ -85,14 +17,50 @@ GAMEPAD_SETTINGS_DATA =
     {
         {
             panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_FULLSCREEN,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_RESOLUTION,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VSYNC,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_ANTIALIASING_TYPE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
-            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
         },
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
         },
     },
     [SETTING_PANEL_CAMERA] =
@@ -148,7 +116,14 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_INPUT_PREFERRED_MODE,
+            header = SI_GAMEPAD_SECTION_HEADER,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_GAMEPAD_TEMPLATE,
+            header = SI_GAMEPAD_SECTION_HEADER,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -329,13 +304,52 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_FOOTSTEPS_VOLUME,
         },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_BACKGROUND_AUDIO,
+            header = SI_AUDIO_OPTIONS_OUTPUT,
+        },
     },
     [SETTING_PANEL_SOCIAL] =
     {
+        -- settings for the GamepadChatSystem
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_GAMEPAD_TEXT_SIZE,
+            header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED,
+            header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+        },
+        -- Settings for the KeyboardChatSystem
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_MIN_ALPHA,
+            header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_TEXT_SIZE,
+            header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+        },
+        -- Shared settings
         {
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_LANGUAGE,
             settingId = LANGUAGE_SETTING_USE_PROFANITY_FILTER,
+            header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
         },
         {
             panel = SETTING_PANEL_SOCIAL,
@@ -482,7 +496,95 @@ GAMEPAD_SETTINGS_DATA =
     },
     [SETTING_PANEL_INTERFACE] =
     {
-        --dynamically created
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD,
+            header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_RAID_LIVES,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_QUEST_TRACKER,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_COMPASS_QUEST_GIVERS,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_COMPASS_ACTIVE_QUESTS,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_ARMOR_INDICATOR,
+        },
+        -- shared chat bubbles
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CHAT_BUBBLE,
+            settingId = CHAT_BUBBLE_SETTING_ENABLED,
+            header = IsConsoleUI() and SI_INTERFACE_OPTIONS_QUICK_CHAT or SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CHAT_BUBBLE,
+            settingId = CHAT_BUBBLE_SETTING_SPEED_MODIFIER,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CHAT_BUBBLE,
+            settingId = CHAT_BUBBLE_SETTING_ENABLED_ONLY_FROM_CONTACTS,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CHAT_BUBBLE,
+            settingId = CHAT_BUBBLE_SETTING_ENABLED_FOR_LOCAL_PLAYER,
+        },
+        -- non-console chat bubbles
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_SAY_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_YELL_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_WHISPER_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_GROUP_ENABLED,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_EMOTE_ENABLED,
+        },
     },
     [SETTING_PANEL_NAMEPLATES] =
     {
@@ -737,12 +839,20 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_COMBAT,
             system = SETTING_TYPE_ACTIVE_COMBAT_TIP,
-            settingId = 0,
+            settingId = 0, -- TODO: make an enum for this, or merge it with another setting type
         },
         {
             panel = SETTING_PANEL_COMBAT,
             system = SETTING_TYPE_UI,
             settingId = UI_SETTING_ULTIMATE_NUMBER,
+        },
+
+        -- Encounter log
+        {
+            panel = SETTING_PANEL_COMBAT,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
+            header = SI_INTERFACE_OPTIONS_ENCOUNTER_LOG,
         },
 
         -- SCT
@@ -891,29 +1001,20 @@ GAMEPAD_SETTINGS_DATA =
             settingId = BUFFS_SETTING_PERMANENT_EFFECTS,
         },
     },
-}
-
-local platform = GetUIPlatform()
-if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM and (platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX) then
-    GAMEPAD_SETTINGS_DATA[SETTING_PANEL_ACCOUNT] =
+    [SETTING_PANEL_ACCOUNT] =
     {
         -- Email Address
+        {
+            panel = SETTING_PANEL_ACCOUNT,
+            system = SETTING_TYPE_ACCOUNT,
+            settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
+            header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
+        },
         {
             panel = SETTING_PANEL_ACCOUNT,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION,
             header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
-        },
-        {
-            panel = SETTING_PANEL_ACCOUNT,
-            system = SETTING_TYPE_ACCOUNT,
-            settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
-            header = function()
-                if not ZO_OptionsPanel_Account_CanResendActivation() then
-                    return GetString(SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER)
-                end
-                return nil
-            end,
         },
         -- Marketing Preferences
         {
@@ -922,122 +1023,5 @@ if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM and (platform == UI_PLA
             settingId = ACCOUNT_SETTING_GET_UPDATES,
             header = SI_INTERFACE_OPTIONS_ACCOUNT_MARKETING_HEADER,
         },
-    }
-end
-
---Platform specific settings
-if IsConsoleUI() then
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_AUDIO], {
-        panel = SETTING_PANEL_AUDIO,
-        system = SETTING_TYPE_AUDIO,
-        settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
-    })
-    if ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting() then
-        table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], 1, {
-            panel = SETTING_PANEL_VIDEO,
-            system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY,
-        })
-    end
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
-        panel = SETTING_PANEL_VIDEO,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
-    })
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 1, {
-        panel = SETTING_PANEL_SOCIAL,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_GAMEPAD_TEXT_SIZE,
-        header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
-    })
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 2, {
-        panel = SETTING_PANEL_SOCIAL,
-        system = SETTING_TYPE_UI,
-        settingId = UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED,
-    })
-else
-    if DoesPlatformAllowConfiguringAutomaticInputChanging() then
-        table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_GAMEPLAY], 1, {
-            panel = SETTING_PANEL_GAMEPLAY,
-            system = SETTING_TYPE_GAMEPAD,
-            settingId = GAMEPAD_SETTING_AUTOMATIC_INPUT_MODE_CHANGING_ENABLED,
-        })
-    end
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_GAMEPLAY], 1, {
-        panel = SETTING_PANEL_GAMEPLAY,
-        system = SETTING_TYPE_GAMEPAD,
-        settingId = GAMEPAD_SETTING_GAMEPAD_PREFERRED,
-        header = SI_GAMEPAD_SECTION_HEADER,
-    })
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], 1, {
-        panel = SETTING_PANEL_VIDEO,
-        system = SETTING_TYPE_GRAPHICS,
-        settingId = GRAPHICS_SETTING_FULLSCREEN,
-    })
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], 2, {
-        panel = SETTING_PANEL_VIDEO,
-        system = SETTING_TYPE_GRAPHICS,
-        settingId = GRAPHICS_SETTING_RESOLUTION,
-    })
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_COMBAT], 
-    {
-        panel = SETTING_PANEL_COMBAT,
-        system = SETTING_TYPE_COMBAT,
-        settingId = COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS,
-        header = SI_INTERFACE_OPTIONS_ENCOUNTER_LOG,
-    })
-
-    table.insert(interfaceSettingsChatBubbles, {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_SAY_ENABLED,
-    })
-    table.insert(interfaceSettingsChatBubbles, {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_YELL_ENABLED,
-    })
-    table.insert(interfaceSettingsChatBubbles, {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_WHISPER_ENABLED,
-    })
-    table.insert(interfaceSettingsChatBubbles, {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_GROUP_ENABLED,
-    })
-    table.insert(interfaceSettingsChatBubbles, {
-        panel = SETTING_PANEL_INTERFACE,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_EMOTE_ENABLED,
-    })
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 1, {
-        panel = SETTING_PANEL_SOCIAL,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_MIN_ALPHA,
-        header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
-    })
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_SOCIAL], 2, {
-        panel = SETTING_PANEL_SOCIAL,
-        system = SETTING_TYPE_CUSTOM,
-        settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_TEXT_SIZE,
-    })
-end
-
-if IsSystemUsingHDR() then
-    table.insert(GAMEPAD_SETTINGS_DATA[SETTING_PANEL_VIDEO], {
-        panel = SETTING_PANEL_VIDEO,
-        system = SETTING_TYPE_GRAPHICS,
-        settingId = GRAPHICS_SETTING_HDR_BRIGHTNESS,
-    })
-end
-
-local function AddSettings(panel, settings)
-    for _, entry in ipairs(settings) do
-        table.insert(GAMEPAD_SETTINGS_DATA[panel], entry)
-    end
-end
-
-AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsHUD)
-AddSettings(SETTING_PANEL_INTERFACE, interfaceSettingsChatBubbles)
+    },
+}

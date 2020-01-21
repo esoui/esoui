@@ -252,7 +252,7 @@ function ZO_LegalAgreementsScreen_Gamepad:InitKeybindingDescriptor()
                 PlaySound(SOUNDS.NEGATIVE_CLICK)
                 self.docData = self.docProvider:PreviousLegalDoc()
                 if not self.docData then
-                    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_CONSOLE_LEGAL_DECLINE_HEADER), GetString(SI_CONSOLE_LEGAL_DECLINE_PROMPT))
+                    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_LEGAL_DECLINE_HEADER), GetString(SI_LEGAL_DECLINE_PROMPT))
                 else
                     self:UpdateCurrentText()
                 end
