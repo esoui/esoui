@@ -199,7 +199,7 @@ function ZO_GamepadChatSystem:LoadChatFromSettings()
 end
 
 function ZO_GamepadChatSystem:InitializeSharedControlManagement(control)
-    SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper, "ZO_GamepadChatWindowTemplate", "Gamepad")
+    SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper, "ZO_GamepadChatWindowTemplate", "ZO_ChatWindowTab_Gamepad")
 end
 
 function ZO_GamepadChatSystem:IsWindowPinned()

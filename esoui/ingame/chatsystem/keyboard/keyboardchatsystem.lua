@@ -121,7 +121,7 @@ function ZO_ChatSystem:SaveLocalContainerSettings(container, containerControl)
 end
 
 function ZO_ChatSystem:InitializeSharedControlManagement(control)
-    SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper, "ZO_KeyboardChatWindowTemplate", "Keyboard")
+    SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper, "ZO_KeyboardChatWindowTemplate", "ZO_ChatWindowTabTemplate")
 
     self.friendsButton = control:GetNamedChild("Friends")
     self.friendsLabel = control:GetNamedChild("NumOnlineFriends")

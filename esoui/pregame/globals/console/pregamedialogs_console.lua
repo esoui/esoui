@@ -23,7 +23,7 @@ ESO_Dialogs["LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE"] =
             text = SI_CONSOLE_LEGAL_BUTTON_DISAGREE,
             keybind = "DIALOG_NEGATIVE",
             callback = function(dialog)
-                -- do nothing
+                PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_LEGAL_DECLINE_HEADER), GetString(SI_LEGAL_DECLINE_PROMPT))
             end,
         },
     }

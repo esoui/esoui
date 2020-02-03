@@ -1149,8 +1149,6 @@ function ZO_Market_Keyboard:OnHidden()
     self.marketScene:AddFragment(self.contentFragment)
     ITEM_PREVIEW_KEYBOARD:UnregisterCallback("RefreshActions", self.refreshActionsCallback)
     self.queuedPreviewProductData = nil
-    self:ClearQueuedCategoryIndices()
-    self:ClearQueuedMarketProductId()
 end
 
 function ZO_Market_Keyboard:RefreshProducts()

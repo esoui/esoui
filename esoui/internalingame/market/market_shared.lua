@@ -590,6 +590,12 @@ function ZO_Market_Shared:OnHiding()
     self:EndCurrentPreview()
 end
 
+function ZO_Market_Shared:OnHidden()
+    self:ClearQueuedCategoryId()
+    self:ClearQueuedCategoryIndices()
+    self:ClearQueuedMarketProductId()
+end
+
 function ZO_Market_Shared:ClearLabeledGroups()
     ZO_ClearNumericallyIndexedTable(self.featuredProducts)
     ZO_ClearNumericallyIndexedTable(self.limitedTimedOfferProducts)
@@ -693,9 +699,6 @@ function ZO_Market_Shared.PreviewMarketProduct(previewObject, marketProductId)
 end
 
 --[[ Functions to be overridden ]]--
-
-function ZO_Market_Shared:OnHidden()
-end
 
 function ZO_Market_Shared:UpdateCrownBalance(amount)
 end

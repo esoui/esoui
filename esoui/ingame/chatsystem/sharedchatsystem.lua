@@ -1350,14 +1350,15 @@ function SharedChatSystem:Initialize(control, platformSettings)
     self.maxContainerHeight = 380
 end
 
-function SharedChatSystem:InitializeSharedControlManagement(control, newContainerFn, chatWindowTemplateName, chatWindowTabPrefix)
+function SharedChatSystem:InitializeSharedControlManagement(control, newContainerFn, chatWindowTemplateName, chatWindowTabName)
     local function TabFactoryFunc(tabControl)
         tabControl:GetNamedChild("Text"):SetHidden(self.platformSettings.hideTabs)
     end
 
     self.containers = {}
 
-    self.tabPool = ZO_ControlPool:New("ZO_ChatWindowTabTemplate", GuiRoot, chatWindowTabPrefix)
+    local NO_PARENT = nil
+    self.tabPool = ZO_ControlPool:New("ZO_ChatWindowTabTemplate", NO_PARENT, chatWindowTabName)
     self.tabPool:SetCustomFactoryBehavior(TabFactoryFunc)
 
     local function CreateWindow(objectPool)

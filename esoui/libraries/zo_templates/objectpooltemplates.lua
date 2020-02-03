@@ -8,11 +8,11 @@ do
     local function Reset(animation, pool)
         animation:Stop()
 
-        if(pool.customResetBehavior) then
+        if pool.customResetBehavior then
             pool.customResetBehavior(animation)
         end
-    end    
-    
+    end
+
     function ZO_AnimationPool:New(templateName)
         local function AnimationFactory(pool)
             local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual(templateName)
@@ -43,7 +43,7 @@ ZO_ControlPool = ZO_ObjectPool:Subclass()
 
 local function ControlFactory(pool)
     local control = ZO_ObjectPool_CreateNamedControl(pool.name, pool.templateName, pool, pool.parent)
-    if(pool.customFactoryBehavior) then
+    if pool.customFactoryBehavior then
         pool.customFactoryBehavior(control)
     end
     return control
@@ -52,30 +52,27 @@ end
 local function ControlReset(control, pool)
     control:SetHidden(true)
     control:ClearAnchors()
-    if(pool.customResetBehavior) then
+    if pool.customResetBehavior then
         pool.customResetBehavior(control)
     end
 end
 
-function ZO_ControlPool:New(templateName, parent, prefix)
+function ZO_ControlPool:New(templateName, parent, overrideName)
     local pool = ZO_ObjectPool.New(self, ControlFactory, ControlReset)
-    
-    if(parent) then
-        if(prefix) then
-            pool.name = parent:GetName()..prefix
-        else
-            pool.name = parent:GetName()..templateName
-        end
-        
-        pool.parent = parent
+
+    local controlName = overrideName or templateName
+
+    if parent then
+        controlName = parent:GetName() .. controlName
     else
-        pool.name = templateName
-        pool.parent = GuiRoot
+        parent = GuiRoot
     end
 
+    pool.name = controlName
+    pool.parent = parent
     pool.templateName = templateName
-    
-    return pool 
+
+    return pool
 end
 
 function ZO_ControlPool:SetCustomFactoryBehavior(customFactoryBehavior)
@@ -88,7 +85,7 @@ end
 
 function ZO_ControlPool:AcquireObject(objectKey)
     local control, key = ZO_ObjectPool.AcquireObject(self, objectKey)
-    if(control) then
+    if control then
         control:SetHidden(false)
     end
     return control, key
@@ -104,7 +101,7 @@ function ZO_MetaPool:New(sourcePool)
     local pool = ZO_Object.New(self)
     pool.sourcePool = sourcePool
     pool.activeObjects = {}
-    return pool 
+    return pool
 end
 
 function ZO_MetaPool:AcquireObject()
@@ -136,7 +133,7 @@ function ZO_MetaPool:ReleaseAllObjects()
         self.sourcePool:ReleaseObject(key)
     end
 
-    ZO_ClearTable(self.activeObjects) 
+    ZO_ClearTable(self.activeObjects)
 end
 
 function ZO_MetaPool:ReleaseObject(objectKey)

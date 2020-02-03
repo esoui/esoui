@@ -72,7 +72,6 @@ function ZO_ConsoleLegalDocsProvider:Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_ConsoleLegalDocsProvider", EVENT_FETCHED_LEGAL_DOCS, function()
         self.haveFetchedRemoteDocs = true
         self.nextLegalDocIndex = 1
-        EVENT_MANAGER:UnregisterForEvent("ZO_ConsoleLegalDocsProvider", EVENT_FETCHED_LEGAL_DOCS)
         PregameStateManager_SetState("LegalAgreements")
     end)
 end
@@ -108,8 +107,10 @@ function ZO_ConsoleLegalDocsProvider:NextLegalDoc()
 end
 
 function ZO_ConsoleLegalDocsProvider:PreviousLegalDoc()
-    if self.haveFetchedRemoteDocs and self.nextLegalDocIndex > 1 then
-        self.nextLegalDocIndex = self.nextLegalDocIndex - 1
+    -- Set next legal doc to the doc before the current doc.
+    -- current nextLegalDoc index is currentDocIndex + 1, so subtract 2 to counteract that
+    if self.haveFetchedRemoteDocs and self.nextLegalDocIndex > 2 then
+        self.nextLegalDocIndex = self.nextLegalDocIndex - 2
         return self:NextLegalDoc()
     end
     return nil
