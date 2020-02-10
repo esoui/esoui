@@ -33,6 +33,8 @@
                                 </Control>
                             </Controls>
                         </Control>
+
+                        <Texture name="$(parent)ScrollIndicator" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL" />
                     </Controls>
                 </Control>
 

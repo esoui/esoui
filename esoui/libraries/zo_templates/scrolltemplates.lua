@@ -1613,6 +1613,10 @@ end
 
 local function CanSelectData(self, index)
     local dataEntry = self.data[index]
+    if dataEntry == nil then
+        return false
+    end
+
     local dataTypeInfo = GetDataTypeInfo(self, dataEntry.typeId)
     return dataTypeInfo.selectable
 end

@@ -7,7 +7,6 @@ local VERTICAL_FOCUS_INDEX =
     ACTION_TILES = 2
 }
 
-
 local ZO_MarketAnnouncement_Gamepad = ZO_MarketAnnouncement_Shared:Subclass()
 
 function ZO_MarketAnnouncement_Gamepad:New(...)
@@ -16,7 +15,7 @@ end
 
 function ZO_MarketAnnouncement_Gamepad:Initialize(control)
     -- This data must be setup before parent initialize is called
-    self.actionTileControlByType = 
+    self.actionTileControlByType =
     {
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Gamepad_Control",
         [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = "ZO_ZoneStoriesTile_Gamepad_Control",
@@ -48,7 +47,7 @@ end
 function ZO_MarketAnnouncement_Gamepad:SetupVerticalNavigation()
     self.verticalFocus = ZO_GamepadFocus:New(self.control, nil, MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 
-    self.actionTileListFocusData = 
+    self.actionTileListFocusData =
     {
         activate = function()
             self.actionTileListFocus:SetActive(true)
@@ -67,7 +66,7 @@ function ZO_MarketAnnouncement_Gamepad:UpdateVerticalNavigation()
     if not GetMarketAnnouncementCrownStoreLocked() then
         self.verticalFocus:AddEntry(self.carousel:GetFocusEntryData())
     else
-        self.carousel:UpdateScrollKeybind()
+        self.carousel:UpdateKeybinds()
     end
 
     if self.actionTileListFocus:GetItemCount() >= 1 then
@@ -125,8 +124,8 @@ function ZO_MarketAnnouncement_Gamepad:UpdateActionTileNavigation()
 end
 
 function ZO_MarketAnnouncement_Gamepad:OnDailyLoginRewardsUpdated()
-    if self.fragment:IsShowing() then 
-        self:LayoutActionTiles() 
+    if self.fragment:IsShowing() then
+        self:LayoutActionTiles()
         self.verticalFocus:Deactivate()
         self:UpdateVerticalNavigation()
         self.verticalFocus:Activate()

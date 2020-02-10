@@ -271,44 +271,55 @@ end
 -- Preview Scene Functions
 ---------------------------
 
-function ZO_DailyLoginRewards_Gamepad:MovePreviewToPreviousReward()
-    local scrollData = self.gridListPanelList:GetData()
-    local nextIndex = self.currentRewardPreviewIndex - 1
-    while nextIndex ~= self.currentRewardPreviewIndex do
-        local selectedRewardEntry = scrollData[nextIndex]
-        local rewardData = selectedRewardEntry.data
-        if rewardData.day then
-            if CanPreviewReward(rewardData:GetRewardId()) then
-                self:UpdatePreview(rewardData)
-                self.currentRewardPreviewIndex = nextIndex
-                return
-            end
+do
+    local NEXT_INDEX = 1
+    local PREVIOUS_INDEX = -1
+
+    local function GetNextIndex(currentIndex, maxIndex, direction)
+        if currentIndex == maxIndex and direction == NEXT_INDEX then
+            return 1
+        elseif currentIndex == 1 and direction == PREVIOUS_INDEX then
+            return maxIndex
         end
 
-        nextIndex = nextIndex - 1
-        if nextIndex == 0 then
-            nextIndex = #scrollData
+        return currentIndex + direction
+    end
+
+    function ZO_DailyLoginRewards_Gamepad:MovePreviewToPreviousReward()
+        local scrollData = self.gridListPanelList:GetData()
+        local numScrollEntries = #scrollData
+        local nextIndex = GetNextIndex(self.currentRewardPreviewIndex, numScrollEntries, PREVIOUS_INDEX)
+        while nextIndex ~= self.currentRewardPreviewIndex do
+            local selectedRewardEntry = scrollData[nextIndex]
+            local rewardData = selectedRewardEntry.data
+            if rewardData.day then
+                if CanPreviewReward(rewardData:GetRewardId()) then
+                    self:UpdatePreview(rewardData)
+                    self.currentRewardPreviewIndex = nextIndex
+                    return
+                end
+            end
+
+            nextIndex = GetNextIndex(nextIndex, numScrollEntries, PREVIOUS_INDEX)
         end
     end
-end
 
-function ZO_DailyLoginRewards_Gamepad:MovePreviewToNextReward()
-    local scrollData = self.gridListPanelList:GetData()
-    local nextIndex = self.currentRewardPreviewIndex + 1
-    while nextIndex ~= self.currentRewardPreviewIndex do
-        local selectedRewardEntry = scrollData[nextIndex]
-        local rewardData = selectedRewardEntry.data
-        if rewardData.day then
-            if CanPreviewReward(rewardData:GetRewardId()) then
-                self:UpdatePreview(rewardData)
-                self.currentRewardPreviewIndex = nextIndex
-                return
+    function ZO_DailyLoginRewards_Gamepad:MovePreviewToNextReward()
+        local scrollData = self.gridListPanelList:GetData()
+        local numScrollEntries = #scrollData
+        local nextIndex = GetNextIndex(self.currentRewardPreviewIndex, numScrollEntries, NEXT_INDEX)
+        while nextIndex ~= self.currentRewardPreviewIndex do
+            local selectedRewardEntry = scrollData[nextIndex]
+            local rewardData = selectedRewardEntry.data
+            if rewardData.day then
+                if CanPreviewReward(rewardData:GetRewardId()) then
+                    self:UpdatePreview(rewardData)
+                    self.currentRewardPreviewIndex = nextIndex
+                    return
+                end
             end
-        end
 
-        nextIndex = nextIndex + 1
-        if nextIndex == #scrollData + 1 then
-            nextIndex = 1
+            nextIndex = GetNextIndex(nextIndex, numScrollEntries, NEXT_INDEX)
         end
     end
 end
