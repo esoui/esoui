@@ -24,7 +24,7 @@ end
 local function ShowServerSelect()
     --Makes sure the login stuff is in the background when selecting your server.
     ShowLogin()
-    ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", {isIntro = false, onClosed = ZO_GameMenu_PreGame_Reset})
+    ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", { onSelectedCallback = ZO_GameMenu_PreGame_Reset })
 end
 
 local function AddServerEntry(entryTable)

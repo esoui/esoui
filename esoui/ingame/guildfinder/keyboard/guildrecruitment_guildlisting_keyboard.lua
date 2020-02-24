@@ -14,15 +14,15 @@ end
 
 function ZO_GuildRecruitment_GuildListing_Keyboard:Initialize(control)
     local function OnTextEdited(control, data)
-        local attribute = data.dataSource.attribute
+        local attribute = data.attribute
         local editBoxObject = control and control.object
         editBoxObject:SetControlHidden()
         if editBoxObject:IsEditing() then
-            data.dataSource.currentValue = editBoxObject:GetEditBoxText()
+            data.currentValue = editBoxObject:GetEditBoxText()
         end
     end
 
-    self.templateData =
+    local templateData =
     {
         gridListClass = ZO_GridScrollList_Keyboard,
         headerTemplate = "ZO_GuildRecruitment_GuildListing_Keyboard_Header_Template",
@@ -96,7 +96,7 @@ function ZO_GuildRecruitment_GuildListing_Keyboard:Initialize(control)
         },
     }
 
-    ZO_GuildRecruitment_GuildListing_Shared.Initialize(self, control)
+    ZO_GuildRecruitment_GuildListing_Shared.Initialize(self, control, templateData)
 
     self.alertControl = self.control:GetNamedChild("AlertContainerAlert")
 

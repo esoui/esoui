@@ -326,12 +326,9 @@ local AlertHandlers = {
     end,
 
     [EVENT_GROUP_NOTIFICATION_MESSAGE] = function(groupMessageCode)
-        if groupMessageCode == GROUP_MSG_YOU_ARE_NOT_IN_A_GROUP then
-            return ERROR, GetString(SI_GROUP_NOTIFICATION_YOU_ARE_NOT_IN_A_GROUP), SOUNDS.GENERAL_ALERT_ERROR
-        elseif groupMessageCode == GROUP_MSG_YOU_ARE_NOT_THE_LEADER then
-            return ERROR, GetString(SI_GROUP_NOTIFICATION_YOU_ARE_NOT_THE_LEADER), SOUNDS.GENERAL_ALERT_ERROR
-        elseif groupMessageCode == GROUP_MSG_INVALID_MEMBER then
-            return ERROR, GetString(SI_GROUP_NOTIFICATION_GROUP_MSG_INVALID_MEMBER), SOUNDS.GENERAL_ALERT_ERROR
+        local message = GetString("SI_GROUPNOTIFICATIONMESSAGE", groupMessageCode)
+        if message ~= "" then
+            return ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 

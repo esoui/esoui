@@ -254,13 +254,13 @@ do
         end
     end
 
-    local function CreateButtonIcon(name, parent, keycode, anchor)
-        local buttonIcon = CreateControl(name, parent, CT_BUTTON)
-        buttonIcon:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(keycode))
-        buttonIcon:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
-        buttonIcon:SetAnchor(anchor, parent, anchor)
-        buttonIcon:SetHidden(true) -- hidden by default
-        return buttonIcon
+    local function CreateIconButton(name, parent, keyCode, anchor)
+        local iconButton = CreateControlFromVirtual(name, parent, "ZO_KeyButton")
+        iconButton:SetKeyCode(keyCode)
+        iconButton:SetDimensions(ZO_TABBAR_ICON_WIDTH, ZO_TABBAR_ICON_HEIGHT)
+        iconButton:SetAnchor(anchor, parent, anchor)
+        iconButton:SetHidden(true) -- hidden by default
+        return iconButton
     end
 
     local function OnTabChanged(newData)
@@ -274,8 +274,8 @@ do
 
     function GamepadMarket_TabBarScrollList:Initialize(control)
         self.control = control
-        self.leftIcon = CreateButtonIcon("$(parent)LeftArrow", self.control, KEY_GAMEPAD_LEFT_SHOULDER, LEFT)
-        self.rightIcon = CreateButtonIcon("$(parent)RightArrow", self.control, KEY_GAMEPAD_RIGHT_SHOULDER, RIGHT)
+        self.leftIcon = CreateIconButton("$(parent)LeftArrow", self.control, KEY_GAMEPAD_LEFT_SHOULDER, LEFT)
+        self.rightIcon = CreateIconButton("$(parent)RightArrow", self.control, KEY_GAMEPAD_RIGHT_SHOULDER, RIGHT)
         ZO_HorizontalScrollList.Initialize(self, control, "ZO_GamepadMarket_TabBarEntryTemplate", NUM_VISIBLE_CATEGORIES, TabBar_Setup, MenuEntryTemplateEquality)
         self:InitializeKeybindStripDescriptors()
         self:SetOnTargetDataChangedCallback(OnTabChanged)

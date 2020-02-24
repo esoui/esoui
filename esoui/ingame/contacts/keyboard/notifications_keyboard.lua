@@ -511,7 +511,7 @@ function ZO_KeyboardNotificationManager:RefreshVisible()
 end
 
 function ZO_KeyboardNotificationManager:OnNumNotificationsChanged(totalNumNotifications)
-    CHAT_SYSTEM:OnNumNotificationsChanged(totalNumNotifications)
+    KEYBOARD_CHAT_SYSTEM:OnNumNotificationsChanged(totalNumNotifications)
 end
 
 function ZO_KeyboardNotificationManager:BuildEmptyList()

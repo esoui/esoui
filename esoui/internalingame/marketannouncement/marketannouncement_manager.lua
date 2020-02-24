@@ -20,7 +20,8 @@ function MarketAnnouncement_Manager:Initialize()
 
     local MARKET_PRODUCT_SORT_KEYS =
     {
-        isDeprioritized = { tiebreaker = "isPromo", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        isDeprioritized = { tiebreaker = "announceSortOrder", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+        announceSortOrder = { tiebreaker = "isPromo", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isPromo = { tiebreaker = "isLimitedTime", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         isLimitedTime = {tiebreaker = "timeLeft", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
         timeLeft = { isNumeric = true, tiebreaker = "hasActivationRequirement", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
@@ -54,6 +55,7 @@ function MarketAnnouncement_Manager:Initialize()
                 local discountPercent = select(4, productData:GetMarketProductPricingByPresentation())
                 local hasDiscount = discountPercent > 0 or self:HasHouseDiscount(productData)
                 local hasActivationRequirement = productData:HasActivationRequirement()
+                local announceSortOrder = productData:GetAnnounceSortOrder()
                 local productInfo = {
                                         productData = productData,
                                         -- for sorting
@@ -68,6 +70,7 @@ function MarketAnnouncement_Manager:Initialize()
                                         stackCount = productData:GetStackCount(),
                                         isDeprioritized = isDeprioritized,
                                         hasActivationRequirement = hasActivationRequirement,
+                                        announceSortOrder = announceSortOrder,
                                     }
 
                 table.insert(self.productInfoTable, productInfo)

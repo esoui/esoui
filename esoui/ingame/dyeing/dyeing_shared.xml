@@ -17,6 +17,12 @@
             <OnInitialized>
                 ZO_DyeingUtils_DyeingSwatchVisuals_OnInitialized(self)
             </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Highlight" tier="HIGH" layer="2" textureFile="EsoUI/Art/Dye/dye_swatch_highlight.dds" excludeFromResizeToFitExtents="true" blendMode="ADD" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+            </Controls>
         </TextureComposite>
 
         <TextureComposite name="ZO_DyeingSwatch" inherits="ZO_DyeingSwatchVisuals" virtual="true" mouseEnabled="true">

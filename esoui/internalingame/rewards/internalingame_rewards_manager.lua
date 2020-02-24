@@ -37,13 +37,16 @@ function InternalIngameRewardsManager:GetListOfRewardNamesFromLastCodeRedemption
                 local displayName = rewardData:GetFormattedName()
                 table.insert(rewardNames, displayName)
             end
+            internalassert(GetNumRewardListEntries(rewardListId) == #rewardListEntries, string.format("Code Redemption: Unsupported reward type in reward list %d", rewardListId))
         else
             -- we don't have a quantity so we'll assume 1, we shouldn't be getting any rewards
             -- here that require a quantity specified, those should come as part of a reward list
             local quantity = 1
             local rewardData = self:GetInfoForReward(rewardId, quantity)
-            local displayName = rewardData:GetFormattedName()
-            table.insert(rewardNames, displayName)
+            if internalassert(rewardData, string.format("Code Redemption: Unsupported reward type for reward %d", rewardId)) then
+                local displayName = rewardData:GetFormattedName()
+                table.insert(rewardNames, displayName)
+            end
         end
     end
 

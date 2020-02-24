@@ -211,9 +211,9 @@ do
 
             local previousPriceLabel = buttonControl:GetNamedChild("PreviousPrice")
             if onSale then
-                local previousPriceText = ZO_CurrencyControl_FormatCurrency(price, DONT_USE_SHORT_FORMAT)
-
-                previousPriceLabel:SetText(previousPriceText)
+                local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(price))
+                local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
+                previousPriceLabel:SetText(strikethroughAmountString)
                 previousPriceLabel:ClearAnchors()
 
                 -- We want to layout the two price controls so that they appear centered within the "button"

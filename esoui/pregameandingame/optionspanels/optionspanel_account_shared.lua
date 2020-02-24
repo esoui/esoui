@@ -13,7 +13,7 @@ end
 
 local g_serviceType = GetPlatformServiceType()
 
-local function IsAccountManagementAvailable()
+function ZO_OptionsPanel_IsAccountManagementAvailable()
     if g_serviceType == PLATFORM_SERVICE_TYPE_DMM then
         return false
     end
@@ -60,9 +60,8 @@ local ZO_Panel_Account_ControlData =
             callback = function()
                 RequestResendAccountEmailVerification()
             end,
-            visible = function()
-                return IsAccountManagementAvailable() and ZO_OptionsPanel_Account_CanResendActivation()
-            end,
+            exists = ZO_OptionsPanel_IsAccountManagementAvailable,
+            visible = ZO_OptionsPanel_Account_CanResendActivation,
         },
     },
 
@@ -78,8 +77,9 @@ local ZO_Panel_Account_ControlData =
             gamepadCustomTooltipFunction = function(tooltip, text)
                 GAMEPAD_TOOLTIPS:LayoutSettingAccountResendActivation(tooltip, HasActivatedEmail(), ZO_OptionsPanel_GetAccountEmail())
             end,
+            exists = ZO_OptionsPanel_IsAccountManagementAvailable,
             callback = function()
-                if IsConsoleUI() then
+                if IsInGamepadPreferredMode() then
                     local data =
                     {
                         finishedCallback = function()
@@ -108,6 +108,7 @@ local ZO_Panel_Account_ControlData =
                     end
                 end
             end,
+            exists = ZO_OptionsPanel_IsAccountManagementAvailable,
             SetSettingOverride = function(control, value)
                 SetSecureSetting(control.data.system, control.data.settingId, tostring(value))
             end,
@@ -127,12 +128,12 @@ local ZO_Panel_Account_ControlData =
     }
 }
 
-----------------------------
--- Add Account Settings to the Settings Layout
-----------------------------
-if IsAccountManagementAvailable() then
-    ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_ACCOUNT, ZO_Panel_Account_ControlData)
+ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_ACCOUNT, ZO_Panel_Account_ControlData)
 
+------------------------------------------
+-- Register for account settings events 
+------------------------------------------
+if ZO_OptionsPanel_IsAccountManagementAvailable() then
     local function OnAccountManagementRequestUnsuccessful(eventId, resultMessage)
         ZO_Dialogs_ShowPlatformDialog("ACCOUNT_MANAGEMENT_REQUEST_FAILED", { mainText = resultMessage })
     end
@@ -144,8 +145,4 @@ if IsAccountManagementAvailable() then
     end
 
     EVENT_MANAGER:RegisterForEvent("AccountManagement", EVENT_ACCOUNT_EMAIL_ACTIVATION_EMAIL_SENT, OnAccountManagementActivationEmailSent)
-
-    if not IsConsoleUI() then
-        KEYBOARD_OPTIONS:AddUserPanel(SETTING_PANEL_ACCOUNT, GetString("SI_SETTINGSYSTEMPANEL", SETTING_PANEL_ACCOUNT), nil, IsAccountLoggedIn)
-    end
 end

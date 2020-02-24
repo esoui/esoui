@@ -180,10 +180,7 @@ end
 
 function LoginManager_Keyboard:OnProfileNotLinked()
     ZO_Dialogs_ReleaseDialog("LINKED_LOGIN_KEYBOARD")
-    if IsHeronUI() then
-        -- TODO: Heron, prompt the user to link accounts
-        assert(false, "Account linking not implemented")
-    else
+    if not IsHeronUI() then
         self:SwitchToCreateLinkAccountFragment()
     end
 end

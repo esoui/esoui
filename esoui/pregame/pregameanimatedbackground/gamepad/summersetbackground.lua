@@ -207,7 +207,7 @@ end
 --Global XML Handlers
 
 function ZO_SummersetBackground_OnInitialized(self)
-    if IsConsoleUI() then
+    if IsGamepadUISupported() then
         PREGAME_ANIMATED_BACKGROUND = SummersetBackground:New(self)
     end
 end

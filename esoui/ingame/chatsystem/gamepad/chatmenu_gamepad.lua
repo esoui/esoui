@@ -26,6 +26,7 @@ function ZO_ChatMenu_Gamepad:Initialize(control)
     self:InitializeFragment()
     self:InitializeControls()
     self:InitializePassiveFocus()
+    self:InitializeRefreshGroup()
     self:RegisterForEvents()
 end
 
@@ -95,10 +96,10 @@ function ZO_ChatMenu_Gamepad:InitializeChannelDropdown()
 
     -- Prepare switches for sorting
     -- These switches are the slash commands used to set the channel (e.g.:/zone)
-    -- The channelData holds a table of all the channels and their information, 
+    -- The channelData holds a table of all the channels and their information,
     -- and the switch lookup provides the mapping of the channel id to the default (e.g.: /zone vs /z) switch needed to go there
-    local channelData = CHAT_SYSTEM.channelData
-    local switchLookup = CHAT_SYSTEM.switchLookup
+    local channelData = ZO_ChatSystem_GetChannelInfo()
+    local switchLookup = ZO_ChatSystem_GetChannelSwitchLookupTable()
     local switches = {}
     for channel in pairs(channelData) do
         local switch = switchLookup[channel]
@@ -209,40 +210,71 @@ function ZO_ChatMenu_Gamepad:InitializePassiveFocus()
     self:AddNextFocusArea(self.textInputAreaFocalArea)
 end
 
-function ZO_ChatMenu_Gamepad:RegisterForEvents()
-    local RESELECT = true
-    local function RefreshChannelDropdown()
+function ZO_ChatMenu_Gamepad:InitializeRefreshGroup()
+    self.channelRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
+    self.channelRefreshGroup:AddDirtyState("Dropdown", function()
+        local RESELECT = true
         self:RefreshChannelDropdown(RESELECT)
+    end)
+    self.channelRefreshGroup:AddDirtyState("ActiveChannel", function()
+        self:OnChatChannelChanged()
+    end)
+end
+
+function ZO_ChatMenu_Gamepad:DirtyChannelDropdown()
+    self.channelRefreshGroup:MarkDirty("Dropdown")
+end
+
+function ZO_ChatMenu_Gamepad:DirtyActiveChannel()
+    self.channelRefreshGroup:MarkDirty("ActiveChannel")
+end
+
+function ZO_ChatMenu_Gamepad:RegisterForEvents()
+    local function AddMessage(...)
+        self:AddMessage(...)
+    end
+
+    local function DirtyChannelDropdown()
+        self:DirtyChannelDropdown()
+    end
+
+    local function DirtyActiveChannel()
+        self:DirtyActiveChannel()
+    end
+
+    local function OnScreenResized()
+        self:ReadjustFixedCenterOffset()
     end
 
     local function OnGroupMemberJoined(eventCode, playerName)
         if playerName == GetRawUnitName("player") then
-            RefreshChannelDropdown()
+            self:DirtyChannelDropdown()
         end
     end
 
     local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer)
         if isLocalPlayer then
-            RefreshChannelDropdown()
+            self:DirtyChannelDropdown()
         end
     end
 
     local function OnGuildMemberRankChanged(eventCode, guildId, displayName)
         if displayName == GetDisplayName() then
-            RefreshChannelDropdown()
+            self:DirtyChannelDropdown()
         end
     end
 
-    CALLBACK_MANAGER:RegisterCallback("OnFormattedChatEvent", function(...) self:AddMessage(...) end)
-    CALLBACK_MANAGER:RegisterCallback("OnChatSetChannel", function(...) self:OnChatChannelChanged(...) end)
-    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:ReadjustFixedCenterOffset() end)
+    CHAT_ROUTER:RegisterCallback("FormattedChatMessage", AddMessage)
+    CALLBACK_MANAGER:RegisterCallback("OnChatSetChannel", DirtyActiveChannel)
+    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)
-    self.control:RegisterForEvent(EVENT_GUILD_SELF_JOINED_GUILD, RefreshChannelDropdown)
-    self.control:RegisterForEvent(EVENT_GUILD_SELF_LEFT_GUILD, RefreshChannelDropdown)
+    self.control:RegisterForEvent(EVENT_GUILD_SELF_JOINED_GUILD, DirtyChannelDropdown)
+    self.control:RegisterForEvent(EVENT_GUILD_SELF_LEFT_GUILD, DirtyChannelDropdown)
     self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
-    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, RefreshChannelDropdown)
-    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshChannelDropdown)
+    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, DirtyChannelDropdown)
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, DirtyChannelDropdown)
+    self.control:RegisterForEvent(EVENT_CHAT_CATEGORY_COLOR_CHANGED, DirtyChannelDropdown)
 end
 
 function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
@@ -426,6 +458,7 @@ function ZO_ChatMenu_Gamepad:PerformUpdate()
 end
 
 function ZO_ChatMenu_Gamepad:OnShow()
+    self.channelRefreshGroup:TryClean()
     self.list:RefreshVisible()
     self:FocusTextInput()
 end
@@ -497,7 +530,7 @@ do
 
             local messageEntry = ZO_GamepadEntryData:New(message)
             messageEntry:SetFontScaleOnSelection(false)
-            messageEntry.data = 
+            messageEntry.data =
             {
                 id = self.nextMessageId,
                 fromDisplayName = fromDisplayName,
@@ -527,16 +560,16 @@ end
 
 do
     local function IsEntryForCurrentChannel(entry)
-        local channelData = CHAT_SYSTEM:GetCurrentChannelData()
+        local channelData = GAMEPAD_CHAT_SYSTEM:GetCurrentChannelData()
         return entry.data == channelData
     end
 
     function ZO_ChatMenu_Gamepad:OnChatChannelChanged()
         --Set the dropdown selection to the appropriate channel
         self.channelDropdown:SetSelectedItemByEval(IsEntryForCurrentChannel, true)
-        
+
         --Set the selected item text for the dropdown to the appropriate text
-        local channelData, channelTarget = CHAT_SYSTEM:GetCurrentChannelData()
+        local channelData, channelTarget = GAMEPAD_CHAT_SYSTEM:GetCurrentChannelData()
         local channelText
         if channelTarget then
             --Console can only have display names.  This won't do anything to character names on PC
@@ -546,7 +579,7 @@ do
             channelText = zo_strformat(SI_CHAT_ENTRY_GENERAL_FORMAT, GetChannelName(channelData.id))
         end
         self.selectedChannelLabel:SetText(channelText)
-        local r, g, b = CHAT_SYSTEM:GetCategoryColorFromChannel(channelData.id)
+        local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(channelData.id)
         self.selectedChannelLabel:SetColor(r, g, b, 1)
         self.textEdit:SetColor(r, g, b)
 
@@ -570,11 +603,11 @@ function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
         local data = entry.data
         --Target means we don't yet have enough info to properly change channels
         if data and not data.target then
-            CHAT_SYSTEM:SetChannel(data.id)
+            GAMEPAD_CHAT_SYSTEM:SetChannel(data.id)
         end
     end
 
-    local switchLookup = CHAT_SYSTEM.switchLookup
+    local switchLookup = ZO_ChatSystem_GetChannelSwitchLookupTable()
     local channelDropdown = self.channelDropdown
     channelDropdown.minimumWidth = 0
     channelDropdown:ClearItems()
@@ -583,15 +616,15 @@ function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
     for i, switch in ipairs(self.sortedChannelSwitches) do
         --The switchLookup also includes a backward lookup to use any switch (not just defaults) to find the associated channel data
         local channelData = switchLookup[switch]
-        --TODO: Figure out an elegant way to handle /tell using a gamepad and virtual keyboard for display names on a console (see also TODO in OnChannelSelected)
+        -- exclude channels that require an explicit target (ie. /tell) and channels that we don't currently meet the requirements for
         if channelData and not channelData.target and (not channelData.requires or channelData.requires(channelData.id)) then
-            local r, g, b = CHAT_SYSTEM:GetCategoryColorFromChannel(channelData.id)
+            local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(channelData.id)
             local itemColor = ZO_ColorDef:New(r, g, b)
             local coloredSwitchText = itemColor:Colorize(switch)
             local entry = ZO_ComboBox:CreateItemEntry(coloredSwitchText, OnChannelSelected)
             entry.data = channelData
             channelDropdown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
-            local stringWidth = self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(switch)) / GetUIGlobalScale()
+            local stringWidth = (self.selectedChannelFakeLabel:GetStringWidth(zo_strupper(switch)) / GetUIGlobalScale()) + 10 -- 10px of margin to avoid word wrapping
             channelDropdown.minimumWidth = zo_max(stringWidth, channelDropdown.minimumWidth)
         end
     end
@@ -653,7 +686,7 @@ end
 function ZO_ChatMenu_Gamepad:SetupOptions(entryData)
     local data = entryData.data
 
-    local socialData = 
+    local socialData =
     {
         displayName = data.fromDisplayName,
         category = data.category,
@@ -665,7 +698,7 @@ end
 
 function ZO_ChatMenu_Gamepad:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
-    
+
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToGroupOption, ZO_SocialOptionsDialogGamepad.ShouldAddInviteToGroupOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption)

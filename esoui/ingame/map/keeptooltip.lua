@@ -290,7 +290,7 @@ end
 
 local function LayoutKeepActionLine_Gamepad(self, section, formatString, usable)
     if usable then
-        local keyText = ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1)
+        local keyText = ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)
         self:LayoutIconStringLine(section, nil, zo_strformat(formatString, keyText), self.tooltip:GetStyle("mapKeepAccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
     else
         self:LayoutIconStringLine(section, nil, GetString(SI_TOOLTIP_KEEP_NOT_RESPAWNABLE), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))

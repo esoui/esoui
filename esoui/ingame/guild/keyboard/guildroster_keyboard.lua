@@ -178,6 +178,13 @@ function ZO_KeyboardGuildRosterManager:UnlockSelection()
     self:RefreshVisible()
 end
 
+function ZO_KeyboardGuildRosterManager:ShowPromoteToGuildMasterDialog(guildId, currentRankIndex, targetDisplayName)
+    local guildAlliance = GUILD_ROSTER_MANAGER:GetGuildAlliance()
+    local guildName = GUILD_ROSTER_MANAGER:GetGuildName()
+    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), "100%", "100%")
+    local rankName = GetFinalGuildRankName(guildId, currentRankIndex)
+    ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", { guildId = guildId, displayName = targetDisplayName}, { mainTextParams = { targetDisplayName, allianceIcon, guildName, rankName }})
+end
 
 --Events
 ---------
@@ -206,51 +213,23 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
             local masterList = GUILD_ROSTER_MANAGER:GetMasterList()
             local playerData = masterList[playerIndex]
             local playerHasHigherRank = playerData.rankIndex < data.rankIndex
-            local playerIsGuildmaster = IsGuildRankGuildMaster(guildId, playerData.rankIndex)
             local playerIsPendingInvite = data.rankId == DEFAULT_INVITED_RANK
-            local ALLIANCE_ICON_SIZE = 17
 
-            if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_PROMOTE) and not playerIsPendingInvite then
-                if data.rankIndex > 1 then
-                    local newRankIndex = data.rankIndex - 1
-                    if playerData.rankIndex < newRankIndex then
-                        AddMenuItem(GetString(SI_GUILD_PROMOTE),
-                                    function()
-                                        GuildPromote(guildId, data.displayName)
-                                        PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
-                                    end)
-                    elseif playerIsGuildmaster then
-                        AddMenuItem(GetString(SI_GUILD_PROMOTE),
-                                    function()
-                                        local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
-                                        local rankName = GetFinalGuildRankName(guildId, 2)
-                                        ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", { guildId = guildId, displayName = data.displayName}, { mainTextParams = { data.displayName, allianceIcon, guildName, rankName }})
-                                    end)
-                    end
-                end
-            end
-
-            if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_DEMOTE) and not playerIsPendingInvite then
-                if data.rankIndex < GetNumGuildRanks(guildId) then
-                    if playerHasHigherRank then
-                        AddMenuItem(GetString(SI_GUILD_DEMOTE),
-                                    function()
-                                        GuildDemote(guildId, data.displayName)
-                                        PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
-                                    end)
-                    end
-                end
+            if ZO_GuildRosterManager.CanSetPlayerRank(guildId, playerData.rankIndex, data.rankIndex, data.rankId) then
+                AddMenuItem(GetString(SI_GUILD_SET_RANK),
+                            function()
+                                ZO_Dialogs_ShowDialog("GUILD_SET_RANK_KEYBOARD", { guildId = guildId, targetData = data, playerData = playerData })
+                            end)
             end
 
             if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_REMOVE) then
                 if playerIsPendingInvite then
-                    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
+                    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), "100%", "100%")
                         AddMenuItem(GetString(SI_GUILD_UNINVITE), function()
                                                                     ZO_Dialogs_ShowDialog("UNINVITE_GUILD_PLAYER", { guildId = guildId,  displayName = data.displayName }, { mainTextParams = { data.displayName, allianceIcon, guildName } })
                                                                 end)
                 else
                     if playerHasHigherRank and playerIndex ~= dataIndex then
-                        local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
                         AddMenuItem(GetString(SI_GUILD_REMOVE), function()
                                                                     ZO_Dialogs_ShowDialog("GUILD_REMOVE_MEMBER_KEYBOARD", { guildId = guildId,  displayName = data.displayName }, { mainTextParams = { data.displayName } })
                                                                 end)
@@ -308,6 +287,130 @@ end
 function ZO_KeyboardGuildRosterManager:GuildRosterRowRank_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
     self:ExitRow(control:GetParent())
+end
+
+function ZO_KeyboardGuildRosterManager:SetRankDialogRank(rankIndex)
+    local rank = self.setRankDialogRankControlPool:GetExistingObject(rankIndex)
+    if rank then
+        self.setRankDialogRadioButtonGroup:SetClickedButton(rank:GetNamedChild("Button"))
+    end
+end
+
+function ZO_KeyboardGuildRosterManager:OnSetRankDialogInitialized(control)
+    local SELECTED_BIND_ALPHA = 1
+    local DESELECTED_BIND_ALPHA = 0.5
+    local radioButtonContainer = control:GetNamedChild("Buttons")
+    self.setRankDialogRankControlPool = ZO_ControlPool:New("ZO_GuildSetRankDialogRank_Keyboard", radioButtonContainer)
+    self.setRankDialogRadioButtonGroup = ZO_RadioButtonGroup:New()
+    self.setRankDialogRadioButtonGroup:SetSelectionChangedCallback(function(group, control, previousControl)
+        if control then
+            control:GetParent():GetNamedChild("Bind"):SetAlpha(SELECTED_BIND_ALPHA)
+        end
+        if previousControl then
+            previousControl:GetParent():GetNamedChild("Bind"):SetAlpha(DESELECTED_BIND_ALPHA)
+        end
+    end)
+    ZO_PostHookHandler(control, "OnEffectivelyShown", function() PushActionLayerByName("SetGuildRankDialog") end)
+    ZO_PreHookHandler(control, "OnEffectivelyHidden", function() RemoveActionLayerByName("SetGuildRankDialog") end)
+
+    ZO_Dialogs_RegisterCustomDialog("GUILD_SET_RANK_KEYBOARD",
+    {
+        title =
+        {
+            text = SI_GUILD_SET_RANK_DIALOG_TITLE,
+        },
+        mainText =
+        {
+            text = function(dialog)
+                return dialog.data.targetData.displayName
+            end
+        },
+        customControl = control,
+        setup = function(dialog, data)
+            EVENT_MANAGER:RegisterForEvent("SetRankDialogKeyboard", EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName)
+                if guildId == data.guildId and displayName == data.targetData.displayName or displayName == data.playerData.displayName then
+                    ZO_Dialogs_ReleaseDialog("GUILD_SET_RANK_KEYBOARD")
+                end
+            end)
+            EVENT_MANAGER:RegisterForEvent("SetRankDialogKeyboard", EVENT_GUILD_RANK_CHANGED, function(_, guildId)
+                if guildId == data.guildId then
+                    ZO_Dialogs_ReleaseDialog("GUILD_SET_RANK_KEYBOARD")
+                end
+            end)
+
+            self.setRankDialogRadioButtonGroup:Clear()
+            self.setRankDialogRankControlPool:ReleaseAllObjects()
+
+            local targetRankIndex = data.targetData.rankIndex
+            local IS_KEYBOARD = false
+            local entries = ZO_GuildRosterManager.ComputeSetRankEntries(data.guildId, data.playerData.rankIndex, targetRankIndex, IS_KEYBOARD)
+            local previousControl
+            local INHERIT_COLOR = true
+            for rankIndex, entry in ipairs(entries) do
+                local rank = self.setRankDialogRankControlPool:AcquireObject()
+                local rankButton = rank:GetNamedChild("Button")
+                rankButton.rankIndex = rankIndex
+                rankButton.label:SetText(zo_iconTextFormat(entry.rankIcon, "100%", "100%", entry.rankName, INHERIT_COLOR))
+
+                local rankBind = rank:GetNamedChild("Bind")
+                ZO_KeyMarkupLabel_SetCustomOffsets(rankBind, -5, 5, -2, 3)
+                local keyMarkup = ZO_Keybindings_GetBindingStringFromAction("SET_GUILD_RANK_"..rankIndex, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP)
+                rankBind:SetText(keyMarkup)
+
+                if previousControl then
+                    rank:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, 0, 5)
+                else
+                    rank:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
+                end
+                self.setRankDialogRadioButtonGroup:Add(rankButton)
+                self.setRankDialogRadioButtonGroup:SetButtonIsValidOption(rankButton, entry.enabled)
+
+                previousControl = rank
+
+                if rankIndex == targetRankIndex then
+                    self.setRankDialogRadioButtonGroup:SetClickedButton(rankButton)
+                    rankBind:SetAlpha(SELECTED_BIND_ALPHA)
+                else
+                    rankBind:SetAlpha(DESELECTED_BIND_ALPHA)
+                end
+            end
+        end,
+        finishedCallback = function(dialog)
+            EVENT_MANAGER:UnregisterForEvent("SetRankDialogKeyboard", EVENT_GUILD_MEMBER_RANK_CHANGED)
+            EVENT_MANAGER:UnregisterForEvent("SetRankDialogKeyboard", EVENT_GUILD_RANK_CHANGED)
+        end,
+        buttons =
+        {
+            -- Confirm Button
+            {
+                control = control:GetNamedChild("Confirm"),
+                keybind = "DIALOG_PRIMARY",
+                text = GetString(SI_DIALOG_ACCEPT),
+                callback = function(dialog)
+                    local data = dialog.data
+                    local newRankIndex = self.setRankDialogRadioButtonGroup:GetClickedButton().rankIndex
+                    if newRankIndex ~= data.targetData.rankIndex then
+                        if newRankIndex == 1 then
+                            self:ShowPromoteToGuildMasterDialog(data.guildId, data.targetData.rankIndex, data.targetData.displayName)
+                        else
+                            if newRankIndex < data.targetData.rankIndex then
+                                PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
+                            else
+                                PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
+                            end
+                            GuildSetRank(data.guildId, data.targetData.displayName, newRankIndex)
+                        end
+                    end
+                end,
+            },
+            -- Cancel Button
+            {
+                control = control:GetNamedChild("Cancel"),
+                keybind = "DIALOG_NEGATIVE",
+                text = GetString(SI_DIALOG_CANCEL),
+            },
+        },
+    })
 end
 
 --Global XML
@@ -461,4 +564,8 @@ function ZO_ConfirmRemoveGuildMemberDialog_Keyboard_OnInitialized(self)
             },
         },
     })
+end
+
+function ZO_GuildSetRankDialog_Keyboard_OnInitialized(self)
+    GUILD_ROSTER_KEYBOARD:OnSetRankDialogInitialized(self)
 end

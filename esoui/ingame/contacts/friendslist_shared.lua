@@ -272,7 +272,7 @@ end
 
 function ZO_FriendsList:OnNumOnlineChanged()
     self:CallFunctionOnLists("OnNumOnlineChanged")
-    CHAT_SYSTEM:OnNumOnlineFriendsChanged(self.numOnlineFriends)
+    CALLBACK_MANAGER:FireCallbacks("NumOnlineFriendsChanged", self.numOnlineFriends)
 end
 
 -- A singleton will be used by both keyboard and gamepad screens

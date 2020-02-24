@@ -6,8 +6,9 @@ function ZO_ZoneStories_Shared:New(...)
     return object
 end
 
-function ZO_ZoneStories_Shared:Initialize(control, infoContainerControl)
+function ZO_ZoneStories_Shared:Initialize(control, infoContainerControl, templateData)
     self.control = control
+    self.templateData = templateData
     self.infoContainerControl = infoContainerControl
     self.titleControl = infoContainerControl:GetNamedChild("Title")
     self.descriptionControl = infoContainerControl:GetNamedChild("Description")
@@ -20,17 +21,6 @@ function ZO_ZoneStories_Shared:Initialize(control, infoContainerControl)
 end
 
 function ZO_ZoneStories_Shared:InitializeGridList()
-    -- Create Data Object Pool
-    local function CreateEntryData()
-        return ZO_GridSquareEntryData_Shared:New()
-    end
-
-    local function ResetEntryData(data)
-        data:SetDataSource(nil)
-    end
-
-    self.entryDataObjectPool = ZO_ObjectPool:New(CreateEntryData, ResetEntryData)
-
     -- Initialize grid list object
     local gridListControl = self.infoContainerControl:GetNamedChild("GridList")
     self.gridListControl = gridListControl
@@ -114,7 +104,6 @@ end
 function ZO_ZoneStories_Shared:BuildGridList()
     if self.gridList then
         self.gridList:ClearGridList()
-        self.entryDataObjectPool:ReleaseAllObjects()
 
         self:BuildAchievementList()
         self:BuildActivityCompletionList()
@@ -128,11 +117,14 @@ function ZO_ZoneStories_Shared:BuildAchievementList()
         local zoneId = self:GetSelectedZoneId()
         local numAchievements = GetNumUnblockedZoneStoryActivitiesForZoneCompletionType(zoneId, ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS)
         for i = 1, numAchievements do
-            local entryData = self.entryDataObjectPool:AcquireObject()
             local achievementId = GetZoneActivityIdForZoneCompletionType(zoneId, ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS, i)
-            entryData:SetDataSource({ achievementId = achievementId, completionType = ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS })
-            entryData.gridHeaderName = ""
-            self.gridList:AddEntry(entryData, self.templateData.achievements.entryTemplate)
+            local data =
+            {
+                achievementId = achievementId,
+                completionType = ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS,
+                gridHeaderName = "",
+            }
+            self.gridList:AddEntry(data, self.templateData.achievements.entryTemplate)
         end
     end
 end
@@ -143,12 +135,14 @@ function ZO_ZoneStories_Shared:BuildActivityCompletionList()
         if zoneData then
             for _, completionType in ipairs(ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST) do
                 if GetNumZoneActivitiesForZoneCompletionType(zoneData.id, completionType) > 0 then
-                    local entryData = self.entryDataObjectPool:AcquireObject()
-                    local data = { zoneData = zoneData, completionType = completionType }
-                    entryData:SetDataSource(data)
-                    entryData.gridHeaderName = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER)
-                    entryData.gridHeaderTemplate = self.templateData.activityCompletion.headerTemplate
-                    self.gridList:AddEntry(entryData, self.templateData.activityCompletion.entryTemplate)
+                    local data =
+                    {
+                        zoneData = zoneData,
+                        completionType = completionType,
+                        gridHeaderName = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER),
+                        gridHeaderTemplate = self.templateData.activityCompletion.headerTemplate,
+                    }
+                    self.gridList:AddEntry(data, self.templateData.activityCompletion.entryTemplate)
                 end
             end
         end

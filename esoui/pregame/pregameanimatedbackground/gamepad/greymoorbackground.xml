@@ -1,0 +1,29 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_GreymoorBackgroundShowAnimation">
+            <Animations>
+                <AlphaAnimation duration="ZO_GREYMOOR_BACKGROUND_FADE_DURATION_MS" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <TopLevelControl name="ZO_GreymoorBackground" mouseEnabled="true" tier="LOW" layer="BACKGROUND" level="1" hidden="true">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_GreymoorBackground_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Ground" textureFile="EsoUI\Art\PregameAnimatedBackground\greymoorGround.dds" pixelRoundingEnabled="false">
+                            <Anchor point="TOP"/>
+                            <Anchor point="BOTTOM"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

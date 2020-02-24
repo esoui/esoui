@@ -1741,8 +1741,8 @@ end
     Any item that could be sold on the trading house should be categorized.
 ]]--
 
-internalassert(ITEMTYPE_MAX_VALUE == 70, "Do you need to update the trading house with your new itemtype?")
-internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3100, "Do you need to update the trading house with your new specialized itemtype?")
+internalassert(ITEMTYPE_MAX_VALUE == 71, "Do you need to update the trading house with your new itemtype?")
+internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3150, "Do you need to update the trading house with your new specialized itemtype?")
 internalassert(EQUIP_TYPE_MAX_VALUE == 15, "Do you need to update the trading house with your new equip type?")
 
 -- All Items

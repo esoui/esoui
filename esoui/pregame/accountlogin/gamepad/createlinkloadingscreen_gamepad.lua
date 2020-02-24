@@ -87,8 +87,8 @@ end
 
 local function OnNoLink()
     if IsHeronUI() then
-        -- TODO: Heron, account linking flow
-        PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), GetString(SI_BAD_LOGIN))
+        -- Account linking will be handled in an overlay, jump back to login so the user can manually continue once that's done
+        PregameStateManager_SetState("AccountLogin")
     else
         PregameStateManager_SetState("CreateLinkAccount")
     end
@@ -144,7 +144,11 @@ local function OnServerLocked()
 end
 
 local function OnInvalidCredentials(eventId, errorCode, accountPageURL)
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), GetString(SI_BAD_LOGIN))
+    local badLoginString = GetString(SI_BAD_LOGIN)
+    if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS then
+        badLoginString = GetString(SI_BAD_LOGIN_ZOS)
+    end
+    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_GAMEPAD_GENERIC_LOGIN_ERROR), badLoginString)
 end
 
 local function OnPaymentExpired(eventId, errorCode, accountPageURL)
@@ -214,8 +218,10 @@ local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debug
         dialogText = GetString(SI_UNEXPECTED_ERROR)
     end
 
-    if not LINK_ACCOUNT_GAMEPAD:IsAccountValidForLinking(linkingError) then
-        LINK_ACCOUNT_GAMEPAD:ClearCredentials()
+    if IsConsoleUI() then
+        if not LINK_ACCOUNT_GAMEPAD:IsAccountValidForLinking(linkingError) then
+            LINK_ACCOUNT_GAMEPAD:ClearCredentials()
+        end
     end
 
     local errorString = zo_strformat(dialogText, GetString(SI_HELP_URL))

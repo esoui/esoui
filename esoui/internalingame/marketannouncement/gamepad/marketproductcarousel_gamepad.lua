@@ -19,38 +19,104 @@ function ZO_MarketProductCarousel_Gamepad:Initialize(...)
     self.selectionIndicator:SetButtonControlName("MarketProduct_Indicator_Gamepad")
     self.selection = self.control:GetNamedChild("Selection")
 
-    local onActivationChanged = function(self, active)
+    self.actionKeybindDescriptor =
+    {
+        name = function()
+            local data = self:GetSelectedData()
+            if data then
+                local marketProductId = data.marketProduct and data.marketProduct.productData and data.marketProduct.productData.marketProductId
+                if marketProductId then
+                    local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
+                    if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
+                        keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CHAPTER_UPGRADE
+                    else
+                        keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE
+                    end
+                    return GetString(keybindStringId)
+                end
+            end
+            return GetString(SI_GAMEPAD_SELECT_OPTION)
+        end,
+        keybind = "UI_SHORTCUT_PRIMARY",
+        sound = function()
+             if self.active then
+                return SOUNDS.DIALOG_ACCEPT
+            else
+                return SOUNDS.DIALOG_DECLINE
+            end
+        end,
+        visible = function()
+            return self.active
+        end,
+        callback = function()
+            if self.active then
+                ZO_GAMEPAD_MARKET_ANNOUNCEMENT:OnMarketAnnouncementViewCrownStoreKeybind()
+            end
+        end
+    }
+
+    self.helpButtonKeybindDescriptor =
+    {
+        name = GetString(SI_MARKET_ANNOUNCEMENT_HELP_BUTTON),
+        keybind = "UI_SHORTCUT_SECONDARY",
+        sound = function()
+             if self.active then
+                return SOUNDS.DIALOG_ACCEPT
+            else
+                return SOUNDS.DIALOG_DECLINE
+            end
+        end,
+        visible = function()
+            local data = self:GetSelectedData()
+            return self:IsHelpButtonKeybindVisible(data.marketProduct)
+        end,
+        callback = function()
+            local data = self:GetSelectedData()
+            if data.marketProduct then
+                local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(data.marketProduct:GetId())
+                RequestShowSpecificHelp(helpCategoryIndex, helpIndex)
+            end
+        end
+    }
+
+    local function SetCenterControlActive(self, active)
         local control = self:GetCenterControl()
         if control then
             control.object:SetSelected(active)
         end
     end
 
-    self:SetOnActivatedChangedFunction(onActivationChanged)
-
-    local function UpdateScrollKeybind(newData)
-        self:UpdateScrollKeybind(newData)
+    local function OnSelectedDataChanged(newData, oldData)
+        SetCenterControlActive(self, self.active)
+        self:UpdateKeybinds(newData)
     end
 
-    self:SetOnSelectedDataChangedCallback(UpdateScrollKeybind)
+    self:SetOnActivatedChangedFunction(SetCenterControlActive)
+    self:SetOnSelectedDataChangedCallback(OnSelectedDataChanged)
 
     self.focusData =
     {
         activate = function()
             self:Activate()
             local data = self:GetSelectedData()
-            UpdateScrollKeybind(data)
+            self:UpdateKeybinds(data)
         end,
         deactivate = function()
             self:Deactivate()
             local data = self:GetSelectedData()
-            UpdateScrollKeybind(data)
+            self:UpdateKeybinds(data)
         end,
         highlight = self.selection
     }
 end
 
-function ZO_MarketProductCarousel_Gamepad:UpdateScrollKeybind(newData)
+function ZO_MarketProductCarousel_Gamepad:IsHelpButtonKeybindVisible(marketProduct)
+    local helpCategoryIndex, helpIndex = GetMarketAnnouncementHelpLinkIndices(marketProduct:GetId())
+    local hasHelpLink = helpCategoryIndex and helpIndex
+    return marketProduct:IsPromo() and hasHelpLink
+end
+
+function ZO_MarketProductCarousel_Gamepad:UpdateKeybinds(newData)
     if self.scrollKeybindButton then
         local marketProduct = newData and newData.marketProduct
         if self.active and marketProduct then
@@ -59,8 +125,20 @@ function ZO_MarketProductCarousel_Gamepad:UpdateScrollKeybind(newData)
             local shouldScroll = descriptionTextControl and descriptionTextControl:GetHeight() > descriptionControl:GetHeight()
             self.scrollKeybindButton:SetHidden(not shouldScroll)
             descriptionControl:SetDisabled(not self.active)
+            self.selectKeybindButton:SetKeybindButtonDescriptor(self.actionKeybindDescriptor)
+            self.selectKeybindButton:SetHidden(not self.active)
+            if self:IsHelpButtonKeybindVisible(marketProduct) then
+                self.selectKeybindButton:SetAnchor(TOPRIGHT, self.helpKeybindButton, TOPLEFT)
+                self.helpKeybindButton:SetAnchor(TOPRIGHT, self.keybindAnchorControl, TOPLEFT)
+                self.helpKeybindButton:SetHidden(false)
+            else
+                self.selectKeybindButton:SetAnchor(TOPRIGHT, self.keybindAnchorControl, TOPLEFT)
+                self.helpKeybindButton:SetHidden(true)
+            end
         else
             self.scrollKeybindButton:SetHidden(true)
+            self.selectKeybindButton:SetAnchor(TOPRIGHT, self.keybindAnchorControl, TOPLEFT)
+            self.helpKeybindButton:SetHidden(true)
         end
     end
 end
@@ -82,10 +160,14 @@ end
 
 function ZO_MarketProductCarousel_Gamepad:SetSelectKeybindButton(selectKeybindButton)
     self.selectKeybindButton = selectKeybindButton
+
+    self.selectKeybindButton:SetKeybindButtonDescriptor(self.actionKeybindDescriptor)
 end
 
 function ZO_MarketProductCarousel_Gamepad:SetHelpKeybindButton(helpKeybindButton)
     self.helpKeybindButton = helpKeybindButton
+
+    self.helpKeybindButton:SetKeybindButtonDescriptor(self.helpButtonKeybindDescriptor)
 end
 
 function ZO_MarketProductCarousel_Gamepad:SetScrollKeybindButton(scrollKeybindButton)
@@ -97,10 +179,6 @@ function ZO_MarketProductCarousel_Gamepad:SetKeybindAnchorControl(keybindAnchorC
 end
 
 function ZO_MarketProductCarousel_Gamepad:EntrySetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
-    control.object:SetKeybindButton(self.selectKeybindButton)
-    control.object:SetHelpKeybindButton(self.helpKeybindButton)
-    control.object:SetKeybindAnchorControl(self.keybindAnchorControl)
-
     ZO_MarketProductCarousel_Shared.EntrySetup(self, control, data, self.active and selected, reselectingDuringRebuild, enabled, activated)
 end
 

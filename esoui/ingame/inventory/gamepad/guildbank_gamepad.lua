@@ -638,7 +638,7 @@ function ZO_GuildBank_Gamepad:DepositFunds(currencyType, amount)
 end
 
 function ZO_GuildBank_Gamepad:WithdrawFunds(currencyType, amount)
-    WithdrawCurrencyFromGuildBank(currencyType, amount)
+    TransferCurrency(currencyType, amount, CURRENCY_LOCATION_GUILD_BANK, CURRENCY_LOCATION_CHARACTER)
 end
 
 function ZO_GuildBank_Gamepad:OnCategoryChangedCallback(selectedData)

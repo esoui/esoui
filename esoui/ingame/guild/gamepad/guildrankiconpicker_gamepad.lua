@@ -14,9 +14,7 @@ function ZO_GuildRankIconPicker_Gamepad:New(...)
 end
 
 function ZO_GuildRankIconPicker_Gamepad:Initialize(control)
-    ZO_GuildRankIconPicker_Shared.Initialize(self, control)
-
-    self.templateData =
+    local templateData =
     {
         gridListClass = ZO_GridScrollList_Gamepad,
         entryTemplate = "ZO_GuildRank_RankIconPickerIcon_Gamepad_Control",
@@ -25,6 +23,8 @@ function ZO_GuildRankIconPicker_Gamepad:Initialize(control)
         entryPaddingX = ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_GAMEPAD_OFFSET,
         entryPaddingY = ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_GAMEPAD_OFFSET,
     }
+
+    ZO_GuildRankIconPicker_Shared.Initialize(self, control, templateData)
 
     self:InitializeRankIconPickerGridList()
 end
@@ -38,12 +38,12 @@ end
 function ZO_GuildRankIconPicker_Gamepad:OnRankIconPickerGridSelectionChanged(oldSelectedData, selectedData)
     -- Deselect previous tile
     if oldSelectedData and oldSelectedData.dataEntry then
-        oldSelectedData.dataSource.isSelected = false
+        oldSelectedData.isSelected = false
     end
 
     -- Select newly selected tile.
     if selectedData and selectedData.dataEntry then
-        selectedData.dataSource.isSelected = true
+        selectedData.isSelected = true
     end
 
     self.rankIconPickerGridList:RefreshGridList()
@@ -65,7 +65,7 @@ end
 function ZO_GuildRankIconPicker_Gamepad:OnRankIconPickerSelectedGridListEntryClicked()
     local selectedData = self.rankIconPickerGridList:GetSelectedData()
     if selectedData and self.rankIconPickedCallback then
-        self.rankIconPickedCallback(selectedData.dataSource.iconIndex)
+        self.rankIconPickedCallback(selectedData.iconIndex)
     end
     self.rankIconPickerGridList:RefreshGridList()
 end

@@ -69,3 +69,6 @@ function ZO_PregameSceneStateAdvanceFromFragment:Hide()
 end
 
 PREGAME_GAMMA_ADJUST_INTRO_ADVANCE_FRAGMENT = ZO_PregameSceneStateAdvanceFromFragment:New("GammaAdjust")
+
+SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjustActions")
+PREGAME_SCREEN_ADJUST_INTRO_ADVANCE_FRAGMENT = ZO_PregameSceneStateAdvanceFromFragment:New("ScreenAdjustIntro")

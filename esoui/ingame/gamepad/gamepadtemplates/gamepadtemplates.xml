@@ -299,7 +299,7 @@
         </Control>
 
         <Control name="ZO_GamepadXPBarFooter" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
-            <Anchor point="RIGHT" relativeTo="ZO_KeybindStripControl" offsetX="-127" offsetY="-52" />
+            <Anchor point="RIGHT" relativeTo="ZO_KeybindStripControl" offsetX="-127" />
             <Controls>
                 <StatusBar name="$(parent)XPBar" inherits="ZO_GamepadSkillsXPBar">
                     <Anchor point="RIGHT" />
@@ -313,7 +313,7 @@
                 </Label>
 
                 <Label name="$(parent)Name" font="ZoFontGamepadCondensed27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                    <Anchor point="BOTTOMRIGHT"  relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="-5"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="-5"/>
                 </Label>
             </Controls>
         </Control>

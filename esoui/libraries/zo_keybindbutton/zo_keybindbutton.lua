@@ -54,7 +54,7 @@ end
 
 function ZO_KeybindButtonMixin:SetCustomKeyText(keyText)
     self.customKeyText = true
-    self.keyLabel:SetText(ZO_Keybindings_GenerateKeyMarkup(keyText))
+    self.keyLabel:SetText(ZO_Keybindings_GenerateTextKeyMarkup(keyText))
     self:UpdateEnabledState()
 end
 
@@ -112,7 +112,7 @@ function ZO_KeybindButtonMixin:GetUsingCustomAnchors()
 end
 
 local function OnKeybindLabelChanged(label, bindingText, key, mod1, mod2, mod3, mod4)
-    label.owner:AdjustBindingAnchors(not ZO_Keybindings_HasTexturePathForKey(key))
+    label.owner:AdjustBindingAnchors(not ZO_Keybindings_ShouldUseIconKeyMarkup(key))
 end
 
 function ZO_KeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPreferredKeybind, alwaysPreferGamepadMode)

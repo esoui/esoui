@@ -40,9 +40,9 @@ do
         local keybindString
         local key, mod1, mod2, mod3, mod4 = GetIngameHighestPriorityActionBindingInfoFromName("SHOW_HOUSING_PANEL", IsInGamepadPreferredMode())
         if key ~= KEY_INVALID then
-            keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT, TEXTURE_SCALE_PERCENT)
+            keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT)
         else
-            keybindString = ZO_Keybindings_GenerateKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
+            keybindString = ZO_Keybindings_GenerateTextKeyMarkup(GetString(SI_ACTION_IS_NOT_BOUND))
         end
 
         -- The display name of a MarketProductCollectible is the name of the collectible

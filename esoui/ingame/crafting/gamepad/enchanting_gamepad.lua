@@ -381,7 +381,7 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                     local cost = GetCostToCraftEnchantingItem(self:GetAllCraftingBagAndSlots())
                     return ZO_CraftingUtils_GetCostToCraftString(cost)
                 else
-                    return GetString("SI_DECONSTRUCTACTIONNAME_PERFORM", DECONSTRUCT_ACTION_NAME_EXTRACT)
+                    return GetString("SI_DECONSTRUCTACTIONNAME", DECONSTRUCT_ACTION_NAME_EXTRACT)
                 end
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
@@ -527,7 +527,22 @@ function ZO_GamepadEnchanting:SetEnchantingMode(enchantingMode)
     end
 end
 
+function ZO_GamepadEnchanting:OnInventoryUpdate(validItemIds)
+    -- Inventory updates can stomp over slotted determination, so we need to refresh that status
+    -- However inventory updates can come in before the list has ever been commited, so we also don't want to RefreshVisible
+    -- that will get called at a later appropriate time
+    ZO_SharedEnchanting.OnInventoryUpdate(self, validItemIds)
+
+    self:RefreshSlottedEntries()
+end
+
 function ZO_GamepadEnchanting:UpdateSelection()
+    self:RefreshSlottedEntries()
+
+    self.inventory.list:RefreshVisible()
+end
+
+function ZO_GamepadEnchanting:RefreshSlottedEntries()
     if self.enchantingMode == ENCHANTING_MODE_CREATION then
         local rune1BagId, rune1SlotIndex, rune2BagId, rune2SlotIndex, rune3BagId, rune3SlotIndex = self:GetAllCraftingBagAndSlots()
         for _, data in pairs(self.inventory.list.dataList) do
@@ -546,7 +561,6 @@ function ZO_GamepadEnchanting:UpdateSelection()
             ZO_GamepadCraftingUtils_SetEntryDataSlotted(data, self.extractionSlot:ContainsBagAndSlot(data.bagId, data.slotIndex))
         end
     end
-    self.inventory.list:RefreshVisible()
 end
 
 function ZO_GamepadEnchanting:Select()
@@ -601,33 +615,6 @@ function ZO_GamepadEnchantingInventory:IsLocked(bagId, slotIndex)
     return ZO_GamepadCraftingInventory.IsLocked(self, bagId, slotIndex) or self.owner:IsSlotted(bagId, slotIndex)
 end
 
-local function IsEnchantingItem(bagId, slotIndex)
-    local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
-
-    if usedInCraftingType == CRAFTING_TYPE_ENCHANTING then
-        if runeType == ENCHANTING_RUNE_ASPECT or runeType == ENCHANTING_RUNE_ESSENCE or runeType == ENCHANTING_RUNE_POTENCY then
-            return true
-        end
-        if craftingSubItemType == ITEMTYPE_GLYPH_WEAPON or craftingSubItemType == ITEMTYPE_GLYPH_ARMOR or craftingSubItemType == ITEMTYPE_GLYPH_JEWELRY then
-            return true
-        end
-    end
-
-    return false
-end
-
-local function DoesEnchantingItemPassFilter(bagId, slotIndex, filterType)
-    local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
-
-    if filterType == EXTRACTION_FILTER then
-        return craftingSubItemType == ITEMTYPE_GLYPH_WEAPON or craftingSubItemType == ITEMTYPE_GLYPH_ARMOR or craftingSubItemType == ITEMTYPE_GLYPH_JEWELRY
-    elseif filterType == NO_FILTER or filterType == runeType then
-        return runeType == ENCHANTING_RUNE_ASPECT or runeType == ENCHANTING_RUNE_ESSENCE or runeType == ENCHANTING_RUNE_POTENCY
-    end
-
-    return false
-end
-
 function ZO_GamepadEnchantingInventory:Refresh(data)
     local filterType
     local titleString = nil
@@ -640,7 +627,7 @@ function ZO_GamepadEnchantingInventory:Refresh(data)
         filterType = EXTRACTION_FILTER
         titleString = GetString(SI_ENCHANTING_EXTRACTION)
     end
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(IsEnchantingItem, DoesEnchantingItemPassFilter, filterType, data)
+    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ZO_Enchanting_DoesEnchantingItemPassFilter, filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
 
     if titleString then

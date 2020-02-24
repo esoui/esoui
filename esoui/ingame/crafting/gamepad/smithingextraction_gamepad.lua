@@ -269,7 +269,7 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
         {
             name = function()
                 local verb = self:IsInRefineMode() and DECONSTRUCT_ACTION_NAME_REFINE or DECONSTRUCT_ACTION_NAME_DECONSTRUCT
-                return GetString("SI_DECONSTRUCTACTIONNAME_PERFORM", verb)
+                return GetString("SI_DECONSTRUCTACTIONNAME", verb)
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
             gamepadOrder = 1010,

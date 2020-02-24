@@ -364,8 +364,24 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ContentsCategories" relativePoint="TOPRIGHT" offsetX="37" />
 
                     <Controls>
-                        <Label name="$(parent)Title" inherits="ZO_AchievementsLargeLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                        <Label name="$(parent)Title" inherits="ZO_AchievementsLargeLabel_Keyboard" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                             <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                            <OnInitialized>
+                                local fonts =
+                                {
+                                    {
+                                        font = "ZoFontWinH2",
+                                    },
+                                    {
+                                        font = "ZoFontWinH3",
+                                    },
+                                    {
+                                        font = "ZoFontWinH4",
+                                    },
+                                }
+                                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                            </OnInitialized>
                         </Label>
 
                         <Control name="$(parent)Filter" inherits="ZO_ComboBox">

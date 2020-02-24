@@ -76,17 +76,22 @@ local function OnBlockingSceneActivated()
 end
 
 function ZO_GuildRanks_Keyboard:Initialize(control)
-    ZO_GuildRanks_Shared.Initialize(self, control)
+    local templateData =
+    {
+        gridListClass = ZO_GridScrollList_Keyboard,
+        entryTemplate = "ZO_GuildRank_PermissionCheckboxTile_Keyboard_Control",
+        entryWidth = ZO_GUILD_RANK_PERMISSON_CHECKBOX_KEYBOARD_WIDTH,
+        entryHeight = ZO_GUILD_RANK_PERMISSON_CHECKBOX_KEYBOARD_HEIGHT,
+        headerTemplate = "ZO_GuildRanks_Keyboard_Header_Template",
+        headerHeight = ZO_GUILD_RANK_HEADER_TEMPLATE_KEYBOARD_HEIGHT,
+    }
+
+    ZO_GuildRanks_Shared.Initialize(self, control, templateData)
 
     self.rankIconButtonContainer = self.control:GetNamedChild("RankIconButtonIconContainer")
     self.rankIconDisplayControl = self.control:GetNamedChild("RankIcon")
 
     -- Initialize grid list object
-    local ALWAYS_ANIMATE = true
-    self.permissionsContainer = self.control:GetNamedChild("PermissionsContainer")
-    local permissionsGridListControl = self.permissionsContainer:GetNamedChild("PermissionsPanel")
-    self.permissionsGridListControl = permissionsGridListControl
-
     self.rankIconPickerButton = self.rankIconButtonContainer:GetNamedChild("Frame")
     self.rankIconIconControl = self.rankIconButtonContainer:GetNamedChild("Icon")
 
@@ -97,16 +102,6 @@ function ZO_GuildRanks_Keyboard:Initialize(control)
     ZO_CheckButton_SetCheckState(self.rankIconPickerButton, true)
     ZO_CheckButton_Enable(self.rankIconPickerButton)
     self.rankIconPickerButton:SetHandler("OnClicked", OnRankIconPickerClicked)
-
-    self.templateData =
-    {
-        gridListClass = ZO_GridScrollList_Keyboard,
-        entryTemplate = "ZO_GuildRank_PermissionCheckboxTile_Keyboard_Control",
-        entryWidth = ZO_GUILD_RANK_PERMISSON_CHECKBOX_KEYBOARD_WIDTH,
-        entryHeight = ZO_GUILD_RANK_PERMISSON_CHECKBOX_KEYBOARD_HEIGHT,
-        headerTemplate = "ZO_GuildRanks_Keyboard_Header_Template",
-        headerHeight = ZO_GUILD_RANK_HEADER_TEMPLATE_KEYBOARD_HEIGHT,
-    }
 
     self:InitializePermissionsGridList()
 
@@ -165,6 +160,11 @@ function ZO_GuildRanks_Keyboard:Initialize(control)
                                                                 -- Blocking scene is cleared in SaveAndExit() to prevent the scene manager from exiting then re-entering the main menu
                                                             end
                                                         end)
+end
+
+function ZO_GuildRanks_Keyboard:InitializePermissionsGridListControl()
+    self.permissionsContainer = self.control:GetNamedChild("PermissionsContainer")
+    self.permissionsGridListControl = self.permissionsContainer:GetNamedChild("PermissionsPanel")
 end
 
 function ZO_GuildRanks_Keyboard:OnRankIconPickerClicked()

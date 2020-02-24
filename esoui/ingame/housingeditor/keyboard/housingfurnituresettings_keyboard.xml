@@ -148,7 +148,7 @@
 
         <Control name="ZO_Furniture_Setting_Panel_Header_DisplayName" inherits="ZO_SortHeader" virtual="true">
             <OnInitialized>
-                ZO_SortHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_DISPLAY_NAME), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                ZO_SortHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
             </OnInitialized>
             <Dimensions x="ZO_KEYBOARD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH" y="32"/>
         </Control>

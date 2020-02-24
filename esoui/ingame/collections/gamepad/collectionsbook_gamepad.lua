@@ -1289,8 +1289,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
                         local link = ZO_LinkHandler_CreateChatLink(GetCollectibleLink, dialog.data.collectibleId)
-                        ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
-                        CHAT_SYSTEM:SubmitTextEntry()
+                        ZO_LinkHandler_InsertLinkAndSubmit(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
                     end,
                     visible = IsChatSystemAvailableForCurrentPlatform
                 },

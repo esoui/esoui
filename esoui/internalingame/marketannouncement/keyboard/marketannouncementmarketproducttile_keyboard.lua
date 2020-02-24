@@ -24,6 +24,20 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(data)
 
     ZO_MarketAnnouncementMarketProductTile.Layout(self, data)
 
+    local marketProduct = data.marketProduct
+    if initializingMarketProduct or marketProduct.control ~= self.control or self.marketProduct:GetId() ~= marketProduct:GetId() then
+        local keybindStringId
+        local marketProductId = marketProduct:GetId()
+        local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
+        if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
+            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CHAPTER_UPGRADE
+        else
+            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE
+        end
+
+        self.control.object:SetActionText(GetString(keybindStringId))
+    end
+
     if initializingMarketProduct then
         self.control.object:SetActionCallback(function() ZO_KEYBOARD_MARKET_ANNOUNCEMENT:OnMarketAnnouncementViewCrownStoreKeybind() end)
 
@@ -89,7 +103,7 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:OnMouseExit()
     self.isMousedOver = false
 
     self.actionButton:SetShowingHighlight(self.isMousedOver)
-    
+
     if self.marketProduct then
         self.marketProduct:SetupBundleDisplay()
     end

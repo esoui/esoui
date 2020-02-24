@@ -40,6 +40,13 @@ function ZO_LinkHandler_InsertLink(link)
     end
 end
 
+function ZO_LinkHandler_InsertLinkAndSubmit(link)
+    ZO_LinkHandler_InsertLink(link)
+    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    chatSystem:SubmitTextEntry()
+    chatSystem:Maximize()
+end
+
 local function HandleLinkMouseEvent(link, button, control, eventType)
     if type(link) == "string" and #link > 0 then
         local handled = LINK_HANDLER:FireCallbacks(eventType, link, button, ZO_LinkHandler_ParseLink(link))

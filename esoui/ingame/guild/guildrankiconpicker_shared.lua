@@ -10,13 +10,11 @@ function ZO_GuildRankIconPicker_Shared:New(...)
     return object
 end
 
-function ZO_GuildRankIconPicker_Shared:Initialize(control)
+function ZO_GuildRankIconPicker_Shared:Initialize(control, templateData)
     self.control = control
 
     -- This is platform specific data that needs to be overridden by the inheriting classes as it
     -- specifies the platform specific data to use.
-    self.templateData =
-    {
     --[[ Expected Attributes for Icon Picker
         gridListClass - The class object from which self.rankIconPickerGridList will be created,
         entryTemplate - The name of the template control to be used for an icon in the view that allows a guild rank to select its icon,
@@ -25,22 +23,7 @@ function ZO_GuildRankIconPicker_Shared:Initialize(control)
         entryPaddingX - The padding in pixels between icons horizontally,
         entryPaddingY - The padding in pixels between icons vertically,
     ]]
-    }
-
-    self:InitializeGridListDataPool()
-end
-
-function ZO_GuildRankIconPicker_Shared:InitializeGridListDataPool()
-    -- Create Data Object Pool
-    local function CreateEntryData()
-        return ZO_GridSquareEntryData_Shared:New()
-    end
-
-    local function ResetEntryData(data)
-        data:SetDataSource(nil)
-    end
-
-    self.rankIconPickerEntryDataObjectPool = ZO_ObjectPool:New(CreateEntryData, ResetEntryData)
+    self.templateData = templateData
 end
 
 function ZO_GuildRankIconPicker_Shared:OnRankIconPickerEntrySetup(control, data)
@@ -88,13 +71,11 @@ end
 
 function ZO_GuildRankIconPicker_Shared:BuildRankIconPickerGridList()
     self.rankIconPickerGridList:ClearGridList()
-    self.rankIconPickerEntryDataObjectPool:ReleaseAllObjects()
+
     local templateData = self.templateData
     for i = 1, GetNumGuildRankIcons() do
-        local entryData = self.rankIconPickerEntryDataObjectPool:AcquireObject()
         local data = self:CreateRankIconPickerDataObject(i)
-        entryData:SetDataSource(data)
-        self.rankIconPickerGridList:AddEntry(entryData, templateData.entryTemplate)
+        self.rankIconPickerGridList:AddEntry(data, templateData.entryTemplate)
     end
 
     self.rankIconPickerGridList:CommitGridList()

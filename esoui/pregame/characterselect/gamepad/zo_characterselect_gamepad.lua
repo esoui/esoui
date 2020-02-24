@@ -14,29 +14,24 @@ local ENTRY_TYPE_CHAPTER = 4
 local CREATE_NEW_ICON = "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds"
 
 --[[ Character Select Delete Screen ]]--
-local EXPECTED_ICON_SIZE = 64
-local BASE_PERCENT = 100
 
-local CHARACTER_DELETE_KEY_ICONS = {
-    [true] = {    KEY_GAMEPAD_LEFT_SHOULDER_HOLD,
-                KEY_GAMEPAD_RIGHT_SHOULDER_HOLD,
-                KEY_GAMEPAD_LEFT_TRIGGER_HOLD,
-                KEY_GAMEPAD_RIGHT_TRIGGER_HOLD },
-    [false] = {   KEY_GAMEPAD_LEFT_SHOULDER,
-                KEY_GAMEPAD_RIGHT_SHOULDER,
-                KEY_GAMEPAD_LEFT_TRIGGER,
-                KEY_GAMEPAD_RIGHT_TRIGGER },
+local CHARACTER_DELETE_KEY_ICONS = 
+{
+    [true] = 
+    {
+        KEY_GAMEPAD_LEFT_SHOULDER_HOLD,
+        KEY_GAMEPAD_RIGHT_SHOULDER_HOLD,
+        KEY_GAMEPAD_LEFT_TRIGGER_HOLD,
+        KEY_GAMEPAD_RIGHT_TRIGGER_HOLD
+    },
+    [false] = 
+    {   
+        KEY_GAMEPAD_LEFT_SHOULDER,
+        KEY_GAMEPAD_RIGHT_SHOULDER,
+        KEY_GAMEPAD_LEFT_TRIGGER,
+        KEY_GAMEPAD_RIGHT_TRIGGER
+    },
 }
-
-local function ZO_CharacterSelect_Gamepad_GetKeyText(key)
-    local path, width, height = ZO_Keybindings_GetTexturePathForKey(key)
-    if path then
-        local widthPercent = (width / EXPECTED_ICON_SIZE) * BASE_PERCENT;
-        local heightPercent = (height / EXPECTED_ICON_SIZE) * BASE_PERCENT;
-        return ("|t%f%%:%f%%:%s|t"):format(widthPercent, heightPercent, path)
-    end
-    return ""
-end
 
 function ZO_CharacterSelect_Gamepad_ReturnToCharacterList(activateViewPort)
     local self = ZO_CharacterSelect_Gamepad
@@ -62,7 +57,7 @@ local function ZO_CharacterSelect_Gamepad_GetDeleteKeyText()
         end
 
         local keyCode = CHARACTER_DELETE_KEY_ICONS[enabled][i]
-        keyText = keyText .. ZO_CharacterSelect_Gamepad_GetKeyText(keyCode)
+        keyText = keyText .. ZO_Keybindings_GenerateIconKeyMarkup(keyCode)
     end
 
     return keyText
@@ -886,7 +881,29 @@ function ZO_CharacterSelect_Gamepad_RefreshHeader()
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
-    ZO_CharacterSelectProfile_Gamepad:GetNamedChild("Profile"):SetText(GetOnlineIdForActiveProfile())
+    local profileNameString = nil
+    local profileLabelString = nil
+    if IsHeronUI() then
+        -- Use player's heron name
+        profileNameString = GetExternalName()
+        profileLabelString = GetString(SI_CHARACTER_SELECT_HERON_PROFILE_LABEL)
+    elseif IsConsoleUI() then
+        -- Use the console's active profile name
+        profileNameString = GetOnlineIdForActiveProfile()
+        profileLabelString = GetString(SI_CHARACTER_SELECT_PROFILE_LABEL)
+    end
+
+    local profileName = ZO_CharacterSelectProfile_Gamepad:GetNamedChild("ProfileName")
+    local profileLabel = ZO_CharacterSelectProfile_Gamepad:GetNamedChild("ProfileLabel")
+    if profileNameString and profileNameString ~= "" then
+        profileName:SetHidden(false)
+        profileLabel:SetHidden(false)
+        profileName:SetText(profileNameString)
+        profileLabel:SetText(profileLabelString)
+    else
+        profileName:SetHidden(true)
+        profileLabel:SetHidden(true)
+    end
 end
 
 local function OnCharacterConstructionReady()

@@ -41,6 +41,33 @@ function ZO_Enchanting_IsInCreationMode()
     return false
 end
 
+function ZO_Enchanting_DoesEnchantingItemPassFilter(bagId, slotIndex, filterType)
+    local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
+
+    if filterType == EXTRACTION_FILTER then
+        return craftingSubItemType == ITEMTYPE_GLYPH_WEAPON or craftingSubItemType == ITEMTYPE_GLYPH_ARMOR or craftingSubItemType == ITEMTYPE_GLYPH_JEWELRY
+    elseif filterType == NO_FILTER or filterType == runeType then
+        return runeType == ENCHANTING_RUNE_ASPECT or runeType == ENCHANTING_RUNE_ESSENCE or runeType == ENCHANTING_RUNE_POTENCY
+    end
+
+    return false
+end
+
+function ZO_Enchanting_IsEnchantingItem(bagId, slotIndex)
+    local usedInCraftingType, craftingSubItemType, runeType = GetItemCraftingInfo(bagId, slotIndex)
+
+    if usedInCraftingType == CRAFTING_TYPE_ENCHANTING then
+        if runeType == ENCHANTING_RUNE_ASPECT or runeType == ENCHANTING_RUNE_ESSENCE or runeType == ENCHANTING_RUNE_POTENCY then
+            return true
+        end
+        if craftingSubItemType == ITEMTYPE_GLYPH_WEAPON or craftingSubItemType == ITEMTYPE_GLYPH_ARMOR or craftingSubItemType == ITEMTYPE_GLYPH_JEWELRY then
+            return true
+        end
+    end
+
+    return false
+end
+
 function ZO_SharedEnchanting:Initialize(control)
     self.control = control
     self.skillInfo = self.control:GetNamedChild("SkillInfo")

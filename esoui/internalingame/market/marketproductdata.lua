@@ -230,6 +230,10 @@ function ZO_MarketProductData:IsDeprioritizeInAnnouncements()
     return IsDeprioritizedInAnnouncements(self.marketProductId)
 end
 
+function ZO_MarketProductData:GetAnnounceSortOrder()
+    return GetMarketProductAnnounceSortOrder(self.marketProductId)
+end
+
 function ZO_MarketProductData:GetEndTimeString()
     return GetMarketProductEndTimeString(self.marketProductId)
 end

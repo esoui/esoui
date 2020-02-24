@@ -86,9 +86,7 @@ function PregameInitialScreen_Gamepad:PerformDeferredInitialization()
     local pressTextLabel = self.control:GetNamedChild("PressText")
 
     -- Note: the line of text says "Press <<primary button icon>> To Start" but we're still going to handle other input buttons
-    local primaryButtonIconPath = ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_BUTTON_1)
-    local primaryButtonIcon = zo_iconFormat(primaryButtonIconPath, 40, 40)
-    pressTextLabel:SetText(zo_strformat(SI_GAMEPAD_PREGAME_PRESS_BUTTON, primaryButtonIcon))
+    pressTextLabel:SetText(zo_strformat(SI_GAMEPAD_PREGAME_PRESS_BUTTON, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
 
     self.esoLogoAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_FadeAnimation", esoLogoControl)
     self.pressTextAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_PregameInitialScreen_FadeAnimation", pressTextLabel)

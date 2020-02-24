@@ -138,7 +138,10 @@ do
         rowControl.textCallout:ClearAnchors()
 
         if onSale then
-            rowControl.previousCost:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(cost)))
+            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(cost))
+            local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
+            rowControl.previousCost:SetText(strikethroughAmountString)
+
             rowControl.textCallout:SetAnchor(RIGHT, rowControl.previousCost, LEFT, -10)
         else
             rowControl.textCallout:SetAnchor(RIGHT, rowControl.cost, LEFT, -10)

@@ -293,6 +293,10 @@
                         </Label>
                     </Controls>
                 </Control>
+                <Control name="$(parent)KeyboardTooltipMouseoverArea" mouseEnabled="true" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SetCollectibleActiveArea" offsetX="-30" offsetY="30" />
+                    <Dimensions x="50" y="45" />
+                </Control>
             </Controls>
         </Control>
 

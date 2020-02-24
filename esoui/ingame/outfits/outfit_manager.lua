@@ -150,7 +150,7 @@ end
 
 function ZO_OutfitSlotManipulator:GetSlotAppropriateIcon()
     if self.pendingCollectibleId > 0 then
-        collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.pendingCollectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.pendingCollectibleId)
         return collectibleData:GetIcon()
     elseif self:IsSlotDataChangePending() then
         return ZO_Restyle_GetOutfitSlotClearTexture(self.outfitSlotIndex)
@@ -465,30 +465,25 @@ function ZO_OutfitManipulator:IsAnyChangePending()
     return false
 end
 
-do
-    local IS_LOWER = true
-    local IS_PLURAL = false
+function ZO_OutfitManipulator:CanApplyChanges()
+    if not ZO_RestyleCanApplyChanges() then
+        return false, GetString("SI_APPLYOUTFITCHANGESRESULT", APPLY_OUTFIT_CHANGES_RESULT_ALTERATION_UNAVAILABLE)
+    end
 
-    function ZO_OutfitManipulator:CanApplyChanges()
-        if not ZO_RestyleCanApplyChanges() then
-            return false, GetString("SI_APPLYOUTFITCHANGESRESULT", APPLY_OUTFIT_CHANGES_RESULT_ALTERATION_UNAVAILABLE)
-        end
+    if not self:IsAnyChangePending() then
+        return false, GetString("SI_APPLYOUTFITCHANGESRESULT", APPLY_OUTFIT_CHANGES_RESULT_INVALID_DATA)
+    end
 
-        if not self:IsAnyChangePending() then
-            return false, GetString("SI_APPLYOUTFITCHANGESRESULT", APPLY_OUTFIT_CHANGES_RESULT_INVALID_DATA)
-        end
-
-        for _, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
-            if outfitSlotManipulator:IsSlotDataChangePending() then
-                local canApply, errorText = outfitSlotManipulator:CanApplyChanges()
-                if not canApply then
-                    return canApply, errorText
-                end
+    for _, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
+        if outfitSlotManipulator:IsSlotDataChangePending() then
+            local canApply, errorText = outfitSlotManipulator:CanApplyChanges()
+            if not canApply then
+                return canApply, errorText
             end
         end
-
-        return true
     end
+
+    return true
 end
 
 function ZO_OutfitManipulator:GetCollectibleDataAssociations(collectibleData)
@@ -517,7 +512,7 @@ function ZO_OutfitManipulator:OnSlotPendingDataChanged(outfitSlotIndex)
 end
 
 function ZO_OutfitManipulator:SendOutfitChangeRequest(useFlatCurrency)
-    argumentsTable = {}
+    local argumentsTable = {}
     for outfitSlotIndex, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
         if outfitSlotManipulator:IsAnyChangePending() then
             local primaryDyeId, secondaryDyeId, accentDyeId = outfitSlotManipulator:GetPendingDyeData()
@@ -539,6 +534,7 @@ function ZO_OutfitManipulator:SlotManipulatorIterator(...)
     local outfitSlot = nil
     local filterFunctions = {...}
     return function()
+        local slotManipulator
         outfitSlot, slotManipulator = next(self.outfitSlotManipulators, outfitSlot)
 
         while outfitSlot do

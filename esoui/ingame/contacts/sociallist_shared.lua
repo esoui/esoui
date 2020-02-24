@@ -2,7 +2,7 @@
 function ZO_SocialList_GetRowColors(data, selected)
     local textColor = data.online and ZO_SECOND_CONTRAST_TEXT or ZO_DISABLED_TEXT
     local iconColor = data.online and ZO_DEFAULT_ENABLED_COLOR or ZO_DISABLED_TEXT
-    if(selected) then
+    if selected then
         textColor = ZO_SELECTED_TEXT
         iconColor = ZO_SELECTED_TEXT
     end
@@ -11,33 +11,28 @@ function ZO_SocialList_GetRowColors(data, selected)
 end
 
 function ZO_SocialList_ColorRow(control, data, displayNameTextColor, iconColor, otherTextColor)
-    local displayName = GetControl(control, "DisplayName")
+    local displayName = control:GetNamedChild("DisplayName")
     displayName:SetColor(displayNameTextColor:UnpackRGBA())
 
-    local heronUserInfoTexture = GetControl(control, "HeronUserInfo")
-    if heronUserInfoTexture then
-        heronUserInfoTexture:SetColor(iconColor:UnpackRGBA())
-    end
-
     if data.hasCharacter then
-        local character = GetControl(control, "CharacterName")
+        local character = control:GetNamedChild("CharacterName")
         if character then
             character:SetColor(otherTextColor:UnpackRGBA())
         end
 
-        local zone = GetControl(control, "Zone")
+        local zone = control:GetNamedChild("Zone")
         zone:SetColor(otherTextColor:UnpackRGBA())
-        
-        local champion = GetControl(control, "Champion")
+
+        local champion = control:GetNamedChild("Champion")
         champion:SetColor(iconColor:UnpackRGBA())
 
-        local level = GetControl(control, "Level")
+        local level = control:GetNamedChild("Level")
         level:SetColor(otherTextColor:UnpackRGBA())
 
-        local alliance = GetControl(control, "AllianceIcon")
+        local alliance = control:GetNamedChild("AllianceIcon")
         alliance:SetColor(iconColor:UnpackRGBA())
 
-        local class = GetControl(control, "ClassIcon")
+        local class = control:GetNamedChild("ClassIcon")
         class:SetColor(iconColor:UnpackRGBA())
     end
 end
@@ -57,7 +52,7 @@ local KEYBOARD_FUNCTIONS =
     classIcon = GetClassIcon,
 }
 
-local GAMEPAD_FUNCTIONS = 
+local GAMEPAD_FUNCTIONS =
 {
     playerStatusIcon = GetGamepadPlayerStatusIcon,
     championPointsIcon = GetGamepadChampionPointsIcon,
@@ -68,15 +63,15 @@ local GAMEPAD_FUNCTIONS =
 function ZO_SocialList_SharedSocialSetup(control, data, selected)
     local textureFunctions = IsInGamepadPreferredMode() and GAMEPAD_FUNCTIONS or KEYBOARD_FUNCTIONS
 
-    local displayName = GetControl(control, "DisplayName")
-    local characterName = GetControl(control, "CharacterName")
-    local status = GetControl(control, "StatusIcon")
-    local zone = GetControl(control, "Zone")
-    local class = GetControl(control, "ClassIcon")
-    local alliance = GetControl(control, "AllianceIcon")
-    local heronUserInfoTexture = GetControl(control, "HeronUserInfo")
-    local level = GetControl(control, "Level")
-    local champion = GetControl(control, "Champion")
+    local displayName = control:GetNamedChild("DisplayName")
+    local characterName = control:GetNamedChild("CharacterName")
+    local status = control:GetNamedChild("StatusIcon")
+    local zone = control:GetNamedChild("Zone")
+    local class = control:GetNamedChild("ClassIcon")
+    local alliance = control:GetNamedChild("AllianceIcon")
+    local heronUserInfoTexture = control:GetNamedChild("HeronUserInfoIcon")
+    local level = control:GetNamedChild("Level")
+    local champion = control:GetNamedChild("Champion")
 
     if displayName then
         displayName:SetText(ZO_FormatUserFacingDisplayName(data.displayName))

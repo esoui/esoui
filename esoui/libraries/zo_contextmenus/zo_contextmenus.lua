@@ -139,12 +139,11 @@ function ClearMenu()
     ZO_Menu.owner = nil
 
     if type(owner) == "userdata" then
-        owner:SetHandler("OnEffectivelyHidden", ZO_Menu.existingEffectivelyHiddenHandler)
-        ZO_Menu.existingEffectivelyHiddenHandler = nil
+        owner:SetHandler("OnEffectivelyHidden", nil, "ZO_Menu")
     end
 end
 
-function IsMenuVisisble()
+function IsMenuVisible()
     return mouseUpRefCounts[ZO_Menu] ~= nil
 end
 
@@ -162,8 +161,7 @@ end
 
 local function SetMenuOwner(owner)
     if type(owner) == "userdata" then
-        local existingHandler = ZO_PreHookHandler(owner, "OnEffectivelyHidden", ClearMenu)
-        ZO_Menu.existingEffectivelyHiddenHandler = existingHandler
+        owner:SetHandler("OnEffectivelyHidden", ClearMenu, "ZO_Menu")
     end
 
     ZO_Menu.owner = owner
@@ -175,7 +173,7 @@ function GetMenuOwner(menu)
 end
 
 function MenuOwnerClosed(potentialOwner)
-    if IsMenuVisisble() and (GetMenuOwner() == potentialOwner) then
+    if IsMenuVisible() and (GetMenuOwner() == potentialOwner) then
         ClearMenu()
     end
 end

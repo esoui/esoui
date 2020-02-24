@@ -52,8 +52,8 @@ local ZO_OptionsPanel_Audio_ControlData =
             },
             onReleasedHandler = function() PlaySound(SOUNDS.VOLUME_DING_MUSIC) end,
             gamepadIsEnabledCallback = function() 
-                                            return tonumber(GetSetting(SETTING_TYPE_AUDIO, AUDIO_SETTING_MUSIC_ENABLED)) ~= 0
-                                        end,
+                return tonumber(GetSetting(SETTING_TYPE_AUDIO, AUDIO_SETTING_MUSIC_ENABLED)) ~= 0
+            end,
         },
         --Options_Audio_SoundEnabled
         [AUDIO_SETTING_SOUND_ENABLED] =
@@ -176,6 +176,19 @@ local ZO_OptionsPanel_Audio_ControlData =
             panel = SETTING_PANEL_AUDIO,
             text = SI_AUDIO_OPTIONS_BACKGROUND_AUDIO,
             tooltipText = SI_AUDIO_OPTIONS_BACKGROUND_AUDIO_TOOLTIP,
+            exists = ZO_IsPCOrHeronUI,
+        },
+        --Options_Audio_VoiceChatVolume
+        [AUDIO_SETTING_VOICE_CHAT_VOLUME] =
+        {
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_VOICE_CHAT_VOLUME,
+            controlType = OPTIONS_SLIDER,
+            panel = SETTING_PANEL_DEBUG,
+            text = SI_GAMEPAD_AUDIO_OPTIONS_VOICECHAT_VOLUME,
+            minValue = 40,
+            maxValue = 75,
+            exists = IsConsoleUI,
         },
     },
 
@@ -191,6 +204,7 @@ local ZO_OptionsPanel_Audio_ControlData =
             panel = SETTING_PANEL_AUDIO,
             text = SI_INTERFACE_OPTIONS_TOOLTIPS_SUBTITLES_ENABLED,
             tooltipText = SI_INTERFACE_OPTIONS_TOOLTIPS_SUBTITLES_ENABLED_TOOLTIP,
+            exists = ZO_IsIngameUI,
         },
     },
 }

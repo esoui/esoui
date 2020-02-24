@@ -57,6 +57,10 @@
                                 <Texture name="$(parent)Binding">
                                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
                                     <Dimensions x="64" y="64"/>
+                                    <OnInitialized>
+                                        ZO_GamepadTypeBasedControl_OnInitialized(self)
+                                        self:SetTextureSource(GetGamepadLeftStickSlideAndScrollIcon)
+                                    </OnInitialized>
                                 </Texture>
                             </Controls>
                         </ColorSelect>
@@ -81,6 +85,10 @@
                                 <Texture name="$(parent)Binding">
                                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="16"/>
                                     <Dimensions x="64" y="64"/>
+                                    <OnInitialized>
+                                        ZO_GamepadTypeBasedControl_OnInitialized(self)
+                                        self:SetTextureSource(GetGamepadRightStickScrollIcon)
+                                    </OnInitialized>
                                 </Texture>
                             </Controls>
                         </Slider>

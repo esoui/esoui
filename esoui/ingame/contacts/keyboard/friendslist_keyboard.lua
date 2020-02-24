@@ -9,20 +9,7 @@ function ZO_KeyboardFriendsListManager:New(...)
     return ZO_SocialListKeyboard.New(self, ...)
 end
 
-function ZO_KeyboardFriendsListManager:Initialize(control)
-    local rowTemplate
-    local headersControl
-    if IsHeronUI() then
-        rowTemplate = "ZO_FriendsListRow_Heron"
-        headersControl = CreateControlFromVirtual("$(parent)Headers", control, "ZO_FriendsListHeaders_Heron")
-    else
-        rowTemplate = "ZO_FriendsListRow"
-        headersControl = CreateControlFromVirtual("$(parent)Headers", control, "ZO_FriendsListHeaders")
-    end
-    local listControl = control:GetNamedChild("List")
-    listControl:SetAnchor(TOPLEFT, headersControl, BOTTOMLEFT, 0, 3)
-    listControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -35, -32)
-
+function ZO_KeyboardFriendsListManager:Initialize(control, rowTemplate)
     ZO_SocialListKeyboard.Initialize(self, control)
     FRIENDS_LIST_MANAGER:AddList(self)
 
@@ -353,7 +340,21 @@ function ZO_FriendsListRowChampion_OnMouseExit(control)
 end
 
 function ZO_FriendsList_OnInitialized(self)
-    FRIENDS_LIST = ZO_KeyboardFriendsListManager:New(self)
+    -- set up columns before initializing the social list
+    local rowTemplate
+    local headersControl
+    if IsHeronUI() then
+        rowTemplate = "ZO_FriendsListRow_Heron"
+        headersControl = CreateControlFromVirtual("$(parent)Headers", self, "ZO_FriendsListHeaders_Heron")
+    else
+        rowTemplate = "ZO_FriendsListRow"
+        headersControl = CreateControlFromVirtual("$(parent)Headers", self, "ZO_FriendsListHeaders")
+    end
+    local listControl = self:GetNamedChild("List")
+    listControl:SetAnchor(TOPLEFT, headersControl, BOTTOMLEFT, 0, 3)
+    listControl:SetAnchor(BOTTOMRIGHT, self, BOTTOMRIGHT, -35, -32)
+
+    FRIENDS_LIST = ZO_KeyboardFriendsListManager:New(self, rowTemplate)
 end
 
 function ZO_FriendsList_ToggleHideOffline(self)

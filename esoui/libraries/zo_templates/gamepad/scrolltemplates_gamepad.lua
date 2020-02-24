@@ -70,7 +70,6 @@ do
         self:EnableUpdateHandler()
 
         self.scrollIndicator = GetControl(self, "ScrollIndicator")
-        self.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
 
         self.scrollInput = 0
         self.animation, self.timeline = ZO_CreateScrollAnimation(self)

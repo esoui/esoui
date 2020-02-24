@@ -12,7 +12,7 @@ local ZO_Help_Root_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_S
 function ZO_Help_Root_Gamepad:New(...)
     local object = ZO_Object.New(self)
     object:Initialize(...)
-    return object    
+    return object
 end
 
 function ZO_Help_Root_Gamepad:Initialize(control)
@@ -41,6 +41,10 @@ function ZO_Help_Root_Gamepad:Initialize(control)
 
     local list = self:GetMainList()
     list:SetHandleDynamicViewProperties(true)
+
+    self.stuckComplete = false
+
+    self:InitializeDialogs()
 end
 
 function ZO_Help_Root_Gamepad:InitializeKeybindStripDescriptors()
@@ -70,14 +74,10 @@ function ZO_Help_Root_Gamepad:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self:GetMainList())
 end
 
-function ZO_Help_Root_Gamepad:OnDeferredInitialize()
-    self:InitializeDialogs()
-end
-
 -- stuck event handling
 
 function ZO_Help_Root_Gamepad:OnPlayerActivated()
-    if(IsStuckFixPending()) then
+    if IsStuckFixPending() then
         ZO_Dialogs_ShowGamepadDialog(GAMEPAD_UNSTUCK_LOADING_DIALOG)
     end
 end
@@ -145,17 +145,16 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckConfirmDialog()
             text = function()
                 local cost = zo_min(GetRecallCost(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
                 local goldIcon = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
-                local primaryButtonIconPath = ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_BUTTON_1)
-                local primaryButtonIcon = zo_iconFormat(primaryButtonIconPath, 64, 64)
+                local primaryButtonMarkup = ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)
 
                 local text
                 if DoesCurrentZoneHaveTelvarStoneBehavior() then
                     local telvarLossPercentage = zo_floor(GetTelvarStonePercentLossOnNonPvpDeath() * 100)
-                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT_TELVAR, cost, goldIcon, primaryButtonIcon, telvarLossPercentage)
+                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT_TELVAR, cost, goldIcon, primaryButtonMarkup, telvarLossPercentage)
                 elseif IsActiveWorldBattleground() then
                     text = GetString(SI_CUSTOMER_SERVICE_UNSTUCK_COST_PROMPT_IN_BATTLEGROUND)
                 else
-                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT, cost, goldIcon, primaryButtonIcon)
+                    text = zo_strformat(SI_GAMEPAD_HELP_UNSTUCK_CONFIRM_STUCK_PROMPT, cost, goldIcon, primaryButtonMarkup)
                 end
 
                 return text
@@ -193,7 +192,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckCooldownDialog()
 
         updateFn = function(dialog)
             local cooldownTime = GetTimeUntilStuckAvailable()
-            if(cooldownTime > 0) then
+            if cooldownTime > 0 then
                 dialog.cooldownLabelControl:SetText(ZO_FormatTimeMilliseconds(cooldownTime, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS, TIME_FORMAT_PRECISION_SECONDS))
             elseif not ZO_Dialogs_IsDialogHiding(GAMEPAD_UNSTUCK_COOLDOWN_DIALOG) then
                 ZO_Dialogs_ShowGamepadDialog(GAMEPAD_UNSTUCK_CONFIRM_DIALOG)
@@ -206,7 +205,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckCooldownDialog()
             text = GetString(SI_GAMEPAD_HELP_GET_ME_UNSTUCK),
         },
 
-        mainText = 
+        mainText =
         {
             text = GetString(SI_GAMEPAD_HELP_UNSTUCK_COOLDOWN_HEADER),
         },
@@ -236,7 +235,7 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckLoadingDialog()
         end,
 
         updateFn = function()
-            if(self.stuckComplete) then
+            if self.stuckComplete then
                 ZO_Dialogs_ReleaseDialogOnButtonPress(GAMEPAD_UNSTUCK_LOADING_DIALOG)
                 self.stuckComplete = false
                 SCENE_MANAGER:ShowBaseScene()
@@ -262,8 +261,6 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckLoadingDialog()
 end
 
 function ZO_Help_Root_Gamepad:InitializeUnstuckErrorDialog(dialogName, dialogText)
-    local formatText = zo_strformat(dialogText)
-
     ZO_Dialogs_RegisterCustomDialog(dialogName,
     {
         canQueue = true,
@@ -277,9 +274,9 @@ function ZO_Help_Root_Gamepad:InitializeUnstuckErrorDialog(dialogName, dialogTex
             text = SI_GAMEPAD_HELP_GET_ME_UNSTUCK,
         },
 
-        mainText = 
+        mainText =
         {
-            text = formatText,
+            text = dialogText,
         },
        
         buttons =

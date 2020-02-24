@@ -10,8 +10,24 @@ do
 
     function ZO_FormatUserFacingCharacterName(name)
         if name ~= "" then
-            if IsInGamepadPreferredMode()then
+            if IsInGamepadPreferredMode() then
                 return zo_iconTextFormat(CHARACTER_NAME_ICON, CHARACTER_NAME_ICON_SIZE, CHARACTER_NAME_ICON_SIZE, name)
+            else
+                return name
+            end
+        else
+            return ""
+        end
+    end
+end
+
+do
+    local HERON_NAME_ICON_SIZE = "70%"
+
+    function ZO_FormatUserFacingHeronName(name)
+        if name ~= "" then
+            if IsInGamepadPreferredMode() then
+                return zo_iconTextFormat(ZO_GAMEPAD_HERON_NAME_ICON, HERON_NAME_ICON_SIZE, HERON_NAME_ICON_SIZE, name)
             else
                 return name
             end
@@ -29,10 +45,12 @@ function ZO_FormatManualNameEntry(name)
     return IsConsoleUI() and DecorateDisplayName(name) or name
 end
 
+internalassert(UI_PLATFORM_MAX_VALUE == ACCOUNT_LABEL_MAX_VALUE, "There should be a platform account label for every platform")
 function ZO_GetPlatformAccountLabel()
     return GetString("SI_PLATFORMACCOUNTLABEL", GetUIPlatform())
 end
 
+internalassert(PLATFORM_STORE_LABEL_MAX_VALUE == PLATFORM_SERVICE_TYPE_MAX_VALUE, "There should be a platform store label for every platform service")
 function ZO_GetPlatformStoreName()
     return GetString("SI_PLATFORMSTORELABEL", GetPlatformServiceType())
 end
@@ -81,4 +99,35 @@ function ZO_PlatformIgnorePlayer(displayName, idRequestType, ...)
             end
         end
     end
+end
+
+function ZO_PlatformOpenApprovedURL(approvedUrlType, linkText, externalApplicationText)
+    if IsHeronUI() then
+        OpenURLByType(approvedUrlType)
+    else
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_OPEN_URL_BY_TYPE", { urlType = approvedUrlType }, { mainTextParams = { linkText, externalApplicationText } })
+    end
+end
+
+do
+    internalassert(UI_PLATFORM_MAX_VALUE == 3, "do these functions still do what they say they do?")
+    function ZO_IsPCOrHeronUI()
+        return not IsConsoleUI()
+    end
+
+    function ZO_IsPCUI()
+        return not IsConsoleUI() and not IsHeronUI()
+    end
+
+    function ZO_IsConsoleOrHeronUI()
+        return IsHeronUI() or IsConsoleUI()
+    end
+end
+
+function ZO_IsIngameUI()
+    return IsInUI("ingame")
+end
+
+function ZO_IsPregameUI()
+    return IsInUI("pregame")
 end

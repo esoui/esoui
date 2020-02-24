@@ -12,7 +12,7 @@ function ZO_HUDFragment:Initialize(...)
 end
 
 function ZO_HUDFragment:UpdateVisibility()
-    if(self:GetState() == SCENE_FRAGMENT_HIDDEN) then
+    if self:GetState() == SCENE_FRAGMENT_HIDDEN then
         return
     end
 
@@ -26,6 +26,9 @@ function ZO_HUDFragment:UpdateVisibility()
     TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, fragmentHidden, TUTORIAL_SUPPRESSED_BY_SCENE)
     INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("hudScene", fragmentHidden)
     HUD_RAID_LIFE:SetHiddenForReason("hudScene", fragmentHidden)
+    if GAMEPAD_CHAT_SYSTEM:ShouldOnlyShowOnHUD() then
+        GAMEPAD_CHAT_SYSTEM:RefreshVisibility()
+    end
 
     OBJECTIVE_CAPTURE_METER:SetHiddenForReason("hudScene", hiddenOrDead)
     SetFloatingMarkerGlobalAlpha(hiddenOrDead and 0 or 1)
@@ -101,10 +104,6 @@ local HUD_FRAGMENT_GROUP =
     BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT,
     ZONE_STORY_TRACKER_FRAGMENT,
 }
-
-if IsConsoleUI() then
-    table.insert(HUD_FRAGMENT_GROUP, GAMEPAD_TEXT_CHAT_FRAGMENT)
-end
 
 local NO_DEAD_FRAGMENTS =
 {

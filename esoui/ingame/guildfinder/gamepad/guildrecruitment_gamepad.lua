@@ -135,8 +135,7 @@ function ZO_GuildRecruitment_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 if self.currentCategory == ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_GUILD_LISTING then
                     local link = GetGuildRecruitmentLink(self.guildId, LINK_STYLE_BRACKETS)
-                    ZO_LinkHandler_InsertLink(link)
-                    CHAT_SYSTEM:SubmitTextEntry()
+                    ZO_LinkHandler_InsertLinkAndSubmit(link)
                 elseif self.currentCategory == ZO_GUILD_RECRUITMENT_CATEGORY_GAMEPAD_BLACKLIST then
                     local data =
                     {

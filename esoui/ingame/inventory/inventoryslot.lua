@@ -1433,10 +1433,11 @@ local function LinkHelper(slotActions, actionName, link)
     if link and link ~= "" then
         if actionName == "link_to_chat" and IsChatSystemAvailableForCurrentPlatform() then
             local linkFn = function()
-                ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link))
-
+                local formattedLink = zo_strformat(SI_TOOLTIP_ITEM_NAME, link)
                 if IsInGamepadPreferredMode() then
-                    CHAT_SYSTEM:SubmitTextEntry()
+                    ZO_LinkHandler_InsertLinkAndSubmit(formattedLink)
+                else
+                    ZO_LinkHandler_InsertLink(formattedLink)
                 end
             end
 

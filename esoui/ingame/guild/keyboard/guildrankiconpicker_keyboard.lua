@@ -14,9 +14,7 @@ function ZO_GuildRankIconPicker_Keyboard:New(...)
 end
 
 function ZO_GuildRankIconPicker_Keyboard:Initialize(control)
-    ZO_GuildRankIconPicker_Shared.Initialize(self, control)
-
-    self.templateData =
+    local templateData =
     {
         gridListClass = ZO_GridScrollList_Keyboard,
         entryTemplate = "ZO_GuildRank_RankIconPickerIcon_Keyboard_Control",
@@ -25,6 +23,8 @@ function ZO_GuildRankIconPicker_Keyboard:Initialize(control)
         entryPaddingX = ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_KEYBOARD_PADDING,
         entryPaddingY = ZO_GUILD_RANK_RANK_ICON_PICKER_PICK_KEYBOARD_PADDING,
     }
+
+    ZO_GuildRankIconPicker_Shared.Initialize(self, control, templateData)
 
     self:InitializeRankIconPickerGridList()
 end

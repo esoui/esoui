@@ -147,7 +147,7 @@ function ZO_AutoComplete:Hide()
 end
 
 function ZO_AutoComplete:IsOpen()
-    return IsMenuVisisble() and GetMenuOwner() == self.owner
+    return IsMenuVisible() and GetMenuOwner() == self.owner
 end
 
 function ZO_AutoComplete:SetUseCallbacks(useCallbacks)

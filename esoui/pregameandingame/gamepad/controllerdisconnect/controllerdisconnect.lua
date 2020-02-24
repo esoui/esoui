@@ -8,7 +8,7 @@ function ZO_ControllerDisconnect_Initialize(self)
 	ZO_GamepadGenericHeader_Initialize(header)
 	ZO_GamepadGenericHeader_Refresh(header, headerData)
 
-    self:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1)))
+    self:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_GAMEPAD_DISCONNECTED_CONTINUE_TEXT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
 end
 
 function ZO_ControllerDisconnect_ShowPopup()

@@ -330,12 +330,6 @@ function ZO_CharacterCreate_Gamepad:InitializeSkipTutorialDialog()
     })
 end
 
-do
-    local function ReturnToCharacterSelect()
-        PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
-        GAMEPAD_CHARACTER_CREATE_MANAGER:ExitToState("CharacterSelect")
-    end
-
     function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
         if self.isCreating then
             return nil  -- No keybind while creating
@@ -387,14 +381,14 @@ do
                 end,
 
                 visible = function()
-                        local shouldShow = false
-                        if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
-                            if GetTemplateStatus() then
-                                local templates = self.characterData:GetTemplateInfo()
-                                shouldShow = templates and #templates > 0
-                            end
+                    local shouldShow = false
+                    if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
+                        if GetTemplateStatus() then
+                            local templates = self.characterData:GetTemplateInfo()
+                            shouldShow = templates and #templates > 0
                         end
-                        return shouldShow
+                    end
+                    return shouldShow
                 end,
             }
         }
@@ -450,18 +444,19 @@ do
             end,
         }
 
-        local state = PregameStateManager_GetPreviousState()
-        local numCharacters = GetNumCharacters()
-        if (state == "CharacterSelect" or state == "CharacterSelect_FromCinematic") and numCharacters > 0 then
-            keybindStripDescriptor[#keybindStripDescriptor + 1] = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ReturnToCharacterSelect)
-        elseif numCharacters == 0 then
-            -- mimic the behavior from the character select screen
-            keybindStripDescriptor[#keybindStripDescriptor + 1] = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect)
+    local function LeaveCharacterCreate()
+        if GetNumCharacters() > 0 then
+            PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+            GAMEPAD_CHARACTER_CREATE_MANAGER:ExitToState("CharacterSelect")
+        else
+            -- We have no characters, so we cannot show character select. Go back to login
+            ZO_Disconnect()
         end
+    end
+    keybindStripDescriptor[#keybindStripDescriptor + 1] = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(LeaveCharacterCreate)
 
         return keybindStripDescriptor
     end
-end
 
 -- Can't simply return (currentStrip ~= newStrip) because ZoKeybindStrip stores additional 
 -- variables on the descriptor (such as currentStrip.handledDown). This causes an altered

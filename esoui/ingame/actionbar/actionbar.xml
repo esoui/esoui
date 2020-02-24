@@ -227,19 +227,19 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FlipCard" offsetX="12" offsetY="12" />
                 </Backdrop>
 
-                <Texture name="$(parent)LBkey" tier="HIGH">
+                <Texture name="$(parent)LBkey" inherits="ZO_KeyTexture" tier="HIGH">
                     <Dimensions x="40" y="40" />
                     <Anchor point="TOPRIGHT" relativePoint="BOTTOMLEFT" offsetY="-18" />
-                    <OnInitialized>
-                        self:SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER))
+                    <OnInitialized name="UltimateButton">
+                        self:SetKeyCode(KEY_GAMEPAD_LEFT_SHOULDER)
                     </OnInitialized>
                 </Texture>
 
-                <Texture name="$(parent)RBkey" tier="HIGH">
+                <Texture name="$(parent)RBkey" inherits="ZO_KeyTexture" tier="HIGH">
                     <Dimensions x="40" y="40" />
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMRIGHT" offsetY="-18" />
-                    <OnInitialized>
-                        self:SetTexture(GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER))
+                    <OnInitialized name="UltimateButton">
+                        self:SetKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER)
                     </OnInitialized>
                 </Texture>
 

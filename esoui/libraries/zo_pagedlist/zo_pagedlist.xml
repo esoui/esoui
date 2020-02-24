@@ -10,21 +10,19 @@
                     <Anchor point="CENTER" />
                 </Label>
                 
-                <Button name="$(parent)PreviousButton">
+                <Button name="$(parent)PreviousButton" inherits="ZO_KeyButton">
                     <Anchor point="RIGHT" relativeTo="$(parent)PageNumberText" relativePoint="LEFT" offsetX="-10" />
                     <Dimensions x="50" y="50"/>
-                    <OnInitialized>
-                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_LEFT_TRIGGER))
-                        self:SetDisabledTexture(ZO_GAMEPAD_LEFT_TRIGGER_DISABLED)
+                    <OnInitialized name="ZO_PagedList">
+                        self:SetKeyCode(KEY_GAMEPAD_LEFT_TRIGGER)
                     </OnInitialized>
                 </Button>
 
-                <Button name="$(parent)NextButton">
+                <Button name="$(parent)NextButton" inherits="ZO_KeyButton">
                     <Anchor point="LEFT" relativeTo="$(parent)PageNumberText" relativePoint="RIGHT" offsetX="10" />
                     <Dimensions x="50" y="50"/>
-                    <OnInitialized>
-                        self:SetNormalTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_RIGHT_TRIGGER))
-                        self:SetDisabledTexture(ZO_GAMEPAD_RIGHT_TRIGGER_DISABLED)
+                    <OnInitialized name="ZO_PagedList">
+                        self:SetKeyCode(KEY_GAMEPAD_RIGHT_TRIGGER)
                     </OnInitialized>
                 </Button>
             </Controls>

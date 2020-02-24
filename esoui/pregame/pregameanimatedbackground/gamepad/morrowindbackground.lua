@@ -619,7 +619,7 @@ end
 --Global XML Handlers
 
 function ZO_MorrowindBackground_OnInitialized(self)
-    if IsConsoleUI() then
+    if IsGamepadUISupported() then
         PREGAME_ANIMATED_BACKGROUND = MorrowindBackground:New(self)
     end
 end

@@ -8,8 +8,10 @@ function ZO_GuildRecruitment_GuildListing_Shared:New(...)
     return ZO_GuildRecruitment_Panel_Shared.New(self, ...)
 end
 
-function ZO_GuildRecruitment_GuildListing_Shared:Initialize(control)
+function ZO_GuildRecruitment_GuildListing_Shared:Initialize(control, templateData)
     ZO_GuildRecruitment_Panel_Shared.Initialize(self, control)
+
+    self.templateData = templateData
 
     self:InitializeGridList()
 
@@ -31,17 +33,6 @@ function ZO_GuildRecruitment_GuildListing_Shared:Initialize(control)
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:InitializeGridList()
-    -- Create Data Object Pool
-    local function CreateEntryData()
-        return ZO_GridSquareEntryData_Shared:New()
-    end
-
-    local function ResetEntryData(data)
-        data:SetDataSource(nil)
-    end
-
-    self.entryDataObjectPool = ZO_ObjectPool:New(CreateEntryData, ResetEntryData)
-
     -- Initialize grid list object
     local templateData = self.templateData
     local gridListControl = self.control:GetNamedChild("InfoPanel")
@@ -416,7 +407,6 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildGridList()
     if self.gridList then
         local currentScrollValue = self.gridList:GetScrollValue()
         self.gridList:ClearGridList()
-        self.entryDataObjectPool:ReleaseAllObjects()
         self.attributeSelectionData.activities.isDisabled = {}
 
         -- Recruitment Status
@@ -462,10 +452,8 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildGridList()
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionEntry(data)
-    local entryData = self.entryDataObjectPool:AcquireObject()
-    entryData:SetDataSource(data)
-    entryData.gridHeaderName = ""
-    self.gridList:AddEntry(entryData, data.entryTemplate)
+    data.gridHeaderName = ""
+    self.gridList:AddEntry(data, data.entryTemplate)
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:OnActivityCheckboxToggle(attribute, isChecked)
@@ -483,7 +471,6 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildActivityCheckboxes()
     local headerText = self.templateData.activityCheckbox.headerText
     self.attributeSelectionData.activities.entryData = {}
     for i = GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_END do
-        local entryData = self.entryDataObjectPool:AcquireObject()
         local data =
         {
             attribute = attribute,
@@ -497,24 +484,21 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildActivityCheckboxes()
                 return self.attributeSelectionData.activities.isChecked[i] or self.attributeSelectionData.activities.isDisabled[i]
             end,
             onToggleFunction = function(...) self:OnActivityCheckboxToggle(...) end,
+            gridHeaderName = headerText,
+            gridHeaderTemplate = self.templateData.headerTemplate
         }
-        entryData:SetDataSource(data)
-        entryData.gridHeaderName = headerText
-        entryData.gridHeaderTemplate = self.templateData.headerTemplate
         if i == GUILD_ACTIVITY_ATTRIBUTE_VALUE_ITERATION_END then
-            self.gridList:AddEntry(entryData, self.templateData.activityCheckbox.endEntryTemplate)
+            self.gridList:AddEntry(data, self.templateData.activityCheckbox.endEntryTemplate)
         else
-            self.gridList:AddEntry(entryData, self.templateData.activityCheckbox.entryTemplate)
+            self.gridList:AddEntry(data, self.templateData.activityCheckbox.entryTemplate)
         end
-        self.attributeSelectionData.activities.entryData[i] = entryData:GetDataSource()
+        self.attributeSelectionData.activities.entryData[i] = data
     end
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:BuildEditBoxEntry(data)
-    local entryData = self.entryDataObjectPool:AcquireObject()
-    entryData:SetDataSource(data)
-    entryData.gridHeaderName = ""
-    self.gridList:AddEntry(entryData, data.entryTemplate)
+    data.gridHeaderName = ""
+    self.gridList:AddEntry(data, data.entryTemplate)
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:BuildRoleSelectorEntry(data)
@@ -528,10 +512,8 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildRoleSelectorEntry(data)
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:AddRoleEntry(data)
-    local entryData = self.entryDataObjectPool:AcquireObject()
-    entryData:SetDataSource(data)
-    entryData.gridHeaderName = ""
-    self.gridList:AddEntry(entryData, data.entryTemplate)
+    data.gridHeaderName = ""
+    self.gridList:AddEntry(data, data.entryTemplate)
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:OnShowing()

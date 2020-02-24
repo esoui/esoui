@@ -448,6 +448,9 @@ end
 
 function ZO_CharacterCreate_Base:OnLogoutSuccessful()
     self:SetRandomCharacterGenerated(false)
+
+    local NUM_FLASHES_BEFORE_SOLID = 7
+    FlashTaskbarWindow("LOGOUT", NUM_FLASHES_BEFORE_SOLID)
 end
 
 function ZO_CharacterCreate_Base:OnCharacterCreated(characterId)

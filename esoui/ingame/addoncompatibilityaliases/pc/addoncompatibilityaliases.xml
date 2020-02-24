@@ -1,0 +1,12 @@
+<GuiXml>
+    <Animations>
+        <!-- ZO_MoneyInput changes to ZO_CurrencyInput -->
+        <AnimationTimeline name="MoneyInputPulse" inherits="CurrencyInputPulse" />            
+        <AnimationTimeline name="MoneyInputBadInput" inherits="CurrencyInputBadInput" />
+    </Animations>
+    
+    <Controls>
+        <!-- ZO_MoneyInput changes to ZO_CurrencyInput -->
+        <Backdrop name="ZO_DefaultMoneyInputField" inherits="ZO_DefaultCurrencyInputField" virtual="true" />
+	</Controls>
+</GuiXml>

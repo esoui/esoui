@@ -1405,6 +1405,7 @@ function ZO_PlayerToPlayer:RemoveEntryFromIncomingQueueTable(index)
     local incomingEntry = table.remove(self.incomingQueue, index)
     if TIMED_PROMPTS[incomingEntry.incomingType] then
         ZO_Dialogs_ReleaseAllDialogsOfName("PTP_TIMED_RESPONSE_PROMPT", function(dialogData) return dialogData == incomingEntry end)
+        CancelTaskbarWindowFlash("PTP_TIMED_RESPONSE_PROMPT")
     end
     return incomingEntry
 end
@@ -1591,6 +1592,7 @@ function ZO_PlayerToPlayer:OnUpdate()
             -- For time sensitive prompts, the player probably won't see them if they are currently in a UI menu. Let's throw up a dialog before it's too late to respond
             ZO_Dialogs_ShowPlatformDialog("PTP_TIMED_RESPONSE_PROMPT", incomingEntry)
             incomingEntry.seen = true
+            FlashTaskbarWindow("PTP_TIMED_RESPONSE_PROMPT")
         end
     end
 

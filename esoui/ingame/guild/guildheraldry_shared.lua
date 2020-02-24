@@ -1,5 +1,6 @@
-local STYLE_BACKGROUND_INDEX = 1
-local STYLE_SELECTED_INDEX = 2
+-----------------------------------
+-- GuildHeraldryManager Shared
+-----------------------------------
 
 ZO_HERALDRY_CATEGORY_MODE = 1
 ZO_HERALDRY_COLOR_MODE = 2
@@ -17,24 +18,43 @@ function ZO_GuildHeraldryManager_Shared:New(...)
     return manager
 end
 
-function ZO_GuildHeraldryManager_Shared:Initialize(control, currencyOptions)
+function ZO_GuildHeraldryManager_Shared:Initialize(control, currencyOptions, templateData)
     self.control = control
     self.currencyOptions = currencyOptions
 
-    self.styleHeader = self.control:GetNamedChild("StyleHeader")
     self.bgStyleCatListControl = self.control:GetNamedChild("BGStyleCategoryList")
     self.crestStyleCatListControl = self.control:GetNamedChild("CrestStyleCategoryList")
-    self.stylePane = self.control:GetNamedChild("StylePane")
-    self.stylePaneScrollChild = self.stylePane:GetNamedChild("ScrollChild")
     self.pendingTransaction = false
-
-    self.swatchInterpolator = ZO_SimpleControlScaleInterpolator:New(1.0, 1.3)
 
     EndHeraldryCustomization()
 
     EVENT_MANAGER:RegisterForEvent("guildHeraldry", EVENT_PLAYER_DEACTIVATED, function(eventCode)
         EndHeraldryCustomization()
     end)
+
+    -- This is platform specific data that needs to be overridden by the inheriting classes as it
+    -- specifies the platform specific data to use.
+    --[[ Expected values in templateData:
+        gridListClass - The class object to be use to new the style and color grid lists
+        styleEntryTemplate - The template to be used a style element
+        styleEntryWidth - The width of a style element
+        styleEntryHeight - The height of a style element
+        styleGridPadding - The offset of between style elements both horizontally and vertically
+        styleEntrySetup - The function used to setup a style element
+        styleEntryReset - The function used to reset a style element
+        styleHasGridHeader - Bool value of if the style section should have a header internal to the grid list
+        colorEntryTemplate - The template to be used a color element
+        colorEntryWidth - The width of a color element
+        colorEntryHeight - The height of a style element
+        colorEntrySetup - The function used to setup a color element
+        colorEntryReset - The height of a color element
+        headerTemplate - The template used for an in-grid header for both style and color
+        headerHeight - The height of the header template
+        ]]
+    self.templateData = templateData
+
+    self.styleGridListControl = self.control:GetNamedChild("StylePane")
+    self.colorGridListControl = self.control:GetNamedChild("ColorPane")
 end
 
 local function EqualityFunction(leftData, rightData)
@@ -90,189 +110,139 @@ function ZO_GuildHeraldryManager_Shared:PopulateStyleCategoryLists()
     self.crestStyleCatList:Commit()
 end
 
-function ZO_GuildHeraldryManager_Shared:InitializeSwatchPool(template, parent)
-    self.swatchPool = ZO_ControlPool:New(template, parent)
+function ZO_GuildHeraldryManager_Shared:InitializeStyleGridList()
+    local templateData = self.templateData
 
-    local function SetSelected(swatch, selected, skipAnim, skipSound)
-        if swatch.selected ~= selected then
-            swatch.selected = selected
-            if selected and not skipSound then
-                PlaySound(SOUNDS.DYEING_SWATCH_SELECTED)
-            end
-            swatch:UpdateSelectedState(skipAnim)
-        end
-    end
+    self.styleGridList = templateData.gridListClass:New(self.styleGridListControl)
 
-    local function SetHighlighted(swatch, highlighted, skipAnim, skipSound)
-        if swatch.highlighted ~= highlighted then
-            swatch.highlighted = highlighted
-            if highlighted and not skipSound then
-                -- TODO: Need to play a sound here?
-            end
-            swatch:UpdateHighlightedState(skipAnim)
-        end
-    end
+    local NO_HIDE_CALLBACK = nil
+    self.styleGridList:AddEntryTemplate(templateData.styleEntryTemplate, templateData.styleEntryWidth, templateData.styleEntryHeight, templateData.styleEntrySetup, NO_HIDE_CALLBACK, templateData.styleEntryReset, templateData.styleGridPadding, templateData.styleGridPadding)
+    self.styleGridList:AddHeaderTemplate(templateData.headerTemplate, templateData.headerHeight, ZO_DefaultGridTileHeaderSetup)
 
-    local function UpdateState(swatch, skipAnim, highlight, isActive, width)
-        if swatch.mousedOver or isActive then
-            if skipAnim then
-                self.swatchInterpolator:ResetToMax(swatch)
-            else
-                self.swatchInterpolator:ScaleUp(swatch)
-            end
-        else
-            if skipAnim then
-                self.swatchInterpolator:ResetToMin(swatch)
-            else
-                self.swatchInterpolator:ScaleDown(swatch)
-            end
-        end
-
-        if highlight and isActive then
-            highlight:SetParent(swatch)
-            highlight:SetAnchor(TOPLEFT, swatch, TOPLEFT, -width, -width)
-            highlight:SetAnchor(BOTTOMRIGHT, swatch, BOTTOMRIGHT, width, width)
-            highlight:SetHidden(false)
-        end
-    end
-
-    local function UpdateSelectedState(swatch, skipAnim)
-        UpdateState(swatch, skipAnim, self.sharedColorSelectedHighlight, swatch.selected, 5)
-    end
-
-    local function UpdateHighlightedState(swatch, skipAnim)
-        UpdateState(swatch, skipAnim, self.sharedColorBrowseHighlight, swatch.selected or swatch.highlighted, 2)
-    end
-
-    local function OnClicked(swatch, button, upInside)
-        if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
-            self:SelectColor(swatch.colorIndex)
-        end
-    end
-
-    local function OnSwatchCreated(swatch)
-        swatch:SetHandler("OnMouseUp", OnClicked)
-        swatch.SetSelected = SetSelected
-        swatch.SetHighlighted = SetHighlighted
-        swatch.UpdateSelectedState = UpdateSelectedState
-        swatch.UpdateHighlightedState = UpdateHighlightedState
-        swatch.owner = self
-
-        swatch:SetSurfaceHidden(ZO_DYEING_LOCK_INDEX, true)
-    end
-
-    local function OnSwatchReset(swatch)
-        swatch:SetSelected(false, ZO_HERALDRY_SKIP_ANIM)
-        swatch:SetHighlighted(false, ZO_HERALDRY_SKIP_ANIM)
-    end
-
-    self.swatchPool:SetCustomFactoryBehavior(OnSwatchCreated)
-    self.swatchPool:SetCustomResetBehavior(OnSwatchReset)
+    self:BuildStyleGridList()
 end
 
-function ZO_GuildHeraldryManager_Shared:InitializeStylePool(template)
-    self.stylePool = ZO_ControlPool:New(template, self.stylePaneScrollChild)
+function ZO_GuildHeraldryManager_Shared:InitializeColorGridList()
+    local templateData = self.templateData
 
-    local function SetSelected(style, selected, skipAnim, skipSound)
-        if style.selected ~= selected then
-            style.selected = selected
-            if selected and not skipSound then
-                PlaySound(SOUNDS.GUILD_HERALDRY_STYLE_SELECTED)
+    self.colorGridList = templateData.gridListClass:New(self.colorGridListControl)
+
+    local NO_HIDE_CALLBACK = nil
+    local GRID_PADDING = 0
+    local CENTER_ENTRIES = true
+    self.colorGridList:AddEntryTemplate(templateData.colorEntryTemplate, templateData.colorEntryWidth, templateData.colorEntryHeight, templateData.colorEntrySetup, NO_HIDE_CALLBACK, templateData.colorEntryReset, GRID_PADDING, GRID_PADDING, CENTER_ENTRIES)
+    self.colorGridList:AddHeaderTemplate(templateData.headerTemplate, templateData.headerHeight, ZO_DefaultGridTileHeaderSetup)
+
+    self:InitializeColorCategories()
+    self:BuildColorGridList()
+end
+
+function ZO_GuildHeraldryManager_Shared:InitializeColorCategories()
+    self.colorListsByCategory = {}
+    for hueCategory = DYE_HUE_CATEGORY_ITERATION_BEGIN, DYE_HUE_CATEGORY_ITERATION_END do
+        self.colorListsByCategory[hueCategory] = {}
+    end
+    
+    for i = 1, GetNumHeraldryColors() do
+        local colorName, hueCategory, r, g, b, sortKey = GetHeraldryColorInfo(i)
+        local data =
+        {
+            colorIndex = i,
+            dyeName = colorName,
+            hueCategory = hueCategory,
+            known = true,
+            r = r,
+            g = g,
+            b = b,
+            sortKey = sortKey,
+        }
+        table.insert(self.colorListsByCategory[hueCategory], data)
+    end
+
+    for hueCategory = DYE_HUE_CATEGORY_ITERATION_BEGIN, DYE_HUE_CATEGORY_ITERATION_END do
+        table.sort(self.colorListsByCategory[hueCategory], ZO_Dyeing_DyeSortComparator)
+    end
+
+    self.sortedColorList = {}
+    for sortStyleCategory, colors in pairs(self.colorListsByCategory) do
+        for _, color in ipairs(colors) do
+            color.categoryOrder = sortStyleCategory
+            table.insert(self.sortedColorList, color)
+        end
+    end
+
+    table.sort(self.sortedColorList, ZO_DyeSwatchesGridSort)
+end
+
+function ZO_GuildHeraldryManager_Shared:BuildStyleGridList()
+    self.styleGridList:ClearGridList()
+
+    if(self.mode == ZO_HERALDRY_BG_STYLE_MODE or self.mode == ZO_HERALDRY_CREST_STYLE_MODE) and self.activeData then
+        local templateData = self.templateData
+
+        -- Iterate through styles and create each style
+        local selectedStyle = self.activeData.getSelectedStyle()
+        local viewingSelectedCategory = self.activeData.getSelectedCategory() == self.activeData.getViewCategory()
+
+        for i = 1, self.activeData.getNum() do
+            local gridHeaderName = ""
+            if self.activeData.mode == ZO_HERALDRY_BG_STYLE_MODE then
+                gridHeaderName = GetString(SI_GUILD_HERALDRY_PATTERN_HEADER)
+            elseif self.activeData.mode == ZO_HERALDRY_CREST_STYLE_MODE then
+                gridHeaderName = GetString(SI_GUILD_HERALDRY_DESIGN_HEADER)
             end
-            style:UpdateSelectedState(skipAnim)
-        end
-    end
-
-    local function SetHighlighted(style, highlighted, skipAnim, skipSound)
-        if style.highlighted ~= highlighted then
-            style.highlighted = highlighted
-            if highlighted and not skipSound then
-                -- TODO: Need to play a sound here?
-            end
-            style:UpdateHighlightedState(skipAnim)
-        end
-    end
-
-    local function UpdateState(style, skipAnim, highlight, isActive, width)
-        if highlight then
-            if style.mousedOver or isActive then
-                highlight:SetParent(style)
-                highlight:SetAnchor(CENTER, style, CENTER, 0, 0)
-                if highlight.animation then
-                    highlight.animation:PlayForward()
-                elseif highlight.blockAlphaChanges then
-                    highlight:SetHidden(false)
-                else
-                    highlight:SetAlpha(1)
-                end
-            else
-                if highlight.animation then
-                    highlight.animation:PlayBackward()
-                elseif highlight.blockAlphaChanges then
-                    highlight:SetHidden(true)
-                else
-                    highlight:SetAlpha(0)
-                end
-            end
-        end
-
-        if style.frame then
-            if style.frame.SetSurfaceHidden then
-                style.frame:SetSurfaceHidden(STYLE_SELECTED_INDEX, not isActive)
-            elseif width then
-                width = isActive and width or 0
-                style.frame:SetAnchor(TOPLEFT, style, TOPLEFT, -width, -width)
-                style.frame:SetAnchor(BOTTOMRIGHT, style, BOTTOMRIGHT, width, width)
-            end
-        end
-        
-        if style.highlight then
-            local shouldHaveHighlight = isActive
-            
-            if not width then
-                shouldHaveHighlight = false
+            if not templateData.styleHasGridHeader and self.stylesHeader then
+                self.stylesHeader:SetText(gridHeaderName)
+                gridHeaderName = ""
             end
 
-            style.highlight:SetHidden(not shouldHaveHighlight)
+            local styleName, icon = self.activeData.getInfo(i)
+            local data =
+            {
+                index = i,
+                styleName = styleName,
+                icon = icon,
+                checked = viewingSelectedCategory and i == selectedStyle,
+                gridHeaderName = gridHeaderName,
+                gridHeaderTemplate = templateData.headerTemplate
+            }
+
+            self.styleGridList:AddEntry(data, templateData.styleEntryTemplate)
+        end
+
+        self.styleGridList:CommitGridList()
+    end
+end
+
+function ZO_GuildHeraldryManager_Shared:BuildColorGridList()
+    self.colorGridList:ClearGridList()
+
+    if self.mode == ZO_HERALDRY_COLOR_MODE and self.activeData then
+        local templateData = self.templateData
+        local tempTable = {}
+        local selectedData = nil
+        for i, color in ipairs(self.sortedColorList) do
+            color.checked = false
+            local swatchObject = ZO_DyeingSwatch_Shared:New(self)
+            swatchObject:SetDataSource(color)
+            swatchObject.gridHeaderName = GetString("SI_DYEHUECATEGORY", color.categoryOrder)
+            swatchObject.gridHeaderTemplate = templateData.headerTemplate
+            swatchObject.color = ZO_ColorDef:New(color.r, color.g, color.b)
+            if self.activeData and color.colorIndex == self.activeData.getSelectedColorIndex() then
+                color.checked = true
+                selectedData = swatchObject
+            end
+            self.colorGridList:AddEntry(swatchObject, templateData.colorEntryTemplate)
+        end
+
+        self.colorGridList:CommitGridList()
+
+        if selectedData then
+            local NO_CALLBACK = nil
+            local ANIMATE_INSTANTLY = true
+            self.colorGridList:ScrollDataToCenter(selectedData, NO_CALLBACK, ANIMATE_INSTANTLY)
         end
     end
-
-    local DEFAULT_WIDTH = 10
-
-    local function UpdateSelectedState(style, skipAnim)
-        UpdateState(style, skipAnim, self.sharedStyleSelectedHighlight, style.selected, DEFAULT_WIDTH)
-    end
-
-    local function UpdateHighlightedState(style, skipAnim)
-        UpdateState(style, skipAnim, nil, style.highlighted, DEFAULT_WIDTH)
-    end
-
-    local function OnClicked(style, button, upInside)
-        if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
-            self:SelectStyle(style.styleIndex)
-        end
-    end
-
-    local function OnStyleCreated(style)
-        style:SetHandler("OnMouseUp", OnClicked)
-        style.UpdateSelectedState = UpdateSelectedState
-        style.UpdateHighlightedState = UpdateHighlightedState
-        style.SetSelected = SetSelected
-        style.SetHighlighted = SetHighlighted
-        style.icon = GetControl(style, "Icon")
-        style.frame = GetControl(style, "Frame")
-        style.highlight = GetControl(style, "Highlight")
-        style.owner = self
-        style:SetSelected(false, ZO_HERALDRY_SKIP_ANIM)
-    end
-
-    local function OnStyleReset(style)
-        style:SetSelected(false, ZO_HERALDRY_SKIP_ANIM)
-        style:SetHighlighted(false, ZO_HERALDRY_SKIP_ANIM)
-    end
-
-    self.stylePool:SetCustomFactoryBehavior(OnStyleCreated)
-    self.stylePool:SetCustomResetBehavior(OnStyleReset)
 end
 
 function ZO_GuildHeraldryManager_Shared:OnCategorySelected(data)
@@ -288,14 +258,6 @@ function ZO_GuildHeraldryManager_Shared:OnCategorySelected(data)
         end
 
         self:SwitchMode(data.mode)
-        if self.costControl then
-            if data.cost then
-                self.costControl:SetHidden(false)
-                ZO_CurrencyControl_SetSimpleCurrency(self.costControl, CURT_MONEY, data.cost, self.currencyOptions)
-            else
-                self.costControl:SetHidden(true)
-            end
-        end
 
         if data.resetToSelectedCategory then
             data.resetToSelectedCategory()
@@ -306,24 +268,24 @@ function ZO_GuildHeraldryManager_Shared:OnCategorySelected(data)
 end
 
 function ZO_GuildHeraldryManager_Shared:SelectColor(colorIndex, becauseOfRebuild)
-    local selectedColor = self.activeData.getSelectedColor()
-    if selectedColor ~= colorIndex or becauseOfRebuild then
-        local oldSwatch = not becauseOfRebuild and self.colorIndexToSwatch[selectedColor]
-        if oldSwatch then
-            oldSwatch:SetSelected(false)
-        end
-
-        self.activeData.setSelectedColor(colorIndex)
-
-        local newSwatch = self.colorIndexToSwatch[colorIndex]
-        if newSwatch then
-            newSwatch:SetSelected(true, becauseOfRebuild, becauseOfRebuild)
-            if self.colorPane then
-                ZO_Scroll_ScrollControlIntoCentralView(self.colorPane, self.colorIndexToSwatch[colorIndex])
+    local selectedColorIndex = self.activeData.getSelectedColorIndex()
+    if selectedColorIndex ~= colorIndex or becauseOfRebuild then
+        local colorDataList = self.colorGridList:GetData()
+        for i, entryData in ipairs(colorDataList) do
+            if not entryData.data.header and entryData.data.lineBreakAmount == nil then
+                local selected = false
+                local data = entryData.data:GetDataSource()
+                if data.colorIndex == colorIndex then
+                    selected = true
+                end
+                data.checked = selected
+                self:SetEntryDataSelected(entryData, selected)
             end
-        else
-            self.sharedColorSelectedHighlight:SetHidden(true)
         end
+
+        self.activeData.setSelectedColorIndex(colorIndex)
+
+        self.colorGridList:RefreshGridList()
 
         if not becauseOfRebuild then
             self:SetPendingIndices()
@@ -345,7 +307,7 @@ function ZO_GuildHeraldryManager_Shared:SetGuildId(guildId)
     if self.guildId ~= guildId then
         self.guildId = guildId
 
-        if(SCENE_MANAGER:IsShowing("guildHeraldry")) then
+        if SCENE_MANAGER:IsShowing("guildHeraldry") then
             EndHeraldryCustomization()
             StartHeraldryCustomization(guildId)
         end
@@ -354,43 +316,6 @@ end
 
 function ZO_GuildHeraldryManager_Shared:IsEnabled()
     return IsPlayerAllowedToEditHeraldry(self.guildId)
-end
-
-function ZO_GuildHeraldryManager_Shared:LayoutColors()
-    self.swatchPool:ReleaseAllObjects()
-    if self.colorHeaderPool then
-        self.colorHeaderPool:ReleaseAllObjects()
-    end
-
-    self.colorIndexToSwatch = {}
-    local activeSwatches = {}
-
-    for i = 1, GetNumHeraldryColors() do
-        local colorName, hueCategory, r, g, b, sortKey = GetHeraldryColorInfo(i)
-
-        if not activeSwatches[hueCategory] then
-            activeSwatches[hueCategory] = {}
-        end
-
-        local parentCategory = activeSwatches[hueCategory]
-        local swatch = self.swatchPool:AcquireObject()
-
-        swatch:SetColor(ZO_DYEING_SWATCH_INDEX, r, g, b)
-        swatch.sortKey = sortKey
-        swatch.colorName = colorName
-        swatch.colorIndex = i
-
-        parentCategory[#parentCategory + 1] = swatch
-        self.colorIndexToSwatch[i] = swatch
-    end
-
-    local sortedCategories = {}
-    for category in pairs(activeSwatches) do
-        sortedCategories[#sortedCategories + 1] = category
-    end
-    table.sort(sortedCategories)
-
-    self:PopulateColors(activeSwatches, sortedCategories)
 end
 
 function ZO_GuildHeraldryManager_Shared:SetViewedStyleCategory(index)
@@ -411,51 +336,31 @@ function ZO_GuildHeraldryManager_Shared:SetPendingIndices()
     self:UpdateKeybindGroups()
 end
 
+function ZO_GuildHeraldryManager_Shared:IsViewingStyleCategoryWithSelection()
+    if self.activeData and self.activeData.mode ~= ZO_HERALDRY_COLOR_MODE then
+        return self.activeData.getViewCategory() == self.activeData.getSelectedCategory()
+    end
+    return false
+end
+
 function ZO_GuildHeraldryManager_Shared:SelectStyle(styleIndex, becauseOfRebuild)
-    if becauseOfRebuild or self.activeData.getSelectedStyle() ~= styleIndex or self.activeData.getViewCategory() ~= self.activeData.getSelectedCategory() then
-        local oldStyle = not becauseOfRebuild and self.styleIndexToStyle[self.activeData.getSelectedStyle()]
-        if oldStyle then
-            oldStyle:SetSelected(false)
+    local previouslySelectedIndex = self.activeData.getSelectedStyle()
+    if becauseOfRebuild or not self:IsViewingStyleCategoryWithSelection() or previouslySelectedIndex ~= styleIndex then
+        local styleDataList = self.styleGridList:GetData()
+        for i, entryData in ipairs(styleDataList) do
+            if not entryData.data.header then
+                local data = entryData.data
+                data.checked = data.index == styleIndex
+            end
         end
 
         self.activeData.setSelectedCategory(self.activeData.getViewCategory())
         self.activeData.setSelectedStyle(styleIndex)
 
-        local newStyle = self.styleIndexToStyle[styleIndex]
-        if newStyle then
-            newStyle:SetSelected(true, becauseOfRebuild, becauseOfRebuild)
-        end
+        self.styleGridList:RefreshGridList()
 
         if not becauseOfRebuild then
             self:SetPendingIndices()
-        end
-    end
-end
-
-function ZO_GuildHeraldryManager_Shared:LayoutStyles(anchorFunction)
-    self.stylePool:ReleaseAllObjects()
-    self.styleIndexToStyle = {}
-
-    self.styleHeader:SetText(self.activeData.styleHeaderName)
-
-    local currentAnchor = ZO_Anchor:New(CENTER, self.styleHeader, BOTTOMLEFT)
-
-    local selectedStyle = self.activeData.getSelectedStyle()
-    local viewingSelectedCategory = self.activeData.getSelectedCategory() == self.activeData.getViewCategory()
-
-    for i = 1, self.activeData.getNum() do
-        local styleControl = self.stylePool:AcquireObject()
-        local styleName, icon = self.activeData.getInfo(i)
-
-        styleControl.icon:SetTexture(icon)
-        styleControl.styleIndex = i
-
-        self.styleIndexToStyle[i] = styleControl
-
-        anchorFunction(currentAnchor, styleControl, i)
-
-        if viewingSelectedCategory and i == selectedStyle then
-           self:SelectStyle(styleControl.styleIndex, ZO_HERALDRY_SKIP_ANIM)
         end
     end
 end
@@ -515,6 +420,41 @@ function ZO_GuildHeraldryManager_Shared:NoChoiceExitCallback()
     -- Should be overridden by child classes
 end
 
+function ZO_GuildHeraldryManager_Shared:SwitchMode(mode)
+    if self.mode ~= mode then
+        self.mode = mode
+        if mode == ZO_HERALDRY_COLOR_MODE then
+            self.bgStyleCatListControl:SetHidden(true)
+            self.crestStyleCatListControl:SetHidden(true)
+            self.styleGridListControl:SetHidden(true)
+            self.colorGridListControl:SetHidden(false)
+            self:BuildColorGridList()
+        elseif mode == ZO_HERALDRY_BG_STYLE_MODE then
+            self.bgStyleCatListControl:SetHidden(false)
+            self.crestStyleCatListControl:SetHidden(true)
+            self.styleGridListControl:SetHidden(false)
+            self.colorGridListControl:SetHidden(true)
+            self:BuildStyleGridList()
+        elseif mode == ZO_HERALDRY_CREST_STYLE_MODE then
+            self.bgStyleCatListControl:SetHidden(true)
+            self.crestStyleCatListControl:SetHidden(false)
+            self.styleGridListControl:SetHidden(false)
+            self.colorGridListControl:SetHidden(true)
+            self:BuildStyleGridList()
+        else
+            self.bgStyleCatListControl:SetHidden(true)
+            self.crestStyleCatListControl:SetHidden(true)
+            self.styleGridListControl:SetHidden(true)
+            self.colorGridListControl:SetHidden(true)
+            self:BuildColorGridList()
+        end
+    end
+end
+
+function ZO_GuildHeraldryManager_Shared:SetEntryDataSelected(entryData, selected)
+    -- To be overridden
+end
+
 --[[
     Dialog functions.
 --]]
@@ -556,24 +496,22 @@ function ZO_GuildHeraldryManager_Shared:PurchaseHeraldryDialogInitialize(control
         },
         buttons =
         {
-            [1] =
             {
                 keybind =   "DIALOG_PRIMARY",
                 control =   control and GetControl(control, "Accept"),
                 text =      SI_DIALOG_ACCEPT,
                 callback =  function(dialog)
-                                ApplyPendingHeraldryChanges()
-                                dialog.data.owner.pendingTransaction = true
-                            end,
+                    ApplyPendingHeraldryChanges()
+                    dialog.data.owner.pendingTransaction = true
+                end,
             },
-            [2] =
             {
                 keybind =   "DIALOG_NEGATIVE",
                 control =   control and GetControl(control, "Cancel"),
                 text =      SI_DIALOG_CANCEL,
                 callback =  function(dialog)
-                                -- Do nothing
-                            end,
+                    -- Do nothing
+                end,
             },
         }
     })
@@ -599,60 +537,56 @@ function ZO_GuildHeraldryManager_Shared:ApplyChangesHeraldryDialogInitialize(con
         mainText = 
         {
             text =  function()
-                        local textValue
-                        if self:IsPendingExit() then
-                            textValue = SI_GUILD_HERALDRY_DIALOG_APPLY_CHANGES_PENDING_EXIT_DESCRIPTION
-                        else
-                            textValue = SI_GUILD_HERALDRY_DIALOG_APPLY_CHANGES_DESCRIPTION
-                        end
+                local textValue
+                if self:IsPendingExit() then
+                    textValue = SI_GUILD_HERALDRY_DIALOG_APPLY_CHANGES_PENDING_EXIT_DESCRIPTION
+                else
+                    textValue = SI_GUILD_HERALDRY_DIALOG_APPLY_CHANGES_DESCRIPTION
+                end
 
-                        return textValue
-                    end,
+                return textValue
+            end,
         },
         noChoiceCallback =  function()
-                                if self:IsPendingExit() then
-                                    self:NoChoiceExitCallback()
-                                end
-                            end,
+            if self:IsPendingExit() then
+                self:NoChoiceExitCallback()
+            end
+        end,
         buttons =
         {
-            [1] =
             {
                 keybind =   "DIALOG_PRIMARY",
                 control =   control and GetControl(control, "Accept"),
                 text =      SI_GUILD_HERALDRY_DIALOG_ACCEPT,
                 callback =  function(dialog)
-                                ApplyPendingHeraldryChanges()
-                                dialog.data.owner.pendingTransaction = true
+                    ApplyPendingHeraldryChanges()
+                    dialog.data.owner.pendingTransaction = true
 
-                                if self:IsPendingExit() then
-                                    self:ConfirmExit()
-                                end
-                            end,
+                    if self:IsPendingExit() then
+                        self:ConfirmExit()
+                    end
+                end,
             },
-
-            [2] =
             {
                 keybind =   "DIALOG_NEGATIVE",
                 control =   control and GetControl(control, "Cancel"),
                 text =      SI_GUILD_HERALDRY_DIALOG_CANCEL,
                 callback =  function(dialog)
-                                if self:IsPendingExit() then
-                                    self:ConfirmExit()
-                                end
-                            end,
+                    if self:IsPendingExit() then
+                        self:ConfirmExit()
+                    end
+                end,
             },
-            [3] =
             {
                 keybind =   "DIALOG_TERTIARY",
                 control =   control and GetControl(control, "Return"),
                 text =      SI_GAMEPAD_GUILD_HERALDRY_CANCEL_EXIT,
                 callback =  function(dialog)
-                                self:CancelExit()
-                            end,
+                    self:CancelExit()
+                end,
                 visible =   function()
-                                return IsInGamepadPreferredMode() and self:IsPendingExit()
-                            end,
+                    return IsInGamepadPreferredMode() and self:IsPendingExit()
+                end,
             },
         }
     })
@@ -664,7 +598,7 @@ function ZO_GuildHeraldryManager_Shared:ConfirmHeraldryPurchase(control, showDia
         self:PurchaseHeraldryDialogInitialize(control)
     end
 
-    local data = {owner = self}
+    local data = { owner = self }
     showDialogFunc(self:GetPurchaseDialogName(), data)
 end
 
@@ -674,6 +608,26 @@ function ZO_GuildHeraldryManager_Shared:ConfirmHeraldryApplyChanges(control, sho
         self:ApplyChangesHeraldryDialogInitialize(control)
     end
 
-    local data = {owner = self}
+    local data = { owner = self }
     showDialogFunc(self:GetApplyChangesDialogName(), data)
+end
+
+--[[
+    Global XML.
+--]]
+
+function ZO_GuildHeraldry_DyeingSwatch_OnMouseEnter(swatchControl)
+    local swatchObject = swatchControl.object
+    if swatchObject then
+        swatchObject.mousedOver = true
+        swatchObject:UpdateSelectedState()
+    end
+end
+
+function ZO_GuildHeraldry_DyeingSwatch_OnMouseExit(swatchControl)
+    local swatchObject = swatchControl.object
+    if swatchObject then
+        swatchObject.mousedOver = false
+        swatchObject:UpdateSelectedState()
+    end
 end

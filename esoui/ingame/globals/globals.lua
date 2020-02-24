@@ -33,10 +33,12 @@ local function OnLogoutDisallowed(eventCode, wasQuitRequest)
 end
 
 local function OnCombatStateChanged(eventCode, inCombat)
-    if(inCombat) then
+    if inCombat then
         ZO_Dialogs_ReleaseDialog("QUIT_PREVENTED")
         ZO_Dialogs_ReleaseDialog("QUIT_DEFERRED")
         ZO_Dialogs_ReleaseDialog("LOGOUT_DEFERRED")
+        local NUM_FLASHES_BEFORE_SOLID = 7
+        FlashTaskbarWindow("IN_COMBAT", NUM_FLASHES_BEFORE_SOLID)
     end
 end
 

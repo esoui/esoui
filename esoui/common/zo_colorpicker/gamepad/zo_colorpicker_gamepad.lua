@@ -34,9 +34,6 @@ function ZO_ColorPicker_Gamepad:Initialize(control)
     alphaSliderBackgroundTextureSizing:AddAnchor(TOPLEFT, self.alphaSlider, TOPLEFT, -6, -6)
     alphaSliderBackgroundTextureSizing:AddAnchor(BOTTOMRIGHT, self.alphaSlider, BOTTOMRIGHT, 6, 6)
 
-    self.colorSelect:GetNamedChild("Binding"):SetTexture(ZO_GAMEPAD_LEFT_SLIDE_SCROLL_ICON)
-    self.valueSlider:GetNamedChild("Binding"):SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
-
     local function OnDialogReleased()
         self:OnDialogReleased()
     end

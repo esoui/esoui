@@ -71,9 +71,9 @@
 
                 <Button name="$(parent)Dismiss">
                     <Controls>
-                        <Texture name="$(parent)GamepadIcon" hidden="true">
-                            <OnInitialized>
-                                self:SetTexture(ZO_Keybindings_GetTexturePathForKey(KEY_GAMEPAD_BUTTON_1))
+                        <Texture name="$(parent)GamepadIcon" inherits="ZO_KeyTexture" hidden="true">
+                            <OnInitialized name="ErrorFrame">
+                                self:SetKeyCode(KEY_GAMEPAD_BUTTON_1)
                             </OnInitialized>
                         </Texture>
                     </Controls>

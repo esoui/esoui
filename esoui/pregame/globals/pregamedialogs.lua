@@ -247,6 +247,7 @@ ESO_Dialogs["CHARACTER_SELECT_LOGIN"] =
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.COOLDOWN,
+        allowShowOnNextScene = true,
     },
     title =
     {
@@ -280,6 +281,7 @@ ESO_Dialogs["CHARACTER_CREATE_CREATING"] =
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.COOLDOWN,
+        allowShowOnNextScene = true,
     },
     title =
     {
@@ -451,7 +453,13 @@ ESO_Dialogs["BAD_LOGIN"] =
     },
     mainText = 
     {
-        text = SI_BAD_LOGIN,
+        text = function()
+            if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS then
+                return GetString(SI_BAD_LOGIN_ZOS)
+            else
+                return GetString(SI_BAD_LOGIN)
+            end
+        end,
         align = TEXT_ALIGN_LEFT,
     },
     buttons =
@@ -1319,6 +1327,29 @@ ESO_Dialogs["ACCOUNT_MANAGEMENT_EMAIL_CHANGED"] =
     {
         {
             text = SI_OK,
+        },
+    }
+}
+
+ESO_Dialogs["EULA_DECLINED"] =
+{
+    canQueue = true,
+    title =
+    {
+        text = SI_LEGAL_DECLINE_HEADER,
+    },
+    mainText =
+    {
+        text = SI_LEGAL_DECLINE_PROMPT,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CLOSE,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function()
+                EULA_SCREEN:ShowNextEULA()
+            end,
         },
     }
 }

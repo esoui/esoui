@@ -56,8 +56,8 @@ function ZO_HudInfoTutorial:DisplayTutorial(tutorialIndex)
     local title, description = GetTutorialInfo(tutorialIndex)
     local helpCategoryIndex, helpIndex = GetTutorialLinkedHelpInfo(tutorialIndex)
     local hasHelp = helpCategoryIndex ~= nil and helpIndex ~= nil
-    self.tutorial.title:SetText(zo_strformat(SI_TUTORIAL_FORMATTER, title))
-    self.tutorial.description:SetText(zo_strformat(SI_TUTORIAL_FORMATTER, description))
+    self.tutorial.title:SetText(title)
+    self.tutorial.description:SetText(description)
     
 	local showHelpLabel = hasHelp and not isInGamepadMode
     self.tutorial.helpLabel:SetHidden(not showHelpLabel)

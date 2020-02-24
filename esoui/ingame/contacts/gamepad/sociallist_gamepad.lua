@@ -71,6 +71,12 @@ end
 function ZO_GamepadSocialListPanel:ColorRow(control, data, selected)
     local textColor, iconColor, textColor2 = self:GetRowColors(data, selected)
     ZO_SocialList_ColorRow(control, data, textColor, iconColor, textColor2)
+
+    local heronUserInfoTexture = control:GetNamedChild("HeronUserInfoIcon")
+    if heronUserInfoTexture then
+        local heronIconColor = data.online and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
+        heronUserInfoTexture:SetColor(heronIconColor:UnpackRGBA())
+    end
 end
 
 function ZO_GamepadSocialListPanel:GetRowColors(data, selected)
@@ -148,12 +154,12 @@ function ZO_GamepadSocialListPanel:ShouldShowData(data)
 end
 
 function ZO_GamepadSocialListPanel:FilterScrollList()
+    ZO_ScrollList_Clear(self.list)
     local scrollData = ZO_ScrollList_GetDataList(self.list)
-    ZO_ClearNumericallyIndexedTable(scrollData)
 
     local searchTerm = self:GetCurrentSearch()
     for _, data in ipairs(self.masterList) do
-        if(searchTerm == "" or self:IsMatch(searchTerm, data)) then
+        if searchTerm == "" or self:IsMatch(searchTerm, data) then
             if self:ShouldShowData(data) then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_PRIMARY_DATA_TYPE, data))
             end

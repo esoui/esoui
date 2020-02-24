@@ -1749,7 +1749,6 @@ function ZO_NotificationManager:BuildNotificationList()
 
     self.totalNumNotifications = totalNumNotifications
 
-    CHAT_SYSTEM:OnNumNotificationsChanged(totalNumNotifications)
     self:OnNumNotificationsChanged(totalNumNotifications)
 end
 

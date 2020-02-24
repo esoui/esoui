@@ -59,7 +59,7 @@ local TrialEventMappings = {
 
 local function GetGuildChannelErrorFunction(guildIndex)
     return function()
-        if(GetNumGuilds() < guildIndex) then
+        if GetNumGuilds() < guildIndex then
             return zo_strformat(SI_CANT_GUILD_CHAT_NOT_IN_GUILD, guildIndex)
         else
             local guildId = GetGuildId(guildIndex)
@@ -70,7 +70,7 @@ end
 
 local function GetOfficerChannelErrorFunction(guildIndex)
     return function()
-        if(GetNumGuilds() < guildIndex) then
+        if GetNumGuilds() < guildIndex then
             return zo_strformat(SI_CANT_GUILD_CHAT_NOT_IN_GUILD, guildIndex)
         else
             local guildId = GetGuildId(guildIndex)
@@ -335,8 +335,51 @@ if not IsConsoleUI() then
     }
 end
 
+-- Build switch lookup table
+-- A switch is a string, eg "/zone", which you can start your chat message with to make sure it goes to a specific channel.
+-- This lookup table has two kinds of entries in it:
+-- * switch string -> channel data.
+--     This is used to pick a channel based on the player's message and switch string.
+-- * channel ID -> switch string.
+--     This is used to enumerate what kinds of channels are available and what switch string you can use to refer to them.
+--     Each channel can have multiple switches, in which case only the first switch string is used.
+local g_switchLookup = {}
+for channelId, data in pairs(ChannelInfo) do
+    data.id = channelId
+
+    if data.switches then
+        for switchArg in data.switches:gmatch("%S+") do
+            switchArg = switchArg:lower()
+            g_switchLookup[switchArg] = data
+            if not g_switchLookup[channelId] then
+                g_switchLookup[channelId] = switchArg
+            end
+        end
+    end
+
+    if data.targetSwitches then
+        local targetData = ZO_ShallowTableCopy(data)
+        targetData.target = channelId
+        for switchArg in data.targetSwitches:gmatch("%S+") do
+            switchArg = switchArg:lower()
+            g_switchLookup[switchArg] = targetData
+            if not g_switchLookup[channelId] then
+                g_switchLookup[channelId] = switchArg
+            end
+        end
+    end
+end
+
 function ZO_ChatSystem_GetChannelInfo()
     return ChannelInfo
+end
+
+function ZO_ChatSystem_GetChannelSwitchLookupTable()
+    return g_switchLookup
+end
+
+function ZO_ChatSystem_GetCategoryColorFromChannel(channelId)
+    return GetChatCategoryColor(MultiLevelEventToCategoryMappings[EVENT_CHAT_MESSAGE_CHANNEL][channelId])
 end
 
 function ZO_ChatSystem_GetEventCategoryMappings()

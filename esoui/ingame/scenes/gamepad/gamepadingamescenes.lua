@@ -135,15 +135,6 @@ do
     SCENE_MANAGER:AddSceneGroup("helpSceneGroupGamepad", ZO_SceneGroup:New("helpTutorialsCategoriesGamepad", "helpTutorialsEntriesGamepad"))
 end
 
-------------------------
--- Gamepad Screen Adjust Scene
-------------------------
-
-local screenAdjustScene = SCENE_MANAGER:GetScene("screenAdjust")
-screenAdjustScene:AddFragmentGroup(FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW)
-screenAdjustScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
-screenAdjustScene:AddFragment(GAMEPAD_SCREEN_ADJUST_ACTION_LAYER_FRAGMENT)
-
 -----------------------
 -- Gamepad Player Menu Submenu Scene
 -----------------------

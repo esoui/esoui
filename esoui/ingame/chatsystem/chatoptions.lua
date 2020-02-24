@@ -209,11 +209,9 @@ do
             filter.key = key
 
             local button = filter:GetNamedChild("Check")
+            ZO_CheckButton_SetLabelText(button, entry.name)
             button.channels = entry.channels
             table.insert(self.filterButtons, button)
-
-            local label = filter:GetNamedChild("Label")
-            label:SetText(entry.name)
 
             ZO_Anchor_BoxLayout(filterAnchor, filter, count, FILTERS_PER_ROW, FILTER_PAD_X, FILTER_PAD_Y, FILTER_WIDTH, FILTER_HEIGHT, INITIAL_XOFFS, INITIAL_YOFFS)
             count = count + 1
@@ -237,18 +235,16 @@ do
 
             local guildFilter = guild:GetNamedChild("Guild")
             local guildButton = guildFilter:GetNamedChild("Check")
+            ZO_CheckButton_SetLabelText(guildButton, GetString("SI_CHATCHANNELCATEGORIES", k))
             guildButton.channels = {k}
             table.insert(self.filterButtons, guildButton)
-            local guildLabel = guildFilter:GetNamedChild("Label")
-            guildLabel:SetText(GetString("SI_CHATCHANNELCATEGORIES", k))
 
             local officerFilter = guild:GetNamedChild("Officer")
             local officerButton = officerFilter:GetNamedChild("Check")
             local officerChannel = k + MAX_GUILDS
+            ZO_CheckButton_SetLabelText(officerButton, GetString("SI_CHATCHANNELCATEGORIES", officerChannel))
             officerButton.channels = {officerChannel}
             table.insert(self.filterButtons, officerButton)
-            local officerLabel = officerFilter:GetNamedChild("Label")
-            officerLabel:SetText(GetString("SI_CHATCHANNELCATEGORIES", officerChannel))
 
             local nameLabel = guild:GetNamedChild("GuildName")
             table.insert(self.guildNameLabels, nameLabel)

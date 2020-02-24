@@ -1217,24 +1217,23 @@ do
 
     local GAMEPAD_DUNGEON_BUTTON_TEXTURES = {
         UP = {
-            NORMAL = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER),
-            PRESSED = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER),
-            MOUSEOVER = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER),
-            DISABLED = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_SHOULDER),
+            KEY_CODE = KEY_GAMEPAD_LEFT_SHOULDER,
         },
         DOWN = {
-            NORMAL = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER),
-            PRESSED = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER),
-            MOUSEOVER = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER),
-            DISABLED = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_SHOULDER),
+            KEY_CODE = KEY_GAMEPAD_RIGHT_SHOULDER,
         },
     }
 
     local function SetButtonTextures(button, textures)
-        button:SetNormalTexture(textures.NORMAL)
-        button:SetPressedTexture(textures.PRESSED)
-        button:SetMouseOverTexture(textures.MOUSEOVER)
-        button:SetDisabledTexture(textures.DISABLED)
+        if textures.KEY_CODE then
+            button:SetKeyCode(textures.KEY_CODE)
+        else
+            button:SetKeyCode(nil)
+            button:SetNormalTexture(textures.NORMAL)
+            button:SetPressedTexture(textures.PRESSED)
+            button:SetMouseOverTexture(textures.MOUSEOVER)
+            button:SetDisabledTexture(textures.DISABLED)
+        end
     end
 
     SetupWorldMap = function()
@@ -8083,7 +8082,7 @@ function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
 
                 ZO_WorldMapGamepadInteractKeybind:SetHidden(g_interactKeybindForceHidden or GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing())
                 local KEYBIND_SCALE_PERCENT = 120
-                ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT, KEYBIND_SCALE_PERCENT), buttonText))
+                ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1, KEYBIND_SCALE_PERCENT), buttonText))
             end
         end
     else
@@ -8153,8 +8152,7 @@ function ZO_WorldMap_IsTooltipShowing()
 end
 
 function ZO_WorldMap_GetZoomText_Gamepad()
-    local SCALE = 100
-    return ZO_Keybindings_GetKeyText(KEY_GAMEPAD_LEFT_TRIGGER, SCALE, SCALE) .. ZO_Keybindings_GetKeyText(KEY_GAMEPAD_RIGHT_TRIGGER, SCALE, SCALE) .. GetString(SI_WORLD_MAP_ZOOM)
+    return ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_LEFT_TRIGGER) .. ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_RIGHT_TRIGGER, SCALE) .. GetString(SI_WORLD_MAP_ZOOM)
 end
 
 function ZO_WorldMap_IsWorldMapInfoShowing()

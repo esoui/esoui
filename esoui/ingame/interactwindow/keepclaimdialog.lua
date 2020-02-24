@@ -358,6 +358,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
 
                         local keepId = GetGuildClaimInteractionKeepId()
                         local count = 1
+                        local selectedIndex = nil
                         for guildId, entry in pairs(self.entries) do
                             local newEntry = control.dropdown:CreateItemEntry(entry.guildText, OnGuildSelected)
                             newEntry.guildId = entry.guildId
@@ -375,12 +376,19 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
                             end
 
                             control.dropdown:AddItem(newEntry)
-
+                            if guildId == self.selectedGuildId then
+                                selectedIndex = count
+                            end
                             count = count + 1
                         end
 
-                        self.currentDropdown:SelectFirstItem()
-
+                        if selectedIndex then
+                            local IGNORE_CALLBACK = true
+                            self.currentDropdown:SelectItemByIndex(selectedIndex, IGNORE_CALLBACK)
+                        else
+                            self.currentDropdown:SelectFirstItem()
+                        end
+                        
                         control.dropdown:UpdateItems()
 
                         local function OnDropdownDeactivated()

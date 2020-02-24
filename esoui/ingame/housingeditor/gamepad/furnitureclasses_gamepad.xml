@@ -20,15 +20,6 @@
 
                 <Label name="$(parent)PreviousPrice" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" excludeFromResizeToFitExtents="true" hidden="true">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Price" relativePoint="BOTTOMRIGHT" offsetX="-32" />
-                    <Controls>
-                        <Texture name="$(parent)Strikethrough" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" layer="OVERLAY">
-                            <Anchor point="LEFT" offsetX="-2" offsetY="1"/>
-                            <Anchor point="RIGHT" offsetX="2" offsetY="1"/>
-                            <OnInitialized>
-                                self:SetHeight(2.5)
-                            </OnInitialized>
-                        </Texture>
-                    </Controls>
                 </Label>
 
                 <Label name="$(parent)Label" override="true">

@@ -151,6 +151,7 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
         ZO_InventorySlot_SetUpdateCallback(nil)
         self:Deactivate()
         self:DeactivateHeader()
+        self:ClearActiveKeybinds()
     elseif newState == SCENE_HIDDEN then
         --clear the currentListType so we can refresh it when we re-enter
         self:SwitchActiveList(nil)
@@ -158,7 +159,6 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
         self.listWaitingOnDestroyRequest = nil
         self:TryClearNewStatusOnHidden()
 
-        self:ClearActiveKeybinds()
         ZO_SavePlayerConsoleProfile()
     end
 end

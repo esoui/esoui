@@ -1,10 +1,9 @@
-local DEPRECATED_COLLECTION_NAME = nil
-
 do
+    local DEPRECATED_ARG = nil
+
     function ZO_Tooltip:LayoutCollectibleFromData(collectibleData, showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
         if collectibleData then
-            local DEPRECATED_ARG = nil
-            self:LayoutCollectible(collectibleData:GetId(), DEPRECATED_COLLECTION_NAME, collectibleData:GetName(), collectibleData:GetNickname(), collectibleData:IsPurchasable(), collectibleData:GetDescription(), collectibleData:GetHint(), DEPRECATED_ARG, collectibleData:GetCategoryType(), showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
+            self:LayoutCollectible(collectibleData:GetId(), DEPRECATED_ARG, collectibleData:GetName(), collectibleData:GetNickname(), collectibleData:IsPurchasable(), collectibleData:GetDescription(), collectibleData:GetHint(), DEPRECATED_ARG, collectibleData:GetCategoryType(), showVisualLayerInfo, cooldownSecondsRemaining, showBlockReason)
         end
     end
 end

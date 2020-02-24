@@ -27,7 +27,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:New(...)
 end
 
 function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
-    self.templateData =
+    local templateData =
     {
         gridListClass = ZO_GridScrollList_Gamepad,
         gridHighlightTemplate = "ZO_GuildRecruitment_GuildListing_Gamepad_Highlight_Template",
@@ -40,7 +40,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
             dimensionsX = ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COLUMN_WIDTH,
             dimensionsY = ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_ENTRY_HEIGHT,
             statusEntryTemplate = "ZO_GuildRecruitment_StatusSelectionTile_Gamepad_Control",
-            startTimeEntryTemplate = "ZO_GuildRecruitment_StarTimeSelectionTile_Gamepad_Control",
+            startTimeEntryTemplate = "ZO_GuildRecruitment_StartTimeSelectionTile_Gamepad_Control",
             endTimeEntryTemplate = "ZO_GuildRecruitment_EndTimeSelectionTile_Gamepad_Control",
             startTimeDimensionsX = ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_START_TIME_COMBOBOX_ENTRY_WIDTH,
             timeDimensionsY = ZO_GUILD_RECRUITMENT_GUILD_LISTING_GAMEPAD_COMBOBOX_ENTRY_HEIGHT,
@@ -101,7 +101,7 @@ function ZO_GuildRecruitment_GuildListing_Gamepad:Initialize(control)
         },
     }
 
-    ZO_GuildRecruitment_GuildListing_Shared.Initialize(self, control)
+    ZO_GuildRecruitment_GuildListing_Shared.Initialize(self, control, templateData)
     ZO_GuildFinder_Panel_GamepadBehavior.Initialize(self, control)
 
     self:InitializeGuildNotListedDialog()
@@ -130,12 +130,12 @@ end
 function ZO_GuildRecruitment_GuildListing_Gamepad:OnGridSelectionChanged(oldSelectedData, selectedData)
     -- Deselect previous tile
     if oldSelectedData and oldSelectedData.dataEntry then
-        oldSelectedData.dataSource.isSelected = false
+        oldSelectedData.isSelected = false
     end
 
     -- Select newly selected tile.
     if selectedData and selectedData.dataEntry then
-        selectedData.dataSource.isSelected = true
+        selectedData.isSelected = true
 
         if oldSelectedData and oldSelectedData.dataEntry then
             self.currentGridListSelectedData = self.gridList:GetSelectedData()

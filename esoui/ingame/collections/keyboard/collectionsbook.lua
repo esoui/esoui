@@ -366,7 +366,7 @@ do
                     local entryData = self.entryDataObjectPool:AcquireObject()
                     entryData:SetDataSource(collectibleData)
                     local headerState = collectibleData:IsUnlocked() and COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED or COLLECTIBLE_UNLOCK_STATE_LOCKED
-                    entryData.gridHeaderName = GetString("SI_COLLECTIBLEUNLOCKSTATE", headerState) 
+                    entryData.gridHeaderName = GetString("SI_COLLECTIBLEUNLOCKSTATE", headerState)
                     gridListPanelList:AddEntry(entryData)
                 end
             end

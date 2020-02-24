@@ -410,6 +410,57 @@ function ZO_GuildRosterManager:OnGuildIdChanged()
     self:CallFunctionOnLists("OnGuildIdChanged")
 end
 
+function ZO_GuildRosterManager.ComputeSetRankEntries(guildId, playerRankIndex, targetRankIndex, isGamepad)
+    local entries = {}
+    local playerHasPromotePermission = DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_PROMOTE)
+    local playerHasDemotePermission = DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_DEMOTE)
+    local numRanks = GetNumGuildRanks(guildId)
+    for rankIndex = 1, numRanks do
+        local rankName = GetFinalGuildRankName(guildId, rankIndex)
+        local rankIconIndex = GetGuildRankIconIndex(guildId, rankIndex)
+
+        local enabled = rankIndex > playerRankIndex or IsGuildRankGuildMaster(guildId, playerRankIndex)
+        if enabled then
+            if rankIndex < targetRankIndex then
+                enabled = playerHasPromotePermission
+            elseif rankIndex > targetRankIndex then
+                enabled = playerHasDemotePermission
+            end
+        end
+        
+        table.insert(entries,
+        {
+            rankName = rankName,
+            rankIcon = isGamepad and GetGuildRankLargeIcon(rankIconIndex) or GetGuildRankSmallIcon(rankIconIndex),
+            enabled = enabled,
+        })      
+    end
+
+    return entries
+end
+
+function ZO_GuildRosterManager.CanPromotePlayer(guildId, myRankIndex, theirRankIndex, theirRankId)
+    if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_PROMOTE) then
+        if theirRankId ~= DEFAULT_INVITED_RANK and theirRankIndex > 1 then
+            local theirNewRankIndex = theirRankIndex - 1
+            return myRankIndex < theirNewRankIndex or IsGuildRankGuildMaster(guildId, myRankIndex)
+        end
+    end
+    return false
+end
+
+function ZO_GuildRosterManager.CanDemotePlayer(guildId, myRankIndex, theirRankIndex, theirRankId)
+    if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_DEMOTE) then
+        if theirRankId ~= DEFAULT_INVITED_RANK and theirRankIndex < GetNumGuildRanks(guildId) then
+            return myRankIndex < theirRankIndex
+        end
+    end
+    return false
+end
+
+function ZO_GuildRosterManager.CanSetPlayerRank(guildId, myRankIndex, theirRankIndex, theirRankId)
+    return ZO_GuildRosterManager.CanPromotePlayer(guildId, myRankIndex, theirRankIndex, theirRankId) or ZO_GuildRosterManager.CanDemotePlayer(guildId, myRankIndex, theirRankIndex, theirRankId)
+end
 
 -- A singleton will be used by both keyboard and gamepad screens
 GUILD_ROSTER_MANAGER = ZO_GuildRosterManager:New()

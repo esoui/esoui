@@ -11,9 +11,13 @@ function ZO_Cutscene:Initialize(control)
 
     control:RegisterForEvent(EVENT_BEGIN_CUTSCENE, function() self:OnBeginCutscene() end)
     control:RegisterForEvent(EVENT_END_CUTSCENE, function() self:OnEndCutscene() end)
-    control:RegisterForEvent(EVENT_VIDEO_PLAYBACK_COMPLETE, function() self:OnVideoPlaybackComplete() end)
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
     control:RegisterForEvent(EVENT_PLAYER_DEACTIVATED, function() self:OnPlayerDeactivated() end)
+    local function OnVideoPlaybackComplete()
+        self:OnVideoPlaybackComplete()
+    end
+    control:RegisterForEvent(EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
+    control:RegisterForEvent(EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
 end
 
 function ZO_Cutscene:OnPlayerActivated()
@@ -31,10 +35,10 @@ end
 function ZO_Cutscene:RefreshCutscene()
     if IsCutsceneActive() then
         self.control:SetHidden(false)
-        local videoPath = GetActiveCutsceneVideoPath()
-        if videoPath ~= "" then
+        local videoDataId = GetActiveCutsceneVideoDataId()
+        if videoDataId ~= 0 then
             local PLAY_IMMEDIATELY = true
-            PlayVideo(videoPath, PLAY_IMMEDIATELY, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
+            PlayVideoById(videoDataId, PLAY_IMMEDIATELY, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
             SCENE_MANAGER:SetInUIMode(true)
         else
             RequestEndCutscene()

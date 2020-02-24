@@ -70,7 +70,7 @@ function CampaignEmperor:IsIneligible_OnMouseExit(control)
 end
 
 function CampaignEmperor:OnDropdownClicked(control)
-    local menuShowing = IsMenuVisisble() and GetMenuOwner() == control
+    local menuShowing = IsMenuVisible() and GetMenuOwner() == control
     ClearMenu()
 
     if not menuShowing then

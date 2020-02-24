@@ -171,14 +171,12 @@ function ZO_GuildRanks_Shared:New(...)
     return object
 end
 
-function ZO_GuildRanks_Shared:Initialize(control)
+function ZO_GuildRanks_Shared:Initialize(control, templateData)
     self.control = control
     self.ranks = {}
 
     -- This is platform specific data that needs to be overridden by the inheriting classes as it
     -- specifies the platform specific data to use.
-    self.templateData =
-    {
     --[[ Expected Attributes for Permissions
         gridListClass - The class object from which self.permissionsGridList will be created,
         entryTemplate - The name of the template control to be used for the permission checkbox entry,
@@ -188,25 +186,13 @@ function ZO_GuildRanks_Shared:Initialize(control)
         headerHeight - The height to be used for the headerTemplate,
         highlightTemplate - Optional: highlight override template used for Gamepad (needed since checkboxes highlight the checkbox instead of the full control which is the default),
     ]]
-    }
+    self.templateData = templateData
 
-    -- These controls are required to be overridden by the inheriting class
-    self.permissionsGridListControl = nil
-
-    self:InitializeGridListDataPools()
+    self:InitializePermissionsGridListControl()
 end
 
-function ZO_GuildRanks_Shared:InitializeGridListDataPools()
-    -- Create Data Object Pool
-    local function CreateEntryData()
-        return ZO_GridSquareEntryData_Shared:New()
-    end
-
-    local function ResetEntryData(data)
-        data:SetDataSource(nil)
-    end
-
-    self.permissionEntryDataObjectPool = ZO_ObjectPool:New(CreateEntryData, ResetEntryData)
+function ZO_GuildRanks_Shared:InitializePermissionsGridListControl()
+    assert(false) -- override in derived function
 end
 
 function ZO_GuildRanks_Shared:GetSelectedRank()
@@ -216,16 +202,12 @@ end
 function ZO_GuildRanks_Shared:InitializePermissionsGridList()
     local templateData = self.templateData
 
-    if not self.permissionsGridListControl or not templateData then
-        assert(false) -- override in derived class
-    end
-
     -- Override default highlight template to hide white outline around tiles
     self.permissionsGridList = templateData.gridListClass:New(self.permissionsGridListControl, templateData.highlightTemplate)
 
-    local HIDE_CALLBACK = nil
+    local NO_HIDE_CALLBACK = nil
     local GRID_PADDING = 0
-    self.permissionsGridList:AddEntryTemplate(templateData.entryTemplate, templateData.entryWidth, templateData.entryHeight, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING, GRID_PADDING)
+    self.permissionsGridList:AddEntryTemplate(templateData.entryTemplate, templateData.entryWidth, templateData.entryHeight, ZO_DefaultGridTileEntrySetup, NO_HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, GRID_PADDING, GRID_PADDING)
     self.permissionsGridList:AddHeaderTemplate(templateData.headerTemplate, templateData.headerHeight, ZO_DefaultGridTileHeaderSetup)
 
     self:BuildPermissionsGridList()
@@ -266,17 +248,14 @@ end
 
 function ZO_GuildRanks_Shared:BuildPermissionsGridList()
     self.permissionsGridList:ClearGridList()
-    self.permissionEntryDataObjectPool:ReleaseAllObjects()
 
     local templateData = self.templateData
     for categoryIndex, category in pairs(GUILD_RANKS_MANAGER:GetPermissionsLayout()) do
         for i, permission in ipairs(category.permissions) do
-            local entryData = self.permissionEntryDataObjectPool:AcquireObject()
             local data = self:CreatePermissionDataObject(i, permission)
-            entryData:SetDataSource(data)
-            entryData.gridHeaderName = category.header
-            entryData.gridHeaderTemplate = templateData.headerTemplate
-            self.permissionsGridList:AddEntry(entryData, templateData.entryTemplate)
+            data.gridHeaderName = category.header
+            data.gridHeaderTemplate = templateData.headerTemplate
+            self.permissionsGridList:AddEntry(data, templateData.entryTemplate)
         end
     end
 

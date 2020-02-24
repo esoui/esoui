@@ -395,12 +395,10 @@ function ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningTex
 
         if dialog.mainTextControl then
             dialog.mainTextControl:SetText(mainText)
-            dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
         end
 
         if dialog.warningTextControl and warningText then
             dialog.warningTextControl:SetText(warningText)
-            dialog.scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
         elseif dialog.warningTextControl then
             dialog.warningTextControl:SetText("")
         end
@@ -793,7 +791,7 @@ function ZO_GenericCenteredGamepadDialogTemplate_OnInitialized(dialog)
     local GENERIC_CENTERED_DIALOG_RIGHT_SCROLL_INDICATOR_X_OFFSET = -1
     dialog.rightStickScrollIndicatorOffsetX = GENERIC_CENTERED_DIALOG_RIGHT_SCROLL_INDICATOR_X_OFFSET
 
-    dialog:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_TUTORIAL_CONTINUE, ZO_Keybindings_GetKeyText(KEY_GAMEPAD_BUTTON_1)))
+    dialog:GetNamedChild("InteractKeybind"):SetText(zo_strformat(SI_TUTORIAL_CONTINUE, ZO_Keybindings_GenerateIconKeyMarkup(KEY_GAMEPAD_BUTTON_1)))
 end
 
 local MIN_HEIGHT_SCROLL_WINDOW = 480

@@ -182,6 +182,7 @@ function GuildHistoryManager:SetGuildId(guildId)
     self.guildId = guildId
     self:RequestInitialEvents()
     self.refreshGroup:MarkDirty("EventListData")
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function GuildHistoryManager:SetupGuildEvent(control, data)

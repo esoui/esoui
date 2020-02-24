@@ -74,7 +74,7 @@
                     <Controls>
                         <Control name="$(parent)DisplayName" inherits="ZO_SortHeader">
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_SOCIAL_LIST_PANEL_HEADER_DISPLAY_NAME), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                ZO_SortHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
                             <Anchor point="TOPLEFT" offsetX="89"/>
                             <Dimensions x="225" y="32"/>

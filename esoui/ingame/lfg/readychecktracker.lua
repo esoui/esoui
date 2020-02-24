@@ -88,7 +88,13 @@ do
     end
 
     function ZO_ReadyCheckTracker:Update()
-        if GetActivityFinderStatus() == ACTIVITY_FINDER_STATUS_READY_CHECK and HasAcceptedLFGReadyCheck() then
+        local inReadyCheckState = GetActivityFinderStatus() == ACTIVITY_FINDER_STATUS_READY_CHECK
+
+        if inReadyCheckState and ZO_Dialogs_IsShowing("LFG_LEAVE_QUEUE_CONFIRMATION") then
+            ZO_Dialogs_ReleaseDialog("LFG_LEAVE_QUEUE_CONFIRMATION")
+        end
+
+        if inReadyCheckState and HasAcceptedLFGReadyCheck() then
             local tanksAccepted, tanksPending, healersAccepted, healersPending, dpsAccepted, dpsPending = GetLFGReadyCheckCounts()
             local pendingTotal = tanksPending + healersPending + dpsPending
             local total = pendingTotal + tanksAccepted + healersAccepted + dpsAccepted 

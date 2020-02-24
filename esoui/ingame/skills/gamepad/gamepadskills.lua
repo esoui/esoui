@@ -1800,13 +1800,6 @@ do
         },
     }
 
-    local function DisableSpinner(dialog)
-        local selectedControl = dialog.entryList:GetSelectedControl()
-        if selectedControl and selectedControl.pointLimitedSpinner then
-            selectedControl.pointLimitedSpinner:SetActive(false)
-        end
-    end
-
     function ZO_GamepadSkills:InitializeAttributeDialog()
         self:ResetAttributeData()
         
@@ -1869,7 +1862,18 @@ do
                 },
             },
 
-            parametricListOnSelectionChangedCallback = function() self:UpdatePendingStatBonuses() end,
+            parametricListOnSelectionChangedCallback = function()
+                self:UpdatePendingStatBonuses()
+            end,
+
+            parametricListOnActivatedChangedCallback = function(list, isActive)
+                if not isActive then
+                    local selectedControl = list:GetSelectedControl()
+                    if selectedControl and selectedControl.pointLimitedSpinner then
+                        selectedControl.pointLimitedSpinner:SetActive(false)
+                    end
+                end
+            end,
 
             buttons =
             {
@@ -1884,26 +1888,21 @@ do
                             PurchaseAttributes(pendingHealth, pendingMagicka, pendingStamina)
                             PlaySound(SOUNDS.GAMEPAD_STATS_SINGLE_PURCHASE)
                         end
-                        DisableSpinner(dialog)
                     end,
                 },
                 {
                     keybind = "DIALOG_NEGATIVE",
                     text = SI_GAMEPAD_BACK_OPTION,
-                    callback = function(dialog)
-                        DisableSpinner(dialog)
-                    end,
                 },
             },
 
             finishedCallback = function(dialog)
-                                --Setup Skills Scene
-                                DisableSpinner(dialog)
-                                ZO_GenericGamepadDialog_HideTooltip(dialog)
-                                self.showAttributeDialog = false
-                                self.selectedTooltipRefreshGroup:MarkDirty("Full")
-                                self:ResetAttributeData()                                
-                            end,
+                --Setup Skills Scene
+                ZO_GenericGamepadDialog_HideTooltip(dialog)
+                self.showAttributeDialog = false
+                self.selectedTooltipRefreshGroup:MarkDirty("Full")
+                self:ResetAttributeData()
+            end,
         })
     end
 end

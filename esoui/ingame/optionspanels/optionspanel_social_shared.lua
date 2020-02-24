@@ -24,6 +24,8 @@ do
         [CHAT_CATEGORY_OFFICER_5] = CHAT_CHANNEL_OFFICER_5,
     }
 
+    local switchLookupTable = ZO_ChatSystem_GetChannelSwitchLookupTable()
+
     function ZO_OptionsPanel_Social_GetColorControlName(control)
         local data = control.data
         local name
@@ -31,7 +33,7 @@ do
         if data.overrideName then
             name = GetString(data.overrideName)
         else
-            local switch = CHAT_SYSTEM.switchLookup[categoryToChannelMappings[data.chatChannelCategory]]
+            local switch = switchLookupTable[categoryToChannelMappings[data.chatChannelCategory]]
             if switch then
                 name = switch
             else
@@ -48,7 +50,7 @@ do
 end
 
 function ZO_OptionsPanel_Social_ResetChatColorToDefault(control, data)
-    CHAT_SYSTEM:ResetChannelCategoryToDefault(data.chatChannelCategory)
+    ResetChatCategoryColorToDefault(data.chatChannelCategory)
 end
 
 function ZO_OptionsPanel_Social_InitializeGuildLabel(control)
@@ -76,7 +78,7 @@ function ZO_OptionsPanel_Social_TextSizeOnShow(control)
 end
 
 function ZO_OptionsPanel_Social_ResetTextSizeToDefault(control)
-    CHAT_SYSTEM:ResetFontSizeToDefault()
+    KEYBOARD_CHAT_SYSTEM:ResetFontSizeToDefault()
     -- Gamepad does not pass in a control when resetting
     -- So skip attempting to update the control itself
     if not IsInGamepadPreferredMode() then
@@ -90,7 +92,7 @@ do
         if valueLabel then
             valueLabel:SetText(value)
         end
-        CHAT_SYSTEM:SetFontSize(value)
+        KEYBOARD_CHAT_SYSTEM:SetFontSize(value)
         SetChatFontSize(value)
     end
 
@@ -109,7 +111,7 @@ do
 end
 
 function ZO_OptionsPanel_Social_MinAlphaOnShow(control)
-    local currentChoice = zo_round(CHAT_SYSTEM:GetMinAlpha() * 100)
+    local currentChoice = zo_round(KEYBOARD_CHAT_SYSTEM:GetMinAlpha() * 100)
     GetControl(control, "Slider"):SetValue(currentChoice)
     local valueLabel = GetControl(control, "ValueLabel")
     if valueLabel then
@@ -118,7 +120,7 @@ function ZO_OptionsPanel_Social_MinAlphaOnShow(control)
 end
 
 function ZO_OptionsPanel_Social_ResetMinAlphaToDefault(control)
-    CHAT_SYSTEM:ResetMinAlphaToDefault()
+    KEYBOARD_CHAT_SYSTEM:ResetMinAlphaToDefault()
     -- Gamepad does not pass in a control when resetting
     -- So skip attempting to update the control itself
     if not IsInGamepadPreferredMode() then
@@ -132,7 +134,7 @@ do
         if valueLabel then
             valueLabel:SetText(value)
         end
-        CHAT_SYSTEM:SetMinAlpha(value / 100)
+        KEYBOARD_CHAT_SYSTEM:SetMinAlpha(value / 100)
     end
 
     function ZO_OptionsPanel_Social_InitializeMinAlphaControl(control, selected)
@@ -144,6 +146,16 @@ do
         slider:SetHandler("OnValueChanged", OnSliderChanged)
         ZO_Options_SetupSlider(control, selected)
     end
+end
+
+
+function ZO_OptionsPanel_Social_OnGamepadChatTextSizeScrollListChanged(selectedData)
+    SetGamepadChatFontSize(selectedData.value)
+    GAMEPAD_CHAT_SYSTEM:SetFontSize(selectedData.value)
+end
+
+local function DoesPlatformNotUseGamepadChatSystem()
+    return not ZO_ChatSystem_DoesPlatformUseGamepadChatSystem()
 end
 
 local ZO_OptionsPanel_Social_ControlData =
@@ -210,6 +222,16 @@ local ZO_OptionsPanel_Social_ControlData =
             valid = {AVA_NOTIFICATIONS_SETTING_CHOICE_DONT_SHOW, AVA_NOTIFICATIONS_SETTING_CHOICE_AUTOMATIC, AVA_NOTIFICATIONS_SETTING_CHOICE_ALWAYS_SHOW,},
             valueStringPrefix = "SI_AVANOTIFICATIONSSETTINGCHOICE",
         },
+        [UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED,
+            text = SI_SOCIAL_OPTIONS_GAMEPAD_CHAT_HUD_ENABLED,
+            tooltipText = SI_SOCIAL_OPTIONS_GAMEPAD_CHAT_HUD_ENABLED_TOOLTIP,
+            existsOnGamepad = ZO_ChatSystem_DoesPlatformUseGamepadChatSystem,
+        },
     },
 
     --Custom
@@ -226,8 +248,22 @@ local ZO_OptionsPanel_Social_ControlData =
             panel = SETTING_PANEL_SOCIAL,
             text = SI_SOCIAL_OPTIONS_TEXT_SIZE,
             tooltipText = SI_SOCIAL_OPTIONS_TEXT_SIZE_TOOLTIP,
+            existsOnGamepad = DoesPlatformNotUseGamepadChatSystem,
             minValue = 8,
             maxValue = 24,
+        },
+        --Options_Social_GamepadTextSize
+        [OPTIONS_CUSTOM_SETTING_SOCIAL_GAMEPAD_TEXT_SIZE] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            panel = SETTING_PANEL_SOCIAL,
+            text = SI_SOCIAL_OPTIONS_TEXT_SIZE,
+            tooltipText = SI_SOCIAL_OPTIONS_TEXT_SIZE_TOOLTIP,
+            valid = { GAMEPAD_CHAT_TEXT_SIZE_SETTING_SMALL, GAMEPAD_CHAT_TEXT_SIZE_SETTING_MEDIUM, GAMEPAD_CHAT_TEXT_SIZE_SETTING_LARGE, },
+            valueStringPrefix = "SI_GAMEPADCHATTEXTSIZESETTING",
+            GetSettingOverride = GetGamepadChatFontSize,
+            scrollListChangedCallback = ZO_OptionsPanel_Social_OnGamepadChatTextSizeScrollListChanged,
+            existsOnGamepad = ZO_ChatSystem_DoesPlatformUseGamepadChatSystem,
         },
         --Options_Social_MinAlpha
         [OPTIONS_CUSTOM_SETTING_SOCIAL_MIN_ALPHA] = 
@@ -240,6 +276,7 @@ local ZO_OptionsPanel_Social_ControlData =
             panel = SETTING_PANEL_SOCIAL,
             text = SI_SOCIAL_OPTIONS_MIN_ALPHA,
             tooltipText = SI_SOCIAL_OPTIONS_MIN_ALPHA_TOOLTIP,
+            existsOnGamepad = DoesPlatformNotUseGamepadChatSystem,
             minValue = 0,
             maxValue = 100,
         },

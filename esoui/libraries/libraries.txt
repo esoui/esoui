@@ -74,8 +74,6 @@ EsoUI\Libraries\ZO_Templates\StatusBarTemplates.lua
 EsoUI\Libraries\ZO_Templates\StatusBarTemplates.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\StatusBarTemplates_Gamepad.xml
 
-EsoUI\Libraries\ZO_Templates\OptionsWindowTemplate.lua
-EsoUI\Libraries\ZO_Templates\OptionsWindowTemplate.xml
 EsoUI\Libraries\ZO_Templates\ObjectPoolTemplates.lua
 EsoUI\Libraries\ZO_Templates\ZO_ItemScreenTemplates.xml
 

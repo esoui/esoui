@@ -508,16 +508,18 @@ function ZO_MinimizeChatFragment:New(actionLayerName)
 end
 
 function ZO_MinimizeChatFragment:Show()
-    self.wasChatMaximized = not CHAT_SYSTEM:IsMinimized()
+    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    self.wasChatMaximized = not chatSystem:IsMinimized()
     if self.wasChatMaximized then
-        CHAT_SYSTEM:Minimize()
+        chatSystem:Minimize()
     end
     self:OnShown()
 end
 
 function ZO_MinimizeChatFragment:Hide()
-    if (self.wasChatMaximized or (CHAT_SYSTEM:IsPinnable() and CHAT_SYSTEM:IsWindowPinned())) and CHAT_SYSTEM:IsMinimized() then
-        CHAT_SYSTEM:Maximize()
+    local chatSystem = SYSTEMS:GetObject("ChatSystem")
+    if (self.wasChatMaximized or (chatSystem:IsPinnable() and chatSystem:IsWindowPinned())) and chatSystem:IsMinimized() then
+        chatSystem:Maximize()
     end
 
     self.wasChatMaximized = false
@@ -995,3 +997,5 @@ LOCKPICK_TUTORIAL_FRAGMENT = ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_LOC
 
 HOUSING_EDITOR_HUD_FRAGMENT = ZO_HousingEditorHUDFragment:New()
 HOUSING_EDITOR_ACTION_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingEditorActionBarTopLevel)
+
+SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjustActions")

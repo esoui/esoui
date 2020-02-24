@@ -61,16 +61,10 @@ local GAMEPAD_TRIGGER_ALLOCATE_POINTS_BUTTON_TEMPLATES =
 {
     SIZE = 55,
     DECREASE = {
-        NORMAL = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_TRIGGER),
-        PRESSED = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_TRIGGER),
-        MOUSEOVER = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_LEFT_TRIGGER),
-        DISABLED = ZO_GAMEPAD_LEFT_TRIGGER_DISABLED,
+        KEY_CODE = KEY_GAMEPAD_LEFT_TRIGGER
     },
     INCREASE = {
-        NORMAL = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_TRIGGER),
-        PRESSED = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_TRIGGER),
-        MOUSEOVER = GetGamepadIconPathForKeyCode(KEY_GAMEPAD_RIGHT_TRIGGER),
-        DISABLED = ZO_GAMEPAD_RIGHT_TRIGGER_DISABLED,
+        KEY_CODE = KEY_GAMEPAD_RIGHT_TRIGGER
     },
 }
 
@@ -562,10 +556,15 @@ function ZO_ChampionStar:GetConstellation()
 end
 
 local function SetButtonTextures(btn, textures)
-    btn:SetNormalTexture(textures.NORMAL)
-    btn:SetPressedTexture(textures.PRESSED)
-    btn:SetMouseOverTexture(textures.MOUSEOVER)
-    btn:SetDisabledTexture(textures.DISABLED)
+    if textures.KEY_CODE then
+        btn:SetKeyCode(textures.KEY_CODE)
+    else
+        btn:SetKeyCode(nil)
+        btn:SetNormalTexture(textures.NORMAL)
+        btn:SetPressedTexture(textures.PRESSED)
+        btn:SetMouseOverTexture(textures.MOUSEOVER)
+        btn:SetDisabledTexture(textures.DISABLED)
+    end
 end
 
 function ZO_ChampionStar:ApplyButtonTemplatesToTextControl(template)

@@ -34,6 +34,7 @@ function ZO_GamepadGuildRosterManager:Initialize(control)
     control:RegisterForEvent(EVENT_GUILD_MEMBER_NOTE_CHANGED, OnGuildMemberNoteChanged)
 
     self:InitializeConfirmRemoveDialog()
+    self:InitializeSetRankDialog()
 end
 
 function ZO_GamepadGuildRosterManager:InitializeHeader()
@@ -173,29 +174,10 @@ end
 function ZO_GamepadGuildRosterManager:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
 
-    local function CanPromote()
-        return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_PROMOTE) and self.socialData.rankIndex > 1
+    local function ShouldAddSetRankOption()
+        return ZO_GuildRosterManager.CanSetPlayerRank(self.guildId, self.playerData.rankIndex, self.socialData.rankIndex, self.socialData.rankId)
     end
-
-    local function ShouldAddPromoteOption()
-        return CanPromote() and self.playerData.rankIndex < (self.socialData.rankIndex - 1) and self.socialData.rankId ~= DEFAULT_INVITED_RANK
-    end
-
-    local function ShouldAddPromoteToGuildMasterOption()
-        return CanPromote() and not ShouldAddPromoteOption() and IsGuildRankGuildMaster(self.guildId, self.playerData.rankIndex) and self.socialData.rankId ~= DEFAULT_INVITED_RANK
-    end
-    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildPromoteOption, ShouldAddPromoteOption)
-    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildPromoteToGuildMasterOption, ShouldAddPromoteToGuildMasterOption)
-
-    local function ShouldAddDemoteOption()
-        local guildId = self.guildId
-        local rankIndex = self.socialData.rankIndex
-        return DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_DEMOTE) and 
-                rankIndex < GetNumGuildRanks(guildId) and
-                self.playerData.rankIndex < rankIndex and 
-                self.socialData.rankId ~= DEFAULT_INVITED_RANK
-    end
-    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildDemoteOption, ShouldAddDemoteOption)
+    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildSetRankOption, ShouldAddSetRankOption)
 
     local function ShouldAddRemoveOption()
         local socialData = self.socialData
@@ -209,7 +191,6 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
 
     local function ShouldAddUninviteOption()
         local socialData = self.socialData
-        local playerData = self.playerData
         return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_REMOVE) and
                 socialData.rankId == DEFAULT_INVITED_RANK
     end
@@ -244,34 +225,15 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildShowGamerCardOption, IsConsoleUI)
 end
 
-function ZO_GamepadGuildRosterManager:BuildPromoteOption()
+function ZO_GamepadGuildRosterManager:BuildSetRankOption()
     local callback = function()
-        GuildPromote(self.guildId, self.socialData.displayName)
-        PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
+        ZO_Dialogs_ShowGamepadDialog("GUILD_SET_RANK_GAMEPAD", { guildId = self.guildId, targetData = self.socialData, playerData = self.playerData })
     end
-    return self:BuildOptionEntry(nil, SI_GUILD_PROMOTE, callback)
-end
-
-function ZO_GamepadGuildRosterManager:BuildPromoteToGuildMasterOption()
-    local callback = function()
-        local guildInfo = ZO_AllianceIconNameFormatter(self.guildAlliance, self.guildName)
-        local rankName = GetFinalGuildRankName(self.guildId, 2)
-        ZO_Dialogs_ShowGamepadDialog("PROMOTE_TO_GUILDMASTER", { guildId = self.guildId, displayName = self.socialData.displayName }, { mainTextParams = { ZO_FormatUserFacingDisplayName(self.socialData.displayName), "", guildInfo, rankName } })
-    end
-    return self:BuildOptionEntry(nil, SI_GUILD_PROMOTE, callback)
-end
-
-function ZO_GamepadGuildRosterManager:BuildDemoteOption()
-    local callback = function()
-        GuildDemote(self.guildId, self.socialData.displayName)
-        PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
-    end
-    return self:BuildOptionEntry(nil, SI_GUILD_DEMOTE, callback)
+    return self:BuildOptionEntry(nil, SI_GUILD_SET_RANK, callback)
 end
 
 function ZO_GamepadGuildRosterManager:BuildRemoveOption()
     local callback = function()
-        local guildInfo = ZO_AllianceIconNameFormatter(self.guildAlliance, self.guildName)
         ZO_Dialogs_ShowGamepadDialog(ZO_GAMEPAD_CONFIRM_REMOVE_GUILD_MEMBER_DIALOG_NAME, { guildId = self.guildId,  displayName = self.socialData.displayName }, { mainTextParams = { ZO_FormatUserFacingDisplayName(self.socialData.displayName) }})
     end
     return self:BuildOptionEntry(nil, SI_GUILD_REMOVE, callback)
@@ -334,7 +296,6 @@ function ZO_GamepadGuildRosterManager:InitializeConfirmRemoveDialog()
         end
     end
 
-    local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CONFIRM_REMOVE_GUILD_MEMBER_DIALOG_NAME,
     {
         blockDialogReleaseOnPress = true,
@@ -407,7 +368,6 @@ function ZO_GamepadGuildRosterManager:InitializeConfirmRemoveDialog()
                         end
                     end,
                     callback = function(dialog)
-                        local targetData = dialog.entryList:GetTargetData()
                         local targetControl = dialog.entryList:GetTargetControl()
                         ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
                         self.addToBlacklist = ZO_GamepadCheckBoxTemplate_IsChecked(targetControl)
@@ -482,6 +442,102 @@ function ZO_GamepadGuildRosterManager:InitializeConfirmRemoveDialog()
                 callback = function(dialog)
                     ReleaseDialog()
                 end,
+            },
+        }
+    })
+end
+
+function ZO_GamepadGuildRosterManager:InitializeSetRankDialog()
+    local function OnRankSelected(dialog, entry)
+        local data = dialog.data
+        local newRankIndex = entry.rankIndex
+        if newRankIndex ~= data.targetData.rankIndex then
+            if newRankIndex == 1 then
+                local guildInfo = ZO_AllianceIconNameFormatter(self.guildAlliance, self.guildName)
+                local rankName = GetFinalGuildRankName(self.guildId, data.targetData.rankIndex)
+                ZO_Dialogs_ShowGamepadDialog("PROMOTE_TO_GUILDMASTER", { guildId = self.guildId, displayName = data.targetData.displayName }, { mainTextParams = { ZO_FormatUserFacingDisplayName(data.targetData.displayName), "", guildInfo, rankName } })
+            else
+                if newRankIndex < data.targetData.rankIndex then
+                    PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
+                else
+                    PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
+                end
+                GuildSetRank(data.guildId, data.targetData.displayName, newRankIndex)
+            end
+        end
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("GUILD_SET_RANK_GAMEPAD",
+    {
+        canQueue = true,
+
+        gamepadInfo = {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+
+        setup = function(dialog, data)
+            EVENT_MANAGER:RegisterForEvent("SetRankDialogGamepad", EVENT_GUILD_MEMBER_RANK_CHANGED, function(_, guildId, displayName)
+                if guildId == data.guildId and displayName == data.targetData.displayName or displayName == data.playerData.displayName then
+                    ZO_Dialogs_ReleaseDialog("GUILD_SET_RANK_GAMEPAD")
+                end
+            end)
+            EVENT_MANAGER:RegisterForEvent("SetRankDialogGamepad", EVENT_GUILD_RANK_CHANGED, function(_, guildId)
+                if guildId == data.guildId then
+                    ZO_Dialogs_ReleaseDialog("GUILD_SET_RANK_GAMEPAD")
+                end
+            end)
+
+            dialog.info.parametricList = {}
+            local targetRankIndex = data.targetData.rankIndex
+            local IS_GAMEPAD = true
+            local entries = ZO_GuildRosterManager.ComputeSetRankEntries(data.guildId, data.playerData.rankIndex, targetRankIndex, IS_GAMEPAD)
+            for rankIndex, entry in ipairs(entries) do
+                local rankEntry = ZO_GamepadEntryData:New(entry.rankName, entry.rankIcon)
+                rankEntry:SetEnabled(entry.enabled)
+                if rankIndex == targetRankIndex then
+                    rankEntry:SetSelected(true)
+                end
+                rankEntry.rankIndex = rankIndex
+                rankEntry.setup = ZO_SharedGamepadEntry_OnSetup
+                rankEntry.callback = OnRankSelected
+                
+                table.insert(dialog.info.parametricList,
+                {
+                    template = "ZO_GamepadSubMenuEntryTemplateWithStatus",
+                    entryData = rankEntry,
+                })
+            end
+            
+            dialog:setupFunc()
+            dialog.entryList:SetSelectedIndexWithoutAnimation(targetRankIndex)
+        end,
+
+        finishedCallback = function(dialog)
+            EVENT_MANAGER:UnregisterForEvent("SetRankDialogGamepad", EVENT_GUILD_MEMBER_RANK_CHANGED)
+            EVENT_MANAGER:UnregisterForEvent("SetRankDialogGamepad", EVENT_GUILD_RANK_CHANGED)
+        end,
+
+        title =
+        {
+            text = SI_GUILD_SET_RANK_DIALOG_TITLE,
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                enabled = function(dialog)
+                    local entry = dialog.entryList:GetTargetData()
+                    return entry.enabled
+                end,
+                callback =  function(dialog)
+                    local entry = dialog.entryList:GetTargetData()
+                    entry.callback(dialog, entry)
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
             },
         }
     })

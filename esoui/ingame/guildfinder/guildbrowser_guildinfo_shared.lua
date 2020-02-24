@@ -26,7 +26,14 @@ function ZO_GuildBrowser_GuildInfo_Shared:Initialize(control)
         end
     end
 
+    local function OnGuildFinderSearchResultsReady()
+        if self:IsShown() then
+            self:RefreshInfoPanel()
+        end
+    end
+
     GUILD_BROWSER_MANAGER:RegisterCallback("OnGuildDataReady", OnGuildDataReady)
+    GUILD_BROWSER_MANAGER:RegisterCallback("OnGuildFinderSearchResultsReady", OnGuildFinderSearchResultsReady)
 end
 
 function ZO_GuildBrowser_GuildInfo_Shared:SetGuildToShow(guildId)
@@ -90,4 +97,8 @@ end
 
 function ZO_GuildBrowser_GuildInfo_Shared:OnHidden()
     self.currentGuildId = 0
+end
+
+function ZO_GuildBrowser_GuildInfo_Shared:IsShown()
+    asset(false) -- To be overridden
 end

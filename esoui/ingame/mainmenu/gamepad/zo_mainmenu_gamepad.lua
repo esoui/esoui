@@ -1,4 +1,4 @@
-local MENU_ENTRIES = {}
+ZO_MENU_ENTRIES = {}
 
 local MENU_MAIN_ENTRIES =
 {
@@ -445,7 +445,7 @@ for menuEntryId, data in ipairs(MENU_ENTRY_DATA) do
         end
     end
 
-    table.insert(MENU_ENTRIES, newEntry)
+    table.insert(ZO_MENU_ENTRIES, newEntry)
 end
 
 local MODE_MAIN_LIST = 1
@@ -618,7 +618,7 @@ function ZO_MainMenuManager_Gamepad:UpdateEntryEnabledStates()
         end
     end
 
-    for _, entry in ipairs(MENU_ENTRIES) do
+    for _, entry in ipairs(ZO_MENU_ENTRIES) do
         UpdateState(entry)
         if entry.subMenu then
             for _, subMenuEntry in ipairs(entry.subMenu) do
@@ -775,14 +775,14 @@ do
         -- we only need to default the first time the Player Menu is shown
         -- so as soon as we init, we don't need to update this any more
         if self.initialized then
-            for _, entry in ipairs(MENU_ENTRIES) do
+            for _, entry in ipairs(ZO_MENU_ENTRIES) do
                 AddEntryToList(self.mainList, entry, self.mainMenuEntryToListIndex)
             end
         else
             --The entry we want to start on may not be at the top, and its index can be variable since entries are contextually visible
             local currentMenuIndex = 0
             local defaultEntryIndex = 1
-            for _, entry in ipairs(MENU_ENTRIES) do
+            for _, entry in ipairs(ZO_MENU_ENTRIES) do
                 if AddEntryToList(self.mainList, entry, self.mainMenuEntryToListIndex) then
                     currentMenuIndex = currentMenuIndex + 1
                     if entry.data.scene == DEFAULT_MENU_ENTRY_SCENE_NAME then

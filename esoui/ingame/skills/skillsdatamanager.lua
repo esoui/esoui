@@ -581,12 +581,12 @@ function ZO_ActiveSkillData:GetSlotOnCurrentHotbar()
 end
 
 function ZO_ActiveSkillData:HasPointsToClear(clearMorphsOnly)
-    if self:IsPurchased() then
+    if self:GetNumPointsAllocated() > 0 then
         if clearMorphsOnly then
+            -- make sure there are points allocated to a morph
             return self:GetCurrentMorphSlot() ~= MORPH_SLOT_BASE
-        else
-            return not self:IsAutoGrant()
         end
+        return true
     end
     return false
 end

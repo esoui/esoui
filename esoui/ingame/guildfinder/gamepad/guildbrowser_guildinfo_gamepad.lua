@@ -75,13 +75,29 @@ function ZO_GuildBrowser_GuildInfo_Gamepad:Initialize(control)
     self:BuildActionList()
 end
 
+function ZO_GuildBrowser_GuildInfo_Gamepad:IsShown()
+    GAMEPAD_GUILD_BROWSER_GUILD_INFO_FRAGMENT:IsShowing()
+end
+
 function ZO_GuildBrowser_GuildInfo_Gamepad:BuildActionList()
     local list = self:GetMainList()
     list:Clear()
 
     if GetGuildRecruitmentStatusAttribute(self.currentGuildId) == GUILD_RECRUITMENT_STATUS_ATTRIBUTE_VALUE_LISTED then
         local applyEntry = ZO_GamepadEntryData:New(GetString(SI_GUILD_BROWSER_GUILD_INFO_APPLY_TO_GUILD))
-        applyEntry.onSelectFunction = function() ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SUBMIT_GUILD_FINDER_APPLICATION") end
+        applyEntry.onSelectFunction = function()
+            local guildData = GUILD_BROWSER_MANAGER:GetGuildData(self.currentGuildId)
+            if guildData then
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SUBMIT_GUILD_FINDER_APPLICATION")
+            else
+                local data =
+                {
+                    guildId = self.currentGuildId,
+                    onCloseFunction = function() SCENE_MANAGER:HideCurrentScene() end,
+                }
+                ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_APPLICATION_STALE", data, { mainTextParams = { GetString("SI_GUILDAPPLICATIONRESPONSE", GUILD_APP_RESPONSE_GUILD_DATA_OUT_OF_DATE) } })
+            end
+        end
         list:AddEntry("ZO_GamepadItemSubEntryTemplate", applyEntry)
     else
         local exitEntry = ZO_GamepadEntryData:New(GetString(SI_GUILD_BROWSER_GUILD_INFO_EXIT))

@@ -17,7 +17,7 @@ function ZO_ZoneStories_Gamepad:New(...)
 end
 
 function ZO_ZoneStories_Gamepad:Initialize(control)
-    self.templateData =
+    local templateData =
     {
         gridListClass = ZO_GridScrollList_Gamepad,
         achievements = 
@@ -72,7 +72,7 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     GAMEPAD_ZONE_STORIES_SCENE:AddFragment(rightPaneFragment)
 
     local infoContainerControl = rightPane:GetNamedChild("InfoContainer")
-    ZO_ZoneStories_Shared.Initialize(self, control, infoContainerControl)
+    ZO_ZoneStories_Shared.Initialize(self, control, infoContainerControl, templateData)
 
     self.headerData = {
         titleText = GetString(SI_ACTIVITY_FINDER_CATEGORY_ZONE_STORIES),

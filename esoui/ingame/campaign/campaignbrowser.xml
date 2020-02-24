@@ -9,7 +9,7 @@
         </Control>
         <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
         <Label name="ZO_RulesetEntry" inherits="ZO_TreeLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
-            <Dimensions x="200" />
+            <Dimensions x="180" />
         </Label>
 
         <Label name="ZO_CampaignBrowserLoadingLabel" virtual="true" inherits="ZO_LoadingText" font="ZoFontGame"/>

@@ -27,7 +27,9 @@ function ZO_GamepadOptions:Initialize(control)
         end
     end
 
-    EVENT_MANAGER:RegisterForEvent("GamepadOptions", EVENT_DEFERRED_SETTING_REQUEST_COMPLETED, OnDeferredSettingRequestCompleted)
+    control:RegisterForEvent(EVENT_DEFERRED_SETTING_REQUEST_COMPLETED, OnDeferredSettingRequestCompleted)
+    control:RegisterForEvent(EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED, function() self:RefreshGamepadInfoPanel() end)
+    control:RegisterForEvent(EVENT_KEYBINDINGS_LOADED, function() self:RefreshGamepadInfoPanel() end)
 end
 
 function ZO_GamepadOptions:InitializeScenes()
@@ -133,8 +135,7 @@ function ZO_GamepadOptions:OnDeferredInitialize()
     self:InitializeHeader()
     self:InitializeOptionsLists()
     self:InitializeKeybindStrip()
-    self:InitializeGamepadInfoPanelTable()
-    self:RefreshGamepadInfoPanel()
+    self:InitializeGamepadInfoPanel()
 end
 
 function ZO_GamepadOptions:InitializeHeader()
@@ -179,7 +180,7 @@ function ZO_GamepadOptions:Select()
     elseif controlType == OPTIONS_COLOR then
         ZO_Options_ColorOnClicked(control)
     elseif controlType == OPTIONS_CHAT_COLOR then
-        ZO_Options_ChatColorOnClicked(control)
+        ZO_Options_Social_ChatColorOnClicked(control)
     end
 end
 
@@ -234,8 +235,7 @@ do
                 alignment = KEYBIND_STRIP_ALIGN_LEFT,
                 name = function()
                     local control = self.optionsList:GetSelectedControl()
-                    local controlType = self:GetControlTypeFromControl(control)
-                    if controlType == OPTIONS_CHECKBOX then
+                    if control and self:GetControlTypeFromControl(control) == OPTIONS_CHECKBOX then
                         return GetString(SI_GAMEPAD_TOGGLE_OPTION)
                     else
                         return GetString(SI_GAMEPAD_SELECT_OPTION)
@@ -259,62 +259,6 @@ end
 
 function ZO_GamepadOptions:IsAtRoot()
     return self.currentCategory == SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT
-end
-
-function ZO_GamepadOptions:InitializeGamepadInfoPanelTable()
-    if not self:HasInfoPanel() then return end --no infopanel in pregame
-
-    local control = self.control:GetNamedChild("InfoPanel")
-
-    control:GetNamedChild("Gamepad"):SetTexture(GetGamepadVisualReferenceArt())
-    
-    if GetGamepadType() == GAMEPAD_TYPE_XBOX then 
-        self.keyCodeToLabelGroupControl = 
-        {
-            [KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right6"),
-            [KEY_GAMEPAD_BUTTON_2] = control:GetNamedChild("Right5"),
-            [KEY_GAMEPAD_BUTTON_3] = control:GetNamedChild("Right3"),
-            [KEY_GAMEPAD_BUTTON_4] = control:GetNamedChild("Right4"),
-            [KEY_GAMEPAD_LEFT_TRIGGER] = control:GetNamedChild("Left1"),
-            [KEY_GAMEPAD_RIGHT_TRIGGER] = control:GetNamedChild("Right1"),
-            [KEY_GAMEPAD_LEFT_SHOULDER] = control:GetNamedChild("Left2"),
-            [KEY_GAMEPAD_RIGHT_SHOULDER] = control:GetNamedChild("Right2"),
-            [KEY_GAMEPAD_LEFT_STICK] = control:GetNamedChild("Left3"),
-            [KEY_GAMEPAD_RIGHT_STICK] = control:GetNamedChild("BottomRight"),
-            [KEY_GAMEPAD_DPAD_UP] = control:GetNamedChild("Left4"),
-            [KEY_GAMEPAD_DPAD_DOWN] = control:GetNamedChild("Left6"),
-            [KEY_GAMEPAD_DPAD_LEFT] = control:GetNamedChild("Left5"),
-            [KEY_GAMEPAD_DPAD_RIGHT] = control:GetNamedChild("BottomLeft"),
-            [KEY_GAMEPAD_START] = control:GetNamedChild("TopRight"),
-            [KEY_GAMEPAD_BACK] = control:GetNamedChild("TopLeft"),
-        }
-    elseif GetGamepadType() == GAMEPAD_TYPE_PS4 then
-        self.keyCodeToLabelGroupControl = 
-        {
-            [KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right6"),
-            [KEY_GAMEPAD_BUTTON_2] = control:GetNamedChild("Right5"),
-            [KEY_GAMEPAD_BUTTON_3] = control:GetNamedChild("Right3"),
-            [KEY_GAMEPAD_BUTTON_4] = control:GetNamedChild("Right4"),
-            [KEY_GAMEPAD_LEFT_TRIGGER] = control:GetNamedChild("Left1"),
-            [KEY_GAMEPAD_RIGHT_TRIGGER] = control:GetNamedChild("Right1"),
-            [KEY_GAMEPAD_LEFT_SHOULDER] = control:GetNamedChild("Left2"),
-            [KEY_GAMEPAD_RIGHT_SHOULDER] = control:GetNamedChild("Right2"),
-            [KEY_GAMEPAD_LEFT_STICK] = control:GetNamedChild("BottomLeft"),
-            [KEY_GAMEPAD_RIGHT_STICK] = control:GetNamedChild("BottomRight"),
-            [KEY_GAMEPAD_DPAD_UP] = control:GetNamedChild("Left3"),
-            [KEY_GAMEPAD_DPAD_DOWN] = control:GetNamedChild("Left5"),
-            [KEY_GAMEPAD_DPAD_LEFT] = control:GetNamedChild("Left4"),
-            [KEY_GAMEPAD_DPAD_RIGHT] = control:GetNamedChild("Left6"),
-            [KEY_GAMEPAD_START] = control:GetNamedChild("TopRight"),
-        }
-        if GetUIPlatform() == UI_PLATFORM_PS4 then
-            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_TOUCHPAD_PRESSED] = control:GetNamedChild("TopLeft")
-        else
-            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_BACK] = control:GetNamedChild("TopLeft")
-        end
-    else
-        internalassert(false, "No control template art for current gamepad type")
-    end
 end
 
 function ZO_GamepadOptions_OptionsHorizontalListSetup(control, data, selected, reselectingDuringRebuild, enabled, selectedFromParent)
@@ -550,7 +494,7 @@ local function SetupGameCameraZoomLabels(control, isHoldKey, labelToUse, linesUs
     labelToUse = labelToUse + 1 --use an extra label to show Toggle
     linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
     local chordedActionString = control.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
-    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), ZO_Keybinding_GetGamepadActionName("GAME_CAMERA_GAMEPAD_ZOOM"), ZO_GAMEPAD_POV_ADJUST_ICON))
+    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), ZO_Keybinding_GetGamepadActionName("GAME_CAMERA_GAMEPAD_ZOOM"), zo_iconFormat(GetGamepadBothDpadDownAndRightStickScrollIcon(), 80, 40)))
     return labelToUse, linesUsed
 end
 
@@ -564,104 +508,161 @@ local function SetupQuickSlotLabels(control, labelToUse, linesUsed)
     return labelToUse, linesUsed
 end
 
-function ZO_GamepadOptions:RefreshGamepadInfoPanel()
+function ZO_GamepadOptions:InitializeGamepadInfoPanel()
     if not self:HasInfoPanel() then return end --no infopanel in pregame
 
-    local generalLayer = GetString(SI_KEYBINDINGS_LAYER_GENERAL)
-    local isChordedKeySetupMap = {}
-
-    for key, control in pairs(self.keyCodeToLabelGroupControl) do
-        local labelToUse = 1
-        local linesUsed = 0
-        local actionName = GetActionNameFromKey(generalLayer, key)
-        local holdKey = ConvertKeyPressToHold(key)
-        local holdActionName = GetActionNameFromKey(generalLayer, holdKey)
-        --regular key
-        if actionName and actionName ~= "" then
-            local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
-            if actionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction and also can toggle camera
-                local NOT_HOLD_KEY = false
-                labelToUse, linesUsed = SetupGameCameraZoomLabels(control, NOT_HOLD_KEY, labelToUse, linesUsed)
-            elseif actionName == "ACTION_BUTTON_9" then -- special keybind that handles hold functionality in lua to show a radial menu
-                labelToUse, linesUsed = SetupQuickSlotLabels(control, labelToUse, linesUsed)
-            else
-                localizedActionName = holdActionName and holdActionName ~= "" and zo_strformat(SI_BINDING_NAME_GAMEPAD_TAP_LEFT, localizedActionName) or localizedActionName 
-                control:GetNamedChild("Label" .. labelToUse):SetText(localizedActionName)           
+    if IsHeronUI() then
+        OPTIONS_MENU_INFO_PANEL_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+            if newState == SCENE_FRAGMENT_SHOWING then
+                if GetMostRecentGamepadType() ~= GAMEPAD_TYPE_HERON then
+                    TriggerTutorial(TUTORIAL_TRIGGER_HERON_THIRD_PARTY_CONTROLLER_SHOWING)
+                end
             end
-            linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
-            labelToUse = labelToUse + 1
+        end)
+    end
+
+    self:RefreshGamepadInfoPanel()
+end
+
+do
+    local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_HERON, GAMEPAD_TYPE_SWITCH)
+    local GAMEPAD_TYPE_HAS_SWAPPED_FACE_BUTTONS = ZO_CreateSetFromArguments(GAMEPAD_TYPE_SWITCH)
+    function ZO_GamepadOptions:RefreshGamepadInfoPanel()
+        if not self:HasInfoPanel() then return end --no infopanel in pregame
+
+        local control = self.control:GetNamedChild("InfoPanel")
+
+        control:GetNamedChild("Gamepad"):SetTexture(GetGamepadVisualReferenceArt())
+        
+        local mostRecentGamepadType = GetMostRecentGamepadType()
+        local backKeyCode = mostRecentGamepadType == GAMEPAD_TYPE_PS4 and KEY_GAMEPAD_TOUCHPAD_PRESSED or KEY_GAMEPAD_BACK
+        self.keyCodeToLabelGroupControl = 
+        {
+            [KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right6"),
+            [KEY_GAMEPAD_BUTTON_2] = control:GetNamedChild("Right5"),
+            [KEY_GAMEPAD_BUTTON_3] = control:GetNamedChild("Right3"),
+            [KEY_GAMEPAD_BUTTON_4] = control:GetNamedChild("Right4"),
+            [KEY_GAMEPAD_LEFT_TRIGGER] = control:GetNamedChild("Left1"),
+            [KEY_GAMEPAD_RIGHT_TRIGGER] = control:GetNamedChild("Right1"),
+            [KEY_GAMEPAD_LEFT_SHOULDER] = control:GetNamedChild("Left2"),
+            [KEY_GAMEPAD_RIGHT_SHOULDER] = control:GetNamedChild("Right2"),
+            [KEY_GAMEPAD_LEFT_STICK] = control:GetNamedChild("Left3"),
+            [KEY_GAMEPAD_RIGHT_STICK] = control:GetNamedChild("BottomRight"),
+            [KEY_GAMEPAD_DPAD_UP] = control:GetNamedChild("Left4"),
+            [KEY_GAMEPAD_DPAD_DOWN] = control:GetNamedChild("Left6"),
+            [KEY_GAMEPAD_DPAD_LEFT] = control:GetNamedChild("Left5"),
+            [KEY_GAMEPAD_DPAD_RIGHT] = control:GetNamedChild("BottomLeft"),
+            [KEY_GAMEPAD_START] = control:GetNamedChild("TopRight"),
+            [backKeyCode] = control:GetNamedChild("TopLeft"),
+        }
+
+        if GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK[mostRecentGamepadType] then
+            -- swap dpad and left stick
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_LEFT_STICK] = control:GetNamedChild("BottomLeft")
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_DPAD_UP] = control:GetNamedChild("Left3")
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_DPAD_DOWN] = control:GetNamedChild("Left5")
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_DPAD_LEFT] = control:GetNamedChild("Left4")
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_DPAD_RIGHT] = control:GetNamedChild("Left6")
         end
 
-        --hold key
-        if holdActionName and holdActionName ~= "" then
-            local localizedActionName = ZO_Keybinding_GetGamepadActionName(holdActionName)           
-            if holdActionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction
-                local HOLD_KEY = true
-                labelToUse, linesUsed = SetupGameCameraZoomLabels(control, HOLD_KEY, labelToUse, linesUsed)
-            else
-                control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(SI_BINDING_NAME_GAMEPAD_HOLD_LEFT, localizedActionName))           
-            end
-            linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
-            labelToUse = labelToUse + 1
+        if GAMEPAD_TYPE_HAS_SWAPPED_FACE_BUTTONS[mostRecentGamepadType] then
+            -- swap a/b, x/y
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right5")
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_BUTTON_2] = control:GetNamedChild("Right6")
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_BUTTON_3] = control:GetNamedChild("Right4")
+            self.keyCodeToLabelGroupControl[KEY_GAMEPAD_BUTTON_4] = control:GetNamedChild("Right3")
         end
 
-        --chorded keys
-        local chordedKeys = {GetKeyChordsFromSingleKey(key)} 
-        if chordedKeys then
-            for i, chordedKey in ipairs(chordedKeys) do
-                actionName = GetActionNameFromKey(generalLayer, chordedKey)
-                if actionName and actionName ~= "" then
-                    if linesUsed < 4 and not isChordedKeySetupMap[chordedKey] then
-                        local icon = self:GetButtonTextureInfoFromActionName(actionName)
-                        local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
-                        local chordedActionString = control.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
-                        control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), localizedActionName, icon))
-                        
-                        local numLines = control:GetNamedChild("Label" .. labelToUse):GetNumLines()
-                        if linesUsed == 3 and numLines > 1 then --the last label is using two lines
-                             control:GetNamedChild("Label" .. labelToUse):SetText("") --unsetup the label and try on other key
-                            isChordedKeySetupMap[chordedKey] = false
-                        else
-                            labelToUse = labelToUse + 1
-                            linesUsed = linesUsed + numLines
-                            isChordedKeySetupMap[chordedKey] = true --this chord has been setup, ignore it when check the second key
-                        end             
-                    elseif isChordedKeySetupMap[chordedKey] == nil then
-                        isChordedKeySetupMap[chordedKey] = false --We ran out of space in this group, we'll try again on the chords other key
+        local generalLayer = GetString(SI_KEYBINDINGS_LAYER_GENERAL)
+        local isChordedKeySetupMap = {}
+
+        for key, control in pairs(self.keyCodeToLabelGroupControl) do
+            local labelToUse = 1
+            local linesUsed = 0
+            local actionName = GetActionNameFromKey(generalLayer, key)
+            local holdKey = ConvertKeyPressToHold(key)
+            local holdActionName = GetActionNameFromKey(generalLayer, holdKey)
+            --regular key
+            if actionName and actionName ~= "" then
+                local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
+                if actionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction and also can toggle camera
+                    local NOT_HOLD_KEY = false
+                    labelToUse, linesUsed = SetupGameCameraZoomLabels(control, NOT_HOLD_KEY, labelToUse, linesUsed)
+                elseif actionName == "ACTION_BUTTON_9" then -- special keybind that handles hold functionality in lua to show a radial menu
+                    labelToUse, linesUsed = SetupQuickSlotLabels(control, labelToUse, linesUsed)
+                else
+                    localizedActionName = holdActionName and holdActionName ~= "" and zo_strformat(SI_BINDING_NAME_GAMEPAD_TAP_LEFT, localizedActionName) or localizedActionName 
+                    control:GetNamedChild("Label" .. labelToUse):SetText(localizedActionName)           
+                end
+                linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
+                labelToUse = labelToUse + 1
+            end
+
+            --hold key
+            if holdActionName and holdActionName ~= "" then
+                local localizedActionName = ZO_Keybinding_GetGamepadActionName(holdActionName)           
+                if holdActionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction
+                    local HOLD_KEY = true
+                    labelToUse, linesUsed = SetupGameCameraZoomLabels(control, HOLD_KEY, labelToUse, linesUsed)
+                else
+                    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(SI_BINDING_NAME_GAMEPAD_HOLD_LEFT, localizedActionName))           
+                end
+                linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
+                labelToUse = labelToUse + 1
+            end
+
+            --chorded keys
+            local chordedKeys = {GetKeyChordsFromSingleKey(key)} 
+            if chordedKeys then
+                for i, chordedKey in ipairs(chordedKeys) do
+                    actionName = GetActionNameFromKey(generalLayer, chordedKey)
+                    if actionName and actionName ~= "" then
+                        if linesUsed < 4 and not isChordedKeySetupMap[chordedKey] then
+                            local buttonMarkup = self:GetButtonMarkupFromActionName(actionName)
+                            local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
+                            local chordedActionString = control.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
+                            control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), localizedActionName, buttonMarkup))
+                            
+                            local numLines = control:GetNamedChild("Label" .. labelToUse):GetNumLines()
+                            if linesUsed == 3 and numLines > 1 then --the last label is using two lines
+                                 control:GetNamedChild("Label" .. labelToUse):SetText("") --unsetup the label and try on other key
+                                isChordedKeySetupMap[chordedKey] = false
+                            else
+                                labelToUse = labelToUse + 1
+                                linesUsed = linesUsed + numLines
+                                isChordedKeySetupMap[chordedKey] = true --this chord has been setup, ignore it when check the second key
+                            end             
+                        elseif isChordedKeySetupMap[chordedKey] == nil then
+                            isChordedKeySetupMap[chordedKey] = false --We ran out of space in this group, we'll try again on the chords other key
+                        end
                     end
                 end
             end
+
+            --clean up unused labels
+            while labelToUse < 5 do
+                control:GetNamedChild("Label" .. labelToUse):SetText("")
+                labelToUse = labelToUse + 1
+            end
         end
 
-        --clean up unused labels
-        while labelToUse < 5 do
-            control:GetNamedChild("Label" .. labelToUse):SetText("")
-            labelToUse = labelToUse + 1
+        for key, isSetup in pairs(isChordedKeySetupMap) do
+            assert(isSetup) --in case we make a control scheme with enough chords they can't be nicely placed
         end
-    end
-
-    for key, isSetup in pairs(isChordedKeySetupMap) do
-        assert(isSetup) --in case we make a control scheme with enough chords they can't be nicely placed
     end
 end
 
-function ZO_GamepadOptions:GetButtonTextureInfoFromActionName(actionName)
+function ZO_GamepadOptions:GetButtonMarkupFromActionName(actionName)
     local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
     for bindingIndex = 1, GetMaxBindingsPerAction() do
         local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex)
         if key ~= KEY_INVALID then                  
             -- If the key matches the preferred mode then just use it
             if IsKeyCodeGamepadKey(key) then
-                local icon, width, height = GetGamepadIconPathForKeyCode(key)
-                local isKeyHold = IsKeyCodeHoldKey(key)
-                return icon, width, height, isKeyHold
+                return ZO_Keybindings_GenerateIconKeyMarkup(key)
             end
         end
     end
-end
-
-function ZO_GamepadOptions_RefreshGamepadInfoPanel()
-    GAMEPAD_OPTIONS:RefreshGamepadInfoPanel()
 end
 
 function ZO_GamepadOptions_OnInitialize(control)
@@ -692,7 +693,7 @@ function ZO_GamepadOptions:RefreshCategoryList()
     self:AddCategory(SETTING_PANEL_SOCIAL)
     self:AddCategory(SETTING_PANEL_COMBAT)
 
-    if ZO_SharedOptions_SettingsData[SETTING_PANEL_ACCOUNT] ~= nil then
+    if ZO_OptionsPanel_IsAccountManagementAvailable() then
         self:AddCategory(SETTING_PANEL_ACCOUNT)
     end
 
@@ -809,17 +810,20 @@ end
 function ZO_GamepadOptions:AddSettingGroup(panelId)
     local settings = GAMEPAD_SETTINGS_DATA[panelId]
     if settings then
+        local lastHeader = nil
         for i, setting in ipairs(settings) do
             local data = self:GetSettingsData(setting.panel, setting.system, setting.settingId)
             local isVisible = data.visible == nil or data.visible
 
-            -- If this is a deferred setting and it isn't loaded, then don't show it
-            if IsSettingDeferred(data.system, data.settingId) and not IsDeferredSettingLoaded(data.system, data.settingId) then
+            local exists = data.existsOnGamepad or data.exists
+            if exists ~= nil and not exists() then
+                -- This setting isn't available on this platform
                 isVisible = false
-            else
-                if type(isVisible) == "function" then
-                    isVisible = isVisible()
-                end
+            elseif IsSettingDeferred(data.system, data.settingId) and not IsDeferredSettingLoaded(data.system, data.settingId) then
+                -- If this is a deferred setting and it isn't loaded, then don't show it
+                isVisible = false
+            elseif type(isVisible) == "function" then
+                isVisible = isVisible()
             end
 
             if isVisible then
@@ -840,13 +844,14 @@ function ZO_GamepadOptions:AddSettingGroup(panelId)
                 end
 
                 local templateName = TEMPLATE_NAMES[controlType]
-                local isHeader = header or data.header
-                if isHeader then 
+                local newHeader = header or data.header
+                if newHeader and newHeader ~= lastHeader then 
                     templateName = templateName .. "WithHeader"
                     if not data.header then
                         data.header = header
                     end
                 end
+                lastHeader = newHeader
 
                 self.optionsList:AddEntry(templateName, data)
             end

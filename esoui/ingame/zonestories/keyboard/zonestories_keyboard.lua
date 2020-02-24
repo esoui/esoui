@@ -12,7 +12,7 @@ function ZO_ZoneStories_Keyboard:New(...)
 end
 
 function ZO_ZoneStories_Keyboard:Initialize(control)
-    self.templateData =
+    local templateData =
     {
         gridListClass = ZO_GridScrollList_Keyboard,
         achievements = 
@@ -44,7 +44,7 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
     self.trackingMessageLabel = control:GetNamedChild("TrackingMessage")
 
     local infoContainerControl = control:GetNamedChild("InfoContainer")
-    ZO_ZoneStories_Shared.Initialize(self, control, infoContainerControl)
+    ZO_ZoneStories_Shared.Initialize(self, control, infoContainerControl, templateData)
 
     self.keybindStripDescriptor =
     {

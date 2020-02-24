@@ -29,6 +29,7 @@ do
     function ZO_EditDefaultText_Initialize(self, defaultText)
         local label = GetControl(self, "Text")
         label:SetText(defaultText)
+        self:SetDefaultTextForVirtualKeyboard(defaultText)
         self.defaultTextEnabled = true
         UpdateVisibility(self)
     end

@@ -1,17 +1,16 @@
-function ZO_Pregame_MustPlayVideos()
-    return GetCVar("HasPlayedPregameVideo") == "0"
+function ZO_Pregame_HasPlayedVideos()
+    return GetCVar("HasPlayedPregameVideo") ~= "0"
 end
 
-function ZO_Pregame_AllowVideosToPlay()
-    return GetCVar("SkipPregameVideos") == "0"
+function ZO_Pregame_ShouldSkipVideos()
+    -- only skip if the cvar is set, _and_ the player has seen the videos at least once
+    return GetCVar("SkipPregameVideos") ~= "0" and ZO_Pregame_HasPlayedVideos()
 end
 
 ZO_PREGAME_CHARACTER_COUNT = 0
 ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY = false
 ZO_PREGAME_CHARACTER_LIST_RECEIVED = false
 ZO_PREGAME_HAD_GLOBAL_ERROR = false
-ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = false
-ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
 
 local QUEUE_VIDEO = false
 
@@ -50,23 +49,10 @@ end
 
 local AttemptToPlayIntroCinematic
 do
-    local OPENING_CINEMATIC =
-    {
-        [CHAPTER_BASE_GAME] = "Video/Opening_Cinematic_$(officialLanguage).bik",
-        [CHAPTER_VOLCANO] = "Video/Morrowind_Opener_$(officialLanguage).bik",
-        [CHAPTER_GLACIER] = "Video/Summerset_Opener_$(officialLanguage).bik",
-        [CHAPTER_MESA] = "Video/Elsweyr_Opener_$(officialLanguage).bik",
-    }
-
     function AttemptToPlayIntroCinematic()
         SetVideoCancelAllOnCancelAny(true)
-        local highestUnlockedChapter = GetHighestUnlockedChapter()
-        local videoPath = OPENING_CINEMATIC[highestUnlockedChapter]
-        if videoPath then
-            ZO_PlayVideoAndAdvance(videoPath, QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
-        else
-            ZO_PlayVideoAndAdvance("Video/Opening_Cinematic_$(officialLanguage).bik", QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
-        end
+        local videoDataId = GetOpeningCinematicVideoDataId()
+        ZO_PlayVideoAndAdvance(PlayVideoById, videoDataId, QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
     end
 end
 
@@ -110,13 +96,13 @@ local g_sharedPregameStates =
 
     ["CharacterSelect_FromCinematic"] =
     {
-        OnEnter = function(allowAnimation)
+        OnEnter = function()
             ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
             if IsInGamepadPreferredMode() then
                 GAMEPAD_OPTIONS:SetGamepadOptionsInputBlocked(false)
             end
         end,
-        
+
         OnExit = function()
         end
     },
@@ -129,7 +115,6 @@ local g_sharedPregameStates =
 
         OnEnter = function()
             AttemptToPlayIntroCinematic()
-            ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING = true
             SCENE_MANAGER:ShowBaseScene()
         end,
 
@@ -155,7 +140,7 @@ local g_sharedPregameStates =
             -- didn't show the cinematic before switching to this scene
             SCENE_MANAGER:ShowBaseScene()
         end,
-        
+
         OnExit = function()
         end,
 
@@ -164,7 +149,7 @@ local g_sharedPregameStates =
         end
     },
 
-    ["CharacterCreateFadeIn"] = 
+    ["CharacterCreateFadeIn"] =
     {
         ShouldAdvance = function()
             return false
@@ -184,7 +169,7 @@ local g_sharedPregameStates =
 
     ["CharacterCreate"] =
     {
-        OnEnter = function(allowAnimation)
+        OnEnter = function()
             ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_CREATION)
             local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
             characterCreate:Reset()
@@ -209,7 +194,7 @@ local g_sharedPregameStates =
 
     ["CharacterCreate_Barbershop"] =
     {
-        OnEnter = function(allowAnimation)
+        OnEnter = function()
             if IsInGamepadPreferredMode() then
                 Pregame_ShowScene("gamepadCharacterCreate")
             else
@@ -236,7 +221,7 @@ local g_sharedPregameStates =
                 Pregame_ShowScene("chapterUpgradeKeyboard")
             end
         end,
-        
+
         GetStateTransitionData = function()
             return "CharacterSelect"
         end,
@@ -262,7 +247,7 @@ local g_sharedPregameStates =
                 Pregame_ShowScene("chapterUpgradeKeyboard")
             end
         end,
-        
+
         GetStateTransitionData = function()
             return "WaitForCharacterDataLoaded"
         end,
@@ -307,24 +292,6 @@ local g_sharedPregameStates =
         end
     },
 
-    ["ScreenAdjust"] =
-    {
-        ShouldAdvance = function()
-            return not IsConsoleUI()
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("screenAdjust")
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "GammaAdjust"
-        end,
-    },
-
     ["ScreenAdjustIntro"] =
     {
         ShouldAdvance = function()
@@ -332,7 +299,7 @@ local g_sharedPregameStates =
         end,
 
         OnEnter = function()
-            SCENE_MANAGER:Show("screenAdjustIntro")
+            SCENE_MANAGER:Show("screenAdjust")
             SetCVar("PregameScreenAdjustEnabled", "false")
         end,
 
@@ -370,7 +337,7 @@ local g_sharedPregameStates =
     ["PlayIntroMovies"] =
     {
         ShouldAdvance = function()
-            return not(ZO_Pregame_MustPlayVideos() or ZO_Pregame_AllowVideosToPlay())
+            return ZO_Pregame_ShouldSkipVideos()
         end,
 
         OnEnter = function()
@@ -379,7 +346,7 @@ local g_sharedPregameStates =
             if IsConsoleUI() then
                 skipMode = VIDEO_SKIP_MODE_ALLOW_SKIP
             else
-                skipMode = ZO_Pregame_MustPlayVideos() and VIDEO_SKIP_MODE_NO_SKIP or VIDEO_SKIP_MODE_ALLOW_SKIP
+                skipMode = ZO_Pregame_HasPlayedVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
             end
 
             -- TODO: Determine if these videos need localization or subtitles...
@@ -387,7 +354,7 @@ local g_sharedPregameStates =
 
             PlayVideo("Video/Bethesda_logo.bik", QUEUE_VIDEO, skipMode)
 
-            ZO_PlayVideoAndAdvance("Video/ZOS_logo.bik", QUEUE_VIDEO, skipMode)
+            ZO_PlayVideoAndAdvance(PlayVideo, "Video/ZOS_logo.bik", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()
@@ -401,15 +368,15 @@ local g_sharedPregameStates =
     ["ShowLegalSplashScreen"] =
     {
         ShouldAdvance = function()
-            return not(ZO_Pregame_MustPlayVideos() or ZO_Pregame_AllowVideosToPlay())
+            return ZO_Pregame_ShouldSkipVideos()
         end,
 
         OnEnter = function()
-            SCENE_MANAGER:Show("logoSplash")
+            SCENE_MANAGER:Show("copyrightLogosSplash")
         end,
 
         GetStateTransitionData = function()
-            return "ScreenAdjustIntro"
+            return "AccountLoginEntryPoint"
         end,
 
         OnExit = function()
@@ -419,11 +386,11 @@ local g_sharedPregameStates =
     ["ShowHavokSplashScreen"] =
     {
         ShouldAdvance = function()
-            return not(ZO_Pregame_MustPlayVideos() or ZO_Pregame_AllowVideosToPlay())
+            return ZO_Pregame_ShouldSkipVideos()
         end,
 
         OnEnter = function()
-            SCENE_MANAGER:Show("havokSplash")
+            SimpleLogoSplash_ShowWithTexture("EsoUI/Art/Login/havok_logo.dds")
         end,
 
         GetStateTransitionData = function()
@@ -438,12 +405,12 @@ local g_sharedPregameStates =
     {
         ShouldAdvance = function()
             local serviceType = GetPlatformServiceType()
-            return not(serviceType == PLATFORM_SERVICE_TYPE_DMM and (ZO_Pregame_MustPlayVideos() or ZO_Pregame_AllowVideosToPlay()))
+            return serviceType ~= PLATFORM_SERVICE_TYPE_DMM or ZO_Pregame_ShouldSkipVideos()
         end,
 
         OnEnter = function()
-            local skipMode = ZO_Pregame_MustPlayVideos() and VIDEO_SKIP_MODE_NO_SKIP or VIDEO_SKIP_MODE_ALLOW_SKIP
-            ZO_PlayVideoAndAdvance("Video/jp_DMM_logo.bik", QUEUE_VIDEO, skipMode)
+            local skipMode = ZO_Pregame_HasPlayedVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
+            ZO_PlayVideoAndAdvance(PlayVideo, "Video/jp_DMM_logo.bik", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()
@@ -535,7 +502,7 @@ function PregameStateManager_SetState(stateName, ...)
 end
 
 function PregameStateManager_ReenterLoginState()
-    if(PregameStateManager_GetCurrentState() == "AccountLogin") then
+    if PregameStateManager_GetCurrentState() == "AccountLogin" then
         CALLBACK_MANAGER:FireCallbacks("OnPregameEnterState", "AccountLogin")
     else
         PregameStateManager_SetState("AccountLogin")
@@ -544,7 +511,7 @@ end
 
 function PregameStateManager_AdvanceState()
     local currentStateData = PregameStateManager_GetState(g_currentStateName)
-    if(currentStateData and currentStateData.GetStateTransitionData) then
+    if currentStateData and currentStateData.GetStateTransitionData then
         PregameStateManager_SetState(currentStateData.GetStateTransitionData())
     else
         -- If there are no transition data, then we're not going anywhere...we'll be locked in the current state.
@@ -568,7 +535,7 @@ function PregameStateManager_GetPreviousState()
     return g_previousState
 end
 
-local function OnCharacterListReceived(eventCode, characterCount, maxCharacters, mostRecentlyPlayedCharacterId)
+local function OnCharacterListReceived(_, characterCount, maxCharacters, mostRecentlyPlayedCharacterId)
     ZO_PREGAME_CHARACTER_LIST_RECEIVED = true
     ZO_PREGAME_CHARACTER_COUNT = characterCount
 
@@ -613,7 +580,6 @@ end
 
 -- Debugging utility...you must be at character select already to use this.
 local function SetupUIReloadAfterLogin()
-    g_careAboutLoading = false
     RequestCharacterList()
 
     return "CharacterSelect"
@@ -647,7 +613,7 @@ function IsInCharacterCreateState()
     return PregameStateManager_GetCurrentState() == "CharacterCreate"
 end
 
-local function OnCharacterSelected(eventCode, characterId)
+local function OnCharacterSelected(_, characterId)
     PregameStateManager_SetState("BeginLoadingIntoWorld")
 end
 
@@ -656,22 +622,18 @@ function PregameIsFullyLoaded()
 end
 
 function AttemptToAdvancePastChapterOpeningCinematic()
-    if IsPlayingChapterOpeningCinematic() then
-        if PregameIsFullyLoaded() and ZO_PREGAME_IS_CHAPTER_OPENING_CINEMATIC_PLAYING == false then
-            PregameStateManager_AdvanceState()
-        end
+    if PregameIsFullyLoaded() then
+        PregameStateManager_AdvanceStateFromState("PlayChapterOpeningCinematic")
     end
 end
 
 function AttemptToAdvancePastCharacterSelectCinematic()
-    if (IsInCharacterSelectCinematicState()) then
-        if (PregameIsFullyLoaded() and ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING == false) then
-            PregameStateManager_AdvanceState()
-        end
+    if PregameIsFullyLoaded() then
+        PregameStateManager_AdvanceStateFromState("CharacterSelect_PlayCinematic")
     end
 end
 
-local function OnSubsystemLoadComplete(eventId, subSystem)
+local function OnSubsystemLoadComplete(_, subSystem)
     if subSystem == LOADING_SYSTEM_GAME_DATA or subSystem == LOADING_SYSTEM_SHARED_CHARACTER_OBJECT then
         AttemptToFireCharacterConstructionReady()
         -- LOADING_SYSTEM_GAME_DATA loads before LOADING_SYSTEM_SHARED_CHARACTER_OBJECT so if we hit either
@@ -715,7 +677,7 @@ function RegisterForLoadingUpdates()
     end
 end
 
-local function OnShowPregameGuiInState(eventCode, desiredState)
+local function OnShowPregameGuiInState(_, desiredState)
     SetGuiHidden("pregame", false)
 
     if initialStateOverrideFn then
@@ -728,11 +690,32 @@ local function OnShowPregameGuiInState(eventCode, desiredState)
 end
 
 function PregameStateManager_PlayCharacter(charId, loadOption)
-    if(type(loadOption) == "string") then
+    if type(loadOption) == "string" then
         PregameStateManager_SetState(loadOption)
     else --We will need to revisit this once the tutorial gate is integrated into the build
         CALLBACK_MANAGER:FireCallbacks("OnCharacterLoadRequested")
         SelectCharacterForPlay(charId, loadOption)
+    end
+end
+
+do
+    local g_currentVideoPregameState = nil
+    local function OnVideoPlaybackComplete()
+        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE)
+        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR)
+
+        if not ZO_PREGAME_HAD_GLOBAL_ERROR then
+            PregameStateManager_AdvanceStateFromState(g_currentVideoPregameState)
+        end
+    end
+
+    function ZO_PlayVideoAndAdvance(playVideoFunction, ...)
+        if playVideoFunction then
+            g_currentVideoPregameState = PregameStateManager_GetCurrentState()
+            EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
+            EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
+            playVideoFunction(...)
+        end
     end
 end
 
@@ -745,16 +728,46 @@ local function OnDisplayNameReady()
     shouldTryToShowChapterInterstitial = true
 end
 
+local function OnDisconnectedFromServer()
+    local FORCE = true
+    ZO_Dialogs_ReleaseAllDialogs(FORCE)
+
+    if IsInGamepadPreferredMode() then
+        ZO_Gamepad_DisplayServerDisconnectedError()
+    else
+        ZO_Keyboard_DisplayServerDisconnectedError()
+    end
+
+    local NUM_FLASHES_BEFORE_SOLID = 7
+    FlashTaskbarWindow("DISCONNECTED", NUM_FLASHES_BEFORE_SOLID)
+end
+
 local function OnGamepadPreferredModeChanged()
+    if IsAnyVideoPlaying() then
+        -- Allow the video to finish. All states that play a video should be
+        -- able to be used in either keyboard or gamepad flows, to properly
+        -- shuffle the player on to the next state
+        return
+    end
+
+    local FORCE_CLOSE = true
+    ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
+
     if not IsAccountLoggedIn() then
-        PregameStateManager_SetState("AccountLogin")
+        PregameStateManager_SetState("AccountLoginEntryPoint")
     elseif not IsPregameCharacterConstructionReady() then
         PregameStateManager_SetState("WaitForCharacterDataLoaded")
     elseif PregameStateManager_GetCurrentState() == "CharacterCreate" or GetNumCharacters() == 0 then
         PregameStateManager_SetState("CharacterCreate")
     else
+        local wasLoadingIntoWorld = PregameStateManager_GetCurrentState() == "BeginLoadingIntoWorld"
         MoveCameraToCurrentCharacter()
         PregameStateManager_SetState("CharacterSelect")
+        if wasLoadingIntoWorld then
+            -- pop up the loading dialog.
+            -- this needs to happen as a transition from character select so the input-appropriate version of that scene is visible in the background
+            PregameStateManager_SetState("BeginLoadingIntoWorld")
+        end
     end
 end
 
@@ -764,7 +777,7 @@ function ZO_RegisterForSavedVars(systemName, version, defaults, callback)
         callback(savedVars)
     end
 
-    local function OnAddonLoaded(eventId, name)
+    local function OnAddonLoaded(_, name)
         if name == "ZO_Pregame" then
             EVENT_MANAGER:UnregisterForEvent(systemName, EVENT_ADD_ON_LOADED)
 
@@ -784,3 +797,4 @@ EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_LIST_RECEI
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SHOW_PREGAME_GUI_IN_STATE, OnShowPregameGuiInState)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelected)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
+EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnDisconnectedFromServer)

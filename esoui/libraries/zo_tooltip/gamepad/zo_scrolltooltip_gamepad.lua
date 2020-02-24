@@ -8,7 +8,6 @@ local MAX_SCROLL_VALUE = 100
 
 function ZO_ScrollTooltip_Gamepad:Initialize(control, styleNamespace, style)
     local scrollIndicator = control:GetNamedChild("ScrollIndicator")
-    scrollIndicator:SetTexture(ZO_GAMEPAD_RIGHT_SCROLL_ICON)
 
     local scroll = control:GetNamedChild("Scroll")
     local scrollChild = scroll:GetNamedChild("ScrollChild")
