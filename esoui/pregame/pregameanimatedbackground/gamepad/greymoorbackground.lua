@@ -67,17 +67,28 @@ local HALF_SNOW_EMITTER_RANGE = SNOW_EMITTER_RANGE * 0.5
 local SNOW_EMISSION_RATE = 5.5
 local SNOW_FLIP_BOOK_PLAYBACK_INFO = { playbackType = ANIMATION_PLAYBACK_LOOP, loopCount = LOOP_INDEFINITELY }
 
-function GreymoorBackground:CreateSnowParticleSystem(centerOffsetX, primeS, minSize, maxSize, minDuration, maxDuration)
+--[[
+    snowInfo =
+    {
+        minSize = 24,
+        maxSize = 30,
+        minDuration = 4.0,
+        maxDuration = 3.0,
+        emissionRate = SNOW_EMISSION_RATE,
+        alphaRangeGenerator = ZO_UniformRangeGenerator:New(0.42, 0.28, 0.28, 0.14),
+    }
+]]--
+function GreymoorBackground:CreateSnowParticleSystem(centerOffsetX, primeS, snowInfo)
     local snowParticleSystem = ZO_ControlParticleSystem:New(ZO_LeafParticle_Control)
     snowParticleSystem:SetParentControl(self.containerControl)
-    snowParticleSystem:SetParticlesPerSecond(SNOW_EMISSION_RATE)
+    snowParticleSystem:SetParticlesPerSecond(snowInfo.emissionRate)
     snowParticleSystem:SetStartPrimeS(primeS)
-    snowParticleSystem:SetParticleParameter("Size", "DurationS", "LeafDescent", ZO_UniformRangeGenerator:New(minSize, maxSize, minDuration, maxDuration, 1.3, 3.5))
+    snowParticleSystem:SetParticleParameter("Size", "DurationS", "LeafDescent", ZO_UniformRangeGenerator:New(snowInfo.minSize, snowInfo.maxSize, snowInfo.minDuration, snowInfo.maxDuration, 1.3, 3.5))
     snowParticleSystem:SetParticleParameter("Texture", "EsoUI/Art/PregameAnimatedBackground/snowTwirl.dds")
     snowParticleSystem:SetParticleParameter("FlipBookCellsWide", 16)
     snowParticleSystem:SetParticleParameter("FlipBookCellsHigh", 2)
     snowParticleSystem:SetParticleParameter("FlipBookPlaybackInfo", SNOW_FLIP_BOOK_PLAYBACK_INFO)
-    snowParticleSystem:SetParticleParameter("FlipBookDurationS", ZO_UniformRangeGenerator:New(1.0, 2.5))
+    snowParticleSystem:SetParticleParameter("FlipBookDurationS", ZO_UniformRangeGenerator:New(0.5, 2.5))
     snowParticleSystem:SetParticleParameter("LeafSectionTop", ZO_UniformRangeGenerator:New(0, 0.6))
     snowParticleSystem:SetParticleParameter("LeafSectionBottom", ZO_UniformRangeGenerator:New(0, -1.2))
     snowParticleSystem:SetParticleParameter("LeafTextureRotationRadians", 0)
@@ -88,7 +99,7 @@ function GreymoorBackground:CreateSnowParticleSystem(centerOffsetX, primeS, minS
     snowParticleSystem:SetParticleParameter("StartOffsetX", ZO_UniformRangeGenerator:New(centerOffsetX - HALF_SNOW_EMITTER_RANGE, centerOffsetX + HALF_SNOW_EMITTER_RANGE))
     snowParticleSystem:SetParticleParameter("StartOffsetY", -50)
     snowParticleSystem:SetParticleParameter("StartColorR", "StartColorG", "StartColorB", 1, 1, 1)
-    snowParticleSystem:SetParticleParameter("StartAlpha", "EndAlpha", ZO_UniformRangeGenerator:New(0.42, 0.28, 0.28, 0.14))
+    snowParticleSystem:SetParticleParameter("StartAlpha", "EndAlpha", snowInfo.alphaRangeGenerator)
     snowParticleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)
     snowParticleSystem:SetParticleParameter("StartScale", 1)
     snowParticleSystem:SetParticleParameter("EndScale", 0.6)
@@ -128,15 +139,49 @@ function GreymoorBackground:CreateLightParticleSystem(index, offsetX)
     return lightParticleSystem
 end
 
+function GreymoorBackground:AddPrimedSnowParticleSystem(emitterInfo, particleInfo, index)
+    local fullCycleS = 1 / particleInfo.emissionRate
+    --Spread the snow emitters evenly over a full cycle. They fire in the order they are listed in SNOW_EMITTERS.
+    local primeS = (1 - ((index - 1) / (NUM_SNOW_EMITTERS - 1))) * fullCycleS
+
+    table.insert(self.particleSystems, self:CreateSnowParticleSystem(emitterInfo.centerX, primeS + particleInfo.maxDuration, particleInfo))
+end
+
 function GreymoorBackground:InitializeParticleSystems()
-    for i, emitterInfo in ipairs(SNOW_EMITTERS) do
-        local centerOffsetX = emitterInfo.centerX
-        local fullCycleS = 1 / SNOW_EMISSION_RATE
-        --Spread the snow emitters evenly over a full cycle. They fire in the order they are listed in SNOW_EMITTERS.
-        local primeS = (1 - ((i - 1) / (NUM_SNOW_EMITTERS - 1))) * fullCycleS
-        local MAX_DURATION_S = 4
-        table.insert(self.particleSystems, self:CreateSnowParticleSystem(centerOffsetX, primeS + MAX_DURATION_S, 24, 30, 4.0, 2.5))
-        table.insert(self.particleSystems, self:CreateSnowParticleSystem(centerOffsetX, primeS + MAX_DURATION_S, 30, 36, 3.0, 2.0))
+    local smallSnowInfo =
+    {
+        minSize = 24,
+        maxSize = 30,
+        minDuration = 4.0,
+        maxDuration = 3.0,
+        emissionRate = SNOW_EMISSION_RATE,
+        alphaRangeGenerator = ZO_UniformRangeGenerator:New(0.42, 0.28, 0.28, 0.14),
+    }
+
+    local mediumSnowInfo =
+    {
+        minSize = 48,
+        maxSize = 60,
+        minDuration = 2.5,
+        maxDuration = 2.0,
+        emissionRate = SNOW_EMISSION_RATE,
+        alphaRangeGenerator = ZO_UniformRangeGenerator:New(0.42, 0.28, 0.28, 0.14),
+    }
+
+    local largeSnowInfo =
+    {
+        minSize = 80,
+        maxSize = 128,
+        minDuration = 1.0,
+        maxDuration = 0.8,
+        emissionRate = SNOW_EMISSION_RATE / 8,
+        alphaRangeGenerator = ZO_UniformRangeGenerator:New(0.28, 0.14, 0.14, 0.07),
+    }
+
+    for index, emitterInfo in ipairs(SNOW_EMITTERS) do
+        self:AddPrimedSnowParticleSystem(emitterInfo, smallSnowInfo, index)
+        self:AddPrimedSnowParticleSystem(emitterInfo, mediumSnowInfo, index)
+        self:AddPrimedSnowParticleSystem(emitterInfo, largeSnowInfo, index)
     end
 
     for i, centerX in ipairs(LIGHT_EMITTERS) do
