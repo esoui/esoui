@@ -3858,6 +3858,7 @@ SafeAddString(SI_GUILD_CREATE_ERROR_ALREADY_LEADER, "Impossible de créer une gu
 SafeAddString(SI_GUILD_CREATE_ERROR_LOW_LEVEL, "Vous devez être au moins de niveau <<1>> pour créer une guilde", 0)
 SafeAddString(SI_GUILD_CREATE_ERROR_TOO_MANY, "Impossible de créer une guilde, vous êtes déjà membre de <<1>> guildes", 0)
 SafeAddString(SI_GUILD_CREATE_TITLE, "Créer et rejoindre des guildes", 0)
+SafeAddString(SI_GUILD_DEMOTE, "Rétrograder", 0)
 SafeAddString(SI_GUILD_DESCRIPTION_DEFAULT_TEXT, "Saisissez des renseignements concernant votre guilde que vous aimeriez communiquer à ses membres.", 1)
 SafeAddString(SI_GUILD_DESCRIPTION_EMPTY_TEXT, "Aucune description disponible pour cette guilde.", 0)
 SafeAddString(SI_GUILD_DESCRIPTION_HEADER, "Description", 1)

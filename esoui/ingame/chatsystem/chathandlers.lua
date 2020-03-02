@@ -23,7 +23,8 @@ local function ShouldShowGroupErrorInChat(error)
     return not ShouldShowGroupErrorInAlert(error)
 end
 
-local ChatEventFormatters = {
+-- message formatting events can be keyed off of anything, including strings, but numbers will be assumed to be EVENT_MANAGER events and will automatically be registered.
+local BUILTIN_MESSAGE_FORMATTERS = {
     [EVENT_CHAT_MESSAGE_CHANNEL] = function(messageType, fromName, text, isFromCustomerService, fromDisplayName)
         local channelInfo = ChannelInfo[messageType]
 
@@ -147,6 +148,11 @@ local ChatEventFormatters = {
     [EVENT_BATTLEGROUND_INACTIVITY_WARNING] = function()
         return GetString(SI_BATTLEGROUND_INACTIVITY_WARNING)
     end,
+
+    ["AddSystemMessage"] = function(messageText)
+        -- system messages will already be formatted by the time they get here
+        return messageText
+    end,
 }
 
 -----------------
@@ -170,9 +176,10 @@ function ZO_ChatRouter:Initialize()
         return
     end
 
-    self.registeredEventHandlers = {}
-    for eventId, eventFormatter in pairs(ChatEventFormatters) do
-        self:AddEventFormatter(eventId, eventFormatter)
+    self.registeredMessageFormatters = {}
+    self.hasRegisteredEvent = {}
+    for eventCode, messageFormatter in pairs(BUILTIN_MESSAGE_FORMATTERS) do
+        self:RegisterMessageFormatter(eventCode, messageFormatter)
     end
 
     local function OnTryInsertLink(...)
@@ -185,25 +192,59 @@ function ZO_ChatRouter:Initialize()
     end
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked)
+
+    -- FlashTaskbarWindow is a private function: to keep it from tainting the normal event handler we'll register for it seperately
+    local function OnChatMessageChannel(_, chatChannel)
+        if chatChannel == CHAT_CHANNEL_WHISPER then
+            local NUM_FLASHES_BEFORE_SOLID = 7
+            FlashTaskbarWindow("WHISPER", NUM_FLASHES_BEFORE_SOLID)
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("ChatRouterNotification", EVENT_CHAT_MESSAGE_CHANNEL, OnChatMessageChannel)
+end
+
+function ZO_ChatRouter:GetRegisteredMessageFormatters()
+    return self.registeredMessageFormatters
 end
 
 do
-    local MultiLevelEventToCategoryMappings, SimpleEventToCategoryMappings = ZO_ChatSystem_GetEventCategoryMappings()
-    function ZO_ChatRouter:AddEventFormatter(eventCode, eventFormatter)
+    local function OnChatEvent(eventCode, ...)
+        CHAT_ROUTER:FormatAndAddChatMessage(eventCode, ...)
+    end
+
+    function ZO_ChatRouter:RegisterMessageFormatter(eventKey, messageFormatter)
         if not IsChatSystemAvailableForCurrentPlatform() then
             return
         end
 
-        local function OnChatEvent(_, ...)
-            local eventCategory = nil
-            if SimpleEventToCategoryMappings[eventCode] then
-                eventCategory = SimpleEventToCategoryMappings[eventCode]
-            elseif MultiLevelEventToCategoryMappings[eventCode] then
-                local messageType = select(1, ...)
-                eventCategory = MultiLevelEventToCategoryMappings[eventCode][messageType]
-            end
+        self.registeredMessageFormatters[eventKey] = messageFormatter
 
-            local formattedEventText, targetChannel, fromDisplayName, rawMessageText = eventFormatter(...)
+        if type(eventKey) == "number" and not self.hasRegisteredEvent[eventKey] then
+            local eventCode = eventKey
+            EVENT_MANAGER:RegisterForEvent("ChatRouter", eventCode, OnChatEvent)
+            self.hasRegisteredEvent[eventCode] = true
+        end
+    end
+end
+
+do
+    local MultiLevelEventToCategoryMappings, SimpleEventToCategoryMappings = ZO_ChatSystem_GetEventCategoryMappings()
+    function ZO_ChatRouter:FormatAndAddChatMessage(eventKey, ...)
+        if not IsChatSystemAvailableForCurrentPlatform() then
+            return
+        end
+
+        local eventCategory = nil
+        if SimpleEventToCategoryMappings[eventKey] then
+            eventCategory = SimpleEventToCategoryMappings[eventKey]
+        elseif MultiLevelEventToCategoryMappings[eventKey] then
+            local messageType = select(1, ...)
+            eventCategory = MultiLevelEventToCategoryMappings[eventKey][messageType]
+        end
+
+        local messageFormatter = self.registeredMessageFormatters[eventKey]
+        if messageFormatter then
+            local formattedEventText, targetChannel, fromDisplayName, rawMessageText = messageFormatter(...)
             if formattedEventText then
                 if targetChannel then
                     local target = select(2, ...)
@@ -213,33 +254,16 @@ do
                 self:FireCallbacks("FormattedChatMessage", formattedEventText, eventCategory, targetChannel, fromDisplayName, rawMessageText)
             end
         end
-
-        self.registeredEventHandlers[eventCode] = OnChatEvent
-        EVENT_MANAGER:RegisterForEvent("ChatRouter", eventCode, OnChatEvent)
     end
-end
-
-function ZO_ChatRouter:EmitChatEvent(eventCode, ...)
-    if not IsChatSystemAvailableForCurrentPlatform() then
-        return
-    end
-
-    local onChatEventCallback = self.registeredEventHandlers[eventCode]
-    return onChatEventCallback(eventCode, ...)
 end
 
 function ZO_ChatRouter:AddSystemMessage(messageText)
-    if not IsChatSystemAvailableForCurrentPlatform() then
-        return
-    end
-
-    self:FireCallbacks("FormattedChatMessage", messageText, CHAT_CATEGORY_SYSTEM)
+    self:FormatAndAddChatMessage("AddSystemMessage", messageText)
 end
 
 function ZO_ChatRouter:AddDebugMessage(messageText)
     self:AddSystemMessage(messageText)
 end
-
 
 function ZO_ChatRouter:AddCommandPrefix(prefixCharacter, callback)
     self:FireCallbacks("AddCommandPrefix", prefixCharacter, callback)
@@ -254,16 +278,4 @@ end
 
 function ZO_ChatSystem_DoesPlatformUseKeyboardChatSystem()
     return IsKeyboardUISupported()
-end
-
-function ZO_ChatSystem_GetEventHandlers()
-    return ChatEventFormatters
-end
-
-function ZO_ChatEvent(eventId, ...)
-    CHAT_ROUTER:EmitChatEvent(eventId, ...)
-end
-
-function ZO_ChatSystem_AddEventHandler(eventId, eventFormatter)
-    CHAT_ROUTER:AddEventFormatter(eventId, eventFormatter)
 end

@@ -174,6 +174,24 @@ end
 function ZO_GamepadGuildRosterManager:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
 
+    local function WouldPromoteToGuildMaster()
+        local theirNewRankIndex = self.socialData.rankIndex - 1
+        return IsGuildRankGuildMaster(self.guildId, theirNewRankIndex)
+    end
+    local function ShouldAddPromoteOption()
+        return not WouldPromoteToGuildMaster() and ZO_GuildRosterManager.CanPromotePlayer(self.guildId, self.playerData.rankIndex, self.socialData.rankIndex, self.socialData.rankId)
+    end
+    local function ShouldAddPromoteToGuildMasterOption()
+        return WouldPromoteToGuildMaster() and ZO_GuildRosterManager.CanPromotePlayer(self.guildId, self.playerData.rankIndex, self.socialData.rankIndex, self.socialData.rankId)
+    end
+    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildPromoteOption, ShouldAddPromoteOption)
+    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildPromoteToGuildMasterOption, ShouldAddPromoteToGuildMasterOption)
+    
+    local function ShouldAddDemoteOption()
+        return ZO_GuildRosterManager.CanDemotePlayer(self.guildId, self.playerData.rankIndex, self.socialData.rankIndex, self.socialData.rankId)
+    end
+    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildDemoteOption, ShouldAddDemoteOption)
+
     local function ShouldAddSetRankOption()
         return ZO_GuildRosterManager.CanSetPlayerRank(self.guildId, self.playerData.rankIndex, self.socialData.rankIndex, self.socialData.rankId)
     end
@@ -223,6 +241,31 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, function() return not SelectedIndexIsPlayerIndex() and self.socialData.rankId ~= DEFAULT_INVITED_RANK end)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
     self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildShowGamerCardOption, IsConsoleUI)
+end
+
+function ZO_GamepadGuildRosterManager:BuildPromoteOption()
+    local callback = function()
+        GuildPromote(self.guildId, self.socialData.displayName)
+        PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
+    end
+    return self:BuildOptionEntry(nil, SI_GUILD_PROMOTE, callback)
+end
+
+function ZO_GamepadGuildRosterManager:BuildPromoteToGuildMasterOption()
+    local callback = function()
+        local guildInfo = ZO_AllianceIconNameFormatter(self.guildAlliance, self.guildName)
+        local rankName = GetFinalGuildRankName(self.guildId, 2)
+        ZO_Dialogs_ShowGamepadDialog("PROMOTE_TO_GUILDMASTER", { guildId = self.guildId, displayName = self.socialData.displayName }, { mainTextParams = { ZO_FormatUserFacingDisplayName(self.socialData.displayName), "", guildInfo, rankName } })
+    end
+    return self:BuildOptionEntry(nil, SI_GUILD_PROMOTE, callback)
+end
+
+function ZO_GamepadGuildRosterManager:BuildDemoteOption()
+    local callback = function()
+        GuildDemote(self.guildId, self.socialData.displayName)
+        PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
+    end
+    return self:BuildOptionEntry(nil, SI_GUILD_DEMOTE, callback)
 end
 
 function ZO_GamepadGuildRosterManager:BuildSetRankOption()

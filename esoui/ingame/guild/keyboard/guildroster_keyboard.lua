@@ -121,6 +121,35 @@ function ZO_KeyboardGuildRosterManager:InitializeKeybindDescriptor()
                 return false
             end
         },
+
+        -- Set Rank
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_GUILD_SET_RANK),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+        
+            callback = function()
+                local data = ZO_ScrollList_GetData(self.mouseOverRow)
+                local guildId = GUILD_ROSTER_MANAGER:GetGuildId()
+                local masterList = GUILD_ROSTER_MANAGER:GetMasterList()
+                local playerIndex = GetPlayerGuildMemberIndex(guildId)
+                local playerData = masterList[playerIndex]
+                ZO_Dialogs_ShowDialog("GUILD_SET_RANK_KEYBOARD", { guildId = guildId, targetData = data, playerData = playerData })
+            end,
+
+            visible = function()
+                if self.mouseOverRow then
+                    local data = ZO_ScrollList_GetData(self.mouseOverRow)
+                    local guildId = GUILD_ROSTER_MANAGER:GetGuildId()
+                    local masterList = GUILD_ROSTER_MANAGER:GetMasterList()
+                    local playerIndex = GetPlayerGuildMemberIndex(guildId)
+                    local playerData = masterList[playerIndex]
+                    return ZO_GuildRosterManager.CanSetPlayerRank(guildId, playerData.rankIndex, data.rankIndex, data.rankId)
+                end
+                return false
+            end
+        },
+
     }
 end
 
@@ -214,6 +243,32 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRow_OnMouseUp(control, button,
             local playerData = masterList[playerIndex]
             local playerHasHigherRank = playerData.rankIndex < data.rankIndex
             local playerIsPendingInvite = data.rankId == DEFAULT_INVITED_RANK
+
+            if ZO_GuildRosterManager.CanPromotePlayer(guildId, playerData.rankIndex, data.rankIndex, data.rankId) then
+                local newRankIndex = data.rankIndex - 1
+                if playerData.rankIndex < newRankIndex then
+                    AddMenuItem(GetString(SI_GUILD_PROMOTE),
+                                function()
+                                    GuildPromote(guildId, data.displayName)
+                                    PlaySound(SOUNDS.GUILD_ROSTER_PROMOTE)
+                                end)
+                elseif IsGuildRankGuildMaster(guildId, playerData.rankIndex) then
+                    AddMenuItem(GetString(SI_GUILD_PROMOTE),
+                                function()
+                                    local allianceIcon = zo_iconFormat(GetAllianceSymbolIcon(guildAlliance), ALLIANCE_ICON_SIZE, ALLIANCE_ICON_SIZE)
+                                    local rankName = GetFinalGuildRankName(guildId, 2)
+                                    ZO_Dialogs_ShowDialog("PROMOTE_TO_GUILDMASTER", { guildId = guildId, displayName = data.displayName}, { mainTextParams = { data.displayName, allianceIcon, guildName, rankName }})
+                                end)
+                end 
+            end
+
+            if ZO_GuildRosterManager.CanDemotePlayer(guildId, playerData.rankIndex, data.rankIndex, data.rankId) then
+                    AddMenuItem(GetString(SI_GUILD_DEMOTE),
+                                    function()
+                                        GuildDemote(guildId, data.displayName)
+                                        PlaySound(SOUNDS.GUILD_ROSTER_DEMOTE)
+                                    end)
+            end
 
             if ZO_GuildRosterManager.CanSetPlayerRank(guildId, playerData.rankIndex, data.rankIndex, data.rankId) then
                 AddMenuItem(GetString(SI_GUILD_SET_RANK),

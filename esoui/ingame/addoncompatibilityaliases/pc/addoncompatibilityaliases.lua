@@ -753,3 +753,15 @@ CHAT_SYSTEM = KEYBOARD_CHAT_SYSTEM
 function CHAT_SYSTEM:AddMessage(messageText)
     return CHAT_ROUTER:AddSystemMessage(messageText)
 end
+
+function ZO_ChatSystem_GetEventHandlers()
+    return CHAT_ROUTER:GetRegisteredMessageFormatters()
+end
+
+function ZO_ChatEvent(eventKey, ...)
+    CHAT_ROUTER:FormatAndAddChatMessage(eventKey, ...)
+end
+
+function ZO_ChatSystem_AddEventHandler(eventKey, eventFormatter)
+    CHAT_ROUTER:RegisterMessageFormatter(eventKey, eventFormatter)
+end

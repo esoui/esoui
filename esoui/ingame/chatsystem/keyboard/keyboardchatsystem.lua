@@ -399,15 +399,6 @@ function ZO_ChatSystem:Maximize()
     end
 end
 
-function ZO_ChatSystem:OnFormattedChatMessage(message, category, ...)
-    SharedChatSystem.OnFormattedChatMessage(self, message, category, ...)
-
-    if category == CHAT_CATEGORY_WHISPER_INCOMING then
-        local NUM_FLASHES_BEFORE_SOLID = 7
-        FlashTaskbarWindow("WHISPER", NUM_FLASHES_BEFORE_SOLID)
-    end
-end
-
 function ZO_ChatSystem:GetFont()
     return ZoFontEditChat
 end

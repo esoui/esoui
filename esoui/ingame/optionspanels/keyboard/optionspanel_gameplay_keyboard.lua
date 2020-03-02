@@ -154,6 +154,13 @@ panelBuilder:AddSetting({
     header = SI_GAMEPLAY_OPTIONS_ITEMS,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_LootHistory",
+    settingType = SETTING_TYPE_LOOT,
+    settingId = LOOT_SETTING_LOOT_HISTORY,
+    header = SI_GAMEPLAY_OPTIONS_ITEMS,
+})
+
 -- TODO: hmm these aren't item options :thonking:
 panelBuilder:AddSetting({
     controlName = "Options_Gameplay_HidePolymorphHelm",

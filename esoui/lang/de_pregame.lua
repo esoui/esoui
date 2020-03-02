@@ -2894,7 +2894,7 @@ SafeAddString(SI_OPEN_CHAPTER_PREPURCHASE_WEB, "Dies wird den |c76BCC3<<1>>|r im
 SafeAddString(SI_OPEN_CHAPTER_UPGRADE, "Dies wird den |c76BCC3<<1>>|r öffnen.\n\n|cc16403Nach der Bestätigung des Kaufs müsst Ihr Euch neu einloggen, damit er wirksam wird.|r", 0)
 SafeAddString(SI_OPEN_CHAPTER_UPGRADE_STEAM, "Dies wird die zugehörige Shopseite im Steam Overlay öffnen.\n\n|cc16403Nach der Bestätigung des Kaufs müsst Ihr Euch neu einloggen, damit er wirksam wird.|r", 3)
 SafeAddString(SI_OPEN_CHAPTER_UPGRADE_WEB, "Dies wird den |c76BCC3<<1>>|r im Standardbrowser außerhalb des Spiels öffnen.\n\n|cc16403Nach der Bestätigung des Kaufs müsst Ihr Euch neu einloggen, damit er wirksam wird.|r", 0)
-SafeAddString(SI_OPEN_ENTER_CODE_PAGE, "Dies wird den |c76BCC3<<1>>|r im Standardbrowser außerhalb des Spiels öffnen. Seid Ihr sicher, dass Ihr fortfahren möchtet?\n\n|cc16403Loggt Euch nach dem Abschluss des Kaufs erneut ein, damit dieser aktiv wird.|r", 3)
+SafeAddString(SI_OPEN_ENTER_CODE_PAGE, "Dies wird |c76BCC3<<1>>|r im Standardbrowser außerhalb des Spiels öffnen. Seid Ihr sicher, dass Ihr fortfahren möchtet?\n\n|cc16403Loggt Euch nach dem Abschluss des Kaufs erneut ein, damit dieser aktiv wird.|r", 3)
 SafeAddString(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, "<<1>> öffnen", 0)
 SafeAddString(SI_OPEN_STORE_BUY_CROWNS_TEXT, "Ihr könnt im <<2>> zusätzliche <<1>> kaufen.", 0)
 SafeAddString(SI_OPEN_STORE_BUY_PLUS_TEXT, "Dies wird den <<1>> öffnen.\n\nNachdem Ihr eine Mitgliedschaft abgeschlossen habt, müsst Ihr Euch erneut einloggen, um die Vorteile zu erhalten.", 0)

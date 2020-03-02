@@ -159,10 +159,12 @@ end
 
 function ZO_KeyboardOptions:PanelRequiresDeferredLoading(panelId)
     local panelControls = self.controlTable[panelId]
-    for i, control in ipairs(panelControls) do
-        local data = control.data
-        if IsSettingDeferred(data.system, data.settingId) then
-            return true
+    if panelControls then
+        for i, control in ipairs(panelControls) do
+            local data = control.data
+            if IsSettingDeferred(data.system, data.settingId) then
+                return true
+            end
         end
     end
 
@@ -281,6 +283,8 @@ function ZO_KeyboardOptions:UpdatePanelVisibility(panelId)
 
         self.emptyPanelLabel:SetHidden(hasAnyVisibleSetting)
         self.control:GetNamedChild("Settings"):SetHidden(not hasAnyVisibleSetting)
+    else
+        self.emptyPanelLabel:SetHidden(false)
     end
 end
 
@@ -305,17 +309,18 @@ end
 
 function ZO_KeyboardOptions:UpdatePanelOptions(panelIndex, saveOptions)
     local controls = self.controlTable[panelIndex]
-
-    for index, control in pairs(controls) do
-        local data = control.data
-        if self:IsControlTypeAnOption(data) then
-            local value = ZO_Options_UpdateOption(control)
-            if saveOptions == SAVE_CURRENT_VALUES then
-                data.value = value       -- Save the values (can't click cancel to restore old values after this)
-            end
-        elseif data.controlType == OPTIONS_CUSTOM then
-            if data.customSetupFunction then
-                data.customSetupFunction(control)
+    if controls then
+        for index, control in pairs(controls) do
+            local data = control.data
+            if self:IsControlTypeAnOption(data) then
+                local value = ZO_Options_UpdateOption(control)
+                if saveOptions == SAVE_CURRENT_VALUES then
+                    data.value = value       -- Save the values (can't click cancel to restore old values after this)
+                end
+            elseif data.controlType == OPTIONS_CUSTOM then
+                if data.customSetupFunction then
+                    data.customSetupFunction(control)
+                end
             end
         end
     end
