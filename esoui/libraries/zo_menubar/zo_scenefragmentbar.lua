@@ -54,9 +54,9 @@ end
 function ZO_SceneFragmentBar:Clear()
     ZO_MenuBar_ClearSelection(self.menuBar)
     self:RemoveActiveKeybind()
-    if(self.currentFragmentGroup) then
-        SCENE_MANAGER:RemoveFragmentGroup(self.currentFragmentGroup)
-    end
+    --Removing the fragment bar fragments from the scene makes it so the scene does not care about when those fragments finish hiding for computing its own hidden state. Since this function is only called when the scene
+    --that owns this bar is hiding we can rely on the behavior where a hidden scene dumps all of its temporary fragments to handle this. If you call Clear at any other time it will not remove the temporary fragments
+    --added by the fragment bar.
 end
 
 function ZO_SceneFragmentBar:RemoveAll()

@@ -3858,6 +3858,7 @@ SafeAddString(SI_GUILD_CREATE_ERROR_ALREADY_LEADER, "Ihr könnt keine neue Gilde
 SafeAddString(SI_GUILD_CREATE_ERROR_LOW_LEVEL, "Ihr müsst mindestens Stufe <<1>> erreicht haben, um eine Gilde gründen zu können.", 0)
 SafeAddString(SI_GUILD_CREATE_ERROR_TOO_MANY, "Ihr könnt keine neue Gilde erstellen, da Ihr bereits in einem <<n:1*Gilde^f>> seid.", 0)
 SafeAddString(SI_GUILD_CREATE_TITLE, "Gilden erstellen und beitreten", 0)
+SafeAddString(SI_GUILD_DEMOTE, "Degradieren", 0)
 SafeAddString(SI_GUILD_DESCRIPTION_DEFAULT_TEXT, "Gebt die Informationen zu Eurer Gilde an, die Eure Gildenmitgleider sehen können sollen.", 1)
 SafeAddString(SI_GUILD_DESCRIPTION_EMPTY_TEXT, "Es wurde keine Beschreibung für diese Gilde festgelegt.", 0)
 SafeAddString(SI_GUILD_DESCRIPTION_HEADER, "Über uns", 1)

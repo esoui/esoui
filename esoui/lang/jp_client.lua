@@ -3858,6 +3858,7 @@ SafeAddString(SI_GUILD_CREATE_ERROR_ALREADY_LEADER, "すでに他のギルドを
 SafeAddString(SI_GUILD_CREATE_ERROR_LOW_LEVEL, "レベル<<1>>以上でないとギルドを作成できない", 0)
 SafeAddString(SI_GUILD_CREATE_ERROR_TOO_MANY, "すでに<<1>>つのギルドに所属しているため、ギルドを作成できない", 0)
 SafeAddString(SI_GUILD_CREATE_TITLE, "ギルドの作成と加入", 0)
+SafeAddString(SI_GUILD_DEMOTE, "降格", 0)
 SafeAddString(SI_GUILD_DESCRIPTION_DEFAULT_TEXT, "ギルドのメンバーに知らせたいギルド情報を入力する。", 1)
 SafeAddString(SI_GUILD_DESCRIPTION_EMPTY_TEXT, "ギルドの説明が設定されていない。", 0)
 SafeAddString(SI_GUILD_DESCRIPTION_HEADER, "紹介文", 1)
