@@ -21,11 +21,12 @@ end
 
 function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(data)
     local initializingMarketProduct = not self.marketProduct or not self.marketProduct.control
+    local oldMarketProductId = self.marketProduct and self.marketProduct:GetId()
 
     ZO_MarketAnnouncementMarketProductTile.Layout(self, data)
 
     local marketProduct = data.marketProduct
-    if initializingMarketProduct or marketProduct.control ~= self.control or self.marketProduct:GetId() ~= marketProduct:GetId() then
+    if initializingMarketProduct or marketProduct.control ~= self.control or oldMarketProductId ~= marketProduct:GetId() then
         local keybindStringId
         local marketProductId = marketProduct:GetId()
         local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
