@@ -34,7 +34,7 @@ function ZO_LevelUpRewardsUpcoming_Gamepad:LayoutReward(data, rewardContainer, p
     rewardControl.nameControl:SetText(name)
     local rewardType = data:GetRewardType()
     if rewardType then
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemQuality())
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemDisplayQuality())
         rewardControl.nameControl:SetColor(r, g, b, 1)
     else
         local r, g, b = ZO_NORMAL_TEXT:UnpackRGB()

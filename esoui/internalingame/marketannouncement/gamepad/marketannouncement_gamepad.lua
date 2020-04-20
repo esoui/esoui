@@ -1,6 +1,7 @@
 ----
 -- ZO_MarketAnnouncement_Gamepad
 ----
+
 local VERTICAL_FOCUS_INDEX =
 {
     CAROUSEL = 1,
@@ -17,12 +18,15 @@ function ZO_MarketAnnouncement_Gamepad:Initialize(control)
     -- This data must be setup before parent initialize is called
     self.actionTileControlByType =
     {
+        [ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT] = "ZO_EventAnnouncementTile_Gamepad_Control",
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Gamepad_Control",
         [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = "ZO_ZoneStoriesTile_Gamepad_Control",
     }
 
     ZO_MarketAnnouncement_Shared.Initialize(self, control, IsInGamepadPreferredMode)
-    self.carousel = ZO_MarketProductCarousel_Gamepad:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Gamepad_Control")
+
+    local AUTO_SCROLL = true
+    self.carousel = ZO_MarketProductCarousel_Gamepad:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Gamepad_Control", AUTO_SCROLL)
     self.carousel:SetSelectKeybindButton(self.selectButton)
     self.carousel:SetHelpKeybindButton(self.helpButton)
     self.carousel:SetScrollKeybindButton(self.scrollButton)

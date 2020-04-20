@@ -5,6 +5,22 @@
             <Dimensions x="228" />
         </Label>
 
+        <Control name="ZO_CollectionsBook_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="227"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CollectionsBook_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="227"/>
+                </Label>
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_CollectionsBook_TopLevel" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_CollectionsBook_OnInitialize(self)

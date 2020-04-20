@@ -44,13 +44,6 @@ panelBuilder:AddSetting({
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
 })
 
-panelBuilder:AddSetting({
-    controlName = "Options_Video_AntiAliasing_Type",
-    settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_ANTIALIASING_TYPE,
-    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-})
-
 -- inline slider
 panelBuilder:AddSetting({
     controlName = "Options_Video_Gamma_Adjustment",
@@ -116,6 +109,14 @@ panelBuilder:AddSetting({
     settingId = GRAPHICS_SETTING_MIP_LOAD_SKIP_LEVELS,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     template = "ZO_Options_Video_Dropdown_IncludeApplyScreenWarning",
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_AntiAliasing_Type",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_ANTIALIASING_TYPE,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     indentLevel = 1,
 })
 

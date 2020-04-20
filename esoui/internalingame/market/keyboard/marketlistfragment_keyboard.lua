@@ -157,25 +157,25 @@ function ZO_MarketListFragment_Keyboard:ShowMarketProducts(marketProducts)
         local productHeader = productInfo.headerName
         if productHeader and lastHeaderName ~= productHeader then
             local headerData =
-                {
-                    headerName = productHeader,
-                    headerColor = productInfo.headerColor,
-                }
+            {
+                headerName = productHeader,
+                headerColor = productInfo.headerColor,
+            }
             table.insert(self.scrollData, ZO_ScrollList_CreateDataEntry(MARKET_LIST_ENTRY_HEADER, headerData))
             lastHeaderName = productHeader
         end
 
         local productId = productInfo.productId
-        local quality = productInfo.quality or ITEM_QUALITY_NORMAL
+        local displayQuality = productInfo.displayQuality or ITEM_DISPLAY_QUALITY_NORMAL
 
         local rowData =
-            {
-                productId = productId,
-                name = GetMarketProductDisplayName(productId),
-                icon = GetMarketProductIcon(productId),
-                stackCount = productInfo.stackCount,
-                quality = quality,
-            }
+        {
+            productId = productId,
+            name = GetMarketProductDisplayName(productId),
+            icon = GetMarketProductIcon(productId),
+            stackCount = productInfo.stackCount,
+            displayQuality = displayQuality,
+        }
         table.insert(self.scrollData, ZO_ScrollList_CreateDataEntry(MARKET_LIST_ENTRY_MARKET_PRODUCT, rowData))
     end
 

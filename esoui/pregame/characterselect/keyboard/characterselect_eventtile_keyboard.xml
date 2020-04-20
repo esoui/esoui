@@ -1,0 +1,86 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CharacterSelect_EventTile_Keyboard_Control" inherits="ZO_CharacterSelect_EventTile_Control ZO_Tile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="1920" y="624" />
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontCallout3",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontCallout2",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontCallout0",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontHeader3",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontHeader2",
+                        lineLimit = 2,
+                        dontUseForAdjusting = true,
+                    },
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("ContainerTitle"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                ZO_CharacterSelect_EventTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)OverlayMunge" override="true" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_MungeOverlay.dds">
+                            <TextureCoords left="0" right="0.9375" top="0" bottom="0.609375"/>
+                        </Texture>
+
+                        <Label name="$(parent)TimeRemaining" override="true" font="ZoFontGameBold" />
+
+                        <Label name="$(parent)Description" override="true" font="ZoFontKeybindStripKey" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CharacterSelect_SmallEventTile_Keyboard_Control" inherits="ZO_CharacterSelect_EventTile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="358" y="283" />
+            <OnInitialized>
+                ZO_CharacterSelect_SmallEventTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)OverlayMunge" override="true" hidden="true" />
+
+                        <!-- The mini carousel image is positioned at the bottom right of the image with the large banner image.
+                             The small image is expected to be 358x283 inside an image that is 2048x1024 -->
+                        <Texture name="$(parent)EventImage" layer="BACKGROUND" override="true">
+                            <ClearAnchors />
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                            <TextureCoords left="0.8252" right="1" top="0.7236" bottom="1"/>
+                        </Texture>
+
+                        <Label name="$(parent)TimeRemaining" override="true" tier="HIGH" layer="OVERLAY">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)EventImage" offsetX="30" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)EventImage" />
+                        </Label>
+
+                        <Label name="$(parent)Title" override="true" tier="HIGH" layer="OVERLAY" font="ZoFontHeader4">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Description" override="true" hidden="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

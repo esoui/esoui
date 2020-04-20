@@ -142,8 +142,8 @@ function GamepadMarketProductListScene:ShowMarketProducts(marketProducts)
         entryData.listIndex = i
         entryData:SetStackCount(productInfo.stackCount)
 
-        entryData.quality = productInfo.quality or ITEM_QUALITY_NORMAL
-        entryData:SetNameColors(entryData:GetColorsBasedOnQuality(entryData.quality))
+        entryData.displayQuality = productInfo.displayQuality or ITEM_DISPLAY_QUALITY_NORMAL
+        entryData:SetNameColors(entryData:GetColorsBasedOnQuality(entryData.displayQuality))
 
         -- check if we should add a header
         local productHeader = productInfo.headerName

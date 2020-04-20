@@ -51,8 +51,8 @@ function ZO_SmithingExtractionSlot:Refresh()
             self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex)))
 
             if not self:HasAnimationRefs() then
-                local quality = select(8, GetItemInfo(bagId, slotIndex))
-                self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+                local displayQuality = GetItemDisplayQuality(bagId, slotIndex)
+                self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
             end
         elseif self:HasMultipleItems() then
             self.nameLabel:SetText(zo_strformat(SI_CRAFTING_SLOT_MULTIPLE_SELECTED, ZO_CommaDelimitNumber(self:GetStackCount())))

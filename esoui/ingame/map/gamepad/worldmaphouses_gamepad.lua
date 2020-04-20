@@ -96,6 +96,7 @@ function ZO_MapHouses_Gamepad:InitializeKeybindDescriptor()
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, ZO_WorldMapInfo_OnBackPressed)
+    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.list)
 end
 
 function ZO_MapHouses_Gamepad:OnShowing()

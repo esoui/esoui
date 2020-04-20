@@ -68,7 +68,9 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
             self:Refresh()
 
-            self:ColorizeText(self:GetBoosterRowForQuality(selectedData.quality))
+            -- selectedData.quality is depricated, included here for addon backwards compatibility
+            local functionalQuality = selectedData.functionalQuality or selectedData.quality
+            self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
 
             self.selectedItem = selectedData
 
@@ -153,7 +155,9 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self:RemoveItemFromCraft()
 
             if self.selectedItem then
-                self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
+                -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+                local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
+                self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
             end
 
             self.owner:SetEnableSkillBar(true)
@@ -215,7 +219,9 @@ function ZO_GamepadSmithingImprovement:ChangeMode(mode)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     if self.selectedItem then
-        self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
+        -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+        local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
+        self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
     else
         self:ClearBoosterRowHighlight()
     end
@@ -268,7 +274,9 @@ end
 
 function ZO_GamepadSmithingImprovement:UpdateSelection()
     if self.selectedItem then
-        self:ColorizeText(self:GetBoosterRowForQuality(self.selectedItem.quality))
+        -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+        local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
+        self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
     else
         self:ClearBoosterRowHighlight()
     end
@@ -339,7 +347,9 @@ function ZO_GamepadSmithingImprovement:ConfirmImprove()
 end
 
 function ZO_GamepadSmithingImprovement:CanImprove()
-    return self.spinner:GetValue() <= self:GetBoosterRowForQuality(self.selectedItem.quality).currentStack
+    -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+    local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
+    return self.spinner:GetValue() <= self:GetBoosterRowForQuality(functionalQuality).currentStack
 end
 
 function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
@@ -430,7 +440,9 @@ function ZO_GamepadSmithingImprovement:RefreshImprovementChance()
     ZO_SharedSmithingImprovement.RefreshImprovementChance(self)
     local row = self:GetRowForSelection()
     if row then
-        self.slotContainer.selectedLabel:SetText(zo_strformat(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_SELECTION, GetString("SI_ITEMQUALITY", row.quality), self.spinner:GetValue(), row.reagentName))
+        -- row.quality is depricated, included here for addon backwards compatibility
+        local functionalQuality = row.functionalQuality or row.quality
+        self.slotContainer.selectedLabel:SetText(zo_strformat(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_SELECTION, GetString("SI_ITEMQUALITY", functionalQuality), self.spinner:GetValue(), row.reagentName))
     end
     self:ColorizeText(row)
 end
@@ -478,7 +490,9 @@ function ZO_GamepadSmithingImprovement:ColorizeText(qualityRow)
     if qualityRow ~= nil then
         if self.improvementSlot:HasItem() then
             self:HighlightBoosterRow(qualityRow)
-            local qualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, qualityRow.quality))
+            -- qualityRow.quality is depricated, included here for addon backwards compatibility
+            local displayQuality = qualityRow.displayQuality or qualityRow.quality
+            local qualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
             self.slotContainer.selectedLabel:SetColor(qualityColor:UnpackRGBA())
         else
             self:ClearBoosterRowHighlight()
@@ -536,10 +550,10 @@ end
 
 do
     local QUALITY_TEXTURES = {
-        [ITEM_QUALITY_NORMAL] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_normal2fine.dds",
-        [ITEM_QUALITY_MAGIC] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_fine2superior.dds",
-        [ITEM_QUALITY_ARCANE] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_superior2epic.dds",
-        [ITEM_QUALITY_ARTIFACT] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_epic2legendary.dds",
+        [ITEM_DISPLAY_QUALITY_NORMAL] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_normal2fine.dds",
+        [ITEM_DISPLAY_QUALITY_MAGIC] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_fine2superior.dds",
+        [ITEM_DISPLAY_QUALITY_ARCANE] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_superior2epic.dds",
+        [ITEM_DISPLAY_QUALITY_ARTIFACT] = "EsoUI/Art/Crafting/Gamepad/gp_smithing_quality_epic2legendary.dds",
     }
 
     function ZO_GamepadSmithingImprovement:EnableQualityBridge(enable, quality)

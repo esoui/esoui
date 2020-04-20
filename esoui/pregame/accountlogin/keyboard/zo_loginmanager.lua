@@ -33,7 +33,7 @@ function LoginManager_Keyboard:Initialize()
     EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_BAD_CLIENT_VERSION, FilterMethodCallback(self.OnBadClientVersion))
 end
 
-function LoginManager_Keyboard:ShowRelevantLoginFragment()
+function LoginManager_Keyboard:GetRelevantLoginFragment()
     -- Show the create/link account fragment if the following conditions are met:
     --  1. If we require a linked login for the current client version
     --  2. If we have not yet established a link between accounts
@@ -45,7 +45,7 @@ function LoginManager_Keyboard:ShowRelevantLoginFragment()
         self.currentFragment = LOGIN_FRAGMENT
     end
 
-    SCENE_MANAGER:AddFragment(self.currentFragment)
+    return self.currentFragment
 end
 
 function LoginManager_Keyboard:HideShowingLoginFragment()
@@ -59,7 +59,7 @@ function LoginManager_Keyboard:IsShowingCreateLinkAccountFragment()
 end
 
 function LoginManager_Keyboard:IsLoginSceneShowing()
-    return GAME_MENU_PREGAME_SCENE:IsShowing()
+    return GAME_MENU_PREGAME_KEYBOARD:IsLoginSceneShowing()
 end
 
 function LoginManager_Keyboard:SwitchToLoginFragment()
@@ -68,6 +68,7 @@ function LoginManager_Keyboard:SwitchToLoginFragment()
         SCENE_MANAGER:RemoveFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
         SCENE_MANAGER:AddFragment(LOGIN_FRAGMENT)
         self.showCreateLinkAccountFragment = false
+        LOGIN_KEYBOARD:SetLoginButtonHidden(false)
     end
 end
 
@@ -77,6 +78,7 @@ function LoginManager_Keyboard:SwitchToCreateLinkAccountFragment()
         SCENE_MANAGER:RemoveFragment(LOGIN_FRAGMENT)
         SCENE_MANAGER:AddFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
         self.showCreateLinkAccountFragment = true
+        LOGIN_KEYBOARD:SetLoginButtonHidden(true)
     end
 end
 
@@ -213,7 +215,7 @@ end
 function LoginManager_Keyboard:OnLoginQueued(waitTime, queuePosition)
     if not loginQueuedScene then
         loginQueuedScene = ZO_Scene:New("loginQueuedScene", SCENE_MANAGER)
-        loginQueuedScene:AddFragment(PREGAME_SLIDE_SHOW_FRAGMENT)
+        loginQueuedScene:AddFragment(PREGAME_BACKGROUND_FRAGMENT)
     end
 
     SCENE_MANAGER:Show("loginQueuedScene")

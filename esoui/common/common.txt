@@ -2,6 +2,8 @@
 ; DebugUtils are loaded first so that they can be used in every AddOn
 ## DependsOn: ZO_Libraries
 
+
+EsoUI\Common\Globals\Globals.lua
 EsoUI\Common\Globals\CommonTextures.lua
 
 EsoUI\Common\GamepadGrid\GamepadGrid.lua
@@ -19,6 +21,9 @@ EsoUI\Common\Gamepad\ZO_GamepadLoading.lua
 EsoUI\Common\Gamepad\ZO_GamepadLoading.xml
 
 EsoUI\Common\ZO_Keybindings\KeybindingUtils.lua
+
+EsoUI\Common\Carousel\Carousel_Shared.lua
+EsoUI\Common\Carousel\Carousel_Shared.xml
 
 EsoUI\Common\Console\AutoSaving_Console.lua
 EsoUI\Common\Console\AutoSaving_Console.xml
@@ -47,6 +52,7 @@ EsoUI\Common\Gamepad\ZO_GamepadMultiFocusParametricScrollListScreen.lua
 EsoUI\Common\Gamepad\ZO_GamepadIconSelector.lua
 EsoUI\Common\Gamepad\ZO_GamepadIconSelector.xml
 
+EsoUI\Common\ZO_GameMenu\GameMenuManager.lua
 EsoUI\Common\ZO_GameMenu\ZO_GameMenu.lua
 EsoUI\Common\ZO_GameMenu\ZO_GameMenu.xml
 

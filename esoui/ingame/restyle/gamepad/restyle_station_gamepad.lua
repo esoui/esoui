@@ -13,7 +13,7 @@ end
 function ZO_Restyle_Station_Gamepad:Initialize(control)
     self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
     self.actionMode = ACTION_NONE
-    
+
     GAMEPAD_RESTYLE_STATION_SCENE = ZO_InteractScene:New("gamepad_restyle_station", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
     SYSTEMS:RegisterGamepadRootScene("restyle_station", GAMEPAD_RESTYLE_STATION_SCENE)
     ZO_Gamepad_MultiFocus_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, nil, GAMEPAD_RESTYLE_STATION_SCENE)
@@ -32,8 +32,9 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
             self:OnFragmentHidden()
         end
     end)
+    GAMEPAD_RESTYLE_STATION_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
 
-    local function OnOutfitPendingDataChanged(outfitIndex, slotIndex) 
+    local function OnOutfitPendingDataChanged(outfitIndex, slotIndex)
         if not slotIndex and GAMEPAD_RESTYLE_STATION_SCENE:IsShowing() then
             self:Update()
         else
@@ -48,7 +49,7 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
     ZO_OUTFIT_MANAGER:RegisterCallback("PendingDataChanged", OnOutfitPendingDataChanged)
     control:RegisterForEvent(EVENT_CURRENCY_UPDATE, function(eventId, ...) self:OnCurrencyChanged(...) end)
     control:RegisterForEvent(EVENT_WEAPON_PAIR_LOCK_CHANGED, OnWeaponPairLockedChanged)
-    
+
     control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:OnUpdate(currentFrameTimeSeconds) end)
 end
 
@@ -82,6 +83,14 @@ do
         -- We do this on an update loop because sometimes when changing target you aren't in a state where you're allowed to swap or unsheath
         -- So you could get yourself stuck into the wrong state
         self.nextWeaponStateEvaluateTimeS = GetFrameTimeSeconds() + NEXT_WEAPON_STATE_EVALUATE_TIME_S
+    end
+end
+
+function ZO_Restyle_Station_Gamepad:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
+    if bypassHideSceneConfirmationReason == nil then
+        self:AttemptExit()
+    else
+        scene:AcceptHideScene()
     end
 end
 
@@ -286,30 +295,17 @@ function ZO_Restyle_Station_Gamepad:CreateOptionsKeybind()
     }
 end
 
-function ZO_Restyle_Station_Gamepad:CreateSpecialExitKeybind()
-    return
-    {
-        --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-        name = "Gamepad Restyle Exit",
-        keybind = "UI_SHORTCUT_EXIT",
-        ethereal = true,
-        callback = function() self:AttemptExit() end,
-    }
-end
-
 function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
     local function MultiFocusBack()
         if self.actionMode == ACTION_DYES then
             self:ActivateCurrentSelection()
         else
-            self:AttemptExit()
+            SCENE_MANAGER:HideCurrentScene()
         end
     end
 
     -- Apply
     local apply = self:CreateApplyKeybind(self)
-
-    local specialExit = self:CreateSpecialExitKeybind()
 
     -- Main list
     self.keybindStripDescriptor =
@@ -322,18 +318,20 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
         -- Select
         {
             name = function()
-                        if self.actionMode == ACTION_DYES then
-                            local activeTool = self.dyeingPanel:GetActiveDyeTool()
-                            return GetString(activeTool:GetToolActionString())
-                        else
-                            return GetString(SI_GAMEPAD_SELECT_OPTION)
-                        end
-                  end,
+                if self.actionMode == ACTION_DYES then
+                    local activeTool = self.dyeingPanel:GetActiveDyeTool()
+                    return GetString(activeTool:GetToolActionString())
+                else
+                    return GetString(SI_GAMEPAD_SELECT_OPTION)
+                end
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
-            visible = function() return not (self.actionMode == ACTION_STYLES and RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_EQUIPMENT) end,
+            visible = function()
+                return not (self.actionMode == ACTION_STYLES and RESTYLE_GAMEPAD:GetMode() == RESTYLE_MODE_EQUIPMENT)
+            end,
             callback = function()
-                            self:HandleSelectAction()
-                       end,
+                self:HandleSelectAction()
+            end,
         },
         
         apply,
@@ -346,9 +344,6 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Randomize
         self:CreateRandomizeKeybind(self),
-
-        -- Special exit button
-        specialExit,
     }
 
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.outfitSlotList)
@@ -365,14 +360,11 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            self:ShowOutfitSelection()
-                       end
+                self:ShowOutfitSelection()
+            end
         },
 
         apply,
-
-        -- Special exit button
-        specialExit,
     }
 
     self.savedSetsKeybindDescriptor =
@@ -385,35 +377,34 @@ function ZO_Restyle_Station_Gamepad:InitializeKeybindStripDescriptors()
         -- Select
         {
             name = function()
-                        if self.actionMode == ACTION_DYES then
-                            if self:ShouldShowSelectedDyeSet() then
-                                return GetString(SI_GAMEPAD_DYEING_USE_SAVED_SET)
-                            else
-                                local activeTool = self.dyeingPanel:GetActiveDyeTool()
-                                return GetString(activeTool:GetToolActionString())
-                            end
-                        else
-                            return GetString(SI_GAMEPAD_SELECT_OPTION)
-                        end
-                  end,
+                if self.actionMode == ACTION_DYES then
+                    if self:ShouldShowSelectedDyeSet() then
+                        return GetString(SI_GAMEPAD_DYEING_USE_SAVED_SET)
+                    else
+                        local activeTool = self.dyeingPanel:GetActiveDyeTool()
+                        return GetString(activeTool:GetToolActionString())
+                    end
+                else
+                    return GetString(SI_GAMEPAD_SELECT_OPTION)
+                end
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            self:HandleSelectSavedSetAction()
-                       end
+                self:HandleSelectSavedSetAction()
+            end
         },
 
         -- Use Set
         {
             name = GetString(SI_GAMEPAD_DYEING_USE_SAVED_SET),
             keybind = "UI_SHORTCUT_TERTIARY",
-            callback = function() 
-                            self:HandleUseSetAction()
-                       end,
-            visible = function() return not self:ShouldShowAllDyeFoci() and not self:ShouldShowSelectedDyeSet() end,
+            callback = function()
+                self:HandleUseSetAction()
+            end,
+            visible = function()
+                return not self:ShouldShowAllDyeFoci() and not self:ShouldShowSelectedDyeSet()
+            end,
         },
-
-        -- Special exit button
-        specialExit,
     }
 end
 
@@ -732,14 +723,16 @@ function ZO_Restyle_Station_Gamepad:InitializeOptionsDialog()
                 callback =  function(dialog)
                     ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RESTYLE_STATION_OPTIONS")
                 end,
-            },     
+            },
         },
         noChoiceCallback = function(dialog)
             local parametricList = dialog.info.parametricList
             for i, entry in ipairs(parametricList) do
                 if entry.entryData.action.isDropdown then
                     local control = dialog.entryList:GetControlFromData(entry.entryData)
-                    control.dropdown:Deactivate()
+                    if control then
+                        control.dropdown:Deactivate()
+                    end
                 end
             end
         end
@@ -1289,7 +1282,7 @@ function ZO_Restyle_Station_Gamepad:OnPanelSelectionEnd(helperPanel)
         if RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE then
             self.header.tabBar:MovePrevious()
         else
-            self:AttemptExit()
+            SCENE_MANAGER:HideCurrentScene()
         end
     else
         self:DeactivateCurrentSelection()
@@ -1422,21 +1415,45 @@ function ZO_Restyle_Station_Gamepad:AttemptExit()
     end
 
     if self:DoesCurrentOutfitHaveChanges() then
-        ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_CHANGES", { confirmCallback = function()
-                                                                                                ZO_OUTFIT_MANAGER:EquipOutfit(self.currentOutfitManipulator:GetOutfitIndex()) 
-                                                                                                SCENE_MANAGER:HideCurrentScene()
-                                                                                                self.currentOutfitManipulator:ClearPendingChanges() 
-                                                                                            end})
+        local function OnConfirmExit()
+            ZO_OUTFIT_MANAGER:EquipOutfit(self.currentOutfitManipulator:GetOutfitIndex())
+            self.currentOutfitManipulator:ClearPendingChanges()
+            GAMEPAD_RESTYLE_STATION_SCENE:AcceptHideScene()
+        end
+
+        local function OnCancelExit()
+            GAMEPAD_RESTYLE_STATION_SCENE:RejectHideScene()
+        end
+
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_CHANGES",
+        {
+            confirmCallback = OnConfirmExit,
+            declineCallback = OnCancelExit,
+        })
         return
     end
 
     if ZO_Dyeing_AreTherePendingDyes(currentMode, setIndex) then
-        ZO_Dialogs_ShowGamepadDialog("EXIT_DYE_UI_DISCARD_GAMEPAD")
+        local function OnConfirmExit()
+            self:ExitWithoutSave()
+            GAMEPAD_RESTYLE_STATION_SCENE:AcceptHideScene()
+        end
+
+        local function OnCancelExit()
+            GAMEPAD_RESTYLE_STATION_SCENE:RejectHideScene()
+        end
+
+        ZO_Dialogs_ShowGamepadDialog("EXIT_DYE_UI_DISCARD_GAMEPAD",
+        {
+            confirmCallback = OnConfirmExit,
+            declineCallback = OnCancelExit,
+
+        })
         return
     end
 
-
     self:ExitWithoutSave()
+    GAMEPAD_RESTYLE_STATION_SCENE:AcceptHideScene()
 end
 
 function ZO_Restyle_Station_Gamepad:ExitWithoutSave()
@@ -1447,7 +1464,6 @@ function ZO_Restyle_Station_Gamepad:ExitWithoutSave()
             UnequipOutfit()
         end
     end
-    SCENE_MANAGER:HideCurrentScene()
 end
 
 function ZO_Restyle_Station_Gamepad:ActivateCurrentSelection()

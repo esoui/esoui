@@ -54,7 +54,7 @@ function ZO_FriendsList:Initialize()
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_NOTE_UPDATED, function(_, displayName, note) self:OnFriendNoteUpdated(displayName, note) end)
     EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnFriendPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
     if IsHeronUI() then
-        EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_HERON_USER_INFO_UPDATED, function(_, displayName, heronName) self:OnFriendHeronUserInfoUpdated(displayName, heronName) end)
+        EVENT_MANAGER:RegisterForEvent(EVENT_NAMESPACE, EVENT_FRIEND_HERON_INFO_BATCH_UPDATED, function(_) self:OnHeronInfoBatchUpdated() end)
     end
 end
 
@@ -257,13 +257,8 @@ function ZO_FriendsList:OnFriendPlayerStatusChanged(displayName, characterName, 
     end
 end
 
-function ZO_FriendsList:OnFriendHeronUserInfoChanged(displayName, heronName)
-    local data, friendIndex = self:FindDataByDisplayName(displayName)
-    if data then
-        data.heronName = heronName
-        data.isHeronUser = heronName ~= nil
-        self:RefreshSort()
-    end
+function ZO_FriendsList:OnHeronInfoBatchUpdated()
+    self:RefreshData()
 end
 
 function ZO_FriendsList:OnNumTotalFriendsChanged()

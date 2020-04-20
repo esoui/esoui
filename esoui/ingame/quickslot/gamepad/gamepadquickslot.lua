@@ -283,11 +283,11 @@ function ZO_GamepadQuickslot:PopulateMenu()
             local slotIcon = GetSlotTexture(i)
             local slotName = GetSlotName(i)
             slotName = zo_strformat(SI_TOOLTIP_ITEM_NAME, slotName)
-            local slotItemQuality = GetSlotItemQuality(i)
+            local slotItemDisplayQuality = GetSlotItemDisplayQuality(i)
 
             local slotNameData
             if slotItemQuality then
-                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, slotItemQuality)
+                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, slotItemDisplayQuality)
                 local colorTable = { r = r, g = g, b = b }
                 slotNameData = {slotName, colorTable}
             else

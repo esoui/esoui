@@ -28,7 +28,11 @@ function ZO_LoginBase_Keyboard:Initialize(control)
 end
 
 function ZO_LoginBase_Keyboard:ResizeControls()
-    ZO_ReanchorControlForLeftSidePanel(self.bgMunge)
+    if PregameStateManager_GetCurrentState() == "AccountLogin" then
+        ZO_ReanchorControlTopHorizontalMenu(ZO_OptionsWindow)
+    else
+        ZO_ReanchorControlForLeftSidePanel(self.bgMunge)
+    end
 end
 
 function ZO_LoginBase_Keyboard:UpdateEsoLogo()

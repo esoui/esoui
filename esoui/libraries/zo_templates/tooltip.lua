@@ -262,9 +262,9 @@ function ZO_Tooltip_AddDivider(tooltipControl)
     end
 end
 
-function ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType)
+function ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
     if gameDataType == TOOLTIP_GAME_DATA_DIVIDER then
-        ZO_Tooltip_AddDivider(tooltipControl)
+        ZO_Tooltip_AddDivider(tooltipControl, ...)
     end
 end
 

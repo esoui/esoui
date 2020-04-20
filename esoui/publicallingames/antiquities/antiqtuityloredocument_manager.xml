@@ -1,0 +1,62 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_AntiquityLoreDocument_HighlightAnimation">
+            <Animations>
+                <CustomAnimation duration="160">
+                    <UpdateFunction>
+                        ZO_AntiquityLoreDocument_HighlightAnimation_OnUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <!-- Base -->
+        
+        <Control name="ZO_AntiquityLoreDocument_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontBookScrollTitle" />
+                <Label name="$(parent)Body" font="ZoFontBookScroll" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityLoreDocument_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontGamepadBookScrollTitle" />
+                <Label name="$(parent)Body" font="ZoFontGamepadBookScroll" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityLoreDocument" virtual="true">
+            <OnInitialized>
+                self.backgroundTexture = self:GetNamedChild("BG")
+                self.titleLabel = self:GetNamedChild("Title")
+                self.bodyLabel = self:GetNamedChild("Body")
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)BG">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Texture>
+                
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65">
+                    <Anchor point="TOPLEFT" offsetX="ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y" />
+                    <Anchor point="TOPRIGHT" offsetX="-ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y" />
+                </Label>
+
+                <Label name="$(parent)Body" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="-ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_LABEL_PADDING_Y" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_LABEL_PADDING_Y" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <!-- Wide -->
+        
+        <Control name="ZO_AntiquityLoreWideDocument" inherits="ZO_AntiquityLoreDocument" virtual="true">
+            <Dimensions x="ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_CONTROL_WIDTH" />
+        </Control>
+    </Controls>
+</GuiXml>

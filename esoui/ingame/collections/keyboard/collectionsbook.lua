@@ -170,8 +170,8 @@ do
             control:SetText(categoryData:GetFormattedName())
         end
 
-        self.categoryTree:AddTemplate("ZO_StatusIconHeader", TreeHeaderSetup_Child, nil, nil, CHILD_INDENT, CHILD_SPACING)
-        self.categoryTree:AddTemplate("ZO_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
+        self.categoryTree:AddTemplate("ZO_CollectionsBook_StatusIconHeader", TreeHeaderSetup_Child, nil, nil, CHILD_INDENT, CHILD_SPACING)
+        self.categoryTree:AddTemplate("ZO_CollectionsBook_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless)
         self.categoryTree:AddTemplate("ZO_CollectionsBook_SubCategory", TreeEntrySetup, TreeEntryOnSelected)
 
         self.categoryTree:SetExclusive(true)
@@ -238,7 +238,7 @@ do
 
         if not searchResults then
             local hasChildren = categoryData:GetNumSubcategories() > 0
-            local nodeTemplate = hasChildren and "ZO_StatusIconHeader" or "ZO_StatusIconChildlessHeader"
+            local nodeTemplate = hasChildren and "ZO_CollectionsBook_StatusIconHeader" or "ZO_CollectionsBook_StatusIconChildlessHeader"
 
             local parentNode = self:AddCategory(nodeTemplate, categoryData)
         
@@ -248,7 +248,7 @@ do
         else
             local categoryIndex = categoryData:GetCategoryIndicies()
             local hasChildren = NonContiguousCount(searchResults[categoryIndex]) > 1 or searchResults[categoryIndex][ZO_COLLECTIONS_SEARCH_ROOT] == nil
-            local nodeTemplate = hasChildren and "ZO_StatusIconHeader" or "ZO_StatusIconChildlessHeader"
+            local nodeTemplate = hasChildren and "ZO_CollectionsBook_StatusIconHeader" or "ZO_CollectionsBook_StatusIconChildlessHeader"
 
             local parentNode = self:AddCategory(nodeTemplate, categoryData)
         

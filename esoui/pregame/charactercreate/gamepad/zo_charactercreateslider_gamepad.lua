@@ -186,14 +186,6 @@ function ZO_CharacterCreateGenderSlider_Gamepad:SetValue(value)
     end
 end
 
-function ZO_CharacterCreateGenderSlider_Gamepad:ChangeValue(changeAmount)
-    local newSteppedValue = zo_floor(self.slider:GetValue()) + changeAmount
-    local min, max = self.slider:GetMinMax()
-    newSteppedValue = zo_clamp(newSteppedValue, min, max)
-    self:SetValue(newSteppedValue)
-    self:Update()
-end
-
 function ZO_CharacterCreateGenderSlider_Gamepad:Randomize(randomizeType)
     if self.lockState == TOGGLE_BUTTON_OPEN then
         local randomValue = 1
@@ -217,7 +209,7 @@ end
 
 function ZO_CharacterCreateGenderSlider_Gamepad:Update()
     self.initializing = true
-	local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local currentValue = CharacterCreateGetGender(characterMode)
     self.slider:SetValue(currentValue)
     self.initializing = nil

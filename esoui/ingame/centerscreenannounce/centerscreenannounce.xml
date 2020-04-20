@@ -72,6 +72,12 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
+
+        <AnimationTimeline name="CenterScreenScryingUpdatedIconFadeIn">
+            <Animations>
+                <AlphaAnimation applyToChildControlName="AchievedIcon" duration="200" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
     </Animations>
 
     <Controls>
@@ -125,6 +131,8 @@
                         <Control name="$(parent)RaidCompleteText" inherits="ZO_RaidCompleteText">
                             <Anchor point="TOP" relativePoint="BOTTOM" />
                         </Control>
+
+                        <Control name="$(parent)ScryingUpdatedSection" resizeToFitDescendents="true" />
                     </Controls>
                 </Label>
             </Controls>
@@ -168,6 +176,10 @@
                                 </Label>
                             </Controls>
                         </Control>
+
+                        <Control name="$(parent)ScryingUpdatedSection">
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10" />
+                        </Control>
                     </Controls>
                 </Label>
             </Controls>
@@ -209,6 +221,10 @@
                                 <Label name="$(parent)VitalityPercent" font="ZoFontGamepad42" />
                             </Controls>
                         </Control>
+
+                        <Control name="$(parent)ScryingUpdatedSection">
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="20" />
+                        </Control>
                     </Controls>
                 </Label>
             </Controls>
@@ -238,6 +254,18 @@
                 <Label name="$(parent)VitalityPercent" />
             </Controls>
         </Control>
+
+        <Texture name="ZO_CenterScreenAnnounce_ScryingUpdated_Icon" textureFile="EsoUI/Art/Antiquities/digsite_unknown.dds" virtual="true">
+            <Dimensions x="50" y="50"/>
+            <OnInitialized>
+                ZO_CenterScreenAnnounce_ScryingUpdated_Icon_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)AchievedIcon" textureFile="EsoUI/Art/Antiquities/digsite_complete.dds">
+                    <AnchorFill/>
+                </Texture>
+            </Controls>
+        </Texture>
 
         <Control name="ZO_CenterScreenAnnounce_Keyboard_Template" virtual="true">
             <Anchor point="TOP" offsetY="230" />

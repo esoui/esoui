@@ -22,11 +22,11 @@ function PurchaseKioskDialog:Initialize(control)
     local accept = function(selectedGuildId)
         GuildKioskPurchase(selectedGuildId)
         PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-        INTERACT_WINDOW:OnEndInteraction(ZO_PURCHASE_KIOSK_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(ZO_PURCHASE_KIOSK_INTERACTION)
     end
 
     local decline = function()
-        INTERACT_WINDOW:OnEndInteraction(ZO_PURCHASE_KIOSK_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(ZO_PURCHASE_KIOSK_INTERACTION)
     end
     
     local dialog = ZO_SelectGuildDialog:New(control, "PURCHASE_KIOSK", accept, decline)
@@ -112,11 +112,11 @@ function BidOnKioskDialog:Initialize(control)
         local bidAmount = ZO_DefaultCurrencyInputField_GetCurrency(self.newBidInput)
         GuildKioskBid(selectedGuildId, bidAmount)
         PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-        INTERACT_WINDOW:OnEndInteraction(ZO_BID_ON_KIOSK_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(ZO_BID_ON_KIOSK_INTERACTION)
     end
 
     local decline = function()
-        INTERACT_WINDOW:OnEndInteraction(ZO_BID_ON_KIOSK_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(ZO_BID_ON_KIOSK_INTERACTION)
     end
     
     self.dialog = ZO_SelectGuildDialog:New(control, "BID_ON_KIOSK", accept, decline)

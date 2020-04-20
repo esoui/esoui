@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CharacterSelect_EventTile_Control" inherits="ZO_Tile_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="1920" y="624" />
+
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)OverlayMunge" layer="CONTROLS">
+                            <AnchorFill />
+                        </Texture>
+
+                        <!-- The Large banner image is positioned at the top left of the image.
+                             The image is expected to be 1248x624 inside an image that is 2048x1024 -->
+                        <Texture name="$(parent)EventImage" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                            <Anchor point="TOPLEFT" offsetX="672" />
+                            <Anchor point="BOTTOMRIGHT" />
+                            <TextureCoords left="0" right="0.609375" top="0" bottom="0.609375"/>
+                        </Texture>
+
+                        <Label name="$(parent)TimeRemaining" layer="TEXT"  modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Dimensions x="690" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)OverlayMunge" offsetX="80" offsetY="50"/>
+                        </Label>
+
+                        <Label name="$(parent)Title" layer="TEXT" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Description" layer="TEXT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

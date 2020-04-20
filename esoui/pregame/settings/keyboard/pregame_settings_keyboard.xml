@@ -1,0 +1,52 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_Pregame_Settings_Keyboard_Subcategory_Label" inherits="ZO_HorizontalMenu_LabelHeader" font="ZoFontWinH1" virtual="true">
+            <Dimensions y="48" />
+            <OnMouseUp>
+                ZO_Pregame_Settings_Keyboard_Subcategory_Label_MouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+
+        <TopLevelControl name="ZO_Pregame_Settings_Keyboard_Control" layer="BACKGROUND" mouseEnabled="true" hidden="true" >
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Pregame_Settings_Keyboard_Initialized(self)
+            </OnInitialized>
+
+            <OnMouseUp>
+                ZO_Pregame_Settings_Keyboard_OnMouseUp(upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Options/Keyboard/pregame_Settings_MungeBG.dds">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <Dimensions x="768" />
+                    <TextureCoords left="0" right="0.9375" top="0" bottom="1"/>
+                </Texture>
+
+                <Control name="$(parent)BackgroundHitArea" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <Dimensions x="600" />
+                </Control>
+
+                <Control name="$(parent)Subcategory">
+                    <Dimensions y="50" />
+                </Control>
+
+                <Label name="$(parent)Title" font="ZoFontCenterScreenAnnounceLarge" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_GAME_MENU_SETTINGS">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Subcategory" relativePoint="TOP" />
+                </Label>
+
+                <Control name="$(parent)BackButton" inherits="ZO_DialogButton">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_OptionsWindowResetToDefaultButton" relativePoint="TOPRIGHT" offsetX="30" />
+                    <OnInitialized> 
+                        ZO_KeybindButtonTemplate_Setup(self, "OPTIONS_LOGIN_SETTINGS_BACK", function() PREGAME_SETTINGS_KEYBOARD:HideSettings() end, GetString(SI_GAME_MENU_BACK))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

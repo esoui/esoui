@@ -345,7 +345,7 @@ function ZO_KeyboardGuildRosterManager:GuildRosterRowRank_OnMouseExit(control)
 end
 
 function ZO_KeyboardGuildRosterManager:SetRankDialogRank(rankIndex)
-    local rank = self.setRankDialogRankControlPool:GetExistingObject(rankIndex)
+    local rank = self.setRankDialogRankControlPool:GetActiveObject(rankIndex)
     if rank then
         self.setRankDialogRadioButtonGroup:SetClickedButton(rank:GetNamedChild("Button"))
     end

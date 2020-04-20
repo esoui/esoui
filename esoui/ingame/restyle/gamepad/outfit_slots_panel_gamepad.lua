@@ -124,9 +124,6 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
     -- Randomize
     local randomize = ZO_RESTYLE_STATION_GAMEPAD:CreateRandomizeKeybind(self)
 
-    -- Special exit button
-    local specialExit = ZO_RESTYLE_STATION_GAMEPAD:CreateSpecialExitKeybind()
-
     local function HandleMultiFocusAreaBack()
         self.slotManipulator:UpdatePreview(REFRESH_PREVIEW_INSTANTLY)
         self:EndSelection()
@@ -146,14 +143,13 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            self:HandleGridSelectAction()
-                       end
+                self:HandleGridSelectAction()
+            end
         },
 
         apply,
         options,
         undoAll,
-        specialExit,
     }
 
     -- Search Bar
@@ -169,14 +165,13 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            self:HandleSearchSelectAction()
-                       end
+                self:HandleSearchSelectAction()
+            end
         },
 
         apply,
         options,
         undoAll,
-        specialExit,
     }
 end
 
@@ -313,14 +308,14 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeItemMaterialDialog()
         end,
         parametricList = {}, -- Generated Dynamically
         parametricListOnSelectionChangedCallback = function(dialog, list, newSelectedData, oldSelectedData)
-                                                        local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
-                                                        if previewCollectionId ~= 0 then
-                                                            local data = dialog.data
-                                                            local slotManipulator = data.slotManipulator
-                                                            local primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
-                                                            AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, slotManipulator:GetOutfitSlotIndex(), data.selectedData:GetId(), newSelectedData.materialIndex, primaryDye, secondaryDye, accentDye, REFRESH_PREVIEW_INSTANTLY)
-                                                        end
-                                                   end,
+            local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
+            if previewCollectionId ~= 0 then
+                local data = dialog.data
+                local slotManipulator = data.slotManipulator
+                local primaryDye, secondaryDye, accentDye = slotManipulator:GetPendingDyeData()
+                AddOutfitSlotPreviewElementToPreviewCollection(previewCollectionId, slotManipulator:GetOutfitSlotIndex(), data.selectedData:GetId(), newSelectedData.materialIndex, primaryDye, secondaryDye, accentDye, REFRESH_PREVIEW_INSTANTLY)
+            end
+        end,
         blockDialogReleaseOnPress = true,
         buttons = 
         {
@@ -346,8 +341,8 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeItemMaterialDialog()
                     dialog.data.slotManipulator:UpdatePreview(REFRESH_PREVIEW_INSTANTLY)
                     ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_OUTFIT_ITEM_MATERIAL_OPTIONS")
                 end,
-            },     
-        } 
+            },
+        }
     })
 end
 

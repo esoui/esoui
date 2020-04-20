@@ -100,6 +100,9 @@ function ZO_GuildHeraldryManager_Gamepad:Initialize(control)
             EndHeraldryCustomization()
             self:UnregisterEvents()
             self:SetDirectionalInputEnabled(false)
+            self:SetPendingExit(false)
+
+            -- Remove all keybind groups that may have been added
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.globalKeybindStripDescriptor)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.colorKeybindStripDescriptor)
@@ -108,9 +111,15 @@ function ZO_GuildHeraldryManager_Gamepad:Initialize(control)
             KEYBIND_STRIP:RestoreDefaultExit()
             self.activeKeybindStripDescriptor = nil
             GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT:TakeFocus()
+
+            -- Deactivate the active element to remove the tigger keybinds associated with the active control manager
             if self.categoryList:IsActive() then
                 self.categoryList:Deactivate()
             end
+            if self.colorGridList:IsActive() then
+                self.colorGridList:Deactivate()
+            end
+            self:DeactivateCurrentFocus()
         end
     end)
 end

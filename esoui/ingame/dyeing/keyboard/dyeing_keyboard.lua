@@ -316,10 +316,14 @@ do
             if swatchObject then
                 ZO_Dyeing_CreateTooltipOnMouseEnter(swatchObject.control, swatchObject.dyeName, swatchObject.known, swatchObject.achievementId)
             else
-                -- Technically should never be able to get here, but you never know
-                local dyeName, _, _, _, achievementId = GetDyeInfoById(dyeId)
-                if dyeName ~= "" then
-                    ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, dyeName, UNKNOWN_DYE, achievementId, IS_NON_PLAYER_DYE)
+                --If a color in a saved set is currently filtered out of the general view, we get here
+                local playerDyeInfo = ZO_DYEING_MANAGER:GetPlayerDyeInfoById(dyeId)
+                if playerDyeInfo then
+                    ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, playerDyeInfo.dyeName, playerDyeInfo.known, playerDyeInfo.achievementId)
+                else
+                    -- Technically should never be able to get here, but you never know
+                    local nonPlayerDye = ZO_DYEING_MANAGER:GetOrCreateNonPlayerDyeInfoById(dyeId)
+                    ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, nonPlayerDye.dyeName, UNKNOWN_DYE, nonPlayerDye.achievementId, IS_NON_PLAYER_DYE)
                 end
             end
         end

@@ -87,7 +87,7 @@ function ZO_SharedProvisioner:Initialize(control)
     self.provisionerStationInteraction =
     {
         type = "Provisioner Station",
-        End = function()
+        OnEndBecauseAnotherInteractIsBeginning = function()
             SCENE_MANAGER:Hide(self.mainSceneName)
         end,
         interactTypes = { INTERACTION_CRAFT },

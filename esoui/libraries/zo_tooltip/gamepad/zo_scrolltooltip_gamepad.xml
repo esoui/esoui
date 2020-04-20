@@ -39,6 +39,11 @@
             </OnInitialized>
 
             <Controls>
+                <Backdrop name="$(parent)Border" centerColor="00000000" tier="HIGH" layer="OVERLAY" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="7" offsetY="7" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7" />
+                </Backdrop>
+
                 <Backdrop name="$(parent)Bg" inherits="ZO_ScrollTooltipBackdrop_Gamepad" tier="MEDIUM" excludeFromResizeToFitExtents="true">
                     <AnchorFill />
                 </Backdrop>

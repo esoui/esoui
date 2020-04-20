@@ -167,7 +167,8 @@ local function OnGiftSendingUpdate(dialog, currentTimeInSeconds)
         -- Only present the waiting state after a fixed delay, to avoid very short transitions between waiting and result
         data.currentState = GIFTING_STATE_WAITING
 
-        ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(SI_GIFT_SENDING_TEXT, data.itemName), TEXT_ALIGN_CENTER })
+        local itemName = GetMarketProductDisplayName(data.marketProductId)
+        ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(SI_GIFT_SENDING_TEXT, itemName), TEXT_ALIGN_CENTER })
         ZO_Dialogs_SetDialogLoadingIcon(dialog:GetNamedChild("Loading"), dialog:GetNamedChild("Text"), SHOW_LOADING_ICON)
     end
 end

@@ -109,7 +109,7 @@ function ZO_Tooltip:GetCheckboxSection(text, isComplete)
 end
 
 function ZO_Tooltip:LayoutAchievementRewards(achievementId)
-    local hasRewardItem, itemName, iconTextureName, quality = GetAchievementRewardItem(achievementId)
+    local hasRewardItem, itemName, iconTextureName, displayQuality = GetAchievementRewardItem(achievementId)
     local hasRewardTitle, titleName = GetAchievementRewardTitle(achievementId)
     local hasRewardDye, dyeId = GetAchievementRewardDye(achievementId)
     local hasRewardCollectible, collectibleId = GetAchievementRewardCollectible(achievementId)
@@ -126,7 +126,7 @@ function ZO_Tooltip:LayoutAchievementRewards(achievementId)
         local itemSection = rewardsSection:AcquireSection(self:GetStyle("topSection"))
         local iconStyle = self:GetStyle("achievementItemIcon")
         local iconTexture = zo_iconFormat(iconTextureName, iconStyle.width, iconStyle.height)
-        itemSection:AddLine(zo_strformat(SI_GAMEPAD_ACHIEVEMENTS_ITEM_ICON_AND_DESCRIPTION, iconTexture, itemName), ZO_TooltipStyles_GetItemQualityStyle(quality), self:GetStyle("statValuePairValueSmall"))
+        itemSection:AddLine(zo_strformat(SI_GAMEPAD_ACHIEVEMENTS_ITEM_ICON_AND_DESCRIPTION, iconTexture, itemName), ZO_TooltipStyles_GetItemQualityStyle(displayQuality), self:GetStyle("statValuePairValueSmall"))
         itemSection:AddLine(GetString(SI_GAMEPAD_ACHIEVEMENTS_ITEM_LABEL))
 
         rewardsSection:AddSection(itemSection)

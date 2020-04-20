@@ -62,7 +62,7 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             self.esoLogoAnimation:PlayFromStart()
 
             if IsErrorQueuedFromIngame() then
-                ZO_Gamepad_DisplayServerDisconnectedError()
+                ZO_Pregame_DisplayServerDisconnectedError()
             end
         elseif newState == SCENE_HIDDEN then
             self:ClearError()

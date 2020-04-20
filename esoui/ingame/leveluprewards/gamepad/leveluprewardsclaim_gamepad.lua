@@ -116,7 +116,8 @@ function ZO_LevelUpRewardsClaim_Gamepad:InitializeKeybindStripDescriptors()
 end
 
 function ZO_LevelUpRewardsClaim_Gamepad:InitializeHeader()
-    self.headerData = {
+    self.headerData =
+    {
         titleText = "",
         data1HeaderText = GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_ATTRIBUTE_POINTS_LABEL),
         data2HeaderText = GetString(SI_LEVEL_UP_REWARDS_GAMEPAD_SKILL_POINTS_LABEL),
@@ -201,7 +202,7 @@ function ZO_LevelUpRewardsClaim_Gamepad:CreateRewardEntry(rewardEntryData)
     local icon = rewardEntryData:GetGamepadIcon()
     local entryData = ZO_GamepadEntryData:New(name, icon)
     entryData:SetStackCount(rewardEntryData:GetQuantity())
-    entryData:SetNameColors(entryData:GetColorsBasedOnQuality(rewardEntryData:GetItemQuality()))
+    entryData:SetNameColors(entryData:GetColorsBasedOnQuality(rewardEntryData:GetItemDisplayQuality()))
     entryData:SetDataSource(rewardEntryData)
 
     return entryData

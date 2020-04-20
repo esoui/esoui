@@ -10,11 +10,12 @@ local CREATE_BUCKET_WINDOW_DATA =
         tabMouseOver = "EsoUI/Art/CharacterCreate/CharacterCreate_raceIcon_over.dds",
         nextTab = CREATE_BUCKET_CLASS,
         previousTab = CREATE_BUCKET_FACE,
-        onExpandFn =    function()
-                            if not ZO_CHARACTERCREATE_MANAGER:GetPlayingTransitionAnimations() then
-                                CharacterCreateSetIdlePosture()
-                            end
-                        end,
+        onExpandFn = function()
+            if not ZO_CHARACTERCREATE_MANAGER:GetPlayingTransitionAnimations() then
+                CharacterCreateSetIdlePosture()
+            end
+            SetCharacterCameraZoomAmount(-1)
+        end,
     },
 
     [CREATE_BUCKET_CLASS] =
@@ -26,6 +27,9 @@ local CREATE_BUCKET_WINDOW_DATA =
         tabMouseOver = "EsoUI/Art/CharacterCreate/CharacterCreate_classIcon_over.dds",
         nextTab = CREATE_BUCKET_BODY,
         previousTab = CREATE_BUCKET_RACE,
+        onExpandFn = function()
+            SetCharacterCameraZoomAmount(-1)
+        end,
     },
 
     [CREATE_BUCKET_BODY] =
@@ -37,7 +41,9 @@ local CREATE_BUCKET_WINDOW_DATA =
         tabMouseOver = "EsoUI/Art/CharacterCreate/CharacterCreate_bodyIcon_over.dds",
         nextTab = CREATE_BUCKET_FACE,
         previousTab = CREATE_BUCKET_CLASS,
-        onExpandFn = function() SetCharacterCameraZoomAmount(-1) end,
+        onExpandFn = function()
+            SetCharacterCameraZoomAmount(-1)
+        end,
 
         subCategoryData =
         {
@@ -57,7 +63,9 @@ local CREATE_BUCKET_WINDOW_DATA =
         tabMouseOver = "EsoUI/Art/CharacterCreate/CharacterCreate_faceIcon_over.dds",
         nextTab = CREATE_BUCKET_RACE,
         previousTab = CREATE_BUCKET_BODY,
-        onExpandFn = function() SetCharacterCameraZoomAmount(1) end,
+        onExpandFn = function()
+            SetCharacterCameraZoomAmount(1)
+        end,
 
         subCategoryData =
         {
@@ -122,17 +130,15 @@ function ZO_CharacterCreateBucket_Keyboard:CreateTabControl(windowData)
 
     tabControl.windowData = windowData
 
-    tabControl:SetHandler("OnMouseUp", function(tabControl, button, upInside)
-        if upInside then
-            self.manager:SwitchBuckets(tabControl)
-        end
+    tabControl:SetHandler("OnClicked", function(control, button)
+        self.manager:SwitchBuckets(control)
     end)
 
-    tabControl:SetHandler("OnMouseEnter", function(tabControl)
+    tabControl:SetHandler("OnMouseEnter", function(control)
         self:MouseEnter()
     end)
 
-    tabControl:SetHandler("OnMouseExit", function(tabControl)
+    tabControl:SetHandler("OnMouseExit", function(control)
         self:MouseExit()
     end)
 
@@ -240,6 +246,10 @@ function ZO_CharacterCreateBucket_Keyboard:Reset()
     self.controlData = {}
     self.lastAnchored = nil
     self.subcategoryContainers = {}
+
+    local tabControl = self:GetTab()
+    tabControl:SetEnabled(true)
+    tabControl:SetDesaturation(0)
 
     if self.subCategories then
         for _, subCategoryObj in pairs(self.subCategories) do

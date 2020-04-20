@@ -419,7 +419,7 @@ function ZO_HousingFurnitureList_Gamepad:BuildFurnitureEntry(furnitureObject)
 
     entry:SetFontScaleOnSelection(false)
 
-    entry.quality = furnitureObject:GetQuality()
+    entry.quality = furnitureObject:GetDisplayQuality()
     entry:SetNameColors(entry:GetColorsBasedOnQuality(entry.quality))
 
     local stackCount = furnitureObject:GetStackCount()

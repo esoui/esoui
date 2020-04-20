@@ -56,7 +56,7 @@ function ZO_SharedAlchemy:Initialize(control)
     self.alchemyStationInteraction =
     {
         type = "Alchemy Station",
-        End = function()
+        OnEndBecauseAnotherInteractIsBeginning = function()
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },

@@ -1,0 +1,20 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LabelRevealAnimationWindow" virtual="true">
+            <OnInitialized>
+                ZO_LabelRevealAnimation_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Scroll name="$(parent)Mask" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Label name="$(parent)Text">
+                            <Anchor point="LEFT" relativeTo="$(grandparent)" />
+                        </Label>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

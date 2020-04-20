@@ -84,8 +84,9 @@ ZO_DYEING_LOCK_INDEX = 4
 ZO_DYEING_STATION_INTERACTION =
 {
     type = "Dyeing Station",
-    End = function()
+    OnEndBecauseAnotherInteractIsBeginning = function()
         SYSTEMS:HideScene("restyle")
+        SYSTEMS:HideScene("restyle_station")
     end,
     interactTypes = { INTERACTION_DYE_STATION },
 }

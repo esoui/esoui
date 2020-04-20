@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_CharacterSelect_EventTile_Gamepad_Control" inherits="ZO_CharacterSelect_EventTile_Control ZO_Tile_Gamepad_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="1920" y="632" />
+            <OnInitialized>
+                local fonts =
+                {
+                    {
+                        font = "ZoFontGamepadBold61",
+                        lineLimit = 2,
+                    },
+                    {
+                        font = "ZoFontGamepadBold54",
+                        lineLimit = 2,
+                    }
+                }
+                ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("ContainerTitle"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                ZO_CharacterSelect_EventTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Texture name="$(parent)OverlayMunge" override="true" textureFile="EsoUI/Art/CharacterSelect/Gamepad/gp_characterSelect_MungeOverlay.dds">
+                            <TextureCoords left="0" right="0.9375" top="0" bottom="0.6172"/>
+                        </Texture>
+
+                        <Label name="$(parent)TimeRemaining" override="true" font="ZoFontGamepad27" />
+
+                        <Texture name="$(parent)EventImage" override="true">
+                            <ClearAnchors />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)OverlayMunge" offsetX="672" offsetY="4"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OverlayMunge" offsetY="-4" />
+                        </Texture>
+
+                        <Label name="$(parent)Description" override="true" font="ZoFontGamepad34" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

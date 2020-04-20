@@ -4,10 +4,6 @@ function ZO_LootPickup_Gamepad:New(...)
     return ZO_Loot_Gamepad_Base.New(self, ...)
 end
 
-local function OnBlockingSceneActivated()
-    EndLooting()
-end
-
 function ZO_LootPickup_Gamepad:Initialize(control)
     ZO_Loot_Gamepad_Base.Initialize(self, GAMEPAD_RIGHT_TOOLTIP)
 
@@ -19,13 +15,12 @@ function ZO_LootPickup_Gamepad:Initialize(control)
 
     local function OnStateChanged(oldState, newState)
         if newState == SCENE_SHOWING then
-            MAIN_MENU_MANAGER:SetBlockingScene("lootGamepad", OnBlockingSceneActivated)
             self:OnShowing()
         elseif(newState == SCENE_HIDING) then
+            EndLooting()
             SCENE_MANAGER:RestoreHUDUIScene()
         elseif newState == SCENE_HIDDEN then
             self:OnHide()
-            MAIN_MENU_MANAGER:ClearBlockingScene(OnBlockingSceneActivated)
         end
     end
 

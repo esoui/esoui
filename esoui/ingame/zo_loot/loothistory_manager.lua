@@ -74,17 +74,18 @@ function LootHistory_Manager:Initialize()
                 local itemId = GetItemInstanceId(bagId, slotId)
                 local isVirtual = bagId == BAG_VIRTUAL
                 local isStolen = IsItemStolen(bagId, slotId)
-                OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, nil, itemId, isVirtual, isStolen)
+                local NO_QUEST_ITEM_ICON = nil
+                OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, NO_QUEST_ITEM_ICON, itemId, isVirtual, isStolen)
             end
         end
     end
 
-    local IS_NOT_VIRTUAL = false
-
-    local IS_NOT_STOLEN = false
     local function OnQuestToolUpdate(questIndex, questName, countDelta, questItemIcon, questItemId, questItemName)
         if countDelta > 0 then
-            OnNewItemReceived(questItemName, countDelta, nil, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL, IS_NOT_STOLEN)
+            local NO_ITEM_SOUND = nil
+            local IS_NOT_VIRTUAL = false
+            local IS_NOT_STOLEN = false
+            OnNewItemReceived(questItemName, countDelta, NO_ITEM_SOUND, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL, IS_NOT_STOLEN)
         end
     end
 
@@ -100,6 +101,12 @@ function LootHistory_Manager:Initialize()
         end
     end
 
+    local function OnAntiquityLeadAcquired(antiquityId)
+        if CanAddLootEntry() then
+            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnAntiquityLeadAcquired(antiquityId)
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CURRENCY_UPDATE, function(eventId, ...) OnCurrencyUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
@@ -109,6 +116,7 @@ function LootHistory_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CROWN_CRATE_QUANTITY_UPDATE, function(eventId, ...) OnCrownCrateQuantityUpdate(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function(...) OnNewCollectibleReceived(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_SKILL_XP_UPDATE, function(eventId, ...) OnSkillExperienceUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_ANTIQUITY_LEAD_ACQUIRED, function(eventId, ...) OnAntiquityLeadAcquired(...) end)
 end
 
 ZO_LOOT_HISTORY_MANAGER = LootHistory_Manager:New()

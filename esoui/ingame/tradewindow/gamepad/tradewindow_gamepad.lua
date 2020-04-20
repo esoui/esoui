@@ -404,23 +404,26 @@ function ZO_GamepadTradeWindow:RefreshOfferList(tradetype, list)
         local itemLink = GetTradeItemLink(tradetype, i, LINK_STYLE_DEFAULT)
 
         if itemLink and itemLink ~= "" then
-            local text, icon, stackCount, quality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(tradetype, i)
+            local text, icon, stackCount, displayQuality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(tradetype, i)
 
             text = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, text, stackCount)
 
-            local itemData = {
-                        text = text,
-                        icon = icon,
-                        quality = quality,
-                        stackCount = stackCount,
-                        sellPrice = sellPrice,
-                        meetsUsageRequirement = meetsUsageRequirement,
-                        equipType = equipType,
-                        itemStyle = itemStyle,
-                        creator = creator,
-                        itemLink = itemLink,
-                        tradeIndex = i,
-                    }
+            local itemData =
+            {
+                text = text,
+                icon = icon,
+                displayQuality = displayQuality,
+                -- quality is depricated, included here for addon backwards compatibility
+                quality = displayQuality,
+                stackCount = stackCount,
+                sellPrice = sellPrice,
+                meetsUsageRequirement = meetsUsageRequirement,
+                equipType = equipType,
+                itemStyle = itemStyle,
+                creator = creator,
+                itemLink = itemLink,
+                tradeIndex = i,
+            }
 
             local entry = self:AddOfferListEntry(list, text, nil, function() TradeRemoveItem(i) end)
             entry:InitializeInventoryVisualData(itemData)

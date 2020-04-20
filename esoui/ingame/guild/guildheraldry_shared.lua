@@ -377,6 +377,10 @@ function ZO_GuildHeraldryManager_Shared:IsPendingExit()
     return self.isPendingExit
 end
 
+function ZO_GuildHeraldryManager_Shared:IsCurrentBlockingScene()
+    return false -- May be overridden
+end
+
 function ZO_GuildHeraldryManager_Shared:AttemptSaveIfBlocking(showBaseScene)
     local attemptedSave = false
 
@@ -388,9 +392,7 @@ function ZO_GuildHeraldryManager_Shared:AttemptSaveIfBlocking(showBaseScene)
     return attemptedSave
 end
 
-function ZO_GuildHeraldryManager_Shared:AttemptSaveAndExit(showBaseScene)
-    local blocked = false
-
+function ZO_GuildHeraldryManager_Shared:AttemptPromptSaveWarning()
     if HasPendingHeraldryChanges() then
         self:SetPendingExit(true)
         if not IsCreatingHeraldryForFirstTime() then
@@ -398,14 +400,27 @@ function ZO_GuildHeraldryManager_Shared:AttemptSaveAndExit(showBaseScene)
             local heraldryFunds = GetHeraldryGuildBankedMoney()
             if heraldryFunds and pendingCost <= heraldryFunds then
                 self:ConfirmHeraldryApplyChanges()
-                blocked = true
+                return true
             end
         end
     end
 
-    if not blocked then
+    return false
+end
+
+function ZO_GuildHeraldryManager_Shared:AttemptSaveAndExit(showBaseScene)
+    if not self:AttemptPromptSaveWarning() then
         self:ConfirmExit(showBaseScene)
     end
+end
+
+function ZO_GuildHeraldryManager_Shared:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
+    if bypassHideSceneConfirmationReason == nil then
+        if self:AttemptPromptSaveWarning() then
+            return
+        end
+    end
+    scene:AcceptHideScene()
 end
 
 function ZO_GuildHeraldryManager_Shared:ConfirmExit(showBaseScene)

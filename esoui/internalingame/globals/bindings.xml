@@ -76,6 +76,77 @@
         </Category>
     </Layer>
 
+    <Layer name="ScryingActions">
+        <Category>
+            <Action name="SCRYING_TOGGLE_NORMAL_ACTION">
+                <Down>
+                    SCRYING:TryToggleCurrentSkill(SCRYING_ACTIVE_SKILL_NORMAL)
+                </Down>
+            </Action>
+            <Action name="SCRYING_TOGGLE_SPECIAL_ACTION_1">
+                <Down>
+                    SCRYING:TryToggleCurrentSkill(SCRYING_ACTIVE_SKILL_BOMB)
+                </Down>
+            </Action>
+            <Action name="SCRYING_TOGGLE_SPECIAL_ACTION_2">
+                <Down>
+                    SCRYING:TryToggleCurrentSkill(SCRYING_ACTIVE_SKILL_CO_OPT)
+                </Down>
+            </Action>
+            <Action name="SCRYING_TOGGLE_SPECIAL_ACTION_3">
+                <Down>
+                    SCRYING:TryToggleCurrentSkill(SCRYING_ACTIVE_SKILL_LINE)
+                </Down>
+            </Action>
+            <Action name="SCRYING_PERFORM_ACTION">
+                <Down>
+                    SCRYING:PerformAction()
+                </Down>
+            </Action>
+            <Action name="SCRYING_CANCEL">
+                <Down>
+                    SCRYING:TryCancel()
+                </Down>
+            </Action>
+            <Action name="SCRYING_MORE_INFO">
+                <Down>
+                    return SCRYING:ShowMoreInfo()
+                </Down>
+                <Up>
+                    return SCRYING:HideMoreInfo()
+                </Up>
+            </Action>
+        </Category>
+    </Layer>
+
+    <Layer name="AntiquityDiggingActions">
+        <Category>
+            <Action name="ANTIQUITY_DIGGING_PRIMARY_ACTION">
+                <Down> return ANTIQUITY_DIGGING:UsePrimaryAction() </Down>
+            </Action>
+
+            <Action name="ANTIQUITY_DIGGING_CANCEL">
+                <Down> return ANTIQUITY_DIGGING:TryCancel() </Down>
+            </Action>
+
+            <Action name="ANTIQUITY_DIGGING_SELECT_BASIC_EXCAVATION">
+                <Down> return ANTIQUITY_DIGGING:SelectTool(DIGGING_ACTIVE_SKILL_BASIC_EXCAVATION) </Down>
+            </Action>
+
+            <Action name="ANTIQUITY_DIGGING_SELECT_HEAVY_SHOVEL">
+                <Down> return ANTIQUITY_DIGGING:SelectTool(DIGGING_ACTIVE_SKILL_HEAVY_SHOVEL) </Down>
+            </Action>
+
+            <Action name="ANTIQUITY_DIGGING_SELECT_RADAR_SENSE">
+                <Down> return ANTIQUITY_DIGGING:SelectTool(DIGGING_ACTIVE_SKILL_RADAR_SENSE) </Down>
+            </Action>
+
+            <Action name="ANTIQUITY_DIGGING_SELECT_CAREFUL_TOUCH">
+                <Down> return ANTIQUITY_DIGGING:SelectTool(DIGGING_ACTIVE_SKILL_CAREFUL_TOUCH) </Down>
+            </Action>
+        </Category>
+    </Layer>
+
     <Layer name="MarketAnnouncement" allowFallthrough="false">
         <Category>
             <Action name="MARKET_ANNOUNCEMENT_CLOSE" hideAction="true">

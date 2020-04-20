@@ -528,11 +528,15 @@ function ZO_GamepadInteractiveSortFilterList:CommitScrollList()
             --If the cursor is in the list, but the list is empty because of a filter, we need to force it out of the panel area
             self:ActivateFocusArea(self.headersFocalArea)
         else
-            -- if we've lost our selection and the panelFocalArea is active, then we want to
-            -- AutoSelect the next appropriate entry
+            local ANIMATE_INSTANTLY = true
             local selectedData = ZO_ScrollList_GetSelectedData(self.list)
-            if not selectedData then
-                local ANIMATE_INSTANTLY = true
+            if selectedData then
+                -- make sure our selection is in view in case there was a large change from a filter
+                local NO_CALLBACK = nil
+                ZO_ScrollList_ScrollDataIntoView(self.list, ZO_ScrollList_GetSelectedDataIndex(self.list), NO_CALLBACK, ANIMATE_INSTANTLY)
+            else
+                -- if we've lost our selection and the panelFocalArea is active, then we want to
+                -- AutoSelect the next appropriate entry
                 ZO_ScrollList_AutoSelectData(self.list, ANIMATE_INSTANTLY)
             end
         end

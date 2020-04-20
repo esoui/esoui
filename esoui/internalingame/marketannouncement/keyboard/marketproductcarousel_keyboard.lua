@@ -2,17 +2,16 @@
 -- ZO_MarketProductCarousel_Keyboard
 --
 
-ZO_MarketProductCarousel_Keyboard = ZO_MarketProductCarousel_Shared:Subclass()
+ZO_MarketProductCarousel_Keyboard = ZO_Carousel_Shared:Subclass()
 
 function ZO_MarketProductCarousel_Keyboard:New(...)
-    return ZO_MarketProductCarousel_Shared.New(self, ...)
+    return ZO_Carousel_Shared.New(self, ...)
 end
 
 function ZO_MarketProductCarousel_Keyboard:Initialize(...)
-    ZO_MarketProductCarousel_Shared.Initialize(self, ...)
+    ZO_Carousel_Shared.Initialize(self, ...)
 
-    self.selectionIndicator:SetButtonControlName("MarketProduct_Indicator_Keyboard")
-    self:SetOnControlClicked(function(clickedControl, button, upInside) clickedControl.object:OnMouseUp() end) 
+    self:SetOnControlClicked(function(clickedControl, button, upInside) clickedControl.object:OnMouseUp() end)
 
     local function OnSelectedDataChanged()
         self:OnSelectedDataChanged()
@@ -21,12 +20,12 @@ function ZO_MarketProductCarousel_Keyboard:Initialize(...)
     self:SetOnSelectedDataChangedCallback(OnSelectedDataChanged)
 end
 
-function ZO_MarketProductCarousel_Keyboard:SetNumProductAnnouncements(numProducts)
-    ZO_MarketProductCarousel_Shared.SetNumProductAnnouncements(self, numProducts)
+function ZO_MarketProductCarousel_Keyboard:Commit()
+    ZO_Carousel_Shared.Commit(self)
 
     -- Add each pip button to each of the scroll list tile's mouseover group
     for _, control in ipairs(self.controls) do
-        for i = 1, numProducts do
+        for i = 1, self:GetNumItems() do
             local button = self.selectionIndicator:GetButtonByIndex(i)
             control.object:AddMouseOverElement(button)
         end
@@ -41,7 +40,7 @@ function ZO_MarketProductCarousel_Keyboard:OnSelectedDataChanged()
 end
 
 function ZO_MarketProductCarousel_Keyboard:UpdateSelection(index)
-    ZO_MarketProductCarousel_Shared.UpdateSelection(self, index)
+    ZO_Carousel_Shared.UpdateSelection(self, index)
 
     self:OnSelectedDataChanged()
 end

@@ -321,6 +321,9 @@ end
 function ZO_CharacterCreateBucketManager_Gamepad:EnableTabBarCategory(bucket, enabled)
     local tabBarParams = self.tabBarEntries[bucket:GetTabIndex()]
     tabBarParams.canSelect = enabled
+
+    local header = GAMEPAD_CHARACTER_CREATE_MANAGER.header
+    ZO_GamepadGenericHeader_Refresh(header, self.headerData)
 end
 
 function ZO_CharacterCreateBucketManager_Gamepad:Activate()
@@ -349,6 +352,11 @@ function ZO_CharacterCreateBucketManager_Gamepad:SwitchBuckets(bucketCategory)
 end
 
 function ZO_CharacterCreateBucketManager_Gamepad:SwitchBucketsInternal(bucketCategory)
+    local bucket = self:BucketForCategory(bucketCategory)
+    if bucket == self.currentBucket then
+        return
+    end
+
     -- collapse current bucket
     if self.currentBucket then
         self.currentBucket:Collapse()
@@ -359,8 +367,6 @@ function ZO_CharacterCreateBucketManager_Gamepad:SwitchBucketsInternal(bucketCat
     end
 
     -- expand desired bucket
-    local bucket = self:BucketForCategory(bucketCategory)
-
     if bucket then
         bucket:Expand()
         self.currentBucket = bucket

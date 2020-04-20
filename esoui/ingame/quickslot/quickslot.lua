@@ -490,7 +490,10 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
                 slotIndex = slotIndex,
                 meetsUsageRequirement = slotData.meetsUsageRequirement,
                 locked = slotData.locked,
-                quality = slotData.quality,
+                functionalQuality = slotData.functionalQuality,
+                displayQuality = slotData.displayQuality,
+                -- slotData.quality is depricated, included here for addon backwards compatibility
+                quality = slotData.displayQuality,
                 slotType = SLOT_TYPE_ITEM,
                 filterData = { GetItemFilterTypeInfo(BAG_BACKPACK, slotIndex) },
                 age = slotData.age,
@@ -536,7 +539,9 @@ local function UpdateNewStatusControl(control, data)
 end
 
 function ZO_QuickslotManager:SetUpQuickSlot(control, data)
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+    -- data.quality is depricated, included here for addon backwards compatibility
+    local displayQuality = data.displayQuality or data.quality
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
     local nameControl = GetControl(control, "Name")
     nameControl:SetText(data.name)
     nameControl:SetColor(r, g, b, 1)

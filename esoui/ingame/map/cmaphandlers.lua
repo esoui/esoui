@@ -108,6 +108,15 @@ function CMapHandlers:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ZONE_STORY_ACTIVITY_TRACKED, RefreshZoneStory)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ZONE_STORY_ACTIVITY_UNTRACKED, RefreshZoneStory)
 
+    local function RefreshAntiquityDigSites()
+        self:RefreshAntiquityDigSitePins()
+    end
+
+    ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", RefreshAntiquityDigSites)
+    ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", RefreshAntiquityDigSites)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ANTIQUITY_TRACKING_INITIALIZED, RefreshAntiquityDigSites)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_ANTIQUITY_TRACKING_UPDATE, RefreshAntiquityDigSites)
+
     local function RefreshBreadcrumbPins()
         RefreshAllQuestPins()
         RefreshZoneStory()
@@ -119,6 +128,7 @@ function CMapHandlers:InitializeEvents()
     local function OnPlayerActivated()
         RefreshKeeps()
         RefreshZoneStory()
+        RefreshAntiquityDigSites()
     end
 
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
@@ -131,8 +141,8 @@ function CMapHandlers:AddKeep(keepId, bgContext)
             self:AddMapPin(pinType, keepId)
 
             local keepUnderAttack = GetKeepUnderAttack(keepId, bgContext)
-            if(keepUnderAttack) then
-                local keepUnderAttackPinType = ZO_WorldMap_GetUnderAttackPinForKeepPin(pinType)
+            if keepUnderAttack then
+                local keepUnderAttackPinType = ZO_MapPin.GetUnderAttackPinForKeepPin(pinType)
                 self:AddMapPin(keepUnderAttackPinType, keepId)
             end
         end
@@ -144,7 +154,7 @@ function CMapHandlers:RefreshKeeps()
     local numKeeps = GetNumKeeps()
     for i = 1, numKeeps do
         local keepId, bgContext = GetKeepKeysByIndex(i)
-        if(IsLocalBattlegroundContext(bgContext)) then
+        if IsLocalBattlegroundContext(bgContext) then
             self:AddKeep(keepId, bgContext)
         end
     end
@@ -152,7 +162,7 @@ end
 
 function CMapHandlers:RefreshKeep(keepId, bgContext)
     RemoveMapPinsInRange(MAP_PIN_TYPE_KEEP_NEUTRAL, MAP_PIN_TYPE_KEEP_ATTACKED_SMALL, keepId)
-    if(IsLocalBattlegroundContext(bgContext)) then
+    if IsLocalBattlegroundContext(bgContext) then
         self:AddKeep(keepId, bgContext)
     end
 end
@@ -197,6 +207,11 @@ end
 function CMapHandlers:RefreshZoneStory()
     RemoveMapZoneStoryPins()
     AddMapZoneStoryPins()
+end
+
+function CMapHandlers:RefreshAntiquityDigSitePins()
+    RemoveMapAntiquityDigSitePins()
+    AddMapAntiquityDigSitePins()
 end
 
 C_MAP_HANDLERS = CMapHandlers:New()

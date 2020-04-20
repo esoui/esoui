@@ -238,3 +238,19 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:LayoutKeepUpgrade(name, descript
     self:LayoutStringLine(keepUpgradeSection, description, self.tooltip:GetStyle("keepUpgradeTooltipContent"))
     self.tooltip:AddSection(keepUpgradeSection)
 end
+
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendDigSiteAntiquities(digSiteId)
+    local antiquityIds = { GetInProgressAntiquitiesForDigSite(digSiteId) }
+    local antiquitiesSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("keepInfoSection"))
+    for index, antiquityId in ipairs(antiquityIds) do
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        if antiquityData then
+            local antiquityName = antiquityData:GetName()
+            local colorDef = GetAntiquityQualityColor(antiquityData:GetQuality())
+            local coloredAntiquityName = colorDef:Colorize(antiquityName)
+            local digSiteString = zo_strformat(SI_ANTIQUITY_DIG_SITE_MAP_TOOLTIP, coloredAntiquityName)
+            self:LayoutStringLine(antiquitiesSection, digSiteString, self.tooltip:GetStyle("keepBaseTooltipContent"))
+        end
+    end
+    self.tooltip:AddSection(antiquitiesSection)
+end

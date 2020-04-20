@@ -11,6 +11,25 @@ function ZO_Tooltip:LayoutServiceTokenTooltip(tokenType)
     descriptionSection:AddLine(tokenDescription, self:GetStyle("bodyDescription"))
     self:AddSection(descriptionSection)
 
+    if tokenType == SERVICE_TOKEN_ALLIANCE_CHANGE then
+        local anyRaceCollectibleId = GetAnyRaceAnyAllianceCollectibleId()
+        local collectibleName = GetCollectibleName(anyRaceCollectibleId)
+        local categoryName = GetCollectibleCategoryName(anyRaceCollectibleId)
+        local tokensAvailableText = zo_strformat(SI_SERVICE_TOOLTIP_REQUIRES_COLLECTIBLE_TO_USE, collectibleName, categoryName)
+
+        local meetsRequirementTextStyle
+        local numTokens = GetNumServiceTokens(tokenType)
+        if CanPlayAnyRaceAsAnyAlliance() then
+            meetsRequirementTextStyle = self:GetStyle("succeeded")
+        else
+            meetsRequirementTextStyle = self:GetStyle("failed")
+        end
+
+        local requiredCollectibleSection = self:AcquireSection(self:GetStyle("bodySection"))
+        requiredCollectibleSection:AddLine(tokensAvailableText, self:GetStyle("bodyDescription"), meetsRequirementTextStyle)
+        self:AddSection(requiredCollectibleSection)
+    end
+
     local tokensAvailableText
     local tokensAvailableTextStyle
     local numTokens = GetNumServiceTokens(tokenType)

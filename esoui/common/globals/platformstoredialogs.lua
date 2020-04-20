@@ -48,7 +48,7 @@ function ZO_ShowBuyCrownsPlatformDialog()
 end
 
 -- Buy ESO plus
-ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] = 
+ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
 {
     gamepadInfo =
     {
@@ -58,9 +58,9 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
     {
         text = SI_OPEN_STORE_TO_BUY_PLUS_TITLE,
     },
-    mainText = 
+    mainText =
     {
-        text = SI_OPEN_STORE_TO_BUY_PLUS_TEXT,
+        text = zo_strformat(SI_OPEN_STORE_TO_BUY_PLUS_TEXT, ZO_GetPlatformStoreName()),
     },
     buttons =
     {

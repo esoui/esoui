@@ -54,6 +54,7 @@ local AREA_PIN_TYPE_NAME =
 {
     QUEST_PINS = "areaQuestPins",
     ZONE_STORY_SUGGESTION_PINS = "areaZoneStorySuggestionPins",
+    ANTIQUITY_DIG_SITE_PINS = "antiquityDigSitePins",
 }
 
 local function IsPlayerInsideJournalQuestConditionGoalArea(journalIndex, stepIndex, conditionIndex)
@@ -122,10 +123,16 @@ function Compass:Initialize(control)
     self:InitializePoiPins()
     self:InitializeQuestPins()
     self:InitializeZoneStoryAreaPins()
+    self:InitializeAntiquityDigSiteAreaPins()
 
-    local function OnPlayerInPinAreaChanged(...)
-        self:OnPlayerInQuestPinAreaChanged(...)
-        self:OnPlayerInZoneStoryPinAreaChanged(...)
+    local function OnPlayerInPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
+        if ZO_MapPin.QUEST_CONDITION_PIN_TYPES[pinType] then
+            self:OnQuestAreaGoalStateChanged(param1 + 1, param2 + 1, param3 + 1, playerIsInside)
+        elseif pinType == MAP_PIN_TYPE_ZONE_STORY_SUGGESTED_AREA then
+            self:OnPlayerInZoneStoryPinAreaChanged(pinType, param1, param2, param3, playerIsInside)
+        elseif pinType == MAP_PIN_TYPE_ANTIQUITY_DIG_SITE or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE  then
+            self:OnPlayerInAntiquityDigSitePinAreaChanged(pinType, param1, param2, param3, playerIsInside)
+        end
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_IN_PIN_AREA_CHANGED, OnPlayerInPinAreaChanged)
@@ -171,22 +178,28 @@ function Compass:ApplyTemplateToAreaTexture(texture, template, restingAlpha, pin
     self:SetAreaTexturePlatformTextures(texture, pinType)
 end
 
-function Compass:OnPlayerInZoneStoryPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
-    if pinType == MAP_PIN_TYPE_ZONE_STORY_SUGGESTED_AREA then
-        local trackedZoneId, trackedZoneCompletionType, trackedActivityId = GetTrackedZoneStoryActivityInfo()
-        if trackedZoneId == param1 and trackedZoneCompletionType == param2 and trackedActivityId == param3 then
-            if playerIsInside then
-                self:TryPlayingAnimationOnAreaPin(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId, pinType)
-            else
-                self:StopAreaPinOutAnimation(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId)
-            end
-            self:SetPlayerInside(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId)
+function Compass:OnPlayerInZoneStoryPinAreaChanged(pinType, param1, param2, param3, playerIsInside)
+    local trackedZoneId, trackedZoneCompletionType, trackedActivityId = GetTrackedZoneStoryActivityInfo()
+    if trackedZoneId == param1 and trackedZoneCompletionType == param2 and trackedActivityId == param3 then
+        if playerIsInside then
+            self:TryPlayingAnimationOnAreaPin(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId, pinType)
+        else
+            self:StopAreaPinOutAnimation(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId)
         end
+        self:SetPlayerInside(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, trackedZoneId, trackedZoneCompletionType, trackedActivityId, playerIsInside)
     end
 end
 
+function Compass:OnPlayerInAntiquityDigSitePinAreaChanged(pinType, param1, param2, param3, playerIsInside)
+    if playerIsInside then
+        self:TryPlayingAnimationOnAreaPin(AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS, param1, param2, param3, pinType)
+    else
+        self:StopAreaPinOutAnimation(AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS, param1, param2, param3)
+    end
+    self:SetPlayerInside(AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS, param1, param2, param3, playerIsInside)
+end
+
 function Compass:InitializeZoneStoryAreaPins()
-    local areaTexturePinPool
     local function ResetAreaTexture(areaTexture)
         Compass.ResetAreaTexture(areaTexture)
     end
@@ -194,7 +207,7 @@ function Compass:InitializeZoneStoryAreaPins()
     local function CreateAreaTexture(objectPool)
         return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS, objectPool)
     end
-    areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
 
     local function OnAreaAnimationStarted(animationTimeline)
         local IGNORE_PIN_TEXTURE = true
@@ -211,13 +224,38 @@ function Compass:InitializeZoneStoryAreaPins()
     self.areaAnimationPools[AREA_PIN_TYPE_NAME.ZONE_STORY_SUGGESTION_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
 end
 
+function Compass:InitializeAntiquityDigSiteAreaPins()
+    local function ResetAreaTexture(areaTexture)
+        Compass.ResetAreaTexture(areaTexture)
+    end
+
+    local function CreateAreaTexture(objectPool)
+        return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS, objectPool)
+    end
+    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+
+    local function OnAreaAnimationStarted(animationTimeline)
+        local IGNORE_PIN_TEXTURE = true
+        self:OnAreaAnimationStarted(animationTimeline, areaTexturePinPool, IGNORE_PIN_TEXTURE)
+    end
+
+    local function OnAreaAnimationStopped(animationTimeline)
+        self:OnAreaAnimationStopped(animationTimeline, self.areaAnimationPools[AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS])
+    end
+
+    local function CreateAreaAnimationTimeline()
+        return self:CreateAreaAnimationTimeline(OnAreaAnimationStarted, OnAreaAnimationStopped)
+    end
+    self.areaAnimationPools[AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
+end
+
 local AREA_TEXTURE_RESTING_ALPHA_GAMEPAD = 1
 local AREA_TEXTURE_RESTING_ALPHA_KEYBOARD = 0.85
 
 function Compass:SetAreaTexturePlatformTextures(areaTexture, pinType)
     local platformModifier = IsInGamepadPreferredMode() and "Gamepad/gp_" or ""
     local pinType = pinType or areaTexture.pinType
-    local pinTypeAssisted = ZO_MapPin.ASSISTED_PIN_TYPES[pinType]
+    local pinTypeAssisted = ZO_MapPin.ASSISTED_PIN_TYPES[pinType] or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE
     if pinTypeAssisted then
         areaTexture.left:SetTexture("EsoUI/Art/Compass/"..platformModifier.."areapin2frame_ends.dds")
         areaTexture.right:SetTexture("EsoUI/Art/Compass/"..platformModifier.."areapin2frame_ends.dds")
@@ -358,7 +396,7 @@ function Compass:OnQuestAreaGoalStateChanged(journalIndex, stepIndex, conditionI
     else
         self:StopAreaPinOutAnimation(AREA_PIN_TYPE_NAME.QUEST_PINS, journalIndex - 1, stepIndex - 1, conditionIndex - 1)
         if self.areaOverrideQueue then
-            for i=#self.areaOverrideQueue, 1, -1 do
+            for i = #self.areaOverrideQueue, 1, -1 do
                 local nextOverride = self.areaOverrideQueue[i]
                 if nextOverride.journalIndex == journalIndex and nextOverride.stepIndex == stepIndex and nextOverride.conditionIndex == conditionIndex then
                     table.remove(self.areaOverrideQueue, i)
@@ -375,15 +413,7 @@ function Compass:OnQuestAreaGoalStateChanged(journalIndex, stepIndex, conditionI
     self.refreshingJournalIndex = false
 end
 
-function Compass:OnPlayerInQuestPinAreaChanged(eventCode, pinType, param1, param2, param3, playerIsInside)
-    local isAreaPin = ZO_MapPin.QUEST_CONDITION_PIN_TYPES[pinType]
-    if isAreaPin then
-        self:OnQuestAreaGoalStateChanged(param1 + 1, param2 + 1, param3 + 1, playerIsInside)
-    end
-end
-
 function Compass:InitializeQuestPins()
-    local areaTexturePinPool
     local function ResetAreaTexture(areaTexture)
         Compass.ResetAreaTexture(areaTexture)
     end
@@ -392,7 +422,7 @@ function Compass:InitializeQuestPins()
         return self:CreateAreaTexture(AREA_PIN_TYPE_NAME.QUEST_PINS, objectPool)
     end
 
-    areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
+    local areaTexturePinPool = ZO_ObjectPool:New(CreateAreaTexture, ResetAreaTexture)
 
     local function OnAreaAnimationStarted(animationTimeline)
         local USE_PIN_TEXTURE = false

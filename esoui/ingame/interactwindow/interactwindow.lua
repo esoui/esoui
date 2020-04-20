@@ -13,19 +13,39 @@ end
 
 function ZO_InteractionManager:Initialize()
     ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("ARRESTED")
+
+    EVENT_MANAGER:RegisterForEvent("InteractWindow", EVENT_INTERACTION_ENDED, function(_, ...) self:OnInteractionEnded(...) end)
 end
 
 function ZO_InteractionManager:OnBeginInteraction(interaction)
-    if(self.currentInteraction and (interaction.type ~= self.currentInteraction.type) and self.currentInteraction.End) then
-        self.currentInteraction.End()
+    -- Note: The original intention behind OnEndBecauseAnotherInteractIsBeginning (previously called End) is mostly lost to history at this point
+    -- but it doesn't do what it would seem like, hence the very explicit rename.  For now we don't want to simply remove it in case something
+    -- was actually depending on it somehow, but for the most part no new systems should really use it because in theory it likely will never actually get called
+    -- If you're looking for a callback that happens when your systems interaction ends for reasons outside of its control, see self.currentInteraction.OnInteractionCanceled
+    if(self.currentInteraction and (interaction.type ~= self.currentInteraction.type) and self.currentInteraction.OnEndBecauseAnotherInteractIsBeginning) then
+        -- TODO: Look into if this code can be removed entirely.  For now this will help us determine if this ever actually gets called.
+        internalassert(false, "OnEndBecauseAnotherInteractIsBeginning is being called.")
+        self.currentInteraction.OnEndBecauseAnotherInteractIsBeginning()
     end
     self.currentInteraction = interaction
 end
 
-function ZO_InteractionManager:OnEndInteraction(interaction)
+function ZO_InteractionManager:EndInteraction(interaction)
     if(self.currentInteraction == interaction) then
         self:TerminateClientInteraction(interaction)
         self.currentInteraction = nil
+    end
+end
+
+function ZO_InteractionManager:OnInteractionEnded(interactType, cancelContext)
+    -- The intention here is to account for situations where the interaction got ended in code but Lua hadn't been aware of it
+    -- For example, if combat kicked the player out of an interact
+    -- For now this will only fire the callback if the interact that was cancelled was the same interact that this manager thought should be running
+    -- This is an edge case, the standard flow should have the owning scene starting and ending explicitly wherever possible
+    if self.currentInteraction and self.currentInteraction.interactTypes and self.currentInteraction.OnInteractionCanceled then
+        if ZO_IsElementInNumericallyIndexedTable(self.currentInteraction.interactTypes, interactType) then
+            self.currentInteraction.OnInteractionCanceled(cancelContext)
+        end
     end
 end
 

@@ -75,7 +75,6 @@ function ChampionPerks:Initialize(control)
     self.initialized = false
     self.dirty = false
     self.isChampionSystemNew = false
-    SetChampionMusicActive(false)
     SetShouldRenderWorld(true)
     self:SetupCustomConfirmDialog()
 
@@ -144,10 +143,8 @@ function ChampionPerks:Initialize(control)
             self.lastHealthValue = GetUnitPower("player", POWERTYPE_HEALTH)
             self.control:RegisterForEvent(EVENT_POWER_UPDATE, function(...) self:OnPowerUpdate(...) end)
         elseif newState == SCENE_SHOWN then
-            SetChampionMusicActive(true)
             TriggerTutorial(TUTORIAL_TRIGGER_CHAMPION_UI_SHOWN)
         elseif newState == SCENE_HIDING then
-            SetChampionMusicActive(false)
             SetShouldRenderWorld(true)
         elseif newState == SCENE_HIDDEN then
             if self:HasUnsavedChanges() and AreChampionPointsActive() then

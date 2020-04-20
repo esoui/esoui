@@ -110,7 +110,7 @@ function ZO_PlatformOpenApprovedURL(approvedUrlType, linkText, externalApplicati
 end
 
 do
-    internalassert(UI_PLATFORM_MAX_VALUE == 3, "do these functions still do what they say they do?")
+    internalassert(UI_PLATFORM_MAX_VALUE == 4, "Do these functions still do what they say they do?")
     function ZO_IsPCOrHeronUI()
         return not IsConsoleUI()
     end

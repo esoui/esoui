@@ -12,11 +12,12 @@ function WorldMapInfo:Initialize(control)
 end
 
 function WorldMapInfo:InitializeTabs()
-    local function CreateButtonData(normal, pressed, highlight)
+    local function CreateButtonData(normal, pressed, highlight, visibleFunction)
         return {
             normal = normal,
             pressed = pressed,
             highlight = highlight,
+            visible = visibleFunction,
         }
     end
     
@@ -27,7 +28,7 @@ function WorldMapInfo:InitializeTabs()
     local questButtonData = CreateButtonData("EsoUI/Art/WorldMap/map_indexIcon_quests_up.dds",
                                              "EsoUI/Art/WorldMap/map_indexIcon_quests_down.dds",
                                              "EsoUI/Art/WorldMap/map_indexIcon_quests_over.dds")
-    self.modeBar:Add(SI_MAP_INFO_MODE_QUESTS, { WORLD_MAP_QUESTS_FRAGMENT }, questButtonData)  
+    self.modeBar:Add(SI_MAP_INFO_MODE_QUESTS, { WORLD_MAP_QUESTS_FRAGMENT }, questButtonData)
 
     --Key Button
     local keyButtonData = CreateButtonData("EsoUI/Art/WorldMap/map_indexIcon_key_up.dds",
@@ -47,16 +48,22 @@ function WorldMapInfo:InitializeTabs()
                                                 "EsoUI/Art/WorldMap/map_indexIcon_locations_over.dds")
     self.modeBar:Add(SI_MAP_INFO_MODE_LOCATIONS, { WORLD_MAP_LOCATIONS_FRAGMENT }, locationButtonData)
 
-	--Houses Button
+    --Houses Button
     local housesButtonData = CreateButtonData("EsoUI/Art/WorldMap/map_indexIcon_housing_up.dds",
                                                 "EsoUI/Art/WorldMap/map_indexIcon_housing_down.dds",
                                                 "EsoUI/Art/WorldMap/map_indexIcon_housing_over.dds")
     self.modeBar:Add(SI_MAP_INFO_MODE_HOUSES, { WORLD_MAP_HOUSES:GetFragment() }, housesButtonData)
 
+    --Antiquities Button
+    local antiquitiesButtonData = CreateButtonData("EsoUI/Art/Journal/journal_tabIcon_antiquities_up.dds",
+                                                "EsoUI/Art/Journal/journal_tabIcon_antiquities_down.dds",
+                                                "EsoUI/Art/Journal/journal_tabIcon_antiquities_over.dds",
+                                                AreAntiquitySkillLinesDiscovered)
+    self.modeBar:Add(SI_MAP_INFO_MODE_ANTIQUITIES, { WORLD_MAP_ANTIQUITIES_KEYBOARD:GetFragment() }, antiquitiesButtonData)
 end
 
 function WorldMapInfo:SelectTab(name)
-    if(WORLD_MAP_INFO_FRAGMENT:IsShowing()) then
+    if WORLD_MAP_INFO_FRAGMENT:IsShowing() then
         self.modeBar:SelectFragment(name)
     else
         self.modeBar:SetStartingFragment(name)
@@ -64,6 +71,7 @@ function WorldMapInfo:SelectTab(name)
 end
 
 function WorldMapInfo:OnShowing()
+    self.modeBar:UpdateButtons()
     self.modeBar:ShowLastFragment()
 end
 

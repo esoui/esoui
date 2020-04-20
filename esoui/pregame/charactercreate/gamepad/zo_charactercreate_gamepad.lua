@@ -330,124 +330,129 @@ function ZO_CharacterCreate_Gamepad:InitializeSkipTutorialDialog()
     })
 end
 
-    function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
-        if self.isCreating then
-            return nil  -- No keybind while creating
-        end
+function ZO_CharacterCreate_Gamepad:GenerateKeybindingDescriptor()
+    if self.isCreating then
+        return nil  -- No keybind while creating
+    end
 
-        local keybindStripDescriptor =
+    local keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            {
-                name = function()
-                    return (self.focusControl and self.focusControl.primaryButtonName) or GetString(SI_GAMEPAD_SELECT_OPTION)
-                end,
-                keybind = "UI_SHORTCUT_PRIMARY",
-                ethereal = not (self.focusControl and self.focusControl.showKeybind),
-
-                callback = function()
-                    ZO_CharacterCreate_Gamepad_OnPrimaryButtonPressed()
-                end,
-            },
-            {
-                name = GetString(SI_CREATE_CHARACTER_GAMEPAD_FINISH),
-                keybind = "UI_SHORTCUT_TERTIARY",
-
-                callback = function()
-                    if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
-                        PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
-                        ZO_CharacterCreate_Gamepad_ShowFinishScreen()
-                    else
-                        self:SaveCharacterChanges()
-                    end
-                end,
-            },
-            {
-                name = GetString(SI_CREATE_CHARACTER_GAMEPAD_RANDOMIZE),
-                keybind = "UI_SHORTCUT_SECONDARY",
-
-                callback = function()
-                    ZO_CharacterCreate_Gamepad_RandomizeAppearance()
-                end,
-                sound = SOUNDS.CC_RANDOMIZE,
-            },
-            {
-                name = GetString(SI_CREATE_CHARACTER_GAMEPAD_USE_TEMPLATE),
-                keybind = "UI_SHORTCUT_LEFT_TRIGGER",
-
-                callback = function()
-                    PlaySound(SOUNDS.CC_GAMEPAD_CHARACTER_CLICK)
-                    ZO_Dialogs_ShowGamepadDialog("CHARACTER_CREATE_TEMPLATE_SELECT")
-                end,
-
-                visible = function()
-                    local shouldShow = false
-                    if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
-                        if GetTemplateStatus() then
-                            local templates = self.characterData:GetTemplateInfo()
-                            shouldShow = templates and #templates > 0
-                        end
-                    end
-                    return shouldShow
-                end,
-            }
-        }
-
-        if self.focusControl and self.focusControl.CanLock then
-            if self.focusControl.CanLock() then
-                local keybindName
-                local callbackSound
-                if self.focusControl:IsLocked() then
-                    keybindName = GetString(SI_CREATE_CHARACTER_GAMEPAD_UNLOCK_VALUE)
-                    callbackSound = SOUNDS.CC_UNLOCK_VALUE
-                else
-                    keybindName = GetString(SI_CREATE_CHARACTER_GAMEPAD_LOCK_VALUE)
-                    callbackSound = SOUNDS.CC_LOCK_VALUE
-                end
-
-                keybindStripDescriptor[#keybindStripDescriptor + 1] =
-                    {
-                        name = keybindName,
-                        keybind = "UI_SHORTCUT_RIGHT_STICK",
-
-                        callback = function()
-                            self.focusControl:ToggleLocked()
-                            PlaySound(callbackSound)
-                            self:RefreshKeybindStrip()
-                        end,
-                    }
-            end
-        end
-
-        local gearPreviews
-        if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
-            gearPreviews = CHARACTER_CREATE_PREVIEW_GEAR_INFO
-        else
-            gearPreviews = CHARACTER_EDIT_PREVIEW_GEAR_INFO
-        end
-
-        local nextGear = (self.currentGearPreviewIndex % #gearPreviews) + 1
-        local name = gearPreviews[nextGear].name
-
-        keybindStripDescriptor[#keybindStripDescriptor + 1] =
-        {
-            name = name,
-            keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+            name = function()
+                return (self.focusControl and self.focusControl.primaryButtonName) or GetString(SI_GAMEPAD_SELECT_OPTION)
+            end,
+            keybind = "UI_SHORTCUT_PRIMARY",
+            ethereal = not (self.focusControl and self.focusControl.showKeybind),
 
             callback = function()
-                self.currentGearPreviewIndex = (self.currentGearPreviewIndex % #gearPreviews) + 1
+                ZO_CharacterCreate_Gamepad_OnPrimaryButtonPressed()
+            end,
+        },
+        {
+            name = GetString(SI_CREATE_CHARACTER_GAMEPAD_FINISH),
+            keybind = "UI_SHORTCUT_TERTIARY",
 
-                gearPreviews[self.currentGearPreviewIndex].OnSelectedCallback()
-                PlaySound(SOUNDS.CC_PREVIEW_GEAR)
+            callback = function()
+                if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
+                    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+                    ZO_CharacterCreate_Gamepad_ShowFinishScreen()
+                else
+                    self:SaveCharacterChanges()
+                end
+            end,
+        },
+        {
+            name = GetString(SI_CREATE_CHARACTER_GAMEPAD_RANDOMIZE),
+            keybind = "UI_SHORTCUT_SECONDARY",
 
-                self:RefreshKeybindStrip()
+            callback = function()
+                ZO_CharacterCreate_Gamepad_RandomizeAppearance()
+            end,
+
+            visible = function()
+                return self:GetCharacterCreateMode() ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+            end,
+
+            sound = SOUNDS.CC_RANDOMIZE,
+        },
+        {
+            name = GetString(SI_CREATE_CHARACTER_GAMEPAD_USE_TEMPLATE),
+            keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+
+            callback = function()
+                PlaySound(SOUNDS.CC_GAMEPAD_CHARACTER_CLICK)
+                ZO_Dialogs_ShowGamepadDialog("CHARACTER_CREATE_TEMPLATE_SELECT")
+            end,
+
+            visible = function()
+                local shouldShow = false
+                if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
+                    if GetTemplateStatus() then
+                        local templates = self.characterData:GetTemplateInfo()
+                        shouldShow = templates and #templates > 0
+                    end
+                end
+                return shouldShow
             end,
         }
+    }
+
+    if self.focusControl and self.focusControl.CanLock then
+        if self.focusControl.CanLock() then
+            local keybindName
+            local callbackSound
+            if self.focusControl:IsLocked() then
+                keybindName = GetString(SI_CREATE_CHARACTER_GAMEPAD_UNLOCK_VALUE)
+                callbackSound = SOUNDS.CC_UNLOCK_VALUE
+            else
+                keybindName = GetString(SI_CREATE_CHARACTER_GAMEPAD_LOCK_VALUE)
+                callbackSound = SOUNDS.CC_LOCK_VALUE
+            end
+
+            keybindStripDescriptor[#keybindStripDescriptor + 1] =
+                {
+                    name = keybindName,
+                    keybind = "UI_SHORTCUT_RIGHT_STICK",
+
+                    callback = function()
+                        self.focusControl:ToggleLocked()
+                        PlaySound(callbackSound)
+                        self:RefreshKeybindStrip()
+                    end,
+                }
+        end
+    end
+
+    local gearPreviews
+    if ZO_CHARACTERCREATE_MANAGER:GetCharacterMode() == CHARACTER_MODE_CREATION then
+        gearPreviews = CHARACTER_CREATE_PREVIEW_GEAR_INFO
+    else
+        gearPreviews = CHARACTER_EDIT_PREVIEW_GEAR_INFO
+    end
+
+    local nextGear = (self.currentGearPreviewIndex % #gearPreviews) + 1
+    local name = gearPreviews[nextGear].name
+
+    keybindStripDescriptor[#keybindStripDescriptor + 1] =
+    {
+        name = name,
+        keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+
+        callback = function()
+            self.currentGearPreviewIndex = (self.currentGearPreviewIndex % #gearPreviews) + 1
+
+            gearPreviews[self.currentGearPreviewIndex].OnSelectedCallback()
+            PlaySound(SOUNDS.CC_PREVIEW_GEAR)
+
+            self:RefreshKeybindStrip()
+        end,
+    }
 
     local function LeaveCharacterCreate()
         if GetNumCharacters() > 0 then
             PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
-            GAMEPAD_CHARACTER_CREATE_MANAGER:ExitToState("CharacterSelect")
+            self:ExitToState("CharacterSelect")
         else
             -- We have no characters, so we cannot show character select. Go back to login
             ZO_Disconnect()
@@ -455,8 +460,8 @@ end
     end
     keybindStripDescriptor[#keybindStripDescriptor + 1] = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(LeaveCharacterCreate)
 
-        return keybindStripDescriptor
-    end
+    return keybindStripDescriptor
+end
 
 -- Can't simply return (currentStrip ~= newStrip) because ZoKeybindStrip stores additional 
 -- variables on the descriptor (such as currentStrip.handledDown). This causes an altered
@@ -671,9 +676,7 @@ function ZO_CharacterCreate_Gamepad:InitializeRaceSelectors()
 
     local activeButtonControls = {}
     for i, race in ipairs(races) do
-        if race.gamepadPosition == GAMEPAD_SELECTOR_IGNORE_POSITION then
-            --nothing for now
-        else
+        if race.gamepadPosition ~= GAMEPAD_SELECTOR_IGNORE_POSITION then
             local raceButton = layoutTable[race.gamepadPosition]
             -- Special case for 4 (3+imperial) buttons: we want the last button to be horizontally centered, to match how the tenth button is horizontally centered when 10 (9+imperial) buttons are visible
             -- to do that we'll just use the already centered column 2 button
@@ -698,15 +701,15 @@ function ZO_CharacterCreate_Gamepad:SetValidRace()
 
     local currentRace = self.characterData:GetRaceForRaceDef(currentRaceId)
     if currentRace then
-        if currentRace.alliance == 0 or currentRace.alliance == currentAlliance or CanPlayAnyRaceAsAnyAlliance() then
+        if currentRace.alliance == ALLIANCE_NONE or currentRace.alliance == currentAlliance or CanPlayAnyRaceAsAnyAlliance() then
             return
         end
     end
 
     local races = self.characterData:GetRaceInfo()
     for i, race in ipairs(races) do
-        if race.alliance == 0 or race.alliance == currentAlliance or CanPlayAnyRaceAsAnyAlliance() then
-            GAMEPAD_CHARACTER_CREATE_MANAGER:SetRace(race.race, "preventAllianceChange")
+        if race.alliance == ALLIANCE_NONE or race.alliance == currentAlliance or CanPlayAnyRaceAsAnyAlliance() then
+            self:SetRace(race.race, "preventAllianceChange")
             return
         end
     end
@@ -918,6 +921,9 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
     -- (where the triangle data needs to live on its own rather than being tied to the unit)
     self.physiqueTriangle:Update()
     self.faceTriangle:Update()
+
+    -- Update Gender Text
+    self:UpdateGenderSpecificText()
 end
 
 function ZO_CharacterCreate_Gamepad:OnGenerateRandomCharacter()
@@ -1044,7 +1050,7 @@ function ZO_CharacterCreate_Gamepad:SetTemplate(templateId)
     self.characterData:UpdateAllianceSelectability()
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateAllianceSelectorsForTemplate(...) end, self.characterData:GetAllianceInfo(), templateData, self.allianceRadioGroup, validAlliances)
 
-    if templateData.gender ~= 0 then
+    if templateData.gender ~= GENDER_NEUTER then
         self.genderSlider:ToggleLocked()
     end
 
@@ -1057,10 +1063,10 @@ function ZO_CharacterCreate_Gamepad:SetTemplate(templateId)
 
     -- Pick an alliance 
     local alliance = templateData.alliance
-    if alliance == 0 then
+    if alliance == ALLIANCE_NONE then
         -- (never random unless a race without a fixed alliance is picked)
         alliance = self.characterData:GetRaceForRaceDef(CharacterCreateGetRace(characterMode)).alliance
-        if alliance == 0 then
+        if alliance == ALLIANCE_NONE then
             alliance = self.characterData:PickRandomAlliance(validAlliances)
         end
     end
@@ -1068,14 +1074,14 @@ function ZO_CharacterCreate_Gamepad:SetTemplate(templateId)
 
     -- Pick a class
     if templateData.class ~= 0 then
-        CharacterCreateSetClass(templateData.class)
+        self:SetClass(templateData.class)
     else
         self:PickRandomSelectableClass()
     end
     
     -- Pick a gender
-    if templateData.gender ~= 0 then
-        CharacterCreateSetGender(templateData.gender)
+    if templateData.gender ~= GENDER_NEUTER then
+        self:SetGender(templateData.gender)
     else
         self:PickRandomGender()
     end
@@ -1275,6 +1281,7 @@ function ZO_CharacterCreate_Gamepad:InitializeForEditChanges(characterInfo, mode
     self:SetCharacterCreateMode(mode)
 
     local raceTemplate = characterInfo
+    local allianceTemplate = characterInfo
     local customControls = self.customBucketControls
     if mode == CHARACTER_CREATE_MODE_EDIT_RACE then
         raceTemplate =  {
@@ -1283,19 +1290,35 @@ function ZO_CharacterCreate_Gamepad:InitializeForEditChanges(characterInfo, mode
                         }
         customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = false
         customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = true
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS].shouldAdd = false
+        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = true
     elseif mode == CHARACTER_CREATE_MODE_EDIT_APPEARANCE then
         customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = false
         customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = false
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS].shouldAdd = false
+        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = true
+    elseif mode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
+        allianceTemplate = {
+            alliance = ALLIANCE_NONE,
+        }
+        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = true
+        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = false
+        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = false
     end
+
+    -- none of the edit modes allow for changing class
+    customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS].shouldAdd = false
 
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateRaceSelectorsForTemplate(...) end, self.characterData:GetRaceInfo(), raceTemplate, self.raceRadioGroup)
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateClassSelectorsForTemplate(...) end, self.characterData:GetClassInfo(), characterInfo, self.classRadioGroup)
-
-    self:UpdateSelectorsForTemplate(function(...) return self:UpdateAllianceSelectorsForTemplate(...) end, self.characterData:GetAllianceInfo(), characterInfo, self.allianceRadioGroup)
+    self:UpdateSelectorsForTemplate(function(...) return self:UpdateAllianceSelectorsForTemplate(...) end, self.characterData:GetAllianceInfo(), allianceTemplate, self.allianceRadioGroup)
 
     self:Reset()
+
+    local appearanceControlsEnabled = mode ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_BODY, appearanceControlsEnabled)
+    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_BODY_SHAPE, appearanceControlsEnabled)
+    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_HEAD_TYPE, appearanceControlsEnabled)
+    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_FEATURES, appearanceControlsEnabled)
+    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_FACE, appearanceControlsEnabled)
 
     -- Make the controls match what you picked...
     self:UpdateRaceControl()
@@ -1311,6 +1334,10 @@ function ZO_CharacterCreate_Gamepad:InitializeForRaceChange(characterInfo)
     self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_RACE)
 end
 
+function ZO_CharacterCreate_Gamepad:InitializeForAllianceChange(characterInfo)
+    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_ALLIANCE)
+end
+
 function ZO_CharacterCreate_Gamepad:InitializeForCharacterCreate()
     self:SetCharacterCreateMode(CHARACTER_CREATE_MODE_CREATE)
 
@@ -1318,6 +1345,7 @@ function ZO_CharacterCreate_Gamepad:InitializeForCharacterCreate()
     customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = true
     customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = true
     customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS].shouldAdd = true
+    customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = true
 
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local templateData = self.characterData:GetTemplate(CharacterCreateGetTemplate(characterMode))
@@ -1386,7 +1414,7 @@ do
         end,
 
         [CHARACTER_CREATE_SELECTOR_CLASS] = function(button)
-            CharacterCreateSetClass(button.defId)
+            GAMEPAD_CHARACTER_CREATE_MANAGER:SetClass(button.defId)
             GAMEPAD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
         end,
 

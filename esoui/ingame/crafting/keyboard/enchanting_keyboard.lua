@@ -22,7 +22,7 @@ function ZO_Enchanting:InitializeEnchantingScenes()
     local ENCHANTING_STATION_INTERACTION =
     {
         type = "Enchanting Station",
-        End = function()
+        OnEndBecauseAnotherInteractIsBeginning = function()
             SCENE_MANAGER:Hide(self.mainSceneName)
         end,
         interactTypes = { INTERACTION_CRAFT },

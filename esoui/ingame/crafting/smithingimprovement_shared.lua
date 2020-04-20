@@ -39,7 +39,8 @@ function ZO_SharedSmithingImprovement:InitializeBoosterRows()
         return row
     end
 
-    self.rows = {
+    self.rows =
+    {
         InitializeRow(self.boosterContainer:GetNamedChild("NormalToFine"), "Normal", "Fine"),
         InitializeRow(self.boosterContainer:GetNamedChild("FineToSuperior"), "Fine", "Superior"),
         InitializeRow(self.boosterContainer:GetNamedChild("SuperiorToEpic"), "Superior", "Epic"),
@@ -50,25 +51,28 @@ function ZO_SharedSmithingImprovement:InitializeBoosterRows()
         row.index = i
     end
 
-    local function InitializeQualityLabel(label, quality)
-        label:SetText(GetString("SI_ITEMQUALITY", quality))
-        label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+    local function InitializeQualityLabel(label, displayQuality)
+        label:SetText(GetString("SI_ITEMQUALITY", displayQuality))
+        label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
         label.fadeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("SmithingImprovementBoosterFade", label)
     end
 
-    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Normal"), ITEM_QUALITY_NORMAL)
-    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Fine"), ITEM_QUALITY_MAGIC)
-    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Superior"), ITEM_QUALITY_ARCANE)
-    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Epic"), ITEM_QUALITY_ARTIFACT)
-    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Legendary"), ITEM_QUALITY_LEGENDARY)
+    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Normal"), ITEM_DISPLAY_QUALITY_NORMAL)
+    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Fine"), ITEM_DISPLAY_QUALITY_MAGIC)
+    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Superior"), ITEM_DISPLAY_QUALITY_ARCANE)
+    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Epic"), ITEM_DISPLAY_QUALITY_ARTIFACT)
+    InitializeQualityLabel(self.boosterContainer:GetNamedChild("Legendary"), ITEM_DISPLAY_QUALITY_LEGENDARY)
 end
 
 function ZO_SharedSmithingImprovement:RefreshBoosterRows()
     for i, row in ipairs(self.rows) do
-        local reagentName, icon, stack, _, _, _, _, quality = GetSmithingImprovementItemInfo(GetCraftingInteractionType(), i)
+        local reagentName, icon, stack, _, _, _, _, functionalQuality, displayQuality = GetSmithingImprovementItemInfo(GetCraftingInteractionType(), i)
         row.reagentName = reagentName
         row.currentStack = stack
-        row.quality = quality
+        row.functionalQuality = functionalQuality
+        row.displayQuality = displayQuality
+        -- row.quality is depricated, included here for addon backwards compatibility
+        row.quality = displayQuality
         row.icon = icon
 
         row.stackLabel:SetText(stack)
@@ -122,7 +126,8 @@ function ZO_SharedSmithingImprovement:OnSlotChanged()
             self.spinner:SetValue(maxBoosters)
             self.spinner:SetSoftMax(row.currentStack)
 
-            self.currentQuality = row.quality - 1 -- need the "from" quality
+            -- row.quality is depricated, included here for addon backwards compatibility
+            self.currentQuality = (row.functionalQuality and row.functionalQuality - 1) or (row.quality and row.quality -1) -- need the "from" quality
 
             self.boosterSlot.craftingType = GetCraftingInteractionType()
             self.boosterSlot.index = row.index
@@ -152,9 +157,11 @@ function ZO_SharedSmithingImprovement:OnSlotChanged()
     end
 end
 
-function ZO_SharedSmithingImprovement:GetBoosterRowForQuality(quality)
+function ZO_SharedSmithingImprovement:GetBoosterRowForQuality(functionalQuality)
     for i, row in ipairs(self.rows) do
-        if row.quality - 1 == quality then
+        -- row.quality is depricated, included here for addon backwards compatibility
+        local rowFunctionalQuality = row.functionalQuality or row.quality
+        if rowFunctionalQuality - 1 == functionalQuality then
             return row
         end
     end
@@ -187,8 +194,8 @@ end
 
 function ZO_SharedSmithingImprovement:GetRowForSelection()
     if self.improvementSlot:HasItem() then
-        local quality = select(8, GetItemInfo(self.improvementSlot:GetBagAndSlot()))
-        return self:GetBoosterRowForQuality(quality)
+        local functionalQuality = GetItemFunctionalQuality(self.improvementSlot:GetBagAndSlot())
+        return self:GetBoosterRowForQuality(functionalQuality)
     end
 end
 
@@ -337,8 +344,8 @@ function ZO_SmithingImprovementSlot:Refresh()
             self.nameLabel:SetHidden(false)
             self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(self:GetBagAndSlot())))
 
-            local quality = select(8, GetItemInfo(self:GetBagAndSlot()))
-            self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+            local displayQuality = GetItemDisplayQuality(self:GetBagAndSlot())
+            self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
         else
             self.nameLabel:SetHidden(true)
         end

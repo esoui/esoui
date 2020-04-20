@@ -855,40 +855,25 @@ function ZO_ItemPreview_Shared:ToggleInteractionCameraPreview(framingTargetFragm
     self:SetInteractionCameraPreviewEnabled(not self:IsInteractionCameraPreviewEnabled(), framingTargetFragment, framingFragment, previewOptionsFragment)
 end
 
-do
-    function ZO_ItemPreview_Shared:RemoveFragmentImmediately(fragment)
-        if fragment:GetHideOnSceneHidden() then
-            --The fragment may already be in the hiding state waiting for scene hidden when this happens. So we enable show/hide time updates so it can re-try hiding now that it doesn't have to wait on scene hidden.
-            fragment:SetAllowShowHideTimeUpdates(true)
-            fragment:SetHideOnSceneHidden(false)
-            SCENE_MANAGER:RemoveFragment(fragment)
-            fragment:SetHideOnSceneHidden(true)
-            fragment:SetAllowShowHideTimeUpdates(false)
+function ZO_ItemPreview_Shared:SetInteractionCameraPreviewEnabled(enabled, framingTargetFragment, framingFragment, previewOptionsFragment)
+    if enabled ~= self:IsInteractionCameraPreviewEnabled() then
+        if enabled then
+            SetInteractionUsingInteractCamera(false)
+            SCENE_MANAGER:AddFragment(framingTargetFragment)
+            SCENE_MANAGER:AddFragment(framingFragment)
+            SCENE_MANAGER:AddFragment(previewOptionsFragment)
+            SCENE_MANAGER:AddFragment(self.fragment)
         else
-            SCENE_MANAGER:RemoveFragment(fragment)
-        end
-    end
-
-    function ZO_ItemPreview_Shared:SetInteractionCameraPreviewEnabled(enabled, framingTargetFragment, framingFragment, previewOptionsFragment)
-        if enabled ~= self:IsInteractionCameraPreviewEnabled() then
-            if enabled then
-                SetInteractionUsingInteractCamera(false)
-                SCENE_MANAGER:AddFragment(framingTargetFragment)
-                SCENE_MANAGER:AddFragment(framingFragment)
-                SCENE_MANAGER:AddFragment(previewOptionsFragment)
-                SCENE_MANAGER:AddFragment(self.fragment)
-            else
-                --We want the preview to end instantly in the toggle case but on scene hidden otherwise. If it ends instantly when the scene hides
-                --there will be a 200ms window where it tries to go back into the interact camera then exits the scene and goes into the game camera.
-                --The two fragments that are important for continuing the preview until the scene is hidden are the preview fragment (self.fragment)
-                --and the framing fragment.
-                self:RemoveFragmentImmediately(self.fragment)
-                SCENE_MANAGER:RemoveFragment(previewOptionsFragment)
-                self:RemoveFragmentImmediately(framingFragment)
-                SCENE_MANAGER:RemoveFragment(framingTargetFragment)
+            --We want the preview to end instantly in the toggle case but on scene hidden otherwise. If it ends instantly when the scene hides
+            --there will be a 200ms window where it tries to go back into the interact camera then exits the scene and goes into the game camera.
+            --The two fragments that are important for continuing the preview until the scene is hidden are the preview fragment (self.fragment)
+            --and the framing fragment.
+            SCENE_MANAGER:RemoveFragmentImmediately(self.fragment)
+            SCENE_MANAGER:RemoveFragment(previewOptionsFragment)
+            SCENE_MANAGER:RemoveFragmentImmediately(framingFragment)
+            SCENE_MANAGER:RemoveFragment(framingTargetFragment)
             
-                SetInteractionUsingInteractCamera(true)
-            end
+            SetInteractionUsingInteractCamera(true)
         end
     end
 end

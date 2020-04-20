@@ -45,9 +45,9 @@ local function SetupStackSplit(stackControl, inventorySlotControl)
     stackControl.stackSize = stackSize
     stackControl.slotControl = inventorySlotControl
 
-    local itemIcon, _, _, _, _, _, _, quality = GetItemInfo(bagId, slotIndex)
+    local itemIcon, _, _, _, _, _, _, _, displayQuality = GetItemInfo(bagId, slotIndex)
     local itemName = GetItemName(bagId, slotIndex)
-    local qualityColor = GetItemQualityColor(quality)
+    local qualityColor = GetItemQualityColor(displayQuality)
     GetControl(stackControl, "Prompt"):SetText(zo_strformat(SI_INVENTORY_SPLIT_STACK_PROMPT, qualityColor:Colorize(itemName)))
 
     local sourceSlot = GetControl(stackControl, "Source")

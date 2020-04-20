@@ -255,9 +255,9 @@ local READER_MEDIA = {
         PageWidth = 520,
         PageHeight = 725,
 
-        OpenSound = SOUNDS.NOTE_OPEN,
-        CloseSound = SOUNDS.NOTE_CLOSE,
-        TurnPageSound = SOUNDS.NOTE_PAGE_TURN,
+        OpenSound = SOUNDS.LORE_NOTE_OPEN,
+        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
+        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
     },
     [BOOK_MEDIUM_NOTE] = {
         NumPages = 1,
@@ -276,9 +276,9 @@ local READER_MEDIA = {
         PageWidth = 520,
         PageHeight = 725,
 
-        OpenSound = SOUNDS.NOTE_OPEN,
-        CloseSound = SOUNDS.NOTE_CLOSE,
-        TurnPageSound = SOUNDS.NOTE_PAGE_TURN,
+        OpenSound = SOUNDS.LORE_NOTE_OPEN,
+        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
+        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
     },
     [BOOK_MEDIUM_SCROLL] = {
         NumPages = 1,
@@ -298,9 +298,9 @@ local READER_MEDIA = {
         PageHeight = 650,
         FontAlpha = .65,
 
-        OpenSound = SOUNDS.NOTE_OPEN,
-        CloseSound = SOUNDS.NOTE_CLOSE,
-        TurnPageSound = SOUNDS.NOTE_PAGE_TURN,
+        OpenSound = SOUNDS.LORE_NOTE_OPEN,
+        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
+        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
     },
     [BOOK_MEDIUM_STONE_TABLET] = {
         NumPages = 1,

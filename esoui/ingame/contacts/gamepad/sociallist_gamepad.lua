@@ -154,8 +154,11 @@ function ZO_GamepadSocialListPanel:ShouldShowData(data)
 end
 
 function ZO_GamepadSocialListPanel:FilterScrollList()
-    ZO_ScrollList_Clear(self.list)
     local scrollData = ZO_ScrollList_GetDataList(self.list)
+    -- We are not using ZO_ScrollList_Clear because that will clear the selected index
+    -- and select the first thing in the list. Child classes need the selected index
+    -- so they can preserve their selection in the list.
+    ZO_ClearNumericallyIndexedTable(scrollData)
 
     local searchTerm = self:GetCurrentSearch()
     for _, data in ipairs(self.masterList) do

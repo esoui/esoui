@@ -92,7 +92,7 @@ function ZO_QuestJournal_Keyboard:SetIconTexture(iconControl, iconData, selected
 end
 
 function ZO_QuestJournal_Keyboard:InitializeQuestList()
-    self.navigationTree = ZO_Tree:New(self.control:GetNamedChild("NavigationContainerScrollChild"), 40, -10, 300)
+    self.navigationTree = ZO_Tree:New(self.control:GetNamedChild("NavigationContainerScrollChild"), 60, -10, 300)
 
     local openTexture = "EsoUI/Art/Buttons/tree_open_up.dds"
     local closedTexture = "EsoUI/Art/Buttons/tree_closed_up.dds"
@@ -107,6 +107,8 @@ function ZO_QuestJournal_Keyboard:InitializeQuestList()
         control.iconHighlight:SetTexture(open and overOpenTexture or overClosedTexture)
 
         control.text:SetSelected(open)
+
+        ZO_IconHeader_UpdateSize(control)
     end
 
     self.navigationTree:AddTemplate("ZO_QuestJournalHeader", TreeHeaderSetup, nil, nil, nil, 0)

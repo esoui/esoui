@@ -42,6 +42,14 @@ end
 function ZO_HousingFurniturePlacement_Gamepad:OnFurnitureTargetChanged(list, targetData, oldTargetData)
     ZO_HousingFurnitureList_Gamepad.OnFurnitureTargetChanged(self, list, targetData, oldTargetData)
 
+    if targetData.furnitureObject and targetData.furnitureObject.collectibleId then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(targetData.furnitureObject.collectibleId)
+        if collectibleData and collectibleData:IsBlacklisted() then
+            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, HOUSING_REQUEST_RESULT_BLOCKED_BY_BLACKLISTED_COLLECTIBLE)
+            return
+        end
+    end
+
     ZO_HousingFurnitureBrowser_Base.PreviewFurniture(targetData.furnitureObject)
     self:UpdateCurrentKeybinds()
 end

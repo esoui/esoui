@@ -12,13 +12,16 @@ function ZO_MarketAnnouncement_Keyboard:Initialize(control)
     -- This data must be setup before parent initialize is called
     self.actionTileControlByType =
     {
+        [ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT] = "ZO_EventAnnouncementTile_Keyboard_Control",
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Keyboard_Control",
         [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = "ZO_ZoneStoriesTile_Keyboard_Control",
     }
 
     local conditionFunction = function() return not IsInGamepadPreferredMode() end
     ZO_MarketAnnouncement_Shared.Initialize(self, control, conditionFunction)
-    self.carousel = ZO_MarketProductCarousel_Keyboard:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Keyboard_Control")
+
+    local AUTO_SCROLL = true
+    self.carousel = ZO_MarketProductCarousel_Keyboard:New(self.carouselControl, "ZO_MarketAnnouncementMarketProductTile_Keyboard_Control", AUTO_SCROLL)
     self.productDescriptionBackground = self.controlContainer:GetNamedChild("ProductBG")
 end
 
@@ -36,7 +39,7 @@ function ZO_MarketAnnouncement_Keyboard:CreateMarketProduct()
     return ZO_MarketAnnouncementMarketProduct_Keyboard:New()
 end
 
---global XML functions
+-- Global XML functions
 
 function ZO_MarketAnnouncement_Keyboard_OnInitialize(control)
     ZO_KEYBOARD_MARKET_ANNOUNCEMENT = ZO_MarketAnnouncement_Keyboard:New(control)

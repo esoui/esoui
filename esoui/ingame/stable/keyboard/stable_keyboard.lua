@@ -64,7 +64,7 @@ function ZO_Stable_Keyboard:InitializeEvents()
     local STABLES_INTERACTION =
     {
         type = "Stable",
-        End =   function()
+        OnEndBecauseAnotherInteractIsBeginning =   function()
                     if not self:IsPreferredScreen() then
                         self:SetHidden(true)
                     end

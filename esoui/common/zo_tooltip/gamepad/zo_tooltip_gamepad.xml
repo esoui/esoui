@@ -22,11 +22,16 @@
                 ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
             </OnInitialized>
         </Label>
-        
+
         <Control name="ZO_GamepadTooltipTemplate" virtual="true" hidden="true">
             <Controls>
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
+                        <Backdrop name="$(parent)Border" centerColor="00000000" tier="HIGH" layer="OVERLAY" excludeFromResizeToFitExtents="true" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="-30" offsetY="-45" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="30" offsetY="-5" />
+                        </Backdrop>
+
                         <Label name="$(parent)StatusLabelVisualLayer" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_CONTEXT_HIGHLIGHT" hidden="true">
                             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
                         </Label>

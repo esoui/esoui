@@ -17,12 +17,14 @@ EsoUI\PublicAllIngames\Currency\Gamepad\CurrencySelector_Gamepad.xml
 
 EsoUI\PublicAllIngames\Tooltip\Tooltip.lua
 EsoUI\PublicAllIngames\Tooltip\Tooltip.xml
+
+EsoUI\PublicAllIngames\Tooltip\AbilityTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\AchievementTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\ItemTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\CollectionsTooltips.lua
+EsoUI\PublicAllIngames\Tooltip\CurrencyTooltips.lua
+EsoUI\PublicAllIngames\Tooltip\ItemTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\MarketTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\RewardTooltips.lua
-EsoUI\PublicAllIngames\Tooltip\CurrencyTooltips.lua
 
 EsoUI\PublicAllIngames\Dialogs\PublicAllIngamesDialogs.xml
 
@@ -48,6 +50,7 @@ EsoUI\PublicAllIngames\TrialAccount\TrialAccount_IngameShared.lua
 
 EsoUI\PublicAllIngames\ChapterUpgrade\ChapterUpgrade_Manager.lua
 
+EsoUI\PublicAllIngames\Scenes\PublicAllIngameFragments.lua
 EsoUI\PublicAllIngames\Scenes\Keyboard\KeyboardPublicAllIngameFragmentGroups.lua
 EsoUI\PublicAllIngames\Scenes\Gamepad\GamepadPublicAllIngameFragmentGroups.lua
 
@@ -61,3 +64,6 @@ EsoUI\PublicAllIngames\Tile\Keyboard\DailyRewardsTile_Keyboard.lua
 EsoUI\PublicAllIngames\Tile\Keyboard\DailyRewardsTile_Keyboard.xml
 EsoUI\PublicAllIngames\Tile\Gamepad\DailyRewardsTile_Gamepad.lua
 EsoUI\PublicAllIngames\Tile\Gamepad\DailyRewardsTile_Gamepad.xml
+
+EsoUI\PublicAllIngames\Antiquities\AntiqtuityLoreDocument_Manager.lua
+EsoUI\PublicAllIngames\Antiquities\AntiqtuityLoreDocument_Manager.xml

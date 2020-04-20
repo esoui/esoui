@@ -34,8 +34,14 @@ function ZO_RewardData:SetChoiceIndex(choiceIndex)
     self.choiceIndex = choiceIndex
 end
 
-function ZO_RewardData:SetItemQuality(itemQuality)
-    self.quality = itemQuality
+function ZO_RewardData:SetItemFunctionalQuality(itemFunctionalQuality)
+    self.functionalQuality = itemFunctionalQuality
+end
+
+function ZO_RewardData:SetItemDisplayQuality(itemDisplayQuality)
+    self.displayQuality = itemDisplayQuality
+    -- self.quality is depricated, included here for addon backwards compatibility
+    self.quality = itemDisplayQuality
 end
 
 function ZO_RewardData:SetCurrencyInfo(currencyType)
@@ -76,8 +82,14 @@ function ZO_RewardData:GetCurrencyType()
     return self.currencyType
 end
 
-function ZO_RewardData:GetItemQuality()
-    return self.quality or ITEM_QUALITY_NORMAL
+function ZO_RewardData:GetItemFunctionalQuality()
+    -- self.quality is depricated, included here for addon backwards compatibility
+    return self.functionalQuality or self.quality or ITEM_QUALITY_NORMAL
+end
+
+function ZO_RewardData:GetItemDisplayQuality()
+    -- self.quality is depricated, included here for addon backwards compatibility
+    return self.displayQuality or self.quality or ITEM_DISPLAY_QUALITY_NORMAL
 end
 
 function ZO_RewardData:GetKeyboardIcon()
@@ -238,7 +250,8 @@ end
 function ZO_RewardsManager:GetItemEntryInfo(rewardId, quantity, parentChoice)
     local itemLink = GetItemRewardItemLink(rewardId, quantity)
     local displayName = GetItemLinkName(itemLink)
-    local itemQuality = GetItemLinkQuality(itemLink)
+    local itemFunctionalQuality = GetItemLinkFunctionalQuality(itemLink)
+    local itemDisplayQuality = GetItemLinkDisplayQuality(itemLink)
     local icon = GetItemLinkIcon(itemLink)
     local equipType = GetItemLinkEquipType(itemLink)
     local equipSlot = ZO_Character_GetEquipSlotForEquipType(equipType)
@@ -246,7 +259,8 @@ function ZO_RewardsManager:GetItemEntryInfo(rewardId, quantity, parentChoice)
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
     rewardData:SetFormattedName(zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName))
     rewardData:SetIcon(icon)
-    rewardData:SetItemQuality(itemQuality)
+    rewardData:SetItemFunctionalQuality(itemFunctionalQuality)
+    rewardData:SetItemDisplayQuality(itemDisplayQuality)
     rewardData:SetEquipSlot(equipSlot)
     rewardData:SetQuantity(quantity)
     rewardData:SetFormattedNameWithStack(zo_strformat(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, displayName, ZO_SELECTED_TEXT:Colorize(quantity)))
@@ -295,20 +309,47 @@ function ZO_RewardsManager:GetCollectibleEntryInfo(rewardId, parentChoice)
     assert(false) -- must be implemented on specific gui version of this manager
 end
 
+function ZO_RewardsManager:GetRewardContextualTypeString(rewardId, parentChoice)
+    local entryType = GetRewardType(rewardId)
+    -- COLLECTIBLE is implemented on specific gui version of this manager
+    if entryType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+        local currencyType = GetAddCurrencyRewardInfo(rewardId)
+        local IS_PLURAL = false
+        local IS_UPPER = false
+        return GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)
+    elseif entryType == REWARD_ENTRY_TYPE_ITEM then
+        local QUANTITY = 1
+        local itemLink = GetItemRewardItemLink(rewardId, QUANTITY)
+        local itemType, specializedItemType = GetItemLinkItemType(itemLink)
+        if itemType ~= ITEMTYPE_NONE then
+            local equipType = GetItemLinkEquipType(itemLink)
+            if equipType ~= EQUIP_TYPE_INVALID then
+                return GetString("SI_EQUIPTYPE", equipType)
+            else
+                return ZO_GetSpecializedItemTypeText(itemType, specializedItemType)
+            end
+        end
+    end
+
+    return nil
+end
+
 ------------------
 -- XML Functions
 ------------------
 
-function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo)
-    local rewardData = control.data
+function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY)
+    local rewardData = control.GetRewardData and control.GetRewardData() or control.data
     if rewardData then
         local rewardType = rewardData:GetRewardType()
         if rewardType and rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
             anchorPoint = anchorPoint or LEFT
             anchorPointRelativeTo = anchorPointRelativeTo or RIGHT
+            anchorOffsetX = anchorOffsetX or 0
+            anchorOffsetY = anchorOffsetY or 0
             local rewardId = rewardData:GetRewardId()
             local quantity = rewardData:GetQuantity()
-            InitializeTooltip(ItemTooltip, control, anchorPoint, 0, 0, anchorPointRelativeTo)
+            InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
             ItemTooltip:SetReward(rewardId, quantity)
             if rewardType == REWARD_ENTRY_TYPE_ITEM then
                 ItemTooltip:ShowComparativeTooltips()

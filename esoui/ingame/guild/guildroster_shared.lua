@@ -100,8 +100,8 @@ function ZO_GuildRosterManager:SetGuildId(guildId)
     self.guildName = GetGuildName(guildId)
     self.guildAlliance = GetGuildAlliance(guildId)
 
-    -- We must refresh everything before notify the listeners that the guildId has change so that the data
-    -- being accessed by the new guildId is that data for that guild.
+    -- We must refresh everything before notifing the listeners that the guildId has changed so that the data
+    -- being accessed by the new guildId is the data for that guild.
     self:RefreshAll()
     self:OnGuildIdChanged()
 end

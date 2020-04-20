@@ -1,0 +1,37 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_AntiquityDiggingHUDFade">
+            <Animations>
+                <AlphaAnimation duration="750" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingHUDFastFade">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Label name="ZO_AntiquityDiggingKeybindLabel" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontWinH2" virtual="true">
+            <OnInitialized name="DiggingKeybind">
+                ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
+            </OnInitialized>
+        </Label>
+
+        <TopLevelControl name="ZO_AntiquityDiggingTopLevel" mouseEnabled="true" layer="BACKGROUND" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_AntiquityDigging_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)KeybindContainer" alpha="0">
+                    <AnchorFill/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -193,13 +193,13 @@ function ZO_TradeWindow:HideAllSlots(who)
     end    
 end
 
-function ZO_TradeWindow:InitializeSlot(who, index, name, icon, quantity, quality)
+function ZO_TradeWindow:InitializeSlot(who, index, name, icon, quantity, displayQuality)
     local row = self.Columns[who][index]
     local slotControl = row.SlotControl
     row.Available = false
 
     row.NameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, name))
-    row.NameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+    row.NameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
 
     ZO_Inventory_SetupSlot(slotControl, quantity, icon)
     UpdateMouseoverForUpdatedSlot(slotControl)
@@ -262,11 +262,11 @@ end
 
 --Either player added an item to the trade
 function ZO_TradeWindow:OnTradeWindowItemAdded(eventCode, who, tradeSlot, itemSoundCategory)
-    local itemName, icon, quantity, quality = GetTradeItemInfo(who, tradeSlot)
-    self:InitializeSlot(who, tradeSlot, itemName, icon, quantity, quality)
+    local itemName, icon, quantity, displayQuality = GetTradeItemInfo(who, tradeSlot)
+    self:InitializeSlot(who, tradeSlot, itemName, icon, quantity, displayQuality)
 
     --if this on their side, show the slot now that it has an item
-    if(who == TRADE_THEM) then
+    if who == TRADE_THEM then
         local row = self.Columns[TRADE_THEM][tradeSlot]
         row.SlotControl:SetHidden(false)
     end

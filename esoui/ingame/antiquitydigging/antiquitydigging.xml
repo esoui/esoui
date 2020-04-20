@@ -1,0 +1,295 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_AntiquityDiggingHUDFade">
+            <Animations>
+                <AlphaAnimation duration="750" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingHUDFastFade">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingHUDFastPartialFade">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0.4" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingDigPowerGlowLoop" playbackType="PING_PONG" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="700" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingDigPowerRefundGlow">
+            <Animations>
+                <AlphaAnimation duration="100" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation delay="250" duration="750" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <!-- Durability Templates -->
+        <Control name="ZO_AntiquityDurabilityFrame_Keyboard_Template" inherits="ZO_TargetUnitFrame_Keyboard_Template" virtual="true">
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="54" />
+            <Controls>
+                <Control name="$(parent)TextArea">
+                    <Controls>
+                        <Label name="$(grandparent)Name" font="ZoFontWinH2" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_AntiquityDurabilityFrame_Gamepad_Template" inherits="ZO_TargetUnitFrame_Gamepad_Template" virtual="true">
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="53" />
+            <Controls>
+                <Control name="$(parent)TextArea">
+                    <Controls>
+                        <Label name="$(grandparent)Name" font="ZoFontGamepad27" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_AntiquityDurabilityFrame" inherits="ZO_TargetUnitFrame" virtual="true"/>
+        
+        <!-- Stability Templates -->
+        <Control name="ZO_AntiquityDiggingStabilityBar_Keyboard_Template" virtual="true">
+            <Anchor point="TOP" offsetY="12"/>
+            <Dimensions y="39" />
+            <Controls>
+                <Control name="$(parent)Health">
+                    <Anchor point="TOPLEFT" offsetX="-10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="10"/>
+                    <Controls>
+                        <StatusBar name="$(parent)BarLeft">
+                            <Dimensions y="23"/>
+                        </StatusBar>
+                        <StatusBar name="$(parent)BarRight">
+                            <Dimensions y="23"/>
+                        </StatusBar>
+                        <Label name="$(parent)Text" font="ZoFontWinH3"/>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)BracketLeft" textureFile="EsoUI/Art/BossBar/bossBar_bracket_left.dds">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="8"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)BracketRight" textureFile="EsoUI/Art/BossBar/bossBar_bracket_right.dds">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-8"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Compass/compass.dds">
+                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.609375" />
+                </Texture>
+
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Compass/compass.dds">
+                    <Dimensions x="18" y="39" />
+                    <TextureCoords left="0" right="0.28125" top="0" bottom="0.609375" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Compass/compass.dds">
+                    <Dimensions x="18" y="39" />
+                    <TextureCoords left="0.28125" right="0" top="0" bottom="0.609375" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingStabilityBar_Gamepad_Template" virtual="true">
+            <Anchor point="TOP" offsetY="19"/>
+            <Dimensions y="24" />
+            <Controls>
+                <Control name="$(parent)Health">
+                    <Anchor point="TOPLEFT" offsetX="-6"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="6"/>
+
+                    <Controls>
+                        <StatusBar name="$(parent)BarLeft">
+                            <Dimensions y="14"/>
+                        </StatusBar>
+                        <StatusBar name="$(parent)BarRight">
+                            <Dimensions y="14"/>
+                        </StatusBar>
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold18"/>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)BracketLeft" textureFile="EsoUI/Art/BossBar/Gamepad/gp_bossBar_bracket.dds">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="6" />
+                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)BracketRight" textureFile="EsoUI/Art/BossBar/Gamepad/gp_bossBar_bracket.dds">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-6" />
+                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.75" />
+                </Texture>
+
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                    <Dimensions x="14" y="24" />
+                    <TextureCoords left="0" right="0.4375" top="0" bottom="0.75" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Compass/Gamepad/gp_compass.dds">
+                    <Dimensions x="14" y="24" />
+                    <TextureCoords left="0.4375" right="0" top="0" bottom="0.75" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_AntiquityDiggingTopLevel" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_AntiquityDigging_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)KeybindContainer" alpha="0">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)MoreInfoKeybindButton" inherits="ZO_KeybindButton">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-40"/>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)MeterContainer" alpha="0">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)DigPower">
+                            <Anchor point="TOP" offsetY="145"/>
+                            <Dimensions x="200" y="64"/>
+                            <Controls>
+                                <Texture name="$(parent)Background">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Dimensions x="256" y="64"/>
+                                </Texture>
+
+                                <StatusBar name="$(parent)Bar1" inherits="ZO_ArrowStatusBar">
+                                    <Anchor point="TOPLEFT" offsetX="18" offsetY="8"/>
+                                    <Dimensions y="32"/>
+                                </StatusBar>
+
+                                <StatusBar name="$(parent)Bar2" inherits="ZO_ArrowStatusBar">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bar1" relativePoint="TOPRIGHT"/>
+                                    <Dimensions y="32"/>
+                                </StatusBar>
+
+                                <Texture name="$(parent)Frame" tier="MEDIUM">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Dimensions x="256" y="64"/>
+                                </Texture>
+
+                                <Texture name="$(parent)Glow" tier="MEDIUM" blendMode="ADD">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Dimensions x="256" y="64"/>
+                                </Texture>
+
+                                <Texture name="$(parent)IconFrame" tier="MEDIUM">
+                                    <Dimensions y="64"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Icon1" tier="LOW">
+                                            <Anchor point="TOPLEFT" offsetX="39" offsetY="14"/>
+                                            <Dimensions x="34" y="34"/>
+                                        </Texture>
+
+                                        <Texture name="$(parent)Icon2" tier="LOW">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon1" relativePoint="TOPRIGHT" offsetX="8"/>
+                                            <Dimensions x="34" y="34"/>
+                                        </Texture>
+                                    </Controls>
+                                </Texture>
+
+                                <Texture name="$(parent)RefundGlow" tier="MEDIUM" textureFile="EsoUI/Art/Antiquities/Digging_UBERGlow.dds" blendMode="ADD" alpha="0">
+                                    <Anchor point="TOPLEFT" offsetX="-4" offsetY="-8"/>
+                                    <Dimensions x="256" y="64"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Stability">
+                            <Dimensions x="500"/>
+                            <Controls>
+                                <Control name="$(parent)Health" inherits="ZO_PlayerAttributeContainer">
+                                    <Controls>
+                                        <StatusBar name="$(parent)BarLeft" inherits="ZO_PlayerAttributeStatusBar" barAlignment="REVERSE">
+                                            <Anchor point="LEFT" />
+                                            <Anchor point="RIGHT" relativePoint="CENTER" />
+                                            <Controls>
+                                                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" barAlignment="REVERSE" />
+                                            </Controls>
+                                        </StatusBar>
+                                        <StatusBar name="$(parent)BarRight" inherits="ZO_PlayerAttributeStatusBar">
+                                            <Anchor point="RIGHT" />
+                                            <Anchor point="LEFT" relativePoint="CENTER" />
+                                            <Controls>
+                                                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" />
+                                            </Controls>
+                                        </StatusBar>
+                                        <Label name="$(parent)Text" horizontalAlignment="CENTER">
+                                            <Anchor point="LEFT"/>
+                                            <Anchor point="RIGHT"/>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+
+                                <Texture name="$(parent)BracketLeft">
+                                    <Dimensions x="64" y="64"/>
+                                </Texture>
+
+                                <Texture name="$(parent)BracketRight">
+                                    <Dimensions x="64" y="64"/>
+                                </Texture>
+
+                                <Texture name="$(parent)Center">
+                                    <AnchorFill />
+                                    <Controls>
+                                        <Texture name="$(parent)TopMungeOverlay" inherits="ZO_RandomizedMunge" level="1">
+                                            <Dimensions y="4" />
+                                            <Anchor point="TOPLEFT" offsetY="2" />
+                                            <Anchor point="TOPRIGHT" offsetY="2" />
+                                        </Texture>
+                                        <Texture name="$(parent)BottomMungeOverlay" inherits="ZO_RandomizedMunge" level="1">
+                                            <Dimensions y="3" />
+                                            <Anchor point="BOTTOMLEFT" offsetY="-4" />
+                                            <Anchor point="BOTTOMRIGHT" offsetY="-4" />
+                                        </Texture>
+                                    </Controls>
+                                </Texture>
+
+                                <Texture name="$(parent)Left">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)BgCenter" relativePoint="LEFT" />
+                                </Texture>
+
+                                <Texture name="$(parent)Right">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BgCenter" relativePoint="RIGHT" />
+                                </Texture>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -446,7 +446,6 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     local function OnCampaignLockPending(_, campaignId, alliance, timeLeftS)
-        local campaignRulesetTypeString = GetString("SI_CAMPAIGNRULESETTYPE", GetCampaignRulesetType(GetCampaignRulesetId(campaignId)))
         local colorizedCampaignName = ZO_SELECTED_TEXT:Colorize(GetCampaignName(campaignId))
         local allianceString = ZO_SELECTED_TEXT:Colorize(ZO_CampaignBrowser_FormatPlatformAllianceIconAndName(alliance))
 
@@ -690,7 +689,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnTrackedZoneStoryActivityCompleted(zoneId, zoneCompletionType, activityId)
         self:RemoveFromIncomingQueue(INTERACT_TYPE_TRACK_ZONE_STORY)
 
-        local numCompletedActivities, totalActivities, numUnblockedActivities, _, progressText = ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType)
+        local numCompletedActivities, totalActivities, _, _, progressText = ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType)
 
         if numCompletedActivities == totalActivities and not CanZoneStoryContinueTrackingActivities(zoneId) then
             return
@@ -824,7 +823,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnDuelInviteReceived(nil, duelPartnerCharacterName, duelPartnerDisplayName)
         end
 
-        local inviterCharaterName, aMillisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()
+        local inviterCharaterName, millisecondsSinceRequest, inviterDisplayName = GetGroupInviteInfo()
 
         if inviterCharaterName ~= "" or inviterDisplayName ~= "" then
             OnGroupInviteReceived(nil, inviterCharaterName, inviterDisplayName)
@@ -933,6 +932,10 @@ end
 
 function ZO_PlayerToPlayer:SetHidden(hidden)
     SHARED_INFORMATION_AREA:SetHidden(self.container, hidden)
+end
+
+function ZO_PlayerToPlayer:IsHidden()
+    return SHARED_INFORMATION_AREA:IsHidden(self.container)
 end
 
 local INCOMING_MESSAGE_TEXT = {
@@ -1646,6 +1649,12 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.targetLabel:SetHidden(hideTargetLabel)
         self.promptKeybindButton1:SetHidden(self.promptKeybindButton1.shouldHide)
         self.promptKeybindButton2:SetHidden(self.promptKeybindButton2.shouldHide)
+
+        -- SetHidden isn't guaranteed to unhide us, so if something else is showing in the shared information
+        -- area, we shouldn't push our keybind layer
+        if self:IsHidden() then
+            self.shouldShowNotificationKeybindLayer = false
+        end
 
         local isNotificationLayerShown = IsActionLayerActiveByName(notificationsKeybindLayerName)
 

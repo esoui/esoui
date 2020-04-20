@@ -1181,13 +1181,21 @@ function ZO_SkillsDataManager:IsDataReady()
 end
 
 function ZO_SkillsDataManager:GetSkillTypeData(skillType)
-    return self.skillTypeObjectPool:GetExistingObject(skillType)
+    return self.skillTypeObjectPool:GetActiveObject(skillType)
 end
 
 function ZO_SkillsDataManager:GetSkillLineDataByIndices(skillType, skillLineIndex)
     local skillTypeData = self:GetSkillTypeData(skillType)
     if skillTypeData then
         return skillTypeData:GetSkillLineDataByIndex(skillLineIndex)
+    end
+end
+
+function ZO_SkillsDataManager:GetSkillLineDataById(skillLineId)
+    for _, skillLineData in self.skillLineObjectPool:ActiveObjectIterator() do
+        if skillLineData:GetId() == skillLineId then
+            return skillLineData
+        end
     end
 end
 

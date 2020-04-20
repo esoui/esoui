@@ -1,0 +1,306 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="AntiquityJournalTileHighlight_Keyboard">
+            <Animations>
+                <AlphaAnimation duration="180" startAlpha="0" endAlpha="0.7">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="AntiquityJournalIconHighlight_Keyboard">
+            <Animations>
+                <AlphaAnimation duration="180" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Label name="ZO_AntiquityLabel_Keyboard" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
+
+        <Label name="ZO_AntiquityTitleLabel_Keyboard" inherits="ZO_AntiquityLabel_Keyboard" font="ZoFontHeader2" virtual="true" />
+
+        <Label name="ZO_AntiquityLargeLabel_Keyboard" inherits="ZO_AntiquityLabel_Keyboard" font="ZoFontHeader2" modifyTextType="UPPERCASE" virtual="true" />
+
+        <Label name="ZO_AntiquityHeading_Keyboard" inherits="ZO_AntiquityLargeLabel_Keyboard" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+
+        <Texture name="ZO_AntiquityProgressIcon" virtual="true">
+            <Dimensions x="28" y="28"/>
+        </Texture>
+
+        <Control name="ZO_AntiquityLogBookProgress" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Label name="$(parent)Progress" inherits="ZO_AntiquityLargeLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOP" />
+                </Label>
+                <Label name="$(parent)LogBook" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ANTIQUITY_LOG_BOOK">
+                    <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <StatusBar name="ZO_AntiquityStatusBar" inherits="ZO_ArrowProgressBarWithBG" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_AntiquityLabel_Keyboard" font="ZoFontWinH4">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-4" />
+                </Label>
+            </Controls>
+        </StatusBar>
+
+        <Control name="ZO_AntiquityIcon" mouseEnabled="true" virtual="true">
+            <Dimensions x="52" y="52" />
+
+            <OnInitialized>
+                ZO_AntiquityIcon_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_AntiquityIcon_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_AntiquityIcon_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Backdrop" color="000000" level="4">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Icon" level="5">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                </Texture>
+
+                <Texture name="$(parent)HighlightTexture" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" layer="OVERLAY">
+                    <AnchorFill />
+                </Texture>
+
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS" level="7">
+                    <AnchorFill />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityFragmentIcon" inherits="ZO_AntiquityIcon" virtual="true">
+            <Dimensions x="40" y="40" />
+
+            <OnMouseEnter>
+                ZO_AntiquityFragmentIcon_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_AntiquityFragmentIcon_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+        
+        <Control name="ZO_AntiquityTileBaseControl_Keyboard" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
+            <DimensionConstraints minX="550" maxX="550" minY="70" />
+            <ResizeToFitPadding height="12"/>
+
+            <OnMouseEnter>
+                ZO_AntiquityTileBaseControl_Keyboard_OnMouseEnter(self, button, upInside)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_AntiquityTileBaseControl_Keyboard_OnMouseExit(self, button, upInside)
+            </OnMouseExit>
+
+            <OnMouseDoubleClick>
+                ZO_AntiquityTileBaseControl_Keyboard_OnMouseDoubleClick(self, button, upInside)
+            </OnMouseDoubleClick>
+
+            <Controls>
+                <Control name="$(parent)Highlight" inherits="ZO_ListEntryHighlight" excludeFromResizeToFitExtents="true" />
+
+                <Control name="$(parent)AntiquityBackdrop" inherits="ZO_ListEntryBackdrop" excludeFromResizeToFitExtents="true" />
+
+                <Control name="$(parent)Icon" inherits="ZO_AntiquityIcon">
+                    <Anchor point="TOPLEFT" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)Header">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="10" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="10" />
+                    <DimensionConstraints minX="476" maxX="476" />
+
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_AntiquityTitleLabel_Keyboard">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)AntiquityType" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                        </Label>
+
+                        <Label name="$(parent)NumRecovered" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="LEFT" relativeTo="$(parent)AntiquityType" relativePoint="RIGHT" offsetX="15" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityTileControl_Keyboard" inherits="ZO_AntiquityTileBaseControl_Keyboard" virtual="true">
+            <OnInitialized>
+                ZO_AntiquityTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Header" override="true">
+                    <Controls>
+                        <Control name="$(parent)LogBookProgress" inherits="ZO_AntiquityLogBookProgress">
+                            <Anchor point="RIGHT" offsetX="-15" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquitySetTileControl_Keyboard" inherits="ZO_AntiquityTileBaseControl_Keyboard" virtual="true">
+            <OnInitialized>
+                ZO_AntiquitySetTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Header" override="true">
+                    <Controls>
+                        <Control name="$(parent)LogBookProgress" inherits="ZO_AntiquityLogBookProgress">
+                            <Anchor point="RIGHT" offsetX="-15" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)AntiquitiesRecovered" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="6" />
+                </Label>
+
+                <Control name="$(parent)Antiquities" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AntiquitiesRecovered" relativePoint="BOTTOMLEFT" offsetY="2" />
+                    <DimensionConstraints minX="476" maxX="476" />
+                    <ResizeToFitPadding height="5"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_ScryableAntiquityTileControl_Keyboard" inherits="ZO_AntiquityTileBaseControl_Keyboard" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_ScryableAntiquityTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Control name="$(parent)Header" override="true">
+                    <Controls>
+                        <Label name="$(parent)Difficulty" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="LEFT" relativeTo="$(parent)NumRecovered" relativePoint="RIGHT" offsetX="15" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ProgressIcons" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                    <ResizeToFitPadding height="5"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_AntiquityJournal_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
+            <OnInitialized>
+                ZO_AntiquityJournal_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Contents">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+                    <Controls>
+                        <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
+                            <Dimensions x="330" />
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                        </Control>
+
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
+                            <Dimensions x="240"/>
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
+                                    <OnInitialized>
+                                        ZO_EditDefaultText_Initialize(self, GetString(SI_ANTIQUITY_SEARCH_EDIT_DEFAULT))
+                                    </OnInitialized>
+                                    <OnTextChanged>
+                                        ZO_AntiquityJournal_Keyboard_OnSearchTextChanged(self)
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
+                        </Label>
+
+                        <Control name="$(parent)Category">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Search" relativePoint="TOPRIGHT" />
+                            <Anchor point="TOPRIGHT" />
+                            <Controls>
+                                <Label name="$(parent)Title" inherits="ZO_AntiquityLargeLabel_Keyboard" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
+
+                                <StatusBar name="$(parent)Progress" inherits="ZO_AntiquityStatusBar">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                    <Anchor point="RIGHT" offsetX="-230" constrains="X" />
+                                </StatusBar>
+
+                                <Control name="$(parent)Filter" inherits="ZO_ComboBox">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" offsetX="10" />
+                                    <Dimensions x="220" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)ContentEmptyLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ANTIQUITY_EMPTY_LIST" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetY="70" />
+                        </Label>
+
+                        <Control name="$(parent)ContentList" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetY="25" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-10" />
+                        </Control>
+
+                        <Control name="$(parent)LockedContentPanel" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="150" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-50" />
+
+                            <Controls>
+                                <Label name="$(parent)ScryingToolLockedLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Label>
+
+                                <Label name="$(parent)AntiquarianGuildZoneLockedLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ScryingToolLockedLabel" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ScryingToolLockedLabel" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                                </Label>
+
+                                <Button name="$(parent)UpgradeContentButton" inherits="ZO_DefaultButton" text="SI_ANTIQUITY_UPGRADE">
+                                    <Anchor point="TOP" relativeTo="$(parent)AntiquarianGuildZoneLockedLabel" relativePoint="BOTTOM" offsetY="20" />
+
+                                    <OnClicked>
+                                        ZO_ShowAntiquityContentUpgrade()
+                                    </OnClicked>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+    </Controls>
+</GuiXml>

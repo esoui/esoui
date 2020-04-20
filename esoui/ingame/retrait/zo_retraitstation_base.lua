@@ -14,7 +14,7 @@ function ZO_RetraitStation_Base:Initialize(control, interactSceneName)
     self.retraitStationInteraction =
     {
         type = "Retrait Station",
-        End = function()
+        OnEndBecauseAnotherInteractIsBeginning = function()
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_RETRAIT },

@@ -118,12 +118,31 @@ do
     end
 end
 
-function ZO_SharedOptions:LoadDefaults(control, data)
-    if data.customResetToDefaultsFunction then
-        data.customResetToDefaultsFunction(control, data)
-    elseif self:IsControlTypeAnOption(data) then
-        if not data.excludeFromResetToDefault then
-            ResetSettingToDefault(data.system, data.settingId)
+function ZO_SharedOptions:DoesSettingExist(settingData)
+    local existsValueOrCallback
+    if self:IsGamepadOptions() then
+        existsValueOrCallback = settingData.existsOnGamepad or settingData.exists
+    else
+        existsValueOrCallback = settingData.exists
+    end
+
+    if existsValueOrCallback == nil then
+        return true -- default is existence
+    elseif type(existsValueOrCallback) == "function" then
+        return existsValueOrCallback()
+    else
+        return existsValueOrCallback
+    end
+end
+
+function ZO_SharedOptions:LoadDefaults(control, settingData)
+    if self:DoesSettingExist(settingData) then
+        if settingData.customResetToDefaultsFunction then
+            settingData.customResetToDefaultsFunction(control, settingData)
+        elseif self:IsControlTypeAnOption(settingData) then
+            if not settingData.excludeFromResetToDefault then
+                ResetSettingToDefault(settingData.system, settingData.settingId)
+            end
         end
     end
 end

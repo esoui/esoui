@@ -450,7 +450,7 @@ function ZO_Provisioner:RefreshRecipeDetails()
             if ingredientIndex > numIngredients then
                 ingredientSlot:ClearItem()
             else
-                local name, icon, requiredQuantity, _, quality = GetRecipeIngredientItemInfo(recipeListIndex, recipeIndex, ingredientIndex)
+                local name, icon, requiredQuantity, _, displayQuality = GetRecipeIngredientItemInfo(recipeListIndex, recipeIndex, ingredientIndex)
 
                 -- Scale the recipe ingredients to what will actually be used when you hit craft.
                 -- If numIterations is 0 we should just show what ingredients you would need to craft once, instead.
@@ -459,8 +459,8 @@ function ZO_Provisioner:RefreshRecipeDetails()
                     requiredQuantity = requiredQuantity * numIterations
                 end
 
-                local ingredientCount = GetCurrentRecipeIngredientCount(recipeListIndex, recipeIndex, ingredientIndex) 
-                ingredientSlot:SetItem(name, icon, ingredientCount, quality, requiredQuantity)
+                local ingredientCount = GetCurrentRecipeIngredientCount(recipeListIndex, recipeIndex, ingredientIndex)
+                ingredientSlot:SetItem(name, icon, ingredientCount, displayQuality, requiredQuantity)
                 ingredientSlot:SetItemIndices(recipeListIndex, recipeIndex, ingredientIndex)
             end
         end
@@ -546,18 +546,20 @@ function ZO_ProvisionerRow:SetItemIndices(recipeListIndex, recipeIndex, ingredie
     self.control.ingredientIndex = ingredientIndex
 end
 
-function ZO_ProvisionerRow:SetItem(name, icon, ingredientCount, quality, requiredQuantity)
+function ZO_ProvisionerRow:SetItem(name, icon, ingredientCount, displayQuality, requiredQuantity)
     self.ingredientCount = ingredientCount
     self.requiredQuantity = requiredQuantity
-    self.quality = quality
-    
+    self.displayQuality = displayQuality
+    -- self.quality is depricated, included here for addon backwards compatibility
+    self.quality = displayQuality
+
     self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, name))
     self.icon:SetTexture(icon)
     self.countFractionDisplay:SetValues(ingredientCount, requiredQuantity)
-        
+
     --The name label takes the remaining width which is the full row minus padding, icon, padding, padding, count, padding.
     self.nameLabel:SetWidth(ZO_PROVISIONER_SLOT_ROW_WIDTH - ZO_PROVISIONER_SLOT_ICON_SIZE - ZO_PROVISIONER_SLOT_PADDING_X * 4 - self.countControl:GetWidth())
-    
+
     self:UpdateColors()
     self:SetHidden(false)
 
@@ -589,10 +591,11 @@ end
 function ZO_ProvisionerRow:UpdateColors()
     local ingredientCount = self.ingredientCount
     local requiredQuantity = self.requiredQuantity
-    local quality = self.quality
 
     if ingredientCount >= requiredQuantity then
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+        -- self.quality is depricated, included here for addon backwards compatibility
+        local displayQuality = self.displayQuality or self.quality
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         self.nameLabel:SetColor(r, g, b, 1)
     else
         self.nameLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())

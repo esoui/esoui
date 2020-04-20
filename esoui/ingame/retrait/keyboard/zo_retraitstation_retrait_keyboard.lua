@@ -490,8 +490,8 @@ function ZO_RetraitStationRetraitSlot:SetItem(bagId, slotIndex)
             self.nameLabel:SetHidden(false)
             self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex)))
 
-            local quality = select(8, GetItemInfo(bagId, slotIndex))
-            self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+            local displayQuality = GetItemDisplayQuality(bagId, slotIndex)
+            self.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
         else
             self.nameLabel:SetHidden(true)
         end

@@ -37,7 +37,7 @@ function ZO_WorldMapChoiceDialog_Gamepad:Initialize()
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_GAMEPAD_BACK_OPTION,
-            },            
+            },
         },
     }
 
@@ -159,11 +159,11 @@ do
 
     function ZO_WorldMapChoiceDialog_Gamepad:AddQuestDialogItems(parametricListEntries, mouseOverPinHandlers)
         local header = GetString(SI_GAMEPAD_WORLD_MAP_SET_ACTIVE_QUEST)
-            
+
         local questPinHandlers = {}
         for _, pinHandlerInfo in ipairs(mouseOverPinHandlers) do
             local gamepadPinActionGroup = ZO_WorldMap_GetGamepadPinActionGroupForHandler(pinHandlerInfo.handler)
-            if gamepadPinActionGroup == ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_QUEST then                                 
+            if gamepadPinActionGroup == ZO_WORLD_MAP_GAMEPAD_PIN_ACTION_GROUP_QUEST then
                 table.insert(questPinHandlers, pinHandlerInfo)
             end
         end
@@ -223,6 +223,48 @@ function ZO_WorldMapChoiceDialog_Gamepad:AddRespawnDialogItems(parametricListEnt
     end
 end
 
+--Antiquity Entries
+do
+    local function QuestPinHandlersSortFunction(firstPinHandlerInfo, secondPinHandlerInfo)
+        local firstName = firstPinHandlerInfo.handler.gamepadDialogEntryName
+        local secondName = secondPinHandlerInfo.handler.gamepadDialogEntryName
+
+        return firstName < secondName
+    end
+
+    function ZO_WorldMapChoiceDialog_Gamepad:AddAntiquityDialogItems(parametricListEntries, mouseOverPinHandlers)
+        local antiquityPinHandlers = {}
+        for _, pinHandlerInfo in ipairs(mouseOverPinHandlers) do
+            if pinHandlerInfo.pin:IsAntiquityDigSitePin() then
+                table.insert(antiquityPinHandlers, pinHandlerInfo)
+            end
+        end
+        table.sort(antiquityPinHandlers, QuestPinHandlersSortFunction)
+
+        for i, pinHandlerInfo in ipairs(antiquityPinHandlers) do
+            local pin = pinHandlerInfo.pin
+            local handler = pinHandlerInfo.handler
+
+            local name = handler.gamepadDialogEntryName
+            local NO_ICON = nil
+
+            local entryData = self:CreatePinEntryData(name, NO_ICON, pin, handler)
+            local antiquityColor = handler.gamepadDialogEntryColor
+            entryData:SetNameColors(antiquityColor, antiquityColor:Lerp(ZO_BLACK, 0.25))
+
+            local dialogListEntry =
+            {
+                entryData = entryData,
+                template = "ZO_GamepadMenuEntryNoCapitalization"
+            }
+            if i == 1 then
+                dialogListEntry.header = GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_TRACK_ANTIQUITY)
+            end
+            table.insert(parametricListEntries, dialogListEntry)
+        end
+    end
+end
+
 --List Construction
 function ZO_WorldMapChoiceDialog_Gamepad:BuildChoiceEntries(dialog, data)
     local parametricListEntries = dialog.info.parametricList
@@ -233,6 +275,7 @@ function ZO_WorldMapChoiceDialog_Gamepad:BuildChoiceEntries(dialog, data)
     self:AddTravelDialogItems(parametricListEntries, mouseOverPinHandlers)
     self:AddQuestDialogItems(parametricListEntries, mouseOverPinHandlers)
     self:AddRespawnDialogItems(parametricListEntries, mouseOverPinHandlers)
+    self:AddAntiquityDialogItems(parametricListEntries, mouseOverPinHandlers)
 end
 
 function ZO_WorldMapChoiceDialog_Gamepad:Setup(dialog, data)
@@ -244,7 +287,8 @@ end
 
 function ZO_WorldMapChoiceDialog_Gamepad:OnPinRemovedFromMap(pin)
     if ZO_Dialogs_IsShowing("WORLD_MAP_CHOICE_GAMEPAD") then
-        --A pin that we were showing in the dialog was just removed from the map.
+        -- A pin that we were showing in the dialog was just removed from the map.
+        -- A pin could have multiple entries in the list
         local parametricDialog = ZO_GenericGamepadDialog_GetControl(GAMEPAD_DIALOGS.PARAMETRIC)
         local parametricListEntries = parametricDialog.info.parametricList
         local entryRemoved = false
@@ -260,7 +304,6 @@ function ZO_WorldMapChoiceDialog_Gamepad:OnPinRemovedFromMap(pin)
                 end
                 table.remove(parametricListEntries, i)
                 entryRemoved = true
-                break
             end
         end
 

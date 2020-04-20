@@ -44,7 +44,7 @@ function ZO_ObjectPool:New(factoryFunctionOrObjectClass, resetFunction)
         if type(factoryFunctionOrObjectClass) == "function" then
             pool.m_Factory  = factoryFunctionOrObjectClass   -- Signature: function(ZO_ObjectPool)
         else
-            pool.m_Factory = function() return factoryFunctionOrObjectClass:New() end
+            pool.m_Factory = function(pool) return factoryFunctionOrObjectClass:New(pool) end
         end
         
         pool.m_Reset    = resetFunction     -- Signature: function(objectBeingReset)
@@ -79,12 +79,30 @@ function ZO_ObjectPool:GetActiveObjectCount()
     return NonContiguousCount(self.m_Active)
 end
 
+function ZO_ObjectPool:HasActiveObjects()
+    return next(self.m_Active) ~= nil
+end
+
 function ZO_ObjectPool:GetActiveObjects()
     return self.m_Active
 end
 
+function ZO_ObjectPool:GetActiveObject(objectKey)
+    return self.m_Active[objectKey]
+end
+
+function ZO_ObjectPool:ActiveObjectIterator(filterFunctions)
+    return ZO_FilteredNonContiguousTableIterator(self.m_Active, filterFunctions)
+end
+
 function ZO_ObjectPool:GetFreeObjectCount()
     return NonContiguousCount(self.m_Free)
+end
+
+function ZO_ObjectPool:ActiveAndFreeObjectIterator(filterFunctions)
+    local objects = {}
+    ZO_CombineNonContiguousTables(objects, self.m_Active, self.m_Free)
+    return ZO_FilteredNonContiguousTableIterator(objects, filterFunctions)
 end
 
 function ZO_ObjectPool:SetCustomAcquireBehavior(customAcquireBehavior)
@@ -130,10 +148,6 @@ function ZO_ObjectPool:AcquireObject(objectKey)
     end
         
     return object, objectKey
-end
-
-function ZO_ObjectPool:GetExistingObject(objectKey)
-    return self.m_Active[objectKey]
 end
 
 function ZO_ObjectPool:ReleaseObject(objectKey)

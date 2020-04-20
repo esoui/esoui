@@ -63,6 +63,12 @@ GAMEPAD_SETTINGS_DATA =
     {
         {
             panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_SUBTITLES,
+            settingId = SUBTITLE_SETTING_ENABLED_FOR_VIDEOS,
+            header = SI_AUDIO_OPTIONS_SUBTITLES,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
             system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_AUDIO_VOLUME,
             header = SI_AUDIO_OPTIONS_GENERAL,
@@ -170,9 +176,7 @@ local ZO_OptionsPanel_Gamepad_Pregame_ControlData =
             panel = SETTING_PANEL_CINEMATIC,
             settingId = OPTIONS_CUSTOM_SETTING_GAMEPAD_PREGAME_PLAY_CINEMATIC,
             text = SI_GAME_MENU_PLAY_CINEMATIC,
-            callback = function() 
-                            PregameStateManager_SetState("CharacterSelect_PlayCinematic")
-                        end
+            callback = ZO_PlayIntroCinematicAndReturn,
         },
 
     }

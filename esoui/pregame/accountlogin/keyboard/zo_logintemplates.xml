@@ -1,10 +1,11 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_LoginBase_Keyboard" virtual="true">
-            <Dimensions x="ZO_MIN_CANVAS_WIDTH" y="ZO_MIN_CANVAS_HEIGHT" />
+            <Anchor point="TOPLEFT" />
+            <Anchor point="BOTTOMRIGHT" />
 
             <Controls>
-                <Texture name="$(parent)BGMunge" textureFile="EsoUI/Art/Login/login_UIWindowBG_left.dds">
+                <Texture name="$(parent)BGMunge" textureFile="EsoUI/Art/Login/login_UIWindowBG_left.dds" hidden="true">
                     <Dimensions x="512" y="914" />
                     <Anchor point="TOPLEFT" offsetX="160" offsetY="10" />
                     <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
@@ -18,8 +19,8 @@
                 </Texture>
 
                 <Control name="$(parent)ESOLogo" resizeToFitDescendents="true">
-                    <Anchor point="BOTTOM" relativeTo="$(parent)BGMunge" relativePoint="TOP" offsetX="90" offsetY="385" />
-                    
+                    <Anchor point="TOP" offsetY="180"/>
+
                     <Controls>
                         <Texture name="$(parent)Left" textureFile="EsoUI/Art/Login/login_logo_left.dds" resizeToFitFile="true">
                             <Anchor point="BOTTOMLEFT" />
@@ -34,7 +35,22 @@
         </Control>
 
         <Button name="ZO_LoginMenuButton" inherits="ZO_DefaultTextButton" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true">
-            <Dimensions x="300" />
+            <PressedOffset x="2" y="2" />
+            <Dimensions x="256" y="64"/>
+
+            <Textures
+                normal="EsoUI/Art/Login/Keyboard/LoginButton_Normal.dds"
+                pressed="EsoUI/Art/Login/Keyboard/LoginButton_mouseDown.dds"
+                mouseOver="EsoUI/Art/Login/Keyboard/LoginButton_mouseOver.dds"
+                disabled="EsoUI/Art/Login/Keyboard/LoginButton_Disabled.dds"
+            />
+
+            <FontColors
+                 normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                 pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
+                 mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
+                 disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
+            />
         </Button>
 
         <Label name="ZO_LoginMenuEditLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" />

@@ -323,6 +323,7 @@ function ZO_Scroll_Initialize(self)
         self.scrollbar:SetHandler("OnRectHeightChanged", ZO_Scroll_ScrollOrBarOnHeightChanged)
     end
     
+    self.isScrollBarEthereal = false
     self.useScrollbar = true
     self.hideScrollBarOnDisabled = true
     self.useFadeGradient = true
@@ -552,7 +553,7 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
     local scrollEnabled = verticalExtents > 0 or verticalOffset > 0
     local scrollbar  = self.scrollbar
     local scrollIndicator = self.scrollIndicator
-    local scrollbarHidden = not self.useScrollbar or (self.hideScrollBarOnDisabled and not scrollEnabled)
+    local scrollbarHidden = not self.useScrollbar or (self.hideScrollBarOnDisabled and not scrollEnabled) or self.isScrollBarEthereal
     local verticalExtentsChanged = self.verticalExtents ~= nil and not zo_floatsAreEqual(self.verticalExtents, verticalExtents)
     self.verticalExtents = verticalExtents
 
@@ -573,7 +574,8 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
         --auto scroll bar hiding
         local wasHidden = scrollbar:IsHidden()
         scrollbar:SetHidden(scrollbarHidden)
-        scrollbar:SetMinMax(MIN_SCROLL_VALUE, not scrollbarHidden and MAX_SCROLL_VALUE or MIN_SCROLL_VALUE)
+        local maxScrollValue = (not scrollbarHidden or self.isScrollBarEthereal) and MAX_SCROLL_VALUE or MIN_SCROLL_VALUE
+        scrollbar:SetMinMax(MIN_SCROLL_VALUE, maxScrollValue)
         if wasHidden and not scrollbarHidden and scrollbar.resetScrollbarOnShow then
             ZO_Scroll_ResetToTop(self)
             self.scrollValue = MIN_SCROLL_VALUE
@@ -627,8 +629,15 @@ function ZO_Scroll_GetScrollIndicator(self)
     return self.scrollIndicator
 end
 
+function ZO_Scroll_SetScrollbarEthereal(self, isEthereal)
+    if self.isScrollBarEthereal ~= isEthereal then
+        self.isScrollBarEthereal = isEthereal
+        ZO_Scroll_UpdateScrollBar(self)
+    end
+end
+
 function ZO_Scroll_SetHideScrollbarOnDisable(self, hide)
-    self.hideScrollBarOnDisabled = hide    
+    self.hideScrollBarOnDisabled = hide
     ZO_Scroll_UpdateScrollBar(self)
 end
 
@@ -725,6 +734,7 @@ function ZO_ScrollList_Initialize(self)
 
     self.animation, self.timeline = CreateScrollAnimation(self)
 
+    self.isScrollBarEthereal = false
     self.hideScrollBarOnDisabled = true
     self.useScrollbar = true
     self.useFadeGradient = true
@@ -1240,8 +1250,8 @@ local function RemoveAnimationOnControl(control, animationFieldName, animateInst
 end
 
 local function HighlightControl(self, control)
-    local ANIMATE_INSTANTLY = false
-    PlayAnimationOnControl(control, self.highlightTemplate, "HighlightAnimation", ANIMATE_INSTANTLY, self.overrideHighlightEndAlpha)
+    local DONT_ANIMATE_INSTANTLY = false
+    PlayAnimationOnControl(control, self.highlightTemplate, "HighlightAnimation", DONT_ANIMATE_INSTANTLY, self.overrideHighlightEndAlpha)
 
     self.highlightedControl = control
     
@@ -1373,6 +1383,10 @@ function ZO_ScrollList_EnableHighlight(self, highlightTemplate, highlightCallbac
     end
 end
 
+function ZO_ScrollList_SetScrollbarEthereal(self, isEthereal)
+    self.isScrollBarEthereal = isEthereal
+end
+
 function ZO_ScrollList_SetHideScrollbarOnDisable(self, hideOnDisable)
     -- Not updating state here, you should call this when the list is being created.
     -- The bar will update state properly when the list has data committed.
@@ -1414,7 +1428,7 @@ local function AreDataEqualSelections(self, data1, data2)
 
     if data1 == nil or data2 == nil then
         return false
-    end        
+    end
 
     local dataEntry1 = data1.dataEntry
     local dataEntry2 = data2.dataEntry
@@ -1462,15 +1476,24 @@ function ZO_ScrollList_GetDataIndex(self, data)
 end
 
 function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild, animateInstantly)
-    if AreSelectionsEnabled(self) and self.selectedData ~= data then
-        if reselectingDuringRebuild == nil then
-            reselectingDuringRebuild = false
-        end
+    if not AreSelectionsEnabled(self) then
+        return
+    end
 
+    if reselectingDuringRebuild == nil then
+        reselectingDuringRebuild = false
+    end
+
+    -- Update the current selection to the new data
+    -- If it's already the selected entry then we still need to do some cleanup if this is a rebuild
+    -- Specifically we need to make sure the selected index is still valid and correct
+    local notAlreadySelected = self.selectedData ~= data
+    if notAlreadySelected or reselectingDuringRebuild then
         if animateInstantly == nil then
             animateInstantly = false
         end
 
+        -- Find the data index for the data in the scroll list
         local dataIndex
         if data ~= nil then
             for i = 1, #self.data do
@@ -1486,30 +1509,37 @@ function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild,
             end
         end
 
-        local previouslySelectedData = self.selectedData
-        if self.selectedData then
-            self.selectedData = nil
-            self.selectedDataIndex = nil
-            if self.selectedControl then
-                UnselectControl(self, self.selectedControl, animateInstantly)
+        -- if this is a new selection, unselect the old control and save off any necessary info
+        if notAlreadySelected then
+            local previouslySelectedData = self.selectedData
+            if self.selectedData then
+                self.selectedData = nil
+                self.selectedDataIndex = nil
+                if self.selectedControl then
+                    UnselectControl(self, self.selectedControl, animateInstantly)
+                end
             end
         end
-        
+
+        -- if we have a selected data then update the selected control and any necessary info
         if data ~= nil then
             self.selectedDataIndex = dataIndex
             self.lastSelectedDataIndex = dataIndex
             self.selectedData = data
 
-            if not control then
-                control = ZO_ScrollList_GetDataControl(self, data)
-            end
+            -- don't need to select the control if it's already the selected data
+            if notAlreadySelected then
+                if not control then
+                    control = ZO_ScrollList_GetDataControl(self, data)
+                end
 
-            if control then
-                SelectControl(self, control, animateInstantly)
+                if control then
+                    SelectControl(self, control, animateInstantly)
+                end
             end
         end
-        
-        if self.selectionCallback then
+
+        if self.selectionCallback and notAlreadySelected then
             self.selectionCallback(previouslySelectedData, self.selectedData, reselectingDuringRebuild)
         end
     end
@@ -1521,7 +1551,7 @@ local function OnContentsUpdate(self)
     if windowHeight > 0 then
         self:SetHandler("OnUpdate", nil)
         ZO_ScrollList_SetHeight(self, windowHeight)
-        ZO_ScrollList_Commit(self:GetParent())        
+        ZO_ScrollList_Commit(self:GetParent())
     end
 end
 
@@ -1570,7 +1600,7 @@ local function FreeActiveScrollListControl(self, i)
 end
 
 local function ResizeScrollBar(self, scrollableDistance)
-    local shouldHideScrollbar
+    local shouldHideScrollbar = self.isScrollBarEthereal
     local scrollBarHeight = self.scrollbar:GetHeight()
     local scrollListHeight = ZO_ScrollList_GetHeight(self)
 
@@ -1581,13 +1611,12 @@ local function ResizeScrollBar(self, scrollableDistance)
         self.scrollbar:SetThumbTextureHeight(scrollBarHeight * scrollListHeight / (scrollableDistance + scrollListHeight))
         self.scrollbar:SetMinMax(0, scrollableDistance)
         self.scrollbar:SetEnabled(true)
-        shouldHideScrollbar = false
     else
         self.offset = 0
         self.scrollbar:SetThumbTextureHeight(scrollBarHeight)
         self.scrollbar:SetMinMax(0, 0)
         self.scrollbar:SetEnabled(false)
-        shouldHideScrollbar = self.hideScrollBarOnDisabled
+        shouldHideScrollbar = shouldHideScrollbar or self.hideScrollBarOnDisabled
     end
 
     shouldHideScrollbar = shouldHideScrollbar or not self.useScrollbar
@@ -1627,11 +1656,19 @@ local function IsCategoryHeader(self, index)
     return dataTypeInfo.categoryHeader
 end
 
+local function GetClampedSelectedIndex(self)
+    local selectedIndex = self.selectedDataIndex or self.lastSelectedDataIndex
+    if selectedIndex then
+        return zo_clamp(selectedIndex, 1, #self.data)
+    end
+    return nil
+end
+
 local function AutoSelect(self, animateInstantly)
     if #self.data > 0 then
-        local recalledIndex = self.selectedDataIndex or self.lastSelectedDataIndex
-        if recalledIndex then
-            for i = zo_min(recalledIndex, #self.data), 1, -1 do
+        local selectedIndex = GetClampedSelectedIndex(self)
+        if selectedIndex then
+            for i = selectedIndex, 1, -1 do
                 if CanSelectData(self, i) then
                     ZO_ScrollList_SelectData(self, self.data[i].data, NO_DATA_CONTROL, NOT_RESELECTING_DURING_REBUILD, animateInstantly)
                     return
@@ -1882,9 +1919,9 @@ end
 -- Assuming it wasn't reset, or manually set to something else.  If another party needs to know what data would be selected if the list were active, this is how
 function ZO_ScrollList_GetAutoSelectIndex(self)
     if #self.data > 0 then
-        local recalledIndex = self.selectedDataIndex or self.lastSelectedDataIndex
-        if recalledIndex and CanSelectData(self, recalledIndex) then
-            return recalledIndex
+        local selectedIndex = GetClampedSelectedIndex(self)
+        if selectedIndex and CanSelectData(self, selectedIndex) then
+            return selectedIndex
         end
     end
     return nil

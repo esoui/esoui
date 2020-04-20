@@ -1,4 +1,13 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_WorldMapPinFadeIn">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
     <Controls>
         <Texture name="ZO_MapTile" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" virtual="true">
             <Dimensions x="230" y="230" />
@@ -11,26 +20,8 @@
         <!-- High tier to show over top of the gamepad ragged edge border-->
         <Texture name="ZO_PinBlob" tier="HIGH" virtual="true" level="6" pixelRoundingEnabled="false" shaderEffectType="HALO"/>
 
-        <!-- Higher tier than ZO_PinBlob since the pin icon should always draw above the area circle -->
-        <Control name="ZO_MapPin" mouseEnabled="true" tier="HIGH" level="10" hidden="true" virtual="true">
-            <Dimensions x="22" y="22" />
-
-            <OnMouseDown>
-                if not ZO_WorldMap_WouldPinHandleClick(self, button, ctrl, alt, shift) then
-                    ZO_WorldMap_MouseDown(button, ctrl, alt, shift)
-                end
-            </OnMouseDown>
-
-            <OnMouseUp>
-                if ZO_WorldMap_WouldPinHandleClick(self, button) then
-                    if upInside then
-                        ZO_WorldMap_HandlePinClicked(self, button, ctrl, alt, shift)
-                    end
-                else
-                    ZO_WorldMap_MouseUp(ZO_WorldMapContainer, button, MouseIsOver(ZO_WorldMapScroll))
-                end
-            </OnMouseUp>
-
+        <Polygon name="ZO_PinPolygonBlob" pointLayout="COUNTER_CLOCKWISE" smoothingEnabled="true" layer="BACKGROUND" tier="HIGH" level="6" mouseEnabled="true" virtual="true">
+            <Border minThicknessPixels="3" maxThicknessPixels="3" textureFile="EsoUI\Art\MapPins\PolygonPinBorder.dds"/>
             <OnMouseEnter>
                 ZO_WorldMap_HandlePinEnter()
             </OnMouseEnter>
@@ -38,22 +29,7 @@
             <OnMouseExit>
                 ZO_WorldMap_HandlePinExit()
             </OnMouseExit>
-
-            <Controls>
-                <Texture name="$(parent)Highlight" textureFile="$(MAP_PIN_PATH)UI-WorldMapPinHighlight.dds" pixelRoundingEnabled="false">
-                    <Anchor point="TOPLEFT" offsetX ="-5" offsetY ="-5" />
-                    <Anchor point="BOTTOMRIGHT" offsetX ="5" offsetY ="5" />
-                </Texture>
-
-                <Texture name="$(parent)Background" pixelRoundingEnabled="false">
-                    <AnchorFill/>
-                </Texture>
-
-                <Label name="$(parent)Label" font="ZoFontGameOutline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="BACKGROUND">
-                    <AnchorFill/>
-                </Label>
-            </Controls>
-        </Control>
+        </Polygon>
 
         <Button name="ZO_DungeonFloorSelect" inherits="ZO_KeyButton" virtual="true">
             <OnClicked>
@@ -425,13 +401,24 @@
 
                 <Control name="$(parent)ZoomKeybind" inherits="ZO_KeybindButton" hidden="true"/>
 
+                <Control name="$(parent)EndDigSiteRevealKeybind" inherits="ZO_KeybindButton" tier="HIGH" hidden="true">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)MapFrame" offsetY="-15" />
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Performance/StatusMeterMunge.dds" excludeFromResizeToFitExtents="true">
+                            <TextureCoords left="0.15625" right="0.828125" top="0.3671875" bottom="0.625" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)KeyLabel" offsetX="-30" offsetY="-12" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)NameLabel" offsetX="30" offsetY="12" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
                 <Control name="$(parent)Buttons">
                     <Dimensions y="36"/>
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="-4"/>
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="-4" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
                     <Controls>
                         <Texture name="$(parent)BG" color="000000">
-                            <AnchorFill/>
+                            <AnchorFill />
                         </Texture>
 
                         <Slider name="$(parent)HistorySlider" inherits="ZO_Slider">

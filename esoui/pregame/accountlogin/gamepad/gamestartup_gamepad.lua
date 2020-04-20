@@ -199,7 +199,9 @@ function ZO_GameStartup_Gamepad:Initialize(control)
     local gameStartup_Gamepad_Fragment = ZO_FadeSceneFragment:New(self.control)
     GAME_STARTUP_MAIN_GAMEPAD_SCENE = ZO_Scene:New("GameStartup", SCENE_MANAGER)
     GAME_STARTUP_MAIN_GAMEPAD_SCENE:AddFragment(gameStartup_Gamepad_Fragment)
-    GAME_STARTUP_MAIN_GAMEPAD_SCENE:AddFragment(ZO_FadeSceneFragment:New(GameStartup_GamepadMiddlePane))
+
+    self.announcementFragment = ZO_FadeSceneFragment:New(GameStartup_GamepadMiddlePane)
+    self.serverAlertFragment = ZO_FadeSceneFragment:New(GameStartup_Gamepad_ServerAlert)
 
     GAME_STARTUP_MAIN_GAMEPAD_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -279,14 +281,25 @@ function ZO_GameStartup_Gamepad:InitializeHeaders()
     }
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
 
-    self.announcement = GameStartup_GamepadMiddlePane:GetNamedChild("Container"):GetNamedChild("Content")
+    self.announcement = GameStartup_GamepadMiddlePane:GetNamedChild("Container"):GetNamedChild("ContentScrollChildText")
 end
 
 function ZO_GameStartup_Gamepad:RefreshHeader(titleText)
+    local accountName
+    if ZO_IsForceConsoleOrHeronFlow() then
+        accountName = DecorateDisplayName(GetCVar("AccountName"))
+    else
+        accountName = GetOnlineIdForActiveProfile()
+    end
+
     self.headerData =
     {
         titleText = titleText,
     }
+    if accountName ~= "" then
+        self.headerData.data1HeaderText = GetString(SI_GAME_STARTUP_GAMEPAD_WELCOME)
+        self.headerData.data1Text = accountName
+    end
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
@@ -477,9 +490,26 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
 
         data = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_SERVER_SELECT))
         self.mainList:AddEntry("ZO_GamepadHorizontalListRow", data)
+
+        data = ZO_GamepadEntryData:New(GetString(SI_LOGIN_ANNOUNCEMENTS_TITLE))
+        data.isAnnouncement = true
+        self.mainList:AddEntry("GameStartupLabelEntry", data)
     end
 
     self.mainList:Commit()
+end
+
+function ZO_GameStartup_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+    if (selectedData and not selectedData.isAnnouncement) and not GAME_STARTUP_SERVERALERT_GAMEPAD.serverAlert:IsControlHidden() then
+        GAME_STARTUP_MAIN_GAMEPAD_SCENE:RemoveFragment(self.announcementFragment)
+        GAME_STARTUP_MAIN_GAMEPAD_SCENE:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+        GAME_STARTUP_MAIN_GAMEPAD_SCENE:AddFragment(self.serverAlertFragment)
+    else
+        GAME_STARTUP_MAIN_GAMEPAD_SCENE:RemoveFragment(self.serverAlertFragment)
+        GAME_STARTUP_MAIN_GAMEPAD_SCENE:AddFragment(self.announcementFragment)
+        GAME_STARTUP_MAIN_GAMEPAD_SCENE:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+    end
+    KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
 end
 
 function ZO_GameStartup_Gamepad:PopulateInitialList()
@@ -507,6 +537,50 @@ function ZO_GameStartup_Gamepad:SetPsnFreeTrialEnded(psnFreeTrialEnded)
     self.psnFreeTrialEnded = psnFreeTrialEnded
 end
 
-function ZO_GameStartup_Gamepad_Initialize(self)
-    GAME_STARTUP_GAMEPAD = ZO_GameStartup_Gamepad:New(self)
+local ZO_GameStartup_ServerAlert_Gamepad = ZO_Object:Subclass()
+
+function ZO_GameStartup_ServerAlert_Gamepad:New(control)
+    local object = ZO_Object.New(self)
+    object:Initialize(control)
+    return object
+end
+
+function ZO_GameStartup_ServerAlert_Gamepad:Initialize(control)
+    self.control = control
+
+    self.serverAlert = control:GetNamedChild("ServerAlert")
+    self.serverAlertLabel = self.serverAlert:GetNamedChild("Text")
+    self.serverAlertImage = self.serverAlert:GetNamedChild("AlertImage")
+
+    local function OnAnnouncementsResult(eventCode, success)
+        local serverAlertMessage = success and GetServerAlertMessage()
+        if serverAlertMessage and serverAlertMessage ~= "" then
+            self.serverAlert:SetHidden(false)
+            self.serverAlertImage:SetTexture("EsoUI/Art/Login/login_icon_yield.dds")
+            self.serverAlertLabel:SetText(serverAlertMessage)
+        else
+            local serverNoticeMessage = success and GetServerNoticeMessage()
+            if serverNoticeMessage and serverNoticeMessage ~= "" then
+                self.serverAlert:SetHidden(false)
+                self.serverAlertImage:SetTexture("EsoUI/Art/Login/login_icon_info.dds")
+                self.serverAlertLabel:SetText(serverNoticeMessage)
+            else
+                self.serverAlert:SetHidden(true)
+            end
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("GameStartup_Gamepad", EVENT_ANNOUNCEMENTS_RESULT, OnAnnouncementsResult)
+end
+
+---------------
+-- Global XML
+---------------
+
+function ZO_GameStartup_Gamepad_Initialize(control)
+    GAME_STARTUP_GAMEPAD = ZO_GameStartup_Gamepad:New(control)
+end
+
+function ZO_GameStartup_Gamepad_ServerAlert_Initialize(control)
+    GAME_STARTUP_SERVERALERT_GAMEPAD = ZO_GameStartup_ServerAlert_Gamepad:New(control)
 end

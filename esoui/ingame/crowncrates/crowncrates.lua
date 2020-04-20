@@ -205,7 +205,7 @@ end
 
 function ZO_CrownCrates:InitializeGamepadKeybindStripDescriptors()
     local function BackCallback()
-        if self.stateMachine:IsCurrentStateByName("ALL_REVEALED") then
+        if self.stateMachine:IsCurrentState("ALL_REVEALED") then
             self.stateMachine:FireCallbacks(ZO_CROWN_CRATE_TRIGGER_COMMANDS.BACK_TO_MANIFEST)
         else
             self:AttemptExit()
@@ -238,7 +238,7 @@ function ZO_CrownCrates:InitializeKeyboardKeybindStripDescriptors()
             name = GetString(SI_CROWN_CRATE_CHANGE_CRATE_KEYBIND),
             keybind = "UI_SHORTCUT_NEGATIVE",
             visible = function()
-                return self.stateMachine:IsCurrentStateByName("ALL_REVEALED")
+                return self.stateMachine:IsCurrentState("ALL_REVEALED")
             end,
             callback = BackCallback,
         }

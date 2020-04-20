@@ -1,4 +1,6 @@
 local ANNOUNCEMENTS_UPDATE_INTERVAL = 60
+local ANNOUNCEMENTS_START_SCROLL_TIME = 10
+local ANNOUNCEMENTS_TICKER_VELOCITY = 0.05
 
 local function RequestOpenURL(url, text)
     local urlApplication = SI_URL_APPLICATION_WEB
@@ -20,40 +22,26 @@ local function OnLinkClicked(link, button, text, color, linkType, ...)
     end
 end
 
--- Controls the pregame slideshow
-local PregameSlideShow_Keyboard = ZO_Object:Subclass()
+-- Controls the pregame background
+local PregameBackground_Keyboard = ZO_Object:Subclass()
 
-function PregameSlideShow_Keyboard:New(...)
+function PregameBackground_Keyboard:New(...)
     local object = ZO_Object.New(self)
     object:Initialize(...)
     return object
 end
 
-function PregameSlideShow_Keyboard:Initialize(control)
+function PregameBackground_Keyboard:Initialize(control)
     self.control = control
-    self.crossfade = control:GetNamedChild("Crossfade")
+    self.background = control:GetNamedChild("Background")
 
-    PREGAME_SLIDE_SHOW_FRAGMENT = ZO_SimpleSceneFragment:New(control)
+    ZO_ResizeControlForBestScreenFit(self.background)
+
+    PREGAME_BACKGROUND_FRAGMENT = ZO_SimpleSceneFragment:New(control)
 end
 
-function PregameSlideShow_Keyboard:BeginSlideShow()
-    local numLoadingScreens = GetNumLoadingScreens()
-    local texturesTable = {}
-    local slideShow = ZO_CrossfadeBG_GetObject(self.crossfade)
-    for i = 1, numLoadingScreens do
-        local assetId = GetLoadingScreenTexture(i)
-        table.insert(texturesTable, assetId)
-    end
-    slideShow:PlaySlideShow(20000, unpack(texturesTable))
-end
-
-function PregameSlideShow_Keyboard:StopSlideShow()
-    local slideShow = ZO_CrossfadeBG_GetObject(self.crossfade)
-    slideShow:StopSlideShow()
-end
-
-function ZO_PregameSlideShow_Initialize(control)
-    PREGAME_SLIDESHOW_KEYBOARD = PregameSlideShow_Keyboard:New(control)
+function ZO_PregameBackground_Keyboard_Initialize(control)
+    PREGAME_BACKGROUND_KEYBOARD = PregameBackground_Keyboard:New(control)
 end
 
 -- Controls the background during the login process, as well as the game version label
@@ -68,47 +56,11 @@ end
 function LoginBG_Keyboard:Initialize(control)
     self.control = control
 
-    self.gameVersionLabel = control:GetNamedChild("GameVersionLabel")
-    self.accountRequired = control:GetNamedChild("AcctRequired")
-
-    local briefVersion = GetESOVersionString()
-    local fullVersion = GetESOFullVersionString()
-    self.gameVersionLabel:SetText(zo_strformat(SI_VERSION, briefVersion))
-    self.fullVersion = fullVersion
-
-    self:RebuildRequiredAccountLabel()
-    
     LOGIN_BG_FRAGMENT = ZO_FadeSceneFragment:New(control)
-end
-
-function LoginBG_Keyboard:GetFullVersion()
-    return self.fullVersion
-end
-
-function LoginBG_Keyboard:RebuildRequiredAccountLabel()
-    local requiresAccountLinking = IsUsingLinkedLogin()
-    if not requiresAccountLinking then
-        local url = select(5, GetPlatformInfo(GetSelectedPlatformIndex()))
-        local linkText = GetString(SI_LOGIN_ACCOUNT_REQUIRED_ESO)
-        local link = ZO_LinkHandler_CreateURLLink(url, linkText)
-        local message = zo_strformat(SI_LOGIN_ACCOUNT_REQUIRED, link)
-        self.accountRequired:SetText(message)
-    end
-
-    self.accountRequired:SetHidden(requiresAccountLinking)
 end
 
 function ZO_LoginBG_Initialize(control)
     LOGIN_BG_KEYBOARD = LoginBG_Keyboard:New(control)
-end
-
-function ZO_LoginBG_GameVersionLabel_OnMouseEnter(label)
-    InitializeTooltip(InformationTooltip, label, BOTTOMLEFT, 0, -10, TOPLEFT)
-    SetTooltipText(InformationTooltip, zo_strformat(SI_VERSION, LOGIN_BG_KEYBOARD:GetFullVersion()))
-end
-
-function ZO_LoginBG_GameVersionLabel_OnMouseExit()
-    ClearTooltip(InformationTooltip)
 end
 
 -- Handles login related functionality (all regions)
@@ -125,42 +77,97 @@ function Login_Keyboard:Initialize(control)
 
     self.credentialsContainer = control:GetNamedChild("Credentials")
     self.accountName = self.credentialsContainer:GetNamedChild("AccountName")
-    self.accountNameEdit = self.accountName:GetNamedChild("Edit")
+    self.helpButton = self.credentialsContainer:GetNamedChild("Help")
     self.trustedSettingsBar = self.credentialsContainer:GetNamedChild("TrustedSettingsBar")
     self.rememberAccount = self.credentialsContainer:GetNamedChild("RememberAccount")
     self.rememberAccountButton = self.rememberAccount:GetNamedChild("Button")
     self.rememberAccountText = self.rememberAccount:GetNamedChild("Text")
     self.password = self.credentialsContainer:GetNamedChild("Password")
-    self.passwordEdit = self.password:GetNamedChild("Edit")
     self.capsLockWarning = self.credentialsContainer:GetNamedChild("CapsLockWarning")
     self.loginButton = control:GetNamedChild("Login")
     self.loginButtonDisabledTimer = self.loginButton:GetNamedChild("DisabledTimer")
     self.announcements = control:GetNamedChild("Announcements")
-    self.announcementsText = self.announcements:GetNamedChild("Text")
+    self.announcementsScroll = self.announcements:GetNamedChild("TickerScroll")
+    self.announcementsLabel = self.announcementsScroll:GetNamedChild("Text")
+    self.serverAlert = control:GetNamedChild("ServerAlert")
+    self.serverAlertLabel = self.serverAlert:GetNamedChild("Text")
+    self.serverAlertImage = self.serverAlert:GetNamedChild("AlertImage")
     self.relaunchGameLabel = control:GetNamedChild("RelaunchGameLabel")
 
-    self.accountNameEdit:SetMaxInputChars(MAX_EMAIL_LENGTH)
-    self.passwordEdit:SetMaxInputChars(MAX_PASSWORD_LENGTH)
+    self.accountNameEdit = ZO_EditBox:New(self.accountName)
+    self.passwordEdit = ZO_EditBox:New(self.password)
+    self.accountNameEdit:SetEmptyText(GetString(SI_ACCOUNT_NAME))
+    self.passwordEdit:SetEmptyText(GetString(SI_PASSWORD))
     self:InitializeCredentialEditBoxes()
 
-    ZO_PreHookHandler(self.passwordEdit, "OnTextChanged", function() self:UpdateLoginButtonState() end)
-    ZO_PreHookHandler(self.accountNameEdit, "OnTextChanged", function() self:UpdateLoginButtonState() end)
+    self.passwordEdit:GetEditControl():SetHandler("OnTextChanged", function() self:UpdateLoginButtonState() end, "ZO_Login")
+    self.accountNameEdit:GetEditControl():SetHandler("OnTextChanged", function() self:UpdateLoginButtonState() end, "ZO_Login")
     self:InitializeTrustedSettingsBar(self.trustedSettingsBar)
     self.capsLockWarning:SetHidden(not IsCapsLockOn())
 
     self.credentialsContainer:SetHidden(requiresAccountLinking)
     self:ReanchorLoginButton()
 
+    self.startTickerTimeS = math.huge
+    self.translateAnimationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ScrollAnnouncementTickerAnimation", self.announcementsLabel)
+    self.fadeInAnimationTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ScrollAnnouncementFadeInAnimation", self.announcementsLabel)
+
+    local function OnMouseEnterHelp(label)
+        InitializeTooltip(InformationTooltip, label, BOTTOM, 0, -10, TOP)
+        SetTooltipText(InformationTooltip, GetString(SI_LOGIN_HELP_TOOLTIP))
+    end
+
+    local function OnMouseExitHelp()
+        ClearTooltip(InformationTooltip)
+    end
+
+    local function OnClickedHelp()
+        local requiresAccountLinking = IsUsingLinkedLogin()
+        if not requiresAccountLinking then
+            local url = select(5, GetPlatformInfo(GetSelectedPlatformIndex()))
+            local text = GetString(SI_LOGIN_ACCOUNT_REQUIRED_ESO)
+            RequestOpenURL(url, text)
+        end
+    end
+
     control:SetHandler("OnUpdate", function(control, timeSeconds) self:OnUpdate(control, timeSeconds) end)
+
+    self.helpButton:SetHandler("OnMouseEnter", OnMouseEnterHelp)
+    self.helpButton:SetHandler("OnMouseExit", OnMouseExitHelp)
+    self.helpButton:SetHandler("OnClicked", OnClickedHelp)
 
     local function OnAnnouncementsResult(eventCode, success)
         local message = success and GetAnnouncementMessage() or GetString(SI_LOGIN_ANNOUNCEMENTS_FAILURE)
 
-        if(message == "") then
+        if message == "" then
             self.announcements:SetHidden(true)
         else
             self.announcements:SetHidden(false)
-            self.announcementsText:SetText(message)
+            self.announcementsText = message
+            self.announcementsLabel:SetText(message)
+        end
+
+        local serverAlertMessage = success and GetServerAlertMessage()
+        if serverAlertMessage and serverAlertMessage ~= "" then
+            self.serverAlert:SetHidden(false)
+            self.serverAlertImage:SetTexture("EsoUI/Art/Login/login_icon_yield.dds")
+            self.serverAlertLabel:SetFont("ZoFontGameBold")
+            self.serverAlertLabel:SetText(serverAlertMessage)
+        else
+            local serverNoticeMessage = success and GetServerNoticeMessage()
+            if serverNoticeMessage and serverNoticeMessage ~= "" then
+                self.serverAlert:SetHidden(false)
+                self.serverAlertImage:SetTexture("EsoUI/Art/Login/login_icon_info.dds")
+                self.serverAlertLabel:SetFont("ZoFontGame")
+                self.serverAlertLabel:SetText(serverNoticeMessage)
+            else
+                self.serverAlert:SetHidden(true)
+            end
+        end
+
+        if IsUsingLinkedLogin() then
+            self.shouldShowServerAlert = not self.serverAlert:IsHidden()
+            self.serverAlert:SetHidden(true)
         end
     end
 
@@ -185,14 +192,59 @@ function Login_Keyboard:Initialize(control)
 
     LOGIN_FRAGMENT = ZO_FadeSceneFragment:New(control)
     LOGIN_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-                                                        if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                        if newState == SCENE_FRAGMENT_SHOWN then
                                                             self:InitializeLoginButtonState()
                                                             self:AttemptAutomaticLogin()
                                                             if ZO_RZCHROMA_EFFECTS then
                                                                 ZO_RZCHROMA_EFFECTS:SetAlliance(ALLIANCE_NONE)
                                                             end
+                                                            self.startTickerTimeS = GetFrameTimeSeconds() + ANNOUNCEMENTS_START_SCROLL_TIME
                                                         end
                                                     end)
+
+    local dialogControl = ZO_Login_Announcement_Dialog_Keyboard
+    local announcementDialogInfo =
+    {
+        customControl = dialogControl,
+        canQueue = true,
+        title =
+        {
+            text = SI_LOGIN_ANNOUNCEMENTS_TITLE
+        },
+        setup = function(dialog)
+            local textControl = dialog:GetNamedChild("ContainerText")
+            textControl:SetText(self.announcementsText)
+        end,
+        buttons =
+        {
+            {
+                control = dialogControl:GetNamedChild("Close"),
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CLOSE,
+            },
+        }
+    }
+
+    ZO_Dialogs_RegisterCustomDialog("Announcement_Dialog", announcementDialogInfo)
+
+    local OnLinkClicked = function(link, button, text, color, linkType, ...)
+        if ZO_Dialogs_IsShowing("Announcement_Dialog") then
+            -- Need to release the Announcement dialog so that the CONFIRM_OPEN_URL dialog will be shown
+            ZO_Dialogs_ReleaseDialog("Announcement_Dialog")
+            self.isShowingLinkConfirmation = true
+            return true
+        end
+    end
+
+    local OnAllDialogsHidden = function()
+        if self.isShowingLinkConfirmation then
+            ZO_Dialogs_ShowDialog("Announcement_Dialog")
+            self.isShowingLinkConfirmation = false
+        end
+    end
+
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked)
+    CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", OnAllDialogsHidden)
 
     local lastPlatformName = GetCVar("LastPlatform")
     for platformIndex = 0, GetNumPlatforms() do
@@ -208,32 +260,62 @@ function Login_Keyboard:GetControl()
     return self.control
 end
 
+function Login_Keyboard:SetLoginButtonHidden(isHidden)
+    return self.loginButton:SetHidden(isHidden)
+end
+
 function Login_Keyboard:OnUpdate(control, timeSeconds)
-    if(self.announcementRequestTime == nil or timeSeconds > self.announcementRequestTime) then
+    if self.announcementRequestTime == nil or timeSeconds > self.announcementRequestTime then
         self.announcementRequestTime = timeSeconds + ANNOUNCEMENTS_UPDATE_INTERVAL
         RequestAnnouncements()
+    end
+
+    if self.startTickerTimeS <= timeSeconds then
+        local textWidth = self.announcementsLabel:GetTextWidth()
+        if textWidth > self.announcementsScroll:GetWidth() then
+            local translateAnimation = self.translateAnimationTimeline:GetAnimation(1)
+            translateAnimation:SetTranslateOffsets(0, 0, -textWidth, 0)
+            translateAnimation:SetDuration(textWidth / ANNOUNCEMENTS_TICKER_VELOCITY)
+            translateAnimation:SetHandler("OnStop", function()
+                if not self.hasDoneTranslateStop then
+                    self.hasDoneTranslateStop = true
+                    self.startTickerTimeS = math.huge
+                    self.translateAnimationTimeline:PlayInstantlyToStart()
+
+                    local fadeInAnimation = self.fadeInAnimationTimeline:GetAnimation(1)
+                    fadeInAnimation:SetHandler("OnStop", function()
+                        self.startTickerTimeS = GetFrameTimeSeconds() + ANNOUNCEMENTS_START_SCROLL_TIME
+                    end)
+                    self.fadeInAnimationTimeline:PlayFromStart()
+                end
+            end)
+
+            self.translateAnimationTimeline:PlayFromStart()
+            self.hasDoneTranslateStop = nil
+            self.startTickerTimeS = math.huge
+        end
     end
 end
 
 function Login_Keyboard:InitializeTrustedSettingsBar(bar)
     local menuBarData =
     {
-        initialButtonAnchorPoint = RIGHT, 
-        buttonTemplate = "ZO_LoginTrustedSettingsButton", 
-        normalSize = 51,
-        downSize = 64,
-        buttonPadding = -15,
+        initialButtonAnchorPoint = RIGHT,
+        buttonTemplate = "ZO_LoginTrustedSettingsButton",
+        normalSize = 32,
+        downSize = 40,
+        buttonPadding = 0,
         animationDuration = 180,
     }
 
     ZO_MenuBar_SetData(bar, menuBarData)
 
     local function UpdateTrustedSetting(tabData)
-        local trustedSetting = (tabData.descriptor == "trustedMachine") and 1 or 0
+        local trustedSetting = tabData.descriptor == "trustedMachine" and 1 or 0
         SetCVar("IsTrustedMachine", trustedSetting)
-        
+
         self.rememberAccount:SetHidden(trustedSetting == 0)
-        if(trustedSetting == 0) then
+        if trustedSetting == 0 then
             SetCVar("RememberAccountName", 0) -- only turn this off if the machine becomes untrusted...but the user always needs to re-enable it.
             ZO_CheckButton_SetCheckState(self.rememberAccountButton, false)
         end
@@ -264,7 +346,7 @@ function Login_Keyboard:InitializeTrustedSettingsBar(bar)
 
     local isTrusted = GetCVar("IsTrustedMachine")
 
-    if(tonumber(isTrusted) == 1) then
+    if tonumber(isTrusted) == 1 then
         ZO_MenuBar_SelectDescriptor(bar, "trustedMachine")
     else
         ZO_MenuBar_SelectDescriptor(bar, "untrustedMachine")
@@ -294,11 +376,11 @@ function Login_Keyboard:UpdateLoginButtonState()
 end
 
 function Login_Keyboard:InitializeLoginButtonState(stateName)
-    if(stateName == nil or stateName == "AccountLogin") then
+    if stateName == nil or stateName == "AccountLogin" then
         local accountEmpty = self:GetEditControlStates()
 
-        if(not ZO_Dialogs_IsShowingDialog()) then
-            if(not accountEmpty) then
+        if not ZO_Dialogs_IsShowingDialog() then
+            if not accountEmpty then
                 self.passwordEdit:TakeFocus()
             else
                 self.accountNameEdit:TakeFocus()
@@ -315,17 +397,17 @@ function Login_Keyboard:DisableLoginUntil(timeToEnable)
     self.loginButtonDisabledTimer:SetHidden(false)
 
     local nextTimerUpdate = GetFrameTimeMilliseconds()
-    
+
     local function EnableCheck()
         local now = GetFrameTimeMilliseconds()
 
-        if(now >= timeToEnable) then
+        if now >= timeToEnable then
             self.inMaintenanceMode = false
             self:UpdateLoginButtonState()
             self.loginButton:SetHandler("OnUpdate", nil)
             self.loginButtonDisabledTimer:SetHidden(true)
             self.loginButtonDisabledTimer:SetText("")
-        elseif(now >= nextTimerUpdate) then
+        elseif now >= nextTimerUpdate then
             local timer
             timer, nextTimerUpdate = ZO_FormatTimeMilliseconds((timeToEnable - now), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
             self.loginButtonDisabledTimer:SetText(zo_strformat(SI_SERVER_MAINTENANCE_LOGIN_BUTTON_TIMER, timer))
@@ -336,8 +418,8 @@ function Login_Keyboard:DisableLoginUntil(timeToEnable)
 end
 
 function Login_Keyboard:InitializeCredentialEditBoxes(pullAccountNameFromCVar)
-    if(pullAccountNameFromCVar == nil or pullAccountNameFromCVar == true) then
-        if(GetCVar("RememberAccountName") == "1") then
+    if pullAccountNameFromCVar == nil or pullAccountNameFromCVar == true then
+        if GetCVar("RememberAccountName") == "1" then
             self.accountNameEdit:SetText(GetCVar("AccountName"))
         else
             self.accountNameEdit:SetText("")
@@ -357,7 +439,7 @@ end
 
 function Login_Keyboard:AttemptLoginFromPasswordEdit()
     local state = self.loginButton:GetState()
-    if(state == BSTATE_NORMAL) then
+    if state == BSTATE_NORMAL then
         self.passwordEdit:LoseFocus()
         self:DoLogin()
     end
@@ -398,14 +480,6 @@ function Login_Keyboard:ReanchorLoginButton()
             self.loginButton:SetAnchor(CENTER, self.credentialsContainer, CENTER, 0, -50)
         end
     end
-
-    self:ReanchorAnnouncements()
-end
-
-function Login_Keyboard:ReanchorAnnouncements()
-    if IsUsingLinkedLogin() then
-        self.announcements:SetAnchor(TOP, self.loginButton, BOTTOM, 0, 100)
-    end
 end
 
 -- XML Handlers --
@@ -428,6 +502,12 @@ end
 
 function ZO_Login_LoginButton_OnClicked()
     LOGIN_KEYBOARD:DoLogin()
+end
+
+function ZO_Login_Announcemnt_OnMouseUp()
+    if not ZO_Dialogs_IsShowingDialog() then
+        ZO_Dialogs_ShowDialog("Announcement_Dialog")
+    end
 end
 
 function ZO_Login_SetupCheckButton(control, cvarName, labelText)

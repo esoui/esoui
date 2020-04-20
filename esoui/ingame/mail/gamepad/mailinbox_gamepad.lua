@@ -453,22 +453,25 @@ function ZO_MailInbox_Gamepad:EnterViewAttachments()
         for i = 1, mailData.numAttachments do
             local itemLink = GetAttachedItemLink(mailId, i, LINK_STYLE_DEFAULT)
             local itemName = GetItemLinkName(itemLink)
-            local icon, stack, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle, quality = GetAttachedItemInfo(mailId, i)
+            local icon, stack, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle, displayQuality = GetAttachedItemInfo(mailId, i)
 
             itemName = zo_strformat(SI_LINK_FORMAT_ITEM_NAME, itemName)
 
-            local itemData = {
-                        text = itemName,
-                        icon = icon,
-                        quality = quality,
-                        stackCount = stack,
-                        sellPrice = sellPrice,
-                        meetsUsageRequirement = meetsUsageRequirement,
-                        equipType = equipType,
-                        itemStyle = itemStyle,
-                        creator = creator,
-                        itemLink = itemLink,
-                    }
+            local itemData =
+            {
+                text = itemName,
+                icon = icon,
+                displayQuality = displayQuality,
+                -- quality is depricated, included here for addon backwards compatibility
+                quality = displayQuality,
+                stackCount = stack,
+                sellPrice = sellPrice,
+                meetsUsageRequirement = meetsUsageRequirement,
+                equipType = equipType,
+                itemStyle = itemStyle,
+                creator = creator,
+                itemLink = itemLink,
+            }
 
             local attachmentEntry = ZO_GamepadEntryData:New(itemName)
             attachmentEntry:InitializeInventoryVisualData(itemData)

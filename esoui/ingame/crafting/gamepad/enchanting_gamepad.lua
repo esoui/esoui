@@ -126,7 +126,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
     self.enchantingStationInteraction =
     {
         type = "Enchanting Station",
-        End = function()
+        OnEndBecauseAnotherInteractIsBeginning = function()
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },

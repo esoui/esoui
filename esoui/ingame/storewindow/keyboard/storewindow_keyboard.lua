@@ -77,7 +77,7 @@ function ZO_StoreManager:Initialize(control)
                                 STORE_WINDOW:BuyMultiplePurchase()
                             end,
             },
-        
+
             [2] =
             {
                 control =   GetControl(self.multipleDialog, "Cancel"),
@@ -257,6 +257,7 @@ function ZO_StoreManager:Initialize(control)
     control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
     control:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
     control:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
+    control:RegisterForEvent(EVENT_ANTIQUITY_LEAD_ACQUIRED, RefreshStoreWindow)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshStoreWindow)
 
     local function OnItemRepaired(bagId, slotIndex)
@@ -549,7 +550,7 @@ function ZO_StoreManager:GetStoreItems()
 
     -- We only want to show the all filter if we aren't showing one specific filter
     -- because then all and the specific filter would have the same contents
-    self.showAllFilter = numUsedStoreFilters ~= 1 
+    self.showAllFilter = numUsedStoreFilters ~= 1
 end
 
 function ZO_StoreManager:UpdateList()
@@ -568,10 +569,10 @@ function ZO_StoreManager:UpdateList()
 end
 
 function ZO_StoreManager:SetUpBuySlot(control, data)
-    local newStatusControl = GetControl(control, "Status")
-    local slotControl = GetControl(control, "Button")
-    local nameControl = GetControl(control, "Name")
-    local priceControl = GetControl(control, "SellPrice")
+    local newStatusControl = control:GetNamedChild("Status")
+    local slotControl = control:GetNamedChild("Button")
+    local nameControl = control:GetNamedChild("Name")
+    local priceControl = control:GetNamedChild("SellPrice")
 
     newStatusControl:SetHidden(true)
 
@@ -595,21 +596,29 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     local meetsReqs = data.meetsRequirementsToBuy and data.meetsRequirementsToEquip
     ZO_ItemSlot_SetupSlotBase(slotControl, data.stack, data.icon, meetsReqs)
 
-    nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, data.name))
+    nameControl:SetText(data.name)
     if data.meetsRequirementsToBuy then
         if data.questNameColor then
             nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
         elseif slotControl.isCollectible then
             nameControl:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
         else
-            nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality))
+            -- data.quality is depricated, included here for addon backwards compatibility
+            local displayQuality = data.displayQuality or data.quality
+            local qualityColor = nil
+            if data.entryType == STORE_ENTRY_TYPE_ANTIQUITY_LEAD then
+                qualityColor = GetAntiquityQualityColor(displayQuality)
+            else
+                qualityColor = GetItemQualityColor(displayQuality)
+            end
+            nameControl:SetColor(qualityColor:UnpackRGBA())
         end
     else
         nameControl:SetColor(MEET_BUY_REQS_FAIL_COLOR:UnpackRGBA())
     end
 
     local locked = false
-    if not data.meetsRequirementsToBuy and (data.buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE or data.buyStoreFailure == STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE) then
+    if not data.meetsRequirementsToBuy and ZO_StoreManager_DoesBuyStoreFailureLockEntry(data.buyStoreFailure) then
         locked = true
     end
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, meetsReqs, locked)
@@ -659,7 +668,7 @@ function ZO_StoreManager:RefreshBuyMultiple()
     local quantityControl = GetControl(self.multipleDialog, "SlotStackCount")
     local currencyControl = GetControl(self.multipleDialog, "Currency")
 
-    local icon, name, stack, price, _, meetsRequirementsToBuy, meetsRequirementsToEquip, _, _, currencyType1, currencyQuantity1,
+    local icon, _, stack, price, _, meetsRequirementsToBuy, meetsRequirementsToEquip, _, _, currencyType1, currencyQuantity1,
             currencyType2, currencyQuantity2 = GetStoreEntryInfo(entryIndex)
 
     -- Set info about what slot this is, on the top level slot control

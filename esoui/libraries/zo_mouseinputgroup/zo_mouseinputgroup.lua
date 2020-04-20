@@ -12,10 +12,10 @@ function ZO_MouseInputGroup:Initialize(rootControl)
     self.over = false
     self.inputTypeGroups = { }
     self.rootControl = rootControl
-
     self.refreshMouseOverFunction = function()
         self:RefreshMouseOver()
     end
+
     self.rootMouseEnterFunction = rootControl:GetHandler("OnMouseEnter")
     self.rootMouseExitFunction = rootControl:GetHandler("OnMouseExit")
     rootControl:SetHandler("OnMouseEnter", nil)
@@ -24,10 +24,12 @@ function ZO_MouseInputGroup:Initialize(rootControl)
 end
 
 function ZO_MouseInputGroup:GetInputTypeGroup(inputType)
-    if not self.inputTypeGroups[inputType] then
-        self.inputTypeGroups[inputType] = {}
+    local inputTypeGroup = self.inputTypeGroups[inputType]
+    if not inputTypeGroup then
+        inputTypeGroup = {}
+        self.inputTypeGroups[inputType] = inputTypeGroup
     end
-    return self.inputTypeGroups[inputType]
+    return inputTypeGroup
 end
 
 function ZO_MouseInputGroup:Contains(control, inputType)
@@ -47,8 +49,8 @@ function ZO_MouseInputGroup:Add(control, inputType)
         local groupControls = self:GetInputTypeGroup(inputType)
         table.insert(groupControls, control)
         if inputType == ZO_MOUSE_INPUT_GROUP_MOUSE_OVER then
-            ZO_PreHookHandler(control, "OnMouseEnter", self.refreshMouseOverFunction)
-            ZO_PreHookHandler(control, "OnMouseExit", self.refreshMouseOverFunction)
+            control:SetHandler("OnMouseEnter", self.refreshMouseOverFunction, inputType, CONTROL_HANDLER_ORDER_BEFORE)
+            control:SetHandler("OnMouseExit", self.refreshMouseOverFunction, inputType, CONTROL_HANDLER_ORDER_BEFORE)
         end
     end
 end
@@ -57,6 +59,26 @@ function ZO_MouseInputGroup:AddControlAndAllChildren(control, inputType)
     self:Add(control, inputType)
     for i = 1, control:GetNumChildren() do
         self:AddControlAndAllChildren(control:GetChild(i), inputType)
+    end
+end
+
+function ZO_MouseInputGroup:RemoveAll(inputType, excludedControls)
+    -- Optional exclusion of a single control, or a numerically indexed table
+    -- of controls, from this remove operation.
+    if excludedControls and type(excludedControls) ~= "table" then
+        excludedControls = {excludedControls}
+    end
+    local groupControls = self:GetInputTypeGroup(inputType)
+    for controlIndex = #groupControls, 1, -1 do
+        local control = groupControls[controlIndex]
+        -- Remove all controls in the group except the root control.
+        if control ~= self.rootControl then
+            if not excludedControls or not ZO_IsElementInNumericallyIndexedTable(excludedControls, control) then
+                table.remove(groupControls, controlIndex)
+                control:SetHandler("OnMouseEnter", nil, inputType)
+                control:SetHandler("OnMouseExit", nil, inputType)
+            end
+        end
     end
 end
 

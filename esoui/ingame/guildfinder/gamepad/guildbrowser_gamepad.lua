@@ -529,12 +529,17 @@ end
 
 function ZO_GuildBrowser_Gamepad:BuildLanguageData()
     self.languageData:Clear()
-    for i = GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END do
-        local newEntry = ZO_ComboBox_Base:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString("SI_GUILDLANGUAGEATTRIBUTEVALUE", i)))
-        newEntry.language = i
+    local function AddEntry(language)
+        local newEntry = ZO_ComboBox_Base:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString("SI_GUILDLANGUAGEATTRIBUTEVALUE", language)))
+        newEntry.language = language
         self.languageData:AddItem(newEntry)
-        self.languageData:SetItemSelected(newEntry, ZO_GuildBrowser_IsGuildAttributeLanguageFilterDefault(i))
+        self.languageData:SetItemSelected(newEntry, ZO_GuildBrowser_IsGuildAttributeLanguageFilterDefault(language))
     end
+
+    for language = GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END do
+        AddEntry(language)
+    end
+    AddEntry(GUILD_LANGUAGE_ATTRIBUTE_VALUE_OTHER)
 end
 
 function ZO_GuildBrowser_Gamepad:BuildRolesData()

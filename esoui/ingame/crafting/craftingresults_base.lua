@@ -334,7 +334,7 @@ local function DidLastCraftGainBooster(numItemsGained)
     if smithingObject and smithingObject:IsExtracting() then
         local boosterItemType = GetBoosterItemTypeForCraftingType()
         for i = 1, numItemsGained do
-            local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, quality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
+            local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType = GetLastCraftingResultItemInfo(i)
             if itemType == boosterItemType then
                 return true
             end
@@ -364,12 +364,14 @@ end
 do
     local CRAFTING_RESULT_SORT_ORDER =
     {
+        displayQuality = { tiebreaker = "quality", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        -- quality is depricated, included here for addon backwards compatibility
         quality = { tiebreaker = "stack", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         stack = { tiebreaker = "resultIndex", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
         resultIndex = { isNumeric = true },
     }
     local function CompareCraftingResultItems(left, right)
-        return ZO_TableOrderingFunction(left, right, "quality", CRAFTING_RESULT_SORT_ORDER, ZO_SORT_ORDER_DOWN)
+        return ZO_TableOrderingFunction(left, right, "displayQuality", CRAFTING_RESULT_SORT_ORDER, ZO_SORT_ORDER_DOWN)
     end
 
     function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType)
@@ -385,31 +387,31 @@ do
             end
 
             if numItemsGained == 0 then
-				if craftingType == CRAFTING_TYPE_ALCHEMY then
-					-- Crafted inert potion
-					ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
-				elseif craftingType == CRAFTING_TYPE_ENCHANTING then
-					-- No extraction results
-					ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
-				elseif IsSmithingCraftingType(craftingType) then
-					-- Only display extraction-related messaging for operations that produce items.
-					if self.craftingProcessProducesItems then
-						-- No results from gear deconstruction
-						local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
-						if penaltyApplied then
-							ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
-						else
-							ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
-						end
-					end
-				end
+                if craftingType == CRAFTING_TYPE_ALCHEMY then
+                    -- Crafted inert potion
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
+                elseif craftingType == CRAFTING_TYPE_ENCHANTING then
+                    -- No extraction results
+                    ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ENCHANT_NO_YIELD)
+                elseif IsSmithingCraftingType(craftingType) then
+                    -- Only display extraction-related messaging for operations that produce items.
+                    if self.craftingProcessProducesItems then
+                        -- No results from gear deconstruction
+                        local failedExtractionStringId, failedExtractionSoundName = GetFailedSmithingExtractionResultInfo(craftingType)
+                        if penaltyApplied then
+                            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, SI_SMITHING_DECONSTRUCTION_LEVEL_PENALTY)
+                        else
+                            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, failedExtractionSoundName, failedExtractionStringId)
+                        end
+                    end
+                end
             else
                 local shouldDisplayMessages = self:ShouldDisplayMessages()
                 local finalItemSoundCategory = ITEM_SOUND_CATEGORY_NONE
 
                 local resultItems = {}
                 for i = 1, numItemsGained do
-                    local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, quality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
+                    local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, displayQuality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
                     -- Don't save messages if we can't display them immediately
                     if shouldDisplayMessages then
                         table.insert(resultItems,
@@ -423,7 +425,9 @@ do
                             equipType = equipType,
                             itemType = itemType,
                             itemStyle = itemStyle,
-                            quality = quality,
+                            displayQuality = displayQuality,
+                            -- quality is depricated, included here for addon backwards compatibility
+                            quality = displayQuality,
                             itemSoundCategory = itemSoundCategory,
                             itemInstanceId = itemInstanceId,
                             itemLink = GetLastCraftingResultItemLink(i),
@@ -464,6 +468,14 @@ do
                 self:DisplayTranslatedRunes()
             end
         end
+    end
+end
+
+function ZO_CraftingResults_Base:ForceCompleteCraftProcess()
+    if self:IsCraftInProgress() then
+        self.craftingProcessCompleted = true
+        self.tooltipAnimationCompleted = true
+        CALLBACK_MANAGER:FireCallbacks("CraftingAnimationsStopped")
     end
 end
 

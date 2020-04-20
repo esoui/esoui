@@ -21,8 +21,6 @@ function ZO_GuildBrowser_GuildList_Keyboard:Initialize(control)
     ZO_GuildBrowser_GuildList_Shared.Initialize(self, control)
 
     self.filterManager = ZO_GuildBrowser_ManageFilters_Shared:New()
-
-    self.filterHeaderLabel = control:GetNamedChild("FiltersHeader")
     self.traderCheckBox = control:GetNamedChild("TraderCheckBox")
 
     ZO_CheckButton_SetLabelText(self.traderCheckBox.checkButton, GetString(SI_GUILD_BROWSER_GUILD_LIST_FILTERS_GUILD_TRADER))
@@ -157,9 +155,6 @@ function ZO_GuildBrowser_GuildList_Keyboard:UpdateFilterBar()
     self.traderCheckBox:SetAnchor(RIGHT, currentAnchorControl, LEFT, -10, 0)
     currentAnchorControl = self.traderCheckBox
     self.traderCheckBox:SetHidden(false)
-
-    self.filterHeaderLabel:ClearAnchors()
-    self.filterHeaderLabel:SetAnchor(RIGHT, currentAnchorControl, LEFT, -10, 0)
 end
 
 function ZO_GuildBrowser_GuildList_Keyboard:RefreshActivitiesFilter()
@@ -462,16 +457,26 @@ do
     end
 end
 
-local function SetupLanguageFiltersComboBox(comboBox, iterBegin, iterEnd, stringBase, defaultText, multiSelectText)
+local function SetupLanguageFiltersComboBox(comboBox, iterBegin, iterEnd, extraValues, stringBase, defaultText, multiSelectText)
     comboBox:ClearItems()
 
     comboBox:SetNoSelectionText(defaultText)
     comboBox:SetMultiSelectionTextFormatter(multiSelectText)
 
-    for i = iterBegin, iterEnd do
-        local entry = comboBox:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString(stringBase, i)))
-        entry.value = i
+    local function AddEntry(value)
+        local entry = comboBox:CreateItemEntry(ZO_CachedStrFormat(SI_GUILD_FINDER_ATTRIBUTE_VALUE_FORMATTER, GetString(stringBase, value)))
+        entry.value = value
         comboBox:AddItem(entry)
+    end
+
+    for i = iterBegin, iterEnd do
+        AddEntry(i)
+    end
+
+    if extraValues then
+        for _, value in ipairs(extraValues) do
+            AddEntry(value)
+        end
     end
     SetLanguageFiltersComboBoxToDefault(comboBox)
 end
@@ -578,7 +583,7 @@ function ZO_GuildFinderAdditionalFiltersDialog_OnInitialized(self)
     self.languagesComboBox = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("LanguageSelector"))
     self.languagesComboBox:SetSortsItems(false)
     self.languagesComboBox:SetHideDropdownCallback(OnComboboxSelectionChanged)
-    SetupLanguageFiltersComboBox(self.languagesComboBox, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END, "SI_GUILDLANGUAGEATTRIBUTEVALUE", GetString(SI_GUILD_BROWSER_GUILD_LIST_FILTERS_DEFAULT_LANGUAGE), SI_GUILD_BROWSER_GUILD_LIST_LANGUAGES_DROPDOWN_TEXT)
+    SetupLanguageFiltersComboBox(self.languagesComboBox, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN, GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END, { GUILD_LANGUAGE_ATTRIBUTE_VALUE_OTHER }, "SI_GUILDLANGUAGEATTRIBUTEVALUE", GetString(SI_GUILD_BROWSER_GUILD_LIST_FILTERS_DEFAULT_LANGUAGE), SI_GUILD_BROWSER_GUILD_LIST_LANGUAGES_DROPDOWN_TEXT)
 
     self.sizeComboBox = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("SizeSelector"))
     self.sizeComboBox:SetSortsItems(false)

@@ -341,7 +341,7 @@ ESO_Dialogs["BUY_BAG_SPACE"] =
         text = zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE),
     },
     noChoiceCallback = function(dialog)
-                            INTERACT_WINDOW:OnEndInteraction(BUY_BAG_SPACE_INTERACTION)
+                            INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
                          end,
     buttons =
     {
@@ -350,14 +350,14 @@ ESO_Dialogs["BUY_BAG_SPACE"] =
             text =      SI_DIALOG_ACCEPT,
             callback =  function(dialog)
                             BuyBagSpace()
-                            INTERACT_WINDOW:OnEndInteraction(BUY_BAG_SPACE_INTERACTION)
+                            INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
                         end,
         },
         [2] =
         {
             text =       SI_DIALOG_DECLINE,
             callback =   function(dialog)
-                            INTERACT_WINDOW:OnEndInteraction(BUY_BAG_SPACE_INTERACTION)
+                            INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
                          end,
         },
     },
@@ -499,26 +499,26 @@ ESO_Dialogs["CANT_BUYBACK_FROM_FENCE"] =
     {
         text = SI_STOLEN_ITEM_CANNOT_BUYBACK_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_STOLEN_ITEM_CANNOT_BUYBACK_TEXT,
     },
     buttons =
     {
-        [1] =
         {
-            text =      SI_ITEM_ACTION_SELL,
+            text = SI_ITEM_ACTION_SELL,
             callback =  function(dialog)
-                            SellInventoryItem(dialog.data.bag, dialog.data.slot, dialog.data.stackCount)
-                        end,
+                SellInventoryItem(dialog.data.bag, dialog.data.slot, dialog.data.stackCount)
+            end,
         },
-        [2] =
         {
-            text =      SI_DIALOG_CANCEL,
+            text = SI_DIALOG_CANCEL,
         },
     },
     updateFn = function(dialog)
-        local itemColor = GetItemQualityColor(dialog.data.quality)
+        -- dialog.data.quality is depricated, included here for addon backwards compatibility
+        local displayQuality = dialog.data.displayQuality or dialog.data.quality
+        local itemColor = GetItemQualityColor(displayQuality)
         ZO_Dialogs_RefreshDialogText("CANT_BUYBACK_FROM_FENCE", dialog, { mainTextParams = { itemColor:Colorize(dialog.data.itemName) } } )
     end,
 }
@@ -529,7 +529,7 @@ ESO_Dialogs["SCRIPT_ACCESS_VIOLATION"] =
     {
         text = SI_PROMPT_TITLE_SCRIPT_ACCESS_VIOLATION,
     },
-    mainText = 
+    mainText =
     {
         text = SI_SCRIPT_ACCESS_VIOLATION,
     },
@@ -1268,7 +1268,7 @@ ESO_Dialogs["CONFIRM_RELEASE_KEEP_OWNERSHIP"] =
         text = SI_GUILD_RELEASE_KEEP_CONFIRM_PROMPT,
     },
     noChoiceCallback = function()
-        INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
     end,
     buttons =
     {
@@ -1277,14 +1277,14 @@ ESO_Dialogs["CONFIRM_RELEASE_KEEP_OWNERSHIP"] =
             text = SI_GUILD_RELEASE_KEEP_ACCEPT,
             callback = function(dialog)
                 dialog.data.release()
-                INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
+                INTERACT_WINDOW:EndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
             end,
         },
         [2] =
         {
             text = SI_DIALOG_CANCEL,
             callback = function(dialog)
-                INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
+                INTERACT_WINDOW:EndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
             end,
             
         },
@@ -1887,13 +1887,18 @@ ESO_Dialogs["EXIT_DYE_UI_DISCARD_GAMEPAD"] =
     buttons =
     {
         {
-            text = SI_YES,
+            text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                ZO_RESTYLE_STATION_GAMEPAD:ExitWithoutSave()
+                dialog.data.confirmCallback()
             end
         },
         {
-            text = SI_NO,
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
+                if dialog.data.declineCallback then
+                    dialog.data.declineCallback()
+                end
+            end
         },
     },
     noChoiceCallback = function(dialog)
@@ -3672,8 +3677,8 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] =
             local introText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO)
             local scrollItemLink = GetPendingSkillRespecScrollItemLink()
             local scrollName = GetItemLinkName(scrollItemLink)
-            local scrollQuality = GetItemLinkQuality(scrollItemLink)
-            local qualityColor = GetItemQualityColor(scrollQuality)
+            local scrollDisplayQuality = GetItemLinkDisplayQuality(scrollItemLink)
+            local qualityColor = GetItemQualityColor(scrollDisplayQuality)
             local costText = zo_strformat(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, qualityColor:Colorize(scrollName))
             return string.format("%s\n\n%s", introText, costText)
         end,

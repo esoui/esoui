@@ -24,8 +24,8 @@
 
                     <Controls>
                         <Texture name="$(parent)Title" textureFile="EsoUI/Art/Login/Gamepad/consoleLogoGreymoor.dds">
-                            <Dimensions x="498" y="258"/>
-                            <TextureCoords left="0" right="0.486328125" top="0" bottom="1"/>
+                            <Dimensions x="498" y="121"/>
+                            <TextureCoords left="0" right="0.552734375" top="0" bottom="0.9453125"/>
                             <Anchor point="TOPLEFT" />
                         </Texture>
                         <!--<Texture name="$(parent)Ouroboros" textureFile="EsoUI/Art/Login/Gamepad/consoleOuroborosSummerset.dds">

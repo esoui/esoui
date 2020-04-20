@@ -31,13 +31,13 @@ do
         local itemData = {}
         itemData.bag, itemData.slot = ZO_Inventory_GetBagAndIndex(targetData)
         itemData.itemName = targetData.text
-        itemData.quality = select(8, GetItemInfo(itemData.bag, itemData.slot))
+        itemData.functionalQuality = GetItemFunctionalQuality(itemData.bag, itemData.slot)
         itemData.stackCount = targetData.stackCount
 
         if self.confirmationMode then
             itemData.stackCount = STORE_WINDOW_GAMEPAD:GetSpinnerValue()
             if itemData.stackCount > 0 then
-                if itemData.quality >= ITEM_QUALITY_ARCANE then
+                if itemData.functionalQuality >= ITEM_QUALITY_ARCANE then
                     ZO_Dialogs_ShowGamepadDialog("CANT_BUYBACK_FROM_FENCE", itemData)
                 else
                     SellInventoryItem(itemData.bag, itemData.slot, itemData.stackCount)
@@ -51,7 +51,7 @@ do
                 local calcSellPrice = GetItemSellValueWithBonuses(itemData.bag, itemData.slot)
                 STORE_WINDOW_GAMEPAD:SetupSpinner(spinnerMax, spinnerMax, calcSellPrice, targetData.currencyType1)
             else
-                if itemData.quality >= ITEM_QUALITY_ARCANE then
+                if itemData.functionalQuality >= ITEM_QUALITY_ARCANE then
                     ZO_Dialogs_ShowGamepadDialog("CANT_BUYBACK_FROM_FENCE", itemData)
                 else
                     SellInventoryItem(itemData.bag, itemData.slot, 1)

@@ -17,25 +17,25 @@ function CharacterCreateSliderManager:New(...)
 end
 
 function CharacterCreateSliderManager:Initialize(parent)
-    local CreateSlider =    function(pool)
-                                local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider", "ZO_CharacterCreateSlider_Keyboard", pool, parent)
-                                return ZO_CharacterCreateSlider_Keyboard:New(control)
-                            end
+    local function CreateSlider(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider", "ZO_CharacterCreateSlider_Keyboard", pool, parent)
+        return ZO_CharacterCreateSlider_Keyboard:New(control)
+    end
 
-    local CreateAppearanceSlider =  function(pool)
-                                        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider", "ZO_CharacterCreateSlider_Keyboard", pool, parent)
-                                        return ZO_CharacterCreateAppearanceSlider_Keyboard:New(control)
-                                    end
+    local function CreateAppearanceSlider(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider", "ZO_CharacterCreateSlider_Keyboard", pool, parent)
+        return ZO_CharacterCreateAppearanceSlider_Keyboard:New(control)
+    end
 
-    local CreateColorPicker =   function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker", "ZO_CharacterCreateColorSlider_Keyboard", pool, parent)
-                                    return ZO_CharacterCreateColorSlider_Keyboard:New(control)
-                                end
+    local function CreateColorPicker(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker", "ZO_CharacterCreateColorSlider_Keyboard", pool, parent)
+        return ZO_CharacterCreateColorSlider_Keyboard:New(control)
+    end
 
-    local CreateDropdown =  function(pool)
-                                local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateDropdown", "ZO_CharacterCreateDropDownSlider_Keyboard", pool, parent)
-                                return ZO_CharacterCreateDropdownSlider_Keyboard:New(control)
-                            end
+    local function CreateDropdown(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateDropdown", "ZO_CharacterCreateDropDownSlider_Keyboard", pool, parent)
+        return ZO_CharacterCreateDropdownSlider_Keyboard:New(control)
+    end
 
     local function ResetSlider(slider)
         local sliderControl = slider.control
@@ -49,7 +49,7 @@ function CharacterCreateSliderManager:Initialize(parent)
     local function ResetColorPicker(slider)
         local sliderControl = slider.control
         KEYBOARD_BUCKET_MANAGER:RemoveControl(sliderControl)
-        ZO_ColorSwatchPicker_Clear(GetControl(sliderControl, "Slider"))
+        ZO_ColorSwatchPicker_Clear(sliderControl:GetNamedChild("Slider"))
         sliderControl:SetHidden(true)
         if slider:IsLocked() then
             slider:ToggleLocked()
@@ -109,8 +109,6 @@ function ZO_CharacterCreate_Keyboard:Initialize(...)
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate", EVENT_CHARACTER_CREATE_ZOOM_CHANGED, HandleZoomChanged)
 
     CHARACTER_CREATE_FRAGMENT = ZO_FadeSceneFragment:New(self.control, 300)
-
-    self:InitializeSkipTutorialDialog()
 end
 
 function ZO_CharacterCreate_Keyboard:OnCharacterCreateRequested()
@@ -128,9 +126,9 @@ do
 
     function ZO_CharacterCreate_Keyboard:OnCharacterCreateFailed(reason)
         local errorReason = GetString("SI_CHARACTERCREATEEDITERROR", reason)
-    
+
         -- Show the fact that the character could not be created.
-        ZO_Dialogs_ShowDialog("CHARACTER_CREATE_FAILED_REASON", nil, {mainTextParams = {errorReason}})
+        ZO_Dialogs_ShowDialog("CHARACTER_CREATE_FAILED_REASON", nil, { mainTextParams = { errorReason } })
 
         if reasonsThatDisableCreateButton[reason] then
             self.createButton:SetEnabled(false)
@@ -159,11 +157,11 @@ do
         self.genderRadioGroup = ZO_RadioButtonGroup:New()
 
         -- create the triangle controls
-        local physiqueTriangleControl = CreateControlFromVirtual("$(parent)PhysiqueSelection", self.control, "ZO_CharacterCreateTriangleTemplate_Keyboard")
-        self.physiqueTriangle = CreateTriangle(physiqueTriangleControl, SetPhysique, GetPhysique, SI_CREATE_CHARACTER_BODY_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FAT, SI_CREATE_CHARACTER_TRIANGLE_THIN)
+        self.physiqueTriangleControl = CreateControlFromVirtual("$(parent)PhysiqueSelection", self.control, "ZO_CharacterCreateTriangleTemplate_Keyboard")
+        self.physiqueTriangle = CreateTriangle(self.physiqueTriangleControl, SetPhysique, GetPhysique, SI_CREATE_CHARACTER_BODY_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FAT, SI_CREATE_CHARACTER_TRIANGLE_THIN)
 
-        local faceTriangleControl = CreateControlFromVirtual("$(parent)FaceSelection", self.control, "ZO_CharacterCreateTriangleTemplate_Keyboard")
-        self.faceTriangle = CreateTriangle(faceTriangleControl, SetFace, GetFace, SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT, SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN)
+        self.faceTriangleControl = CreateControlFromVirtual("$(parent)FaceSelection", self.control, "ZO_CharacterCreateTriangleTemplate_Keyboard")
+        self.faceTriangle = CreateTriangle(self.faceTriangleControl, SetFace, GetFace, SI_CREATE_CHARACTER_FACE_TRIANGLE_LABEL, SI_CREATE_CHARACTER_TRIANGLE_FACE_MUSCULAR, SI_CREATE_CHARACTER_TRIANGLE_FACE_FAT, SI_CREATE_CHARACTER_TRIANGLE_FACE_THIN)
 
         -- setup the create button and link it to the name control
         self.createButton = self.control:GetNamedChild("CreateButton")
@@ -180,6 +178,10 @@ do
         self.saveButton = self.control:GetNamedChild("SaveButton")
 
         self.templateControl = self.control:GetNamedChild("Template")
+
+        self.raceSelectionControl = self.control:GetNamedChild("Race")
+        self.classSelectionControl = self.control:GetNamedChild("ClassSelection")
+        self.genderSelectionControl = self.control:GetNamedChild("GenderSelection")
     end
 end
 
@@ -236,14 +238,19 @@ function ZO_CharacterCreate_Keyboard:InitializeRaceSelectors()
 end
 
 function ZO_CharacterCreate_Keyboard:InitializeGenderSelector()
-    ZO_CharacterCreateGenderSelectionMaleLabel:SetText(GetString("SI_GENDER", GENDER_MALE))
-    ZO_CharacterCreateGenderSelectionFemaleLabel:SetText(GetString("SI_GENDER", GENDER_FEMALE))
+    local maleSelector = self.genderSelectionControl:GetNamedChild("Male")
+    maleSelector:GetNamedChild("Label"):SetText(GetString("SI_GENDER", GENDER_MALE))
 
-    ZO_CharacterCreateGenderSelectionMaleButton.gender = GENDER_MALE
-    ZO_CharacterCreateGenderSelectionFemaleButton.gender = GENDER_FEMALE
+    local femaleSelector = self.genderSelectionControl:GetNamedChild("Female")
+    femaleSelector:GetNamedChild("Label"):SetText(GetString("SI_GENDER", GENDER_FEMALE))
 
-    self.genderRadioGroup:Add(ZO_CharacterCreateGenderSelectionMaleButton)
-    self.genderRadioGroup:Add(ZO_CharacterCreateGenderSelectionFemaleButton)
+    local maleSelectorButton = maleSelector:GetNamedChild("Button")
+    maleSelectorButton.gender = GENDER_MALE
+    local femaleSelectorButton = femaleSelector:GetNamedChild("Button")
+    femaleSelectorButton.gender = GENDER_FEMALE
+
+    self.genderRadioGroup:Add(maleSelectorButton)
+    self.genderRadioGroup:Add(femaleSelectorButton)
 end
 
 function ZO_CharacterCreate_Keyboard:InitializeTemplateList()
@@ -287,55 +294,6 @@ function ZO_CharacterCreate_Keyboard:InitializeTemplateList()
     end
 end
 
-function ZO_CharacterCreate_Keyboard:InitializeSkipTutorialDialog()
-    local control = ZO_CharacterCreateSkipTutorialDialog
-    ZO_Dialogs_RegisterCustomDialog("CHARACTER_CREATE_SKIP_TUTORIAL",
-    {
-        customControl = control,
-        canQueue = true,
-        title =
-        {
-            text = SI_PROMPT_TITLE_SKIP_TUTORIAL,
-        },
-        mainText = 
-        {
-            text = SI_PROMPT_BODY_SKIP_TUTORIAL,
-        },
-        noChoiceCallback =  function(dialog)
-                                ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(true)
-                            end,
-        buttons =
-        {
-            {
-                control = GetControl(control, "Play"),
-                text = SI_PROMPT_PLAY_TUTORIAL_BUTTON,
-                keybind = "DIALOG_PRIMARY",
-                callback =  function(dialog)
-                                self:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_DEFAULT_LOCATION)
-                            end,
-            },
-
-            {
-                control = GetControl(control, "Skip"),
-                text = SI_PROMPT_SKIP_TUTORIAL_BUTTON,
-                keybind = "DIALOG_SECONDARY",
-                callback =  function(dialog)
-                                self:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_SKIP_TUTORIAL)
-                            end,
-            },
-
-            {
-                control = GetControl(control, "Back"),
-                text = SI_PROMPT_BACK_TUTORIAL_BUTTON,
-                keybind = "DIALOG_NEGATIVE",
-                callback =  function(dialog)
-                                ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(true)
-                            end,
-            },
-        }
-    })
-end
-
 function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
     local templateData = self.characterData:GetTemplate(templateId)
     if not templateData then
@@ -349,15 +307,6 @@ function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
 
     CharacterCreateSetTemplate(templateId)
 
-    KEYBOARD_BUCKET_MANAGER:SwitchBuckets(CREATE_BUCKET_RACE)
-
-    -- Disable appearance related controls if the appearance is overridden in the template.
-    local enabled = not templateData.overrideAppearance
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, enabled)
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, enabled)
-
-    ZO_CharacterCreateRandomizeAppearance:SetEnabled(enabled)
-
     local validRaces = {}
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateRaceSelectorsForTemplate(...) end, self.characterData:GetRaceInfo(), templateData, self.raceRadioGroup, validRaces)
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateClassSelectorsForTemplate(...) end, self.characterData:GetClassInfo(), templateData, self.classRadioGroup)
@@ -366,8 +315,8 @@ function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
     self.characterData:UpdateAllianceSelectability()
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateAllianceSelectorsForTemplate(...) end, self.characterData:GetAllianceInfo(), templateData, self.allianceRadioGroup, validAlliances)
 
-    self.genderRadioGroup:SetEnabled(templateData.gender == 0)
-    
+    self:UpdateGenderSelectorsForTemplate(templateData)
+
     -- Pick a race
     if templateData.race ~= 0 then
         CharacterCreateSetRace(templateData.race)
@@ -376,12 +325,12 @@ function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
     end
 
     -- Pick an alliance 
-    if templateData.alliance ~= 0 then
+    if templateData.alliance ~= ALLIANCE_NONE then
         ZO_CharacterCreate_SetAlliance(templateData.alliance)
     else
         -- (never random unless a race without a fixed alliance is picked)
         local alliance = self.characterData:GetRaceForRaceDef(CharacterCreateGetRace(characterMode)).alliance
-        if alliance ~= 0 then
+        if alliance ~= ALLIANCE_NONE then
             ZO_CharacterCreate_SetAlliance(alliance)
         else
             ZO_CharacterCreate_SetAlliance(self.characterData:PickRandomAlliance(validAlliances))
@@ -390,26 +339,38 @@ function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
 
     -- Pick a class
     if templateData.class ~= 0 then
-        CharacterCreateSetClass(templateData.class)
+        self:SetClass(templateData.class)
     else
         -- UpdateSelectorsForTemplate() should be called prior to this function or unselectable classes might be set (which would result in no class being set).
         self:PickRandomSelectableClass()
     end
 
     -- Pick a gender
-    if templateData.gender ~= 0 then
-        CharacterCreateSetGender(templateData.gender)
+    if templateData.gender ~= GENDER_NEUTER then
+        self:SetGender(templateData.gender)
     else
         self:PickRandomGender()
     end
 
     -- Make the controls match what you picked...
-    KEYBOARD_CHARACTER_CREATE_MANAGER:ResetControls()
+    self:ResetControls()
     if not templateData.overrideAppearance then
         ZO_CharacterCreate_RandomizeAppearance("initial")
     else
         InitializeAppearanceFromTemplate(templateId)
     end
+
+    KEYBOARD_BUCKET_MANAGER:SwitchBuckets(CREATE_BUCKET_RACE)
+
+    -- Disable appearance related controls if the appearance is overridden in the template.
+    -- buckets need to be disabled after reseting the controls
+    local enabled = not templateData.overrideAppearance
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, enabled)
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, enabled)
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, true)
+
+    ZO_CharacterCreateRandomizeAppearance:SetEnabled(enabled)
+
     return true
 end
 
@@ -421,7 +382,7 @@ function ZO_CharacterCreate_Keyboard:InitializeClassSelectors()
             internalassert(false, errorString)
         end
 
-        local parent = ZO_CharacterCreateClassSelectionButtonArea
+        local parent = self.classSelectionControl:GetNamedChild("ButtonArea")
         local stride = 3
         local padX = 0
         local padY = 0
@@ -671,11 +632,11 @@ do
 
         KEYBOARD_BUCKET_MANAGER:Reset()
         KEYBOARD_BUCKET_MANAGER:AddSubCategories()
-        KEYBOARD_BUCKET_MANAGER:AddControl(ZO_CharacterCreateGenderSelection, CREATE_BUCKET_RACE, function() self:UpdateGenderControl() end)
-        KEYBOARD_BUCKET_MANAGER:AddControl(ZO_CharacterCreateRace, CREATE_BUCKET_RACE, function() self:UpdateRaceControl() end)
-        KEYBOARD_BUCKET_MANAGER:AddControl(ZO_CharacterCreateClassSelection, CREATE_BUCKET_CLASS, function() self:UpdateClassControl() end)
-        KEYBOARD_BUCKET_MANAGER:AddControl(ZO_CharacterCreatePhysiqueSelection, CREATE_BUCKET_BODY, UpdateSlider, RandomizeSlider, SLIDER_SUBCAT_BODY_TYPE)
-        KEYBOARD_BUCKET_MANAGER:AddControl(ZO_CharacterCreateFaceSelection, CREATE_BUCKET_FACE, UpdateSlider, RandomizeSlider, SLIDER_SUBCAT_FACE_TYPE)
+        KEYBOARD_BUCKET_MANAGER:AddControl(self.genderSelectionControl, CREATE_BUCKET_RACE, function() self:UpdateGenderControl() end)
+        KEYBOARD_BUCKET_MANAGER:AddControl(self.raceSelectionControl, CREATE_BUCKET_RACE, function() self:UpdateRaceControl() end)
+        KEYBOARD_BUCKET_MANAGER:AddControl(self.classSelectionControl, CREATE_BUCKET_CLASS, function() self:UpdateClassControl() end)
+        KEYBOARD_BUCKET_MANAGER:AddControl(self.physiqueTriangleControl, CREATE_BUCKET_BODY, UpdateSlider, RandomizeSlider, SLIDER_SUBCAT_BODY_TYPE)
+        KEYBOARD_BUCKET_MANAGER:AddControl(self.faceTriangleControl, CREATE_BUCKET_FACE, UpdateSlider, RandomizeSlider, SLIDER_SUBCAT_FACE_TYPE)
 
         -- TODO: this fixes a bug where the triangles don't reflect the correct data...there will be more fixes to pregameCharacterManager to address the real issue
         -- (where the triangle data needs to live on its own rather than being tied to the unit)
@@ -719,6 +680,9 @@ do
         end
 
         KEYBOARD_BUCKET_MANAGER:RemoveUnusedSubCategories()
+
+        -- Update Gender Text
+        self:UpdateGenderSpecificText()
     end
 end
 
@@ -727,7 +691,7 @@ function ZO_CharacterCreate_Keyboard:ResetNameEdit()
     nameEdit:TakeFocus() -- Fix an issue where the animated name text wouldn't display
     nameEdit:SetText("")
     nameEdit:LoseFocus()
-    GetControl(self.nameControl, "Instructions"):SetHidden(false)
+    self.nameControl:GetNamedChild("Instructions"):SetHidden(false)
 end
 
 function ZO_CharacterCreate_Keyboard:Reset()
@@ -772,8 +736,8 @@ function ZO_CharacterCreate_Keyboard:UpdateGenderSpecificText(currentGender)
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     currentGender = currentGender or CharacterCreateGetGender(characterMode)
 
-    ZO_CharacterCreateRaceName:SetText(zo_strformat(SI_RACE_NAME, GetRaceName(currentGender, CharacterCreateGetRace(characterMode))))
-    ZO_CharacterCreateClassSelectionName:SetText(zo_strformat(SI_CLASS_NAME, GetClassName(currentGender, CharacterCreateGetClass(characterMode))))
+    self.raceSelectionControl:GetNamedChild("Name"):SetText(zo_strformat(SI_RACE_NAME, GetRaceName(currentGender, CharacterCreateGetRace(characterMode))))
+    self.classSelectionControl:GetNamedChild("Name"):SetText(zo_strformat(SI_CLASS_NAME, GetClassName(currentGender, CharacterCreateGetClass(characterMode))))
 end
 
 function ZO_CharacterCreate_Keyboard:UpdateRaceControl()
@@ -800,11 +764,11 @@ function ZO_CharacterCreate_Keyboard:UpdateRaceControl()
 
         self:UpdateGenderSpecificText()
 
-        ZO_CharacterCreateRaceAlliance:SetText(zo_strformat(SI_ALLIANCE_NAME, allianceName))
-        ZO_CharacterCreateRaceDescription:SetText(race.lore)
+        self.raceSelectionControl:GetNamedChild("Alliance"):SetText(zo_strformat(SI_ALLIANCE_NAME, allianceName))
+        self.raceSelectionControl:GetNamedChild("Description"):SetText(race.lore)
 
-        ZO_CharacterCreateRaceAllianceBG:SetTexture(backdropTop)
-        ZO_CharacterCreateRaceAllianceBGBottom:SetTexture(backdropBottom)
+        self.raceSelectionControl:GetNamedChild("AllianceBG"):SetTexture(backdropTop)
+        self.raceSelectionControl:GetNamedChild("AllianceBGBottom"):SetTexture(backdropBottom)
     end
 end
 
@@ -815,7 +779,7 @@ function ZO_CharacterCreate_Keyboard:UpdateGenderControl()
     local function IsGenderClicked(button)
         return button.gender == currentGender
     end
-    
+
     self.genderRadioGroup:UpdateFromData(IsGenderClicked)
 end
 
@@ -832,7 +796,7 @@ function ZO_CharacterCreate_Keyboard:UpdateClassControl()
     local class = self.characterData:GetClassForClassDef(currentClass)
     if class then
         self:UpdateGenderSpecificText()
-        ZO_CharacterCreateClassSelectionDescription:SetText(class.lore)
+        self.classSelectionControl:GetNamedChild("Description"):SetText(class.lore)
     end
 end
 
@@ -847,7 +811,7 @@ end
 
 function ZO_CharacterCreate_Keyboard:OnCreateButtonClicked(startLocation)
     local characterName = self.nameControl:GetText()
-    
+
     if characterName and #characterName > 0 then
         if ZO_CHARACTERCREATE_MANAGER:GetShouldPromptForTutorialSkip() and CanSkipTutorialArea() and startLocation ~= CHARACTER_OPTION_CLEAN_TEST_AREA and startLocation ~= "CharacterSelect_FromIngame" then
             ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(false)
@@ -866,25 +830,50 @@ function ZO_CharacterCreate_Keyboard:InitializeForEditChanges(characterInfo, mod
 
     local raceTemplate = characterInfo
     if mode == CHARACTER_CREATE_MODE_EDIT_RACE then
-        raceTemplate =  {
-                            race = 0,
-                            alliance = characterInfo.alliance,
-                        }
+        raceTemplate =
+        {
+            race = 0,
+            alliance = characterInfo.alliance,
+        }
     end
+
+    local genderTemplate =
+    {
+        gender = GENDER_NEUTER
+    }
+
+    local allianceTemplate = characterInfo
+    if mode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
+        allianceTemplate =
+        {
+            alliance = ALLIANCE_NONE,
+        }
+        genderTemplate = characterInfo
+    end
+
+    self:UpdateGenderSelectorsForTemplate(genderTemplate)
 
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateRaceSelectorsForTemplate(...) end, self.characterData:GetRaceInfo(), raceTemplate, self.raceRadioGroup)
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateClassSelectorsForTemplate(...) end, self.characterData:GetClassInfo(), characterInfo, self.classRadioGroup)
-
-    self:UpdateSelectorsForTemplate(function(...) return self:UpdateAllianceSelectorsForTemplate(...) end, self.characterData:GetAllianceInfo(), characterInfo, self.allianceRadioGroup)
+    self:UpdateSelectorsForTemplate(function(...) return self:UpdateAllianceSelectorsForTemplate(...) end, self.characterData:GetAllianceInfo(), allianceTemplate, self.allianceRadioGroup)
 
     self:Reset()
+
+    -- disable the buckets after reset
+    local appearanceControlsEnabled = mode ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, appearanceControlsEnabled)
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, appearanceControlsEnabled)
+    -- none of the edit modes allow for changing class
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, false)
+
+    ZO_CharacterCreateRandomizeAppearance:SetEnabled(appearanceControlsEnabled)
 
     self.templateControl:SetHidden(true)
 
     local name = zo_strformat(SI_CHARACTER_SELECT_NAME, characterInfo.name)
     self.nameControl:SetText(name)
     self.nameControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGB())
-    GetControl(self.nameControl, "Instructions"):SetHidden(true)
+    self.nameControl:GetNamedChild("Instructions"):SetHidden(true)
     self.nameControl:SetEditEnabled(false)
     self.nameControl:SetMouseEnabled(false)
 
@@ -900,6 +889,10 @@ function ZO_CharacterCreate_Keyboard:InitializeForRaceChange(characterInfo)
     self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_RACE)
 end
 
+function ZO_CharacterCreate_Keyboard:InitializeForAllianceChange(characterInfo)
+    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_ALLIANCE)
+end
+
 function ZO_CharacterCreate_Keyboard:InitializeForCharacterCreate()
     self:SetCharacterCreateMode(CHARACTER_CREATE_MODE_CREATE)
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
@@ -910,6 +903,14 @@ function ZO_CharacterCreate_Keyboard:InitializeForCharacterCreate()
     if templateData == nil then
         templateData = self.characterData:GetNoneTemplate()
     end
+
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, true)
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, true)
+    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, true)
+
+    ZO_CharacterCreateRandomizeAppearance:SetEnabled(true)
+
+    self:UpdateGenderSelectorsForTemplate(templateData)
 
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateRaceSelectorsForTemplate(...) end, self.characterData:GetRaceInfo(), templateData, self.raceRadioGroup)
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateClassSelectorsForTemplate(...) end, self.characterData:GetClassInfo(), templateData, self.classRadioGroup)
@@ -928,6 +929,14 @@ function ZO_CharacterCreate_Keyboard:InitializeForCharacterCreate()
     ZO_CharacterCreate_SetChromaColorForAlliance(currentAlliance)
 end
 
+
+function ZO_CharacterCreate_Keyboard:UpdateGenderSelectorsForTemplate(templateData)
+    for button in self.genderRadioGroup:IterateButtons() do
+        local enabled = templateData.gender == GENDER_NEUTER or templateData.gender == button.gender
+        self:SetSelectorButtonEnabled(button, self.genderRadioGroup, enabled)
+    end
+end
+
 --
 --[[ XML Handlers and global functions ]]--
 --
@@ -936,11 +945,78 @@ function ZO_CharacterCreate_RandomizeAppearance(randomizeType)
     KEYBOARD_BUCKET_MANAGER:RandomizeAppearance(randomizeType)
 end
 
+function ZO_CharacterCreate_RandomizeAppearance_OnMouseEnter(control)
+    -- If a button is disabled, add any disable reasons to the tooltip
+    if control:GetState() == BSTATE_DISABLED or control:GetState() == BSTATE_DISABLED_PRESSED then
+        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -5, TOP)
+
+        -- Check if disabled due to a barbershop mode
+        local characterCreateMode = KEYBOARD_CHARACTER_CREATE_MANAGER:GetCharacterCreateMode()
+        if characterCreateMode ~= CHARACTER_CREATE_MODE_CREATE then
+            local tokenType = KEYBOARD_CHARACTER_CREATE_MANAGER:GetTokenTypeForCharacterCreateMode(characterCreateMode)
+            local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
+            InformationTooltip:AddLine(zo_strformat(SI_CREATE_CHARACTER_SELECTOR_TOKEN_DISABLED, tokenString), "", ZO_NORMAL_TEXT:UnpackRGB())
+        end
+    end
+end
+
+function ZO_CharacterCreate_RandomizeAppearance_OnMouseExit(control)
+    ClearTooltip(InformationTooltip)
+end
+
 function ZO_CharacterCreate_Initialize(control)
     KEYBOARD_CHARACTER_CREATE_MANAGER = ZO_CharacterCreate_Keyboard:New(control)
     SYSTEMS:RegisterKeyboardObject(ZO_CHARACTER_CREATE_SYSTEM_NAME, KEYBOARD_CHARACTER_CREATE_MANAGER)
 
     KEYBOARD_BUCKET_MANAGER = ZO_CharacterCreateBucketManager_Keyboard:New(ZO_CharacterCreateBuckets)
+end
+
+function ZO_CharacterCreateSkipTutorialDialog_Initialize(control)
+    ZO_Dialogs_RegisterCustomDialog("CHARACTER_CREATE_SKIP_TUTORIAL",
+    {
+        customControl = control,
+        canQueue = true,
+        title =
+        {
+            text = SI_PROMPT_TITLE_SKIP_TUTORIAL,
+        },
+        mainText = 
+        {
+            text = SI_PROMPT_BODY_SKIP_TUTORIAL,
+        },
+        noChoiceCallback = function(dialog)
+            ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(true)
+        end,
+        buttons =
+        {
+            {
+                control = control:GetNamedChild("Play"),
+                text = SI_PROMPT_PLAY_TUTORIAL_BUTTON,
+                keybind = "DIALOG_PRIMARY",
+                callback = function(dialog)
+                    KEYBOARD_CHARACTER_CREATE_MANAGER:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_DEFAULT_LOCATION)
+                end,
+            },
+
+            {
+                control = control:GetNamedChild("Skip"),
+                text = SI_PROMPT_SKIP_TUTORIAL_BUTTON,
+                keybind = "DIALOG_SECONDARY",
+                callback = function(dialog)
+                    KEYBOARD_CHARACTER_CREATE_MANAGER:CreateCharacter(dialog.data.startLocation, CHARACTER_CREATE_SKIP_TUTORIAL)
+                end,
+            },
+
+            {
+                control = control:GetNamedChild("Back"),
+                text = SI_PROMPT_BACK_TUTORIAL_BUTTON,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function(dialog)
+                    ZO_CHARACTERCREATE_MANAGER:SetShouldPromptForTutorialSkip(true)
+                end,
+            },
+        }
+    })
 end
 
 function ZO_CharacterCreate_OnCreateButtonClicked(startLocation)
@@ -997,7 +1073,7 @@ function ZO_CharacterCreate_CheckEnableCreateButton(editControl)
 end
 
 function ZO_CharacterCreate_OnNameFieldFocusGained(editControl)
-    GetControl(editControl, "Instructions"):SetHidden(true)
+    editControl:GetNamedChild("Instructions"):SetHidden(true)
     ZO_CharacterCreate_CheckEnableCreateButton(editControl)
 
     if WINDOW_MANAGER:IsHandlingHardwareEvent() then
@@ -1007,7 +1083,7 @@ end
 
 function ZO_CharacterCreate_OnNameFieldFocusLost(editControl)
     if #editControl:GetText() == 0 then
-        GetControl(editControl, "Instructions"):SetHidden(false)
+        editControl:GetNamedChild("Instructions"):SetHidden(false)
     end
     editControl.linkedInstructions:Hide()
 end
@@ -1015,20 +1091,24 @@ end
 do
     local SELECTOR_CLICK_HANDLERS =
     {
-        [CHARACTER_CREATE_SELECTOR_RACE] =  function(button)
-                        KEYBOARD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
-                        KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
-                    end,
+        [CHARACTER_CREATE_SELECTOR_RACE] = function(button)
+            KEYBOARD_CHARACTER_CREATE_MANAGER:SetRace(button.defId)
+            KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
+        end,
 
         [CHARACTER_CREATE_SELECTOR_CLASS] = function(button)
-                        CharacterCreateSetClass(button.defId)
-                        KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
-                    end,
+            KEYBOARD_CHARACTER_CREATE_MANAGER:SetClass(button.defId)
+            KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateClassControl()
+        end,
 
-        [CHARACTER_CREATE_SELECTOR_ALLIANCE] =  function(button)
-                            KEYBOARD_CHARACTER_CREATE_MANAGER:SetAlliance(button.defId)
-                            KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
-                        end,
+        [CHARACTER_CREATE_SELECTOR_ALLIANCE] = function(button)
+            KEYBOARD_CHARACTER_CREATE_MANAGER:SetAlliance(button.defId)
+            KEYBOARD_CHARACTER_CREATE_MANAGER:UpdateRaceControl()
+        end,
+
+        [CHARACTER_CREATE_SELECTOR_GENDER] = function(button)
+            KEYBOARD_CHARACTER_CREATE_MANAGER:SetGender(button.gender)
+        end,
     }
 
     function ZO_CharacterCreate_OnSelectorClicked(button)
@@ -1058,13 +1138,13 @@ function ZO_CharacterCreate_MouseEnterNamedSelector(button)
             local selectorType = button.selectorType
 
             local addDisableReason = false
-            local tokenType
-            if characterCreateMode == CHARACTER_CREATE_MODE_EDIT_APPEARANCE then
-                tokenType = SERVICE_TOKEN_APPEARANCE_CHANGE
+            local tokenType = KEYBOARD_CHARACTER_CREATE_MANAGER:GetTokenTypeForCharacterCreateMode(characterCreateMode)
+            if tokenType == SERVICE_TOKEN_APPEARANCE_CHANGE then
                 addDisableReason = selectorType == CHARACTER_CREATE_SELECTOR_RACE or selectorType == CHARACTER_CREATE_SELECTOR_CLASS or selectorType == CHARACTER_CREATE_SELECTOR_ALLIANCE
-            elseif characterCreateMode == CHARACTER_CREATE_MODE_EDIT_RACE then
-                tokenType = SERVICE_TOKEN_RACE_CHANGE
+            elseif tokenType == SERVICE_TOKEN_RACE_CHANGE then
                 addDisableReason = selectorType == CHARACTER_CREATE_SELECTOR_CLASS or selectorType == CHARACTER_CREATE_SELECTOR_ALLIANCE
+            elseif tokenType == SERVICE_TOKEN_ALLIANCE_CHANGE then
+                addDisableReason = selectorType == CHARACTER_CREATE_SELECTOR_RACE or selectorType == CHARACTER_CREATE_SELECTOR_CLASS or selectorType == CHARACTER_CREATE_SELECTOR_GENDER
             end
 
             if addDisableReason then
@@ -1096,9 +1176,19 @@ function ZO_CharacterCreate_MouseExitNamedSelector(button)
     ClearTooltip(InformationTooltip)
 end
 
-function ZO_CharacterCreateSelectGender(button)
-    OnCharacterCreateOptionChanged()
-    KEYBOARD_CHARACTER_CREATE_MANAGER:SetGender(button.gender)
+function ZO_CharacterCreateGenderSelector_OnMouseEnter(button)
+    local characterCreateMode = KEYBOARD_CHARACTER_CREATE_MANAGER:GetCharacterCreateMode()
+    if characterCreateMode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
+        if button:GetState() == BSTATE_DISABLED or button:GetState() == BSTATE_DISABLED_PRESSED then
+            InitializeTooltip(InformationTooltip, button, TOPRIGHT, 0, 0, TOPLEFT)
+            local tokenString = GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_ALLIANCE_CHANGE)
+            InformationTooltip:AddLine(zo_strformat(SI_CREATE_CHARACTER_SELECTOR_TOKEN_DISABLED, tokenString), "", ZO_NORMAL_TEXT:UnpackRGB())
+        end
+    end
+end
+
+function ZO_CharacterCreateGenderSelector_OnMouseExit(button)
+    ClearTooltip(InformationTooltip)
 end
 
 function ZO_CharacterCreate_ChangeSlider(slider, changeAmount)

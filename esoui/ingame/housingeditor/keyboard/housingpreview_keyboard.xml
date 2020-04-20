@@ -119,14 +119,14 @@
 
                 <Button name="$(parent)GoToEntrance" text="SI_HOUSING_EDITOR_SAFE_LOC" inherits="ZO_DefaultButton">
                     <Dimensions x="250"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TemplatePreviewButton" relativePoint="TOPLEFT" offsetY="-10"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TemplatePreviewButton" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <OnClicked>
                         HousingEditorJumpToSafeLocation()
                     </OnClicked>
                 </Button>
 
                 <Control name="$(parent)PurchaseOptions" override="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" offsetY="50" />
+                    <Anchor point="TOP" relativeTo="$(parent)Template" relativePoint="BOTTOM" offsetY="90" />
                     <Controls>
                         <Control name="$(parent)Gold" override="true" inherits="ZO_HousingPreviewDialog_PurchaseOptionSection_Keyboard" />
 

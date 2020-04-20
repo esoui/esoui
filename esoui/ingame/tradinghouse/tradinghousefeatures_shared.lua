@@ -453,11 +453,11 @@ end
 do
     local QUALITY_VALUES =
     {
-        ITEM_QUALITY_NORMAL, 
-        ITEM_QUALITY_MAGIC,
-        ITEM_QUALITY_ARCANE,
-        ITEM_QUALITY_ARTIFACT,
-        ITEM_QUALITY_LEGENDARY,
+        ITEM_DISPLAY_QUALITY_NORMAL, 
+        ITEM_DISPLAY_QUALITY_MAGIC,
+        ITEM_DISPLAY_QUALITY_ARCANE,
+        ITEM_DISPLAY_QUALITY_ARTIFACT,
+        ITEM_DISPLAY_QUALITY_LEGENDARY,
     }
 
     local function AddColorizedQualityChoices(params)
@@ -466,16 +466,16 @@ do
         local ANY_VALUE = nil
         params:AddChoice(anyQualityString, ANY_VALUE)
 
-        for _, qualityValue in ipairs(QUALITY_VALUES) do
-            local color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, qualityValue))
-            local qualityString = color:Colorize(GetString("SI_ITEMQUALITY", qualityValue))
-            params:AddChoice(qualityString, qualityValue)
+        for _, displayQuality in ipairs(QUALITY_VALUES) do
+            local color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
+            local qualityString = color:Colorize(GetString("SI_ITEMQUALITY", displayQuality))
+            params:AddChoice(qualityString, displayQuality)
         end
     end
 
     local qualityParams = CreateDropDownFeatureParams("Quality")
     qualityParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_QUALITY))
-    AddEnumSearcher(qualityParams, TRADING_HOUSE_FILTER_TYPE_QUALITY, GetItemLinkQuality)
+    AddEnumSearcher(qualityParams, TRADING_HOUSE_FILTER_TYPE_QUALITY, GetItemLinkDisplayQuality)
     AddColorizedQualityChoices(qualityParams)
 end
 

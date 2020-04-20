@@ -2,21 +2,20 @@
 -- ZO_MarketProductCarousel_Gamepad
 --
 
-ZO_MarketProductCarousel_Gamepad = ZO_MarketProductCarousel_Shared:Subclass()
+ZO_MarketProductCarousel_Gamepad = ZO_Carousel_Shared:Subclass()
 
 function ZO_MarketProductCarousel_Gamepad:New(...)
-    return ZO_MarketProductCarousel_Shared.New(self, ...)
+    return ZO_Carousel_Shared.New(self, ...)
 end
 
 function ZO_MarketProductCarousel_Gamepad:Initialize(...)
-    ZO_MarketProductCarousel_Shared.Initialize(self, ...)
+    ZO_Carousel_Shared.Initialize(self, ...)
     self.leftArrow.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowScaleAnimation_Gamepad", self.leftArrow)
     self.rightArrow.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowScaleAnimation_Gamepad", self.rightArrow)
 
     self.leftArrow.downAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowDownScaleAnimation_Gamepad", self.leftArrow)
     self.rightArrow.downAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_MarketAnnouncement_ArrowDownScaleAnimation_Gamepad", self.rightArrow)
 
-    self.selectionIndicator:SetButtonControlName("MarketProduct_Indicator_Gamepad")
     self.selection = self.control:GetNamedChild("Selection")
 
     self.actionKeybindDescriptor =
@@ -179,7 +178,7 @@ function ZO_MarketProductCarousel_Gamepad:SetKeybindAnchorControl(keybindAnchorC
 end
 
 function ZO_MarketProductCarousel_Gamepad:EntrySetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
-    ZO_MarketProductCarousel_Shared.EntrySetup(self, control, data, self.active and selected, reselectingDuringRebuild, enabled, activated)
+    ZO_Carousel_Shared.EntrySetup(self, control, data, self.active and selected, reselectingDuringRebuild, enabled, activated)
 end
 
 do

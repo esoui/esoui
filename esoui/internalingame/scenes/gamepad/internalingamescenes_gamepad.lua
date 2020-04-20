@@ -69,6 +69,11 @@ codeRedemptionGamepadScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 codeRedemptionGamepadScene:AddFragment(GENERAL_ACTION_LAYER_FRAGMENT)
 codeRedemptionGamepadScene:AddFragment(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
 
+------------------------------------
+--Crown Crates Scene
+------------------------------------
+local remoteCrownCratesSceneGamepad = ZO_RemoteScene:New("crownCrateGamepad", SCENE_MANAGER)
+
 SCENE_MANAGER:OnScenesLoaded()
 
 ZO_GAMEPAD_DIALOG_BASE_SCENE_NAME = "empty"

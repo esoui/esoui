@@ -38,7 +38,7 @@ do
         -- add headers if necessary
         local settingData = KEYBOARD_OPTIONS:GetSettingsData(self.panel, settingTemplate.settingType, settingTemplate.settingId)
 
-        if settingData.exists == nil or settingData.exists() then
+        if KEYBOARD_OPTIONS:DoesSettingExist(settingData) then
             if settingTemplate.header ~= self.lastHeader then
                 local headerControl
                 local controlName = string.format("OptionsPanel%dHeader%d", self.panel, self.headerControlIndex)

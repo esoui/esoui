@@ -4,7 +4,7 @@ ZO_SKILL_ABILITY_DISPLAY_VIEW = 2
 ZO_SKILL_RESPEC_INTERACT_INFO =
 {
     type = "Skill Respec Shrine",
-    End = function()
+    OnEndBecauseAnotherInteractIsBeginning = function()
         SCENE_MANAGER:ShowBaseScene()
     end,
     interactTypes = { INTERACTION_SKILL_RESPEC },

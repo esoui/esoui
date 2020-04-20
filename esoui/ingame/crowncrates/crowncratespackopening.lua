@@ -1126,8 +1126,8 @@ end
 function ZO_CrownCratesCard:CanSelect()
     return not (self.cardState == CARD_STATES.START 
            or self.cardState == CARD_STATES.LEAVING)
-           and (self.stateMachine:IsCurrentStateByName("ACTIVE_HAND_MANIPULATION") 
-           or self.stateMachine:IsCurrentStateByName("ALL_REVEALED"))
+           and (self.stateMachine:IsCurrentState("ACTIVE_HAND_MANIPULATION") 
+           or self.stateMachine:IsCurrentState("ALL_REVEALED"))
 end
 
 function ZO_CrownCratesCard:SetState(newState)
@@ -1683,8 +1683,8 @@ function ZO_CrownCratesPackOpening:RemoveAllRevealedKeybinds()
 end
 
 function ZO_CrownCratesPackOpening:HandleDirectionalInput(selectedDirection)
-    if (self.stateMachine:IsCurrentStateByName("ACTIVE_HAND_MANIPULATION")
-       or self.stateMachine:IsCurrentStateByName("ALL_REVEALED")) and selectedDirection then
+    if (self.stateMachine:IsCurrentState("ACTIVE_HAND_MANIPULATION")
+       or self.stateMachine:IsCurrentState("ALL_REVEALED")) and selectedDirection then
         local selectedCard = self:GetSelectedCard()
         local nextCard
         if selectedCard then

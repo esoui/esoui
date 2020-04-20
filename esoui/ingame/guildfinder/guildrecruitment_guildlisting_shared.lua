@@ -269,6 +269,7 @@ function ZO_GuildRecruitment_GuildListing_Shared:BuildAttributeSelectionData()
             entryTemplate = self.templateData.attributeSelection.entryTemplate,
             iterBegin = GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_BEGIN,
             iterEnd = GUILD_LANGUAGE_ATTRIBUTE_VALUE_ITERATION_END,
+            extraValues = { GUILD_LANGUAGE_ATTRIBUTE_VALUE_OTHER },
             stringPrefix = "SI_GUILDLANGUAGEATTRIBUTEVALUE",
             headerText = self.templateData.attributeSelection.languageHeaderText,
             onSelectionCallback = OnDropdownSelected,

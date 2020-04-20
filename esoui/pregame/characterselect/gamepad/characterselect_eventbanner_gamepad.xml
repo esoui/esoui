@@ -1,0 +1,55 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_CharacterSelect_EventBanner_CarouselArrowTemplate_Gamepad" virtual="true">
+            <Dimensions x="32" y="64" />
+            <Textures
+                normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
+                pressed=""
+                mouseOver=""
+                disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"
+            />
+        </Button>
+
+        <TopLevelControl name="ZO_CharacterSelect_EventBanner_Gamepad_Control" inherits="ZO_CharacterSelect_EventBanner_Control" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_CharacterSelect_EventBanner_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)BG" override="true" textureFile="EsoUI/Art/CharacterSelect/gamepad/gp_characterSelect_bannerBackground.dds">
+                            <TextureCoords left="0" right="0.9375" top="0" bottom="0.6172"/>
+                            <Dimensions x="1920" y="632" />
+                            <ClearAnchors />
+                            <Anchor point="TOPLEFT" offsetY="156" />
+                        </Texture>
+
+                        <Control name="$(parent)Carousel" override="true">
+                            <Dimensions x="1920" y="632" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BG" />
+                            <Controls>
+                                <Control name="$(parent)SelectionIndicator" override="true">
+                                    <ClearAnchors />
+                                    <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-60"/>
+                                </Control>
+
+                                <Button name="$(parent)LeftArrow" inherits="ZO_CharacterSelect_EventBanner_CarouselArrowTemplate_Gamepad" override="true">
+                                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                                    <ClearAnchors />
+                                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="50" />
+                                </Button>
+                                <Button name="$(parent)RightArrow" inherits="ZO_CharacterSelect_EventBanner_CarouselArrowTemplate_Gamepad"  override="true">
+                                    <ClearAnchors />
+                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="-50" />
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

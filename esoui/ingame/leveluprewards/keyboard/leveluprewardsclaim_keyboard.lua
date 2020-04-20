@@ -83,7 +83,7 @@ function ZO_LevelUpRewardsClaim_Keyboard:SetupRewardRow(rowControl, data)
     rowControl.nameControl:SetText(name)
     local rewardType = data:GetRewardType()
     if rewardType then
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemQuality())
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data:GetItemDisplayQuality())
         rowControl.nameControl:SetColor(r, g, b, 1)
     else
         local r, g, b = ZO_NORMAL_TEXT:UnpackRGB()
@@ -347,6 +347,8 @@ do
 
         r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
         tooltip:AddLine(body, "ZoFontGameMedium", r, g, b)
+
+        ZO_ItemTooltip_UpdateVisualStyle(tooltip)
     end
 
     function ZO_LevelUpRewards_RewardRow_OnMouseEnter(control)

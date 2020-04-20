@@ -1,0 +1,7 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_AntiquityMapProgressIcon" level="2" virtual="true">
+            <Dimensions x="22" y="22"/>
+        </Texture>
+    </Controls>
+</GuiXml>

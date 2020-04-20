@@ -33,7 +33,12 @@ do
         --things added to the collection top section stack downward
         local topSection = self:AcquireSection(self:GetStyle("collectionsTopSection"))
 
-        topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
+        local specializedCollectibleType = GetSpecializedCollectibleType(collectibleId)
+        if specializedCollectibleType == SPECIALIZED_COLLECTIBLE_TYPE_NONE then
+            topSection:AddLine(GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType))
+        else
+            topSection:AddLine(GetString("SI_SPECIALIZEDCOLLECTIBLETYPE", specializedCollectibleType))
+        end
         local unlockState = GetCollectibleUnlockStateById(collectibleId)
         topSection:AddLine(GetString("SI_COLLECTIBLEUNLOCKSTATE", unlockState))
             

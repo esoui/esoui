@@ -1200,10 +1200,7 @@ end
 function ZO_SkillsManager:OnPlayerDeactivated()
     --If we are deactivated we might be jumping somewhere else. We also might be in the respec interaction which will not be valid when we get where we are going. So just clear out the respec here.
     if KEYBOARD_SKILLS_SCENE:IsShowing() and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
-        local DEFAULT_PUSH = nil
-        local DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK = nil
-        local DEFAULT_NUM_SCENES_NEXT_SCENE_POPS = nil
-        SCENE_MANAGER:Show(SCENE_MANAGER:GetBaseScene():GetName(), DEFAULT_PUSH, DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK, DEFAULT_NUM_SCENES_NEXT_SCENE_POPS, ZO_BHSCR_SKILLS_PLAYER_DEACTIVATED)
+        SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_SKILLS_PLAYER_DEACTIVATED)
     end
 end
 

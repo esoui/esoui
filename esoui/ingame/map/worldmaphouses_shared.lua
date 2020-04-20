@@ -20,7 +20,7 @@ function ZO_MapHouses_Shared:Initialize(control, fragmentClass)
     end)
 
     local function UpdateForModeChange(modeData)
-        self:SetListEnabled(ZO_WorldMap_IsMapChangingAllowed())
+        self:SetListEnabled(WORLD_MAP_MANAGER:IsMapChangingAllowed())
     end
 
     local function OnFastTravelNetworkUpdated()

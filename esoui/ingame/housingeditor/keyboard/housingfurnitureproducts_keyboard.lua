@@ -115,8 +115,8 @@ do
         local currencyColorR, currencyColorG, currencyColorB
         local iconDesaturation
         if canBePurchased then
-            local quality = marketProductFurnitureObject:GetQuality()
-            nameColorR, nameColorG, nameColorB = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+            local displayQuality = marketProductFurnitureObject:GetDisplayQuality()
+            nameColorR, nameColorG, nameColorB = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
             currencyColorR, currencyColorG, currencyColorB = ZO_SELECTED_TEXT:UnpackRGB()
             iconDesaturation = 0
         else

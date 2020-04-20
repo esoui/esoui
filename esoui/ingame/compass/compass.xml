@@ -18,7 +18,7 @@
         </AnimationTimeline>
 
         <AnimationTimeline name="CompassPoiPinAnimationOut">
-            <Animations>                
+            <Animations>
                 <ScaleAnimation duration="500">
                     <OnPlay>
                         self:SetScaleValues(animatingControl:GetScale(), 3)
@@ -670,6 +670,24 @@
                                     maxDistanceM="225"
                                     removedAnimation="CompassPinOut"
                                     drawLevelOffsetBase="22"
+                    />
+                    <CompassPinType name="ANTIQUITY_DIG_SITE"
+                                    pinTexture="$(COMPASS_PATH)antiquity_digSite_icon.dds"
+                                    maxDistanceM="225"
+                                    closeAlpha="1.0"
+                                    farAlpha="0.75"
+                                    farAlphaDistanceM="85"
+                                    farScaleDistanceM="200"
+                                    drawLevelOffsetBase="23"
+                    />
+                    <CompassPinType name="TRACKED_ANTIQUITY_DIG_SITE"
+                                    pinTexture="$(COMPASS_PATH)antiquity_trackedDigSite_icon.dds"
+                                    maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE"
+                                    closeAlpha="1.0"
+                                    farAlpha="0.75"
+                                    farAlphaDistanceM="85"
+                                    farScaleDistanceM="200"
+                                    drawLevelOffsetBase="24"
                     />
                     <CompassPinType name="BGPIN_FLAG_FIRE_DRAKES"
                                     pinTexture="$(COMPASS_PATH)compass_BG_flag_orange.dds"

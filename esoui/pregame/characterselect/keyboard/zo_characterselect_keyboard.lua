@@ -3,15 +3,6 @@ local g_characterOrderDividerHalfHeight
 local g_characterSelectStartDragOrder
 local g_selectedOrderControl
 
-local function GetDataForCharacterId(charId)
-    local dataList = ZO_ScrollList_GetDataList(ZO_CharacterSelectScrollList)
-    for _, dataEntry in ipairs(dataList) do
-        if AreId64sEqual(dataEntry.data.id, charId) then
-            return dataEntry
-        end
-    end
-end
-
 function ZO_CharacterSelect_GetFormattedLevelChampion(characterData)
     if characterData.championPoints and characterData.championPoints > 0 then
         return zo_strformat(SI_CHARACTER_SELECT_CHAMPION_CLASS, characterData.championPoints, '')
@@ -56,10 +47,10 @@ function ZO_CharacterSelect_EnableSelection(data)
 end
 
 local function SetupCharacterEntry(control, data)
-    local characterName = GetControl(control, "Name")
-    local characterStatus = GetControl(control, "ClassLevel")
-    local characterLocation = GetControl(control, "Location")
-    local characterAlliance = GetControl(control, "Alliance")
+    local characterName = control:GetNamedChild("Name")
+    local characterStatus = control:GetNamedChild("ClassLevel")
+    local characterLocation = control:GetNamedChild("Location")
+    local characterAlliance = control:GetNamedChild("Alliance")
 
     characterName:SetText(ZO_CharacterSelect_Manager_GetFormattedCharacterName(data))
     characterStatus:SetText(ZO_CharacterSelect_GetFormattedLevelChampionAndClass(data))
@@ -287,10 +278,56 @@ function ZO_CharacterSelect_Initialize(self)
     end
 
     local function OnCharacterSelectedForPlay(eventCode, charId)
-        local data = GetDataForCharacterId(charId)
-        -- data will come back as nil on character creation
-        local charData = data and data.data or nil
-        ZO_CharacterSelect_DisableSelection(charData)
+        local data = CHARACTER_SELECT_MANAGER:GetDataForCharacterId(charId)
+        ZO_CharacterSelect_DisableSelection(data)
+    end
+
+    local function PopulateCarousel()
+        if not self.carousel then
+            return
+        end
+
+        self.carousel:Clear()
+
+        local numEvents = CHARACTER_SELECT_MANAGER:GetNumEventAnnouncements()
+        for i = 1, numEvents do
+            local data = CHARACTER_SELECT_MANAGER:GetEventAnnouncementDataByIndex(i)
+            local entryData =
+            {
+                index = data.index,
+                name = data.name,
+                description = data.description,
+                image = data.image,
+                startTime = data.startTime,
+                remainingTime = data.remainingTime,
+                callback = function() self.carousel:UpdateSelection(i) end
+            }
+
+            self.carousel:AddEntry(entryData)
+        end
+
+        self.carousel:Commit()
+
+        -- update visibility of events/chapter upgrade as appropriate
+        local chapterUpgradeId = GetCurrentChapterUpgradeId()
+
+        if numEvents > 0 then
+            ZO_CharacterSelectEventMinimized:SetHidden(false)
+            ZO_CharacterSelectChapterUpgrade:SetHidden(true)
+        elseif chapterUpgradeId == 0 or IsChapterOwned(chapterUpgradeId) then
+            ZO_CharacterSelectChapterUpgrade:SetHidden(true)
+            ZO_CharacterSelectEventMinimized:SetHidden(true)
+        else
+            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
+            ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId)))
+            ZO_CharacterSelectChapterUpgradeImage:SetTexture(GetCurrentChapterMediumLogoFileIndex())
+
+            ZO_CharacterSelectChapterUpgrade:SetHidden(false)
+            ZO_CharacterSelectEventMinimized:SetHidden(true)
+        end
+
+        local autoShowIndex = CHARACTER_SELECT_MANAGER:GetEventAnnouncementAutoShowIndex()
+        self.carousel:SetSelectedIndex(autoShowIndex and (1 - autoShowIndex) or 0)
     end
 
     local function OnPregameFullyLoaded()
@@ -303,15 +340,16 @@ function ZO_CharacterSelect_Initialize(self)
             ZO_CharacterSelectCharacterSlots:SetAnchor(TOP, nil, TOP, 0, 31)
         end
 
-        local chapterUpgradeId = GetCurrentChapterUpgradeId()
-        if chapterUpgradeId == 0 or IsChapterOwned(chapterUpgradeId) then
-            ZO_CharacterSelectChapterUpgrade:SetHidden(true)
-        else
-            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
-            ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId)))
-            ZO_CharacterSelectChapterUpgradeImage:SetTexture(GetCurrentChapterMediumLogoFileIndex())
+        if not self.carousel then
+            -- Setup events minimized display if we have events, otherwise show chapter upgrade if relevant, or show nothing
+            self.carousel = ZO_Carousel_Shared:New(ZO_CharacterSelectEventMinimizedCarousel, "ZO_CharacterSelect_SmallEventTile_Keyboard_Control")
+            self.carousel:SetSelectionIndicatorPipStateImages("EsoUI/Art/Buttons/RadioButtonDown.dds", "EsoUI/Art/Buttons/RadioButtonUp.dds", "EsoUI/Art/Buttons/RadioButtonHighlight.dds")
+        end
 
-            ZO_CharacterSelectChapterUpgrade:SetHidden(false)
+        PopulateCarousel()
+
+        if CHARACTER_SELECT_FRAGMENT:IsShowing() then
+            ZO_CharacterSelect_OnCharacterSelectShown(self)
         end
     end
 
@@ -338,6 +376,8 @@ function ZO_CharacterSelect_Initialize(self)
         ZO_ScrollList_SelectData(ZO_CharacterSelectScrollList, characterData)
     end)
 
+    CHARACTER_SELECT_MANAGER:RegisterCallback("EventAnnouncementExpired", function() PopulateCarousel() end)
+
     self:SetHandler("OnUpdate", function(_, timeS)
         ZO_CharacterSelect_OnUpdate(timeS)
     end)
@@ -345,7 +385,32 @@ function ZO_CharacterSelect_Initialize(self)
     CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", OnCharacterConstructionReady)
     CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
 
+    CHARACTER_SELECT_BACKGROUND_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_CharacterSelectBG)
     CHARACTER_SELECT_FRAGMENT = ZO_FadeSceneFragment:New(self, 300)
+    CHARACTER_SELECT_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWN then
+            SCENE_MANAGER:AddFragment(CHARACTER_SELECT_BACKGROUND_FRAGMENT)
+            ZO_CharacterSelect_OnCharacterSelectShown(self)
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            SCENE_MANAGER:RemoveFragment(CHARACTER_SELECT_BACKGROUND_FRAGMENT)
+            if self.carousel then
+                self.carousel:Deactivate()
+            end
+        end
+    end)
+end
+
+function ZO_CharacterSelect_OnCharacterSelectShown(self)
+    if not IsInGamepadPreferredMode() and self.carousel then
+        self.carousel:Activate()
+        self.carousel:UpdateArrows()
+
+        local autoShowIndex = CHARACTER_SELECT_MANAGER:GetEventAnnouncementAutoShowIndex()
+        if autoShowIndex then
+            ZO_CharacterSelect_ShowEventBanner()
+            CHARACTER_SELECT_MANAGER:UpdateLastSeenTimestamp()
+        end
+    end
 end
 
 function ZO_CharacterSelect_IsKeyboardCharacterSelectShowing()
@@ -376,9 +441,7 @@ end
 
 function ZO_CharacterSelect_Login(option)
     local state = PregameStateManager_GetCurrentState()
-    --Entering and returning from a cinematic leaves us in CharacterSelect_FromCinematic. This is not a state, and it should
-    --never have been one. It should be a edge back to the character select state.
-    if state == "CharacterSelect" or state == "CharacterSelect_FromCinematic" then
+    if state == "CharacterSelect" then
         local selectedData = ZO_ScrollList_GetSelectedData(ZO_CharacterSelectScrollList)
         if selectedData then
             if selectedData.needsRename then
@@ -482,7 +545,6 @@ end
 function ZO_CharacterEntry_OnMouseUp(self)
     if g_characterSelectStartDragOrder then
         if g_selectedOrderControl then
-            local selectedData = ZO_CharacterSelect_GetSelectedCharacterData()
             local startOrder = g_characterSelectStartDragOrder
             local endOrder = g_selectedOrderControl.dataEntry.data.order
             local centerX, centerY = g_selectedOrderControl:GetCenter()
@@ -579,6 +641,10 @@ function ZO_CharacterSelect_Move_Character_Down()
     end
 end
 
+function ZO_CharacterSelect_ShowEventBanner()
+    SCENE_MANAGER:AddFragment(CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:GetFragment())
+end
+
 -- Service Token Indicator Functions
 
 local ServiceTokenIndicator = ZO_Object:Subclass()
@@ -627,19 +693,53 @@ function ServiceTokenIndicator:Initialize(control, tokenType, iconTexture)
     control:SetHandler("OnMouseExit", function(control)
         self:OnMouseExit(control)
     end)
+
+    control:SetHandler("OnEffectivelyShown", function(control)
+        self:RefreshEnabledState(GetNumServiceTokens(self.tokenType))
+    end)
 end
 
 function ServiceTokenIndicator:SetTokenCount(numTokens)
     self.tokenCount:SetText(numTokens)
 
-    self.enabled = numTokens ~= 0
+    self:RefreshEnabledState(numTokens)
+end
 
-    self.icon:SetDesaturation(self.enabled and 0 or 1)
+function ServiceTokenIndicator:RefreshEnabledState(numTokens)
+    local hasTokens = numTokens > 0
+    self.icon:SetDesaturation(hasTokens and 0 or 1)
+
+    if self:MeetsUsageRequirements() or not hasTokens then
+        self.icon:SetColor(ZO_WHITE:UnpackRGB())
+        self.enabled = hasTokens
+    else
+        self.icon:SetColor(ZO_ERROR_COLOR:UnpackRGB())
+        self.enabled = false
+    end
 end
 
 function ServiceTokenIndicator:OnMouseEnter()
-    InitializeTooltip(self.tooltip, self.control, BOTTOM, 0, -10, TOP)
     self.highlight:SetHidden(false)
+
+    InitializeTooltip(self.tooltip, self.control, BOTTOM, 0, -10, TOP)
+    self:AddHeader(self.tooltipHeaderText)
+    self:AddBodyText(self:GetDescription())
+
+    local requiredCollectibleId = self:GetRequiredCollectibleId()
+    if requiredCollectibleId ~= 0 then
+        local collectibleName = GetCollectibleName(requiredCollectibleId)
+        local categoryName = GetCollectibleCategoryName(requiredCollectibleId)
+        local requiredCollectibleText = zo_strformat(SI_SERVICE_TOOLTIP_REQUIRES_COLLECTIBLE_TO_USE, collectibleName, categoryName)
+
+        local meetsRequirementTextStyle
+        local numTokens = GetNumServiceTokens(tokenType)
+        if self:MeetsUsageRequirements() then
+            meetsRequirementTextStyle = ZO_SUCCEEDED_TEXT
+        else
+            meetsRequirementTextStyle = ZO_ERROR_COLOR
+        end
+        self:AddBodyText(requiredCollectibleText, meetsRequirementTextStyle)
+    end
 
     local tokensAvailableText
     local tokensAvailableTextColor
@@ -652,8 +752,6 @@ function ServiceTokenIndicator:OnMouseEnter()
         tokensAvailableTextColor = ZO_ERROR_COLOR
     end
 
-    self:AddHeader(self.tooltipHeaderText)
-    self:AddBodyText(self:GetDescription())
     self:AddBodyText(tokensAvailableText, tokensAvailableTextColor)
 end
 
@@ -691,6 +789,16 @@ function ServiceTokenIndicator:GetDescription()
     return GetServiceTokenDescription(self.tokenType)
 end
 
+function ServiceTokenIndicator:MeetsUsageRequirements()
+    -- optional override
+    return true
+end
+
+function ServiceTokenIndicator:GetRequiredCollectibleId()
+    -- optional override
+    return 0
+end
+
 -- Name Change Tokens
 
 local NameChangeTokenIndicator = ServiceTokenIndicator:Subclass()
@@ -716,7 +824,7 @@ function NameChangeTokenIndicator:OnMouseUp()
 end
 
 function ZO_NameChangeIndicator_Initialize(control)
-    NAME_CHANGE_TOKEN_INDICATOR = NameChangeTokenIndicator:New(control)
+    local nameChangeTokenIndicator = NameChangeTokenIndicator:New(control)
 end
 
 -- Race Change Tokens
@@ -740,7 +848,7 @@ function RaceChangeTokenIndicator:OnMouseUp()
 end
 
 function ZO_RaceChangeIndicator_Initialize(control)
-    RACE_CHANGE_TOKEN_INDICATOR = RaceChangeTokenIndicator:New(control)
+    local raceChangeTokenIndicator = RaceChangeTokenIndicator:New(control)
 end
 
 -- Appearance Change Tokens
@@ -764,5 +872,37 @@ function AppearanceChangeTokenIndicator:OnMouseUp()
 end
 
 function ZO_AppearanceChangeIndicator_Initialize(control)
-    APPEARANCE_CHANGE_TOKEN_INDICATOR = AppearanceChangeTokenIndicator:New(control)
+    local appearanceChangeTokenIndicator = AppearanceChangeTokenIndicator:New(control)
+end
+
+-- Alliance Change Tokens
+
+local AllianceChangeTokenIndicator = ServiceTokenIndicator:Subclass()
+
+function AllianceChangeTokenIndicator:New(...)
+    return ServiceTokenIndicator.New(self, ...)
+end
+
+function AllianceChangeTokenIndicator:Initialize(control)
+    ServiceTokenIndicator.Initialize(self, control, SERVICE_TOKEN_ALLIANCE_CHANGE, "EsoUI/Art/Icons/Token_AllianceChange.dds")
+end
+
+function AllianceChangeTokenIndicator:OnMouseUp()
+    if self.enabled then
+        local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
+        ZO_CHARACTERCREATE_MANAGER:InitializeForAllianceChange(characterData)
+        PregameStateManager_SetState("CharacterCreate_Barbershop")
+    end
+end
+
+function AllianceChangeTokenIndicator:MeetsUsageRequirements()
+    return CanPlayAnyRaceAsAnyAlliance()
+end
+
+function AllianceChangeTokenIndicator:GetRequiredCollectibleId()
+    return GetAnyRaceAnyAllianceCollectibleId()
+end
+
+function ZO_AllianceChangeIndicator_Initialize(control)
+    local allianceChanceTokenIndicator = AllianceChangeTokenIndicator:New(control)
 end

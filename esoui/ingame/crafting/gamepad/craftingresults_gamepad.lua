@@ -129,12 +129,27 @@ do
             headerTextId = SI_GAMEPAD_CRAFTING_COMPLETED_ITEM
         end
 
+        -- itemInfo.quality is depricated, included here for addon backwards compatibility
+        local displayQuality = itemInfo.displayQuality or itemInfo.quality
         local displayData =
         {
-            header = {text = GetString(headerTextId)},
+            header =
+            {
+                text = GetString(headerTextId)
+            },
             lines =
             {
-                {text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemInfo.name), icon = itemInfo.icon, stack = itemInfo.stack, color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemInfo.quality)), meetsUsageRequirement = itemInfo.meetsUsageRequirement, quality = itemInfo.quality, itemInstanceId = itemInfo.itemInstanceId}
+                {
+                    text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemInfo.name),
+                    icon = itemInfo.icon,
+                    stack = itemInfo.stack,
+                    color = GetItemQualityColor(displayQuality),
+                    meetsUsageRequirement = itemInfo.meetsUsageRequirement,
+                    displayQuality = displayQuality,
+                    -- quality is depricated, included here for addon backwards compatibility
+                    quality = displayQuality,
+                    itemInstanceId = itemInfo.itemInstanceId,
+                }
             }
         }
 
@@ -156,18 +171,18 @@ function ZO_CraftingResults_Gamepad:DisplayDiscoveryHelper(titleString, numDisco
     displayData.lines = {}
 
     local headerText = GetString(titleString)
-    displayData.header = {text = headerText}
+    displayData.header = { text = headerText }
 
     for i = 1, numDiscoveries do
-        local discoveryName, itemName, icon, _, _, _, _, quality = lastLearnedDiscoveryFn(i)
+        local discoveryName, itemName, icon, _, _, _, _, displayQuality = lastLearnedDiscoveryFn(i)
 
-        local qualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+        local qualityColor = GetItemQualityColor(displayQuality)
         local itemString = zo_strformat(SI_GAMEPAD_ITEM_LEARNED_FROM, itemName)
         local colorizedItem = qualityColor:Colorize(itemString)
 
         local lineText = zo_strformat(SI_GAMEPAD_ITEM_TRAITS_LEARNED, discoveryName, colorizedItem)
 
-        table.insert(displayData.lines, {text = lineText, icon = icon})
+        table.insert(displayData.lines, { text = lineText, icon = icon })
     end
 
     ZO_AlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
@@ -192,6 +207,7 @@ function ZO_CraftingResults_Gamepad_Initialize(control)
     GAMEPAD_CRAFTING_RESULTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
     GAMEPAD_CRAFTING_RESULTS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_HIDDEN then
+            GAMEPAD_CRAFTING_RESULTS:ForceCompleteCraftProcess()
             GAMEPAD_CRAFTING_RESULTS:ClearAll()
         end
     end)

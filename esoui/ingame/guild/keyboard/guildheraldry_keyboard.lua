@@ -12,10 +12,6 @@ function ZO_GuildHeraldryManager_Keyboard:New(...)
     return ZO_GuildHeraldryManager_Shared.New(self, ...)
 end
 
-local function OnBlockingSceneActivated()
-    GUILD_HERALDRY:AttemptSaveAndExit()
-end
-
 function ZO_GuildHeraldryManager_Keyboard:Initialize(control)
     local function StyleGridEntrySetup(control, data, list)
         local iconContainer = control:GetNamedChild("IconContainer")
@@ -90,15 +86,14 @@ function ZO_GuildHeraldryManager_Keyboard:Initialize(control)
     GUILD_HERALDRY_SCENE = ZO_Scene:New("guildHeraldry", SCENE_MANAGER)
     GUILD_HERALDRY_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
-            MAIN_MENU_MANAGER:SetBlockingScene("guildHeraldry", OnBlockingSceneActivated)
-            KEYBIND_STRIP:RemoveDefaultExit()
             StartHeraldryCustomization(self.guildId)
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-            KEYBIND_STRIP:RestoreDefaultExit()
             EndHeraldryCustomization()
+            self:SetPendingExit(false)
         end
     end)
+    GUILD_HERALDRY_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
 
     self.control:RegisterForEvent(EVENT_HERALDRY_CUSTOMIZATION_START, function(eventCode)
         if not IsInGamepadPreferredMode() then
@@ -156,10 +151,6 @@ function ZO_GuildHeraldryManager_Keyboard:SetEntryDataSelected(entryData, select
     end
 end
 
-function ZO_GuildHeraldryManager_Keyboard:IsCurrentBlockingScene()
-    return MAIN_MENU_MANAGER:GetBlockingSceneName() == "guildHeraldry"
-end
-
 function ZO_GuildHeraldryManager_Keyboard:ConfirmExit()
     if self.changeGuildCallback then
         local callback = self.changeGuildCallback
@@ -169,23 +160,19 @@ function ZO_GuildHeraldryManager_Keyboard:ConfirmExit()
         self.changeGuildParams = nil
 
         callback(params)
-    elseif not MAIN_MENU_MANAGER:HasBlockingSceneNextScene() then
-        SCENE_MANAGER:HideCurrentScene()
+    else
+        GUILD_HERALDRY_SCENE:AcceptHideScene()
     end
-
-    self:SetPendingExit(false)
-    MAIN_MENU_MANAGER:ClearBlockingScene(OnBlockingSceneActivated)
 end
 
 function ZO_GuildHeraldryManager_Keyboard:CancelExit()
-    MAIN_MENU_MANAGER:CancelBlockingSceneNextScene()
-    self.changeGuildCallback = nil
-    self.changeGuildParams = nil
+    GUILD_HERALDRY_SCENE:RejectHideScene()
     self:SetPendingExit(false)
 end
 
 function ZO_GuildHeraldryManager_Keyboard:NoChoiceExitCallback()
-    self:CancelExit()
+    GUILD_HERALDRY_SCENE:RejectHideScene()
+    self:SetPendingExit(false)
 end
 
 function ZO_GuildHeraldryManager_Keyboard:InitializeKeybindStripDescriptors()
@@ -255,16 +242,6 @@ function ZO_GuildHeraldryManager_Keyboard:InitializeKeybindStripDescriptors()
 
             visible = function()
                 return HasPendingHeraldryChanges() and not IsCreatingHeraldryForFirstTime()
-            end,
-        },
-
-        -- Custom Exit
-        {
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            name = GetString(SI_EXIT_BUTTON),
-            keybind = "UI_SHORTCUT_EXIT",
-            callback = function()
-                self:AttemptSaveAndExit()
             end,
         },
     }

@@ -376,6 +376,8 @@ function MainMenu_Keyboard:Initialize(control)
                 if nextSceneData.sceneGroup then
                     nextSceneData.sceneGroup:SetActiveScene(nextSceneData.sceneName)
                     self:Update(nextSceneData.category, nextSceneData.sceneName)
+                elseif nextSceneData.sceneName then
+                    self:ToggleScene(nextSceneData.sceneName)
                 elseif nextSceneData.category then
                     self:ToggleCategory(nextSceneData.category)
                 end

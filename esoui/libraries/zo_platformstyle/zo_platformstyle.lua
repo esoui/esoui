@@ -41,11 +41,14 @@ function ZO_PlatformStyle:Initialize(applyFunction, keyboardStyle, gamepadStyle)
 end
 
 function ZO_PlatformStyle:Apply()
-    local style
-    if IsInGamepadPreferredMode() then
-        style = self.gamepadStyle
-    else
-        style = self.keyboardStyle
-    end
+    local style = self:GetStyle()    
     self.applyFunction(style)
+end
+
+function ZO_PlatformStyle:GetStyle()
+    if IsInGamepadPreferredMode() then
+        return self.gamepadStyle
+    else
+        return self.keyboardStyle
+    end
 end

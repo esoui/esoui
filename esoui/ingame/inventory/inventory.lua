@@ -118,6 +118,8 @@ local sortKeys =
     slotIndex = { isNumeric = true },
     stackCount = { tiebreaker = "slotIndex", isNumeric = true },
     name = { tiebreaker = "stackCount" },
+    displayQuality = { tiebreaker = "quality", isNumeric = true },
+    -- quality is depricated, included here for addon backwards compatibility
     quality = { tiebreaker = "name", isNumeric = true },
     stackSellPrice = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true },
     statusSortOrder = { tiebreaker = "age", isNumeric = true},
@@ -227,23 +229,25 @@ end
 
 local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
     local options = overrideOptions or ITEM_SLOT_CURRENCY_OPTIONS
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, slot.quality)
-    local nameControl = GetControl(rowControl, "Name")
+    -- slot.quality is depricated, included here for addon backwards compatibility
+    local displayQuality = slot.displayQuality or slot.quality
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
+    local nameControl = rowControl:GetNamedChild("Name")
     nameControl:SetText(slot.name) -- already formatted
     nameControl:SetColor(r, g, b, 1)
 
-    local itemValue 
+    local itemValue
     if type(options.overrideSellValue) == "function" then
         itemValue = options.overrideSellValue(slot)
     else
         itemValue = GetDefaultSlotSellValue(slot)
     end
 
-    local sellPriceControl = GetControl(rowControl, "SellPrice")
+    local sellPriceControl = rowControl:GetNamedChild("SellPrice")
     sellPriceControl:SetHidden(false)
     ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, CURT_MONEY, itemValue, options)
 
-    local inventorySlot = GetControl(rowControl, "Button")
+    local inventorySlot = rowControl:GetNamedChild("Button")
     ZO_Inventory_BindSlot(inventorySlot, slot.inventory.slotType, slot.slotIndex, slot.bagId)
     ZO_PlayerInventorySlot_SetupSlot(rowControl, slot.stackCount, slot.iconFile, slot.meetsUsageRequirement, slot.locked or IsUnitDead("player"))
 
@@ -735,16 +739,16 @@ do
             itemCount = actualItemCount
         end
 
-        local quality = GetItemQuality(bag, slot)
-        local coloredItemName = GetItemQualityColor(quality):Colorize(name)
-        if(needsConfirm) then
+        local displayQuality = GetItemDisplayQuality(bag, slot)
+        local coloredItemName = GetItemQualityColor(displayQuality):Colorize(name)
+        if needsConfirm then
             local dialogName = "CONFIRM_DESTROY_ITEM_PROMPT"
             if IsInGamepadPreferredMode() then
                 dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG
             end
-            ZO_Dialogs_ShowPlatformDialog(dialogName, nil, {mainTextParams = {coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION)}})
+            ZO_Dialogs_ShowPlatformDialog(dialogName, nil, { mainTextParams = { coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION) } })
         else
-            ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, {mainTextParams = {coloredItemName, itemCount}})
+            ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, { mainTextParams = { coloredItemName, itemCount } })
         end
     end
 
@@ -763,8 +767,8 @@ do
         if IsInGamepadPreferredMode() then
             BUY_BAG_SPACE_GAMEPAD:Show(cost)
         else
-            if(not ZO_Dialogs_FindDialog("BUY_BAG_SPACE")) then
-                ZO_Dialogs_ShowDialog("BUY_BAG_SPACE", {cost = cost})
+            if not ZO_Dialogs_FindDialog("BUY_BAG_SPACE") then
+                ZO_Dialogs_ShowDialog("BUY_BAG_SPACE", { cost = cost })
                 INTERACT_WINDOW:OnBeginInteraction(BUY_BAG_SPACE_INTERACTION)
             end
         end
@@ -774,8 +778,8 @@ do
          if IsInGamepadPreferredMode() then
             BUY_BANK_SPACE_GAMEPAD:Show(cost)
         else
-            if(not ZO_Dialogs_FindDialog("BUY_BANK_SPACE")) then
-                ZO_Dialogs_ShowDialog("BUY_BANK_SPACE", {cost = cost})
+            if not ZO_Dialogs_FindDialog("BUY_BANK_SPACE") then
+                ZO_Dialogs_ShowDialog("BUY_BANK_SPACE", { cost = cost })
             end
         end
     end
@@ -1660,7 +1664,7 @@ function ZO_InventoryManager:RefreshInventorySlotOverlay(inventoryType, slotInde
 
         local slot = inventory.slots[bagId][slotIndex]
         if slot then
-            local _, _, _, meetsUsageRequirement, _ = GetItemInfo(bagId, slotIndex)
+            local _, _, _, meetsUsageRequirement = GetItemInfo(bagId, slotIndex)
             local isLocalPlayerDead = IsUnitDead("player")
             local isLocked = slot.locked or isLocalPlayerDead
 

@@ -137,6 +137,12 @@
                             </Controls>
                         </Control>
 
+                        <Label name="$(parent)SelectedLabel" override="true" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER">
+                                <ClearAnchors/>
+                                <Anchor point="LEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="-23"/>
+                                <Anchor point="RIGHT" relativeTo="$(parent)List" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="-23"/>
+                        </Label>
+                        
                         <Label name="$(parent)ExtraInfoLabel" override="true">
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                             <ClearAnchors/>

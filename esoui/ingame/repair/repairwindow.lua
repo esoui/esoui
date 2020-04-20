@@ -114,15 +114,28 @@ end
 do
     local function GatherDamagedEquipmentFromBag(bagId, dataTable)
         local bagSlots = GetBagSize(bagId)
-        for slotIndex=0, bagSlots - 1 do
+        for slotIndex = 0, bagSlots - 1 do
             local condition = GetItemCondition(bagId, slotIndex)
             if condition < 100 and not IsItemStolen(bagId, slotIndex) then
-                local icon, stackCount, _, _, _, _, _, quality = GetItemInfo(bagId, slotIndex)
+                local icon, stackCount, _, _, _, _, _, functionalQuality, displayQuality = GetItemInfo(bagId, slotIndex)
                 if stackCount > 0 then
                     local repairCost = GetItemRepairCost(bagId, slotIndex)
                     if repairCost > 0 then
                         local name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bagId, slotIndex))
-                        local data = { bagId = bagId, slotIndex = slotIndex, name = name, icon = icon, stackCount = stackCount, quality = quality, condition = condition, repairCost = repairCost }
+                        local data =
+                        {
+                            bagId = bagId,
+                            slotIndex = slotIndex,
+                            name = name,
+                            icon = icon,
+                            stackCount = stackCount,
+                            functionalQuality = functionalQuality,
+                            displayQuality = displayQuality,
+                            -- quality is depricated, included here for addon backwards compatibility
+                            quality = displayQuality,
+                            condition = condition,
+                            repairCost = repairCost
+                        }
                         dataTable[#dataTable + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_REPAIR_ITEM, data)
                     end
                 end
@@ -164,7 +177,9 @@ function ZO_Repair:SetupRepairItem(control, data)
     ZO_Inventory_SetupSlot(slotControl, data.stackCount, data.icon)
 
     nameControl:SetText(data.name) -- already formatted
-    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality))
+    -- data.quality is depricated, included here for addon backwards compatibility
+    local displayQuality = data.displayQuality or data.quality
+    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
 
     repairCostControl:SetHidden(false)
     ZO_CurrencyControl_SetSimpleCurrency(repairCostControl, CURT_MONEY, data.repairCost, REPAIR_COST_CURRENCY_OPTIONS)

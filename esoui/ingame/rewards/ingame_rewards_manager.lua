@@ -24,4 +24,16 @@ function IngameRewardsManager:GetCollectibleEntryInfo(rewardId, parentChoice)
     return nil
 end
 
+function IngameRewardsManager:GetRewardContextualTypeString(rewardId, parentChoice)
+    local entryType = GetRewardType(rewardId)
+    if entryType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+        local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData then
+            return collectibleData:GetCategoryTypeDisplayName()
+        end
+    end
+    return ZO_RewardsManager.GetRewardContextualTypeString(self, rewardId, parentChoice)
+end
+
 REWARDS_MANAGER = IngameRewardsManager:New()

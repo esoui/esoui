@@ -112,6 +112,7 @@ function ZO_GamepadStoreManager:Initialize(control)
     self.control:RegisterForEvent(EVENT_ITEM_REPAIR_FAILURE, OnFailedRepair)
     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
+    self.control:RegisterForEvent(EVENT_ANTIQUITY_LEAD_ACQUIRED, RefreshActiveComponent)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshActiveComponent)
 
     self:InitializeKeybindStrip()

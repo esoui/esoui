@@ -431,7 +431,8 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
                 if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
                     local dataEntry = ZO_GamepadEntryData:New(zo_strformat(SI_PROVISIONER_RECIPE_NAME_COUNT_NONE, recipe.name), recipe.iconFile, recipe.iconFile)
                     dataEntry:SetDataSource(recipe)
-                    dataEntry:SetNameColors(dataEntry:GetColorsBasedOnQuality(recipe.quality))
+                    -- recipe.quality is depricated, included here for addon backwards compatibility
+                    dataEntry:SetNameColors(dataEntry:GetColorsBasedOnQuality(recipe.displayQuality or recipe.quality))
                     dataEntry:SetSubLabelColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
                     dataEntry:SetStackCount(recipe.maxIterationsForIngredients)
                     dataEntry:SetSubLabelTemplate("ZO_ProvisioningSubLabelTemplate")
@@ -586,11 +587,11 @@ function ZO_ProvisionerIngredientBarSlotTemplate_OnInitialized(control)
 end
 
 function ZO_ProvisionerIngredientBarSlotTemplateSetup(control, data)
-    local name, icon, requiredQuantity, _, quality = GetRecipeIngredientItemInfo(data.recipeListIndex, data.recipeIndex, data.ingredientIndex)
+    local name, icon, requiredQuantity, _, displayQuality = GetRecipeIngredientItemInfo(data.recipeListIndex, data.recipeIndex, data.ingredientIndex)
     local ingredientCount = GetCurrentRecipeIngredientCount(data.recipeListIndex, data.recipeIndex, data.ingredientIndex)
 
     control.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, name))
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
     control.nameLabel:SetColor(r, g, b, 1)
 
     control.iconControl:SetTexture(icon)

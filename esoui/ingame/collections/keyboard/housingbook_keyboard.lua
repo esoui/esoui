@@ -37,8 +37,13 @@ end
 
 function HousingBook_Keyboard:InitializeEvents()
     ZO_SpecializedCollectionsBook_Keyboard.InitializeEvents(self)
-
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("PrimaryResidenceSet", function() self:RefreshList() end)
+
+    local function OnZoneChanged()
+        self.refreshGroups:RefreshSingle("ZoneChanged")
+    end
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnZoneChanged)
+    self.control:RegisterForEvent(EVENT_ZONE_CHANGED, OnZoneChanged)
 end
 
 function HousingBook_Keyboard:RefreshDetails()

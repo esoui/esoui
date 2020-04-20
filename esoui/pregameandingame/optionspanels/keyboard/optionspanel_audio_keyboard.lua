@@ -4,10 +4,17 @@ local panelBuilder = ZO_KeyboardOptionsPanelBuilder:New(SETTING_PANEL_AUDIO)
 -- Audio -> Subtitles --
 ------------------------
 panelBuilder:AddSetting({
-    controlName = "Options_Gameplay_SubtitlesEnabled",
+    controlName = "Options_Audio_SubtitlesEnabledForNPCs",
     settingType = SETTING_TYPE_SUBTITLES,
-    settingId = SUBTITLE_SETTING_ENABLED,
-    header = SI_GAMEPLAY_OPTIONS_SUBTITLES,
+    settingId = SUBTITLE_SETTING_ENABLED_FOR_NPCS,
+    header = SI_AUDIO_OPTIONS_SUBTITLES,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Audio_SubtitlesEnabledForVideos",
+    settingType = SETTING_TYPE_SUBTITLES,
+    settingId = SUBTITLE_SETTING_ENABLED_FOR_VIDEOS,
+    header = SI_AUDIO_OPTIONS_SUBTITLES,
 })
 
 ----------------------

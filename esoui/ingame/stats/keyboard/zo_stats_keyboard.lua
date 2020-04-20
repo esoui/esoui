@@ -214,8 +214,8 @@ function ZO_Stats:SetEquipmentBonusTooltip()
         if equipSlotHasItem then
             local lowestItemLink = GetItemLink(BAG_WORN, self.equipmentBonus.lowestEquipSlot)
             lowestItemText = GetItemLinkName(lowestItemLink)
-            local quality = GetItemLinkQuality(lowestItemLink)
-            local qualityColor = GetItemQualityColor(quality)
+            local displayQuality = GetItemLinkDisplayQuality(lowestItemLink)
+            local qualityColor = GetItemQualityColor(DisplayQuality)
             lowestItemText = qualityColor:Colorize(lowestItemText)
         else
             lowestItemText = zo_strformat(SI_STATS_EQUIPMENT_BONUS_TOOLTIP_EMPTY_SLOT, GetString("SI_EQUIPSLOT", self.equipmentBonus.lowestEquipSlot))

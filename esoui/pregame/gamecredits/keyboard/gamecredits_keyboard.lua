@@ -30,9 +30,14 @@ function CreditsScreen_Keyboard:Initialize(control)
 
 end
 
+function CreditsScreen_Keyboard:SetOnExitCallback(onExitCallback)
+    self.onExitCallback = onExitCallback
+end
+
 function CreditsScreen_Keyboard:Exit()
-    SCENE_MANAGER:RemoveFragment(GAME_CREDITS_FRAGMENT)
-    ZO_GameMenu_PreGame_Reset()
+    if self.onExitCallback then
+        self.onExitCallback()
+    end
 end
 
 function CreditsScreen_Keyboard:IsPreferredScreen()

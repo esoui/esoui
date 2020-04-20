@@ -41,6 +41,28 @@
                     end
                 </Down>
             </Action>
+        
+            <Action name="EVENT_BANNER_PRIMARY" hideAction="true" rebindable="false">
+                <Down>
+                    if not IsInGamepadPreferredMode() then
+                        CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:OnEventBannerCloseKeybind()
+                    end
+                </Down>
+            </Action>
+            <Action name="EVENT_BANNER_NEGATIVE" hideAction="true" rebindable="false">
+                <Down>
+                    if not IsInGamepadPreferredMode() then
+                        CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:OnEventBannerCloseKeybind()
+                    end
+                </Down>
+            </Action>
+            <Action name="EVENT_BANNER_CLOSE" hideAction="true" rebindable="false">
+                <Down>
+                    if not IsInGamepadPreferredMode() then
+                        CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:OnEventBannerCloseKeybind()
+                    end
+                </Down>
+            </Action>
         </Category>
     </Layer>
     <Layer name="GamepadShortcuts">
@@ -173,6 +195,9 @@
             </Action>
             <Action name="OPTIONS_LOAD_DEFAULTS" hideAction="true" inheritsBindFrom="DIALOG_RESET">
                 <Down> ZO_Dialogs_ShowDialog("OPTIONS_RESET_TO_DEFAULTS") </Down>
+            </Action>
+            <Action name="OPTIONS_LOGIN_SETTINGS_BACK" hideAction="true" inheritsBindFrom="DIALOG_NEGATIVE">
+                <Down> PREGAME_SETTINGS_KEYBOARD:HideSettings() </Down>
             </Action>
         </Category>
     </Layer>

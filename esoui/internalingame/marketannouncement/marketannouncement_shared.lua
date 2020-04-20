@@ -6,14 +6,16 @@ ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X = 315
 ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y = 210
 ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_ASPECT_RATIO = ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X / ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y
 
-ZO_ACTION_TILE_TYPE = 
+ZO_ACTION_TILE_TYPE =
 {
-    DAILY_REWARDS = 1,
-    ZONE_STORIES = 2,
+    EVENT_ANNOUNCEMENT = 1,
+    DAILY_REWARDS = 2,
+    ZONE_STORIES = 3,
 }
 
 ZO_ACTION_SORTED_TILE_TYPE =
 {
+    ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT,
     ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
     ZO_ACTION_TILE_TYPE.ZONE_STORIES,
 }
@@ -64,11 +66,12 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
 
     self.marketProductSelectedCallback = function(...) self:UpdateLabels(...) end
 
-    local function OnDailyLoginRewardsUpdated() 
+    local function OnDailyLoginRewardsUpdated()
         self:OnDailyLoginRewardsUpdated()
     end
 
     ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("OnMarketAnnouncementDataUpdated", function() self:UpdateMarketCarousel() end)
+    ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("EventAnnouncementExpired", function() self:LayoutActionTiles() end)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, OnDailyLoginRewardsUpdated)
 end
 
@@ -113,6 +116,7 @@ end
 
 function ZO_MarketAnnouncement_Shared:OnShowing()
     PlaySound(SOUNDS.DEFAULT_WINDOW_OPEN)
+    RequestEventAnnouncements()
     self:LayoutActionTiles()
 
     if GetMarketAnnouncementCrownStoreLocked() then
@@ -144,19 +148,24 @@ end
 function ZO_MarketAnnouncement_Shared:UpdateMarketCarousel()
     if self.fragment:IsShowing() then
         local productInfoTable = ZO_MARKET_ANNOUNCEMENT_MANAGER:GetProductInfoTable()
-        self.numAnnouncementProducts = #productInfoTable
-        if self.numAnnouncementProducts > 0 then
-            self.carousel:SetNumProductAnnouncements(self.numAnnouncementProducts)
-            self.carousel:UpdateSelection(1)
-        end
 
         self.carousel:Clear()
         for index, productInfo in ipairs(productInfoTable) do
             local marketProduct = self:CreateMarketProduct()
             marketProduct:SetMarketProductData(productInfo.productData)
-            self.carousel:AddEntry({marketProduct = marketProduct, callback = self.marketProductSelectedCallback, index = index})
+            local data =
+            {
+                marketProduct = marketProduct,
+                callback = self.marketProductSelectedCallback,
+                index = index
+            }
+            self.carousel:AddEntry(data)
         end
         self.carousel:Commit()
+
+        if #productInfoTable > 0 then
+            self.carousel:UpdateSelection(1)
+        end
     end
 end
 
@@ -179,6 +188,10 @@ end
 function ZO_MarketAnnouncement_Shared:OnMarketAnnouncementViewCrownStoreKeybind()
     local targetData = self.carousel:GetSelectedData()
     local marketProductId = targetData.marketProduct:GetId()
+    self:DoOpenMarketBehaviorForMarketProductId(marketProductId)
+end
+
+function ZO_MarketAnnouncement_Shared:DoOpenMarketBehaviorForMarketProductId(marketProductId)
     local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
 
     local additionalData = GetMarketProductOpenMarketBehaviorReferenceData(marketProductId)
@@ -195,12 +208,28 @@ function ZO_MarketAnnouncement_Shared:OnMarketAnnouncementViewCrownStoreKeybind(
     end
 end
 
+function ZO_MarketAnnouncement_Shared.GetEventAnnouncementTilesData(tileInfoList)
+    --- Add tile if there is an active event
+    if ZO_MARKET_ANNOUNCEMENT_MANAGER:GetNumEventAnnouncements() > 0 then
+        local eventAnnouncementTileInfo =
+        {
+            type = ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT,
+            data =
+            {
+                eventAnnouncementIndex = 1 -- Always show first sorted announcement on the tile
+            },
+            visible = true,
+        }
+        table.insert(tileInfoList, eventAnnouncementTileInfo)
+    end
+end
+
 function ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData(tileInfoList)
     --- Add tile if Daily Rewards is unlocked
     if not ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() then
          local dailyRewardIndex = ZO_DAILYLOGINREWARDS_MANAGER:GetDailyLoginRewardIndex()
 
-        local dailyRewardTileInfo = 
+        local dailyRewardTileInfo =
         {
             type = ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
             data =
@@ -226,7 +255,7 @@ function ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData(tileInfoList)
         local zoneStoriesTileInfo =
         {
             type = ZO_ACTION_TILE_TYPE.ZONE_STORIES,
-            data = 
+            data =
             {
                 zoneId = zoneId,
             },
@@ -237,13 +266,14 @@ function ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData(tileInfoList)
 end
 
 do
-    ZO_TILE_TYPE_TO_GET_TILE_INFO_FUNCTION = 
+    ZO_TILE_TYPE_TO_GET_TILE_INFO_FUNCTION =
     {
+        [ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT] = ZO_MarketAnnouncement_Shared.GetEventAnnouncementTilesData,
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData,
         [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData,
     }
     function ZO_MarketAnnouncement_Shared:LayoutActionTiles()
-        -- Get list of available tile infos 
+        -- Get list of available tile infos
         local availableTileInfoList = {}
         for _, data in ipairs(ZO_ACTION_SORTED_TILE_TYPE) do
             local tileInfoFunction = ZO_TILE_TYPE_TO_GET_TILE_INFO_FUNCTION[data]
@@ -283,7 +313,7 @@ do
                     break
                 end
             else
-                assert("ObjectPool was not defined for Action Tile " .. i) 
+                assert("ObjectPool was not defined for Action Tile " .. i)
             end
         end
     end

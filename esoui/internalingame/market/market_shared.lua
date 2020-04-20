@@ -381,12 +381,13 @@ do
             for productIndex = 1, numProducts do
                 local productId = GetMarketProductIdFromCrownCrateTier(tierId, productIndex)
                 if not addedMarketProductsMapping[productId] then
+                    local displayQuality = GetMarketProductDisplayQuality(productId)
                     local productInfo =
                         {
                             productId = productId,
                             name = GetMarketProductDisplayName(productId),
                             stackCount = GetMarketProductStackCount(productId),
-                            quality = GetMarketProductQuality(productId),
+                            displayQuality = displayQuality,
                             tierId = tierId,
                             tierOrdering = tierOrdering,
                             headerName = tierDisplayName,
@@ -418,14 +419,15 @@ function ZO_Market_Shared.GetMarketProductBundleChildProductInfo(marketProductId
                 isValidForPlayer = IsCollectibleValidForPlayer(collectibleId)
             end
 
-            local productInfo = {
-                            productId = childMarketProductId,
-                            name = GetMarketProductDisplayName(childMarketProductId),
-                            stackCount = GetMarketProductStackCount(childMarketProductId),
-                            isBundle = isBundle,
-                            isValidForPlayer = isValidForPlayer,
-                            quality = GetMarketProductQuality(childMarketProductId),
-                        }
+            local productInfo =
+            {
+                productId = childMarketProductId,
+                name = GetMarketProductDisplayName(childMarketProductId),
+                stackCount = GetMarketProductStackCount(childMarketProductId),
+                isBundle = isBundle,
+                isValidForPlayer = isValidForPlayer,
+                displayQuality = GetMarketProductDisplayQuality(childMarketProductId),
+            }
             table.insert(marketProducts, productInfo)
         end
     end

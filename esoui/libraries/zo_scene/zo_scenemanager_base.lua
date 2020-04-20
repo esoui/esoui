@@ -130,6 +130,19 @@ function ZO_SceneManager_Base:RemoveFragment(fragment)
     end
 end
 
+function ZO_SceneManager_Base:RemoveFragmentImmediately(fragment)
+    if fragment:GetHideOnSceneHidden() then
+        --The fragment may already be in the hiding state waiting for scene hidden when this happens. So we enable show/hide time updates so it can re-try hiding now that it doesn't have to wait on scene hidden.
+        fragment:SetAllowShowHideTimeUpdates(true)
+        fragment:SetHideOnSceneHidden(false)
+        SCENE_MANAGER:RemoveFragment(fragment)
+        fragment:SetHideOnSceneHidden(true)
+        fragment:SetAllowShowHideTimeUpdates(false)
+    else
+        SCENE_MANAGER:RemoveFragment(fragment)
+    end
+end
+
 function ZO_SceneManager_Base:AddFragmentGroup(fragmentGroup)
     for i, fragment in ipairs(fragmentGroup) do
         self:AddFragment(fragment)
@@ -137,7 +150,7 @@ function ZO_SceneManager_Base:AddFragmentGroup(fragmentGroup)
 end
 
 function ZO_SceneManager_Base:RemoveFragmentGroup(fragmentGroup)
-    for i, fragment in ipairs(fragmentGroup) do
+    for _, fragment in pairs(fragmentGroup) do
         self:RemoveFragment(fragment)
     end
 end

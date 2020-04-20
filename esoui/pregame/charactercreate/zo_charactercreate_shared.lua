@@ -22,10 +22,12 @@ NUM_CREATE_BUCKETS = 11
 CHARACTER_CREATE_MODE_CREATE = "create"
 CHARACTER_CREATE_MODE_EDIT_RACE = "raceChange"
 CHARACTER_CREATE_MODE_EDIT_APPEARANCE = "appearanceChange"
+CHARACTER_CREATE_MODE_EDIT_ALLIANCE = "allianceChange"
 
 CHARACTER_CREATE_SELECTOR_RACE = "race"
 CHARACTER_CREATE_SELECTOR_CLASS = "class"
 CHARACTER_CREATE_SELECTOR_ALLIANCE = "alliance"
+CHARACTER_CREATE_SELECTOR_GENDER = "gender"
 
 CHARACTER_CREATE_MAX_SUPPORTED_CLASSES = 6
 
@@ -66,9 +68,9 @@ function ZO_CharacterCreate_Manager:Initialize()
         self:SetShouldPromptForTutorialSkip(true)
     end
 
-    local function OnCharacterEditSucceeded(eventCode, characterId)
+    local function OnCharacterEditSucceeded(eventCode, characterId, pendingAllianceChange)
         ZO_Dialogs_ReleaseAllDialogsOfName("CHARACTER_CREATE_SAVING_CHANGES")
-        ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_SAVE_SUCCESS")
+        ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_SAVE_SUCCESS", { characterId = characterId, pendingAllianceChange = pendingAllianceChange })
     end
 
     local function OnCharacterEditFailed(eventCode, characterId, error)
@@ -175,6 +177,14 @@ function ZO_CharacterCreate_Manager:InitializeForRaceChange(characterData)
     characterCreate:InitializeForRaceChange(characterData)
 end
 
+function ZO_CharacterCreate_Manager:InitializeForAllianceChange(characterData)
+    ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_EDIT)
+    -- match the appearance set here to the default apperance set in PregameCharacterManager to avoid reloading the character
+    SelectClothing(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
+    local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
+    characterCreate:InitializeForAllianceChange(characterData)
+end
+
 function ZO_CharacterCreate_Manager:InitializeForCharacterCreate()
     ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_CREATION)
     local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
@@ -235,9 +245,26 @@ function ZO_CharacterCreate_Base:GetCharacterCreateMode()
     return self.characterCreateMode
 end
 
+function ZO_CharacterCreate_Base:GetTokenTypeForCharacterCreateMode(characterCreateMode)
+    if characterCreateMode == CHARACTER_CREATE_MODE_EDIT_APPEARANCE then
+        return SERVICE_TOKEN_APPEARANCE_CHANGE
+    elseif characterCreateMode == CHARACTER_CREATE_MODE_EDIT_RACE then
+        return SERVICE_TOKEN_RACE_CHANGE
+    elseif characterCreateMode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
+        return SERVICE_TOKEN_ALLIANCE_CHANGE
+    else
+        return SERVICE_TOKEN_NONE
+    end
+end
+
 -- Any functions that end up changing sliders need to be wrapped like this
 function ZO_CharacterCreate_Base:SetRace(race, options)
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local currentRace = CharacterCreateGetRace(characterMode)
+    if race == currentRace then
+        return
+    end
+
     CharacterCreateSetRace(race)
     
     -- When picking a race, unless the player is entitled to playing any race as any alliance or if the newly selected race
@@ -249,7 +276,7 @@ function ZO_CharacterCreate_Base:SetRace(race, options)
     end
 
     local currentRaceData = self.characterData:GetRaceForRaceDef(CharacterCreateGetRace(characterMode))
-    if currentRaceData.alliance == 0 then
+    if currentRaceData.alliance == ALLIANCE_NONE then
         chooseNewAlliance = false
     end
 
@@ -267,6 +294,11 @@ end
 
 function ZO_CharacterCreate_Base:SetAlliance(allianceDef, options)
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local currentAlliance = CharacterCreateGetAlliance(characterMode)
+    if allianceDef == currentAlliance then
+        return
+    end
+
     ZO_CharacterCreate_SetAlliance(allianceDef)
 
     -- When picking an alliance, unless the player is entitled to playing any race as any alliance or if the current race
@@ -278,12 +310,11 @@ function ZO_CharacterCreate_Base:SetAlliance(allianceDef, options)
     end
 
     local currentRaceData = self.characterData:GetRaceForRaceDef(CharacterCreateGetRace(characterMode))
-    if currentRaceData.alliance == 0 then
+    if currentRaceData.alliance == ALLIANCE_NONE then
         return
     end
 
     local currentAllianceData = self.characterData:GetAllianceForAllianceDef(allianceDef)
-    local currentAlliance = currentAllianceData.alliance
 
     -- Looking for the race on the same row as this one in the column under the appropriate alliance
     local racePos = currentRaceData.position - 1
@@ -300,11 +331,23 @@ function ZO_CharacterCreate_Base:SetAlliance(allianceDef, options)
 end
 
 function ZO_CharacterCreate_Base:SetGender(gender)
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local currentGender = CharacterCreateGetGender(characterMode)
+    if gender == currentGender then
+        return
+    end
+
     CharacterCreateSetGender(gender)
     self:ResetControls()
 end
 
 function ZO_CharacterCreate_Base:SetClass(class)
+    local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
+    local currentClass = CharacterCreateGetClass(characterMode)
+    if class == currentClass then
+        return
+    end
+
     CharacterCreateSetClass(class)
 end
 
@@ -407,7 +450,7 @@ function ZO_CharacterCreate_Base:UpdateRaceSelectorsForTemplate(raceData, templa
         else
             -- check to see if the selected race is allowed based on the template alliance
             local templateAlliance = templateData.alliance
-            if templateAlliance ~= 0 then
+            if templateAlliance ~= ALLIANCE_NONE then
                 if templateAlliance ~= raceData.alliance and not CanPlayAnyRaceAsAnyAlliance() then
                     enabled = false
                 end
@@ -428,7 +471,7 @@ function ZO_CharacterCreate_Base:UpdateClassSelectorsForTemplate(classData, temp
 end
 
 function ZO_CharacterCreate_Base:UpdateAllianceSelectorsForTemplate(allianceData, templateData)
-    return allianceData.isSelectable and (templateData.alliance == 0 or templateData.alliance == allianceData.alliance)
+    return allianceData.isSelectable and (templateData.alliance == ALLIANCE_NONE or templateData.alliance == allianceData.alliance)
 end
 
 function ZO_CharacterCreate_Base:UpdateSelectorsForTemplate(isEnabledCallback, characterDataTable, templateData, radioGroup, optionalValidIndexTable)
@@ -467,6 +510,8 @@ function ZO_CharacterCreate_Base:SaveCharacterChanges()
         tokenType = SERVICE_TOKEN_APPEARANCE_CHANGE
     elseif createMode == CHARACTER_CREATE_MODE_EDIT_RACE then
         tokenType = SERVICE_TOKEN_RACE_CHANGE
+    elseif createMode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
+        tokenType = SERVICE_TOKEN_ALLIANCE_CHANGE
     end
 
     local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
@@ -483,6 +528,8 @@ function ZO_CharacterCreate_Base:ExitToState(stateName)
             tokenType = SERVICE_TOKEN_APPEARANCE_CHANGE
         elseif createMode == CHARACTER_CREATE_MODE_EDIT_RACE then
             tokenType = SERVICE_TOKEN_RACE_CHANGE
+        elseif createMode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
+            tokenType = SERVICE_TOKEN_ALLIANCE_CHANGE
         end
         local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
         ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_CONFIRM_REVERT_CHANGES", { newState = stateName }, {mainTextParams = { tokenString }})
@@ -526,6 +573,10 @@ function ZO_CharacterCreate_Base:InitializeForAppearanceChange(characterData)
 end
 
 function ZO_CharacterCreate_Base:InitializeForRaceChange(characterData)
+    -- optional override
+end
+
+function ZO_CharacterCreate_Base:InitializeForAllianceChange(characterData)
     -- optional override
 end
 

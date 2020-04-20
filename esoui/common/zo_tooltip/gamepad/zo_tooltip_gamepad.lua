@@ -13,6 +13,9 @@ local function LayoutFunction(self, tooltipType, ...)
         return nil -- if this line fired you called a function that does not exist on ZO_GamepadTooltip or ZO_Tooltip
     end
 
+    -- Always default the border to hidden so that tooltips to which it is not relevant don't have to deal with it.
+    self:SetBorderHidden(tooltipType, true)
+
     local tooltipInfo = self:GetTooltipInfo(tooltipType)
     tooltipContainerTip:ClearLines(tooltipInfo.resetScroll)
     local returnValue = tooltipFunction(tooltipContainerTip.tooltip, ...)
@@ -86,6 +89,7 @@ function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, a
     container.tip = container:GetNamedChild("Tip")
     container.tip.initialized = false;
 
+    container.gamepadTooltipContainerBorderControl = container:GetNamedChild("Border")
     container.statusLabel = container:GetNamedChild("StatusLabel")
     container.statusLabelValue = container:GetNamedChild("StatusLabelValue")
     container.statusLabelValueForVisualLayer = container:GetNamedChild("StatusLabelValueForVisualLayer")
@@ -117,6 +121,7 @@ function ZO_GamepadTooltip:InitializeTooltip(tooltipType, baseControl, prefix, a
         darkBgControl = darkBgControl,
         headerContainerControl = headerContainerControl,
         headerControl = headerControl,
+        gamepadTooltipContainerBorderControl = gamepadTooltipContainerBorderControl,
 
         fragment = ZO_FadeSceneFragment:New(control, true),
         bgFragment = bgFragment,
@@ -155,6 +160,13 @@ function ZO_GamepadTooltip:ResetScrollTooltipToTop(tooltipType)
     local tooltipContainerTip = self:GetAndInitializeTooltipContainerTip(tooltipType)
     if tooltipContainerTip then
         tooltipContainerTip:ResetToTop()
+    end
+end
+
+function ZO_GamepadTooltip:SetBorderHidden(tooltipType, isHidden)
+    local container = self:GetTooltipContainer(tooltipType)
+    if container.gamepadTooltipContainerBorderControl then
+        container.gamepadTooltipContainerBorderControl:SetHidden(isHidden)
     end
 end
 
@@ -288,6 +300,7 @@ function ZO_GamepadTooltip:GetAndInitializeTooltipContainerTip(tooltipType)
         if tooltipContainerTip.initialized == false then
             tooltipContainerTip.initialized = true
             ZO_ScrollTooltip_Gamepad:Initialize(tooltipContainerTip, ZO_TOOLTIP_STYLES)
+            tooltipContainerTip.tooltip.gamepadTooltipContainerBorderControl = tooltipContainer.gamepadTooltipContainerBorderControl
         end
         return tooltipContainerTip
     end

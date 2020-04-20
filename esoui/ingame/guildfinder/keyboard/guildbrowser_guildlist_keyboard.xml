@@ -75,10 +75,6 @@
                 <Label name="$(parent)Results" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="TOP" offsetY="50" />
                 </Label>
-                
-                <Label name="$(parent)FiltersHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_BROWSER_GUILD_LIST_FILTERS_HEADER">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT" offsetX="80" offsetY="-30" />
-                </Label>
 
                 <Control name="$(parent)TraderCheckBox" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
@@ -118,7 +114,7 @@
                 </Control>
 
                 <Control name="$(parent)Activites" inherits="ZO_MultiselectComboBox">
-                    <Dimensions x="160" />
+                    <Dimensions x="175" />
                     <Anchor point="RIGHT" relativeTo="$(parent)Personalities" relativePoint="LEFT" offsetX="-5" />
                 </Control>
 

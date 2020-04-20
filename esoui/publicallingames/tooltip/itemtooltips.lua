@@ -7,6 +7,11 @@ local NO_PREVIEW_VALUE = nil
 local NO_ITEM_NAME = nil
 local NO_TRADE_BOP_DATA = nil
 
+local ITEM_MYTHIC_BORDER_FILE = "EsoUI/Art/Tooltips/Gamepad/GP_UI-Border_Mythic_64px.dds"
+local ITEM_MYTHIC_BORDER_RED_FILE = "EsoUI/Art/Tooltips/Gamepad/GP_UI-Border_Mythic_RED_64px.dds"
+local ITEM_MYTHIC_FILE_WIDTH = 512
+local ITEM_MYTHIC_FILE_HEIGHT = 64
+
 ZO_ENCHANT_DIFF_ADD = "add"
 ZO_ENCHANT_DIFF_REMOVE = "remove"
 ZO_ENCHANT_DIFF_NONE = "none"
@@ -21,8 +26,8 @@ ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT = "inventoryAndBankA
 
 function ZO_Tooltip:AddItemTitle(itemLink, name)
     name = name or GetItemLinkName(itemLink)
-    local quality = GetItemLinkQuality(itemLink)
-    local qualityStyle = ZO_TooltipStyles_GetItemQualityStyle(quality)
+    local displayQuality = GetItemLinkDisplayQuality(itemLink)
+    local qualityStyle = ZO_TooltipStyles_GetItemQualityStyle(displayQuality)
     self:AddLine(zo_strformat(SI_TOOLTIP_ITEM_NAME, name), qualityStyle, self:GetStyle("title"))
 end
 
@@ -621,7 +626,7 @@ end
 
 function ZO_Tooltip:AddMaterialLevels(itemLink)
     local levelsDescription = GetItemLinkMaterialLevelDescription(itemLink)
-    if(levelsDescription ~= "") then
+    if levelsDescription ~= "" then
         local levelsSection = self:AcquireSection(self:GetStyle("bodySection"))
         levelsSection:AddLine(levelsDescription, self:GetStyle("bodyDescription"))
         self:AddSection(levelsSection)
@@ -661,6 +666,22 @@ function ZO_Tooltip:AddItemTags(itemLink)
 end
 
 --Layout Functions
+function ZO_Tooltip:UpdateGamepadBorderDisplay(itemLink)
+    -- Self is an internal scroll tooltip control, but the border we want to set is on the
+    -- outer container control. That container control has been reference on the tooltip control self.
+    -- Set Mythic Border to show or hide depending on if the item is Mythic
+    if self.gamepadTooltipContainerBorderControl then
+        local borderFile
+        local isBorderHidden = GetItemLinkDisplayQuality(itemLink) ~= ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE
+        if IsItemLinkStolen(itemLink) then
+            borderFile = ITEM_MYTHIC_BORDER_RED_FILE
+        else
+            borderFile = ITEM_MYTHIC_BORDER_FILE
+        end
+        self.gamepadTooltipContainerBorderControl:SetEdgeTexture(borderFile, ITEM_MYTHIC_FILE_WIDTH, ITEM_MYTHIC_FILE_HEIGHT)
+        self.gamepadTooltipContainerBorderControl:SetHidden(isBorderHidden)
+    end
+end
 
 function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData, extraData)
     self:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
@@ -673,6 +694,8 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
     elseif DoesItemLinkHaveEnchantCharges(itemLink) then
         self:AddEnchantChargeBar(itemLink, forceFullDurability, previewValueToAdd)
     end
+
+    self:UpdateGamepadBorderDisplay(itemLink)
 
     local isFurniture = IsItemLinkPlaceableFurniture(itemLink)
     local enchantDiffMode
@@ -723,12 +746,12 @@ function ZO_Tooltip:LayoutBooster(itemLink, itemName, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     local boosterDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
-    local toQuality = GetItemLinkQuality(itemLink)
-    local fromQuality = zo_max(ITEM_QUALITY_TRASH, toQuality - 1)
-    local toQualityText = GetString("SI_ITEMQUALITY", toQuality)
-    local fromQualityText = GetString("SI_ITEMQUALITY", fromQuality)
-    toQualityText = GetItemQualityColor(toQuality):Colorize(toQualityText)
-    fromQualityText = GetItemQualityColor(fromQuality):Colorize(fromQualityText)
+    local toDisplayQuality = GetItemLinkDisplayQuality(itemLink)
+    local fromDisplayQuality = zo_max(ITEM_DISPLAY_QUALITY_TRASH, toDisplayQuality - 1)
+    local toQualityText = GetString("SI_ITEMQUALITY", toDisplayQuality)
+    local fromQualityText = GetString("SI_ITEMQUALITY", fromDisplayQuality)
+    toQualityText = GetItemQualityColor(toDisplayQuality):Colorize(toQualityText)
+    fromQualityText = GetItemQualityColor(fromDisplayQuality):Colorize(fromQualityText)
     boosterDescriptionSection:AddLine(zo_strformat(SI_ENCHANTMENT_BOOSTER_DESCRIPTION, fromQualityText, toQualityText), self:GetStyle("bodyDescription"))
     self:AddSection(boosterDescriptionSection)
     self:AddPrioritySellText(itemLink)
@@ -742,7 +765,7 @@ do
         self:AddEnchant(itemLink)
 
         local minLevel, minChampionPoints = GetItemLinkGlyphMinLevels(itemLink)
-        if(minLevel or minChampionPoints) then
+        if minLevel or minChampionPoints then
             local requirementsSection = self:AcquireSection(self:GetStyle("bodySection"))
             if minChampionPoints then
                 requirementsSection:AddLine(zo_strformat(SI_ENCHANTING_GLYPH_REQUIRED_SINGLE_CHAMPION_POINTS_GAMEPAD, FORMATTED_CHAMPION_RANK_ICON, minChampionPoints), self:GetStyle("bodyDescription"))
@@ -753,6 +776,8 @@ do
         end
 
         self:AddFlavorText(itemLink)
+
+        self:UpdateGamepadBorderDisplay(itemLink)
     end
 end
 
@@ -978,7 +1003,7 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData, ex
     if requiredQuality > 0 then
         local quality = GetNonCombatBonus(NON_COMBAT_BONUS_PROVISIONING_RARITY_LEVEL)
         local qualitySuccessStyle
-        if(quality >= requiredQuality) then
+        if quality >= requiredQuality then
             qualitySuccessStyle = self:GetStyle("succeeded")
         else
             qualitySuccessStyle = self:GetStyle("failed")
@@ -1132,6 +1157,8 @@ function ZO_Tooltip:LayoutStyleMaterial(itemLink, itemName, extraData)
     self:AddSection(styleSection)
     self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
+
+    self:UpdateGamepadBorderDisplay(itemLink)
 end
 
 function ZO_Tooltip:LayoutRawBaseMaterial(itemLink, itemName, extraData)
@@ -1139,8 +1166,8 @@ function ZO_Tooltip:LayoutRawBaseMaterial(itemLink, itemName, extraData)
     if(refinedItemLink ~= "") then
         local refinedSection = self:AcquireSection(self:GetStyle("bodySection"))
         local refinedItemName = GetItemLinkName(refinedItemLink)
-        local quality = GetItemLinkQuality(refinedItemLink)
-        local qualityColor = GetItemQualityColor(quality)
+        local displayQuality = GetItemLinkDisplayQuality(refinedItemLink)
+        local qualityColor = GetItemQualityColor(displayQuality)
 
         local minRawMats = GetSmithingRefinementMinRawMaterial()
         local maxRawMats = GetSmithingRefinementMaxRawMaterial()
@@ -1166,14 +1193,14 @@ function ZO_Tooltip:LayoutRawBooster(itemLink, itemName, extraData)
         local boosterDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
 
         local refinedItemName = GetItemLinkName(refinedItemLink)
-        local refinedItemQuality = GetItemLinkQuality(refinedItemLink)
-        local toQuality = GetItemLinkQuality(itemLink)
-        local fromQuality = zo_max(ITEM_QUALITY_TRASH, toQuality - 1)
+        local refinedItemDisplayQuality = GetItemLinkDisplayQuality(refinedItemLink)
+        local toDisplayQuality = GetItemLinkDisplayQuality(itemLink)
+        local fromDisplayQuality = zo_max(ITEM_DISPLAY_QUALITY_TRASH, toDisplayQuality - 1)
 
         local requiredStackSize = GetRequiredSmithingRefinementStackSize()
-        local refinedItemText = GetItemQualityColor(refinedItemQuality):Colorize(refinedItemName)
-        local toQualityText = GetItemQualityColor(toQuality):Colorize(GetString("SI_ITEMQUALITY", toQuality))
-        local fromQualityText = GetItemQualityColor(fromQuality):Colorize(GetString("SI_ITEMQUALITY", fromQuality))
+        local refinedItemText = GetItemQualityColor(refinedItemDisplayQuality):Colorize(refinedItemName)
+        local toQualityText = GetItemQualityColor(toDisplayQuality):Colorize(GetString("SI_ITEMQUALITY", toDisplayQuality))
+        local fromQualityText = GetItemQualityColor(fromDisplayQuality):Colorize(GetString("SI_ITEMQUALITY", fromDisplayQuality))
 
         boosterDescriptionSection:AddLine(zo_strformat(SI_RAW_BOOSTER_DESCRIPTION, requiredStackSize, refinedItemText, fromQualityText, toQualityText), self:GetStyle("bodyDescription"))
         self:AddSection(boosterDescriptionSection)
@@ -1229,6 +1256,8 @@ function ZO_Tooltip:LayoutAlchemyPreview(itemLink, itemTypeString, prospectiveAl
         self:AddItemTitle(itemLink)
         self:AddBaseStats(itemLink)
         self:AddOnUseAbility(itemLink)
+
+        self:UpdateGamepadBorderDisplay(itemLink)
     else
         if self.icon then
             self.icon:SetHidden(true)
@@ -1272,7 +1301,7 @@ function ZO_Tooltip:LayoutEnchantingCraftingItem(itemLink, icon, creator, extraD
 end
 
 function ZO_Tooltip:LayoutEnchantingPreview(potencyRuneBagId, potencyRuneSlotIndex, essenceRuneBagId, essenceRuneSlotIndex, aspectRuneBagId, aspectRuneSlotIndex, extraData)
-    local _, icon, _, _, _, _ = GetEnchantingResultingItemInfo(potencyRuneBagId, potencyRuneSlotIndex, essenceRuneBagId, essenceRuneSlotIndex, aspectRuneBagId, aspectRuneSlotIndex)
+    local _, icon = GetEnchantingResultingItemInfo(potencyRuneBagId, potencyRuneSlotIndex, essenceRuneBagId, essenceRuneSlotIndex, aspectRuneBagId, aspectRuneSlotIndex)
     local itemLink = GetEnchantingResultingItemLink(potencyRuneBagId, potencyRuneSlotIndex, essenceRuneBagId, essenceRuneSlotIndex, aspectRuneBagId, aspectRuneSlotIndex)
 
     self:LayoutEnchantingCraftingItem(itemLink, icon, extraData)
@@ -1295,6 +1324,8 @@ function ZO_Tooltip:LayoutStoreWindowItem(itemData)
         self:LayoutCollectibleFromLink(itemData.itemLink)
     elseif itemData.entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
         self:LayoutQuestItem(itemData.questItemId)
+    elseif itemData.entryType == STORE_ENTRY_TYPE_ANTIQUITY_LEAD then
+        self:LayoutAntiquityLead(GetStoreEntryAntiquityId(itemData.slotIndex))
     else
         self:LayoutStoreItemFromLink(itemData.itemLink, itemData.icon)
     end
@@ -1557,7 +1588,7 @@ end
 function ZO_Tooltip:LayoutTradeItem(who, tradeIndex)
     local itemLink = GetTradeItemLink(who, tradeIndex, LINK_STYLE_DEFAULT)
     local equipped = false
-    local name, icon, stack, quality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(who, tradeIndex)
+    local name, icon, stack, displayQuality, creator, sellPrice, meetsUsageRequirement, equipType, itemStyle = GetTradeItemInfo(who, tradeIndex)
     local tradeBoPData
     if IsTradeItemBoPAndTradeable(who, tradeIndex) then
         tradeBoPData =

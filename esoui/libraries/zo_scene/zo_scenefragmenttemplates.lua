@@ -178,6 +178,100 @@ function ZO_TranslateFromTopSceneFragment:New(control, alwaysAnimate, duration)
     return ZO_AnimatedSceneFragment.New(self, "TranslateFromTopSceneAnimation", control, alwaysAnimate, duration)
 end
 
+ZO_CustomAnimationSceneFragment = ZO_SceneFragment:Subclass()
+
+function ZO_CustomAnimationSceneFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function ZO_CustomAnimationSceneFragment:Initialize(control, showAnimationTemplate, hideAnimationTemplate)
+    ZO_SceneFragment.Initialize(self)
+    self.control = control
+    self.animationOnStop = function()
+        if self.showAnimation then
+            self.showAnimation:SetHandler("OnStop", nil, "ZO_CustomAnimationSceneFragment")
+
+            ReleaseAnimation(self.showAnimationTemplate, self.showAnimationKey)
+            self.showAnimation = nil
+            self.showAnimationKey = nil
+        end
+
+        -- This callback should be at the end of the function because it could cause other sequential animations to play
+        self:OnShown()
+    end
+    self.animationReverseOnStop = function(_, completedPlaying)
+        control:SetHidden(true)
+
+        if self.showAnimation and self.showAnimation:IsPlaying() then
+            self.showAnimation:PlayInstantlyToEnd()
+        end
+
+        if self.hideAnimation then
+            self.hideAnimation:SetHandler("OnStop", nil, "ZO_CustomAnimationSceneFragment")
+
+            if completedPlaying then
+                self.hideAnimation:PlayInstantlyToEnd()
+            end
+            ReleaseAnimation(self.hideAnimationTemplate, self.hideAnimationKey)
+            self.hideAnimation = nil
+            self.hideAnimationKey = nil
+        end
+
+        -- This callback should be at the end of the function because it could cause other sequential animations to play
+        self:OnHidden()
+    end
+
+    self.showAnimationTemplate = showAnimationTemplate
+    self.hideAnimationTemplate = hideAnimationTemplate
+end
+
+function ZO_CustomAnimationSceneFragment:GetShowAnimation()
+    if self.showAnimation == nil and self.showAnimationTemplate ~= nil then
+        self.showAnimation, self.showAnimationKey = AcquireAnimation(self.showAnimationTemplate)
+        self.showAnimation:ApplyAllAnimationsToControl(self.control)
+    end
+
+    return self.showAnimation
+end
+
+function ZO_CustomAnimationSceneFragment:GetHideAnimation()
+    if self.hideAnimation == nil and self.hideAnimationTemplate ~= nil then
+        self.hideAnimation, self.hideAnimationKey = AcquireAnimation(self.hideAnimationTemplate)
+        self.hideAnimation:ApplyAllAnimationsToControl(self.control)
+    end
+
+    return self.hideAnimation
+end
+
+function ZO_CustomAnimationSceneFragment:GetControl()
+    return self.control
+end
+
+function ZO_CustomAnimationSceneFragment:Show()
+    self.control:SetHidden(false)
+    local animation = self:GetShowAnimation()
+    if animation then
+        animation:SetHandler("OnStop", self.animationOnStop, "ZO_CustomAnimationSceneFragment")
+        animation:PlayFromStart()
+    else
+        local NO_ANIMATION = nil
+        local COMPLETED_PLAYING = true
+        self.animationOnStop(NO_ANIMATION, COMPLETED_PLAYING)
+    end
+end
+
+function ZO_CustomAnimationSceneFragment:Hide()
+    local animation = self:GetHideAnimation()
+    if animation then
+        animation:SetHandler("OnStop", self.animationReverseOnStop, "ZO_CustomAnimationSceneFragment")
+        animation:PlayFromStart()
+    else
+        local NO_ANIMATION = nil
+        local COMPLETED_PLAYING = true
+        self.animationReverseOnStop(NO_ANIMATION, COMPLETED_PLAYING)
+    end
+end
+
 ZO_ConveyorSceneFragment = ZO_SceneFragment:Subclass()
 
 function ZO_ConveyorSceneFragment:New(...)

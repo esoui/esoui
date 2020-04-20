@@ -50,10 +50,10 @@ EVENT_GUILD_MEMBER_CHARACTER_VETERAN_RANK_CHANGED = EVENT_GUILD_MEMBER_CHARACTER
 EVENT_FRIEND_CHARACTER_VETERAN_RANK_CHANGED = EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED
 
 function GetItemLinkGlyphMinMaxLevels(itemLink)
-	local minLevel, minChampPoints = GetItemLinkGlyphMinLevels(itemLink) 
-	local maxLevel = nil
-	local maxChampPoints = nil
-	return minLevel, maxLevel, minChampPoints, maxChampPoints
+    local minLevel, minChampPoints = GetItemLinkGlyphMinLevels(itemLink) 
+    local maxLevel = nil
+    local maxChampPoints = nil
+    return minLevel, maxLevel, minChampPoints, maxChampPoints
 end
 
 --Renamed some NameplateDisplayChoice settings
@@ -174,7 +174,7 @@ function GetLFGRequestInfo(requestIndex)
 end
 
 function GetLFGFindReplacementNotificationInfo()
-    local activityId = GetActivityFindReplacementNotificationInfo(activityType, index)
+    local activityId = GetActivityFindReplacementNotificationInfo()
     if activityId then
         return GetActivityTypeAndIndex(activityId)
     end
@@ -260,8 +260,8 @@ function GetSmithingStyleItemInfo(itemStyleId)
     local alwaysHideIfLocked = GetItemStyleInfo(itemStyleId)
     local name = GetItemLinkName(styleItemLink)
     local icon, sellPrice, meetsUsageRequirement = GetItemLinkInfo(styleItemLink)
-    local quality = GetItemLinkQuality(styleItemLink)
-    return name, icon, sellPrice, meetsUsageRequirement, itemStyleId, quality, alwaysHideIfLocked
+    local displayQuality = GetItemLinkDisplayQuality(styleItemLink)
+    return name, icon, sellPrice, meetsUsageRequirement, itemStyleId, displayQuality, alwaysHideIfLocked
 end
 
 ITEMSTYLE_NONE                      = 0
@@ -455,6 +455,10 @@ function GetLearnedAbilityInfoForLevel(level, learnedIndex, isProgression)
     end
 end
 
+--
+-- Map related aliases
+--
+
 -- Battleground pin enum fixup
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_NEUTRAL = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_NEUTRAL
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_A_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_A_FIRE_DRAKES
@@ -472,6 +476,46 @@ MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_NEUTRAL = MAP_PIN_TYPE_BGPIN_CAPTURE_ARE
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_FIRE_DRAKES = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_FIRE_DRAKES
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_PIT_DAEMONS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_PIT_DAEMONS
 MAP_PIN_TYPE_BGPIN_MULTI_CAPTURE_AREA_D_STORM_LORDS = MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_D_STORM_LORDS
+
+ZO_MapPin.PulseAninmation = ZO_MapPin.PulseAnimation
+
+--Added Tracking Level Map Pin Function
+
+function SetMapQuestPinsAssisted(questIndex, assisted)
+    SetMapQuestPinsTrackingLevel(questIndex, assisted and TRACKING_LEVEL_ASSISTED or TRACKING_LEVEL_UNTRACKED)
+end
+
+function ZO_WorldMap_RefreshMapFrameAnchor()
+    WORLD_MAP_MANAGER:RefreshMapFrameAnchor()
+end
+
+function ZO_WorldMap_PushSpecialMode(mode)
+    WORLD_MAP_MANAGER:PushSpecialMode(mode)
+end
+
+function ZO_WorldMap_PopSpecialMode()
+    WORLD_MAP_MANAGER:PopSpecialMode()
+end
+
+function ZO_WorldMap_GetMode()
+    return WORLD_MAP_MANAGER:GetMode()
+end
+
+function ZO_WorldMap_IsMapChangingAllowed(zoomDirection)
+    return WORLD_MAP_MANAGER:IsMapChangingAllowed(zoomDirection)
+end
+
+function ZO_WorldMap_GetFilterValue(option)
+    return WORLD_MAP_MANAGER:GetFilterValue(option)
+end
+
+function ZO_WorldMap_AreStickyPinsEnabledForPinGroup(pinGroup)
+    return WORLD_MAP_MANAGER:AreStickyPinsEnabledForPinGroup(pinGroup)
+end
+
+--
+-- End map related aliases
+--
 
 VISUAL_LAYER_HEADWEAR = VISUAL_LAYER_HAT
 
@@ -518,12 +562,6 @@ function IsCollectibleHiddenWhenLocked(collectibleId)
     else
         return GetCollectibleHideMode(collectibleId) == COLLECTIBLE_HIDE_MODE_WHEN_LOCKED
     end
-end
-
---Added Tracking Level Map Pin Function
-
-function SetMapQuestPinsAssisted(questIndex, assisted)
-    SetMapQuestPinsTrackingLevel(questIndex, assisted and TRACKING_LEVEL_ASSISTED or TRACKING_LEVEL_UNTRACKED)
 end
 
 -- LFG now only supports single role selection
@@ -764,4 +802,50 @@ end
 
 function ZO_ChatSystem_AddEventHandler(eventKey, eventFormatter)
     CHAT_ROUTER:RegisterMessageFormatter(eventKey, eventFormatter)
+end
+
+-- State machine refactor
+function ZO_CrownCratesStateMachine:IsCurrentStateByName(stateName)
+    return self:IsCurrentState(stateName)
+end
+
+HousingEditorPushFurniture = HousingEditorPushSelectedObject
+
+function ZO_ItemPreview_Shared:RemoveFragmentImmediately(fragment)
+    SCENE_MANAGER:RemoveFragmentImmediately(fragment)
+end
+
+-- Object Pools
+function ZO_ObjectPool:GetExistingObject(objectKey)
+    return self:GetActiveObject(objectKey)
+end
+
+function ZO_MetaPool:GetExistingObject(objectKey)
+    return self:GetActiveObject(objectKey)
+end
+
+-- Create a separate item display quality distinct from an item's functional quality support
+TOOLTIP_GAME_DATA_STOLEN = TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN
+
+ITEM_QUALITY_TRASH = ITEM_FUNCTIONAL_QUALITY_TRASH
+ITEM_QUALITY_NORMAL = ITEM_FUNCTIONAL_QUALITY_NORMAL
+ITEM_QUALITY_MAGIC = ITEM_FUNCTIONAL_QUALITY_MAGIC
+ITEM_QUALITY_ARCANE = ITEM_FUNCTIONAL_QUALITY_ARCANE
+ITEM_QUALITY_ARTIFACT = ITEM_FUNCTIONAL_QUALITY_ARTIFACT
+ITEM_QUALITY_LEGENDARY = ITEM_FUNCTIONAL_QUALITY_LEGENDARY
+
+GetItemQuality = GetItemFunctionalQuality
+GetItemLinkQuality = GetItemLinkFunctionalQuality
+GetSlotItemQuality = GetSlotItemDisplayQuality
+ZO_FurnitureDataBase.GetQuality = ZO_FurnitureDataBase.GetDisplayQuality
+ZO_PlaceableFurnitureItem.GetQuality = ZO_PlaceableFurnitureItem.GetDisplayQuality
+ZO_RetrievableFurniture.GetQuality = ZO_RetrievableFurniture.GetDisplayQuality
+ZO_HousingMarketProduct.GetQuality = ZO_HousingMarketProduct.GetDisplayQuality
+ZO_RewardData.SetItemQuality = ZO_RewardData.SetItemDisplayQuality
+ZO_RewardData.GetItemQuality = ZO_RewardData.GetItemDisplayQuality
+GetPlacedHousingFurnitureQuality = GetPlacedHousingFurnitureDisplayQuality
+
+-- Interact Window
+function ZO_InteractionManager:OnEndInteraction(...) --This name was always an action, not a reaction
+    self:EndInteraction(...)
 end

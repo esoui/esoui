@@ -168,9 +168,6 @@
         </Control>
 
         <Control name="ZO_ScrollContainer" inherits="ZO_ScrollContainerBase" virtual="true">
-            <OnInitialized>
-                ZO_Scroll_Initialize(self)
-            </OnInitialized>
             <Controls>
                 <Control name="$(parent)Scroll" override="true">
                     <Controls>

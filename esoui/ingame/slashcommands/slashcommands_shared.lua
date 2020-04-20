@@ -39,7 +39,7 @@ if AreUserAddOnsSupported() or IsInternalBuild() then
             CHAT_ROUTER:AddSystemMessage("All lines begin with the time in MS since logging began and the line type.")
             CHAT_ROUTER:AddSystemMessage("<unitState> refers to the following fields for a unit: unitId, health/max, magicka/max, stamina/max, ultimate/max, werewolf/max, shield, map NX, map NY, headingRadians.")
             CHAT_ROUTER:AddSystemMessage("<targetUnitState> is replaced with an asterisk if the source and target are the same.")
-            CHAT_ROUTER:AddSystemMessage("<equipmentInfo> refers to the following fields for a piece of equipment: slot, id, isCP, level, trait, quality, setId, enchantType, isEnchantCP, enchantLevel, enchantQuality.")
+            CHAT_ROUTER:AddSystemMessage("<equipmentInfo> refers to the following fields for a piece of equipment: slot, id, isCP, level, trait, displayQuality, setId, enchantType, isEnchantCP, enchantLevel, enchantQuality.")
             PrintLineTypeInfo("BEGIN_LOG", "timeSinceEpochMS", "logVersion", "realmName", "language", "gameVersion")
             PrintLineTypeInfo("END_LOG")
             PrintLineTypeInfo("BEGIN_COMBAT")

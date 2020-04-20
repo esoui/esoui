@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Carousel_Control" inherits="ZO_HorizontalScrollListTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)SelectionIndicator" inherits="ZO_SelectionIndicator_Control">
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="70" offsetY="-27"/>
+                </Control>
+
+                <Scroll name="$(parent)Scroll" override="true">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" offsetX="30" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-30" />
+                </Scroll>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

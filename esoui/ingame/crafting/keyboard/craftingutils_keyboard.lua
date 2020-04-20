@@ -98,7 +98,7 @@ function ZO_KeyboardCraftingUtils_RequestCraftingCreate(craftingObject, numItera
     end
 
     local resultItemLink = craftingObject:GetResultItemLink()
-    local nameColor = GetItemQualityColor(GetItemLinkQuality(resultItemLink))
+    local nameColor = GetItemQualityColor(GetItemLinkDisplayQuality(resultItemLink))
     local colorizedItemName = nameColor:Colorize(GetItemLinkName(resultItemLink))
     local itemQuantity = craftingObject:GetMultiCraftNumResults(numIterations)
 

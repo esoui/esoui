@@ -72,7 +72,7 @@ function ZO_Smithing_Common:Initialize(control)
     self.smithingStationInteraction =
     {
         type = "Smithing Station",
-        End = function()
+        OnEndBecauseAnotherInteractIsBeginning = function()
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },

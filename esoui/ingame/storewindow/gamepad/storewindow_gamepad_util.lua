@@ -1,6 +1,3 @@
-local STORE_ITEM_HEADER_DEFAULT_PADDING = 60
-local STABLE_ITEM_POST_PADDING = 20
-
 local STORE_WEAPON_GROUP = 1
 local STORE_HEAVY_ARMOR_GROUP = 2
 local STORE_MEDIUM_ARMOR_GROUP = 3
@@ -11,7 +8,8 @@ local STORE_MATERIALS_GROUP = 7
 local STORE_QUICKSLOTS_GROUP = 8
 local STORE_COLLECTIBLE_GROUP = 9
 local STORE_QUEST_ITEMS_GROUP = 10
-local STORE_OTHER_GROUP = 11
+local STORE_ANTIQUITY_LEADS_GROUP = 11
+local STORE_OTHER_GROUP = 12
 
 -------------------
 --Utility functions
@@ -23,6 +21,8 @@ local function GetItemStoreGroup(itemData)
         return STORE_COLLECTIBLE_GROUP
     elseif itemData.entryType == STORE_ENTRY_TYPE_QUEST_ITEM then
         return STORE_QUEST_ITEMS_GROUP
+    elseif itemData.entryType == STORE_ENTRY_TYPE_ANTIQUITY_LEAD then
+        return STORE_ANTIQUITY_LEADS_GROUP
     elseif itemData.equipType == EQUIP_TYPE_RING or itemData.equipType== EQUIP_TYPE_NECK then
         return STORE_JEWELRY_GROUP
     elseif itemData.itemType == ITEMTYPE_WEAPON or itemData.displayFilter == ITEMFILTERTYPE_WEAPONS then
@@ -59,6 +59,8 @@ local function GetBestItemCategoryDescription(itemData)
         return GetString("SI_COLLECTIBLECATEGORYTYPE", collectibleCategory)
     elseif itemData.storeGroup == STORE_QUEST_ITEMS_GROUP then
         return GetString(SI_ITEM_FORMAT_STR_QUEST_ITEM)
+    elseif itemData.storeGroup == STORE_ANTIQUITY_LEADS_GROUP then
+        return GetString(SI_GAMEPAD_VENDOR_ANTIQUITY_LEAD_GROUP_HEADER)
     else
         return ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
     end
@@ -142,7 +144,9 @@ local REPAIR_ITEMS_SORT_KEYS =
 {
     name = { tiebreaker = "repairCost" },
     repairCost = { tiebreaker = "condition", isNumeric = true },
-    condition = { tiebreaker = "quality", isNumeric = true },
+    condition = { tiebreaker = "displayQuality", isNumeric = true },
+    displayQuality = { tiebreaker = "quality" },
+    -- quality is depricated, included here for addon backwards compatibility
     quality = { tiebreaker = "stackCount" },
     stackCount = { tiebreaker = "slotIndex" },
     slotIndex = { isId64 = true },
@@ -165,7 +169,6 @@ local function GetBuyItems()
         end
         itemData.selectedNameColor = ZO_SELECTED_TEXT
         itemData.unselectedNameColor = ZO_DISABLED_TEXT
-        itemData.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemData.name)
 
         itemData.itemLink = GetStoreItemLink(itemData.slotIndex)
         itemData.itemType = GetItemLinkItemType(itemData.itemLink)
@@ -173,7 +176,7 @@ local function GetBuyItems()
 
         itemData.storeGroup = GetItemStoreGroup(itemData)
         itemData.bestGamepadItemCategoryName = GetBestItemCategoryDescription(itemData)
-        if not itemData.meetsRequirementsToBuy and (itemData.buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE or itemData.buyStoreFailure == STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE) then
+        if not itemData.meetsRequirementsToBuy and ZO_StoreManager_DoesBuyStoreFailureLockEntry(itemData.buyStoreFailure) then
             itemData.locked = true
         end
     end
@@ -203,11 +206,10 @@ local function GetSellItems()
 end
 
 local function GetBuybackItems()
-
     local items = {}
     for entryIndex = 1, GetNumBuybackItems() do
-        local icon, name, stackCount, price, quality, meetsRequirementsToEquip  = GetBuybackItemInfo(entryIndex)
-        if(stackCount > 0) then
+        local icon, name, stackCount, price, functionalQuality, meetsRequirementsToEquip, displayQuality = GetBuybackItemInfo(entryIndex)
+        if stackCount > 0 then
             local itemLink = GetBuybackItemLink(entryIndex)
             local itemType = GetItemLinkItemType(itemLink)
             local equipType = GetItemLinkEquipType(itemLink)
@@ -222,7 +224,10 @@ local function GetBuybackItems()
                 stackCount = stackCount,
                 price = price,
                 sellPrice = totalPrice,
-                quality = quality,
+                functionalQuality = functionalQuality,
+                displayQuality = displayQuality,
+                -- self.quality is depricated, included here for addon backwards compatibility
+                quality = displayQuality,
                 meetsRequirementsToBuy = true,
                 meetsRequirementsToEquip = meetsRequirementsToEquip,
                 stackBuyPrice = totalPrice,
@@ -348,7 +353,7 @@ local function GetStableItems()
         table.insert(items, itemData)
     end
 
-    return items, 0, STABLE_ITEM_POST_PADDING
+    return items
 end
 
 --When using the ItemSortFunc, you'll want to ensure that your updateFunc provides an itemData.bestGamepadItemCategoryName
@@ -392,12 +397,8 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
     local currentBestCategoryName = nil
 
     for i, itemData in ipairs(items) do
-        local nextItemData = items[i + 1]
-        local isNextEntryAHeader = nextItemData and nextItemData.bestGamepadItemCategoryName ~= itemData.bestGamepadItemCategoryName
-        local postPadding = postPaddingOverride or (isNextEntryAHeader and STORE_ITEM_HEADER_DEFAULT_PADDING)
-
         local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
-        
+
         --This is only used by stables
         local stableTrainingData = itemData.data
         if stableTrainingData then
@@ -406,7 +407,7 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
             entry:SetBarValues(MIN_BONUS, stableTrainingData.maxBonus, stableTrainingData.bonus)
             entry:SetShowBarEvenWhenUnselected(true)
         end
-        
+
         if not itemData.ignoreStoreVisualInit then
             entry:InitializeStoreVisualData(itemData)
         end
@@ -428,7 +429,7 @@ end
 
 function ZO_GamepadStoreList:UpdateList()
     self:Clear()
-    local items, prePaddingOverride, postPaddingOverride = self.updateFunc()
+    local items = self.updateFunc()
     if self.sortFunc then
         table.sort(items, self.sortFunc)
     end

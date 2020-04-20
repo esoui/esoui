@@ -1,165 +1,3 @@
---Section Generators
-
-function ZO_Tooltip:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
-    local bar = self:AcquireStatusBar(self:GetStyle("abilityProgressBar"))
-    if nextRankXP == 0 then
-        bar:SetMinMax(0, 1)
-        bar:SetValue(1)
-    else
-        bar:SetMinMax(0, nextRankXP - lastRankXP)
-        bar:SetValue(currentXP - lastRankXP)
-    end
-    self:AddStatusBar(bar)
-end
-
-do
-    local TANK_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_tank_down_no_glow_64.dds", 40, 40)
-    local HEALER_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_healer_down_no_glow_64.dds", 40, 40)
-    local DAMAGE_ROLE_ICON = zo_iconFormat("EsoUI/Art/LFG/LFG_dps_down_no_glow_64.dds", 40, 40)
-    local g_roleIconTable = {}
-
-    function ZO_Tooltip:AddAbilityStats(abilityId, overrideActiveRank)
-        local statsSection = self:AcquireSection(self:GetStyle("abilityStatsSection"))
-
-        --Cast Time
-        local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId, overrideActiveRank)
-        local castTimePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-        if(channeled) then
-            castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CHANNEL_TIME_LABEL), self:GetStyle("statValuePairStat"))
-            castTimePair:SetValue(ZO_FormatTimeMilliseconds(channelTime, TIME_FORMAT_STYLE_CHANNEL_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
-        else
-            castTimePair:SetStat(GetString(SI_ABILITY_TOOLTIP_CAST_TIME_LABEL), self:GetStyle("statValuePairStat"))
-            castTimePair:SetValue(ZO_FormatTimeMilliseconds(castTime, TIME_FORMAT_STYLE_CAST_TIME, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
-        end
-        statsSection:AddStatValuePair(castTimePair)
-
-        --Target
-        local targetDescription = GetAbilityTargetDescription(abilityId, overrideActiveRank)
-        if(targetDescription) then
-            local targetPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            targetPair:SetStat(GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_LABEL), self:GetStyle("statValuePairStat"))
-            targetPair:SetValue(targetDescription, self:GetStyle("abilityStatValuePairValue"))
-            statsSection:AddStatValuePair(targetPair)
-        end
-
-        --Range
-        local minRangeCM, maxRangeCM = GetAbilityRange(abilityId, overrideActiveRank)
-        if(maxRangeCM > 0) then
-            local rangePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            rangePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RANGE_LABEL), self:GetStyle("statValuePairStat"))
-            if(minRangeCM == 0) then
-                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RANGE, FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("abilityStatValuePairValue"))
-            else
-                rangePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_MIN_TO_MAX_RANGE, FormatFloatRelevantFraction(minRangeCM / 100), FormatFloatRelevantFraction(maxRangeCM / 100)), self:GetStyle("abilityStatValuePairValue"))
-            end
-            statsSection:AddStatValuePair(rangePair)
-        end
-
-        --Radius/Distance
-        local radiusCM = GetAbilityRadius(abilityId, overrideActiveRank)
-        local angleDistanceCM = GetAbilityAngleDistance(abilityId)
-        if(radiusCM > 0) then
-            local radiusDistancePair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            if(angleDistanceCM > 0) then
-                radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_AREA_LABEL), self:GetStyle("statValuePairStat"))
-                -- Angle distance is the distance to the left and right of the caster, not total distance. So we're multiplying by 2 to accurately reflect that in the UI.
-                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_AOE_DIMENSIONS, FormatFloatRelevantFraction(radiusCM / 100), FormatFloatRelevantFraction(angleDistanceCM * 2 / 100)), self:GetStyle("abilityStatValuePairValue"))
-            else
-                radiusDistancePair:SetStat(GetString(SI_ABILITY_TOOLTIP_RADIUS_LABEL), self:GetStyle("statValuePairStat"))
-                radiusDistancePair:SetValue(zo_strformat(SI_ABILITY_TOOLTIP_RADIUS, FormatFloatRelevantFraction(radiusCM / 100)), self:GetStyle("abilityStatValuePairValue")) 
-            end
-            statsSection:AddStatValuePair(radiusDistancePair)
-        end
-
-        --Duration
-        local durationMS = GetAbilityDuration(abilityId, overrideActiveRank)
-        if(durationMS > 0) then
-            local durationPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            durationPair:SetStat(GetString(SI_ABILITY_TOOLTIP_DURATION_LABEL), self:GetStyle("statValuePairStat"))
-            durationPair:SetValue(ZO_FormatTimeMilliseconds(durationMS, TIME_FORMAT_STYLE_DURATION, TIME_FORMAT_PRECISION_TENTHS_RELEVANT, TIME_FORMAT_DIRECTION_NONE), self:GetStyle("abilityStatValuePairValue"))
-            statsSection:AddStatValuePair(durationPair)
-        end
-
-        --Cost
-        local cost, mechanic = GetAbilityCost(abilityId, overrideActiveRank)
-        if(cost > 0) then
-            local costPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            costPair:SetStat(GetString(SI_ABILITY_TOOLTIP_RESOURCE_COST_LABEL), self:GetStyle("statValuePairStat"))
-            local mechanicName = GetString("SI_COMBATMECHANICTYPE", mechanic)
-            local costString = zo_strformat(SI_ABILITY_TOOLTIP_RESOURCE_COST, cost, mechanicName)
-            if(mechanic == POWERTYPE_MAGICKA) then
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairMagickaValue"))
-            elseif(mechanic == POWERTYPE_STAMINA) then
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairStaminaValue"))
-            elseif(mechanic == POWERTYPE_HEALTH) then
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairHealthValue"))
-            else
-                costPair:SetValue(costString, self:GetStyle("abilityStatValuePairValue"))
-            end
-            statsSection:AddStatValuePair(costPair)
-        end
-
-        --Roles
-        local isTankRole, isHealerRole, isDamageRole = GetAbilityRoles(abilityId)
-        if isTankRole then
-            table.insert(g_roleIconTable, TANK_ROLE_ICON)
-        end
-        if isHealerRole then
-            table.insert(g_roleIconTable, HEALER_ROLE_ICON)
-        end
-        if isDamageRole then
-            table.insert(g_roleIconTable, DAMAGE_ROLE_ICON)
-        end
-        if(#g_roleIconTable > 0) then
-            local rolesPair = statsSection:AcquireStatValuePair(self:GetStyle("statValuePair"))
-            rolesPair:SetStat(GetString(SI_ABILITY_TOOLTIP_ROLE_LABEL), self:GetStyle("statValuePairStat"))
-            local finalIconText = table.concat(g_roleIconTable, "")
-            rolesPair:SetValue(finalIconText, self:GetStyle("abilityStatValuePairValue"))
-            statsSection:AddStatValuePair(rolesPair)
-            ZO_ClearNumericallyIndexedTable(g_roleIconTable)
-        end
-
-        self:AddSection(statsSection)
-    end
-end
-
-function ZO_Tooltip:AddAbilityDescription(abilityId, pendingChampionPoints, overrideActiveRank)
-    local descriptionHeader = GetAbilityDescriptionHeader(abilityId)
-    local description
-    if not pendingChampionPoints then
-        description = GetAbilityDescription(abilityId, overrideActiveRank)
-    else
-        description = GetChampionAbilityDescription(abilityId, pendingChampionPoints)
-    end
-    if descriptionHeader ~= "" or description ~= "" then
-        local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
-        if descriptionHeader ~= "" then
-            --descriptionHeader has already been run through grammar
-            descriptionSection:AddLine(descriptionHeader, self:GetStyle("bodyHeader"))
-        end
-        if description ~= "" then
-            --description has already been run through grammar
-            descriptionSection:AddLine(description, self:GetStyle("bodyDescription"))
-        end
-        self:AddSection(descriptionSection)
-    end
-end
-
-function ZO_Tooltip:AddAbilityNewEffects(...)
-    local numNewEffectReturns = select("#", ...)
-    if(numNewEffectReturns > 0) then
-        for i = 1, numNewEffectReturns do
-            local newEffect = select(i, ...)
-            local newEffectSection = self:AcquireSection(self:GetStyle("bodySection"))
-            newEffectSection:AddLine(GetString(SI_ABILITY_TOOLTIP_NEW_EFFECT), self:GetStyle("newEffectTitle"), self:GetStyle("bodyHeader"))
-            newEffectSection:AddLine(newEffect, self:GetStyle("newEffectBody"), self:GetStyle("bodyDescription"))
-            self:AddSection(newEffectSection)
-        end
-    end
-end
-
---Layout Functions
-
 --showRankNeededLine: adds a line with the skill line rank needed to unlock the specific progression
 --showPointSpendLine: adds a line telling the user they can spend a skill point to purchase/upgrade/morph the ability
 --showAdvisedLine: adds a line if the skill progression is advised
@@ -199,7 +37,7 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
                         headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_UNLOCK_INFO, skillLineName, lineRankNeededToUnlock), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
                         hadRankNeededLineToShow = true
                     end
-                end                
+                end
             end
         end
     end
@@ -238,7 +76,7 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
                             headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
                         end
                     end
-                end                
+                end
             end
         end
     end
@@ -337,8 +175,8 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
     if addNewEffects then
         self:AddAbilityNewEffects(GetAbilityNewEffectLines(skillProgressionData:GetAbilityId()))
     end
-    local NO_CHAMPION_POINTS = nil
-    self:AddAbilityDescription(skillProgressionData:GetAbilityId(), NO_CHAMPION_POINTS, activeRank)
+    local descriptionText = GetAbilityDescription(skillProgressionData:GetAbilityId(), activeRank)
+    self:AddAbilityDescription(skillProgressionData:GetAbilityId(), descriptionText)
 
     --Passive Upgrade Section
 
@@ -355,7 +193,8 @@ function ZO_Tooltip:LayoutChampionSkillAbility(disciplineIndex, skillIndex, pend
     local abilityId = GetChampionAbilityId(disciplineIndex, skillIndex)
     
     self:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_NAME, GetAbilityName(abilityId)), self:GetStyle("title"))
-    self:AddAbilityDescription(abilityId, pendingPoints)
+    local descriptionText = GetChampionAbilityDescription(abilityId, pendingPoints)
+    self:AddAbilityDescription(abilityId, descriptionText)
 
     local unlockLevel = GetChampionSkillUnlockLevel(disciplineIndex, skillIndex)
     if unlockLevel ~= nil then
@@ -419,23 +258,11 @@ function ZO_Tooltip:LayoutAbilityWithSkillProgressionData(abilityId, skillProgre
         self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
 
         self:AddAbilityStats(abilityId, currentRank)
-        self:AddAbilityDescription(abilityId)
+        local descriptionText = GetAbilityDescription(abilityId, currentRank)
+        self:AddAbilityDescription(abilityId, descriptionText)
     else
         self:LayoutSimpleAbility(abilityId)
     end
-end
-
-function ZO_Tooltip:LayoutSimpleAbility(abilityId)
-    local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
-
-    self:AddSectionEvenIfEmpty(headerSection)
-
-    local formattedAbilityName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
-    self:AddLine(formattedAbilityName, self:GetStyle("title"))
-
-    self:AddAbilityStats(abilityId)
-
-    self:AddAbilityDescription(abilityId)
 end
 
 do

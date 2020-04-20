@@ -53,4 +53,20 @@ function InternalIngameRewardsManager:GetListOfRewardNamesFromLastCodeRedemption
     return rewardNames
 end
 
+function InternalIngameRewardsManager:GetRewardContextualTypeString(rewardId, parentChoice)
+    local entryType = GetRewardType(rewardId)
+    if entryType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+        local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
+        if collectibleId > 0 then
+            local specializedCollectibleType = GetSpecializedCollectibleType(collectibleId)
+            if specializedCollectibleType == SPECIALIZED_COLLECTIBLE_TYPE_NONE then
+                return GetString("SI_COLLECTIBLECATEGORYTYPE", GetCollectibleCategoryType(collectibleId))
+            else
+                return GetString("SI_SPECIALIZEDCOLLECTIBLETYPE", specializedCollectibleType)
+            end
+        end
+    end
+    return ZO_RewardsManager.GetRewardContextualTypeString(self, rewardId, parentChoice)
+end
+
 REWARDS_MANAGER = InternalIngameRewardsManager:New()

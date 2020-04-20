@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Control name="GameStartupLabelEntry" inherits="ZO_GamepadFullWidthLabelEntryTemplate" virtual="true" />
-               
+
         <TopLevelControl name="GameStartup_GamepadMiddlePane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
             <Controls>
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
@@ -12,15 +12,63 @@
                     <Controls>
                         <Control name="$(parent)GenericHeader" inherits="ZO_GamepadGenericContentHeader" />
 
-                        <Label name="$(parent)Content" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
+                        <Control name="$(parent)Content" inherits="ZO_ScrollContainer_Gamepad">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)GenericHeader" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_TITLE_INFO_PADDING_Y" />
                             <Anchor point="BOTTOMRIGHT" />
-                        </Label>
+                            <OnInitialized>
+                                ZO_Scroll_Initialize_Gamepad(self)
+                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT, nil, ZO_GAMEPAD_PANEL_BG_SCROLL_INDICATOR_OFFSET_FOR_ARROW)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Control name="$(parent)ScrollChild" override="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                    <Controls>
+                                        <Label name="$(parent)Text" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>
-        
+
+        <TopLevelControl name="GameStartup_Gamepad_ServerAlert" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+
+            <OnInitialized>
+                ZO_GameStartup_Gamepad_ServerAlert_Initialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ServerAlert" resizeToFitDescendents="true" >
+                    <DimensionConstraints minX="675" maxX="675" />
+                    <Anchor point="CENTER" />
+                    <ResizeToFitPadding height="30"/>
+
+                    <Controls>
+                        <Texture name="$(parent)AlertImage" layer="OVERLAY" textureFile="EsoUI/Art/Login/Keyboard/Login_Server_Alert.dds">
+                            <Dimensions x="64" y="64" />
+                            <Anchor point="TOP" offsetY="10" />
+                        </Texture>
+
+                        <Label name="$(parent)Text" font="ZoFontGamepad34" horizontalAlignment="CENTER" verticalAlignment="CENTER" maxLineCount="3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Dimensions x="635" />
+                            <Anchor point="TOP" relativeTo="$(parent)AlertImage" relativePoint="BOTTOM" />
+                        </Label>
+
+                        <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop_Gamepad" excludeFromResizeToFitExtents="true" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
         <TopLevelControl name="GameStartup_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
             <OnInitialized>
                 ZO_GameStartup_Gamepad_Initialize(self)

@@ -4,8 +4,8 @@
 
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
 local EQUIPPED_THIS_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
-local EQUIPPED_OTHER_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"    --same for now
-local ITEM_IS_HIDDEN_TEXTURE = "EsoUI/Art/Inventory/inventory_icon_hiddenBy.dds"				--should be red checkmark
+local EQUIPPED_OTHER_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" --same as EQUIPPED_THIS_SLOT_TEXTURE for now
+local ITEM_IS_HIDDEN_TEXTURE = "EsoUI/Art/Inventory/inventory_icon_hiddenBy.dds" --should be red checkmark
 local MAIL_ATTACHED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local TRADE_ITEM_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local ACHIEVEMENT_EARNED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
@@ -14,7 +14,7 @@ local UPGRADE_SKILL_TEXTURE = "EsoUI/Art/Progression/Gamepad/gp_purchase.dds"
 local ASSISTED_TEXTURE = "EsoUI/Art/Journal/Gamepad/gp_trackedQuestIcon.dds"
 local SPEAKER_TEXTURE = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_speaking.dds"
 local SELECTED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
-local SPEAKER_TEXTURE = "EsoUI/Art/VOIP/Gamepad/gp_VOIP_speaking.dds"
+local TRACKED_ANTIQUITY_TEXTURE = "EsoUI/Art/Antiquities/Gamepad/gp_trackedAntiquityIcon.dds"
 
 local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
 local NORMAL_FONT_UNSELECTED = "ZoFontGamepad34"
@@ -31,7 +31,7 @@ function ZO_SharedGamepadEntry_OnInitialized(control)
     end
     control.checkBox = control:GetNamedChild("CheckBox")
     control.label = control:GetNamedChild("Label")
-    control.header = control:GetNamedChild("Header")  
+    control.header = control:GetNamedChild("Header")
     --cooldown timer
     control.cooldown = control:GetNamedChild("Cooldown")
 
@@ -111,13 +111,13 @@ end
 function ZO_CharacterGamepadEntry_OnInitialized(control)
     control.readyForTrain = control:GetNamedChild("ReadyForTrain")
     control.spinner = control:GetNamedChild("Spinner")
-    if(control.spinner ~= nil) then
+    if control.spinner ~= nil then
         control.spinnerDecrease = control.spinner:GetNamedChild("Decrease")
         control.spinnerIncrease = control.spinner:GetNamedChild("Increase")
     end
 
     local dropdown = control:GetNamedChild("Dropdown")
-    if(dropdown ~= nil) then
+    if dropdown ~= nil then
         control.dropdown = ZO_ComboBox_ObjectFromContainer(dropdown)
     end
 end
@@ -419,6 +419,10 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(GetPlatformTraitInformationIcon(data.traitInformation))
         end
 
+        if data.isTrackedAntiquity then
+            statusIndicator:AddIcon(TRACKED_ANTIQUITY_TEXTURE)
+        end
+
         statusIndicator:Show()
     end
 end
@@ -489,17 +493,17 @@ function ZO_GamepadGuildHubRow_OnInitialized(control)
     control.membersOnline = control:GetNamedChild("MembersOnline")
 
     local bankIconContainer = control:GetNamedChild("BankIconContainer")
-    if(bankIconContainer ~= nil) then
+    if bankIconContainer ~= nil then
         control.bankIcon = bankIconContainer:GetNamedChild("Bank")
     end
     
     local heraldryIconContainer = control:GetNamedChild("HeraldryIconContainer")
-    if(heraldryIconContainer ~= nil) then
+    if heraldryIconContainer ~= nil then
         control.heraldryIcon = heraldryIconContainer:GetNamedChild("Heraldry")
     end
     
     local storeIconContainer = control:GetNamedChild("StoreIconContainer")
-    if(storeIconContainer ~= nil) then
+    if storeIconContainer ~= nil then
         control.tradingHouseIcon = storeIconContainer:GetNamedChild("TradingHouse")
     end
 end
@@ -577,7 +581,7 @@ do
     end
 
     local NORMAL_RATIO
-    local SMALL_RATIO 
+    local SMALL_RATIO
 
     function SetMenuEntryFontFace(label, selected)
         label:SetFont(selected and NORMAL_FONT_SELECTED or NORMAL_FONT_UNSELECTED)
@@ -604,7 +608,7 @@ end
 
 function ZO_GamepadMenuEntryTemplate_GetAlpha(selected, disabled)
     if not selected or disabled then
-        return .64
+        return 0.64
     else
         return 1
     end
@@ -830,8 +834,8 @@ end
 
 function ZO_GamepadHorizontalListRow_Initialize(self, setupFunction, equalityFunction)
     self.GetHeight = function(control)
-                         return control.label:GetTextHeight() + control.horizontalListControl:GetHeight()
-                     end
+        return control.label:GetTextHeight() + control.horizontalListControl:GetHeight()
+    end
     self.label = self:GetNamedChild("Name")
     self.horizontalListControl = self:GetNamedChild("HorizontalList")
     self.horizontalListObject = ZO_HorizontalScrollList_Gamepad:New(self.horizontalListControl, "ZO_GamepadHorizontalListEntry", 1, setupFunction, equalityFunction)

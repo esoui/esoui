@@ -1,21 +1,37 @@
 <GuiXml>
     <!-- Faces -->
     <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/Univers57.otf" />
+    <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWUDC_70-M.ttf"/>
 
     <String name="BOLD_FONT" value="EsoUI/Common/Fonts/Univers67.otf" />
+    <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67Cyrillic-CondensedBold.otf"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
 
     <String name="CHAT_FONT" value="EsoUI/Common/Fonts/Univers57.otf" />
+    <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.otf"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWUDC_70-M.ttf"/>
 
     <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/FTN47.otf" />
+    <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+
     <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/FTN57.otf" />
+    <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
+
     <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/FTN87.otf" />
+    <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.ttf"/>
 
     <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ProseAntiquePSMT.otf" />
+    <BackupFont originalFont="$(ANTIQUE_FONT)" backupFont="EsoUI/Common/Fonts/ProseAntiquePSMTCyrillic.otf"/>
+    <BackupFont originalFont="$(ANTIQUE_FONT)" backupFont="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf"/>
+
     <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/Handwritten_Bold.otf" />
+    <BackupFont originalFont="$(HANDWRITTEN_FONT)" backupFont="EsoUI/Common/Fonts/HandwrittenCyrillic_Bold.ttf"/>
+    <BackupFont originalFont="$(HANDWRITTEN_FONT)" backupFont="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf"/>
+
     <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/TrajanPro-Regular.otf" />
+    <BackupFont originalFont="$(STONE_TABLET_FONT)" backupFont="EsoUI/Common/Fonts/TrajanProCyrillic-Regular.otf"/>
+    <BackupFont originalFont="$(STONE_TABLET_FONT)" backupFont="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf"/>
 
     <!-- Sizes -->
     <String name="KB_8" value="8"/>

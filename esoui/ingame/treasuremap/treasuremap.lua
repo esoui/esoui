@@ -12,7 +12,7 @@ local function OnGamepadSceneStateChange(oldState, newState)
                     alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
                     KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-                        INTERACT_WINDOW:OnEndInteraction(TREASURE_MAP_INTERACTION)
+                        INTERACT_WINDOW:EndInteraction(TREASURE_MAP_INTERACTION)
                         SCENE_MANAGER:HideCurrentScene()
                     end)
                 }
@@ -42,7 +42,7 @@ function TreasureMap:Initialize(control)
     TREASURE_MAP_INVENTORY_SCENE = ZO_Scene:New("treasureMapInventory", SCENE_MANAGER)
     TREASURE_MAP_INVENTORY_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_HIDDEN then
-            INTERACT_WINDOW:OnEndInteraction(TREASURE_MAP_INTERACTION)
+            INTERACT_WINDOW:EndInteraction(TREASURE_MAP_INTERACTION)
         end
     end)
     SYSTEMS:RegisterKeyboardRootScene("treasureMapInventory", TREASURE_MAP_INVENTORY_SCENE)
@@ -50,7 +50,7 @@ function TreasureMap:Initialize(control)
     TREASURE_MAP_QUICK_SLOT_SCENE = ZO_Scene:New("treasureMapQuickSlot", SCENE_MANAGER)
     TREASURE_MAP_QUICK_SLOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_HIDDEN then
-            INTERACT_WINDOW:OnEndInteraction(TREASURE_MAP_INTERACTION)
+            INTERACT_WINDOW:EndInteraction(TREASURE_MAP_INTERACTION)
         end
     end)
     SYSTEMS:RegisterKeyboardRootScene("treasureMapQuickSlot", TREASURE_MAP_QUICK_SLOT_SCENE)

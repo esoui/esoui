@@ -1,0 +1,68 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CharacterSelect_EventBanner_Control" tier="MEDIUM" hidden="true" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <!-- Underlay to eat all the mouse input. Hidden for design reasons. -->
+                <Control name="$(parent)ModalUnderlay" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+
+                    <Controls>
+                        <Texture name="$(parent)UnderlayTint" color="000000" alpha="0.55">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+
+                    <!-- Eat the mouse wheel input -->
+                    <OnMouseWheel />
+                </Control>
+
+                <Control name="$(parent)Container">
+                    <Dimensions x="1920" y="1080"/>
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Texture name="$(parent)BG">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Control name="$(parent)Carousel" inherits="ZO_Carousel_Control">
+                            <Controls>
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <ClearAnchors />
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <FadeGradient x1="0" y1="0" size1="0" x2="0" y2="0" size2="0" />
+                                </Scroll>
+
+                                <Control name="$(parent)SelectionIndicator" override="true">
+                                    <Anchor point="BOTTOM" relativePoint="BOTTOM"/>
+                                </Control>
+
+                                <Button name="$(parent)LeftArrow" override="true">
+                                    <Textures
+                                        normal="EsoUI/Art/Buttons/leftArrow_up.dds"
+                                        pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
+                                        disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"
+                                    />
+                                </Button>
+
+                                <Button name="$(parent)RightArrow" override="true">
+                                    <Textures
+                                        normal="EsoUI/Art/Buttons/rightArrow_up.dds"
+                                        pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
+                                        disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
+                                    />
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

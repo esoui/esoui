@@ -1,10 +1,12 @@
 local function EmitMessage(text)
+    if text == "" then
+        text = "[Empty String]"
+    end
+
     if CHAT_ROUTER then
-        if text == "" then
-            text = "[Empty String]"
-        end
-        
         CHAT_ROUTER:AddDebugMessage(text)
+    elseif RequestDebugPrintText then
+        RequestDebugPrintText(text)
     end
 end
 

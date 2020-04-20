@@ -504,12 +504,14 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
     self.searchResultsInfoList = {}
 
     local function SetupBaseSearchResultRow(rowControl, result)
-        self.searchResultsControlsList[#self.searchResultsControlsList+1] = rowControl
-        self.searchResultsInfoList[#self.searchResultsInfoList+1] = result
+        self.searchResultsControlsList[#self.searchResultsControlsList + 1] = rowControl
+        self.searchResultsInfoList[#self.searchResultsInfoList + 1] = result
 
-        local nameControl = GetControl(rowControl, "Name")
+        local nameControl = rowControl:GetNamedChild("Name")
         nameControl:SetText(ZO_TradingHouse_GetItemDataFormattedName(result))
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, result.quality)
+        -- result.quality is depricated, included here for addon backwards compatibility
+        local displayQuality = result.displayQuality or result.quality
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         nameControl:SetColor(r, g, b, 1)
 
         local traitInformationControl = GetControl(rowControl, "TraitInfo")
@@ -517,20 +519,20 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
 
         if not result.isGuildSpecificItem then
             local traitInformation = GetItemTraitInformationFromItemLink(result.itemLink)
-        
+
             if traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
                 traitInformationControl:AddIcon(GetPlatformTraitInformationIcon(traitInformation))
                 traitInformationControl:Show()
             end
         end
 
-        local sellPricePerUnitControl = GetControl(rowControl, "SellPricePerUnit")
+        local sellPricePerUnitControl = rowControl:GetNamedChild("SellPricePerUnit")
         ZO_CurrencyControl_SetSimpleCurrency(sellPricePerUnitControl, result.currencyType, result.purchasePricePerUnit, ITEM_RESULT_CURRENCY_OPTIONS, nil, false)
 
-        local sellPriceControl = GetControl(rowControl, "SellPrice")
+        local sellPriceControl = rowControl:GetNamedChild("SellPrice")
         ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, result.currencyType, result.purchasePrice, ITEM_RESULT_CURRENCY_OPTIONS, nil, self.playerMoney[result.currencyType] < result.purchasePrice)
 
-        local resultControl = GetControl(rowControl, "Button")
+        local resultControl = rowControl:GetNamedChild("Button")
         ZO_Inventory_SetupSlot(resultControl, result.stackCount, result.icon)
 
         -- Cached for verification when the player tries to purchase this
@@ -579,22 +581,24 @@ function ZO_TradingHouseManager:InitializeListings(control)
     local function SetupPostedItemRow(rowControl, postedItem)
         local index = postedItem.slotIndex
 
-        local nameControl = GetControl(rowControl, "Name")
+        local nameControl = rowControl:GetNamedChild("Name")
         nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, postedItem.name))
-        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, postedItem.quality)
+        -- postedItem.quality is depricated, included here for addon backwards compatibility
+        local displayQuality = postedItem.displayQuality or postedItem.quality
+        local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         nameControl:SetColor(r, g, b, 1)
 
-        local timeRemainingControl = GetControl(rowControl, "TimeRemaining")
+        local timeRemainingControl = rowControl:GetNamedChild("TimeRemaining")
         timeRemainingControl:SetText(zo_strformat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, ZO_FormatTime(postedItem.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)))
 
-        local sellPriceControl = GetControl(rowControl, "SellPrice")
+        local sellPriceControl = rowControl:GetNamedChild("SellPrice")
         ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, CURT_MONEY, postedItem.purchasePrice, ITEM_RESULT_CURRENCY_OPTIONS)
 
-        local postedItemControl = GetControl(rowControl, "Button")
+        local postedItemControl = rowControl:GetNamedChild("Button")
         ZO_Inventory_BindSlot(postedItemControl, SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING, index)
         ZO_Inventory_SetupSlot(postedItemControl, postedItem.stackCount, postedItem.icon)
 
-        local cancelButton = GetControl(rowControl, "CancelSale")
+        local cancelButton = rowControl:GetNamedChild("CancelSale")
         cancelButton:SetHandler("OnClicked", CancelListing)
     end
 
@@ -1034,11 +1038,11 @@ end
 -- Utility to show a confirmation for some kind of trading house item (listing or search result)
 local function SetupTradingHouseItemDialog(dialogControl, itemInfoFn, slotIndex, slotType, costLabelStringId)
     -- Item data is set up on the dialog control before the dialog is shown
-    local icon, itemName, quality, stackCount, _, _, purchasePrice, currencyType = itemInfoFn(slotIndex)
+    local icon, itemName, displayQuality, stackCount, _, _, purchasePrice, currencyType = itemInfoFn(slotIndex)
 
     local nameControl = dialogControl:GetNamedChild("ItemName")
     nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName))
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
     nameControl:SetColor(r, g, b, 1)
 
     local itemControl = dialogControl:GetNamedChild("Item")

@@ -157,15 +157,15 @@ function ZO_Loot:InitializeKeybindDescriptors()
             keybind = "LOOT_EXIT",
             ethereal = true,
             callback =  function()
-                            EndLooting()
-                        end,
+                EndLooting()
+            end,
         }
     }
 end
 
 
 function ZO_Loot:SetUpLootItem(control, data)
-    local nameControl = GetControl(control, "Name")
+    local nameControl = control:GetNamedChild("Name")
 
     if data.currencyType and data.currencyType ~= CURT_NONE then
         nameControl:SetText(zo_strformat(SI_LOOT_CURRENCY_FORMAT, ZO_Currency_FormatPlatform(data.currencyType, data.currencyAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
@@ -173,11 +173,17 @@ function ZO_Loot:SetUpLootItem(control, data)
     else
         if data.itemType == LOOT_TYPE_COLLECTIBLE then
             nameControl:SetColor(ZO_WHITE:UnpackRGBA())
+        elseif data.itemType == LOOT_TYPE_ANTIQUITY_LEAD then
+            -- data.quality is depricated, included here for addon backwards compatibility
+            local displayQuality = data.displayQuality or data.quality
+            nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS, displayQuality))
         else
             if data.isQuest then
                 nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
             else
-                nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality))
+                -- data.quality is depricated, included here for addon backwards compatibility
+                local displayQuality = data.displayQuality or data.quality
+                nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
             end
         end
 
@@ -268,7 +274,7 @@ end
 
 function ZO_Loot:UpdateListAddLootItems(scrollData, numLootItems, addStolenItems)
     for i = 1, numLootItems do
-        local lootId, name, icon, count, quality, value, isQuest, isStolen, itemType = GetLootItemInfo(i)
+        local lootId, name, icon, count, displayQuality, value, isQuest, isStolen, itemType = GetLootItemInfo(i)
 
         -- only add stolen items or non stolen items
         if addStolenItems == isStolen then
@@ -279,7 +285,9 @@ function ZO_Loot:UpdateListAddLootItems(scrollData, numLootItems, addStolenItems
                 name = name,
                 icon = icon,
                 count = count,
-                quality = quality,
+                displayQuality = displayQuality,
+                -- quality is depricated, included here for addon backwards compatibility
+                quality = displayQuality,
                 value = value,
                 isQuest = isQuest,
                 isStolen = isStolen,

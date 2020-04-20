@@ -8,10 +8,6 @@ function ZO_GuildRecruitment_GuildListing_Keyboard:New(...)
     return ZO_GuildRecruitment_GuildListing_Shared.New(self, ...)
 end
 
-local function OnBlockingSceneActivated()
-    GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD:SaveAndExit()
-end
-
 function ZO_GuildRecruitment_GuildListing_Keyboard:Initialize(control)
     local function OnTextEdited(control, data)
         local attribute = data.attribute
@@ -127,28 +123,7 @@ function ZO_GuildRecruitment_GuildListing_Keyboard:InitializeKeybindDescriptors(
                 ZO_LinkHandler_InsertLink(link)
             end,
         },
-
-        -- Custom Exit
-        {
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            name = GetString(SI_EXIT_BUTTON),
-            keybind = "UI_SHORTCUT_EXIT",
-            callback = function()
-                self:SaveAndExit()
-            end,
-        },
     }
-end
-
-function ZO_GuildRecruitment_GuildListing_Keyboard:SaveAndExit()
-    self:Save()
-
-    if not MAIN_MENU_MANAGER:HasBlockingSceneNextScene() and not self.pendingGuildChange  and not self.pendingCategoryChange then
-        SCENE_MANAGER:HideCurrentScene()
-    end
-    self.pendingGuildChange = nil
-    self.pendingCategoryChange = false
-    MAIN_MENU_MANAGER:ClearBlockingScene(OnBlockingSceneActivated)
 end
 
 function ZO_GuildRecruitment_GuildListing_Shared:Save(onRecruitmentStatusChanged)
@@ -177,21 +152,9 @@ function ZO_GuildRecruitment_GuildListing_Shared:Save(onRecruitmentStatusChanged
     end
 end
 
-function ZO_GuildRecruitment_GuildListing_Keyboard:ChangeCategory()
-    self.pendingCategoryChange = true
-    self:SaveAndExit()
-end
-
 function ZO_GuildRecruitment_GuildListing_Keyboard:ChangeSelectedGuild(dialogCallback, dialogParams)
-    local guildEntry = dialogParams.entry
-
-    self.pendingGuildChange = self.guildId ~= guildEntry.guildId
-
-    if self.pendingGuildChange then
-        self:SaveAndExit()
-        if dialogCallback then
-            dialogCallback(dialogParams)
-        end
+    if dialogCallback and self.guildId ~= dialogParams.entry.guildId then
+        dialogCallback(dialogParams)
     end
 end
 
@@ -210,20 +173,12 @@ function ZO_GuildRecruitment_GuildListing_Keyboard:UpdateAlert()
     self.alertControl:SetHidden(hideAlert)
 end
 
-function ZO_GuildRecruitment_GuildListing_Keyboard:OnShowing()
-    ZO_GuildRecruitment_GuildListing_Shared.OnShowing(self)
-
-    MAIN_MENU_MANAGER:SetBlockingScene("guildRecruitmentKeyboard", OnBlockingSceneActivated)
-    KEYBIND_STRIP:RemoveDefaultExit()
-end
-
 function ZO_GuildRecruitment_GuildListing_Keyboard:OnHidden()
     ZO_GuildRecruitment_GuildListing_Shared.OnHidden(self)
 
     self:Save()
 
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    KEYBIND_STRIP:RestoreDefaultExit()
 end
 
 function ZO_GuildRecruitment_GuildListing_Keyboard:ShowCategory()

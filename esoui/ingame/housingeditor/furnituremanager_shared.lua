@@ -138,8 +138,13 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
         self:OnFurnitureRemovedFromHouse(furnitureId, collectibleId)
     end
 
+    local function FurnitureMoved(eventId, furnitureId, collectibleId)
+        self.forcePositionalDataUpdate = true
+    end
+
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_PLACED, FurniturePlaced)
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_REMOVED, FurnitureRemoved)
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_MOVED, FurnitureMoved)
 
     local function InHouseOnUpdate()
         self:InHouseOnUpdate()
@@ -565,20 +570,29 @@ do
             local playerWorldX, playerWorldY, playerWorldZ = GetPlayerWorldPositionInHouse()
             local playerCameraHeading = GetPlayerCameraHeading()
 
-            --If this is the first update in the zone or we've moved far enough from our last position then update the retrievable furniture's
-            --position information relative to the player.
+            --If this is the first update in the zone, we've moved far enough from our last position or if a
+            --furnishing has been moved then update the retrievable furniture's position information relative to the player.
             local updateDistances = false
-            if self.lastPlayerWorldX == nil then
+            if self.forcePositionalDataUpdate then
                 updateDistances = true
+                self.forcePositionalDataUpdate = false
             else
-                local distanceChange = zo_abs(playerWorldX - self.lastPlayerWorldX) + zo_abs(playerWorldY - self.lastPlayerWorldY) + zo_abs(playerWorldZ - self.lastPlayerWorldZ)
-                if distanceChange > DISTANCE_CHANGE_BEFORE_UPDATE then
+                if self.lastPlayerWorldX == nil then
                     updateDistances = true
+                else
+                    local distanceChange = zo_abs(playerWorldX - self.lastPlayerWorldX) + zo_abs(playerWorldY - self.lastPlayerWorldY) + zo_abs(playerWorldZ - self.lastPlayerWorldZ)
+                    if distanceChange > DISTANCE_CHANGE_BEFORE_UPDATE then
+                        updateDistances = true
+                    end
                 end
             end
-            self.lastPlayerWorldX = playerWorldX
-            self.lastPlayerWorldY = playerWorldY
-            self.lastPlayerWorldZ = playerWorldZ
+
+            -- If distances require an update, capture the latest position of the player.
+            if updateDistances then
+                self.lastPlayerWorldX = playerWorldX
+                self.lastPlayerWorldY = playerWorldY
+                self.lastPlayerWorldZ = playerWorldZ
+            end
 
             --If this is the first update or we are updating the distances (which also influences heading) or we have turned the camera far enough from
             --our last heading then update the retrievable furniture direction to the player
@@ -588,7 +602,11 @@ do
             elseif zo_abs(self.lastPlayerHeading - playerCameraHeading) > HEADING_CHANGE_BEFORE_UPDATE_RADIANS then
                 updateHeading = true
             end
-            self.lastPlayerHeading = playerCameraHeading
+
+            -- If the camera heading has changed significantly, capture the latest heading.
+            if updateHeading then
+                self.lastPlayerHeading = playerCameraHeading
+            end
 
             --In both cases we update all the position data. This could be changed to only touch the heading for the heading case but
             --it saves very little.
@@ -703,6 +721,7 @@ function ZO_SharedFurnitureManager:RequestApplyPlaceableTextFilterToData()
         local itemTaskId = CreateBackgroundListFilter(BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, self.placeableTextFilter)
         self.inProgressPlaceableFurnitureTextFilterTaskIds[ZO_PLACEABLE_TYPE_ITEM] = itemTaskId
         AddBackgroundListFilterType(itemTaskId, BACKGROUND_LIST_FILTER_TYPE_NAME)
+        AddBackgroundListFilterType(itemTaskId, BACKGROUND_LIST_FILTER_TYPE_ITEM_TAGS)
         AddBackgroundListFilterType(itemTaskId, BACKGROUND_LIST_FILTER_TYPE_FURNITURE_KEYWORDS)
         for bagId, slots in pairs(self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]) do
             for slotId, slotData in pairs(slots) do
@@ -793,6 +812,7 @@ function ZO_SharedFurnitureManager:RequestApplyMarketProductTextFilterToData()
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_DESCRIPTION)
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_SEARCH_KEYWORDS)
         AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_FURNITURE_KEYWORDS)
+        AddBackgroundListFilterType(marketProductTaskId, BACKGROUND_LIST_FILTER_TYPE_ITEM_TAGS)
         for i, marketProductData in ipairs(self.marketProducts) do
             marketProductData:SetPassesTextFilter(false)
             AddBackgroundListFilterEntry(marketProductTaskId, marketProductData:GetMarketProductId())

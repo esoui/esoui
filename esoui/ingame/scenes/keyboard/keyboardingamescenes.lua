@@ -855,6 +855,31 @@ KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(KEYBOARD_GUILD_BROWSER_GUILD_INFO_FRA
 KEYBOARD_LINK_GUILD_INFO_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_SOCIAL)
 
 -------------------
+-- Antiquities Scene
+-------------------
+
+local antiquityJournalScene = SCENE_MANAGER:GetScene("antiquityJournalKeyboard")
+antiquityJournalScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+antiquityJournalScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+antiquityJournalScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+antiquityJournalScene:AddFragment(ANTIQUITY_JOURNAL_FRAGMENT)
+antiquityJournalScene:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
+antiquityJournalScene:AddFragment(RIGHT_BG_FRAGMENT)
+antiquityJournalScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
+antiquityJournalScene:AddFragment(TITLE_FRAGMENT)
+antiquityJournalScene:AddFragment(JOURNAL_TITLE_FRAGMENT)
+antiquityJournalScene:AddFragment(CODEX_WINDOW_SOUNDS)
+
+local antiquityLoreScene = SCENE_MANAGER:GetScene("antiquityLoreKeyboard")
+antiquityLoreScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+antiquityLoreScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
+antiquityLoreScene:AddFragment(ANTIQUITY_LORE_FRAGMENT)
+antiquityLoreScene:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
+antiquityLoreScene:AddFragment(RIGHT_BG_FRAGMENT)
+antiquityLoreScene:AddFragment(TITLE_FRAGMENT)
+antiquityLoreScene:AddFragment(CODEX_WINDOW_SOUNDS)
+
+-------------------
 --Main Menu
 -------------------
 
@@ -1099,6 +1124,13 @@ do
             highlight = "EsoUI/Art/Journal/journal_tabIcon_quest_over.dds",
         },
         {
+            categoryName = SI_JOURNAL_MENU_ANTIQUITIES,
+            descriptor = "antiquityJournalKeyboard",
+            normal = "EsoUI/Art/Journal/journal_tabIcon_antiquities_up.dds",
+            pressed = "EsoUI/Art/Journal/journal_tabIcon_antiquities_down.dds",
+            highlight = "EsoUI/Art/Journal/journal_tabIcon_antiquities_over.dds",
+        },
+        {
             categoryName = SI_JOURNAL_MENU_CADWELLS_ALMANAC,
             descriptor = "cadwellsAlmanac",
             normal = "EsoUI/Art/Journal/journal_tabIcon_cadwell_up.dds",
@@ -1120,7 +1152,6 @@ do
             pressed = "EsoUI/Art/Journal/journal_tabIcon_achievements_down.dds",
             highlight = "EsoUI/Art/Journal/journal_tabIcon_achievements_over.dds",
         },
-
         {
             categoryName = SI_JOURNAL_MENU_LEADERBOARDS,
             descriptor = "leaderboards",
@@ -1128,9 +1159,8 @@ do
             pressed = "EsoUI/Art/Journal/journal_tabIcon_leaderboard_down.dds",
             highlight = "EsoUI/Art/Journal/journal_tabIcon_leaderboard_over.dds",
         },
-
     }
-    SCENE_MANAGER:AddSceneGroup("journalSceneGroup", ZO_SceneGroup:New("questJournal", "cadwellsAlmanac", "loreLibrary", "achievements", "leaderboards"))
+    SCENE_MANAGER:AddSceneGroup("journalSceneGroup", ZO_SceneGroup:New("questJournal", "antiquityJournalKeyboard", "cadwellsAlmanac", "loreLibrary", "achievements", "leaderboards"))
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_JOURNAL, "journalSceneGroup", iconData)
 end
 

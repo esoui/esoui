@@ -148,6 +148,7 @@ do
         ZO_ScrollTooltip_Gamepad:Initialize(control.scrollTooltip, tooltipStyles or ZO_TOOLTIP_STYLES)
         control.tip = control.scrollTooltip.tooltip
         control.tip.icon = control.icon
+        control.tip.gamepadTooltipContainerBorderControl = control:GetNamedChild("Border")
         if screenResizeHandler then
             control:RegisterForEvent(EVENT_SCREEN_RESIZED, function()
                 screenResizeHandler(control)
