@@ -1129,6 +1129,12 @@ do
             normal = "EsoUI/Art/Journal/journal_tabIcon_antiquities_up.dds",
             pressed = "EsoUI/Art/Journal/journal_tabIcon_antiquities_down.dds",
             highlight = "EsoUI/Art/Journal/journal_tabIcon_antiquities_over.dds",
+            statusIcon = function()
+                if ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead() then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+                return nil
+            end,
         },
         {
             categoryName = SI_JOURNAL_MENU_CADWELLS_ALMANAC,

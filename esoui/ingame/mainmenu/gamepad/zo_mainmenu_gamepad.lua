@@ -250,6 +250,9 @@ local MENU_ENTRY_DATA =
         customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
         name = GetString(SI_MAIN_MENU_JOURNAL),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_journal.dds",
+        isNewCallback = function()
+            return ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead()
+        end,
         subMenu =
         {
             [MENU_JOURNAL_ENTRIES.QUESTS] =
@@ -273,6 +276,9 @@ local MENU_ENTRY_DATA =
                 scene = "gamepad_antiquity_journal",
                 name = GetString(SI_JOURNAL_MENU_ANTIQUITIES),
                 icon = "EsoUI/Art/Journal/Gamepad/GP_journal_tabIcon_antiquities.dds",
+                isNewCallback = function()
+                    return ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead()
+                end,
             },
             [MENU_JOURNAL_ENTRIES.LORE_LIBRARY] =
             {

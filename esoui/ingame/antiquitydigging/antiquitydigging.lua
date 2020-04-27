@@ -36,7 +36,6 @@ local HAS_TWO_BARS = true
 
 local KEYBOARD_STYLE =
 {
-    keybindButtonTemplate = "ZO_KeybindButton_Keyboard_Template",
     stabilityBarTemplate = "ZO_AntiquityDiggingStabilityBar_Keyboard_Template",
     digPowerFrameTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Keyboard/Digging_1Bar_Border.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Keyboard/Digging_2Bar_Border.dds" },
     digPowerBackgroundTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Keyboard/Digging_1Bar_Border_BG.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Keyboard/Digging_2Bar_Border_BG.dds" },
@@ -48,7 +47,6 @@ local KEYBOARD_STYLE =
 
 local GAMEPAD_STYLE =
 {
-    keybindButtonTemplate = "ZO_KeybindButton_Gamepad_Template",
     stabilityBarTemplate = "ZO_AntiquityDiggingStabilityBar_Gamepad_Template",
     digPowerFrameTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_1Bar_Border.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Bar_Border.dds" },
     digPowerBackgroundTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_1Bar_Border_BG.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Bar_Border_BG.dds" },
@@ -73,9 +71,7 @@ function ZO_AntiquityDigging:Initialize(control)
     self.keybindContainer = control:GetNamedChild("KeybindContainer")
     self.meterContainer = control:GetNamedChild("MeterContainer")
     self.moreInfoKeybindButton = self.keybindContainer:GetNamedChild("MoreInfoKeybindButton")
-    local NO_DEFAULT_KEYBIND = nil
-    local DONT_SHOW_UNBOUND = nil
-    self.moreInfoKeybindButton:SetKeybind(NO_DEFAULT_KEYBIND, DONT_SHOW_UNBOUND, "ANTIQUITY_DIGGING_MORE_INFO")
+    self.moreInfoKeybindButton:SetKeybind("ANTIQUITY_DIGGING_MORE_INFO")
     self.stabilityControl = self.meterContainer:GetNamedChild("Stability")
     self.stabilityBarLeft = self.meterContainer:GetNamedChild("StabilityHealthBarLeft")
     self.stabilityBarRight = self.meterContainer:GetNamedChild("StabilityHealthBarRight")
@@ -135,10 +131,9 @@ function ZO_AntiquityDigging:Initialize(control)
         -- When the end of game summary fragment comes in, we want to get rid of the keybinds
         -- and tone down the bars so they don't feel like they're part of the summary but can still be referenced
         if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() then
-            if newState == SCENE_FRAGMENT_SHOWING then
-                self.keybindContainerFastTimeline:PlayFromEnd()
-                self.meterContainerFastPartialTimeline:PlayFromEnd()
-            end
+            self:HideMoreInfo()
+            self.keybindContainerFastTimeline:PlayFromEnd()
+            self.meterContainerFastPartialTimeline:PlayFromEnd()
         end
     end)
 
@@ -231,11 +226,13 @@ function ZO_AntiquityDigging:RefreshInputModeFragments()
 end
 
 function ZO_AntiquityDigging:ApplyPlatformStyle(style)
-    ApplyTemplateToControl(self.moreInfoKeybindButton, style.keybindButtonTemplate)
-    ApplyTemplateToControl(self.stabilityControl, style.stabilityBarTemplate)
+    ApplyTemplateToControl(self.moreInfoKeybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
     --Reset the text here to handle the force uppercase on gamepad
     self.moreInfoKeybindButton:SetText(GetString(SI_ANTIQUITIES_DIGGING_MORE_INFO))
     self.moreInfoKeybindButton:SetHidden(not IsInGamepadPreferredMode())
+
+    ApplyTemplateToControl(self.stabilityControl, style.stabilityBarTemplate)
+
     self:RefreshDigPowerConfiguration(style)
 end
 
@@ -454,7 +451,9 @@ function ZO_AntiquityDigging:OnUpdate(timeS)
 end
 
 function ZO_AntiquityDigging:OnShowMoreInfoKeybindPressed()
-    if self.moreInfoKeybindButton:GetKeybind() then
+    -- this keybind is currently only enabled for gamepad and hidden for keyboard
+    -- keyboard shows the tooltip by mousing over
+    if IsInGamepadPreferredMode() then
         local selectedActiveSkill = GetSelectedDiggingActiveSkill()
         self:ShowMoreInfoBySkill(selectedActiveSkill)
     end

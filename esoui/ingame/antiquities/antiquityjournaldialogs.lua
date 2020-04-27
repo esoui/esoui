@@ -2,6 +2,7 @@
 
 ZO_Dialogs_RegisterCustomDialog("CONFIRM_ABANDON_ANTIQUITY_SCRYING_PROGRESS",
 {
+    canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,

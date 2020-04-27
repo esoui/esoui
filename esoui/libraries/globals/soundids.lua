@@ -954,7 +954,7 @@ SOUNDS = {
     ANTIQUITIES_FANFARE_FRAGMENT_PROGRESSION = "Antiquities_Digging_Fragment_Progression",
     ANTIQUITIES_FANFARE_FRAGMENT_RUNDOWN_ICONS = "Antiquities_Digging_Fragment_Rundown_Icons",
     ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED = "Antiquities_Digging_Fragment_Discovered",
-    ANTIQUITIES_FANFARE_FRAGMENTS_FOUND_ALL = "Antiquities_Digging_Fragments_Found_All",
+    ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED_FINAL = "Antiquities_Digging_Fragments_Found_All",
     ANTIQUITIES_FANFARE_COMPLETED = "Antiquities_Digging_Antiquity_Completed",
     ANTIQUITIES_FANFARE_FAILURE = "Antiquities_Digging_Failure",
 }

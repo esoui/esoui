@@ -1373,7 +1373,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             if numGoalsAchieved > 0 and numGoalsAchieved > lastNumGoalsAchieved then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SCRYING_PROGRESS_TEXT, SOUNDS.SCRYING_PROGRESS_ADDED)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED)
-                messageParams:SetText(GetString(SI_ANTIQUITIES_SCRYING_PROGRESS_UPDATED_HEADER), antiquityData:GetColorizedName())
+                messageParams:SetText(GetString(SI_ANTIQUITIES_SCRYING_PROGRESS_UPDATED_HEADER), antiquityData:GetColorizedFormattedName())
                 messageParams:SetScryingProgressData(lastNumGoalsAchieved, numGoalsAchieved, antiquityData:GetTotalNumGoals())
                 return messageParams
             end

@@ -29,8 +29,38 @@
 
         <Label name="ZO_AntiquityHeading_Keyboard" inherits="ZO_AntiquityLargeLabel_Keyboard" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
 
-        <Texture name="ZO_AntiquityProgressIcon" virtual="true">
-            <Dimensions x="28" y="28"/>
+        <Control name="ZO_AntiquityScryableHeading_Keyboard" virtual="true">
+            <DimensionConstraints minY="32" maxY="32" />
+
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_AntiquityHeading_Keyboard">
+                    <Anchor point="LEFT" offsetX="40" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Label name="ZO_AntiquityJournal_SubCategory" inherits="ZO_TreeStatusLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
+            <Dimensions x="228" />
+        </Label>
+
+        <Control name="ZO_AntiquityJournal_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="227" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityJournal_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="227" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_AntiquityProgressIcon" level="2" virtual="true">
+            <Dimensions x="28" y="28" />
         </Texture>
 
         <Control name="ZO_AntiquityLogBookProgress" resizeToFitDescendents="true" virtual="true">
@@ -59,14 +89,6 @@
                 ZO_AntiquityIcon_OnInitialized(self)
             </OnInitialized>
 
-            <OnMouseEnter>
-                ZO_AntiquityIcon_OnMouseEnter(self)
-            </OnMouseEnter>
-
-            <OnMouseExit>
-                ZO_AntiquityIcon_OnMouseExit(self)
-            </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)Backdrop" color="000000" level="4">
                     <AnchorFill />
@@ -90,6 +112,10 @@
         <Control name="ZO_AntiquityFragmentIcon" inherits="ZO_AntiquityIcon" virtual="true">
             <Dimensions x="40" y="40" />
 
+            <OnInitialized>
+                ZO_AntiquityFragmentIcon_OnInitialized(self)
+            </OnInitialized>
+
             <OnMouseEnter>
                 ZO_AntiquityFragmentIcon_OnMouseEnter(self)
             </OnMouseEnter>
@@ -97,11 +123,18 @@
             <OnMouseExit>
                 ZO_AntiquityFragmentIcon_OnMouseExit(self)
             </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" tier="HIGH" level="10">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="TOPLEFT" offsetX="-1" offsetY="-1" />
+                </Texture>
+            </Controls>
         </Control>
         
         <Control name="ZO_AntiquityTileBaseControl_Keyboard" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
-            <DimensionConstraints minX="550" maxX="550" minY="70" />
-            <ResizeToFitPadding height="12"/>
+            <DimensionConstraints minX="570" maxX="570" minY="70" />
+            <ResizeToFitPadding height="12" />
 
             <OnMouseEnter>
                 ZO_AntiquityTileBaseControl_Keyboard_OnMouseEnter(self, button, upInside)
@@ -121,13 +154,18 @@
                 <Control name="$(parent)AntiquityBackdrop" inherits="ZO_ListEntryBackdrop" excludeFromResizeToFitExtents="true" />
 
                 <Control name="$(parent)Icon" inherits="ZO_AntiquityIcon">
-                    <Anchor point="TOPLEFT" offsetY="10" />
+                    <Anchor point="TOPLEFT" offsetX="40" offsetY="10" />
                 </Control>
+
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" level="10">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-8" />
+                </Texture>
 
                 <Control name="$(parent)Header">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="10" />
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="10" />
-                    <DimensionConstraints minX="476" maxX="476" />
+                    <DimensionConstraints minX="436" maxX="436" />
 
                     <Controls>
                         <Label name="$(parent)Title" inherits="ZO_AntiquityTitleLabel_Keyboard">
@@ -181,9 +219,9 @@
                 </Label>
 
                 <Control name="$(parent)Antiquities" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)AntiquitiesRecovered" relativePoint="BOTTOMLEFT" offsetY="2" />
-                    <DimensionConstraints minX="476" maxX="476" />
-                    <ResizeToFitPadding height="5"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AntiquitiesRecovered" relativePoint="BOTTOMLEFT" />
+                    <DimensionConstraints minX="436" maxX="436" />
+                    <ResizeToFitPadding height="14" />
                 </Control>
             </Controls>
         </Control>
@@ -199,16 +237,20 @@
                         <Label name="$(parent)Difficulty" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                             <Anchor point="LEFT" relativeTo="$(parent)NumRecovered" relativePoint="RIGHT" offsetX="15" />
                         </Label>
+
+                        <Label name="$(parent)LeadExpiration" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="26" />
+                        </Label>
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)ProgressIcons" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
-                    <ResizeToFitPadding height="5"/>
+                    <ResizeToFitPadding height="5" />
                 </Control>
             </Controls>
         </Control>
-        
+
         <TopLevelControl name="ZO_AntiquityJournal_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_AntiquityJournal_Keyboard_OnInitialized(self)
@@ -220,14 +262,14 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-5" />
                     <Controls>
                         <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                            <Dimensions x="330" />
+                            <Dimensions x="300" />
                             <Anchor point="TOPLEFT" offsetX="-10" offsetY="72" />
                             <Anchor point="BOTTOMLEFT" offsetX="-10" />
                         </Control>
 
                         <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
-                            <Dimensions x="240"/>
+                            <Dimensions x="240" />
                             <Controls>
                                 <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
                                     <OnInitialized>
@@ -247,19 +289,20 @@
                         <Control name="$(parent)Category">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Search" relativePoint="TOPRIGHT" />
                             <Anchor point="TOPRIGHT" />
+
                             <Controls>
                                 <Label name="$(parent)Title" inherits="ZO_AntiquityLargeLabel_Keyboard" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPLEFT" offsetX="40" />
                                 </Label>
 
                                 <StatusBar name="$(parent)Progress" inherits="ZO_AntiquityStatusBar">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="5" />
-                                    <Anchor point="RIGHT" offsetX="-230" constrains="X" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="6" />
+                                    <Dimensions x="275" />
                                 </StatusBar>
 
                                 <Control name="$(parent)Filter" inherits="ZO_ComboBox">
-                                    <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" offsetX="10" />
-                                    <Dimensions x="220" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" offsetX="15" />
+                                    <Anchor point="RIGHT" constrains="X" />
                                 </Control>
                             </Controls>
                         </Control>
@@ -270,7 +313,7 @@
 
                         <Control name="$(parent)ContentList" inherits="ZO_ScrollContainer">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetY="25" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-10" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-75" />
                         </Control>
 
                         <Control name="$(parent)LockedContentPanel" hidden="true">

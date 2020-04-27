@@ -8,8 +8,6 @@ local ANTIQUITY_SCRYING_INTERACTION =
     interactTypes = { INTERACTION_ANTIQUITY_SCRYING },
 }
 
-ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("SCRYING_INTERRUPTED")
-
 -- This object holds the interaction logic between the scrying remote scene and the rest of the ingame UI.
 ZO_IngameScrying = ZO_Object:Subclass()
 
@@ -51,13 +49,6 @@ function ZO_IngameScrying:Initialize()
         end
     end
     EVENT_MANAGER:RegisterForEvent("ZO_IngameScrying", EVENT_SCRYING_EXIT_RESPONSE, OnScryingExitResponse)
-
-    local function OnInterruptScrying()
-        if SCRYING_SCENE:IsShowing() then
-            SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_SCRYING_INTERRUPTED)
-        end
-    end
-    EVENT_MANAGER:RegisterForEvent("ZO_IngameScrying", EVENT_INTERRUPT_SCRYING, OnInterruptScrying)
 end
 
 function ZO_IngameScrying:RefreshInputModeFragments()

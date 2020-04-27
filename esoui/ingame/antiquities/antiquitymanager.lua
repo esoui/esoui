@@ -2,6 +2,7 @@ ZO_ANTIQUITY_UNKNOWN_ICON_TEXTURE = "EsoUI/Art/Icons/U26_Unknown_Antiquity_Quest
 ZO_DIGSITE_UNKNOWN_ICON_TEXTURE = "EsoUI/Art/Antiquities/digsite_unknown.dds"
 ZO_DIGSITE_COMPLETE_ICON_TEXTURE = "EsoUI/Art/Antiquities/digsite_complete.dds"
 
+ZO_LEAD_EXPIRATION_WARNING_DAYS = 7
 ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID = 0
 local g_scryableAntiquityCategoryData = ZO_AntiquityCategory:New(ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID)
 ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA = g_scryableAntiquityCategoryData
@@ -30,6 +31,7 @@ function ZO_AntiquityManager:Initialize(...)
             OnContentLockChanged()
         end
     end
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
 
     local function OnCollectionUpdated(updateType, updatedCollectiblesByState)
         for collectibleState, collectibles in pairs(updatedCollectiblesByState) do
@@ -41,9 +43,15 @@ function ZO_AntiquityManager:Initialize(...)
             end
         end
     end
-
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+
+    local function OnSkillsUpdated()
+        OnContentLockChanged()
+    end
+    SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", OnSkillsUpdated)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillsUpdated)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillsUpdated)
+
     EVENT_MANAGER:RegisterForEvent("ZO_AntiquityManager", EVENT_ANTIQUITY_JOURNAL_SHOW_SCRYABLE, ZO_ShowAntiquityScryables)
 end
 
@@ -140,6 +148,35 @@ end
 function ZO_GetAntiquityScryingSkillLineData()
     local scryingSkillLineId = GetAntiquityScryingSkillLineId()
     return SKILLS_DATA_MANAGER:GetSkillLineDataById(scryingSkillLineId)
+end
+
+function ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityOrSetData, control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY)
+    if antiquityOrSetData:HasDiscovered() then
+        ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY)
+
+        if antiquityOrSetData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
+            local zoneId = antiquityOrSetData:GetZoneId()
+            local zoneName = GetZoneNameById(zoneId)
+            local addedPadding = false
+
+            if zoneName ~= "" then
+                if not addedPadding then
+                    ItemTooltip:AddVerticalPadding(18)
+                    addedPadding = true
+                end
+                ItemTooltip:AddLine(ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_ANTIQUITY_TOOLTIP_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName))), "ZoFontGameMedium", ZO_SELECTED_TEXT:UnpackRGB())
+            end
+
+            local nearExpiration, timeRemaining = antiquityOrSetData:GetLeadExpirationStatus()
+            if nearExpiration then
+                if not addedPadding then
+                    ItemTooltip:AddVerticalPadding(18)
+                    addedPadding = true
+                end
+                ItemTooltip:AddLine(ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, ZO_SELECTED_TEXT:Colorize(timeRemaining))), "ZoFontGameMedium", ZO_SELECTED_TEXT:UnpackRGB())
+            end
+        end
+    end
 end
 
 ANTIQUITY_MANAGER = ZO_AntiquityManager:New()

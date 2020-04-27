@@ -6,8 +6,15 @@
             </OnInitialized>
         </TopLevelControl>
 
-        <Texture name="ZO_AntiquityJournalAntiquityIconTexture_Gamepad" virtual="true">
+        <Texture name="ZO_AntiquityJournalAntiquityFragmentIconTexture_Gamepad" virtual="true">
             <Dimensions x="50" y="50" />
+
+            <Controls>
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" level="4">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="-1" offsetY="-1" />
+                </Texture>
+            </Controls>
         </Texture>
 
         <Texture name="ZO_AntiquityJournalAntiquityProgressIconTexture_Gamepad" textureFile="EsoUI/Art/CharacterWindow/equipmentBonusIcon_full.dds" virtual="true">
@@ -19,7 +26,7 @@
                 <Label name="$(parent)Progress" inherits="ZO_GamepadHeaderLabelTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Anchor point="BOTTOM" relativePoint="CENTER" />
                 </Label>
-                <Label name="$(parent)LogBook" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_ANTIQUITY_LOG_BOOK" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <Label name="$(parent)LogBook" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_ANTIQUITY_LOG_BOOK">
                     <Anchor point="TOP" relativePoint="CENTER" />
                 </Label>
             </Controls>
@@ -31,32 +38,38 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)IconContainer">
-                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="15" offsetY="42" />
-                    <Dimensions x="60" y="60" />
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="14" />
+                    <Dimensions x="58" y="58" />
 
                     <Controls>
-                        <Texture name="$(parent)IconTexture">
-                            <AnchorFill />
-                        </Texture>
-
                         <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+
+                        <Texture name="$(parent)IconTexture" level="2">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Texture>
                     </Controls>
                 </Control>
 
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" level="3">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativeTo="$(parent)IconContainer" relativePoint="TOPLEFT" offsetX="-2" offsetY="3" />
+                </Texture>
+
                 <Control name="$(parent)Header">
-                    <Anchor point="TOPLEFT" offsetX="90" offsetY="3" />
+                    <Anchor point="TOPLEFT" offsetX="95" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-15" offsetY="81" />
 
                     <Controls>
-                        <Label name="$(parent)TitleLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="NONE">
+                        <Label name="$(parent)TitleLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" font="ZoFontGamepadCondensed45" modifyTextType="NONE">
                             <Anchor point="TOPLEFT" />
                         </Label>
 
-                        <Label name="$(parent)AntiquityTypeLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="BOTTOMLEFT" />
+                        <Label name="$(parent)AntiquityTypeLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TitleLabel" relativePoint="BOTTOMLEFT" offsetY="-7" />
                         </Label>
 
-                        <Label name="$(parent)NumRecoveredLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                        <Label name="$(parent)NumRecoveredLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <Anchor point="LEFT" relativeTo="$(parent)AntiquityTypeLabel" relativePoint="RIGHT" />
                         </Label>
                     </Controls>
@@ -70,7 +83,7 @@
                 ZO_AntiquityJournalAntiquitySectionRowGamepad_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" verticalAlignment="BOTTOM" >
+                <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate" verticalAlignment="BOTTOM" >
                     <Anchor point="TOPLEFT" offsetX="20" offsetY="10" />
                 </Label>
             </Controls>
@@ -84,7 +97,7 @@
             <Controls>
                 <Control name="$(parent)Header" override="true">
                     <Controls>
-                        <Label name="$(parent)DifficultyLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                        <Label name="$(parent)DifficultyLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <Anchor point="LEFT" relativeTo="$(parent)NumRecoveredLabel" relativePoint="RIGHT" />
                         </Label>
                     </Controls>
@@ -97,6 +110,22 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_AntiquityJournalInProgressAntiquityNearExpirationRow_Gamepad" inherits="ZO_AntiquityJournalInProgressAntiquityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_IN_PROGRESS_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD" />
+            <OnInitialized>
+                ZO_AntiquityJournalInProgressAntiquityNearExpirationRowGamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)LeadExpirationLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                </Label>
+
+                <Control name="$(parent)ProgressIcons" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="32" />
+                </Control>
+            </Controls>
+        </Control>
+
         <Control name="ZO_AntiquityJournalScryableAntiquityRow_Gamepad" inherits="ZO_AntiquityJournalBaseRow_Gamepad" virtual="true">
             <Dimensions y="ZO_SCRYABLE_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD" />
             <OnInitialized>
@@ -105,11 +134,23 @@
             <Controls>
                 <Control name="$(parent)Header" override="true">
                     <Controls>
-                        <Label name="$(parent)DifficultyLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                        <Label name="$(parent)DifficultyLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <Anchor point="LEFT" relativeTo="$(parent)NumRecoveredLabel" relativePoint="RIGHT" />
                         </Label>
                     </Controls>
                 </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityJournalScryableAntiquityNearExpirationRow_Gamepad" inherits="ZO_AntiquityJournalScryableAntiquityRow_Gamepad" virtual="true">
+            <Dimensions y="ZO_SCRYABLE_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD" />
+            <OnInitialized>
+                ZO_AntiquityJournalScryableAntiquityNearExpirationRowGamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)LeadExpirationLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                </Label>
             </Controls>
         </Control>
 
@@ -143,15 +184,15 @@
                 </Control>
 
                 <Control name="$(parent)ContentContainer">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="16" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
                     <Controls>
-                        <Label name="$(parent)AntiquitiesRecoveredLabel" inherits="ZO_GamepadHeaderLabelTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                        <Label name="$(parent)AntiquitiesRecoveredLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <Anchor point="TOPLEFT" />
                         </Label>
 
                         <Control name="$(parent)AntiquitiesGridList" inherits="ZO_GridScrollList_Gamepad">
-                            <Anchor point="TOPLEFT" offsetX="-40" offsetY="40" />
-                            <DimensionConstraints minX="720" maxX="720" minY="60" maxY="120" />
+                            <Anchor point="TOPLEFT" offsetX="-40" offsetY="39" />
+                            <DimensionConstraints minX="720" maxX="720" minY="60" maxY="180" />
                         </Control>
                     </Controls>
                 </Control>

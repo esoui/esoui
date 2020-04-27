@@ -289,7 +289,6 @@ function ZO_ScryingActionButton:Initialize(control, skill, actionName)
     self.actionName = actionName
     ZO_Keybindings_RegisterLabelForBindingUpdate(control:GetNamedChild("Keybind"), actionName)
     
-    -- TODO: gamepad ability tooltips
     self.abilitySlot:SetHandler("OnMouseEnter", function()
         InitializeTooltip(AbilityTooltip, self.icon, TOPLEFT, 5, -5, TOPRIGHT)
         AbilityTooltip:SetAbilityId(self.abilityId)
@@ -666,6 +665,10 @@ function ZO_ScryingBoard:Initialize(gameControl)
         hexControl.hexObject = nil
     end
     self.hexControlPool:SetCustomResetBehavior(ResetHexControl)
+    local function HexAcquire(hexControl, hexIndex)
+        ZO_ScryingHex:New(self, hexControl, hexIndex)
+    end
+    self.hexControlPool:SetCustomAcquireBehavior(HexAcquire)
 
     self.fakeHexPool = ZO_ControlPool:New("ZO_ScryingFakeHex", self.boardControl, "FakeHex")
 
@@ -684,9 +687,8 @@ function ZO_ScryingBoard:OnShowing()
     self:RecalculateHexSize()
 
     for hexIndex = 1, GetNumTotalScryingHexes() do
-        local hexControl = self.hexControlPool:AcquireObject()
-        local hex = ZO_ScryingHex:New(self, hexControl, hexIndex)
-        self.hexList[hexIndex] = hex
+        local hexControl = self.hexControlPool:AcquireObject(hexIndex)
+        self.hexList[hexIndex] = hexControl.hexObject
     end
 
     self:SetupFakeHexBackground()
@@ -722,33 +724,60 @@ function ZO_ScryingBoard:RecalculateHexSize()
 end
 
 do
-    local STARTING_DISTANCE = 5
-    local LAST_DISTANCE = 20
+    local BOARD_CENTER_OFFSET_Y = 10
+    local BORDER_COLOR = ZO_ColorDef:New("AA00EFFF")
+    local MAX_HEX_SCALE = 0.75
+    local MIN_HEX_SCALE = 0.35
+    local MAX_HEX_RADIUS_X = 520
+    local MAX_HEX_RADIUS_Y = 400
+
     function ZO_ScryingBoard:CreateFakeHex(row, column, distance)
         if (row + column) % 2 == 0 and not self:GetHex(row, column) then
             local offsetX, offsetY = self:ConvertHexCoordinateToOffset(row, column)
             local boardBottomY = self.boardControl:GetBottom()
-            local boardBottomX = self.boardControl:GetCenter()
-            local expectedCenterX, expectedCenterY = boardBottomX + offsetX, boardBottomY + offsetY
+            local boardCenterX, boardCenterY = self.boardControl:GetCenter()
+            local expectedCenterX, expectedCenterY = boardCenterX + offsetX, boardBottomY + offsetY
 
-            if not self.boardMask:IsPointInside(expectedCenterX, expectedCenterY) then
+            -- Calculate hexagon's normalized elliptical distance from the board's origin
+            -- and derive an eased alpha for the control.
+            local centerOffsetX, centerOffsetY = expectedCenterX - boardCenterX, expectedCenterY - (boardCenterY + BOARD_CENTER_OFFSET_Y)
+            local angleRadians = math.atan2(centerOffsetX, centerOffsetY)
+            local a = math.abs(math.sin(angleRadians) * (centerOffsetX / MAX_HEX_RADIUS_X))
+            local b = math.abs(math.cos(angleRadians) * (centerOffsetY / MAX_HEX_RADIUS_Y))
+            local normalizedDistance = 1 - (a + b)
+            if normalizedDistance <= 0 then
+                return
+            end
+            local easedDistance = normalizedDistance > 0.25 and 1 or ZO_EaseOutCubic(zo_lerp(0, 4, normalizedDistance))
+
+            -- Before creating the object, test if it will overlap anything we don't want it to
+            local scale = zo_lerp(MIN_HEX_SCALE, MAX_HEX_SCALE, easedDistance)
+            local surfaceWidth = self.hexWidth * scale
+            local surfaceHeight = self.hexHeight * scale
+
+            -- testing top and bottom to have more precise testing against lattice work
+            -- we don't need this precision on the X axis
+            local expectedTopY = expectedCenterY - (surfaceWidth * 0.5)
+            local expectedBottomY = expectedCenterY + (surfaceWidth * 0.5)
+            if not self.boardMask:IsPointInside(expectedCenterX, expectedTopY) or not self.boardMask:IsPointInside(expectedCenterX, expectedBottomY) then
                 return
             end
 
             local fakeControl, fakeControlKey = self.fakeHexPool:AcquireObject()
+            fakeControl.centerOffsetAngleRadians = angleRadians
             fakeControl:ClearAnchors()
             fakeControl:SetAnchor(CENTER, self.boardControl, BOTTOM, offsetX, offsetY)
 
-            distance = distance + STARTING_DISTANCE
-            local scale = 1 - (distance / LAST_DISTANCE)
-            local surfaceWidth = self.hexWidth * scale
-            local surfaceHeight = self.hexHeight * scale
             fakeControl:SetDimensions(surfaceWidth, surfaceHeight)
 
             -- Remove margin around center texture
             local halfTextureRatioX = ZO_SCRYING_HEX_TEXTURE_WIDTH / ZO_SCRYING_SURFACE_TEXTURE_WIDTH / 2
             local halfTextureRatioY = ZO_SCRYING_HEX_TEXTURE_HEIGHT / ZO_SCRYING_SURFACE_TEXTURE_HEIGHT / 2
             fakeControl:SetCenterTextureCoords(1 - halfTextureRatioX, halfTextureRatioX, 1 - halfTextureRatioY, halfTextureRatioY)
+
+            local r, g, b = BORDER_COLOR:UnpackRGB()
+            local a = easedDistance
+            fakeControl:SetBorderColor(r, g, b, a)
         end
     end
 end
@@ -989,17 +1018,6 @@ do
 
             table.sort(borderVisibleHexes, SortByHexIndex)
 
-            -- TODO: sometimes the affected hex list will include multiples of
-            -- the same hex. This is a bug, but to keep the rest of behavior
-            -- functioning we can work around it by deduplicating here.
-            local lastHex = nil
-            for index, hex in ZO_NumericallyIndexedTableReverseIterator(borderVisibleHexes) do
-                if hex == lastHex then
-                    table.remove(borderVisibleHexes, index)
-                end
-                lastHex = hex
-            end
-
             -- Add outlines to all affected hexes
             local tracedHexSet = {}
             for _, hex in ipairs(borderVisibleHexes) do
@@ -1147,6 +1165,7 @@ function ZO_Scrying:Initialize(control)
     self.control = control
     self.board = ZO_ScryingBoard:New(self.control:GetNamedChild("Game"))
 
+    self.isScryingReady = false
     self.waitingForScryingResult = false
     self.waitingToCompleteScrying = false
     self.lastScryingResult = nil
@@ -1172,6 +1191,7 @@ function ZO_Scrying:Initialize(control)
         local NO_SOUND = true
         local ANIMATE_INSTANTLY = true
         if newState == SCENE_SHOWING then
+            self.isScryingReady = false
             self:TrySetCurrentSkill(SCRYING_ACTIVE_SKILL_NORMAL, NO_SOUND)
             self.board:OnShowing()
             self:RefreshNormalActionMeter(ANIMATE_INSTANTLY)
@@ -1179,9 +1199,6 @@ function ZO_Scrying:Initialize(control)
             self:RefreshActionButtons()
             self:RefreshEyeAnimations()
             self:RefreshMoreInfoButton()
-        elseif newState == SCENE_SHOWN then
-            self:RefreshInputState()
-            self:TryTriggerInitialTutorials()
         elseif newState == SCENE_HIDING then
             --clear the current tutorial when hiding so we don't push an extra action layer
             self.triggeredTutorial = false
@@ -1192,8 +1209,11 @@ function ZO_Scrying:Initialize(control)
         end
     end)
 
-    local NO_OUTRO_ANIMATION = nil
-    SCRYING_FRAGMENT = ZO_CustomAnimationSceneFragment:New(self.control, "ZO_Scrying_IntroAnimation", NO_OUTRO_ANIMATION)
+    self.control:RegisterForEvent(EVENT_SCRYING_READY, function()
+        self.isScryingReady = true
+        self:RefreshInputState()
+        self:TryTriggerInitialTutorials()
+    end)
 
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         if SCRYING_SCENE:IsShowing() then
@@ -1238,7 +1258,7 @@ function ZO_Scrying:Initialize(control)
 end
 
 function ZO_Scrying:RefreshInputState()
-    local allowPlayerInput = SCRYING_SCENE:GetState() == SCENE_SHOWN and not self.triggeredTutorial
+    local allowPlayerInput = SCRYING_SCENE:IsShowing() and self.isScryingReady and not self.triggeredTutorial
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("ScryingActions")
@@ -1397,10 +1417,8 @@ function ZO_Scrying:RefreshEyeAnimations()
         self.eyeBackdropRightSpinLoop:PlayFromEnd() -- reverse for counterclockwise rotation
 
         local frameElements = self.control:GetNamedChild("GameFrame")
-        self.eyeFrameGlowLoop = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingFrame_GlowLoop", frameElements:GetNamedChild("Glow1"))
+        self.eyeFrameGlowLoop = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingFrame_GlowLoop", frameElements:GetNamedChild("Glow"))
         self.eyeFrameGlowLoop:PlayFromStart()
-
-        self.eyeFrameGlowAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingFrame_GlowOnce", frameElements:GetNamedChild("Glow2"))
     end
 end
 
@@ -1499,32 +1517,80 @@ do
     end
 
     function ZO_FramePolygon_OnInitialized(polygon)
-        -- This is a super rough shape that outlines the "window" into the antiquarian's eye.
-        -- Can be used for visibility checks, or to create a tiling effect that still stays within the bounds of the frame
-        polygon:AddPoint(0.889454, 0.505029)
-        polygon:AddPoint(0.786856, 0.742449)
-        polygon:AddPoint(0.639240, 0.921305)
-        polygon:AddPoint(0.356572, 0.922888)
-        polygon:AddPoint(0.207909, 0.731369)
-        polygon:AddPoint(0.111593, 0.501863)
-        polygon:AddPoint(0.216285, 0.235953)
-        polygon:AddPoint(0.374370, 0.066593)
-        polygon:AddPoint(0.627724, 0.068176)
-        polygon:AddPoint(0.786856, 0.273940)
+        -- This is a shape that outlines the "window" into the antiquarian's eye. It traces the edge of the window fairly precisely.
+        polygon:AddPoint(0.819490, 0.501118)
+        polygon:AddPoint(0.777049, 0.633015)
+        polygon:AddPoint(0.729892, 0.735502)
+        polygon:AddPoint(0.676250, 0.820165)
+        polygon:AddPoint(0.623788, 0.870963)
+        polygon:AddPoint(0.572504, 0.872745)
+        polygon:AddPoint(0.548336, 0.861160)
+        polygon:AddPoint(0.532421, 0.882548)
+        polygon:AddPoint(0.524758, 0.869180)
+        polygon:AddPoint(0.524168, 0.809471)
+        polygon:AddPoint(0.511200, 0.765802)
+        polygon:AddPoint(0.500000, 0.745305)
+        polygon:AddPoint(0.481727, 0.785408)
+        polygon:AddPoint(0.475832, 0.814818)
+        polygon:AddPoint(0.476421, 0.871854)
+        polygon:AddPoint(0.468758, 0.883440)
+        polygon:AddPoint(0.451074, 0.860269)
+        polygon:AddPoint(0.429854, 0.872745)
+        polygon:AddPoint(0.377391, 0.875419)
+        polygon:AddPoint(0.320802, 0.815709)
+        polygon:AddPoint(0.269519, 0.739958)
+        polygon:AddPoint(0.228256, 0.650838)
+        polygon:AddPoint(0.201730, 0.577761)
+        polygon:AddPoint(0.179920, 0.502901)
+        polygon:AddPoint(0.212930, 0.386154)
+        polygon:AddPoint(0.244172, 0.312185)
+        polygon:AddPoint(0.306066, 0.200786)
+        polygon:AddPoint(0.372675, 0.125926)
+        polygon:AddPoint(0.477011, 0.125035)
+        polygon:AddPoint(0.500589, 0.160683)
+        polygon:AddPoint(0.521221, 0.127709)
+        polygon:AddPoint(0.624967, 0.127709)
+        polygon:AddPoint(0.676250, 0.181180)
+        polygon:AddPoint(0.731071, 0.268517)
+        polygon:AddPoint(0.782943, 0.379916)
     end
-end
 
-do
-    function ZO_Scrying_Vignette_OnShowing(vignette)
-        vignette.inverseAspectRatio = vignette:GetHeight() / vignette:GetWidth()
-    end
-
-    local VIGNETTE_FINAL_SCALE = 8
-    local VIGNETTE_ROTATIONS_PER_SECOND = -0.2
-    function ZO_Scrying_Vignette_OnUpdate(vignette, progress)
-        local scale = ZO_EaseInQuadratic(progress) * VIGNETTE_FINAL_SCALE
-        local angle = GetFrameTimeMilliseconds() * 0.001 * math.pi * 2 * VIGNETTE_ROTATIONS_PER_SECOND
-        ZO_ScaleAndRotateTextureCoords(vignette, angle, 0.5, 0.5, scale * vignette.inverseAspectRatio, scale)
+    function ZO_HexMaskPolygon_OnInitialized(polygon)
+        -- defines a smaller mask that avoids the extra lattice work at the top and bottom of the window
+        polygon:AddPoint(0.785301, 0.413781)
+        polygon:AddPoint(0.792375, 0.506465)
+        polygon:AddPoint(0.768796, 0.623211)
+        polygon:AddPoint(0.723997, 0.732828)
+        polygon:AddPoint(0.675661, 0.789864)
+        polygon:AddPoint(0.617893, 0.816600)
+        polygon:AddPoint(0.558357, 0.791647)
+        polygon:AddPoint(0.540673, 0.805906)
+        polygon:AddPoint(0.521221, 0.786300)
+        polygon:AddPoint(0.501768, 0.742631)
+        polygon:AddPoint(0.477600, 0.786300)
+        polygon:AddPoint(0.458737, 0.803232)
+        polygon:AddPoint(0.439285, 0.789864)
+        polygon:AddPoint(0.380338, 0.811253)
+        polygon:AddPoint(0.317266, 0.784517)
+        polygon:AddPoint(0.278950, 0.736393)
+        polygon:AddPoint(0.234151, 0.639253)
+        polygon:AddPoint(0.220593, 0.577761)
+        polygon:AddPoint(0.212341, 0.450320)
+        polygon:AddPoint(0.222362, 0.388828)
+        polygon:AddPoint(0.247119, 0.316641)
+        polygon:AddPoint(0.304297, 0.211481)
+        polygon:AddPoint(0.326697, 0.203460)
+        polygon:AddPoint(0.417475, 0.204351)
+        polygon:AddPoint(0.433980, 0.199895)
+        polygon:AddPoint(0.458737, 0.216828)
+        polygon:AddPoint(0.477600, 0.200786)
+        polygon:AddPoint(0.498821, 0.233761)
+        polygon:AddPoint(0.521810, 0.203460)
+        polygon:AddPoint(0.544210, 0.214154)
+        polygon:AddPoint(0.565431, 0.198113)
+        polygon:AddPoint(0.598441, 0.205242)
+        polygon:AddPoint(0.688039, 0.209698)
+        polygon:AddPoint(0.732839, 0.284558)
     end
 end
 

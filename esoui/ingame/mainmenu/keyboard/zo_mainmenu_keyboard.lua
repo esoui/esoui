@@ -195,6 +195,11 @@ ZO_CATEGORY_LAYOUT_INFO =
         pressed = "EsoUI/Art/MainMenu/menuBar_journal_down.dds",
         disabled = "EsoUI/Art/MainMenu/menuBar_journal_disabled.dds",
         highlight = "EsoUI/Art/MainMenu/menuBar_journal_over.dds",
+        indicators = function()
+            if ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead() then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
+        end,
     },
     [MENU_CATEGORY_COLLECTIONS] =
     {

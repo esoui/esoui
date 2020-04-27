@@ -1,5 +1,21 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_AntiquityLore_IconChildlessHeader" inherits="ZO_IconChildlessHeader" resizeToFitDescendents="true" virtual="true">
+            <OnInitialized>
+                ZO_AntiquityLore_IconHeader_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="350"/>
+                </Label>
+                <Label name="$(parent)SubText" font="ZoFontGameMedium" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="-5" />
+                    <DimensionConstraints maxX="350" minY="24"/>
+                </Label>
+            </Controls>
+        </Control>
+        
         <Label name="ZO_AntiquityLoreLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontWinH5" wrapMode="ELLIPSIS" virtual="true" />
 
         <Label name="ZO_AntiquityLoreHeadingLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontWinH3" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" virtual="true" />

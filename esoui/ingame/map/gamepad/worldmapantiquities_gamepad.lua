@@ -8,12 +8,114 @@ function ZO_MapAntiquities_Gamepad:Initialize(control)
     ZO_MapAntiquities_Shared.Initialize(self, control, ZO_SimpleSceneFragment)
     self:SetNoItemsLabelControl(control:GetNamedChild("MainNoItemsLabel"))
     self:InitializeKeybindDescriptor()
+    self:InitializeOptionsDialog()
 
     self.control:RegisterForEvent(EVENT_ANTIQUITY_TRACKING_UPDATE, function()
         if self.fragment:IsShowing() then
             self:RefreshKeybinds()
         end
     end)
+end
+
+function ZO_MapAntiquities_Gamepad:InitializeOptionsDialog()
+    ZO_Dialogs_RegisterCustomDialog("WORLD_MAP_ANTIQUITIES_GAMEPAD_OPTIONS",
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+        title =
+        {
+            text = SI_GAMEPAD_WORLD_MAP_OPTIONS
+        },
+        setup = function(dialog, data)
+            local parametricList = dialog.info.parametricList
+            ZO_ClearNumericallyIndexedTable(parametricList)
+
+            for i, action in ipairs(data.actions) do
+                local entryData = ZO_GamepadEntryData:New(action.text)
+                entryData.setup = ZO_SharedGamepadEntry_OnSetup
+                entryData.callback = action.callback
+
+                local listItem =
+                {
+                    template = "ZO_GamepadItemEntryTemplate",
+                    entryData = entryData,
+                }
+
+                table.insert(parametricList, listItem)
+            end
+
+            dialog:setupFunc()
+        end,
+
+        parametricList = {}, -- Generated Dynamically
+
+        buttons = 
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    if targetData and targetData.callback then
+                        targetData.callback(dialog)
+                    end
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_GAMEPAD_BACK_OPTION,
+            },
+        },
+    })
+end
+
+function ZO_MapAntiquities_Gamepad:ShowOptionsDialog()
+    local actions = {}
+
+    local targetData = self.list:GetTargetData()
+    local antiquityId = targetData:GetId()
+
+    if targetData:IsInProgress() and not targetData:IsTracked() then
+        local trackAction =
+        {
+            text = GetString(SI_WORLD_MAP_ANTIQUITIES_TRACK),
+            callback = function(dialog)
+                SetTrackedAntiquityId(antiquityId)
+                WORLD_MAP_MANAGER:ShowAntiquityOnMap(antiquityId)
+            end,
+        }
+
+        table.insert(actions, trackAction)
+    end
+
+    if targetData:CanScry() then
+        local scryAction =
+        {
+            text = GetString(SI_ANTIQUITY_SCRY),
+            callback = function()
+                SCENE_MANAGER:ShowBaseScene()
+                ScryForAntiquity(antiquityId)
+            end,
+        }
+
+        table.insert(actions, scryAction)
+    end
+
+    if targetData:IsInProgress() then
+        local abandonAction =
+        {
+            text = GetString(SI_ANTIQUITY_ABANDON),
+            callback = function(dialog)
+                ZO_Dialogs_ShowGamepadDialog("CONFIRM_ABANDON_ANTIQUITY_SCRYING_PROGRESS", { antiquityId = antiquityId, })
+            end,
+        }
+
+        table.insert(actions, abandonAction)
+    end
+
+    ZO_Dialogs_ShowGamepadDialog("WORLD_MAP_ANTIQUITIES_GAMEPAD_OPTIONS", { actions = actions, })
 end
 
 function ZO_MapAntiquities_Gamepad:InitializeList(control)
@@ -136,16 +238,14 @@ function ZO_MapAntiquities_Gamepad:InitializeKeybindDescriptor()
                 return targetData ~= nil and targetData:IsInProgress() and not targetData:IsTracked()
             end
         },
-        -- Scry for antiquity
+        -- Options
         {
-            keybind = "UI_SHORTCUT_SECONDARY",
+            keybind = "UI_SHORTCUT_TERTIARY",
 
-            name = GetString(SI_ANTIQUITY_SCRY),
+            name = GetString(SI_GAMEPAD_WORLD_MAP_OPTIONS),
 
             callback = function()
-                local targetData = self.list:GetTargetData()
-                SCENE_MANAGER:ShowBaseScene()
-                ScryForAntiquity(targetData:GetId())
+                self:ShowOptionsDialog()
             end,
 
             visible = function()
@@ -154,7 +254,7 @@ function ZO_MapAntiquities_Gamepad:InitializeKeybindDescriptor()
                 end
 
                 local targetData = self.list:GetTargetData()
-                return targetData ~= nil and targetData:CanScry()
+                return targetData ~= nil
             end
         },
     }

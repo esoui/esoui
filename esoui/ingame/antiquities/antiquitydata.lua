@@ -22,6 +22,24 @@ function ZO_Antiquity:Initialize(antiquityId)
     self.numDigSites = 0
     self.numRecovered = 0
     self.loreEntries = {}
+    local fragmentName = nil
+
+    -- Get Antiquity Set information.
+    local antiquitySetId = GetAntiquitySetId(antiquityId)
+    if antiquitySetId and antiquitySetId ~= 0 then
+        local antiquitySetData = ANTIQUITY_DATA_MANAGER:GetOrCreateAntiquitySetData(antiquitySetId)
+        self.antiquitySetData = antiquitySetData
+        antiquitySetData:AddAntiquityData(self)
+        fragmentName = self.name
+    end
+
+    -- Get Antiquity Category information.
+    local antiquityCategoryId = GetAntiquityCategoryId(antiquityId)
+    if antiquityCategoryId and antiquityCategoryId ~= ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
+        local antiquityCategoryData = ANTIQUITY_DATA_MANAGER:GetOrCreateAntiquityCategoryData(antiquityCategoryId)
+        self.antiquityCategoryData = antiquityCategoryData
+        antiquityCategoryData:AddAntiquityData(self)
+    end
 
     -- Get Antiquity Lore entries.
     local numLoreEntries = GetNumAntiquityLoreEntries(antiquityId)
@@ -33,25 +51,10 @@ function ZO_Antiquity:Initialize(antiquityId)
             loreEntryIndex = loreEntryIndex,
             displayName = loreDisplayName,
             description = loreDescription,
+            fragmentName = fragmentName,
             unlocked = false
         }
         table.insert(self.loreEntries, loreEntryData)
-    end
-
-    -- Get Antiquity Set information.
-    local antiquitySetId = GetAntiquitySetId(antiquityId)
-    if antiquitySetId and antiquitySetId ~= 0 then
-        local antiquitySetData = ANTIQUITY_DATA_MANAGER:GetOrCreateAntiquitySetData(antiquitySetId)
-        self.antiquitySetData = antiquitySetData
-        antiquitySetData:AddAntiquityData(self)
-    end
-
-    -- Get Antiquity Category information.
-    local antiquityCategoryId = GetAntiquityCategoryId(antiquityId)
-    if antiquityCategoryId and antiquityCategoryId ~= ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
-        local antiquityCategoryData = ANTIQUITY_DATA_MANAGER:GetOrCreateAntiquityCategoryData(antiquityCategoryId)
-        self.antiquityCategoryData = antiquityCategoryData
-        antiquityCategoryData:AddAntiquityData(self)
     end
 
     self:Refresh()
@@ -62,6 +65,9 @@ function ZO_Antiquity:Refresh()
 
     -- Get Antiquity Progress information.
     self.hasLead = DoesAntiquityHaveLead(antiquityId)
+    -- Retain the New Lead state when refreshing an antiquity that still has a lead.
+    self.hasNewLead = self.hasNewLead and self.hasLead
+    self.leadExpirationTimeS = GetFrameTimeSeconds() + GetAntiquityLeadTimeRemainingSeconds(antiquityId)
     self.needsCombination = DoesAntiquityNeedCombination(antiquityId)
     self.numRecovered = GetNumAntiquitiesRecovered(antiquityId)
     self.numLoreEntriesAcquired = GetNumAntiquityLoreEntriesAcquired(antiquityId)
@@ -82,6 +88,17 @@ end
 function ZO_Antiquity:OnDigSitesUpdated()
     self.lastNumGoalsAchieved = self.numGoalsAchieved
     self:RefreshDigSites()
+end
+
+function ZO_Antiquity:OnLeadAcquired()
+    self.hasNewLead = true
+end
+
+function ZO_Antiquity:ClearNewLead()
+    if self.hasNewLead then
+        self.hasNewLead = false
+        ANTIQUITY_DATA_MANAGER:OnSingleAntiquityNewLeadCleared(self:GetId())
+    end
 end
 
 function ZO_Antiquity:GetType()
@@ -134,12 +151,29 @@ function ZO_Antiquity:GetIcon()
     return self.icon
 end
 
+function ZO_Antiquity:GetLeadExpirationStatus()
+    local nearExpiration = false
+    local timeRemaining
+    if self:HasLead() and self.leadExpirationTimeS then
+        local leadTimeRemainingS = self.leadExpirationTimeS - GetFrameTimeSeconds()
+        if leadTimeRemainingS > 0 then
+            nearExpiration = (leadTimeRemainingS / ZO_ONE_DAY_IN_SECONDS) <= ZO_LEAD_EXPIRATION_WARNING_DAYS
+            timeRemaining = ZO_FormatTimeLargestTwo(leadTimeRemainingS, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT)
+        end
+    end
+    return nearExpiration, timeRemaining
+end
+
 function ZO_Antiquity:RequiresLead()
     return self.requiresLead
 end
 
 function ZO_Antiquity:HasLead()
     return self.hasLead
+end
+
+function ZO_Antiquity:HasNewLead()
+    return self.hasNewLead
 end
 
 function ZO_Antiquity:MeetsLeadRequirements()

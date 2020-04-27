@@ -1,3 +1,26 @@
+function ZO_Tooltip:AddAntiquityLeadStatus(antiquityId)
+    local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+    if antiquityData and antiquityData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
+        local nearExpiration, timeRemaining = antiquityData:GetLeadExpirationStatus()
+        if nearExpiration then
+            self:AddLine(ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, timeRemaining)), self:GetStyle("bodyDescription"))
+        end
+    end
+end
+
+function ZO_Tooltip:AddAntiquityZone(antiquityId)
+    local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+    if antiquityData and antiquityData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
+        local zoneName = GetZoneNameById(antiquityData:GetZoneId())
+        if zoneName ~= "" then
+            local locationSection = self:AcquireSection(self:GetStyle("bodySection"))
+            local formattedLocation = zo_strformat(SI_ANTIQUITY_TOOLTIP_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName))
+            locationSection:AddLine(formattedLocation, self:GetStyle("bodyDescription"))
+            self:AddSection(locationSection)
+        end
+    end
+end
+
 function ZO_Tooltip:LayoutAntiquityLead(antiquityId)
     local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
     if antiquityData then
@@ -16,13 +39,8 @@ function ZO_Tooltip:LayoutAntiquityLead(antiquityId)
         bodySection:AddLine(formattedDescription, descriptionStyle)
         self:AddSection(bodySection)
 
-        local zoneName = GetZoneNameById(antiquityData:GetZoneId())
-        if zoneName ~= "" then
-            local locationSection = self:AcquireSection(self:GetStyle("bodySection"))
-            local formattedLocation = zo_strformat(SI_ANTIQUITY_LEAD_TOOLTIP_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName))
-            locationSection:AddLine(formattedLocation, self:GetStyle("bodyDescription"))
-            self:AddSection(locationSection)
-        end
+        self:AddAntiquityZone(antiquityId)
+        self:AddAntiquityLeadStatus(antiquityId)
     end
 end
 
@@ -50,18 +68,32 @@ function ZO_Tooltip:LayoutAntiquitySetFragment(antiquityId)
             self:AddSection(bodySection)
 
             if meetsLeadRequirements then
-                local zoneName = GetZoneNameById(antiquityData:GetZoneId())
-                if zoneName ~= "" then
-                    local locationSection = self:AcquireSection(self:GetStyle("bodySection"))
-                    local formattedLocation = zo_strformat(SI_ANTIQUITY_LEAD_TOOLTIP_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName))
-                    locationSection:AddLine(formattedLocation, self:GetStyle("bodyDescription"))
-                    self:AddSection(locationSection)
-                end
+                self:AddAntiquityZone(antiquityId)
+                self:AddAntiquityLeadStatus(antiquityId)
             else
                 local missingLeadSection = self:AcquireSection(self:GetStyle("bodySection"))
                 missingLeadSection:AddLine(GetString(SI_ANTIQUITY_REQUIRES_LEAD), self:GetStyle("bodyDescription"))
                 self:AddSection(missingLeadSection)
             end
         end
+    end
+end
+
+function ZO_Tooltip:LayoutAntiquityReward(antiquityId)
+    local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+    if antiquityData and antiquityData:HasReward() and antiquityData:HasDiscovered() then
+        local rewardId = antiquityData:GetRewardId()
+        self:LayoutReward(rewardId)
+        self:AddAntiquityZone(antiquityId)
+        self:AddAntiquityLeadStatus(antiquityId)
+    end
+end
+
+function ZO_Tooltip:LayoutAntiquitySetReward(antiquitySetId)
+    local antiquitySetData = ANTIQUITY_DATA_MANAGER:GetAntiquitySetData(antiquitySetId)
+    if antiquitySetData and antiquitySetData:HasReward() and antiquitySetData:HasDiscovered() then
+        local rewardId = antiquitySetData:GetRewardId()
+        self:LayoutReward(rewardId)
+        self:AddAntiquityZone(antiquityId)
     end
 end

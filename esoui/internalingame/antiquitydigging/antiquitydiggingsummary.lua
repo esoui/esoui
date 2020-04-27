@@ -1,6 +1,9 @@
 local ACCEPT = true
 local REJECT = false
 
+-- Allows us to easily add/remove lore from the end game flow based on design
+local IS_LORE_VIEW_ENABLED = false
+
 -- Style Constants
 
 local FRAME_BORDER_PADDING_KEYBOARD = 4
@@ -123,13 +126,15 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
     -- Antiquity Reward
     self.antiquityRewardControl = self.rewardsControl:GetNamedChild("Antiquity")
     self.rewardAntiquityHeaderLabelRevealer = self.antiquityRewardControl:GetNamedChild("Header")
+    self.rewardAntiquitySubHeaderLabelRevealer = self.antiquityRewardControl:GetNamedChild("SubHeader")
     local antiquityRewardContainerControl = self.antiquityRewardControl:GetNamedChild("Container")
     self.rewardAntiquityNameLabelRevealer = antiquityRewardContainerControl:GetNamedChild("Name")
     self.rewardAntiquityIconTexture = antiquityRewardContainerControl:GetNamedChild("FrameIcon")
     self.antiquityRewardTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingAntiquityRewardInTimeline", self.antiquityRewardControl)
     self.antiquityRewardTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
     self.rewardAntiquityHeaderLabelRevealer:SetSizeAnimation(self.antiquityRewardTimeline:GetAnimation(2))
-    self.rewardAntiquityNameLabelRevealer:SetSizeAnimation(self.antiquityRewardTimeline:GetAnimation(8))
+    self.rewardAntiquitySubHeaderLabelRevealer:SetSizeAnimation(self.antiquityRewardTimeline:GetAnimation(8))
+    self.rewardAntiquityNameLabelRevealer:SetSizeAnimation(self.antiquityRewardTimeline:GetAnimation(9))
 
     -- New Lead
     self.newLeadControl = self.rewardsControl:GetNamedChild("NewLead")
@@ -227,10 +232,10 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
                 local DONT_DESATURATE, DONT_SHOW_SILHOUETTE = false, false
                 self.setProgressionControlForCurrentAntiquity:SetDisplayBehavior(DONT_DESATURATE, DONT_SHOW_SILHOUETTE)
                 self.setProgressionSparksParticleSystem:Start()
-                PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED)
                 if self.isAntiquitySetComplete then
-                    self.setProgressionHeaderLabel:SetText(GetString(SI_ANTIQUITY_DIGGING_ALL_SET_ANTIQUITIES_FOUND))
-                    PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENTS_FOUND_ALL)
+                    PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED_FINAL)
+                else
+                    PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED)
                 end
                 -- 3. Then start shrinking back to normal
                 timeline:PlayFromEnd()
@@ -513,8 +518,6 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
     do
         local state = fanfareStateMachine:AddState("SET_PROGRESSION_IN")
         state:RegisterCallback("OnActivated", function()
-            -- This label can change later if the set is completed
-            self.setProgressionHeaderLabel:SetText(GetString(SI_ANTIQUITY_DIGGING_SET_PROGRESSION))
             self.setProgressionControl:SetHidden(false)
             self.setProgressionTimeline:PlayFromStart()
             PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENT_PROGRESSION)
@@ -791,7 +794,9 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
     self.hasAntiquitySet = antiquitySetId ~= 0
 
     -- Antiquity Reward
-    local antiquityName = GetAntiquityName(antiquityId)
+    local rewardSubheaderHeaderStringId = self.hasAntiquitySet and SI_ANTIQUITY_DIGGING_REWARDS_ANTIQUITY_FRAGMENT_HEADER or SI_ANTIQUITY_DIGGING_REWARDS_ANTIQUITY_HEADER
+    self.rewardAntiquitySubHeaderLabelRevealer:SetText(GetString(rewardSubheaderHeaderStringId))
+    local antiquityName = zo_strformat(SI_ANTIQUITY_NAME_FORMATTER, GetAntiquityName(antiquityId))
     local antiquityQuality = GetAntiquityQuality(antiquityId)
     local qualityColorDef = GetAntiquityQualityColor(antiquityQuality)
     self.rewardAntiquityIconTexture:SetTexture(GetAntiquityIcon(antiquityId))
@@ -823,13 +828,17 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
         local qualityColorDef = nil
         local countText = ""
         if lootType == LOOT_TABLE_ENTRY_TYPE_CURRENCY then
-            name = ZO_Currency_GetAmountLabel(id)
+            name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(id))
             icon = ZO_Currency_GetPlatformCurrencyIcon(id)
             local USE_SHORT_FORMAT = true
             countText = ZO_CurrencyControl_FormatCurrency(count, USE_SHORT_FORMAT)
         elseif lootType == LOOT_TABLE_ENTRY_TYPE_ITEM then
+            name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
             qualityColorDef = GetItemQualityColor(quality)
-            countText = tostring(count)
+
+            if count > 1 then
+                countText = tostring(count)
+            end
         elseif lootType == LOOT_TABLE_ENTRY_TYPE_ANTIQUITY_LEAD then
             qualityColorDef = GetAntiquityQualityColor(quality)
         end
@@ -871,7 +880,7 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
     self.bonusRewardsNoLootFoundLabel:SetHidden(self.hasBonusRewards)
 
     -- Lore
-    if GetDiggingAntiquityHasNewLoreEntryToShow() then
+    if GetDiggingAntiquityHasNewLoreEntryToShow() and IS_LORE_VIEW_ENABLED then
         self:AcquireAndLayoutLoreDocumentControl()
         self.showLore = true
     else
@@ -882,6 +891,11 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
     if self.hasAntiquitySet then
         local MAX_ICONS_PER_ROW = 8
         local numAntiquitiesInSet = GetNumAntiquitySetAntiquities(antiquitySetId)
+
+        local antiquitySetName = zo_strformat(SI_ANTIQUITY_NAME_FORMATTER, GetAntiquitySetName(antiquitySetId))
+        local antiquitySetQuality = GetAntiquitySetQuality(antiquitySetId)
+        local antiquitySetQualityColorDef = GetAntiquityQualityColor(antiquitySetQuality)
+        self.setProgressionHeaderLabel:SetText(antiquitySetQualityColorDef:Colorize(antiquitySetName))
 
         -- TODO: This logic will need to change when we implement the fancy translation animations
         local firstControlInRow = nil

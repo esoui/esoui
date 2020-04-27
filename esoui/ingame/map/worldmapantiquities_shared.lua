@@ -49,7 +49,8 @@ function ZO_MapAntiquities_Shared:Initialize(control, fragmentClass)
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", RefreshList)
     self.control:RegisterForEvent(EVENT_ANTIQUITY_TRACKING_INITIALIZED, RefreshList)
     self.control:RegisterForEvent(EVENT_ANTIQUITY_TRACKING_UPDATE, RefreshList)
-
+    self.control:RegisterForEvent(EVENT_ANTIQUITY_UPDATED, RefreshList)
+    self.control:RegisterForEvent(EVENT_ANTIQUITIES_UPDATED, RefreshList)
 end
 
 function ZO_MapAntiquities_Shared:InitializeList()

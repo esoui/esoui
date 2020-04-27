@@ -9,6 +9,7 @@ function HousingPreviewDialog_Keyboard:Initialize(control)
 
     SYSTEMS:RegisterKeyboardObject("HOUSING_PREVIEW", self)
     self:InitializePurchaseButtons()
+    self.returnToEntranceButton = control:GetNamedChild("GoToEntrance") 
 end
 
 function HousingPreviewDialog_Keyboard:InitializeTemplateComboBox()
@@ -45,6 +46,16 @@ function HousingPreviewDialog_Keyboard:SetupPurchaseOptionControl(control, curre
         control.button.backgroundTextureControl:SetTexture("EsoUI/Art/Buttons/ESO_buttonLarge_disabled.dds")
     end
 
+end
+
+function HousingPreviewDialog_Keyboard:RefreshTemplateComboBox()
+    ZO_HousingPreviewDialog_Shared.RefreshTemplateComboBox(self)
+
+    if self.notAvailableLabel:IsControlHidden() then
+        self.returnToEntranceButton:SetAnchor(TOPLEFT, self.templatePreviewButton, BOTTOMLEFT, 0, 10)
+    else
+        self.returnToEntranceButton:SetAnchor(TOP, self.notAvailableLabel, BOTTOM, 0, 50)
+    end
 end
 
 -- Global XML functions

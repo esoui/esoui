@@ -20,7 +20,7 @@ end
 
 function ZO_AntiquityDataManager:InitializeEventHandlers()
     local function OnAntiquitiesUpdated()
-        self:RebuildAntiquities()
+        self:RefreshAll()
     end
 
     local function OnSingleAntiquityUpdated(event, antiquityId)
@@ -39,12 +39,17 @@ function ZO_AntiquityDataManager:InitializeEventHandlers()
         self:OnSkillsUpdated()
     end
 
+    local function OnAntiquityLeadAcquired(event, antiquityId)
+        self:OnSingleAntiquityLeadAcquired(antiquityId)
+    end
+
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITIES_UPDATED, OnAntiquitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_UPDATED, OnSingleAntiquityUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_DIG_SITES_UPDATED, OnSingleAntiquityDigSitesUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_SEARCH_RESULTS_READY, OnAntiquitySearchResultsReady)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_SKILLS_FULL_UPDATE, OnSkillsUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_SKILL_LINE_ADDED, OnSkillsUpdated)
+    EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_LEAD_ACQUIRED, OnAntiquityLeadAcquired)
 end
 
 -- ZO_AntiquityCategory
@@ -65,6 +70,7 @@ function ZO_AntiquityDataManager:GetAntiquityCategoryData(antiquityCategoryId)
     return self.antiquityCategories[antiquityCategoryId]
 end
 
+-- Internal function
 function ZO_AntiquityDataManager:GetOrCreateAntiquityCategoryData(antiquityCategoryId)
     if antiquityCategoryId and antiquityCategoryId ~= ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
         local antiquityCategoryData = self:GetAntiquityCategoryData(antiquityCategoryId)
@@ -142,28 +148,61 @@ function ZO_AntiquityDataManager:GetOrCreateAntiquityData(antiquityId)
 end
 
 function ZO_AntiquityDataManager:RefreshAntiquity(antiquityId)
-    if antiquityId and antiquityId ~= 0 then
-        local antiquityData = self:GetOrCreateAntiquityData(antiquityId)
+    local antiquityData = self:GetAntiquityData(antiquityId)
+    if antiquityData then
         antiquityData:Refresh()
         self:SortTopLevelAntiquityCategories()
         self:FireCallbacks("SingleAntiquityUpdated", antiquityData)
+    else
+        internalassert(false, string.format("Invalid antiquityId (%s)", tostring(antiquityId) or "nil"))
     end
 end
 
 function ZO_AntiquityDataManager:OnSingleAntiquityDigSitesUpdated(antiquityId)
-    if antiquityId and antiquityId ~= 0 then
-        local antiquityData = self:GetOrCreateAntiquityData(antiquityId)
+    local antiquityData = self:GetAntiquityData(antiquityId)
+    if antiquityData then
         antiquityData:OnDigSitesUpdated()
         self:SortTopLevelAntiquityCategories()
         self:FireCallbacks("SingleAntiquityDigSitesUpdated", antiquityData)
+    else
+        internalassert(false, string.format("Invalid antiquityId (%s)", tostring(antiquityId) or "nil"))
+    end
+end
+
+function ZO_AntiquityDataManager:OnSingleAntiquityLeadAcquired(antiquityId)
+    local antiquityData = self:GetAntiquityData(antiquityId)
+    if antiquityData then
+        antiquityData:OnLeadAcquired()
+        self:SortTopLevelAntiquityCategories()
+        self:FireCallbacks("SingleAntiquityLeadAcquired", antiquityData)
+    else
+        internalassert(false, string.format("Invalid antiquityId (%s)", tostring(antiquityId) or "nil"))
+    end
+end
+
+function ZO_AntiquityDataManager:OnSingleAntiquityNewLeadCleared(antiquityId)
+    local antiquityData = self:GetAntiquityData(antiquityId)
+    if antiquityData then
+        self:SortTopLevelAntiquityCategories()
+        self:FireCallbacks("SingleAntiquityNewLeadCleared", antiquityData)
+    else
+        internalassert(false, string.format("Invalid antiquityId (%s)", tostring(antiquityId) or "nil"))
     end
 end
 
 function ZO_AntiquityDataManager:OnSkillsUpdated()
     if self.highestScryableDifficulty ~= GetHighestScryableDifficulty() then
-        self:RebuildAntiquities()
+        self:RefreshAll()
         self.highestScryableDifficulty = GetHighestScryableDifficulty()
     end
+end
+
+function ZO_AntiquityDataManager:RefreshAll()
+    for _, antiquityData in self:AntiquityIterator() do
+        antiquityData:Refresh()
+    end
+    self:SortTopLevelAntiquityCategories()
+    self:FireCallbacks("AntiquitiesUpdated")
 end
 
 function ZO_AntiquityDataManager:RebuildAntiquities()
@@ -181,6 +220,15 @@ function ZO_AntiquityDataManager:RebuildAntiquities()
 
     self:SortTopLevelAntiquityCategories()
     self:FireCallbacks("AntiquitiesUpdated")
+end
+
+function ZO_AntiquityDataManager:HasNewLead()
+    for _, categoryData in ipairs(self.topLevelCategories) do
+        if categoryData:HasNewLead() then
+            return true
+        end
+    end
+    return false
 end
 
 -- Search

@@ -23,15 +23,15 @@ local AXIS_INDICATOR_RGB_WEIGHT_MIN_PERCENTAGE = 0.8
 local AXIS_INDICATOR_RGB_WEIGHT_MAX_PERCENTAGE = 1.3
 local AXIS_INDICATOR_SCALE_MAX = 3
 local AXIS_INDICATOR_SCALE_MIN = 1
-local AXIS_INDICATOR_VISIBILITY_YAW_OFFSET_ANGLE = math.rad(2)
+local AXIS_INDICATOR_VISIBILITY_YAW_OFFSET_ANGLE = math.rad(7)
 local AXIS_KEYBIND_RGB_WEIGHT_MIN_PERCENTAGE = 0.3
 local AXIS_KEYBIND_RGB_WEIGHT_MAX_PERCENTAGE = 0.7
+local AXIS_MAX_DRAW_LEVEL = 100000
 local ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M = 2.25
 local TRANSLATION_AXIS_RANGE_MAX_CM = 10000
 -- Texture height / width, specified in pixels.
-local TRANSLATION_AXIS_INDICATOR_ASPECT_RATIO = 216 / 374
-local TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M = 1.5
-local TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M * TRANSLATION_AXIS_INDICATOR_ASPECT_RATIO
+local TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M = 1
+local TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M = 0.5
 
 -- Yaw offset, in radians, for the Y-axis indicator while in pickup mode.
 -- This slight offset allows the axis to remain visible and interactive
@@ -60,8 +60,8 @@ local DEFAULT_PRECISION_ROTATE_UNITS_DEG = math.rad(15)
 local PRECISION_UNIT_ADJUSTMENT_INCREMENT = 1
 local PRECISION_UNIT_ADJUSTMENT_DECREMENT = 2
 
-local TEXTURE_ARROW_DIRECTION = "EsoUI/Art/Housing/direction_arrow.dds"
-local TEXTURE_ARROW_DIRECTION_INVERSE = "EsoUI/Art/Housing/direction_inverse_arrow.dds"
+local TEXTURE_ARROW_DIRECTION = "EsoUI/Art/Housing/translation_arrow.dds"
+local TEXTURE_ARROW_DIRECTION_INVERSE = "EsoUI/Art/Housing/translation_inverse_arrow.dds"
 local TEXTURE_ARROW_ROTATION_FORWARD = "EsoUI/Art/Housing/dual_rotation_arrow.dds"
 local TEXTURE_ARROW_ROTATION_REVERSE = "EsoUI/Art/Housing/dual_rotation_arrow_reverse.dds"
 local TEXTURE_HOUSE_ICON = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuicon_home.dds"
@@ -293,7 +293,6 @@ function ZO_HousingEditorHud:Initialize(control)
                 KEYBIND_STRIP:AddKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             end
             self:UnregisterDragMouseAxis()
-            self:RegisterAxisVisibilityUpdates()
             self:UpdateAxisIndicators()
         elseif newState == SCENE_HIDDEN then
             self:ClearPlacementKeyPresses()
@@ -301,7 +300,6 @@ function ZO_HousingEditorHud:Initialize(control)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
-            self:UnregisterAxisVisibilityUpdates()
             self:UpdateAxisIndicators()
         end
     end)
@@ -634,42 +632,6 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
     end
 end
 
-function ZO_HousingEditorHud:RegisterAxisVisibilityUpdates()
-    if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
-        EVENT_MANAGER:RegisterForUpdate("ZO_HousingEditorHud_OnUpdateAxisVisibility", 1, function() self:OnUpdateAxisVisibility() end)
-    end
-end
-
-function ZO_HousingEditorHud:UnregisterAxisVisibilityUpdates()
-    EVENT_MANAGER:UnregisterForUpdate("ZO_HousingEditorHud_OnUpdateAxisVisibility")
-end
-
-function ZO_HousingEditorHud:OnUpdateAxisVisibility()
-    if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_PLACEMENT or not self:IsPrecisionEditingEnabled() or not self:IsPrecisionPlacementMoveMode() then
-        self:UnregisterAxisVisibilityUpdates()
-        return
-    end
-
-    if self.focusAxis then
-        return
-    end
-
-    local furnitureId = HousingEditorGetSelectedFurnitureId()
-    local _, yaw = HousingEditorGetFurnitureOrientation(furnitureId)
-    local cameraX, cameraY, cameraZ, originX, originY, originZ = self:GetCameraAndAxisIndicatorOrigins()
-    local relativeX, relativeZ = ZO_Rotate2D(yaw, cameraX - originX, cameraZ - originZ)
-    local horizontalAngle = math.atan2(relativeX, relativeZ)
-    local deltaY = cameraY - originY
-    local axes = self.translationIndicators
-
-    axes[1].control:SetHidden(horizontalAngle >= 0)
-    axes[2].control:SetHidden(horizontalAngle < 0)
-    axes[3].control:SetHidden(deltaY >= 0)
-    axes[4].control:SetHidden(deltaY < 0)
-    axes[5].control:SetHidden(math.abs(horizontalAngle) <= HALF_PI)
-    axes[6].control:SetHidden(math.abs(horizontalAngle) > HALF_PI)
-end
-
 function ZO_HousingEditorHud:OnMouseEnterAxis(control, ...)
     if not self.focusAxis then
         control:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, AXIS_INDICATOR_RGB_WEIGHT_MAX_PERCENTAGE)
@@ -690,14 +652,17 @@ function ZO_HousingEditorHud:OnMouseDownAxis(control, mouseButton)
 end
 
 do
-    local function GetVisibleTranslationRange(originX, originY, originZ, horizontalAngleRadians)
-        -- Offset horizontally or vertically based on the optional horizontalAngleRadians parameter.
+    local function GetVisibleTranslationRange(originX, originY, originZ, horizontalAngleRadians, invertWorldOffsets)
+        -- Offset horizontally based on the optional horizontalAngleRadians parameter.
         local worldOffsetX, worldOffsetY, worldOffsetZ = 0, 0, 0
         if horizontalAngleRadians then
             worldOffsetX = math.sin(horizontalAngleRadians) * TRANSLATION_AXIS_RANGE_MAX_CM
             worldOffsetZ = math.cos(horizontalAngleRadians) * TRANSLATION_AXIS_RANGE_MAX_CM
         else
             worldOffsetY = -TRANSLATION_AXIS_RANGE_MAX_CM
+        end
+        if invertWorldOffsets then
+            worldOffsetX, worldOffsetZ = -worldOffsetX, -worldOffsetZ
         end
 
         -- Clip the translation range's end points at the camera view frustum bounds.
@@ -713,6 +678,20 @@ do
         local translationDistance = zo_distance3D(clippedX1, clippedY1, clippedZ1, clippedX2, clippedY2, clippedZ2)
         local originOffset = zo_distance3D(clippedX1, clippedY1, clippedZ1, originX, originY, originZ)
         local normalizedOffset = originOffset / translationDistance
+
+        -- Check if the translation range is too constrained by the view frustum
+        -- by ensuring that the dot product of the two vectors, clippedXYZ2 - clippedXYZ1
+        -- and originXYZ - clippedXYZ1, is roughly positive.
+        local vecX1, vecY1, vecZ1 = clippedX2 - clippedX1, clippedY2 - clippedY1, clippedZ2 - clippedZ1
+        local vecX2, vecY2, vecZ2 = originX - clippedX1, originY - clippedY1, originZ - clippedZ1
+        local dotProduct = vecX1 * vecX2 + vecY1 * vecY2 + vecZ1 * vecZ2
+
+        -- The MIN_SQRT_DOT_PRODUCT allows for a slight overshot on any given axis for situations
+        -- where the vector extends just beyond the view frustum boundary but is still valid.
+        local MIN_SQRT_DOT_PRODUCT = -50
+        if math.sqrt(dotProduct) < MIN_SQRT_DOT_PRODUCT then
+            return
+        end
 
         local translationRange =
         {
@@ -742,20 +721,46 @@ do
             self.focusInitialX, self.focusInitialY, self.focusInitialZ = HousingEditorGetFurnitureWorldPosition(selectedFurnitureId)
             self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll = HousingEditorGetFurnitureOrientation(selectedFurnitureId)
 
+            -- Calculate the translation range using the selected item's center point.
+            local centerX, centerY, centerZ = HousingEditorGetFurnitureWorldCenter(HousingEditorGetSelectedFurnitureId())
+            local centerOffsetX, centerOffsetY, centerOffsetZ = centerX - self.focusInitialX, centerY - self.focusInitialY, centerZ - self.focusInitialZ
+            local isTranslation = false
+
+            if axis.axis == HOUSING_EDITOR_POSITION_AXIS_X1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_X2 then
+                local horizontalAngleRadians = self.focusInitialYaw + HALF_PI
+                local cameraOffsetRadians = (GetPlayerCameraHeading() - horizontalAngleRadians) % TWO_PI
+                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, horizontalAngleRadians, cameraOffsetRadians < PI)
+                isTranslation = true
+            elseif axis.axis == HOUSING_EDITOR_POSITION_AXIS_Y1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_Y2 then
+                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ)
+                isTranslation = true
+            elseif axis.axis == HOUSING_EDITOR_POSITION_AXIS_Z1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_Z2 then
+                local horizontalAngleRadians = self.focusInitialYaw
+                local cameraOffsetRadians = (GetPlayerCameraHeading() - horizontalAngleRadians) % TWO_PI
+                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, horizontalAngleRadians, cameraOffsetRadians < PI)
+                isTranslation = true
+            end
+
+            if isTranslation then
+                if self.focusRangeAxis then
+                    -- Remove the item's center offset from the translation range.
+                    local range = self.focusRangeAxis
+                    range.minX, range.minY, range.minZ = range.minX - centerOffsetX, range.minY - centerOffsetY, range.minZ - centerOffsetZ
+                    range.maxX, range.maxY, range.maxZ = range.maxX - centerOffsetX, range.maxY - centerOffsetY, range.maxZ - centerOffsetZ
+                else
+                    self.focusAxis, self.focusOffset, self.focusOriginX, self.focusOriginY, self.focusAngle = nil, nil, nil, nil, nil
+                    self.focusInitialX, self.focusInitialY, self.focusInitialZ = nil, nil, nil
+                    self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll = nil, nil, nil
+                    return
+                end
+            end
+
             for _, indicator in pairs(self.allAxisIndicators) do
                 local isActiveAxis = indicator.axis == self.focusAxis.axis or indicator.axis == self.focusAxis.pairedAxis
                 if isActiveAxis then
                     indicator.control:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, AXIS_INDICATOR_RGB_WEIGHT_MAX_PERCENTAGE)
                 end
                 indicator.control:SetHidden(not isActiveAxis)
-            end
-
-            if self.focusAxis.axis == HOUSING_EDITOR_POSITION_AXIS_X1 or self.focusAxis.axis == HOUSING_EDITOR_POSITION_AXIS_X2 then
-                self.focusRangeAxis = GetVisibleTranslationRange(self.focusInitialX, self.focusInitialY, self.focusInitialZ, self.focusInitialYaw + HALF_PI)
-            elseif self.focusAxis.axis == HOUSING_EDITOR_POSITION_AXIS_Y1 or self.focusAxis.axis == HOUSING_EDITOR_POSITION_AXIS_Y2 then
-                self.focusRangeAxis = GetVisibleTranslationRange(self.focusInitialX, self.focusInitialY, self.focusInitialZ)
-            elseif self.focusAxis.axis == HOUSING_EDITOR_POSITION_AXIS_Z1 or self.focusAxis.axis == HOUSING_EDITOR_POSITION_AXIS_Z2 then
-                self.focusRangeAxis = GetVisibleTranslationRange(self.focusInitialX, self.focusInitialY, self.focusInitialZ, self.focusInitialYaw)
             end
 
             EVENT_MANAGER:RegisterForUpdate("ZO_HousingEditorHud_DragMouseAxis", 1, function() self:OnDragMouseAxis() end)
@@ -769,7 +774,14 @@ function ZO_HousingEditorHud:UnregisterDragMouseAxis()
         EVENT_MANAGER:UnregisterForUpdate("ZO_HousingEditorHud_DragMouseAxis")
         EVENT_MANAGER:UnregisterForEvent("ZO_HousingEditorHud_OnMouseUp", EVENT_GLOBAL_MOUSE_UP)
 
-        self.focusAxis.control:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, AXIS_INDICATOR_RGB_WEIGHT_MIN_PERCENTAGE)
+        for _, indicator in pairs(self.allAxisIndicators) do
+            local isActiveAxis = indicator.axis == self.focusAxis.axis or indicator.axis == self.focusAxis.pairedAxis
+            if isActiveAxis then
+                indicator.control:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, AXIS_INDICATOR_RGB_WEIGHT_MIN_PERCENTAGE)
+            end
+            indicator.control:SetHidden(false)
+        end
+
         self.focusOffset, self.focusAxis, self.focusOriginX, self.focusOriginY = nil, nil, nil, nil
         self.focusInitialX, self.focusInitialY, self.focusInitialZ = nil, nil, nil
         self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll = nil, nil, nil
@@ -815,31 +827,19 @@ do
     end
 
     function ZO_HousingEditorHud:OnDragMousePosition(normalizedOffsetX, normalizedOffsetY)
-        local axisType = self.focusAxis.axis
         local translationRange = self.focusRangeAxis
-        local normalizedOffset
-
-        if axisType == HOUSING_EDITOR_POSITION_AXIS_X1 or axisType == HOUSING_EDITOR_POSITION_AXIS_X2 then
-            local viewAngle = (GetPlayerCameraHeading() - self.focusInitialYaw) % TWO_PI
-            local baseOffset = translationRange.baseOffset
-            if viewAngle > HALF_PI and viewAngle < (HALF_PI + PI) then
-                normalizedOffset = baseOffset - normalizedOffsetX
-            else
-                normalizedOffset = baseOffset + normalizedOffsetX
-            end
-        elseif axisType == HOUSING_EDITOR_POSITION_AXIS_Z1 or axisType == HOUSING_EDITOR_POSITION_AXIS_Z2 then
-            local viewAngle = (GetPlayerCameraHeading() - self.focusInitialYaw + HALF_PI) % TWO_PI
-            local baseOffset = translationRange.baseOffset
-            if viewAngle > HALF_PI and viewAngle < (HALF_PI + PI) then
-                normalizedOffset = baseOffset - normalizedOffsetX
-            else
-                normalizedOffset = baseOffset + normalizedOffsetX
-            end
-        elseif axisType == HOUSING_EDITOR_POSITION_AXIS_Y1 or axisType == HOUSING_EDITOR_POSITION_AXIS_Y2 then
-            normalizedOffset = translationRange.baseOffset + normalizedOffsetY
-        end
 
         if translationRange then
+            local axisType = self.focusAxis.axis
+            local baseOffset = translationRange.baseOffset
+            local normalizedOffset
+
+            if axisType == HOUSING_EDITOR_POSITION_AXIS_Y1 or axisType == HOUSING_EDITOR_POSITION_AXIS_Y2 then
+                normalizedOffset = baseOffset + normalizedOffsetY
+            else
+                normalizedOffset = baseOffset + normalizedOffsetX
+            end
+
             local x, y, z = InterpolateTranslationRange(translationRange, zo_clamp(normalizedOffset, 0, 1))
             local result = HousingEditorAdjustPrecisionEditingPosition(x, y, z)
             ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
@@ -950,6 +950,13 @@ function ZO_HousingEditorHud:GetCameraForwardVector()
     return forwardX, forwardY, forwardZ
 end
 
+function ZO_HousingEditorHud:GetAxisIndicatorOffsetPosition(axis)
+    local control = axis.control
+    local originX, originY, originZ = control:GetParent():Get3DRenderSpaceOrigin()
+    local offsetX, offsetY, offsetZ = control:Get3DRenderSpaceOrigin()
+    return GuiRender3DPositionToWorldPosition(originX + offsetX, originY + offsetY, originZ + offsetZ)
+end
+
 function ZO_HousingEditorHud:CalculateDynamicAxisIndicatorScale(cameraX, cameraY, cameraZ, worldX, worldY, worldZ)
     local screenX, screenY = GuiRoot:GetDimensions()
     local distance = zo_distance3D(cameraX, cameraY, cameraZ, worldX, worldY, worldZ)
@@ -1052,9 +1059,18 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
                 self.translationIndicators[6].control:Set3DRenderSpaceOrientation(-pitch, self.translationIndicators[6].yaw, 0)
             end
 
+            local cameraX, cameraY, cameraZ = self:GetCameraOrigin()
             for _, indicator in ipairs(self.translationIndicators) do
                 local alpha = indicator.control:GetAlpha()
-                indicator.control:SetHidden(hideTranslation or alpha <= 0)
+                local hideIndicator = hideTranslation or alpha <= 0
+                indicator.control:SetHidden(hideIndicator)
+
+                if not hideIndicator then
+                    local indicatorX, indicatorY, indicatorZ = self:GetAxisIndicatorOffsetPosition(indicator)
+                    local cameraX, cameraY, cameraZ = self:GetCameraOrigin()
+                    local drawLevel = AXIS_MAX_DRAW_LEVEL - zo_distance3D(cameraX, cameraY, cameraZ, indicatorX, indicatorY, indicatorZ)
+                    indicator.control:SetDrawLevel(drawLevel)
+                end
             end
 
             for _, indicator in ipairs(self.rotationIndicators) do

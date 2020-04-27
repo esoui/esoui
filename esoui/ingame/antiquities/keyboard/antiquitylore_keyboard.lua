@@ -81,6 +81,14 @@ function ZO_AntiquityLore_Keyboard:InitializeEntryTree()
         control.text:SetText(data.title)
         node:SetEnabled(data.unlocked)
         SetTreeEntryState(control, data.unlocked, node == node:IsSelected())
+
+        control.subText = control:GetNamedChild("SubText")
+        if data.subTitle then
+            control.subText:SetText(data.subTitle)
+        end
+        control.subText:SetHidden(not data.subTitle)
+        control.subText:SetSelected(open)
+
         ZO_IconHeader_Setup(control, open)
     end
 
@@ -94,8 +102,8 @@ function ZO_AntiquityLore_Keyboard:InitializeEntryTree()
     end
 
     self.selectedLoreEntryIndex = 0
-    self.loreEntryTree = ZO_Tree:New(GetControl(self.control, "LoreEntryContainerScrollChild"), 0, -16, 400)
-    self.loreEntryTree:AddTemplate("ZO_IconChildlessHeader", TreeEntrySetup, TreeEntryOnSelected, TreeEntryEquality)
+    self.loreEntryTree = ZO_Tree:New(GetControl(self.control, "LoreEntryContainerScrollChild"), 0, 10, 400)
+    self.loreEntryTree:AddTemplate("ZO_AntiquityLore_IconChildlessHeader", TreeEntrySetup, TreeEntryOnSelected, TreeEntryEquality)
     self.loreEntryTree:SetExclusive(true)
     self.loreEntryTree:SetOpenAnimation("ZO_TreeOpenAnimation")
 end
@@ -150,8 +158,14 @@ function ZO_AntiquityLore_Keyboard:Refresh()
 
         self.loreEntryCount:SetText(zo_strformat(SI_ANTIQUITY_CODEX_ENTRIES_FOUND, numUnlockedLoreEntries, numLoreEntries))
         for loreEntryIndex, loreEntryData in ipairs(loreEntries) do
-            local data = {title = loreEntryData.displayName, loreEntryIndex = loreEntryIndex, unlocked = loreEntryData.unlocked}
-            self.loreEntryTree:AddNode("ZO_IconChildlessHeader", data, nil, nil, false)
+            local data =
+            {
+                title = loreEntryData.displayName,
+                loreEntryIndex = loreEntryIndex,
+                unlocked = loreEntryData.unlocked,
+                subTitle = loreEntryData.fragmentName,
+            }
+            self.loreEntryTree:AddNode("ZO_AntiquityLore_IconChildlessHeader", data, nil, nil, false)
         end
     end
 
@@ -179,6 +193,24 @@ function ZO_AntiquityLore_Keyboard:ShowAntiquityLoreEntry(loreEntryIndex)
 end
 
 -- Global XML --
+
+function ZO_AntiquityLore_IconHeader_OnInitialized(control)
+    ZO_IconHeader_OnInitialized(control)
+    control.OnMouseUp = ZO_TreeEntry_OnMouseUp
+
+    control.SetSelected = function(control, open, enabled, disableScaling)
+        ZO_IconHeader_Setup(control, open, enabled, disableScaling)
+        control.subText:SetSelected(open)
+    end
+    control.OnMouseEnter = function(...)
+        ZO_IconHeader_OnMouseEnter(...)
+        ZO_SelectableLabel_OnMouseEnter(control.subText)
+    end
+    control.OnMouseExit = function(...)
+        ZO_IconHeader_OnMouseExit(...)
+        ZO_SelectableLabel_OnMouseExit(control.subText)
+    end
+end
 
 function ZO_AntiquityLore_Keyboard_OnInitialized(control)
     ANTIQUITY_LORE_KEYBOARD = ZO_AntiquityLore_Keyboard:New(control)

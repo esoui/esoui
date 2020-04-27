@@ -121,6 +121,15 @@ function ZO_AntiquitySet:GetNumAntiquitiesRecovered()
     return count
 end
 
+function ZO_AntiquitySet:HasNewLead()
+    for _, antiquityData in self:AntiquityIterator() do
+        if antiquityData:HasNewLead() then
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_AntiquitySet:HasDiscovered()
     return self:AntiquityIterator({ZO_Antiquity.HasDiscovered})() ~= nil
 end

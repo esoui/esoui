@@ -789,7 +789,6 @@ end
 SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
 
 CHAMPION_UI_MUSIC_FRAGMENT = ZO_UIMusicFragment:New(OVERRIDE_MUSIC_MODE_CHAMPION)
-SCRYING_UI_MUSIC_FRAGMENT = ZO_UIMusicFragment:New(OVERRIDE_MUSIC_MODE_SCRYING)
 
 --------------------------------------
 --General Fragment Declarations

@@ -80,15 +80,19 @@ function ZO_AntiquityLoreGamepad:ShowAntiquityOrSet(antiquityOrSetData, pushScen
 end
 
 function ZO_AntiquityLoreGamepad:Refresh()
-    -- Because the data manager rebuilds, we need to get the new reference for the data (our old reference is outdated)
-    -- TODO: Don't rebuild the data manager on a refresh
+    -- Because the data manager might need to cpompletely rebuild, we need to get the new reference for the data (our old reference might be outdated)
     if self.currentAntiquityOrSetData and not self.fragment:IsHidden() then
         if self.currentAntiquityOrSetData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
-            self.currentAntiquityOrSetData = ANTIQUITY_DATA_MANAGER:GetOrCreateAntiquityData(self.currentAntiquityOrSetData:GetId())
+            self.currentAntiquityOrSetData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(self.currentAntiquityOrSetData:GetId())
         else
-            self.currentAntiquityOrSetData = ANTIQUITY_DATA_MANAGER:GetOrCreateAntiquitySetData(self.currentAntiquityOrSetData:GetId())
+            self.currentAntiquityOrSetData = ANTIQUITY_DATA_MANAGER:GetAntiquitySetData(self.currentAntiquityOrSetData:GetId())
         end
-        self:RefreshLoreList()
+
+        if self.currentAntiquityOrSetData then
+            self:RefreshLoreList()
+        else
+            SCENE_MANAGER:HideCurrentScene()
+        end
     end
 end
 
@@ -120,6 +124,11 @@ function ZO_AntiquityLoreGamepad:RefreshLoreList()
             local entryTitle = loreEntryData.displayName
             local iconTexture = loreEntryData.unlocked and ZO_CHECK_ICON or nil
             local entryData = ZO_GamepadEntryData:New(entryTitle, iconTexture)
+
+            if loreEntryData.fragmentName then
+                entryData:AddSubLabels({ loreEntryData.fragmentName })
+                entryData:SetSubLabelColors(ZO_NORMAL_TEXT)
+            end
 
             entryData:SetDataSource(loreEntryData)
             entryData:SetIconTintOnSelection(true)

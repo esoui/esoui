@@ -1,7 +1,7 @@
 local ACCEPT = true
 local REJECT = false
 
-ZO_ANTIQUITY_DIGGING_FANFARE_DELAY_MS = 1000
+ZO_ANTIQUITY_DIGGING_FANFARE_DELAY_MS = 2000
 
 ZO_Dialogs_RegisterCustomDialog("CONFIRM_STOP_ANTIQUITY_DIGGING",
 {
@@ -50,10 +50,14 @@ ZO_Dialogs_RegisterCustomDialog("CONFIRM_STOP_ANTIQUITY_DIGGING",
 -- Antiquity Digging --
 ----------------------
 
-local AOE_SKILLS =
+local KEYBOARD_STYLE =
 {
-    DIGGING_ACTIVE_SKILL_HEAVY_SHOVEL,
-    DIGGING_ACTIVE_SKILL_RADAR_SENSE,
+    keybindLabelFont = "ZoFontWinH2",
+}
+
+local GAMEPAD_STYLE =
+{
+    keybindLabelFont = "ZoFontGamepad22",
 }
 
 ZO_AntiquityDigging = ZO_Object:Subclass()
@@ -70,6 +74,8 @@ function ZO_AntiquityDigging:Initialize(control)
 
     self.keybindContainerTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingHUDFade", self.keybindContainer)
     self.keybindContainerFastTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingHUDFastFade", self.keybindContainer)
+
+    self.keybindLabels = {} -- will be populated on EVENT_KEYBINDINGS_LOADED
 
     ANTIQUITY_DIGGING_SCENE = ZO_RemoteScene:New("antiquityDigging", SCENE_MANAGER)
 
@@ -163,6 +169,14 @@ function ZO_AntiquityDigging:Initialize(control)
             self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DESTROYED)
         end
     end)
+
+    self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
+end
+
+function ZO_AntiquityDigging:ApplyPlatformStyle(style)
+    for _, keybindLabel in pairs(self.keybindLabels) do
+        keybindLabel:SetFont(style.keybindLabelFont)
+    end
 end
 
 function ZO_AntiquityDigging:SetControlsEnabled(enabled)
@@ -204,7 +218,7 @@ function ZO_AntiquityDigging:SetGamepadControlsEnabled(enabled)
     end
 end
 
-function ZO_AntiquityDigging:OnMouseDown(self, button)
+function ZO_AntiquityDigging:OnMouseDown(control, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local mouseOverSkill = GetMouseOverDiggingActiveSkill()
         if mouseOverSkill then
@@ -254,11 +268,11 @@ function ZO_AntiquityDigging:CreateKeybindLabel(skill, bindingName)
 end
 
 function ZO_AntiquityDigging:BuildKeybindLabels()
-    self.keybindLabels = {}
     self:CreateKeybindLabel(DIGGING_ACTIVE_SKILL_BASIC_EXCAVATION, "ANTIQUITY_DIGGING_SELECT_BASIC_EXCAVATION")
     self:CreateKeybindLabel(DIGGING_ACTIVE_SKILL_RADAR_SENSE, "ANTIQUITY_DIGGING_SELECT_RADAR_SENSE")
     self:CreateKeybindLabel(DIGGING_ACTIVE_SKILL_HEAVY_SHOVEL, "ANTIQUITY_DIGGING_SELECT_HEAVY_SHOVEL")
     self:CreateKeybindLabel(DIGGING_ACTIVE_SKILL_CAREFUL_TOUCH, "ANTIQUITY_DIGGING_SELECT_CAREFUL_TOUCH")
+    self.platformStyle:Apply()
 end
 
 function ZO_AntiquityDigging:RefreshKeybindAnchors()

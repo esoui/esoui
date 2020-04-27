@@ -41,10 +41,10 @@ end
 
 ZO_ControlPool = ZO_ObjectPool:Subclass()
 
-local function ControlFactory(pool)
+local function ControlFactory(pool, objectKey)
     local control = ZO_ObjectPool_CreateNamedControl(pool.name, pool.templateName, pool, pool.parent)
     if pool.customFactoryBehavior then
-        pool.customFactoryBehavior(control)
+        pool.customFactoryBehavior(control, objectKey)
     end
     return control
 end

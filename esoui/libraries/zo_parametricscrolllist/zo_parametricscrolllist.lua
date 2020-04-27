@@ -178,6 +178,12 @@ function ZO_ParametricScrollList:AddDataTemplateWithHeader(templateName, setupFu
     end
 end
 
+function ZO_ParametricScrollList:SetEqualityFunction(templateName, equalityFunction)
+    if self.dataTypes[templateName] then
+        self.dataTypes[templateName].equalityFunction = equalityFunction or DefaultEqualityFunction
+    end
+end
+
 function ZO_ParametricScrollList:AddEntryAtIndex(index, templateName, data, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
     if self.dataTypes[templateName] then
         --Keep these parallel arrays in sync with RemoveEntry below

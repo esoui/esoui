@@ -138,13 +138,13 @@ function ZO_ObjectPool:AcquireObject(objectKey)
     then
         self.m_Free[objectKey] = nil
     else        
-        object = self:m_Factory()
+        object = self:m_Factory(objectKey)
     end
            
     self.m_Active[objectKey] = object
 
     if self.customAcquireBehavior then
-        self.customAcquireBehavior(object)
+        self.customAcquireBehavior(object, objectKey)
     end
         
     return object, objectKey

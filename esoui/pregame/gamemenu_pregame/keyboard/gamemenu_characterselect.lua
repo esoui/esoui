@@ -8,7 +8,13 @@ local function ShowCharacterSelect()
     if PregameIsFullyLoaded() then
         SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
     else
-        CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", function() SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT) end)
+        local function OnPregameFullyLoaded()
+            SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
+            -- Make sure we unregister the callback, so we don't unintentially add the character select fragment in subsequent loads
+            CALLBACK_MANAGER:UnregisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
+        end
+
+        CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
     end
     local esoPlus = GAME_MENU_CHARACTERSELECT:GetControl():GetNamedChild("ESOPlus")
     esoPlus:SetHidden(IsESOPlusSubscriber())
@@ -26,7 +32,7 @@ local function AddCharactersEntry(entryTable)
         name = GetString(SI_GAME_MENU_CHARACTERS),
         callback = ShowCharacterSelect,
         unselectedCallback = HideCharacterSelect,
-        hasSelectedState = true
+        hasSelectedState = true,
     }
     table.insert(entryTable, data)
 end

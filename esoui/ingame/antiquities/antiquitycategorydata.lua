@@ -47,6 +47,20 @@ function ZO_AntiquityCategory:GetParentCategoryData()
     return self.parentCategoryData
 end
 
+function ZO_AntiquityCategory:HasNewLead()
+    for index, antiquityData in self:AntiquityIterator() do
+        if antiquityData:HasNewLead() then
+            return true
+        end
+    end
+    for index, subcategoryData in self:SubcategoryIterator() do
+        if subcategoryData:HasNewLead() then
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_AntiquityCategory:AddAntiquityData(antiquityData)
     table.insert(self.antiquities, antiquityData)
 end

@@ -110,13 +110,16 @@ function ZO_MapAntiquities_Keyboard:AntiquityMapEntryClicked(control, button)
     -- context menu so it's easy to see what options there are
     local antiquityData = control.antiquityData
     local antiquityIsInProgress = antiquityData:IsInProgress()
-    local canTrackAntiquity = antiquityIsInProgress and not antiquityData:IsTracked()
-    if button == MOUSE_BUTTON_INDEX_LEFT and canTrackAntiquity then
+    local antiquityIsTracked = antiquityData:IsTracked()
+    if button == MOUSE_BUTTON_INDEX_LEFT and antiquityIsInProgress then
         local antiquityId = antiquityData:GetId()
-        SetTrackedAntiquityId(antiquityId)
+        if not antiquityIsTracked then
+            SetTrackedAntiquityId(antiquityId)
+        end
         WORLD_MAP_MANAGER:ShowAntiquityOnMap(antiquityId)
     elseif button == MOUSE_BUTTON_INDEX_RIGHT or (button == MOUSE_BUTTON_INDEX_LEFT and not antiquityIsInProgress) then
         ClearMenu()
+        local canTrackAntiquity = antiquityIsInProgress and not antiquityIsTracked
         if canTrackAntiquity then
             AddMenuItem(GetString(SI_WORLD_MAP_ANTIQUITIES_TRACK), function()
                 local antiquityId = antiquityData:GetId()
@@ -124,10 +127,17 @@ function ZO_MapAntiquities_Keyboard:AntiquityMapEntryClicked(control, button)
                 WORLD_MAP_MANAGER:ShowAntiquityOnMap(antiquityId)
             end)
         end
+
         if antiquityData:CanScry() then
             AddMenuItem(GetString(SI_ANTIQUITY_SCRY), function()
                 SCENE_MANAGER:ShowBaseScene()
                 ScryForAntiquity(antiquityData:GetId())
+            end)
+        end
+
+        if antiquityIsInProgress then
+            AddMenuItem(GetString(SI_ANTIQUITY_ABANDON), function()
+                ZO_Dialogs_ShowDialog("CONFIRM_ABANDON_ANTIQUITY_SCRYING_PROGRESS", { antiquityId = antiquityData:GetId(), })
             end)
         end
         ShowMenu(control)

@@ -2,16 +2,7 @@
     <Animations>
         <AnimationTimeline name="ZO_ScryingFrame_GlowLoop" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <AlphaAnimation duration="7500" startAlpha="0" endAlpha=".7">
-                    <EasingFunction>
-                        return ZO_EaseInOutZeroToOneToZero(progress)
-                    </EasingFunction>
-                </AlphaAnimation>
-            </Animations>
-        </AnimationTimeline>
-        <AnimationTimeline name="ZO_ScryingFrame_GlowOnce">
-            <Animations>
-                <AlphaAnimation duration="400" startAlpha="0" endAlpha="1">
+                <AlphaAnimation duration="7500" startAlpha="0.5" endAlpha=".9">
                     <EasingFunction>
                         return ZO_EaseInOutZeroToOneToZero(progress)
                     </EasingFunction>
@@ -69,26 +60,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
-        <AnimationTimeline name="ZO_Scrying_IntroAnimation">
-            <Animations>
-                <CustomAnimation applyToChildControlName="Vignette" duration="1500">
-                    <OnPlay>
-                        local vignette = self:GetAnimatedControl()
-                        vignette:SetHidden(false)
-                        ZO_Scrying_Vignette_OnShowing(vignette)
-                    </OnPlay>
-                    <UpdateFunction>
-                        local vignette = self:GetAnimatedControl()
-                        ZO_Scrying_Vignette_OnUpdate(vignette, progress)
-                    </UpdateFunction>
-                    <OnStop>
-                        local vignette = self:GetAnimatedControl()
-                        vignette:SetHidden(true)
-                    </OnStop>
-                </CustomAnimation>
-            </Animations>
-        </AnimationTimeline>
     </Animations>
 
     <Controls>
@@ -96,15 +67,6 @@
             <AnchorFill/>
             <OnInitialized>
                 ZO_ScryingHexPolygon_OnInitialized(self)
-            </OnInitialized>
-        </Polygon>
-
-        <Polygon name="ZO_ScryingFramePolygon" layer="BACKGROUND" virtual="true">
-            <!-- Assumed anchored to Game control or a control with the same rect as Game-->
-            <Anchor point="TOPLEFT" offsetX="300"/>
-            <Anchor point="BOTTOMRIGHT" offsetX="-300"/>
-            <OnInitialized>
-                ZO_FramePolygon_OnInitialized(self)
             </OnInitialized>
         </Polygon>
 
@@ -157,7 +119,7 @@
                     <!-- Flash (3) -->
                     <Surface texCoordLeft="0.25" texCoordTop="0.5" texCoordRight="0.5" texCoordBottom="0.75" color="00FFFFFF" />
                     <!-- Foreground (4) -->
-                    <Surface texCoordLeft="0.5" texCoordTop="0.75" texCoordRight="0.75" texCoordBottom="1" />
+                    <Surface texCoordLeft="0.5" texCoordTop="0.75" texCoordRight="0.75" texCoordBottom="1" color="22FFFFFF"/>
                 </TextureComposite>
                 <!-- Goal controls on level 5-->
                 <Polygon name="$(parent)Polygon" level="6" inherits="ZO_ScryingHexPolygon" alpha="0" mouseEnabled="true">
@@ -246,14 +208,26 @@
                         <Control name="$(parent)EyeBackground" tier="MEDIUM">
                             <AnchorFill/>
                             <Controls>
-                                <Polygon name="$(parent)Mask" inherits="ZO_ScryingFramePolygon" alpha="0" />
+                                <Polygon name="$(parent)Mask" alpha="0">
+                                    <Anchor point="TOPLEFT" offsetX="300"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-300"/>
+                                    <OnInitialized>
+                                        ZO_HexMaskPolygon_OnInitialized(self)
+                                    </OnInitialized>
+                                </Polygon>
 
                                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Scrying/eye_background.dds" centerTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" >
                                     <Anchor point="CENTER"/>
-                                    <Dimensions x="1200" y="1200"/>
+                                    <Dimensions x="1160" y="1135"/>
                                 </Texture>
 
-                                <Polygon name="$(parent)Scroll" inherits="ZO_ScryingFramePolygon" centerBlendMode="ADD" centerTextureFile="EsoUI/Art/Scrying/eye_scrolling_background.dds" centerTextureAddressMode="WRAP" alpha="0.1"/>
+                                <Polygon name="$(parent)Scroll" layer="BACKGROUND" centerBlendMode="ADD" centerTextureFile="EsoUI/Art/Scrying/eye_scrolling_background.dds" centerTextureAddressMode="WRAP" alpha="0.1">
+                                    <Anchor point="TOPLEFT" offsetX="300"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-300"/>
+                                    <OnInitialized>
+                                        ZO_FramePolygon_OnInitialized(self)
+                                    </OnInitialized>
+                                </Polygon>
 
                                 <Texture name="$(parent)LeftSpin" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_background_spin.dds">
                                     <Anchor point="LEFT" offsetX="320" />
@@ -275,10 +249,6 @@
                             </Controls>
                         </Control>
 
-                        <Texture name="$(parent)SafeAreaOverlay" tier="MEDIUM" textureFile="EsoUI/Art/Scrying/eye_background_overlay.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                            <AnchorFill />
-                        </Texture>
-
                         <Control name="$(parent)Frame" tier="HIGH">
                             <AnchorFill/>
                             <Controls>
@@ -292,22 +262,7 @@
                                     <Anchor point="BOTTOMRIGHT" />
                                     <TextureCoords left="0.5" top="0" right="1" bottom="0.25" />
                                 </Texture>
-                                <Control name="$(parent)Glow2" alpha="0">
-                                    <AnchorFill/>
-                                    <Controls>
-                                        <Texture name="$(parent)Left" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
-                                            <TextureCoords left="0" top="0.5" right="0.5" bottom="0.75" />
-                                        </Texture>
-                                        <Texture name="$(parent)Right" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                                            <Anchor point="TOPLEFT" relativePoint="TOP" />
-                                            <Anchor point="BOTTOMRIGHT" />
-                                            <TextureCoords left="0.5" top="0.5" right="1" bottom="0.75" />
-                                        </Texture>
-                                    </Controls>
-                                </Control>
-                                <Control name="$(parent)Glow1" alpha="0">
+                                <Control name="$(parent)Glow" alpha="0">
                                     <AnchorFill/>
                                     <Controls>
                                         <Texture name="$(parent)Left" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
@@ -368,7 +323,7 @@
                                 </Control>
 
                                 <Control name="$(parent)SpecialActionMeter">
-                                    <Anchor point="CENTER" relativePoint="TOP" offsetY="123" />
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetY="143" />
                                     <Dimensions x="140" y="140" />
                                     <Controls>
                                         <Texture name="$(parent)LastTexture" textureFile="EsoUI/Art/Scrying/special_crystals.dds">
@@ -400,11 +355,6 @@
                         </Control>
                     </Controls>
                 </Control>
-
-                <Texture name="$(parent)Vignette" tier="HIGH" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/vignette.dds">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
-                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>
