@@ -4033,7 +4033,8 @@ function ZO_WorldMap_OnHide()
         WORLD_MAP_MANAGER:PopSpecialMode()
         ZO_WorldMap_RefreshAccessibleAvAGraveyards()
     elseif mode == MAP_MODE_DIG_SITES then
-        WORLD_MAP_MANAGER:EndDigSiteReveal()
+        local NO_SOUND = true
+        WORLD_MAP_MANAGER:EndDigSiteReveal(NO_SOUND)
         WORLD_MAP_MANAGER:RefreshAllAntiquityDigSites()
     end
 end
@@ -4704,11 +4705,6 @@ do
         local function EndDigSiteReveal()
             WORLD_MAP_MANAGER:EndDigSiteReveal()
         end
-
-        local endDigSiteRevealKeybind = self:GetNamedChild("EndDigSiteRevealKeybind")
-        ZO_KeybindButtonTemplate_Setup(endDigSiteRevealKeybind, "UI_SHORTCUT_PRIMARY", EndDigSiteReveal, GetString(SI_WORLD_MAP_ANTIQUITIES_CONTINUE))
-        endDigSiteRevealKeybind:SetMouseOverEnabled(false)
-        g_keybindStrips.endDigSiteRevealKeybind = endDigSiteRevealKeybind
 
         local sharedKeybindStrip =
         {
@@ -5755,6 +5751,22 @@ function ZO_WorldMapManager:Initialize(control)
     WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_WorldMapAutoNavigationOverlay)
     WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:SetConditional(function() return self:IsPreventingMapNavigation() end)
 
+    local autoNavigationOverlayControl = ZO_WorldMapAutoNavigationOverlay
+    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT = ZO_SimpleSceneFragment:New(autoNavigationOverlayControl)
+    WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:SetConditional(function() return self:IsPreventingMapNavigation() end)
+
+    local autoNavigationContinueKeybind = autoNavigationOverlayControl:GetNamedChild("ContinueKeybind")
+
+    -- TODO: Make this a more generic handler for exiting map auto-navigation
+    local function EndDigSiteReveal()
+        WORLD_MAP_MANAGER:EndDigSiteReveal()
+    end
+    ZO_KeybindButtonTemplate_Setup(autoNavigationContinueKeybind, "UI_SHORTCUT_PRIMARY", EndDigSiteReveal, GetString(SI_WORLD_MAP_ANTIQUITIES_CONTINUE))
+    autoNavigationContinueKeybind:SetMouseOverEnabled(false)
+    autoNavigationContinueKeybind:SetClickSound(SOUNDS.POSITIVE_CLICK)
+    autoNavigationContinueKeybind:SetAnchor(BOTTOM, control:GetNamedChild("MapFrame"), BOTTOM, 0, -15)
+    self.autoNavigationContinueKeybind = autoNavigationContinueKeybind
+
     WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD = ZO_FadeSceneFragment:New(ZO_WorldMapRespawnTimer)
     ZO_MixinHideableSceneFragment(WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD)
     WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD:SetHiddenForReason("TimerInactive", true)
@@ -5796,12 +5808,12 @@ end
 do
     local KEYBOARD_STYLE =
     {
-        hideEndDigSiteRevealKeybindBackground = false,
+        hideAutoNavigationContinueKeybindBackground = false,
     }
 
     local GAMEPAD_STYLE =
     {
-        hideEndDigSiteRevealKeybindBackground = true,
+        hideAutoNavigationContinueKeybindBackground = true,
     }
 
     function ZO_WorldMapManager:InitializePlatformStyle()
@@ -5810,9 +5822,11 @@ do
 end
 
 function ZO_WorldMapManager:ApplyPlatformStyle(style)
-    local endDigSiteRevealKeybind = g_keybindStrips.endDigSiteRevealKeybind
-    ApplyTemplateToControl(endDigSiteRevealKeybind, ZO_GetPlatformTemplate("ZO_KeybindButton"))
-    endDigSiteRevealKeybind:GetNamedChild("Bg"):SetHidden(style.hideEndDigSiteRevealKeybindBackground)
+    local autoNavigationContinueKeybind = self.autoNavigationContinueKeybind
+    ApplyTemplateToControl(autoNavigationContinueKeybind, ZO_GetPlatformTemplate("ZO_KeybindButton"))
+    autoNavigationContinueKeybind:GetNamedChild("Bg"):SetHidden(style.hideAutoNavigationContinueKeybindBackground)
+    -- Reset the text here to handle the force uppercase on gamepad
+    autoNavigationContinueKeybind:SetText(GetString(SI_WORLD_MAP_ANTIQUITIES_CONTINUE))
 end
 
 function ZO_WorldMapManager:Update(currentFrameTimeS)
@@ -6072,10 +6086,13 @@ function ZO_WorldMapManager:IsAnimatingDigSites()
     return self.antiquityDigSiteAnimationState ~= ANTIQUITY_DIG_SITE_ANIMATION_STATE.INACTIVE
 end
 
-function ZO_WorldMapManager:EndDigSiteReveal()
+function ZO_WorldMapManager:EndDigSiteReveal(shouldSupressSound)
+    if not shouldSupressSound then
+        PlaySound(SOUNDS.POSITIVE_CLICK)
+    end
     self:ClearFocusedAntiquityId()
     self:PopSpecialMode()
-    g_keybindStrips.endDigSiteRevealKeybind:SetHidden(true)
+    self.autoNavigationContinueKeybind:SetHidden(true)
     ZO_WorldMap_MarkKeybindStripsDirty()
     g_mapPanAndZoom:SetCurrentNormalizedZoom(0)
 
@@ -6125,7 +6142,7 @@ function ZO_WorldMapManager:RefreshAntiquityDigSitePings(currentFrameTimeS)
             end
         elseif self.antiquityDigSiteAnimationState == ANTIQUITY_DIG_SITE_ANIMATION_STATE.FINISH_ANIMATIONS then
             self:ClearDigSitePings()
-            g_keybindStrips.endDigSiteRevealKeybind:SetHidden(false)
+            self.autoNavigationContinueKeybind:SetHidden(false)
         end
     end
 end

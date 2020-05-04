@@ -97,30 +97,6 @@
             </Controls>
         </Control>
 
-		<!-- Precision Movement action bar button -->
-		<Control name="ZO_HousingHudMoveButton" virtual="true">
-            <Controls>
-                <Texture name="$(parent)Backdrop" color="0000ff" override="true">
-                    <AnchorFill/>
-					<TextureSampleProcessingWeight type="TEX_SAMPLE_PROCESSING_RGB" weight="0.5"/>
-                </Texture>
-
-                <Texture name="$(parent)Icon" blendMode="TEX_BLEND_MODE_ADD" desaturation="1" override="true">
-                    <AnchorFill/>
-					<TextureSampleProcessingWeight type="TEX_SAMPLE_PROCESSING_RGB" weight="1"/>
-                </Texture>
-
-                <Texture name="$(parent)Frame" level="2">
-                    <AnchorFill/>
-                </Texture>
-
-                <Label name="$(parent)Text" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameSmall" excludeFromResizeToFitExtents="true">
-                    <Dimensions x="70" y="18"/>
-                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="1"/>
-                </Label>
-            </Controls>
-        </Control>
-
         <TopLevelControl name="ZO_HousingEditorActionBarTopLevel" hidden="true">
             <OnInitialized>
                 ZO_HousingEditorActionBar_OnInitialize(self)
@@ -149,41 +125,35 @@
 						<Control name="$(parent)PrecisionMoveButtons" resizeToFitDescendents="true">
 							<Anchor point="TOP" />
 							<Controls>
-								<Control name="$(parent)PrecisionMoveLeftButton" inherits="ZO_HousingHudMoveButton">
+								<Control name="$(parent)PrecisionMoveLeftButton" inherits="ZO_HousingHudButton">
 									<Anchor point="LEFT"/>
 									<Controls>
-										<Texture name="$(parent)Backdrop" color="0000ff" override="true"/>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/direction_arrow.dds" override="true" />
+						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_left.dds" override="true" />
 									</Controls>
 								</Control>
-								<Control name="$(parent)PrecisionMoveRightButton" inherits="ZO_HousingHudMoveButton">
+								<Control name="$(parent)PrecisionMoveRightButton" inherits="ZO_HousingHudButton">
 									<Controls>
-										<Texture name="$(parent)Backdrop" color="0000ff" override="true"/>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/direction_inverse_arrow.dds" override="true" />
+						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_right.dds" override="true" />
 									</Controls>
 								</Control>
-								<Control name="$(parent)PrecisionMoveForwardButton" inherits="ZO_HousingHudMoveButton">
+								<Control name="$(parent)PrecisionMoveForwardButton" inherits="ZO_HousingHudButton">
 									<Controls>
-										<Texture name="$(parent)Backdrop" color="00ff00" override="true"/>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/direction_perspective_arrow.dds" override="true"/>
+						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_forward.dds" override="true"/>
 									</Controls>
 								</Control>
-								<Control name="$(parent)PrecisionMoveBackButton" inherits="ZO_HousingHudMoveButton">
+								<Control name="$(parent)PrecisionMoveBackButton" inherits="ZO_HousingHudButton">
 									<Controls>
-										<Texture name="$(parent)Backdrop" color="00ff00" override="true"/>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/direction_perspective_inverse_arrow.dds" override="true"/>
+						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_back.dds" override="true"/>
 									</Controls>
 								</Control>
-								<Control name="$(parent)PrecisionMoveUpButton" inherits="ZO_HousingHudMoveButton">
+								<Control name="$(parent)PrecisionMoveDownButton" inherits="ZO_HousingHudButton">
 									<Controls>
-										<Texture name="$(parent)Backdrop" color="ff0000" override="true"/>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/direction_inverse_arrow.dds" override="true"/>
+						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_up.dds" override="true"/>
 									</Controls>
 								</Control>
-								<Control name="$(parent)PrecisionMoveDownButton" inherits="ZO_HousingHudMoveButton">
+								<Control name="$(parent)PrecisionMoveUpButton" inherits="ZO_HousingHudButton">
 									<Controls>
-										<Texture name="$(parent)Backdrop" color="ff0000" override="true"/>
-						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/direction_arrow.dds" override="true"/>
+						                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Housing/housing_precisionControlIcon_down.dds" override="true"/>
 									</Controls>
 								</Control>
 							</Controls>

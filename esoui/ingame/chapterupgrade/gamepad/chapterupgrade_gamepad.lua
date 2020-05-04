@@ -39,6 +39,8 @@ function ZO_ChapterUpgradePane_Gamepad:InitializeSortFilterList(...)
     ZO_ScrollList_AddDataType(self.list, CHAPTER_UPGRADE_REWARD_DATA, "ZO_ChapterUpgrade_Gamepad_RewardsEntry", ZO_CHAPTER_UPGRADE_GAMEPAD_REWARD_ENTRY_HEIGHT, SetupReward)
     ZO_ScrollList_SetTypeSelectable(self.list, CHAPTER_UPGRADE_REWARD_HEADER_DATA, false)
     ZO_ScrollList_SetTypeSelectable(self.list, CHAPTER_UPGRADE_REWARD_EDITION_HEADER_DATA, false)
+    ZO_ScrollList_SetTypeCategoryHeader(self.list, CHAPTER_UPGRADE_REWARD_HEADER_DATA, true)
+    ZO_ScrollList_SetTypeCategoryHeader(self.list, CHAPTER_UPGRADE_REWARD_EDITION_HEADER_DATA, true)
 end
 
 function ZO_ChapterUpgradePane_Gamepad:ShowSelectedDataTooltip()
@@ -218,7 +220,6 @@ function ZO_ChapterUpgrade_Gamepad:InitializeKeybindStripDescriptors()
                 end
             end,
         },
-
         -- Upgrade
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -241,6 +242,36 @@ function ZO_ChapterUpgrade_Gamepad:InitializeKeybindStripDescriptors()
 
             callback = function()
                 ZO_Dialogs_ShowGamepadDialog("GAMEPAD_CHAPTER_UPGRADE_CHOOSE_EDITION", { chapterUpgradeData = self.categoryList:GetTargetData(), })
+            end,
+        },
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Chapter Upgrade Previous Section in List",
+            keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+            ethereal = true,
+            callback = function()
+                if ZO_ScrollList_CanScrollUp(self.chapterUpgradePane.list) then
+                    ZO_ScrollList_SelectFirstIndexInCategory(self.chapterUpgradePane.list, ZO_SCROLL_SELECT_CATEGORY_PREVIOUS)
+                    PlaySound(ZO_PARAMETRIC_SCROLL_MOVEMENT_SOUNDS[ZO_PARAMETRIC_MOVEMENT_TYPES.JUMP_PREVIOUS])
+                end
+            end,
+            enabled = function()
+                return self.selectionMode == SELECTION_MODE.REWARD
+            end,
+        },
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Chapter Upgrade Next Section in List",
+            keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+            ethereal = true,
+            callback = function()
+                if ZO_ScrollList_CanScrollDown(self.chapterUpgradePane.list) then
+                    ZO_ScrollList_SelectFirstIndexInCategory(self.chapterUpgradePane.list, ZO_SCROLL_SELECT_CATEGORY_NEXT)
+                    PlaySound(ZO_PARAMETRIC_SCROLL_MOVEMENT_SOUNDS[ZO_PARAMETRIC_MOVEMENT_TYPES.JUMP_NEXT])
+                end
+            end,
+           enabled = function()
+                return self.selectionMode == SELECTION_MODE.REWARD
             end,
         },
     }

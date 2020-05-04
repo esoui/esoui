@@ -1821,6 +1821,7 @@ function ZO_MapPin:FadeInMapPin()
         areaAnimation:SetAnimatedControl(areaControl)
     end
 
+    PlaySound(SOUNDS.MAP_PIN_FADEIN)
     fadeInAnimation:PlayFromStart()
 end
 

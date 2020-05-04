@@ -1,7 +1,7 @@
-ZO_IN_PROGRESS_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD = 128
-ZO_IN_PROGRESS_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD = 159
-ZO_SCRYABLE_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD = 85
-ZO_SCRYABLE_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD = 119
+ZO_IN_PROGRESS_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD = 153
+ZO_IN_PROGRESS_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD = 184
+ZO_SCRYABLE_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD = 110
+ZO_SCRYABLE_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD = 144
 ZO_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD = 85
 ZO_ANTIQUITY_SET_1_DATA_ROW_HEIGHT_GAMEPAD = 182
 ZO_ANTIQUITY_SET_2_DATA_ROW_HEIGHT_GAMEPAD = 242
@@ -86,8 +86,8 @@ function ZO_AntiquityJournalGamepad:InitializeLists()
     local function CategoryEqualityFunction(left, right)
         return left:GetId() == right:GetId()
     end
-    self.categoryList:SetEqualityFunction("ZO_GamepadMenuEntryTemplate", CategoryEqualityFunction)
-    self.subcategoryList:SetEqualityFunction("ZO_GamepadMenuEntryTemplate", CategoryEqualityFunction)
+    self.categoryList:SetEqualityFunction("ZO_GamepadItemEntryTemplate", CategoryEqualityFunction)
+    self.subcategoryList:SetEqualityFunction("ZO_GamepadItemEntryTemplate", CategoryEqualityFunction)
 
     self.subcategoryList:SetOnTargetDataChangedCallback(function()
         self:ShowAntiquityListFragment()
@@ -171,7 +171,7 @@ function ZO_AntiquityJournalGamepad:InitializeEvents()
 
     local function OnSingleAntiquityLeadUpdated(antiquityData)
         MAIN_MENU_GAMEPAD:MarkNewnessDirty()
-        if self.categoryList then
+        if self.categoryList and not self.fragment:IsHidden() then
             self.categoryList:RefreshVisible()
             self.subcategoryList:RefreshVisible()
             self:RefreshAntiquity(antiquityData)
@@ -397,7 +397,9 @@ function ZO_AntiquityJournalGamepad:DeactivateAntiquityList()
 end
 
 function ZO_AntiquityJournalGamepad:ShowScryable()
-    self:ViewCategory(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
+    local NO_SUBCATEGORY_LIST = nil
+    local FOCUS_ANTIQUITY_LIST = true
+    self:ViewCategory(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA, NO_SUBCATEGORY_LIST, FOCUS_ANTIQUITY_LIST)
 end
 
 function ZO_AntiquityJournalGamepad:GetCurrentCategoryData()
@@ -410,9 +412,9 @@ end
 
 -- Opens up the provided category, or the current category if no categoryData is provided.
 -- If a subcategoryData is provided, also tries to select the subcategory.
-function ZO_AntiquityJournalGamepad:ViewCategory(categoryData, subcategoryData)
+function ZO_AntiquityJournalGamepad:ViewCategory(categoryData, subcategoryData, focusAntiquityList)
     if categoryData then
-        local index = self.categoryList:GetIndexForData("ZO_GamepadMenuEntryTemplate", categoryData)
+        local index = self.categoryList:GetIndexForData("ZO_GamepadItemEntryTemplate", categoryData)
         if index then
             self.categoryList:SetSelectedIndexWithoutAnimation(index)
         else
@@ -424,12 +426,17 @@ function ZO_AntiquityJournalGamepad:ViewCategory(categoryData, subcategoryData)
     self:ShowSubcategoryList(RESET_SELECTION_TO_TOP)
 
     if subcategoryData then
-        local index = self.categoryList:GetIndexForData("ZO_GamepadMenuEntryTemplate", subcategoryData)
+        local index = self.subcategoryList:GetIndexForData("ZO_GamepadItemEntryTemplate", subcategoryData)
         if index then
             self.subcategoryList:SetSelectedIndexWithoutAnimation(index)
         else
             return zo_internalassert(false, "Trying to view an invalid subcategoryData")
         end
+    end
+
+    if focusAntiquityList then
+        self:DeactivateCurrentList()
+        self:ActivateAntiquityList()
     end
 end
 
@@ -446,6 +453,7 @@ function ZO_AntiquityJournalListGamepad:Initialize(control)
     self:InitializeControlPools()
     self:InitializeAntiquitySections()
     self:InitializeLists()
+    self:InitializeOptionsDialog()
 end
 
 function ZO_AntiquityJournalListGamepad:InitializeControl(control)
@@ -479,7 +487,7 @@ end
 
 function ZO_AntiquityJournalListGamepad:InitializeLists()
     local listControl = self:GetListControl()
-    
+
     local function SetupInProgressAntiquityRow(control, data)
         self:SetupInProgressAntiquityRow(control, data)
     end
@@ -519,6 +527,8 @@ function ZO_AntiquityJournalListGamepad:InitializeLists()
     ZO_ScrollList_SetTypeCategoryHeader(listControl, ANTIQUITY_SECTION_ROW_DATA, true)
 
     local function ShowSubcategories()
+        self.lastSelectedData = nil
+        ZO_ScrollList_ResetAutoSelectIndex(self.list)
         self:ClearActiveFragmentList()
         self:Deactivate()
         ANTIQUITY_JOURNAL_GAMEPAD:ActivateCurrentList()
@@ -576,64 +586,57 @@ function ZO_AntiquityJournalListGamepad:InitializeLists()
         {
             order = 20,
             keybind = "UI_SHORTCUT_SECONDARY",
-            name = function()
-                local categoryData = self:GetCurrentSubcategoryData()
-                if IsScryableCategory(categoryData) then
-                    return GetString(SI_ANTIQUITY_ABANDON)
-                else
-                    return GetString(SI_ANTIQUITY_FRAGMENTS)
-                end
-            end,
-            callback = function()
-                local categoryData = self:GetCurrentSubcategoryData()
-                if IsScryableCategory(categoryData) then
-                    local antiquityData = self:GetCurrentAntiquityData()
-                    if antiquityData then
-                        ZO_Dialogs_ShowGamepadDialog("CONFIRM_ABANDON_ANTIQUITY_SCRYING_PROGRESS", { antiquityId = antiquityData:GetId() })
-                    end
-                else
-                    self:ToggleAntiquityFragmentFocus()
-                end
+            name = GetString(SI_ANTIQUITY_FRAGMENTS),
+            callback = function(dialog)
+                self:ToggleAntiquityFragmentFocus()
             end,
             visible = function()
+                local categoryData = self:GetCurrentSubcategoryData()
                 local antiquityData = self:GetCurrentAntiquityData()
                 if antiquityData and antiquityData:HasDiscovered() then
-                    local categoryData = self:GetCurrentSubcategoryData()
-                    if IsScryableCategory(categoryData) then
-                        return antiquityData:HasDiscoveredDigSites()
-                    else
-                        return antiquityData:GetType() == ZO_ANTIQUITY_TYPE_SET
-                    end
+                    return not IsScryableCategory(categoryData) and antiquityData:GetType() == ZO_ANTIQUITY_TYPE_SET
                 end
                 return false
-            end
+            end,
         },
         {
             order = 30,
             keybind = "UI_SHORTCUT_TERTIARY",
-            name = GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP),
+            name = GetString(SI_GAMEPAD_QUEST_JOURNAL_SCRYABLE_OPTIONS),
             callback = function()
-                local antiquityData = self:GetCurrentAntiquityData()
-                if antiquityData then
-                    local antiquityId = antiquityData:GetId()
-                    SetTrackedAntiquityId(antiquityId)
-                    WORLD_MAP_MANAGER:ShowAntiquityOnMap(antiquityId)
-                end
+               ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SCRYABLE_ANTIQUITY_OPTIONS", self:CreateOptionsDialogActions())
             end,
             visible = function()
                 local categoryData = self:GetCurrentSubcategoryData()
-                if IsScryableCategory(categoryData) then
-                    local antiquityData = self:GetCurrentAntiquityData()
-                    if antiquityData then
-                        return antiquityData:HasDiscoveredDigSites()
-                    end
-                end
-                return false
+                return IsScryableCategory(categoryData)
             end,
+        },
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Antiquity Journal Top of List",
+            keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+            ethereal = true,
+            callback = function()
+                if ZO_ScrollList_CanScrollUp(self.list) then
+                    ZO_ScrollList_SelectFirstIndexInCategory(self.list, ZO_SCROLL_SELECT_CATEGORY_PREVIOUS)
+                    PlaySound(ZO_PARAMETRIC_SCROLL_MOVEMENT_SOUNDS[ZO_PARAMETRIC_MOVEMENT_TYPES.JUMP_PREVIOUS])
+                end
+            end
+        },
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad Antiquity Journal Bottom of List",
+            keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+            ethereal = true,
+            callback = function()
+                if ZO_ScrollList_CanScrollDown(self.list) then
+                    ZO_ScrollList_SelectFirstIndexInCategory(self.list, ZO_SCROLL_SELECT_CATEGORY_NEXT)
+                    PlaySound(ZO_PARAMETRIC_SCROLL_MOVEMENT_SOUNDS[ZO_PARAMETRIC_MOVEMENT_TYPES.JUMP_NEXT])
+                end
+            end
         },
     }
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, ShowSubcategories)
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, listControl)
 
     self.fragmentListKeybindStripDescriptor =
     {
@@ -646,6 +649,158 @@ function ZO_AntiquityJournalListGamepad:InitializeLists()
             end,
         },
     }
+end
+
+function ZO_AntiquityJournalListGamepad:CreateOptionActionDataAbandonFragments()
+    return
+    {
+        template = "ZO_GamepadItemEntryTemplate",
+        text = GetString(SI_ANTIQUITY_ABANDON),
+        callback = function(dialog)
+            local categoryData = self:GetCurrentSubcategoryData()
+            if IsScryableCategory(categoryData) then
+                local antiquityData = self:GetCurrentAntiquityData()
+                if antiquityData then
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_SCRYABLE_ANTIQUITY_OPTIONS")
+                    ZO_Dialogs_ShowGamepadDialog("CONFIRM_ABANDON_ANTIQUITY_SCRYING_PROGRESS", { antiquityId = antiquityData:GetId() })
+                end
+            end
+        end,
+        visible = function()
+            local antiquityData = self:GetCurrentAntiquityData()
+            if antiquityData and antiquityData:HasDiscovered() then
+                local categoryData = self:GetCurrentSubcategoryData()
+                if IsScryableCategory(categoryData) then
+                    return antiquityData:HasDiscoveredDigSites()
+                end
+            end
+            return false
+        end,
+    }
+end
+
+function ZO_AntiquityJournalListGamepad:CreateOptionActionDataShowOnMap()
+    return
+    {
+        template = "ZO_GamepadItemEntryTemplate",
+        text = GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP),
+        callback = function(dialog)
+                local antiquityData = self:GetCurrentAntiquityData()
+                if antiquityData then
+                    local antiquityId = antiquityData:GetId()
+                    SetTrackedAntiquityId(antiquityId)
+                    WORLD_MAP_MANAGER:ShowAntiquityOnMap(antiquityId)
+                end
+        end,
+        visible = function()
+            local categoryData = self:GetCurrentSubcategoryData()
+            if IsScryableCategory(categoryData) then
+                local antiquityData = self:GetCurrentAntiquityData()
+                if antiquityData then
+                    return antiquityData:HasDiscoveredDigSites()
+                end
+            end
+            return false
+        end,
+    }
+end
+
+function ZO_AntiquityJournalListGamepad:CreateOptionActionDataViewInCodex()
+    return
+    {
+        template = "ZO_GamepadItemEntryTemplate",
+        text = GetString(SI_ANTIQUITY_VIEW_IN_CODEX),
+        callback = function(dialog)
+            ZO_Dialogs_ReleaseDialog("GAMEPAD_SCRYABLE_ANTIQUITY_OPTIONS")
+            local scryableAntiquityData = self:GetCurrentAntiquityData()
+            local categoryData = scryableAntiquityData.antiquityCategoryData:GetParentCategoryData()
+            local subcategoryData = scryableAntiquityData.antiquityCategoryData
+            local FOCUS_ANTIQUITY_LIST = true
+            ANTIQUITY_JOURNAL_GAMEPAD:ViewCategory(categoryData, subcategoryData, FOCUS_ANTIQUITY_LIST)
+        end,
+        visible = function()
+            local categoryData = self:GetCurrentSubcategoryData()
+            return IsScryableCategory(categoryData)
+        end,
+    }
+end
+
+function ZO_AntiquityJournalListGamepad:CreateOptionsDialogActions()
+    local actionsTable = {}
+
+    table.insert(actionsTable, self:CreateOptionActionDataAbandonFragments())
+    table.insert(actionsTable, self:CreateOptionActionDataShowOnMap())
+    table.insert(actionsTable, self:CreateOptionActionDataViewInCodex())
+
+    return actionsTable
+end
+
+function ZO_AntiquityJournalListGamepad:InitializeOptionsDialog()
+    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_SCRYABLE_ANTIQUITY_OPTIONS",
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+        title =
+        {
+            text = SI_GAMEPAD_SCRYABLE_ANTIQUITY_OPTIONS_HEADER
+        },
+        setup = function(dialog, allActions)
+            local parametricList = dialog.info.parametricList
+            ZO_ClearNumericallyIndexedTable(parametricList)
+
+            for i, action in ipairs(allActions) do
+                local entryData = ZO_GamepadEntryData:New(action.text)
+                entryData.action = action
+                entryData.setup = action.setup or ZO_SharedGamepadEntry_OnSetup
+                entryData.callback = action.callback
+
+                local listItem =
+                {
+                    template = action.template or "ZO_GamepadItemEntryTemplate",
+                    entryData = entryData,
+                    header = action.header,
+                }
+
+                table.insert(parametricList, listItem)
+            end
+
+            dialog:setupFunc()
+        end,
+        parametricList = {}, -- Generated Dynamically
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    if targetData and targetData.callback then
+                        targetData.callback(dialog)
+                    end
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_GAMEPAD_BACK_OPTION,
+                callback =  function(dialog)
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_SCRYABLE_ANTIQUITY_OPTIONS")
+                end,
+            },
+        },
+        noChoiceCallback = function(dialog)
+            local parametricList = dialog.info.parametricList
+            for i, entry in ipairs(parametricList) do
+                if entry.entryData.action.isDropdown then
+                    local control = dialog.entryList:GetControlFromData(entry.entryData)
+                    if control then
+                        control.dropdown:Deactivate()
+                    end
+                end
+            end
+        end
+    })
 end
 
 function ZO_AntiquityJournalListGamepad:GetActiveFragmentList()
@@ -717,6 +872,11 @@ function ZO_AntiquityJournalListGamepad:OnSelectionChanged(oldData, newData)
     if newData then
         self.lastSelectedData = newData
 
+        if not newData:HasDiscovered() then
+            self:ClearAntiquityTooltip()
+            return
+        end
+
         if newData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
             if newData:HasNewLead() then
                 newData:ClearNewLead()
@@ -735,10 +895,6 @@ function ZO_AntiquityJournalListGamepad:OnSelectionChanged(oldData, newData)
     else
         self:ClearAntiquityTooltip()
     end
-end
-
-function ZO_AntiquityJournalListGamepad:GetLastAntiquityData()
-    return self.lastSelectedData
 end
 
 function ZO_AntiquityJournalListGamepad:GetCurrentAntiquityData()
@@ -831,7 +987,7 @@ do
                 end
 
                 -- Iterate over all antiquities, adding each antiquity to the section whose criteria it meets (if any).
-                for _, antiquityData in ANTIQUITY_DATA_MANAGER:AntiquityIterator({ZO_Antiquity.IsVisible}) do
+                for _, antiquityData in ANTIQUITY_DATA_MANAGER:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
                     for _, antiquitySection in ipairs(self.scryableAntiquitySections) do
                         local passesFilter = true
                         for _, filterFunction in ipairs(antiquitySection.filterFunctions) do
@@ -862,7 +1018,7 @@ do
                 -- Add the antiquity/antiquity set entries.
                 local antiquitySets = {}
 
-                for _, antiquityData in currentSubcategoryData:AntiquityIterator({ZO_Antiquity.IsVisible}) do
+                for _, antiquityData in currentSubcategoryData:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
                     local antiquitySetData = antiquityData:GetAntiquitySetData()
                     local entryTemplate = ANTIQUITY_ROW_DATA
                     local entryData
@@ -1126,8 +1282,13 @@ function ZO_AntiquityJournalListGamepad:SetupScryableAntiquityRow(control, data)
             control.difficultyLabel:SetAnchor(LEFT, control.numRecoveredLabel, RIGHT, 15)
         end
         control.difficultyLabel:SetHidden(false)
+
+        local zoneName = GetZoneNameById(data:GetZoneId())
+        control.zoneLabel:SetText(zo_strformat(SI_ANTIQUITY_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName)))
+        control.zoneLabel:SetHidden(false)
     else
         control.difficultyLabel:SetHidden(true)
+        control.zoneLabel:SetHidden(true)
     end
 end
 
@@ -1277,6 +1438,7 @@ function ZO_AntiquityJournalInProgressAntiquityRowGamepad_OnInitialized(control)
     ZO_AntiquityJournalBaseRowGamepad_OnInitialized(control)
 
     control.difficultyLabel = control.header:GetNamedChild("DifficultyLabel")
+    control.zoneLabel = control.header:GetNamedChild("Zone")
     control.progressIcons = control:GetNamedChild("ProgressIcons")
 end
 
@@ -1290,6 +1452,7 @@ function ZO_AntiquityJournalScryableAntiquityRowGamepad_OnInitialized(control)
     ZO_AntiquityJournalBaseRowGamepad_OnInitialized(control)
 
     control.difficultyLabel = control.header:GetNamedChild("DifficultyLabel")
+    control.zoneLabel = control.header:GetNamedChild("Zone")
 end
 
 function ZO_AntiquityJournalScryableAntiquityNearExpirationRowGamepad_OnInitialized(control)

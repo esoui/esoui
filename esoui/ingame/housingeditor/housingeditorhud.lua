@@ -23,7 +23,7 @@ local AXIS_INDICATOR_RGB_WEIGHT_MIN_PERCENTAGE = 0.8
 local AXIS_INDICATOR_RGB_WEIGHT_MAX_PERCENTAGE = 1.3
 local AXIS_INDICATOR_SCALE_MAX = 3
 local AXIS_INDICATOR_SCALE_MIN = 1
-local AXIS_INDICATOR_VISIBILITY_YAW_OFFSET_ANGLE = math.rad(7)
+local AXIS_INDICATOR_PICKUP_YAW_OFFSET_ANGLE = math.rad(20)
 local AXIS_KEYBIND_RGB_WEIGHT_MIN_PERCENTAGE = 0.3
 local AXIS_KEYBIND_RGB_WEIGHT_MAX_PERCENTAGE = 0.7
 local AXIS_MAX_DRAW_LEVEL = 100000
@@ -38,8 +38,8 @@ local TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M = 0.5
 -- while it is rotationally locked to the camera's heading.
 local Y_AXIS_INDICATOR_YAW_OFFSET_RAD = -(PI * 15 / 180)
 
-local X_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(0.2, 0, 1, 1)
-local X_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(0.2, 0, 1, 1)
+local X_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 0.5, 0.9, 1)
+local X_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 0.5, 0.9, 1)
 local Y_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(1, 0.2, 0, 1)
 local Y_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(1, 0.2, 0, 1)
 local Z_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 1, 0.2, 1)
@@ -578,10 +578,10 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
     self.rotationIndicators = {
         {axis = HOUSING_EDITOR_ROTATION_AXIS_X1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 1.0, color = X_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, pitch = HALF_PI, yaw = -HALF_PI},
         {axis = HOUSING_EDITOR_ROTATION_AXIS_X2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 1.0, color = X_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, pitch = HALF_PI, yaw =  HALF_PI},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.75, color = Y_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw = 0},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.75, color = Y_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, roll = PI, yaw = 0},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.5, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw =  HALF_PI},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.5, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, yaw = -HALF_PI, roll = PI},
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.66, color = Y_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw = 0},
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.66, color = Y_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, roll = PI, yaw = 0},
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.33, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw =  HALF_PI},
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.33, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, yaw = -HALF_PI, roll = PI},
     }
 
     self.allAxisIndicators = {}
@@ -982,14 +982,15 @@ end
 function ZO_HousingEditorHud:MoveAxisIndicators(worldX, worldY, worldZ, pitch, yaw, roll)
     local cameraX, cameraY, cameraZ = self:GetCameraOrigin()
     local axisIndicators, renderX, renderY, renderZ, renderYaw, scaleX, scaleY
+    local isPrecisionEditing = self:IsPrecisionEditingEnabled()
 
-    if self:IsPrecisionEditingEnabled() and self:IsPrecisionPlacementMoveMode() then
+    if isPrecisionEditing and self:IsPrecisionPlacementMoveMode() then
         axisIndicators = self.translationIndicators
     else
         axisIndicators = self.rotationIndicators
     end
 
-    if self:IsPrecisionEditingEnabled() then
+    if isPrecisionEditing then
         renderX, renderY, renderZ = WorldPositionToGuiRender3DPosition(worldX, worldY, worldZ)
         if self:IsPrecisionPlacementRotationMode() then
             renderYaw = 0
@@ -1013,12 +1014,8 @@ function ZO_HousingEditorHud:MoveAxisIndicators(worldX, worldY, worldZ, pitch, y
         axis.control:Set3DRenderSpaceOrigin(scaledX * (axis.offsetX or 0), scaledY * (axis.offsetY or 0), scaledX * (axis.offsetZ or 0))
     end
 
-    local cameraHeading = GetPlayerCameraHeading()
-    local horizontalAngle = (renderYaw - cameraHeading) % HALF_PI
-    if horizontalAngle < QUARTER_PI then
-        renderYaw = renderYaw + AXIS_INDICATOR_VISIBILITY_YAW_OFFSET_ANGLE
-    else
-        renderYaw = renderYaw - AXIS_INDICATOR_VISIBILITY_YAW_OFFSET_ANGLE
+    if not isPrecisionEditing then
+        renderYaw = renderYaw - AXIS_INDICATOR_PICKUP_YAW_OFFSET_ANGLE
     end
 
     self.axisIndicatorWindow:Set3DRenderSpaceOrigin(renderX, renderY, renderZ)
@@ -1060,6 +1057,8 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
             end
 
             local cameraX, cameraY, cameraZ = self:GetCameraOrigin()
+            local forwardX, forwardY, forwardZ = self:GetCameraForwardVector()
+
             for _, indicator in ipairs(self.translationIndicators) do
                 local alpha = indicator.control:GetAlpha()
                 local hideIndicator = hideTranslation or alpha <= 0
@@ -1067,8 +1066,10 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
 
                 if not hideIndicator then
                     local indicatorX, indicatorY, indicatorZ = self:GetAxisIndicatorOffsetPosition(indicator)
-                    local cameraX, cameraY, cameraZ = self:GetCameraOrigin()
-                    local drawLevel = AXIS_MAX_DRAW_LEVEL - zo_distance3D(cameraX, cameraY, cameraZ, indicatorX, indicatorY, indicatorZ)
+                    -- We cannot use distance squared reliably here as the result could exceed the maximum draw level for a control.
+                    local horizontalDistance = math.sqrt((cameraX - indicatorX) * (cameraX - indicatorX) + (cameraZ - indicatorZ) * (cameraZ - indicatorZ))
+                    local verticalCoefficient = forwardY > 0 and 1 or -1
+                    local drawLevel = horizontalDistance + verticalCoefficient * (cameraY - indicatorY)
                     indicator.control:SetDrawLevel(drawLevel)
                 end
             end
@@ -1086,27 +1087,33 @@ end
 function ZO_HousingEditorHud:InitializeHudControls()
     do
         local yawLeftButton = self.buttonContainer:GetNamedChild("YawLeftButton")
-        yawLeftButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCW.dds")
+        yawLeftButton.icon = yawLeftButton:GetNamedChild("Icon")
+        yawLeftButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(yawLeftButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_LEFT")
 
         local yawRightButton = self.buttonContainer:GetNamedChild("YawRightButton")
-        yawRightButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCCW.dds")
+        yawRightButton.icon = yawRightButton:GetNamedChild("Icon")
+        yawRightButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(yawRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_RIGHT")
 
         local pitchForwardButton = self.buttonContainer:GetNamedChild("PitchForwardButton")
-        pitchForwardButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCCW.dds")
+        pitchForwardButton.icon = pitchForwardButton:GetNamedChild("Icon")
+        pitchForwardButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(pitchForwardButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_FORWARD")
 
         local pitchBackButton = self.buttonContainer:GetNamedChild("PitchBackButton")
-        pitchBackButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCW.dds")
+        pitchBackButton.icon = pitchBackButton:GetNamedChild("Icon")
+        pitchBackButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(pitchBackButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_BACKWARD")
 
         local rollLeftButton = self.buttonContainer:GetNamedChild("RollLeftButton")
-        rollLeftButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCCW.dds")
+        rollLeftButton.icon = rollLeftButton:GetNamedChild("Icon")
+        rollLeftButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rollLeftButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_LEFT")
 
         local rollRightButton = self.buttonContainer:GetNamedChild("RollRightButton")
-        rollRightButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCW.dds")
+        rollRightButton.icon = rollRightButton:GetNamedChild("Icon")
+        rollRightButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rollRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_RIGHT")
     
         self.pickupRotateHudButtons =
@@ -1126,39 +1133,27 @@ function ZO_HousingEditorHud:InitializeHudControls()
 
     do
         local moveLeftButton = self.precisionMoveButtons:GetNamedChild("PrecisionMoveLeftButton")
-        moveLeftButton.backdrop = moveLeftButton:GetNamedChild("Backdrop")
         moveLeftButton.icon = moveLeftButton:GetNamedChild("Icon")
-        moveLeftButton.icon:SetTextureCoordsRotation(0)
         ZO_Keybindings_RegisterLabelForBindingUpdate(moveLeftButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_LEFT")
 
         local moveRightButton = self.precisionMoveButtons:GetNamedChild("PrecisionMoveRightButton")
-        moveRightButton.backdrop = moveRightButton:GetNamedChild("Backdrop")
         moveRightButton.icon = moveRightButton:GetNamedChild("Icon")
-        moveRightButton.icon:SetTextureCoordsRotation(PI)
         ZO_Keybindings_RegisterLabelForBindingUpdate(moveRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_RIGHT")
 
         local moveForwardButton = self.precisionMoveButtons:GetNamedChild("PrecisionMoveForwardButton")
-        moveForwardButton.backdrop = moveForwardButton:GetNamedChild("Backdrop")
         moveForwardButton.icon = moveForwardButton:GetNamedChild("Icon")
-        moveForwardButton.icon:SetTextureCoordsRotation(0)
         ZO_Keybindings_RegisterLabelForBindingUpdate(moveForwardButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_FORWARD")
 
         local moveBackButton = self.precisionMoveButtons:GetNamedChild("PrecisionMoveBackButton")
-        moveBackButton.backdrop = moveBackButton:GetNamedChild("Backdrop")
         moveBackButton.icon = moveBackButton:GetNamedChild("Icon")
-        moveBackButton.icon:SetTextureCoordsRotation(PI)
         ZO_Keybindings_RegisterLabelForBindingUpdate(moveBackButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_BACKWARD")
 
         local moveUpButton = self.precisionMoveButtons:GetNamedChild("PrecisionMoveUpButton")
-        moveUpButton.backdrop = moveUpButton:GetNamedChild("Backdrop")
         moveUpButton.icon = moveUpButton:GetNamedChild("Icon")
-        moveUpButton.icon:SetTextureCoordsRotation(HALF_PI)
         ZO_Keybindings_RegisterLabelForBindingUpdate(moveUpButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_RIGHT")
 
         local moveDownButton = self.precisionMoveButtons:GetNamedChild("PrecisionMoveDownButton")
-        moveDownButton.backdrop = moveDownButton:GetNamedChild("Backdrop")
         moveDownButton.icon = moveDownButton:GetNamedChild("Icon")
-        moveDownButton.icon:SetTextureCoordsRotation(-HALF_PI)
         ZO_Keybindings_RegisterLabelForBindingUpdate(moveDownButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_LEFT")
 
         self.precisionMoveHudButtons =
@@ -1178,27 +1173,33 @@ function ZO_HousingEditorHud:InitializeHudControls()
 
     do
         local rotateYawLeftButton = self.precisionRotateButtons:GetNamedChild("PrecisionYawLeftButton")
-        rotateYawLeftButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCW.dds")
+        rotateYawLeftButton.icon = rotateYawLeftButton:GetNamedChild("Icon")
+        rotateYawLeftButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotateYawLeftButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_LEFT")
 
         local rotateYawRightButton = self.precisionRotateButtons:GetNamedChild("PrecisionYawRightButton")
-        rotateYawRightButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCCW.dds")
+        rotateYawRightButton.icon = rotateYawRightButton:GetNamedChild("Icon")
+        rotateYawRightButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_yawCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotateYawRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_RIGHT")
 
         local rotatePitchForwardButton = self.precisionRotateButtons:GetNamedChild("PrecisionPitchForwardButton")
-        rotatePitchForwardButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCCW.dds")
+        rotatePitchForwardButton.icon = rotatePitchForwardButton:GetNamedChild("Icon")
+        rotatePitchForwardButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotatePitchForwardButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_FORWARD")
 
         local rotatePitchBackButton = self.precisionRotateButtons:GetNamedChild("PrecisionPitchBackButton")
-        rotatePitchBackButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCW.dds")
+        rotatePitchBackButton.icon = rotatePitchBackButton:GetNamedChild("Icon")
+        rotatePitchBackButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotatePitchBackButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_BACKWARD")
 
         local rotateRollLeftButton = self.precisionRotateButtons:GetNamedChild("PrecisionRollLeftButton")
-        rotateRollLeftButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCCW.dds")
+        rotateRollLeftButton.icon = rotateRollLeftButton:GetNamedChild("Icon")
+        rotateRollLeftButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotateRollLeftButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_LEFT")
 
         local rotateRollRightButton = self.precisionRotateButtons:GetNamedChild("PrecisionRollRightButton")
-        rotateRollRightButton:GetNamedChild("Icon"):SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCW.dds")
+        rotateRollRightButton.icon = rotateRollRightButton:GetNamedChild("Icon")
+        rotateRollRightButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotateRollRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_RIGHT")
 
         self.precisionRotateHudButtons =
@@ -1438,11 +1439,7 @@ do
                     local interval = key.keypressIntervalMS
                     local weight = zo_lerp(AXIS_KEYBIND_RGB_WEIGHT_MIN_PERCENTAGE, AXIS_KEYBIND_RGB_WEIGHT_MAX_PERCENTAGE, interval)
 
-                    if key.backdrop then
-                        key.backdrop:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, weight)
-                    else
-                        key:GetNamedChild("Icon"):SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1 + weight)
-                    end
+                    key.icon:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1 + weight)
 
                     if key.axis and key.precisionMode == isPrecisionMode then
                         local axis = key.axis
@@ -1473,11 +1470,7 @@ do
                         self:RotateAndScaleAxisIndicator(control, rotation)
                     end
                 else
-                    if key.backdrop then
-                        key.backdrop:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, AXIS_KEYBIND_RGB_WEIGHT_MIN_PERCENTAGE)
-                    else
-                        key:GetNamedChild("Icon"):SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
-                    end
+                    key.icon:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
 
                     if key.axis and key.precisionMode == isPrecisionMode then
                         local control = key.axis.control
@@ -1501,7 +1494,7 @@ do
             local key = self.placementKeys[i]
             if key and key.keypressStartMS then
                 key.keypressStartMS = nil
-                key:GetNamedChild("Icon"):SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
+                key.icon:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
             end
         end
     end

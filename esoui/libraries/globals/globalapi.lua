@@ -218,6 +218,9 @@ function zo_callLater(func, ms)
     return id
 end
 
+function zo_removeCallLater(id)
+    EVENT_MANAGER:UnregisterForUpdate("CallLaterFunction"..id)
+end
 
 do
     local workingTable = {}

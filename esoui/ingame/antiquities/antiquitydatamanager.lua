@@ -14,6 +14,9 @@ function ZO_AntiquityDataManager:Initialize()
     self.antiquityCategories = {}
     self.antiquitySets = {}
     self.topLevelCategories = {}
+
+    self.highestScryableDifficulty = GetHighestScryableDifficulty()
+
     self:InitializeEventHandlers()
     self:RebuildAntiquities()
 end
@@ -47,9 +50,10 @@ function ZO_AntiquityDataManager:InitializeEventHandlers()
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_UPDATED, OnSingleAntiquityUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_DIG_SITES_UPDATED, OnSingleAntiquityDigSitesUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_SEARCH_RESULTS_READY, OnAntiquitySearchResultsReady)
-    EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_SKILLS_FULL_UPDATE, OnSkillsUpdated)
-    EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_SKILL_LINE_ADDED, OnSkillsUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_LEAD_ACQUIRED, OnAntiquityLeadAcquired)
+    SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", OnSkillsUpdated)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillsUpdated)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillsUpdated)
 end
 
 -- ZO_AntiquityCategory
@@ -191,9 +195,10 @@ function ZO_AntiquityDataManager:OnSingleAntiquityNewLeadCleared(antiquityId)
 end
 
 function ZO_AntiquityDataManager:OnSkillsUpdated()
-    if self.highestScryableDifficulty ~= GetHighestScryableDifficulty() then
+    local newHighestScryableDifficulty = GetHighestScryableDifficulty()
+    if self.highestScryableDifficulty ~= newHighestScryableDifficulty then
         self:RefreshAll()
-        self.highestScryableDifficulty = GetHighestScryableDifficulty()
+        self.highestScryableDifficulty = newHighestScryableDifficulty
     end
 end
 

@@ -1146,6 +1146,11 @@ function CenterScreenAnnounce:ReleaseMessageParams(messageParams)
 end
 
 do
+    local ALLOWED_TYPES_DURING_SCRYING =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+    }
+
     local ALLOWED_TYPES_DURING_ANTIQUITIES_DIGGING =
     {
         [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
@@ -1153,6 +1158,15 @@ do
     }
 
     function CenterScreenAnnounce:CanDisplayMessage(category, csaType)
+        -- Early out if category is not of scrying category while showing scrying or map mode dig sites
+        if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES) and category ~= CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
+            return false
+        end
+
+        if SCRYING_SCENE:IsShowing() and not ALLOWED_TYPES_DURING_SCRYING[csaType] then
+            return false
+        end
+
         -- Early out if the message type can't be shown during antiquity digging
         if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() and not ALLOWED_TYPES_DURING_ANTIQUITIES_DIGGING[csaType] then
             return false
@@ -1622,9 +1636,34 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
     }
 
-    -- Types that if they to happen while digging for an antiquity
+    -- Types that if they were to happen while scrying for an antiquity
+    -- will be stored and shown after the scrying game is over
+    local ALLOWED_QUEUE_TYPES_WHILE_SCRYING =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT] = true,
+    }
+
+    -- Types that if they were to happen while digging for an antiquity
     -- will be stored and shown after the digging game is over
     local ALLOWED_QUEUE_TYPES_WHILE_ANTIQUITIES_DIGGING =
     {
@@ -1635,6 +1674,13 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
     }
 
@@ -1655,6 +1701,12 @@ do
 
             -- prevent unwanted announcements from queuing when the user is crafting
             if ZO_CraftingUtils_IsCraftingWindowOpen() and not ALLOWED_QUEUE_TYPES_WHILE_CRAFTING[csaType] then
+                self.messageParamsPool:ReleaseObject(messageParams.key)
+                return
+            end
+
+            -- prevent unwanted announcements from queuing when the user is scrying
+            if (SCRYING_SCENE:IsShowing() or WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES)) and not ALLOWED_QUEUE_TYPES_WHILE_SCRYING[csaType] then
                 self.messageParamsPool:ReleaseObject(messageParams.key)
                 return
             end

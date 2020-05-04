@@ -43,7 +43,7 @@
                     <Anchor point="CENTER" relativePoint="LEFT" offsetX="47" />
                 </Texture>
 
-                <Label name="$(parent)Text" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                <Label name="$(parent)Text" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
                     <Dimensions x="270" />
                     <Anchor point="LEFT" offsetX="90" />
                 </Label>

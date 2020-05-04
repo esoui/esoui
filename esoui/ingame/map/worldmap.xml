@@ -159,6 +159,18 @@
 
             <!-- Make sure to consume the mouse wheel input -->
             <OnMouseWheel />
+
+            <Controls>
+                <Control name="$(parent)ContinueKeybind" inherits="ZO_KeybindButton" hidden="true">
+                    <Controls>
+                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Performance/StatusMeterMunge.dds" excludeFromResizeToFitExtents="true">
+                            <TextureCoords left="0.15625" right="0.828125" top="0.3671875" bottom="0.625" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)KeyLabel" offsetX="-30" offsetY="-12" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)NameLabel" offsetX="30" offsetY="12" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
         </TopLevelControl>
 
         <TopLevelControl name="ZO_WorldMapZoom" level="1" resizeToFitDescendents="true" hidden="true">
@@ -400,17 +412,6 @@
                 <Label name="$(parent)MouseOverDescription" horizontalAlignment="CENTER" />
 
                 <Control name="$(parent)ZoomKeybind" inherits="ZO_KeybindButton" hidden="true"/>
-
-                <Control name="$(parent)EndDigSiteRevealKeybind" inherits="ZO_KeybindButton" tier="HIGH" hidden="true">
-                    <Anchor point="BOTTOM" relativeTo="$(parent)MapFrame" offsetY="-15" />
-                    <Controls>
-                        <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Performance/StatusMeterMunge.dds" excludeFromResizeToFitExtents="true">
-                            <TextureCoords left="0.15625" right="0.828125" top="0.3671875" bottom="0.625" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)KeyLabel" offsetX="-30" offsetY="-12" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)NameLabel" offsetX="30" offsetY="12" />
-                        </Texture>
-                    </Controls>
-                </Control>
 
                 <Control name="$(parent)Buttons">
                     <Dimensions y="36"/>

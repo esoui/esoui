@@ -108,6 +108,14 @@ do
         self:RefreshGoal()
     end
 
+    function ZO_ScryingHex:SetScale(scale)
+        self.control:SetScale(scale)
+    end
+
+    function ZO_ScryingHex:SetAlpha(alpha)
+        self.control:SetAlpha(alpha)
+    end
+
     function ZO_ScryingHex:PlayChangeAnimation()
         local newHexType = GetScryingHexType(self.hexIndex)
 
@@ -287,7 +295,8 @@ function ZO_ScryingActionButton:Initialize(control, skill, actionName)
     self.icon = self.abilitySlot:GetNamedChild("Icon")
     self.activeSkill = skill
     self.actionName = actionName
-    ZO_Keybindings_RegisterLabelForBindingUpdate(control:GetNamedChild("Keybind"), actionName)
+    self.keybindLabel = control:GetNamedChild("Keybind")
+    ZO_Keybindings_RegisterLabelForBindingUpdate(self.keybindLabel, actionName)
     
     self.abilitySlot:SetHandler("OnMouseEnter", function()
         InitializeTooltip(AbilityTooltip, self.icon, TOPLEFT, 5, -5, TOPRIGHT)
@@ -303,26 +312,36 @@ function ZO_ScryingActionButton:Initialize(control, skill, actionName)
     end)
 end
 
-local SCRYING_ACTION_ACTIVE_COLOR = ZO_DEFAULT_ENABLED_COLOR
-local SCRYING_ACTION_INACTIVE_COLOR = ZO_ColorDef:New(.7, .7, .7)
-local SCRYING_ACTION_DISABLED_COLOR = ZO_DEFAULT_DISABLED_COLOR
-function ZO_ScryingActionButton:Refresh()
-    if not IsScryingActiveSkillUnlocked(self.activeSkill) then
-        self.control:SetHidden(true)
-        return
-    else
-        self.control:SetHidden(false)
-    end
+do
+    local KEYBOARD_BINDING_FONT = "ZoFontWinH3"
+    local GAMEPAD_BINDING_FONT = "ZoFontGamepad18"
+    local SCRYING_ACTION_ACTIVE_COLOR = ZO_DEFAULT_ENABLED_COLOR
+    local SCRYING_ACTION_INACTIVE_COLOR = ZO_ColorDef:New(.7, .7, .7)
+    local SCRYING_ACTION_DISABLED_COLOR = ZO_DEFAULT_DISABLED_COLOR
+    function ZO_ScryingActionButton:Refresh()
+        if not IsScryingActiveSkillUnlocked(self.activeSkill) then
+            self.control:SetHidden(true)
+            return
+        else
+            self.control:SetHidden(false)
+        end
 
-    self.abilityId = GetScryingActiveSkillAbilityId(self.activeSkill)
-    self.icon:SetTexture(GetAbilityIcon(self.abilityId))
+        if IsInGamepadPreferredMode() then
+            self.keybindLabel:SetFont(GAMEPAD_BINDING_FONT)
+        else
+            self.keybindLabel:SetFont(KEYBOARD_BINDING_FONT)
+        end
 
-    if SCRYING:GetCurrentSkill() == self.activeSkill then
-        self.icon:SetColor(SCRYING_ACTION_ACTIVE_COLOR:UnpackRGBA())
-    elseif IsScryingActiveSkillUsable(self.activeSkill) == SCRYING_ACTIVE_SKILL_USE_RESULT_SUCCESS then
-        self.icon:SetColor(SCRYING_ACTION_INACTIVE_COLOR:UnpackRGBA())
-    else
-        self.icon:SetColor(SCRYING_ACTION_DISABLED_COLOR:UnpackRGBA())
+        self.abilityId = GetScryingActiveSkillAbilityId(self.activeSkill)
+        self.icon:SetTexture(GetAbilityIcon(self.abilityId))
+
+        if SCRYING:GetCurrentSkill() == self.activeSkill then
+            self.icon:SetColor(SCRYING_ACTION_ACTIVE_COLOR:UnpackRGBA())
+        elseif IsScryingActiveSkillUsable(self.activeSkill) == SCRYING_ACTIVE_SKILL_USE_RESULT_SUCCESS then
+            self.icon:SetColor(SCRYING_ACTION_INACTIVE_COLOR:UnpackRGBA())
+        else
+            self.icon:SetColor(SCRYING_ACTION_DISABLED_COLOR:UnpackRGBA())
+        end
     end
 end
 
@@ -595,22 +614,41 @@ function ZO_ScryingModalCursor:UpdateDirectionalInput()
         local row, column = targetHex:GetCoordinates()
         local newRow, newColumn = row, column
 
-        -- vertical movement
-        local verticalMove = self.verticalMovementController:CheckMovement()
-        if verticalMove == MOVEMENT_CONTROLLER_MOVE_NEXT then
-            newRow = row + 2
-        elseif verticalMove == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-            newRow = row - 2
-        end
+        local verticalMove, horizontalMove
+        if self.board:GetLineStartHex() then
+            -- line drawing mode
+            local lineStartHex = self.board:GetLineStartHex()
+            local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
+            dy = -dy -- flip such that +1 is down
+            local DEADZONE = 0.4
+            if math.sqrt(dx * dx + dy * dy) > DEADZONE then
+                local angleTurns = math.atan2(dy, dx) / (2 * math.pi)
+                -- recenter such that the top sixth of of the circle is centered around 0 and the bottom sixth around 3
+                local angleTurnsNormalized = (angleTurns + 5 / 16) % 1
+                local angleDirection = math.floor(angleTurnsNormalized * 6)
+                local rowOffset, columnOffset = GetHexOffsetsForScryingGridDirection(angleDirection)
+                local rowStart, columnStart = lineStartHex:GetCoordinates()
+                newRow = rowStart + rowOffset
+                newColumn = columnStart + columnOffset
+            end
+        else
+            -- vertical movement
+            verticalMove = self.verticalMovementController:CheckMovement()
+            if verticalMove == MOVEMENT_CONTROLLER_MOVE_NEXT then
+                newRow = row + 2
+            elseif verticalMove == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+                newRow = row - 2
+            end
 
-        -- horizontal movement
-        local horizontalMove = self.horizontalMovementController:CheckMovement()
-        if horizontalMove == MOVEMENT_CONTROLLER_MOVE_NEXT then
-            newColumn = column + 1
-            newRow = (newColumn % 2 == 0) and (row - 1) or (row + 1)
-        elseif horizontalMove == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-            newColumn = column - 1
-            newRow = (newColumn % 2 == 0) and (row - 1) or (row + 1)
+            -- horizontal movement
+            horizontalMove = self.horizontalMovementController:CheckMovement()
+            if horizontalMove == MOVEMENT_CONTROLLER_MOVE_NEXT then
+                newColumn = column + 1
+                newRow = (newColumn % 2 == 0) and (row - 1) or (row + 1)
+            elseif horizontalMove == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+                newColumn = column - 1
+                newRow = (newColumn % 2 == 0) and (row - 1) or (row + 1)
+            end
         end
 
         -- apply movement
@@ -663,6 +701,8 @@ function ZO_ScryingBoard:Initialize(gameControl)
     self.hexControlPool = ZO_ControlPool:New("ZO_ScryingHex", self.boardControl, "Hex")
     local function ResetHexControl(hexControl)
         hexControl.hexObject = nil
+        hexControl:SetScale(1)
+        hexControl:SetAlpha(1)
     end
     self.hexControlPool:SetCustomResetBehavior(ResetHexControl)
     local function HexAcquire(hexControl, hexIndex)
@@ -675,6 +715,11 @@ function ZO_ScryingBoard:Initialize(gameControl)
     self.goalControlPool = ZO_ControlPool:New("ZO_ScryingGoal", self.boardControl, "Goal")
 
     self.modalCursor = ZO_ScryingModalCursor:New(self, self.boardControl:GetNamedChild("ModalCursor"))
+
+    self.endOfGameTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingHex_EndOfGame")
+    self.endOfGameTimeline:GetFirstAnimation():SetUpdateFunction(function(...)
+        self:OnEndOfGameTimelineUpdate(...)
+    end)
 end
 
 function ZO_ScryingBoard:OnShowing()
@@ -1126,6 +1171,25 @@ function ZO_ScryingBoard:PerformActionOnTargetHex()
     end
 end
 
+function ZO_ScryingBoard:PlayEndOfGameAnimation()
+    self.endOfGameTimeline:PlayFromStart()
+end
+
+do
+    local MIN_SCALE = 0.75
+    local MIN_ALPHA = 0.4
+    function ZO_ScryingBoard:OnEndOfGameTimelineUpdate(animation, progress)
+        local scale = zo_lerp(1, MIN_SCALE, progress)
+        local alpha = zo_lerp(1, MIN_ALPHA, progress)
+        for _, hex in ipairs(self.hexList) do
+            if hex:GetHexType() ~= SCRYING_HEX_TYPE_OWNED then
+                hex:SetScale(scale)
+                hex:SetAlpha(alpha)
+            end
+        end
+    end
+end
+
 function ZO_ScryingBoard:GetLineStartHex()
     return self.lineStartHex
 end
@@ -1192,6 +1256,8 @@ function ZO_Scrying:Initialize(control)
         local ANIMATE_INSTANTLY = true
         if newState == SCENE_SHOWING then
             self.isScryingReady = false
+            self.startedOutro = false
+            self.startedEndOfGame = false
             self:TrySetCurrentSkill(SCRYING_ACTIVE_SKILL_NORMAL, NO_SOUND)
             self.board:OnShowing()
             self:RefreshNormalActionMeter(ANIMATE_INSTANTLY)
@@ -1204,20 +1270,29 @@ function ZO_Scrying:Initialize(control)
             self.triggeredTutorial = false
             self:RefreshInputState()
             ZO_Dialogs_ReleaseAllDialogsOfName("CONFIRM_EXIT_SCRYING")
+            if self.completedEndOfGameCallLaterId then
+                zo_removeCallLater(self.completedEndOfGameCallLaterId)
+            end
         elseif newState == SCENE_HIDDEN then
             self.board:OnHidden()
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_SCRYING_READY, function()
+    self.control:RegisterForEvent(EVENT_SCRYING_INTRO_COMPLETE, function()
         self.isScryingReady = true
         self:RefreshInputState()
         self:TryTriggerInitialTutorials()
     end)
 
+    self.control:RegisterForEvent(EVENT_SCRYING_OUTRO_COMPLETE, function()
+        self.waitingForOutro = false
+        self:TryCompleteScrying()        
+    end)
+
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         if SCRYING_SCENE:IsShowing() then
             self:RefreshInputState()
+            self:RefreshActionButtons()
             self:RefreshMoreInfoButton()
         end
     end)
@@ -1232,6 +1307,7 @@ function ZO_Scrying:Initialize(control)
 
     self.control:RegisterForEvent(EVENT_SCRYING_GAME_OVER, function()
         self.waitingForScryingResult = true
+        self.waitingToCompleteScrying = true
         self:TryCompleteScrying()
     end)
 
@@ -1251,9 +1327,7 @@ function ZO_Scrying:Initialize(control)
     end)
 
     SCRYING_HEX_ANIMATION_PROVIDER:RegisterCallback("BlockingAnimationsCompleted", function()
-        if self.waitingToCompleteScrying then
-            self:TryCompleteScrying()
-        end
+        self:TryCompleteScrying()
     end)
 end
 
@@ -1332,7 +1406,10 @@ do
 end
 
 function ZO_Scrying:TryCompleteScrying()
-    self.waitingToCompleteScrying = true
+    if not self.waitingToCompleteScrying then
+        return
+    end
+
     if self.waitingForScryingResult then
         -- wait until server provides a scrying result
         return
@@ -1340,6 +1417,22 @@ function ZO_Scrying:TryCompleteScrying()
 
     if SCRYING_HEX_ANIMATION_PROVIDER:AreBlockingAnimationsPlaying() then
         -- wait until existing animations are complete
+        return
+    end
+
+    if not self.startedEndOfGame then
+        self:StartEndOfGame()
+    end
+    if self.waitingForEndOfGame then
+        return
+    end
+
+    if not self.startedOutro then
+        self.startedOutro = true
+        StartScryingOutro()
+        self.waitingForOutro = true
+    end
+    if self.waitingForOutro then
         return
     end
 
@@ -1436,6 +1529,20 @@ function ZO_Scrying:TryCancel()
     else
         SCENE_MANAGER:Hide("Scrying")
     end
+end
+
+function ZO_Scrying:StartEndOfGame()
+    self.startedEndOfGame = true
+    
+    self.completedEndOfGameCallLaterId = zo_callLater(function() 
+        self.completedEndOfGameCallLaterId = nil
+        self.waitingForEndOfGame = false
+        self:TryCompleteScrying()
+    end, 2000)
+
+    self.board:PlayEndOfGameAnimation()
+
+    self.waitingForEndOfGame = true
 end
 
 function ZO_Scrying:ShowMoreInfo()
@@ -1578,18 +1685,18 @@ do
         polygon:AddPoint(0.212341, 0.450320)
         polygon:AddPoint(0.222362, 0.388828)
         polygon:AddPoint(0.247119, 0.316641)
-        polygon:AddPoint(0.304297, 0.211481)
-        polygon:AddPoint(0.326697, 0.203460)
-        polygon:AddPoint(0.417475, 0.204351)
-        polygon:AddPoint(0.433980, 0.199895)
-        polygon:AddPoint(0.458737, 0.216828)
-        polygon:AddPoint(0.477600, 0.200786)
-        polygon:AddPoint(0.498821, 0.233761)
-        polygon:AddPoint(0.521810, 0.203460)
-        polygon:AddPoint(0.544210, 0.214154)
-        polygon:AddPoint(0.565431, 0.198113)
-        polygon:AddPoint(0.598441, 0.205242)
-        polygon:AddPoint(0.688039, 0.209698)
+        polygon:AddPoint(0.297224, 0.224176)
+        polygon:AddPoint(0.329055, 0.223285)
+        polygon:AddPoint(0.415117, 0.216155)
+        polygon:AddPoint(0.434569, 0.206352)
+        polygon:AddPoint(0.456380, 0.231306)
+        polygon:AddPoint(0.476421, 0.216155)
+        polygon:AddPoint(0.500000, 0.250021)
+        polygon:AddPoint(0.522400, 0.215264)
+        polygon:AddPoint(0.544799, 0.232197)
+        polygon:AddPoint(0.565431, 0.207243)
+        polygon:AddPoint(0.600799, 0.219720)
+        polygon:AddPoint(0.695703, 0.221502)
         polygon:AddPoint(0.732839, 0.284558)
     end
 end

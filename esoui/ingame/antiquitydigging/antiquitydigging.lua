@@ -76,7 +76,7 @@ function ZO_AntiquityDigging:Initialize(control)
     self.stabilityBarLeft = self.meterContainer:GetNamedChild("StabilityHealthBarLeft")
     self.stabilityBarRight = self.meterContainer:GetNamedChild("StabilityHealthBarRight")
     self.stabilityText = self.meterContainer:GetNamedChild("StabilityHealthText")
-    
+
     local STABILITY_BAR_GRADIENT = { ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_DIGGING, ANTIQUITY_DIGGING_COLORS_STABILITY_START)), ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_DIGGING, ANTIQUITY_DIGGING_COLORS_STABILITY_END)) }
     ZO_StatusBar_SetGradientColor(self.stabilityBarLeft, STABILITY_BAR_GRADIENT)
     ZO_StatusBar_SetGradientColor(self.stabilityBarRight, STABILITY_BAR_GRADIENT)
@@ -179,10 +179,9 @@ function ZO_AntiquityDigging:Initialize(control)
             if unitFrame.nameLabel then
                 local antiquityId = GetDigSpotAntiquityId()
                 if antiquityId ~= 0 then
-                    local antiquityName = GetAntiquityName(antiquityId)
-                    local antiquityQuality = GetAntiquityQuality(antiquityId)
-                    local qualityColorDef = GetAntiquityQualityColor(antiquityQuality)
-                    unitFrame.nameLabel:SetText(qualityColorDef:Colorize(antiquityName))
+                    local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+                    local antiquityName = antiquityData:GetColorizedFormattedName()
+                    unitFrame.nameLabel:SetText(antiquityName)
                 end
             end
         end
@@ -274,13 +273,14 @@ function ZO_AntiquityDigging:RefreshDurabilityBar()
 end
 
 function ZO_AntiquityDigging:RefreshStabilityBar()
+    local remainingTimeS = GetDigSpotStabilityTimeRemainingSeconds()
     local currentStability, maxStability = GetDigSpotStability()
     local halfCurrentStability, halfMaxStability = currentStability * 0.5, maxStability * 0.5
     self.stabilityBarLeft:SetMinMax(0, halfMaxStability)
     self.stabilityBarLeft:SetValue(halfCurrentStability)
     self.stabilityBarRight:SetMinMax(0, halfMaxStability)
     self.stabilityBarRight:SetValue(halfCurrentStability)
-    self.stabilityText:SetText(ZO_FormatResourceBarCurrentAndMax(currentStability, maxStability, RESOURCE_NUMBERS_SETTING_NUMBER_ONLY))
+    self.stabilityText:SetText(ZO_FormatTime(remainingTimeS, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR))
 end
 
 do

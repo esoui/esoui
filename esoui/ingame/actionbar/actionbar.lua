@@ -29,7 +29,7 @@ function ZO_ActionBar_GetButton(slotNum)
 end
 
 function ZO_ActionBar_CanUseActionSlots()
-    return ((not IsGameCameraActive() and not IsInteractionCameraActive()) or SCENE_MANAGER:IsShowing("hud")) and not IsUnitDead("player")
+    return (not (IsGameCameraActive() or IsInteractionCameraActive() or IsProgrammableCameraActive()) or SCENE_MANAGER:IsShowing("hud")) and not IsUnitDead("player")
 end
 
 function ZO_ActionBar_OnActionButtonDown(slotNum)

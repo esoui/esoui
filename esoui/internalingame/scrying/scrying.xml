@@ -60,6 +60,16 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ScryingHex_EndOfGame">
+            <Animations>
+                <CustomAnimation duration="1000">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
     </Animations>
 
     <Controls>
@@ -84,8 +94,8 @@
                     </Controls>
                 </Button>
 
-                <Label name="$(parent)Keybind" font="ZoFontGamepad18">
-                    <Anchor point="TOP" relativeTo="$(parent)AbilitySlot" relativePoint="BOTTOM" offsetY="-6"/>
+                <Label name="$(parent)Keybind" font="ZoFontWinH3">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)AbilitySlot" relativePoint="TOP" offsetY="6"/>
                 </Label>
             </Controls>
         </Control>
@@ -185,8 +195,8 @@
         </Control>
 
         <TopLevelControl name="ZO_ScryingTopLevel" mouseEnabled="true" tier="LOW" layer="BACKGROUND" hidden="true">
-            <Anchor point="TOPLEFT" offsetY="-20"/>
-            <Anchor point="BOTTOMRIGHT" offsetY="-20"/>
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT"/>
 
             <OnInitialized>
                 ZO_Scrying_OnInitialized(self)
@@ -203,7 +213,7 @@
             <Controls>
                 <Control name="$(parent)Game">
                     <Dimensions x="2384" y="1180" />
-                    <Anchor point="CENTER" offsetY="15"/>
+                    <Anchor point="CENTER"/>
                     <Controls>
                         <Control name="$(parent)EyeBackground" tier="MEDIUM">
                             <AnchorFill/>
@@ -243,7 +253,7 @@
 
                         <Control name="$(parent)SafeArea" tier="MEDIUM">
                             <Anchor point="BOTTOM" offsetY="-296"/>
-                            <Dimensions x="810" y="630" />
+                            <Dimensions x="810" y="610" />
                             <Controls>
                                 <Texture name="$(parent)ModalCursor" inherits="ZO_ScryingModalCursor" />
                             </Controls>
@@ -252,28 +262,28 @@
                         <Control name="$(parent)Frame" tier="HIGH">
                             <AnchorFill/>
                             <Controls>
-                                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
-                                    <TextureCoords left="0" top="0" right="0.5" bottom="0.25" />
+                                <Texture name="$(parent)Left" scale="1.1" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                    <Dimensions x="158" y="1024"/>
+                                    <Anchor point="RIGHT" relativePoint="CENTER" />
+                                    <TextureCoords left="0" top="0" right="0.154296875" bottom="1" />
                                 </Texture>
-                                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                                    <Anchor point="TOPLEFT" relativePoint="TOP" />
-                                    <Anchor point="BOTTOMRIGHT" />
-                                    <TextureCoords left="0.5" top="0" right="1" bottom="0.25" />
+                                <Texture name="$(parent)Right" scale="1.1" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                    <Dimensions x="158" y="1024"/>
+                                    <Anchor point="LEFT" relativePoint="CENTER" />
+                                    <TextureCoords left="0.154296875" top="0" right="0.30859375" bottom="1" />
                                 </Texture>
                                 <Control name="$(parent)Glow" alpha="0">
                                     <AnchorFill/>
                                     <Controls>
-                                        <Texture name="$(parent)Left" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
-                                            <TextureCoords left="0" top="0.25" right="0.5" bottom="0.5" />
+                                        <Texture name="$(parent)Left" scale="1.1" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                            <Dimensions x="352" y="1024"/>
+                                            <Anchor point="RIGHT" relativePoint="CENTER" />
+                                            <TextureCoords left="0.3095703125" top="0" right="0.654296875" bottom="1" />
                                         </Texture>
-                                        <Texture name="$(parent)Right" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                                            <Anchor point="TOPLEFT" relativePoint="TOP" />
-                                            <Anchor point="BOTTOMRIGHT" />
-                                            <TextureCoords left="0.5" top="0.25" right="1" bottom="0.5" />
+                                        <Texture name="$(parent)Right" scale="1.1" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                            <Dimensions x="352" y="1024"/>
+                                            <Anchor point="LEFT" relativePoint="CENTER" />
+                                            <TextureCoords left="0.654296875" top="0" right="0.9990234375" bottom="1" />
                                         </Texture>
                                     </Controls>
                                 </Control>
@@ -336,16 +346,22 @@
                                 </Control>
 
                                 <Control name="$(parent)SpecialAction1" inherits="ZO_ScryingAction">
-                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="-128" offsetY="180" />
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="-122" offsetY="203" />
                                 </Control>
                                 <Control name="$(parent)SpecialAction2" inherits="ZO_ScryingAction">
-                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="0" offsetY="224" />
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="0" offsetY="246" />
                                 </Control>
                                 <Control name="$(parent)SpecialAction3" inherits="ZO_ScryingAction">
-                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="128" offsetY="180" />
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="122" offsetY="203" />
                                 </Control>
                                 <Control name="$(parent)NormalAction" inherits="ZO_ScryingAction">
-                                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetX="0" offsetY="-128" />
+                                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetX="0" offsetY="-134" />
+                                    <Controls>
+                                         <Label name="$(parent)Keybind" override="true">
+                                            <ClearAnchors/>
+                                            <Anchor point="TOP" relativeTo="$(parent)AbilitySlot" relativePoint="BOTTOM" offsetY="-6"/>
+                                        </Label>
+                                    </Controls>
                                 </Control>
 
                                 <Control name="$(parent)MoreInfo" inherits="ZO_KeybindButton">

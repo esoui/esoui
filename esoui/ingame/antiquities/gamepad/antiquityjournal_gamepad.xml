@@ -96,9 +96,17 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Header" override="true">
+                    <Anchor point="TOPLEFT" offsetX="95" offsetY="3" />
+                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="3" />
+                    <Dimensions y="103" />
+
                     <Controls>
                         <Label name="$(parent)DifficultyLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <Anchor point="LEFT" relativeTo="$(parent)NumRecoveredLabel" relativePoint="RIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Zone" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TitleLabel" relativePoint="BOTTOMLEFT" offsetY="20" />
                         </Label>
                     </Controls>
                 </Control>
@@ -133,9 +141,17 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Header" override="true">
+                    <Anchor point="TOPLEFT" offsetX="95" offsetY="3" />
+                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="3" />
+                    <Dimensions y="103" />
+
                     <Controls>
                         <Label name="$(parent)DifficultyLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <Anchor point="LEFT" relativeTo="$(parent)NumRecoveredLabel" relativePoint="RIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Zone" inherits="ZO_GamepadHeaderLabelTextTemplate">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TitleLabel" relativePoint="BOTTOMLEFT" offsetY="20" />
                         </Label>
                     </Controls>
                 </Control>
@@ -149,7 +165,7 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)LeadExpirationLabel" inherits="ZO_GamepadHeaderLabelTextTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="2" />
                 </Label>
             </Controls>
         </Control>

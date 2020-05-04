@@ -144,7 +144,9 @@ function Login_Keyboard:Initialize(control)
         else
             self.announcements:SetHidden(false)
             self.announcementsText = message
-            self.announcementsLabel:SetText(message)
+
+            local messageAsSingleLine = zo_strgsub(message, "\n", " ")
+            self.announcementsLabel:SetText(messageAsSingleLine)
         end
 
         local serverAlertMessage = success and GetServerAlertMessage()

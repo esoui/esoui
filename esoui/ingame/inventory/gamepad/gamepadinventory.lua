@@ -39,12 +39,14 @@ function ZO_GamepadInventory:Initialize(control)
     end
 
     local function OnUpdate(updateControl, currentFrameTimeSeconds)
-       self:OnUpdate(currentFrameTimeSeconds)
+        if self.scene:IsShowing() then
+            self:OnUpdate(currentFrameTimeSeconds)
+        end
     end
 
-    self.trySetClearNewFlagCallback =   function(callId)
-                                            self:TrySetClearNewFlag(callId)
-                                        end
+    self.trySetClearNewFlagCallback = function(callId)
+        self:TrySetClearNewFlag(callId)
+    end
 
     local function RefreshVisualLayer()
         if self.scene:IsShowing() then
@@ -1061,8 +1063,6 @@ function ZO_GamepadInventory:RefreshItemList()
 
     local lastBestItemCategoryName
     for i, itemData in ipairs(filteredDataTable) do
-        local nextItemData = filteredDataTable[i + 1]
-
         local entryData = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
         entryData:InitializeInventoryVisualData(itemData)
 

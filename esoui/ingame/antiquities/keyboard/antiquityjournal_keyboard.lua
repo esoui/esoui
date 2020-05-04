@@ -208,9 +208,7 @@ function ZO_AntiquityTileBase_Keyboard:OnMouseEnter()
 end
 
 function ZO_AntiquityTileBase_Keyboard:OnMouseExit()
-    ZO_HideAntiquityOrSetTooltip_Keyboard(self.control, self.tileData)
     ANTIQUITY_JOURNAL_KEYBOARD:ClearMouseOverTile(self)
-    self:SetHighlightHidden(true)
 end
 
 function ZO_AntiquityTileBase_Keyboard:OnMouseDoubleClick()
@@ -406,6 +404,7 @@ function ZO_ScryableAntiquityTile_Keyboard:Initialize(control)
     self.colorizeLabels = false
     ZO_AntiquityTileBase_Keyboard.Initialize(self, control)
     self.difficulty = self.header:GetNamedChild("Difficulty")
+    self.zoneLabel = self.header:GetNamedChild("Zone")
     self.leadExpiration = self.header:GetNamedChild("LeadExpiration")
     self.progressIcons = control:GetNamedChild("ProgressIcons")
     self.actions = {
@@ -420,13 +419,22 @@ function ZO_ScryableAntiquityTile_Keyboard:Initialize(control)
                 WORLD_MAP_MANAGER:ShowAntiquityOnMap(antiquityId)
             end,
         },
-        ["secondary"] = {
+        ["negative"] = {
             label = GetString(SI_ANTIQUITY_ABANDON),
             visible = function(self)
                 return self.tileData:HasDiscoveredDigSites()
             end,
             execute = function(self)
                 ZO_Dialogs_ShowDialog("CONFIRM_ABANDON_ANTIQUITY_SCRYING_PROGRESS", { antiquityId = self:GetAntiquityId() })
+            end,
+        },
+        ["tertiary"] = {
+            label = GetString(SI_ANTIQUITY_VIEW_IN_CODEX),
+            execute = function(self)
+                local NOT_REBUILDING = false
+                local BRING_PARENT_INTO_VIEW = true
+                local node = self.tileData:GetAntiquityCategoryData().nodeKeyboard
+                node:GetTree():SelectNode(node, NOT_REBUILDING, BRING_PARENT_INTO_VIEW)
             end,
         },
         ["primary"] = {
@@ -478,6 +486,10 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
         end
         self.difficulty:SetHidden(false)
 
+        local zoneName = GetZoneNameById(tileData:GetZoneId())
+        self.zoneLabel:SetText(zo_strformat(SI_ANTIQUITY_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName)))
+        self.zoneLabel:SetHidden(false)
+
         local isLeadNearingExpiration, leadTimeRemaining = self.tileData:GetLeadExpirationStatus()
         if isLeadNearingExpiration then
             self.leadExpiration:SetText(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, ZO_SELECTED_TEXT:Colorize(leadTimeRemaining)))
@@ -504,10 +516,18 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
                 previousItem = iconControl
             end
         end
+        self.progressIcons:ClearAnchors()
+        if isLeadNearingExpiration then
+            self.progressIcons:SetAnchor(TOPLEFT, self.leadExpiration, BOTTOMLEFT, 0, 4)
+        else
+            self.progressIcons:SetAnchor(TOPLEFT, self.zoneLabel, BOTTOMLEFT, 0, 4)
+        end
         self.progressIcons:SetHidden(false)
     else
         self.difficulty:SetHidden(true)
+        self.leadExpiration:SetHidden(true)
         self.progressIcons:SetHidden(true)
+        self.zoneLabel:SetHidden(true)
     end
 end
 
@@ -526,7 +546,7 @@ end
 
 function ZO_ScryableAntiquityTile_Keyboard:OnMouseExit()
     ZO_AntiquityTileBase_Keyboard.OnMouseExit(self)
-    local antiquitySetData = self.tileData:GetAntiquitySetData()
+    local antiquitySetData = self.tileData and self.tileData:GetAntiquitySetData()
     if antiquitySetData then
         ZO_HideAntiquityOrSetTooltip_Keyboard(self.control, antiquitySetData)
     end
@@ -560,7 +580,8 @@ function ZO_AntiquityJournal_Keyboard:InitializeKeybindDescriptors()
     self.keybindStripDescriptor = {}
 
     local function AddKeybindDescriptor(actionIndex, keybind)
-        local keybindDescriptor = {
+        local keybindDescriptor =
+        {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             keybind = keybind,
             name = function()
@@ -586,12 +607,13 @@ function ZO_AntiquityJournal_Keyboard:InitializeKeybindDescriptors()
                 local tile = self:GetMouseOverTile()
                 return tile and tile:IsActionVisible(actionIndex)
             end,
-    }
+        }
         table.insert(self.keybindStripDescriptor, keybindDescriptor)
     end
 
+    AddKeybindDescriptor("tertiary", "UI_SHORTCUT_TERTIARY")
     AddKeybindDescriptor("showOnMap", "UI_SHORTCUT_SHOW_QUEST_ON_MAP")
-    AddKeybindDescriptor("secondary", "UI_SHORTCUT_SECONDARY")
+    AddKeybindDescriptor("negative", "UI_SHORTCUT_NEGATIVE")
     AddKeybindDescriptor("primary", "UI_SHORTCUT_PRIMARY")
 end
 
@@ -722,7 +744,7 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     end
 
     -- Define the templates that are to be used by the tree view control.
-    local CHILD_INDENT = 60
+    local CHILD_INDENT = 74
     local CHILD_SPACING = 0
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconHeader", TreeHeaderSetup_Child, nil, TreeEqualityFunction, CHILD_INDENT, CHILD_SPACING)
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
@@ -843,6 +865,7 @@ end
 
 function ZO_AntiquityJournal_Keyboard:ResetTiles()
     -- Reset all tiles and lookup indexes.
+    self:ClearMouseOverTile(self.mouseOverTile)
     self.antiquityHeadingControlPool:ReleaseAllObjects()
     self.antiquityTileControlPool:ReleaseAllObjects()
     self.antiquitySetTileControlPool:ReleaseAllObjects()
@@ -1290,10 +1313,12 @@ function ZO_AntiquityJournal_Keyboard:SetMouseOverTile(tileData)
     self:UpdateKeybinds()
 end
 
-function ZO_AntiquityJournal_Keyboard:ClearMouseOverTile(tileData)
-    if self.mouseOverTile == tileData then
+function ZO_AntiquityJournal_Keyboard:ClearMouseOverTile(tile)
+    if tile and tile == self.mouseOverTile then
         self.mouseOverTile = nil
+        ZO_HideAntiquityOrSetTooltip_Keyboard(tile.control, tile.tileData)
         self:UpdateKeybinds()
+        tile:SetHighlightHidden(true)
     end
 end
 

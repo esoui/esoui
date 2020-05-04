@@ -238,14 +238,17 @@
                             <Anchor point="LEFT" relativeTo="$(parent)NumRecovered" relativePoint="RIGHT" offsetX="15" />
                         </Label>
 
+                        <Label name="$(parent)Zone" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="22" />
+                        </Label>
+
                         <Label name="$(parent)LeadExpiration" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="26" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Zone" relativePoint="BOTTOMLEFT" offsetY="2" />
                         </Label>
                     </Controls>
                 </Control>
 
                 <Control name="$(parent)ProgressIcons" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
                     <ResizeToFitPadding height="5" />
                 </Control>
             </Controls>
@@ -296,7 +299,7 @@
                                 </Label>
 
                                 <StatusBar name="$(parent)Progress" inherits="ZO_AntiquityStatusBar">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="6" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
                                     <Dimensions x="275" />
                                 </StatusBar>
 

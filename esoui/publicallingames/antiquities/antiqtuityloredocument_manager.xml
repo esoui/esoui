@@ -13,7 +13,7 @@
     
     <Controls>
         <!-- Base -->
-        
+
         <Control name="ZO_AntiquityLoreDocument_Keyboard_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontBookScrollTitle" />
@@ -34,11 +34,11 @@
                 self.titleLabel = self:GetNamedChild("Title")
                 self.bodyLabel = self:GetNamedChild("Body")
             </OnInitialized>
-            
+
             <Controls>
                 <Texture name="$(parent)BG">
-                    <Anchor point="TOPLEFT"/>
-                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
                 </Texture>
                 
                 <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65">
@@ -57,6 +57,12 @@
         
         <Control name="ZO_AntiquityLoreWideDocument" inherits="ZO_AntiquityLoreDocument" virtual="true">
             <Dimensions x="ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_CONTROL_WIDTH" />
+        </Control>
+        
+        <!-- Standard -->
+        
+        <Control name="ZO_AntiquityLoreStandardDocument" inherits="ZO_AntiquityLoreDocument" virtual="true">
+            <Dimensions x="ZO_ANTIQUITY_LORE_DOCUMENT_CONTROL_WIDTH" />
         </Control>
     </Controls>
 </GuiXml>

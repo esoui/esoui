@@ -789,6 +789,7 @@ end
 SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
 
 CHAMPION_UI_MUSIC_FRAGMENT = ZO_UIMusicFragment:New(OVERRIDE_MUSIC_MODE_CHAMPION)
+SCRYING_UI_MUSIC_FRAGMENT = ZO_UIMusicFragment:New(OVERRIDE_MUSIC_MODE_SCRYING)
 
 --------------------------------------
 --General Fragment Declarations
@@ -821,6 +822,7 @@ RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightBackground)
 STATS_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedStatsBackground)
 WIDE_RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideRightBackground)
 LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedLeftPanelBackground)
+THIN_RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinRightBackground)
 THIN_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinRightPanelBackground)
 THIN_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinLeftPanelBackground)
 THIN_TALL_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinTallRightPanelBackground)

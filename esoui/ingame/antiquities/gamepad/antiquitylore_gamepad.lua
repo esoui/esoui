@@ -126,7 +126,7 @@ function ZO_AntiquityLoreGamepad:RefreshLoreList()
             local entryData = ZO_GamepadEntryData:New(entryTitle, iconTexture)
 
             if loreEntryData.fragmentName then
-                entryData:AddSubLabels({ loreEntryData.fragmentName })
+                entryData:AddSubLabels({ ZO_CachedStrFormat(SI_ANTIQUITY_NAME_FORMATTER, loreEntryData.fragmentName) })
                 entryData:SetSubLabelColors(ZO_NORMAL_TEXT)
             end
 
@@ -191,9 +191,10 @@ function ZO_AntiquityLoreGamepad:AddLoreEntry(previousControl, controlIndex, ent
         else
             offsetX = -50
         end
-        loreEntryControl:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, offsetX, -70)
+        loreEntryControl:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, offsetX, -64)
     end
     loreEntryControl:SetHidden(false)
+    loreEntryControl.highlightAnimation:PlayBackward()
 
     return loreEntryControl
 end

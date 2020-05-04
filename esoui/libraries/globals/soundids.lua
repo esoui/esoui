@@ -401,6 +401,7 @@ SOUNDS = {
     MAP_LOCATION_CLICKED            = "Map_Location_Clicked",
     MAP_AUTO_NAVIGATION_MAP_CHANGE  = "Map_Auto_Navigation_Map_Change",
     MAP_AUTO_NAVIGATION_BEGIN_ZOOM  = "Map_Auto_Navigation_Begin_Zoom",
+    MAP_PIN_FADEIN                  = "Map_Pin_FadeIn",
     GAMEPAD_MAP_START_MAP_CHANGE    = "Console_Map_Start_Map_Change",
     GAMEPAD_MAP_COMPLETE_MAP_CHANGE = "Console_Map_Complete_Map_Change",
 

@@ -1033,12 +1033,6 @@ local AlertHandlers = {
         end
     end,
 
-    [EVENT_ANTIQUITY_SCRYING_RESULT] = function(result)
-        if result ~= ANTIQUITY_SCRYING_RESULT_SUCCESS then
-            return ERROR, GetString("SI_ANTIQUITYSCRYINGRESULT", result), SOUNDS.SCRYING_NO_PROGRESS_ADDED
-        end
-    end,
-
     [EVENT_ANTIQUITY_DIGGING_ACTIVE_SKILL_USE_RESULT] = function(result)
         if result ~= DIGGING_ACTIVE_SKILL_USE_RESULT_SUCCESS then
             return ERROR, GetString("SI_DIGGINGACTIVESKILLUSERESULT", result), SOUNDS.GENERAL_ALERT_ERROR

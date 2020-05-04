@@ -874,9 +874,9 @@ local antiquityLoreScene = SCENE_MANAGER:GetScene("antiquityLoreKeyboard")
 antiquityLoreScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 antiquityLoreScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
 antiquityLoreScene:AddFragment(ANTIQUITY_LORE_FRAGMENT)
+antiquityLoreScene:AddFragment(ANTIQUITY_LORE_READER_FRAGMENT)
 antiquityLoreScene:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
-antiquityLoreScene:AddFragment(RIGHT_BG_FRAGMENT)
-antiquityLoreScene:AddFragment(TITLE_FRAGMENT)
+antiquityLoreScene:AddFragment(THIN_RIGHT_BG_FRAGMENT)
 antiquityLoreScene:AddFragment(CODEX_WINDOW_SOUNDS)
 
 -------------------

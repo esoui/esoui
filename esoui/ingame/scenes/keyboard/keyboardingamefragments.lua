@@ -8,6 +8,7 @@ HOUSING_BOOK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingBook_Keyboard)
 HOUSING_FURNITURE_BROWSER_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingFurnitureBrowserMenu_KeyboardTopLevel)
 ANTIQUITY_JOURNAL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AntiquityJournal_Keyboard_TopLevel)
 ANTIQUITY_LORE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AntiquityLore_Keyboard_TopLevel)
+ANTIQUITY_LORE_READER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AntiquityLoreReader_Keyboard_TopLevel)
 
 CROWN_STORE_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_CROWN_STORE_TITLE)
 

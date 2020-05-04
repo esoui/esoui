@@ -1,3 +1,26 @@
+-- Standard Document Configuration
+
+ZO_ANTIQUITY_LORE_DOCUMENT_CONTROL_WIDTH = 1024
+local ANTIQUITY_LORE_DOCUMENT_FILE_WIDTH = 1024
+local ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER = ZO_ANTIQUITY_LORE_DOCUMENT_CONTROL_WIDTH / ANTIQUITY_LORE_DOCUMENT_FILE_WIDTH
+
+local ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_HEIGHT = 1024
+local ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET = 576
+ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_HEIGHT
+
+local ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_HEIGHT = 512
+local ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET = 448
+ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_HEIGHT
+
+local ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_HEIGHT = 256
+local ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET = 256
+ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_HEIGHT
+
+-- Wide Document Configuration
+
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_CONTROL_WIDTH = 1200
 local ANTIQUITY_LORE_WIDE_DOCUMENT_FILE_WIDTH = 1024
 local ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_CONTROL_WIDTH / ANTIQUITY_LORE_WIDE_DOCUMENT_FILE_WIDTH
@@ -17,6 +40,8 @@ local ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET = 256
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_CONTROL_HEIGHT = ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_HEIGHT
 
+-- General Configuration
+
 ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X = 60
 ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y = 45
 ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X = ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X * 2
@@ -32,6 +57,7 @@ local LABEL_ALIGNMENTS =
     TEXT_ALIGN_RIGHT,
 }
 
+local ANTIQUITY_CODEX_TEXTURE_FORMATTER = "EsoUI/Art/Antiquities/Codex/AntiquityLore_%s_%d.dds"
 local ANTIQUITY_CODEX_WIDE_TEXTURE_FORMATTER = "EsoUI/Art/Antiquities/Codex/AntiquityLore_%s_%d.dds"
 
 ZO_AntiquityLoreDocument_Manager = ZO_CallbackObject:Subclass()
@@ -51,7 +77,6 @@ function ZO_AntiquityLoreDocument_Manager:Initialize()
         ApplyTemplateToControl(control, ZO_GetPlatformTemplate("ZO_AntiquityLoreDocument"))
     end)
 
-    --Preparing for the scenario where we want thinner taller versions for keyboard
     self.wideControlAcquisitionDescriptor =
     {
         pool = widePool,
@@ -79,11 +104,52 @@ function ZO_AntiquityLoreDocument_Manager:Initialize()
             },
         },
     }
+
+    local standardPool = ZO_ControlPool:New("ZO_AntiquityLoreStandardDocument", nil, "LoreStandardDocument")
+    standardPool:SetCustomFactoryBehavior(function(control)
+        control.highlightAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityLoreDocument_HighlightAnimation", control)
+    end)
+    standardPool:SetCustomAcquireBehavior(function(control)
+        ApplyTemplateToControl(control, ZO_GetPlatformTemplate("ZO_AntiquityLoreDocument"))
+    end)
+
+    self.standardControlAcquisitionDescriptor =
+    {
+        pool = standardPool,
+        metaPools = {},
+        fileFormatter = ANTIQUITY_CODEX_TEXTURE_FORMATTER,
+        sizeDescriptors =
+        {
+            {
+                maxLabelHeight = ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
+                textureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_CONTROL_HEIGHT,
+                textureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_TEXTURE_COORDS_BOTTOM,
+                imageQualifier = "Small",
+            },
+            {
+                maxLabelHeight = ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
+                textureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_CONTROL_HEIGHT,
+                textureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_TEXTURE_COORDS_BOTTOM,
+                imageQualifier = "Medium",
+            },
+            {
+                maxLabelHeight = ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
+                textureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_CONTROL_HEIGHT,
+                textureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_TEXTURE_COORDS_BOTTOM,
+                imageQualifier = "Large",
+            },
+        },
+    }
 end
 
 -- Never hold on to a control indefinitely. Make sure to always call ReleaseAllObjects when you no longer need them, or at least when leaving your scene
 function ZO_AntiquityLoreDocument_Manager:AcquireWideDocumentForLoreEntry(parentControl, antiquityId, loreEntryIndex)
     return self:InternalAcquireDocumentForLoreEntry(self.wideControlAcquisitionDescriptor, parentControl, antiquityId, loreEntryIndex)
+end
+
+-- Never hold on to a control indefinitely. Make sure to always call ReleaseAllObjects when you no longer need them, or at least when leaving your scene
+function ZO_AntiquityLoreDocument_Manager:AcquireDocumentForLoreEntry(parentControl, antiquityId, loreEntryIndex)
+    return self:InternalAcquireDocumentForLoreEntry(self.standardControlAcquisitionDescriptor, parentControl, antiquityId, loreEntryIndex)
 end
 
 function ZO_AntiquityLoreDocument_Manager:InternalAcquireDocumentForLoreEntry(acquisitionDescriptor, parentControl, antiquityId, loreEntryIndex)
@@ -180,16 +246,16 @@ function ZO_AntiquityLoreDocument_Manager:InternalAcquireDocumentForLoreEntry(ac
     control:SetHeight(sizeDescriptor.textureHeight)
     control:SetParent(parentControl)
 
-    if loreEntryData.unlocked then
-        control.highlightAnimation:PlayInstantlyToEnd()
-    else
-        control.highlightAnimation:PlayInstantlyToStart()
-    end
     return control
 end
 
 function ZO_AntiquityLoreDocument_Manager:ReleaseAllObjects(parentControl)
     local metaPool = self.wideControlAcquisitionDescriptor.metaPools[parentControl]
+    if metaPool then
+        metaPool:ReleaseAllObjects()
+    end
+
+    local metaPool = self.standardControlAcquisitionDescriptor.metaPools[parentControl]
     if metaPool then
         metaPool:ReleaseAllObjects()
     end
@@ -199,6 +265,9 @@ function ZO_AntiquityLoreDocument_HighlightAnimation_OnUpdate(control, progress)
     local easedProgress = ZO_EaseInCubic(progress)
     local animatedControl = control:GetAnimatedControl()
     animatedControl.backgroundTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_WEIGHT_RGB, zo_lerp(0.4, 1.5, easedProgress))
+    local drawLayer = progress > 0 and DL_CONTROLS or DL_BACKGROUND
+    animatedControl:SetDrawLayer(drawLayer)
+    animatedControl.backgroundTexture:SetDrawLayer(drawLayer)
 end
 
 ANTIQUITY_LORE_DOCUMENT_MANAGER = ZO_AntiquityLoreDocument_Manager:New()

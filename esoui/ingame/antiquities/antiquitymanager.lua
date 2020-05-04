@@ -68,10 +68,12 @@ end
 
 function ZO_AntiquityManager:GetAntiquarianGuildZoneLockedMessage()
     local antiquarianGuildZoneCollectibleData = self:GetAntiquarianGuildZoneCollectibleData()
-    local antiquarianGuildZoneCollectibleName = antiquarianGuildZoneCollectibleData:GetName()
-    local antiquarianGuildZoneCollectibleCategory = antiquarianGuildZoneCollectibleData:GetCategoryTypeDisplayName()
-    local antiquarianGuildZoneName = ZO_SELECTED_TEXT:Colorize(self:GetAntiquarianGuildZoneName())
-    return zo_strformat(SI_ANTIQUITY_GUILD_ZONE_LOCKED, antiquarianGuildZoneName, antiquarianGuildZoneCollectibleName, antiquarianGuildZoneCollectibleCategory)
+    if antiquarianGuildZoneCollectibleData then
+        local antiquarianGuildZoneCollectibleName = antiquarianGuildZoneCollectibleData:GetName()
+        local antiquarianGuildZoneCollectibleCategory = antiquarianGuildZoneCollectibleData:GetCategoryTypeDisplayName()
+        local antiquarianGuildZoneName = ZO_SELECTED_TEXT:Colorize(self:GetAntiquarianGuildZoneName())
+        return zo_strformat(SI_ANTIQUITY_GUILD_ZONE_LOCKED, antiquarianGuildZoneName, antiquarianGuildZoneCollectibleName, antiquarianGuildZoneCollectibleCategory)
+    end
 end
 
 function ZO_AntiquityManager:GetScryingToolCollectibleData()
@@ -80,20 +82,22 @@ function ZO_AntiquityManager:GetScryingToolCollectibleData()
 end
 
 function ZO_AntiquityManager:GetScryingLockedMessage()
-    local antiquarianGuildCityName = ZO_SELECTED_TEXT:Colorize(GetString(SI_ANTIQUITY_GUILD_CITY_NAME))
-    local antiquarianGuildZoneName = ZO_SELECTED_TEXT:Colorize(self:GetAntiquarianGuildZoneName())
     local scryingSkillLineData = ZO_GetAntiquityScryingSkillLineData()
-    local scryingSkillLineName = ZO_SELECTED_TEXT:Colorize(scryingSkillLineData:GetFormattedName())
+    if scryingSkillLineData then
+        local antiquarianGuildCityName = ZO_SELECTED_TEXT:Colorize(GetString(SI_ANTIQUITY_GUILD_CITY_NAME))
+        local antiquarianGuildZoneName = ZO_SELECTED_TEXT:Colorize(self:GetAntiquarianGuildZoneName())
+        local scryingSkillLineName = ZO_SELECTED_TEXT:Colorize(scryingSkillLineData:GetFormattedName())
 
-    if not ZO_IsScryingToolUnlocked() then
-        local scryingToolCollectibleData = self:GetScryingToolCollectibleData()
-        local scryingToolCollectibleName = scryingToolCollectibleData:GetName()
-        local scryingToolCollectibleCategory = scryingToolCollectibleData:GetCategoryTypeDisplayName()
-        return zo_strformat(SI_ANTIQUITY_SCRYING_TOOL_LOCKED, scryingToolCollectibleName, scryingToolCollectibleCategory, scryingSkillLineName, antiquarianGuildCityName, antiquarianGuildZoneName)
-    end
+        if not ZO_IsScryingToolUnlocked() then
+            local scryingToolCollectibleData = self:GetScryingToolCollectibleData()
+            local scryingToolCollectibleName = scryingToolCollectibleData:GetName()
+            local scryingToolCollectibleCategory = scryingToolCollectibleData:GetCategoryTypeDisplayName()
+            return zo_strformat(SI_ANTIQUITY_SCRYING_TOOL_LOCKED, scryingToolCollectibleName, scryingToolCollectibleCategory, scryingSkillLineName, antiquarianGuildCityName, antiquarianGuildZoneName)
+        end
 
-    if not AreAntiquitySkillLinesDiscovered() then
-        return zo_strformat(SI_ANTIQUITY_SCRYING_SKILL_LINE_MISSING, scryingSkillLineName, antiquarianGuildCityName, antiquarianGuildZoneName)
+        if not AreAntiquitySkillLinesDiscovered() then
+            return zo_strformat(SI_ANTIQUITY_SCRYING_SKILL_LINE_MISSING, scryingSkillLineName, antiquarianGuildCityName, antiquarianGuildZoneName)
+        end
     end
 end
 

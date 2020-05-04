@@ -45,7 +45,7 @@ function ZO_Antiquity:Initialize(antiquityId)
     local numLoreEntries = GetNumAntiquityLoreEntries(antiquityId)
     for loreEntryIndex = 1, numLoreEntries do
         local loreDisplayName, loreDescription = GetAntiquityLoreEntry(antiquityId, loreEntryIndex)
-        local loreEntryData = 
+        local loreEntryData =
         {
             antiquityId = antiquityId,
             loreEntryIndex = loreEntryIndex,
@@ -153,15 +153,15 @@ end
 
 function ZO_Antiquity:GetLeadExpirationStatus()
     local nearExpiration = false
-    local timeRemaining
+    local timeRemainingText
     if self:HasLead() and self.leadExpirationTimeS then
         local leadTimeRemainingS = self.leadExpirationTimeS - GetFrameTimeSeconds()
         if leadTimeRemainingS > 0 then
             nearExpiration = (leadTimeRemainingS / ZO_ONE_DAY_IN_SECONDS) <= ZO_LEAD_EXPIRATION_WARNING_DAYS
-            timeRemaining = ZO_FormatTimeLargestTwo(leadTimeRemainingS, TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT)
+            timeRemainingText = ZO_FormatTimeLargestTwo(leadTimeRemainingS, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_HIDE_ZEROES)
         end
     end
-    return nearExpiration, timeRemaining
+    return nearExpiration, timeRemainingText
 end
 
 function ZO_Antiquity:RequiresLead()

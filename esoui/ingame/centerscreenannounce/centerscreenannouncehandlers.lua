@@ -1127,6 +1127,22 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED] = fun
     end
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_SCRYING_RESULT] = function(result)
+    --The map handles the case where you improved and unlocked more goals than before
+    if result == ANTIQUITY_SCRYING_RESULT_NO_PROGRESS or result == ANTIQUITY_SCRYING_RESULT_NO_ADDITIONAL_PROGRESS then
+        local antiquityId = GetScryingCurrentAntiquityId()
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        if antiquityData then
+            local numGoalsAchieved = antiquityData:GetNumGoalsAchieved()
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SCRYING_PROGRESS_TEXT)
+            messageParams:SetText(GetString("SI_ANTIQUITYSCRYINGRESULT", result))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT)
+            messageParams:SetScryingProgressData(numGoalsAchieved, numGoalsAchieved, antiquityData:GetTotalNumGoals())
+            return messageParams
+        end
+    end
+end
+
 function ZO_CenterScreenAnnounce_GetEventHandlers()
     return CENTER_SCREEN_EVENT_HANDLERS
 end
@@ -1168,6 +1184,7 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
