@@ -1,9 +1,6 @@
 local ACCEPT = true
 local REJECT = false
 
--- Allows us to easily add/remove lore from the end game flow based on design
-local IS_LORE_VIEW_ENABLED = false
-
 -- Style Constants
 
 local FRAME_BORDER_PADDING_KEYBOARD = 4
@@ -55,15 +52,14 @@ function ZO_AntiquityDiggingSummary:Initialize(control)
         end
     end)
 
+    control:RegisterForEvent(EVENT_START_ANTIQUITY_DIGGING, function()
+        -- make sure we start at the beginning of the state machine on start
+        self.fanfareStateMachine:SetCurrentState("INACTIVE")
+    end)
+
     control:RegisterForEvent(EVENT_REQUEST_ANTIQUITY_DIGGING_EXIT, function()
         if ANTIQUITY_DIGGING_SUMMARY_FRAGMENT:IsShowing() then
             AntiquityDiggingExitResponse(ACCEPT)
-        end
-    end)
-
-    control:RegisterForEvent(EVENT_STOP_ANTIQUITY_DIGGING, function()
-        if ANTIQUITY_DIGGING_SCENE:IsShowing() then
-            self.fanfareStateMachine:SetCurrentState("QUIT")
         end
     end)
 
@@ -100,16 +96,28 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
     end
 
     --Keybind
-    local descriptor =
+    self.keybindButtonsControl = self.control:GetNamedChild("Keybinds")
+    self.keybindTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingSummaryKeybindFade", self.keybindButtonsControl)
+
+    local primaryDescriptor =
     {
         keybind = "ANTIQUITY_DIGGING_PRIMARY_ACTION",
         callback = function()
             self:HandleCommand(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
         end,
     }
-    self.keybindButton = self.control:GetNamedChild("KeybindButton")
-    self.keybindButton:SetKeybindButtonDescriptor(descriptor)
-    self.keybindTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingSummaryKeybindFade", self.keybindButton)
+    self.primaryKeybindButton = self.keybindButtonsControl:GetNamedChild("Primary")
+    self.primaryKeybindButton:SetKeybindButtonDescriptor(primaryDescriptor)
+
+    local secondaryDescriptor =
+    {
+        keybind = "ANTIQUITY_DIGGING_CODEX",
+        callback = function()
+            self:ShowCodexEntry()
+        end,
+    }
+    self.secondaryKeybindButton = self.keybindButtonsControl:GetNamedChild("Secondary")
+    self.secondaryKeybindButton:SetKeybindButtonDescriptor(secondaryDescriptor)
 
     -- Failure
     self.failureControl = self.control:GetNamedChild("Failure")
@@ -149,7 +157,8 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
     self.bonusRewardsControl = self.rewardsControl:GetNamedChild("Bonus")
     self.bonusRewardsHeaderLabel = self.bonusRewardsControl:GetNamedChild("Header")
     local bonusItemsContainer = self.bonusRewardsControl:GetNamedChild("Items")
-    self.bonusesControlPool = ZO_ControlPool:New("ZO_AntiquityDiggingRewardItem_Control", bonusItemsContainer)
+    self.bonusesRowControlPool = ZO_ControlPool:New("ZO_AntiquityBonusLootRowContainer_Control", bonusItemsContainer)
+    self.bonusesControlPool = ZO_ControlPool:New("ZO_AntiquityDiggingRewardItem_Control")
     self.bonusesControlPool:SetCustomFactoryBehavior(function(control)
         control.iconTexture = control:GetNamedChild("Icon")
         control.stackCountLabel = control.iconTexture:GetNamedChild("StackCount")
@@ -165,11 +174,6 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
     self.bonusRewardsNoLootFoundLabel = bonusItemsContainer:GetNamedChild("NoLootFound")
     self.bonusRewardsTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingRewardBonusesFade", self.bonusRewardsControl)
     self.bonusRewardsTimeline:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
-
-    -- Lore
-    self.loreControl = self.control:GetNamedChild("Lore")
-    self.loreHeaderLabel = self.loreControl:GetNamedChild("Header")
-    self.loreTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingLoreFade", self.loreControl)
 
     -- Set Progression
     self.setProgressionControl = self.control:GetNamedChild("SetProgression")
@@ -249,6 +253,15 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
     self.setCompleteFramedAntiquityControl = self.setCompleteControl:GetNamedChild("FramedAntiquity")
     self.setCompleteFramedAntiquityIconTexture = self.setCompleteFramedAntiquityControl:GetNamedChild("Icon")
     self.setCompleteTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingSetCompleteFade", self.setCompleteControl)
+
+    -- Transfer
+    self.transferControl = self.control:GetNamedChild("Transfer")
+    self.transferTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingTransferFade", self.transferControl)
+
+    -- Lore
+    self.loreControl = self.control:GetNamedChild("Lore")
+    self.loreHeaderLabel = self.loreControl:GetNamedChild("Header")
+    self.loreTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingLoreFade", self.loreControl)
 
     self:InitializeParticleSystems()
 end
@@ -345,35 +358,20 @@ function ZO_AntiquityDiggingSummary:InitializeParticleSystems()
     self.setCompleteStarbustParticleSystem = setCompleteStarbustParticleSystem
 end
 
-function ZO_AntiquityDiggingSummary:SetKeybindButtonText(text)
-    self.keybindButtonText = text
-    self.keybindButton:SetText(text)
+function ZO_AntiquityDiggingSummary:ConfigureKeybindButton(keybindButton, enabled, text)
+    if enabled then
+        keybindButton:SetHidden(false)
+        keybindButton.originalText = text
+        keybindButton:SetText(text)
+    else
+        keybindButton:SetHidden(true)
+    end
 end
 
 function ZO_AntiquityDiggingSummary:InitializeStateMachine()
     local fanfareStateMachine = ZO_StateMachine_Base:New("ANTIQUITY_DIGGING_FANFARE_STATE_MACHINE")
     self.fanfareStateMachine = fanfareStateMachine
     local IGNORE_ANIMATION_CALLBACKS = true
-
-    --[[ States --
-        00 - INACTIVE
-        02 - BEGIN
-        04 - ANTIQUITY_REWARD_IN
-        05 - NEW_LEAD_IN
-        06 - BONUS_REWARDS_IN
-        08 - REWARDS
-        10 - REWARDS_OUT
-        12 - LORE_IN
-        14 - LORE
-        16 - LORE_OUT
-        18 - SET_PROGRESSION_IN
-        20 - SET_PROGRESSION
-        22 - SET_PROGRESSION_OUT
-        24 - SET_COMPLETE_IN
-        26 - SET_COMPLETE
-        50 - FAILURE_IN
-        99 - QUIT
-    ]]--
 
     do
         local state = fanfareStateMachine:AddState("INACTIVE")
@@ -383,25 +381,29 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
             self.antiquityRewardTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.newLeadTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.bonusRewardsTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
-            self.loreTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.setProgressionTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.setCompleteTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.setProgressionAntiquityIconScaleTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
+            self.loreTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.keybindTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.failureControl:SetHidden(true)
             self.antiquityRewardControl:SetHidden(true)
             self.newLeadControl:SetHidden(true)
             self.bonusRewardsControl:SetHidden(true)
-            self.loreControl:SetHidden(true)
             self.setProgressionControl:SetHidden(true)
             self.setCompleteControl:SetHidden(true)
+            self.transferControl:SetHidden(true)
+            self.loreControl:SetHidden(true)
             self.bonusesControlPool:ReleaseAllObjects()
+            self.bonusesRowControlPool:ReleaseAllObjects()
             self.setProgressionAntiquityIconPool:ReleaseAllObjects()
             self.setProgressionSparksParticleSystem:Stop()
             self.setCompleteBlastParticleSystem:Stop()
             self.setCompleteSparksParticleSystem:Stop()
             self.setCompleteStarbustParticleSystem:Stop()
             ANTIQUITY_LORE_DOCUMENT_MANAGER:ReleaseAllObjects(self.loreControl)
+            self:ConfigureKeybindButton(self.primaryKeybindButton, false)
+            self:ConfigureKeybindButton(self.secondaryKeybindButton, false)
         end)
     end
 
@@ -420,7 +422,7 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
     do
         local state = fanfareStateMachine:AddState("ANTIQUITY_REWARD_IN")
         state:RegisterCallback("OnActivated", function()
-            self:SetKeybindButtonText(GetString(SI_ANTIQUITY_DIGGING_FANFARE_NEXT))
+            self:ConfigureKeybindButton(self.primaryKeybindButton, true, GetString(SI_ANTIQUITY_DIGGING_FANFARE_NEXT))
             self.antiquityRewardControl:SetHidden(false)
             self.rewardsOutTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
             self.antiquityRewardTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
@@ -480,38 +482,6 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
             end
             self.antiquityRewardControl:SetHidden(true)
             self.bonusRewardsControl:SetHidden(true)
-        end)
-    end
-
-    do
-        local state = fanfareStateMachine:AddState("LORE_IN")
-        state:RegisterCallback("OnActivated", function()
-            self.loreControl:SetHidden(false)
-            self.loreTimeline:PlayFromStart()
-            PlaySound(SOUNDS.ANTIQUITIES_FANFARE_MOTIF_SCROLL_APPEAR)
-        end)
-
-        state:RegisterCallback("OnDeactivated", function()
-            if self.loreTimeline:IsPlaying() then
-                self.loreTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
-            end
-        end)
-    end
-
-    fanfareStateMachine:AddState("LORE")
-
-    do
-        local state = fanfareStateMachine:AddState("LORE_OUT")
-        state:RegisterCallback("OnActivated", function()
-            self.loreTimeline:PlayBackward()
-        end)
-
-        state:RegisterCallback("OnDeactivated", function() 
-            if self.loreTimeline:IsPlaying() then
-                self.loreTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
-            end
-            self.loreControl:SetHidden(true)
-            ANTIQUITY_LORE_DOCUMENT_MANAGER:ReleaseAllObjects(self.loreControl)
         end)
     end
 
@@ -582,9 +552,62 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
     fanfareStateMachine:AddState("SET_COMPLETE")
 
     do
+        local state = fanfareStateMachine:AddState("SET_COMPLETE_OUT")
+        state:RegisterCallback("OnActivated", function()
+            self.setCompleteTimeline:PlayBackward()
+        end)
+
+        state:RegisterCallback("OnDeactivated", function()
+            if self.setCompleteTimeline:IsPlaying() then
+                self.setCompleteTimeline:PlayInstantlyToStart(IGNORE_ANIMATION_CALLBACKS)
+            end
+            self.setCompleteControl:SetHidden(true)
+            self.setCompleteBlastParticleSystem:Stop()
+            self.setCompleteSparksParticleSystem:Stop()
+            self.setCompleteStarbustParticleSystem:Stop()
+        end)
+    end
+
+    do
+        local state = fanfareStateMachine:AddState("TRANSFER")
+        state:RegisterCallback("OnActivated", function()
+            StartDiggingTransitionToNextDay()
+            self.transferControl:SetHidden(false)
+            self.transferTimeline:PlayFromStart()
+            self:ConfigureKeybindButton(self.primaryKeybindButton, false)
+        end)
+
+        state:RegisterCallback("OnDeactivated", function()
+            self.transferControl:SetHidden(true)
+            self.transferTimeline:Stop()
+        end)
+    end
+
+    do
+        local state = fanfareStateMachine:AddState("LORE_IN")
+        state:RegisterCallback("OnActivated", function()
+            self.loreControl:SetAlpha(0)
+            self.loreControl:SetHidden(false)
+            self.loreTimeline:PlayFromStart()
+            PlaySound(SOUNDS.ANTIQUITIES_FANFARE_MOTIF_SCROLL_APPEAR)
+        end)
+    end
+
+    do
+        local state = fanfareStateMachine:AddState("LORE")
+        state:RegisterCallback("OnDeactivated", function()
+            if self.loreTimeline:IsPlaying() then
+                self.loreTimeline:PlayInstantlyToEnd(IGNORE_ANIMATION_CALLBACKS)
+            end
+            self.loreControl:SetHidden(true)
+            ANTIQUITY_LORE_DOCUMENT_MANAGER:ReleaseAllObjects(self.loreControl)
+        end)
+    end
+
+    do
         local state = fanfareStateMachine:AddState("FAILURE_IN")
         state:RegisterCallback("OnActivated", function()
-            self:SetKeybindButtonText(GetString(SI_EXIT_BUTTON))
+            self:ConfigureKeybindButton(self.primaryKeybindButton, true, GetString(SI_EXIT_BUTTON))
             self.failureControl:SetHidden(false)
             self.failureTimeline:PlayFromStart()
             PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FAILURE)
@@ -600,79 +623,86 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
 
     -- Edges --
     do
-        fanfareStateMachine:AddEdgeAutoName("INACTIVE", "BEGIN") --0 -> 1
-        local antiquityRewardInEdge = fanfareStateMachine:AddEdgeAutoName("BEGIN", "ANTIQUITY_REWARD_IN") --2 -> 4
+        fanfareStateMachine:AddEdgeAutoName("INACTIVE", "BEGIN")
+        local antiquityRewardInEdge = fanfareStateMachine:AddEdgeAutoName("BEGIN", "ANTIQUITY_REWARD_IN")
         antiquityRewardInEdge:SetConditional(function()
             return self.gameOverFlags == ANTIQUITY_DIGGING_GAME_OVER_FLAGS_VICTORY
         end)
-        local antiquityRewardToNewLeadInEdge = fanfareStateMachine:AddEdgeAutoName("ANTIQUITY_REWARD_IN", "NEW_LEAD_IN") --4 -> 5
+        local antiquityRewardToNewLeadInEdge = fanfareStateMachine:AddEdgeAutoName("ANTIQUITY_REWARD_IN", "NEW_LEAD_IN")
         antiquityRewardToNewLeadInEdge:SetConditional(function()
             return self.hasNewLead
         end)
-        local antiquityRewardToBonusRewardsInEdge = fanfareStateMachine:AddEdgeAutoName("ANTIQUITY_REWARD_IN", "BONUS_REWARDS_IN") --4 -> 6
+        local antiquityRewardToBonusRewardsInEdge = fanfareStateMachine:AddEdgeAutoName("ANTIQUITY_REWARD_IN", "BONUS_REWARDS_IN")
         antiquityRewardToBonusRewardsInEdge:SetConditional(function()
             return not self.hasNewLead
         end)
-        fanfareStateMachine:AddEdge("ANTIQUITY_REWARD_IN_TO_REWARDS_SKIP", "ANTIQUITY_REWARD_IN", "REWARDS") --4 -> 8
-        fanfareStateMachine:AddEdgeAutoName("NEW_LEAD_IN", "BONUS_REWARDS_IN") --5 -> 6
-        fanfareStateMachine:AddEdge("NEW_LEAD_IN_TO_REWARDS_SKIP", "NEW_LEAD_IN", "REWARDS") --5 -> 8
-        fanfareStateMachine:AddEdgeAutoName("BONUS_REWARDS_IN", "REWARDS") --6 -> 8
-        local rewardsOutEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS", "REWARDS_OUT") --8 -> 10
+        fanfareStateMachine:AddEdge("ANTIQUITY_REWARD_IN_TO_REWARDS_SKIP", "ANTIQUITY_REWARD_IN", "REWARDS")
+        fanfareStateMachine:AddEdgeAutoName("NEW_LEAD_IN", "BONUS_REWARDS_IN")
+        fanfareStateMachine:AddEdge("NEW_LEAD_IN_TO_REWARDS_SKIP", "NEW_LEAD_IN", "REWARDS")
+        fanfareStateMachine:AddEdgeAutoName("BONUS_REWARDS_IN", "REWARDS")
+        local rewardsOutEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS", "REWARDS_OUT")
         rewardsOutEdge:SetConditional(function()
             return self.showLore or self.hasAntiquitySet
         end)
-        local rewardsOutToLoreEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS_OUT", "LORE_IN") --10 -> 12
-        rewardsOutToLoreEdge:SetConditional(function()
-            return self.showLore
-        end)
-        local rewardsOutToSetCombinationEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS_OUT", "SET_PROGRESSION_IN") --10 -> 18
-        rewardsOutToSetCombinationEdge:SetConditional(function()
-            return not self.showLore
-        end)
-        fanfareStateMachine:AddEdgeAutoName("LORE_IN", "LORE") --12 -> 14
-        local loreOutEdge = fanfareStateMachine:AddEdgeAutoName("LORE", "LORE_OUT") --14 -> 16
-        loreOutEdge:SetConditional(function()
+        local rewardsOutToSetProgressionInEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS_OUT", "SET_PROGRESSION_IN")
+        rewardsOutToSetProgressionInEdge:SetConditional(function()
             return self.hasAntiquitySet
         end)
-        fanfareStateMachine:AddEdgeAutoName("LORE_OUT", "SET_PROGRESSION_IN") --16 -> 18
-        fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_IN", "SET_PROGRESSION") --18 -> 20
-        local setProgressionOutEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION", "SET_PROGRESSION_OUT") --20 -> 22
-        setProgressionOutEdge:SetConditional(function()
+        local rewardsOutToLoreEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS_OUT", "TRANSFER")
+        rewardsOutToLoreEdge:SetConditional(function()
+            return not self.hasAntiquitySet and self.showLore
+        end)
+        fanfareStateMachine:AddEdgeAutoName("LORE_IN", "LORE")
+
+        fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_IN", "SET_PROGRESSION")
+        fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION", "SET_PROGRESSION_OUT")
+        local setProgressionOutTransferEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_OUT", "TRANSFER")
+        setProgressionOutTransferEdge:SetConditional(function()
+            return not self.isAntiquitySetComplete
+        end)
+        local setProgressionOutSetCompleteInEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_OUT", "SET_COMPLETE_IN")
+        setProgressionOutSetCompleteInEdge:SetConditional(function()
             return self.isAntiquitySetComplete
         end)
-        fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_OUT", "SET_COMPLETE_IN") --22 -> 24
-        fanfareStateMachine:AddEdgeAutoName("SET_COMPLETE_IN", "SET_COMPLETE") --24 -> 26
-        local setCompleteQuitEdge = fanfareStateMachine:AddEdgeAutoName("SET_COMPLETE", "QUIT") --26 -> 99
-        setCompleteQuitEdge:RegisterCallback("OnActivated", function()
-            self:SetKeybindButtonText(GetString(SI_EXIT_BUTTON))
+        fanfareStateMachine:AddEdgeAutoName("SET_COMPLETE_IN", "SET_COMPLETE")
+        local setCompleteQuitEdge = fanfareStateMachine:AddEdgeAutoName("SET_COMPLETE", "QUIT")
+        setCompleteQuitEdge:SetConditional(function()
+            return not self.showLore
         end)
-        local failureInEdge = fanfareStateMachine:AddEdgeAutoName("BEGIN", "FAILURE_IN") --2 -> 50
+        setCompleteQuitEdge:RegisterCallback("OnActivated", function()
+            self:ConfigureKeybindButton(self.primaryKeybindButton, true, GetString(SI_EXIT_BUTTON))
+        end)
+        local setCompleteOutEdge = fanfareStateMachine:AddEdgeAutoName("SET_COMPLETE", "SET_COMPLETE_OUT")
+        setCompleteOutEdge:SetConditional(function()
+            return self.showLore
+        end)
+        fanfareStateMachine:AddEdgeAutoName("SET_COMPLETE_OUT", "TRANSFER")
+        fanfareStateMachine:AddEdgeAutoName("TRANSFER", "LORE_IN")
+        local failureInEdge = fanfareStateMachine:AddEdgeAutoName("BEGIN", "FAILURE_IN")
         failureInEdge:SetConditional(function()
             return self.gameOverFlags ~= ANTIQUITY_DIGGING_GAME_OVER_FLAGS_VICTORY
         end)
-        local rewardsQuitEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS", "QUIT") --6 -> 99
+        local rewardsQuitEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS", "QUIT")
         rewardsQuitEdge:SetConditional(function()
             return not (self.showLore or self.hasAntiquitySet)
         end)
         rewardsQuitEdge:RegisterCallback("OnActivated", function()
-            self:SetKeybindButtonText(GetString(SI_EXIT_BUTTON))
+            self:ConfigureKeybindButton(self.primaryKeybindButton, true, GetString(SI_EXIT_BUTTON))
         end)
-        local loreQuitEdge = fanfareStateMachine:AddEdgeAutoName("LORE", "QUIT") --12 -> 99
-        loreQuitEdge:SetConditional(function()
-            return not self.hasAntiquitySet
-        end)
+        local loreQuitEdge = fanfareStateMachine:AddEdgeAutoName("LORE", "QUIT")
         loreQuitEdge:RegisterCallback("OnActivated", function()
-            self:SetKeybindButtonText(GetString(SI_EXIT_BUTTON))
+            self:ConfigureKeybindButton(self.primaryKeybindButton, true, GetString(SI_EXIT_BUTTON))
+            self:ConfigureKeybindButton(self.secondaryKeybindButton, true, GetString(SI_ANTIQUITY_DIGGING_FANFARE_CODEX))
         end)
-        local setProgressionQuitEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION", "QUIT") --20 -> 99
+        local setProgressionQuitEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION", "QUIT")
         setProgressionQuitEdge:SetConditional(function()
             return not self.isAntiquitySetComplete
         end)
         setProgressionQuitEdge:RegisterCallback("OnActivated", function()
-            self:SetKeybindButtonText(GetString(SI_EXIT_BUTTON))
+            self:ConfigureKeybindButton(self.primaryKeybindButton, true, GetString(SI_EXIT_BUTTON))
         end)
         -- If the player skips the failure at any point, just let them quit
-        fanfareStateMachine:AddEdgeAutoName("FAILURE_IN", "QUIT") --50 -> 99
+        fanfareStateMachine:AddEdgeAutoName("FAILURE_IN", "QUIT")
     end
 
     -- Triggers --
@@ -690,6 +720,7 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
             return numFadeAnimations + NUM_SCALE_ANIMATIONS
         end)
     end
+    fanfareStateMachine:AddTrigger("TIME_HAS_PASSED", ZO_StateMachine_TriggerStateCallback, ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.TIME_HAS_PASSED)
 
     -- Add triggers to edges --
     fanfareStateMachine:AddTriggerToEdge("BEGIN", "INACTIVE_TO_BEGIN")
@@ -697,27 +728,29 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "ANTIQUITY_REWARD_IN_TO_BONUS_REWARDS_IN")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "NEW_LEAD_IN_TO_BONUS_REWARDS_IN")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "BONUS_REWARDS_IN_TO_REWARDS")
-    fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "REWARDS_OUT_TO_LORE_IN")
+    fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "REWARDS_OUT_TO_TRANSFER")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "REWARDS_OUT_TO_SET_PROGRESSION_IN")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "LORE_IN_TO_LORE")
-    fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "LORE_OUT_TO_SET_PROGRESSION_IN")
     fanfareStateMachine:AddTriggerToEdge("SET_PROGRESSION_ANIMATIONS_COMPLETE", "SET_PROGRESSION_IN_TO_SET_PROGRESSION")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "SET_PROGRESSION_OUT_TO_SET_COMPLETE_IN")
+    fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "SET_PROGRESSION_OUT_TO_TRANSFER")
     fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "SET_COMPLETE_IN_TO_SET_COMPLETE")
+    fanfareStateMachine:AddTriggerToEdge("ANIMATION_COMPLETE", "SET_COMPLETE_OUT_TO_TRANSFER")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "BEGIN_TO_ANTIQUITY_REWARD_IN")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "ANTIQUITY_REWARD_IN_TO_REWARDS_SKIP")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "NEW_LEAD_IN_TO_REWARDS_SKIP")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "BONUS_REWARDS_IN_TO_REWARDS")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "REWARDS_TO_REWARDS_OUT")
-    fanfareStateMachine:AddTriggerToEdge("NEXT", "REWARDS_OUT_TO_LORE_IN")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "REWARDS_OUT_TO_TRANSFER")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "REWARDS_OUT_TO_SET_PROGRESSION_IN")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "LORE_IN_TO_LORE")
-    fanfareStateMachine:AddTriggerToEdge("NEXT", "LORE_TO_LORE_OUT")
-    fanfareStateMachine:AddTriggerToEdge("NEXT", "LORE_OUT_TO_SET_PROGRESSION_IN")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "SET_PROGRESSION_IN_TO_SET_PROGRESSION")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "SET_PROGRESSION_TO_SET_PROGRESSION_OUT")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "SET_PROGRESSION_OUT_TO_SET_COMPLETE_IN")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "SET_PROGRESSION_OUT_TO_TRANSFER")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "SET_COMPLETE_IN_TO_SET_COMPLETE")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "SET_COMPLETE_TO_SET_COMPLETE_OUT")
+    fanfareStateMachine:AddTriggerToEdge("NEXT", "SET_COMPLETE_OUT_TO_TRANSFER")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "BEGIN_TO_FAILURE_IN")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "REWARDS_TO_QUIT")
     fanfareStateMachine:AddTriggerToEdge("NEXT", "LORE_TO_QUIT")
@@ -748,6 +781,10 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
         end
     end)
     self.setCompleteTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
+
+    local transferToNextDayCompleteTrigger = fanfareStateMachine:AddTrigger("TRANSFER_TO_LORE_IN", ZO_StateMachine_TriggerEventManager, EVENT_ANTIQUITY_DIGGING_TRANSITION_TO_NEXT_DAY_COMPLETE)
+    fanfareStateMachine:GetEdgeByName("TRANSFER_TO_LORE_IN"):AddTrigger(transferToNextDayCompleteTrigger)
+
     -- Reset state machine
     self.fanfareStateMachine:SetCurrentState("INACTIVE")
 end
@@ -758,6 +795,8 @@ function ZO_AntiquityDiggingSummary:ApplyPlatformStyle()
     ApplyTemplateToControl(self.newLeadControl, ZO_GetPlatformTemplate("ZO_AntiquityDiggingSummary_NewLead"))
     ApplyTemplateToControl(self.bonusRewardsControl, ZO_GetPlatformTemplate("ZO_AntiquityDiggingSummary_BonusRewards"))
     ApplyTemplateToControl(self.loreControl, ZO_GetPlatformTemplate("ZO_AntiquityDiggingSummary_Lore"))
+    ApplyTemplateToControl(self.transferControl, ZO_GetPlatformTemplate("ZO_AntiquityDiggingSummary_Transfer"))
+
     if not self.loreControl:IsHidden() then
         ANTIQUITY_LORE_DOCUMENT_MANAGER:ReleaseAllObjects(self.loreControl)
         self:AcquireAndLayoutLoreDocumentControl()
@@ -773,9 +812,11 @@ function ZO_AntiquityDiggingSummary:ApplyPlatformStyle()
         control:MarkStyleDirty()
     end
 
-    ApplyTemplateToControl(self.keybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
+    ApplyTemplateToControl(self.primaryKeybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
+    ApplyTemplateToControl(self.secondaryKeybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
     -- Reset the text here to handle the force uppercase on gamepad
-    self.keybindButton:SetText(self.keybindButtonText)
+    self.primaryKeybindButton:SetText(self.primaryKeybindButton.originalText)
+    self.secondaryKeybindButton:SetText(self.secondaryKeybindButton.originalText)
 end
 
 function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
@@ -819,8 +860,9 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
 
     -- Bonus Rewards
     local numBonusLootRewards = GetNumDigSpotBonusLootRewards()
-    local previousLeftControl = nil
-    local previousRightControl = nil
+    local currentRowControl = nil
+    local previousControl = nil
+    local maxBonusLootPerRow = 3
     self.hasBonusRewards = numBonusLootRewards > 0
     for i = 1, numBonusLootRewards do
         local control = self.bonusesControlPool:AcquireObject(i)
@@ -851,36 +893,36 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
         control.iconTexture:SetTexture(icon)
         control.stackCountLabel:SetText(countText)
 
-        -- TODO: Expecting some iteration on the rules of layout here
-        if i % 2 == 0 then
-            if previousRightControl then
-                control:SetAnchor(TOPLEFT, previousRightControl, BOTTOMLEFT, 0, 10)
+        --See if we've reached the maximum items for the current row
+        if i % maxBonusLootPerRow == 1 then
+            --If there is no row control yet, we need to create one
+            if not currentRowControl then
+                currentRowControl = self.bonusesRowControlPool:AcquireObject()
+                currentRowControl:SetAnchor(TOP, nil, TOP, 0, 15)
             else
-                control:SetAnchor(TOPLEFT, nil, TOP, 20, 15)
-            end
-            previousRightControl = control
-        else
-            if i == numBonusLootRewards then
-                -- Last one is odd, center it
-                if previousLeftControl then
-                    control:SetAnchor(TOP, previousLeftControl, BOTTOMRIGHT, 20, 10)
-                else
-                    control:SetAnchor(TOP, nil, TOP, 0, 15)
-                end
-            else
-                if previousLeftControl then
-                    control:SetAnchor(TOPRIGHT, previousLeftControl, BOTTOMRIGHT, 0, 10)
-                else
-                    control:SetAnchor(TOPRIGHT, nil, TOP, -20, 15)
-                end
-                previousLeftControl = control
+                --If we get here, this is not the first row, so anchor it underneath the previous row
+                local rowControl = self.bonusesRowControlPool:AcquireObject()
+                rowControl:SetAnchor(TOP, currentRowControl, BOTTOM, 0, 10)
+                currentRowControl = rowControl
+                previousControl = nil
             end
         end
+
+        control:SetParent(currentRowControl)
+
+        --If this is not the first control, put it to the right of the previous control, otherwise anchor it to the top left of the row
+        if previousControl then
+            control:SetAnchor(TOPLEFT, previousControl, TOPRIGHT, 40, 0)
+        else
+            control:SetAnchor(TOPLEFT)
+        end
+
+        previousControl = control
     end
     self.bonusRewardsNoLootFoundLabel:SetHidden(self.hasBonusRewards)
 
     -- Lore
-    if GetDiggingAntiquityHasNewLoreEntryToShow() and IS_LORE_VIEW_ENABLED then
+    if GetDiggingAntiquityHasNewLoreEntryToShow() then
         self:AcquireAndLayoutLoreDocumentControl()
         self.showLore = true
     else
@@ -961,12 +1003,29 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
 end
 
 function ZO_AntiquityDiggingSummary:AcquireAndLayoutLoreDocumentControl()
-    local loreDocumentControl = ANTIQUITY_LORE_DOCUMENT_MANAGER:AcquireWideDocumentForLoreEntry(self.loreControl, GetDigSpotAntiquityId(), GetNumAntiquityLoreEntriesAcquired(GetDigSpotAntiquityId()))
+    local USE_MAGIC_VIEW = true
+    local loreDocumentControl = ANTIQUITY_LORE_DOCUMENT_MANAGER:AcquireWideDocumentForLoreEntry(self.loreControl, GetDigSpotAntiquityId(), GetNumAntiquityLoreEntriesAcquired(GetDigSpotAntiquityId()), USE_MAGIC_VIEW)
     loreDocumentControl:SetAnchor(TOP, self.loreHeaderLabel, BOTTOM, 0, 20)
 end
 
 function ZO_AntiquityDiggingSummary:HandleCommand(command)
     self.fanfareStateMachine:FireCallbacks(command)
+end
+
+function ZO_AntiquityDiggingSummary:OnUsePrimaryAction()
+    if not self.primaryKeybindButton:IsHidden() then
+        self.primaryKeybindButton:OnClicked()
+    end
+end
+
+function ZO_AntiquityDiggingSummary:OnUseCodex()
+    if not self.secondaryKeybindButton:IsHidden() then
+        self.secondaryKeybindButton:OnClicked()
+    end
+end
+
+function ZO_AntiquityDiggingSummary:ShowCodexEntry()
+    RequestShowCodexForDigSpotAntiquity()
 end
 
 -- Global / XML --

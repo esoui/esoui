@@ -55,6 +55,7 @@ function ZO_Tooltip:LayoutAntiquitySetFragment(antiquityId)
 
             local meetsLeadRequirements = antiquityData:MeetsLeadRequirements()
             local isHidden = not meetsLeadRequirements and not antiquityData:HasRecovered()
+            local isRepeatable = antiquityData:IsRepeatable()
             if isHidden then
                 self:AddLine(GetString(SI_ANTIQUITY_NAME_HIDDEN), self:GetStyle("title"))
             else
@@ -70,7 +71,8 @@ function ZO_Tooltip:LayoutAntiquitySetFragment(antiquityId)
             if meetsLeadRequirements then
                 self:AddAntiquityZone(antiquityId)
                 self:AddAntiquityLeadStatus(antiquityId)
-            else
+            --If the antiquity is not repeatable and has been collected before, it doesn't make sense to display this line
+            elseif isHidden or isRepeatable then
                 local missingLeadSection = self:AcquireSection(self:GetStyle("bodySection"))
                 missingLeadSection:AddLine(GetString(SI_ANTIQUITY_REQUIRES_LEAD), self:GetStyle("bodyDescription"))
                 self:AddSection(missingLeadSection)

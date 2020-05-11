@@ -18,14 +18,11 @@ function ZO_InteractionManager:Initialize()
 end
 
 function ZO_InteractionManager:OnBeginInteraction(interaction)
-    -- Note: The original intention behind OnEndBecauseAnotherInteractIsBeginning (previously called End) is mostly lost to history at this point
-    -- but it doesn't do what it would seem like, hence the very explicit rename.  For now we don't want to simply remove it in case something
-    -- was actually depending on it somehow, but for the most part no new systems should really use it because in theory it likely will never actually get called
-    -- If you're looking for a callback that happens when your systems interaction ends for reasons outside of its control, see self.currentInteraction.OnInteractionCanceled
-    if(self.currentInteraction and (interaction.type ~= self.currentInteraction.type) and self.currentInteraction.OnEndBecauseAnotherInteractIsBeginning) then
-        -- TODO: Look into if this code can be removed entirely.  For now this will help us determine if this ever actually gets called.
-        internalassert(false, "OnEndBecauseAnotherInteractIsBeginning is being called.")
-        self.currentInteraction.OnEndBecauseAnotherInteractIsBeginning()
+    -- If we are interacting already, and the call comes from switching interactions, we need to make sure the previous interact
+    -- scene takes care of what it needs to before moving on to another interact scene. This is currently how it works,
+    -- but is not the ideal solution since there are implications of how InteractScene works that by happenstance work with this flow
+    if(self.currentInteraction and (interaction.type ~= self.currentInteraction.type) and self.currentInteraction.OnInteractSwitch) then
+        self.currentInteraction.OnInteractSwitch()
     end
     self.currentInteraction = interaction
 end

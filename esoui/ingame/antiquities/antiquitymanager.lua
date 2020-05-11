@@ -51,8 +51,6 @@ function ZO_AntiquityManager:Initialize(...)
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", OnSkillsUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillsUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillsUpdated)
-
-    EVENT_MANAGER:RegisterForEvent("ZO_AntiquityManager", EVENT_ANTIQUITY_JOURNAL_SHOW_SCRYABLE, ZO_ShowAntiquityScryables)
 end
 
 function ZO_AntiquityManager:GetAntiquarianGuildZoneName()
@@ -133,17 +131,6 @@ function ZO_ShowAntiquityContentUpgrade()
     end
 end
 
-function ZO_ShowAntiquityScryables()
-    SCENE_MANAGER:HideCurrentScene()
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "gamepad_antiquity_journal")
-        ANTIQUITY_JOURNAL_GAMEPAD:ShowScryable()
-    else
-        MAIN_MENU_KEYBOARD:ShowSceneGroup("journalSceneGroup", "antiquityJournalKeyboard")
-        ANTIQUITY_JOURNAL_KEYBOARD:ShowScryable()
-    end
-end
-
 function ZO_GetAntiquityDiggingSkillLineData()
     local diggingSkillLineId = GetAntiquityDiggingSkillLineId()
     return SKILLS_DATA_MANAGER:GetSkillLineDataById(diggingSkillLineId)
@@ -152,6 +139,24 @@ end
 function ZO_GetAntiquityScryingSkillLineData()
     local scryingSkillLineId = GetAntiquityScryingSkillLineId()
     return SKILLS_DATA_MANAGER:GetSkillLineDataById(scryingSkillLineId)
+end
+
+function ZO_GetAntiquityScryingPassiveSkillInfo(passiveSkillRank)
+    local scryingSkillLineId = GetAntiquityScryingSkillLineId()
+    local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataById(scryingSkillLineId)
+
+    if skillLineData then
+        local scryingPassiveSkillIndex = GetScryingPassiveSkillIndex(SCRYING_PASSIVE_SKILL_ANTIQUARIAN_INSIGHT)
+        local skillData = skillLineData:GetSkillDataByIndex(scryingPassiveSkillIndex)
+
+        if skillData then
+            local skillRankData = skillData:GetRankData(passiveSkillRank)
+
+            if skillRankData then
+                return skillRankData:GetName(), passiveSkillRank, skillData:GetNumRanks()
+            end
+        end
+    end
 end
 
 function ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityOrSetData, control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY)
@@ -168,7 +173,7 @@ function ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityOrSetData, control, a
                     ItemTooltip:AddVerticalPadding(18)
                     addedPadding = true
                 end
-                ItemTooltip:AddLine(ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_ANTIQUITY_TOOLTIP_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName))), "ZoFontGameMedium", ZO_SELECTED_TEXT:UnpackRGB())
+                ItemTooltip:AddLine(ZO_NORMAL_TEXT:Colorize(zo_strformat(SI_ANTIQUITY_TOOLTIP_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName))), "ZoFontGameMedium", ZO_NORMAL_TEXT:UnpackRGB())
             end
 
             local nearExpiration, timeRemaining = antiquityOrSetData:GetLeadExpirationStatus()

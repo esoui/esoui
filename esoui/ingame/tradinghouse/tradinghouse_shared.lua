@@ -7,7 +7,10 @@ ZO_TRADING_HOUSE_SYSTEM_NAME = "tradingHouse"
 ZO_TRADING_HOUSE_INTERACTION =
 {
     type = "TradingHouse",
-    OnEndBecauseAnotherInteractIsBeginning = function() SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):CloseTradingHouse() end,
+    OnInteractSwitch = function()
+        internalassert(false, "OnInteractSwitch is being called.") 
+        SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):CloseTradingHouse() 
+    end,
     interactTypes = { INTERACTION_TRADINGHOUSE },
 }
 

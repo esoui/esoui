@@ -1,3 +1,10 @@
+local ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_HEIGHT = 1024
+local ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_BOTTOM_OFFSET = 643
+local ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_HEIGHT = 512
+local ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_BOTTOM_OFFSET = 453
+local ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_HEIGHT = 256
+local ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_BOTTOM_OFFSET = 256
+
 -- Standard Document Configuration
 
 ZO_ANTIQUITY_LORE_DOCUMENT_CONTROL_WIDTH = 1024
@@ -8,16 +15,22 @@ local ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_HEIGHT = 1024
 local ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET = 576
 ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
 ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_LARGE_FILE_HEIGHT
+ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_HEIGHT
 
 local ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_HEIGHT = 512
 local ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET = 448
 ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
 ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_MEDIUM_FILE_HEIGHT
+ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_HEIGHT
 
 local ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_HEIGHT = 256
 local ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET = 256
 ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
 ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_SMALL_FILE_HEIGHT
+ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_HEIGHT
 
 -- Wide Document Configuration
 
@@ -29,19 +42,27 @@ local ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_FILE_HEIGHT = 1024
 local ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET = 576
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_CONTROL_HEIGHT = ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_FILE_HEIGHT
+ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_LARGE_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_LARGE_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_FILE_HEIGHT
 
 local ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_FILE_HEIGHT = 512
 local ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET = 448
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_CONTROL_HEIGHT = ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_FILE_HEIGHT
+ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_MEDIUM_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_MEDIUM_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_FILE_HEIGHT
 
 local ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_HEIGHT = 256
 local ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET = 256
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_CONTROL_HEIGHT = ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER
 ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_FILE_HEIGHT
+ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_SMALL_CONTROL_HEIGHT = ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_BOTTOM_OFFSET * ANTIQUITY_LORE_WIDE_DOCUMENT_SCALE_MODIFIER
+ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_SMALL_TEXTURE_COORDS_BOTTOM = ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_BOTTOM_OFFSET / ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_FILE_HEIGHT
 
 -- General Configuration
 
+ZO_ANTIQUITY_LORE_MAGIC_MIN_ALPHA = 0.5
+ZO_ANTIQUITY_LORE_MAGIC_MAX_ALPHA = 0.1
 ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X = 60
 ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y = 45
 ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X = ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X * 2
@@ -59,6 +80,9 @@ local LABEL_ALIGNMENTS =
 
 local ANTIQUITY_CODEX_TEXTURE_FORMATTER = "EsoUI/Art/Antiquities/Codex/AntiquityLore_%s_%d.dds"
 local ANTIQUITY_CODEX_WIDE_TEXTURE_FORMATTER = "EsoUI/Art/Antiquities/Codex/AntiquityLore_%s_%d.dds"
+local ANTIQUITY_CODEX_MAGIC_PAPER_TEXTURE_FORMATTER = "EsoUI/Art/Antiquities/Codex/Antiquity_Entry_DIGGING_%s.dds"
+local ANTIQUITY_CODEX_END_TEXTURE_FORMATTER = "EsoUI/Art/Antiquities/Codex/Digging_PostGame_End_%s.dds"
+local ANTIQUITY_CODEX_MAGIC_TEXTURE_FORMATTER = "EsoUI/Art/Antiquities/Codex/Digging_PostGame_Magic_%s.dds"
 
 ZO_AntiquityLoreDocument_Manager = ZO_CallbackObject:Subclass()
 
@@ -88,18 +112,24 @@ function ZO_AntiquityLoreDocument_Manager:Initialize()
                 maxLabelHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
                 textureHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_CONTROL_HEIGHT,
                 textureCoordBottom = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_SMALL_TEXTURE_COORDS_BOTTOM,
+                endsTextureHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_SMALL_CONTROL_HEIGHT,
+                endsTextureCoordBottom = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_SMALL_TEXTURE_COORDS_BOTTOM,
                 imageQualifier = "Small",
             },
             {
                 maxLabelHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
                 textureHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_CONTROL_HEIGHT,
                 textureCoordBottom = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_MEDIUM_TEXTURE_COORDS_BOTTOM,
+                endsTextureHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_MEDIUM_CONTROL_HEIGHT,
+                endsTextureCoordBottom = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_MEDIUM_TEXTURE_COORDS_BOTTOM,
                 imageQualifier = "Medium",
             },
             {
                 maxLabelHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
                 textureHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_CONTROL_HEIGHT,
                 textureCoordBottom = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_LARGE_TEXTURE_COORDS_BOTTOM,
+                endsTextureHeight = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_LARGE_CONTROL_HEIGHT,
+                endsTextureCoordBottom = ZO_ANTIQUITY_LORE_WIDE_DOCUMENT_ENDS_LARGE_TEXTURE_COORDS_BOTTOM,
                 imageQualifier = "Large",
             },
         },
@@ -124,18 +154,24 @@ function ZO_AntiquityLoreDocument_Manager:Initialize()
                 maxLabelHeight = ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
                 textureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_CONTROL_HEIGHT,
                 textureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_SMALL_TEXTURE_COORDS_BOTTOM,
+                endsTextureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_CONTROL_HEIGHT,
+                endsTextureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_SMALL_TEXTURE_COORDS_BOTTOM,
                 imageQualifier = "Small",
             },
             {
                 maxLabelHeight = ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
                 textureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_CONTROL_HEIGHT,
                 textureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_MEDIUM_TEXTURE_COORDS_BOTTOM,
+                endsTextureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_CONTROL_HEIGHT,
+                endsTextureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_MEDIUM_TEXTURE_COORDS_BOTTOM,
                 imageQualifier = "Medium",
             },
             {
                 maxLabelHeight = ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_CONTROL_HEIGHT - ANTIQUITY_LORE_NON_LABEL_DEADSPACE_Y,
                 textureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_CONTROL_HEIGHT,
                 textureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_LARGE_TEXTURE_COORDS_BOTTOM,
+                endsTextureHeight = ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_CONTROL_HEIGHT,
+                endsTextureCoordBottom = ZO_ANTIQUITY_LORE_DOCUMENT_ENDS_LARGE_TEXTURE_COORDS_BOTTOM,
                 imageQualifier = "Large",
             },
         },
@@ -143,16 +179,16 @@ function ZO_AntiquityLoreDocument_Manager:Initialize()
 end
 
 -- Never hold on to a control indefinitely. Make sure to always call ReleaseAllObjects when you no longer need them, or at least when leaving your scene
-function ZO_AntiquityLoreDocument_Manager:AcquireWideDocumentForLoreEntry(parentControl, antiquityId, loreEntryIndex)
-    return self:InternalAcquireDocumentForLoreEntry(self.wideControlAcquisitionDescriptor, parentControl, antiquityId, loreEntryIndex)
+function ZO_AntiquityLoreDocument_Manager:AcquireWideDocumentForLoreEntry(parentControl, antiquityId, loreEntryIndex, useMagicView)
+    return self:InternalAcquireDocumentForLoreEntry(self.wideControlAcquisitionDescriptor, parentControl, antiquityId, loreEntryIndex, useMagicView)
 end
 
 -- Never hold on to a control indefinitely. Make sure to always call ReleaseAllObjects when you no longer need them, or at least when leaving your scene
-function ZO_AntiquityLoreDocument_Manager:AcquireDocumentForLoreEntry(parentControl, antiquityId, loreEntryIndex)
-    return self:InternalAcquireDocumentForLoreEntry(self.standardControlAcquisitionDescriptor, parentControl, antiquityId, loreEntryIndex)
+function ZO_AntiquityLoreDocument_Manager:AcquireDocumentForLoreEntry(parentControl, antiquityId, loreEntryIndex, useMagicView)
+    return self:InternalAcquireDocumentForLoreEntry(self.standardControlAcquisitionDescriptor, parentControl, antiquityId, loreEntryIndex, useMagicView)
 end
 
-function ZO_AntiquityLoreDocument_Manager:InternalAcquireDocumentForLoreEntry(acquisitionDescriptor, parentControl, antiquityId, loreEntryIndex)
+function ZO_AntiquityLoreDocument_Manager:InternalAcquireDocumentForLoreEntry(acquisitionDescriptor, parentControl, antiquityId, loreEntryIndex, useMagicView)
     local loreEntryData = nil
     if ANTIQUITY_DATA_MANAGER then
         local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
@@ -225,14 +261,23 @@ function ZO_AntiquityLoreDocument_Manager:InternalAcquireDocumentForLoreEntry(ac
             break
         end
     end
-
+    
     control:SetAlpha(alpha)
-    local backgroundTexture = control.backgroundTexture
-    backgroundTexture:SetTexture(string.format(acquisitionDescriptor.fileFormatter, sizeDescriptor.imageQualifier, documentVariant))
-    if flipHorizontalTextureCoords then
-        backgroundTexture:SetTextureCoords(0, 1, 0, sizeDescriptor.textureCoordBottom)
+
+    local backgroundTexturePath
+    if useMagicView then
+        backgroundTexturePath = string.format(ANTIQUITY_CODEX_MAGIC_PAPER_TEXTURE_FORMATTER, sizeDescriptor.imageQualifier)
+        flipHorizontalTextureCoords = true
     else
+        backgroundTexturePath = string.format(acquisitionDescriptor.fileFormatter, sizeDescriptor.imageQualifier, documentVariant)
+    end
+
+    local backgroundTexture = control.backgroundTexture
+    backgroundTexture:SetTexture(backgroundTexturePath)
+    if flipHorizontalTextureCoords then
         backgroundTexture:SetTextureCoords(1, 0, 0, sizeDescriptor.textureCoordBottom)
+    else
+        backgroundTexture:SetTextureCoords(0, 1, 0, sizeDescriptor.textureCoordBottom)
     end
     backgroundTexture:SetHeight(sizeDescriptor.textureHeight)
     backgroundTexture:SetVertexColors(VERTEX_POINTS_TOPLEFT, colorR, colorG, colorB, alpha)
@@ -240,9 +285,38 @@ function ZO_AntiquityLoreDocument_Manager:InternalAcquireDocumentForLoreEntry(ac
     backgroundTexture:SetVertexColors(VERTEX_POINTS_BOTTOMLEFT, 0.65 * colorR, 0.65 * colorG, 0.65 * colorB, alpha)
     backgroundTexture:SetVertexColors(VERTEX_POINTS_BOTTOMRIGHT, 0.25 * colorR, 0.25 * colorG, 0.25 * colorB, alpha)
     backgroundTexture:SetDesaturation(desaturation)
+
+    local leftEndTexture, rightEndTexture = control.leftEndTexture, control.rightEndTexture
+    local magicTexture = control.magicTexture
+    if useMagicView then
+        leftEndTexture:SetHidden(false)
+        rightEndTexture:SetHidden(false)
+        local endTexturePath = string.format(ANTIQUITY_CODEX_END_TEXTURE_FORMATTER, sizeDescriptor.imageQualifier)
+        leftEndTexture:SetTexture(endTexturePath)
+        leftEndTexture:SetHeight(sizeDescriptor.endsTextureHeight)
+        leftEndTexture:SetTextureCoords(0, 1, 0, sizeDescriptor.endsTextureCoordBottom)
+        rightEndTexture:SetTexture(endTexturePath)
+        rightEndTexture:SetHeight(sizeDescriptor.endsTextureHeight)
+        rightEndTexture:SetTextureCoords(1, 0, 0, sizeDescriptor.endsTextureCoordBottom)
+
+        magicTexture:SetHidden(false)
+        magicTexture:SetTexture(string.format(ANTIQUITY_CODEX_MAGIC_TEXTURE_FORMATTER, sizeDescriptor.imageQualifier))
+        magicTexture.sparkleTimeline:PlayFromStart()
+        magicTexture.flowTimeline:GetFirstAnimation():SetBaseTextureCoords(0, 1, 0, sizeDescriptor.textureCoordBottom)
+        magicTexture.flowTimeline:PlayFromStart()
+    else
+        leftEndTexture:SetHidden(true)
+        rightEndTexture:SetHidden(true)
+        magicTexture:SetHidden(true)
+        magicTexture.sparkleTimeline:Stop()
+        magicTexture.flowTimeline:Stop()
+    end
+    
     control.titleLabel:SetHorizontalAlignment(titleAlignment)
     control.titleLabel:SetHidden(not loreEntryData.unlocked)
+
     control.bodyLabel:SetHidden(not loreEntryData.unlocked)
+
     control:SetHeight(sizeDescriptor.textureHeight)
     control:SetParent(parentControl)
 

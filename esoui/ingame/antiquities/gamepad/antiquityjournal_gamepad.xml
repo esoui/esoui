@@ -1,5 +1,15 @@
 <GuiXml>
     <Controls>
+        <TopLevelControl name="ZO_AntiquityJournal_FooterBar_Gamepad" inherits="ZO_GamepadXPBarFooter" hidden="true">
+            <Controls>
+                <Label name="$(parent)Rank" override="true"  hidden="true" />
+
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)XPBar" relativePoint="LEFT" offsetX="-5" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+
         <TopLevelControl name="ZO_AntiquityJournal_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
             <OnInitialized>
                 ZO_AntiquityJournalGamepad_OnInitialized(self)

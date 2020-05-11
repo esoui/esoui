@@ -9,6 +9,27 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
+        <AnimationTimeline name="ZO_ScryingNormalActionMeter_Crossfade">
+            <Animations>
+                <AlphaAnimation applyToChildControlName="EdgeText" duration="200" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation applyToChildControlName="EdgeDot" duration="200" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ScryingNormalActionMeter_Idle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation applyToChildControlName="Edge" cellsWide="6" cellsHigh="4" framerate="6"/>
+            </Animations>
+        </AnimationTimeline>
+
         <AnimationTimeline name="ZO_ScryingSpecialActionMeter_Crossfade">
             <Animations>
                 <AlphaAnimation applyToChildControlName="ActiveTexture" duration="200" startAlpha="0" endAlpha="1">
@@ -293,8 +314,7 @@
                                     <Controls>
                                         <!--
                                         The heavy lifting for animating each element of the normal action meter is mostly handled by anchor constraints:
-                                        as the meter empties, the ActivatedMask will shrink, and as a result, the DeactivatedMask will grow.
-                                        Elements within the ActivatedMask imply "filled"-ness, while the DeactivatedMask implies emptiness.
+                                        as the meter empties, the ActivatedMask will shrink, causing the darkened frame background to become visible.
                                         The edge is anchored in between the two, to obscure the hard rectangular edge.
                                         -->
                                         <Scroll name="$(parent)ActivatedMask">
@@ -302,32 +322,24 @@
                                             <Anchor point="TOPRIGHT" />
                                             <Dimensions y="110" />
                                             <Controls>
-                                                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Scrying/crystal_glow.dds">
-                                                    <Anchor point="TOP" offsetY="-9" />
-                                                    <Dimensions x="60" y="120" />
-                                                    <TextureCoords left="0" top="0" right="0.59375" bottom="0.9453125" />
-                                                </Texture>
-                                                <Texture name="$(parent)Body" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/crystal_main.dds">
+                                                <Texture name="$(parent)Body" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/crystal_on.dds">
                                                     <Anchor point="TOP" />
                                                     <Dimensions x="50" y="110" />
-                                                    <TextureCoords left="0" right="0.75" top="0" bottom="0.8125" />
                                                 </Texture>
                                             </Controls>
                                         </Scroll>
-                                        <Scroll name="$(parent)DeactivatedMask">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ActivatedMask" relativePoint="BOTTOMLEFT" />
-                                            <Anchor point="BOTTOMRIGHT" />
-                                            <Controls>
-                                                <Texture name="$(parent)Darkness" textureFile="EsoUI/Art/Scrying/crystal_shadow.dds">
-                                                    <Anchor point="TOP" relativeTo="$(grandparent)"/>
-                                                    <Dimensions x="55" y="118" />
-                                                    <TextureCoords left="0" top="0" right="0.9375" bottom="0.9140625" />
-                                                </Texture>
-                                            </Controls>
-                                        </Scroll>
-                                        <Texture name="$(parent)Edge" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/crystal_edge.dds">
+                                        <Texture name="$(parent)Edge" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/crystal_edge.dds" blendMode="ADD">
                                             <Anchor point="CENTER" relativeTo="$(parent)ActivatedMask" relativePoint="BOTTOM" />
-                                            <Dimensions x="128" y="128" />
+                                            <Dimensions x="200" y="48" />
+                                            <Controls>
+                                                <Texture name="$(parent)Dot" layer="OVERLAY" level="1" alpha="1" textureFile="EsoUI/Art/Scrying/crystal_dot.dds">
+                                                    <Anchor point="CENTER" />
+                                                    <Dimensions x="64" y="64" />
+                                                </Texture>
+                                                <Label name="$(parent)Text" layer="OVERLAY" level="2" alpha="0" font="ZoFontKeyboard18ThickOutline">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                </Label>
+                                            </Controls>
                                         </Texture>
                                     </Controls>
                                 </Control>
@@ -355,7 +367,7 @@
                                     <Anchor point="CENTER" relativePoint="TOP" offsetX="122" offsetY="203" />
                                 </Control>
                                 <Control name="$(parent)NormalAction" inherits="ZO_ScryingAction">
-                                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetX="0" offsetY="-134" />
+                                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetX="0" offsetY="-136" />
                                     <Controls>
                                          <Label name="$(parent)Keybind" override="true">
                                             <ClearAnchors/>

@@ -653,6 +653,7 @@ EsoUI\Ingame\QuestToolMonitor\QuestToolMonitor.xml
 EsoUI\Ingame\TrialAccount\TrialAccount.lua
 EsoUI\Ingame\TrialAccount\TrialAccount.xml
 
+EsoUI\Ingame\Help\Help_Manager.lua
 EsoUI\Ingame\Help\HelpMechanicAssistanceData.lua
 EsoUI\Ingame\Help\HelpSubmitTicketData.lua
 EsoUI\Ingame\Help\Help_GenericTicketSubmission_Manager.lua
@@ -1409,3 +1410,4 @@ EsoUI\Ingame\Scenes\IngameScenes.lua
 EsoUI\Ingame\Scenes\Keyboard\KeyboardIngameScenes.lua
 EsoUI\Ingame\Scenes\Console\ConsoleIngameScenes.lua
 EsoUI\Ingame\Scenes\Gamepad\GamepadIngameScenes.lua
+EsoUI\Ingame\Scenes\UISystemManager.lua

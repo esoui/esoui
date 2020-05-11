@@ -255,13 +255,17 @@ function ZO_Tooltip:AddItemValue(itemLink)
     local CONSIDER_CONDITION = true
     local value = GetItemLinkValue(itemLink, not CONSIDER_CONDITION)
     if value > 0 then
+        local valueString = ZO_CommaDelimitNumber(value)
         local effectiveValue = GetItemLinkValue(itemLink, CONSIDER_CONDITION)
-        local finalValue = value
-        if(effectiveValue ~= value) then
-            finalValue = zo_strformat(SI_ITEM_FORMAT_STR_EFFECTIVE_VALUE_OF_MAX, effectiveValue, value)
+        local currencyIcon = ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)
+        local lineText
+        if effectiveValue ~= value then
+            local effectiveValueString = ZO_CommaDelimitNumber(effectiveValue)
+            lineText = zo_strformat(SI_GAMEPAD_TOOLTIP_EFFECTIVE_ITEM_VALUE_FORMAT, effectiveValueString, valueString, currencyIcon)
+        else
+            lineText = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, valueString, currencyIcon)
         end
-        local valueString = zo_strformat(SI_GAMEPAD_TOOLTIP_ITEM_VALUE_FORMAT, finalValue, ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY))
-        statsSection:AddLine(valueString, self:GetStyle("statValuePairValue"))
+        statsSection:AddLine(lineText, self:GetStyle("statValuePairValue"))
     end
     self:AddSection(statsSection)
 end

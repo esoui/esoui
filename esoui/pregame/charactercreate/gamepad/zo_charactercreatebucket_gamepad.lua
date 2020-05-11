@@ -14,16 +14,16 @@ local DEFAULT_OFFSET = -60
 -- Table for the Bucket data. Each Bucket is a tab in the UI.
 ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
 {
-    [CREATE_BUCKET_RACE] = 
-    { 
+    [CREATE_BUCKET_RACE] =
+    {
         windowName = "RaceBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_CHARACTER),
-        onExpandFn =    function()
-                            if not ZO_CHARACTERCREATE_MANAGER:GetPlayingTransitionAnimations() then
-                                CharacterCreateSetIdlePosture()
-                            end
-                            SetCharacterCameraZoomAmount(-1)
-                        end,
+        onExpandFn = function()
+            if not ZO_CHARACTERCREATE_MANAGER:GetPlayingTransitionAnimations() then
+                CharacterCreateSetIdlePosture()
+            end
+            SetCharacterCameraZoomAmount(-1)
+        end,
 
         -- Controls for the tab
         controls =
@@ -33,25 +33,25 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE },
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE },
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS },
-        }
+        },
     },
 
-    [CREATE_BUCKET_BODY] = 
-    { 
-        windowName = "BodyTypeBucket_Gamepad", 
-        title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_BODY_TYPE), 
+    [CREATE_BUCKET_BODY] =
+    {
+        windowName = "BodyTypeBucket_Gamepad",
+        title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_BODY_TYPE),
         onExpandFn = function() SetCharacterCameraZoomAmount(-1) end,
 
         controls =
         {
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_PHYSIQUE },
-        }
+        },
     },
 
     [CREATE_BUCKET_BODY_SHAPE] =
-    { 
+    {
         windowName = "BodyShapeBucket_Gamepad",
-        title = GetString(SI_CREATE_CHARACTER_BUCKET_TITLE_BODY), 
+        title = GetString(SI_CREATE_CHARACTER_BUCKET_TITLE_BODY),
         onExpandFn = function() SetCharacterCameraZoomAmount(-1) end,
 
         controls =
@@ -72,9 +72,9 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
         },
     },
 
-    [CREATE_BUCKET_HEAD_TYPE] = 
-    { 
-        windowName = "HeadTypeBucket_Gamepad", 
+    [CREATE_BUCKET_HEAD_TYPE] =
+    {
+        windowName = "HeadTypeBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD_TYPE),
         onExpandFn = function() SetCharacterCameraZoomAmount(1) end,
         controls =
@@ -83,9 +83,9 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
         }
     },
 
-    [CREATE_BUCKET_FEATURES] = 
-    { 
-        windowName = "FeaturesBucket_Gamepad", 
+    [CREATE_BUCKET_FEATURES] =
+    {
+        windowName = "FeaturesBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD),
         previousTab = CREATE_BUCKET_CLASS,
         onExpandFn = function() SetCharacterCameraZoomAmount(1) end,
@@ -111,9 +111,9 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
         },
     },
 
-    [CREATE_BUCKET_FACE] = 
+    [CREATE_BUCKET_FACE] =
     {
-        windowName = "FaceBucket_Gamepad", 
+        windowName = "FaceBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_BUCKET_TITLE_FACE),
         onExpandFn = function() SetCharacterCameraZoomAmount(1) end,
 

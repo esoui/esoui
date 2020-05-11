@@ -243,7 +243,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
             self:SetCurrentDropdown(nil)
         end
 
-        INTERACT_WINDOW:Interaction(GUILD_KEEP_CLAIM_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
     end
 
     local function ReleaseDialog()

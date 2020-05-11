@@ -1,3 +1,5 @@
+local SCROLL_MAGNITUDE_THRESHOLD = 1
+
 ZO_AntiquityLoreReader_Keyboard = ZO_Object:Subclass()
 
 function ZO_AntiquityLoreReader_Keyboard:New(...)
@@ -11,6 +13,7 @@ function ZO_AntiquityLoreReader_Keyboard:Initialize(control)
 end
 
 function ZO_AntiquityLoreReader_Keyboard:InitializeControls(control)
+    control.owner = self
     self.control = control
     self.loreEntryControls = {}
     self.loreScroll = self.control:GetNamedChild("Content")
@@ -18,6 +21,7 @@ function ZO_AntiquityLoreReader_Keyboard:InitializeControls(control)
 
     -- Allow the lore reader's scroll control to scroll beyond the standard bounds
     -- in order to support the central display of all lore entries.
+    self.accumulatedScrollMagnitude = 0
     self.loreScroll.scroll = self.loreScroll
     self.loreScroll:SetScrollBounding(SCROLL_BOUNDING_UNBOUND)
     self.loreScroll:SetFadeGradient(1, 0, 1, 50)
@@ -35,6 +39,9 @@ end
 function ZO_AntiquityLoreReader_Keyboard:Reset()
     for loreEntryControlIndex, loreEntryControl in ipairs(self.loreEntryControls) do
         self:FocusLoreEntry(loreEntryControl)
+        loreEntryControl.treeNode = nil
+        loreEntryControl:SetHandler("OnMouseDown", nil)
+        loreEntryControl:SetMouseEnabled(false)
     end
 
     ANTIQUITY_LORE_DOCUMENT_MANAGER:ReleaseAllObjects(self.loreScrollChild)
@@ -63,49 +70,53 @@ function ZO_AntiquityLoreReader_Keyboard:AddLoreEntry(loreEntryData)
         loreEntryControl:SetAnchor(TOPLEFT, self.previouslyAddedLoreEntryControl, BOTTOMLEFT, offsetX, -60)
     end
     loreEntryControl:SetHidden(false)
+    loreEntryControl:SetMouseEnabled(true)
+    loreEntryControl:SetHandler("OnMouseDown", ZO_AntiquityLoreEntry_OnClicked)
     self:UnfocusLoreEntry(loreEntryControl)
 
     self.previouslyAddedLoreEntryControl = loreEntryControl
     table.insert(self.loreEntryControls, loreEntryControl)
+
     return loreEntryControl
 end
 
 function ZO_AntiquityLoreReader_Keyboard:ShowAntiquityLoreEntry(data)
-    local loreEntryControl = data.loreEntryControl
-    if loreEntryControl then
-        local scrollControl = self.loreScroll
-        local scrollHeight = scrollControl:GetHeight()
-        scrollControl:SetVerticalScroll(0)
-        local currentHorizonalScrollOffset, currentVerticalScrollOffset = scrollControl:GetScrollOffsets()
+    if data then
+        local loreEntryControl = data.loreEntryControl
+        if loreEntryControl then
+            local scrollControl = self.loreScroll
+            local scrollHeight = scrollControl:GetHeight()
+            scrollControl:SetVerticalScroll(0)
 
-        -- Scroll the selected lore entry to the center of the scroll control's view.
-        local controlOffset = loreEntryControl:GetTop()
-        local controlHeight = loreEntryControl:GetHeight()
-        local targetOffset = controlOffset - 0.5 * scrollHeight + 0.5 * controlHeight
-        scrollControl:SetVerticalScroll(targetOffset)
+            -- Scroll the selected lore entry to the center of the scroll control's view.
+            local controlOffset = loreEntryControl:GetTop()
+            local controlHeight = loreEntryControl:GetHeight()
+            local targetOffset = controlOffset - 0.5 * scrollHeight + 0.5 * controlHeight
+            scrollControl:SetVerticalScroll(targetOffset)
 
-        if self.selectedLoreEntryControl then
-            self:UnfocusLoreEntry(self.selectedLoreEntryControl)
-        end
-        if data.unlocked then
-            self:FocusLoreEntry(loreEntryControl)
-        end
-        self.selectedLoreEntryControl = loreEntryControl
-
-        -- Update the lore entries' draw levels such that the focused control (loreEntryControl) is on top
-        -- with the adjacent lore entries appearing in descending order in both directions (above and below).
-        local currentDrawLevel = 100
-        local drawLevelIncrement = 1
-        for index, control in ipairs(self.loreEntryControls) do
-            control:SetDrawLevel(currentDrawLevel)
-            control.backgroundTexture:SetDrawLevel(currentDrawLevel)
-            if control == loreEntryControl then
-                drawLevelIncrement = -1
+            if self.selectedLoreEntryControl then
+                self:UnfocusLoreEntry(self.selectedLoreEntryControl)
             end
-            currentDrawLevel = currentDrawLevel + drawLevelIncrement
-        end
+            if data.unlocked then
+                self:FocusLoreEntry(loreEntryControl)
+            end
+            self.selectedLoreEntryControl = loreEntryControl
 
-        PlaySound(SOUNDS.BOOK_PAGE_TURN)
+            -- Update the lore entries' draw levels such that the focused control (loreEntryControl) is on top
+            -- with the adjacent lore entries appearing in descending order in both directions (above and below).
+            local currentDrawLevel = 100
+            local drawLevelIncrement = 1
+            for index, control in ipairs(self.loreEntryControls) do
+                control:SetDrawLevel(currentDrawLevel)
+                control.backgroundTexture:SetDrawLevel(currentDrawLevel)
+                if control == loreEntryControl then
+                    drawLevelIncrement = -1
+                end
+                currentDrawLevel = currentDrawLevel + drawLevelIncrement
+            end
+
+            PlaySound(SOUNDS.BOOK_PAGE_TURN)
+        end
     end
 end
 
@@ -125,6 +136,7 @@ function ZO_AntiquityLore_Keyboard:Initialize(control)
 end
 
 function ZO_AntiquityLore_Keyboard:InitializeControls(control)
+    control.owner = self
     self.control = control
     self.antiquityIcon = self.control:GetNamedChild("AntiquityIcon")
     self.antiquityName = self.control:GetNamedChild("AntiquityName")
@@ -144,6 +156,7 @@ function ZO_AntiquityLore_Keyboard:InitializeScene()
         elseif newState == SCENE_HIDING then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
+            ANTIQUITY_LORE_READER_KEYBOARD:Reset()
         end
     end)
 end
@@ -241,6 +254,7 @@ end
 function ZO_AntiquityLore_Keyboard:Reset()
     self.antiquityId = nil
     self.antiquitySetId = nil
+    self.accumulatedScrollMagnitude = 0
     self.loreEntryTree:Reset()
     ANTIQUITY_LORE_READER_KEYBOARD:Reset()
 end
@@ -260,7 +274,11 @@ function ZO_AntiquityLore_Keyboard:Refresh()
 
         local firstNode
         for loreEntryIndex, loreEntryData in ipairs(loreEntries) do
-            local loreEntryControl = ANTIQUITY_LORE_READER_KEYBOARD:AddLoreEntry(loreEntryData)
+            local loreEntryControl
+            if loreEntryData.unlocked then
+                loreEntryControl = ANTIQUITY_LORE_READER_KEYBOARD:AddLoreEntry(loreEntryData)
+            end
+
             local data =
             {
                 title = loreEntryData.displayName,
@@ -269,9 +287,14 @@ function ZO_AntiquityLore_Keyboard:Refresh()
                 unlocked = loreEntryData.unlocked,
                 subTitle = loreEntryData.fragmentName and ZO_CachedStrFormat(SI_ANTIQUITY_NAME_FORMATTER, loreEntryData.fragmentName),
             }
+
             local template = antiquityData.antiquitySetId and "ZO_AntiquityLore_SetIconChildlessHeader" or "ZO_IconChildlessHeader"
             local node = self.loreEntryTree:AddNode(template, data)
-			firstNode = firstNode or node
+
+            if loreEntryControl then
+                loreEntryControl.treeNode = node
+			    firstNode = firstNode or node
+            end
         end
 
         -- Select the first node in the tree.
@@ -295,7 +318,39 @@ function ZO_AntiquityLore_Keyboard:ShowAntiquitySet(antiquitySetId)
     SCENE_MANAGER:Show("antiquityLoreKeyboard")
 end
 
+function ZO_AntiquityLore_Keyboard:ScrollLoreEntries(directionMagnitude)
+    self.accumulatedScrollMagnitude = self.accumulatedScrollMagnitude + directionMagnitude
+
+    local direction
+    if self.accumulatedScrollMagnitude >= SCROLL_MAGNITUDE_THRESHOLD then
+        direction = 1
+        self.accumulatedScrollMagnitude = 0
+    elseif self.accumulatedScrollMagnitude <= -SCROLL_MAGNITUDE_THRESHOLD then
+        direction = -1
+        self.accumulatedScrollMagnitude = 0
+    end
+
+    if direction then
+        local currentNode = self.loreEntryTree:GetSelectedNode()
+        if currentNode then
+            local targetNode
+            if direction > 0 then
+                targetNode = currentNode:GetPreviousSiblingNode()
+            else
+                targetNode = currentNode:GetNextSiblingNode()
+            end
+            if targetNode then
+                self.loreEntryTree:SelectNode(targetNode)
+            end
+        end
+    end
+end
+
 -- Global XML --
+
+function ZO_AntiquityLoreReader_OnMouseWheel(control, delta, ctrl, alt, shift)
+    ANTIQUITY_LORE_KEYBOARD:ScrollLoreEntries(delta)
+end
 
 function ZO_AntiquityLore_IconHeader_UpdateSize(control)
     local textWidth, textHeight = control.text:GetTextDimensions()
@@ -331,4 +386,10 @@ end
 
 function ZO_AntiquityLoreReader_Keyboard_OnInitialized(control)
     ANTIQUITY_LORE_READER_KEYBOARD = ZO_AntiquityLoreReader_Keyboard:New(control)
+end
+
+function ZO_AntiquityLoreEntry_OnClicked(control)
+    if control.treeNode then
+        ANTIQUITY_LORE_KEYBOARD.loreEntryTree:SelectNode(control.treeNode)
+    end
 end

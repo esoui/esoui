@@ -41,6 +41,8 @@ function ZO_IngameScrying:Initialize()
         return HANDLED
     end)
 
+    SCRYING_SCENE:AddFragment(ZO_ActionLayerFragment:New("ScryingActions"))
+
     local function OnScryingExitResponse(_, accept)
         if accept then
             SCRYING_SCENE:AcceptHideScene()

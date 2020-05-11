@@ -66,7 +66,7 @@ function ZO_MarketListFragment_Keyboard:SetupEntry(rowControl, data)
         rowControl.stackCount:SetHidden(true)
     end
 
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.displayQuality)
     rowControl.nameControl:SetColor(r, g, b, 1)
 
     rowControl:SetHandler("OnMouseEnter", self.onRowMouseEnter)

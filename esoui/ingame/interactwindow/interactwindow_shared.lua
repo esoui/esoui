@@ -168,11 +168,11 @@ end
 
 function ZO_SharedInteraction:CreateInteractScene(name)
 
-    CONVERSATION_INTERACTION =
+    local CONVERSATION_INTERACTION =
     {
         type = "Interact",
         interactTypes = { INTERACTION_CONVERSATION, INTERACTION_QUEST },
-        OnEndBecauseAnotherInteractIsBeginning = function() self:EndInteraction() end,
+        OnInteractSwitch = function() self:SwitchInteraction() end,
     }
 
     self.sceneName = name
@@ -656,7 +656,7 @@ function ZO_SharedInteraction:ResetInteraction(bodyText)
     -- Should be overridden
 end
 
-function ZO_SharedInteraction:EndInteraction()
+function ZO_SharedInteraction:SwitchInteraction()
     -- Should be overridden
 end
 

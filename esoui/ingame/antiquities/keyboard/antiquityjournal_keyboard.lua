@@ -97,8 +97,10 @@ function ZO_AntiquityTileBase_Keyboard:SetHighlightHidden(hidden)
     self.highlight:SetHidden(false)
     if hidden then
         self.highlightAnimation:PlayBackward()
+        self.icon.highlightAnimation:PlayBackward()
     else
         self.highlightAnimation:PlayForward()
+        self.icon.highlightAnimation:PlayForward()
     end
 end
 
@@ -202,9 +204,7 @@ function ZO_AntiquityTileBase_Keyboard:Refresh()
 end
 
 function ZO_AntiquityTileBase_Keyboard:OnMouseEnter()
-    ZO_ShowAntiquityOrSetTooltip_Keyboard(self.control, self.tileData)
     ANTIQUITY_JOURNAL_KEYBOARD:SetMouseOverTile(self)
-    self:SetHighlightHidden(false)
 end
 
 function ZO_AntiquityTileBase_Keyboard:OnMouseExit()
@@ -214,6 +214,68 @@ end
 function ZO_AntiquityTileBase_Keyboard:OnMouseDoubleClick()
     if self:CanPerformAction("primary") then
         return self:PerformAction("primary")
+    end
+end
+
+function ZO_AntiquityTileBase_Keyboard:ShowTooltip()
+    -- tileData will be either an antiquityData or antiquitySetData
+    -- figure out which and assign appropriately
+    local antiquityData
+    local antiquitySetData
+    if self.tileData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
+        antiquityData = self.tileData
+        antiquitySetData = antiquityData:GetAntiquitySetData()
+    else
+        antiquitySetData = self.tileData
+    end
+
+    -- Overall we want to show the reward for discovering this antiquity or set
+    -- and if this antiquity is part of a set (a set fragment) we want to show the tooltip
+    -- for that as well
+    if antiquityData and antiquityData:HasDiscovered() then
+        if antiquitySetData then
+            InitializeTooltip(AntiquityTooltip, self.control, TOPLEFT, 0, 5, BOTTOMLEFT)
+            AntiquityTooltip:SetAntiquitySetFragment(antiquityData:GetId())
+        elseif antiquityData:HasReward() then
+            ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityData, self.control, RIGHT, LEFT, -4)
+        end
+    end
+
+    if antiquitySetData and antiquitySetData:HasDiscovered() then
+        if antiquitySetData:HasReward() then
+            ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquitySetData, self.control, RIGHT, LEFT, -4)
+        end
+    end
+end
+
+function ZO_AntiquityTileBase_Keyboard:HideTooltip(antiquitySetId)
+    -- this mirrors the ShowTooltip function in order to figure out
+    -- which tooltips to clear
+    local antiquityData
+    local antiquitySetData
+    if self.tileData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
+        antiquityData = self.tileData
+        antiquitySetData = antiquityData:GetAntiquitySetData()
+    else
+        antiquitySetData = self.tileData
+    end
+
+    if antiquityData and antiquityData:HasDiscovered() then
+        if antiquitySetData then
+            ClearTooltip(AntiquityTooltip)
+        elseif antiquityData:HasReward() then
+            ZO_Rewards_Shared_OnMouseExit(self.control)
+        end
+
+        if antiquityData:HasNewLead() then
+            antiquityData:ClearNewLead()
+        end
+    end
+
+    if antiquitySetData and antiquitySetData:HasDiscovered() then
+        if antiquitySetData:HasReward() then
+            ZO_Rewards_Shared_OnMouseExit(self.control)
+        end
     end
 end
 
@@ -313,7 +375,9 @@ end
 
 function ZO_AntiquitySetTile_Keyboard:Reset()
     ZO_AntiquityTileBase_Keyboard.Reset(self)
-    self.mouseInputGroup:RemoveAll(ZO_MOUSE_INPUT_GROUP_MOUSE_OVER, self.icon)
+    -- remove all of the icons from antiquityIconMetaPool from our mouseover group
+    local excludedControls = { self.icon }
+    self.mouseInputGroup:RemoveAll(ZO_MOUSE_INPUT_GROUP_MOUSE_OVER, excludedControls)
     self.antiquityIconMetaPool:ReleaseAllObjects()
 end
 
@@ -536,22 +600,6 @@ function ZO_ScryableAntiquityTile_Keyboard:Reset()
     self.progressIconMetaPool:ReleaseAllObjects()
 end
 
-function ZO_ScryableAntiquityTile_Keyboard:OnMouseEnter()
-    ZO_AntiquityTileBase_Keyboard.OnMouseEnter(self)
-    local antiquitySetData = self.tileData:GetAntiquitySetData()
-    if antiquitySetData then
-        ZO_ShowAntiquityOrSetTooltip_Keyboard(self.control, antiquitySetData)
-    end
-end
-
-function ZO_ScryableAntiquityTile_Keyboard:OnMouseExit()
-    ZO_AntiquityTileBase_Keyboard.OnMouseExit(self)
-    local antiquitySetData = self.tileData and self.tileData:GetAntiquitySetData()
-    if antiquitySetData then
-        ZO_HideAntiquityOrSetTooltip_Keyboard(self.control, antiquitySetData)
-    end
-end
-
 -- Antiquity Journal
 
 ZO_AntiquityJournal_Keyboard = ZO_Object:Subclass()
@@ -731,7 +779,7 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
 
     local function TreeEntrySetup(node, control, data, open)
         control:SetSelected(false)
-        control:SetText(data:GetName())
+        control:SetText(ZO_CachedStrFormat(SI_ZONE_NAME, data:GetName()))
         self:UpdateCategoryNodeStatusIcon(node)
     end
 
@@ -930,21 +978,6 @@ do
     end
 
     do
-        local function CompareInProgress(left, right)
-            local leftProgress = left:GetNumDigSites()
-            local rightProgress = right:GetNumDigSites()
-            if leftProgress < rightProgress then
-                return false
-            elseif leftProgress == rightProgress then
-                return ZO_Antiquity.CompareNameTo(left, right)
-            end
-            return true
-        end
-
-        local function CompareName(left, right)
-            return ZO_Antiquity.CompareNameTo(left, right)
-        end
-
         -- Note that the order of these sections matters: lower-indexed sections are prioritized above subsequent sections.
         local antiquitySections =
         {
@@ -976,18 +1009,25 @@ do
                 sortFunction = ZO_DefaultAntiquitySortComparison,
                 list = {}
             },
+        }
+
+        for antiquityDifficulty = 1, ANTIQUITY_DIFFICULTY_MAX_VALUE do
+            local skillName, requiredRank, maximumRank = ZO_GetAntiquityScryingPassiveSkillInfo(antiquityDifficulty)
+            local antiquitySection =
             {
-                sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_REQUIRES_SKILL),
+                sectionHeading = zo_strformat(SI_ANTIQUITY_SUBHEADING_REQUIRES_SKILL, skillName, requiredRank, maximumRank),
                 filterFunctions =
                 {
                     function(antiquityData)
-                        return antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsScryingSkillRequirements()
+                        local isMatch = antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsScryingSkillRequirements()
+                        return isMatch and antiquityData:GetDifficulty() == antiquityDifficulty
                     end,
                 },
                 sortFunction = ZO_DefaultAntiquitySortComparison,
                 list = {}
-            },
-        }
+            }
+            table.insert(antiquitySections, antiquitySection)
+        end
 
         function ZO_AntiquityJournal_Keyboard:AddScryableAntiquityTiles(previousTileOrHeading, headingText, antiquities, sortFunction)
             table.sort(antiquities, sortFunction)
@@ -1174,7 +1214,8 @@ do
     end
 
     function ZO_AntiquityJournal_Keyboard:AddScryableCategory()
-        self.categoryTree:AddNode("ZO_AntiquityJournal_StatusIconChildlessHeader", ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
+        local treeNode = self.categoryTree:AddNode("ZO_AntiquityJournal_StatusIconChildlessHeader", ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
+        ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA.nodeKeyboard = treeNode
     end
 
     function ZO_AntiquityJournal_Keyboard:AddCategory(category, parentCategory)
@@ -1299,6 +1340,10 @@ function ZO_AntiquityJournal_Keyboard:OnSingleAntiquityLeadUpdated(data)
         categoryData = categoryData:GetParentCategoryData()
     end
 
+    if ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA then
+        self:UpdateCategoryStatusIcon(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
+    end
+
     -- Refresh the main menu and scene group's new indicators.
     MAIN_MENU_KEYBOARD:RefreshCategoryBar()
     MAIN_MENU_KEYBOARD:UpdateSceneGroupButtons("journalSceneGroup")
@@ -1308,17 +1353,19 @@ function ZO_AntiquityJournal_Keyboard:UpdateKeybinds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_AntiquityJournal_Keyboard:SetMouseOverTile(tileData)
-    self.mouseOverTile = tileData
+function ZO_AntiquityJournal_Keyboard:SetMouseOverTile(tile)
+    self.mouseOverTile = tile
+    tile:ShowTooltip()
+    tile:SetHighlightHidden(false)
     self:UpdateKeybinds()
 end
 
 function ZO_AntiquityJournal_Keyboard:ClearMouseOverTile(tile)
     if tile and tile == self.mouseOverTile then
         self.mouseOverTile = nil
-        ZO_HideAntiquityOrSetTooltip_Keyboard(tile.control, tile.tileData)
-        self:UpdateKeybinds()
+        tile:HideTooltip()
         tile:SetHighlightHidden(true)
+        self:UpdateKeybinds()
     end
 end
 
@@ -1424,62 +1471,16 @@ end
 
 function ZO_AntiquityFragmentIcon_OnMouseEnter(control)
     if control.antiquityData then
-        ZO_ShowAntiquityOrSetTooltip_Keyboard(control, control.antiquityData)
+        InitializeTooltip(AntiquityTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
+        AntiquityTooltip:SetAntiquitySetFragment(control.antiquityData:GetId())
+        control.highlightAnimation:PlayForward()
     end
 end
 
 function ZO_AntiquityFragmentIcon_OnMouseExit(control)
     if control.antiquityData then
-        ZO_HideAntiquityOrSetTooltip_Keyboard(control, control.antiquityData)
-    end
-end
-
-function ZO_ShowAntiquityOrSetTooltip_Keyboard(control, antiquityOrSetData)
-    if antiquityOrSetData:HasDiscovered() then
-        local tooltipShown = false
-
-        if antiquityOrSetData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL and antiquityOrSetData:GetAntiquitySetData() then
-            InitializeTooltip(AntiquityTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
-            AntiquityTooltip:SetAntiquitySetFragment(antiquityOrSetData:GetId())
-            tooltipShown = true
-        elseif antiquityOrSetData:HasReward() then
-            ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityOrSetData, control, RIGHT, LEFT, -4)
-            tooltipShown = true
-        end
-
-        if tooltipShown then
-            if control.owner and control.owner.icon then
-                control.owner.icon.highlightAnimation:PlayForward()
-            elseif control.highlightAnimation then
-                control.highlightAnimation:PlayForward()
-            end
-        end
-    end
-end
-
-function ZO_HideAntiquityOrSetTooltip_Keyboard(control, antiquityOrSetData)
-    if antiquityOrSetData:HasDiscovered() then
-        local isIndividualAntiquity = antiquityOrSetData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL
-        local tooltipCleared = false
-
-        if isIndividualAntiquity and antiquityOrSetData:GetAntiquitySetData() then
-            ClearTooltip(AntiquityTooltip)
-            tooltipCleared = true
-        elseif antiquityOrSetData:HasReward() then
-            ZO_Rewards_Shared_OnMouseExit(control)
-            tooltipCleared = true
-        end
-
-        if tooltipCleared then
-            if control.owner and control.owner.icon then
-                control.owner.icon.highlightAnimation:PlayBackward()
-            elseif control.highlightAnimation then
-                control.highlightAnimation:PlayBackward()
-            end
-        end
-
-        if isIndividualAntiquity and antiquityOrSetData:HasNewLead() then
-            antiquityOrSetData:ClearNewLead()
-        end
+        ClearTooltip(AntiquityTooltip)
+        control.antiquityData:ClearNewLead()
+        control.highlightAnimation:PlayBackward()
     end
 end

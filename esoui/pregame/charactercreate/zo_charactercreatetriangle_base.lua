@@ -79,6 +79,12 @@ function ZO_CharacterCreateTriangle_Base:ToggleLocked()
     self:UpdateLockState()
 end
 
+function ZO_CharacterCreateTriangle_Base:SetLocked(isLocked)
+    if self:IsLocked() ~= isLocked then
+        self:ToggleLocked()
+    end
+end
+
 function ZO_CharacterCreateTriangle_Base:CanLock()
     return true
 end

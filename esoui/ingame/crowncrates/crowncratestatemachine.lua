@@ -410,12 +410,9 @@ function ZO_CrownCratesStateMachine:Initialize(manager, packChoosing, packOpenin
 end
 
 function ZO_CrownCratesStateMachine:Reset()
-    ZO_StateMachine_Base.Reset(self)
-
     if self:HasCurrentState() and not self:IsCurrentState("START") then
         TriggerCrownCrateNPCAnimation(CROWN_CRATE_NPC_ANIMATION_TYPE_FAREWELL)
     end
-
     self:SetCurrentState("START")
 end
 

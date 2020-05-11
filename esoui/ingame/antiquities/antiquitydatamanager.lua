@@ -46,11 +46,16 @@ function ZO_AntiquityDataManager:InitializeEventHandlers()
         self:OnSingleAntiquityLeadAcquired(antiquityId)
     end
 
+    local function OnAntiquityShowCodexEntry(event, antiquityId)
+        self:OnAntiquityShowCodexEntry(antiquityId)
+    end
+
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITIES_UPDATED, OnAntiquitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_UPDATED, OnSingleAntiquityUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_DIG_SITES_UPDATED, OnSingleAntiquityDigSitesUpdated)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_SEARCH_RESULTS_READY, OnAntiquitySearchResultsReady)
     EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_LEAD_ACQUIRED, OnAntiquityLeadAcquired)
+    EVENT_MANAGER:RegisterForEvent("AntiquityDataManager", EVENT_ANTIQUITY_SHOW_CODEX_ENTRY, OnAntiquityShowCodexEntry)
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", OnSkillsUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillsUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillsUpdated)
@@ -200,6 +205,19 @@ function ZO_AntiquityDataManager:OnSkillsUpdated()
         self:RefreshAll()
         self.highestScryableDifficulty = newHighestScryableDifficulty
     end
+end
+
+function ZO_AntiquityDataManager:OnAntiquityShowCodexEntry(antiquityId)
+    if IsInGamepadPreferredMode() then
+        local DONT_PUSH = false
+        local antiquityData = self:GetAntiquityData(antiquityId)
+        internalassert(antiquityData ~= nil)
+        if antiquityData then
+            ANTIQUITY_LORE_GAMEPAD:ShowAntiquityOrSet(antiquityData, DONT_PUSH)
+        end
+    else
+        ANTIQUITY_LORE_KEYBOARD:ShowAntiquity(antiquityId)
+    end 
 end
 
 function ZO_AntiquityDataManager:RefreshAll()

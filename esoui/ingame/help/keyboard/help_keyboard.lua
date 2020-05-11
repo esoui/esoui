@@ -2,15 +2,15 @@ ZO_HELP_NAVIGATION_CONTAINER_WIDTH = 365
 -- 55 is the inset from the left side of the header to the left side of the text in ZO_IconHeader, 16 is the offset for the Scroll from ZO_ScrollContainerBase
 ZO_HELP_NAVIGATION_CATEGORY_LABEL_WIDTH = ZO_HELP_NAVIGATION_CONTAINER_WIDTH - 55 - 16
 
-ZO_HelpManager = ZO_Object:Subclass()
+ZO_Help_Keyboard = ZO_Object:Subclass()
 
-function ZO_HelpManager:New(...)
+function ZO_Help_Keyboard:New(...)
     local help = ZO_Object.New(self)
     help:Initialize(...)
     return help
 end
 
-function ZO_HelpManager:Initialize(control)
+function ZO_Help_Keyboard:Initialize(control)
     self.control = control
     control.owner = self
 
@@ -92,7 +92,7 @@ function ZO_HelpManager:Initialize(control)
     self:InitializeKeybindStripDescriptors()
 end
 
-function ZO_HelpManager:InitializeKeybindStripDescriptors()
+function ZO_Help_Keyboard:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -119,7 +119,7 @@ function ZO_HelpManager:InitializeKeybindStripDescriptors()
     }
 end
 
-function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+function ZO_Help_Keyboard:ShowSpecificHelp(helpCategoryIndex, helpIndex)
     if SCENE_MANAGER:IsShowing("helpTutorials") then
         self:SelectHelp(helpCategoryIndex, helpIndex)
     else
@@ -129,7 +129,7 @@ function ZO_HelpManager:ShowSpecificHelp(helpCategoryIndex, helpIndex)
     end    
 end
 
-function ZO_HelpManager:OnShowing()
+function ZO_Help_Keyboard:OnShowing()
     if self.dirty then
         self:Refresh()
     end
@@ -142,7 +142,7 @@ function ZO_HelpManager:OnShowing()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_HelpManager:OnHidden()
+function ZO_Help_Keyboard:OnHidden()
     if self.searchBox:GetText() ~= "" then
         self.searchBox:SetText("")
     end
@@ -150,7 +150,7 @@ function ZO_HelpManager:OnHidden()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_HelpManager:InitializeTree()
+function ZO_Help_Keyboard:InitializeTree()
     self.navigationTree = ZO_Tree:New(GetControl(self.control, "NavigationContainerScrollChild"), 60, -10, 350)
 
     local function TreeHeaderSetup(node, control, data, open)
@@ -185,7 +185,7 @@ function ZO_HelpManager:InitializeTree()
     self.navigationTree:SetOpenAnimation("ZO_TreeOpenAnimation")
 end
 
-function ZO_HelpManager:SelectHelp(helpCategoryIndex, helpIndex)
+function ZO_Help_Keyboard:SelectHelp(helpCategoryIndex, helpIndex)
     if self.helpControls and self.helpControls[helpCategoryIndex] then
         local helpControl = self.helpControls[helpCategoryIndex][helpIndex]
         if helpControl then
@@ -195,7 +195,7 @@ function ZO_HelpManager:SelectHelp(helpCategoryIndex, helpIndex)
     end
 end
 
-function ZO_HelpManager:AddHelpEntry(helpCategoryIndex, helpIndex)
+function ZO_Help_Keyboard:AddHelpEntry(helpCategoryIndex, helpIndex)
     local parent
     if not self.categoryControls[helpCategoryIndex] then
         self.helpControls[helpCategoryIndex] = {}
@@ -234,7 +234,7 @@ function ZO_HelpManager:AddHelpEntry(helpCategoryIndex, helpIndex)
     end
 end
 
-function ZO_HelpManager:AddTrialEntry()
+function ZO_Help_Keyboard:AddTrialEntry()
     local accountTypeId, title, description = GetTrialInfo();
     if accountTypeId ~= 0 and title ~= "" and description ~= "" then
         local parent
@@ -268,7 +268,7 @@ function ZO_HelpManager:AddTrialEntry()
     end
 end
 
-function ZO_HelpManager:RefreshList()
+function ZO_Help_Keyboard:RefreshList()
     self.navigationTree:Reset()
 
     self.helpControls = {}
@@ -299,12 +299,12 @@ function ZO_HelpManager:RefreshList()
     self:RefreshDetails()
 end
 
-function ZO_HelpManager:Refresh()
+function ZO_Help_Keyboard:Refresh()
     self.dirty = false
     self:RefreshList()
 end
 
-function ZO_HelpManager:RefreshDetails()
+function ZO_Help_Keyboard:RefreshDetails()
     local selectedData = self.navigationTree:GetSelectedData()
 
     if selectedData and selectedData.helpCategoryIndex and selectedData.helpIndex then
@@ -345,12 +345,12 @@ function ZO_HelpManager:RefreshDetails()
     end
 end
 
-function ZO_HelpManager:SearchStart(searchString)
+function ZO_Help_Keyboard:SearchStart(searchString)
     self.searchString = searchString
     StartHelpSearch(searchString)
 end
 
-function ZO_HelpManager:OnLinkClicked(link, button, text, color, linkType, ...)
+function ZO_Help_Keyboard:OnLinkClicked(link, button, text, color, linkType, ...)
     if linkType == HELP_LINK_TYPE and button == MOUSE_BUTTON_INDEX_LEFT then
         local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(link)
         if helpCategoryIndex and helpIndex then
@@ -380,5 +380,5 @@ function ZO_Tutorials_Entries_OnTextureLoaded(control)
 end
 
 function ZO_Help_Initialize(control)
-    HELP = ZO_HelpManager:New(control)
+    HELP = ZO_Help_Keyboard:New(control)
 end

@@ -125,6 +125,10 @@
                 <Down> return ANTIQUITY_DIGGING:UsePrimaryAction() </Down>
             </Action>
 
+            <Action name="ANTIQUITY_DIGGING_CODEX">
+                <Down> return ANTIQUITY_DIGGING:UseCodex() </Down>
+            </Action>
+
             <Action name="ANTIQUITY_DIGGING_CANCEL">
                 <Down> return ANTIQUITY_DIGGING:TryCancel() </Down>
             </Action>

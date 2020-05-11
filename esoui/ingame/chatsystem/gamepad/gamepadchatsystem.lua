@@ -252,6 +252,11 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
             end
         end
 
+        local function OnChatChannelUpdated()
+            local channelData, channelTarget = CHAT_ROUTER:GetCurrentChannelData()
+            self:SetChannel(channelData.id, channelTarget)
+        end
+
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_CHAT_MESSAGE_CHANNEL, OnChatMessageChannel)
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
@@ -261,6 +266,7 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
         CALLBACK_MANAGER:RegisterCallback("QuestTrackerUpdatedOnScreen", function() self:TryFadeOut() end)
         CALLBACK_MANAGER:RegisterCallback("QuestTrackerUpdatedOnScreen", function() self:TryFadeIn() end)
         CALLBACK_MANAGER:RegisterCallback("QuestTrackerFadedOutOnScreen", function() self:TryFadeIn(FADE_IN_OVER_TRACKER) end)
+        CALLBACK_MANAGER:RegisterCallback("OnChatChannelUpdated", OnChatChannelUpdated)
     end
 end
 

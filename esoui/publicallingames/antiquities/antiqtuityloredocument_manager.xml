@@ -9,6 +9,29 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityLoreDocument_MagicSparkleAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation startAlpha="ZO_ANTIQUITY_LORE_MAGIC_MIN_ALPHA" endAlpha="ZO_ANTIQUITY_LORE_MAGIC_MAX_ALPHA" duration="2000">
+                    <EasingFunction> return ZO_EaseOutQuadratic(progress) </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation startAlpha="ZO_ANTIQUITY_LORE_MAGIC_MAX_ALPHA" endAlpha="ZO_ANTIQUITY_LORE_MAGIC_MIN_ALPHA" delay="2000" duration="2000">
+                    <EasingFunction> return ZO_EaseInQuadratic(progress) </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation startAlpha="ZO_ANTIQUITY_LORE_MAGIC_MIN_ALPHA" endAlpha="ZO_ANTIQUITY_LORE_MAGIC_MAX_ALPHA" delay="4000" duration="3000">
+                    <EasingFunction> return ZO_EaseOutQuadratic(progress) </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation startAlpha="ZO_ANTIQUITY_LORE_MAGIC_MAX_ALPHA" endAlpha="ZO_ANTIQUITY_LORE_MAGIC_MIN_ALPHA" delay="7000" duration="3000">
+                    <EasingFunction> return ZO_EaseInQuadratic(progress) </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityLoreDocument_MagicFlowAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureSlideAnimation deltaU="1" duration="90000"/>
+            </Animations>
+        </AnimationTimeline>
     </Animations>
     
     <Controls>
@@ -17,14 +40,14 @@
         <Control name="ZO_AntiquityLoreDocument_Keyboard_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontBookScrollTitle" />
-                <Label name="$(parent)Body" font="ZoFontBookScroll" />
+                <Label name="$(parent)Body" font="ZoFontBookScroll" maxLineCount="12" />
             </Controls>
         </Control>
 
         <Control name="ZO_AntiquityLoreDocument_Gamepad_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontGamepadBookScrollTitle" />
-                <Label name="$(parent)Body" font="ZoFontGamepadBookScroll" />
+                <Label name="$(parent)Body" font="ZoFontGamepadBookScroll" maxLineCount="8" />
             </Controls>
         </Control>
 
@@ -33,6 +56,9 @@
                 self.backgroundTexture = self:GetNamedChild("BG")
                 self.titleLabel = self:GetNamedChild("Title")
                 self.bodyLabel = self:GetNamedChild("Body")
+                self.leftEndTexture = self:GetNamedChild("LeftEnd")
+                self.rightEndTexture = self:GetNamedChild("RightEnd")
+                self.magicTexture = self:GetNamedChild("Magic")
             </OnInitialized>
 
             <Controls>
@@ -41,7 +67,7 @@
                     <Anchor point="TOPRIGHT" />
                 </Texture>
                 
-                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65">
+                <Label name="$(parent)Title" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65">
                     <Anchor point="TOPLEFT" offsetX="ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y" />
                     <Anchor point="TOPRIGHT" offsetX="-ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y" />
                 </Label>
@@ -50,6 +76,25 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="-ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_LABEL_PADDING_Y" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_LABEL_PADDING_Y" />
                 </Label>
+
+                <Texture name="$(parent)Magic" layer="OVERLAY" blendMode="COLOR_DODGE" addressMode="WRAP" autoAdjustTextureCoords="false">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BG" offsetX="15"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BG" offsetX="-15"/>
+                    <OnInitialized>
+                        self.sparkleTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityLoreDocument_MagicSparkleAnimation", self)
+                        self.flowTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityLoreDocument_MagicFlowAnimation", self)
+                    </OnInitialized>
+                </Texture>
+
+                <Texture name="$(parent)LeftEnd" layer="OVERLAY">
+                    <Dimensions x="256"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="48"/>
+                </Texture>
+
+                <Texture name="$(parent)RightEnd" layer="OVERLAY">
+                    <Dimensions x="256"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-48"/>
+                </Texture>
             </Controls>
         </Control>
         

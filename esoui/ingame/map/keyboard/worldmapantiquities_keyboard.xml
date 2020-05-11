@@ -39,8 +39,9 @@
                     <AnchorFill />
                 </Control>
 
-                <Label name="$(parent)Name" font="ZoFontGameBold" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                <Label name="$(parent)Name" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontGameBold" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Anchor point="TOPLEFT" offsetX="30" offsetY="5" />
+                    <Anchor point="TOPRIGHT" offsetY="5" />
                 </Label>
 
                 <Texture name="$(parent)TrackedIcon" textureFile="EsoUI/Art/Antiquities/Keyboard/trackedAntiquityIcon.dds" hidden="true">

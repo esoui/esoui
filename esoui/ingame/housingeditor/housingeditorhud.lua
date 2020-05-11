@@ -16,11 +16,11 @@ local TWO_PI = 2 * PI
 local HALF_PI = 0.5 * PI
 local QUARTER_PI = 0.25 * PI
 
-local AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE = 0.9
+local AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE = 0.6
 local AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE = 0
-local AXIS_INDICATOR_ALPHA_MAX_PERCENTAGE = 0.9
-local AXIS_INDICATOR_RGB_WEIGHT_MIN_PERCENTAGE = 0.8
-local AXIS_INDICATOR_RGB_WEIGHT_MAX_PERCENTAGE = 1.3
+local AXIS_INDICATOR_ALPHA_MAX_PERCENTAGE = 0.6
+local AXIS_INDICATOR_RGB_WEIGHT_MIN_PERCENTAGE = 1.4
+local AXIS_INDICATOR_RGB_WEIGHT_MAX_PERCENTAGE = 3
 local AXIS_INDICATOR_SCALE_MAX = 3
 local AXIS_INDICATOR_SCALE_MIN = 1
 local AXIS_INDICATOR_PICKUP_YAW_OFFSET_ANGLE = math.rad(20)
@@ -51,7 +51,7 @@ local PRECISION_POSITION_OR_ORIENTATION_UPDATE_INTERVAL_MS = 100
 local PRECISION_MOVE_UNITS_CM = {1, 10, 100}
 local PRECISION_ROTATE_UNITS_DEG = {0.05, 1, 15}
 local PRECISION_ROTATE_INTERVALS_MS = {[0.05] = 120000, [1] = 9000, [15] = 1200}
-local PICKUP_ROTATE_INTERVALS_MS = 1200
+local PICKUP_ROTATE_INTERVALS_MS = 2000
 local PICKUP_AXIS_INDICATOR_DISTANCE_CM = 1000
 
 local DEFAULT_PRECISION_MOVE_UNITS_CM = 10
@@ -331,6 +331,20 @@ function ZO_HousingEditorHud:Initialize(control)
         self:UpdateKeybinds()
     end
 
+    local function OnAddOnLoaded(event, addOnName)
+        if addOnName == "ZO_Ingame" then
+            EVENT_MANAGER:UnregisterForEvent("HousingEditor", EVENT_ADD_ON_LOADED)
+            local defaults =
+            {
+                moveUnitsCentimeters = 10,
+                rotateUnitsRadians = math.rad(15),
+            }
+            self.savedOptions = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", 1, "ZO_HousingEditor_Options", defaults)
+            self:OnSavedOptionsLoaded()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_MODE_CHANGED, OnHousingModeChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadModeChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PLACED, OnFurnitureChanged)
@@ -384,10 +398,14 @@ function ZO_HousingEditorHud:RefreshConstants()
     end
 end
 
+function ZO_HousingEditorHud:OnSavedOptionsLoaded()
+    self:InitializePlacementSettings()
+end
+
 function ZO_HousingEditorHud:InitializePlacementSettings()
     HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
-    HousingEditorSetPrecisionMoveUnits(DEFAULT_PRECISION_MOVE_UNITS_CM)
-    HousingEditorSetPrecisionRotateUnits(DEFAULT_PRECISION_ROTATE_UNITS_DEG)
+    HousingEditorSetPrecisionMoveUnits(self.savedOptions.moveUnitsCentimeters)
+    HousingEditorSetPrecisionRotateUnits(self.savedOptions.rotateUnitsRadians)
 end
 
 function ZO_HousingEditorHud:InitializeMovementControllers()
@@ -450,7 +468,6 @@ function ZO_HousingEditorHud:OnDeferredInitialization()
         return
     end
     self.initialized = true
-    self:InitializePlacementSettings()
     self:InitializeAxisIndicators()
     self:InitializeKeybindDescriptors()
 end
@@ -580,8 +597,8 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
         {axis = HOUSING_EDITOR_ROTATION_AXIS_X2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 1.0, color = X_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, pitch = HALF_PI, yaw =  HALF_PI},
         {axis = HOUSING_EDITOR_ROTATION_AXIS_Y1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.66, color = Y_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw = 0},
         {axis = HOUSING_EDITOR_ROTATION_AXIS_Y2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.66, color = Y_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, roll = PI, yaw = 0},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.33, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw =  HALF_PI},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.33, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, yaw = -HALF_PI, roll = PI},
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.44, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw =  HALF_PI},
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.44, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, yaw = -HALF_PI, roll = PI},
     }
 
     self.allAxisIndicators = {}
@@ -1310,11 +1327,15 @@ do
         if unitType == HOUSING_EDITOR_PRECISION_PLACEMENT_MODE_MOVE then
             local unitList = PRECISION_MOVE_UNITS_CM
             local currentUnits = HousingEditorGetPrecisionMoveUnits()
-            HousingEditorSetPrecisionMoveUnits(self:GetAdjacentPrecisionUnits(unitList, currentUnits, direction))
+            local newUnits = self:GetAdjacentPrecisionUnits(unitList, currentUnits, direction)
+            HousingEditorSetPrecisionMoveUnits(newUnits)
+            self.savedOptions.moveUnitsCentimeters = newUnits
         elseif unitType == HOUSING_EDITOR_PRECISION_PLACEMENT_MODE_ROTATE then
             local unitList = PRECISION_ROTATE_UNITS_DEG
             local currentUnits = zo_roundToNearest(math.deg(HousingEditorGetPrecisionRotateUnits()), 0.001)
-            HousingEditorSetPrecisionRotateUnits(math.rad(self:GetAdjacentPrecisionUnits(unitList, currentUnits, direction)))
+            local newUnits = math.rad(self:GetAdjacentPrecisionUnits(unitList, currentUnits, direction))
+            HousingEditorSetPrecisionRotateUnits(newUnits)
+            self.savedOptions.rotateUnitsRadians = newUnits
         end
     end
 

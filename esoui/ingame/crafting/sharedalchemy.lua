@@ -56,7 +56,8 @@ function ZO_SharedAlchemy:Initialize(control)
     self.alchemyStationInteraction =
     {
         type = "Alchemy Station",
-        OnEndBecauseAnotherInteractIsBeginning = function()
+        OnInteractSwitch = function()
+            internalassert(false, "OnInteractSwitch is being called.")
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },

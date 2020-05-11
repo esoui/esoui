@@ -37,4 +37,8 @@ function BattlegroundFinder_Manager:Initialize()
     GAMEPAD_BATTLEGROUND_FINDER_SCENE = BATTLEGROUND_FINDER_GAMEPAD:GetScene()
 end
 
+function BattlegroundFinder_Manager:GetCategoryData()
+    return categoryData
+end
+
 BATTLEGROUND_FINDER_MANAGER = BattlegroundFinder_Manager:New()

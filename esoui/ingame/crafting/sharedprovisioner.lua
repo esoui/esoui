@@ -87,7 +87,8 @@ function ZO_SharedProvisioner:Initialize(control)
     self.provisionerStationInteraction =
     {
         type = "Provisioner Station",
-        OnEndBecauseAnotherInteractIsBeginning = function()
+        OnInteractSwitch = function()
+            internalassert(false, "OnInteractSwitch is being called.")
             SCENE_MANAGER:Hide(self.mainSceneName)
         end,
         interactTypes = { INTERACTION_CRAFT },

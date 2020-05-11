@@ -849,3 +849,10 @@ GetPlacedHousingFurnitureQuality = GetPlacedHousingFurnitureDisplayQuality
 function ZO_InteractionManager:OnEndInteraction(...) --This name was always an action, not a reaction
     self:EndInteraction(...)
 end
+
+function ZO_SharedInteraction:EndInteraction()
+    self:SwitchInteraction()
+end
+
+-- ZO_HelpManager was really specifically keyboard help, naming to meet standards because we need an actual manager now
+ZO_HelpManager = ZO_Help_Keyboard

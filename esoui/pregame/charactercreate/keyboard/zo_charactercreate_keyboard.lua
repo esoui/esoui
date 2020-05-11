@@ -41,9 +41,7 @@ function CharacterCreateSliderManager:Initialize(parent)
         local sliderControl = slider.control
         KEYBOARD_BUCKET_MANAGER:RemoveControl(sliderControl)
         sliderControl:SetHidden(true)
-        if slider:IsLocked() then
-            slider:ToggleLocked()
-        end
+        slider:SetLocked(false)
     end
 
     local function ResetColorPicker(slider)
@@ -51,9 +49,7 @@ function CharacterCreateSliderManager:Initialize(parent)
         KEYBOARD_BUCKET_MANAGER:RemoveControl(sliderControl)
         ZO_ColorSwatchPicker_Clear(sliderControl:GetNamedChild("Slider"))
         sliderControl:SetHidden(true)
-        if slider:IsLocked() then
-            slider:ToggleLocked()
-        end
+        slider:SetLocked(false)
     end
 
     self.pools =
@@ -108,7 +104,28 @@ function ZO_CharacterCreate_Keyboard:Initialize(...)
 
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate", EVENT_CHARACTER_CREATE_ZOOM_CHANGED, HandleZoomChanged)
 
+    local function OnStateChanged(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:ResetControls()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self:UpdateUnsavedSettings()
+        end
+    end
+
     CHARACTER_CREATE_FRAGMENT = ZO_FadeSceneFragment:New(self.control, 300)
+    CHARACTER_CREATE_FRAGMENT:RegisterCallback("StateChange", OnStateChanged)
+end
+
+function ZO_CharacterCreate_Keyboard:UpdateUnsavedSettings()
+    for name, nameTable in pairs(self.controlsByNameCategory) do
+        for category, slider in pairs(nameTable) do
+            ZO_CHARACTERCREATE_MANAGER:SetCharacterUnsavedSetting(name, category, slider:GetValue(), slider:IsLocked())
+        end
+    end
+
+    local UNUSED_VALUE = nil
+    ZO_CHARACTERCREATE_MANAGER:SetCharacterUnsavedSetting("triangle", "physique", UNUSED_VALUE, self.physiqueTriangle:IsLocked())
+    ZO_CHARACTERCREATE_MANAGER:SetCharacterUnsavedSetting("triangle", "face", UNUSED_VALUE, self.faceTriangle:IsLocked())
 end
 
 function ZO_CharacterCreate_Keyboard:OnCharacterCreateRequested()
@@ -360,14 +377,11 @@ function ZO_CharacterCreate_Keyboard:SetTemplate(templateId)
         InitializeAppearanceFromTemplate(templateId)
     end
 
-    KEYBOARD_BUCKET_MANAGER:SwitchBuckets(CREATE_BUCKET_RACE)
-
     -- Disable appearance related controls if the appearance is overridden in the template.
-    -- buckets need to be disabled after reseting the controls
+    -- buckets need to be disabled after resetting the controls
     local enabled = not templateData.overrideAppearance
     KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, enabled)
     KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, enabled)
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, true)
 
     ZO_CharacterCreateRandomizeAppearance:SetEnabled(enabled)
 
@@ -638,11 +652,22 @@ do
         KEYBOARD_BUCKET_MANAGER:AddControl(self.physiqueTriangleControl, CREATE_BUCKET_BODY, UpdateSlider, RandomizeSlider, SLIDER_SUBCAT_BODY_TYPE)
         KEYBOARD_BUCKET_MANAGER:AddControl(self.faceTriangleControl, CREATE_BUCKET_FACE, UpdateSlider, RandomizeSlider, SLIDER_SUBCAT_FACE_TYPE)
 
+        local _, physiqueIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting("triangle", "physique")
+        if physiqueIsLocked ~= nil then
+            self.physiqueTriangle:SetLocked(physiqueIsLocked)
+        end
+
+        local _, faceIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting("triangle", "face")
+        if faceIsLocked ~= nil then
+            self.faceTriangle:SetLocked(faceIsLocked)
+        end
+
         -- TODO: this fixes a bug where the triangles don't reflect the correct data...there will be more fixes to pregameCharacterManager to address the real issue
         -- (where the triangle data needs to live on its own rather than being tied to the unit)
         self.physiqueTriangle:Update()
         self.faceTriangle:Update()
 
+        self.controlsByNameCategory = {}
         local sliderData = {}
 
         for i = 1, GetNumSliders() do
@@ -650,12 +675,28 @@ do
 
             if name then
                 local slider = self.sliderManager:AcquireObject(CHARACTER_CREATE_SLIDER_TYPE_SLIDER)
-                slider:SetData(i, name, category, steps, value, defaultValue)
+                local unsavedValue, unsavedIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting(name, category)
+                if unsavedValue and unsavedIsLocked then
+                    slider:SetLocked(unsavedIsLocked)
+                end
+                slider:SetData(i, name, category, steps, unsavedValue or value, defaultValue)
 
                 local bucket = SLIDER_CATEGORY_TO_CREATE_BUCKET[category]
                 local subCat = SUBCATEGORY_FOR_SLIDER[name]
 
-                sliderData[#sliderData + 1] = { bucket = bucket, subCat = subCat, name = name, control = slider.control, }
+                sliderData[#sliderData + 1] =
+                {
+                    bucket = bucket,
+                    subCat = subCat,
+                    name = name,
+                    control = slider.control,
+                }
+
+                if not self.controlsByNameCategory[name] then
+                    self.controlsByNameCategory[name] = {}
+                end
+
+                self.controlsByNameCategory[name][category] = slider
             end
         end
 
@@ -664,12 +705,28 @@ do
 
             if numValues > 0 then
                 local appearanceSlider = self.sliderManager:AcquireObject(appearanceType)
+                local unsavedValue, unsavedIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting(appearanceName, appearanceType)
+                if unsavedValue and unsavedIsLocked then
+                    appearanceSlider:SetLocked(unsavedIsLocked)
+                end
                 appearanceSlider:SetData(appearanceName, numValues, displayName)
 
                 local bucket = APPEARANCE_NAME_TO_CREATE_BUCKET[appearanceName]
                 local subCat = SUBCATEGORY_FOR_APPEARANCE[appearanceName]
 
-                sliderData[#sliderData + 1] = { bucket = bucket, subCat = subCat, name = appearanceName, control = appearanceSlider.control, }
+                sliderData[#sliderData + 1] =
+                {
+                    bucket = bucket,
+                    subCat = subCat,
+                    name = appearanceName,
+                    control = appearanceSlider.control,
+                }
+
+                if not self.controlsByNameCategory[appearanceName] then
+                    self.controlsByNameCategory[appearanceName] = {}
+                end
+
+                self.controlsByNameCategory[appearanceName][appearanceType] = appearanceSlider
             end
         end
 
@@ -680,6 +737,15 @@ do
         end
 
         KEYBOARD_BUCKET_MANAGER:RemoveUnusedSubCategories()
+        KEYBOARD_BUCKET_MANAGER:SwitchBuckets(CREATE_BUCKET_RACE)
+
+        local mode = self:GetCharacterCreateMode()
+        local appearanceControlsEnabled = mode ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+        KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, appearanceControlsEnabled)
+        KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, appearanceControlsEnabled)
+        
+        local classControlsEnabled = mode == CHARACTER_CREATE_MODE_CREATE
+        KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, classControlsEnabled)
 
         -- Update Gender Text
         self:UpdateGenderSpecificText()
@@ -859,13 +925,7 @@ function ZO_CharacterCreate_Keyboard:InitializeForEditChanges(characterInfo, mod
 
     self:Reset()
 
-    -- disable the buckets after reset
     local appearanceControlsEnabled = mode ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, appearanceControlsEnabled)
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, appearanceControlsEnabled)
-    -- none of the edit modes allow for changing class
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, false)
-
     ZO_CharacterCreateRandomizeAppearance:SetEnabled(appearanceControlsEnabled)
 
     self.templateControl:SetHidden(true)
@@ -904,10 +964,6 @@ function ZO_CharacterCreate_Keyboard:InitializeForCharacterCreate()
         templateData = self.characterData:GetNoneTemplate()
     end
 
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, true)
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, true)
-    KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, true)
-
     ZO_CharacterCreateRandomizeAppearance:SetEnabled(true)
 
     self:UpdateGenderSelectorsForTemplate(templateData)
@@ -935,6 +991,10 @@ function ZO_CharacterCreate_Keyboard:UpdateGenderSelectorsForTemplate(templateDa
         local enabled = templateData.gender == GENDER_NEUTER or templateData.gender == button.gender
         self:SetSelectorButtonEnabled(button, self.genderRadioGroup, enabled)
     end
+end
+
+function ZO_CharacterCreate_Keyboard:ClickGenderButton(genderButton)
+    self.genderRadioGroup:SetClickedButton(genderButton)
 end
 
 --
@@ -1189,6 +1249,13 @@ end
 
 function ZO_CharacterCreateGenderSelector_OnMouseExit(button)
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_CharacterCreateGenderSelectorLabel_OnMouseClicked(label, mouseButton, upInside)
+    if mouseButton == MOUSE_BUTTON_INDEX_LEFT and upInside then
+        local genderButton = label:GetParent():GetNamedChild("Button")
+        KEYBOARD_CHARACTER_CREATE_MANAGER:ClickGenderButton(genderButton)
+    end
 end
 
 function ZO_CharacterCreate_ChangeSlider(slider, changeAmount)

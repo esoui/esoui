@@ -1171,11 +1171,13 @@ local function ZO_CharacterSelect_Gamepad_StateChanged(oldState, newState)
 end
 
 local function CharacterDeleted(eventCode, charId)
-    -- We need to release the dialog to make sure the keybinds are cleared.
-    -- Releasing this dialog will request the character list
-    ZO_CharacterSelect_Gamepad.deleting = false
-    ZO_CharacterSelect_Gamepad.refresh = true
-    ZO_Dialogs_ReleaseDialog("CHARACTER_SELECT_DELETING")
+    if ZO_CharacterSelect_Gamepad.deleting then
+        -- We need to release the dialog to make sure the keybinds are cleared.
+        -- Releasing this dialog will request the character list
+        ZO_CharacterSelect_Gamepad.deleting = false
+        ZO_CharacterSelect_Gamepad.refreshAfterCharacterDeleted = true
+        ZO_Dialogs_ReleaseDialog("CHARACTER_SELECT_DELETING")
+    end
 end
 
 local g_requestedRename = ""
@@ -1300,14 +1302,14 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     end)
 
     CHARACTER_SELECT_MANAGER:RegisterCallback("CharacterListUpdated", function()
-        if self.refresh then
+        if self.refreshAfterCharacterDeleted then
             if CHARACTER_SELECT_MANAGER:GetNumCharacters() == 0 then
                 return -- We are going to the character create screen
             end
             PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
             ZO_CharacterSelect_Gamepad_ReturnToCharacterList(ACTIVATE_VIEWPORT)
-            self.refresh = false
             self.characterList:Clear()
+            self.refreshAfterCharacterDeleted = false
         end
 
         RecreateList(self)

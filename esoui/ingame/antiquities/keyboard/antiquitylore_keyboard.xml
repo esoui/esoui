@@ -83,8 +83,11 @@
             </OnInitialized>
 
             <Controls>
-                <Scroll name="$(parent)Content">
+                <Scroll name="$(parent)Content" mouseEnabled="true">
                     <AnchorFill />
+                    <OnMouseWheel>
+                        ZO_AntiquityLoreReader_OnMouseWheel(self, delta, ctrl, alt, shift)
+                    </OnMouseWheel>
 
                     <Controls>
                         <Control name="$(parent)ScrollChild">

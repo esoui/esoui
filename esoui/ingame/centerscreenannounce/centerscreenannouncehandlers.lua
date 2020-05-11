@@ -1096,6 +1096,15 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAILY_LOGIN_REWARDS_CLAIMED] = function()
     return messageParams
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_LEAD_ACQUIRED] = function(antiquityId)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+    local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+    local secondaryText = zo_strformat(SI_ANTIQUITY_LEAD_ACQUIRED_TEXT, antiquityData:GetColorizedName())
+    messageParams:SetText(GetString(SI_ANTIQUITY_LEAD_ACQUIRED_TITLE), secondaryText)
+    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED)
+    return messageParams
+end
+
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY] = function()
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
     messageParams:SetText(GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TITLE), GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TEXT))

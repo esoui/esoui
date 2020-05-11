@@ -6498,13 +6498,15 @@ end
 
 function ZO_WorldMapManager:GetFilterValue(option)
     local modeData = self:GetModeData()
-    if modeData.filters then
+    if modeData and modeData.filters then
         local mapFilterType = GetMapFilterType()
         local filters = modeData.filters[mapFilterType]
         if filters then
             return filters[option]
         end
     end
+
+    return nil
 end
 
 function ZO_WorldMapManager:AreStickyPinsEnabledForPinGroup(pinGroup)

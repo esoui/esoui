@@ -163,7 +163,7 @@ function ZO_AntiquityDigging:Initialize(control)
         self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED)
     end)
 
-    control:RegisterForEvent(EVENT_ANTIQUITY_DIG_SPOT_DURABILITY_CHANGED, function(newDurability)
+    control:RegisterForEvent(EVENT_ANTIQUITY_DIG_SPOT_DURABILITY_CHANGED, function(eventId, newDurability)
         self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DAMAGED)
         if newDurability == 0 then
             self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DESTROYED)
@@ -362,7 +362,13 @@ function ZO_AntiquityDigging:UsePrimaryAction()
     if ANTIQUITY_DIGGING_SUMMARY_FRAGMENT:IsHidden() then
         UseDiggingActiveSkillOnSelectedCell(GetSelectedDiggingActiveSkill())
     else
-        ANTIQUITY_DIGGING_SUMMARY:HandleCommand(ZO_END_OF_GAME_FANFARE_TRIGGER_COMMANDS.NEXT)
+        ANTIQUITY_DIGGING_SUMMARY:OnUsePrimaryAction()        
+    end
+end
+
+function ZO_AntiquityDigging:UseCodex()
+    if not ANTIQUITY_DIGGING_SUMMARY_FRAGMENT:IsHidden() then
+        ANTIQUITY_DIGGING_SUMMARY:OnUseCodex()
     end
 end
 

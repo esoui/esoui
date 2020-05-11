@@ -310,11 +310,10 @@ function ZO_ScryingActionButton:Initialize(control, skill, actionName)
             SCRYING:TrySetCurrentSkill(self.activeSkill)
         end
     end)
+    self:UpdatePlatformStyle()
 end
 
 do
-    local KEYBOARD_BINDING_FONT = "ZoFontWinH3"
-    local GAMEPAD_BINDING_FONT = "ZoFontGamepad18"
     local SCRYING_ACTION_ACTIVE_COLOR = ZO_DEFAULT_ENABLED_COLOR
     local SCRYING_ACTION_INACTIVE_COLOR = ZO_ColorDef:New(.7, .7, .7)
     local SCRYING_ACTION_DISABLED_COLOR = ZO_DEFAULT_DISABLED_COLOR
@@ -324,12 +323,6 @@ do
             return
         else
             self.control:SetHidden(false)
-        end
-
-        if IsInGamepadPreferredMode() then
-            self.keybindLabel:SetFont(GAMEPAD_BINDING_FONT)
-        else
-            self.keybindLabel:SetFont(KEYBOARD_BINDING_FONT)
         end
 
         self.abilityId = GetScryingActiveSkillAbilityId(self.activeSkill)
@@ -342,6 +335,14 @@ do
         else
             self.icon:SetColor(SCRYING_ACTION_DISABLED_COLOR:UnpackRGBA())
         end
+    end
+end
+
+do
+    local KEYBOARD_BINDING_FONT = "ZoFontWinH3"
+    local GAMEPAD_BINDING_FONT = "ZoFontGamepad18"
+    function ZO_ScryingActionButton:UpdatePlatformStyle()
+        self.keybindLabel:SetFont(IsInGamepadPreferredMode() and GAMEPAD_BINDING_FONT or KEYBOARD_BINDING_FONT)
     end
 end
 
@@ -363,9 +364,13 @@ function ZO_ScryingNormalActionsMeter:Initialize(control)
     self.control = control
     self.activatedMask = control:GetNamedChild("ActivatedMask")
     self.edgeTexture = control:GetNamedChild("Edge")
+    self.valueText = control:GetNamedChild("EdgeText")
+    self.crossfadeAnim = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingNormalActionMeter_Crossfade", self.control)
+    self.idleLoop = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingNormalActionMeter_Idle", self.control)
     self.value = 0
     self.min = 0
     self.max = 1
+    self.isTextVisible = false
 
     self.maskBaseHeight = self.control:GetHeight()
 
@@ -373,6 +378,8 @@ function ZO_ScryingNormalActionsMeter:Initialize(control)
     self.edgeBaseHeight = self.edgeTexture:GetHeight()
 
     self:SetValue(0)
+    self:UpdatePlatformStyle()
+    self.idleLoop:PlayFromStart()
 end
 
 function ZO_ScryingNormalActionsMeter:SetValue(value)
@@ -402,8 +409,49 @@ function ZO_ScryingNormalActionsMeter:SetMinMax(min, max)
     self.max = max
 end
 
-function ZO_ScryingNormalActionsMeter:SmoothTransition(value, max, forceInit)
-    ZO_StatusBar_SmoothTransition(self, value, max, forceInit)
+do
+    local TURNS_UNTIL_SHOW_TEXT = 3
+    function ZO_ScryingNormalActionsMeter:SmoothTransition(value, max, forceInit)
+        ZO_StatusBar_SmoothTransition(self, value, max, forceInit)
+        local shouldTextBeVisible = value <= TURNS_UNTIL_SHOW_TEXT
+        if shouldTextBeVisible ~= self.isTextVisible then
+            self.isTextVisible = shouldTextBeVisible
+            if shouldTextBeVisible then
+                if forceInit then
+                    self.crossfadeAnim:PlayInstantlyToEnd()
+                else
+                    self.crossfadeAnim:PlayFromStart()
+                end
+            else
+                if forceInit then
+                    self.crossfadeAnim:PlayInstantlyToStart()
+                else
+                    self.crossfadeAnim:PlayFromEnd()
+                end
+            end
+        end
+
+        if shouldTextBeVisible then
+            self.valueText:SetText(tostring(value))
+        end
+    end
+end
+
+do
+    local KEYBOARD_VALUE_FONT =  "ZoFontKeyboard18ThickOutline"
+    local GAMEPAD_VALUE_FONT = "ZoFontGamepad36ThickOutline" 
+    function ZO_ScryingNormalActionsMeter:UpdatePlatformStyle()
+        self.valueText:SetFont(IsInGamepadPreferredMode() and GAMEPAD_VALUE_FONT or KEYBOARD_VALUE_FONT)
+    end
+end
+
+function ZO_ScryingNormalActionsMeter:OnShowing()
+    self.valueText:SetAlpha(1)
+end
+
+function ZO_ScryingNormalActionsMeter:OnEndOfGameTimelineUpdate(animation, progress)
+    local alpha = zo_lerp(1, 0, progress)
+    self.valueText:SetAlpha(alpha)
 end
 
 ----------------------------------
@@ -715,11 +763,6 @@ function ZO_ScryingBoard:Initialize(gameControl)
     self.goalControlPool = ZO_ControlPool:New("ZO_ScryingGoal", self.boardControl, "Goal")
 
     self.modalCursor = ZO_ScryingModalCursor:New(self, self.boardControl:GetNamedChild("ModalCursor"))
-
-    self.endOfGameTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingHex_EndOfGame")
-    self.endOfGameTimeline:GetFirstAnimation():SetUpdateFunction(function(...)
-        self:OnEndOfGameTimelineUpdate(...)
-    end)
 end
 
 function ZO_ScryingBoard:OnShowing()
@@ -1033,6 +1076,29 @@ do
         end
     end
 
+    local HEX_NEIGHBORS =
+    {
+        {-2, 0},
+        {-1, 1},
+        {1, 1},
+        {2, 0},
+        {1, -1},
+        {-1, -1},
+    }
+
+    local function FindAdjacentIslandForHex(board, hexToIslandMap, hex)
+        local row, column = hex:GetCoordinates()
+        for _, neighborOffset in ipairs(HEX_NEIGHBORS) do
+            local rowOffset, columnOffset = unpack(neighborOffset)
+            local neighborRow, neighborColumn = row + rowOffset, column + columnOffset
+            local neighborHex = board:GetHex(neighborRow, neighborColumn)
+
+            if hexToIslandMap[neighborHex] then
+                return hexToIslandMap[neighborHex]
+            end
+        end
+    end
+
     function ZO_ScryingBoard:RefreshSimulatedAction()
         local lastBorderVisibleHexes = self.borderVisibleHexes
         local borderVisibleHexes = self.lastBorderVisibleHexes -- reusing to avoid garbage
@@ -1063,12 +1129,22 @@ do
 
             table.sort(borderVisibleHexes, SortByHexIndex)
 
-            -- Add outlines to all affected hexes
-            local tracedHexSet = {}
+            -- find islands
+            local islands = {}
+            local hexToIslandMap = {}
             for _, hex in ipairs(borderVisibleHexes) do
-                if not tracedHexSet[hex] then
-                    SCRYING_HEX_ANIMATION_PROVIDER:TraceBorderHexIsland(hex, tracedHexSet)
+                local island = FindAdjacentIslandForHex(self, hexToIslandMap, hex)
+                if not island then
+                    island = { firstHex = hex }
+                    table.insert(islands, island)
                 end
+                hexToIslandMap[hex] = island
+            end
+
+            -- Add outlines to all affected hexes
+            for _, island in ipairs(islands) do
+                local hex = island.firstHex
+                SCRYING_HEX_ANIMATION_PROVIDER:TraceBorderHexIsland(hex)
             end
 
             -- play sound to suggest that the previewed action has changed
@@ -1171,10 +1247,6 @@ function ZO_ScryingBoard:PerformActionOnTargetHex()
     end
 end
 
-function ZO_ScryingBoard:PlayEndOfGameAnimation()
-    self.endOfGameTimeline:PlayFromStart()
-end
-
 do
     local MIN_SCALE = 0.75
     local MIN_ALPHA = 0.4
@@ -1260,11 +1332,15 @@ function ZO_Scrying:Initialize(control)
             self.startedEndOfGame = false
             self:TrySetCurrentSkill(SCRYING_ACTIVE_SKILL_NORMAL, NO_SOUND)
             self.board:OnShowing()
+            self.normalActionMeter:OnShowing()
             self:RefreshNormalActionMeter(ANIMATE_INSTANTLY)
             self:RefreshSpecialActionMeter(ANIMATE_INSTANTLY)
             self:RefreshActionButtons()
             self:RefreshEyeAnimations()
             self:RefreshMoreInfoButton()
+            self:UpdatePlatformStyle()
+            SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_SCRYING)
+            PlaySound(SOUNDS.SCRYING_START_INTRO)
         elseif newState == SCENE_HIDING then
             --clear the current tutorial when hiding so we don't push an extra action layer
             self.triggeredTutorial = false
@@ -1275,6 +1351,10 @@ function ZO_Scrying:Initialize(control)
             end
         elseif newState == SCENE_HIDDEN then
             self.board:OnHidden()
+            -- We may have already left music mode as a result of the outro,
+            -- in which case this is harmless, but otherwise we still need to
+            -- leave music mode
+            SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
         end
     end)
 
@@ -1294,6 +1374,7 @@ function ZO_Scrying:Initialize(control)
             self:RefreshInputState()
             self:RefreshActionButtons()
             self:RefreshMoreInfoButton()
+            self:UpdatePlatformStyle()
         end
     end)
 
@@ -1329,6 +1410,12 @@ function ZO_Scrying:Initialize(control)
     SCRYING_HEX_ANIMATION_PROVIDER:RegisterCallback("BlockingAnimationsCompleted", function()
         self:TryCompleteScrying()
     end)
+
+    self.endOfGameTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ScryingHex_EndOfGame")
+    self.endOfGameTimeline:GetFirstAnimation():SetUpdateFunction(function(...)
+        self.board:OnEndOfGameTimelineUpdate(...)
+        self.normalActionMeter:OnEndOfGameTimelineUpdate(...)
+    end)
 end
 
 function ZO_Scrying:RefreshInputState()
@@ -1355,6 +1442,13 @@ end
 
 function ZO_Scrying:RefreshMoreInfoButton()
     self.moreInfoButton:SetHidden(not IsInGamepadPreferredMode())
+end
+
+function ZO_Scrying:UpdatePlatformStyle()
+    self.normalActionMeter:UpdatePlatformStyle()
+    for _, actionButton in ipairs(self.actionButtons) do
+        actionButton:UpdatePlatformStyle()
+    end
 end
 
 function ZO_Scrying:IsPlayerInputEnabled()
@@ -1430,6 +1524,7 @@ function ZO_Scrying:TryCompleteScrying()
     if not self.startedOutro then
         self.startedOutro = true
         StartScryingOutro()
+        SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
         self.waitingForOutro = true
     end
     if self.waitingForOutro then
@@ -1540,7 +1635,8 @@ function ZO_Scrying:StartEndOfGame()
         self:TryCompleteScrying()
     end, 2000)
 
-    self.board:PlayEndOfGameAnimation()
+    self.endOfGameTimeline:PlayFromStart()
+    PlaySound(SOUNDS.SCRYING_START_END_OF_GAME)
 
     self.waitingForEndOfGame = true
 end

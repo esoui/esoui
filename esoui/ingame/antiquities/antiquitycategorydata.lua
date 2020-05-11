@@ -66,7 +66,21 @@ function ZO_AntiquityCategory:AddAntiquityData(antiquityData)
 end
 
 function ZO_AntiquityCategory:AntiquityIterator(filterFunctions)
-    return ZO_FilteredNumericallyIndexedTableIterator(self.antiquities, filterFunctions)
+    if self:GetId() == ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
+        -- Aggregate all antiquities that qualify as Scryable regardless of category.
+        local function MatchAllScryableAntiquities(antiquityData)
+            return antiquityData:IsInProgress() or antiquityData:IsScryable() or (antiquityData:HasDiscovered() and antiquityData:IsInCurrentPlayerZone())
+        end
+
+        local combinedFilterFunctions = {MatchAllScryableAntiquities}
+        if filterFunctions then
+            ZO_CombineNumericallyIndexedTables(combinedFilterFunctions, filterFunctions)
+        end
+
+        return ANTIQUITY_DATA_MANAGER:AntiquityIterator(combinedFilterFunctions)
+    else
+        return ZO_FilteredNumericallyIndexedTableIterator(self.antiquities, filterFunctions)
+    end
 end
 
 function ZO_AntiquityCategory:AddSubcategoryData(subcategoryData)

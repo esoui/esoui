@@ -112,16 +112,6 @@
             </Animations>
         </AnimationTimeline>
 
-        <AnimationTimeline name="ZO_AntiquityDiggingLoreFade">
-            <Animations>
-                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
-                    <EasingFunction>
-                        return ZO_EaseOutQuadratic(progress)
-                    </EasingFunction>
-                </AlphaAnimation>
-            </Animations>
-        </AnimationTimeline>
-
         <AnimationTimeline name="ZO_AntiquityDiggingSetProgressionFade">
             <Animations>
                 <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
@@ -161,6 +151,32 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingTransferFade">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <AlphaAnimation duration="1500" startAlpha="1" endAlpha="0" delay="1500">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingLoreFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
     </Animations>
 
     <Controls>
@@ -190,6 +206,8 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_AntiquityBonusLootRowContainer_Control" resizeToFitDescendents="true" virtual="true" />
+        
         <Control name="ZO_AntiquityDiggingRewardItem_Control" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon">
@@ -492,7 +510,7 @@
             <AnchorFill />
 
             <Controls>
-                <Label name="$(parent)Header" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_NEW_LEAD_FOUND">
+                <Label name="$(parent)Header" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_NEW_LEAD_FOUND">
                     <Anchor point="TOP" relativePoint="CENTER" offsetY="-70" />
                 </Label>
 
@@ -536,7 +554,7 @@
             <AnchorFill />
 
             <Controls>
-                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_BONUS_LOOT_HEADER">
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_BONUS_LOOT_HEADER">
                     <Anchor point="TOP" relativePoint="CENTER" offsetY="70" />
                 </Label>
 
@@ -549,30 +567,6 @@
                         </Label>
                     </Controls>
                 </Control>
-            </Controls>
-        </Control>
-
-        <!-- Lore -->
-
-        <Control name="ZO_AntiquityDiggingSummary_Lore_Keyboard_Template" virtual="true">
-            <Controls>
-                <Label name="$(parent)Header" font="ZoFontWinH1" />
-            </Controls>
-        </Control>
-        
-        <Control name="ZO_AntiquityDiggingSummary_Lore_Gamepad_Template" virtual="true">
-            <Controls>
-                <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
-            </Controls>
-        </Control>
-            
-        <Control name="ZO_AntiquityDiggingSummary_Lore" virtual="true">
-            <AnchorFill />
-
-            <Controls>
-                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_NEW_CODEX_ENTRY">
-                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-275"/>
-                </Label>
             </Controls>
         </Control>
 
@@ -603,7 +597,7 @@
                     <Dimensions x="500" y="8" />
                 </Control>
 
-                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                     <Anchor point="BOTTOM" relativeTo="$(parent)Divider" relativePoint="TOP" offsetY="-10"/>
                 </Label>
 
@@ -678,7 +672,57 @@
                 </Control>
             </Controls>
         </Control>
-        
+
+        <!-- Transfer -->
+
+        <Control name="ZO_AntiquityDiggingSummary_Transfer_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH1" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Transfer_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Transfer" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_TRANSFERING">
+                    <Dimensions x="1150"/>
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-275"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <!-- Lore -->
+
+        <Control name="ZO_AntiquityDiggingSummary_Lore_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH1" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Lore_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Lore" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_NEW_CODEX_ENTRY">
+                    <Dimensions x="1150"/>
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-275"/>
+                </Label>
+            </Controls>
+        </Control>
+
         <!-- Top Level -->
         
         <TopLevelControl name="ZO_AntiquityDiggingSummaryTopLevel" tier="MEDIUM" layer="BACKGROUND" level="1" hidden="true">
@@ -708,14 +752,24 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Lore" inherits="ZO_AntiquityDiggingSummary_Lore" />
-
                 <Control name="$(parent)SetProgression" inherits="ZO_AntiquityDiggingSummary_SetProgression" />
 
                 <Control name="$(parent)SetComplete" inherits="ZO_AntiquityDiggingSummary_SetComplete" />
+
+                <Control name="$(parent)Transfer" inherits="ZO_AntiquityDiggingSummary_Transfer" />
                 
-                <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton">
-                    <Anchor point="BOTTOM" offsetY="-100"/>
+                <Control name="$(parent)Lore" inherits="ZO_AntiquityDiggingSummary_Lore" />
+
+                <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-110"/>
+                    <Controls>
+                        <Control name="$(parent)Primary" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT"/>
+                        </Control>
+                        <Control name="$(parent)Secondary" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Primary" relativePoint="TOPRIGHT" offsetX="40"/>
+                        </Control>
+                    </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>

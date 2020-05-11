@@ -8,12 +8,12 @@ local SELECTOR_PER_ROW_CENTER_OFFSET = -65
 local INITIAL_BUCKET = CREATE_BUCKET_RACE
 
 local function CreatePreviewOption(dressingOption)
-    return  {
-                name = zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_OPTION_FORMAT, GetString("SI_CHARACTERCREATEDRESSINGOPTION", dressingOption)),
-                OnSelectedCallback =    function()
-                                            SelectClothing(dressingOption)
-                                        end
-            }
+    return {
+        name = zo_strformat(SI_CREATE_CHARACTER_GAMEPAD_PREVIEW_OPTION_FORMAT, GetString("SI_CHARACTERCREATEDRESSINGOPTION", dressingOption)),
+        OnSelectedCallback =  function()
+            SelectClothing(dressingOption)
+        end,
+    }
 end
 
 local PREVIEW_NO_GEAR = CreatePreviewOption(DRESSING_OPTION_NUDE)
@@ -22,14 +22,14 @@ local PREVIEW_CHAMPION_GEAR = CreatePreviewOption(DRESSING_OPTION_WARDROBE_1)
 local PREVIEW_CURRENT_GEAR = CreatePreviewOption(DRESSING_OPTION_YOUR_GEAR)
 local PREVIEW_CURRENT_GEAR_AND_COLLECTIBLES = CreatePreviewOption(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
 
-local CHARACTER_CREATE_PREVIEW_GEAR_INFO = 
+local CHARACTER_CREATE_PREVIEW_GEAR_INFO =
 {
     PREVIEW_NOVICE_GEAR,
     PREVIEW_CHAMPION_GEAR,
     PREVIEW_NO_GEAR,
 }
 
-local CHARACTER_EDIT_PREVIEW_GEAR_INFO = 
+local CHARACTER_EDIT_PREVIEW_GEAR_INFO =
 {
     PREVIEW_CURRENT_GEAR_AND_COLLECTIBLES, -- match the first appearance here to the default apperance set in PregameCharacterManager to avoid reloading the character
     PREVIEW_CURRENT_GEAR,
@@ -54,38 +54,36 @@ function CharacterCreateSliderManager:New(...)
 end
 
 function CharacterCreateSliderManager:Initialize(parent)
-    local CreateSlider =    function(pool)
-                                local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
-                                return ZO_CharacterCreateSlider_Gamepad:New(control)
-                            end
+    local CreateSlider = function(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+        return ZO_CharacterCreateSlider_Gamepad:New(control)
+    end
 
-    local CreateAppearanceSlider =  function(pool)
-                                        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
-                                        return ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
-                                    end
+    local CreateAppearanceSlider = function(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateAppearanceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+        return ZO_CharacterCreateAppearanceSlider_Gamepad:New(control)
+    end
 
-    local CreateColorPicker =   function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
-                                    return ZO_CharacterCreateColorSlider_Gamepad:New(control)
-                                end
+    local CreateColorPicker = function(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateColorPicker_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+        return ZO_CharacterCreateColorSlider_Gamepad:New(control)
+    end
 
-    local CreateVoiceSlider =   function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateVoiceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
-                                    return ZO_CharacterCreateVoiceSlider_Gamepad:New(control)
-                                end
+    local CreateVoiceSlider = function(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateVoiceSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+        return ZO_CharacterCreateVoiceSlider_Gamepad:New(control)
+    end
 
-    local CreateGenderSlider =  function(pool)
-                                    local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
-                                    return ZO_CharacterCreateGenderSlider_Gamepad:New(control)
-                                end
+    local CreateGenderSlider = function(pool)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+        return ZO_CharacterCreateGenderSlider_Gamepad:New(control)
+    end
 
     local function ResetSlider(slider)
         local sliderControl = slider.control
         GAMEPAD_BUCKET_MANAGER:RemoveControl(sliderControl)
         sliderControl:SetHidden(true)
-        if slider:IsLocked() then
-            slider:ToggleLocked()
-        end
+        slider:SetLocked(false)
     end
 
     self.pools =
@@ -254,6 +252,7 @@ end
 
 function ZO_CharacterCreate_Gamepad:OnStateChanged(oldState, newState)
     if newState == SCENE_SHOWING then
+        self:ResetControls()
         self.currentGearPreviewIndex = 1
 
         self.scene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
@@ -267,6 +266,22 @@ function ZO_CharacterCreate_Gamepad:OnStateChanged(oldState, newState)
         -- that may change our focus control which will impact the keybinds
         self:RefreshKeybindStrip()
     elseif newState == SCENE_HIDDEN then
+        -- Save unsaved settings to manager so they can be applied on a platform swap for stadia
+        for i, controlList in pairs(self.controls) do
+            for j, control in pairs(controlList) do
+                local controlInfo = control.info
+                if controlInfo.type == GAMEPAD_BUCKET_CONTROL_TYPE_SLIDER then
+                    ZO_CHARACTERCREATE_MANAGER:SetCharacterUnsavedSetting(controlInfo.name, controlInfo.category, control.slider:GetValue(), control:IsLocked())
+                elseif controlInfo.type == GAMEPAD_BUCKET_CONTROL_TYPE_APPEARANCE then
+                    ZO_CHARACTERCREATE_MANAGER:SetCharacterUnsavedSetting(controlInfo.name, controlInfo.appearanceType, control.slider:GetValue(), control:IsLocked())
+                end
+            end
+        end
+
+        local UNUSED_VALUE = nil
+        ZO_CHARACTERCREATE_MANAGER:SetCharacterUnsavedSetting("triangle", "physique", UNUSED_VALUE, self.physiqueTriangle:IsLocked())
+        ZO_CHARACTERCREATE_MANAGER:SetCharacterUnsavedSetting("triangle", "face", UNUSED_VALUE, self.faceTriangle:IsLocked())
+
         self.scene:RemoveFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
         ZO_CharacterCreate_GamepadCharacterViewport.Deactivate()
         SCENE_MANAGER:RemoveFragment(CHARACTER_CREATE_GAMEPAD_CONTAINER_FRAGMENT)
@@ -833,12 +848,26 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
 
         if name then
             local slider = self.sliderManager:AcquireObject(CHARACTER_CREATE_SLIDER_TYPE_SLIDER)
-            slider:SetData(i, name, category, steps, value, defaultValue)
+            local unsavedValue, unsavedIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting(name, category)
+            if unsavedValue and unsavedIsLocked then
+                slider:SetLocked(unsavedIsLocked)
+            end
+            slider:SetData(i, name, category, steps, unsavedValue or value, defaultValue)
 
             local bucketIndex, index = FindBucketFromName(GAMEPAD_BUCKET_CONTROL_TYPE_SLIDER, name)
 
             if bucketIndex then
-                local info = { bucketIndex = bucketIndex, index = index, type = GAMEPAD_BUCKET_CONTROL_TYPE_SLIDER, name = name, control = slider.control, updateFn = UpdateSlider, randomizeFn = RandomizeSlider }
+                local info =
+                {
+                    bucketIndex = bucketIndex,
+                    index = index,
+                    type = GAMEPAD_BUCKET_CONTROL_TYPE_SLIDER,
+                    name = name,
+                    category = category,
+                    control = slider.control,
+                    updateFn = UpdateSlider,
+                    randomizeFn = RandomizeSlider,
+                }
                 slider.info = info
                 controlData[#controlData + 1] = info
                 self.controls[bucketIndex] = self.controls[bucketIndex] or {}
@@ -855,12 +884,26 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
 
         if numValues > 0 then
             local slider = self.sliderManager:AcquireObject(appearanceType)
+            local unsavedValue, unsavedIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting(name, appearanceType)
+            if unsavedValue and unsavedIsLocked then
+                slider:SetLocked(unsavedIsLocked)
+            end
             slider:SetData(name, numValues, displayName)
 
             local bucketIndex, index = FindBucketFromName(GAMEPAD_BUCKET_CONTROL_TYPE_APPEARANCE, name)
 
             if bucketIndex then
-                local info = { bucketIndex = bucketIndex, index = index, type = GAMEPAD_BUCKET_CONTROL_TYPE_APPEARANCE, name = name, control = slider.control, updateFn = UpdateSlider, randomizeFn = RandomizeSlider }
+                local info =
+                {
+                    bucketIndex = bucketIndex,
+                    index = index,
+                    type = GAMEPAD_BUCKET_CONTROL_TYPE_APPEARANCE,
+                    name = name,
+                    appearanceType = appearanceType,
+                    control = slider.control,
+                    updateFn = UpdateSlider,
+                    randomizeFn = RandomizeSlider,
+                }
                 slider.info = info
                 controlData[#controlData + 1] = info
                 self.controls[bucketIndex] = self.controls[bucketIndex] or {}
@@ -885,14 +928,15 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
                             control = control()
                         end
 
-                        local info =    {
-                                            index = index,
-                                            type = GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM,
-                                            bucketIndex = bucketIndex,
-                                            control = control,
-                                            updateFn = controlInfo.updateFn,
-                                            randomizeFn = controlInfo.randomizeFn
-                                        }
+                        local info =
+                        {
+                            index = index,
+                            type = GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM,
+                            bucketIndex = bucketIndex,
+                            control = control,
+                            updateFn = controlInfo.updateFn,
+                            randomizeFn = controlInfo.randomizeFn,
+                        }
 
                         control.sliderObject = control.sliderObject or {}
                         control.sliderObject.info = info
@@ -912,10 +956,20 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
     end
 
     for category, bucket in pairs(ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD) do
-        GAMEPAD_BUCKET_MANAGER:SetEnabled(category, (self.controls[category] ~= nil))
+        GAMEPAD_BUCKET_MANAGER:SetEnabled(category, self.controls[category] ~= nil)
     end
 
     GAMEPAD_BUCKET_MANAGER:Finalize()
+
+    local _, physiqueIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting("triangle", "physique")
+    if physiqueIsLocked ~= nil then
+        self.physiqueTriangle:SetLocked(physiqueIsLocked)
+    end
+
+    local _, faceIsLocked = ZO_CHARACTERCREATE_MANAGER:GetCharacterUnsavedSetting("triangle", "face")
+    if faceIsLocked ~= nil then
+        self.faceTriangle:SetLocked(faceIsLocked)
+    end
 
     -- TODO: this fixes a bug where the triangles don't reflect the correct data...there will be more fixes to pregameCharacterManager to address the real issue
     -- (where the triangle data needs to live on its own rather than being tied to the unit)

@@ -217,7 +217,6 @@ do
         local firstEdgeHex, firstAngleIndex = hex, angleIndex
         if hex == nil then
             -- we are an island of a single tile
-            self:OnHexTraced(startHex)
             for pointAngleIndex = 0, 5 do
                 table.insert(self.points, {startHex, pointAngleIndex})
             end
@@ -244,7 +243,6 @@ do
                 startAngleIndex = startAngleIndex - 6
             end
 
-            self:OnHexTraced(lastHex)
             for pointAngleIndex = startAngleIndex + 2, endAngleIndex do
                 table.insert(self.points, {lastHex, pointAngleIndex})
             end
@@ -261,10 +259,6 @@ do
     function ZO_ScryingIsland:GenerateIsland(startHex)
         self:GenerateIslandPoints(startHex)
         self:GeneratePolygonFromIsland()
-    end
-
-    function ZO_ScryingIsland:OnHexTraced()
-        -- To be overriden
     end
 end
 
@@ -291,24 +285,11 @@ function ZO_ScryingBorderIsland:Initialize(pool)
 end
 
 -- Override
-function ZO_ScryingBorderIsland:GenerateIsland(startHex, tracedHexSet)
+function ZO_ScryingBorderIsland:GenerateIsland(startHex)
     self.control:SetHidden(false)
     self:SetTargetBorderType(startHex:GetBorderType())
 
-    -- register hex set for use in OnHexTraced
-    self.tracedHexSet = tracedHexSet
-
     ZO_ScryingIsland.GenerateIsland(self, startHex)
-
-    -- unregister set to avoid a leak
-    self.tracedHexSet = nil
-end
-
--- Override
-function ZO_ScryingBorderIsland:OnHexTraced(hex)
-    if self.tracedHexSet then
-        self.tracedHexSet[hex] = true
-    end
 end
 
 ZO_AFFECTED_HEX_BORDER_PIXELS = 10
@@ -425,9 +406,9 @@ function ZO_ScryingHexAnimationProvider:ReleaseBorderHexIslands()
     self.borderIslandPool:ReleaseAllObjects()
 end
 
-function ZO_ScryingHexAnimationProvider:TraceBorderHexIsland(topBorderHex, visitedHexSet)
+function ZO_ScryingHexAnimationProvider:TraceBorderHexIsland(topBorderHex)
     local island = self.borderIslandPool:AcquireObject()
-    island:GenerateIsland(topBorderHex, visitedHexSet)
+    island:GenerateIsland(topBorderHex)
 end
 
 function ZO_ScryingHexAnimationProvider:AddBlockingGoal()

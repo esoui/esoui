@@ -115,7 +115,7 @@ end
 
 function ZO_AntiquitySet:GetNumAntiquitiesRecovered()
     local count = 0
-    for _, _ in self:AntiquityIterator({ZO_Antiquity.NeedsCombination}) do
+    for _, _ in self:AntiquityIterator({ZO_Antiquity.IsComplete}) do
         count = count + 1
     end
     return count

@@ -345,6 +345,10 @@ local function OnDialogHiding(dialog)
         dialog.entryList:Deactivate()
     end
     TryRemoveKeybinds()
+
+    if dialog.info.onHidingCallback then
+        dialog.info.onHidingCallback(dialog)
+    end
 end
 
 local function OnDialogHidden(dialog)

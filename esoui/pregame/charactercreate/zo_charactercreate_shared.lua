@@ -48,6 +48,7 @@ function ZO_CharacterCreate_Manager:Initialize()
     self.shouldPromptForTutorialSkip = true -- this in addition to the account flag means we should prompt
     self.playingTransitionAnimations = false
     self.characterMode = CHARACTER_MODE_CREATION
+    self.characterUnsavedSettings = {}
 
     local function OnLogoutSuccessful()
         local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
@@ -75,7 +76,8 @@ function ZO_CharacterCreate_Manager:Initialize()
 
     local function OnCharacterEditFailed(eventCode, characterId, error)
         ZO_Dialogs_ReleaseAllDialogsOfName("CHARACTER_CREATE_SAVING_CHANGES")
-        local dialogParams = {
+        local dialogParams =
+        {
             mainTextParams = { GetString("SI_CHARACTERCREATEEDITERROR", error) },
         }
 
@@ -159,6 +161,30 @@ end
 
 function ZO_CharacterCreate_Manager:GetCharacterMode()
     return self.characterMode
+end
+
+function ZO_CharacterCreate_Manager:SetCharacterUnsavedSetting(name, type, value, locked)
+    if not self.characterUnsavedSettings[name] then
+        self.characterUnsavedSettings[name] = {}
+    end
+
+    if not self.characterUnsavedSettings[name][type] then
+        self.characterUnsavedSettings[name][type] = {}
+    end
+
+    self.characterUnsavedSettings[name][type] =
+    {
+        value = value,
+        locked = locked,
+    }
+end
+
+function ZO_CharacterCreate_Manager:GetCharacterUnsavedSetting(name, type)
+    if not (self.characterUnsavedSettings[name] and self.characterUnsavedSettings[name][type]) then
+        return
+    end
+
+    return self.characterUnsavedSettings[name][type].value, self.characterUnsavedSettings[name][type].locked
 end
 
 function ZO_CharacterCreate_Manager:InitializeForAppearanceChange(characterData)

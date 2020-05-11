@@ -169,6 +169,10 @@
                     <AnchorFill/>
                     <Controls>
                         <Control name="$(parent)MoreInfoKeybindButton" inherits="ZO_KeybindButton">
+                            <Anchor point="BOTTOMLEFT" offsetX="100" offsetY="-40"/>
+                        </Control>
+
+                        <Control name="$(parent)HelpTutorialsKeybindButton" inherits="ZO_KeybindButton">
                             <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-40"/>
                         </Control>
                     </Controls>

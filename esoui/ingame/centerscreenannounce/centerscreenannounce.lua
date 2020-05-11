@@ -1619,6 +1619,31 @@ function CenterScreenAnnounce:CallExpiringCallback(announcementLine)
     end
 end
 
+function CenterScreenAnnounce:RemoveAllCSAsOfAnnounceType(announceType)
+    --First, go through anything in the display queue that matches the type, and remove it
+    for i, entry in ZO_NumericallyIndexedTableReverseIterator(self.displayQueue) do
+        if entry.csaType == announceType then
+            table.remove(self.displayQueue, i)
+        end
+    end
+
+    --Loop through each active line
+    for lineStyle, lineStyleTable in pairs(self.activeLines) do
+        for _, line in ipairs(lineStyleTable) do
+            if line.messageParams and line.messageParams.csaType == announceType then
+                --The animations for each of the line types are stored in different locations, so we need a separate implementation for each type
+                if lineStyle == CSA_LINE_TYPE_LARGE then
+                    line.wipeAnimationTimeline:PlayInstantlyToEnd()
+                elseif lineStyle == CSA_LINE_TYPE_SMALL then
+                    line.translateTimeline:PlayInstantlyToEnd(true)
+                    line.fadeInTimeline:PlayInstantlyToEnd(true)
+                    line.fadeOutTimeline:PlayInstantlyToEnd()
+                end
+            end
+        end
+    end
+end
+
 -- Legacy support for addons
 function CenterScreenAnnounce:AddMessage(eventId, category, ...)
     local messageParams = self:CreateMessageParams(category)
@@ -1681,6 +1706,7 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
     }
 

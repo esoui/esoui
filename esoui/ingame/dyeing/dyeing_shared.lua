@@ -84,7 +84,8 @@ ZO_DYEING_LOCK_INDEX = 4
 ZO_DYEING_STATION_INTERACTION =
 {
     type = "Dyeing Station",
-    OnEndBecauseAnotherInteractIsBeginning = function()
+    OnInteractSwitch = function()
+        internalassert(false, "OnInteractSwitch is being called.")
         SYSTEMS:HideScene("restyle")
         SYSTEMS:HideScene("restyle_station")
     end,

@@ -856,6 +856,38 @@ function ZO_TreeNode:RefreshControl(userRequested)
     end
 end
 
+function ZO_TreeNode:GetNextSiblingNode(includeDisabledNodes)
+    if self.parentNode then
+        local siblingNodes = self.parentNode.children
+        local hasPassedCurrentNode = false
+
+        for index, siblingNode in ipairs(siblingNodes) do
+            if hasPassedCurrentNode then
+                if includeDisabledNodes or siblingNode:IsEnabled() then
+                    return siblingNode
+                end
+            elseif siblingNode == self then
+                hasPassedCurrentNode = true
+            end
+        end
+    end
+end
+
+function ZO_TreeNode:GetPreviousSiblingNode(includeDisabledNodes)
+    if self.parentNode then
+        local siblingNodes = self.parentNode.children
+        local adjacentNode
+
+        for index, siblingNode in ipairs(siblingNodes) do
+            if siblingNode == self then
+                return adjacentNode
+            elseif includeDisabledNodes or siblingNode:IsEnabled() then
+                adjacentNode = siblingNode
+            end
+        end
+    end
+end
+
 --Global XML
 
 function ZO_TreeHeader_OnMouseUp(self, upInside)

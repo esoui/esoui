@@ -959,6 +959,15 @@ function ZO_MainMenuManager_Gamepad:ShowDailyLoginRewardsEntry()
     SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu")
 end
 
+function ZO_MainMenuManager_Gamepad:ShowScryableAntiquities()
+    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.JOURNAL])
+    local entry = self.mainList:GetTargetData()
+    self:RefreshSubList(entry)
+    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[MENU_JOURNAL_ENTRIES.ANTIQUITIES])
+    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu", "gamepad_antiquity_journal")
+    ANTIQUITY_JOURNAL_GAMEPAD:ShowScryable()
+end
+
 function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
     local activityFinderSceneName = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME
     local zoneStoriesSceneName = "zoneStoriesGamepad"

@@ -43,6 +43,7 @@ local KEYBOARD_STYLE =
     digPowerDoubleBarSingleGlowTexture = "EsoUI/Art/Antiquities/Keyboard/Digging_2Bar_Single_Glow.dds",
     digPowerDoubleBarDoubleGlowTexture = "EsoUI/Art/Antiquities/Keyboard/Digging_2Bar_Glow.dds",
     digPowerIconFrameTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Keyboard/Digging_1Icon_Border.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Keyboard/Digging_2Icon_Border.dds" },
+    helpTutorialsKeybind = "TOGGLE_HELP",
 }
 
 local GAMEPAD_STYLE =
@@ -54,6 +55,7 @@ local GAMEPAD_STYLE =
     digPowerDoubleBarSingleGlowTexture = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Bar_Single_Glow.dds",
     digPowerDoubleBarDoubleGlowTexture = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Bar_Glow.dds",
     digPowerIconFrameTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_1Icon_Border.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Icon_Border.dds" },
+    helpTutorialsKeybind = "GAMEPAD_SPECIAL_TOGGLE_HELP",
 }
 
 local DIG_POWER_REFUND_INCREMENT_INTERVAL_S = 0.05
@@ -70,6 +72,7 @@ function ZO_AntiquityDigging:Initialize(control)
     self.control = control
     self.keybindContainer = control:GetNamedChild("KeybindContainer")
     self.meterContainer = control:GetNamedChild("MeterContainer")
+    self.helpTutorialsKeybindButton = self.keybindContainer:GetNamedChild("HelpTutorialsKeybindButton")
     self.moreInfoKeybindButton = self.keybindContainer:GetNamedChild("MoreInfoKeybindButton")
     self.moreInfoKeybindButton:SetKeybind("ANTIQUITY_DIGGING_MORE_INFO")
     self.stabilityControl = self.meterContainer:GetNamedChild("Stability")
@@ -102,6 +105,7 @@ function ZO_AntiquityDigging:Initialize(control)
     self.meterContainerFastPartialTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingHUDFastPartialFade", self.meterContainer)
 
     ANTIQUITY_DIGGING_SCENE = ZO_RemoteInteractScene:New("antiquityDigging", SCENE_MANAGER, ANTIQUITY_DIGGING_INTERACTION)
+    HELP_MANAGER:AddOverlayScene("antiquityDigging")
 
     ANTIQUITY_DIGGING_ACTIONS_FRAGMENT = ZO_ActionLayerFragment:New("AntiquityDiggingActions")
     ANTIQUITY_DIGGING_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -127,6 +131,8 @@ function ZO_AntiquityDigging:Initialize(control)
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_GAME_OVER, function()
         self.isGameOver = true
         self:RefreshInputModeFragments()
+
+        CENTER_SCREEN_ANNOUNCE:RemoveAllCSAsOfAnnounceType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE)
 
         -- When the end of game summary fragment comes in, we want to get rid of the keybinds
         -- and tone down the bars so they don't feel like they're part of the summary but can still be referenced
@@ -155,6 +161,10 @@ function ZO_AntiquityDigging:Initialize(control)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_DIG_POWER_REFUND, function()
         self:OnDigPowerRefund()
+    end)
+
+    control:RegisterForEvent(EVENT_STOP_ANTIQUITY_DIGGING, function()
+        SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
     end)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_MOUSE_OVER_ACTIVE_SKILL_CHANGED, function(_, mousedOverSkill)
@@ -225,7 +235,13 @@ function ZO_AntiquityDigging:RefreshInputModeFragments()
 end
 
 function ZO_AntiquityDigging:ApplyPlatformStyle(style)
-    ApplyTemplateToControl(self.moreInfoKeybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
+    local keybindButtonTemplate = ZO_GetPlatformTemplate("ZO_KeybindButton")
+    self.helpTutorialsKeybindButton:SetKeybind(style.helpTutorialsKeybind)
+    ApplyTemplateToControl(self.helpTutorialsKeybindButton, keybindButtonTemplate)
+    --Reset the text here to handle the force uppercase on gamepad
+    self.helpTutorialsKeybindButton:SetText(GetString(SI_HELP_TUTORIALS))
+
+    ApplyTemplateToControl(self.moreInfoKeybindButton, keybindButtonTemplate)
     --Reset the text here to handle the force uppercase on gamepad
     self.moreInfoKeybindButton:SetText(GetString(SI_ANTIQUITIES_DIGGING_MORE_INFO))
     self.moreInfoKeybindButton:SetHidden(not IsInGamepadPreferredMode())
@@ -256,6 +272,7 @@ function ZO_AntiquityDigging:OnAntiquityDiggingReadyToPlay()
     self.meterContainerTimeline:PlayForward()
     self.durabilityUnitFrame:SetHasTarget(true)
     self:RefreshDurabilityBar()
+    self.durabilityUnitFrame:RefreshControls() -- force refreshes the name
     self:RefreshStabilityBar()
     self:RefreshDigPowerConfiguration()
     self:RefreshDigPowerBars()

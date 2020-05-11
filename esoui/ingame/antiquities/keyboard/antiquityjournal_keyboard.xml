@@ -169,7 +169,26 @@
 
                     <Controls>
                         <Label name="$(parent)Title" inherits="ZO_AntiquityTitleLabel_Keyboard">
+                            <OnInitialized>
+                                local fonts =
+                                {
+                                    {
+                                        font = "ZoFontWinH3",
+                                        lineLimit = 1,
+                                    },
+                                    {
+                                        font = "ZoFontWinH4",
+                                        lineLimit = 1,
+                                    },
+                                    {
+                                        font = "ZoFontWinH5",
+                                        lineLimit = 1,
+                                    },
+                                }
+                                ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                            </OnInitialized>
                             <Anchor point="TOPLEFT" />
+                            <DimensionConstraints maxX="350" />
                         </Label>
 
                         <Label name="$(parent)AntiquityType" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">

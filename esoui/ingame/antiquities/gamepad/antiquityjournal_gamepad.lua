@@ -62,6 +62,10 @@ function ZO_AntiquityJournalGamepad:InitializeControl(control)
     ANTIQUITY_JOURNAL_SCENE_GAMEPAD = ZO_Scene:New("gamepad_antiquity_journal", SCENE_MANAGER)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_DO_NOT_CREATE_TAB_BAR, ZO_ACTIVATE_ON_SHOW, ANTIQUITY_JOURNAL_SCENE_GAMEPAD)
 
+    ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT = ZO_FadeSceneFragment:New(ZO_AntiquityJournal_FooterBar_Gamepad)
+    ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT.footerBarName = ZO_AntiquityJournal_FooterBar_Gamepad:GetNamedChild("Name")
+    ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT.footerBarBar = ZO_AntiquityJournal_FooterBar_Gamepad:GetNamedChild("XPBar")
+
     self.fragment = ZO_SimpleSceneFragment:New(control)
     ZO_ANTIQUITY_JOURNAL_GAMEPAD_FRAGMENT = self.fragment
     self.fragment:SetHideOnSceneHidden(true)
@@ -71,7 +75,6 @@ end
 function ZO_AntiquityJournalGamepad:InitializeLists()
     local function CategoryEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         data:SetNew(data:HasNewLead())
-
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
@@ -195,7 +198,7 @@ function ZO_AntiquityJournalGamepad:OnShowing()
         self:ShowSubcategoryList()
         self:DeactivateCurrentList()
         self:ActivateAntiquityList()
-    elseif not self:GetCurrentList() then
+    else
         self:ShowCategoryList()
     end
 
@@ -228,12 +231,15 @@ function ZO_AntiquityJournalGamepad:ShowCategoryList()
     self:HideAntiquityListFragment()
     self:RefreshHeader()
     self:SetCurrentList(self.categoryList)
+    self.categoryList:RefreshVisible()
+    SCENE_MANAGER:RemoveFragment(ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT)
 end
 
 function ZO_AntiquityJournalGamepad:ShowSubcategoryList(resetSelectionToTop)
     self:RefreshSubcategories(resetSelectionToTop)
     self:ShowAntiquityListFragment()
     self:SetCurrentList(self.subcategoryList)
+    self.subcategoryList:RefreshVisible()
 end
 
 function ZO_AntiquityJournalGamepad:ActivateCurrentList(...)
@@ -346,7 +352,7 @@ function ZO_AntiquityJournalGamepad:RefreshSubcategories(resetSelectionToTop)
         end
 
         for _, subcategoryData in categoryData:SubcategoryIterator() do
-            local subcategoryName = subcategoryData:GetName()
+            local subcategoryName = ZO_CachedStrFormat(SI_ZONE_NAME, subcategoryData:GetName())
             local entryData = ZO_GamepadEntryData:New(subcategoryName)
 
             entryData:SetDataSource(subcategoryData)
@@ -957,14 +963,26 @@ do
                 rowTemplate = SCRYABLE_ANTIQUITY_ROW_DATA,
                 list = {}
             },
+        }
+
+        for antiquityDifficulty = 1, ANTIQUITY_DIFFICULTY_MAX_VALUE do
+            local skillName, requiredRank, maximumRank = ZO_GetAntiquityScryingPassiveSkillInfo(antiquityDifficulty)
+            local antiquitySection =
             {
-                sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_REQUIRES_SKILL),
-                filterFunctions = {function(antiquityData) return antiquityData:HasDiscovered() and antiquityData:IsInCurrentPlayerZone() and not antiquityData:MeetsScryingSkillRequirements() end},
+                sectionHeading = zo_strformat(SI_ANTIQUITY_SUBHEADING_REQUIRES_SKILL, skillName, requiredRank, maximumRank),
+                filterFunctions =
+                {
+                    function(antiquityData)
+                        local isMatch = antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsScryingSkillRequirements()
+                        return isMatch and antiquityData:GetDifficulty() == antiquityDifficulty
+                    end,
+                },
                 sortFunction = ZO_DefaultAntiquitySortComparison,
                 rowTemplate = SCRYABLE_ANTIQUITY_ROW_DATA,
                 list = {}
-            },
-        }
+            }
+            table.insert(self.scryableAntiquitySections, antiquitySection)
+        end
     end
 
     function ZO_AntiquityJournalListGamepad:RefreshAntiquities()
@@ -977,9 +995,10 @@ do
 
         if not currentSubcategoryData then
             self.titleLabel:SetText("")
+            SCENE_MANAGER:RemoveFragment(ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT)
         else
             -- Refresh the header.
-            self.titleLabel:SetText(currentSubcategoryData:GetName())
+            self.titleLabel:SetText(ZO_CachedStrFormat(SI_ZONE_NAME, currentSubcategoryData:GetName()))
 
             if IsScryableCategory(currentSubcategoryData) then
                 for _, antiquitySection in ipairs(self.scryableAntiquitySections) do
@@ -1016,6 +1035,8 @@ do
                 end
             else
                 -- Add the antiquity/antiquity set entries.
+                local maxLoreEntries = 0
+                local unlockedLoreEntries = 0
                 local antiquitySets = {}
 
                 for _, antiquityData in currentSubcategoryData:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
@@ -1039,9 +1060,16 @@ do
 
                                 entryTemplate = rowTemplate
                             end
+
+                            for _, antiquitySetAntiquityData in antiquitySetData:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
+                                maxLoreEntries = maxLoreEntries + antiquitySetAntiquityData:GetNumLoreEntries()
+                                unlockedLoreEntries = unlockedLoreEntries + antiquitySetAntiquityData:GetNumUnlockedLoreEntries()
+                            end
                         end
                     else
                         entryData = antiquityData
+                        maxLoreEntries = maxLoreEntries + antiquityData:GetNumLoreEntries()
+                        unlockedLoreEntries = unlockedLoreEntries + antiquityData:GetNumUnlockedLoreEntries()
                     end
 
                     if entryData then
@@ -1051,6 +1079,14 @@ do
                         table.insert(scrollDataList, ZO_ScrollList_CreateDataEntry(entryTemplate, entryData))
                     end
                 end
+
+                ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT.footerBarName:SetText(zo_strformat(SI_GAMEPAD_ANTIQUITY_JOURNAL_PROGRESS_SUBCATEGORY, currentSubcategoryData:GetName()))
+                if maxLoreEntries > 0 then
+                    ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT.footerBarBar:SetValue(unlockedLoreEntries / maxLoreEntries)
+                else
+                    ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT.footerBarBar:SetValue(0)
+                end
+                SCENE_MANAGER:AddFragment(ZO_ANTIQUITY_JOURNAL_FOOTER_GAMEPAD_FRAGMENT)
             end
         end
 
@@ -1065,10 +1101,19 @@ do
 end
 
 function ZO_AntiquityJournalListGamepad:RefreshAntiquity()
+    local lastSelectedFragmentData
     local lastSelectedData = self.lastSelectedData
+    local activeFragmentList = self:GetActiveFragmentList()
+    if activeFragmentList and activeFragmentList:IsActive() then
+        lastSelectedFragmentData = ZO_ScrollList_GetSelectedData(activeFragmentList.list)
+    end
+
     self:RefreshVisible()
     if lastSelectedData then
         ZO_ScrollList_SelectData(self.list, lastSelectedData)
+        if activeFragmentList and lastSelectedFragmentData then
+            ZO_ScrollList_SelectData(activeFragmentList.list, lastSelectedFragmentData)
+        end
     end
 end
 

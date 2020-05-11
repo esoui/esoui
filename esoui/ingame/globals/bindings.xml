@@ -420,11 +420,7 @@
             </Action>
 
             <Action name="TOGGLE_HELP">
-                <Down>
-                    if not TUTORIAL_SYSTEM:ShowHelp() then
-                        SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_HELP)
-                    end
-                </Down>
+                <Down> HELP_MANAGER:ToggleHelp() </Down>
             </Action>
 
             <Action name="TOGGLE_SYSTEM" rebindable="false">
@@ -1257,11 +1253,23 @@
         </Category>
     </Layer>
 
+    <Layer name="ScryingActions">
+        <Category>
+            <BlockAction name="SPECIAL_MOVE_CROUCH"/>
+            <BlockAction name="SPECIAL_MOVE_ATTACK"/>
+            <BlockAction name="SPECIAL_MOVE_BLOCK"/>
+            <BlockAction name="TOGGLE_FIRST_PERSON"/>
+        </Category>
+    </Layer>
+
     <Layer name="AntiquityDiggingActions">
         <Category>
             <Action name="ANTIQUITY_DIGGING_MORE_INFO">
                 <Down> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindPressed() </Down>
                 <Up> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindReleased() </Up>
+            </Action>
+            <Action name="GAMEPAD_SPECIAL_TOGGLE_HELP">
+                <Down> HELP_MANAGER:ToggleHelp() </Down>
             </Action>
         </Category>
     </Layer>

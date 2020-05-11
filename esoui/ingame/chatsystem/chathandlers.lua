@@ -269,6 +269,15 @@ function ZO_ChatRouter:AddCommandPrefix(prefixCharacter, callback)
     self:FireCallbacks("AddCommandPrefix", prefixCharacter, callback)
 end
 
+function ZO_ChatRouter:SetCurrentChannelData(channelData, channelTarget)
+    self.currentChannel = channelData
+    self.currentTarget = channelTarget
+end
+
+function ZO_ChatRouter:GetCurrentChannelData()
+    return self.currentChannel, self.currentTarget
+end
+
 CHAT_ROUTER = ZO_ChatRouter:New()
 
 --- Global functions ---

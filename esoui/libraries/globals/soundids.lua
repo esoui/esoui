@@ -924,6 +924,8 @@ SOUNDS = {
     CODE_REDEMPTION_SUCCESS                 = "CodeRedemption_Success",
 
     --Scrying
+    SCRYING_START_INTRO                     = "Antiquities_Scrying_Overlay_Intro",
+    SCRYING_START_END_OF_GAME               = "Antiquities_Scrying_Overlay_Outro",
     SCRYING_CAPTURE_GOAL                    = "Antiquities_Scrying_Capture_Goal",
     SCRYING_CAPTURE_HEX_SMALL               = "Antiquities_Scrying_Capture_Hex_Small",
     SCRYING_CAPTURE_HEX_MEDIUM              = "Antiquities_Scrying_Capture_Hex_Medium",
