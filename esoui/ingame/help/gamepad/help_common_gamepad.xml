@@ -39,6 +39,8 @@
                                 </Control>
                             </Controls>
                         </Control>
+
+                        <Texture name="$(parent)ScrollIndicator" override="true" tier="HIGH" layer="OVERLAY" />
                     </Controls>
                 </Control>
             </Controls>

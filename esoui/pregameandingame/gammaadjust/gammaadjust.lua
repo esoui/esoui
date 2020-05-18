@@ -78,6 +78,16 @@ do
         return fragment
     end
 
+    function ZO_GammaAdjustFragment:SetValueAsUnsaved()
+        if self.slider then
+            self.unsavedValue = self.slider:GetValue()
+        end
+    end
+
+    function ZO_GammaAdjustFragment:ClearUnsavedValue()
+        self.unsavedValue = self.slider:GetValue()
+    end
+
     function ZO_GammaAdjustFragment:Show()
         currentGamma = GetCVar("GAMMA_ADJUSTMENT")
 
@@ -87,7 +97,11 @@ do
         end
 
         if ZO_GammaAdjust_NeedsFirstSetup() then
-            self.slider:SetValue(DEFAULT_INITIAL_GAMMA)
+            if self.unsavedValue then
+                self.slider:SetValue(self.unsavedValue)
+            else
+                self.slider:SetValue(DEFAULT_INITIAL_GAMMA)
+            end
         else
             self.slider:SetValue(currentGamma)
         end
@@ -116,7 +130,7 @@ do
     function ZO_GammaAdjustFragment:OnHidden()
         ZO_FadeSceneFragment.OnHidden(self)
 
-        if(self.slider.Deactivate) then
+        if self.slider.Deactivate then
             self.slider:Deactivate()
         end
     end
@@ -132,6 +146,7 @@ do
         ApplyTemplateToControl(self.declineGamma, style.declineTemplate)
         ZO_SelectableLabel_SetNormalColor(self.confirmGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
         ZO_SelectableLabel_SetNormalColor(self.declineGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
+        self:SetValueAsUnsaved()
 
         self:UpdateVisibility()
     end
@@ -179,18 +194,18 @@ do
 end
 
 local function GammaToLinear(gamma)
-    if(gamma <= 0.04045) then
-        return (gamma / 12.92)
+    if gamma <= 0.04045 then
+        return gamma / 12.92
     else
         return zo_pow(zo_abs(gamma + 0.055) / 1.055, 2.4)
     end
 end
 
 local function LinearToGamma(linear)
-    if(linear <= 0.0031308) then
-        return (linear * 12.92)
+    if linear <= 0.0031308 then
+        return linear * 12.92
     else
-        return (1.055 * zo_pow(zo_abs(linear), 1 / 2.4) - 0.055)
+        return 1.055 * zo_pow(zo_abs(linear), 1 / 2.4) - 0.055
     end
 end
 

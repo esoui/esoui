@@ -856,3 +856,5 @@ end
 
 -- ZO_HelpManager was really specifically keyboard help, naming to meet standards because we need an actual manager now
 ZO_HelpManager = ZO_Help_Keyboard
+-- Renamed event to be more consistent with our naming conventions
+EVENT_HELP_SHOW_SPECIFIC_PAGE = EVENT_SHOW_SPECIFIC_HELP_PAGE

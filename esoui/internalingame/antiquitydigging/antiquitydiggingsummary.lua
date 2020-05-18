@@ -205,12 +205,7 @@ function ZO_AntiquityDiggingSummary:InitializeControls()
         control.frameTexture = control:GetNamedChild("Frame")
         control.bgTexture = control.frameTexture:GetNamedChild("BG")
         control.fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingFramedAntiquityIconFade", control)
-        control.fadeTimeline:SetHandler("OnStop", function(_, completedPlaying)
-            OnCompleteFireTrigger(_, completedPlaying)
-            if completedPlaying then
-                PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENT_RUNDOWN_ICONS)
-            end
-        end)
+        control.fadeTimeline:SetHandler("OnStop", OnCompleteFireTrigger)
 
         SetupControlStyleTemplating(control, "ZO_AntiquityDigging_FramedAntiquityIcon")
         control.SetDisplayBehavior = SetAntiquityIconDisplayBehavior
@@ -648,20 +643,22 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
         rewardsOutToSetProgressionInEdge:SetConditional(function()
             return self.hasAntiquitySet
         end)
-        local rewardsOutToLoreEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS_OUT", "TRANSFER")
-        rewardsOutToLoreEdge:SetConditional(function()
+        local rewardsOutToTransferEdge = fanfareStateMachine:AddEdgeAutoName("REWARDS_OUT", "TRANSFER")
+        rewardsOutToTransferEdge:SetConditional(function()
             return not self.hasAntiquitySet and self.showLore
         end)
         fanfareStateMachine:AddEdgeAutoName("LORE_IN", "LORE")
-
         fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_IN", "SET_PROGRESSION")
-        fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION", "SET_PROGRESSION_OUT")
-        local setProgressionOutTransferEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_OUT", "TRANSFER")
-        setProgressionOutTransferEdge:SetConditional(function()
-            return not self.isAntiquitySetComplete
+        local setProgressionOutEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION", "SET_PROGRESSION_OUT")
+        setProgressionOutEdge:SetConditional(function()
+            return self.isAntiquitySetComplete or self.showLore
         end)
-        local setProgressionOutSetCompleteInEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_OUT", "SET_COMPLETE_IN")
-        setProgressionOutSetCompleteInEdge:SetConditional(function()
+        local setProgressionOutToTransferEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_OUT", "TRANSFER")
+        setProgressionOutToTransferEdge:SetConditional(function()
+            return not self.isAntiquitySetComplete and self.showLore
+        end)
+        local setProgressionOutToSetCompleteInEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION_OUT", "SET_COMPLETE_IN")
+        setProgressionOutToSetCompleteInEdge:SetConditional(function()
             return self.isAntiquitySetComplete
         end)
         fanfareStateMachine:AddEdgeAutoName("SET_COMPLETE_IN", "SET_COMPLETE")
@@ -696,7 +693,7 @@ function ZO_AntiquityDiggingSummary:InitializeStateMachine()
         end)
         local setProgressionQuitEdge = fanfareStateMachine:AddEdgeAutoName("SET_PROGRESSION", "QUIT")
         setProgressionQuitEdge:SetConditional(function()
-            return not self.isAntiquitySetComplete
+            return not (self.showLore or self.isAntiquitySetComplete)
         end)
         setProgressionQuitEdge:RegisterCallback("OnActivated", function()
             self:ConfigureKeybindButton(self.primaryKeybindButton, true, GetString(SI_EXIT_BUTTON))

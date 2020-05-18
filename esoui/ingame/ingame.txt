@@ -1385,6 +1385,7 @@ EsoUI\Ingame\AntiquityDigging\AntiquityDigging.lua
 EsoUI\Ingame\AntiquityDigging\AntiquityDigging.xml
 
 EsoUI\Ingame\Scrying\IngameScrying.lua
+EsoUI\Ingame\Scrying\IngameScrying.xml
 
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua

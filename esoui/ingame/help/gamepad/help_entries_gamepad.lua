@@ -8,28 +8,13 @@ function HelpTutorialsEntriesGamepad:Initialize(control)
     ZO_HelpTutorialsGamepad.Initialize(self, control)
 
     local helpEntriesFragment = ZO_FadeSceneFragment:New(control)
-    HELP_TUTORIALS_ENTRIES_GAMEPAD = ZO_Scene:New("helpTutorialsEntriesGamepad", SCENE_MANAGER)
-    HELP_TUTORIALS_ENTRIES_GAMEPAD:AddFragment(helpEntriesFragment)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE = ZO_Scene:New("helpTutorialsEntriesGamepad", SCENE_MANAGER)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:AddFragment(helpEntriesFragment)
 
     local function OnStateChanged(...)
         self:OnStateChanged(...)
     end
-    HELP_TUTORIALS_ENTRIES_GAMEPAD:RegisterCallback("StateChange", OnStateChanged)
-end
-
-function HelpTutorialsEntriesGamepad:InitializeEvents()
-    ZO_HelpTutorialsGamepad.InitializeEvents(self)
-
-    local function OnShowSpecificPage(eventId, helpCategoryIndex, helpIndex)
-        if IsInGamepadPreferredMode() then
-            -- ideally we would do a push here, but that is currently not playing
-            -- well with opening help from the Crown Store
-            -- specifically: attempting to gift from the furniture browser with gifting locked
-            self:Show(helpCategoryIndex, helpIndex)
-        end
-    end
-
-    self.control:RegisterForEvent(EVENT_HELP_SHOW_SPECIFIC_PAGE, OnShowSpecificPage)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:RegisterCallback("StateChange", OnStateChanged)
 end
 
 function HelpTutorialsEntriesGamepad:SelectOrQueueHelpEntry(categoryIndex, helpIndex)

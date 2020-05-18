@@ -1510,8 +1510,9 @@ function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild,
         end
 
         -- if this is a new selection, unselect the old control and save off any necessary info
+        local previouslySelectedData = nil
         if notAlreadySelected then
-            local previouslySelectedData = self.selectedData
+            previouslySelectedData = self.selectedData
             if self.selectedData then
                 self.selectedData = nil
                 self.selectedDataIndex = nil

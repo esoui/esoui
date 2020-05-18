@@ -1,7 +1,8 @@
 local ACCEPT = true
 local REJECT = false
 
-ZO_ANTIQUITY_DIGGING_FANFARE_DELAY_MS = 2000
+local ANTIQUITY_DIGGING_FANFARE_LONG_DELAY_MS = 2000
+local ANTIQUITY_DIGGING_FANFARE_SHORT_DELAY_MS = 500
 
 ZO_Dialogs_RegisterCustomDialog("CONFIRM_STOP_ANTIQUITY_DIGGING",
 {
@@ -77,6 +78,8 @@ function ZO_AntiquityDigging:Initialize(control)
 
     self.keybindLabels = {} -- will be populated on EVENT_KEYBINDINGS_LOADED
 
+    self.isHelpOverlayVisible = false
+
     ANTIQUITY_DIGGING_SCENE = ZO_RemoteScene:New("antiquityDigging", SCENE_MANAGER)
 
     ANTIQUITY_DIGGING_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -85,14 +88,12 @@ function ZO_AntiquityDigging:Initialize(control)
             self.isReadyToPlay = false
             control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, function() self:OnAntiquityDiggingReadyToPlay() end)
             self:RefreshActiveToolKeybinds()
-            PushActionLayerByName("AntiquityDiggingActions")
         elseif newState == SCENE_FRAGMENT_HIDING then
             control:UnregisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY)
             control:SetHandler("OnUpdate", nil)
-            self:SetControlsEnabled(false)
             --clear the current tutorial when hiding so we don't push an extra action layer
             self.triggeredTutorial = false
-            RemoveActionLayerByName("AntiquityDiggingActions")
+            self:RefreshInputState()
             ZO_Dialogs_ReleaseAllDialogsOfName("CONFIRM_STOP_ANTIQUITY_DIGGING")
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self.keybindContainerTimeline:PlayInstantlyToStart()
@@ -136,22 +137,21 @@ function ZO_AntiquityDigging:Initialize(control)
     end)
 
     control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_GAME_OVER, function(eventId, gameOverFlags)
+        local fanfareDelayMs = PlayerLeftDiggingEarly() and ANTIQUITY_DIGGING_FANFARE_SHORT_DELAY_MS or ANTIQUITY_DIGGING_FANFARE_LONG_DELAY_MS
         self.beginEndOfGameFanfareEventId = zo_callLater(function()
             self.beginEndOfGameFanfareEventId = nil
             ANTIQUITY_DIGGING_SUMMARY:BeginEndOfGameFanfare(gameOverFlags)
-        end, ZO_ANTIQUITY_DIGGING_FANFARE_DELAY_MS)
+        end, fanfareDelayMs)
     end)
     
     control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
-        if self:IsReadyToPlay() then
-            self:SetControlsEnabled(true)
-        end
+        self:RefreshInputState()
     end)
 
     control:RegisterForEvent(EVENT_TUTORIAL_HIDDEN, function()
         if self.triggeredTutorial then
             self.triggeredTutorial = false
-            PushActionLayerByName("AntiquityDiggingActions")
+            self:RefreshInputState()
         end
     end)
 
@@ -163,11 +163,16 @@ function ZO_AntiquityDigging:Initialize(control)
         self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED)
     end)
 
-    control:RegisterForEvent(EVENT_ANTIQUITY_DIG_SPOT_DURABILITY_CHANGED, function(eventId, newDurability)
+    control:RegisterForEvent(EVENT_ANTIQUITY_DIG_SPOT_DURABILITY_CHANGED, function(_, newDurability)
         self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DAMAGED)
         if newDurability == 0 then
             self:ShowTutorial(TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_ANTIQUITY_DESTROYED)
         end
+    end)
+
+    control:RegisterForEvent(EVENT_HELP_OVERLAY_VISIBILITY_CHANGED, function(_, isVisible)
+        self.isHelpOverlayVisible = isVisible
+        self:RefreshInputState()
     end)
 
     self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
@@ -177,14 +182,6 @@ function ZO_AntiquityDigging:ApplyPlatformStyle(style)
     for _, keybindLabel in pairs(self.keybindLabels) do
         keybindLabel:SetFont(style.keybindLabelFont)
     end
-end
-
-function ZO_AntiquityDigging:SetControlsEnabled(enabled)
-    local isGamepad = IsInGamepadPreferredMode()
-    local keyboardEnabled = enabled and not isGamepad
-    local gamepadEnabled = enabled and isGamepad
-    self:SetKeyboardControlsEnabled(keyboardEnabled)
-    self:SetGamepadControlsEnabled(gamepadEnabled)
 end
 
 function ZO_AntiquityDigging:SetKeyboardControlsEnabled(enabled)
@@ -236,8 +233,6 @@ function ZO_AntiquityDigging:OnMouseDown(control, button)
 end
 
 function ZO_AntiquityDigging:OnAntiquityDiggingReadyToPlay()
-    self:SetControlsEnabled(true)
-
     self.control:SetHandler("OnUpdate", function()
         self:OnUpdate()
     end)
@@ -247,6 +242,8 @@ function ZO_AntiquityDigging:OnAntiquityDiggingReadyToPlay()
     self:TryTriggerInitialTutorials()
 
     self.isReadyToPlay = true
+
+    self:RefreshInputState()
 end
 
 function ZO_AntiquityDigging:IsReadyToPlay()
@@ -307,9 +304,28 @@ function ZO_AntiquityDigging:ShowTutorial(tutorial)
     local tutorialId = GetTutorialId(tutorial)
     if CanTutorialBeSeen(tutorialId) and (not HasSeenTutorial(tutorialId)) then
         self.triggeredTutorial = true
-        RemoveActionLayerByName("AntiquityDiggingActions")
+        self:RefreshInputState()
         TriggerTutorial(tutorial)
     end
+end
+
+function ZO_AntiquityDigging:RefreshInputState()
+    local allowPlayerInput = self:IsReadyToPlay() and not self.triggeredTutorial and not self.isHelpOverlayVisible
+    if self.isPlayerInputEnabled ~= allowPlayerInput then
+        if allowPlayerInput then
+            PushActionLayerByName("AntiquityDiggingActions")
+            self.isPlayerInputEnabled = true
+        else
+            RemoveActionLayerByName("AntiquityDiggingActions")
+            self.isPlayerInputEnabled = false
+        end
+    end
+
+    local isGamepad = IsInGamepadPreferredMode()
+    local keyboardEnabled = allowPlayerInput and not isGamepad
+    local gamepadEnabled = allowPlayerInput and isGamepad
+    self:SetKeyboardControlsEnabled(keyboardEnabled)
+    self:SetGamepadControlsEnabled(gamepadEnabled)
 end
 
 do

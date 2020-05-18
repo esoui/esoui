@@ -376,8 +376,8 @@
                                     </Controls>
                                 </Control>
 
-                                <Control name="$(parent)MoreInfo" inherits="ZO_KeybindButton">
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-100" offsetY="-40"/>
+                                <Control name="$(parent)MoreInfoKeybindButton" inherits="ZO_KeybindButton">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="100" offsetY="-40"/>
                                 </Control>
                             </Controls>
                         </Control>

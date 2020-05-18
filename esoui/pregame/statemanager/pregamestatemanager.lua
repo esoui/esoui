@@ -769,7 +769,8 @@ end
 local IS_WORLD_SELECT_STATE = ZO_CreateSetFromArguments("WorldSelect_Requested", "WorldSelect_ShowList", "WorldSelect")
 
 function ZO_Pregame_OnGamepadPreferredModeChanged()
-    if PregameStateManager_GetCurrentState() == nil then
+    local currentState = PregameStateManager_GetCurrentState()
+    if currentState == nil then
         -- The initial state has not been set up yet, let's wait for that
         return
     end
@@ -784,8 +785,15 @@ function ZO_Pregame_OnGamepadPreferredModeChanged()
     local FORCE_CLOSE = true
     ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
 
-    if not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[PregameStateManager_GetCurrentState()] then -- While in world select, we're logged in but haven't yet started the character loading process
+    if not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[currentState] then -- While in world select, we're logged in but haven't yet started the character loading process
         PregameStateManager_SetState("AccountLoginEntryPoint")
+
+        -- Once the previous gamma adjust state has been exited. Reset the check that it was set and set the state back to adjust gamma
+        if currentState == "GammaAdjust" then
+            SetCVar("PregameGammaCheckEnabled", "true")
+            PregameStateManager_SetState("GammaAdjust")
+            GAMMA_SCENE_FRAGMENT:ClearUnsavedValue()
+        end
     elseif not IsPregameCharacterConstructionReady() then
         PregameStateManager_SetState("WaitForCharacterDataLoaded")
     elseif PregameStateManager_GetCurrentState() == "CharacterCreate" or GetNumCharacters() == 0 then

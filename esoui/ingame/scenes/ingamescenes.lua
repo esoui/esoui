@@ -168,6 +168,8 @@ BATTLEGROUND_SCOREBOARD_IN_GAME_UI_SCENE:AddFragment(MOUSE_UI_MODE_FRAGMENT)
 
 ANTIQUITY_DIGGING_SCENE:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
 ANTIQUITY_DIGGING_SCENE:AddFragment(ANTIQUITY_DIGGING_FRAGMENT)
+--This is separated so the keybinds can be above the help overlay while everything else is below it
+ANTIQUITY_DIGGING_SCENE:AddFragment(ZO_SimpleSceneFragment:New(ZO_AntiquityDigging_KeybindContainer))
 ANTIQUITY_DIGGING_SCENE:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 
 -------------------

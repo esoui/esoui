@@ -1022,6 +1022,42 @@ ESO_Dialogs["INELIGIBLE_SERVICE"] =
 
 -- Character Edit Dialogs
 
+ESO_Dialogs["CHARACTER_CREATE_NO_CHANGES_MADE"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CHARACTER_EDIT_NO_CHANGES_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CHARACTER_EDIT_NO_CHANGES_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            keybind = "DIALOG_PRIMARY",
+            callback =  function(dialog)
+                            PregameStateManager_SetState(dialog.data.newState)
+                        end,
+        },
+
+        {
+            text = SI_DIALOG_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            callback =  function(dialog)
+                            -- do nothing
+                        end,
+        },
+    }
+}
+
 ESO_Dialogs["CHARACTER_CREATE_CONFIRM_SAVE_CHANGES"] =
 {
     canQueue = true,

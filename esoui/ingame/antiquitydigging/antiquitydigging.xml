@@ -157,7 +157,21 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_AntiquityDiggingTopLevel" hidden="true">
+        <TopLevelControl name="ZO_AntiquityDigging_KeybindContainer" alpha="0" hidden="true">
+            <Anchor point="BOTTOMLEFT" offsetX="100" offsetY="-40"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-40"/>
+            <Controls>
+                <Control name="$(parent)MoreInfoKeybindButton" inherits="ZO_KeybindButton">
+                    <Anchor point="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)HelpTutorialsKeybindButton" inherits="ZO_KeybindButton">
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_AntiquityDiggingTopLevel" layer="BACKGROUND" hidden="true">
             <AnchorFill />
 
             <OnInitialized>
@@ -165,22 +179,25 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)KeybindContainer" alpha="0">
-                    <AnchorFill/>
-                    <Controls>
-                        <Control name="$(parent)MoreInfoKeybindButton" inherits="ZO_KeybindButton">
-                            <Anchor point="BOTTOMLEFT" offsetX="100" offsetY="-40"/>
-                        </Control>
-
-                        <Control name="$(parent)HelpTutorialsKeybindButton" inherits="ZO_KeybindButton">
-                            <Anchor point="BOTTOMRIGHT" offsetX="-100" offsetY="-40"/>
-                        </Control>
-                    </Controls>
-                </Control>
-
                 <Control name="$(parent)MeterContainer" alpha="0">
                     <AnchorFill/>
                     <Controls>
+                        <Control name="$(parent)RadarCount">
+                            <Controls>
+                                <Texture name="$(parent)Fill">
+                                    <AnchorFill/>
+                                </Texture>
+                                
+                                <Texture name="$(parent)Frame" level="1">
+                                    <AnchorFill/>
+                                </Texture>
+                                
+                                <Label name="$(parent)Label">
+                                    <Anchor point="CENTER" offsetY="-7" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                        
                         <Control name="$(parent)DigPower">
                             <Anchor point="TOP" offsetY="145"/>
                             <Dimensions x="200" y="64"/>

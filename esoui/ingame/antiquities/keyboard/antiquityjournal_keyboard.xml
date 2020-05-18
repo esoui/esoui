@@ -46,7 +46,7 @@
         <Control name="ZO_AntiquityJournal_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
-                    <DimensionConstraints maxX="227" />
+                    <Dimensions x="227" />
                 </Label>
             </Controls>
         </Control>
@@ -54,8 +54,17 @@
         <Control name="ZO_AntiquityJournal_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
-                    <DimensionConstraints maxX="227" />
+                    <Dimensions x="227" />
                 </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityJournal_StatusIconDividedHeader" inherits="ZO_AntiquityJournal_StatusIconChildlessHeader" virtual="true">
+            <Controls>
+                <Texture name="$(parent)DividerTexture" inherits="ZO_HorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-55" offsetY="2" />
+                    <Dimensions x="300" />
+                </Texture>
             </Controls>
         </Control>
 
@@ -254,15 +263,15 @@
                 <Control name="$(parent)Header" override="true">
                     <Controls>
                         <Label name="$(parent)Difficulty" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="LEFT" relativeTo="$(parent)NumRecovered" relativePoint="RIGHT" offsetX="15" />
-                        </Label>
-
-                        <Label name="$(parent)Zone" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="22" />
                         </Label>
 
+                        <Label name="$(parent)Zone" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="LEFT" relativeTo="$(parent)Difficulty" relativePoint="RIGHT" offsetX="15" />
+                        </Label>
+
                         <Label name="$(parent)LeadExpiration" inherits="ZO_AntiquityLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Zone" relativePoint="BOTTOMLEFT" offsetY="2" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Difficulty" relativePoint="BOTTOMLEFT" offsetY="2" />
                         </Label>
                     </Controls>
                 </Control>

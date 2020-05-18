@@ -1,10 +1,5 @@
-Compass = ZO_Object:Subclass()
-
-function Compass:New(...)
-    local compass = ZO_Object.New(self)
-    compass:Initialize(...)
-    return compass
-end
+local AREA_TEXTURE_RESTING_ALPHA_GAMEPAD = 1
+local AREA_TEXTURE_RESTING_ALPHA_KEYBOARD = 0.85
 
 local QUEST_AREA_PIN_TYPES =
 {
@@ -56,6 +51,14 @@ local AREA_PIN_TYPE_NAME =
     ZONE_STORY_SUGGESTION_PINS = "areaZoneStorySuggestionPins",
     ANTIQUITY_DIG_SITE_PINS = "antiquityDigSitePins",
 }
+
+Compass = ZO_Object:Subclass()
+
+function Compass:New(...)
+    local compass = ZO_Object.New(self)
+    compass:Initialize(...)
+    return compass
+end
 
 local function IsPlayerInsideJournalQuestConditionGoalArea(journalIndex, stepIndex, conditionIndex)
     journalIndex = journalIndex - 1
@@ -249,9 +252,6 @@ function Compass:InitializeAntiquityDigSiteAreaPins()
     self.areaAnimationPools[AREA_PIN_TYPE_NAME.ANTIQUITY_DIG_SITE_PINS] = ZO_ObjectPool:New(CreateAreaAnimationTimeline, function() end)
 end
 
-local AREA_TEXTURE_RESTING_ALPHA_GAMEPAD = 1
-local AREA_TEXTURE_RESTING_ALPHA_KEYBOARD = 0.85
-
 function Compass:SetAreaTexturePlatformTextures(areaTexture, pinType)
     local platformModifier = IsInGamepadPreferredMode() and "Gamepad/gp_" or ""
     local pinType = pinType or areaTexture.pinType
@@ -317,28 +317,39 @@ function Compass.ResetAreaTexture(areaTexture)
     areaTexture:ClearAnchors()
 end
 
+local END_CAP_WIDTH = 18
+local function CalculateAreaTextureEndDimensions(areaTextureControl)
+    local width, height = areaTextureControl:GetParent():GetDimensions()
+    return (width + END_CAP_WIDTH * 2), height
+end
+
 function Compass:CreateAreaTexture(areaPinName, objectPool)
     local areaTexture = ZO_ObjectPool_CreateNamedControl(areaPinName, "ZO_CompassAreaTexture", objectPool, self.control)
 
-    areaTexture.animationIn = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationIn")
-    areaTexture.animationIn:GetAnimation(1):SetAnimatedControl(areaTexture.left)
-    areaTexture.animationIn:GetAnimation(2):SetAnimatedControl(areaTexture.right)
-    areaTexture.animationIn:GetAnimation(3):SetAnimatedControl(areaTexture.center)
+    local animationIn = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationIn")
+    animationIn:GetAnimation(1):SetAnimatedControl(areaTexture.left)
+    animationIn:GetAnimation(2):SetAnimatedControl(areaTexture.right)
+    animationIn:GetAnimation(3):SetAnimatedControl(areaTexture.center)
 
-    for i = 4, areaTexture.animationIn:GetNumAnimations() do
-        areaTexture.animationIn:GetAnimation(i):SetAnimatedControl(areaTexture)
+    for i = 4, animationIn:GetNumAnimations() do
+        animationIn:GetAnimation(i):SetAnimatedControl(areaTexture)
     end
 
-    areaTexture.resetAlphaAnimation = areaTexture.animationIn:GetLastAnimation()
+    areaTexture.animationIn = animationIn
+
+    areaTexture.resetAlphaAnimation = animationIn:GetLastAnimation()
     areaTexture.resetAlphaAnimation:SetEndAlpha(IsInGamepadPreferredMode() and AREA_TEXTURE_RESTING_ALPHA_GAMEPAD or AREA_TEXTURE_RESTING_ALPHA_KEYBOARD)
 
-    local function OnAreaTextureInOnStop(animationOut)
-        objectPool:ReleaseObject(animationOut.areaTexture.key)
+    local function OnAreaTextureInOnStop(animationTimeline)
+        local animatingControl = animationTimeline.areaTexture
+        objectPool:ReleaseObject(animatingControl.key)
     end
 
-    areaTexture.animationOut = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationOut", areaTexture)
-    areaTexture.animationOut:SetHandler("OnStop", OnAreaTextureInOnStop)
-    areaTexture.animationOut.areaTexture = areaTexture
+    local animationOut = ANIMATION_MANAGER:CreateTimelineFromVirtual("CompassAreaTextureAnimationOut", areaTexture)
+    animationOut:SetHandler("OnStop", OnAreaTextureInOnStop)
+    animationOut.areaTexture = areaTexture
+
+    areaTexture.animationOut = animationOut
 
     return areaTexture
 end
@@ -485,7 +496,26 @@ function Compass:InitializeQuestPins()
         self:OnZoneChanged()
     end
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
-    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:PerformFullAreaQuestUpdate() end)
+
+    local function OnScreenResized()
+        -- The various area textures are not anchored to grow and shrink with the compass frame
+        -- instead their size animation targets the size of the compass frame at start and sets the
+        -- textures width to that. So when the screen resizes, and the width of the frame changes,
+        -- the area textures widths need to be updated as well
+        for _, areaAnimationPool in pairs(self.areaAnimationPools) do
+            for _, animationTimeline in areaAnimationPool:ActiveObjectIterator() do
+                local sizeAnimation = animationTimeline.areaTexture.animationIn:GetAnimation(5)
+                local animatedControl = sizeAnimation:GetAnimatedControl()
+                local areaTextureWidth, areaTextureHeight = CalculateAreaTextureEndDimensions(animatedControl)
+                if sizeAnimation:IsPlaying() then
+                    sizeAnimation:SetEndWidth(areaTextureWidth)
+                else
+                    animatedControl:SetWidth(areaTextureWidth)
+                end
+            end
+        end
+    end
+    self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
 
     self:PerformFullAreaQuestUpdate()
 
@@ -781,7 +811,7 @@ do
                 if bestPinType < 3 then
                     bestPinDescription = ZO_FormatUserFacingCharacterOrDisplayName(bestPinDescription)
                 end
-                if(formatId) then
+                if formatId then
                     self.centerOverPinLabel:SetText(ZO_CachedStrFormat(formatId, bestPinDescription))
                 else
                     self.centerOverPinLabel:SetText(bestPinDescription)
@@ -803,25 +833,26 @@ function ZO_CompassPoiPinAnimationOutUpdate(animation, progress, control)
     COMPASS:CompassPoiPinAnimationOutUpdate(animation, progress, control)
 end
 
-function ZO_Compass_AnimationIn_Size(control, animatingControl)
+function ZO_Compass_AnimationIn_Size(animation, animatingControl)
     local pinScale = animatingControl.pin:GetScale()
-    local width, height = animatingControl:GetParent():GetDimensions()
-    control:SetStartAndEndWidth(32 * pinScale, width + 36)
-    control:SetStartAndEndHeight(32 * pinScale, height)
+    local areaTextureWidth, areaTextureHeight = CalculateAreaTextureEndDimensions(animatingControl)
+    animation:SetStartAndEndWidth(32 * pinScale, areaTextureWidth)
+    animation:SetStartAndEndHeight(32 * pinScale, areaTextureHeight)
 end
 
-function ZO_Compass_AnimationIn_Translate(control, animatingControl)
+function ZO_Compass_AnimationIn_Translate(animation, animatingControl)
     local parent = animatingControl:GetParent()
     local offsetX = animatingControl.pin:GetCenter() - parent:GetCenter()
+    animatingControl:ClearAnchors()
     animatingControl:SetAnchor(CENTER, parent, CENTER, offsetX, 0)
 
-    control:SetTranslateDeltas(-offsetX, 0)
+    animation:SetTranslateDeltas(-offsetX, 0)
 end
 
-function ZO_Compass_AnimationOut_Alpha(control, animatingControl)
-    if control:GetTimeline().owner.refreshingJournalIndex then
-        control:SetAlphaValues(0, 0)
+function ZO_Compass_AnimationOut_Alpha(animation, animatingControl)
+    if animation:GetTimeline().owner.refreshingJournalIndex then
+        animation:SetAlphaValues(0, 0)
     else
-        control:SetAlphaValues(animatingControl:GetAlpha(), 0)
+        animation:SetAlphaValues(animatingControl:GetAlpha(), 0)
     end
 end

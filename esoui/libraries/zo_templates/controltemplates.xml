@@ -1,0 +1,13 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PropagateMouseOverBehavior" mouseEnabled="true" virtual="true">
+            <OnMouseEnter name="ZO_PropagateMouseOverBehavior">
+                ZO_PropagateHandler(self:GetParent(), "OnMouseEnter")
+            </OnMouseEnter>
+
+            <OnMouseExit name="ZO_PropagateMouseOverBehavior">
+                ZO_PropagateHandler(self:GetParent(), "OnMouseExit")
+            </OnMouseExit>
+        </Control>
+    </Controls>
+</GuiXml>

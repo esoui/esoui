@@ -55,7 +55,7 @@ function ZO_UISystemManager:Initialize()
                 end
             end,
         },
-        [UI_SYSTEM_BATTLEGROUNDS] =
+        [UI_SYSTEM_BATTLEGROUND_FINDER] =
         {
             keyboardOpen = function()
                 MAIN_MENU_KEYBOARD:ToggleScene("groupMenuKeyboard")
@@ -90,13 +90,13 @@ function ZO_UISystemManager:RequestOpenUISystem(system)
 end
 
 function ZO_UISystemManager:OpenGamepadUISystem(system)
-    if self.systems[system] ~= nil then
+    if internalassert(self.systems[system], "That UI system cannot be opened in this manner.") then
         self.systems[system].gamepadOpen()
     end
 end
 
 function ZO_UISystemManager:OpenKeyboardUISystem(system)
-    if self.systems[system] ~= nil then
+    if internalassert(self.systems[system], "That UI system cannot be opened in this manner.") then
         self.systems[system].keyboardOpen()
     end
 end

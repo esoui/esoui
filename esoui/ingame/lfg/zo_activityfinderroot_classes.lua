@@ -66,6 +66,8 @@ do
     function ZO_ActivityFinderLocation_Base:SetGroupSizeRangeText(labelControl, groupIconFormat)
         local minGroupSize, maxGroupSize = self:GetGroupSizeRange()
         if TEAM_BASED_ACTIVITY_TYPES[self.activityType] then
+            -- HARD CODING TO four to make it clear the player will be put on a four person team even when entering solo
+            maxGroupSize = 4
             labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_TEAM_FORMAT, maxGroupSize, groupIconFormat))
         elseif minGroupSize ~= maxGroupSize then
             labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_RANGE_FORMAT, minGroupSize, maxGroupSize, groupIconFormat))

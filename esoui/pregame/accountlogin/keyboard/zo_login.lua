@@ -6,8 +6,11 @@ local function RequestOpenURL(url, text)
     local urlApplication = SI_URL_APPLICATION_WEB
     if url:find("mailto:", 1, true) then
         urlApplication = SI_URL_APPLICATION_MAIL
+    else
+        -- Pass in the url as the text we want to display as the thing we are opening instead of the text which is typically "here"
+        text = url
     end
-    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL", {url = url}, {mainTextParams = {text, GetString(urlApplication)}})
+    ZO_Dialogs_ShowDialog("CONFIRM_OPEN_URL", { url = url }, { mainTextParams = { text, GetString(urlApplication) }})
 end
 
 local function OnLinkClicked(link, button, text, color, linkType, ...)

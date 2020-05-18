@@ -52,10 +52,13 @@ function ZO_AntiquityJournalGamepad:New(...)
 end
 
 function ZO_AntiquityJournalGamepad:Initialize(control)
+    self.autoShowScryable = false
+
     self:InitializeControl(control)
     self:InitializeControlPools()
     self:InitializeLists()
     self:InitializeEvents()
+    self:InitializeOptionsDialog()
 end
 
 function ZO_AntiquityJournalGamepad:InitializeControl(control)
@@ -79,21 +82,23 @@ function ZO_AntiquityJournalGamepad:InitializeLists()
     end
 
     self.categoryList = self:GetMainList()
-    self.categoryList:AddDataTemplate("ZO_GamepadItemEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    self.categoryList:AddDataTemplate("ZO_GamepadItemEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    local USE_DEFAULT_COMPARISON = nil
+    self.categoryList:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, USE_DEFAULT_COMPARISON, "ZO_GamepadMenuEntryHeaderTemplate")
     self.categoryList:SetNoItemText(GetString(SI_ANTIQUITY_EMPTY_LIST))
 
     self.subcategoryList = self:AddList("subcategories")
-    self.subcategoryList:AddDataTemplate("ZO_GamepadItemEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    self.subcategoryList:AddDataTemplate("ZO_GamepadItemEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, USE_DEFAULT_COMPARISON, "ZO_GamepadMenuEntryHeaderTemplate")
     self.subcategoryList:SetNoItemText(GetString(SI_ANTIQUITY_EMPTY_LIST))
 
     local function CategoryEqualityFunction(left, right)
         return left:GetId() == right:GetId()
     end
+
     self.categoryList:SetEqualityFunction("ZO_GamepadItemEntryTemplate", CategoryEqualityFunction)
     self.subcategoryList:SetEqualityFunction("ZO_GamepadItemEntryTemplate", CategoryEqualityFunction)
-
-    self.subcategoryList:SetOnTargetDataChangedCallback(function()
-        self:ShowAntiquityListFragment()
+    self.subcategoryList:SetOnTargetDataChangedCallback(function(list, targetData, oldTargetData)
+        self:OnSubcategoryTargetChanged(targetData)
     end)
 
     -- Initialize each lists' keybinds.
@@ -141,6 +146,18 @@ function ZO_AntiquityJournalGamepad:InitializeLists()
                 return true
             end,
         },
+        {
+            order = 30,
+            keybind = "UI_SHORTCUT_TERTIARY",
+            name = GetString(SI_GAMEPAD_QUEST_JOURNAL_SCRYABLE_OPTIONS),
+            callback = function()
+               ZO_Dialogs_ShowGamepadDialog("GAMEPAD_ANTIQUITY_CATEGORY_FILTER_OPTIONS")
+            end,
+            visible = function()
+                local categoryData = self:GetCurrentSubcategoryData()
+                return not IsScryableCategory(categoryData)
+            end,
+        },
     }
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.subcategoryList.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
         self:ShowCategoryList()
@@ -184,6 +201,107 @@ function ZO_AntiquityJournalGamepad:InitializeEvents()
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityNewLeadCleared", OnSingleAntiquityLeadUpdated)
 end
 
+do
+    local optionsFilterDropdownEntryData
+    function ZO_AntiquityJournalGamepad:GetOrCreateFilterOptionsDropdownEntryData()
+        if optionsFilterDropdownEntryData == nil then
+            optionsFilterDropdownEntryData = ZO_GamepadEntryData:New()
+            optionsFilterDropdownEntryData.dropdownEntry = true
+            optionsFilterDropdownEntryData.setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
+                local dropdown = control.dropdown
+                dropdown:SetSortsItems(false)
+                dropdown:ClearItems()
+
+                local entries = {}
+                for i = ANTIQUITY_FILTER_MIN_VALUE, ANTIQUITY_FILTER_MAX_VALUE do
+                    local function OnItemSelected()
+                        self.currentFilter = i
+                        self:RefreshAntiquityList()
+                    end
+                    entries[i] = dropdown:CreateItemEntry(GetString("SI_ANTIQUITYFILTER", i), OnItemSelected)
+                    dropdown:AddItem(entries[i])
+                end
+
+                dropdown:UpdateItems()
+
+                local IGNORE_CALLBACK = true
+                dropdown:TrySelectItemByData(entries[self.currentFilter], IGNORE_CALLBACK)
+            end
+        end
+        return optionsFilterDropdownEntryData
+    end
+end
+
+function ZO_AntiquityJournalGamepad:InitializeOptionsDialog()
+    -- Initialize filter to show all
+    self.currentFilter = ANTIQUITY_FILTER_SHOW_ALL
+
+    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_ANTIQUITY_CATEGORY_FILTER_OPTIONS",
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+        title =
+        {
+            text = SI_GAMEPAD_ANTIQUITY_CATEGORY_OPTIONS_HEADER
+        },
+        setup = function(dialog)
+           local parametricListEntries = dialog.info.parametricList
+            ZO_ClearNumericallyIndexedTable(parametricListEntries)
+
+            local filterDropdown =
+            {
+                template = "ZO_GamepadDropdownItem",
+                entryData = self:GetOrCreateFilterOptionsDropdownEntryData(),
+            }
+
+            table.insert(parametricListEntries, filterDropdown)
+
+            dialog.setupFunc(dialog)
+        end,
+        parametricList = {}, -- Generated Dynamically
+        blockDialogReleaseOnPress = true, -- We need to manually control when we release so we can use the select keybind to activate entries
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    local targetControl = dialog.entryList:GetTargetControl()
+                    if targetData.dropdownEntry then
+                        local dropdown = targetControl.dropdown
+                        dropdown:Activate()
+                    end
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_GAMEPAD_BACK_OPTION,
+                callback =  function(dialog)
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_ANTIQUITY_CATEGORY_FILTER_OPTIONS")
+                end,
+            },
+        },
+        noChoiceCallback = function(dialog)
+            local parametricList = dialog.info.parametricList
+            for i, entry in ipairs(parametricList) do
+                if entry.entryData.action.isDropdown then
+                    local control = dialog.entryList:GetControlFromData(entry.entryData)
+                    if control then
+                        control.dropdown:Deactivate()
+                    end
+                end
+            end
+        end
+    })
+end
+
+function ZO_AntiquityJournalGamepad:GetCurrentFilterSelection()
+    return self.currentFilter
+end
+
 function ZO_AntiquityJournalGamepad:PerformUpdate()
     self.dirty = false
 end
@@ -202,6 +320,13 @@ function ZO_AntiquityJournalGamepad:OnShowing()
         self:ShowCategoryList()
     end
 
+    if self.autoShowScryable then
+        local NO_SUBCATEGORY_LIST = nil
+        local FOCUS_ANTIQUITY_LIST = true
+        self:ViewCategory(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA, NO_SUBCATEGORY_LIST, FOCUS_ANTIQUITY_LIST)
+        self.autoShowScryable = false
+    end
+
     TriggerTutorial(TUTORIAL_TRIGGER_ANTIQUITY_JOURNAL_OPENED)
 end
 
@@ -211,6 +336,16 @@ function ZO_AntiquityJournalGamepad:OnHiding()
     ANTIQUITY_JOURNAL_LIST_GAMEPAD:ClearAntiquityTooltip()
     self:DisableCurrentList()
     self:HideAntiquityListFragment()
+end
+
+function ZO_AntiquityJournalGamepad:OnSubcategoryTargetChanged(targetData)
+    if self.lastSelectedSubcategoryData and self.lastSelectedSubcategoryData.dataSource == targetData.dataSource then
+        return
+    end
+
+    ANTIQUITY_JOURNAL_LIST_GAMEPAD:OnSubcategoryChanged()
+    self:ShowAntiquityListFragment()
+    self.lastSelectedSubcategoryData = targetData
 end
 
 function ZO_AntiquityJournalGamepad:AddCurrentListKeybinds()
@@ -322,14 +457,20 @@ function ZO_AntiquityJournalGamepad:RefreshCategories(resetSelectionToTop)
         self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
     end
 
-    for _, categoryData in ANTIQUITY_DATA_MANAGER:TopLevelAntiquityCategoryIterator() do
+    for categoryIndex, categoryData in ANTIQUITY_DATA_MANAGER:TopLevelAntiquityCategoryIterator() do
         local categoryName = categoryData:GetName()
         local gamepadIcon = categoryData:GetGamepadIcon()
         local entryData = ZO_GamepadEntryData:New(categoryName, gamepadIcon)
 
         entryData:SetDataSource(categoryData)
         entryData:SetIconTintOnSelection(true)
-        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
+
+        if categoryIndex == 1 then
+            entryData:SetHeader(GetString(SI_ANTIQUITY_LOG_BOOK))
+            self.categoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", entryData)
+        else
+            self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
+        end
     end
 
     self.categoryList:Commit(resetSelectionToTop)
@@ -403,9 +544,7 @@ function ZO_AntiquityJournalGamepad:DeactivateAntiquityList()
 end
 
 function ZO_AntiquityJournalGamepad:ShowScryable()
-    local NO_SUBCATEGORY_LIST = nil
-    local FOCUS_ANTIQUITY_LIST = true
-    self:ViewCategory(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA, NO_SUBCATEGORY_LIST, FOCUS_ANTIQUITY_LIST)
+    self.autoShowScryable = true
 end
 
 function ZO_AntiquityJournalGamepad:GetCurrentCategoryData()
@@ -533,8 +672,6 @@ function ZO_AntiquityJournalListGamepad:InitializeLists()
     ZO_ScrollList_SetTypeCategoryHeader(listControl, ANTIQUITY_SECTION_ROW_DATA, true)
 
     local function ShowSubcategories()
-        self.lastSelectedData = nil
-        ZO_ScrollList_ResetAutoSelectIndex(self.list)
         self:ClearActiveFragmentList()
         self:Deactivate()
         ANTIQUITY_JOURNAL_GAMEPAD:ActivateCurrentList()
@@ -1042,41 +1179,44 @@ do
                 for _, antiquityData in currentSubcategoryData:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
                     local antiquitySetData = antiquityData:GetAntiquitySetData()
                     local entryTemplate = ANTIQUITY_ROW_DATA
+                    local filterFunction = ANTIQUITY_DATA_MANAGER:GetAntiquityFilterFunction(ANTIQUITY_JOURNAL_GAMEPAD:GetCurrentFilterSelection())
                     local entryData
 
-                    if antiquitySetData then
-                        if not antiquitySets[antiquitySetData] then
-                            entryData = antiquitySetData
+                    if not filterFunction or filterFunction(antiquityData, antiquitySetData) then
+                        if antiquitySetData then
+                            if not antiquitySets[antiquitySetData] then
+                                entryData = antiquitySetData
 
-                            if antiquitySetData:HasDiscovered() then
-                                antiquitySets[antiquitySetData] = true
+                                if antiquitySetData:HasDiscovered() then
+                                    antiquitySets[antiquitySetData] = true
 
-                                local numAntiquities = antiquitySetData:GetNumAntiquities()
-                                local rowTemplateIndex = math.ceil(numAntiquities / MAX_ANTIQUITIES_PER_ROW)
-                                local rowTemplate = ANTIQUITY_SET_ROW_DATA_TEMPLATES[rowTemplateIndex]
-                                if not rowTemplate then
-                                    internalassert(false, string.format("Antiquity set '%s' has exceeded the maximum number of supported antiquity fragments.", antiquitySetData:GetName()))
+                                    local numAntiquities = antiquitySetData:GetNumAntiquities()
+                                    local rowTemplateIndex = math.ceil(numAntiquities / MAX_ANTIQUITIES_PER_ROW)
+                                    local rowTemplate = ANTIQUITY_SET_ROW_DATA_TEMPLATES[rowTemplateIndex]
+                                    if not rowTemplate then
+                                        internalassert(false, string.format("Antiquity set '%s' has exceeded the maximum number of supported antiquity fragments.", antiquitySetData:GetName()))
+                                    end
+
+                                    entryTemplate = rowTemplate
                                 end
 
-                                entryTemplate = rowTemplate
+                                for _, antiquitySetAntiquityData in antiquitySetData:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
+                                    maxLoreEntries = maxLoreEntries + antiquitySetAntiquityData:GetNumLoreEntries()
+                                    unlockedLoreEntries = unlockedLoreEntries + antiquitySetAntiquityData:GetNumUnlockedLoreEntries()
+                                end
                             end
+                        else
+                            entryData = antiquityData
+                            maxLoreEntries = maxLoreEntries + antiquityData:GetNumLoreEntries()
+                            unlockedLoreEntries = unlockedLoreEntries + antiquityData:GetNumUnlockedLoreEntries()
+                        end
 
-                            for _, antiquitySetAntiquityData in antiquitySetData:AntiquityIterator({ ZO_Antiquity.IsVisible }) do
-                                maxLoreEntries = maxLoreEntries + antiquitySetAntiquityData:GetNumLoreEntries()
-                                unlockedLoreEntries = unlockedLoreEntries + antiquitySetAntiquityData:GetNumUnlockedLoreEntries()
+                        if entryData then
+                            if not reselectAntiquityData and lastAntiquityData and entryData:GetId() == lastAntiquityData:GetId() then
+                                reselectAntiquityData = entryData
                             end
+                            table.insert(scrollDataList, ZO_ScrollList_CreateDataEntry(entryTemplate, entryData))
                         end
-                    else
-                        entryData = antiquityData
-                        maxLoreEntries = maxLoreEntries + antiquityData:GetNumLoreEntries()
-                        unlockedLoreEntries = unlockedLoreEntries + antiquityData:GetNumUnlockedLoreEntries()
-                    end
-
-                    if entryData then
-                        if not reselectAntiquityData and lastAntiquityData and entryData:GetId() == lastAntiquityData:GetId() then
-                            reselectAntiquityData = entryData
-                        end
-                        table.insert(scrollDataList, ZO_ScrollList_CreateDataEntry(entryTemplate, entryData))
                     end
                 end
 
@@ -1231,6 +1371,12 @@ function ZO_AntiquityJournalListGamepad:OnAntiquitySetFragmentSelectionChanged(o
     else
         self:ClearAntiquityTooltip()
     end
+end
+
+function ZO_AntiquityJournalListGamepad:OnSubcategoryChanged()
+    self.lastSelectedData = nil
+    ZO_ScrollList_ResetAutoSelectIndex(self.list)
+    ZO_ScrollList_ResetToTop(self.list)
 end
 
 function ZO_AntiquityJournalListGamepad:SetupAntiquitySetFragmentIcon(control, antiquityData)

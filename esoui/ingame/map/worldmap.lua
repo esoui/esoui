@@ -5089,9 +5089,9 @@ do
                 end
             elseif newState == SCENE_HIDING then
                 ZO_WorldMap_SetDirectionalInputActive(false)
-            elseif newState == SCENE_HIDDEN then
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepad:GetDescriptor())
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseOptions:GetDescriptor())
+            elseif newState == SCENE_HIDDEN then
                 g_gamepadMap:StopMotion()
                 if ZO_WorldMapButtonsToggleSize then
                     ZO_WorldMapButtonsToggleSize:SetHidden(false)

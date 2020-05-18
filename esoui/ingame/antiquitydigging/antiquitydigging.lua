@@ -34,6 +34,10 @@ local TWO_SPENDER_STYLE =
 local HAS_ONE_BAR = false
 local HAS_TWO_BARS = true
 
+local function HelpTutorialKeybindCallback()
+    HELP_MANAGER:ToggleHelp()
+end
+
 local KEYBOARD_STYLE =
 {
     stabilityBarTemplate = "ZO_AntiquityDiggingStabilityBar_Keyboard_Template",
@@ -43,7 +47,14 @@ local KEYBOARD_STYLE =
     digPowerDoubleBarSingleGlowTexture = "EsoUI/Art/Antiquities/Keyboard/Digging_2Bar_Single_Glow.dds",
     digPowerDoubleBarDoubleGlowTexture = "EsoUI/Art/Antiquities/Keyboard/Digging_2Bar_Glow.dds",
     digPowerIconFrameTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Keyboard/Digging_1Icon_Border.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Keyboard/Digging_2Icon_Border.dds" },
-    helpTutorialsKeybind = "TOGGLE_HELP",
+    radarCountFont = "ZoFontWinH3",
+    radarCountSize = 64,
+    radarCountFrameTexture = "EsoUI/Art/Antiquities/digging_crystal_border.dds",
+    helpTutorialsDescriptor = 
+    {
+        keybind = "TOGGLE_HELP",
+        callback = HelpTutorialKeybindCallback
+    },
 }
 
 local GAMEPAD_STYLE =
@@ -55,7 +66,14 @@ local GAMEPAD_STYLE =
     digPowerDoubleBarSingleGlowTexture = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Bar_Single_Glow.dds",
     digPowerDoubleBarDoubleGlowTexture = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Bar_Glow.dds",
     digPowerIconFrameTexture = { [HAS_ONE_BAR] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_1Icon_Border.dds", [HAS_TWO_BARS] = "EsoUI/Art/Antiquities/Gamepad/GP_Digging_2Icon_Border.dds" },
-    helpTutorialsKeybind = "GAMEPAD_SPECIAL_TOGGLE_HELP",
+    radarCountFont = "ZoFontGamepadBold27",
+    radarCountSize = 80,
+    radarCountFrameTexture = "EsoUI/Art/Antiquities/GP_digging_crystal_border.dds",
+    helpTutorialsDescriptor = 
+    {
+        keybind = "GAMEPAD_SPECIAL_TOGGLE_HELP",
+        callback = HelpTutorialKeybindCallback
+    },
 }
 
 local DIG_POWER_REFUND_INCREMENT_INTERVAL_S = 0.05
@@ -70,7 +88,7 @@ end
 
 function ZO_AntiquityDigging:Initialize(control)
     self.control = control
-    self.keybindContainer = control:GetNamedChild("KeybindContainer")
+    self.keybindContainer = ZO_AntiquityDigging_KeybindContainer
     self.meterContainer = control:GetNamedChild("MeterContainer")
     self.helpTutorialsKeybindButton = self.keybindContainer:GetNamedChild("HelpTutorialsKeybindButton")
     self.moreInfoKeybindButton = self.keybindContainer:GetNamedChild("MoreInfoKeybindButton")
@@ -79,6 +97,10 @@ function ZO_AntiquityDigging:Initialize(control)
     self.stabilityBarLeft = self.meterContainer:GetNamedChild("StabilityHealthBarLeft")
     self.stabilityBarRight = self.meterContainer:GetNamedChild("StabilityHealthBarRight")
     self.stabilityText = self.meterContainer:GetNamedChild("StabilityHealthText")
+    self.radarCountControl = self.meterContainer:GetNamedChild("RadarCount")
+    self.radarCountFillIcon = self.radarCountControl:GetNamedChild("Fill")
+    self.radarCountFrameIcon = self.radarCountControl:GetNamedChild("Frame")
+    self.radarCountLabel = self.radarCountControl:GetNamedChild("Label")
 
     local STABILITY_BAR_GRADIENT = { ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_DIGGING, ANTIQUITY_DIGGING_COLORS_STABILITY_START)), ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_DIGGING, ANTIQUITY_DIGGING_COLORS_STABILITY_END)) }
     ZO_StatusBar_SetGradientColor(self.stabilityBarLeft, STABILITY_BAR_GRADIENT)
@@ -105,7 +127,13 @@ function ZO_AntiquityDigging:Initialize(control)
     self.meterContainerFastPartialTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_AntiquityDiggingHUDFastPartialFade", self.meterContainer)
 
     ANTIQUITY_DIGGING_SCENE = ZO_RemoteInteractScene:New("antiquityDigging", SCENE_MANAGER, ANTIQUITY_DIGGING_INTERACTION)
-    HELP_MANAGER:AddOverlayScene("antiquityDigging")
+    local overlaySceneInfo =
+    {
+        systemFilters = { UI_SYSTEM_ANTIQUITY_DIGGING },
+        showOverlayConditionalFunction = function() return not IsDiggingGameOver() end,
+    }
+
+    HELP_MANAGER:AddOverlayScene("antiquityDigging", overlaySceneInfo)
 
     ANTIQUITY_DIGGING_ACTIONS_FRAGMENT = ZO_ActionLayerFragment:New("AntiquityDiggingActions")
     ANTIQUITY_DIGGING_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -163,6 +191,10 @@ function ZO_AntiquityDigging:Initialize(control)
         self:OnDigPowerRefund()
     end)
 
+    control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_NUM_RADARS_REMAINING_CHANGED, function()
+        self:OnNumRadarsRemainingChanged()
+    end)
+
     control:RegisterForEvent(EVENT_STOP_ANTIQUITY_DIGGING, function()
         SCENE_MANAGER:RequestShowLeaderBaseScene(ZO_BHSCR_INTERACT_ENDED)
     end)
@@ -218,6 +250,7 @@ function ZO_AntiquityDigging:RefreshInputModeFragments()
         end
         --Remove the digging actions fragment so it can be on top of the gamepad UI mode fragment
         SCENE_MANAGER:RemoveFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
     end
 
     if IsInGamepadPreferredMode() then
@@ -231,12 +264,13 @@ function ZO_AntiquityDigging:RefreshInputModeFragments()
     if not self.isGameOver then
         -- Re-add the digging actions fragment so it can be on top of the gamepad UI mode fragment
         SCENE_MANAGER:AddFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
+        SCENE_MANAGER:AddFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
     end
 end
 
 function ZO_AntiquityDigging:ApplyPlatformStyle(style)
     local keybindButtonTemplate = ZO_GetPlatformTemplate("ZO_KeybindButton")
-    self.helpTutorialsKeybindButton:SetKeybind(style.helpTutorialsKeybind)
+    self.helpTutorialsKeybindButton:SetKeybindButtonDescriptor(style.helpTutorialsDescriptor)
     ApplyTemplateToControl(self.helpTutorialsKeybindButton, keybindButtonTemplate)
     --Reset the text here to handle the force uppercase on gamepad
     self.helpTutorialsKeybindButton:SetText(GetString(SI_HELP_TUTORIALS))
@@ -245,6 +279,10 @@ function ZO_AntiquityDigging:ApplyPlatformStyle(style)
     --Reset the text here to handle the force uppercase on gamepad
     self.moreInfoKeybindButton:SetText(GetString(SI_ANTIQUITIES_DIGGING_MORE_INFO))
     self.moreInfoKeybindButton:SetHidden(not IsInGamepadPreferredMode())
+
+    self.radarCountFrameIcon:SetTexture(style.radarCountFrameTexture)
+    self.radarCountControl:SetDimensions(style.radarCountSize, style.radarCountSize)
+    self.radarCountLabel:SetFont(style.radarCountFont)
 
     ApplyTemplateToControl(self.stabilityControl, style.stabilityBarTemplate)
 
@@ -276,6 +314,7 @@ function ZO_AntiquityDigging:OnAntiquityDiggingReadyToPlay()
     self:RefreshStabilityBar()
     self:RefreshDigPowerConfiguration()
     self:RefreshDigPowerBars()
+    self:RefreshRadarCount()
 
     self.control:SetHandler("OnUpdate", function(_, timeS)
         self:OnUpdate(timeS)
@@ -425,6 +464,25 @@ function ZO_AntiquityDigging:RefreshDigPowerBars()
     end
 end
 
+function ZO_AntiquityDigging:RefreshRadarCount()
+    if IsDigSpotRadarLimited() then
+        self.radarCountControl:SetHidden(false)
+        local current, max = GetDigSpotNumRadars()
+        self.radarCountLabel:SetText(current)
+        local color
+        if current == 0 then
+            color = ZO_ERROR_COLOR
+            self.radarCountFillIcon:SetTexture("EsoUI/Art/Antiquities/digging_crystal_empty.dds")
+        else
+            color = ZO_WHITE
+            self.radarCountFillIcon:SetTexture("EsoUI/Art/Antiquities/digging_crystal_full.dds")
+        end
+        self.radarCountLabel:SetColor(color:UnpackRGBA())
+    else
+        self.radarCountControl:SetHidden(true)
+    end
+end
+
 function ZO_AntiquityDigging:OnAntiquityDiggingExitResponse(accept)
     if accept then
         ANTIQUITY_DIGGING_SCENE:AcceptHideScene()
@@ -450,10 +508,18 @@ function ZO_AntiquityDigging:OnDigPowerRefund()
     self.digPowerRefundGlowTimeline:PlayFromStart()
 end
 
+function ZO_AntiquityDigging:OnNumRadarsRemainingChanged()
+    self:RefreshRadarCount()
+end
+
 function ZO_AntiquityDigging:OnUpdate(timeS)
     local digPowerOffsetX, digPowerOffsetY = GetDigPowerBarUIPosition()
     self.digPowerControl:ClearAnchors()
     self.digPowerControl:SetAnchor(CENTER, GuiRoot, TOPLEFT, digPowerOffsetX, digPowerOffsetY)
+    local radarCountOffsetX, radarCountOffsetY = GetRadarCountUIPosition()
+    self.radarCountControl:ClearAnchors()
+    self.radarCountControl:SetAnchor(CENTER, GuiRoot, TOPLEFT, radarCountOffsetX, radarCountOffsetY)
+
     if self.nextOverrideVisualDigPowerIncrementS and timeS > self.nextOverrideVisualDigPowerIncrementS then
         local current, max = GetDigSpotDigPower()
         if self.overrideVisualDigPower < current then 

@@ -1289,6 +1289,7 @@ end
 ----------------------
 -- Scrying Minigame --
 ----------------------
+
 ZO_Scrying = ZO_Object:Subclass()
 
 function ZO_Scrying:New(...)
@@ -1299,25 +1300,27 @@ end
 
 function ZO_Scrying:Initialize(control)
     self.control = control
-    self.board = ZO_ScryingBoard:New(self.control:GetNamedChild("Game"))
+    self.board = ZO_ScryingBoard:New(control:GetNamedChild("Game"))
 
     self.isScryingReady = false
     self.waitingForScryingResult = false
     self.waitingToCompleteScrying = false
     self.lastScryingResult = nil
+    self.isHelpOverlayVisible = false
 
-    self.normalActionMeter = ZO_ScryingNormalActionsMeter:New(self.control:GetNamedChild("GameFrameNormalActionMeter"))
-    self.specialActionMeter = ZO_ScryingSpecialActionsMeter:New(self.control:GetNamedChild("GameFrameSpecialActionMeter"))
+    local frameElements = control:GetNamedChild("GameFrame")
+    self.normalActionMeter = ZO_ScryingNormalActionsMeter:New(frameElements:GetNamedChild("NormalActionMeter"))
+    self.specialActionMeter = ZO_ScryingSpecialActionsMeter:New(frameElements:GetNamedChild("SpecialActionMeter"))
 
     self.actionButtons =
     {
-        ZO_ScryingActionButton:New(self.control:GetNamedChild("GameFrameNormalAction"), SCRYING_ACTIVE_SKILL_NORMAL, "SCRYING_TOGGLE_NORMAL_ACTION"),
-        ZO_ScryingActionButton:New(self.control:GetNamedChild("GameFrameSpecialAction1"), SCRYING_ACTIVE_SKILL_BOMB, "SCRYING_TOGGLE_SPECIAL_ACTION_1"),
-        ZO_ScryingActionButton:New(self.control:GetNamedChild("GameFrameSpecialAction2"), SCRYING_ACTIVE_SKILL_CO_OPT, "SCRYING_TOGGLE_SPECIAL_ACTION_2"),
-        ZO_ScryingActionButton:New(self.control:GetNamedChild("GameFrameSpecialAction3"), SCRYING_ACTIVE_SKILL_LINE, "SCRYING_TOGGLE_SPECIAL_ACTION_3"),
+        ZO_ScryingActionButton:New(frameElements:GetNamedChild("NormalAction"), SCRYING_ACTIVE_SKILL_NORMAL, "SCRYING_TOGGLE_NORMAL_ACTION"),
+        ZO_ScryingActionButton:New(frameElements:GetNamedChild("SpecialAction1"), SCRYING_ACTIVE_SKILL_BOMB, "SCRYING_TOGGLE_SPECIAL_ACTION_1"),
+        ZO_ScryingActionButton:New(frameElements:GetNamedChild("SpecialAction2"), SCRYING_ACTIVE_SKILL_CO_OPT, "SCRYING_TOGGLE_SPECIAL_ACTION_2"),
+        ZO_ScryingActionButton:New(frameElements:GetNamedChild("SpecialAction3"), SCRYING_ACTIVE_SKILL_LINE, "SCRYING_TOGGLE_SPECIAL_ACTION_3"),
     }
 
-    self.moreInfoButton = self.control:GetNamedChild("GameFrameMoreInfo")
+    self.moreInfoButton = frameElements:GetNamedChild("MoreInfoKeybindButton")
     self.moreInfoButton:SetText(GetString(SI_SCRYING_MORE_INFO))
     self.moreInfoButton:SetKeybind("SCRYING_MORE_INFO")
     ApplyTemplateToControl(self.moreInfoButton, "ZO_KeybindButton_Gamepad_Template")
@@ -1338,7 +1341,7 @@ function ZO_Scrying:Initialize(control)
             self:RefreshActionButtons()
             self:RefreshEyeAnimations()
             self:RefreshMoreInfoButton()
-            self:UpdatePlatformStyle()
+            self:RefreshInputState()
             SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_SCRYING)
             PlaySound(SOUNDS.SCRYING_START_INTRO)
         elseif newState == SCENE_HIDING then
@@ -1358,41 +1361,39 @@ function ZO_Scrying:Initialize(control)
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_SCRYING_INTRO_COMPLETE, function()
+    control:RegisterForEvent(EVENT_SCRYING_INTRO_COMPLETE, function()
         self.isScryingReady = true
-        self:RefreshInputState()
         self:TryTriggerInitialTutorials()
     end)
 
-    self.control:RegisterForEvent(EVENT_SCRYING_OUTRO_COMPLETE, function()
+    control:RegisterForEvent(EVENT_SCRYING_OUTRO_COMPLETE, function()
         self.waitingForOutro = false
         self:TryCompleteScrying()        
     end)
 
-    self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
         if SCRYING_SCENE:IsShowing() then
             self:RefreshInputState()
             self:RefreshActionButtons()
             self:RefreshMoreInfoButton()
-            self:UpdatePlatformStyle()
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_START_SCRYING, function()
+    control:RegisterForEvent(EVENT_START_SCRYING, function()
         SCENE_MANAGER:Show("Scrying")
     end)
 
-    self.control:RegisterForEvent(EVENT_REQUEST_SCRYING_EXIT, function()
+    control:RegisterForEvent(EVENT_REQUEST_SCRYING_EXIT, function()
         ZO_Dialogs_ShowPlatformDialog("CONFIRM_EXIT_SCRYING")
     end)
 
-    self.control:RegisterForEvent(EVENT_SCRYING_GAME_OVER, function()
+    control:RegisterForEvent(EVENT_SCRYING_GAME_OVER, function()
         self.waitingForScryingResult = true
         self.waitingToCompleteScrying = true
         self:TryCompleteScrying()
     end)
 
-    self.control:RegisterForEvent(EVENT_ANTIQUITY_SCRYING_RESULT, function(_, result)
+    control:RegisterForEvent(EVENT_ANTIQUITY_SCRYING_RESULT, function(_, result)
         self.lastScryingResult = result
         if self.waitingForScryingResult then
             self.waitingForScryingResult = false
@@ -1400,11 +1401,16 @@ function ZO_Scrying:Initialize(control)
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_TUTORIAL_HIDDEN, function()
+    control:RegisterForEvent(EVENT_TUTORIAL_HIDDEN, function()
         if self.triggeredTutorial then
             self.triggeredTutorial = false
             self:RefreshInputState()
         end
+    end)
+
+    control:RegisterForEvent(EVENT_HELP_OVERLAY_VISIBILITY_CHANGED, function(_, isVisible)
+        self.isHelpOverlayVisible = isVisible
+        self:RefreshInputState()
     end)
 
     SCRYING_HEX_ANIMATION_PROVIDER:RegisterCallback("BlockingAnimationsCompleted", function()
@@ -1416,10 +1422,16 @@ function ZO_Scrying:Initialize(control)
         self.board:OnEndOfGameTimelineUpdate(...)
         self.normalActionMeter:OnEndOfGameTimelineUpdate(...)
     end)
+
+    self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end)
+end
+
+function ZO_Scrying:CanFireActions()
+    return self.isScryingReady
 end
 
 function ZO_Scrying:RefreshInputState()
-    local allowPlayerInput = SCRYING_SCENE:IsShowing() and self.isScryingReady and not self.triggeredTutorial
+    local allowPlayerInput = SCRYING_SCENE:IsShowing() and not self.triggeredTutorial and not self.isHelpOverlayVisible
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("ScryingActions")
@@ -1444,7 +1456,7 @@ function ZO_Scrying:RefreshMoreInfoButton()
     self.moreInfoButton:SetHidden(not IsInGamepadPreferredMode())
 end
 
-function ZO_Scrying:UpdatePlatformStyle()
+function ZO_Scrying:ApplyPlatformStyle(style)
     self.normalActionMeter:UpdatePlatformStyle()
     for _, actionButton in ipairs(self.actionButtons) do
         actionButton:UpdatePlatformStyle()
@@ -1561,6 +1573,9 @@ function ZO_Scrying:TrySetCurrentSkill(scryingActiveSkill, shouldSupressSound)
 end
 
 function ZO_Scrying:TryToggleCurrentSkill(scryingActiveSkill, shouldSupressSound)
+    if not self:CanFireActions() then
+        return
+    end
     if self.currentActiveSkill == scryingActiveSkill then
         -- toggle back to normal mode. if we were going to normal mode anwyays, this has no effect
         scryingActiveSkill = SCRYING_ACTIVE_SKILL_NORMAL
@@ -1573,6 +1588,9 @@ function ZO_Scrying:GetCurrentSkill()
 end
 
 function ZO_Scrying:PerformAction()
+    if not self:CanFireActions() then
+        return
+    end
     self.board:PerformActionOnTargetHex()
 end
 
@@ -1619,6 +1637,9 @@ function ZO_Scrying:OnUnhandledReceiveDrag()
 end
 
 function ZO_Scrying:TryCancel()
+    if not self:CanFireActions() then
+        return
+    end
     if self.board:HasInProgressLineAction() then
         self.board:CancelLineAction()
     else
@@ -1642,6 +1663,9 @@ function ZO_Scrying:StartEndOfGame()
 end
 
 function ZO_Scrying:ShowMoreInfo()
+    if not self:CanFireActions() then
+        return
+    end
     local abilityId = GetScryingActiveSkillAbilityId(self:GetCurrentSkill())
     GAMEPAD_TOOLTIPS:LayoutSimpleAbility(GAMEPAD_RIGHT_TOOLTIP, abilityId)
 end

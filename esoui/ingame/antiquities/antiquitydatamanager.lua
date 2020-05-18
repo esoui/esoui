@@ -61,6 +61,37 @@ function ZO_AntiquityDataManager:InitializeEventHandlers()
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillsUpdated)
 end
 
+do
+    local filterFunctions = {
+        [ANTIQUITY_FILTER_SHOW_ALL] = nil,
+        [ANTIQUITY_FILTER_SHOW_COMPLETED] = function(antiquityData, antiquitySetData)
+            if antiquitySetData then
+                return antiquitySetData:HasRecovered()
+            else
+                return antiquityData:HasRecovered()
+            end
+        end,
+        [ANTIQUITY_FILTER_SHOW_IN_PROGRESS] = function(antiquityData, antiquitySetData)
+            if antiquitySetData then
+                return antiquitySetData:HasDiscoveredDigSites()
+            else
+                return antiquityData:HasDiscoveredDigSites()
+            end
+        end,
+        [ANTIQUITY_FILTER_SHOW_NOT_STARTED] = function(antiquityData, antiquitySetData)
+            if antiquitySetData then
+                return antiquitySetData:HasNoDiscoveredDigSites() and not antiquitySetData:HasRecovered()
+            else
+                return antiquityData:HasNoDiscoveredDigSites() and not antiquityData:HasRecovered()
+            end
+        end,
+    }
+
+    function ZO_AntiquityDataManager:GetAntiquityFilterFunction(antiquityFilter)
+        return filterFunctions[antiquityFilter]
+    end
+end
+
 -- ZO_AntiquityCategory
 
 function ZO_AntiquityDataManager:AntiquityCategoryIterator(filterFunctions)

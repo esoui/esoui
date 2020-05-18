@@ -15,7 +15,6 @@ function ZO_Help_Keyboard:Initialize(control)
     control.owner = self
 
     self.helpControls = {}
-    self.searchString = ""
 
     self.noMatchMessage = control:GetNamedChild("NoMatchMessage")
     self.searchBox = control:GetNamedChild("SearchBox")
@@ -38,6 +37,8 @@ function ZO_Help_Keyboard:Initialize(control)
 
     self:InitializeTree()
 
+    self.systemFilters = nil
+
     local function UpdateHelp()
         if control:IsHidden() then 
             self.dirty = true
@@ -46,33 +47,8 @@ function ZO_Help_Keyboard:Initialize(control)
         end
     end
 
-    self.searchResults = {}
-
-    local SEARCH_DATA_STRIDE = 2
-
-    local function UpdateSearchResults(...)
-        self.searchResults = {}
-
-        for i = 1, select("#", ...), SEARCH_DATA_STRIDE do
-            local helpCategoryIndex, helpIndex = select(i, ...)
-            self.searchResults[#self.searchResults + 1] = {helpCategoryIndex = helpCategoryIndex, helpIndex = helpIndex}
-        end
-    end
-
-    local function OnSearchResultsReady()
-        UpdateSearchResults(GetHelpSearchResults())
-        UpdateHelp()
-    end
-
-    local function OnShowSpecificPage(eventId, helpCategoryIndex, helpIndex)
-        if not IsInGamepadPreferredMode() then
-            self:ShowSpecificHelp(helpCategoryIndex, helpIndex)
-        end
-    end
-
     control:RegisterForEvent(EVENT_HELP_INITIALIZED, UpdateHelp)
-    control:RegisterForEvent(EVENT_HELP_SEARCH_RESULTS_READY, OnSearchResultsReady)
-    control:RegisterForEvent(EVENT_HELP_SHOW_SPECIFIC_PAGE, OnShowSpecificPage)
+    HELP_MANAGER:RegisterCallback("UpdateSearchResults", UpdateHelp)
 
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, self.OnLinkClicked, self)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, self.OnLinkClicked, self)
@@ -130,6 +106,12 @@ function ZO_Help_Keyboard:ShowSpecificHelp(helpCategoryIndex, helpIndex)
 end
 
 function ZO_Help_Keyboard:OnShowing()
+    local systemFilters = HELP_MANAGER:GetShowingOverlaySceneSystemFilters()
+    if systemFilters ~= self.systemFilters then
+        self.systemFilters = systemFilters
+        self.dirty = true
+    end
+
     if self.dirty then
         self:Refresh()
     end
@@ -196,6 +178,13 @@ function ZO_Help_Keyboard:SelectHelp(helpCategoryIndex, helpIndex)
 end
 
 function ZO_Help_Keyboard:AddHelpEntry(helpCategoryIndex, helpIndex)
+    local systemFilters = self.systemFilters
+    if systemFilters and #systemFilters > 0 then
+        if not ZO_IsElementInNumericallyIndexedTable(systemFilters, GetUISystemAssociatedWithHelpEntry(helpCategoryIndex, helpIndex)) then
+            return
+        end
+    end
+
     local parent
     if not self.categoryControls[helpCategoryIndex] then
         self.helpControls[helpCategoryIndex] = {}
@@ -235,6 +224,11 @@ function ZO_Help_Keyboard:AddHelpEntry(helpCategoryIndex, helpIndex)
 end
 
 function ZO_Help_Keyboard:AddTrialEntry()
+    local systemFilters = HELP_MANAGER:GetShowingOverlaySceneSystemFilters()
+    if systemFilters and #systemFilters > 0 then
+        return
+    end
+
     local accountTypeId, title, description = GetTrialInfo();
     if accountTypeId ~= 0 and title ~= "" and description ~= "" then
         local parent
@@ -276,12 +270,10 @@ function ZO_Help_Keyboard:RefreshList()
     self.activeHelpCount = 0
     self.trialIndex = nil
     self.trialDescription = nil
-
-    if self.searchString ~= "" then
-        for i = 1, #self.searchResults do
-            if self.searchResults[i] then
-                self:AddHelpEntry(self.searchResults[i].helpCategoryIndex, self.searchResults[i].helpIndex)
-            end
+    local searchResults = HELP_MANAGER:GetSearchResults()
+    if searchResults then
+        for _, result in ipairs(searchResults) do
+            self:AddHelpEntry(result.helpCategoryIndex, result.helpIndex)
         end
     else
         self:AddTrialEntry()
@@ -345,11 +337,6 @@ function ZO_Help_Keyboard:RefreshDetails()
     end
 end
 
-function ZO_Help_Keyboard:SearchStart(searchString)
-    self.searchString = searchString
-    StartHelpSearch(searchString)
-end
-
 function ZO_Help_Keyboard:OnLinkClicked(link, button, text, color, linkType, ...)
     if linkType == HELP_LINK_TYPE and button == MOUSE_BUTTON_INDEX_LEFT then
         local helpCategoryIndex, helpIndex = GetHelpIndicesFromHelpLink(link)
@@ -363,11 +350,11 @@ end
 -- Global XML functions
 
 function ZO_Help_OnSearchTextChanged(editBox)
-    HELP:SearchStart(editBox:GetText())
+    HELP_MANAGER:SetSearchString(editBox:GetText())
 end
 
 function ZO_Help_OnSearchEnterKeyPressed(editBox)
-    HELP:SearchStart(editBox:GetText())
+    HELP_MANAGER:SetSearchString(editBox:GetText())
     editBox:LoseFocus()
 end
 

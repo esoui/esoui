@@ -48,6 +48,7 @@ function ZO_CharacterCreate_Manager:Initialize()
     self.shouldPromptForTutorialSkip = true -- this in addition to the account flag means we should prompt
     self.playingTransitionAnimations = false
     self.characterMode = CHARACTER_MODE_CREATION
+    self.randomCharacterGenerated = false
     self.characterUnsavedSettings = {}
 
     local function OnLogoutSuccessful()
@@ -134,6 +135,14 @@ function ZO_CharacterCreate_Manager:Initialize()
     CALLBACK_MANAGER:RegisterCallback("CharacterCreateRequested", OnCharacterCreateRequested)
 end
 
+function ZO_CharacterCreate_Manager:SetRandomCharacterGenerated(wasGenerated)
+    self.randomCharacterGenerated = wasGenerated
+end
+
+function ZO_CharacterCreate_Manager:HasRandomCharacterGenerated()
+    return self.randomCharacterGenerated
+end
+
 function ZO_CharacterCreate_Manager:GetCharacterData()
     return self.characterData
 end
@@ -188,7 +197,7 @@ function ZO_CharacterCreate_Manager:GetCharacterUnsavedSetting(name, type)
 end
 
 function ZO_CharacterCreate_Manager:InitializeForAppearanceChange(characterData)
-    ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_EDIT)
+    self:SetCharacterMode(CHARACTER_MODE_EDIT)
     -- match the appearance set here to the default apperance set in PregameCharacterManager to avoid reloading the character
     SelectClothing(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
     local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
@@ -196,7 +205,7 @@ function ZO_CharacterCreate_Manager:InitializeForAppearanceChange(characterData)
 end
 
 function ZO_CharacterCreate_Manager:InitializeForRaceChange(characterData)
-    ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_EDIT)
+    self:SetCharacterMode(CHARACTER_MODE_EDIT)
     -- match the appearance set here to the default apperance set in PregameCharacterManager to avoid reloading the character
     SelectClothing(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
     local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
@@ -204,7 +213,7 @@ function ZO_CharacterCreate_Manager:InitializeForRaceChange(characterData)
 end
 
 function ZO_CharacterCreate_Manager:InitializeForAllianceChange(characterData)
-    ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_EDIT)
+    self:SetCharacterMode(CHARACTER_MODE_EDIT)
     -- match the appearance set here to the default apperance set in PregameCharacterManager to avoid reloading the character
     SelectClothing(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
     local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
@@ -212,7 +221,7 @@ function ZO_CharacterCreate_Manager:InitializeForAllianceChange(characterData)
 end
 
 function ZO_CharacterCreate_Manager:InitializeForCharacterCreate()
-    ZO_CHARACTERCREATE_MANAGER:SetCharacterMode(CHARACTER_MODE_CREATION)
+    self:SetCharacterMode(CHARACTER_MODE_CREATION)
     local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
     characterCreate:Reset()
     characterCreate:InitializeForCharacterCreate()
@@ -245,7 +254,6 @@ end
 function ZO_CharacterCreate_Base:Initialize(control)
     self.control = control
     self.characterData = ZO_CHARACTERCREATE_MANAGER:GetCharacterData()
-    self.randomCharacterGenerated = false
 
     self.characterCreateOption = CHARACTER_CREATE_DEFAULT_LOCATION
     self.characterStartLocation = nil
@@ -253,14 +261,6 @@ function ZO_CharacterCreate_Base:Initialize(control)
     self.characterCreateMode = CHARACTER_CREATE_MODE_CREATE
 
     self:InitializeControls()
-end
-
-function ZO_CharacterCreate_Base:SetRandomCharacterGenerated(wasGenerated)
-    self.randomCharacterGenerated = wasGenerated
-end
-
-function ZO_CharacterCreate_Base:GetRandomCharacterGenerated()
-    return self.randomCharacterGenerated
 end
 
 function ZO_CharacterCreate_Base:SetCharacterCreateMode(mode)
@@ -433,8 +433,8 @@ function ZO_CharacterCreate_Base:AddRaceSelectionDataToSelector(buttonControl, r
 end
 
 function ZO_CharacterCreate_Base:GenerateRandomCharacter()
-    if not self:GetRandomCharacterGenerated() and self.characterData:GetRaceInfo() ~= nil then
-        self:SetRandomCharacterGenerated(true)
+    if not ZO_CHARACTERCREATE_MANAGER:HasRandomCharacterGenerated() and self.characterData:GetRaceInfo() ~= nil then
+        ZO_CHARACTERCREATE_MANAGER:SetRandomCharacterGenerated(true)
         self:PickRandomRace()
         self:PickRandomAlliance()
         self:PickRandomGender()
@@ -516,14 +516,14 @@ function ZO_CharacterCreate_Base:UpdateSelectorsForTemplate(isEnabledCallback, c
 end
 
 function ZO_CharacterCreate_Base:OnLogoutSuccessful()
-    self:SetRandomCharacterGenerated(false)
+    ZO_CHARACTERCREATE_MANAGER:SetRandomCharacterGenerated(false)
 
     local NUM_FLASHES_BEFORE_SOLID = 7
     FlashTaskbarWindow("LOGOUT", NUM_FLASHES_BEFORE_SOLID)
 end
 
 function ZO_CharacterCreate_Base:OnCharacterCreated(characterId)
-    self:SetRandomCharacterGenerated(false) -- the next time we enter character create, we want to generate a random character again.
+    ZO_CHARACTERCREATE_MANAGER:SetRandomCharacterGenerated(false) -- the next time we enter character create, we want to generate a random character again.
     self.characterCreateOption = CHARACTER_CREATE_DEFAULT_LOCATION
 
     PregameStateManager_PlayCharacter(characterId, self.characterStartLocation)
@@ -541,7 +541,11 @@ function ZO_CharacterCreate_Base:SaveCharacterChanges()
     end
 
     local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
-    ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_CONFIRM_SAVE_CHANGES", { tokenType = tokenType }, {mainTextParams = { tokenString }})
+    if IsEditCharacterDifferentFromSelectionCharacter() then
+        ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_CONFIRM_SAVE_CHANGES", { tokenType = tokenType }, { mainTextParams = { tokenString } })
+    else
+        ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_NO_CHANGES_MADE", { tokenType = tokenType, newState = "CharacterSelect_FromIngame" }, { mainTextParams = { tokenString } })
+    end
 end
 
 function ZO_CharacterCreate_Base:ExitToState(stateName)
@@ -557,8 +561,13 @@ function ZO_CharacterCreate_Base:ExitToState(stateName)
         elseif createMode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
             tokenType = SERVICE_TOKEN_ALLIANCE_CHANGE
         end
+
         local tokenString = GetString("SI_SERVICETOKENTYPE", tokenType)
-        ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_CONFIRM_REVERT_CHANGES", { newState = stateName }, {mainTextParams = { tokenString }})
+        if IsEditCharacterDifferentFromSelectionCharacter() then
+            ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_CONFIRM_REVERT_CHANGES", { newState = stateName }, { mainTextParams = { tokenString } })
+        else
+            ZO_Dialogs_ShowPlatformDialog("CHARACTER_CREATE_NO_CHANGES_MADE", { tokenType = tokenType, newState = stateName }, { mainTextParams = { tokenString } })
+        end
     end
 end
 

@@ -2642,6 +2642,8 @@ end
 function ZO_MapPin:GetCenterColor()
     if self:IsAssisted() then
         return ZO_MAP_PIN_ASSISTED_COLOR
+    elseif self.m_PinType == MAP_PIN_TYPE_ANTIQUITY_DIG_SITE then
+        return ZO_MAP_PIN_DIG_SITE_COLOR
     elseif self.m_PinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE then
         return ZO_MAP_PIN_TRACKED_DIG_SITE_COLOR
     else

@@ -94,6 +94,7 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        allowRightStickPassThrough = true,
     },
 
     title =
@@ -106,32 +107,44 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
     setup = function(dialog)
         local parametricList = dialog.info.parametricList
         ZO_ClearNumericallyIndexedTable(parametricList)
+        local systemFilters = HELP_MANAGER:GetShowingOverlaySceneSystemFilters()
 
         for helpCategoryIndex = 1, GetNumHelpCategories() do
             local categoryName = GetHelpCategoryInfo(helpCategoryIndex)
             for helpIndex = 1, GetNumHelpEntriesWithinCategory(helpCategoryIndex) do
-                local helpName, _, _, _, _, _, showOption = GetHelpInfo(categoryIndex, helpIndex)
+                local helpName, _, _, _, _, _, showOption = GetHelpInfo(helpCategoryIndex, helpIndex)
 
                 if IsGamepadHelpOption(showOption) then
-                    -- TODO: Add tech to allow filtering based on scene context
-                    local entryData = ZO_GamepadEntryData:New(helpName)
-                    entryData.setup = ZO_SharedGamepadEntry_OnSetup
-                    entryData.helpCategoryIndex = helpCategoryIndex
-                    entryData.helpIndex = helpIndex
+                    local passesSystemFilter = true
+                    if systemFilters and #systemFilters > 0 then
+                        if not ZO_IsElementInNumericallyIndexedTable(systemFilters, GetUISystemAssociatedWithHelpEntry(helpCategoryIndex, helpIndex)) then
+                            passesSystemFilter = false
+                        end
+                    end
 
-                    local listItem =
-                    {
-                        template = "ZO_GamepadItemEntryTemplate",
-                        entryData = entryData,
-                        header = categoryName,
-                    }
-                    -- Clear so only the first one gets the header
-                    categoryName = nil
+                    if passesSystemFilter then
+                        local entryData = ZO_GamepadEntryData:New(helpName)
+                        entryData.setup = ZO_SharedGamepadEntry_OnSetup
+                        entryData.helpCategoryIndex = helpCategoryIndex
+                        entryData.helpIndex = helpIndex
 
-                    table.insert(parametricList, listItem)
+                        local listItem =
+                        {
+                            template = "ZO_GamepadItemEntryTemplate",
+                            entryData = entryData,
+                            header = categoryName,
+                        }
+                        -- Clear so only the first one gets the header
+                        categoryName = nil
+
+                        table.insert(parametricList, listItem)
+                    end
                 end
             end
         end
+
+        local IS_VISIBLE = true
+        HELP_MANAGER:OnOverlayVisibilityChanged(IS_VISIBLE)
 
         dialog:setupFunc()
     end,
@@ -145,8 +158,13 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
         end
     end,
 
-    onHidingCallback = function(dialog)
+    onHidingCallback = function()
         HELP_TUTORIAL_DISPLAY_GAMEPAD:Hide()
+    end,
+
+    finishedCallback = function()
+        local IS_NOT_VISIBLE = false
+        HELP_MANAGER:OnOverlayVisibilityChanged(IS_NOT_VISIBLE)
     end,
 
     buttons =

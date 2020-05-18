@@ -130,6 +130,11 @@
                     </EasingFunction>
                 </AlphaAnimation>
             </Animations>
+            <Callbacks>
+                <Callback>
+                    PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENT_RUNDOWN_ICONS)
+                </Callback>
+            </Callbacks>
         </AnimationTimeline>
 
         <AnimationTimeline name="ZO_AntiquityDiggingFramedAntiquityIconScale">

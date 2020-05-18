@@ -203,6 +203,10 @@ function ZO_AntiquityTileBase_Keyboard:Refresh()
     self.control:SetHidden(false)
 end
 
+function ZO_AntiquityTileBase_Keyboard:IsControlHidden()
+    return self.control:IsHidden()
+end
+
 function ZO_AntiquityTileBase_Keyboard:OnMouseEnter()
     ANTIQUITY_JOURNAL_KEYBOARD:SetMouseOverTile(self)
 end
@@ -541,10 +545,8 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
         self.difficulty:SetText(zo_strformat(SI_ANTIQUITY_DIFFICULTY_FORMATTER, difficulty))
         self.difficulty:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
         self.difficulty:ClearAnchors()
-        if tileData:IsRepeatable() then
-            self.difficulty:SetAnchor(LEFT, self.numRecoveredLabel, RIGHT, 15)
-        elseif tileData:HasReward() then
-           self.difficulty:SetAnchor(LEFT, self.antiquityType, RIGHT, 15)
+        if tileData:HasReward() or tileData:IsRepeatable() then    
+            self.difficulty:SetAnchor(TOPLEFT, self.title, BOTTOMLEFT, 0, 22)
         else
             self.difficulty:SetAnchor(TOPLEFT, self.title, BOTTOMLEFT)
         end
@@ -584,7 +586,7 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
         if isLeadNearingExpiration then
             self.progressIcons:SetAnchor(TOPLEFT, self.leadExpiration, BOTTOMLEFT, 0, 4)
         else
-            self.progressIcons:SetAnchor(TOPLEFT, self.zoneLabel, BOTTOMLEFT, 0, 4)
+            self.progressIcons:SetAnchor(TOPLEFT, self.difficulty, BOTTOMLEFT, 0, 4)
         end
         self.progressIcons:SetHidden(false)
     else
@@ -796,6 +798,7 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     local CHILD_SPACING = 0
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconHeader", TreeHeaderSetup_Child, nil, TreeEqualityFunction, CHILD_INDENT, CHILD_SPACING)
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
+    self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconDividedHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_SubCategory", TreeEntrySetup, TreeEntryOnSelected, TreeEqualityFunction)
     self.categoryTree:SetExclusive(true)
     self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")
@@ -926,36 +929,10 @@ do
     local filterCategories
     local filterAntiquities
     local filterAntiquitySets
-    local filterFunctions = {
-        [ANTIQUITY_FILTER_SHOW_ALL] = function()
-            return true
-        end,
-        [ANTIQUITY_FILTER_SHOW_COMPLETED] = function(antiquityData, antiquitySetData)
-            if antiquitySetData then
-                return antiquitySetData:HasRecovered()
-            else
-                return antiquityData:HasRecovered()
-            end
-        end,
-        [ANTIQUITY_FILTER_SHOW_IN_PROGRESS] = function(antiquityData, antiquitySetData)
-            if antiquitySetData then
-                return antiquitySetData:HasDiscoveredDigSites()
-            else
-                return antiquityData:HasDiscoveredDigSites()
-            end
-        end,
-        [ANTIQUITY_FILTER_SHOW_NOT_STARTED] = function(antiquityData, antiquitySetData)
-            if antiquitySetData then
-                return antiquitySetData:HasNoDiscoveredDigSites() and not antiquitySetData:HasRecovered()
-            else
-                return antiquityData:HasNoDiscoveredDigSites() and not antiquityData:HasRecovered()
-            end
-        end,
-    }
 
     function ZO_AntiquityJournal_Keyboard:GetFilterTypeFunction()
         if self.filterType then
-            return filterFunctions[self.filterType]
+            return ANTIQUITY_DATA_MANAGER:GetAntiquityFilterFunction(self.filterType)
         end
     end
 
@@ -973,7 +950,7 @@ do
         if self.filterTypeFunction then
             return self.filterTypeFunction(...)
         else
-            return false
+            return true
         end
     end
 
@@ -1102,6 +1079,10 @@ do
                 horizontalScrollOffset, verticalScrollOffset = self.contentList.scroll:GetScrollOffsets()
             end
 
+            -- ResetCategoryTiles will end up clearing the mouseover control
+            -- so save it off before calling it
+            local oldMouseOverTile = self.mouseOverTile
+
             self:ResetCategoryTiles(antiquityCategoryId)
 
             if antiquityCategoryId == ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
@@ -1179,6 +1160,10 @@ do
             if verticalScrollOffset then
                 ZO_Scroll_ScrollAbsoluteInstantly(self.contentList, verticalScrollOffset)
             end
+
+            if oldMouseOverTile and not oldMouseOverTile:IsControlHidden() then
+                self:SetMouseOverTile(oldMouseOverTile)
+            end
         end
     end
 
@@ -1214,7 +1199,7 @@ do
     end
 
     function ZO_AntiquityJournal_Keyboard:AddScryableCategory()
-        local treeNode = self.categoryTree:AddNode("ZO_AntiquityJournal_StatusIconChildlessHeader", ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
+        local treeNode = self.categoryTree:AddNode("ZO_AntiquityJournal_StatusIconDividedHeader", ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
         ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA.nodeKeyboard = treeNode
     end
 

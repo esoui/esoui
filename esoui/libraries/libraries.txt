@@ -58,6 +58,7 @@ EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Keyboard.xml
 EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.lua
 EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.xml
 
+EsoUI\Libraries\ZO_Templates\ControlTemplates.xml
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.lua
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\LabelTemplates_Gamepad.xml
