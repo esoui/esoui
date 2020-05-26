@@ -1679,7 +1679,7 @@ do
     local REJECT = false
     ZO_Dialogs_RegisterCustomDialog("CONFIRM_EXIT_SCRYING",
     {
-        canQueue = true,
+        mustChoose = true,
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1692,9 +1692,6 @@ do
         {
             text = SI_SCRYING_CONFIRM_EXIT_DIALOG_DESCRIPTION
         },
-        noChoiceCallback =  function()
-            RequestRespondToScryingExit(REJECT)
-        end,
         buttons =
         {
             {

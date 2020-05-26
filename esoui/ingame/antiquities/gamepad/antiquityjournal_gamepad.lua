@@ -96,6 +96,7 @@ function ZO_AntiquityJournalGamepad:InitializeLists()
     end
 
     self.categoryList:SetEqualityFunction("ZO_GamepadItemEntryTemplate", CategoryEqualityFunction)
+    self.categoryList:SetEqualityFunction("ZO_GamepadItemEntryTemplateWithHeader", CategoryEqualityFunction)
     self.subcategoryList:SetEqualityFunction("ZO_GamepadItemEntryTemplate", CategoryEqualityFunction)
     self.subcategoryList:SetOnTargetDataChangedCallback(function(list, targetData, oldTargetData)
         self:OnSubcategoryTargetChanged(targetData)
@@ -321,9 +322,8 @@ function ZO_AntiquityJournalGamepad:OnShowing()
     end
 
     if self.autoShowScryable then
-        local NO_SUBCATEGORY_LIST = nil
         local FOCUS_ANTIQUITY_LIST = true
-        self:ViewCategory(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA, NO_SUBCATEGORY_LIST, FOCUS_ANTIQUITY_LIST)
+        self:ViewCategory(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA, FOCUS_ANTIQUITY_LIST)
         self.autoShowScryable = false
     end
 
@@ -555,15 +555,26 @@ function ZO_AntiquityJournalGamepad:GetCurrentSubcategoryData()
     return self.subcategoryList:GetTargetData()
 end
 
--- Opens up the provided category, or the current category if no categoryData is provided.
--- If a subcategoryData is provided, also tries to select the subcategory.
-function ZO_AntiquityJournalGamepad:ViewCategory(categoryData, subcategoryData, focusAntiquityList)
-    if categoryData then
-        local index = self.categoryList:GetIndexForData("ZO_GamepadItemEntryTemplate", categoryData)
+-- Opens up the provided category, or the current category if no antiquityCategoryData is provided.
+function ZO_AntiquityJournalGamepad:ViewCategory(antiquityCategoryData, focusAntiquityList)
+    local parentCategoryData = nil
+    local subcategoryData = nil
+    if antiquityCategoryData then
+        parentCategoryData = antiquityCategoryData:GetParentCategoryData()
+        if parentCategoryData then
+            subcategoryData = antiquityCategoryData
+        else
+            parentCategoryData = antiquityCategoryData
+        end
+    end
+
+    if parentCategoryData then
+        local ANY_TEMPLATE = nil
+        local index = self.categoryList:GetIndexForData(ANY_TEMPLATE, parentCategoryData)
         if index then
             self.categoryList:SetSelectedIndexWithoutAnimation(index)
         else
-            return zo_internalassert(false, "Trying to view an invalid categoryData")
+            return internalassert(false, "Trying to view an invalid parentCategoryData")
         end
     end
 
@@ -575,12 +586,13 @@ function ZO_AntiquityJournalGamepad:ViewCategory(categoryData, subcategoryData, 
         if index then
             self.subcategoryList:SetSelectedIndexWithoutAnimation(index)
         else
-            return zo_internalassert(false, "Trying to view an invalid subcategoryData")
+            return internalassert(false, "Trying to view an invalid subcategoryData")
         end
     end
 
     if focusAntiquityList then
         self:DeactivateCurrentList()
+        self:DeactivateAntiquityList() -- Just in case the list is already active, make sure it's deactivated first so it properly runs activation logic
         self:ActivateAntiquityList()
     end
 end
@@ -856,10 +868,9 @@ function ZO_AntiquityJournalListGamepad:CreateOptionActionDataViewInCodex()
         callback = function(dialog)
             ZO_Dialogs_ReleaseDialog("GAMEPAD_SCRYABLE_ANTIQUITY_OPTIONS")
             local scryableAntiquityData = self:GetCurrentAntiquityData()
-            local categoryData = scryableAntiquityData.antiquityCategoryData:GetParentCategoryData()
-            local subcategoryData = scryableAntiquityData.antiquityCategoryData
+            local antiquityCategoryData = scryableAntiquityData:GetAntiquityCategoryData()
             local FOCUS_ANTIQUITY_LIST = true
-            ANTIQUITY_JOURNAL_GAMEPAD:ViewCategory(categoryData, subcategoryData, FOCUS_ANTIQUITY_LIST)
+            ANTIQUITY_JOURNAL_GAMEPAD:ViewCategory(antiquityCategoryData, FOCUS_ANTIQUITY_LIST)
         end,
         visible = function()
             local categoryData = self:GetCurrentSubcategoryData()

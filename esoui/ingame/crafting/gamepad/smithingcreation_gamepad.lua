@@ -687,11 +687,11 @@ end
 
 function ZO_GamepadSmithingCreation:SelectOption()
     local targetControl = self.optionList:GetTargetControl()
-    if targetControl.templateName == GAMEPAD_SMITHING_CREATION_CHECKBOX_OPTIONS_TEMPLATE or targetControl.templateName == GAMEPAD_SMITHING_CREATION_CHECKBOX_OPTIONS_TEMPLATE then
+    if targetControl.dataIndex == GAMEPAD_SMITHING_CREATION_OPTION_CROWN_STORE then
+        ShowMarketAndSearch("", MARKET_OPEN_OPERATION_UNIVERSAL_STYLE_ITEM)
+    else
         ZO_GamepadCheckBoxTemplate_OnClicked(targetControl)
         self:RefreshFilters()
-    elseif targetControl.dataIndex == GAMEPAD_SMITHING_CREATION_OPTION_CROWN_STORE then
-        ShowMarketAndSearch("", MARKET_OPEN_OPERATION_UNIVERSAL_STYLE_ITEM)
     end
 end
 

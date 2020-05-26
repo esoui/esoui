@@ -423,11 +423,25 @@ function ZO_GamepadChatSystem:IsPinnable()
     return true
 end
 
-function ZO_GamepadChatSystem:OnFormattedChatMessage(...)
-    SharedChatSystem.OnFormattedChatMessage(self, ...)
+do
+    local FILTERED_OUT_CATEGORIES =
+    {
+        [CHAT_CATEGORY_MONSTER_SAY] = true,
+        [CHAT_CATEGORY_MONSTER_YELL] = true,
+        [CHAT_CATEGORY_MONSTER_EMOTE] = true,
+        [CHAT_CATEGORY_MONSTER_WHISPER] = true,
+    }
 
-    if not self.isMinimized then
-        self:Maximize()
+    function ZO_GamepadChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
+        if FILTERED_OUT_CATEGORIES[category] then
+            return
+        end
+
+        SharedChatSystem.OnFormattedChatMessage(self, message, category, targetChannel, fromDisplayName, rawMessageText)
+
+        if not self.isMinimized then
+            self:Maximize()
+        end
     end
 end
 

@@ -247,6 +247,8 @@ h5. CenterScreenAnnounceType
 * CENTER_SCREEN_ANNOUNCE_TYPE_ACTIVITY_COMPLETE
 * CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE
 * CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED
+* CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED
+* CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT
 * CENTER_SCREEN_ANNOUNCE_TYPE_ARTIFACT_CONTROL_STATE
 * CENTER_SCREEN_ANNOUNCE_TYPE_AVENGE_KILL
 * CENTER_SCREEN_ANNOUNCE_TYPE_BAG_CAPACITY_CHANGED
@@ -715,7 +717,7 @@ h5. GameCameraFramingScreenType
 * FRAMING_SCREEN_LOOT
 * FRAMING_SCREEN_MAP
 * FRAMING_SCREEN_REUSE_ME
-* FRAMING_SCREEN_SCRYING
+* FRAMING_SCREEN_REUSE_ME_2
 * FRAMING_SCREEN_SKILLS
 * FRAMING_SCREEN_SOCIAL
 * FRAMING_SCREEN_SYSTEM
@@ -1854,7 +1856,11 @@ h5. UIPlatform
 
 
 h5. UISystem
+* UI_SYSTEM_ALLIANCE_WAR
 * UI_SYSTEM_ANTIQUITY_JOURNAL_SCRYABLE
+* UI_SYSTEM_BATTLEGROUNDS
+* UI_SYSTEM_DUNGEON_FINDER
+* UI_SYSTEM_GUILD_FINDER
 
 
 h5. UnitAttributeVisual
@@ -2853,6 +2859,7 @@ h5. CollectibleUnlockState
 
 
 h5. CollectibleUsageBlockReason
+* COLLECTIBLE_USAGE_BLOCK_REASON_ACTIVE_DIG_SITE_REQUIRED
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_SUBZONE
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_ZONE
@@ -3606,6 +3613,7 @@ h5. HousingEditorCommandResult
 * HOUSING_EDITOR_COMMAND_RESULT_COLLECTIBLE_BLACKLISTED
 * HOUSING_EDITOR_COMMAND_RESULT_COLLECTIBLE_LOCKED
 * HOUSING_EDITOR_COMMAND_RESULT_COMMAND_FAILED
+* HOUSING_EDITOR_COMMAND_RESULT_CURRENTLY_INVALID
 * HOUSING_EDITOR_COMMAND_RESULT_FURNITURE_BEING_MOVED
 * HOUSING_EDITOR_COMMAND_RESULT_FURNITURE_LIMIT_REACHED
 * HOUSING_EDITOR_COMMAND_RESULT_INVALID_ITEM
@@ -6241,6 +6249,13 @@ h5. ScryingHexagonType
 * SCRYING_HEX_TYPE_SPECIAL
 * SCRYING_HEX_TYPE_THREE
 * SCRYING_HEX_TYPE_TWO
+
+
+h5. ScryingPassiveSkill
+* SCRYING_PASSIVE_SKILL_ANTIQUARIAN_INSIGHT
+* SCRYING_PASSIVE_SKILL_AUGURIST_PATIENCE
+* SCRYING_PASSIVE_SKILL_FUTURE_FOCUS
+* SCRYING_PASSIVE_SKILL_PREEMPTIVE_POWER
 
 
 h5. Globals
@@ -14968,6 +14983,9 @@ h2. Game API
 * GetHighestScryableDifficulty()
 ** _Returns:_ *[AntiquityDifficulty|#AntiquityDifficulty]* _highestScryableDifficulty_
 
+* GetScryingPassiveSkillIndex(*[ScryingPassiveSkill|#ScryingPassiveSkill]* _scryingPassiveSkill_)
+** _Returns:_ *luaindex* _scryingPassiveSkillIndex_
+
 * AreAntiquitySkillLinesDiscovered()
 ** _Returns:_ *bool* _isUnlocked_
 
@@ -14988,6 +15006,9 @@ h2. Game API
 
 * GetNumGoalsAchievedForAntiquity(*integer* _antiquityId_)
 ** _Returns:_ *integer* _numAchievedGoals_
+
+* GetAntiquityLeadTimeRemainingSeconds(*integer* _antiquityId_)
+** _Returns:_ *integer* _leadTimeRemainingSeconds_
 
 * IsAntiquityRepeatable(*integer* _antiquityId_)
 ** _Returns:_ *bool* _allowsRepeats_
@@ -15055,6 +15076,9 @@ h2. Game API
 
 
 * IsGameCameraActive()
+** _Returns:_ *bool* _isActive_
+
+* IsProgrammableCameraActive()
 ** _Returns:_ *bool* _isActive_
 
 * IsGameCameraUIModeActive()
@@ -17011,6 +17035,9 @@ h2. Game API
 * GetAntiquityLeadIcon()
 ** _Returns:_ *textureName* _leadIcon_
 
+* GetScryingCurrentAntiquityId()
+** _Returns:_ *integer* _antiquityId_
+
 * GetSelectedDiggingActiveSkill()
 ** _Returns:_ *[DiggingActiveSkills|#DiggingActiveSkills]:nilable* _diggingActiveSkill_
 
@@ -17031,6 +17058,9 @@ h2. Game API
 
 * GetDigSpotStability()
 ** _Returns:_ *integer* _current_, *integer* _max_
+
+* GetDigSpotStabilityTimeRemainingSeconds()
+** _Returns:_ *integer* _timeRemainingS_
 
 * GetDigSpotDigPower()
 ** _Returns:_ *integer* _current_, *integer* _max_
@@ -18339,6 +18369,9 @@ h3. PolygonControl
 * GetCenterTextureCoords()
 ** _Returns:_ *number* _left_, *number* _right_, *number* _top_, *number* _bottom_
 
+* GetPointLayout()
+** _Returns:_ *[PolygonPointLayout|#PolygonPointLayout]* _pointLayout_
+
 * IsSmoothingEnabled()
 ** _Returns:_ *bool* _isSmoothingEnabled_
 
@@ -18365,6 +18398,8 @@ h3. PolygonControl
 * SetCenterTextureAddressMode(*[TextureAddressMode|#TextureAddressMode]* _addressMode_)
 
 * SetCenterTextureCoords(*number* _left_, *number* _right_, *number* _top_, *number* _bottom_)
+
+* SetPointLayout(*[PolygonPointLayout|#PolygonPointLayout]* _pointLayout_)
 
 * SetSmoothingEnabled(*bool* _isSmoothingEnabled_)
 
@@ -19088,6 +19123,7 @@ h2. Events
 * EVENT_ANTIQUITY_JOURNAL_SHOW_SCRYABLE
 * EVENT_ANTIQUITY_LEAD_ACQUIRED (*integer* _antiquityId_)
 * EVENT_ANTIQUITY_SEARCH_RESULTS_READY
+* EVENT_ANTIQUITY_SHOW_CODEX_ENTRY (*integer* _antiquityId_)
 * EVENT_ANTIQUITY_TRACKING_INITIALIZED
 * EVENT_ANTIQUITY_TRACKING_UPDATE (*integer* _trackedAntiquityId_)
 * EVENT_ANTIQUITY_UPDATED (*integer* _antiquityId_)
@@ -19357,7 +19393,6 @@ h2. Events
 * EVENT_INSTANCE_KICK_TIME_UPDATE (*integer* _timeRemainingMs_)
 * EVENT_INTERACTION_ENDED (*[InteractionType|#InteractionType]* _interactType_, *[InteractCancelContext|#InteractCancelContext]* _cancelContext_)
 * EVENT_INTERACT_BUSY
-* EVENT_INTERRUPT_SCRYING
 * EVENT_INVENTORY_BAG_CAPACITY_CHANGED (*integer* _previousCapacity_, *integer* _currentCapacity_, *integer* _previousUpgrade_, *integer* _currentUpgrade_)
 * EVENT_INVENTORY_BANK_CAPACITY_CHANGED (*integer* _previousCapacity_, *integer* _currentCapacity_, *integer* _previousUpgrade_, *integer* _currentUpgrade_)
 * EVENT_INVENTORY_BOUGHT_BAG_SPACE (*integer* _numberOfSlots_)
@@ -19365,6 +19400,7 @@ h2. Events
 * EVENT_INVENTORY_BUY_BAG_SPACE (*integer* _cost_)
 * EVENT_INVENTORY_BUY_BANK_SPACE (*integer* _cost_)
 * EVENT_INVENTORY_CLOSE_BUY_SPACE
+* EVENT_INVENTORY_EQUIP_MYTHIC_FAILED (*[Bag|#Bag]* _bagId_, *integer* _slotContainingMythicId_)
 * EVENT_INVENTORY_FULL_UPDATE
 * EVENT_INVENTORY_IS_FULL (*integer* _numSlotsRequested_, *integer* _numSlotsFree_)
 * EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG
@@ -19466,6 +19502,7 @@ h2. Events
 * EVENT_OPEN_HOUSE_STORE
 * EVENT_OPEN_STORE
 * EVENT_OPEN_TRADING_HOUSE
+* EVENT_OPEN_UI_SYSTEM (*[UISystem|#UISystem]* _system_)
 * EVENT_OUTFITS_INITIALIZED
 * EVENT_OUTFIT_CHANGE_RESPONSE (*[ApplyOutfitChangesResult|#ApplyOutfitChangesResult]* _response_, *luaindex* _outfitIndex_)
 * EVENT_OUTFIT_EQUIP_RESPONSE (*[EquipOutfitResult|#EquipOutfitResult]* _response_)
