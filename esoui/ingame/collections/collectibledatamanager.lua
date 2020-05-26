@@ -11,6 +11,7 @@ ZO_COLLECTION_UPDATE_TYPE =
     REBUILD = 1,
     FORCE_REINITIALIZE = 2,
     UNLOCK_STATE_CHANGES = 3,
+    BLACKLIST_CHANGED = 4,
 }
 
 ----------------------
@@ -43,6 +44,11 @@ function ZO_CollectibleData:BuildData(categoryData, collectibleIndex)
     self.name = GetCollectibleName(collectibleId)
     self.icon = GetCollectibleIcon(collectibleId)
     self.categoryType = GetCollectibleCategoryType(collectibleId)
+    local specializedCategoryType = GetSpecializedCollectibleType(collectibleId)
+    if specializedCategoryType == SPECIALIZED_COLLECTIBLE_TYPE_NONE then
+        specializedCategoryType = nil -- Very rare, this is a memory optimization
+    end
+    self.specializedCategoryType = specializedCategoryType
     self.referenceId = GetCollectibleReferenceId(collectibleId)
     self.hasVisualAppearence = DoesCollectibleHaveVisibleAppearance(collectibleId)
     self.hideMode = GetCollectibleHideMode(collectibleId)
@@ -124,6 +130,7 @@ function ZO_CollectibleData:Refresh()
     self.isRenameable = IsCollectibleRenameable(collectibleId)
     self.isSlottable = IsCollectibleSlottable(collectibleId)
     self.cachedNameWithNickname = nil
+    self.isBlacklisted = IsCollectibleBlacklisted(collectibleId)
 
     local categoryData = self:GetCategoryData()
     if categoryData then
@@ -223,12 +230,24 @@ function ZO_CollectibleData:IsActive()
     return self.isActive
 end
 
+function ZO_CollectibleData:IsBlacklisted()
+    return self.isBlacklisted
+end
+
 function ZO_CollectibleData:GetCategoryType()
     return self.categoryType
 end
 
+function ZO_CollectibleData:GetSpecializedCategoryType()
+    return self.specializedCategoryType or SPECIALIZED_COLLECTIBLE_TYPE_NONE
+end
+
 function ZO_CollectibleData:GetCategoryTypeDisplayName()
-    return GetString("SI_COLLECTIBLECATEGORYTYPE", self.categoryType)
+    if self.specializedCategoryType then
+        return GetString("SI_SPECIALIZEDCOLLECTIBLETYPE", self.specializedCategoryType)
+    else
+        return GetString("SI_COLLECTIBLECATEGORYTYPE", self.categoryType)
+    end
 end
 
 function ZO_CollectibleData:IsCategoryType(categoryType)
@@ -1109,13 +1128,15 @@ function ZO_CollectibleDataManager:Initialize()
         EVENT_COLLECTION_UPDATED happens on init or when a command forces all collectibles to lock/unlock (re-init). Those cases don't use dirty unlock mappings from C, so we do that delta work here while we refresh everything.
         EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED can happen at any time, and is an event that tells us to re-evaluate unlock status for everything because anything could be based on that. Like with EVENT_COLLECTION_UPDATED, we handle the delta here, not in C.
         EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED happens when the client maps out dirty unlock states (collectibles go on trial or ownership changes like crown store or rewards). We consume the dirty mapping from C and broadcast it out.
-        The later 3 all fire the same callback ("OnCollectionUpdated") to all systems registering with the callback manager with info to help determine what happened: collectionUpdateType (ZO_COLLECTION_UPDATE_TYPE), collectiblesByNewUnlockState
+        EVENT_COLLECTIBLE_BLACKLIST_UPDATED happens when the client maps out dirty blacklist states. We consume the dirty mapping from C and broadcast it out.
+        The later 4 all fire the same callback ("OnCollectionUpdated") to all systems registering with the callback manager with info to help determine what happened: collectionUpdateType (ZO_COLLECTION_UPDATE_TYPE), collectiblesByNewUnlockState
     --]]
 
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_UPDATED, function(_, ...) self:OnCollectibleUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTION_UPDATED, function(_, ...) self:OnCollectionUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, function(_, ...) self:OnESOPlusFreeTrialStatusChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, function(_, ...) self:OnCollectiblesUnlockStateChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_BLACKLIST_UPDATED, function(_, ...) self:OnCollectibleBlacklistUpdated(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NEW_STATUS_CLEARED, function(_, ...) self:OnCollectibleNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_CATEGORY_NEW_STATUS_CLEARED, function(_, ...) self:OnCollectibleCategoryNewStatusCleared(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_CollectibleDataManager", EVENT_COLLECTIBLE_NOTIFICATION_NEW, function(_, ...) self:OnCollectibleNotificationNew(...) end)
@@ -1196,6 +1217,10 @@ do
         return GetNextDirtyUnlockStateCollectibleId(lastCollectibleId)
     end
 
+    local function GetNextDirtyBlacklistCollectibleIdIter(_, lastCollectibleId)
+        return GetNextDirtyBlacklistCollectibleId(lastCollectibleId)
+    end
+
     function ZO_CollectibleDataManager:OnCollectiblesUnlockStateChanged()
         local collectiblesByNewUnlockState = {}
         for collectibleId in GetNextDirtyUnlockStateCollectibleIdIter do
@@ -1210,8 +1235,21 @@ do
 
         self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGES, collectiblesByNewUnlockState)
     end
+
+    function ZO_CollectibleDataManager:OnCollectibleBlacklistUpdated()
+        for collectibleId in GetNextDirtyBlacklistCollectibleIdIter do
+            local collectibleData = self.collectibleIdToDataMap[collectibleId]
+            if collectibleData then
+                collectibleData:Refresh()
+            end
+        end
+
+        local collectiblesByNewUnlockState = {}
+        self:FinalizeCollectionUpdates(ZO_COLLECTION_UPDATE_TYPE.BLACKLIST_CHANGED, collectiblesByNewUnlockState)
+    end
 end
 
+-- TODO: Refactor this so that collectiblesByNewUnlockState can hold collectibles for any collectionUpdateType to support different kinds of state changes
 function ZO_CollectibleDataManager:FinalizeCollectionUpdates(collectionUpdateType, collectiblesByNewUnlockState)
     local hasUnlockStateChanges = NonContiguousCount(collectiblesByNewUnlockState) > 0
     if hasUnlockStateChanges then
@@ -1326,7 +1364,7 @@ function ZO_CollectibleDataManager:MapCategoryData(categoryData)
 end
 
 function ZO_CollectibleDataManager:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
-    local categoryData = self.categoryObjectPool:GetExistingObject(categoryIndex)
+    local categoryData = self.categoryObjectPool:GetActiveObject(categoryIndex)
     if categoryData and subcategoryIndex then
         return categoryData:GetSubcategoryData(subcategoryIndex)
     end

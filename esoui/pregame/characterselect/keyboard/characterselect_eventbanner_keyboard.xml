@@ -1,0 +1,95 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_CharacterSelect_EventBanner_Keyboard_Control" inherits="ZO_CharacterSelect_EventBanner_Control" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_CharacterSelect_EventBanner_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ModalUnderlay" override="true">
+                    <OnMouseUp>
+                        CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:OnEventBannerCloseKeybind()
+                    </OnMouseUp>
+                </Control>
+
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)BG" override="true" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_banner_backgroundMunge.dds">
+                            <TextureCoords left="0" right="0.9375" top="0" bottom="0.5273"/>
+                            <AnchorFill />
+                        </Texture>
+
+                        <Control name="$(parent)Carousel" override="true" layer="OVERLAY">
+                            <Dimensions x="1920" y="624"/>
+                            <ClearAnchors />
+                            <Anchor point="TOP" offsetY="208"/>
+                            <Controls>
+                                <Control name="$(parent)SelectionIndicator" override="true">
+                                    <ClearAnchors />
+                                    <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="35"/>
+                                </Control>
+
+                                <Button name="$(parent)LeftArrow" override="true">
+                                    <Dimensions x="16" y="16" />
+                                    <ClearAnchors />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)SelectionIndicator" relativePoint="LEFT" offsetX="-80"/>
+                                    <Textures
+                                        normal="EsoUI/Art/Buttons/leftArrow_up.dds"
+                                        pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
+                                        disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"
+                                    />
+                                </Button>
+
+                                <Button name="$(parent)RightArrow" override="true">
+                                    <Dimensions x="16" y="16" />
+                                    <ClearAnchors />
+                                    <Anchor point="LEFT" relativeTo="$(parent)SelectionIndicator" relativePoint="RIGHT" offsetX="80"/>
+                                    <Textures
+                                        normal="EsoUI/Art/Buttons/rightArrow_up.dds"
+                                        pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
+                                        disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
+                                    />
+                                </Button>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)TopDivider" inherits="ZO_DynamicHorizontalDivider">
+                            <Dimensions y="8" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Carousel" relativePoint="TOPLEFT" offsetY="-8"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Carousel" relativePoint="TOPRIGHT" offsetY="-8" />
+                        </Control>
+
+                        <Control name="$(parent)BottomDivider" inherits="ZO_DynamicHorizontalDivider">
+                            <Dimensions y="8" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMRIGHT" />
+                        </Control>
+
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton" tier="HIGH" layer="OVERLAY">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMLEFT" offsetX="80" offsetY="-20" />
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "EVENT_BANNER_PRIMARY", function() CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:OnEventBannerCloseKeybind() end, GetString(SI_DIALOG_CLOSE))
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Back" inherits="ZO_KeybindButton" hidden="true">
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "EVENT_BANNER_NEGATIVE", function() CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:OnEventBannerCloseKeybind() end)
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Escape" inherits="ZO_KeybindButton" hidden="true">
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_Setup(self, "EVENT_BANNER_CLOSE", function() CHARACTER_SELECT_EVENT_BANNER_KEYBOARD:OnEventBannerCloseKeybind() end)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

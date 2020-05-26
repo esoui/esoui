@@ -26,11 +26,13 @@ EsoUI\Ingame\Particles\Particles.lua
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
-EsoUI\Ingame\Tooltip\AbilityTooltips.lua
+EsoUI\Ingame\Tooltip\ActivityFinderTooltips.lua
+EsoUI\Ingame\Tooltip\AntiquityTooltips.lua
 EsoUI\Ingame\Tooltip\AvATooltips.lua
 EsoUI\Ingame\Tooltip\CadwellsTooltips.lua
 EsoUI\Ingame\Tooltip\ChampionTooltips.lua
 EsoUI\Ingame\Tooltip\CharacterTooltips.lua
+EsoUI\Ingame\Tooltip\CrownCrateTooltips.lua
 EsoUI\Ingame\Tooltip\GiftTooltips.lua
 EsoUI\Ingame\Tooltip\GroupTooltips.lua
 EsoUI\Ingame\Tooltip\GuildKioskTooltips.lua
@@ -40,9 +42,9 @@ EsoUI\Ingame\Tooltip\MapTooltips.lua
 EsoUI\Ingame\Tooltip\NotificationsTooltips.lua
 EsoUI\Ingame\Tooltip\OutfitTooltips.lua
 EsoUI\Ingame\Tooltip\SkillBuildTooltips.lua
+EsoUI\Ingame\Tooltip\SkillTooltips.lua
 EsoUI\Ingame\Tooltip\SocialTooltips.lua
 EsoUI\Ingame\Tooltip\StableTooltips.lua
-EsoUI\Ingame\Tooltip\CrownCrateTooltips.lua
 EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
 
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.xml
@@ -68,10 +70,16 @@ EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.lua
 EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.xml
 
 EsoUI\Ingame\Collections\CollectibleDataManager.lua
+
 EsoUI\Ingame\Skills\SkillsDataManager.lua
 EsoUI\Ingame\Skills\SkillsAndActionBarManager.lua
 EsoUI\Ingame\Skills\SkillPointAllocationManager.lua
 EsoUI\Ingame\Skills\ActionBarAssignmentManager.lua
+
+EsoUI\Ingame\Antiquities\AntiquityData.lua
+EsoUI\Ingame\Antiquities\AntiquityCategoryData.lua
+EsoUI\Ingame\Antiquities\AntiquitySetData.lua
+EsoUI\Ingame\Antiquities\AntiquityDataManager.lua
 
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
@@ -122,7 +130,6 @@ EsoUI\Ingame\Group\Keyboard\ZO_GroupList_Keyboard.xml
 EsoUI\Ingame\TopBar\TopBar.xml
 
 EsoUI\Ingame\ZoneStories\ZoneStories_Manager.lua
-EsoUI\Ingame\Tooltip\ActivityFinderTooltips.lua
 
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityQueueData_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityQueueData_Gamepad.xml
@@ -291,6 +298,14 @@ EsoUI\Ingame\Map\Keyboard\WorldMapKeepUpgrade_Keyboard.xml
 EsoUI\Ingame\Map\Gamepad\WorldMapKeepUpgrade_Gamepad.lua
 EsoUI\Ingame\Map\Gamepad\WorldMapKeepUpgrade_Gamepad.xml
 EsoUI\Ingame\Map\Gamepad\WorldMapChoiceDialog_Gamepad.lua
+EsoUI\Ingame\Map\WorldMapAntiquities_Shared.lua
+EsoUI\Ingame\Map\WorldMapAntiquities_Shared.xml
+EsoUI\Ingame\Map\Keyboard\WorldMapAntiquities_Keyboard.lua
+EsoUI\Ingame\Map\Keyboard\WorldMapAntiquities_Keyboard.xml
+EsoUI\Ingame\Map\Gamepad\WorldMapAntiquities_Gamepad.lua
+EsoUI\Ingame\Map\Gamepad\WorldMapAntiquities_Gamepad.xml
+EsoUI\Ingame\Map\MapPin.lua
+EsoUI\Ingame\Map\MapPin.xml
 EsoUI\Ingame\Map\WorldMap.lua
 EsoUI\Ingame\Map\WorldMap.xml
 EsoUI\Ingame\Map\CMapHandlers.lua
@@ -638,6 +653,7 @@ EsoUI\Ingame\QuestToolMonitor\QuestToolMonitor.xml
 EsoUI\Ingame\TrialAccount\TrialAccount.lua
 EsoUI\Ingame\TrialAccount\TrialAccount.xml
 
+EsoUI\Ingame\Help\Help_Manager.lua
 EsoUI\Ingame\Help\HelpMechanicAssistanceData.lua
 EsoUI\Ingame\Help\HelpSubmitTicketData.lua
 EsoUI\Ingame\Help\Help_GenericTicketSubmission_Manager.lua
@@ -1354,6 +1370,23 @@ EsoUI\Ingame\Contacts\Keyboard\Notifications_Keyboard.xml
 EsoUI\Ingame\Contacts\Gamepad\Notifications_Gamepad.lua
 EsoUI\Ingame\Contacts\Gamepad\Notifications_Gamepad.xml
 
+EsoUI\Ingame\Antiquities\AntiquityManager.lua
+EsoUI\Ingame\Antiquities\AntiquityJournalDialogs.lua
+EsoUI\Ingame\Antiquities\Keyboard\AntiquityJournal_Keyboard.lua
+EsoUI\Ingame\Antiquities\Keyboard\AntiquityJournal_Keyboard.xml
+EsoUI\Ingame\Antiquities\Keyboard\AntiquityLore_Keyboard.lua
+EsoUI\Ingame\Antiquities\Keyboard\AntiquityLore_Keyboard.xml
+EsoUI\Ingame\Antiquities\Gamepad\AntiquityJournal_Gamepad.lua
+EsoUI\Ingame\Antiquities\Gamepad\AntiquityJournal_Gamepad.xml
+EsoUI\Ingame\Antiquities\Gamepad\AntiquityLore_Gamepad.lua
+EsoUI\Ingame\Antiquities\Gamepad\AntiquityLore_Gamepad.xml
+
+EsoUI\Ingame\AntiquityDigging\AntiquityDigging.lua
+EsoUI\Ingame\AntiquityDigging\AntiquityDigging.xml
+
+EsoUI\Ingame\Scrying\IngameScrying.lua
+EsoUI\Ingame\Scrying\IngameScrying.xml
+
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua
 EsoUI\Ingame\Subtitles\Subtitles.xml
@@ -1378,3 +1411,4 @@ EsoUI\Ingame\Scenes\IngameScenes.lua
 EsoUI\Ingame\Scenes\Keyboard\KeyboardIngameScenes.lua
 EsoUI\Ingame\Scenes\Console\ConsoleIngameScenes.lua
 EsoUI\Ingame\Scenes\Gamepad\GamepadIngameScenes.lua
+EsoUI\Ingame\Scenes\UISystemManager.lua

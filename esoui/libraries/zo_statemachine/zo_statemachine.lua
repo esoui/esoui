@@ -263,6 +263,8 @@ function ZO_StateMachine_Edge:Activate()
     end
 
     self.active = true
+
+    self:FireCallbacks("OnActivated")
 end
 
 function ZO_StateMachine_Edge:Deactivate()
@@ -272,6 +274,8 @@ function ZO_StateMachine_Edge:Deactivate()
         for _, trigger in ipairs(self.triggers) do
             trigger:UnregisterEdge(self)
         end
+
+        self:FireCallbacks("OnDeactivated")
     end
 end
 
@@ -282,8 +286,11 @@ function ZO_StateMachine_Edge:Trigger()
 
     self:FireCallbacks("OnTrigger")
 
-    self.parentMachine:SetState(self.toState)
+    self.parentMachine:SetCurrentState(self.toState)
+end
 
+function ZO_StateMachine_Edge:IsActive()
+    return self.active
 end
 
 ---------
@@ -333,6 +340,8 @@ function ZO_StateMachine_State:GetParentMachine()
 end
 
 function ZO_StateMachine_State:Activate()
+    self:FireCallbacks("OnActivating")
+
     for _, edge in ipairs(self.edges) do
         edge:Activate()
     end
@@ -341,8 +350,6 @@ function ZO_StateMachine_State:Activate()
         d(self.fullName .. " firing its OnActivated callbacks.")
     end
 
-    self:FireCallbacks("OnActivated")
-
     if self.updateName then
         EVENT_MANAGER:RegisterForUpdate(self.updateName, 0, self.updateCallback)
 
@@ -350,9 +357,13 @@ function ZO_StateMachine_State:Activate()
             d(self.fullName .. " registered for an update.")
         end
     end
+    
+    self:FireCallbacks("OnActivated")
 end
 
 function ZO_StateMachine_State:Deactivate()
+    self:FireCallbacks("OnDeactivating")
+
     if self.updateName then
         EVENT_MANAGER:UnregisterForUpdate(self.updateName)
 
@@ -365,11 +376,11 @@ function ZO_StateMachine_State:Deactivate()
         d(self.fullName .. " firing its OnDeactivated callbacks.")
     end
 
-    self:FireCallbacks("OnDeactivated")
-
     for _, edge in ipairs(self.edges) do
         edge:Deactivate()
     end
+    
+    self:FireCallbacks("OnDeactivated")
 end
 
 --------
@@ -387,13 +398,33 @@ end
 function ZO_StateMachine_Base:Initialize(name)
     self.name = name
     self.currentState = nil
+    self.states = {}
+    self.edges = {}
+    self.triggers = {}
 end
 
 function ZO_StateMachine_Base:GetName()
     return self.name
 end
 
-function ZO_StateMachine_Base:SetState(state)
+-- States --
+
+function ZO_StateMachine_Base:AddState(stateName, optionalStateTemplate, ...)
+    local template = optionalStateTemplate or ZO_StateMachine_State
+    local state = template:New(self, stateName, ...)
+    self.states[stateName] = state
+    return state
+end
+
+function ZO_StateMachine_Base:GetStateByName(stateName)
+    return self.states[stateName]
+end
+
+function ZO_StateMachine_Base:SetCurrentState(state)
+    if type(state) == "string" then
+        state = self:GetStateByName(state)
+    end
+
     if state == self.currentState then
         return
     end
@@ -410,6 +441,71 @@ end
 
 function ZO_StateMachine_Base:GetCurrentState()
     return self.currentState
+end
+
+function ZO_StateMachine_Base:HasCurrentState()
+    return self.currentState ~= nil
+end
+
+function ZO_StateMachine_Base:IsCurrentState(state)
+    if type(state) == "string" then
+        state = self:GetStateByName(state)
+    end
+    return self:GetCurrentState() == state
+end
+
+-- Edges --
+
+function ZO_StateMachine_Base:AddEdge(edgeName, fromState, toState, optionalEdgeTemplate, ...)
+    if type(fromState) == "string" then
+        fromState = self:GetStateByName(fromState)
+    end
+    if type(toState) == "string" then
+        toState = self:GetStateByName(toState)
+    end
+    local template = optionalStateTemplate or ZO_StateMachine_Edge
+
+    local edge = template:New(fromState, toState, ...)
+    self.edges[edgeName] = edge
+    return edge
+end
+
+function ZO_StateMachine_Base:AddEdgeAutoName(fromState, toState, optionalEdgeTemplate, ...)
+    local fromStateName = (type(fromState) == "string") and fromState or fromState:GetName()
+    local toStateName = (type(toState) == "string") and toState or toState:GetName()
+    local edgeName = string.format("%s_TO_%s", fromStateName, toStateName)
+    return self:AddEdge(edgeName, fromState, toState, optionalEdgeTemplate, ...)
+end
+
+function ZO_StateMachine_Base:GetEdgeByName(edgeName)
+    return self.edges[edgeName]
+end
+
+-- Triggers -- 
+
+function ZO_StateMachine_Base:AddTrigger(triggerName, triggerTemplate, ...)
+    local trigger = triggerTemplate:New(...)
+    self.triggers[triggerName] = trigger
+    return trigger
+end
+
+function ZO_StateMachine_Base:SetTrigger(triggerName, trigger)
+    self.triggers[triggerName] = trigger
+end
+
+function ZO_StateMachine_Base:GetTriggerByName(triggerName)
+    return self.triggers[triggerName]
+end
+
+function ZO_StateMachine_Base:AddTriggerToEdge(trigger, edge)
+    if type(trigger) == "string" then
+        trigger = self:GetTriggerByName(trigger)
+    end
+    if type(edge) == "string" then
+        edge = self:GetEdgeByName(edge)
+    end
+
+    edge:AddTrigger(trigger)
 end
 
 function ZO_StateMachine_Base:Reset()

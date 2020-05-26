@@ -1,0 +1,40 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_WorldMapAntiquitiesGamepadEntry" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+            <OnInitialized>
+                ZO_WorldMapAntiquitiesGamepadEntry_OnInitialize(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42" />
+
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+
+                <Control name="$(parent)Stars">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                    <Dimensions y="26" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_WorldMapAntiquities_Gamepad" hidden="true">
+            <OnInitialized>
+                ZO_WorldMapAntiquities_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Main" inherits="ZO_WorldMapInfoContent_Gamepad">
+                    <Controls>
+                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
+                            <AnchorFill/>
+                        </Control>
+
+                        <Label name="$(parent)NoItemsLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed42" text="SI_WORLD_MAP_ANTIQUITIES_NO_ANTIQUITIES" hidden="true">
+                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                            <Anchor point="CENTER" offsetY="-35" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

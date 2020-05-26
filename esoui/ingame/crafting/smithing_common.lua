@@ -72,7 +72,8 @@ function ZO_Smithing_Common:Initialize(control)
     self.smithingStationInteraction =
     {
         type = "Smithing Station",
-        End = function()
+        OnInteractSwitch = function()
+            internalassert(false, "OnInteractSwitch is being called.")
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },

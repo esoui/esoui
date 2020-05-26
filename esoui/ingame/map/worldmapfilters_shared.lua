@@ -108,7 +108,7 @@ function ZO_WorldMapFilters_Shared:Initialize(control)
 
     local function OnMapChanged()
         local mapFilterType = GetMapFilterType()
-        local mode = ZO_WorldMap_GetMode()
+        local mode = WORLD_MAP_MANAGER:GetMode()
         local newCurrentPanel
         if mapFilterType == MAP_FILTER_TYPE_STANDARD then
             newCurrentPanel = self.pvePanel
@@ -144,6 +144,7 @@ function ZO_PvEWorldMapFilterPanel_Shared:BuildControls()
     self:AddPinFilterCheckBox(MAP_FILTER_OBJECTIVES, ZO_WorldMap_RefreshAllPOIs, GetString(SI_WORLD_MAP_FILTERS_SHOW_DETAILS))
     self:AddPinFilterCheckBox(MAP_FILTER_WAYSHRINES, ZO_WorldMap_RefreshWayshrines)
     self:AddPinFilterCheckBox(MAP_FILTER_GROUP_MEMBERS, ZO_WorldMap_RefreshGroupPins)
+    self:AddPinFilterCheckBox(MAP_FILTER_DIG_SITES, function() WORLD_MAP_MANAGER:RefreshAllAntiquityDigSites() end)
 
     self:PostBuildControls()
 end

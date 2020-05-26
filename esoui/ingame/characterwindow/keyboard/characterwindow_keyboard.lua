@@ -7,6 +7,7 @@ local MOUSE_OVER_TEXTURE = "EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
 local function RestoreMouseOverTexture(slotControl)
     slotControl:SetMouseOverTexture(not ZO_Character_IsReadOnly() and MOUSE_OVER_TEXTURE or nil)
     slotControl:SetPressedMouseOverTexture(not ZO_Character_IsReadOnly() and MOUSE_OVER_TEXTURE or nil)
+    ZO_ResetSparkleAnimationColor(slotControl)
 end
 
 local slots = nil
@@ -43,27 +44,26 @@ local function InitializeSlots()
     {
         [EQUIP_SLOT_MAIN_HAND] = { linksTo = EQUIP_SLOT_OFF_HAND },
         [EQUIP_SLOT_BACKUP_MAIN] = { linksTo = EQUIP_SLOT_BACKUP_OFF },
-        [EQUIP_SLOT_OFF_HAND] = 
-        { 
-            pullFromConditionFn =   function() 
-                                        return GetEquippedItemType(EQUIP_SLOT_MAIN_HAND) == EQUIP_TYPE_TWO_HAND 
-                                    end,
+        [EQUIP_SLOT_OFF_HAND] =
+        {
+            pullFromConditionFn =   function()
+                return GetEquippedItemType(EQUIP_SLOT_MAIN_HAND) == EQUIP_TYPE_TWO_HAND
+            end,
             pullFromFn =    function()
-                                local iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(EQUIP_SLOT_MAIN_HAND)
-                                return iconFile, slotHasItem, locked
-                            end,
+                local iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(EQUIP_SLOT_MAIN_HAND)
+                return iconFile, slotHasItem, locked
+            end,
         },
 
         [EQUIP_SLOT_BACKUP_OFF] =
         {
-            pullFromConditionFn =   function() 
-                                        return GetEquippedItemType(EQUIP_SLOT_BACKUP_MAIN) == EQUIP_TYPE_TWO_HAND 
-                                    end,
-
+            pullFromConditionFn =   function()
+                return GetEquippedItemType(EQUIP_SLOT_BACKUP_MAIN) == EQUIP_TYPE_TWO_HAND 
+            end,
             pullFromFn =    function()
-                                local iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(EQUIP_SLOT_BACKUP_MAIN)
-                                return iconFile, slotHasItem, locked
-                            end,
+                local iconFile, slotHasItem, _, _, _, locked = GetEquippedItemInfo(EQUIP_SLOT_BACKUP_MAIN)
+                return iconFile, slotHasItem, locked
+            end,
         },
     }
 
@@ -81,7 +81,7 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
     local iconControl = slotControl:GetNamedChild("Icon")
     local iconFile, slotHasItem, locked
 
-    if(copyFromLinkedFn) then
+    if copyFromLinkedFn then
         iconFile, slotHasItem, locked = copyFromLinkedFn()
     else
         local _
@@ -94,10 +94,10 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
 
     if disabled then
         iconControl:SetTexture("EsoUI/Art/CharacterWindow/weaponSwap_locked.dds")
-    elseif(slotHasItem) then
+    elseif slotHasItem then
         iconControl:SetTexture(iconFile)
-        
-        if(animationOption == PLAY_ANIMATION) then
+
+        if animationOption == PLAY_ANIMATION then
             ZO_PlaySparkleAnimation(slotControl)
         end
     else
@@ -107,7 +107,7 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
     local stackCountLabel = GetControl(slotControl, "StackCount")
     if slotId == EQUIP_SLOT_POISON or slotId == EQUIP_SLOT_BACKUP_POISON then
         slotControl.stackCount = select(2, GetItemInfo(BAG_WORN, slotId))
-        if (slotControl.stackCount > 1) then
+        if slotControl.stackCount > 1 then
             local USE_LOWERCASE_NUMBER_SUFFIXES = false
             stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(slotControl.stackCount, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)))
         else
@@ -119,13 +119,13 @@ local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFr
     end
 
     if not g_isReadOnly then
-        if(not disabled and copyFromLinkedFn) then
+        if not disabled and copyFromLinkedFn then
             iconControl:SetDesaturation(0)
             iconControl:SetColor(1, 0, 0, .5)
         else
             iconControl:SetColor(1, 1, 1, 1)
 
-            if(not disabled and locked) then
+            if not disabled and locked then
                 iconControl:SetDesaturation(1)
             else
                 iconControl:SetDesaturation(0)
@@ -140,15 +140,15 @@ local function RefreshSingleSlot(slotId, slotControl, animationOption, updateRea
 
     -- If this slot links to or pulls from another slot, it must have the right fields
     -- in the heldSlotLinkage table.  If it doesn't, the data needs to be fixed up.
-    if(linkData) then
-        if(linkData.linksTo) then
+    if linkData then
+        if linkData.linksTo then
             local animateLinkedSlot = animationOption
-            
-            if(updateReason == INVENTORY_UPDATE_REASON_ITEM_CHARGE) then
+
+            if updateReason == INVENTORY_UPDATE_REASON_ITEM_CHARGE then
                 animateLinkedSlot = false
             end
             RefreshSingleSlot(linkData.linksTo, slots[linkData.linksTo], animateLinkedSlot)
-        elseif(linkData.pullFromConditionFn()) then
+        elseif linkData.pullFromConditionFn() then
             pullFromFn = linkData.pullFromFn
             animationOption = NO_ANIMATION
         end
@@ -156,7 +156,7 @@ local function RefreshSingleSlot(slotId, slotControl, animationOption, updateRea
 
     UpdateSlotAppearance(slotId, slotControl, animationOption, pullFromFn)
 
-    if(not pullFromFn) then
+    if not pullFromFn then
         CALLBACK_MANAGER:FireCallbacks("WornSlotUpdate", slotControl)
     end
 end
@@ -195,6 +195,11 @@ local function InventorySlotUpdated(eventCode, bagId, slotId, isNewItem, itemSou
     DoWornSlotUpdate(bagId, slotId, PLAY_ANIMATION, updateReason)
 end
 
+local function InventoryEquipMythicFailed(eventCode, bagId, slotId)
+    local mythicColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE))
+    ZO_PlayColorSparkleAnimation(slots[slotId], mythicColor)
+end
+
 local function InventorySlotLocked(eventCode, bagId, slotId)
     DoWornSlotUpdate(bagId, slotId)
 end
@@ -231,9 +236,9 @@ local function ShowAppropriateEquipSlotDropCallouts(bagId, slotIndex)
     for equipSlot, equipTypes in ZO_Character_EnumerateEquipSlotToEquipTypes() do
         local slotControl = slots[equipSlot]
         local locked = IsLockedWeaponSlot(equipSlot)
-        if(slotControl and not locked) then
+        if slotControl and not locked then
             for i = 1, #equipTypes do
-                if(equipTypes[i] == equipType) then
+                if equipTypes[i] == equipType then
                     ShowSlotDropCallout(slotControl:GetNamedChild("DropCallout"), meetsUsageRequirement)
                     break
                 end
@@ -251,9 +256,9 @@ local function HandleInventorySlotPickup(bagId, slotId)
 end
 
 local function HandleCursorPickup(eventCode, cursorType, param1, param2, param3)
-    if(cursorType == MOUSE_CONTENT_EQUIPPED_ITEM) then
+    if cursorType == MOUSE_CONTENT_EQUIPPED_ITEM then
         HandleEquipSlotPickup(param1)
-    elseif(cursorType == MOUSE_CONTENT_INVENTORY_ITEM) then
+    elseif cursorType == MOUSE_CONTENT_INVENTORY_ITEM then
         HandleInventorySlotPickup(param1, param2)
     end
 end
@@ -316,6 +321,7 @@ function ZO_Character_Initialize(control)
     ZO_Character:RegisterForEvent(EVENT_UNIT_CREATED, OnUnitCreated)
     ZO_Character:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, FullInventoryUpdated)
     ZO_Character:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, InventorySlotUpdated)
+    ZO_Character:RegisterForEvent(EVENT_INVENTORY_EQUIP_MYTHIC_FAILED, InventoryEquipMythicFailed)
     ZO_Character:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, InventorySlotLocked)
     ZO_Character:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, InventorySlotUnlocked)
     ZO_Character:RegisterForEvent(EVENT_CURSOR_PICKUP, HandleCursorPickup)
@@ -342,7 +348,7 @@ function ZO_Character_Initialize(control)
     end
 
     local function OnLevelUpdate(_, unitTag)
-        if(unitTag == "player") then
+        if unitTag == "player" then
             RefreshBackUpWeaponSlotStates()
             OnActiveWeaponPairChanged(nil, GetActiveWeaponPairInfo())
         end
@@ -352,8 +358,8 @@ function ZO_Character_Initialize(control)
     ZO_Character:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
     OnActiveWeaponPairChanged(nil, GetActiveWeaponPairInfo())
 
-	local apparelHiddenLabel = control:GetNamedChild("ApparelHidden")
-	apparelHiddenLabel:SetText(ZO_SELECTED_TEXT:Colorize(GetString(SI_HIDDEN_GENERAL)))
+    local apparelHiddenLabel = control:GetNamedChild("ApparelHidden")
+    apparelHiddenLabel:SetText(ZO_SELECTED_TEXT:Colorize(GetString(SI_HIDDEN_GENERAL)))
 
     OnUnitCreated(nil, "player")
 end

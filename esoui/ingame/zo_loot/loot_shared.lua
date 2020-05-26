@@ -59,8 +59,8 @@ function ZO_Loot_Shared:Initialize(control)
             TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_FULL)
         end
         local itemName = GetItemLinkName(itemLink)
-        local itemQuality = GetItemLinkQuality(itemLink)
-        local qualityColor = GetItemQualityColor(itemQuality)
+        local itemDisplayQuality = GetItemLinkDisplayQuality(itemLink)
+        local qualityColor = GetItemQualityColor(itemDisplayQuality)
         itemName = qualityColor:Colorize(itemName)
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, zo_strformat(GetString("SI_LOOTITEMRESULT", reason), itemName))
     end

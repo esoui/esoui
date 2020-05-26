@@ -173,7 +173,7 @@ function ZO_GamepadInteraction:ResetInteraction(bodyText)
     end
 end
 
-function ZO_GamepadInteraction:EndInteraction()
+function ZO_GamepadInteraction:SwitchInteraction()
     self.itemList:Deactivate()
 end
 

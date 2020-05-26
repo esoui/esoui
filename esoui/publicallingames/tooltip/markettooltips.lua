@@ -139,7 +139,7 @@ function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationInde
 end
 
 function ZO_Tooltip:LayoutEsoPlusTrialNotification(marketProductId, keybindIcon)
-    local legendaryColor = GetItemQualityColor(ITEM_QUALITY_LEGENDARY)
+    local legendaryColor = GetItemQualityColor(ITEM_DISPLAY_QUALITY_LEGENDARY)
     local coloredHeader = legendaryColor:Colorize(GetString(SI_MARKET_FREE_TRIAL_TOOLTIP_HEADER))
     self:AddLine(coloredHeader, self:GetStyle("title"))
 
@@ -200,6 +200,7 @@ function ZO_Tooltip:LayoutCrownCrate(crateId, stackCount)
 end
 
 do
+    internalassert(INSTANT_UNLOCK_MAX_VALUE == 16, "Update gamepad tooltip for new instant unlock type")
     local UNLOCK_LABEL = GetString(SI_MARKET_PRODUCT_TOOLTIP_UNLOCK)
 
     function ZO_Tooltip:LayoutInstantUnlock(instantUnlockId)
@@ -255,6 +256,8 @@ do
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_RACE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_RACE_CHANGE))
             elseif instantUnlockType == INSTANT_UNLOCK_APPEARANCE_CHANGE_TOKEN then
                 tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_APPEARANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_APPEARANCE_CHANGE))
+            elseif instantUnlockType == INSTANT_UNLOCK_ALLIANCE_CHANGE_TOKEN then
+                tokenCountString = zo_strformat(SI_SERVICE_TOOLTIP_SERVICE_TOKENS_AVAILABLE, GetNumServiceTokens(SERVICE_TOKEN_ALLIANCE_CHANGE), GetString("SI_SERVICETOKENTYPE", SERVICE_TOKEN_ALLIANCE_CHANGE))
             end
 
             table.insert(tooltipLines, instantUnlockDescription)

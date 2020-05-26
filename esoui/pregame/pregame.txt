@@ -18,6 +18,11 @@ EsoUI\Pregame\Gamepad\PregameTemplates.xml
 
 EsoUI\Pregame\Scenes\PregameSceneManager.lua
 
+EsoUI\Pregame\StateManager\PregameStateManager.lua
+EsoUI\Pregame\StateManager\Keyboard\PregameStates_Keyboard.lua
+EsoUI\Pregame\StateManager\Gamepad\PregameStates_Gamepad.lua
+EsoUI\Pregame\StateManager\Console\PregameStates_Console.lua
+
 EsoUI\Pregame\Tooltip\Tooltip.xml
 EsoUI\Pregame\Tooltip\CharacterSelectTooltips.lua
 
@@ -94,10 +99,22 @@ EsoUI\Pregame\CharacterCreate\Gamepad\ZO_CharacterCreate_Gamepad.xml
 
 ; Character Select
 EsoUI\Pregame\CharacterSelect\ZO_CharacterSelect_Manager.lua
+EsoUI\Pregame\CharacterSelect\CharacterSelect_EventTile_Shared.lua
+EsoUI\Pregame\CharacterSelect\CharacterSelect_EventTile_Shared.xml
+EsoUI\Pregame\CharacterSelect\CharacterSelect_EventBanner_Shared.lua
+EsoUI\Pregame\CharacterSelect\CharacterSelect_EventBanner_Shared.xml
 EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.lua
 EsoUI\Pregame\CharacterSelect\Keyboard\ZO_CharacterSelect_Keyboard.xml
+EsoUI\Pregame\CharacterSelect\Keyboard\CharacterSelect_EventTile_Keyboard.lua
+EsoUI\Pregame\CharacterSelect\Keyboard\CharacterSelect_EventTile_Keyboard.xml
+EsoUI\Pregame\CharacterSelect\Keyboard\CharacterSelect_EventBanner_Keyboard.lua
+EsoUI\Pregame\CharacterSelect\Keyboard\CharacterSelect_EventBanner_Keyboard.xml
 EsoUI\Pregame\CharacterSelect\Gamepad\ZO_CharacterSelect_Gamepad.lua
 EsoUI\Pregame\CharacterSelect\Gamepad\ZO_CharacterSelect_Gamepad.xml
+EsoUI\Pregame\CharacterSelect\Gamepad\CharacterSelect_EventTile_Gamepad.lua
+EsoUI\Pregame\CharacterSelect\Gamepad\CharacterSelect_EventTile_Gamepad.xml
+EsoUI\Pregame\CharacterSelect\Gamepad\CharacterSelect_EventBanner_Gamepad.lua
+EsoUI\Pregame\CharacterSelect\Gamepad\CharacterSelect_EventBanner_Gamepad.xml
 
 EsoUI\Pregame\GameMenu_PreGame\Keyboard\GameMenu_PreGame.lua
 EsoUI\Pregame\GameMenu_PreGame\Keyboard\GameMenu_PreGame.xml
@@ -137,11 +154,6 @@ EsoUI\Pregame\GameCredits\Gamepad\GameCredits_Gamepad.xml
 EsoUI\Pregame\GameCredits\Keyboard\GameCredits_Keyboard.lua
 EsoUI\Pregame\GameCredits\Keyboard\GameCredits_Keyboard.xml
 
-EsoUI\Pregame\StateManager\PregameStateManager.lua
-EsoUI\Pregame\StateManager\Keyboard\PregameStates_Keyboard.lua
-EsoUI\Pregame\StateManager\Gamepad\PregameStates_Gamepad.lua
-EsoUI\Pregame\StateManager\Console\PregameStates_Console.lua
-
 EsoUI\Pregame\RzChroma\PregameRzChroma_Manager.lua
 EsoUI\Pregame\RzChroma\PregameRzChroma_Effects.lua
 
@@ -166,3 +178,6 @@ EsoUI\Pregame\OptionsPanels\Gamepad\OptionsPanels_Gamepad.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\PregameOptionsPanels_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.xml
+
+EsoUI\Pregame\Settings\Keyboard\Pregame_Settings_Keyboard.lua
+EsoUI\Pregame\Settings\Keyboard\Pregame_Settings_Keyboard.xml

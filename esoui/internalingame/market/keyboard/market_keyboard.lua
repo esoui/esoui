@@ -1179,7 +1179,7 @@ function ZO_Market_Keyboard:RestoreActionLayerForTutorial()
 end
 
 function ZO_Market_Keyboard:RemoveActionLayerForTutorial()
-    -- we exit the gamepad tutotial by pressing "Alt"
+    -- we exit the keyboard tutorial by pressing "Alt"
     RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))
 end
 

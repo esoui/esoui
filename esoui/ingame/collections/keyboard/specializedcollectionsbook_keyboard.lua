@@ -189,6 +189,13 @@ function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, c
         end,
     })
 
+    self.refreshGroups:AddRefreshGroup("ZoneChanged",
+    {
+        RefreshSingle = function()
+            self:RefreshDetails()
+        end,
+    })
+
     control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
 end
 

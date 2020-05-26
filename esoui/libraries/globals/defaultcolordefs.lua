@@ -182,17 +182,17 @@ end
 
 do
     local itemColors = {}
-    function GetItemQualityColor(quality)
-        if not itemColors[quality] then
-            itemColors[quality] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+    function GetItemQualityColor(displayQuality)
+        if not itemColors[displayQuality] then
+            itemColors[displayQuality] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
         end
-        return itemColors[quality]
+        return itemColors[displayQuality]
     end
 end
 
 do
     local itemColors = {}
-    local REDUCE_AMOUNT = .25
+    local REDUCE_AMOUNT = 0.25
     function GetDimItemQualityColor(quality)
         if not itemColors[quality] then
             local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
@@ -200,6 +200,29 @@ do
             itemColors[quality] = ZO_ColorDef:New(r, g, b)
         end
         return itemColors[quality]
+    end
+end
+
+do
+    local antiquityQualityColors = {}
+    function GetAntiquityQualityColor(quality)
+        if not antiquityQualityColors[quality] then
+            antiquityQualityColors[quality] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS, quality))
+        end
+        return antiquityQualityColors[quality]
+    end
+end
+
+do
+    local antiquityQualityColors = {}
+    local REDUCE_AMOUNT = 0.25
+    function GetDimAntiquityQualityColor(quality)
+        if not antiquityQualityColors[quality] then
+            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS, quality)
+            r, g, b = zo_saturate(r - REDUCE_AMOUNT), zo_saturate(g - REDUCE_AMOUNT), zo_saturate(b - REDUCE_AMOUNT)
+            antiquityQualityColors[quality] = ZO_ColorDef:New(r, g, b)
+        end
+        return antiquityQualityColors[quality]
     end
 end
 
@@ -339,3 +362,13 @@ ZO_GAMEPAD_COMPONENT_COLORS =
     SELECTED_ACTIVE_DISABLED = ZO_NORMAL_TEXT,
     UNSELECTED_ACTIVE_DISABLED = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_GAMEPAD_CATEGORY_HEADER)),
 }
+
+------------------------------------
+-- Map Pin Colors
+------------------------------------
+
+ZO_MAP_PIN_NORMAL_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_NORMAL))
+ZO_MAP_PIN_ASSISTED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_ASSISTED))
+ZO_MAP_PIN_DIG_SITE_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_DIG_SITE))
+ZO_MAP_PIN_TRACKED_DIG_SITE_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_TRACKED_DIG_SITE))
+ZO_MAP_PIN_DIG_SITE_BORDER_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_DIG_SITE_BORDER))

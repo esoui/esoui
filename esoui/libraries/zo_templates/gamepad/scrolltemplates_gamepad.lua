@@ -94,8 +94,10 @@ function ZO_ScrollContainer_Gamepad:SetScrollIndicatorEnabled(enabled)
 end
 
 function ZO_ScrollContainer_Gamepad:UpdateScrollIndicator()
-    local _, verticalExtents = self.scroll:GetScrollExtents()
-    self.scrollIndicator:SetHidden(not (self.scrollIndicatorEnabled and verticalExtents ~= 0))
+    if self.scrollIndicator then
+        local _, verticalExtents = self.scroll:GetScrollExtents()
+        self.scrollIndicator:SetHidden(not (self.scrollIndicatorEnabled and verticalExtents ~= 0))
+    end
 end
 
 function ZO_ScrollContainer_Gamepad:EnableUpdateHandler()

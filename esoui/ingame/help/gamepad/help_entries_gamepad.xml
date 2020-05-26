@@ -4,10 +4,6 @@
             <OnInitialized>
                 ZO_Gamepad_Tutorials_Entries_OnInitialize(self)
             </OnInitialized>
-
-            <Controls>
-                <Control name="$(parent)TutorialText" inherits="ZO_Gamepad_Help_Tutorials_Display" />
-            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

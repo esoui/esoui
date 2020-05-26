@@ -116,7 +116,7 @@ function ZO_QuickslotManager:New(container)
         local metEquipRequirements = true -- This was already in a slot, chances are you're not going to fail equip requirements...
         local isItem = (slotType == ACTION_TYPE_ITEM)
 
-        if(isItem) then
+        if isItem then
             for slotNum, quickSlot in pairs(manager.quickSlots) do
                 local validInSlot = IsValidItemForSlotByItemInfo(itemId, itemQualityId, itemRequiredLevel, itemInstanceData, slotNum)
                 if validInSlot then
@@ -137,7 +137,7 @@ function ZO_QuickslotManager:New(container)
 
     local function HandleQuestItemSlotPickup(questItemId)
         for actionSlotIndex, quickSlot in pairs(manager.quickSlots) do
-            local validInSlot = IsValidQuestItemForSlot(questItem, actionSlotIndex)
+            local validInSlot = IsValidQuestItemForSlot(questItemId, actionSlotIndex)
             if validInSlot then
                 manager:ShowSlotDropCallout(quickSlot:GetNamedChild("DropCallout"), true)
             end
@@ -182,7 +182,7 @@ function ZO_QuickslotManager:New(container)
         for i = 1, #scrollData do
             local dataEntry = scrollData[i]
             local data = dataEntry.data
-            if(data.slotIndex == slotIndex) then
+            if data.slotIndex == slotIndex then
                 data.locked = locked
                 ZO_ScrollList_RefreshVisible(manager.list)
                 break
@@ -191,13 +191,13 @@ function ZO_QuickslotManager:New(container)
     end
 
     local function HandleInventorySlotLocked(_, bagId, slotIndex)
-        if(bagId == BAG_BACKPACK) then
+        if bagId == BAG_BACKPACK then
             RefreshSlotLocked(slotIndex, true)
         end
     end
 
     local function HandleInventorySlotUnlocked(_, bagId, slotIndex)
-        if(bagId == BAG_BACKPACK) then
+        if bagId == BAG_BACKPACK then
             RefreshSlotLocked(slotIndex, false)
         end
     end
@@ -224,7 +224,7 @@ function ZO_QuickslotManager:New(container)
 
     QUICKSLOT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_QuickSlot)
     QUICKSLOT_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                            if newState == SCENE_FRAGMENT_SHOWN then
                                                                 manager:UpdateList()
                                                                 manager:UpdateFreeSlots()
                                                             end
@@ -232,10 +232,12 @@ function ZO_QuickslotManager:New(container)
 
     QUICKSLOT_CIRCLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_QuickSlotCircle)
     QUICKSLOT_CIRCLE_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if(newState == SCENE_FRAGMENT_SHOWN) then
+                                                            if newState == SCENE_FRAGMENT_SHOWN then
                                                                 manager.quickSlotState = true
-                                                            elseif(newState == SCENE_FRAGMENT_HIDDEN) then
+                                                            elseif newState == SCENE_FRAGMENT_HIDDEN then
                                                                 manager.quickSlotState = false
+                                                                -- ensure our keybinds are removed since OnMouseExitQuickSlot may come late
+                                                                KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.keybindStripDescriptor)
                                                             end
                                                         end)
 
@@ -305,8 +307,6 @@ function ZO_QuickslotManager:SetupQuickslotCount(quickslot, count)
 end
 
 function ZO_QuickslotManager:CreateQuickSlots()
-    local lastButton = nil
-
     for i = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1, ACTION_BAR_FIRST_UTILITY_BAR_SLOT + ACTION_BAR_UTILITY_BAR_SIZE do
         local quickSlot = CreateControlFromVirtual("ZO_QuickSlot"..i, self.circle, "ZO_QuickSlotTemplate")
 
@@ -318,8 +318,6 @@ function ZO_QuickslotManager:CreateQuickSlots()
 
         ZO_ActionSlot_SetupSlot(quickSlot.icon, quickSlot.button, EMPTY_QUICKSLOT_TEXTURE)
         ZO_CreateSparkleAnimation(quickSlot)
-
-        lastButton = quickSlot
     end
 
     self:PerformQuickSlotLayout()
@@ -327,10 +325,10 @@ end
 
 function ZO_QuickslotManager:DoQuickSlotUpdate(physicalSlot, animationOption)
     local quickSlot = self.quickSlots[physicalSlot]
-    if(quickSlot) then
+    if quickSlot then
         local slotType = GetSlotType(physicalSlot)
 
-        if(slotType == ACTION_TYPE_NOTHING) then
+        if slotType == ACTION_TYPE_NOTHING then
             ZO_ActionSlot_SetupSlot(quickSlot.icon, quickSlot.button, EMPTY_QUICKSLOT_TEXTURE)
             self:SetupQuickslotCount(quickSlot)
         else
@@ -343,26 +341,25 @@ function ZO_QuickslotManager:DoQuickSlotUpdate(physicalSlot, animationOption)
             -- TODO: There's not a lot to go off of to determine if this quick slot was changing contents
             -- or being used, or anything else.  Probably going to need to add additional event info for
             -- something being placed here instead of just doing a full slot update.
-            if(animationOption == PLAY_ANIMATION and not quickSlot:IsHidden()) then
+            if animationOption == PLAY_ANIMATION and not quickSlot:IsHidden() then
                 ZO_PlaySparkleAnimation(quickSlot)
             end
 
             local numSlotted = 0
             for i = ACTION_BAR_FIRST_UTILITY_BAR_SLOT + 1, ACTION_BAR_FIRST_UTILITY_BAR_SLOT + ACTION_BAR_UTILITY_BAR_SIZE do
                 local slotType = GetSlotType(i)
-                if(slotType ~= ACTION_TYPE_NOTHING) then
+                if slotType ~= ACTION_TYPE_NOTHING then
                     numSlotted = numSlotted + 1
                 end
             end
 
-            if(numSlotted == 1) then
+            if numSlotted == 1 then
                 SetCurrentQuickslot(physicalSlot)
             end
         end
 
         local mouseOverControl = WINDOW_MANAGER:GetMouseOverControl()
-        if(mouseOverControl == quickSlot.button)
-        then
+        if mouseOverControl == quickSlot.button then
             ZO_AbilitySlot_OnMouseEnter(quickSlot.button)
         end
     end
@@ -377,7 +374,7 @@ end
 function ZO_QuickslotManager:ShowSlotDropCallout(calloutControl, meetsUsageRequirement)
     calloutControl:SetHidden(false)
 
-    if(meetsUsageRequirement) then
+    if meetsUsageRequirement then
         calloutControl:SetColor(1, 1, 1, 1)
     else
         calloutControl:SetColor(1, 0, 0, 1)
@@ -490,7 +487,10 @@ function ZO_QuickslotManager:AppendItemData(scrollData)
                 slotIndex = slotIndex,
                 meetsUsageRequirement = slotData.meetsUsageRequirement,
                 locked = slotData.locked,
-                quality = slotData.quality,
+                functionalQuality = slotData.functionalQuality,
+                displayQuality = slotData.displayQuality,
+                -- slotData.quality is depricated, included here for addon backwards compatibility
+                quality = slotData.displayQuality,
                 slotType = SLOT_TYPE_ITEM,
                 filterData = { GetItemFilterTypeInfo(BAG_BACKPACK, slotIndex) },
                 age = slotData.age,
@@ -509,7 +509,6 @@ end
 function ZO_QuickslotManager:AppendCollectiblesData(scrollData, collectibleCategoryData)
     local dataObjects
     if collectibleCategoryData then
-        local categoryIndex = collectibleCategoryData:GetCategoryIndicies()
         dataObjects = collectibleCategoryData:GetAllCollectibleDataObjects({ ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
     else
         dataObjects = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsStandardCategory }, { ZO_CollectibleData.IsUnlocked, ZO_CollectibleData.IsValidForPlayer, ZO_CollectibleData.IsSlottable })
@@ -536,7 +535,9 @@ local function UpdateNewStatusControl(control, data)
 end
 
 function ZO_QuickslotManager:SetUpQuickSlot(control, data)
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+    -- data.quality is depricated, included here for addon backwards compatibility
+    local displayQuality = data.displayQuality or data.quality
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
     local nameControl = GetControl(control, "Name")
     nameControl:SetText(data.name)
     nameControl:SetColor(r, g, b, 1)
@@ -598,7 +599,7 @@ end
 
 function ZO_QuickslotManager:UpdateFreeSlots()
     local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
-    if(numUsedSlots < numSlots) then
+    if numUsedSlots < numSlots then
         self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots))
     else
         self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots))
@@ -637,6 +638,32 @@ function ZO_QuickslotManager:CreateNewTabFilterData(filterType, text, normal, pr
     return tabData
 end
 
+function ZO_QuickslotManager:OnMouseOverQuickSlot(slotControl)
+    if slotControl.animation then
+        slotControl.animation:PlayForward()
+    end
+
+    if self.mouseOverSlot ~= slotControl then
+        PlaySound(SOUNDS.QUICKSLOT_MOUSEOVER)
+        self.mouseOverSlot = slotControl
+    end
+
+    if IsSlotUsed(slotControl.slotNum) then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    else
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_QuickslotManager:OnMouseExitQuickSlot(slotControl)
+    if slotControl.animation then
+        slotControl.animation:PlayBackward()
+    end
+
+    self.mouseOverSlot = nil
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
 -------------------
 -- Global functions
 -------------------
@@ -657,31 +684,11 @@ function ZO_Quickslot_OnInitialize(control)
 end
 
 function ZO_QuickslotControl_OnMouseEnter(control)
-    if(control.animation)
-    then
-        control.animation:PlayForward()
-    end
-
-    if QUICKSLOT_WINDOW.mouseOverSlot ~= control then
-        PlaySound(SOUNDS.QUICKSLOT_MOUSEOVER)
-        QUICKSLOT_WINDOW.mouseOverSlot = control
-    end
-
-    if IsSlotUsed(control.slotNum) then
-        KEYBIND_STRIP:AddKeybindButtonGroup(QUICKSLOT_WINDOW.keybindStripDescriptor)
-    else
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(QUICKSLOT_WINDOW.keybindStripDescriptor)
-    end
+    QUICKSLOT_WINDOW:OnMouseOverQuickSlot(control)
 end
 
 function ZO_QuickslotControl_OnMouseExit(control)
-    if(control.animation)
-    then
-        control.animation:PlayBackward()
-    end
-
-    QUICKSLOT_WINDOW.mouseOverSlot = nil
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(QUICKSLOT_WINDOW.keybindStripDescriptor)
+    QUICKSLOT_WINDOW:OnMouseExitQuickSlot(control)
 end
 
 function ZO_QuickslotControl_OnInitialize(control)

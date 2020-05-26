@@ -52,8 +52,8 @@ local ZO_OptionsPanel_Audio_ControlData =
             },
             onReleasedHandler = function() PlaySound(SOUNDS.VOLUME_DING_MUSIC) end,
             gamepadIsEnabledCallback = function() 
-                return tonumber(GetSetting(SETTING_TYPE_AUDIO, AUDIO_SETTING_MUSIC_ENABLED)) ~= 0
-            end,
+                                            return tonumber(GetSetting(SETTING_TYPE_AUDIO, AUDIO_SETTING_MUSIC_ENABLED)) ~= 0
+                                        end,
         },
         --Options_Audio_SoundEnabled
         [AUDIO_SETTING_SOUND_ENABLED] =
@@ -195,16 +195,26 @@ local ZO_OptionsPanel_Audio_ControlData =
     --Subtitles
     [SETTING_TYPE_SUBTITLES] =
     {
-        --Options_Gameplay_TutorialEnabled
-        [SUBTITLE_SETTING_ENABLED] =
+        --Options_Audio_SubtitlesEnabledForNPCs
+        [SUBTITLE_SETTING_ENABLED_FOR_NPCS] =
         {
             controlType = OPTIONS_CHECKBOX,
             system = SETTING_TYPE_SUBTITLES,
-            settingId = SUBTITLE_SETTING_ENABLED,
+            settingId = SUBTITLE_SETTING_ENABLED_FOR_NPCS,
             panel = SETTING_PANEL_AUDIO,
-            text = SI_INTERFACE_OPTIONS_TOOLTIPS_SUBTITLES_ENABLED,
-            tooltipText = SI_INTERFACE_OPTIONS_TOOLTIPS_SUBTITLES_ENABLED_TOOLTIP,
+            text = SI_AUDIO_OPTIONS_NPC_SUBTITLES_ENABLED,
+            tooltipText = SI_AUDIO_OPTIONS_NPC_SUBTITLES_ENABLED_TOOLTIP,
             exists = ZO_IsIngameUI,
+        },
+        --Options_Audio_SubtitlesEnabledForVideos
+        [SUBTITLE_SETTING_ENABLED_FOR_VIDEOS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_SUBTITLES,
+            settingId = SUBTITLE_SETTING_ENABLED_FOR_VIDEOS,
+            panel = SETTING_PANEL_AUDIO,
+            text = SI_AUDIO_OPTIONS_VIDEO_SUBTITLES_ENABLED,
+            tooltipText = SI_AUDIO_OPTIONS_VIDEO_SUBTITLES_ENABLED_TOOLTIP,
         },
     },
 }

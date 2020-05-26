@@ -36,4 +36,8 @@ function DungeonFinder_Manager:Initialize()
     GAMEPAD_DUNGEON_FINDER_SCENE = DUNGEON_FINDER_GAMEPAD:GetScene()
 end
 
+function DungeonFinder_Manager:GetCategoryData()
+    return categoryData
+end
+
 DUNGEON_FINDER_MANAGER = DungeonFinder_Manager:New()

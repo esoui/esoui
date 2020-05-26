@@ -6,3 +6,25 @@ ZO_RESTYLE_SHEETS_KEYBOARD_FRAGMENT_GROUP =
     ZO_RESTYLE_SHEET_WINDOW_FRAGMENT,
     MINIMIZE_CHAT_FRAGMENT,
 }
+
+HELP_TUTORIALS_KEYBOARD_FRAGMENT_GROUP_BASE =
+{
+    HELP_TUTORIALS_FRAGMENT,
+    RIGHT_BG_FRAGMENT,
+    TITLE_FRAGMENT,
+    TREE_UNDERLAY_FRAGMENT,
+    HELP_WINDOW_SOUNDS,
+}
+
+local helpModalUnderlayFragment = ZO_SimpleSceneFragment:New(HelpOverlayModal)
+helpModalUnderlayFragment:RegisterCallback("StateChange", function(oldState, newState)
+    local wasVisible = oldState ~= SCENE_FRAGMENT_HIDDEN
+    local isVisible = newState ~= SCENE_FRAGMENT_HIDDEN
+    if wasVisible ~= isVisible then
+        HELP_MANAGER:OnOverlayVisibilityChanged(isVisible)
+    end
+end)
+
+HELP_TUTORIALS_OVERLAY_KEYBOARD_FRAGMENT_GROUP = ZO_ShallowTableCopy(HELP_TUTORIALS_KEYBOARD_FRAGMENT_GROUP_BASE)
+table.insert(HELP_TUTORIALS_OVERLAY_KEYBOARD_FRAGMENT_GROUP, helpModalUnderlayFragment)
+table.insert(HELP_TUTORIALS_OVERLAY_KEYBOARD_FRAGMENT_GROUP, ZO_SetTitleFragment:New(SI_HELP_TUTORIALS))

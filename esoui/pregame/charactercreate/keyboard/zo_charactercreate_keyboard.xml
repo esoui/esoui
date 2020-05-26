@@ -80,22 +80,27 @@
 
         <Control name="GenderSelector" resizeToFitDescendents="true" virtual="true" >
             <Controls>
-                <Button name="$(parent)Button" mouseOverBlendMode="ADD" inherits="ZO_RadioButton" clickSound="Click_CC_Selector">
+                <Button name="$(parent)Button" inherits="SelectorButton" hidden="false">
                     <Dimensions x="64" y="64" />
                     <Anchor point="TOP" />
 
-                    <OnClicked>
-                        ZO_CharacterCreateSelectGender(self)
-                    </OnClicked>
+                    <OnInitialized>
+                        self.selectorType = CHARACTER_CREATE_SELECTOR_GENDER
+                    </OnInitialized>
+
+                    <OnMouseEnter>
+                        ZO_CharacterCreateGenderSelector_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_CharacterCreateGenderSelector_OnMouseExit(self)
+                    </OnMouseExit>
                 </Button>
 
                 <Label name="$(parent)Label" inherits="CCLabel" font="ZoFontGameShadow" mouseEnabled="true">
                     <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="5" />
                     <OnMouseUp>
-                        if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
-                            local sibling = GetControl(self:GetParent(), "Button")
-                            sibling:GetHandler("OnClicked")(sibling, button)
-                        end
+                        ZO_CharacterCreateGenderSelectorLabel_OnMouseClicked(self, button, upInside)
                     </OnMouseUp>
                 </Label>
             </Controls>
@@ -134,17 +139,27 @@
             </OnMouseDown>
 
             <OnMouseWheel>
-                MoveCharacterCameraZoomAmount(delta / zo_abs(delta))
+                if delta ~= 0 then
+                    if delta > 0 then
+                        MoveCharacterCameraZoomAmount(1)
+                    else
+                        MoveCharacterCameraZoomAmount(-1)
+                    end
+                end
             </OnMouseWheel>
         </Control>
-        
+
         <TopLevelControl name="ZO_CharacterCreateSkipTutorialDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_CharacterCreateSkipTutorialDialog_Initialize(self)
+            </OnInitialized>
+
             <Controls>
                 <Label name="$(parent)Title" override="true">
                     <Dimensions x="440" />
                 </Label>
                 <Label name="$(parent)Text" inherits="ZO_SmallKeyMarkupLabel ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-                
+
                 <Control name="$(parent)Skip" inherits="ZO_CustomDialogButton" />
                 <Control name="$(parent)Play" inherits="ZO_CustomDialogButton" />
                 <Control name="$(parent)Back" inherits="ZO_CustomDialogButton" />
@@ -315,8 +330,6 @@
                                         normal="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_up.dds"
                                         pressed="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_down.dds"
                                         mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_over.dds"
-                                        disabled="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_up.dds"
-                                        disabledPressed="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_down.dds"
                                     />
                                 </Button>
                             </Controls>
@@ -330,8 +343,6 @@
                                         normal="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_up.dds"
                                         pressed="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_down.dds"
                                         mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_over.dds"
-                                        disabled="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_up.dds"
-                                        disabledPressed="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_down.dds"
                                     />
                                 </Button>
                             </Controls>
@@ -350,6 +361,14 @@
                     <OnClicked>
                         ZO_CharacterCreate_RandomizeAppearance()
                     </OnClicked>
+
+                    <OnMouseEnter>
+                        ZO_CharacterCreate_RandomizeAppearance_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_CharacterCreate_RandomizeAppearance_OnMouseExit(self)
+                    </OnMouseExit>
                 </Button>
 
                 <Button name="$(parent)CreateButton" inherits="ZO_DefaultButton" text="SI_CREATE_CHARACTER_BUTTON" clickSound="Click_CreateButton">

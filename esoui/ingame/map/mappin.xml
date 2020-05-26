@@ -1,0 +1,47 @@
+<GuiXml>
+    <Controls>
+        <!-- Higher tier than ZO_PinBlob from WorlMap.xml since the pin icon should always draw above the area circle -->
+        <Control name="ZO_MapPin" mouseEnabled="true" tier="HIGH" level="10" hidden="true" virtual="true">
+            <Dimensions x="22" y="22" />
+
+            <OnMouseDown>
+                if not ZO_WorldMap_WouldPinHandleClick(self, button, ctrl, alt, shift) then
+                    ZO_WorldMap_MouseDown(button, ctrl, alt, shift)
+                end
+            </OnMouseDown>
+
+            <OnMouseUp>
+                if ZO_WorldMap_WouldPinHandleClick(self, button, ctrl, alt, shift) then
+                    if upInside then
+                        ZO_WorldMap_HandlePinClicked(self, button, ctrl, alt, shift)
+                    end
+                else
+                    ZO_WorldMap_MouseUp(ZO_WorldMapContainer, button, MouseIsOver(ZO_WorldMapScroll))
+                end
+            </OnMouseUp>
+
+            <OnMouseEnter>
+                ZO_WorldMap_HandlePinEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_WorldMap_HandlePinExit()
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Highlight" textureFile="$(MAP_PIN_PATH)UI-WorldMapPinHighlight.dds" pixelRoundingEnabled="false">
+                    <Anchor point="TOPLEFT" offsetX="-5" offsetY="-5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="5" offsetY="5" />
+                </Texture>
+
+                <Texture name="$(parent)Background" pixelRoundingEnabled="false">
+                    <AnchorFill/>
+                </Texture>
+
+                <Label name="$(parent)Label" font="ZoFontGameOutline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="BACKGROUND">
+                    <AnchorFill/>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

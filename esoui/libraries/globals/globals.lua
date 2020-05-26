@@ -4,10 +4,10 @@ CALLBACK_MANAGER = ZO_CallbackObject:New()
 function NormalizePointToControl(x, y, control)
     local left, top, right, bottom = control:GetScreenRect()
     local width, height = right - left, bottom - top
-    
-    if(width == 0) then width = 0.001 end
-    if(height == 0) then height = 0.001 end
-    
+
+    if width == 0 then width = 0.001 end
+    if height == 0 then height = 0.001 end
+
     return (x - left) / width, (y - top) / height
 end
 
@@ -22,7 +22,7 @@ function NormalizeUICanvasPoint(x, y)
 end
 
 local function OnAddOnLoaded(event, name)
-    if(name == "ZO_Common") then
+    if name == "ZO_Common" then
         zo_randomseed(GetSecondsSinceMidnight())
         EVENT_MANAGER:UnregisterForEvent("Globals_Common", EVENT_ADD_ON_LOADED)
     end
@@ -38,16 +38,16 @@ function IgnoreMouseDownEditFocusLoss()
 end
 
 local function OnGlobalMouseDown(event, button)
-    if(g_ignoreMouseDownEditFocusLoss) then
+    if g_ignoreMouseDownEditFocusLoss then
         g_ignoreMouseDownEditFocusLoss = false
         return
     end
 
     --If an edit control is focused and the player clicks off of it, then clear the focus
-    if(button == MOUSE_BUTTON_INDEX_LEFT) then
+    if button == MOUSE_BUTTON_INDEX_LEFT then
         local focusEdit = WINDOW_MANAGER:GetFocusControl()
-        if(focusEdit) then
-            if(not MouseIsOver(focusEdit)) then
+        if focusEdit then
+            if not MouseIsOver(focusEdit) then
                 focusEdit:LoseFocus()
             end
         end
@@ -84,28 +84,15 @@ local function GetAppropriateDimenions()
     if(windowAspectRatio > BG_ASPECT_RATIO) then
         height = width / BG_ASPECT_RATIO
     else
-        width = height * BG_ASPECT_RATIO        
+        width = height * BG_ASPECT_RATIO
     end
 
     return width, height
 end
 
-function ZO_ResizeControlForBestScreenFit(control)    
+function ZO_ResizeControlForBestScreenFit(control)
     local width, height = GetAppropriateDimenions()
     control:SetDimensions(width, height)
-end
-
-function ZO_ReanchorControlForLeftSidePanel(control)
-    local function DoLayout()
-        local screenHeight = GuiRoot:GetHeight()
-        local controlHeight = control:GetHeight()
-        local offsetY = (screenHeight - controlHeight) / 2
-        control:ClearAnchors()
-        control:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, 245, offsetY)
-    end
-
-    control:RegisterForEvent(EVENT_SCREEN_RESIZED, DoLayout)
-    DoLayout()
 end
 
 function ZO_ResizeTextureWidthAndMaintainAspectRatio(texture, width)
@@ -113,10 +100,10 @@ function ZO_ResizeTextureWidthAndMaintainAspectRatio(texture, width)
     if originalX > width then
         local newY = (width / originalX) * originalY
         texture:SetWidth(width)
-        texture:SetHeight(newY)  
+        texture:SetHeight(newY)
     else
         texture:SetWidth(originalX)
-        texture:SetHeight(originalY)  
+        texture:SetHeight(originalY)
     end
 end
 

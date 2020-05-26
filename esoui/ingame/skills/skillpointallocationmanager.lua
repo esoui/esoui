@@ -551,7 +551,7 @@ function ZO_SkillPointAllocationManager:GetSkillPointAllocatorForSkillData(skill
     local allocator = nil
     local allocatorKey = skillData.allocatorKey
     if allocatorKey then
-        allocator = allocatorPool:GetExistingObject(allocatorKey)
+        allocator = allocatorPool:GetActiveObject(allocatorKey)
     end
 
     if not allocator then
@@ -706,7 +706,7 @@ function ZO_SkillPointAllocationManager:GetNumPointsAllocatedInSkillLine(skillLi
     for _, skillData in skillLineData:SkillIterator() do
         local allocatorPool = self:GetAllocatorPool()
         local allocatorKey = skillData.allocatorKey
-        local allocator = allocatorKey and allocatorPool:GetExistingObject(allocatorKey)
+        local allocator = allocatorKey and allocatorPool:GetActiveObject(allocatorKey)
         if allocator then
             numPointsAllocated = numPointsAllocated + allocator:GetNumPointsAllocated()
         else
@@ -728,7 +728,7 @@ function ZO_SkillPointAllocationManager:ClearPointsOnSkillLine(skillLineData, ig
             -- We don't want to make allocators if they don't already exist and we don't need them
             local allocatorPool = self:GetAllocatorPool()
             local allocatorKey = skillData.allocatorKey
-            local allocator = allocatorKey and allocatorPool:GetExistingObject(allocatorKey)
+            local allocator = allocatorKey and allocatorPool:GetActiveObject(allocatorKey)
             if allocator then
                 return allocator:CanClear()
             else

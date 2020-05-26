@@ -143,12 +143,13 @@ do
                 end
 
                 local itemLink = GetRecipeResultItemLink(recipeListIndex, recipeIndex)
-                local quality = GetItemLinkQuality(itemLink)
+                local displayQuality = GetItemLinkDisplayQuality(itemLink)
                 local createSound = recipeListCreateSound
                 if createSound == "" then
                     createSound = DEFAULT_RECIPE_CREATE_SOUND
                 end
-                local recipe = {
+                local recipe =
+                {
                     recipeListName = recipeListName,
                     recipeListIndex = recipeListIndex,
                     recipeIndex = recipeIndex,
@@ -160,7 +161,9 @@ do
                     maxIterationsForIngredients = maxIterationsForIngredients,
                     createSound = createSound,
                     iconFile = resultIcon,
-                    quality = quality,
+                    displayQuality = displayQuality,
+                    -- quality is depricated, included here for addon backwards compatibility
+                    quality = displayQuality,
                     tradeskillsLevelReqs = tradeskillsLevelReqs,
                     name = recipeName,
                     requiredCraftingStationType = requiredCraftingStationType,

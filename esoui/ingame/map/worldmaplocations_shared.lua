@@ -20,7 +20,7 @@ function ZO_MapLocations_Shared:Initialize(control)
     self:BuildLocationList()
 
     local function UpdateForModeChange(modeData)
-        self:SetListDisabled(not ZO_WorldMap_IsMapChangingAllowed())
+        self:SetListDisabled(not WORLD_MAP_MANAGER:IsMapChangingAllowed())
     end
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", UpdateForModeChange)

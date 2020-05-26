@@ -66,7 +66,7 @@ function ZO_MarketListFragment_Keyboard:SetupEntry(rowControl, data)
         rowControl.stackCount:SetHidden(true)
     end
 
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality)
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.displayQuality)
     rowControl.nameControl:SetColor(r, g, b, 1)
 
     rowControl:SetHandler("OnMouseEnter", self.onRowMouseEnter)
@@ -157,25 +157,25 @@ function ZO_MarketListFragment_Keyboard:ShowMarketProducts(marketProducts)
         local productHeader = productInfo.headerName
         if productHeader and lastHeaderName ~= productHeader then
             local headerData =
-                {
-                    headerName = productHeader,
-                    headerColor = productInfo.headerColor,
-                }
+            {
+                headerName = productHeader,
+                headerColor = productInfo.headerColor,
+            }
             table.insert(self.scrollData, ZO_ScrollList_CreateDataEntry(MARKET_LIST_ENTRY_HEADER, headerData))
             lastHeaderName = productHeader
         end
 
         local productId = productInfo.productId
-        local quality = productInfo.quality or ITEM_QUALITY_NORMAL
+        local displayQuality = productInfo.displayQuality or ITEM_DISPLAY_QUALITY_NORMAL
 
         local rowData =
-            {
-                productId = productId,
-                name = GetMarketProductDisplayName(productId),
-                icon = GetMarketProductIcon(productId),
-                stackCount = productInfo.stackCount,
-                quality = quality,
-            }
+        {
+            productId = productId,
+            name = GetMarketProductDisplayName(productId),
+            icon = GetMarketProductIcon(productId),
+            stackCount = productInfo.stackCount,
+            displayQuality = displayQuality,
+        }
         table.insert(self.scrollData, ZO_ScrollList_CreateDataEntry(MARKET_LIST_ENTRY_MARKET_PRODUCT, rowData))
     end
 

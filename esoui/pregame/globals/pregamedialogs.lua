@@ -1022,6 +1022,42 @@ ESO_Dialogs["INELIGIBLE_SERVICE"] =
 
 -- Character Edit Dialogs
 
+ESO_Dialogs["CHARACTER_CREATE_NO_CHANGES_MADE"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_CHARACTER_EDIT_NO_CHANGES_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_CHARACTER_EDIT_NO_CHANGES_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            keybind = "DIALOG_PRIMARY",
+            callback =  function(dialog)
+                            PregameStateManager_SetState(dialog.data.newState)
+                        end,
+        },
+
+        {
+            text = SI_DIALOG_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            callback =  function(dialog)
+                            -- do nothing
+                        end,
+        },
+    }
+}
+
 ESO_Dialogs["CHARACTER_CREATE_CONFIRM_SAVE_CHANGES"] =
 {
     canQueue = true,
@@ -1139,10 +1175,20 @@ ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
     {
         text = SI_CHARACTER_EDIT_SAVE_SUCCESS_BODY,
     },
-    buttons = 
+    buttons =
     {
         {
-            text = function()
+            text = GetString(SI_LOGIN_CHARACTER),
+            keybind = "DIALOG_PRIMARY",
+            visible = function(dialog)
+                return dialog.data.pendingAllianceChange
+            end,
+            callback = function(dialog)
+                PregameStateManager_PlayCharacter(dialog.data.characterId, CHARACTER_OPTION_EXISTING_AREA)
+            end,
+        },
+        {
+            text = function(dialog)
                 if IsInGamepadPreferredMode() then
                     return GetString(SI_RENAME_CHARACTER_BACK_KEYBIND)
                 else
@@ -1150,6 +1196,9 @@ ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
                 end
             end,
             keybind = "DIALOG_NEGATIVE",
+            visible = function(dialog)
+                return not dialog.data.pendingAllianceChange
+            end,
             callback = function(dialog)
                 PregameStateManager_SetState("CharacterSelect_FromIngame")
             end,

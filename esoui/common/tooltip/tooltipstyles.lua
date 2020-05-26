@@ -320,32 +320,37 @@ ZO_TOOLTIP_STYLES =
     qualityTrash =
     {
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
-        fontColorField = ITEM_QUALITY_TRASH,
+        fontColorField = ITEM_DISPLAY_QUALITY_TRASH,
     },
     qualityNormal =
     {
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
-        fontColorField = ITEM_QUALITY_NORMAL,
+        fontColorField = ITEM_DISPLAY_QUALITY_NORMAL,
     },
     qualityMagic =
     {
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
-        fontColorField = ITEM_QUALITY_MAGIC,
+        fontColorField = ITEM_DISPLAY_QUALITY_MAGIC,
     },
     qualityArcane =
     {
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
-        fontColorField = ITEM_QUALITY_ARCANE,
+        fontColorField = ITEM_DISPLAY_QUALITY_ARCANE,
     },
     qualityArtifact =
     {
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
-        fontColorField = ITEM_QUALITY_ARTIFACT,
+        fontColorField = ITEM_DISPLAY_QUALITY_ARTIFACT,
     },
     qualityLegendary =
     {
         fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
-        fontColorField = ITEM_QUALITY_LEGENDARY,
+        fontColorField = ITEM_DISPLAY_QUALITY_LEGENDARY,
+    },
+    mythic =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS,
+        fontColorField = ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE,
     },
     bind = 
     {
@@ -1464,6 +1469,46 @@ ZO_TOOLTIP_STYLES =
         statValuePairSpacing = 10,
         widthPercent = 100,
     },
+
+    -- Antiquity Tooltips
+    antiquityQualityWhite =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS,
+        fontColorField = ANTIQUITY_QUALITY_WHITE,
+    },
+    antiquityQualityGreen =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS,
+        fontColorField = ANTIQUITY_QUALITY_GREEN,
+    },
+    antiquityQualityBlue =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS,
+        fontColorField = ANTIQUITY_QUALITY_BLUE,
+    },
+    antiquityQualityPurple =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS,
+        fontColorField = ANTIQUITY_QUALITY_PURPLE,
+    },
+    antiquityQualityGold =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS,
+        fontColorField = ANTIQUITY_QUALITY_GOLD,
+    },
+    antiquityQualityOrange =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS,
+        fontColorField = ANTIQUITY_QUALITY_ORANGE,
+    },
+    antiquityInfoSection =
+    {
+        customSpacing = 25,
+        childSpacing = 25,
+        widthPercent = 100,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+    },
 }
 
 ZO_GAMEPAD_DYEING_TOOLTIP_STYLES =
@@ -1501,16 +1546,35 @@ local function Style(name)
     return ZO_TOOLTIP_STYLES[name]
 end
 
-local ITEM_QUALITY_TO_STYLE =
-{
-    [ITEM_QUALITY_TRASH] = Style("qualityTrash"),
-    [ITEM_QUALITY_NORMAL] = Style("qualityNormal"),
-    [ITEM_QUALITY_MAGIC] = Style("qualityMagic"),
-    [ITEM_QUALITY_ARCANE] = Style("qualityArcane"),
-    [ITEM_QUALITY_ARTIFACT] = Style("qualityArtifact"),
-    [ITEM_QUALITY_LEGENDARY] = Style("qualityLegendary"),
-}
+do
+    local ITEM_QUALITY_TO_STYLE =
+    {
+        [ITEM_DISPLAY_QUALITY_TRASH] = Style("qualityTrash"),
+        [ITEM_DISPLAY_QUALITY_NORMAL] = Style("qualityNormal"),
+        [ITEM_DISPLAY_QUALITY_MAGIC] = Style("qualityMagic"),
+        [ITEM_DISPLAY_QUALITY_ARCANE] = Style("qualityArcane"),
+        [ITEM_DISPLAY_QUALITY_ARTIFACT] = Style("qualityArtifact"),
+        [ITEM_DISPLAY_QUALITY_LEGENDARY] = Style("qualityLegendary"),
+        [ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE] = Style("mythic"),
+    }
 
-function ZO_TooltipStyles_GetItemQualityStyle(itemQuality)
-    return ITEM_QUALITY_TO_STYLE[itemQuality]
+    function ZO_TooltipStyles_GetItemQualityStyle(itemDisplayQuality)
+        return ITEM_QUALITY_TO_STYLE[itemDisplayQuality]
+    end
+end
+
+do
+    local ANTIQUITY_QUALITY_TO_STYLE =
+    {
+        [ANTIQUITY_QUALITY_WHITE] = Style("antiquityQualityWhite"),
+        [ANTIQUITY_QUALITY_GREEN] = Style("antiquityQualityGreen"),
+        [ANTIQUITY_QUALITY_BLUE] = Style("antiquityQualityBlue"),
+        [ANTIQUITY_QUALITY_PURPLE] = Style("antiquityQualityPurple"),
+        [ANTIQUITY_QUALITY_GOLD] = Style("antiquityQualityGold"),
+        [ANTIQUITY_QUALITY_ORANGE] = Style("antiquityQualityOrange"),
+    }
+
+    function ZO_TooltipStyles_GetAntiquityQualityStyle(antiquityQuality)
+        return ANTIQUITY_QUALITY_TO_STYLE[antiquityQuality]
+    end
 end

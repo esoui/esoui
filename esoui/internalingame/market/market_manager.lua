@@ -111,7 +111,7 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
 end
 
 do
-    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 34, "Update market error flow to handle new purchase result")
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 36, "Update market error flow to handle new purchase result")
     local IS_SIMPLE_MARKET_PURCHASE_ERROR = 
     {
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,
@@ -233,7 +233,7 @@ function Market_Manager:GetFreeTrialProductData()
 end
 
 do
-    local freeTrialColor = GetItemQualityColor(ITEM_QUALITY_LEGENDARY)
+    local freeTrialColor = GetItemQualityColor(ITEM_DISPLAY_QUALITY_LEGENDARY)
     local function UpdateEsoPlusFreeTrialStatusText(productData)
         -- it's possible to end up in a state where there is no active
         -- free trial market product, but the player still is on a free trial

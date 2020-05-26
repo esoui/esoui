@@ -33,9 +33,9 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
         end
     end
 
-    local itemQuality = GetItemQuality(bagId, slotIndex)
-    local itemQualityColor = GetItemQualityColor(itemQuality)
-    local itemName = itemQualityColor:Colorize(GetItemName(bagId, slotIndex))
+    local itemDisplayQuality = GetItemDisplayQuality(bagId, slotIndex)
+    local itemDisplayQualityColor = GetItemQualityColor(itemDisplayQuality)
+    local itemName = itemDisplayQualityColor:Colorize(GetItemName(bagId, slotIndex))
     local traitName = ZO_SELECTED_TEXT:Colorize(GetString("SI_ITEMTRAITTYPE", selectedTrait))
 
     local retraitCost, retraitCurrency, retraitCurrencyLocation = GetItemRetraitCost()

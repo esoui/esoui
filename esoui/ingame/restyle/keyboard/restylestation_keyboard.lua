@@ -374,6 +374,8 @@ function ZO_RestyleStation_Keyboard:ConfirmExit()
             SCENE_MANAGER:ShowBaseScene()
         end
         self.exitDestinationData = nil
+    elseif not MAIN_MENU_MANAGER:HasBlockingSceneNextScene() then
+        SCENE_MANAGER:HideCurrentScene()
     end
 
     MAIN_MENU_MANAGER:ClearBlockingScene(self.onBlockingSceneActivatedCallback)

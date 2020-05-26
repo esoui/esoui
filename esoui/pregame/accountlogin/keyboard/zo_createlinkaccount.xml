@@ -17,8 +17,8 @@
             <Controls>
                 <Control name="$(parent)AccountSetup" resizeToFitDescendents="true">
                     <Dimensions x="500" />
-                    <Anchor point="TOP" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOM" offsetY="-60" />
-                    
+                    <Anchor point="TOP" relativeTo="$(parent)ESOLogo" relativePoint="BOTTOM" offsetY="-40" />
+
                     <Controls>
                         <Label name="$(parent)Header" font="ZoFontWinH2" text="SI_KEYBOARD_ACCOUNTSETUP_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                             <Anchor point="TOPLEFT" />
@@ -256,6 +256,12 @@
                         </Button> 
                     </Controls>
                 </Control>
+
+                <Texture name="$(parent)Background" tier="LOW" layer="BACKGROUND" textureFile="EsoUI/Art/Login/Keyboard/Login_AccountCreate_BG.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AccountSetup" offsetX="-100" offsetY="-80" />
+                    <Dimensions x="670" y="730" />
+                    <TextureCoords left="0" right="0.654" top="0" bottom="0.713"/>
+                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>

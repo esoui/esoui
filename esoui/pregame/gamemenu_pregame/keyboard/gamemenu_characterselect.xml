@@ -4,6 +4,42 @@
             <OnInitialized>
                 ZO_GameMenu_CharacterSelect_Initialize(self)
             </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ESOPlus" tier="HIGH" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetY="-465" />
+
+                    <Controls>
+                        <Button name="$(parent)Button" mouseOverBlendMode="ADD">
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Dimensions x="256" y="48" />
+                            <TextureCoords left="0" right="1" top="0" bottom="0.75" />
+                            <Textures
+                                normal="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_ESOPlus_ButtonBanner_Normal.dds"
+                                pressed="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_ESOPlus_ButtonBanner_mouseDown.dds"
+                                mouseOver="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_ESOPlus_ButtonBanner_mouseOver.dds"
+                                disabled="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_ESOPlus_ButtonBanner_Disabled.dds"
+                                />
+
+                            <OnMouseUp>
+                                ZO_ShowBuySubscriptionPlatformDialog()
+                            </OnMouseUp>
+
+                            <Controls>
+                                <Label name="$(parent)ButtonText" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="LEFT" verticalAlignment="CENTER" text="SI_ESO_PLUS_JOIN_TEXT">
+                                    <Anchor point="LEFT" offsetX="40" />
+                                </Label>
+                            </Controls>
+                        </Button>
+
+                        <Texture name="$(parent)Chalice" layer="OVERLAY" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_ESOPlus_Chalice.dds">
+                            <Anchor point="LEFT" relativeTo="$(parent)Button" relativePoint="RIGHT" offsetX="-55" />
+                            <Dimensions x="80" y="100" />
+                            <TextureCoords left="0" right="0.625" top="0" bottom="0.78125" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

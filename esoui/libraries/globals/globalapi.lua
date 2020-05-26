@@ -110,6 +110,15 @@ function zo_roundToZero(value)
     end
 end
 
+function zo_roundToEven(value)
+    local floorvalue = zo_floor(value)
+    if floorvalue % 2 == 0 then
+        return floorvalue
+    else
+        return floorvalue + 1
+    end
+end
+
 function zo_roundToNearest(value, nearest)
     if nearest == 0 then
         return value
@@ -209,6 +218,9 @@ function zo_callLater(func, ms)
     return id
 end
 
+function zo_removeCallLater(id)
+    EVENT_MANAGER:UnregisterForUpdate("CallLaterFunction"..id)
+end
 
 do
     local workingTable = {}
@@ -251,9 +263,48 @@ function zo_getSafeId64Key(id)
     return Id64ToString(id)
 end
 
+function zo_distance(x1, y1, x2, y2)
+    local diffX = x1 - x2
+    local diffY = y1 - y2
+    return zo_sqrt(diffX * diffX + diffY * diffY)
+end
+
 function zo_distance3D(x1, y1, z1, x2, y2, z2)
     local diffX = x1 - x2
     local diffY = y1 - y2
     local diffZ = z1 - z2
     return zo_sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ)
+end
+
+function zo_normalize(value, min, max)
+    return (value - min) / (max - min)
+end
+
+-- Rotate 2D coordinates about the origin by the specified angle.
+function ZO_Rotate2D(angle, x, y)
+    local cosine = math.cos(angle)
+    local sine = math.sin(angle)
+    return x * cosine - y * sine, y * cosine + x * sine
+end
+
+function ZO_ScaleAndRotateTextureCoords(control, angle, originX, originY, scaleX, scaleY)
+    -- protect against 1 / 0
+    if scaleX == 0 then
+        scaleX = 0.0001
+    end
+    if scaleY == 0 then
+        scaleY = 0.0001
+    end
+
+    local scaleCoefficientX, scaleCoefficientY = 1 / scaleX, 1 / scaleY
+
+    local topLeftX, topLeftY = ZO_Rotate2D(angle, -0.5 * scaleCoefficientX, -0.5 * scaleCoefficientY)
+    local topRightX, topRightY = ZO_Rotate2D(angle,  0.5 * scaleCoefficientX, -0.5 * scaleCoefficientY)
+    local bottomLeftX, bottomLeftY = ZO_Rotate2D(angle, -0.5 * scaleCoefficientX,  0.5 * scaleCoefficientY)
+    local bottomRightX, bottomRightY = ZO_Rotate2D(angle,  0.5 * scaleCoefficientX,  0.5 * scaleCoefficientY)
+
+    control:SetVertexUV(VERTEX_POINTS_TOPLEFT, originX + topLeftX, originY + topLeftY)
+    control:SetVertexUV(VERTEX_POINTS_TOPRIGHT, originX + topRightX, originY + topRightY)
+    control:SetVertexUV(VERTEX_POINTS_BOTTOMLEFT, originX + bottomLeftX, originY + bottomLeftY)
+    control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, originX + bottomRightX, originY + bottomRightY)
 end

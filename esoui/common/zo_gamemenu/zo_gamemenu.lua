@@ -1,14 +1,18 @@
-local outsideEntries = {}
+---------------------------
+-- ZO_GameMenu_Base
+--
+-- Base Game Menu for structuring a keyboard tree menu like settings
+---------------------------
 
-ZO_GameMenuManager = ZO_Object:Subclass()
+ZO_GameMenu_Base = ZO_Object:Subclass()
 
-function ZO_GameMenuManager:New(...)
-    local gameMenu = ZO_Object.New(self)
-    gameMenu:Initialize(...)
-    return gameMenu
+function ZO_GameMenu_Base:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
-function ZO_GameMenuManager:Initialize(control)
+function ZO_GameMenu_Base:Initialize(control)
     self.control = control
     control.owner = self
 
@@ -16,7 +20,7 @@ function ZO_GameMenuManager:Initialize(control)
     self.headerControls = {}
 end
 
-function ZO_GameMenuManager:InitializeTree()
+function ZO_GameMenu_Base:InitializeTree()
     self.navigationTree = ZO_Tree:New(GetControl(self.control, "NavigationContainerScrollChild"), 30, 8, 285)
 
     local function BaseTreeHeaderSetup(node, control, data, open)
@@ -62,7 +66,7 @@ function ZO_GameMenuManager:InitializeTree()
     self.navigationTree:AddTemplate("ZO_GameMenu_LabelHeader", TreeHeaderSetup_Child, nil, nil, nil, 5)
     self.navigationTree:AddTemplate("ZO_GameMenu_ChildlessHeader", TreeHeaderSetup_Childless)
     self.navigationTree:AddTemplate("ZO_GameMenu_ChildlessHeader_WithSelectedState", TreeHeaderSetup_Childless, TreeEntryOnSelected)
-    self.navigationTree:AddTemplate("ZO_GameMenu_SubCategory", TreeEntrySetup, TreeEntryOnSelected)
+    self.navigationTree:AddTemplate("ZO_GameMenu_Subcategory", TreeEntrySetup, TreeEntryOnSelected)
 
     self.navigationTree:SetExclusive(true)
     self.navigationTree:SetOpenAnimation("ZO_TreeOpenAnimation")
@@ -70,7 +74,11 @@ function ZO_GameMenuManager:InitializeTree()
     self.navigationTree:Reset()
 end
 
-function ZO_GameMenuManager:SubmitLists(...)
+function ZO_GameMenu_Base:GetControl()
+    return self.control
+end
+
+function ZO_GameMenu_Base:SubmitLists(...)
     self.navigationTree:Reset()
     self.headerControls = {}
 
@@ -81,7 +89,7 @@ function ZO_GameMenuManager:SubmitLists(...)
         end
     end
 
-    for i, entry in ipairs(outsideEntries) do
+    for i, entry in ipairs(ZO_GameMenuManager_GetSubcategoriesEntries()) do
         local visible = entry.visible == nil or entry.visible
         if type(visible) == "function" then
             visible = visible()
@@ -95,7 +103,7 @@ function ZO_GameMenuManager:SubmitLists(...)
     self:RefreshNewStates()
 end
 
-function ZO_GameMenuManager:AddEntry(data)
+function ZO_GameMenu_Base:AddEntry(data)
     if data.categoryName then
         -- It's not a header...add the header if needed
         local parent
@@ -108,7 +116,7 @@ function ZO_GameMenuManager:AddEntry(data)
 
         -- Then add the child
         if parent then
-            self.navigationTree:AddNode("ZO_GameMenu_SubCategory", data, parent)
+            self.navigationTree:AddNode("ZO_GameMenu_Subcategory", data, parent)
         end
     else
         -- It's a header...determine what type
@@ -149,7 +157,7 @@ do
         end
     end
 
-    function ZO_GameMenuManager:RefreshNewStates()
+    function ZO_GameMenu_Base:RefreshNewStates()
         self.navigationTree:ExecuteOnSubTree(nil, RefreshNewStates)
     end
 end
@@ -172,18 +180,8 @@ function ZO_GameMenu_OnHide(control)
     end
 end
 
-function ZO_GameMenu_AddSettingPanel(data)
-    data.categoryName = GetString(SI_GAME_MENU_SETTINGS)
-    table.insert(outsideEntries, data)
-end
-
-function ZO_GameMenu_AddControlsPanel(data)
-    data.categoryName = GetString(SI_GAME_MENU_CONTROLS)
-    table.insert(outsideEntries, data)
-end
-
 function ZO_GameMenu_Initialize(control, onShowFunction, onHideFunction)
-    local gameMenu = ZO_GameMenuManager:New(control)
+    local gameMenu = ZO_GameMenu_Base:New(control)
     control.OnShow = onShowFunction
     control.OnHide = onHideFunction
     control.gameMenu = gameMenu

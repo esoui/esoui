@@ -195,6 +195,11 @@ ZO_CATEGORY_LAYOUT_INFO =
         pressed = "EsoUI/Art/MainMenu/menuBar_journal_down.dds",
         disabled = "EsoUI/Art/MainMenu/menuBar_journal_disabled.dds",
         highlight = "EsoUI/Art/MainMenu/menuBar_journal_over.dds",
+        indicators = function()
+            if ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead() then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
+        end,
     },
     [MENU_CATEGORY_COLLECTIONS] =
     {
@@ -376,6 +381,8 @@ function MainMenu_Keyboard:Initialize(control)
                 if nextSceneData.sceneGroup then
                     nextSceneData.sceneGroup:SetActiveScene(nextSceneData.sceneName)
                     self:Update(nextSceneData.category, nextSceneData.sceneName)
+                elseif nextSceneData.sceneName then
+                    self:ToggleScene(nextSceneData.sceneName)
                 elseif nextSceneData.category then
                     self:ToggleCategory(nextSceneData.category)
                 end

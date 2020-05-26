@@ -226,7 +226,14 @@ function ZO_ChatSystem:InitializeEventManagement()
     local function OnNumOnlineFriendsChanged(numOnline)
         self:SetNumOnlineFriends(numOnline)
     end
+
+    local function OnChatChannelUpdated()
+        local channelData, channelTarget = CHAT_ROUTER:GetCurrentChannelData()
+        self:SetChannel(channelData.id, channelTarget)
+    end
+
     CALLBACK_MANAGER:RegisterCallback("NumOnlineFriendsChanged", OnNumOnlineFriendsChanged)
+    CALLBACK_MANAGER:RegisterCallback("OnChatChannelUpdated", OnChatChannelUpdated)
     self:SetNumOnlineFriends(FRIENDS_LIST_MANAGER:GetNumOnline())
 end
 

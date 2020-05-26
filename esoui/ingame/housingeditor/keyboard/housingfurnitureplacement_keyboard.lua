@@ -53,16 +53,33 @@ function ZO_HousingFurniturePlacement_Keyboard:OnSearchTextChanged(editBox)
 end
 
 function ZO_HousingFurniturePlacement_Keyboard:AddListDataTypes()
+
+    local function IsFurnitureCollectibleBlacklisted(collectibleId)
+        if collectibleId then
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            return collectibleData and collectibleData:IsBlacklisted()
+        end
+        return false
+    end
+
     self.PlaceableFurnitureOnMouseClickCallback = function(control, buttonIndex, upInside)
         if buttonIndex == MOUSE_BUTTON_INDEX_LEFT and upInside then
-            ZO_ScrollList_MouseClick(self:GetList(), control)
+            if control.furnitureObject and IsFurnitureCollectibleBlacklisted(control.furnitureObject.collectibleId) then
+                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, HOUSING_REQUEST_RESULT_BLOCKED_BY_BLACKLISTED_COLLECTIBLE)
+            else
+                ZO_ScrollList_MouseClick(self:GetList(), control)
+            end
         end
     end
 
     self.PlaceableFurnitureOnMouseDoubleClickCallback = function(control, buttonIndex)
         if buttonIndex == MOUSE_BUTTON_INDEX_LEFT then
-            local data = ZO_ScrollList_GetData(control)
-            self:SelectForPlacement(data)
+            if control.furnitureObject and IsFurnitureCollectibleBlacklisted(control.furnitureObject.collectibleId) then
+                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, HOUSING_REQUEST_RESULT_BLOCKED_BY_BLACKLISTED_COLLECTIBLE)
+            else
+                local data = ZO_ScrollList_GetData(control)
+                self:SelectForPlacement(data)
+            end
         end
     end
 

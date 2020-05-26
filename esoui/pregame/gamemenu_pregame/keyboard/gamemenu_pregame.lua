@@ -1,100 +1,145 @@
-local GAME_MENU_PREGAME
-local g_pregameMenuControl
+-----------------
 
-local gameEntries = {}
 
--- Play
+ZO_GameMenu_PreGame_Keyboard = ZO_Object:Subclass()
 
-local function ShowLogin()
-    LOGIN_MANAGER_KEYBOARD:ShowRelevantLoginFragment()
-    SCENE_MANAGER:AddFragment(LOGIN_BG_FRAGMENT)
+function ZO_GameMenu_PreGame_Keyboard:New(...)
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
-local function HideLogin()
-    LOGIN_MANAGER_KEYBOARD:HideShowingLoginFragment()
-end
+function ZO_GameMenu_PreGame_Keyboard:Initialize(control)
+    self.control = control
 
-local function AddPlayEntry(entryTable)
-    local data = {name = GetString(SI_GAME_MENU_PLAY), callback = ShowLogin, unselectedCallback = HideLogin, hasSelectedState = true}
-    table.insert(entryTable, data)
-end
+    local horizontalMenuControl = control:GetNamedChild("HorizontalMenu")
+    self.horizontalMenu = ZO_Horizontal_Menu:New(horizontalMenuControl, ZO_HORIZONAL_MENU_ALIGN_LEFT)
 
--- Server Select
+    self.gameMenuPregameFragment = ZO_FadeSceneFragment:New(self.control)
+    self.scene = ZO_Scene:New("gameMenuPregame", SCENE_MANAGER)
+    self.scene:AddFragment(self.gameMenuPregameFragment)
+    self.scene:AddFragment(PREGAME_BACKGROUND_FRAGMENT)
+    self.scene:AddFragment(LOGIN_BG_FRAGMENT)
+    local loginFragment = LOGIN_MANAGER_KEYBOARD:GetRelevantLoginFragment()
+    self.scene:AddFragment(loginFragment)
 
-local function ShowServerSelect()
-    --Makes sure the login stuff is in the background when selecting your server.
-    ShowLogin()
-    ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", { onSelectedCallback = ZO_GameMenu_PreGame_Reset })
-end
+    local function OnHorizontalMenuItemSetup(menuControl, data)
+        local name = data.name
+        if type(data.name) == "function" then
+            name = data.name()
+        end
 
-local function AddServerEntry(entryTable)
-    local currentServer = GetCVar("LastPlatform")
-
-    currentServer = ZO_GetLocalizedServerName(currentServer)
-
-    local data = {name = zo_strformat(SI_GAME_MENU_SERVER, currentServer), callback = ShowServerSelect, hasSelectedState = true}
-    table.insert(entryTable, data)
-end
-
--- Settings
-
-local function AddSettingsEntries(entryTable)
-    local settingsHeaderData = {name = GetString(SI_GAME_MENU_SETTINGS)}
-    table.insert(entryTable, settingsHeaderData)
-end
-
--- Credits
-
-local function ShowCredits()
-    g_pregameMenuControl:SetHidden(true)
-    SCENE_MANAGER:AddFragment(GAME_CREDITS_FRAGMENT)
-    SCENE_MANAGER:RemoveFragment(LOGIN_BG_FRAGMENT)
-end
-
-local function AddCreditsEntry(entryTable)
-    local data = {name = GetString(SI_GAME_MENU_CREDITS), callback = ShowCredits, unselectedCallback = nil, hasSelectedState = true}
-    table.insert(entryTable, data)
-end
-
--- Quit
-
-local function AddQuitEntry(entryTable)
-    local data = {name = GetString(SI_GAME_MENU_QUIT), callback = PregameQuit, hasSelectedState = true}
-    table.insert(entryTable, data)
-end
-
--- Setup
-
-local function RebuildTree(gameMenu)
-    gameEntries = {}
-    AddPlayEntry(gameEntries)
-    if DoesPlatformSelectServer() then
-        AddServerEntry(gameEntries)
+        menuControl:SetText(name)
     end
-    AddSettingsEntries(gameEntries)
-    AddCreditsEntry(gameEntries)
-    AddQuitEntry(gameEntries)
-    gameMenu:SubmitLists(gameEntries)
-    SCENE_MANAGER:AddFragment(LOGIN_BG_FRAGMENT)
+
+    local HORIZONTAL_SPACING = 30
+    self.horizontalMenu:AddTemplate("ZO_HorizontalMenu_LabelHeader", OnHorizontalMenuItemSetup, HORIZONTAL_SPACING)
+
+    self:BuildMenu()
+
+    -- Quit Option
+    local quitOption = self.control:GetNamedChild("Quit")
+    local data =
+    {
+        name = GetString(SI_GAME_MENU_QUIT),
+        onSelectedCallback = PregameQuit,
+    }
+    quitOption.data = data
+    OnHorizontalMenuItemSetup(quitOption, data)
 end
 
-local function OnShow(gameMenu)    
-    RebuildTree(gameMenu)
+function ZO_GameMenu_PreGame_Keyboard:BuildMenu()
+    self.horizontalMenu:Reset()
+
+    -- Server Menu Option
+    local function OnHideServerSelect()
+        self.horizontalMenu:Refresh()
+    end
+
+    local function OnShowServerSelect(control)
+        ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", { onSelectedCallback = OnHideServerSelect })
+    end
+
+    local function GetServerSelectButtonName()
+        if DoesPlatformSelectServer() then
+            local currentServer = GetCVar("LastPlatform")
+            currentServer = ZO_GetLocalizedServerName(currentServer)
+            return zo_strformat(SI_GAME_MENU_SERVER, currentServer)
+        end
+        return ""
+    end
+
+     if DoesPlatformSelectServer() then
+        local function GetServerMenuItemName()
+            local currentServer = GetCVar("LastPlatform")
+            currentServer = ZO_GetLocalizedServerName(currentServer)
+            return zo_strformat(SI_GAME_MENU_SERVER, currentServer)
+        end
+        self.serverSelectControl = self.horizontalMenu:AddMenuItem("ServerSelect", GetServerMenuItemName, OnShowServerSelect, OnHideServerSelect)
+    end
+
+    -- Settings Menu Option
+    local function OnShowSettings(control)
+        PREGAME_SETTINGS_KEYBOARD:SetOnExitCallback(control.data.onUnselectedCallback)
+        self.scene:AddFragment(SETTINGS_FRAGMENT)
+        self.scene:RemoveFragment(self.gameMenuPregameFragment)
+        self.scene:RemoveFragment(LOGIN_BG_FRAGMENT)
+        local loginFragment = LOGIN_MANAGER_KEYBOARD:GetRelevantLoginFragment()
+        self.scene:RemoveFragment(loginFragment)
+    end
+        
+    local function OnHideSettings()
+        self.control:SetHidden(false)
+        self.scene:RemoveFragment(SETTINGS_FRAGMENT)
+        self.scene:AddFragment(self.gameMenuPregameFragment)
+        self.scene:AddFragment(LOGIN_BG_FRAGMENT)
+        local loginFragment = LOGIN_MANAGER_KEYBOARD:GetRelevantLoginFragment()
+        self.scene:AddFragment(loginFragment)
+    end
+    self.horizontalMenu:AddMenuItem("Settings", GetString(SI_GAME_MENU_SETTINGS), OnShowSettings, OnHideSettings)
+
+    -- Credits Menu Option
+    local function OnShowCredits(control)
+        self.control:SetHidden(true)
+        GAME_CREDITS_KEYBOARD:SetOnExitCallback(control.data.onUnselectedCallback)
+        self.scene:AddFragment(GAME_CREDITS_FRAGMENT)
+        self.scene:RemoveFragment(LOGIN_BG_FRAGMENT)
+        local loginFragment = LOGIN_MANAGER_KEYBOARD:GetRelevantLoginFragment()
+        self.scene:RemoveFragment(loginFragment)
+    end
+
+    local function OnHideCredits()
+        self.control:SetHidden(false)
+        self.scene:RemoveFragment(GAME_CREDITS_FRAGMENT)
+        self.scene:AddFragment(LOGIN_BG_FRAGMENT)
+        local loginFragment = LOGIN_MANAGER_KEYBOARD:GetRelevantLoginFragment()
+        self.scene:AddFragment(loginFragment)
+    end
+    self.horizontalMenu:AddMenuItem("Credits", GetString(SI_GAME_MENU_CREDITS), OnShowCredits, OnHideCredits)
+
+    -- Version Menu Option
+    local function OnMouseEnterVersion(label)
+        ZO_SelectableLabel_OnMouseEnter(label)
+        InitializeTooltip(InformationTooltip, label, TOPLEFT, 0, -10, BOTTOMLEFT)
+        SetTooltipText(InformationTooltip, zo_strformat(SI_VERSION, GetESOFullVersionString()))
+    end
+
+    local function OnMouseExitVersion(label)
+        ZO_SelectableLabel_OnMouseExit(label)
+        ClearTooltip(InformationTooltip)
+    end
+
+    local NO_ACTIVATE_FUNCTION = nil
+    local NO_DEACTIVATE_FUNCTION = nil
+    self.horizontalMenu:AddMenuItem("Version", GetString(SI_VERSION_MENU_ENTRY), NO_ACTIVATE_FUNCTION, NO_DEACTIVATE_FUNCTION, OnMouseEnterVersion, OnMouseExitVersion)
 end
 
-function ZO_GameMenu_PreGame_Reset()
-    g_pregameMenuControl:SetHidden(false)
-    SCENE_MANAGER:Show("gameMenuPregame")
-    RebuildTree(GAME_MENU_PREGAME)
-    --ZO_Login_BeginSlideShow()
+function ZO_GameMenu_PreGame_Keyboard:IsLoginSceneShowing()
+    return not self.control:IsHidden()
 end
+
+--Global XML
 
 function ZO_GameMenu_PreGame_Initialize(self)
-    g_pregameMenuControl = self
-    GAME_MENU_PREGAME = ZO_GameMenu_Initialize(self, OnShow)
-
-    local gameMenuPregameFragment = ZO_FadeSceneFragment:New(self)
-    GAME_MENU_PREGAME_SCENE = ZO_Scene:New("gameMenuPregame", SCENE_MANAGER)
-    GAME_MENU_PREGAME_SCENE:AddFragment(gameMenuPregameFragment)
-    GAME_MENU_PREGAME_SCENE:AddFragment(PREGAME_SLIDE_SHOW_FRAGMENT)
+    GAME_MENU_PREGAME_KEYBOARD = ZO_GameMenu_PreGame_Keyboard:New(self)
 end

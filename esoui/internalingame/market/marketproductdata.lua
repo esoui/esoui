@@ -88,12 +88,12 @@ function ZO_MarketProductData:GetStackCount()
     return GetMarketProductStackCount(self.marketProductId)
 end
 
-function ZO_MarketProductData:GetQuality()
-    return GetMarketProductQuality(self.marketProductId)
+function ZO_MarketProductData:GetDisplayQuality()
+    return GetMarketProductDisplayQuality(self.marketProductId)
 end
 
 function ZO_MarketProductData:GetColorizedDisplayName()
-    local color = GetItemQualityColor(self:GetQuality())
+    local color = GetItemQualityColor(self:GetDisplayQuality())
     return color:Colorize(self:GetDisplayName())
 end
 

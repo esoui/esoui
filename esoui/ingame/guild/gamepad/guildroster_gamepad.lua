@@ -25,13 +25,14 @@ function ZO_GamepadGuildRosterManager:Initialize(control)
 
     self:SetupSort(GUILD_ROSTER_ENTRY_SORT_KEYS, "status", ZO_SORT_ORDER_UP)
 
-    local function OnGuildMemberNoteChanged(eventId, guildId, displayName, note)
-        if GUILD_ROSTER_MANAGER:MatchesGuild(guildId) then 
+    local function OnGuildMemberInfoChanged(eventId, guildId, displayName, note)
+        if GUILD_ROSTER_GAMEPAD.listFragment:IsShowing() and GUILD_ROSTER_MANAGER:MatchesGuild(guildId) then
             self:RefreshTooltip()
         end
     end
 
-    control:RegisterForEvent(EVENT_GUILD_MEMBER_NOTE_CHANGED, OnGuildMemberNoteChanged)
+    control:RegisterForEvent(EVENT_GUILD_MEMBER_NOTE_CHANGED, OnGuildMemberInfoChanged)
+    control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberInfoChanged)
 
     self:InitializeConfirmRemoveDialog()
     self:InitializeSetRankDialog()

@@ -47,13 +47,16 @@ function AttemptToFireCharacterConstructionReady()
     end
 end
 
-local AttemptToPlayIntroCinematic
-do
-    function AttemptToPlayIntroCinematic()
-        SetVideoCancelAllOnCancelAny(true)
-        local videoDataId = GetOpeningCinematicVideoDataId()
-        ZO_PlayVideoAndAdvance(PlayVideoById, videoDataId, QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
-    end
+local function PlayIntroCinematicAndAdvance()
+    SetVideoCancelAllOnCancelAny(true)
+    local videoDataId = GetOpeningCinematicVideoDataId()
+    ZO_PlayVideoAndAdvance(PlayVideoById, videoDataId, QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
+end
+
+function ZO_PlayIntroCinematicAndReturn()
+    SetVideoCancelAllOnCancelAny(true)
+    local videoDataId = GetOpeningCinematicVideoDataId()
+    ZO_PlayVideoAndReturn(PlayVideoById, videoDataId, QUEUE_VIDEO, VIDEO_SKIP_MODE_REQUIRE_CONFIRMATION_FOR_SKIP)
 end
 
 local g_sharedPregameStates =
@@ -69,44 +72,6 @@ local g_sharedPregameStates =
         end
     },
 
-    ["CharacterSelect_PlayCinematic"] =
-    {
-        ShouldAdvance = function()
-            return false
-        end,
-
-        OnEnter = function()
-            if not ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING then
-                AttemptToPlayIntroCinematic()
-                ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = true
-                if IsInGamepadPreferredMode() then
-                    --Stops extra button presses from modifying the options scene, like restoring options defaults or logging out
-                    GAMEPAD_OPTIONS:SetGamepadOptionsInputBlocked(true);
-                end
-            end
-        end,
-
-        GetStateTransitionData = function()
-            return "CharacterSelect_FromCinematic"
-        end,
-
-        OnExit = function()
-        end,
-    },
-
-    ["CharacterSelect_FromCinematic"] =
-    {
-        OnEnter = function()
-            ZO_PREGAME_IS_CHARACTER_SELECT_CINEMATIC_PLAYING = false
-            if IsInGamepadPreferredMode() then
-                GAMEPAD_OPTIONS:SetGamepadOptionsInputBlocked(false)
-            end
-        end,
-
-        OnExit = function()
-        end
-    },
-
     ["PlayChapterOpeningCinematic"] =
     {
         ShouldAdvance = function()
@@ -114,7 +79,7 @@ local g_sharedPregameStates =
         end,
 
         OnEnter = function()
-            AttemptToPlayIntroCinematic()
+            PlayIntroCinematicAndAdvance()
             SCENE_MANAGER:ShowBaseScene()
         end,
 
@@ -496,6 +461,7 @@ function PregameStateManager_SetState(stateName, ...)
         end
     end
 
+    WriteToInterfaceLog(string.format("PregameStateManager_SetState - from: %s, to: %s", tostring(g_previousState), tostring(g_currentStateName)))
     g_currentStateData = newPregameState
     newPregameState.OnEnter(select(2, unpack(stateArgs)))
     CALLBACK_MANAGER:FireCallbacks("OnPregameEnterState", g_currentStateName)
@@ -701,8 +667,8 @@ end
 do
     local g_currentVideoPregameState = nil
     local function OnVideoPlaybackComplete()
-        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE)
-        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR)
+        EVENT_MANAGER:UnregisterForEvent("ZO_PlayVideoAndAdvance", EVENT_VIDEO_PLAYBACK_COMPLETE)
+        EVENT_MANAGER:UnregisterForEvent("ZO_PlayVideoAndAdvance", EVENT_VIDEO_PLAYBACK_ERROR)
 
         if not ZO_PREGAME_HAD_GLOBAL_ERROR then
             PregameStateManager_AdvanceStateFromState(g_currentVideoPregameState)
@@ -710,12 +676,30 @@ do
     end
 
     function ZO_PlayVideoAndAdvance(playVideoFunction, ...)
-        if playVideoFunction then
-            g_currentVideoPregameState = PregameStateManager_GetCurrentState()
-            EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
-            EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
-            playVideoFunction(...)
+        g_currentVideoPregameState = PregameStateManager_GetCurrentState()
+        EVENT_MANAGER:RegisterForEvent("ZO_PlayVideoAndAdvance", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
+        EVENT_MANAGER:RegisterForEvent("ZO_PlayVideoAndAdvance", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
+        playVideoFunction(...)
+    end
+end
+
+do
+    local g_wasVideoStartedInGamepadPreferredMode = false
+    local function OnVideoPlaybackComplete()
+        EVENT_MANAGER:UnregisterForEvent("ZO_PlayVideoAndReturn", EVENT_VIDEO_PLAYBACK_COMPLETE)
+        EVENT_MANAGER:UnregisterForEvent("ZO_PlayVideoAndReturn", EVENT_VIDEO_PLAYBACK_ERROR)
+
+        if g_wasVideoStartedInGamepadPreferredMode ~= IsInGamepadPreferredMode() then
+            -- The gamepad preferred mode changed event is supressed during while the video is playing, let's bring it back now
+            ZO_Pregame_OnGamepadPreferredModeChanged()
         end
+    end
+
+    function ZO_PlayVideoAndReturn(playVideoFunction, ...)
+        g_wasVideoStartedInGamepadPreferredMode = IsInGamepadPreferredMode()
+        EVENT_MANAGER:RegisterForEvent("ZO_PlayVideoAndReturn", EVENT_VIDEO_PLAYBACK_COMPLETE, OnVideoPlaybackComplete)
+        EVENT_MANAGER:RegisterForEvent("ZO_PlayVideoAndReturn", EVENT_VIDEO_PLAYBACK_ERROR, OnVideoPlaybackComplete)
+        playVideoFunction(...)
     end
 end
 
@@ -728,21 +712,69 @@ local function OnDisplayNameReady()
     shouldTryToShowChapterInterstitial = true
 end
 
+function ZO_Pregame_DisplayServerDisconnectedError()
+    if not IsErrorQueuedFromIngame() then
+        return
+    end
+
+    local logoutError, globalErrorCode = GetErrorQueuedFromIngame()
+
+    ZO_PREGAME_HAD_GLOBAL_ERROR = true
+
+    local errorString
+    local errorStringFormat
+
+    if logoutError ~= LOGOUT_ERROR_NO_ERROR and logoutError ~= LOGOUT_ERROR_UNKNOWN_ERROR then
+        errorStringFormat = GetString("SI_LOGOUTERROR", logoutError)
+
+        if errorStringFormat ~= ""  then
+            errorString = zo_strformat(errorStringFormat, GetGameURL())
+        end
+    elseif globalErrorCode ~= GLOBAL_ERROR_CODE_NO_ERROR then
+        -- if the error code is not in LogoutReason then it is probably in the GlobalErrorCode enum
+        errorStringFormat = GetString("SI_GLOBALERRORCODE", globalErrorCode)
+
+        if errorStringFormat ~= ""  then
+            errorString = zo_strformat(errorStringFormat, globalErrorCode)
+        end
+    end
+
+    if errorString == nil or errorString == "" then
+        if IsInGamepadPreferredMode() then
+            errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
+        else
+            errorString = GetString(SI_UNKNOWN_ERROR)
+        end
+    end
+
+    if IsInGamepadPreferredMode() then
+        PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(nil, errorString)
+    else
+        PregameStateManager_ReenterLoginState()
+
+        ZO_Dialogs_ShowDialog("HANDLE_ERROR", nil, {mainTextParams = {errorString}})
+    end
+end
+
 local function OnDisconnectedFromServer()
     local FORCE = true
     ZO_Dialogs_ReleaseAllDialogs(FORCE)
 
-    if IsInGamepadPreferredMode() then
-        ZO_Gamepad_DisplayServerDisconnectedError()
-    else
-        ZO_Keyboard_DisplayServerDisconnectedError()
-    end
+    ZO_Pregame_DisplayServerDisconnectedError()
 
     local NUM_FLASHES_BEFORE_SOLID = 7
     FlashTaskbarWindow("DISCONNECTED", NUM_FLASHES_BEFORE_SOLID)
 end
 
-local function OnGamepadPreferredModeChanged()
+local IS_WORLD_SELECT_STATE = ZO_CreateSetFromArguments("WorldSelect_Requested", "WorldSelect_ShowList", "WorldSelect")
+
+function ZO_Pregame_OnGamepadPreferredModeChanged()
+    local currentState = PregameStateManager_GetCurrentState()
+    if currentState == nil then
+        -- The initial state has not been set up yet, let's wait for that
+        return
+    end
+
     if IsAnyVideoPlaying() then
         -- Allow the video to finish. All states that play a video should be
         -- able to be used in either keyboard or gamepad flows, to properly
@@ -753,8 +785,15 @@ local function OnGamepadPreferredModeChanged()
     local FORCE_CLOSE = true
     ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
 
-    if not IsAccountLoggedIn() then
+    if not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[currentState] then -- While in world select, we're logged in but haven't yet started the character loading process
         PregameStateManager_SetState("AccountLoginEntryPoint")
+
+        -- Once the previous gamma adjust state has been exited. Reset the check that it was set and set the state back to adjust gamma
+        if currentState == "GammaAdjust" then
+            SetCVar("PregameGammaCheckEnabled", "true")
+            PregameStateManager_SetState("GammaAdjust")
+            GAMMA_SCENE_FRAGMENT:ClearUnsavedValue()
+        end
     elseif not IsPregameCharacterConstructionReady() then
         PregameStateManager_SetState("WaitForCharacterDataLoaded")
     elseif PregameStateManager_GetCurrentState() == "CharacterCreate" or GetNumCharacters() == 0 then
@@ -796,5 +835,5 @@ EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISPLAY_NAME_READY, 
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_LIST_RECEIVED, OnCharacterListReceived)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SHOW_PREGAME_GUI_IN_STATE, OnShowPregameGuiInState)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelected)
-EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
+EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ZO_Pregame_OnGamepadPreferredModeChanged)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnDisconnectedFromServer)

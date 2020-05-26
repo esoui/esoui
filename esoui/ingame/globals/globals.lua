@@ -79,7 +79,7 @@ function ZO_GetJumpOrInteractDownAction()
     return g_actionPerformedByJumpOrInteract
 end
 
-function ZO_FormatResourceBarCurrentAndMax(current, maximum)
+function ZO_FormatResourceBarCurrentAndMax(current, maximum, overrideSetting)
 local returnValue = ""
 
     local percent = 0
@@ -93,7 +93,7 @@ local returnValue = ""
     end
 
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
-    local setting = tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
+    local setting = overrideSetting or tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
     if setting == RESOURCE_NUMBERS_SETTING_NUMBER_ONLY then
         returnValue = zo_strformat(SI_ATTRIBUTE_NUMBERS_WITHOUT_PERCENT, ZO_AbbreviateNumber(current, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
     elseif setting == RESOURCE_NUMBERS_SETTING_PERCENT_ONLY then

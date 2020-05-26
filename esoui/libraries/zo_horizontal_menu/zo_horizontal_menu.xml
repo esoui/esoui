@@ -1,0 +1,10 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_HorizontalMenu_LabelHeader" inherits="ZO_SelectableLabel" font="ZoFontHeader3" verticalAlignment="CENTER" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions y="48" />
+            <OnMouseUp>
+                ZO_HorizontalMenu_LabelHeader_MouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+    </Controls>
+</GuiXml>

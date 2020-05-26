@@ -343,7 +343,7 @@
                                         <Control name="$(parent)ScrollChild" override="true">
                                             <Controls>
                                                 <StatusBar name="$(parent)Total" inherits="ZO_AchievementsStatusBar">
-                                                    <Anchor point="TOPLEFT" offsetX="4" offsetY="24" />
+                                                    <Anchor point="TOPLEFT" offsetX="4" offsetY="28" />
                                                     <Anchor point="RIGHT" relativeTo="$(grandparent)" constrains="X" offsetX="-25" />
                                                     
                                                     <Controls>

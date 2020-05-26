@@ -135,8 +135,8 @@ function BuyBack:UpdateList()
     local scrollData = ZO_ScrollList_GetDataList(self.list)
 
     for entryIndex = 1, GetNumBuybackItems() do
-        local icon, name, stack, price, quality, meetsRequirements = GetBuybackItemInfo(entryIndex)
-        if(stack > 0) then
+        local icon, name, stack, price, functionalQuality, meetsRequirements, displayQuality = GetBuybackItemInfo(entryIndex)
+        if stack > 0 then
             local buybackData =
             {
                 slotIndex = entryIndex,
@@ -144,7 +144,10 @@ function BuyBack:UpdateList()
                 name = name,
                 stack = stack,
                 price = price,
-                quality = quality,
+                functionalQuality = functionalQuality,
+                displayQuality = displayQuality,
+                -- quality is depricated, included here for addon backwards compatibility
+                quality = displayQuality,
                 meetsRequirements = meetsRequirements,
                 stackBuyPrice = stack * price,
             }
@@ -186,7 +189,8 @@ function BuyBack:SetupBuyBackSlot(control, data)
     ZO_ItemSlot_SetupSlotBase(slotControl, data.stack, data.icon, data.meetsRequirements)
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, data.meetsRequirements)
     nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, data.name))
-    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.quality))
+    -- data.quality is depricated, included here for addon backwards compatibility
+    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.displayQuality or data.quality))
 
     -- Setup the currency fields for the price.
     local notEnough = self.currentMoney < data.stackBuyPrice

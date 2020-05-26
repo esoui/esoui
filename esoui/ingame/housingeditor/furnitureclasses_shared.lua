@@ -66,8 +66,8 @@ function ZO_FurnitureDataBase:IsFromCrownStore()
     return false
 end
 
-function ZO_FurnitureDataBase:GetQuality()
-    return ITEM_QUALITY_NORMAL
+function ZO_FurnitureDataBase:GetDisplayQuality()
+    return ITEM_DISPLAY_QUALITY_NORMAL
 end
 
 function ZO_FurnitureDataBase:GetStackCount()
@@ -217,11 +217,12 @@ function ZO_PlaceableFurnitureItem:IsBeingPreviewed()
     return IsCurrentlyPreviewingInventoryItemAsFurniture(self.bagId, self.slotIndex)
 end
 
-function ZO_PlaceableFurnitureItem:GetQuality()
+function ZO_PlaceableFurnitureItem:GetDisplayQuality()
     if self.slotData then
-        return self.slotData.quality
+        -- self.slotData.quality is depricated, included here for addon backwards compatibility
+        return self.slotData.displayQuality or self.slotData.quality
     end
-    return ZO_FurnitureDataBase.GetQuality(self)
+    return ZO_FurnitureDataBase.GetDisplayQuality(self)
 end
 
 function ZO_PlaceableFurnitureItem:GetStackCount()
@@ -308,8 +309,10 @@ function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
         self.retrievableFurnitureId = retrievableFurnitureId
         self.icon = icon
         self.furnitureDataId = furnitureDataId
-        self.quality = GetPlacedHousingFurnitureQuality(retrievableFurnitureId)
-    
+        local displayQuality = GetPlacedHousingFurnitureDisplayQuality(retrievableFurnitureId)
+        self.displayQuality = displayQuality
+        --This value is deprecated, but we are leaving it here for backwards compatibility with add-ons
+        self.quality = displayQuality
         local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(furnitureDataId)
         self.categoryId = categoryId
         self.subcategoryId = subcategoryId
@@ -352,8 +355,9 @@ function ZO_RetrievableFurniture:GetDataType()
     return ZO_RECALLABLE_HOUSING_DATA_TYPE
 end
 
-function ZO_RetrievableFurniture:GetQuality()
-    return self.quality
+function ZO_RetrievableFurniture:GetDisplayQuality()
+    -- self.quality is depricated, included here for addon backwards compatibility
+    return self.displayQuality or self.quality
 end
 
 function ZO_RetrievableFurniture:IsPreviewable()
@@ -436,7 +440,9 @@ function ZO_HousingMarketProduct:RefreshInfo(marketProductId, presentationIndex)
     self.cost = cost
     self.costAfterDiscount = costAfterDiscount
     self.discountPercent = discountPercent
-    self.quality = GetMarketProductQuality(marketProductId)
+    self.displayQuality = GetMarketProductDisplayQuality(marketProductId)
+    -- self.quality is depricated, included here for addon backwards compatibility
+    self.quality = self.displayQuality
 
     self.furnitureDataId = GetMarketProductFurnitureDataId(marketProductId)
     local categoryId, subcategoryId, furnitureTheme = GetFurnitureDataInfo(self.furnitureDataId)
@@ -474,8 +480,9 @@ function ZO_HousingMarketProduct:IsBeingPreviewed()
     return IsPreviewingMarketProduct(self.marketProductId)
 end
 
-function ZO_HousingMarketProduct:GetQuality()
-    return self.quality
+function ZO_HousingMarketProduct:GetDisplayQuality()
+    -- self.quality is depricated, included here for addon backwards compatibility
+    return self.displayQuality or self.quality
 end
 
 function ZO_HousingMarketProduct:GetMarketProductPricingByPresentation()

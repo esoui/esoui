@@ -417,5 +417,8 @@ function ZO_WorldMapKeepInfo_Shared:OnShowing()
 end
 
 function ZO_WorldMapKeepInfo_Shared:OnHidden()
+    if self.externalFragments then
+        SCENE_MANAGER:RemoveFragmentGroup(self.externalFragments)
+    end
     self:FireCallbacks("WorldMapKeepInfoHidden")
 end

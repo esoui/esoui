@@ -11,36 +11,40 @@ ZO_TUTORIAL_DIALOG_HARD_MAX_HEIGHT = 360
 
 function ZO_UiInfoBoxTutorial:Initialize()
     self:ClearAll()
-        
-    local dialog = ZO_TutorialDialog
-    self.dialogPane = dialog:GetNamedChild("Pane")
+
+    local dialogControl = ZO_TutorialDialog
+    self.dialogPane = dialogControl:GetNamedChild("Pane")
     self.dialogScrollChild = self.dialogPane:GetNamedChild("ScrollChild")
     self.dialogDescription = self.dialogScrollChild:GetNamedChild("Description")
     self.dialogInfo =
     {
         title = {},
-        customControl = dialog,
+        customControl = dialogControl,
         noChoiceCallback = function(dialog)
-                           dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
-                       end,
+            dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
+        end,
+        finishedCallback = function(dialog)
+            if dialog.data then
+                FireTutorialHiddenEvent(dialog.data.tutorialIndex)
+            end
+        end,
         buttons =
         {
-            [1] =
             {
-                control = dialog:GetNamedChild("Cancel"),
+                control = dialogControl:GetNamedChild("Cancel"),
                 text = SI_EXIT_BUTTON,
                 keybind = "DIALOG_NEGATIVE",
                 clickSound = SOUNDS.DIALOG_ACCEPT,
                 callback =  function(dialog)
-                                dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
-                            end,
+                    dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
+                end,
             },
         }
     }
 
     ZO_Dialogs_RegisterCustomDialog("UI_TUTORIAL", self.dialogInfo)
 
-    ZO_Dialogs_RegisterCustomDialog("UI_TUTORIAL_GAMEPAD", 
+    ZO_Dialogs_RegisterCustomDialog("UI_TUTORIAL_GAMEPAD",
         {
             canQueue = true,
             setup = function(dialog)
@@ -53,18 +57,17 @@ function ZO_UiInfoBoxTutorial:Initialize()
             title =
             {
                 text = function()
-                           return self.title
-                       end,
+                    return self.title
+                end,
             },
             mainText = 
             {
                 text = function()
-                           return self.description
-                       end,
+                    return self.description
+                end,
             },
             buttons =
             {
-                [1] =
                 {
                     --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
                     name = "Gamepad Tutorial Accept",
@@ -72,25 +75,25 @@ function ZO_UiInfoBoxTutorial:Initialize()
                     keybind =    "DIALOG_PRIMARY",
                     clickSound = SOUNDS.DIALOG_ACCEPT,
                     callback =  function(dialog)
-                                    dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
-                                end,
+                        dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
+                    end,
                 }
             },
             noChoiceCallback = function(dialog)
-                               if dialog.data then
-                                    dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
-                               end
-                           end,
+                if dialog.data then
+                    dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
+                end
+            end,
             finishedCallback = function(dialog)
-                                if dialog.data then
-                                    FireTutorialHiddenEvent(dialog.data.tutorialIndex)
-                                end
-                            end,
+                if dialog.data then
+                    FireTutorialHiddenEvent(dialog.data.tutorialIndex)
+                end
+            end,
             removedFromQueueCallback = function(data)
-                               if data then
-                                    data.owner:RemoveTutorial(data.tutorialIndex, TUTORIAL_NOT_SEEN)
-                               end
-                           end,
+                if data then
+                    data.owner:RemoveTutorial(data.tutorialIndex, TUTORIAL_NOT_SEEN)
+                end
+            end,
         }
     )
 
@@ -114,8 +117,6 @@ end
 function ZO_UiInfoBoxTutorial:DisplayTutorial(tutorialIndex)
     self.title, self.description = GetTutorialInfo(tutorialIndex)
 
-
-
     self:SetCurrentlyDisplayedTutorialIndex(tutorialIndex)
     self.gamepadMode = IsInGamepadPreferredMode()
 
@@ -134,7 +135,7 @@ function ZO_UiInfoBoxTutorial:DisplayTutorial(tutorialIndex)
         end
         self.dialogPane:SetHeight(paneHeight)
 
-        ZO_Scroll_ResetToTop(self.dialogPane)    
+        ZO_Scroll_ResetToTop(self.dialogPane)
         ZO_Dialogs_ShowDialog("UI_TUTORIAL", { tutorialIndex = tutorialIndex, owner = self })
     end
 end

@@ -60,7 +60,6 @@ EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Manager.lua
 EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncementMarketProduct_Shared.lua
 EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncementMarketProduct_Shared.xml
 EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncementMarketProductTile.lua
-EsoUI\InternalIngame\MarketAnnouncement\MarketProductCarousel_Shared.lua
 EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Shared.lua
 EsoUI\InternalIngame\MarketAnnouncement\MarketAnnouncement_Shared.xml
 EsoUI\InternalIngame\MarketAnnouncement\Keyboard\MarketAnnouncementMarketProduct_Keyboard.lua
@@ -77,6 +76,12 @@ EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncementMarketProductT
 EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketProductCarousel_Gamepad.lua
 EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncement_Gamepad.lua
 EsoUI\InternalIngame\MarketAnnouncement\Gamepad\MarketAnnouncement_Gamepad.xml
+
+EsoUI\InternalIngame\MarketAnnouncement\EventAnnouncementTile.lua
+EsoUI\InternalIngame\MarketAnnouncement\Gamepad\EventAnnouncementTile_Gamepad.lua
+EsoUI\InternalIngame\MarketAnnouncement\Gamepad\EventAnnouncementTile_Gamepad.xml
+EsoUI\InternalIngame\MarketAnnouncement\Keyboard\EventAnnouncementTile_Keyboard.lua
+EsoUI\InternalIngame\MarketAnnouncement\Keyboard\EventAnnouncementTile_Keyboard.xml
 
 EsoUI\InternalIngame\ZoneStories\ZoneStoriesTile.lua
 EsoUI\InternalIngame\ZoneStories\ZoneStoriesTile.xml
@@ -97,9 +102,20 @@ EsoUI\InternalIngame\CodeRedemption\Gamepad\CodeRedemption_Gamepad.xml
 EsoUI\InternalIngame\CodeRedemption\Keyboard\CodeRedemption_Keyboard.lua
 EsoUI\InternalIngame\CodeRedemption\Keyboard\CodeRedemption_Keyboard.xml
 
+EsoUI\InternalIngame\Scrying\ScryingHexAnimations.lua
+EsoUI\InternalIngame\Scrying\ScryingHexAnimations.xml
+EsoUI\InternalIngame\Scrying\Scrying.lua
+EsoUI\InternalIngame\Scrying\Scrying.xml
+
+EsoUI\InternalIngame\AntiquityDigging\AntiquityDiggingSummary.lua
+EsoUI\InternalIngame\AntiquityDigging\AntiquityDiggingSummary.xml
+EsoUI\InternalIngame\AntiquityDigging\AntiquityDigging.lua
+EsoUI\InternalIngame\AntiquityDigging\AntiquityDigging.xml
+
 ; These should remain at the bottom of the file, to ensure functionality of fragments
 EsoUI\InternalIngame\Scenes\InternalIngameFragments.lua
 EsoUI\InternalIngame\Scenes\Gamepad\InternalIngameFragments_Gamepad.lua
 
 EsoUI\InternalIngame\Scenes\InternalIngameScenes.lua
+EsoUI\InternalIngame\Scenes\Keyboard\InternalIngameScenes_Keyboard.lua
 EsoUI\InternalIngame\Scenes\Gamepad\InternalIngameScenes_Gamepad.lua

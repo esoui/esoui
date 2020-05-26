@@ -14,7 +14,8 @@ function ZO_RetraitStation_Base:Initialize(control, interactSceneName)
     self.retraitStationInteraction =
     {
         type = "Retrait Station",
-        End = function()
+        OnInteractSwitch = function()
+            internalassert(false, "OnInteractSwitch is being called.")
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_RETRAIT },

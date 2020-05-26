@@ -8,13 +8,13 @@ function ZO_GamepadStoreRepair:Initialize(scene)
     ZO_GamepadStoreListComponent.Initialize(self, scene, ZO_MODE_STORE_REPAIR, GetString(SI_STORE_MODE_REPAIR))
 
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
-	    if newState == SCENE_SHOWING then
+        if newState == SCENE_SHOWING then
             self:RegisterEvents()
-			self.list:UpdateList()
+            self.list:UpdateList()
         elseif newState == SCENE_HIDING then
             self:UnregisterEvents()
-		end
-	end)
+        end
+    end)
 
     self:InitializeKeybindStrip()
     self:CreateModeData(SI_STORE_MODE_REPAIR, ZO_MODE_STORE_REPAIR, "EsoUI/Art/Vendor/vendor_tabIcon_repair_up.dds", fragment, self.keybindStripDescriptor)
@@ -24,8 +24,8 @@ end
 function ZO_GamepadStoreRepair:RegisterEvents()
     local OnInventoryUpdated = function(eventId, bagId, slotId, isNewItem, soundCategory, reason)
         if reason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
-			self.list:UpdateList()
-			KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            self.list:UpdateList()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
         end
     end
 

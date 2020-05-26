@@ -292,5 +292,16 @@
                 </Tooltip>
             </Controls>
         </TopLevelControl>
+
+        <Tooltip name="ZO_AntiquityTooltipTemplate" inherits="ZO_BaseTooltip" headerVerticalOffset="10" virtual="true">
+            <ResizeToFitPadding width="32" height="35"/>
+            <DimensionConstraints minX="416" maxX="416" />
+        </Tooltip>
+
+        <TopLevelControl name="AntiquityooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="AntiquityTooltip" inherits="ZO_AntiquityTooltipTemplate" />
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

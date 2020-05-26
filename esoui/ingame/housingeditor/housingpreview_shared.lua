@@ -155,7 +155,7 @@ function ZO_HousingPreviewDialog_Shared:RefreshDisplayInfo()
     local displayInfo = ZO_HOUSE_PREVIEW_MANAGER:GetDisplayInfo()
     self.dialogInfo.title.text = displayInfo.houseName
     self.locationDataLabel:SetText(ZO_CachedStrFormat(SI_ZONE_NAME, displayInfo.houseFoundInLocation))
-    self.houseTypeDataLabel:SetText(displayInfo.houseCategory)
+    self.houseTypeDataLabel:SetText(zo_strformat(SI_HOUSE_TYPE_FORMATTER, displayInfo.houseCategory))
     self.houseImageControl:SetTexture(displayInfo.backgroundImage)
 
     self.displayInfoDirty = false

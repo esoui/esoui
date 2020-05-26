@@ -6,9 +6,11 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dial
     local itemName = itemData.name
 
     local price = displayPrice
-    local nameColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemData.quality))
+    -- itemData.quality is depricated, included here for addon backwards compatibility
+    local displayQuality = itemData.displayQuality or itemData.quality
+    local nameColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
     local currencyType = itemData.currencyType or CURT_MONEY
-    
+
     local itemNameWithQuantity = nameColor:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, stackCount))
     local title = itemNameWithQuantity
     if iconFile then
@@ -20,11 +22,23 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dial
 
     local mainTextParams
     if stackCount > 1 then
-        mainTextParams = {title, "|c"..nameColor:ToHex(), itemName, stackCount, priceText}
+        mainTextParams = 
+        {
+            title,
+            "|c" .. nameColor:ToHex(),
+            itemName,
+            stackCount,
+            priceText,
+        }
     else
-        mainTextParams = {title, nameColor:Colorize(itemName), priceText}
+        mainTextParams =
+        {
+            title,
+            nameColor:Colorize(itemName),
+            priceText,
+        }
     end
-    ZO_Dialogs_ShowGamepadDialog(dialogName, {listingIndex = listingIndex, stackCount = stackCount, price = price}, {mainTextParams = mainTextParams})
+    ZO_Dialogs_ShowGamepadDialog(dialogName, { listingIndex = listingIndex, stackCount = stackCount, price = price }, { mainTextParams = mainTextParams })
 end
 
 ESO_Dialogs["TRADING_HOUSE_CONFIRM_REMOVE_LISTING"] =

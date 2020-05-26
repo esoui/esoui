@@ -8,36 +8,13 @@ function HelpTutorialsEntriesGamepad:Initialize(control)
     ZO_HelpTutorialsGamepad.Initialize(self, control)
 
     local helpEntriesFragment = ZO_FadeSceneFragment:New(control)
-    HELP_TUTORIALS_ENTRIES_GAMEPAD = ZO_Scene:New("helpTutorialsEntriesGamepad", SCENE_MANAGER)
-    HELP_TUTORIALS_ENTRIES_GAMEPAD:AddFragment(helpEntriesFragment)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE = ZO_Scene:New("helpTutorialsEntriesGamepad", SCENE_MANAGER)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:AddFragment(helpEntriesFragment)
 
     local function OnStateChanged(...)
         self:OnStateChanged(...)
     end
-    HELP_TUTORIALS_ENTRIES_GAMEPAD:RegisterCallback("StateChange", OnStateChanged)
-
-    self.tutorialBox = control:GetNamedChild("TutorialText")
-    self.scrollContainer = self.tutorialBox:GetNamedChild("HelpTextContainer")
-
-    local messageContainer = self.tutorialBox:GetNamedChild("HelpMessageContainer")
-    self.description1 = messageContainer:GetNamedChild("DetailsBody1")
-    self.description2 = messageContainer:GetNamedChild("DetailsBody2")
-    self.image = messageContainer:GetNamedChild("DetailsImage")
-end
-
-function HelpTutorialsEntriesGamepad:InitializeEvents()
-    ZO_HelpTutorialsGamepad.InitializeEvents(self)
-
-    local function OnShowSpecificPage(eventId, helpCategoryIndex, helpIndex)
-        if IsInGamepadPreferredMode() then
-            -- ideally we would do a push here, but that is currently not playing
-            -- well with opening help from the Crown Store
-            -- specifically: attempting to gift from the furniture browser with gifting locked
-            self:Show(helpCategoryIndex, helpIndex)
-        end
-    end
-
-    self.control:RegisterForEvent(EVENT_HELP_SHOW_SPECIFIC_PAGE, OnShowSpecificPage)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:RegisterCallback("StateChange", OnStateChanged)
 end
 
 function HelpTutorialsEntriesGamepad:SelectOrQueueHelpEntry(categoryIndex, helpIndex)
@@ -157,35 +134,7 @@ function HelpTutorialsEntriesGamepad:OnSelectionChanged(list, selectedData, oldS
         return
     end
 
-    self.scrollContainer:ResetToTop()
-
-    local _, keyboardDescription1, keyboardDescription2, image, gamepadDescription1, gamepadDescription2 = GetHelpInfo(self.categoryIndex, selectedData.helpIndex)
-    local description1 = gamepadDescription1 ~= "" and gamepadDescription1 or keyboardDescription1
-    local description2 = gamepadDescription2 ~= "" and gamepadDescription2 or keyboardDescription2
-
-    self.description1:SetText(description1)
-
-    if image then
-        self.image:SetHidden(false)
-        self.image:SetTexture(image)
-    else
-        self.image:SetHidden(true)
-        self.image:SetHeight(0)
-    end
-
-    self.description2:SetText(description2)
-end
-
-function HelpTutorialsEntriesGamepad:OnHide()
-    ZO_HelpTutorialsGamepad.OnHide(self)
-end
-
-local GAMEPAD_HELP_MAX_IMAGE_WIDTH = 767
-function ZO_Gamepad_Tutorials_Entries_OnTextureLoaded(control)
-    -- when hidden we directly manipulate the height, so don't apply constraints in those cases
-    if not control:IsHidden() then
-        ZO_ResizeTextureWidthAndMaintainAspectRatio(control, GAMEPAD_HELP_MAX_IMAGE_WIDTH)
-    end
+    HELP_TUTORIAL_DISPLAY_GAMEPAD:ShowHelp(self.categoryIndex, selectedData.helpIndex)
 end
 
 function ZO_Gamepad_Tutorials_Entries_OnInitialize(control)

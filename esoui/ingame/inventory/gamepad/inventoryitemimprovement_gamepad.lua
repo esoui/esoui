@@ -7,7 +7,7 @@ function ZO_InventoryItemImprovement_Gamepad:New(...)
     return ZO_Gamepad_ParametricList_Screen.New(self, ...)
 end
 
-function ZO_InventoryItemImprovement_Gamepad:Initialize(control, title, sceneName, message, noItemMessage, confirmString, improvementSound, 
+function ZO_InventoryItemImprovement_Gamepad:Initialize(control, title, sceneName, message, noItemMessage, confirmString, improvementSound,
                                                         improvementKitPredicate, sortComparator)
     self.sceneName = sceneName
     self.message = message
@@ -16,7 +16,8 @@ function ZO_InventoryItemImprovement_Gamepad:Initialize(control, title, sceneNam
     self.improvementKitPredicate = improvementKitPredicate
     self.sortComparator = sortComparator
 
-    self.headerData = {
+    self.headerData =
+    {
         titleText = title,
         messageText = self.message
     }
@@ -31,7 +32,8 @@ function ZO_InventoryItemImprovement_Gamepad:Initialize(control, title, sceneNam
 end
 
 function ZO_InventoryItemImprovement_Gamepad:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
             name = self.confirmString,
@@ -133,12 +135,12 @@ function ZO_InventoryItemImprovement_Gamepad:BuildList()
 
     for _, itemInfo in ipairs(self.enumeratedList) do
         local itemLink = GetItemLink(itemInfo.bag, itemInfo.index)
-        local icon, _, _, _, _, _, _, quality = GetItemInfo(itemInfo.bag, itemInfo.index)
+        local icon, _, _, _, _, _, _, _, displayQuality = GetItemInfo(itemInfo.bag, itemInfo.index)
         local itemName = zo_strformat(SI_LINK_FORMAT_ITEM_NAME, self:GetItemName(itemInfo))
         local entry = ZO_GamepadEntryData:New(itemName, icon)
         ZO_ClearTable(self.currentEntrySubLabels)
         self:AddItemKitSubLabelsToCurrentEntry(itemLink)
-        self:InitializeImprovementKitVisualData(entry, itemInfo.bag, itemInfo.index, itemInfo.stack, quality, self.currentEntrySubLabels)
+        self:InitializeImprovementKitVisualData(entry, itemInfo.bag, itemInfo.index, itemInfo.stack, displayQuality, self.currentEntrySubLabels)
         self:AddEntry(entry)
     end
 end

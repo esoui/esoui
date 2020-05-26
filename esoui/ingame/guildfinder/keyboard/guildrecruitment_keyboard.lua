@@ -63,13 +63,6 @@ function ZO_GuildRecruitment_Keyboard:Initialize(control)
         ZO_IconHeader_Setup(control, open)
 
         if open and userRequested then
-            -- If deselecting Guild Listing then save changes to it.
-            local selectedNodeIndex = node.tree.selectedNode.data.categoryIndex or node.tree.selectedNode.data.data.categoryIndex
-            local newNodeIndex = node.data.categoryIndex
-            if newNodeIndex ~= selectedNodeIndex and selectedNodeIndex == ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_GUILD_LISTING then
-                GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD:ChangeCategory()
-            end
-
             self.categoryTree:SelectFirstChild(node)
         end
     end
@@ -189,14 +182,6 @@ function ZO_GuildRecruitment_TreeEntry_OnMouseUp(self, upInside)
             PlaySound(SOUNDS.NEGATIVE_CLICK)
         elseif not self.node.selected and self.node.selectSound then
             PlaySound(self.node.selectSound)
-        end
-
-        -- If deselecting Guild Listing then save changes to it.
-        -- The categoryIndex for a top level category is off of data, while it is off of data.data for subcategories.
-        local selectedNodeIndex = self.node.tree.selectedNode.data.categoryIndex or self.node.tree.selectedNode.data.data.categoryIndex
-        local newNodeIndex = self.node.data.categoryIndex
-        if newNodeIndex ~= selectedNodeIndex and selectedNodeIndex == ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_GUILD_LISTING then
-            GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD:ChangeCategory()
         end
 
         local NOT_REBUILDING = false

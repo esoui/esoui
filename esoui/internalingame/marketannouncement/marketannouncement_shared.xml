@@ -21,20 +21,9 @@
                             <AnchorFill />
                         </Backdrop>
 
-                        <Control name="$(parent)Carousel" inherits="ZO_HorizontalScrollListTemplate">
+                        <Control name="$(parent)Carousel" inherits="ZO_Carousel_Control">
                             <Dimensions x="1090" y="520"/>
                             <Anchor point="TOP" relativeTo="$(parent)BG" relativePoint="TOP" offsetY="37"/>
-                            <Controls>                                     
-                                <Control name="$(parent)SelectionIndicator" inherits="ZO_SelectionIndicator_Control">
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMLEFT" offsetX="70" offsetY="-27"/>
-                                </Control>
-                                
-                                <Scroll name="$(parent)Scroll" override="true">
-                                    <ClearAnchors />
-                                    <Anchor point="TOPLEFT" offsetX="30" />
-                                    <Anchor point="BOTTOMRIGHT" offsetX="-30" />
-                                </Scroll>
-                            </Controls>
                         </Control>
 
                         <Control name="$(parent)LockedCrownStore" hidden="true">

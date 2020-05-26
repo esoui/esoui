@@ -401,6 +401,7 @@ SOUNDS = {
     MAP_LOCATION_CLICKED            = "Map_Location_Clicked",
     MAP_AUTO_NAVIGATION_MAP_CHANGE  = "Map_Auto_Navigation_Map_Change",
     MAP_AUTO_NAVIGATION_BEGIN_ZOOM  = "Map_Auto_Navigation_Begin_Zoom",
+    MAP_PIN_FADEIN                  = "Map_Pin_FadeIn",
     GAMEPAD_MAP_START_MAP_CHANGE    = "Console_Map_Start_Map_Change",
     GAMEPAD_MAP_COMPLETE_MAP_CHANGE = "Console_Map_Complete_Map_Change",
 
@@ -410,9 +411,9 @@ SOUNDS = {
     BOOK_PAGE_TURN                  = "Book_PageTurn",
     BOOK_OPEN                       = "Book_Open",
     BOOK_CLOSE                      = "Book_Close",
-    NOTE_PAGE_TURN                  = "Note_PageTurn",
-    NOTE_OPEN                       = "Note_Open",
-    NOTE_CLOSE                      = "Note_Close",
+    LORE_NOTE_PAGE_TURN             = "Lore_Note_PageTurn",
+    LORE_NOTE_OPEN                  = "Lore_Note_Open",
+    LORE_NOTE_CLOSE                 = "Lore_Note_Close",
     TABLET_PAGE_TURN                = "Tablet_PageTurn",
     TABLET_OPEN                     = "Tablet_Open",
     TABLET_CLOSE                    = "Tablet_Close",
@@ -921,4 +922,42 @@ SOUNDS = {
 
     --Code Redemption
     CODE_REDEMPTION_SUCCESS                 = "CodeRedemption_Success",
+
+    --Scrying
+    SCRYING_START_INTRO                     = "Antiquities_Scrying_Overlay_Intro",
+    SCRYING_START_END_OF_GAME               = "Antiquities_Scrying_Overlay_Outro",
+    SCRYING_CAPTURE_GOAL                    = "Antiquities_Scrying_Capture_Goal",
+    SCRYING_CAPTURE_HEX_SMALL               = "Antiquities_Scrying_Capture_Hex_Small",
+    SCRYING_CAPTURE_HEX_MEDIUM              = "Antiquities_Scrying_Capture_Hex_Medium",
+    SCRYING_CAPTURE_HEX_LARGE               = "Antiquities_Scrying_Capture_Hex_Large",
+    SCRYING_ACTIVATE_BOMB                   = "Antiquities_Scrying_Bomb_Activate",
+    SCRYING_CO_OPT_HEX_SMALL                = "Antiquities_Scrying_CoOpt_Hex_Small",
+    SCRYING_CO_OPT_HEX_MEDIUM               = "Antiquities_Scrying_CoOpt_Hex_Medium",
+    SCRYING_CO_OPT_HEX_LARGE                = "Antiquities_Scrying_CoOpt_Hex_Large",
+    SCRYING_ACTIVATE_LINE                   = "Antiquities_Scrying_Line_Activate",
+    SCRYING_START_LINE                      = "Antiquities_Scrying_Line_Start",
+    SCRYING_TARGET_HEX_WITH_BOMB            = "Antiquities_Scrying_Select_Hex_Bomb",
+    SCRYING_TARGET_HEX_WITH_LINE            = "Antiquities_Scrying_Select_Hex_Line",
+    SCRYING_TARGET_UNAFFECTED_HEX           = "Antiquities_Scrying_Select_Hex_Bad",
+    SCRYING_TARGET_AFFECTED_HEX             = "Antiquities_Scrying_Select_Hex_Good",
+    SCRYING_CHOOSE_SKILL                    = "Antiquities_Scrying_Skill_Select",
+    SCRYING_PROGRESS_ADDED                  = "Antiquities_Scrying_Progress_Added",
+    SCRYING_NO_PROGRESS_ADDED               = "Antiquities_Scrying_Progress_NotAdded",
+    SCRYING_PROGRESS_GOAL_FADEIN            = "Antiquities_Scrying_Progress_Goal_FadeIn",
+    SCRYING_PROGRESS_LAST_GOAL_FADEIN       = "Antiquities_Scrying_Progress_Last_Goal_FadeIn",
+
+    --Digging
+    ANTIQUITIES_DIGGING_DIG_POWER_REFUND = "Antiquities_Digging_Dig_Power_Refund",
+
+    -- Antiquities Fanfare
+    ANTIQUITIES_FANFARE_FRAGMENT_FOUND = "Antiquities_Digging_Fragment_Found",
+    ANTIQUITIES_FANFARE_NEW_LEAD_FOUND = "Antiquities_Digging_New_Lead_Found",
+    ANTIQUITIES_FANFARE_BONUS_ITEM_FOUND = "Antiquities_Digging_Bonus_Item_Found",
+    ANTIQUITIES_FANFARE_MOTIF_SCROLL_APPEAR = "Antiquities_Digging_Motif_Scroll_Appear",
+    ANTIQUITIES_FANFARE_FRAGMENT_PROGRESSION = "Antiquities_Digging_Fragment_Progression",
+    ANTIQUITIES_FANFARE_FRAGMENT_RUNDOWN_ICONS = "Antiquities_Digging_Fragment_Rundown_Icons",
+    ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED = "Antiquities_Digging_Fragment_Discovered",
+    ANTIQUITIES_FANFARE_FRAGMENT_DISCOVERED_FINAL = "Antiquities_Digging_Fragments_Found_All",
+    ANTIQUITIES_FANFARE_COMPLETED = "Antiquities_Digging_Antiquity_Completed",
+    ANTIQUITIES_FANFARE_FAILURE = "Antiquities_Digging_Failure",
 }

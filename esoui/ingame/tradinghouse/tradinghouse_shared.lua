@@ -7,7 +7,10 @@ ZO_TRADING_HOUSE_SYSTEM_NAME = "tradingHouse"
 ZO_TRADING_HOUSE_INTERACTION =
 {
     type = "TradingHouse",
-    End = function() SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):CloseTradingHouse() end,
+    OnInteractSwitch = function()
+        internalassert(false, "OnInteractSwitch is being called.") 
+        SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):CloseTradingHouse() 
+    end,
     interactTypes = { INTERACTION_TRADINGHOUSE },
 }
 
@@ -23,9 +26,9 @@ function ZO_TradingHouse_GetItemDataFormattedTime(itemData)
     return ZO_CachedStrFormat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, timeString)
 end
 
-function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
+function ZO_TradingHouse_CreateItemData(index, icon, name, displayQuality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
     if name ~= "" and stackCount > 0 then
-        local UNIT_PRICE_PRECISION = .01
+        local UNIT_PRICE_PRECISION = 0.01
         purchasePricePerUnit = zo_roundToNearest(purchasePricePerUnit, UNIT_PRICE_PRECISION)
         currencyType = currencyType or CURT_MONEY
 
@@ -34,7 +37,9 @@ function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, 
             slotIndex = index,
             icon = icon,
             name = name,
-            quality = quality,
+            displayQuality = displayQuality,
+            -- quality is depricated, included here for addon backwards compatibility
+            quality = displayQuality,
             stackCount = stackCount,
             sellerName = sellerName,
             timeRemaining = timeRemaining,
@@ -52,15 +57,15 @@ function ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, 
 end
 
 function ZO_TradingHouse_CreateListingItemData(index)
-    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemUniqueId, purchasePricePerUnit = GetTradingHouseListingItemInfo(index)
+    local icon, name, displayQuality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemUniqueId, purchasePricePerUnit = GetTradingHouseListingItemInfo(index)
     local itemLink = GetTradingHouseListingItemLink(index)
-    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
+    return ZO_TradingHouse_CreateItemData(index, icon, name, displayQuality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
 end
 
 function ZO_TradingHouse_CreateSearchResultItemData(index)
-    local icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemUniqueId, purchasePricePerUnit = GetTradingHouseSearchResultItemInfo(index)
+    local icon, name, displayQuality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemUniqueId, purchasePricePerUnit = GetTradingHouseSearchResultItemInfo(index)
     local itemLink = GetTradingHouseSearchResultItemLink(index)
-    return ZO_TradingHouse_CreateItemData(index, icon, name, quality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
+    return ZO_TradingHouse_CreateItemData(index, icon, name, displayQuality, stackCount, sellerName, timeRemaining, purchasePrice, currencyType, itemLink, itemUniqueId, purchasePricePerUnit)
 end
 
 function ZO_TradingHouse_CalculateItemSuggestedPostPrice(bagId, slotIndex)
@@ -84,6 +89,11 @@ end
 
 function ZO_TradingHouse_Singleton:Initialize()
     local function OnTradingHouseOpen()
+        local selectedGuild = GetSelectedTradingHouseGuildId()
+        if not selectedGuild then
+            SelectTradingHouseGuildId(GetGuildId(1))
+        end
+
         SYSTEMS:GetObject(ZO_TRADING_HOUSE_SYSTEM_NAME):OpenTradingHouse()
         SYSTEMS:ShowScene(ZO_TRADING_HOUSE_SYSTEM_NAME)
     end
@@ -135,7 +145,7 @@ function ZO_TradingHouse_Shared:IsInListingsMode()
 end
 
 function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
-    local icon, name, quality, stackCount, requiredLevel, requiredCP, purchasePrice, currencyType = fn(index)
+    local icon, name, displayQuality, stackCount, requiredLevel, requiredCP, purchasePrice, currencyType = fn(index)
     if name ~= "" then
         local UNIT_PRICE_PRECISION = .01
         local purchasePricePerUnit = zo_roundToNearest(purchasePrice / stackCount, UNIT_PRICE_PRECISION)
@@ -144,7 +154,9 @@ function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
             slotIndex = index,
             icon = icon,
             name = name,
-            quality = quality,
+            displayQuality = displayQuality,
+            -- quality is depricated, included here for addon backwards compatibility
+            quality = displayQuality,
             stackCount = stackCount,
             sellerName = GetString(SI_GUILD_HERALDRY_SELLER_NAME),
             timeRemaining = 0,

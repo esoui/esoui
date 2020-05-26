@@ -27,6 +27,7 @@ do
         ["ZO_Options_Slider_VerticalLabel"] = 4,
         ["ZO_Options_Checkbox"] = 6,
         ["ZO_Options_InvokeCallback"] = 4,
+        ["ZO_Options_InvokeCallback_Wide"] = 4,
         ["ZO_Options_Account_InvokeCallback_WithEmail"] = 4,
         ["ZO_Options_Color"] = 4,
         ["ZO_Options_Social_ChatColor"] = 8,
@@ -38,7 +39,7 @@ do
         -- add headers if necessary
         local settingData = KEYBOARD_OPTIONS:GetSettingsData(self.panel, settingTemplate.settingType, settingTemplate.settingId)
 
-        if settingData.exists == nil or settingData.exists() then
+        if KEYBOARD_OPTIONS:DoesSettingExist(settingData) then
             if settingTemplate.header ~= self.lastHeader then
                 local headerControl
                 local controlName = string.format("OptionsPanel%dHeader%d", self.panel, self.headerControlIndex)

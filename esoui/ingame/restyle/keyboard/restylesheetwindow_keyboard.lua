@@ -394,9 +394,9 @@ do
                     end
                     ZO_Dyeing_CreateTooltipOnMouseEnter(anchoringControl, playerDyeInfo.dyeName, playerDyeInfo.known, playerDyeInfo.achievementId, IS_PLAYER_DYE, isRightAnchored)
                 else
-                    local dyeName, _, _, _, achievementId = GetDyeInfoById(dyeId)
-                    if dyeName ~= "" then
-                        ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, dyeName, UNKNOWN_DYE, achievementId, IS_NON_PLAYER_DYE, IS_LEFT_ANCHORED)
+                    local nonPlayerDye = ZO_DYEING_MANAGER:GetOrCreateNonPlayerDyeInfoById(dyeId)
+                    if nonPlayerDye.dyeName ~= "" then
+                        ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, nonPlayerDye.dyeName, UNKNOWN_DYE, nonPlayerDye.achievementId, IS_NON_PLAYER_DYE, IS_LEFT_ANCHORED)
                     end
                 end
             end

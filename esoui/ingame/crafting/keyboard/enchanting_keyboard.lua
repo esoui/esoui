@@ -22,7 +22,8 @@ function ZO_Enchanting:InitializeEnchantingScenes()
     local ENCHANTING_STATION_INTERACTION =
     {
         type = "Enchanting Station",
-        End = function()
+        OnInteractSwitch = function()
+            internalassert(false, "OnInteractSwitch is being called.")
             SCENE_MANAGER:Hide(self.mainSceneName)
         end,
         interactTypes = { INTERACTION_CRAFT },

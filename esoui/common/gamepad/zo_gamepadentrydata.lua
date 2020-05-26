@@ -21,11 +21,15 @@ function ZO_GamepadEntryData:Initialize(text, icon, selectedIcon, highlight, isN
 end
 
 function ZO_GamepadEntryData:InitializeInventoryVisualData(itemData)
-    self.uniqueId = itemData.uniqueId   --need this on self so that it can be used for a compare by EqualityFunction in ParametricScrollList, 
-    self:SetDataSource(itemData)        --SharedInventory modifies the dataSource's uniqueId before the GamepadEntryData is rebuilt, 
-    self:AddIcon(itemData.icon)         --so by copying it over, we can still have access to the old one during the Equality check
-    if not itemData.questIndex then 
-        self:SetNameColors(self:GetColorsBasedOnQuality(self.quality))  --quest items are only white
+    -- Need this on self so that it can be used for a compare by EqualityFunction in ParametricScrollList,
+    -- SharedInventory modifies the dataSource's uniqueId before the GamepadEntryData is rebuilt,
+    -- so by copying it over, we can still have access to the old one during the Equality check
+    self.uniqueId = itemData.uniqueId
+    self:SetDataSource(itemData)
+    self:AddIcon(itemData.icon)
+    if not itemData.questIndex then
+        -- self.quality is deprecated, included here for addon backwards compatibility
+        self:SetNameColors(self:GetColorsBasedOnQuality(self.displayQuality or self.quality))  --quest items are only white
     end
     self.cooldownIcon = itemData.icon or itemData.iconFile
     self:SetFontScaleOnSelection(false)    --item entries don't grow on selection
@@ -33,6 +37,10 @@ end
 
 function ZO_GamepadEntryData:InitializeStoreVisualData(itemData)
     self:InitializeInventoryVisualData(itemData)
+    if itemData.entryType == STORE_ENTRY_TYPE_ANTIQUITY_LEAD then
+        -- self.quality is deprecated, included here for addon backwards compatibility
+        self:SetNameColors(self:GetColorsBasedOnAntiquityQuality(self.displayQuality or self.quality))
+    end
     self.meetsUsageRequirement = itemData.meetsRequirementsToBuy and itemData.meetsRequirementsToEquip
     self.currencyType1 = itemData.currencyType1
 end
@@ -43,15 +51,17 @@ function ZO_GamepadEntryData:InitializeTradingHouseVisualData(itemData)
     self:SetShowUnselectedSublabels(true)
 end
 
-function ZO_GamepadEntryData:InitializeItemImprovementVisualData(bag, index, stackCount, quality)
+function ZO_GamepadEntryData:InitializeItemImprovementVisualData(bag, index, stackCount, displayQuality)
     self.bag = bag
     self.index = index
     self:SetStackCount(stackCount)
-    self.quality = quality
+    self.displayQuality = displayQuality
+    -- self.quality is deprecated, included here for addon backwards compatibility
+    self.quality = displayQuality
     self:SetFontScaleOnSelection(false)    --item entries don't grow on selection
 
-    if quality then
-        self:SetNameColors(self:GetColorsBasedOnQuality(quality))
+    if displayQuality then
+        self:SetNameColors(self:GetColorsBasedOnQuality(displayQuality))
     else
        self:SetNameColors(ZO_NORMAL_TEXT)
     end
@@ -63,8 +73,8 @@ function ZO_GamepadEntryData:AddSubLabels(subLabels)
     end
 end
 
-function ZO_GamepadEntryData:InitializeImprovementKitVisualData(bag, index, stackCount, quality, subLabels)
-    self:InitializeItemImprovementVisualData(bag, index, stackCount, quality)
+function ZO_GamepadEntryData:InitializeImprovementKitVisualData(bag, index, stackCount, displayQuality, subLabels)
+    self:InitializeItemImprovementVisualData(bag, index, stackCount, displayQuality)
     self:AddSubLabels(subLabels)
     self:SetSubLabelColors(ZO_NORMAL_TEXT)
 end
@@ -75,12 +85,15 @@ function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(bagId, slotIn
     self.slotIndex = slotIndex
 
     local itemName = GetItemName(self.bagId, self.slotIndex)
-    local icon, _, sellPrice, meetsUsageRequirements, _, _, _, quality = GetItemInfo(self.bagId, self.slotIndex)
+    local icon, _, sellPrice, meetsUsageRequirements, _, _, _, functionalQuality, displayQuality = GetItemInfo(self.bagId, self.slotIndex)
     self:AddIcon(icon)
     self.pressedIcon = self.pressedIcon or icon
     self.sellPrice = sellPrice
     self.meetsUsageRequirement = meetsUsageRequirements
-    self.quality = quality
+    self.functionalQuality = functionalQuality
+    self.displayQuality = displayQuality
+    -- self.quality is deprecated, included here for addon backwards compatibility
+    self.quality = displayQuality
     self.itemType = GetItemType(self.bagId, self.slotIndex)
     self.customSortData = customSortData
 
@@ -94,17 +107,19 @@ function ZO_GamepadEntryData:InitializeCraftingInventoryVisualData(bagId, slotIn
         self.bestItemCategoryName = zo_strformat(GetString("SI_ITEMTYPE", self.itemType))
     end
 
-    self:SetNameColors(self:GetColorsBasedOnQuality(self.quality))
+    self:SetNameColors(self:GetColorsBasedOnQuality(self.displayQuality))
     self.subLabelSelectedColor = self.selectedNameColor
 
     self:SetFontScaleOnSelection(false)    --item entries don't grow on selection
 end
 
 local LOOT_QUEST_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
-function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen, lootType)
+function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, displayQuality, value, isQuest, isStolen, lootType)
     self.lootId = lootId
     self:SetStackCount(count)
-    self.quality = quality
+    self.displayQuality = displayQuality
+    -- self.quality is deprecated, included here for addon backwards compatibility
+    self.quality = displayQuality
     self.value = value
     self.isQuest = isQuest
     self.isStolen = isStolen
@@ -113,8 +128,10 @@ function ZO_GamepadEntryData:InitializeLootVisualData(lootId, count, quality, va
 
     if isQuest then
         self:SetNameColors(LOOT_QUEST_COLOR, LOOT_QUEST_COLOR)
-    elseif quality then
-        self:SetNameColors(self:GetColorsBasedOnQuality(quality))
+    elseif lootType == LOOT_TYPE_ANTIQUITY_LEAD then
+        self:SetNameColors(self:GetColorsBasedOnAntiquityQuality(displayQuality))
+    elseif displayQuality then
+        self:SetNameColors(self:GetColorsBasedOnQuality(displayQuality))
     else
        self:SetNameColors(ZO_NORMAL_TEXT)
     end
@@ -165,9 +182,16 @@ function ZO_GamepadEntryData:SetIgnoreTraitInformation(ignoreTraitInformation)
     self.ignoreTraitInformation = ignoreTraitInformation
 end
 
-function ZO_GamepadEntryData:GetColorsBasedOnQuality(quality)
-    local selectedNameColor = GetItemQualityColor(quality)
-    local unselectedNameColor = GetDimItemQualityColor(quality)
+function ZO_GamepadEntryData:GetColorsBasedOnQuality(displayQuality)
+    local selectedNameColor = GetItemQualityColor(displayQuality)
+    local unselectedNameColor = GetDimItemQualityColor(displayQuality)
+
+    return selectedNameColor, unselectedNameColor
+end
+
+function ZO_GamepadEntryData:GetColorsBasedOnAntiquityQuality(antiquityQuality)
+    local selectedNameColor = GetAntiquityQualityColor(antiquityQuality)
+    local unselectedNameColor = GetDimAntiquityQualityColor(antiquityQuality)
 
     return selectedNameColor, unselectedNameColor
 end

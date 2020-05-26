@@ -332,10 +332,10 @@ ESO_Dialogs["CRAFTING_CREATE_MULTIPLE_GAMEPAD"] =
 }
 
 function ZO_GamepadCraftingUtils_ShowMultiCraftDialog(craftingObject, resultItemLink)
-    local nameColor = GetItemQualityColor(GetItemLinkQuality(resultItemLink))
+    local nameColor = GetItemQualityColor(GetItemLinkDisplayQuality(resultItemLink))
     local itemName = nameColor:Colorize(GetItemLinkName(resultItemLink))
 
-    ZO_Dialogs_ShowGamepadDialog("CRAFTING_CREATE_MULTIPLE_GAMEPAD", {craftingObject = craftingObject}, {mainTextParams={itemName}})
+    ZO_Dialogs_ShowGamepadDialog("CRAFTING_CREATE_MULTIPLE_GAMEPAD", { craftingObject = craftingObject }, { mainTextParams = { itemName } })
 end
 
 ESO_Dialogs["CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD"] =
@@ -445,11 +445,18 @@ ESO_Dialogs["CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD"] =
 }
 
 function ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIndex, maxIterations, deconstructFn, verb)
-    local quality = GetItemQuality(bagId, slotIndex)
-    local nameColor = GetItemQualityColor(quality)
+    local displayQuality = GetItemDisplayQuality(bagId, slotIndex)
+    local nameColor = GetItemQualityColor(displayQuality)
     local itemName = nameColor:Colorize(GetItemName(bagId, slotIndex))
-
-    ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", {bagId = bagId, slotIndex = slotIndex, maxIterations = maxIterations, deconstructFn = deconstructFn, verb = verb}, {mainTextParams = {itemName}})
+    local data =
+    {
+        bagId = bagId,
+        slotIndex = slotIndex,
+        maxIterations = maxIterations,
+        deconstructFn = deconstructFn,
+        verb = verb
+    }
+    ZO_Dialogs_ShowGamepadDialog("CRAFTING_DECONSTRUCT_PARTIAL_STACK_GAMEPAD", data, { mainTextParams = { itemName } })
 end
 
 --[[ Gamepad Crafting Ingredient Bar ]]--

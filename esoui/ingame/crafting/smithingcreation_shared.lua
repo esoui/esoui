@@ -851,7 +851,7 @@ function ZO_SharedSmithingCreation:GenerateMaterialDataForPattern(patternIndex)
     local instanceFilter = {}
     local _, _, _, numMaterials = GetSmithingPatternInfo(patternIndex)
     for materialIndex = 1, numMaterials do
-        local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemStyle, quality, itemInstanceId, rankRequirement, createsItemOfLevel, isChampionPoint = GetSmithingPatternMaterialItemInfo(patternIndex, materialIndex)
+        local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemStyle, displayQuality, itemInstanceId, rankRequirement, createsItemOfLevel, isChampionPoint = GetSmithingPatternMaterialItemInfo(patternIndex, materialIndex)
         if instanceFilter[itemInstanceId] then
             local existingData = instanceFilter[itemInstanceId]
             existingData.min = zo_min(existingData.min, stack)
@@ -873,7 +873,9 @@ function ZO_SharedSmithingCreation:GenerateMaterialDataForPattern(patternIndex)
                 materialIndex = materialIndex,
                 name = name,
                 icon = icon,
-                quality = quality,
+                displayQuality = displayQuality,
+                -- quality is depricated, included here for addon backwards compatibility
+                quality = displayQuality,
                 rankRequirement = rankRequirement,
                 min = stack,
                 max = stack,
@@ -1073,7 +1075,8 @@ function ZO_SharedSmithingCreation:RefreshTraitList(patternData)
                 traitType = traitItemInfo.type,
                 icon = traitItemInfo.icon,
                 name = traitItemInfo.name,
-                quality = traitItemInfo.quality,
+                -- traitItemInfo.quality is depricated, included here for addon backwards compatibility
+                displayQuality = traitItemInfo.displayQuality or traitItemInfo.quality,
             })
         end
     end

@@ -18,13 +18,39 @@ function ZO_CharacterSelect_Manager:Initialize()
     self.playerSelectedCharacterId = nil
     self.bestSelectionPriority = 0
     self.mostRecentCharId = nil
+    self.autoShowIndex = nil
 
     self:RegisterForEvents()
+
+    local function OnSavedVarsReady(savedVars)
+        self.savedVars = savedVars
+
+        --- Character List depends on Event Announcements on Gamepad so Event Announcements must be called first when they're both ready
+        if self.eventAnnouncementDataReady then
+            self:PopulateEventAnnouncements()
+            self.eventAnnouncementDataReady = nil
+        end
+
+        if self.pendingCharacterListParams then
+            self:OnCharacterListReceived(unpack(self.pendingCharacterListParams))
+            self.pendingCharacterListParams = nil
+        end
+
+        self:FireCallbacks("OnSavedDataReady")
+    end
+
+    local defaults = { eventBannerLastSeenTimestamp = 0, }
+    local VERSION = 1
+    ZO_RegisterForSavedVars("CharacterSelect_Manager", VERSION, defaults, OnSavedVarsReady)
 end
 
 function ZO_CharacterSelect_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterSelect_Manager", EVENT_CHARACTER_LIST_RECEIVED, function(_, ...)
-        self:OnCharacterListReceived(...)
+        if not self.savedVars then
+            self.pendingCharacterListParams = { ... }
+        else
+            self:OnCharacterListReceived(...)
+        end
     end)
 
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterSelect_Manager", EVENT_CHARACTER_RENAME_RESULT, function(_, ...)
@@ -34,6 +60,93 @@ function ZO_CharacterSelect_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterSelect_Manager", EVENT_CHARACTER_DELETED, function(_, ...)
         self:OnCharacterDeleted(...)
     end)
+
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterSelect_Manager", EVENT_EVENT_ANNOUNCEMENTS_RECEIVED, function(_, ...)
+        self.autoShowIndex = nil
+
+        if not self.savedVars then
+            self.eventAnnouncementDataReady = true
+        else
+            self:PopulateEventAnnouncements()
+            self:FireCallbacks("EventAnnouncementsReceived")
+        end
+    end)
+
+    function OnEventAnnouncementsUpdated()
+        self:PopulateEventAnnouncements()
+        self:FireCallbacks("EventAnnouncementExpired")
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterSelect_Manager", EVENT_EVENT_ANNOUNCEMENTS_UPDATED, OnEventAnnouncementsUpdated)
+end
+
+function ZO_CharacterSelect_Manager:IsSavedDataReady()
+    return self.savedVars ~= nil
+end
+
+function ZO_CharacterSelect_Manager:PopulateEventAnnouncements()
+    self.eventAnnouncements = {}
+    if self.savedVars then
+        self.autoShowIndex = nil
+        local numEventAnnouncements = GetNumEventAnnouncements()
+        for i = 1, numEventAnnouncements do
+            local eventStartTime = GetEventAnnouncementStartTimeByIndex(i)
+            local data =
+            {
+                index = i,
+                name = GetEventAnnouncementNameByIndex(i),
+                description = GetEventAnnouncementDescriptionByIndex(i),
+                image = GetEventAnnouncementPregameImageByIndex(i),
+                startTime = eventStartTime,
+                remainingTime = GetEventAnnouncementRemainingTimeByIndex(i),
+            }
+
+            table.insert(self.eventAnnouncements, data)
+
+            if eventStartTime > self.savedVars.eventBannerLastSeenTimestamp and not self.autoShowIndex then
+                self.autoShowIndex = i
+            end
+        end
+    end
+end
+
+function ZO_CharacterSelect_Manager:UpdateLastSeenTimestamp()
+    if self.savedVars then
+        self.savedVars.eventBannerLastSeenTimestamp = GetTimeStamp()
+        self.autoShowIndex = nil
+        for i = 1, self:GetNumEventAnnouncements() do
+            local data = self:GetEventAnnouncementDataByIndex(i)
+            if data.startTime > self.savedVars.eventBannerLastSeenTimestamp and not self.autoShowIndex then
+                self.autoShowIndex = i
+            end
+        end
+    end
+end
+
+function ZO_CharacterSelect_Manager:GetNumEventAnnouncements()
+    return self.eventAnnouncements and #self.eventAnnouncements or 0
+end
+
+function ZO_CharacterSelect_Manager:GetEventAnnouncementDataByIndex(index)
+    return self.eventAnnouncements and self.eventAnnouncements[index]
+end
+
+function ZO_CharacterSelect_Manager:GetEventAnnouncementAutoShowIndex()
+    return self.autoShowIndex
+end
+
+function ZO_CharacterSelect_Manager:ClearEventAnnouncementAutoShowIndex()
+    self.autoShowIndex = nil
+end
+
+function ZO_CharacterSelect_Manager:GetEventAnnouncementRemainingTimeByIndex(index)
+    local eventAnnouncementData = self.eventAnnouncements and self.eventAnnouncements[index]
+    local remainingTime = GetEventAnnouncementRemainingTimeByIndex(index)
+    if eventAnnouncementData then
+        eventAnnouncementData.remainingTime = remainingTime
+    end
+
+    return remainingTime
 end
 
 function ZO_CharacterSelect_Manager:GetCharacterDataList()
@@ -169,10 +282,10 @@ function ZO_CharacterSelect_Manager:RefreshConstructedCharacter()
         end
         SelectClothing(DRESSING_OPTION_STARTING_GEAR)
 
-        SetCharacterManagerMode(CHARACTER_MODE_SELECTION)
         SetSuppressCharacterChanges(false)
         local selectedCharacterData = self:GetSelectedCharacterData()
         if selectedCharacterData then
+            SetCharacterManagerMode(CHARACTER_MODE_SELECTION)
             SelectCharacterToView(selectedCharacterData.index)
             -- Generating the random character for pregame may have changed the alliance color
             if ZO_RZCHROMA_EFFECTS then

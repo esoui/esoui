@@ -130,8 +130,8 @@ function ZO_BuffDebuff_ContainerObject:Update()
 
     self.styleObject:UpdateContainer(self)
 
-    buffPool.container:SetHidden(buffPool:GetActiveObjectCount() == 0)
-    debuffPool.container:SetHidden(debuffPool:GetActiveObjectCount() == 0)
+    buffPool.container:SetHidden(not buffPool:HasActiveObjects())
+    debuffPool.container:SetHidden(not debuffPool:HasActiveObjects())
     self.isDirty = false
 end
 

@@ -15,7 +15,7 @@ ESO_Dialogs["OPTIONS_RESET_TO_DEFAULTS"] =
         {
             text = SI_OPTIONS_RESET,
             callback =  function(dialog)
-                            SYSTEMS:GetKeyboardObject("options"):LoadDefaults()
+                            SYSTEMS:GetKeyboardObject("options"):LoadAllDefaults()
                         end
         },
         [2] =
@@ -52,7 +52,7 @@ ESO_Dialogs["GAMEPAD_OPTIONS_RESET_TO_DEFAULTS"] =
         {
             text = SI_OPTIONS_RESET,
             callback =  function(dialog)
-                            SYSTEMS:GetGamepadObject("options"):LoadDefaults()
+                            SYSTEMS:GetGamepadObject("options"):LoadAllDefaults()
                         end
         },
         [2] =

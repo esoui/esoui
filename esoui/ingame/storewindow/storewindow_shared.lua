@@ -44,12 +44,28 @@ function ZO_StoreManager_GetRequiredToBuyErrorText(buyStoreFailure, buyErrorStri
     return GetString("SI_STOREFAILURE", buyStoreFailure)
 end
 
+function ZO_StoreManager_DoesBuyStoreFailureLockEntry(buyStoreFailure)
+    return buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE
+        or buyStoreFailure == STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE
+        or buyStoreFailure == STORE_FAILURE_ALREADY_HAVE_ANTIQUITY_LEAD
+end
+
+local function GetFormattedStoreEntryName(name, entryType)
+    if entryType == STORE_ENTRY_TYPE_ANTIQUITY_LEAD then
+        return zo_strformat(SI_ANTIQUITY_LEAD_NAME_FORMATTER, name)
+    elseif entryType == STORE_ENTRY_TYPE_COLLECTIBLE then
+        return ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, name)
+    else
+        return zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
+    end
+end
+
 function ZO_StoreManager_GetStoreItems()
     local items = {}
     local usedFilterTypes = {}
 
     for entryIndex = 1, GetNumStoreItems() do
-        local icon, name, stack, price, sellPrice, meetsRequirementsToBuy, meetsRequirementsToEquip, quality, questNameColor, currencyType1, currencyQuantity1,
+        local icon, name, stack, price, sellPrice, meetsRequirementsToBuy, meetsRequirementsToEquip, displayQuality, questNameColor, currencyType1, currencyQuantity1,
             currencyType2, currencyQuantity2, entryType, buyStoreFailure, buyErrorStringId = GetStoreEntryInfo(entryIndex)
         local requiredToBuyErrorText
         if not meetsRequirementsToBuy then
@@ -60,12 +76,13 @@ function ZO_StoreManager_GetStoreItems()
             local itemLink = GetStoreItemLink(entryIndex)
             local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
             local sellInformation = GetItemLinkSellInformation(itemLink)
+            local formattedName = GetFormattedStoreEntryName(name, entryType)
             local itemData =
             {
                 entryType = entryType,
                 slotIndex = entryIndex,
                 icon = icon,
-                name = name,
+                name = formattedName,
                 stack = stack,
                 price = price,
                 sellPrice = sellPrice,
@@ -73,7 +90,9 @@ function ZO_StoreManager_GetStoreItems()
                 buyStoreFailure = buyStoreFailure,
                 requiredToBuyErrorText = requiredToBuyErrorText,
                 meetsRequirementsToEquip = meetsRequirementsToEquip,
-                quality = quality,
+                displayQuality = displayQuality,
+                -- quality is depricated, included here for addon backwards compatibility
+                quality = displayQuality,
                 questNameColor = questNameColor,
                 currencyType1 = currencyType1,
                 currencyQuantity1 = currencyQuantity1,

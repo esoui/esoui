@@ -34,6 +34,7 @@ function ZO_MarketAnnouncementMarketProductTile:Layout(data)
         marketProduct:Show()
         marketProduct:SetIsFocused(data.isSelected)
 
+        data.setOnInteractCallback = function(...) marketProduct:SetOnInteractWithScrollCallback(...) end
     end
 end
 

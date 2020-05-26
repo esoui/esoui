@@ -2041,6 +2041,8 @@ function SharedChatSystem:SetChannel(newChannel, channelTarget)
         self.channelRequirement = channelData.requires
         self.currentChannel = newChannel
         self.currentTarget = channelTarget
+        CHAT_ROUTER:SetCurrentChannelData(channelData, channelTarget)
+        CALLBACK_MANAGER:FireCallbacks("OnChatChannelUpdated")
 
         self:UpdateTextEntryChannel()
     end

@@ -50,10 +50,31 @@ function ZO_OutfitSlotManipulator:GetPendingCollectibleId()
 end
 
 function ZO_OutfitSlotManipulator:SetPendingCollectibleId(collectibleId, suppressCallbacks)
+    if collectibleId then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData and collectibleData:IsBlacklisted() then
+            ZO_AlertEvent(EVENT_COLLECTIBLE_USE_RESULT, COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED, true)
+            return
+        end
+    end
+
     if self.pendingCollectibleId ~= collectibleId then
         self.pendingCollectibleId = collectibleId
         self:OnPendingDataChanged(suppressCallbacks)
     end
+end
+
+function ZO_OutfitSlotManipulator:OnCollectibleBlacklistUpdated(suppressCallbacks)
+    if self.pendingCollectibleId then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.pendingCollectibleId)
+        if collectibleData and collectibleData:IsBlacklisted() then
+            ZO_AlertEvent(EVENT_COLLECTIBLE_USE_RESULT, COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED, true)
+            self:RefreshData()
+            self:OnPendingDataChanged(suppressCallbacks)
+            return true
+        end
+    end
+    return false
 end
 
 function ZO_OutfitSlotManipulator:GetCurrentItemMaterialIndex()
@@ -72,6 +93,14 @@ function ZO_OutfitSlotManipulator:SetPendingItemMaterialIndex(itemMaterialIndex,
 end
 
 function ZO_OutfitSlotManipulator:SetPendingCollectibleIdAndItemMaterialIndex(collectibleId, itemMaterialIndex, suppressCallbacks)
+    if collectibleId then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData and collectibleData:IsBlacklisted() then
+            ZO_AlertEvent(EVENT_COLLECTIBLE_USE_RESULT, COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED, true)
+            return
+        end
+    end
+
     if self.pendingCollectibleId ~= collectibleId or self.pendingItemMaterialIndex ~= itemMaterialIndex then
         self.pendingCollectibleId = collectibleId
         self.pendingItemMaterialIndex = itemMaterialIndex
@@ -401,6 +430,18 @@ do
         end
     end
 
+    function ZO_OutfitManipulator:OnCollectibleBlacklistUpdated()
+        local hasChanged = false
+        for _, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
+            local slotCleared = outfitSlotManipulator:OnCollectibleBlacklistUpdated(SUPPRESS_FIRE_CALLBACKS) 
+            hasChanged = hasChanged or slotCleared
+        end
+
+        if hasChanged then
+            self:OnSlotPendingDataChanged()
+        end
+    end
+
     function ZO_OutfitManipulator:RandomizeStyleData(includeHidden)
         for _, outfitSlotManipulator in pairs(self.outfitSlotManipulators) do
             local restyleSlotData = outfitSlotManipulator:GetRestyleSlotData()
@@ -620,6 +661,15 @@ function Outfit_Manager:Initialize()
         end
     end
 
+    local function OnCollectionUpdated(collectionUpdateType)
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.BLACKLIST_CHANGED then
+            for _, outfitManipulator in ipairs(self.outfits) do
+                outfitManipulator:OnCollectibleBlacklistUpdated()
+            end
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_EQUIP_RESPONSE, OnOutfitEquipResponse)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFITS_INITIALIZED, function() self:RefreshOutfits() end)
     EVENT_MANAGER:RegisterForEvent("OutfitManager", EVENT_OUTFIT_CHANGE_RESPONSE, OnOutfitChangeRespone)

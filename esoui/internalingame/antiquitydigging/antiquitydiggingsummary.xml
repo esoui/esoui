@@ -1,0 +1,782 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_AntiquityDiggingModalUnderlayFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="0.3"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingSummaryKeybindFade">
+            <Animations>
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingFailureFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingAntiquityRewardInTimeline">
+            <Animations>
+                <AlphaAnimation applyToChildControlName="Header" delay="10" duration="210" startAlpha="0" endAlpha="1" />
+
+                <SizeAnimation applyToChildControlName="HeaderMask" delay="10" duration="210" startWidth="0" startHeight="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+                
+                <ScaleAnimation applyToChildControlName="Divider" duration="190" startScale="0" endScale="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+                
+                <AlphaAnimation applyToChildControlName="ContainerFrameIcon" delay="80" duration="60" startAlpha="0" endAlpha="1" />
+                
+                <TranslateAnimation applyToChildControlName="ContainerFrameIcon" delay="80" duration="60" deltaX="0" startY="50" endY="0">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+                
+                <ScaleAnimation applyToChildControlName="ContainerFrameIcon" delay="80" duration="60" startScale="0" endScale="1.04">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+                
+                <ScaleAnimation applyToChildControlName="ContainerFrameIcon" delay="140" duration="100" startScale="1.04" endScale="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+
+                <SizeAnimation applyToChildControlName="SubHeaderMask" delay="190" duration="500" startWidth="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+
+                <SizeAnimation applyToChildControlName="ContainerNameMask" delay="190" duration="500" startWidth="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </SizeAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingRewardNewLeadFade">
+            <Animations>
+                <AlphaAnimation duration="300" delay="50" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+            <Callbacks>
+                <Callback delay="50">
+                    PlaySound(SOUNDS.ANTIQUITIES_FANFARE_NEW_LEAD_FOUND)
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+        
+        <AnimationTimeline name="ZO_AntiquityDiggingRewardBonusesFade">
+            <Animations>
+                <AlphaAnimation duration="500" delay="150" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+            <Callbacks>
+                <Callback delay="150">
+                    PlaySound(SOUNDS.ANTIQUITIES_FANFARE_BONUS_ITEM_FOUND)
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingRewardsOutTimeline">
+            <Animations>
+                <AlphaAnimation delay="ZO_ANTIQUITY_DIGGING_FANFARE_OUT_DELAY" duration="ZO_ANTIQUITY_DIGGING_FANFARE_OUT_DURATION" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingSetProgressionFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingFramedAntiquityIconFade">
+            <Animations>
+                <AlphaAnimation duration="ZO_PROGRESSION_FRAMED_ICON_FADE_DURATION_MS" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+            <Callbacks>
+                <Callback>
+                    PlaySound(SOUNDS.ANTIQUITIES_FANFARE_FRAGMENT_RUNDOWN_ICONS)
+                </Callback>
+            </Callbacks>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingFramedAntiquityIconScale">
+            <Animations>
+                <ScaleAnimation duration="ZO_PROGRESSION_FRAMED_ICON_SCALE_DURATION_MS" startScale="1" endScale="1.3">
+                    <EasingFunction>
+                        return ZO_EaseOutCubic(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingSetCompleteFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingTransferFade">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+
+                <AlphaAnimation duration="1500" startAlpha="1" endAlpha="0" delay="1500">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_AntiquityDiggingLoreFade">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <!-- Icons Teamples -->
+
+        <Control name="ZO_AntiquityDiggingRewardItem_Control_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Controls>
+                        <Label name="$(parent)StackCount" font="ZoFontGameOutline" />
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGameBold" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingRewardItem_Control_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Controls>
+                        <Label name="$(parent)StackCount" font="ZoFontGamepad27" />
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGamepad34" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityBonusLootRowContainer_Control" resizeToFitDescendents="true" virtual="true" />
+        
+        <Control name="ZO_AntiquityDiggingRewardItem_Control" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="64" y="64" />
+
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false">
+                            <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDigging_FramedAntiquityIcon_Keyboard_Template" virtual="true">
+            <Dimensions x="ZO_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_KEYBOARD" y="ZO_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_KEYBOARD" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame_buff.dds">
+                    <TextureCoords left="0.1875" right="0.8125" top="0.1875" bottom="0.8125" />
+                    <Controls>
+                        <Texture name="$(parent)BG" textureFile="EsoUI/Art/ActionBar/abilityInset.dds" />
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="ZO_FRAMED_ANTIQUITY_ICON_DIMENSIONS_KEYBOARD" y="ZO_FRAMED_ANTIQUITY_ICON_DIMENSIONS_KEYBOARD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDigging_FramedAntiquityIcon_Gamepad_Template" virtual="true">
+            <Dimensions x="ZO_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_GAMEPAD" y="ZO_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_GAMEPAD" />
+
+            <Controls>
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/Gamepad/gp_abilityFrame_buff.dds">
+                    <TextureCoords left="0.1094" right="0.8906" top="0.1094" bottom="0.8906" />
+                    <Controls>
+                        <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="ZO_FRAMED_ANTIQUITY_ICON_DIMENSIONS_GAMEPAD" y="ZO_FRAMED_ANTIQUITY_ICON_DIMENSIONS_GAMEPAD" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDigging_FramedAntiquityIcon" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Frame" level="3">
+                    <AnchorFill />
+
+                    <Controls>
+                        <Texture name="$(parent)BG" level="1">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" level="5" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <!-- Failure -->
+            
+        <Control name="ZO_AntiquityDiggingSummary_Failure_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Reason">
+                    <Controls>
+                        <Label name="$(parent)Body" font="ZoFontWinH2" />
+
+                        <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+
+                        <Label name="$(parent)Header" font="ZoFontWinH1" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_AntiquityDiggingSummary_Failure_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Reason">
+                    <Controls>
+                        <Label name="$(parent)Body" font="ZoFontGamepad42" />
+
+                        <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+
+                        <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_AntiquityDiggingSummary_Failure" virtual="true">
+            <AnchorFill />
+                    
+            <Controls>
+                <Control name="$(parent)Reason">
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-120" />
+
+                    <Controls>
+                        <Label name="$(parent)Body" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                            <Anchor point="BOTTOM" />
+                        </Label>
+
+                        <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)Body" relativePoint="TOP" offsetY="-10" />
+                            <Dimensions x="500" y="8" />
+                        </Control>
+
+                        <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_FAILURE_HEADER">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)Divider" relativePoint="TOP" offsetY="-10" />
+                        </Label>
+                    </Controls>
+                </Control>
+                        
+                <!-- TODO: Hints -->
+            </Controls>
+        </Control>
+        
+        <!-- Antiquity -->
+
+        <Control name="ZO_AntiquityDiggingSummary_AntiquityReward_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Controls>
+                        <Control name="$(parent)Name">
+                            <Controls>
+                                <Scroll name="$(parent)Mask">
+                                    <Controls>
+                                        <Label name="$(parent)Text" font="ZoFontWinH2" />
+                                    </Controls>
+                                </Scroll>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubHeader">
+                    <Controls>
+                        <Scroll name="$(parent)Mask">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontWinH3" />
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+
+                <Control name="$(parent)Header">
+                    <Controls>
+                        <Scroll name="$(parent)Mask">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontWinH1" />
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_AntiquityDiggingSummary_AntiquityReward_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Controls>
+                        <Control name="$(parent)Name">
+                            <Controls>
+                                <Scroll name="$(parent)Mask">
+                                    <Controls>
+                                        <Label name="$(parent)Text" font="ZoFontGamepad42" />
+                                    </Controls>
+                                </Scroll>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubHeader">
+                    <Controls>
+                        <Scroll name="$(parent)Mask">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontGamepad27" />
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+
+                <Control name="$(parent)Header">
+                    <Controls>
+                        <Scroll name="$(parent)Mask">
+                            <Controls>
+                                <Label name="$(parent)Text" font="ZoFontGamepadBold48" />
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_AntiquityReward" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-120" />
+
+                    <Controls>
+                        <Control name="$(parent)Frame">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="80" y="80" />
+
+                            <Controls>
+                                <Texture name="$(parent)Icon" excludeFromResizeToFitExtents="true">
+                                    <Anchor point="CENTER" />
+                                    <Dimensions x="80" y="80" />
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Name" inherits="ZO_LabelRevealAnimationWindow">
+                            <Anchor point="LEFT" relativeTo="$(parent)Frame" relativePoint="RIGHT" offsetX="10" />
+                            <Controls>
+                                <Scroll name="$(parent)Mask" override="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMLEFT" />
+                                </Scroll>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubHeader" inherits="ZO_LabelRevealAnimationWindow">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Container" relativePoint="TOP"/>
+                    <Controls>
+                        <Scroll name="$(parent)Mask" override="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMLEFT" />
+                            <Controls>
+                                <Label name="$(parent)Text" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" />
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)SubHeader" relativePoint="TOP" offsetY="-20" />
+                    <Anchor point="TOP" relativeTo="$(parent)SubHeader" relativePoint="TOP" offsetY="-28" />
+                    <Dimensions x="500" />
+                </Control>
+
+                <Control name="$(parent)Header" inherits="ZO_LabelRevealAnimationWindow">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Divider" relativePoint="TOP" offsetY="-10" />
+                    <Controls>
+                        <Scroll name="$(parent)Mask" override="true">
+                            <Anchor point="BOTTOM" />
+                            <Controls>
+                                <Label name="$(parent)Text" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_HEADER">
+                                    <Anchor point="BOTTOM" />
+                                </Label>
+                            </Controls>
+                        </Scroll>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- New Lead -->
+
+        <Control name="ZO_AntiquityDiggingSummary_NewLead_Keyboard_Template" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH3" />
+                <Control name="$(parent)Item" inherits="ZO_AntiquityDiggingRewardItem_Control_Keyboard_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_NewLead_Gamepad_Template" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepad27" />
+                <Control name="$(parent)Item" inherits="ZO_AntiquityDiggingRewardItem_Control_Gamepad_Template" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_NewLead" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_NEW_LEAD_FOUND">
+                    <Anchor point="TOP" relativePoint="CENTER" offsetY="-70" />
+                </Label>
+
+                <Control name="$(parent)Item" inherits="ZO_AntiquityDiggingRewardItem_Control">
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Bonus Rewards -->
+
+        <Control name="ZO_AntiquityDiggingSummary_BonusRewards_Keyboard_Template" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH3" />
+
+                <Control name="$(parent)Items">
+                    <Controls>
+                        <Label name="$(parent)NoLootFound" font="ZoFontGameBold" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_BonusRewards_Gamepad_Template" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepad27" />
+
+                <Control name="$(parent)Items">
+                    <Controls>
+                        <Label name="$(parent)NoLootFound" font="ZoFontGamepad34" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_BonusRewards" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_REWARDS_BONUS_LOOT_HEADER">
+                    <Anchor point="TOP" relativePoint="CENTER" offsetY="70" />
+                </Label>
+
+                <Control name="$(parent)Items">
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" />
+
+                    <Controls>
+                        <Label name="$(parent)NoLootFound" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" text="SI_ANTIQUITY_DIGGING_REWARDS_NO_BONUS_LOOT_FOUND" hidden="true">
+                            <Anchor point="TOP" offsetY="15" />
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Set Progression -->
+
+        <Control name="ZO_AntiquityDiggingSummary_SetProgression_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+
+                <Label name="$(parent)Header" font="ZoFontWinH1" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_SetProgression_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+
+                <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_SetProgression" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-200" />
+                    <Dimensions x="500" y="8" />
+                </Control>
+
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Divider" relativePoint="TOP" offsetY="-10"/>
+                </Label>
+
+                <Control name="$(parent)Entries" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="100" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Set Complete -->
+
+        <Control name="ZO_AntiquityDiggingSummary_SetComplete_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Banner">
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontWinH1" />
+                    </Controls>
+                </Texture>
+
+                <Control name="$(parent)FramedAntiquity" inherits="ZO_AntiquityDigging_FramedAntiquityIcon_Keyboard_Template">
+                    <Dimensions x="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_KEYBOARD" y="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_KEYBOARD" />
+                
+                    <Controls>
+                        <Texture name="$(parent)Icon">
+                            <Dimensions x="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_ICON_DIMENSIONS_KEYBOARD" y="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_ICON_DIMENSIONS_KEYBOARD" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_SetComplete_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Banner">
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontGamepadBold48" />
+                    </Controls>
+                </Texture>
+
+                <Control name="$(parent)FramedAntiquity" inherits="ZO_AntiquityDigging_FramedAntiquityIcon_Gamepad_Template">
+                    <Dimensions x="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_GAMEPAD" y="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_FRAME_DIMENSIONS_GAMEPAD" />
+                
+                    <Controls>
+                        <Texture name="$(parent)Icon">
+                            <Dimensions x="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_ICON_DIMENSIONS_GAMEPAD" y="ZO_SET_COMPLETE_FRAMED_ANTIQUITY_ICON_DIMENSIONS_GAMEPAD" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_SetComplete" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <!-- TODO: Get new assets -->
+                <Texture name="$(parent)Banner" textureFile="EsoUI/Art/Buttons/button_xlarge_mouseUp.dds" level="1">
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-100" />
+                    <Dimensions x="500" y="78" />
+                    <!-- 256 X 128 texture cut to 256 x 78-->
+                    <TextureCoords left="0" top="0" right="1" bottom="0.609375" />
+
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_SET_COMPLETE">
+                            <Anchor point="CENTER" />
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Control name="$(parent)FramedAntiquity" inherits="ZO_AntiquityDigging_FramedAntiquityIcon">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Banner" relativePoint="TOP" offsetY="-25" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <!-- Transfer -->
+
+        <Control name="ZO_AntiquityDiggingSummary_Transfer_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH1" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Transfer_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Transfer" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_TRANSFERING">
+                    <Dimensions x="1150"/>
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-275"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <!-- Lore -->
+
+        <Control name="ZO_AntiquityDiggingSummary_Lore_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH1" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Lore_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontGamepadBold48" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_AntiquityDiggingSummary_Lore" virtual="true">
+            <AnchorFill />
+
+            <Controls>
+                <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_ANTIQUITY_DIGGING_NEW_CODEX_ENTRY">
+                    <Dimensions x="1150"/>
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-275"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <!-- Top Level -->
+        
+        <TopLevelControl name="ZO_AntiquityDiggingSummaryTopLevel" tier="MEDIUM" layer="BACKGROUND" level="1" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_AntiquityDiggingSummary_OnInitialized(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Texture name="$(parent)ModalUnderlay" color="000000" mouseEnabled="true">
+                    <AnchorFill />
+                    <OnMouseWheel />
+                </Texture>
+
+                <Control name="$(parent)Failure" inherits="ZO_AntiquityDiggingSummary_Failure" />
+
+                <Control name="$(parent)Rewards">
+                    <AnchorFill />
+                    
+                    <Controls>
+                        <Control name="$(parent)Antiquity" inherits="ZO_AntiquityDiggingSummary_AntiquityReward" />
+
+                        <Control name="$(parent)NewLead" inherits="ZO_AntiquityDiggingSummary_NewLead" />
+                        
+                        <Control name="$(parent)Bonus" inherits="ZO_AntiquityDiggingSummary_BonusRewards" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SetProgression" inherits="ZO_AntiquityDiggingSummary_SetProgression" />
+
+                <Control name="$(parent)SetComplete" inherits="ZO_AntiquityDiggingSummary_SetComplete" />
+
+                <Control name="$(parent)Transfer" inherits="ZO_AntiquityDiggingSummary_Transfer" />
+                
+                <Control name="$(parent)Lore" inherits="ZO_AntiquityDiggingSummary_Lore" />
+
+                <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-110"/>
+                    <Controls>
+                        <Control name="$(parent)Primary" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT"/>
+                        </Control>
+                        <Control name="$(parent)Secondary" inherits="ZO_KeybindButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Primary" relativePoint="TOPRIGHT" offsetX="40"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

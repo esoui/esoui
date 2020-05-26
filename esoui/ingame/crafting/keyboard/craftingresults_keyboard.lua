@@ -11,7 +11,7 @@ local function RegisterEnchantDialog(dialogName, control)
     local function SetupEnchantDialog(dialog)
         local numTranslation = GetNumLastCraftingResultLearnedTranslations()
         for i = 1, numTranslation do
-            local translationName, itemName, icon, _, _, _, _, quality = GetLastCraftingResultLearnedTranslationInfo(i)
+            local translationName, itemName, icon, _, _, _, _, displayQuality = GetLastCraftingResultLearnedTranslationInfo(i)
 
             local row = control:GetNamedChild("Row" .. i)
             row:SetHidden(false)
@@ -19,7 +19,7 @@ local function RegisterEnchantDialog(dialogName, control)
             row.icon:SetTexture(icon)
 
             row.itemName:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName))
-            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
             row.itemName:SetColor(r, g, b, 1)
 
             row.translatedName:SetText(translationName)
@@ -77,7 +77,7 @@ function ZO_CraftingResults_SetupAlchemyDialogLayout(control, options)
     local currentRowIndex = 1
 
     for i = 1, numLearnedTraits do
-        local traitName, itemName, icon, sellPrice, meetsUsageRequirement, equipType, itemStyle, quality = GetLastCraftingResultLearnedTraitInfo(i)
+        local traitName, itemName, icon, sellPrice, meetsUsageRequirement, equipType, itemStyle, displayQuality = GetLastCraftingResultLearnedTraitInfo(i)
 
         if not itemNameToRow[itemName] then
             local row = control:GetNamedChild("Row" .. currentRowIndex)
@@ -92,7 +92,7 @@ function ZO_CraftingResults_SetupAlchemyDialogLayout(control, options)
             row.itemName:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName))
 
             if options.colorItemName then
-                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
                 row.itemName:SetColor(r, g, b, 1)
             end
 
@@ -256,7 +256,9 @@ end
 function ZO_CraftingResults_Keyboard:DisplayCraftingResult(itemInfo)
     local entryText
     local entryColor
-    local itemQualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemInfo.quality))
+    -- itemInfo.quality is depricated, included here for addon backwards compatibility
+    local displayQuality = itemInfo.displayQuality or itemInfo.quality
+    local itemQualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
     if ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
         local itemTrait = GetItemLinkTraitInfo(itemInfo.itemLink)
         local itemTraitString = GetString("SI_ITEMTRAITTYPE", itemTrait)
@@ -307,6 +309,7 @@ function ZO_CraftingResults_Keyboard_Initialize(control)
     CRAFTING_RESULTS_FRAGMENT = ZO_FadeSceneFragment:New(control)
     CRAFTING_RESULTS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_HIDDEN then
+            CRAFTING_RESULTS:ForceCompleteCraftProcess()
             CRAFTING_RESULTS:ClearAll()
         end
     end)

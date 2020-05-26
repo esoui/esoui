@@ -215,8 +215,8 @@ function ZO_GamepadStoreBuy:SetVendorBlurActive(shouldActivateVendorBlur)
         -- As is the case with other item preview fragments, we want to override the
         -- hideOnSceneHidden behavior the blur fragment normally has, but only
         -- when toggling preview on/off. if we are hiding the scene normally, we
-        -- should continue using hideOnSceneHidden. More info in ZO_ItemPreview_Shared:SetInteractionCameraPreviewEnabled().
-        ITEM_PREVIEW_GAMEPAD:RemoveFragmentImmediately(FRAME_TARGET_BLUR_QUADRANT_3_GAMEPAD_FRAGMENT)
+        -- should continue using hideOnSceneHidden. More info in ZO_SceneManager_Base:RemoveFragmentImmediately().
+        SCENE_MANAGER:RemoveFragmentImmediately(FRAME_TARGET_BLUR_QUADRANT_3_GAMEPAD_FRAGMENT)
     end
 end
 

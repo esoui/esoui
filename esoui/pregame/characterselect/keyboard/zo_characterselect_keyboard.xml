@@ -147,7 +147,16 @@
             </Controls>
         </TopLevelControl>
 
-        <TopLevelControl name="ZO_CharacterSelect" layer="BACKGROUND" hidden="true" mouseEnabled="true">
+        <TopLevelControl name="ZO_CharacterSelectBG" layer="BACKGROUND" hidden="true">
+            <Controls>
+                <Control name="$(parent)BGLeft" inherits="ZO_LeftFullscreenPanelBG" alpha=".55">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="-300"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="-300" offsetY="120" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_CharacterSelect" layer="TEXT" hidden="true" mouseEnabled="true">
             <Dimensions x="410" />
             <Anchor point="TOPRIGHT" />
             <Anchor point="BOTTOMRIGHT" />
@@ -160,11 +169,6 @@
                 <Control name="$(parent)BGRight" inherits="ZO_RightFullscreenPanelBG">
                     <Anchor point="TOPRIGHT" offsetX="195"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="195" offsetY="120" />
-                </Control>
-
-                <Control name="$(parent)BGLeft" inherits="ZO_LeftFullscreenPanelBG" alpha=".55">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="-300"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="-300" offsetY="120" />
                 </Control>
 
                 <Label name="$(parent)CharacterSlots" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
@@ -213,6 +217,15 @@
 
                     <OnInitialized>
                         ZO_AppearanceChangeIndicator_Initialize(self)
+                    </OnInitialized>
+
+                </Control>
+
+                <Control name="$(parent)AllianceChange" inherits="ZO_ServiceTokenIndicator">
+                    <Anchor point="LEFT" relativeTo="$(parent)AppearanceChange" relativePoint="RIGHT" offsetX="10" />
+
+                    <OnInitialized>
+                        ZO_AllianceChangeIndicator_Initialize(self)
                     </OnInitialized>
 
                 </Control>
@@ -297,6 +310,89 @@
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetY="-5" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Image" relativePoint="TOPRIGHT" offsetY="-5" />
                         </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)EventMinimized">
+                    <Dimensions x="512" y="512" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
+
+                    <Controls>
+                        <Texture name="$(parent)OverlayBackground" layer="BACKGROUND" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_overlay.dds">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Texture>
+
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_background.dds">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Control name="$(parent)Carousel" inherits="ZO_Carousel_Control">
+                            <Dimensions x="358" y="283" />
+                            <Anchor point="BOTTOMLEFT" offsetY="-64" />
+
+                            <Controls>
+                                <Control name="$(parent)SelectionIndicator" tier="MEDIUM" layer="OVERLAY" override="true">
+                                    <ClearAnchors />
+                                    <Anchor point="TOP" relativeTo="$(parent)Carousel" relativePoint="BOTTOM" offsetY="20"/>
+                                </Control>
+
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <ClearAnchors />
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                    <FadeGradient x1="0" y1="0" size1="0" x2="0" y2="0" size2="0" />
+
+                                    <Controls>
+                                        <Texture name="$(parent)OverlayMunge" layer="TEXT" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_overlay.dds">
+                                            <Anchor point="TOPLEFT" offsetY="-165" />
+                                            <Anchor point="BOTTOMRIGHT" offsetX="154" offsetY="64" />
+                                        </Texture>
+                                    </Controls>
+                                </Scroll>
+
+                                <Button name="$(parent)LeftArrow" layer="OVERLAY" override="true">
+                                    <Dimensions x="16" y="16" />
+                                    <ClearAnchors />
+                                    <Anchor point="LEFT" offsetX= "40" constrains="X" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)SelectionIndicator" relativePoint="LEFT" constrains="Y" />
+                                    <Textures
+                                        normal="EsoUI/Art/Buttons/leftArrow_up.dds"
+                                        pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
+                                        disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"
+                                    />
+                                </Button>
+
+                                <Button name="$(parent)RightArrow" layer="OVERLAY" override="true">
+                                    <Dimensions x="16" y="16" />
+                                    <ClearAnchors />
+                                    <Anchor point="RIGHT" offsetX= "-40" constrains="X" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)SelectionIndicator" relativePoint="RIGHT" constrains="Y" />
+                                    <Textures
+                                        normal="EsoUI/Art/Buttons/rightArrow_up.dds"
+                                        pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
+                                        mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
+                                        disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
+                                    />
+                                </Button>
+                            </Controls>
+                        </Control>
+
+                        <Texture name="$(parent)NavigationDivider" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_divider.dds">
+                            <Dimensions y="4" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMRIGHT" />
+                        </Texture>
+
+                        <Button name="$(parent)HitArea" tier="HIGH">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CarouselScroll" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CarouselScroll" relativePoint="BOTTOMRIGHT" />
+
+                            <OnClicked>
+                                ZO_CharacterSelect_ShowEventBanner()
+                            </OnClicked>
+                        </Button>
                     </Controls>
                 </Control>
             </Controls>

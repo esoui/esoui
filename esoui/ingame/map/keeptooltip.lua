@@ -222,7 +222,7 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
 
             --Keep Fast Travel Status
             local startingKeep = GetKeepFastTravelInteraction()
-            local isUsingKeepRecallStone = ZO_WorldMap_GetMode() == MAP_MODE_AVA_KEEP_RECALL
+            local isUsingKeepRecallStone = WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_KEEP_RECALL)
             if startingKeep or isUsingKeepRecallStone then
                 AddVerticalSpace(self, 5)
                 if keepId == startingKeep then
@@ -263,12 +263,12 @@ local function LayoutKeepTooltip(self, keepId, battlegroundContext, historyPerce
 
         --Keep Under Attack
         local showUnderAttackLine = GetHistoricalKeepUnderAttack(keepId, battlegroundContext, historyPercent)
-        if(showUnderAttackLine) then
+        if showUnderAttackLine then
             AddLine(self, GetString(SI_TOOLTIP_KEEP_IN_COMBAT), KEEP_TOOLTIP_ATTACK_LINE)
         end
 
-        if(ZO_WorldMap_GetMode() == MAP_MODE_AVA_RESPAWN and IsLocalBattlegroundContext(battlegroundContext)) then
-            if(CanRespawnAtKeep(keepId)) then
+        if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_RESPAWN) and IsLocalBattlegroundContext(battlegroundContext) then
+            if CanRespawnAtKeep(keepId) then
                 AddLine(self, GetString(SI_TOOLTIP_KEEP_RESPAWNABLE), KEEP_TOOLTIP_ACCESSIBLE)
             else
                 AddLine(self, GetString(SI_TOOLTIP_KEEP_NOT_RESPAWNABLE), KEEP_TOOLTIP_NOT_ACCESSIBLE)
@@ -350,7 +350,7 @@ local function LayoutKeepTooltip_Gamepad(self, keepId, battlegroundContext, hist
         end
 
         -- Respawn
-        if (ZO_WorldMap_GetMode() == MAP_MODE_AVA_RESPAWN) and IsLocalBattlegroundContext(battlegroundContext) then
+        if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_RESPAWN) and IsLocalBattlegroundContext(battlegroundContext) then
             LayoutKeepActionLine_Gamepad(self, keepSection, SI_GAMEPAD_WORLD_MAP_TOOLTIP_KEEP_RESPAWNABLE, CanRespawnAtKeep(keepId))
         end
 
@@ -495,18 +495,18 @@ local function LayoutForwardCamp(self, graveyardIndex, battlegroundContext, usab
     local text = zo_strformat(GetString(SI_TOOLTIP_KEEP_ALLIANCE_OWNER), allianceName)
     AddLine(self, text, KEEP_TOOLTIP_NORMAL_LINE)
 
-    if(IsForwardCampGuildOwned(battlegroundContext, graveyardIndex)) then
+    if IsForwardCampGuildOwned(battlegroundContext, graveyardIndex) then
         local guildNameText = GetForwardCampOwnerName(battlegroundContext, graveyardIndex)
-        if(guildNameText ~= nil) then
+        if guildNameText ~= nil then
             local fullText = zo_strformat(GetString(SI_TOOLTIP_KEEP_GUILD_OWNER), guildNameText)
             AddLine(self, fullText, KEEP_TOOLTIP_NORMAL_LINE)
         end
     end
 
-    if(ZO_WorldMap_GetMode() == MAP_MODE_AVA_RESPAWN) then
+    if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_RESPAWN) then
         local tooltipText = SI_TOOLTIP_FORWARD_CAMP_RESPAWN
         local tooltipColor = KEEP_TOOLTIP_ACCESSIBLE
-        if (not usable) then
+        if not usable then
             tooltipText = SI_TOOLTIP_KEEP_NOT_RESPAWNABLE
             tooltipColor = KEEP_TOOLTIP_NOT_ACCESSIBLE
         end
@@ -522,7 +522,7 @@ local function LayoutForwardCamp_Gamepad(self, graveyardIndex, battlegroundConte
     local campSection = self.tooltip:AcquireSection(self.tooltip:GetStyle("mapLocationTooltipSection"))
 
     -- Respawn
-    if ZO_WorldMap_GetMode() == MAP_MODE_AVA_RESPAWN then
+    if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_RESPAWN) then
         LayoutKeepActionLine_Gamepad(self, campSection, SI_GAMEPAD_WORLD_MAP_TOOLTIP_KEEP_RESPAWNABLE, usable)
     end
 

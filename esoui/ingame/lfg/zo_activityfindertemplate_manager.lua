@@ -86,6 +86,10 @@ function ZO_ActivityFinderTemplate_Manager:GetGamepadObject()
     return self.gamepadObject
 end
 
+function ZO_ActivityFinderTemplate_Manager:GetCategoryData()
+    assert(false) -- must be overwritten in derived classes
+end
+
 function ZO_ActivityFinderTemplate_Manager:SetLockingCooldownTypes(...)
     self.lockingCooldownTypes = { ... }
 end

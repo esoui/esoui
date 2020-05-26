@@ -8,7 +8,7 @@ ZO_SCALABLE_BACKGROUND_CENTER_TEXTURE_BOTTOM_COORD = (ZO_SCALABLE_BACKGROUND_HEI
 ZO_SCENE_MENU_HEIGHT = 45
 
 ZO_DEFAULT_BACKDROP_ANCHOR_OFFSET = 8
-  
+
 function ZO_SelectionHighlight_SetColor(highlight, r, g, b)
     highlight:SetCenterColor(r, g, b, 1)
     highlight:SetEdgeColor(r, g, b, 1)
@@ -16,13 +16,10 @@ end
 
 function ZO_SelectionHighlight_Highlight(highlight, control, leftOffset, topOffset, rightOffset, bottomOffset)
     highlight:SetHidden(control == nil)
-    
-    if(control)
-    then
+
+    if control then
         highlight:ClearAnchors()
-        
-        if(leftOffset == nil)
-        then
+        if leftOffset == nil then
             highlight:SetAnchorFill(control)
         else
             highlight:SetAnchor(TOPLEFT, control, TOPLEFT, leftOffset, topOffset)
@@ -36,8 +33,8 @@ function ZO_CreateSparkleAnimation(slotControl)
     local sparkle = slotControl:GetNamedChild("Sparkle")
     local sparkleCCW = sparkle:GetNamedChild("CCW")
 
-    local animData = 
-    { 
+    local animData =
+    {
         sparkle = sparkle,
         translateTimeLine = ANIMATION_MANAGER:CreateTimelineFromVirtual("SparkleTranslateAnim", icon),
         sparkleTimeLine = ANIMATION_MANAGER:CreateTimelineFromVirtual("SparkleStarburstAnim", sparkle),
@@ -46,7 +43,7 @@ function ZO_CreateSparkleAnimation(slotControl)
     local ccwAnim = animData.sparkleTimeLine:GetAnimation(2)
     ccwAnim:SetAnimatedControl(sparkleCCW)
 
-    if(slotControl.CustomOnStopCallback) then
+    if slotControl.CustomOnStopCallback then
         animData.sparkleTimeLine:SetHandler("OnStop", function() slotControl:CustomOnStopCallback() end)
     end
 
@@ -56,18 +53,46 @@ end
 function ZO_PlaySparkleAnimation(slotControl)
     local animData = slotControl:GetNamedChild("Icon").animData
 
-    if(slotControl.SetMouseOverTexture) then
+    if slotControl.SetMouseOverTexture then
         slotControl:SetMouseOverTexture(nil) -- Disable mouseover texture, we don't want to show it during motion animation
         slotControl:SetPressedMouseOverTexture(nil)
     end
-    
+
     animData.translateTimeLine:PlayFromStart()
     animData.sparkleTimeLine:PlayFromStart()
     animData.sparkle:SetHidden(false)
 end
 
+function ZO_ResetSparkleAnimationColor(slotControl)
+    local animData = slotControl:GetNamedChild("Icon").animData
+    local sparkleCCW = animData.sparkle:GetNamedChild("CCW")
+
+    animData.sparkle:SetColor(ZO_WHITE:UnpackRGB())
+    sparkleCCW:SetColor(ZO_WHITE:UnpackRGB())
+
+    animData.sparkle:SetHidden(true)
+end
+
+function ZO_PlayColorSparkleAnimation(slotControl, color)
+    local animData = slotControl:GetNamedChild("Icon").animData
+    local sparkleCCW = animData.sparkle:GetNamedChild("CCW")
+
+    if color and color.UnpackRGB then
+        animData.sparkle:SetColor(color:UnpackRGB())
+        sparkleCCW:SetColor(color:UnpackRGB())
+    end
+
+    if slotControl.SetMouseOverTexture then
+        slotControl:SetMouseOverTexture(nil) -- Disable mouseover texture, we don't want to show it during motion animation
+        slotControl:SetPressedMouseOverTexture(nil)
+    end
+
+    animData.sparkleTimeLine:PlayFromStart()
+    animData.sparkle:SetHidden(false)
+end
+
 function ZO_SetupSelectableItemRadialMenuEntryTemplate(template, selected, itemCount)
-    if(itemCount) then
+    if itemCount then
         template.count:SetHidden(false)
         template.count:SetText(itemCount)
 
@@ -122,10 +147,10 @@ do
         self.buttons = {}
     end
 
-	function ZO_RequiredTextFields:SetMatchingString(string)
-		self.matchingString = string
-		self:UpdateButtonEnabled()
-	end
+    function ZO_RequiredTextFields:SetMatchingString(string)
+        self.matchingString = string
+        self:UpdateButtonEnabled()
+    end
 
     function ZO_RequiredTextFields:AddTextField(editControl)
         table.insert(self.editControls, editControl)
@@ -142,26 +167,26 @@ do
     end
 
     function ZO_RequiredTextFields:UpdateButtonEnabled()
-        if(#self.buttons > 0) then
+        if #self.buttons > 0 then
             for _, value in pairs(self.booleans) do
-                if(not value) then
+                if not value then
                     self:SetButtonsEnabled(false)
-					return
+                    return
                 end
             end
 
             for i = 1, #self.editControls do
-			    local editText = self.editControls[i]:GetText()
-				if(self.matchingString) then
-					if(self.matchingString ~= editText) then
-						self:SetButtonsEnabled(false)
-						return
-					end
-				else 
-					if(editText == "") then
-						self:SetButtonsEnabled(false)
-						return
-					end
+                local editText = self.editControls[i]:GetText()
+                if self.matchingString then
+                    if self.matchingString ~= editText then
+                        self:SetButtonsEnabled(false)
+                        return
+                    end
+                else
+                    if editText == "" then
+                        self:SetButtonsEnabled(false)
+                        return
+                    end
                 end
             end
 
@@ -196,9 +221,9 @@ do
         if not self.animation then
             self.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("LoadIconAnimation", GetControl(self, "Icon"))
         end
-        
-        if(self.text) then
-            if(not self.label) then
+
+        if self.text then
+            if not self.label then
                 self.label = CreateControlFromVirtual("$(parent)Text", self, self.labelTemplate)
             end
 
@@ -212,14 +237,14 @@ do
 
     local function Hide(self)
         self:SetHidden(true)
-        if(self.animation) then
+        if self.animation then
             self.animation:Stop()
         end
     end
 
     local function SetText(self, text)
         local textControl = GetControl(self, "Text")
-        if(textControl) then
+        if textControl then
             textControl:SetText(text)
         else
             self.text = text
@@ -227,7 +252,7 @@ do
     end
 
     local function ApplyTemplateToLabel(self, labelTemplate)
-        if(not self.label) then
+        if not self.label then
             self.label = CreateControlFromVirtual("$(parent)Text", self, self.labelTemplate)
         end
         ApplyTemplateToControl(self.label, labelTemplate)
@@ -269,15 +294,15 @@ do
         self.endTimeS = nowS + (remainingTimeMs / 1000)
         self.lastUpdateS = nowS
 
-        if(self.numWarningSounds > 0) then
+        if self.numWarningSounds > 0 then
             EVENT_MANAGER:RegisterForUpdate(self:GetName(), 20, function(timeMS)
                 local timeS = timeMS / 1000
-                if(timeS < self.endTimeS and timeS >= self.endTimeS - self.numWarningSounds) then
+                if timeS < self.endTimeS and timeS >= self.endTimeS - self.numWarningSounds then
                     local lastUpdateSecPart = zo_floor(self.lastUpdateS)
                     local nowSecPart = zo_floor(timeS)
-                    if(lastUpdateSecPart ~= nowSecPart) then
+                    if lastUpdateSecPart ~= nowSecPart then
                         PlaySound(SOUNDS.COUNTDOWN_WARNING)
-                        if(not self.pulseTimeline) then
+                        if not self.pulseTimeline then
                             self.pulseTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_RadialCountdownTimerPulse", self)
                         end
                         self.pulseTimeline:PlayFromStart()

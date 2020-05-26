@@ -39,12 +39,14 @@ function ZO_GamepadInventory:Initialize(control)
     end
 
     local function OnUpdate(updateControl, currentFrameTimeSeconds)
-       self:OnUpdate(currentFrameTimeSeconds)
+        if self.scene:IsShowing() then
+            self:OnUpdate(currentFrameTimeSeconds)
+        end
     end
 
-    self.trySetClearNewFlagCallback =   function(callId)
-                                            self:TrySetClearNewFlag(callId)
-                                        end
+    self.trySetClearNewFlagCallback = function(callId)
+        self:TrySetClearNewFlag(callId)
+    end
 
     local function RefreshVisualLayer()
         if self.scene:IsShowing() then
@@ -698,7 +700,7 @@ function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
 
     if selectedData.equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, BAG_WORN, selectedData.equipSlot) then
         local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(selectedData.equipSlot or EQUIP_SLOT_NONE)
-        
+
         if isHidden then
             GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_TOOLTIP, GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER), nil, ZO_SELECTED_TEXT:Colorize(GetHiddenByStringForVisualLayer(highestPriorityVisualLayerThatIsShowing)))
         else
@@ -765,10 +767,10 @@ local function GetCategoryTypeFromWeaponType(bagId, slotIndex)
 end
 
 local function IsTwoHandedWeaponCategory(categoryType)
-    return (categoryType == GAMEPAD_WEAPON_CATEGORY_TWO_HANDED_MELEE or
+    return  categoryType == GAMEPAD_WEAPON_CATEGORY_TWO_HANDED_MELEE or
             categoryType == GAMEPAD_WEAPON_CATEGORY_DESTRUCTION_STAFF or
             categoryType == GAMEPAD_WEAPON_CATEGORY_RESTORATION_STAFF or
-            categoryType == GAMEPAD_WEAPON_CATEGORY_TWO_HANDED_BOW)
+            categoryType == GAMEPAD_WEAPON_CATEGORY_TWO_HANDED_BOW
 end
 
 function ZO_GamepadInventory:AddFilteredBackpackCategoryIfPopulated(filterType, iconFile)
@@ -1061,8 +1063,6 @@ function ZO_GamepadInventory:RefreshItemList()
 
     local lastBestItemCategoryName
     for i, itemData in ipairs(filteredDataTable) do
-        local nextItemData = filteredDataTable[i + 1]
-
         local entryData = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
         entryData:InitializeInventoryVisualData(itemData)
 
@@ -1252,9 +1252,9 @@ function ZO_GamepadInventory:TryEquipItem(inventorySlot)
         end
 
         if ZO_InventorySlot_WillItemBecomeBoundOnEquip(sourceBag, sourceSlot) then
-            local itemQuality = select(8, GetItemInfo(sourceBag, sourceSlot))
-            local itemQualityColor = GetItemQualityColor(itemQuality)
-            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = DoEquip}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(sourceBag, sourceSlot))}})
+            local itemDisplayQuality = GetItemDisplayQuality(sourceBag, sourceSlot)
+            local itemDisplayQualityColor = GetItemQualityColor(itemDisplayQuality)
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", { onAcceptCallback = DoEquip }, { mainTextParams = { itemDisplayQualityColor:Colorize(GetItemName(sourceBag, sourceSlot)) } })
         else
             DoEquip()
         end

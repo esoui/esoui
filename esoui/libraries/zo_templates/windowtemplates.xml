@@ -316,6 +316,22 @@
             </Controls>
         </TopLevelControl>
 
+        <TopLevelControl name="ZO_ThinRightFootPrint" virtual="true">
+            <Dimensions x="480" y="730" />
+            <Anchor point="RIGHT" offsetY="18" />
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ThinRightFootPrintBackground" allowBringToTop="false" virtual="true">
+            <Dimensions x="500" y="750" />
+            <Anchor point="RIGHT" offsetY="20" />
+            <Controls>
+                <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/centerscreen_left.dds" mouseEnabled="true">
+                    <Dimensions x="1024" y="1024" />
+                    <Anchor point="TOPLEFT" offsetX="-75" offsetY="-75" />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
+
         <TopLevelControl name="ZO_TreeUnderlay" virtual="true">
             <Dimensions x="384" y="1024" />
             <Anchor point="RIGHT" offsetX="-611" offsetY="82" />
@@ -664,7 +680,69 @@
                 </Control>
             </Controls>
         </Control>
-        
+
+        <Control name="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Dimensions x="4" y="8" />
+                    <TextureCoords left="0" right="0.25" top=".25" bottom=".75" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <Dimensions x="4" y="8" />
+                    <TextureCoords left="0.75" right="1" top=".25" bottom=".75" />
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                    <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" />
+                </Texture>
+
+                <Texture name="$(parent)MungeOverlay" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
+                    <Dimensions x="56" y="6" />
+                    <TextureCoords left="0.015625" right="0.4375" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
+                    <Dimensions x="56" y="6" />
+                    <TextureCoords left="0.5625" right="0.9921875" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
+                    <TextureCoords left="0.4375" right="0.5625" top="0" bottom="1" />
+                </Texture>
+
+                <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" hidden="false" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PlatformStyleDynamicHorizontalDivider" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Left" layer="CONTROLS" level="2">
+                    <Anchor point="LEFT" />
+                </Texture>
+
+                <Texture name="$(parent)Right" layer="CONTROLS" level="2">
+                    <Anchor point="RIGHT" />
+                </Texture>
+
+                <Texture name="$(parent)Center" layer="CONTROLS" level="2">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
+                </Texture>
+
+                <Texture name="$(parent)MungeOverlay" layer="CONTROLS" level="3" addressMode="WRAP">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" offsetY="1" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" offsetY="-2" />
+                </Texture>
+            </Controls>
+        </Control>
+
         <Texture name="ZO_BaseTooltipDivider" virtual="true" hidden="true" inherits="ZO_HorizontalDivider">
             <Dimensions x="372" y="5"/>
             <TextureCoords left="0.13671875" right="0.86328125" top="0" bottom="0.625" />

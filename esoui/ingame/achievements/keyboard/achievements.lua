@@ -343,7 +343,7 @@ function Achievement:AddCheckBox(description, checked)
     self.checkBoxes[#self.checkBoxes + 1] = check
 end
 
-function Achievement:AddIconReward(name, icon, quality, rewardIndex)
+function Achievement:AddIconReward(name, icon, displayQuality, rewardIndex)
     local iconControl, key = self.rewardIconPool:AcquireObject()
     iconControl.key = key
 
@@ -354,10 +354,10 @@ function Achievement:AddIconReward(name, icon, quality, rewardIndex)
     iconControl:SetParent(self.control)
 
     ZO_Inventory_BindSlot(iconControl, SLOT_TYPE_ACHIEVEMENT_REWARD, rewardIndex, self.achievementId)
-    
+
     iconControl.label:SetText(name) -- Already localized
-    iconControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
-    
+    iconControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
+
     self.rewardIcons[#self.rewardIcons + 1] = iconControl
 end
 
@@ -539,9 +539,9 @@ end
 local function AddRewards(self, achievementId)
     local completed = select(5, GetAchievementInfo(achievementId))
     -- get item reward
-    local hasRewardItem, itemName, iconTextureName, quality = GetAchievementRewardItem(achievementId)
+    local hasRewardItem, itemName, iconTextureName, displayQuality = GetAchievementRewardItem(achievementId)
     if hasRewardItem then
-        self:AddIconReward(itemName, iconTextureName, quality, 1)
+        self:AddIconReward(itemName, iconTextureName, displayQuality, 1)
     end
 
     -- get title reward

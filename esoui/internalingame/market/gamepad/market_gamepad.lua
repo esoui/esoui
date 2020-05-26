@@ -1281,7 +1281,7 @@ function GamepadMarket:RestoreActionLayerForTutorial()
 end
 
 function GamepadMarket:RemoveActionLayerForTutorial()
-    -- we exit the gamepad tutotial by pressing "A"
+    -- we exit the gamepad tutorial by pressing "A"
     RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_GENERAL))
 end
 

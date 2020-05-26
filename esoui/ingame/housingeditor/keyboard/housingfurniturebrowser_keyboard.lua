@@ -108,8 +108,8 @@ end
 
 function ZO_HousingFurnitureBrowser_Keyboard.SetupFurnitureRow(rowControl, furnitureObject, OnMouseClickCallback, OnMouseDoubleClickCallback)
     rowControl.name:SetText(furnitureObject:GetFormattedName())
-    local quality = furnitureObject:GetQuality()
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+    local displayQuality = furnitureObject:GetDisplayQuality()
+    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
     rowControl.name:SetColor(r, g, b, 1)
 
     rowControl.icon:SetTexture(furnitureObject:GetIcon())

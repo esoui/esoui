@@ -505,6 +505,14 @@ function ZO_Scene:SetSceneRestoreHUDSceneToggleGameMenu(restoreScene)
     self.restoresHUDSceneToggleGameMenu = restoreScene
 end
 
+function ZO_Scene:SetHandleGamepadPreferredModeChangedCallback(handleGamepadPreferredModeChangedCallback)
+    self.handleGamepadPreferredModeChangedCallback = handleGamepadPreferredModeChangedCallback
+end
+
+function ZO_Scene:GetHandleGamepadPreferredModeChangedCallback()
+    return self.handleGamepadPreferredModeChangedCallback
+end
+
 function ZO_Scene:Log(message)
     if WriteToInterfaceLog and g_loggingEnabled then
         WriteToInterfaceLog(string.format("%s - %s - %s", ZO_Scene_GetOriginColor():Colorize(GetString("SI_SCENEMANAGERMESSAGEORIGIN", ZO_REMOTE_SCENE_CHANGE_ORIGIN)), self.name, message))

@@ -254,37 +254,3 @@ local pregameStates =
 }
 
 PregameStateManager_AddGamepadStates(pregameStates)
-
-function ZO_Gamepad_DisplayServerDisconnectedError()
-    if not IsErrorQueuedFromIngame() then
-        return
-    end
-
-    local logoutError, globalErrorCode = GetErrorQueuedFromIngame()
-
-    ZO_PREGAME_HAD_GLOBAL_ERROR = true
-
-    local errorString
-    local errorStringFormat
-
-    if logoutError ~= nil and logoutError ~= LOGOUT_ERROR_UNKNOWN_ERROR then
-        errorStringFormat = GetString("SI_LOGOUTERROR", logoutError)
-
-        if errorStringFormat ~= ""  then
-            errorString = zo_strformat(errorStringFormat, GetGameURL())
-        end
-    elseif globalErrorCode ~= nil and globalErrorCode ~= GLOBAL_ERROR_CODE_NO_ERROR then
-        -- if the error code is not in LogoutReason then it is probably in the GlobalErrorCode enum 
-        errorStringFormat = GetString("SI_GLOBALERRORCODE", globalErrorCode)
-
-        if errorStringFormat ~= ""  then
-            errorString = zo_strformat(errorStringFormat, globalErrorCode)
-        end
-    end
-
-    if errorString == nil or errorString == "" then
-        errorString = zo_strformat(SI_UNEXPECTED_ERROR, GetString(SI_HELP_URL))
-    end
-
-    PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(nil, errorString)
-end

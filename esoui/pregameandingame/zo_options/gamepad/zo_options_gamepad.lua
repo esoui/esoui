@@ -41,9 +41,6 @@ function ZO_GamepadOptions:InitializeScenes()
             self:RefreshHeader()
             self:SetCurrentList(self.categoryList)
 
-            if self.inputBlocked then
-                self:SetGamepadOptionsInputBlocked(false)
-            end
             KEYBIND_STRIP:AddKeybindButtonGroup(self.rootKeybindDescriptor)
         elseif newState == SCENE_HIDDEN then
             self:DisableCurrentList()
@@ -199,13 +196,11 @@ do
                 keybind = "UI_SHORTCUT_SECONDARY",
                 visible = function() return not categoriesWithoutDefaults[self.currentCategory] end,
                 callback = function()
-                    if not self.inputBlocked then
-                        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_OPTIONS_RESET_TO_DEFAULTS")
-                    end
+                    ZO_Dialogs_ShowGamepadDialog("GAMEPAD_OPTIONS_RESET_TO_DEFAULTS")
                 end,
             },
         }
-        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() if not self.inputBlocked then SCENE_MANAGER:HideCurrentScene() end end)
+        ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() SCENE_MANAGER:HideCurrentScene() end)
     
         self.rootKeybindDescriptor = 
         {
@@ -214,11 +209,9 @@ do
                 name = GetString(SI_GAMEPAD_SELECT_OPTION),
                 keybind = "UI_SHORTCUT_PRIMARY",
                 callback = function()
-                    if not self.inputBlocked then
-                        local data = self.categoryList:GetTargetData()
-                        self.currentCategory = data.panelId
-                        SCENE_MANAGER:Push("gamepad_options_panel")
-                    end
+                    local data = self.categoryList:GetTargetData()
+                    self.currentCategory = data.panelId
+                    SCENE_MANAGER:Push("gamepad_options_panel")
                 end,
             },
         }
@@ -244,9 +237,7 @@ do
                 keybind = "UI_SHORTCUT_PRIMARY",
                 order = -500,
                 callback = function()
-                    if not self.inputBlocked then
-                        self:Select()
-                    end
+                    self:Select()
                 end,
             },
         }
@@ -655,8 +646,8 @@ end
 function ZO_GamepadOptions:GetButtonMarkupFromActionName(actionName)
     local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
     for bindingIndex = 1, GetMaxBindingsPerAction() do
-        local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex)
-        if key ~= KEY_INVALID then                  
+        local key = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex)
+        if key ~= KEY_INVALID then
             -- If the key matches the preferred mode then just use it
             if IsKeyCodeGamepadKey(key) then
                 return ZO_Keybindings_GenerateIconKeyMarkup(key)
@@ -815,8 +806,7 @@ function ZO_GamepadOptions:AddSettingGroup(panelId)
             local data = self:GetSettingsData(setting.panel, setting.system, setting.settingId)
             local isVisible = data.visible == nil or data.visible
 
-            local exists = data.existsOnGamepad or data.exists
-            if exists ~= nil and not exists() then
+            if not self:DoesSettingExist(data) then
                 -- This setting isn't available on this platform
                 isVisible = false
             elseif IsSettingDeferred(data.system, data.settingId) and not IsDeferredSettingLoaded(data.system, data.settingId) then
@@ -862,11 +852,12 @@ end
 function ZO_GamepadOptions:LoadPanelDefaults(panelSettings)
     for _, setting in ipairs(panelSettings) do
         local data = self:GetSettingsData(setting.panel, setting.system, setting.settingId)
-        ZO_SharedOptions.LoadDefaults(self, nil, data)
+        local NO_CONTROL = nil
+        ZO_SharedOptions.LoadDefaults(self, NO_CONTROL, data)
     end
 end
 
-function ZO_GamepadOptions:LoadDefaults()
+function ZO_GamepadOptions:LoadAllDefaults()
     if self:IsAtRoot() then
         for panel, settings in pairs(GAMEPAD_SETTINGS_DATA) do
             self:LoadPanelDefaults(settings)
@@ -888,8 +879,4 @@ function ZO_GamepadOptions:LoadDefaults()
     self:SaveCachedSettings()
 
     self:RefreshGamepadInfoPanel()
-end
-
-function ZO_GamepadOptions:SetGamepadOptionsInputBlocked(blocked)
-    self.inputBlocked = blocked
 end

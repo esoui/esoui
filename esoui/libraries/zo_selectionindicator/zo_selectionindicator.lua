@@ -26,13 +26,13 @@ function ZO_SelectionIndicator:Initialize(control)
     self.indicatorList = {}
     self:SetButtonVirtualControl("ZO_SelectionIndicator_Button_Control")
 
-    local function FactoryFunction(objectPool)
-        local button = ZO_ObjectPool_CreateNamedControl(self.controlName, self.virtualControlTemplate, objectPool, self.control)
-        button:SetHandler("OnClicked", function() self:OnButtonClicked(button) end)
-        return button
-    end
+    self.controlPool = ZO_ControlPool:New(self.virtualControlTemplate, self.control, "SelectionIndicatorPip")
 
-    self.objectPool = ZO_ObjectPool:New(FactoryFunction)
+    self.selectedImage = "EsoUI/Art/Buttons/featureDot_active.dds"
+    self.unselectedImage = "EsoUI/Art/Buttons/featureDot_inactive.dds"
+    self.mouseOverImage = nil
+    self.buttonWidth = 16
+    self.buttonHeight = 16
 end
 
 function ZO_SelectionIndicator:OnButtonClicked(button)
@@ -44,12 +44,38 @@ function ZO_SelectionIndicator:OnButtonClicked(button)
     end
 end
 
+function ZO_SelectionIndicator:OnMouseEnter(button)
+    if self.mouseOverImage then
+        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.mouseOverImage)
+    end
+end
+
+function ZO_SelectionIndicator:OnMouseExit(button)
+    if button == self.currentSelection then
+        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.selectedImage)
+    else
+        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.unselectedImage)
+    end
+end
+
 function ZO_SelectionIndicator:SetButtonClickedCallback(buttonClickedCallback)
     self.buttonClickedCallback = buttonClickedCallback
 end
 
 function ZO_SelectionIndicator:SetButtonControlName(controlName)
     self.controlName = controlName
+end
+
+function ZO_SelectionIndicator:SetButtonSelectedImage(image)
+    self.selectedImage = image
+end
+
+function ZO_SelectionIndicator:SetButtonUnselectedImage(image)
+    self.unselectedImage = image
+end
+
+function ZO_SelectionIndicator:SetButtonMouseOverImage(image)
+    self.mouseOverImage = image
 end
 
 function ZO_SelectionIndicator:SetButtonVirtualControl(virtualControlTemplate)
@@ -60,36 +86,50 @@ function ZO_SelectionIndicator:SetGrowthPadding(padding)
     self.growthPadding = padding
 end
 
+function ZO_SelectionIndicator:SetButtonWidth(width)
+    self.buttonWidth = width
+end
+
+function ZO_SelectionIndicator:SetButtonHeight(height)
+    self.buttonHeight = height
+end
+
 function ZO_SelectionIndicator:SetCount(countToAdd)
-    self.objectPool:ReleaseAllObjects()
+    self.controlPool:ReleaseAllObjects()
     ZO_ClearNumericallyIndexedTable(self.indicatorList)
 
+    local width = 0
     for i = 1, countToAdd do
         local button = self:AddButton()
+        width = width + button:GetWidth()
 
         -- Set Anchors
         if self.growthDirection == ZO_SELECTION_INDICATOR_GROWTH_DIRECTION.RIGHT then
             if i > 1 then
                 button:SetAnchor(TOPLEFT, self.indicatorList[i-1], TOPRIGHT, self.growthPadding)
-            else 
+                width = width + self.growthPadding
+            else
                 button:SetAnchor(TOPLEFT)
             end
         elseif self.growthDirection == ZO_SELECTION_INDICATOR_GROWTH_DIRECTION.LEFT then
             if i > 1 then
                 button:SetAnchor(TOPRIGHT, self.indicatorList[i-1], TOPLEFT, -self.growthPadding)
-            else 
+                width = width + self.growthPadding
+            else
                 button:SetAnchor(TOPRIGHT)
             end
         elseif self.growthDirection == ZO_SELECTION_INDICATOR_GROWTH_DIRECTION.UP then
             if i > 1 then
                 button:SetAnchor(BOTTOMLEFT, self.indicatorList[i-1], TOPLEFT, 0, -self.growthPadding)
-            else 
+                width = width + self.growthPadding
+            else
                 button:SetAnchor(BOTTOMLEFT)
             end
         elseif self.growthDirection == ZO_SELECTION_INDICATOR_GROWTH_DIRECTION.DOWN then
             if i > 1 then
                 button:SetAnchor(TOPLEFT, self.indicatorList[i-1], BOTTOMLEFT, 0, self.growthPadding)
-            else 
+                width = width + self.growthPadding
+            else
                 button:SetAnchor(TOPLEFT)
             end
         end
@@ -97,11 +137,16 @@ function ZO_SelectionIndicator:SetCount(countToAdd)
 end
 
 function ZO_SelectionIndicator:AddButton()
-    local button = self.objectPool:AcquireObject()
-    button:GetNamedChild("IndicatorButtonTexture"):SetTexture("EsoUI/Art/Buttons/featureDot_inactive.dds")
-    button:SetHidden(false)
-    table.insert(self.indicatorList, button)
-    return button
+    if self.controlPool then
+        local button = self.controlPool:AcquireObject()
+        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.unselectedImage)
+        button:SetHidden(false)
+        button:SetWidth(self.buttonWidth)
+        button:SetHeight(self.buttonHeight)
+        table.insert(self.indicatorList, button)
+        return button
+    end
+    return nil
 end
 
 function ZO_SelectionIndicator:GetButtonByIndex(index)
@@ -123,10 +168,10 @@ end
 function ZO_SelectionIndicator:SetSelectionByIndex(index)
     local button = self.indicatorList[index]
     if self.currentSelection then
-        self.currentSelection:GetNamedChild("IndicatorButtonTexture"):SetTexture("EsoUI/Art/Buttons/featureDot_inactive.dds")
+        self.currentSelection:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.unselectedImage)
     end
     self.currentSelection = button
-    self.currentSelection:GetNamedChild("IndicatorButtonTexture"):SetTexture("EsoUI/Art/Buttons/featureDot_active.dds")
+    self.currentSelection:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.selectedImage)
 end
 
 -----

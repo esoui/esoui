@@ -39,11 +39,6 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_VIDEO,
-            system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_ANTIALIASING_TYPE,
-        },
-        {
-            panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
         },
@@ -255,8 +250,13 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_AUDIO,
             system = SETTING_TYPE_SUBTITLES,
-            settingId = SUBTITLE_SETTING_ENABLED,
-            header = SI_GAMEPLAY_OPTIONS_SUBTITLES,
+            settingId = SUBTITLE_SETTING_ENABLED_FOR_NPCS,
+            header = SI_AUDIO_OPTIONS_SUBTITLES,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_SUBTITLES,
+            settingId = SUBTITLE_SETTING_ENABLED_FOR_VIDEOS,
         },
         {
             panel = SETTING_PANEL_AUDIO,
@@ -417,6 +417,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_JPN,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SOCIAL_CHAT_COLOR_ZONE_RUS,
         },
         {
             panel = SETTING_PANEL_SOCIAL,

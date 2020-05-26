@@ -1,35 +1,9 @@
---[[
-    Fragment Creation
---]]
-
-local ZO_EULAFragment = ZO_FadeSceneFragment:Subclass()
-
-function ZO_EULAFragment:New(control)
-    local fragment = ZO_FadeSceneFragment.New(self, control, 1500)
-    fragment.dialog = control
-    return fragment
-end
-
-function ZO_EULAFragment:Show()
-    EULA_SCREEN:ShowNextEULA()
-
-    -- Call base class for animations after everything has been tweaked
-    ZO_FadeSceneFragment.Show(self)
-end
-
-function ZO_EULAFragment:OnHidden()
-    ZO_FadeSceneFragment.OnHidden(self)
-    ZO_Dialogs_ReleaseDialog("SHOW_EULA")
-    PregameStateManager_AdvanceStateFromState("ShowEULA")
-end
-
-
 local ZO_EULA = ZO_Object:Subclass()
 
 function ZO_EULA:New(control)
     local object = ZO_Object.New(self)
     object:Initialize(control)
-    return object    
+    return object
 end
 
 function ZO_EULA:Initialize(control)
@@ -41,7 +15,7 @@ function ZO_EULA:Initialize(control)
     self.readTextCheckBox = self.readTextCheckContainer:GetNamedChild("CheckBox")
     self.scroll = control:GetNamedChild("ContainerScroll")
     self:InitializeDialog(control)
-    self:CreateEULAScene(control)
+    self:CreateEULAScene()
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, function(...) self:OnLinkClicked(...) end)
     CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
         if self.isShowingLinkConfirmation then
@@ -223,9 +197,16 @@ function ZO_EULA:SetupButtonTextData(agreeText, disagreeText)
     self.dialogInfo.buttons[2].text = (#disagreeText > 0) and disagreeText or SI_EULA_BUTTON_DISAGREE
 end
 
-function ZO_EULA:CreateEULAScene(control)
-    local eulaScene = ZO_Scene:New("eula", SCENE_MANAGER)
-    eulaScene:AddFragment(ZO_EULAFragment:New(control))
+function ZO_EULA:CreateEULAScene()
+    EULA_SCENE = ZO_Scene:New("eula", SCENE_MANAGER)
+    EULA_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:ShowNextEULA()
+        elseif newState == SCENE_HIDDEN then
+            ZO_Dialogs_ReleaseDialog("SHOW_EULA")
+            PregameStateManager_AdvanceStateFromState("ShowEULA")
+        end
+    end)
 end
 
 --[[

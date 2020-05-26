@@ -237,7 +237,13 @@ end
 function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local anchorIndex = 0
     local ROOT_REWARD_ANCHOR = ZO_Anchor:New(TOPLEFT, self.control:GetNamedChild("RewardAreaHeader"), BOTTOMLEFT, 0, 0)
-    local rewardCurrencyOptions = {showTooltips = true, font = "ZoFontConversationQuestReward", iconSize = 24, iconSide = LEFT }
+    local rewardCurrencyOptions =
+    {
+        showTooltips = true,
+        font = "ZoFontConversationQuestReward",
+        iconSize = 24,
+        iconSide = LEFT
+    }
 
     local moneyAnchorControl = ZO_InteractWindowRewardAreaHeader
     local moneyControls = {}
@@ -248,12 +254,12 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local confirmError
     for i, reward in ipairs(rewardData) do
         local creatorFunc = self:GetRewardCreateFunc(reward.rewardType)
-        if(creatorFunc) then
-            if(self:IsCurrencyReward(reward.rewardType)) then
+        if creatorFunc then
+            if self:IsCurrencyReward(reward.rewardType) then
                 local control = self.currencyRewardPool:AcquireObject()
                 creatorFunc(control, reward.name, reward.amount, rewardCurrencyOptions)
 
-                if(#moneyControls ~= 0) then
+                if #moneyControls ~= 0 then
                     control:ClearAnchors()
                     control:SetAnchor(TOPLEFT, moneyControls[#moneyControls], BOTTOMLEFT, 0, 4)
                 end
@@ -270,7 +276,9 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                     control.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
                 end
 
-                creatorFunc(control, reward.name, reward.amount, reward.icon, reward.meetsUsageRequirement, reward.quality, reward.itemType)
+                -- reward.quality is depricated, included here for addon backwards compatibility
+                local displayQuality = reward.displayQuality or reward.quality
+                creatorFunc(control, reward.name, reward.amount, reward.icon, reward.meetsUsageRequirement, displayQuality, reward.itemType)
 
                 -- Money rewards do not get box-anchored, they're shown after all the reward icons (or immediately if there were no icons)
                 ZO_Anchor_BoxLayout(ROOT_REWARD_ANCHOR, control, anchorIndex, REWARD_STRIDE, REWARD_PADDING_X, REWARD_PADDING_Y, ZO_REWARD_SIZE_X, ZO_REWARD_SIZE_Y, REWARD_ROOT_OFFSET_X, REWARD_ROOT_OFFSET_Y)
@@ -287,7 +295,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     local rewardWindowHeight = zo_ceil(anchorIndex / REWARD_STRIDE) * (ZO_REWARD_SIZE_Y + REWARD_PADDING_Y) + 50
     local initialMoneyControl = moneyControls[1]
 
-    if(initialMoneyControl) then
+    if initialMoneyControl then
         rewardWindowHeight = rewardWindowHeight + (#moneyControls * 28)
 
         initialMoneyControl:ClearAnchors()

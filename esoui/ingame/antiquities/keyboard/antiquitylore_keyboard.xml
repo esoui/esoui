@@ -1,0 +1,103 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AntiquityLore_SetIconChildlessHeader" inherits="ZO_IconChildlessHeader" virtual="true">
+            <OnInitialized>
+                ZO_AntiquityLore_IconHeader_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="350"/>
+                </Label>
+                <Label name="$(parent)SubText" font="ZoFontGameMedium" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="-5" />
+                    <DimensionConstraints maxX="350"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <Label name="ZO_AntiquityLoreLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontWinH5" wrapMode="ELLIPSIS" virtual="true" />
+
+        <Label name="ZO_AntiquityLoreHeadingLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontWinH3" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" virtual="true" />
+
+        <Label name="ZO_AntiquityLoreBaseLabel_Keyboard" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65" virtual="true" />
+
+        <Label name="ZO_AntiquityLoreTitleLabel_Keyboard" inherits="ZO_AntiquityLoreBaseLabel_Keyboard" font="ZoFontBookScrollTitle" wrapMode="ELLIPSIS" virtual="true" />
+
+        <Label name="ZO_AntiquityLoreTextLabel_Keyboard" inherits="ZO_AntiquityLoreBaseLabel_Keyboard" font="ZoFontBookScroll" virtual="true" />
+
+        <TopLevelControl name="ZO_AntiquityLore_Keyboard_TopLevel" inherits="ZO_ThinRightFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_AntiquityLore_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)DividerTop" inherits="ZO_HorizontalDivider">
+                    <Anchor point="TOPLEFT" offsetX="-80" offsetY="12" />
+                    <Dimensions x="600" />
+                </Texture>
+
+                <Texture name="$(parent)AntiquityIcon" level="3">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DividerTop" relativePoint="BOTTOMLEFT" offsetX="80" offsetY="12" />
+                    <Dimensions x="48" y="48" />
+                    <Controls>
+                        <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds" level="2">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                            <AnchorFill />
+                        </Texture>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)AntiquityName" inherits="ZO_AntiquityLoreHeadingLabel_Keyboard" font="ZoFontWinH2">
+                    <Anchor point="LEFT" relativeTo="$(parent)AntiquityIcon" relativePoint="RIGHT" offsetX="15" />
+                    <Dimensions x="380" />
+                </Label>
+
+                <Texture name="$(parent)DividerBottom" inherits="ZO_HorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AntiquityIcon" relativePoint="BOTTOMLEFT" offsetX="-80" offsetY="12" />
+                    <Dimensions x="600" />
+                </Texture>
+
+                <Label name="$(parent)LoreEntryCount" inherits="ZO_AntiquityLoreHeadingLabel_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DividerBottom" relativePoint="BOTTOMLEFT" offsetX="80" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DividerBottom" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)LoreEntryContainer" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LoreEntryCount" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="10" />
+                    <Anchor point="BOTTOM" constrains="Y" />
+                    <Dimensions x="440" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_AntiquityLoreReader_Keyboard_TopLevel" hidden="true">
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-40" />
+            <Anchor point="RIGHT" relativeTo="ZO_AntiquityLore_Keyboard_TopLevel" relativePoint="LEFT" offsetY="-60" />
+            <Dimensions y="930" />
+            <OnInitialized>
+                ZO_AntiquityLoreReader_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)Content" mouseEnabled="true">
+                    <AnchorFill />
+                    <OnMouseWheel>
+                        ZO_AntiquityLoreReader_OnMouseWheel(self, delta, ctrl, alt, shift)
+                    </OnMouseWheel>
+
+                    <Controls>
+                        <Control name="$(parent)ScrollChild">
+                            <Anchor point="TOP" />
+                            <Dimensions x="1300" />
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+
+    </Controls>
+</GuiXml>

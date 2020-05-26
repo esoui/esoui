@@ -7,6 +7,7 @@ LOOT_ENTRY_TYPE_SCORE = 6
 LOOT_ENTRY_TYPE_SKILL_EXPERIENCE = 7
 LOOT_ENTRY_TYPE_CROWN_CRATE = 8
 LOOT_ENTRY_TYPE_KEEP_REWARD = 9
+LOOT_ENTRY_TYPE_ANTIQUITY_LEAD = 10
 
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
@@ -87,7 +88,8 @@ do
         if data1EntryType == LOOT_ENTRY_TYPE_CURRENCY then
             return data1.currencyType == data2.currencyType
         elseif data1EntryType == LOOT_ENTRY_TYPE_ITEM then
-            return data1.itemId == data2.itemId and data1.quality == data2.quality and data1.isStolen == data2.isStolen
+            -- dataX.quality is depricated, included here for addon backwards compatibility
+            return data1.itemId == data2.itemId and data1.displayQuality == data2.displayQuality and data1.isStolen == data2.isStolen and  data1.quality == data2.quality
         elseif data1EntryType == LOOT_ENTRY_TYPE_COLLECTIBLE then
             return data1.collectibleId == data2.collectibleId
         elseif data1EntryType == LOOT_ENTRY_TYPE_MEDAL then
@@ -100,6 +102,8 @@ do
             return data1.lootCrateId == data2.lootCrateId
         elseif data1EntryType == LOOT_ENTRY_TYPE_KEEP_REWARD then
             return false -- special info, cannot be merged
+        elseif data1EntryType == LOOT_ENTRY_TYPE_ANTIQUITY_LEAD then
+            return false -- leads don't stack
         else
             return true
         end
@@ -134,9 +138,10 @@ end
 -- loot stream and queue functions
 
 function ZO_LootHistory_Shared:CreateLootEntry(lootData)
-    local lootEntry = {
-            lines = { lootData, }
-        }
+    local lootEntry =
+    {
+        lines = { lootData, }
+    }
     return lootEntry
 end
 
@@ -197,9 +202,9 @@ end
 
 do
     local FORMAT_EXTRA_OPTIONS =
-        {
-            showCap = true,
-        }
+    {
+        showCap = true,
+    }
     local IS_UPPER = false
 
     function ZO_LootHistory_Shared:AddCurrencyEntry(currencyAdded, currencyType, currencyLocation)
@@ -217,16 +222,17 @@ do
             return zo_strformat(SI_CURRENCY_NAME_FORMAT, formattedCurrencyString)
         end
 
-        local lootData = {
-                            text = GetCurrencyString,
-                            icon = icon,
-                            stackCount = currencyAdded,
-                            color = ZO_SELECTED_TEXT,
-                            currencyType = currencyType,
-                            entryType = LOOT_ENTRY_TYPE_CURRENCY,
-                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
-                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
-                        }
+        local lootData =
+        {
+            text = GetCurrencyString,
+            icon = icon,
+            stackCount = currencyAdded,
+            color = ZO_SELECTED_TEXT,
+            currencyType = currencyType,
+            entryType = LOOT_ENTRY_TYPE_CURRENCY,
+            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+        }
         local lootEntry = self:CreateLootEntry(lootData)
         lootEntry.isPersistent = true
         self:InsertOrQueue(lootEntry)
@@ -234,60 +240,64 @@ do
 end
 
 function ZO_LootHistory_Shared:AddXpEntry(xpAdded)
-    local lootData = {
-                        text = GetString(SI_LOOT_HISTORY_EXPERIENCE_GAIN),
-                        icon = LOOT_EXPERIENCE_ICON,
-                        stackCount = xpAdded,
-                        color = ZO_SELECTED_TEXT,
-                        entryType = LOOT_ENTRY_TYPE_EXPERIENCE,
-                        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
-                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
-                    }
+    local lootData =
+    {
+        text = GetString(SI_LOOT_HISTORY_EXPERIENCE_GAIN),
+        icon = LOOT_EXPERIENCE_ICON,
+        stackCount = xpAdded,
+        color = ZO_SELECTED_TEXT,
+        entryType = LOOT_ENTRY_TYPE_EXPERIENCE,
+        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+    }
     local lootEntry = self:CreateLootEntry(lootData)
     lootEntry.isPersistent = true
     self:InsertOrQueue(lootEntry)
 end
 
 function ZO_LootHistory_Shared:AddMedalEntry(medalId, name, icon, value)
-    local lootData = {
-                        text = zo_strformat(SI_LOOT_HISTORY_MEDAL_NAME_FORMATTER, name),
-                        icon = icon,
-                        value = value,
-                        color = ZO_SELECTED_TEXT,
-                        entryType = LOOT_ENTRY_TYPE_MEDAL,
-                        iconOverlayText = ZO_LootHistory_Shared.GetMedalValueStringFromData,
-                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowMedalValueStringFromData
-                    }
+    local lootData =
+    {
+        text = zo_strformat(SI_LOOT_HISTORY_MEDAL_NAME_FORMATTER, name),
+        icon = icon,
+        value = value,
+        color = ZO_SELECTED_TEXT,
+        entryType = LOOT_ENTRY_TYPE_MEDAL,
+        iconOverlayText = ZO_LootHistory_Shared.GetMedalValueStringFromData,
+        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowMedalValueStringFromData
+    }
     local lootEntry = self:CreateLootEntry(lootData)
     self:InsertOrQueue(lootEntry)
 end
 
 function ZO_LootHistory_Shared:AddScoreEntry(score)
-    local lootData = {
-                        text = GetString(SI_LOOT_HISTORY_LEADERBOARD_SCORE),
-                        icon = LOOT_LEADERBOARD_SCORE_ICON,
-                        value = score,
-                        color = ZO_SELECTED_TEXT,
-                        entryType = LOOT_ENTRY_TYPE_SCORE,
-                        iconOverlayText = ZO_LootHistory_Shared.GetValueStringFromData,
-                        showIconOverlayText = true
-                    }
+    local lootData =
+    {
+        text = GetString(SI_LOOT_HISTORY_LEADERBOARD_SCORE),
+        icon = LOOT_LEADERBOARD_SCORE_ICON,
+        value = score,
+        color = ZO_SELECTED_TEXT,
+        entryType = LOOT_ENTRY_TYPE_SCORE,
+        iconOverlayText = ZO_LootHistory_Shared.GetValueStringFromData,
+        showIconOverlayText = true
+    }
     local lootEntry = self:CreateLootEntry(lootData)
     lootEntry.isPersistent = true
     self:InsertOrQueue(lootEntry)
 end
 
 function ZO_LootHistory_Shared:AddSkillEntry(skillLineData, skillXpAdded)
-    local lootData = {
-                        skillLineData = skillLineData,
-                        text = skillLineData:GetFormattedName(),
-                        icon = skillLineData:GetAnnounceIcon(),
-                        stackCount = skillXpAdded,
-                        color = ZO_SELECTED_TEXT,
-                        entryType = LOOT_ENTRY_TYPE_SKILL_EXPERIENCE,
-                        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
-                        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
-                    }
+    local lootData =
+    {
+        skillLineData = skillLineData,
+        text = skillLineData:GetFormattedName(),
+        icon = skillLineData:GetAnnounceIcon(),
+        stackCount = skillXpAdded,
+        color = ZO_SELECTED_TEXT,
+        entryType = LOOT_ENTRY_TYPE_SKILL_EXPERIENCE,
+        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+    }
     local lootEntry = self:CreateLootEntry(lootData)
     lootEntry.isPersistent = true
     self:InsertOrQueue(lootEntry)
@@ -297,16 +307,17 @@ function ZO_LootHistory_Shared:AddCrownCrateEntry(lootCrateId, numCrates)
     if self:CanShowItemsInHistory() then
         local crownCrateName = GetCrownCrateName(lootCrateId)
         local crateIcon = GetCrownCrateIcon(lootCrateId)
-        local lootData = {
-                            text = zo_strformat(SI_CROWN_CRATE_PACK_NAME, crownCrateName),
-                            icon = crateIcon,
-                            stackCount = numCrates,
-                            lootCrateId = lootCrateId,
-                            color = ZO_SELECTED_TEXT,
-                            entryType = LOOT_ENTRY_TYPE_CROWN_CRATE,
-                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
-                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
-                        }
+        local lootData =
+        {
+            text = zo_strformat(SI_CROWN_CRATE_PACK_NAME, crownCrateName),
+            icon = crateIcon,
+            stackCount = numCrates,
+            lootCrateId = lootCrateId,
+            color = ZO_SELECTED_TEXT,
+            entryType = LOOT_ENTRY_TYPE_CROWN_CRATE,
+            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+        }
         local lootEntry = self:CreateLootEntry(lootData)
         self:InsertOrQueue(lootEntry)
     end
@@ -317,13 +328,30 @@ function ZO_LootHistory_Shared:AddKeepTickEntry(keepId, reason)
         local keepName = GetKeepName(keepId)
         local entryIcon = GetAllianceKeepRewardIcon(GetUnitAlliance("player"))
         local textId = reason == CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD and SI_LOOT_HISTORY_KEEP_REWARD_DEFENSE_TITLE or SI_LOOT_HISTORY_KEEP_REWARD_OFFENSE_TITLE
-        local lootData = {
-                            text = zo_strformat(textId, keepName),
-                            icon = entryIcon,
-                            color = ZO_SELECTED_TEXT,
-                            entryType = LOOT_ENTRY_TYPE_KEEP_REWARD,
-                            showIconOverlayText = false
-                        }
+        local lootData =
+        {
+            text = zo_strformat(textId, keepName),
+            icon = entryIcon,
+            color = ZO_SELECTED_TEXT,
+            entryType = LOOT_ENTRY_TYPE_KEEP_REWARD,
+            showIconOverlayText = false
+        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        self:InsertOrQueue(lootEntry)
+    end
+end
+
+function ZO_LootHistory_Shared:AddAntiquityLeadEntry(antiquityId)
+    if self:CanShowItemsInHistory() then
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        local lootData =
+        {
+            text = zo_strformat(SI_ANTIQUITY_LEAD_NAME_FORMATTER, antiquityData:GetName()),
+            icon = GetAntiquityLeadIcon(),
+            color = GetAntiquityQualityColor(antiquityData:GetQuality()),
+            entryType = LOOT_ENTRY_TYPE_ANTIQUITY_LEAD,
+            showIconOverlayText = false
+        }
         local lootEntry = self:CreateLootEntry(lootData)
         self:InsertOrQueue(lootEntry)
     end
@@ -334,7 +362,7 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
         local itemName
         local icon
         local color
-        local quality
+        local displayQuality
 
         -- we already handle collectibles as collectibles,
         -- but if we get them as something like a quest reward, they need to be funneled properly
@@ -351,8 +379,8 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
         else
             itemName = GetItemLinkName(itemLinkOrName)
             icon = GetItemLinkInfo(itemLinkOrName)
-            quality = GetItemLinkQuality(itemLinkOrName)
-            color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality))
+            displayQuality = GetItemLinkDisplayQuality(itemLinkOrName)
+            color = GetItemQualityColor(displayQuality)
         end
 
         local statusIcon
@@ -365,21 +393,24 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
             highlight = self:GetStolenHighlight()
         end
 
-        local lootData = {
-                            text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName),
-                            icon = icon,
-                            stackCount = stackCount,
-                            color = color,
-                            itemId = itemId,
-                            quality = quality,
-                            isCraftBagItem = isVirtual,
-                            isStolen = isStolen,
-                            statusIcon = statusIcon,
-                            highlight = highlight,
-                            entryType = LOOT_ENTRY_TYPE_ITEM,
-                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
-                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
-                        }
+        local lootData =
+        {
+            text = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName),
+            icon = icon,
+            stackCount = stackCount,
+            color = color,
+            itemId = itemId,
+            displayQuality = displayQuality,
+            -- quality is depricated, included here for addon backwards compatibility
+            quality = displayQuality,
+            isCraftBagItem = isVirtual,
+            isStolen = isStolen,
+            statusIcon = statusIcon,
+            highlight = highlight,
+            entryType = LOOT_ENTRY_TYPE_ITEM,
+            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+        }
 
         local lootEntry = self:CreateLootEntry(lootData)
         self:InsertOrQueue(lootEntry)
@@ -389,18 +420,17 @@ end
 function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
     if self:CanShowItemsInHistory() then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-
-        local QUALITY_NORMAL = 1
-        local lootData = {
-                            text = collectibleData:GetFormattedName(),
-                            icon = collectibleData:GetIcon(),
-                            stackCount = 1,
-                            color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, QUALITY_NORMAL)),
-                            collectibleId = collectibleId,
-                            entryType = LOOT_ENTRY_TYPE_COLLECTIBLE,
-                            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
-                            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
-                        }
+        local lootData =
+        {
+            text = collectibleData:GetFormattedName(),
+            icon = collectibleData:GetIcon(),
+            stackCount = 1,
+            color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_DISPLAY_QUALITY_NORMAL)),
+            collectibleId = collectibleId,
+            entryType = LOOT_ENTRY_TYPE_COLLECTIBLE,
+            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+        }
 
         local lootEntry = self:CreateLootEntry(lootData)
         self:InsertOrQueue(lootEntry)
@@ -453,6 +483,10 @@ function ZO_LootHistory_Shared:OnCrownCrateQuantityUpdated(lootCrateId, oldCount
     if delta > 0 then
         self:AddCrownCrateEntry(lootCrateId, delta)
     end
+end
+
+function ZO_LootHistory_Shared:OnAntiquityLeadAcquired(antiquityId)
+    self:AddAntiquityLeadEntry(antiquityId)
 end
 
 do

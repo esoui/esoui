@@ -1032,6 +1032,19 @@ local AlertHandlers = {
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_GROUPOPERATIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
+
+    [EVENT_ANTIQUITY_DIGGING_ACTIVE_SKILL_USE_RESULT] = function(result)
+        if result ~= DIGGING_ACTIVE_SKILL_USE_RESULT_SUCCESS then
+            return ERROR, GetString("SI_DIGGINGACTIVESKILLUSERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_SCRYING_ACTIVE_SKILL_USE_RESULT] = function(result)
+        local message = GetString("SI_SCRYINGACTIVESKILLUSERESULT", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
 }
 
 ZO_ClientInteractResultSpecificSound =

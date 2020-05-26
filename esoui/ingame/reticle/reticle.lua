@@ -207,6 +207,8 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_WEREWOLF_ACTIVE_WHILE_ATTEMPTING_TO_CRAFT then
                 self.interactKeybindButton:SetText(zo_strformat(SI_CANNOT_CRAFT_WHILE_WEREWOLF))
+            elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_WEREWOLF_ACTIVE_WHILE_ATTEMPTING_TO_EXCAVATE then
+                self.interactKeybindButton:SetText(zo_strformat(SI_CANNOT_EXCAVATE_WHILE_WEREWOLF))
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_IN_HIDEYHOLE then
                 self.interactKeybindButton:SetText(zo_strformat(SI_EXIT_HIDEYHOLE))
             end

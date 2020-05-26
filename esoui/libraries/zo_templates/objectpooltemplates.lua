@@ -41,10 +41,10 @@ end
 
 ZO_ControlPool = ZO_ObjectPool:Subclass()
 
-local function ControlFactory(pool)
+local function ControlFactory(pool, objectKey)
     local control = ZO_ObjectPool_CreateNamedControl(pool.name, pool.templateName, pool, pool.parent)
     if pool.customFactoryBehavior then
-        pool.customFactoryBehavior(control)
+        pool.customFactoryBehavior(control, objectKey)
     end
     return control
 end
@@ -113,7 +113,7 @@ function ZO_MetaPool:AcquireObject()
     return object, key
 end
 
-function ZO_MetaPool:GetExistingObject(objectKey)
+function ZO_MetaPool:GetActiveObject(objectKey)
     return self.activeObjects[objectKey]
 end
 
@@ -121,8 +121,16 @@ function ZO_MetaPool:GetActiveObjectCount()
     return NonContiguousCount(self.activeObjects)
 end
 
+function ZO_MetaPool:HasActiveObjects()
+    return next(self.activeObjects) ~= nil
+end
+
 function ZO_MetaPool:GetActiveObjects()
     return self.activeObjects
+end
+
+function ZO_MetaPool:ActiveObjectIterator(filterFunctions)
+    return ZO_FilteredNonContiguousTableIterator(self.activeObjects, filterFunctions)
 end
 
 function ZO_MetaPool:ReleaseAllObjects()

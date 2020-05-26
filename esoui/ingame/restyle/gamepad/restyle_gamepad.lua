@@ -18,16 +18,12 @@ function ZO_Restyle_Gamepad:Initialize(control)
     self:InitializeModeList()
     self:InitializeKeybindStripDescriptorsRoot()
 
-    local function OnBlockingSceneActivated()
-        self:AttemptExit()
-    end
-
     SYSTEMS:RegisterGamepadRootScene("restyle", GAMEPAD_RESTYLE_ROOT_SCENE)
 
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
     self.headerData =
-    {  
+    {
         titleText = GetString(SI_RESTYLE_STATION_MENU_ROOT_TITLE)
     }
 
@@ -37,7 +33,6 @@ function ZO_Restyle_Gamepad:Initialize(control)
             self.modeList:Activate()
             local currentlySelectedData = self.modeList:GetTargetData()
             self:UpdateOptionLeftTooltip(currentlySelectedData.mode)
-            MAIN_MENU_MANAGER:SetBlockingScene(GAMEPAD_RESTYLE_ROOT_SCENE_NAME, OnBlockingSceneActivated)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptorRoot)
             ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 
@@ -49,7 +44,6 @@ function ZO_Restyle_Gamepad:Initialize(control)
             self.modeList:Deactivate()
             ZO_GamepadGenericHeader_Deactivate(self.header)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptorRoot)
-            MAIN_MENU_MANAGER:ClearBlockingScene(OnBlockingSceneActivated)
         end
     end)
 end

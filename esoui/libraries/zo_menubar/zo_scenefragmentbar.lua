@@ -32,8 +32,8 @@ end
 function ZO_SceneFragmentBar:RemoveActiveKeybind()
     local keybindButton = self.currentKeybindButton
     self.currentKeybindButton = nil
-    if(keybindButton) then
-        if(keybindButton.keybind) then
+    if keybindButton then
+        if keybindButton.keybind then
             KEYBIND_STRIP:RemoveKeybindButton(keybindButton)
         else
             KEYBIND_STRIP:RemoveKeybindButtonGroup(keybindButton)
@@ -42,8 +42,8 @@ function ZO_SceneFragmentBar:RemoveActiveKeybind()
 end
 
 function ZO_SceneFragmentBar:UpdateActiveKeybind()
-    if(self.currentKeybindButton) then
-        if(self.currentKeybindButton.keybind) then
+    if self.currentKeybindButton then
+        if self.currentKeybindButton.keybind then
             KEYBIND_STRIP:UpdateKeybindButton(self.currentKeybindButton)
         else
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindButton)
@@ -75,7 +75,7 @@ function ZO_SceneFragmentBar:Add(name, fragmentGroup, buttonData, keybindButton)
     local existingCallback = buttonData.callback
     buttonData.callback = function()
         self:RemoveActiveKeybind()
-        if(self.currentFragmentGroup) then
+        if self.currentFragmentGroup then
             SCENE_MANAGER:RemoveFragmentGroup(self.currentFragmentGroup)
         end
 
@@ -83,23 +83,27 @@ function ZO_SceneFragmentBar:Add(name, fragmentGroup, buttonData, keybindButton)
         self.currentKeybindButton = keybindButton
 
         SCENE_MANAGER:AddFragmentGroup(fragmentGroup)
-        if(keybindButton) then
-            if(keybindButton.keybind) then
+        if keybindButton then
+            if keybindButton.keybind then
                 KEYBIND_STRIP:AddKeybindButton(keybindButton)
             else
                 KEYBIND_STRIP:AddKeybindButtonGroup(keybindButton)
             end
         end
 
-        if(self.label) then
+        if self.label then
             self.label:SetText(zo_strformat(SI_SCENE_FRAGMENT_BAR_TITLE, GetString(name)))
         end
 
         self.lastFragmentName = name
-        if(existingCallback) then
+        if existingCallback then
             existingCallback()
         end
     end
     ZO_MenuBar_AddButton(self.menuBar, buttonData)
     table.insert(self.buttonData, buttonData)
+end
+
+function ZO_SceneFragmentBar:UpdateButtons(forceSelection)
+    ZO_MenuBar_UpdateButtons(self.menuBar, forceSelection)
 end

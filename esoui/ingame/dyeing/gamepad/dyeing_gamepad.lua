@@ -51,7 +51,6 @@ function ZO_Dyeing_Slots_Panel_Gamepad:Deactivate()
 end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
-    
     local function HandleMultiFocusAreaBack()
         self:EndSelection()
     end
@@ -68,9 +67,6 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
     -- Randomize
     local randomize = ZO_RESTYLE_STATION_GAMEPAD:CreateRandomizeKeybind(self)
 
-    -- Special exit button
-    local specialExit = ZO_RESTYLE_STATION_GAMEPAD:CreateSpecialExitKeybind()
-
     -- Tools List
     self.toolsKeybindStripDescriptor = 
     {
@@ -84,15 +80,14 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            self:HandleDyeToolSelectAction()
-                       end
+                self:HandleDyeToolSelectAction()
+            end
         },
 
         apply,
         options,
         undoAll,
         randomize,
-        specialExit,
     }
 
     -- Dye List
@@ -108,15 +103,14 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeKeybindDescriptors()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                            self:HandleDyeSelectAction()
-                       end
+                self:HandleDyeSelectAction()
+            end
         },
 
         apply,
         options,
         undoAll,
         randomize,
-        specialExit,
     }
 end
 

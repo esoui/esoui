@@ -150,5 +150,5 @@ function ZO_WorldSelect_Initialize()
     local worldSelectFragment = ZO_FadeSceneFragment:New(ZO_WorldSelect)
     local worldSelectScene = ZO_Scene:New("worldSelect", SCENE_MANAGER)
     worldSelectScene:AddFragment(worldSelectFragment)
-    worldSelectScene:AddFragment(PREGAME_SLIDE_SHOW_FRAGMENT)
+    worldSelectScene:AddFragment(PREGAME_BACKGROUND_FRAGMENT)
 end

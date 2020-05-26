@@ -126,7 +126,8 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
     self.enchantingStationInteraction =
     {
         type = "Enchanting Station",
-        End = function()
+        OnInteractSwitch = function()
+            internalassert(false, "OnInteractSwitch is being called.")
             SCENE_MANAGER:ShowBaseScene()
         end,
         interactTypes = { INTERACTION_CRAFT },

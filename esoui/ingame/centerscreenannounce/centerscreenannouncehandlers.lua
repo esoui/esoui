@@ -1096,6 +1096,62 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAILY_LOGIN_REWARDS_CLAIMED] = function()
     return messageParams
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_LEAD_ACQUIRED] = function(antiquityId)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+    local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+    local secondaryText = zo_strformat(SI_ANTIQUITY_LEAD_ACQUIRED_TEXT, antiquityData:GetColorizedName())
+    messageParams:SetText(GetString(SI_ANTIQUITY_LEAD_ACQUIRED_TITLE), secondaryText)
+    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED)
+    return messageParams
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY] = function()
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+    messageParams:SetText(GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TITLE), GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BEGIN_TEXT))
+    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE)
+    return messageParams
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_DIGGING_ANTIQUITY_UNEARTHED] = function()
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+    local antiquityId = GetDigSpotAntiquityId()
+    --If the game is over then the end of game summary will handle showing this info
+    if not IsDiggingGameOver() then
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        if antiquityData then
+            local title = zo_strformat(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_ANTIQUITY_UNEARTHED_TITLE, antiquityData:GetColorizedName())
+            messageParams:SetText(title, GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_ANTIQUITY_UNEARTHED_TEXT))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE)
+            return messageParams
+        end
+    end
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_DIGGING_BONUS_LOOT_UNEARTHED] = function()
+    if not IsDiggingGameOver() then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(GetString(SI_ANTIQUITIES_DIGGING_ANNOUNCEMENT_BONUS_LOOT_TITLE))
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE)
+        return messageParams
+    end
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_SCRYING_RESULT] = function(result)
+    --The map handles the case where you improved and unlocked more goals than before
+    if result == ANTIQUITY_SCRYING_RESULT_NO_PROGRESS or result == ANTIQUITY_SCRYING_RESULT_NO_ADDITIONAL_PROGRESS then
+        local antiquityId = GetScryingCurrentAntiquityId()
+        local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
+        if antiquityData then
+            local numGoalsAchieved = antiquityData:GetNumGoalsAchieved()
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SCRYING_PROGRESS_TEXT)
+            messageParams:SetText(GetString("SI_ANTIQUITYSCRYINGRESULT", result))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT)
+            messageParams:SetScryingProgressData(numGoalsAchieved, numGoalsAchieved, antiquityData:GetTotalNumGoals())
+            return messageParams
+        end
+    end
+end
+
 function ZO_CenterScreenAnnounce_GetEventHandlers()
     return CENTER_SCREEN_EVENT_HANDLERS
 end
@@ -1136,6 +1192,8 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS)
@@ -1330,6 +1388,24 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             end
         end,
     },
+
+    {
+        callbackManager = ANTIQUITY_DATA_MANAGER,
+        callbackRegistration = "SingleAntiquityDigSitesUpdated",
+        callbackFunction = function(antiquityData)
+            local lastNumGoalsAchieved = antiquityData:GetLastNumGoalsAchieved()
+            local numGoalsAchieved = antiquityData:GetNumGoalsAchieved()
+            -- Only trigger for forward progress
+            if numGoalsAchieved > 0 and numGoalsAchieved > lastNumGoalsAchieved then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SCRYING_PROGRESS_TEXT, SOUNDS.SCRYING_PROGRESS_ADDED)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED)
+                messageParams:SetText(GetString(SI_ANTIQUITIES_SCRYING_PROGRESS_UPDATED_HEADER), antiquityData:GetColorizedFormattedName())
+                messageParams:SetScryingProgressData(lastNumGoalsAchieved, numGoalsAchieved, antiquityData:GetTotalNumGoals())
+                return messageParams
+            end
+        end,
+    },
+
 }
 
 function ZO_CenterScreenAnnounce_GetCallbackHandlers()

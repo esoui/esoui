@@ -45,9 +45,17 @@ function ZO_CharacterCreateSlider_Base:SetValue(value)
 end
 
 function ZO_CharacterCreateSlider_Base:ChangeValue(changeAmount)
-    local newSteppedValue = zo_floor(self.slider:GetValue() * self.numSteps) + changeAmount
-    self:SetValue(newSteppedValue / self.numSteps)
-    self:Update()
+    local currentValue = self.slider:GetValue()
+    local valueStep = self.slider:GetValueStep()
+    local newSteppedValue = currentValue + (changeAmount * valueStep)
+    local min, max = self.slider:GetMinMax()
+    if newSteppedValue < min or newSteppedValue > max then
+        newSteppedValue = zo_clamp(newSteppedValue, min, max)
+    end
+    if currentValue ~= newSteppedValue then
+        self:SetValue(newSteppedValue)
+        self:Update()
+    end
 end
 
 function ZO_CharacterCreateSlider_Base:GetValue()
@@ -81,6 +89,12 @@ function ZO_CharacterCreateSlider_Base:ToggleLocked()
     ZO_ToggleButton_SetState(self.padlock, self.lockState)
 
     self:UpdateLockState()
+end
+
+function ZO_CharacterCreateSlider_Base:SetLocked(isLocked)
+    if self:IsLocked() ~= isLocked then
+        self:ToggleLocked()
+    end
 end
 
 function ZO_CharacterCreateSlider_Base:CanLock()
@@ -176,12 +190,6 @@ function ZO_CharacterCreateAppearanceSlider:SetValue(value)
         self:SetAppearanceValue(value)
         self:UpdateChangeButtons(value)
     end
-end
-
-function ZO_CharacterCreateAppearanceSlider:ChangeValue(changeAmount)
-    local newSteppedValue = zo_floor(self.slider:GetValue()) + changeAmount
-    self:SetValue(newSteppedValue)
-    self:Update()
 end
 
 function ZO_CharacterCreateAppearanceSlider:Randomize(randomizeType)

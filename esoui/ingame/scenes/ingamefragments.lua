@@ -1,32 +1,5 @@
 local FRAGMENT_CATEGORY_TITLE = "Title"
 
------------------------------
---Fullscreen Effect Fragment
------------------------------
-
-ZO_FullscreenEffectFragment = ZO_SceneFragment:Subclass()
-
-function ZO_FullscreenEffectFragment:New(effectType, ...)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:SetCategory(FRAGMENT_CATEGORY_FULLSCREEN_EFFECT)
-    fragment.effectType = effectType
-    fragment.params = {...}
-    fragment:SetHideOnSceneHidden(true)
-    return fragment
-end
-
-function ZO_FullscreenEffectFragment:Show()
-    SetFullscreenEffect(self.effectType, unpack(self.params))
-    self:OnShown()
-end
-
-function ZO_FullscreenEffectFragment:Hide()
-    SetFullscreenEffect(FULLSCREEN_EFFECT_NONE)
-    self:OnHidden()
-end
-
-UNIFORM_BLUR_FRAGMENT = ZO_FullscreenEffectFragment:New(FULLSCREEN_EFFECT_UNIFORM_BLUR)
-
 ------------------------
 --Frame Player Fragment
 ------------------------
@@ -339,6 +312,7 @@ FRAME_EMOTE_FRAGMENT_LOOT = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_LOOT)
 FRAME_EMOTE_FRAGMENT_CHAMPION = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CHAMPION)
 FRAME_EMOTE_FRAGMENT_CROWN_STORE = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROWN_STORE)
 FRAME_EMOTE_FRAGMENT_CROWN_CRATES = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROWN_CRATES)
+FRAME_EMOTE_FRAGMENT_SCRYING = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_SCRYING)
 
 -------------------------------
 --Set Title Fragment (sets the title on the ZO_SharedTitle control when it becomes active)
@@ -789,6 +763,33 @@ end
 
 SUPPRESS_COLLECTIBLE_ANNOUNCEMENTS_FRAGMENT = SuppressCollectibleAnnouncementsFragment:New()
 
+------------------------
+-- UI Music Fragment
+------------------------
+
+ZO_UIMusicFragment = ZO_SceneFragment:Subclass()
+
+function ZO_UIMusicFragment:New(musicMode)
+    local fragment = ZO_SceneFragment.New(self)
+    fragment.musicMode = musicMode
+    return fragment
+end
+
+function ZO_UIMusicFragment:Show()
+    SetOverrideMusicMode(self.musicMode)
+    self:OnShown()
+end
+
+function ZO_UIMusicFragment:Hide()
+    SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
+    self:OnHidden()
+end
+
+-- handle the case where /reloadui is called while a music fragment is showing
+SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
+
+CHAMPION_UI_MUSIC_FRAGMENT = ZO_UIMusicFragment:New(OVERRIDE_MUSIC_MODE_CHAMPION)
+
 --------------------------------------
 --General Fragment Declarations
 --------------------------------------
@@ -820,6 +821,7 @@ RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightBackground)
 STATS_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedStatsBackground)
 WIDE_RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedWideRightBackground)
 LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedLeftPanelBackground)
+THIN_RIGHT_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinRightBackground)
 THIN_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinRightPanelBackground)
 THIN_LEFT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinLeftPanelBackground)
 THIN_TALL_RIGHT_PANEL_BG_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedThinTallRightPanelBackground)
@@ -961,6 +963,7 @@ HOUSING_EDITOR_HUD_PLACEMENT_MODE_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment
 HOUSING_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HUD_HOUSING))
 BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundHud")
 BATTLEGROUND_SCOREBOARD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundScoreboard")
+SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SpecialToggleHelp")
 
 --Intercept Layer
 INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SceneChangeInterceptLayer")

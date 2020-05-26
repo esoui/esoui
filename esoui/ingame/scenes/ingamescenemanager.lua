@@ -4,6 +4,7 @@ end
 
 TOPLEVEL_LOCKS_UI_MODE = true
 ZO_REMOTE_SCENE_CHANGE_ORIGIN = SCENE_MANAGER_MESSAGE_ORIGIN_INGAME
+ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("GAMEPAD_MODE_CHANGED")
 
 local ZO_IngameSceneManager = ZO_SceneManager_Leader:Subclass()
 
@@ -33,7 +34,7 @@ function ZO_IngameSceneManager:Initialize(...)
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GLOBAL_MOUSE_UP, function() self:OnGlobalMouseUp() end)
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_MOUNTED_STATE_CHANGED, function() self:OnMountStateChanged() end)
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_DISPLAY_TUTORIAL, function(eventCode, ...) self:OnTutorialStart(...) end)
-    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
+    EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function(eventCode, ...) self:OnGamepadPreferredModeChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("IngameSceneManager", EVENT_REMOTE_TOP_LEVEL_CHANGE, function(eventId, ...) self:ChangeRemoteTopLevel(...) end)
 end
 
@@ -57,7 +58,7 @@ function ZO_IngameSceneManager:IsLockedInUIMode()
     return false
 end
 
-function ZO_IngameSceneManager:SetInUIMode(inUIMode)
+function ZO_IngameSceneManager:SetInUIMode(inUIMode, bypassHideSceneConfirmationReason)
     if IsGameCameraActive() then
         if inUIMode ~= self:IsInUIMode() then
             if inUIMode then
@@ -68,8 +69,7 @@ function ZO_IngameSceneManager:SetInUIMode(inUIMode)
                 return true
             else
                 if not self:IsLockedInUIMode() and DoesGameHaveFocus() and IsSafeForSystemToCaptureMouseCursor() then
-                    --Showing the hud scene may fail if the current scene needs confirmation before closing. So we wait to do all of the other parts until after the hide of the current scene succeeds.
-                    self:ShowWithFollowup(self.hudSceneName, function(allowed)
+                    local function ResultCallback(allowed)
                         if allowed then
                             self.manuallyEnteredHUDUIMode = nil
                             EndLooting()
@@ -79,7 +79,12 @@ function ZO_IngameSceneManager:SetInUIMode(inUIMode)
                             MAIN_MENU_MANAGER:ForceClearBlockingScenes()
                             self:SetBaseScene(self.hudSceneName)
                         end
-                    end)
+                    end
+                    --Showing the hud scene may fail if the current scene needs confirmation before closing. So we wait to do all of the other parts until after the hide of the current scene succeeds.
+                    local DEFAULT_PUSH = nil
+                    local DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK = nil
+                    local DEFAULT_NUM_SCENES_NEXT_SCENE_POPS = nil
+                    self:ShowWithFollowup(self.hudSceneName, ResultCallback, DEFAULT_PUSH, DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK, DEFAULT_NUM_SCENES_NEXT_SCENE_POPS, bypassHideSceneConfirmationReason)
                     return true
                 end
             end
@@ -184,22 +189,35 @@ function ZO_IngameSceneManager:ClearActionRequiredTutorialBlockers()
     self:SetInUIMode(false)
 end
 
-function ZO_IngameSceneManager:OnGamepadPreferredModeChanged()
+function ZO_IngameSceneManager:OnGamepadPreferredModeChanged(isGamepadPreferred)
     if self.currentScene then
         local shouldShowHUD = false
+        local handleGamepadPreferredModeChangedCallback = self.currentScene:GetHandleGamepadPreferredModeChangedCallback()
+        if handleGamepadPreferredModeChangedCallback and handleGamepadPreferredModeChangedCallback(isGamepadPreferred) then
+            shouldShowHUD = false
         --If we are showing a scene, or will be showing a scene after this one hides and that scene was not opened in the current input mode (gamepad/keyboard) then we need to stop it from showing.
-        if self.currentScene:IsShowing() and self.currentScene:WasRequestedToShowInGamepadPreferredMode() ~= IsInGamepadPreferredMode() then
+        elseif self.currentScene:IsShowing() and self.currentScene:WasRequestedToShowInGamepadPreferredMode() ~= IsInGamepadPreferredMode() then
             shouldShowHUD = true
         elseif self.nextScene then
             if self.nextScene:WasRequestedToShowInGamepadPreferredMode() ~= IsInGamepadPreferredMode() then
                 shouldShowHUD = true
             end
         end
+
         if shouldShowHUD then
             local FORCE_CLOSE = true
             ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
             if not self:IsShowingBaseScene() then
-                self:SetInUIMode(false)
+                if not self:SetInUIMode(false, ZO_BHSCR_GAMEPAD_MODE_CHANGED) then
+                    if self:IsLockedInUIMode() then
+                        internalassert(false, "Gamepad preferred mode changed while locked in UI mode: could the player be locked inside a dialog or menu without an input method?")
+                    else
+                        local DEFAULT_PUSH = nil
+                        local DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK = nil
+                        local DEFAULT_NUM_SCENES_NEXT_SCENE_POPS = nil
+                        self:Show(self.hudSceneName, DEFAULT_PUSH, DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK, DEFAULT_NUM_SCENES_NEXT_SCENE_POPS, ZO_BHSCR_GAMEPAD_MODE_CHANGED)
+                    end
+                end
             end
         end
     end
@@ -492,15 +510,6 @@ function ZO_IngameSceneManager:HideTopLevels()
 end
 
 function ZO_IngameSceneManager:OnToggleGameMenuBinding()
-    if SYSTEMS:IsShowing("restyle") then
-        local exitDestinationData =
-        {
-            showBaseScene = true,
-        }
-        SYSTEMS:GetObject("restyle"):AttemptExit(exitDestinationData)
-        return
-    end
-
     if SYSTEMS:IsShowing("restyle_station") then
         SYSTEMS:GetObject("restyle_station"):AttemptExit()
         return
@@ -511,13 +520,13 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
         return
     end
 
-    if not IsInGamepadPreferredMode() and GUILD_RANKS:SaveIfBlocking() then
-        -- The guild ranks scene was the current blocking scene, so we can return early here.
+    local SHOW_BASE_SCENE = true
+    if SYSTEMS:GetObject("guild_heraldry"):AttemptSaveIfBlocking(SHOW_BASE_SCENE) then
         return
     end
 
-    local SHOW_BASE_SCENE = true
-    if SYSTEMS:GetObject("guild_heraldry"):AttemptSaveIfBlocking(SHOW_BASE_SCENE) then
+    if MAIN_MENU_MANAGER:HasBlockingScene() then
+        MAIN_MENU_MANAGER:ActivatedBlockingScene_BaseScene()
         return
     end
 

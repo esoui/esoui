@@ -117,6 +117,7 @@ panelBuilder:AddSetting({
 
 panelBuilder:AddSetting({
     controlName = "Options_Account_ResendActivation",
+    template = "ZO_Options_InvokeCallback_Wide",
     settingType = SETTING_TYPE_CUSTOM,
     settingId = OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION,
     header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,

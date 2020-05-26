@@ -61,11 +61,11 @@ function WorldMapInfo_Gamepad:InitializeTabs()
     -- Table for the Window data. Each entry is a tab in the UI.
     self.tabBarEntries = {
         {
-            text = GetString(SI_MAP_INFO_MODE_QUESTS), 
-            callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT, USES_RIGHT_SIDE_CONTENT) end
+            text = GetString(SI_MAP_INFO_MODE_QUESTS),
+            callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT, USES_RIGHT_SIDE_CONTENT) end,
         },
         {
-            text = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER), 
+            text = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER),
             callback = function()
                 self:SwitchToFragment(WORLD_MAP_ZONE_INFO_STORY_GAMEPAD_FRAGMENT, USES_RIGHT_SIDE_CONTENT)
             end,
@@ -75,15 +75,28 @@ function WorldMapInfo_Gamepad:InitializeTabs()
         },
         {
             text = GetString(SI_MAP_INFO_MODE_LOCATIONS),
-            callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT, USES_RIGHT_SIDE_CONTENT) end
+            callback = function()
+                self:SwitchToFragment(GAMEPAD_WORLD_MAP_LOCATIONS_FRAGMENT, USES_RIGHT_SIDE_CONTENT)
+            end,
         },
         {
-            text = GetString(SI_MAP_INFO_MODE_FILTERS), 
-            callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT, DOESNT_USE_RIGHT_SIDE_CONTENT) end
+            text = GetString(SI_MAP_INFO_MODE_FILTERS),
+            callback = function()
+                self:SwitchToFragment(GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT, DOESNT_USE_RIGHT_SIDE_CONTENT)
+            end,
         },
         {
-            text = GetString(SI_MAP_INFO_MODE_HOUSES), 
-            callback = function() self:SwitchToFragment(GAMEPAD_WORLD_MAP_HOUSES:GetFragment(), DOESNT_USE_RIGHT_SIDE_CONTENT) end
+            text = GetString(SI_MAP_INFO_MODE_HOUSES),
+            callback = function()
+                self:SwitchToFragment(GAMEPAD_WORLD_MAP_HOUSES:GetFragment(), DOESNT_USE_RIGHT_SIDE_CONTENT)
+            end,
+        },
+        {
+            text = GetString(SI_MAP_INFO_MODE_ANTIQUITIES),
+            callback = function()
+                self:SwitchToFragment(WORLD_MAP_ANTIQUITIES_GAMEPAD:GetFragment(), DOESNT_USE_RIGHT_SIDE_CONTENT)
+            end,
+            visible = AreAntiquitySkillLinesDiscovered,
         },
     }
 

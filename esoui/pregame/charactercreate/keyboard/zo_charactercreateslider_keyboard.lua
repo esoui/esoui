@@ -66,6 +66,11 @@ function ZO_CharacterCreateColorSlider_Keyboard:SetData(appearanceName, numValue
     self:Update()
 end
 
+-- Override parent function, otherwise parent function will break if called for this class object
+function ZO_CharacterCreateColorSlider_Keyboard:GetValue()
+    return self.slider.m_picker.m_pressedEntry.m_paletteIndex
+end
+
 function ZO_CharacterCreateColorSlider_Keyboard:Randomize(randomizeType)
     if self.lockState == TOGGLE_BUTTON_OPEN then
         local randomValue = 1
@@ -205,8 +210,19 @@ function ZO_CharacterCreateDropdownSlider_Keyboard:ToggleLocked()
     self:UpdateLockState()
 end
 
+function ZO_CharacterCreateDropdownSlider_Keyboard:SetLocked(isLocked)
+    if self:IsLocked() ~= isLocked then
+        self:ToggleLocked()
+    end
+end
+
 function ZO_CharacterCreateDropdownSlider_Keyboard:UpdateLockState()
     self.dropdown:SetEnabled(self.lockState == TOGGLE_BUTTON_OPEN)
+end
+
+-- Override parent function, otherwise parent function will break if called for this class object
+function ZO_CharacterCreateDropdownSlider_Keyboard:GetValue()
+    return self.dropdown:GetSelectedItem()
 end
 
 function ZO_CharacterCreateDropdownSlider_Keyboard:IsLocked()

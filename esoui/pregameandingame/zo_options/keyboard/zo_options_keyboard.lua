@@ -65,7 +65,13 @@ function ZO_KeyboardOptions:AddUserPanel(panelIdOrString, panelName, panelType, 
 
     self.panelNames[id] = panelName
 
-    local callback =    function()
+    -- SelectionCallback calls expect to place in a control as the first argument even if not used by this callback.
+    local callback =    function(optionButtonControl, anchorFunction)
+                            if anchorFunction then
+                                anchorFunction(self.control)
+                            else
+                                ZO_ReanchorControlForLeftSidePanel(self.control)
+                            end
                             SCENE_MANAGER:AddFragment(OPTIONS_WINDOW_FRAGMENT)
                             self:ChangePanels(id)
                         end
@@ -297,7 +303,7 @@ function ZO_KeyboardOptions:ApplySettings(control)
     self:UpdateAllPanelOptions(SAVE_CURRENT_VALUES)
 end
 
-function ZO_KeyboardOptions:LoadDefaults()
+function ZO_KeyboardOptions:LoadAllDefaults()
     local controls = self.controlTable[self.currentPanel]
     if controls then
         for index, control in pairs(controls) do

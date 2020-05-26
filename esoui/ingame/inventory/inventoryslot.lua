@@ -436,9 +436,9 @@ do
             local function SetupItemRow(rowControl, slotInfo)
                 local bag, index = slotInfo.bag, slotInfo.index
 
-                local icon, _, _, _, _, _, _, quality = GetItemInfo(bag, index)
+                local icon, _, _, _, _, _, _, _, displayQuality = GetItemInfo(bag, index)
 
-                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+                local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
                 local nameControl = GetControl(rowControl, "Name")
                 nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(bag, index)))
                 nameControl:SetColor(r, g, b, 1)
@@ -542,9 +542,9 @@ local function PlaceInventoryItem(inventorySlot)
         local destBag, destSlot = ZO_Inventory_GetBagAndIndex(inventorySlot)
         ClearCursor()
         if ZO_InventorySlot_WillItemBecomeBoundOnEquip(sourceBag, sourceSlot) then
-            local itemQuality = select(8, GetItemInfo(sourceBag, sourceSlot))
-            local itemQualityColor = GetItemQualityColor(itemQuality)
-            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = function() RequestMoveItem(sourceBag, sourceSlot, destBag, destSlot) end}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(sourceBag, sourceSlot))}})
+            local itemDisplayQuality = GetItemDisplayQuality(sourceBag, sourceSlot)
+            local itemQualityColor = GetItemQualityColor(itemDisplayQuality)
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", { onAcceptCallback = function() RequestMoveItem(sourceBag, sourceSlot, destBag, destSlot) end }, { mainTextParams = { itemQualityColor:Colorize(GetItemName(sourceBag, sourceSlot)) } })
         else
             RequestMoveItem(sourceBag, sourceSlot, destBag, destSlot)
         end
@@ -920,12 +920,12 @@ end
 
 local function TrySellItem(inventorySlot)
     local itemData = {}
-    if(CanSellItem()) then
+    if CanSellItem() then
         itemData.stackCount = ZO_InventorySlot_GetStackCount(inventorySlot)
-        if(itemData.stackCount > 0) then
+        if itemData.stackCount > 0 then
             itemData.bag, itemData.slot = ZO_Inventory_GetBagAndIndex(inventorySlot)
 
-            if (IsItemStolen(itemData.bag, itemData.slot)) then
+            if IsItemStolen(itemData.bag, itemData.slot) then
                 local totalSells, sellsUsed = GetFenceSellTransactionInfo()
                 if sellsUsed == totalSells then
                     ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString("SI_STOREFAILURE", STORE_FAILURE_AT_FENCE_LIMIT))
@@ -934,9 +934,11 @@ local function TrySellItem(inventorySlot)
             end
 
             itemData.itemName = GetItemName(itemData.bag, itemData.slot)
-            itemData.quality = select(8, GetItemInfo(itemData.bag, itemData.slot))
+            itemData.functionalQuality = GetItemFunctionalQuality(itemData.bag, itemData.slot)
+            -- itemData.quality is depricated, included here for addon backwards compatibility
+            itemData.quality = itemData.functionalQuality
 
-            if SCENE_MANAGER:IsShowing("fence_keyboard") and itemData.quality >= ITEM_QUALITY_ARCANE then
+            if SCENE_MANAGER:IsShowing("fence_keyboard") and itemData.functionalQuality >= ITEM_QUALITY_ARTIFACT then
                 ZO_Dialogs_ShowDialog("CANT_BUYBACK_FROM_FENCE", itemData)
             else
                 SellInventoryItem(itemData.bag, itemData.slot, itemData.stackCount)
@@ -953,9 +955,9 @@ local function TryLaunderItem(inventorySlot)
         return
     end
 
-    if(CanLaunderItem()) then
+    if CanLaunderItem() then
         local stackCount = ZO_InventorySlot_GetStackCount(inventorySlot)
-        if(stackCount > 0) then
+        if stackCount > 0 then
             local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
             LaunderItem(bag, index, stackCount)
             return true
@@ -979,7 +981,7 @@ end
 
 local function TryEquipItem(inventorySlot)
     local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-    local function DoEquip() 
+    local function DoEquip()
         local equipSucceeds, possibleError = IsEquipable(bag, index)
         if equipSucceeds then
             ClearCursor()
@@ -987,13 +989,13 @@ local function TryEquipItem(inventorySlot)
             return true
         end
 
-        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, possibleError)    
+        ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, possibleError)
     end
-    
+
     if ZO_InventorySlot_WillItemBecomeBoundOnEquip(bag, index) then
-        local itemQuality = select(8, GetItemInfo(bag, index))
-        local itemQualityColor = GetItemQualityColor(itemQuality)
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", {onAcceptCallback = DoEquip}, {mainTextParams = {itemQualityColor:Colorize(GetItemName(bag, index))}})
+        local itemDisplayQuality = GetItemDisplayQuality(bag, index)
+        local itemDisplayQualityColor = GetItemQualityColor(itemDisplayQuality)
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_EQUIP_ITEM", { onAcceptCallback = DoEquip }, { mainTextParams = { itemDisplayQualityColor:Colorize(GetItemName(bag, index)) } })
     else
         DoEquip()
     end

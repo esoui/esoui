@@ -168,11 +168,11 @@ end
 
 function ZO_SharedInteraction:CreateInteractScene(name)
 
-    CONVERSATION_INTERACTION =
+    local CONVERSATION_INTERACTION =
     {
         type = "Interact",
         interactTypes = { INTERACTION_CONVERSATION, INTERACTION_QUEST },
-        End = function() self:EndInteraction() end,
+        OnInteractSwitch = function() self:SwitchInteraction() end,
     }
 
     self.sceneName = name
@@ -603,18 +603,21 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex, isGamepad)
     local data = {}
     local numRewards = GetJournalQuestNumRewards(journalQuestIndex)
     for i = 1, numRewards do
-        local rewardType, name, amount, icon, meetsUsageRequirement, itemQuality, itemType = GetJournalQuestRewardInfo(journalQuestIndex, i)
+        local rewardType, name, amount, icon, meetsUsageRequirement, itemDisplayQuality, itemType = GetJournalQuestRewardInfo(journalQuestIndex, i)
         --We don't want to show a collectible if we already own it
         local isCollectible = rewardType == REWARD_TYPE_AUTO_ITEM and itemType == REWARD_ITEM_TYPE_COLLECTIBLE
         local hideOwnedCollectible = isCollectible and not meetsUsageRequirement
         if not hideOwnedCollectible then
-            local rewardData = {
+            local rewardData = 
+            {
                 rewardType = rewardType,
                 name = name,
                 amount = amount,
                 icon = icon,
                 meetsUsageRequirement = meetsUsageRequirement,
-                quality = itemQuality,
+                displayQuality = itemDisplayQuality,
+                --This value is deprecated. Keeping it here to maintain backwards compatibility for add-ons
+                quality = itemDisplayQuality,
                 index = i,
                 itemType = itemType
             }
@@ -653,7 +656,7 @@ function ZO_SharedInteraction:ResetInteraction(bodyText)
     -- Should be overridden
 end
 
-function ZO_SharedInteraction:EndInteraction()
+function ZO_SharedInteraction:SwitchInteraction()
     -- Should be overridden
 end
 

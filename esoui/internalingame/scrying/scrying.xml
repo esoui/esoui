@@ -1,0 +1,389 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_ScryingFrame_GlowLoop" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="7500" startAlpha="0.5" endAlpha=".9">
+                    <EasingFunction>
+                        return ZO_EaseInOutZeroToOneToZero(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_ScryingNormalActionMeter_Crossfade">
+            <Animations>
+                <AlphaAnimation applyToChildControlName="EdgeText" duration="200" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation applyToChildControlName="EdgeDot" duration="200" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ScryingNormalActionMeter_Idle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation applyToChildControlName="Edge" cellsWide="6" cellsHigh="4" framerate="6"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ScryingSpecialActionMeter_Crossfade">
+            <Animations>
+                <AlphaAnimation applyToChildControlName="ActiveTexture" duration="200" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+                <AlphaAnimation applyToChildControlName="LastTexture" duration="200" startAlpha="1" endAlpha="0">
+                    <EasingFunction>
+                        return ZO_EaseInQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_ScryingBackdrop_SpinCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureRotateAnimation duration="8000" startRotation="6.28318" endRotation="0" />
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="ZO_ScryingBackdrop_TextureScroll" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureSlideAnimation deltaU="1" duration="50000"/>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ScryingGamepadTargetCursor_Idle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureRotateAnimation duration="5000" startRotation="6.28318" endRotation="0" />
+                <ScaleAnimation duration="5000" startScale="1" endScale="1.33">
+                    <EasingFunction>
+                        return ZO_EaseInOutZeroToOneToZero(progress)
+                    </EasingFunction>
+                </ScaleAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ScryingModalCursor_FadeIn">
+            <Animations>
+                <!-- offsets set dynamically -->
+                <TranslateAnimation duration="500">
+                    <EasingFunction>
+                        return ZO_BounceEase(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="ZO_ScryingHex_EndOfGame">
+            <Animations>
+                <CustomAnimation duration="1000">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Polygon name="ZO_ScryingHexPolygon" layer="BACKGROUND" virtual="true">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_ScryingHexPolygon_OnInitialized(self)
+            </OnInitialized>
+        </Polygon>
+
+        <Control name="ZO_ScryingAction" virtual="true">
+            <Controls>
+                <Button name="$(parent)AbilitySlot" level="1" shape="CIRCLE">
+                    <Anchor point="CENTER" />
+                    <Dimensions x="56" y="56"/>
+                    <Textures pressed="EsoUI/Art/ActionBar/passiveAbilityFrame_round_down.dds" mouseOver="EsoUI/Art/ActionBar/passiveAbilityFrame_round_over.dds" />
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                            <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                        </Texture>
+                    </Controls>
+                </Button>
+
+                <Label name="$(parent)Keybind" font="ZoFontWinH3">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)AbilitySlot" relativePoint="TOP" offsetY="6"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Polygon name="ZO_ScryingFakeHex" inherits="ZO_ScryingHexPolygon" layer="CONTROLS" centerTextureFile="EsoUI/Art/Scrying/hex_fakehex.dds" virtual="true" alpha="0.2">
+            <ClearAnchors />
+            <Border thicknessPercent=".05" minThicknessPixels="3" color="AA00EFFF" textureFile="EsoUI/Art/Scrying/hex_line_inout.dds"/>
+        </Polygon>
+
+        <Control name="ZO_ScryingHex" virtual="true">
+            <!-- NOTE: there could be anywhere between 100-1000 hexes for any given board. Be mindful of performance here. -->
+            <OnEffectivelyShown>
+                self.hexObject:OnEffectivelyShown()
+            </OnEffectivelyShown>
+            <OnEffectivelyHidden>
+                self.hexObject:OnEffectivelyHidden()
+            </OnEffectivelyHidden>
+            <Controls>
+                <Texture name="$(parent)Background" level="2" textureFile="EsoUI/Art/Scrying/hex_atlas.dds" pixelRoundingEnabled="false" alpha="0.2" >
+                    <Anchor point="CENTER" />
+                    <TextureCoords left="0.5" top="0.5" right="0.75" bottom="0.75" />
+                </Texture>
+                <Polygon name="$(parent)ScrollingBackgroundA" level="3" inherits="ZO_ScryingHexPolygon" centerTextureFile="EsoUI/Art/Scrying/scrolling_background.dds" centerTextureAddressMode="WRAP" alpha="0.3" />
+                <Polygon name="$(parent)ScrollingBackgroundB" level="3" inherits="ZO_ScryingHexPolygon" centerTextureFile="EsoUI/Art/Scrying/scrolling_background.dds" centerTextureAddressMode="WRAP" alpha="0.3" />
+                <TextureComposite name="$(parent)Textures" level="4" textureFile="EsoUI/Art/Scrying/hex_atlas.dds" pixelRoundingEnabled="false" alpha="0.8" blendMode="ADD">
+                    <Anchor point="CENTER" />
+                    <!-- Darkness (1) -->
+                    <Surface texCoordLeft="0.75" texCoordTop="0.5" texCoordRight="1" texCoordBottom="0.75" color="00FFFFFF" />
+                    <!-- Hex Type (2) -->
+                    <Surface hidden="true" />
+                    <!-- Flash (3) -->
+                    <Surface texCoordLeft="0.25" texCoordTop="0.5" texCoordRight="0.5" texCoordBottom="0.75" color="00FFFFFF" />
+                    <!-- Foreground (4) -->
+                    <Surface texCoordLeft="0.5" texCoordTop="0.75" texCoordRight="0.75" texCoordBottom="1" color="22FFFFFF"/>
+                </TextureComposite>
+                <!-- Goal controls on level 5-->
+                <Polygon name="$(parent)Polygon" level="6" inherits="ZO_ScryingHexPolygon" alpha="0" mouseEnabled="true">
+                    <OnMouseEnter>
+                        self:GetParent().hexObject:OnMouseEnter()
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        self:GetParent().hexObject:OnMouseExit()
+                    </OnMouseExit>
+                    <OnMouseUp>
+                        if upInside then
+                            if button == MOUSE_BUTTON_INDEX_LEFT then
+                                self:GetParent().hexObject:OnMouseClicked()
+                            else
+                                self:GetParent().hexObject:OnMouseRightClicked()
+                            end
+                        end
+                    </OnMouseUp>
+                    <OnDragStart>
+                        self:GetParent().hexObject:OnDragStart()
+                    </OnDragStart>
+                    <OnReceiveDrag>
+                        self:GetParent().hexObject:OnReceiveDrag()
+                    </OnReceiveDrag>
+                </Polygon>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_ScryingFadeInCursor" virtual="true">
+            <OnInitialized>
+                ZO_Scrying_FadeInCursor_OnInitialized(self)
+            </OnInitialized>
+            <OnEffectivelyShown>
+                ZO_Scrying_FadeInCursor_OnEffectivelyShown(self)
+            </OnEffectivelyShown>
+        </Texture>
+
+        <Texture name="ZO_ScryingBombCursor_Petal" inherits="ZO_ScryingFadeInCursor" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/cursor_bomb_petal.dds" virtual="true">
+            <Anchor point="CENTER" />
+        </Texture>
+
+        <Control name="ZO_ScryingModalCursor" virtual="true">
+            <Controls>
+                <Texture name="$(parent)LineStart" inherits="ZO_ScryingFadeInCursor" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/Scrying/cursor_line.dds">
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)LineEnd" inherits="ZO_ScryingFadeInCursor" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/Scrying/cursor_line.dds">
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Texture name="$(parent)CoOpt" inherits="ZO_ScryingFadeInCursor" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/Scrying/cursor_co_opt.dds">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER" />
+                </Texture>
+                <Control name="$(parent)Bomb" hidden="true">
+                    <!-- Bomb petals added dynamically -->
+                    <Anchor point="CENTER" />
+                </Control>
+                <Texture name="$(parent)GamepadTarget" layer="OVERLAY" level="1" hidden="true" textureFile="EsoUI/Art/Scrying/cursor_gamepad.dds" pixelRoundingEnabled="false">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ScryingTopLevel" mouseEnabled="true" tier="LOW" layer="BACKGROUND" hidden="true">
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+
+            <OnInitialized>
+                ZO_Scrying_OnInitialized(self)
+            </OnInitialized>
+
+            <OnMouseUp>
+                SCRYING:OnUnhandledMouseUp()
+            </OnMouseUp>
+
+            <OnReceiveDrag>
+                SCRYING:OnUnhandledReceiveDrag()
+            </OnReceiveDrag>
+
+            <Controls>
+                <Control name="$(parent)Game">
+                    <Dimensions x="2384" y="1180" />
+                    <Anchor point="CENTER"/>
+                    <Controls>
+                        <Control name="$(parent)EyeBackground" tier="MEDIUM">
+                            <AnchorFill/>
+                            <Controls>
+                                <Polygon name="$(parent)Mask" alpha="0">
+                                    <Anchor point="TOPLEFT" offsetX="300"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-300"/>
+                                    <OnInitialized>
+                                        ZO_HexMaskPolygon_OnInitialized(self)
+                                    </OnInitialized>
+                                </Polygon>
+
+                                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Scrying/eye_background.dds" centerTextureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" >
+                                    <Anchor point="CENTER"/>
+                                    <Dimensions x="1160" y="1135"/>
+                                </Texture>
+
+                                <Polygon name="$(parent)Scroll" layer="BACKGROUND" centerBlendMode="ADD" centerTextureFile="EsoUI/Art/Scrying/eye_scrolling_background.dds" centerTextureAddressMode="WRAP" alpha="0.1">
+                                    <Anchor point="TOPLEFT" offsetX="300"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-300"/>
+                                    <OnInitialized>
+                                        ZO_FramePolygon_OnInitialized(self)
+                                    </OnInitialized>
+                                </Polygon>
+
+                                <Texture name="$(parent)LeftSpin" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_background_spin.dds">
+                                    <Anchor point="LEFT" offsetX="320" />
+                                    <Dimensions x="512" y="512" />
+                                </Texture>
+
+                                <Texture name="$(parent)RightSpin" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_background_spin.dds">
+                                    <Anchor point="RIGHT" offsetX="-320" />
+                                    <Dimensions x="512" y="512" />
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)SafeArea" tier="MEDIUM">
+                            <Anchor point="BOTTOM" offsetY="-296"/>
+                            <Dimensions x="810" y="610" />
+                            <Controls>
+                                <Texture name="$(parent)ModalCursor" inherits="ZO_ScryingModalCursor" />
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Frame" tier="HIGH">
+                            <AnchorFill/>
+                            <Controls>
+                                <Texture name="$(parent)Left" scale="1.1" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                    <Dimensions x="158" y="1024"/>
+                                    <Anchor point="RIGHT" relativePoint="CENTER" />
+                                    <TextureCoords left="0" top="0" right="0.154296875" bottom="1" />
+                                </Texture>
+                                <Texture name="$(parent)Right" scale="1.1" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                    <Dimensions x="158" y="1024"/>
+                                    <Anchor point="LEFT" relativePoint="CENTER" />
+                                    <TextureCoords left="0.154296875" top="0" right="0.30859375" bottom="1" />
+                                </Texture>
+                                <Control name="$(parent)Glow" alpha="0">
+                                    <AnchorFill/>
+                                    <Controls>
+                                        <Texture name="$(parent)Left" scale="1.1" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                            <Dimensions x="352" y="1024"/>
+                                            <Anchor point="RIGHT" relativePoint="CENTER" />
+                                            <TextureCoords left="0.3095703125" top="0" right="0.654296875" bottom="1" />
+                                        </Texture>
+                                        <Texture name="$(parent)Right" scale="1.1" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/Scrying/eye_atlas.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                            <Dimensions x="352" y="1024"/>
+                                            <Anchor point="LEFT" relativePoint="CENTER" />
+                                            <TextureCoords left="0.654296875" top="0" right="0.9990234375" bottom="1" />
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)NormalActionMeter">
+                                    <Anchor point="BOTTOM" offsetY="-166" />
+                                    <Dimensions x="80" y="110" />
+                                    <Controls>
+                                        <!--
+                                        The heavy lifting for animating each element of the normal action meter is mostly handled by anchor constraints:
+                                        as the meter empties, the ActivatedMask will shrink, causing the darkened frame background to become visible.
+                                        The edge is anchored in between the two, to obscure the hard rectangular edge.
+                                        -->
+                                        <Scroll name="$(parent)ActivatedMask">
+                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPRIGHT" />
+                                            <Dimensions y="110" />
+                                            <Controls>
+                                                <Texture name="$(parent)Body" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/crystal_on.dds">
+                                                    <Anchor point="TOP" />
+                                                    <Dimensions x="50" y="110" />
+                                                </Texture>
+                                            </Controls>
+                                        </Scroll>
+                                        <Texture name="$(parent)Edge" layer="OVERLAY" textureFile="EsoUI/Art/Scrying/crystal_edge.dds" blendMode="ADD">
+                                            <Anchor point="CENTER" relativeTo="$(parent)ActivatedMask" relativePoint="BOTTOM" />
+                                            <Dimensions x="200" y="48" />
+                                            <Controls>
+                                                <Texture name="$(parent)Dot" layer="OVERLAY" level="1" alpha="1" textureFile="EsoUI/Art/Scrying/crystal_dot.dds">
+                                                    <Anchor point="CENTER" />
+                                                    <Dimensions x="64" y="64" />
+                                                </Texture>
+                                                <Label name="$(parent)Text" layer="OVERLAY" level="2" alpha="0" font="ZoFontKeyboard18ThickOutline">
+                                                    <Anchor point="CENTER" offsetX="1" />
+                                                </Label>
+                                            </Controls>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)SpecialActionMeter">
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetY="143" />
+                                    <Dimensions x="140" y="140" />
+                                    <Controls>
+                                        <Texture name="$(parent)LastTexture" textureFile="EsoUI/Art/Scrying/special_crystals.dds">
+                                            <AnchorFill />
+                                        </Texture>
+                                        <Texture name="$(parent)ActiveTexture" textureFile="EsoUI/Art/Scrying/special_crystals.dds">
+                                            <AnchorFill />
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)SpecialAction1" inherits="ZO_ScryingAction">
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="-122" offsetY="203" />
+                                </Control>
+                                <Control name="$(parent)SpecialAction2" inherits="ZO_ScryingAction">
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="0" offsetY="246" />
+                                </Control>
+                                <Control name="$(parent)SpecialAction3" inherits="ZO_ScryingAction">
+                                    <Anchor point="CENTER" relativePoint="TOP" offsetX="122" offsetY="203" />
+                                </Control>
+                                <Control name="$(parent)NormalAction" inherits="ZO_ScryingAction">
+                                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetX="0" offsetY="-136" />
+                                    <Controls>
+                                         <Label name="$(parent)Keybind" override="true">
+                                            <ClearAnchors/>
+                                            <Anchor point="TOP" relativeTo="$(parent)AbilitySlot" relativePoint="BOTTOM" offsetY="-6"/>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)MoreInfoKeybindButton" inherits="ZO_KeybindButton">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="100" offsetY="-40"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -31,8 +31,7 @@
             </Controls>
         </Label>
 
-        <Control name="ZO_QuestJournalHeader" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
-            <DimensionConstraints minY="48" maxY="48" />
+        <Control name="ZO_QuestJournalHeader" inherits="ZO_IconHeader" mouseEnabled="true" virtual="true">
             <OnInitialized>
                 ZO_QuestJournalHeader_OnInitialized(self)
             </OnInitialized>
@@ -50,16 +49,8 @@
             </OnMouseExit>
 
             <Controls>
-                <Texture name="$(parent)Icon" resizeToFitFile="true">
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="7" />
-                    <Controls>
-                        <Texture name="$(parent)Highlight" hidden="true" blendMode="ADD">
-                            <AnchorFill />
-                        </Texture>
-                    </Controls>
-                </Texture>
-                <Label name="$(parent)Text" font="ZoFontHeader3" inherits="ZO_SelectableLabel">
-                    <Anchor point="LEFT" offsetX="20" />
+                <Texture name="$(parent)Icon" scale="1" override="true" resizeToFitFile="true" />
+                <Label name="$(parent)Text" override="true">
                     <OnMouseUp>
                         self:GetParent():OnMouseUp(upInside)
                     </OnMouseUp>

@@ -16,9 +16,9 @@ function ZO_IconHeader_OnMouseEnter(control)
     end
 end
 
-local ICON_HEADER_ICON_MAX_DIMENSIONS = 48
-local ICON_HEADER_TEXT_OFFSET_X = 55
-local ICON_HEADER_TEXT_PADDING_Y = 9
+ZO_TREE_ENTRY_ICON_HEADER_ICON_MAX_DIMENSIONS = 48
+ZO_TREE_ENTRY_ICON_HEADER_TEXT_OFFSET_X = 55
+ZO_TREE_ENTRY_ICON_HEADER_TEXT_PADDING_Y = 9
 
 function ZO_IconHeader_OnMouseExit(control)
     ZO_SelectableLabel_OnMouseExit(control.text)
@@ -35,7 +35,7 @@ function ZO_IconHeader_OnMouseUp(control, upInside)
     end
 end
 
-function ZO_IconHeader_Setup(control, open, enabled, disableScaling)
+function ZO_IconHeader_Setup(control, open, enabled, disableScaling, updateSizeFunction)
     enabled = enabled == nil or enabled
     control.enabled = enabled
     control.allowIconScaling = not disableScaling
@@ -59,14 +59,18 @@ function ZO_IconHeader_Setup(control, open, enabled, disableScaling)
     control.text:SetSelected(open)
     control.text:SetEnabled(enabled)
 
-    ZO_IconHeader_UpdateSize(control)
+    if updateSizeFunction then
+        updateSizeFunction(control)
+    else
+        ZO_IconHeader_UpdateSize(control)
+    end
 end
 
 function ZO_IconHeader_UpdateSize(control)
     local textWidth, textHeight = control.text:GetTextDimensions()
-    local height = textHeight + ICON_HEADER_TEXT_PADDING_Y * 2
-    height = zo_max(height, ICON_HEADER_ICON_MAX_DIMENSIONS)
-    local width = textWidth + ICON_HEADER_TEXT_OFFSET_X
+    local height = textHeight + ZO_TREE_ENTRY_ICON_HEADER_TEXT_PADDING_Y * 2
+    height = zo_max(height, ZO_TREE_ENTRY_ICON_HEADER_ICON_MAX_DIMENSIONS)
+    local width = textWidth + ZO_TREE_ENTRY_ICON_HEADER_TEXT_OFFSET_X
     control:SetDimensions(width, height)
 end
 

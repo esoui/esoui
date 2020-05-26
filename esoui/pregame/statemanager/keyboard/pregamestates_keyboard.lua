@@ -59,7 +59,6 @@ local pregameStates =
                 DisableShareFeatures()
             end
             LOGIN_KEYBOARD:InitializeCredentialEditBoxes()
-            PREGAME_SLIDESHOW_KEYBOARD:BeginSlideShow()
             PregameLogout()
             RegisterForLoadingUpdates()
 
@@ -75,6 +74,10 @@ local pregameStates =
 
             if ZO_WorldSelectCancel ~= nil then
                 ZO_WorldSelectCancel.gameStateString = "AccountLogin"
+            end
+
+            if IsErrorQueuedFromIngame() then
+                ZO_Pregame_DisplayServerDisconnectedError()
             end
 
             AttemptQuickLaunch()
@@ -155,6 +158,10 @@ local errorCodeToStateChange =
 }
 
 local function GlobalError(eventCode, errorCode, helpLinkURL, ...)
+    if IsInGamepadPreferredMode() then
+        -- TODO: we should harmonize this implementation of global errors, and the gamepad implementation in CreateLinkLoadingScreen_Gamepad
+        return
+    end
     ZO_PREGAME_HAD_GLOBAL_ERROR = true
 
     local errorString, errorStringFormat
@@ -188,38 +195,6 @@ local function GlobalError(eventCode, errorCode, helpLinkURL, ...)
     else
         ZO_Dialogs_ShowDialog("HANDLE_ERROR", nil, {mainTextParams = {errorString}})
     end
-end
-
-function ZO_Keyboard_DisplayServerDisconnectedError(eventCode)
-    local logoutError, globalErrorCode = GetErrorQueuedFromIngame()
-
-    ZO_PREGAME_HAD_GLOBAL_ERROR = true
-
-    local errorString
-    local errorStringFormat
-
-    if logoutError ~= nil and logoutError ~= LOGOUT_ERROR_UNKNOWN_ERROR then
-        errorStringFormat = GetString("SI_LOGOUTERROR", logoutError)
-
-        if errorStringFormat ~= ""  then
-            errorString = zo_strformat(errorStringFormat, GetGameURL())
-        end
-    elseif globalErrorCode ~= nil and globalErrorCode ~= GLOBAL_ERROR_CODE_NO_ERROR then
-        -- if the error code is not in LogoutReason then it is probably in the GlobalErrorCode enum
-        errorStringFormat = GetString("SI_GLOBALERRORCODE", globalErrorCode)
-
-        if errorStringFormat ~= ""  then
-            errorString = zo_strformat(errorStringFormat, globalErrorCode)
-        end
-    end
-
-    if not errorString or errorString == "" then
-        errorString = GetString(SI_UNKNOWN_ERROR)
-    end
-
-    PregameStateManager_ReenterLoginState()
-
-    ZO_Dialogs_ShowDialog("HANDLE_ERROR", nil, {mainTextParams = {errorString}})
 end
 
 local LOGIN_REQUEST_TIME_MAX = 60

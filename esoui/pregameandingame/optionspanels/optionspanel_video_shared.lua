@@ -176,7 +176,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_ANTI_ALIASING_TOOLTIP,
-            valid = { ANTIALIASING_TYPE_NONE, ANTIALIASING_TYPE_FXAA, },
+            valid = { ANTIALIASING_TYPE_NONE, ANTIALIASING_TYPE_FXAA, ANTIALIASING_TYPE_TAA, },
             valueStringPrefix = "SI_ANTIALIASINGTYPE",
             exists = ZO_IsPCUI,
         },

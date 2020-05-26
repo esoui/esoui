@@ -104,18 +104,29 @@ function ZO_GuildRecruitment_Manager.PopulateDropdown(dropDownControl, iterBegin
     if type(omittedIndex) == "function" then
         omittedIndex = omittedIndex()
     end
-
+    
     local selectedEntryIndex
     local currentIndex = 1
-    for i = iterBegin, iterEnd do
-        if not omittedIndex or i ~= omittedIndex then
-            local entry = dropDownControl:CreateItemEntry(GetString(stringBase, i), selectionFunction)
-            entry.value = i
-            if data.currentValue == i then
+
+    local function AddEntry(value)
+        if value ~= omittedIndex then
+            local entry = dropDownControl:CreateItemEntry(GetString(stringBase, value), selectionFunction)
+            entry.value = value
+            if data.currentValue == value then
                 selectedEntryIndex = currentIndex
             end
             dropDownControl:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
             currentIndex = currentIndex + 1
+        end
+    end
+
+    for i = iterBegin, iterEnd do
+        AddEntry(i)
+    end
+
+    if data.extraValues then
+        for _, value in ipairs(data.extraValues) do
+            AddEntry(value)
         end
     end
 

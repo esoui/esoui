@@ -32,4 +32,8 @@ function HomeShow_Manager:Initialize()
     GAMEPAD_HOME_SHOW_SCENE = HOME_SHOW_GAMEPAD:GetScene()
 end
 
+function HomeShow_Manager:GetCategoryData()
+    return categoryData
+end
+
 HOME_SHOW_FINDER_MANAGER = HomeShow_Manager:New()

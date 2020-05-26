@@ -5,15 +5,35 @@ local gameEntries = {}
 -- Characters
 
 local function ShowCharacterSelect()
-    SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
+    if PregameIsFullyLoaded() then
+        SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
+    else
+        local function OnPregameFullyLoaded()
+            SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
+            -- Make sure we unregister the callback, so we don't unintentially add the character select fragment in subsequent loads
+            CALLBACK_MANAGER:UnregisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
+        end
+
+        CALLBACK_MANAGER:RegisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
+    end
+    local esoPlus = GAME_MENU_CHARACTERSELECT:GetControl():GetNamedChild("ESOPlus")
+    esoPlus:SetHidden(IsESOPlusSubscriber())
 end
 
 local function HideCharacterSelect()
     SCENE_MANAGER:RemoveFragment(CHARACTER_SELECT_FRAGMENT)
+    local esoPlus = GAME_MENU_CHARACTERSELECT:GetControl():GetNamedChild("ESOPlus")
+    esoPlus:SetHidden(true)
 end
 
 local function AddCharactersEntry(entryTable)
-    local data = {name = GetString(SI_GAME_MENU_CHARACTERS), callback = ShowCharacterSelect, unselectedCallback = HideCharacterSelect, hasSelectedState = true}
+    local data =
+    {
+        name = GetString(SI_GAME_MENU_CHARACTERS),
+        callback = ShowCharacterSelect,
+        unselectedCallback = HideCharacterSelect,
+        hasSelectedState = true,
+    }
     table.insert(entryTable, data)
 end
 
@@ -56,12 +76,8 @@ end
 
 -- Play Cinematic
 
-local function PlayCinematic()
-    PregameStateManager_SetState("CharacterSelect_PlayCinematic")
-end
-
 local function AddCinematicEntry(entryTable)
-    local data = {name = GetString(SI_GAME_MENU_PLAY_CINEMATIC), callback = PlayCinematic }
+    local data = {name = GetString(SI_GAME_MENU_PLAY_CINEMATIC), callback = ZO_PlayIntroCinematicAndReturn }
     table.insert(entryTable, data)
 end
 
@@ -94,10 +110,10 @@ function ZO_GameMenu_CharacterSelect_Reset()
     RebuildTree(GAME_MENU_CHARACTERSELECT)
 end
 
-function ZO_GameMenu_CharacterSelect_Initialize(self)
-    GAME_MENU_CHARACTERSELECT = ZO_GameMenu_Initialize(self, OnShow)
+function ZO_GameMenu_CharacterSelect_Initialize(control)
+    GAME_MENU_CHARACTERSELECT = ZO_GameMenu_Initialize(control, OnShow)
 
-    local gameMenuCharacterSelectFragment = ZO_FadeSceneFragment:New(self)
+    local gameMenuCharacterSelectFragment = ZO_FadeSceneFragment:New(control)
     local gameMenuCharacterSelectScene = ZO_Scene:New("gameMenuCharacterSelect", SCENE_MANAGER)
     gameMenuCharacterSelectScene:AddFragment(gameMenuCharacterSelectFragment)
 

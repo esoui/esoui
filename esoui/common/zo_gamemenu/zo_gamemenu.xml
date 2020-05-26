@@ -16,7 +16,7 @@
             </OnMouseUp>
         </Label>
 
-        <Label name="ZO_GameMenu_SubCategory" virtual="true" inherits="ZO_SelectableLabel" font="ZoFontWinH3">
+        <Label name="ZO_GameMenu_Subcategory" virtual="true" inherits="ZO_SelectableLabel" font="ZoFontWinH3">
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>

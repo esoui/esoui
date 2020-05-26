@@ -11,8 +11,13 @@ local BORDER_TEXTURE_NORMAL = "EsoUI/Art/Tooltips/UI-Border.dds"
 local DIVIDER_TEXTURE_NORMAL = "EsoUI/Art/Miscellaneous/horizontalDivider.dds"
 local BORDER_TEXTURE_STOLEN = "EsoUI/Art/Tooltips/UI-Border-Red.dds"
 local DIVIDER_TEXTURE_STOLEN = "EsoUI/Art/Miscellaneous/horizontalDividerRed.dds"
+local BORDER_TEXTURE_MYTHIC = "EsoUI/Art/Tooltips/UI-Border_Mythic.dds"
+local BORDER_TEXTURE_MYTHIC_STOLEN = "EsoUI/Art/Tooltips/UI-Border_Mythic_Red.dds"
+local DIVIDER_TEXTURE_MYTHIC = "EsoUI/Art/Miscellaneous/horizontalDivider_Mythic.dds"
 local TOOLTIP_EDGE_WIDTH  = 128
 local TOOLTIP_EDGE_HEIGHT = 16
+local TOOLTIP_EDGE_WIDTH_MYTHIC  = 256
+local TOOLTIP_EDGE_HEIGHT_MYTHIC = 32
 
 local function ClearMouseOverTooltip()
     if g_MouseOverType == MOUSE_OVER_TYPE_FIXTURE then
@@ -163,8 +168,8 @@ function ZO_ItemTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
         ZO_ItemTooltip_SetCondition(tooltipControl, ...)
     elseif gameDataType == TOOLTIP_GAME_DATA_EQUIPPED_INFO then
         ZO_ItemTooltip_SetEquippedInfo(tooltipControl, ...)
-    elseif gameDataType == TOOLTIP_GAME_DATA_STOLEN then
-        ZO_ItemTooltip_SetStolen(tooltipControl, ...)
+    elseif gameDataType == TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN then
+        ZO_ItemTooltip_UpdateVisualStyle(tooltipControl, ...)
     else
         ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
     end
@@ -198,22 +203,60 @@ function ZO_ItemIconTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
 end
 
 function ZO_PopupTooltip_SetLink(link)
-	if not PopupTooltip:IsHidden() and PopupTooltip.lastLink == link then
-		ZO_PopupTooltip_Hide()
+    if not PopupTooltip:IsHidden() and PopupTooltip.lastLink == link then
+        ZO_PopupTooltip_Hide()
         return false
-	end
+    end
 
-	PopupTooltip:SetHidden(false)
+    PopupTooltip:SetHidden(false)
     PopupTooltip:ClearLines()
-	PopupTooltip:SetLink(link)
-	PopupTooltip.lastLink = link
+    PopupTooltip:SetLink(link)
+    PopupTooltip.lastLink = link
 
     return true
 end
 
 function ZO_PopupTooltip_Hide()
-	PopupTooltip:SetHidden(true)
-	PopupTooltip.lastLink = nil
+    PopupTooltip:SetHidden(true)
+    PopupTooltip.lastLink = nil
+end
+
+function ZO_ItemTooltip_UpdateVisualStyle(tooltipControl, isItemMythic, isItemStolen)
+    local borderTexture
+    local dividerTexture
+    local edgeWidth = TOOLTIP_EDGE_WIDTH
+    local edgeHeight = TOOLTIP_EDGE_HEIGHT
+
+    if isItemMythic then
+        if isItemStolen then
+            borderTexture = BORDER_TEXTURE_MYTHIC_STOLEN
+            dividerTexture = DIVIDER_TEXTURE_STOLEN
+        else
+            borderTexture = BORDER_TEXTURE_MYTHIC
+            dividerTexture = DIVIDER_TEXTURE_MYTHIC
+        end
+        edgeWidth = TOOLTIP_EDGE_WIDTH_MYTHIC
+        edgeHeight = TOOLTIP_EDGE_HEIGHT_MYTHIC
+    else
+       if isItemStolen then
+            borderTexture = BORDER_TEXTURE_STOLEN
+            dividerTexture = DIVIDER_TEXTURE_STOLEN
+        else
+            borderTexture = BORDER_TEXTURE_NORMAL
+            dividerTexture = DIVIDER_TEXTURE_NORMAL
+        end
+    end
+
+    tooltipControl:GetNamedChild("BG"):SetEdgeTexture(borderTexture, edgeWidth, edgeHeight)
+    tooltipControl:GetNamedChild("BG"):SetInsets(edgeHeight, edgeHeight, -edgeHeight, -edgeHeight)
+
+    -- Color all dividers
+    if tooltipControl.dividerPool then
+        local dividers = tooltipControl.dividerPool:GetActiveObjects()
+        for _, divider in pairs(dividers) do
+            divider:SetTexture(dividerTexture)
+        end
+    end
 end
 
 function ZO_ItemTooltip_SetCharges(tooltipControl, charges, maxCharges)
@@ -239,6 +282,8 @@ function ZO_ItemTooltip_SetCharges(tooltipControl, charges, maxCharges)
         chargeMeterContainer:SetHidden(false)
         chargeMeterContainer:SetAnchor(CENTER)
     end
+
+    ZO_ItemTooltip_UpdateVisualStyle(tooltipControl)
 end
 
 function ZO_ItemTooltip_SetCondition(tooltipControl, condition, maxCondition)
@@ -264,29 +309,8 @@ function ZO_ItemTooltip_SetCondition(tooltipControl, condition, maxCondition)
         conditionMeterContainer:SetHidden(false)
         conditionMeterContainer:SetAnchor(CENTER)
     end
-end
 
-function ZO_ItemTooltip_SetStolen(tooltipControl, isItemStolen)
-    local borderTexture
-    local dividerTexture
-
-    if isItemStolen then
-        borderTexture = BORDER_TEXTURE_STOLEN
-        dividerTexture = DIVIDER_TEXTURE_STOLEN
-    else
-        borderTexture = BORDER_TEXTURE_NORMAL
-        dividerTexture = DIVIDER_TEXTURE_NORMAL
-    end
-
-    tooltipControl:GetNamedChild("BG"):SetEdgeTexture(borderTexture, TOOLTIP_EDGE_WIDTH, TOOLTIP_EDGE_HEIGHT)
-
-    -- Color all dividers 
-    if tooltipControl.dividerPool then
-        local dividers = tooltipControl.dividerPool:GetActiveObjects()
-        for _, divider in pairs(dividers) do
-            divider:SetTexture(dividerTexture)
-        end
-    end
+    ZO_ItemTooltip_UpdateVisualStyle(tooltipControl)
 end
 
 local function SetTooltipActiveSkillProgression(tooltipControl, progressionIndex, lastRankXP, nextRankXP, currentXP, atMorph)

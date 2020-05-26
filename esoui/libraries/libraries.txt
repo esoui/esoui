@@ -58,6 +58,7 @@ EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Keyboard.xml
 EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.lua
 EsoUI\Libraries\ZO_Templates\EditBoxTemplates_Gamepad.xml
 
+EsoUI\Libraries\ZO_Templates\ControlTemplates.xml
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.lua
 EsoUI\Libraries\ZO_Templates\LabelTemplates_Shared.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\LabelTemplates_Gamepad.xml
@@ -118,8 +119,9 @@ EsoUI\Libraries\ZO_Dialog\Gamepad\ZO_GenericDialog_Gamepad.xml
 EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.lua
 EsoUI\Libraries\ZO_Dialog\ZO_ListDialog.xml
 
-EsoUI\Libraries\ZO_SavingEditBox\ZO_SavingEditBox.lua
-EsoUI\Libraries\ZO_SavingEditBox\ZO_SavingEditBox.xml
+EsoUI\Libraries\ZO_EditBoxes\ZO_EditBox.lua
+EsoUI\Libraries\ZO_EditBoxes\ZO_SavingEditBox.lua
+EsoUI\Libraries\ZO_EditBoxes\ZO_SavingEditBox.xml
 
 EsoUI\Libraries\ZO_ValidNameInstructions\ZO_ValidNameInstructions.lua
 EsoUI\Libraries\ZO_ValidNameInstructions\ZO_ValidNameInstructions.xml
@@ -242,6 +244,9 @@ EsoUI\Libraries\ZO_PointerBox\Keyboard\ZO_PointerBox_Keyboard.xml
 EsoUI\Libraries\ZO_TextureLayerRevealAnimation\ZO_TextureLayerRevealAnimation.lua
 EsoUI\Libraries\ZO_TextureLayerRevealAnimation\ZO_TextureLayerRevealAnimation.xml
 
+EsoUI\Libraries\ZO_LabelRevealAnimation\ZO_LabelRevealAnimation.lua
+EsoUI\Libraries\ZO_LabelRevealAnimation\ZO_LabelRevealAnimation.xml
+
 EsoUI\Libraries\ZO_Tile\Tile.lua
 EsoUI\Libraries\ZO_Tile\Tile.xml
 EsoUI\Libraries\ZO_Tile\ActionTile.lua
@@ -277,3 +282,6 @@ EsoUI\Libraries\ZO_SelectionIndicator\ZO_SelectionIndicator.xml
 EsoUI\Libraries\ZO_MostRecentEventHandler\ZO_MostRecentEventHandler.lua
 
 EsoUI\Libraries\ZO_ScriptProfiler\ZO_ScriptProfiler.lua
+
+EsoUI\Libraries\ZO_Horizontal_Menu\ZO_Horizontal_Menu.lua
+EsoUI\Libraries\ZO_Horizontal_Menu\ZO_Horizontal_Menu.xml

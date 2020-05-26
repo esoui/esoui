@@ -12,6 +12,7 @@ function ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason(name)
 end
 
 ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("ALREADY_SEEN")
+ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("INTERACT_ENDED")
 
 --class
 
@@ -39,7 +40,7 @@ end
 function ZO_SceneManager_Leader:OnRemoteSceneRequest(messageOrigin, requestType, sceneName)
     if messageOrigin ~= ZO_REMOTE_SCENE_CHANGE_ORIGIN then
         if requestType == REMOTE_SCENE_REQUEST_TYPE_SHOW_BASE_SCENE then
-            self:ShowBaseScene(sceneName)
+            self:ShowBaseScene()
             return
         end
 
@@ -203,12 +204,12 @@ function ZO_SceneManager_Leader:Push(sceneName)
     self:Show(sceneName, IS_PUSH)
 end
 
-function ZO_SceneManager_Leader:ShowWithFollowup(sceneName, resultCallback)
-    if self:WillCurrentSceneConfirmHide() then
+function ZO_SceneManager_Leader:ShowWithFollowup(sceneName, resultCallback, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
+    if self:WillCurrentSceneConfirmHide(bypassHideSceneConfirmationReason) then
         self.currentScene:RegisterCallback("HideSceneConfirmationResult", resultCallback)
-        self:Show(sceneName)
+        self:Show(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
     else
-        self:Show(sceneName)
+        self:Show(sceneName, push, nextSceneClearsSceneStack, numScenesNextScenePops, bypassHideSceneConfirmationReason)
         local ALLOWED_TO_HIDE_CURRENT_SCENE = true
         resultCallback(ALLOWED_TO_HIDE_CURRENT_SCENE)
     end
@@ -378,6 +379,13 @@ function ZO_SceneManager_Leader:SendFragmentCompleteMessage()
     self:SyncFollower()
 end
 
-function ZO_SceneManager_Leader:RequestShowLeaderBaseScene()
-    self:ShowBaseScene()
+function ZO_SceneManager_Leader:RequestShowLeaderBaseScene(bypassHideSceneConfirmationReason)
+    if bypassHideSceneConfirmationReason then
+        local DEFAULT_PUSH = nil
+        local DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK = nil
+        local DEFAULT_NUM_SCENES_NEXT_SCENE_POPS = nil
+        self:Show(self:GetBaseScene():GetName(), DEFAULT_PUSH, DEFAULT_NEXT_SCENE_CLEARS_SCENE_STACK, DEFAULT_NUM_SCENES_NEXT_SCENE_POPS, bypassHideSceneConfirmationReason)
+    else
+        self:ShowBaseScene()
+    end
 end

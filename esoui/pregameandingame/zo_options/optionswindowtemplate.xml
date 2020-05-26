@@ -305,8 +305,18 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_Options_InvokeCallback_Wide" mouseEnabled="true" virtual="true">
+            <Dimensions x="570" y="26" />
+            <Controls>
+                <Button name="$(parent)Button" inherits="ZO_DefaultButton" mouseEnabled="true">
+                    <Dimensions x="260" y="26" />
+                    <Anchor point="RIGHT" />
+                </Button>
+            </Controls>
+        </Control>
+
         <Control name="ZO_Options_Account_InvokeCallback_WithEmail" virtual="true" resizeToFitDescendents="true" >
-            <Dimensions x="510" />
+            <Dimensions x="570" />
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontWinH4" text="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER">
                     <Dimensions x="290" y="26" />
@@ -314,7 +324,7 @@
                 </Label>
 
                 <Label name="$(parent)Email" font="ZoFontWinH4" mouseEnabled="true">
-                    <Dimensions x="190" />
+                    <Dimensions x="250" />
                     <Anchor point="TOPRIGHT" />
                     <OnEffectivelyShown>
                         ZO_OptionsPanel_Account_SetupEmailLabel_Keyboard(self)
@@ -328,7 +338,7 @@
                 </Label>
 
                 <Button name="$(parent)Button" inherits="ZO_DefaultButton" mouseEnabled="true">
-                    <Dimensions x="200" />
+                    <Dimensions x="260" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Email" relativePoint="BOTTOMRIGHT" offsetY="4" />
                 </Button>
             </Controls>

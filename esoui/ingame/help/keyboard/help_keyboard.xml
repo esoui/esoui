@@ -82,5 +82,18 @@
                 </Label>
             </Controls>
         </TopLevelControl>
+
+
+        <TopLevelControl name="HelpOverlayModal" layer="BACKGROUND" level="1" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+
+            <Controls>
+                <Texture name="$(parent)Underlay" color="000000" mouseEnabled="true" alpha=".3">
+                    <AnchorFill />
+                    <OnMouseWheel />
+                </Texture>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

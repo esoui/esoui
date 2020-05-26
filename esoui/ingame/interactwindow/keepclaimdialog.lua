@@ -43,11 +43,11 @@ local ZO_KeepClaimDialog = ZO_SelectGuildDialog:Subclass()
 function ZO_KeepClaimDialog:New(control)
     local function acceptFunction(guildId)
         ClaimInteractionKeepForGuild(guildId)
-        INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
     end
 
     local function declineFunction()
-        INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
     end
 
     local dialog = ZO_SelectGuildDialog.New(self, control, SELECT_GUILD_KEEP_CLAIM, acceptFunction, declineFunction)
@@ -66,7 +66,7 @@ function ZO_KeepClaimDialog:New(control)
     local function OnStartKeepGuildClaimInteraction()
         INTERACT_WINDOW:OnBeginInteraction(GUILD_KEEP_CLAIM_INTERACTION)
         if(not dialog:Show()) then
-            INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
+            INTERACT_WINDOW:EndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
         end
     end
 
@@ -168,7 +168,7 @@ function ZO_KeepClaimDialog:InitializeGamepadReleaseKeepDialog()
         },
 
         noChoiceCallback = function()
-            INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
+            INTERACT_WINDOW:EndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
         end,
 
         buttons =
@@ -179,7 +179,7 @@ function ZO_KeepClaimDialog:InitializeGamepadReleaseKeepDialog()
                 text = SI_GUILD_RELEASE_KEEP_ACCEPT,
                 callback = function(dialog)
                     dialog.data.release()
-                    INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
+                    INTERACT_WINDOW:EndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
                 end,
                 visible = function()
                     local keepId = dialogSingleton.data.keepId
@@ -192,7 +192,7 @@ function ZO_KeepClaimDialog:InitializeGamepadReleaseKeepDialog()
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_CANCEL,
                 callback = function(dialog)
-                    INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
+                    INTERACT_WINDOW:EndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
                 end,
             },
         },
@@ -243,7 +243,7 @@ function ZO_KeepClaimDialog:InitializeGamepadClaimKeepDialog()
             self:SetCurrentDropdown(nil)
         end
 
-        INTERACT_WINDOW:OnEndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
+        INTERACT_WINDOW:EndInteraction(GUILD_KEEP_CLAIM_INTERACTION)
     end
 
     local function ReleaseDialog()

@@ -517,12 +517,12 @@ function ZO_SharedInventoryManager:RefreshStatusSortOrder(slotData)
 end
 
 function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagId, slotIndex, isNewItem)
-    local icon, stackCount, sellPrice, meetsUsageRequirement, locked, equipType, _, quality = GetItemInfo(bagId, slotIndex)
+    local icon, stackCount, sellPrice, meetsUsageRequirement, locked, equipType, _, functionalQuality, displayQuality = GetItemInfo(bagId, slotIndex)
     local launderPrice = GetItemLaunderPrice(bagId, slotIndex)
 
     local hadItemInSlotBefore = false
     local wasSameItemInSlotBefore = false
-    local hasItemInSlotNow = (stackCount > 0)
+    local hasItemInSlotNow = stackCount > 0
     local newItemInstanceId = hasItemInSlotNow and GetItemInstanceId(bagId, slotIndex) or nil
 
     local slot = existingSlotData
@@ -564,9 +564,15 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.stackLaunderPrice = stackCount * launderPrice
     slot.bagId = bagId
     slot.slotIndex = slotIndex
-    slot.meetsUsageRequirement = meetsUsageRequirement or (bagId == BAG_WORN) --Items flagged equipped unique can only have one equipped, which means once they are
-    slot.locked = locked                                                      --equipped they are no longer equippable, but we don't want to color these items red
-    slot.quality = quality                                                    --in GamepadInventory once they are equipped, because that doesn't make any sense.
+    -- Items flagged equipped unique can only have one equipped, which means once they are
+    -- equipped they are no longer equippable, but we don't want to color these items red
+    -- in GamepadInventory once they are equipped, because that doesn't make any sense.
+    slot.meetsUsageRequirement = meetsUsageRequirement or (bagId == BAG_WORN)
+    slot.locked = locked
+    slot.functionalQuality = functionalQuality
+    slot.displayQuality = displayQuality
+    -- slot.quality is depricated, included here for addon backwards compatibility
+    slot.quality = displayQuality
     slot.equipType = equipType
     slot.isPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
     slot.isBoPTradeable = IsItemBoPAndTradeable(bagId, slotIndex)

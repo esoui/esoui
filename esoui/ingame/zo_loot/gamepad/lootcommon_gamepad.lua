@@ -20,7 +20,8 @@ function ZO_Loot_Gamepad_Base:InitializeKeybindStripDescriptorsMixin(areEthereal
 
     lootBackupKeybind.ethereal = areEthereal
 
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         { -- Exit Button
             --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
@@ -77,14 +78,16 @@ do
     function ZO_Loot_Gamepad_Base:ShowTooltip(selectedData)
         GAMEPAD_TOOLTIPS:ClearTooltip(self.tooltipType)
         GAMEPAD_TOOLTIPS:Reset(self.tooltipType)
-
+        
+        local lootType = selectedData.lootType
         if selectedData.currencyType then
             GAMEPAD_TOOLTIPS:LayoutCurrency(self.tooltipType, selectedData.currencyType, selectedData.currencyAmount)
         elseif selectedData.isQuest then
             GAMEPAD_TOOLTIPS:LayoutQuestItem(self.tooltipType, GetLootQuestItemId(selectedData.lootId))
+        elseif lootType == LOOT_TYPE_ANTIQUITY_LEAD then
+            GAMEPAD_TOOLTIPS:LayoutAntiquityLead(self.tooltipType, GetLootAntiquityLeadId(selectedData.lootId))
         else
             local lootLink = GetLootItemLink(selectedData.lootId)
-            local lootType = selectedData.lootType
             if lootType == LOOT_TYPE_COLLECTIBLE then
                 GAMEPAD_TOOLTIPS:LayoutCollectibleFromLink(self.tooltipType, lootLink)
             else
@@ -176,13 +179,13 @@ end
 
 function ZO_Loot_Gamepad_Base:UpdateListAddLootItems(numLootItems, addStolenItems)
     for i = 1, numLootItems do
-        local lootId, name, icon, count, quality, value, isQuest, isStolen, lootType = GetLootItemInfo(i)
+        local lootId, name, icon, count, displayQuality, value, isQuest, isStolen, lootType = GetLootItemInfo(i)
             
         -- only add stolen items or non stolen items
         if addStolenItems == isStolen then
             name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
             local lootEntry = ZO_GamepadEntryData:New(name, icon)
-            lootEntry:InitializeLootVisualData(lootId, count, quality, value, isQuest, isStolen, lootType)
+            lootEntry:InitializeLootVisualData(lootId, count, displayQuality, value, isQuest, isStolen, lootType)
             if isStolen then
                 lootEntry:AddIcon(STOLEN_ICON_TEXTURE)
             end

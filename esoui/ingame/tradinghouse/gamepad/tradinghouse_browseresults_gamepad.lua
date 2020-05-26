@@ -73,7 +73,9 @@ function ZO_GamepadTradingHouse_BrowseResults:SetupResultItemRow(control, itemDa
 
     -- name
     control.nameLabel:SetText(ZO_TradingHouse_GetItemDataFormattedName(itemData))
-    control.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, itemData.quality))
+    -- itemData.quality is depricated, included here for addon backwards compatibility
+    local displayQuality = itemData.displayQuality or itemData.quality
+    control.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
 
     -- time
     if not itemData.isGuildSpecificItem then

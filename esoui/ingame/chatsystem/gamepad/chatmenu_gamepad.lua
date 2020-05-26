@@ -569,7 +569,7 @@ do
         self.channelDropdown:SetSelectedItemByEval(IsEntryForCurrentChannel, true)
 
         --Set the selected item text for the dropdown to the appropriate text
-        local channelData, channelTarget = GAMEPAD_CHAT_SYSTEM:GetCurrentChannelData()
+        local channelData, channelTarget = CHAT_ROUTER:GetCurrentChannelData()
         local channelText
         if channelTarget then
             --Console can only have display names.  This won't do anything to character names on PC

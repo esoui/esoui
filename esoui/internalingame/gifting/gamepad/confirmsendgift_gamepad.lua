@@ -213,7 +213,7 @@ end
 EVENT_MANAGER:RegisterForEvent("ZoConfirmSendGiftGamepad", EVENT_CONFIRM_SEND_GIFT, function(eventCode, giftId)
     if IsInGamepadPreferredMode() then
         local marketProductId = GetGiftMarketProductId(giftId)
-        local color = GetItemQualityColor(GetMarketProductQuality(marketProductId))
+        local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
         local colorizedName = color:Colorize(GetMarketProductDisplayName(marketProductId))
         ZO_Dialogs_ShowGamepadDialog("CONFIRM_SEND_GIFT_GAMEPAD", { giftId = giftId, itemName = colorizedName }, { mainTextParams = { colorizedName } })
     end

@@ -147,6 +147,16 @@ function ZO_CenterScreenMessageParams:GetIconData()
     return self.icon, self.iconBg
 end
 
+function ZO_CenterScreenMessageParams:SetScryingProgressData(lastNumGoalsAchieved, numGoalsAchieved, numGoalsTotal)
+    self.lastNumGoalsAchieved = lastNumGoalsAchieved
+    self.numGoalsAchieved = numGoalsAchieved
+    self.numGoalsTotal = numGoalsTotal
+end
+
+function ZO_CenterScreenMessageParams:GetScryingProgressData()
+    return self.lastNumGoalsAchieved, self.numGoalsAchieved, self.numGoalsTotal
+end
+
 function ZO_CenterScreenMessageParams:SetExpiringCallback(callback)
     self.expiringCallback = callback
 end
@@ -376,14 +386,15 @@ function ZO_CenterScreenAnnouncementLine:CreateAnimationWithExpiringCallback(tim
     return timeline
 end
 
-function ZO_CenterScreenAnnouncementLine:CreateWipeAnimation(timelineTemplate, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor, wipeIn, wipeOut)
+function ZO_CenterScreenAnnouncementLine:CreateWipeAnimation(timelineTemplate, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor, wipeInBegin, wipeOutBegin, wipeInEnd)
     local timeline = self:CreateAnimationWithExpiringCallback(timelineTemplate, stopHandler, expiringCallbackCheckOffset, expiringCallbackExecutor)
 
     local wipeInAnim = timeline:GetAnimation(1)
-    wipeInAnim:SetHandler("OnPlay", wipeIn)
+    wipeInAnim:SetHandler("OnPlay", wipeInBegin)
+    wipeInAnim:SetHandler("OnStop", wipeInEnd)
 
     local wipeOutAnim = timeline:GetAnimation(2)
-    wipeOutAnim:SetHandler("OnPlay", wipeOut)
+    wipeOutAnim:SetHandler("OnPlay", wipeOutBegin)
 
     return timeline
 end
@@ -546,6 +557,13 @@ function ZO_CenterScreenAnnouncementLargeLine:Reset()
     self.raidCompleteContainer:SetHidden(true)
     self.wipeAnimationTimeline:Stop()
 
+    if self.scryingIcons then
+        for _, iconTexture in ipairs(self.scryingIcons) do
+            self.scryingUpdatedIconPool:ReleaseObject(iconTexture.controlKey)
+        end
+        self.scryingIcons = nil
+    end
+
     ZO_CenterScreenAnnouncementLine.Reset(self)
 end
 
@@ -594,6 +612,35 @@ function ZO_CenterScreenAnnouncementLargeLine:SetRaidBreakdownText(raidArgumentT
     end
 end
 
+function ZO_CenterScreenAnnouncementLargeLine:SetScryingUpdatedIconData(iconPool, lastGoalsAchieved, goalsAchieved, goalsTotal)
+    self.scryingUpdatedIconPool = iconPool
+    self.scryingIcons = {}
+
+    local parentControl = self.control:GetNamedChild("TextScryingUpdatedSection")
+    local lastControl = nil
+    local SCRYING_ICON_FADE_IN_OFFSET_MS = 200
+    for goalIndex = 1, goalsTotal do
+        local iconTexture, key = iconPool:AcquireObject()
+        iconTexture.controlKey = key
+        table.insert(self.scryingIcons, iconTexture)
+
+        iconTexture:SetParent(parentControl)
+        if lastControl then
+            iconTexture:SetAnchor(LEFT, lastControl, RIGHT, 0, 0)
+        else
+            iconTexture:SetAnchor(LEFT, parentControl, LEFT, 0, 0)
+        end
+        lastControl = iconTexture
+
+        local wasAlreadyAchieved = goalIndex <= lastGoalsAchieved
+        iconTexture.achievedIcon:SetAlpha(wasAlreadyAchieved and 1 or 0)
+        iconTexture.shouldFadeIn = not wasAlreadyAchieved and goalIndex <= goalsAchieved
+        iconTexture.isLastGoal = goalIndex == goalsTotal
+        local fadeAnimation = iconTexture.fadeInTimeline:GetFirstAnimation()
+        iconTexture.fadeInTimeline:SetAnimationOffset(fadeAnimation, (goalIndex - lastGoalsAchieved - 1) * SCRYING_ICON_FADE_IN_OFFSET_MS)
+    end
+end
+
 function ZO_CenterScreenAnnouncementLargeLine:ApplyPlatformStyle()
     ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_CenterScreenAnnounce_LargeTextContainer"))
     local isGamepad = IsInGamepadPreferredMode()
@@ -609,6 +656,23 @@ function ZO_CenterScreenAnnouncementLargeLine.SetupWipeIn(animation, control)
     control:SetAnchor(TOPLEFT, control:GetParent(), TOPLEFT, -560, 0)
 end
 
+function ZO_CenterScreenAnnouncementLargeLine:OnWipeInComplete()
+    if self.scryingIcons then
+        for _, iconTexture in ipairs(self.scryingIcons) do
+            if iconTexture.shouldFadeIn then
+                iconTexture.fadeInTimeline:GetFirstAnimation():SetHandler("OnPlay", function()
+                    if iconTexture.isLastGoal then
+                        PlaySound(SOUNDS.SCRYING_PROGRESS_LAST_GOAL_FADEIN)
+                    else
+                        PlaySound(SOUNDS.SCRYING_PROGRESS_GOAL_FADEIN)
+                    end
+                end)
+                iconTexture.fadeInTimeline:PlayFromStart()
+            end
+        end
+    end
+end
+
 function ZO_CenterScreenAnnouncementLargeLine.SetupWipeOut(animation, control)
     control:ClearAnchors()
     control:SetAnchor(TOPRIGHT, control:GetParent(), TOPRIGHT, 560, 0)
@@ -619,7 +683,12 @@ function ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback(timeline)
 end
 
 function ZO_CenterScreenAnnouncementLargeLine:CreateTimelines()
-    self.wipeAnimationTimeline = self:CreateWipeAnimation("CenterScreenLargeTextWipe", function(_,completedPlayback) self:OnLineComplete(completedPlayback) end, DEFAULT_FADE_OUT_TIME_MS, ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback, ZO_CenterScreenAnnouncementLargeLine.SetupWipeIn, ZO_CenterScreenAnnouncementLargeLine.SetupWipeOut)
+    local onTimelineStopped = function(_,completedPlayback) self:OnLineComplete(completedPlayback) end
+    local expiringCallback = ZO_CenterScreenAnnouncementLargeLine.ExpiringCallback
+    local onWipeInBegin = ZO_CenterScreenAnnouncementLargeLine.SetupWipeIn
+    local onWipeInEnd = function() self:OnWipeInComplete() end
+    local onWipeOutBegin = ZO_CenterScreenAnnouncementLargeLine.SetupWipeOut
+    self.wipeAnimationTimeline = self:CreateWipeAnimation("CenterScreenLargeTextWipe", onTimelineStopped, DEFAULT_FADE_OUT_TIME_MS, expiringCallback, onWipeInBegin, onWipeOutBegin, onWipeInEnd)
 end
 
 function ZO_CenterScreenAnnouncementLargeLine:SetWipeTimelineLifespan(lifespan)
@@ -1010,6 +1079,8 @@ function CenterScreenAnnounce:InitializeLinePools()
         [CSA_LINE_TYPE_MAJOR] = self.majorLinePool,
         [CSA_LINE_TYPE_COUNTDOWN] = self.countdownLinePool,
     }
+
+    self.scryingUpdatedIconPool = ZO_ControlPool:New("ZO_CenterScreenAnnounce_ScryingUpdated_Icon", self.control, "ScryingIcon")
 end
 
 do
@@ -1074,30 +1145,57 @@ function CenterScreenAnnounce:ReleaseMessageParams(messageParams)
     self.messageParamsPool:ReleaseObject(messageParams.key)
 end
 
-function CenterScreenAnnounce:CanDisplayMessage(category)
-    if SYSTEMS:GetObject("craftingResults"):HasEntries() then
-        return false
-    end
+do
+    local ALLOWED_TYPES_DURING_SCRYING =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+    }
 
-    if self:HasActiveLines(CSA_LINE_TYPE_COUNTDOWN) then
-        return false -- nothing can show during a countdown (for now)
-    elseif category == CSA_CATEGORY_COUNTDOWN_TEXT or category == CSA_CATEGORY_MAJOR_TEXT then
-        return true -- these events must always show as soon as possible
-    elseif self.hasActiveLevelBar then
-         -- we can only show one bar increase on the player progress bar at a time
-         -- attempting to show a second before the first has completed will cause errors
-        return false
-    elseif self:HasActiveLines(CSA_LINE_TYPE_SMALL) then
-        if category == CSA_CATEGORY_SMALL_TEXT then
-            return #self.activeLines[CSA_LINE_TYPE_SMALL] < MAX_SMALL_TEXT_LINES
-        else
+    local ALLOWED_TYPES_DURING_ANTIQUITIES_DIGGING =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+    }
+
+    function CenterScreenAnnounce:CanDisplayMessage(category, csaType)
+        -- Early out if category is not of scrying category while showing scrying or map mode dig sites
+        if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES) and category ~= CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
             return false
         end
-    elseif self:HasActiveLines(CSA_LINE_TYPE_LARGE) then
-        return false
-    end
+
+        if SCRYING_SCENE:IsShowing() and not ALLOWED_TYPES_DURING_SCRYING[csaType] then
+            return false
+        end
+
+        -- Early out if the message type can't be shown during antiquity digging
+        if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() and not ALLOWED_TYPES_DURING_ANTIQUITIES_DIGGING[csaType] then
+            return false
+        end
+
+        if SYSTEMS:GetObject("craftingResults"):HasEntries() then
+            return false
+        end
+
+        if self:HasActiveLines(CSA_LINE_TYPE_COUNTDOWN) then
+            return false -- nothing can show during a countdown (for now)
+        elseif category == CSA_CATEGORY_COUNTDOWN_TEXT or category == CSA_CATEGORY_MAJOR_TEXT then
+            return true -- these events must always show as soon as possible
+        elseif self.hasActiveLevelBar then
+             -- we can only show one bar increase on the player progress bar at a time
+             -- attempting to show a second before the first has completed will cause errors
+            return false
+        elseif self:HasActiveLines(CSA_LINE_TYPE_SMALL) then
+            if category == CSA_CATEGORY_SMALL_TEXT then
+                return #self.activeLines[CSA_LINE_TYPE_SMALL] < MAX_SMALL_TEXT_LINES
+            else
+                return false
+            end
+        elseif self:HasActiveLines(CSA_LINE_TYPE_LARGE) then
+            return false
+        end
     
-    return true
+        return true
+    end
 end
 
 function CenterScreenAnnounce:GetWaitingQueueEventData(eventId)
@@ -1301,7 +1399,7 @@ end
 
 function CenterScreenAnnounce:GetNextShowableMessage(removeEntry)
     for i, messageParams in ipairs(self.displayQueue) do
-        if self:CanDisplayMessage(messageParams:GetCategory()) then
+        if self:CanDisplayMessage(messageParams:GetCategory(), messageParams:GetCSAType()) then
             if removeEntry then
                 table.remove(self.displayQueue, i)
             end
@@ -1494,6 +1592,21 @@ local setupFunctions =
 
         return announcementCountdownLine
     end,
+
+    [CSA_CATEGORY_SCRYING_PROGRESS_TEXT] = function(self, messageParams)
+        local largeMessageLine, poolKey = self.largeLinePool:AcquireObject()
+        largeMessageLine:SetKey(poolKey)
+
+        largeMessageLine:SetLargeText(messageParams:GetMainText())
+        largeMessageLine:SetSmallCombinedText(messageParams:GetSecondaryText())
+        largeMessageLine:SetScryingUpdatedIconData(self.scryingUpdatedIconPool, messageParams:GetScryingProgressData())
+        largeMessageLine:SetWipeTimelineLifespan(messageParams:GetLifespanMS())
+        largeMessageLine:PlayWipeAnimation()
+        self.isBeforeMessageExpiring = true
+
+        return largeMessageLine
+    end,
+
 }
 
 function CenterScreenAnnounce:CallExpiringCallback(announcementLine)
@@ -1506,6 +1619,31 @@ function CenterScreenAnnounce:CallExpiringCallback(announcementLine)
     end
 end
 
+function CenterScreenAnnounce:RemoveAllCSAsOfAnnounceType(announceType)
+    --First, go through anything in the display queue that matches the type, and remove it
+    for i, entry in ZO_NumericallyIndexedTableReverseIterator(self.displayQueue) do
+        if entry.csaType == announceType then
+            table.remove(self.displayQueue, i)
+        end
+    end
+
+    --Loop through each active line
+    for lineStyle, lineStyleTable in pairs(self.activeLines) do
+        for _, line in ipairs(lineStyleTable) do
+            if line.messageParams and line.messageParams.csaType == announceType then
+                --The animations for each of the line types are stored in different locations, so we need a separate implementation for each type
+                if lineStyle == CSA_LINE_TYPE_LARGE then
+                    line.wipeAnimationTimeline:PlayInstantlyToEnd()
+                elseif lineStyle == CSA_LINE_TYPE_SMALL then
+                    line.translateTimeline:PlayInstantlyToEnd(true)
+                    line.fadeInTimeline:PlayInstantlyToEnd(true)
+                    line.fadeOutTimeline:PlayInstantlyToEnd()
+                end
+            end
+        end
+    end
+end
+
 -- Legacy support for addons
 function CenterScreenAnnounce:AddMessage(eventId, category, ...)
     local messageParams = self:CreateMessageParams(category)
@@ -1514,7 +1652,7 @@ function CenterScreenAnnounce:AddMessage(eventId, category, ...)
 end
 
 do
-    local ALLOWED_TYPES_WHILE_CRAFTING = 
+    local ALLOWED_QUEUE_TYPES_WHILE_CRAFTING =
     {
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
@@ -1523,6 +1661,53 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+    }
+
+    -- Types that if they were to happen while scrying for an antiquity
+    -- will be stored and shown after the scrying game is over
+    local ALLOWED_QUEUE_TYPES_WHILE_SCRYING =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIG_SITES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_SCRYING_RESULT] = true,
+    }
+
+    -- Types that if they were to happen while digging for an antiquity
+    -- will be stored and shown after the digging game is over
+    local ALLOWED_QUEUE_TYPES_WHILE_ANTIQUITIES_DIGGING =
+    {
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_INFAMY_CHANGED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NOW_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_JUSTICE_NO_LONGER_KOS] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_RANK_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_XP_UPDATE] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_LEAD_ACQUIRED] = true,
+        [CENTER_SCREEN_ANNOUNCE_TYPE_ANTIQUITY_DIGGING_GAME_UPDATE] = true,
     }
 
     function CenterScreenAnnounce:AddMessageWithParams(messageParams)
@@ -1540,8 +1725,20 @@ do
                 return
             end
 
-            -- prevent unwanted announcements from appearing when the user is crafting
-            if ZO_CraftingUtils_IsCraftingWindowOpen() and not ALLOWED_TYPES_WHILE_CRAFTING[csaType] then
+            -- prevent unwanted announcements from queuing when the user is crafting
+            if ZO_CraftingUtils_IsCraftingWindowOpen() and not ALLOWED_QUEUE_TYPES_WHILE_CRAFTING[csaType] then
+                self.messageParamsPool:ReleaseObject(messageParams.key)
+                return
+            end
+
+            -- prevent unwanted announcements from queuing when the user is scrying
+            if (SCRYING_SCENE:IsShowing() or WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES)) and not ALLOWED_QUEUE_TYPES_WHILE_SCRYING[csaType] then
+                self.messageParamsPool:ReleaseObject(messageParams.key)
+                return
+            end
+
+            -- prevent unwanted announcements from queuing when the user is digging for antiquities
+            if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() and not ALLOWED_QUEUE_TYPES_WHILE_ANTIQUITIES_DIGGING[csaType] then
                 self.messageParamsPool:ReleaseObject(messageParams.key)
                 return
             end
@@ -1706,4 +1903,9 @@ function ZO_CenterScreenAnnounce_Initialize(self)
     CENTER_SCREEN_ANNOUNCE = CenterScreenAnnounce:New(self)
 
     ZO_CenterScreenAnnounce_InitializePriorities()
+end
+
+function ZO_CenterScreenAnnounce_ScryingUpdated_Icon_OnInitialized(iconTexture)
+    iconTexture.fadeInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CenterScreenScryingUpdatedIconFadeIn", iconTexture)
+    iconTexture.achievedIcon = iconTexture:GetNamedChild("AchievedIcon")
 end

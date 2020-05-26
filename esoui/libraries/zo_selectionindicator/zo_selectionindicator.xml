@@ -1,9 +1,20 @@
 <GuiXml>
     <Controls>
-        <Button name="ZO_SelectionIndicator_Button_Control" textureFile="EsoUI/Art/Buttons/featureDot_inactive.dds" layer="CONTROLS" level="3" virtual="true">
-            <Dimensions x="16" y="16" />
+        <Button name="ZO_SelectionIndicator_Button_Control" layer="CONTROLS" level="3" virtual="true">
+            <OnClicked>
+                self:GetParent().object:OnButtonClicked(self)
+            </OnClicked>
+
+            <OnMouseEnter>
+                self:GetParent().object:OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self:GetParent().object:OnMouseExit(self)
+            </OnMouseExit>
+
             <Controls>
-                <Texture name="$(parent)IndicatorButtonTexture" textureFile="EsoUI/Art/Buttons/featureDot_inactive.dds" layer="CONTROLS" level="3">
+                <Texture name="$(parent)IndicatorButtonTexture" layer="CONTROLS" level="3">
                     <AnchorFill />
                 </Texture>
             </Controls>

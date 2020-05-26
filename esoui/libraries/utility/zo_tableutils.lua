@@ -212,6 +212,17 @@ function ZO_CombineNumericallyIndexedTables(dest, ...)
     end
 end
 
+-- The dest table is mutable and will take in the values of all subsequent tables.  It must be initialized.
+function ZO_CombineNonContiguousTables(dest, ...)
+    for sourceTableIndex = 1, select("#", ...) do
+        local sourceTable = select(sourceTableIndex, ...)
+        for key, data in pairs(sourceTable) do
+            assert(dest[key] == nil, "Cannot combine tables that share keys")
+            dest[key] = data
+        end
+    end
+end
+
 function ZO_IsElementInNumericallyIndexedTable(table, element)
     for index, value in ipairs(table) do
         if value == element then

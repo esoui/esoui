@@ -252,6 +252,11 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
             end
         end
 
+        local function OnChatChannelUpdated()
+            local channelData, channelTarget = CHAT_ROUTER:GetCurrentChannelData()
+            self:SetChannel(channelData.id, channelTarget)
+        end
+
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_CHAT_MESSAGE_CHANNEL, OnChatMessageChannel)
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
@@ -261,6 +266,7 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
         CALLBACK_MANAGER:RegisterCallback("QuestTrackerUpdatedOnScreen", function() self:TryFadeOut() end)
         CALLBACK_MANAGER:RegisterCallback("QuestTrackerUpdatedOnScreen", function() self:TryFadeIn() end)
         CALLBACK_MANAGER:RegisterCallback("QuestTrackerFadedOutOnScreen", function() self:TryFadeIn(FADE_IN_OVER_TRACKER) end)
+        CALLBACK_MANAGER:RegisterCallback("OnChatChannelUpdated", OnChatChannelUpdated)
     end
 end
 
@@ -417,11 +423,25 @@ function ZO_GamepadChatSystem:IsPinnable()
     return true
 end
 
-function ZO_GamepadChatSystem:OnFormattedChatMessage(...)
-    SharedChatSystem.OnFormattedChatMessage(self, ...)
+do
+    local FILTERED_OUT_CATEGORIES =
+    {
+        [CHAT_CATEGORY_MONSTER_SAY] = true,
+        [CHAT_CATEGORY_MONSTER_YELL] = true,
+        [CHAT_CATEGORY_MONSTER_EMOTE] = true,
+        [CHAT_CATEGORY_MONSTER_WHISPER] = true,
+    }
 
-    if not self.isMinimized then
-        self:Maximize()
+    function ZO_GamepadChatSystem:OnFormattedChatMessage(message, category, targetChannel, fromDisplayName, rawMessageText)
+        if FILTERED_OUT_CATEGORIES[category] then
+            return
+        end
+
+        SharedChatSystem.OnFormattedChatMessage(self, message, category, targetChannel, fromDisplayName, rawMessageText)
+
+        if not self.isMinimized then
+            self:Maximize()
+        end
     end
 end
 

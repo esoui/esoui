@@ -240,6 +240,16 @@ function ActivityFinderRoot_Gamepad:RefreshCategories()
     list:Commit()
 end
 
+function ActivityFinderRoot_Gamepad:SelectCategory(categoryData)
+    local list = self:GetMainList()
+    for i=1, list:GetNumEntries() do
+        if categoryData.gamepadData.name == list:GetEntryData(i).data.name then
+            list:SetSelectedIndex(i)
+            break
+        end
+    end
+end
+
 function ZO_ActivityFinderRoot_Gamepad_OnInitialize(control)
     ZO_ACTIVITY_FINDER_ROOT_GAMEPAD = ActivityFinderRoot_Gamepad:New(control)
 end

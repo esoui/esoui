@@ -348,7 +348,7 @@ function ZO_CrownCratesPack:OnDeselect()
 end
 
 function ZO_CrownCratesPack:CanSelect()
-    return self.stateMachine:IsCurrentStateByName("MANIFEST")
+    return self.stateMachine:IsCurrentState("MANIFEST")
 end
 
 function ZO_CrownCratesPack:SetPackMouseEnabled(enabled)
@@ -1186,7 +1186,7 @@ function ZO_CrownCratesPackChoosing:OnDeactivate()
 end
 
 function ZO_CrownCratesPackChoosing:HandleDirectionalInput(selectedDirection)
-    if self.stateMachine:IsCurrentStateByName("MANIFEST") and selectedDirection then
+    if self.stateMachine:IsCurrentState("MANIFEST") and selectedDirection then
         local selectedPack = self:GetSelectedPack()
         local nextPack
         if selectedPack then

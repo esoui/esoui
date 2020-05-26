@@ -38,7 +38,7 @@ function MarketAnnouncement_Manager:Initialize()
         return ZO_TableOrderingFunction(entry1, entry2, "isDeprioritized", MARKET_PRODUCT_SORT_KEYS, ZO_SORT_ORDER_UP)
     end
 
-    OnMarketAnnouncementDataUpdated = function(eventId, aShouldShow, aIsLocked)
+    function OnMarketAnnouncementDataUpdated(eventId, aShouldShow, aIsLocked)
         self.isLocked = aIsLocked
         self.productInfoTable = {}
 
@@ -87,7 +87,14 @@ function MarketAnnouncement_Manager:Initialize()
         end
     end
 
-    EVENT_MANAGER:RegisterForEvent("EVENT_MARKET_ANNOUNCEMENT_UPDATED", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementDataUpdated) 
+    function OnEventAnnouncementsUpdated()
+        self:PopulateEventAnnouncements()
+        self:FireCallbacks("EventAnnouncementExpired")
+    end
+
+    EVENT_MANAGER:RegisterForEvent("EVENT_MARKET_ANNOUNCEMENT_UPDATED", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementDataUpdated)
+    EVENT_MANAGER:RegisterForEvent("EVENT_EVENT_ANNOUNCEMENTS_UPDATED", EVENT_EVENT_ANNOUNCEMENTS_UPDATED, OnEventAnnouncementsUpdated)
+    EVENT_MANAGER:RegisterForEvent("EVENT_EVENT_ANNOUNCEMENTS_RECEIVED", EVENT_EVENT_ANNOUNCEMENTS_RECEIVED, OnEventAnnouncementsUpdated)
 end
 
 function MarketAnnouncement_Manager:GetProductInfoTable()
@@ -107,6 +114,8 @@ function MarketAnnouncement_Manager:HasHouseDiscount(productData)
 end
 
 function MarketAnnouncement_Manager:OnPlayerActivated()
+    self:PopulateEventAnnouncements()
+
     -- Attempt to show on region change if announcement has not yet been shown today for this character
     if not HasShownMarketAnnouncement() then
         local currentTrialVersion, seenTrialVersion = select(4, ZO_TrialAccount_GetInfo())
@@ -122,6 +131,42 @@ function MarketAnnouncement_Manager:OnStateChanged(oldState, newState)
     if newState == SCENE_HIDING then
         FlagMarketAnnouncementSeen()
     end
+end
+
+function MarketAnnouncement_Manager:PopulateEventAnnouncements()
+    self.eventAnnouncements = {}
+    local numEventAnnouncements = GetNumEventAnnouncements()
+    for i = 1, numEventAnnouncements do
+        local data =
+        {
+            index = i,
+            name = GetEventAnnouncementNameByIndex(i),
+            description = GetEventAnnouncementDescriptionByIndex(i),
+            tileImage = GetEventAnnouncementIngameTileImageByIndex(i),
+            startTime = GetEventAnnouncementStartTimeByIndex(i),
+            remainingTime = GetEventAnnouncementRemainingTimeByIndex(i),
+            marketProductId = GetEventAnnouncementIngameTileMarketProductIdByIndex(i),
+        }
+        table.insert(self.eventAnnouncements, data)
+    end
+end
+
+function MarketAnnouncement_Manager:GetNumEventAnnouncements()
+    return self.eventAnnouncements and #self.eventAnnouncements or 0
+end
+
+function MarketAnnouncement_Manager:GetEventAnnouncementDataByIndex(index)
+    return self.eventAnnouncements and self.eventAnnouncements[index]
+end
+
+function MarketAnnouncement_Manager:GetEventAnnouncementRemainingTimeByIndex(index)
+    local eventAnnouncementData = self.eventAnnouncements and self.eventAnnouncements[index]
+    local remainingTime = GetEventAnnouncementRemainingTimeByIndex(index)
+    if eventAnnouncementData then
+        eventAnnouncementData.remainingTime = remainingTime
+    end
+
+    return remainingTime
 end
 
 ZO_MARKET_ANNOUNCEMENT_MANAGER = MarketAnnouncement_Manager:New()

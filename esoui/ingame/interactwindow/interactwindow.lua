@@ -13,19 +13,36 @@ end
 
 function ZO_InteractionManager:Initialize()
     ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("ARRESTED")
+
+    EVENT_MANAGER:RegisterForEvent("InteractWindow", EVENT_INTERACTION_ENDED, function(_, ...) self:OnInteractionEnded(...) end)
 end
 
 function ZO_InteractionManager:OnBeginInteraction(interaction)
-    if(self.currentInteraction and (interaction.type ~= self.currentInteraction.type) and self.currentInteraction.End) then
-        self.currentInteraction.End()
+    -- If we are interacting already, and the call comes from switching interactions, we need to make sure the previous interact
+    -- scene takes care of what it needs to before moving on to another interact scene. This is currently how it works,
+    -- but is not the ideal solution since there are implications of how InteractScene works that by happenstance work with this flow
+    if(self.currentInteraction and (interaction.type ~= self.currentInteraction.type) and self.currentInteraction.OnInteractSwitch) then
+        self.currentInteraction.OnInteractSwitch()
     end
     self.currentInteraction = interaction
 end
 
-function ZO_InteractionManager:OnEndInteraction(interaction)
+function ZO_InteractionManager:EndInteraction(interaction)
     if(self.currentInteraction == interaction) then
         self:TerminateClientInteraction(interaction)
         self.currentInteraction = nil
+    end
+end
+
+function ZO_InteractionManager:OnInteractionEnded(interactType, cancelContext)
+    -- The intention here is to account for situations where the interaction got ended in code but Lua hadn't been aware of it
+    -- For example, if combat kicked the player out of an interact
+    -- For now this will only fire the callback if the interact that was cancelled was the same interact that this manager thought should be running
+    -- This is an edge case, the standard flow should have the owning scene starting and ending explicitly wherever possible
+    if self.currentInteraction and self.currentInteraction.interactTypes and self.currentInteraction.OnInteractionCanceled then
+        if ZO_IsElementInNumericallyIndexedTable(self.currentInteraction.interactTypes, interactType) then
+            self.currentInteraction.OnInteractionCanceled(cancelContext)
+        end
     end
 end
 

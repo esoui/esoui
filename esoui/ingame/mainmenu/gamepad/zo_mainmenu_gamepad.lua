@@ -31,9 +31,10 @@ local MENU_JOURNAL_ENTRIES =
 {
     QUESTS              = 1,
     CADWELLS_JOURNAL    = 2,
-    LORE_LIBRARY        = 3,
-    ACHIEVEMENTS        = 4,
-    LEADERBOARDS        = 5,
+    ANTIQUITIES         = 3,
+    LORE_LIBRARY        = 4,
+    ACHIEVEMENTS        = 5,
+    LEADERBOARDS        = 6,
 }
 local MENU_SOCIAL_ENTRIES =
 {
@@ -249,6 +250,9 @@ local MENU_ENTRY_DATA =
         customTemplate = "ZO_GamepadMenuEntryTemplateWithArrow",
         name = GetString(SI_MAIN_MENU_JOURNAL),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_journal.dds",
+        isNewCallback = function()
+            return ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead()
+        end,
         subMenu =
         {
             [MENU_JOURNAL_ENTRIES.QUESTS] =
@@ -267,10 +271,19 @@ local MENU_ENTRY_DATA =
                     return GetCadwellProgressionLevel() > CADWELL_PROGRESSION_LEVEL_BRONZE
                 end,
             },
+            [MENU_JOURNAL_ENTRIES.ANTIQUITIES] =
+            {
+                scene = "gamepad_antiquity_journal",
+                name = GetString(SI_JOURNAL_MENU_ANTIQUITIES),
+                icon = "EsoUI/Art/Journal/Gamepad/GP_journal_tabIcon_antiquities.dds",
+                isNewCallback = function()
+                    return ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead()
+                end,
+            },
             [MENU_JOURNAL_ENTRIES.LORE_LIBRARY] =
             {
                 scene = "loreLibraryGamepad",
-                name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_LORE_LIBRARAY),
+                name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_LORE_LIBRARY),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_loreLibrary.dds",
             },
             [MENU_JOURNAL_ENTRIES.ACHIEVEMENTS] =
@@ -489,6 +502,22 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, function() self:UpdateEntryEnabledStates() end)
     control:RegisterForEvent(EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, function() self:UpdateEntryEnabledStates() end)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_CLAIMED, function() self:UpdateEntryEnabledStates() end)
+
+    local function OnBlockingSceneCleared(nextSceneData, showBaseScene)
+        if IsInGamepadPreferredMode() then
+            if showBaseScene then
+                SCENE_MANAGER:ShowBaseScene()
+            elseif nextSceneData then
+                if nextSceneData.sceneName then
+                    self:ToggleScene(nextSceneData.sceneName)
+                elseif nextSceneData.category then
+                    self:ToggleCategory(nextSceneData.category)
+                end
+            end
+        end
+    end
+
+    MAIN_MENU_MANAGER:RegisterCallback("OnBlockingSceneCleared", OnBlockingSceneCleared)
 end
 
 function ZO_MainMenuManager_Gamepad:OnShowing()
@@ -645,16 +674,6 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
         self:MarkNewnessDirty()
     end
 
-    local function OnBlockingSceneCleared(nextSceneData, showBaseScene)
-        if IsInGamepadPreferredMode() then
-            if showBaseScene then
-                SCENE_MANAGER:ShowBaseScene()
-            elseif nextSceneData and nextSceneData.sceneName then
-                SCENE_MANAGER:Toggle(nextSceneData.sceneName)
-            end
-        end
-    end
-
     self.exitHelperPanelFunction = function()
         self:DeactivateHelperPanel()
     end
@@ -663,7 +682,6 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_LEVEL_UPDATE, MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_MAIL_NUM_UNREAD_CHANGED, MarkNewnessDirty)
-    MAIN_MENU_MANAGER:RegisterCallback("OnBlockingSceneCleared", OnBlockingSceneCleared)
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_DAILY_LOGIN_REWARDS_CLAIMED, MarkNewnessDirty)
@@ -939,6 +957,15 @@ function ZO_MainMenuManager_Gamepad:ShowDailyLoginRewardsEntry()
     self:RefreshSubList(entry)
     self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS])
     SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu")
+end
+
+function ZO_MainMenuManager_Gamepad:ShowScryableAntiquities()
+    self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.JOURNAL])
+    local entry = self.mainList:GetTargetData()
+    self:RefreshSubList(entry)
+    self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[MENU_JOURNAL_ENTRIES.ANTIQUITIES])
+    SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu", "gamepad_antiquity_journal")
+    ANTIQUITY_JOURNAL_GAMEPAD:ShowScryable()
 end
 
 function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
