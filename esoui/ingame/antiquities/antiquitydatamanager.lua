@@ -59,6 +59,7 @@ function ZO_AntiquityDataManager:InitializeEventHandlers()
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", OnSkillsUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillsUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillsUpdated)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillProgressionUpdated", OnSkillsUpdated)
 end
 
 do

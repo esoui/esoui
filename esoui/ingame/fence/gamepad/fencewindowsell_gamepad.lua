@@ -32,6 +32,7 @@ do
         itemData.bag, itemData.slot = ZO_Inventory_GetBagAndIndex(targetData)
         itemData.itemName = targetData.text
         itemData.functionalQuality = GetItemFunctionalQuality(itemData.bag, itemData.slot)
+        itemData.displayQuality = GetItemDisplayQuality(itemData.bag, itemData.slot)
         itemData.stackCount = targetData.stackCount
 
         if self.confirmationMode then

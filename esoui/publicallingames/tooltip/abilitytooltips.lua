@@ -193,6 +193,8 @@ function ZO_Tooltip:LayoutSimpleAbility(abilityId)
     local formattedAbilityName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
     self:AddLine(formattedAbilityName, self:GetStyle("title"))
 
-    self:AddAbilityStats(abilityId)
+    if not IsAbilityPassive(abilityId) then
+        self:AddAbilityStats(abilityId)
+    end
     self:AddAbilityDescription(abilityId)
 end

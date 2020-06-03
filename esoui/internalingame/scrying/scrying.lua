@@ -446,12 +446,12 @@ do
 end
 
 function ZO_ScryingNormalActionsMeter:OnShowing()
-    self.valueText:SetAlpha(1)
+    self.control:SetAlpha(1)
 end
 
 function ZO_ScryingNormalActionsMeter:OnEndOfGameTimelineUpdate(animation, progress)
     local alpha = zo_lerp(1, 0, progress)
-    self.valueText:SetAlpha(alpha)
+    self.control:SetAlpha(alpha)
 end
 
 ----------------------------------
@@ -1349,15 +1349,10 @@ function ZO_Scrying:Initialize(control)
             self.triggeredTutorial = false
             self:RefreshInputState()
             ZO_Dialogs_ReleaseAllDialogsOfName("CONFIRM_EXIT_SCRYING")
-            if self.completedEndOfGameCallLaterId then
-                zo_removeCallLater(self.completedEndOfGameCallLaterId)
-            end
         elseif newState == SCENE_HIDDEN then
             self.board:OnHidden()
-            -- We may have already left music mode as a result of the outro,
-            -- in which case this is harmless, but otherwise we still need to
-            -- leave music mode
-            SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
+            -- on the off chance that we are asked to hide while the outro is still in progress, clear out all that state
+            self:ResetScryingPostGameElements()
         end
     end)
 
@@ -1368,7 +1363,7 @@ function ZO_Scrying:Initialize(control)
 
     control:RegisterForEvent(EVENT_SCRYING_OUTRO_COMPLETE, function()
         self.waitingForOutro = false
-        self:TryCompleteScrying()        
+        self:TryCompleteScrying()
     end)
 
     control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
@@ -1384,6 +1379,7 @@ function ZO_Scrying:Initialize(control)
     end)
 
     control:RegisterForEvent(EVENT_REQUEST_SCRYING_EXIT, function()
+        self:HideMoreInfo()
         ZO_Dialogs_ShowPlatformDialog("CONFIRM_EXIT_SCRYING")
     end)
 
@@ -1431,7 +1427,7 @@ function ZO_Scrying:CanFireActions()
 end
 
 function ZO_Scrying:RefreshInputState()
-    local allowPlayerInput = SCRYING_SCENE:IsShowing() and not self.triggeredTutorial and not self.isHelpOverlayVisible
+    local allowPlayerInput = SCRYING_SCENE:IsShowing() and not self.triggeredTutorial and not self.isHelpOverlayVisible and not ZO_Dialogs_IsShowingDialog()
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("ScryingActions")
@@ -1509,6 +1505,15 @@ do
             end
         end
     end
+end
+
+function ZO_Scrying:ResetScryingPostGameElements()
+    self.waitingToCompleteScrying = false
+    self.waitingForScryingResult = false
+    self:CancelEndOfGame()
+    self.startedOutro = false
+    self.waitingForOutro = false
+    SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
 end
 
 function ZO_Scrying:TryCompleteScrying()
@@ -1662,6 +1667,14 @@ function ZO_Scrying:StartEndOfGame()
     self.waitingForEndOfGame = true
 end
 
+function ZO_Scrying:CancelEndOfGame()
+    if self.completedEndOfGameCallLaterId then
+        zo_removeCallLater(self.completedEndOfGameCallLaterId)
+        self.completedEndOfGameCallLaterId = nil
+        self.endOfGameTimeline:Stop()
+    end
+end
+
 function ZO_Scrying:ShowMoreInfo()
     if not self:CanFireActions() then
         return
@@ -1692,6 +1705,12 @@ do
         {
             text = SI_SCRYING_CONFIRM_EXIT_DIALOG_DESCRIPTION
         },
+        setup = function()
+            SCRYING:RefreshInputState()
+        end,
+        finishedCallback = function()
+            SCRYING:RefreshInputState()
+        end,
         buttons =
         {
             {

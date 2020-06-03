@@ -18,8 +18,8 @@ function ZO_ScryingGoal:Initialize(pool)
     self.activateAnim:SetHandler("OnStop", function(_, completedPlaying)
         if completedPlaying then
             self:SetState(ZO_SCRYING_GOAL_STATE_OWNED)
-            SCRYING_HEX_ANIMATION_PROVIDER:RemoveBlockingGoal()
         end
+        SCRYING_HEX_ANIMATION_PROVIDER:RemoveBlockingGoal()
     end)
 
     self:SetState(ZO_SCRYING_GOAL_STATE_NONE)

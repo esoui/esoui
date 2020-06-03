@@ -15,7 +15,7 @@ ZO_Dialogs_RegisterCustomDialog("CONFIRM_STOP_ANTIQUITY_DIGGING",
     {
         text = SI_ANTIQUITY_DIGGING_CONFIRM_EXIT_DIALOG_TITLE
     },
-    mainText = 
+    mainText =
     {
         text = function()
             if IsDiggingAntiquityUnearthed() then
@@ -25,6 +25,12 @@ ZO_Dialogs_RegisterCustomDialog("CONFIRM_STOP_ANTIQUITY_DIGGING",
             end
         end
     },
+    setup = function()
+        ANTIQUITY_DIGGING:RefreshInputState()
+    end,
+    finishedCallback = function()
+        ANTIQUITY_DIGGING:RefreshInputState()
+    end,
     buttons =
     {
         {
@@ -79,23 +85,27 @@ function ZO_AntiquityDigging:Initialize(control)
     self.keybindLabels = {} -- will be populated on EVENT_KEYBINDINGS_LOADED
 
     self.isHelpOverlayVisible = false
-
-    ANTIQUITY_DIGGING_SCENE = ZO_RemoteScene:New("antiquityDigging", SCENE_MANAGER)
+    self.areGamepadControlsEnabled = false
 
     ANTIQUITY_DIGGING_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    ANTIQUITY_DIGGING_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
+
+    -- (ESO-670681) When a remote scene is about to change via ZO_SceneManager_Follower:OnLeaderToFollowerSync, the next scene is established before the current scene is hidden
+    -- When the next scene is set, the fragments are refreshed and, since there is a next scene, the fragments hide.  Because of this order of operations, 
+    -- the fragment can be hiding while the scene is still considered "showing."  Therefore, we can rely on the state of the scene or the state of the fragment, but not both in unison.
+    ANTIQUITY_DIGGING_SCENE = ZO_RemoteScene:New("antiquityDigging", SCENE_MANAGER)
+    ANTIQUITY_DIGGING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
             self.isReadyToPlay = false
             control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, function() self:OnAntiquityDiggingReadyToPlay() end)
             self:RefreshActiveToolKeybinds()
-        elseif newState == SCENE_FRAGMENT_HIDING then
+        elseif newState == SCENE_HIDING then
             control:UnregisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY)
             control:SetHandler("OnUpdate", nil)
             --clear the current tutorial when hiding so we don't push an extra action layer
             self.triggeredTutorial = false
             self:RefreshInputState()
             ZO_Dialogs_ReleaseAllDialogsOfName("CONFIRM_STOP_ANTIQUITY_DIGGING")
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
+        elseif newState == SCENE_HIDDEN then
             self.keybindContainerTimeline:PlayInstantlyToStart()
             if self.beginEndOfGameFanfareEventId  then
                 EVENT_MANAGER:UnregisterForUpdate(self.beginEndOfGameFanfareEventId)
@@ -107,7 +117,7 @@ function ZO_AntiquityDigging:Initialize(control)
     ANTIQUITY_DIGGING_SUMMARY_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         -- When the end of game summary fragment comes in, we want to get rid of the keybinds
         -- and tone down the bars so they don't feel like they're part of the summary but can still be referenced
-        if ANTIQUITY_DIGGING_FRAGMENT:IsShowing() then
+        if ANTIQUITY_DIGGING_SCENE:IsShowing() then
             if newState == SCENE_FRAGMENT_SHOWING then
                 self.keybindContainerFastTimeline:PlayFromEnd()
             elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -193,6 +203,11 @@ function ZO_AntiquityDigging:SetKeyboardControlsEnabled(enabled)
 end
 
 function ZO_AntiquityDigging:SetGamepadControlsEnabled(enabled)
+    if self.areGamepadControlsEnabled == enabled then
+        return
+    end
+    self.areGamepadControlsEnabled = enabled
+
     if enabled then
         if not self.horizontalMovementController then
             local function GetStickMagnitude(direction)
@@ -206,10 +221,10 @@ function ZO_AntiquityDigging:SetGamepadControlsEnabled(enabled)
             self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL, 8, GetStickMagnitude)
             self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL, 8, GetStickMagnitude)
         end
-        DIRECTIONAL_INPUT:Activate(self, self.control)
         self.numRows, self.numColumns = GetDigSpotDimensions()
         self.selectedRow = zo_floor(self.numRows * 0.5)
         self.selectedColumn = zo_floor(self.numColumns * 0.5)
+        DIRECTIONAL_INPUT:Activate(self, self.control)
     else
         DIRECTIONAL_INPUT:Deactivate(self)
     end
@@ -233,10 +248,6 @@ function ZO_AntiquityDigging:OnMouseDown(control, button)
 end
 
 function ZO_AntiquityDigging:OnAntiquityDiggingReadyToPlay()
-    self.control:SetHandler("OnUpdate", function()
-        self:OnUpdate()
-    end)
-
     self.keybindContainerTimeline:PlayForward()
 
     self:TryTriggerInitialTutorials()
@@ -244,6 +255,10 @@ function ZO_AntiquityDigging:OnAntiquityDiggingReadyToPlay()
     self.isReadyToPlay = true
 
     self:RefreshInputState()
+
+    self.control:SetHandler("OnUpdate", function()
+        self:OnUpdate()
+    end)
 end
 
 function ZO_AntiquityDigging:IsReadyToPlay()
@@ -310,7 +325,7 @@ function ZO_AntiquityDigging:ShowTutorial(tutorial)
 end
 
 function ZO_AntiquityDigging:RefreshInputState()
-    local allowPlayerInput = self:IsReadyToPlay() and not self.triggeredTutorial and not self.isHelpOverlayVisible
+    local allowPlayerInput = self:IsReadyToPlay() and not self.triggeredTutorial and not self.isHelpOverlayVisible and not ZO_Dialogs_IsShowingDialog()
     if self.isPlayerInputEnabled ~= allowPlayerInput then
         if allowPlayerInput then
             PushActionLayerByName("AntiquityDiggingActions")
@@ -378,7 +393,7 @@ function ZO_AntiquityDigging:UsePrimaryAction()
     if ANTIQUITY_DIGGING_SUMMARY_FRAGMENT:IsHidden() then
         UseDiggingActiveSkillOnSelectedCell(GetSelectedDiggingActiveSkill())
     else
-        ANTIQUITY_DIGGING_SUMMARY:OnUsePrimaryAction()        
+        ANTIQUITY_DIGGING_SUMMARY:OnUsePrimaryAction()
     end
 end
 

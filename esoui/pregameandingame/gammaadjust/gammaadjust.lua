@@ -1,4 +1,4 @@
-local currentGamma = GetCVar("GAMMA_ADJUSTMENT")
+local g_currentGamma = GetCVar("GAMMA_ADJUSTMENT")
 local DEFAULT_INITIAL_GAMMA = 100 -- this should match the gamma adjustment setting in the RenderSettings
 
 local function GammaDialogInitialize(dialogControl)
@@ -18,7 +18,7 @@ local function GammaDialogInitialize(dialogControl)
                 text = SI_GAMMA_CONFIRM,
                 noReleaseOnClick = true, -- Don't release because the scene needs to fade out, will release later
                 callback =  function(dialog)
-                                SetCVar("GAMMA_ADJUSTMENT", tostring(currentGamma))
+                                SetCVar("GAMMA_ADJUSTMENT", tostring(g_currentGamma))
                                 SCENE_MANAGER:Hide("gammaAdjust")
                                 ZO_SavePlayerConsoleProfile()
                             end,
@@ -57,7 +57,7 @@ do
         keybindTextFontColor = ZO_SELECTED_TEXT,
     }
 
-    local ZO_GammaAdjustFragment = ZO_FadeSceneFragment:Subclass()
+    ZO_GammaAdjustFragment = ZO_FadeSceneFragment:Subclass()
 
     function ZO_GammaAdjustFragment:New(control)
         local fragment = ZO_FadeSceneFragment.New(self, control, 1500)
@@ -74,22 +74,31 @@ do
                                                 ZO_Dialogs_ReleaseDialog("ADJUST_GAMMA_DIALOG")
                                                 oldStop()
                                             end
+
+        local function ZO_GammaAdjustSlider_OnInitialized(slider)
+            slider:SetMinMax(75, 150)
+            slider:SetValue(75)
+            ZO_GammaAdjust_ColorTexturesWithGamma(75)
+            slider:SetHandler("OnValueChanged", ZO_GammaAdjust_SetGamma)
+        end
+
+        local gamepadSlider = control:GetNamedChild("GamepadSlider")
+        self.gamepadSlider = gamepadSlider
+        ZO_GammaAdjustSlider_OnInitialized(gamepadSlider)
+
+        local keyboardSlider = control:GetNamedChild("Slider")
+        self.keyboardSlider = keyboardSlider
+        self.rightArrow = keyboardSlider:GetNamedChild("Increment")
+        self.leftArrow = keyboardSlider:GetNamedChild("Decrement")
+        ZO_GammaAdjustSlider_OnInitialized(keyboardSlider)
+        self:UpdateVisibility()
+
         ZO_PlatformStyle:New(function(style) fragment:ApplyPlatformStyle(style) end, GAMMA_KEYBOARD_STYLE, GAMMA_GAMEPAD_STYLE)
         return fragment
     end
 
-    function ZO_GammaAdjustFragment:SetValueAsUnsaved()
-        if self.slider then
-            self.unsavedValue = self.slider:GetValue()
-        end
-    end
-
-    function ZO_GammaAdjustFragment:ClearUnsavedValue()
-        self.unsavedValue = self.slider:GetValue()
-    end
-
     function ZO_GammaAdjustFragment:Show()
-        currentGamma = GetCVar("GAMMA_ADJUSTMENT")
+        g_currentGamma = GetCVar("GAMMA_ADJUSTMENT")
 
         -- Tweak custom dialog controls
         if self.slider.Activate then
@@ -97,13 +106,9 @@ do
         end
 
         if ZO_GammaAdjust_NeedsFirstSetup() then
-            if self.unsavedValue then
-                self.slider:SetValue(self.unsavedValue)
-            else
-                self.slider:SetValue(DEFAULT_INITIAL_GAMMA)
-            end
+            self.slider:SetValue(DEFAULT_INITIAL_GAMMA)
         else
-            self.slider:SetValue(currentGamma)
+            self.slider:SetValue(g_currentGamma)
         end
 
         if not self.dialogInitialized then
@@ -135,10 +140,6 @@ do
         end
     end
 
-    function CreateGammaSceneFragment(control)
-        GAMMA_SCENE_FRAGMENT = ZO_GammaAdjustFragment:New(control)
-    end
-
     function ZO_GammaAdjustFragment:ApplyPlatformStyle(style)
         self.mainText:SetFont(style.mainFont)
         self.subText:SetFont(style.subFont)
@@ -146,51 +147,34 @@ do
         ApplyTemplateToControl(self.declineGamma, style.declineTemplate)
         ZO_SelectableLabel_SetNormalColor(self.confirmGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
         ZO_SelectableLabel_SetNormalColor(self.declineGamma:GetNamedChild("NameLabel"), style.keybindTextFontColor)
-        self:SetValueAsUnsaved()
 
         self:UpdateVisibility()
     end
 
     function ZO_GammaAdjustFragment:UpdateVisibility()
         local isGamepad = IsInGamepadPreferredMode()
-        if self.gamepadSlider then
-            self.gamepadSlider:SetHidden(not isGamepad)
+        local isShowing = self:IsShowing()
+
+        self.gamepadSlider:SetHidden(not isGamepad)
+        self.keyboardSlider:SetHidden(isGamepad)
+        self.rightArrow:SetHidden(isGamepad)
+        self.leftArrow:SetHidden(isGamepad)
+
+        if isShowing and self.slider and self.slider.Deactivate then
+            self.slider:Deactivate()
         end
 
-        if self.keyboardSlider then
-            self.keyboardSlider:SetHidden(isGamepad)
-            self.rightArrow:SetHidden(isGamepad)
-            self.leftArrow:SetHidden(isGamepad)
-        end
         self.slider = isGamepad and self.gamepadSlider or self.keyboardSlider
+        self.slider:SetValue(g_currentGamma)
+
+        if isShowing and self.slider.Activate then
+            self.slider:Activate()
+        end
     end
 end
 
-do
-    local function ZO_GammaAdjustSlider_OnInitialized(slider)
-        slider:SetMinMax(75, 150)
-        slider:SetValue(75)
-        ZO_GammaAdjust_ColorTexturesWithGamma(75)
-        slider:SetHandler("OnValueChanged", ZO_GammaAdjust_SetGamma)
-        GAMMA_SCENE_FRAGMENT:UpdateVisibility()
-    end
-
-    function ZO_GammaAdjust_Initialize(self)
-        if not self.initialized then
-            self.initialized = true
-            CreateGammaSceneFragment(self)
-
-            local gamepadSlider = self:GetNamedChild("GamepadSlider")
-            GAMMA_SCENE_FRAGMENT.gamepadSlider = gamepadSlider
-            ZO_GammaAdjustSlider_OnInitialized(gamepadSlider)
-
-            local keyboardSlider = self:GetNamedChild("Slider")
-            GAMMA_SCENE_FRAGMENT.keyboardSlider = keyboardSlider
-            GAMMA_SCENE_FRAGMENT.rightArrow = keyboardSlider:GetNamedChild("Increment")
-            GAMMA_SCENE_FRAGMENT.leftArrow = keyboardSlider:GetNamedChild("Decrement")
-            ZO_GammaAdjustSlider_OnInitialized(keyboardSlider)
-        end
-    end
+function ZO_GammaAdjust_Initialize(control)
+    GAMMA_SCENE_FRAGMENT = ZO_GammaAdjustFragment:New(control)
 end
 
 local function GammaToLinear(gamma)
@@ -218,8 +202,8 @@ do
     }
 
     function ZO_GammaAdjust_SetGamma(slider, value)
-        currentGamma = value
-        ZO_GammaAdjust_ColorTexturesWithGamma(currentGamma)
+        g_currentGamma = value
+        ZO_GammaAdjust_ColorTexturesWithGamma(g_currentGamma)
     end
 
     function ZO_GammaAdjust_ColorTexturesWithGamma(gamma)

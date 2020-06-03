@@ -71,6 +71,7 @@ function ZO_Antiquity:Refresh()
     self.needsCombination = DoesAntiquityNeedCombination(antiquityId)
     self.numRecovered = GetNumAntiquitiesRecovered(antiquityId)
     self.numLoreEntriesAcquired = GetNumAntiquityLoreEntriesAcquired(antiquityId)
+    self.difficulty = GetAntiquityDifficulty(antiquityId)
     self:RefreshDigSites()
 
     -- Update the unlocked state of unlocked lore entries.

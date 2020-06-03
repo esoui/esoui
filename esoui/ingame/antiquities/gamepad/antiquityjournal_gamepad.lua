@@ -318,6 +318,7 @@ function ZO_AntiquityJournalGamepad:OnShowing()
         self:DeactivateCurrentList()
         self:ActivateAntiquityList()
     else
+        ANTIQUITY_JOURNAL_LIST_GAMEPAD:ClearSelection()
         self:ShowCategoryList()
     end
 
@@ -372,7 +373,7 @@ end
 
 function ZO_AntiquityJournalGamepad:ShowSubcategoryList(resetSelectionToTop)
     self:RefreshSubcategories(resetSelectionToTop)
-    self:ShowAntiquityListFragment()
+    self:ShowAntiquityListFragment(resetSelectionToTop)
     self:SetCurrentList(self.subcategoryList)
     self.subcategoryList:RefreshVisible()
 end
@@ -504,7 +505,10 @@ function ZO_AntiquityJournalGamepad:RefreshSubcategories(resetSelectionToTop)
     self.subcategoryList:Commit(resetSelectionToTop)
 end
 
-function ZO_AntiquityJournalGamepad:ShowAntiquityListFragment()
+function ZO_AntiquityJournalGamepad:ShowAntiquityListFragment(resetSelectionToTop)
+    if resetSelectionToTop then
+        ANTIQUITY_JOURNAL_LIST_GAMEPAD:ClearSelection()
+    end
     if IsScryableCategory(self:GetCurrentSubcategoryData()) and not ZO_IsScryingUnlocked() then
         self.scene:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         self.scene:RemoveFragment(ZO_ANTIQUITY_JOURNAL_LIST_GAMEPAD_FRAGMENT)
@@ -1017,6 +1021,11 @@ end
 function ZO_AntiquityJournalListGamepad:OnHiding()
     self:ClearAntiquityTooltip()
     self:Deactivate()
+end
+
+function ZO_AntiquityJournalListGamepad:ClearSelection()
+    self.lastSelectedData = nil
+    ZO_ScrollList_ResetToTop(self.list)
 end
 
 function ZO_AntiquityJournalListGamepad:OnSelectionChanged(oldData, newData)

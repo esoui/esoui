@@ -1268,6 +1268,7 @@
             <BlockAction name="SPECIAL_MOVE_ATTACK"/>
             <BlockAction name="SPECIAL_MOVE_BLOCK"/>
             <BlockAction name="TOGGLE_FIRST_PERSON"/>
+            <BlockAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
         </Category>
     </Layer>
 

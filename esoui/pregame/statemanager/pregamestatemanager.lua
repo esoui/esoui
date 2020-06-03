@@ -782,18 +782,20 @@ function ZO_Pregame_OnGamepadPreferredModeChanged()
         return
     end
 
+    if currentState == "GammaAdjust" then
+        -- switching between kb/gamepad will be handled by platform style
+        -- TODO: for ingame scenes, we can use the
+        -- SetHandleGamepadPreferredModeChangedCallback to preempt any UI mode
+        -- switching. ideally we could do the same for pregame scenes, so we could
+        -- share code between the two
+        return
+    end
+
     local FORCE_CLOSE = true
     ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE)
 
     if not IsAccountLoggedIn() or IS_WORLD_SELECT_STATE[currentState] then -- While in world select, we're logged in but haven't yet started the character loading process
         PregameStateManager_SetState("AccountLoginEntryPoint")
-
-        -- Once the previous gamma adjust state has been exited. Reset the check that it was set and set the state back to adjust gamma
-        if currentState == "GammaAdjust" then
-            SetCVar("PregameGammaCheckEnabled", "true")
-            PregameStateManager_SetState("GammaAdjust")
-            GAMMA_SCENE_FRAGMENT:ClearUnsavedValue()
-        end
     elseif not IsPregameCharacterConstructionReady() then
         PregameStateManager_SetState("WaitForCharacterDataLoaded")
     elseif PregameStateManager_GetCurrentState() == "CharacterCreate" or GetNumCharacters() == 0 then

@@ -129,7 +129,7 @@
                 </Label>
 
                 <Button name="$(parent)HideOffline" inherits="ZO_CheckButton">
-                    <Anchor relativeTo="$(parent)" relativePoint="TOP" offsetX="-65" offsetY="35" />
+                    <Anchor relativeTo="$(parent)" relativePoint="TOP" offsetX="-80" offsetY="35" />
                     <OnInitialized>
                         ZO_CheckButton_SetLabelText(self, GetString(SI_SOCIAL_LIST_HIDE_OFFLINE))
                         ZO_CheckButton_SetToggleFunction(self, ZO_KeyboardGuildRoster_ToggleHideOffline)

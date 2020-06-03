@@ -231,6 +231,7 @@ function ZO_AntiquityLore_Keyboard:InitializeEntryTree()
     local DEFAULT_INDENT = 0
     local DEFAULT_SPACING = -10
     local TREE_WIDTH = 400
+    self.loreEntryTreeScroll = GetControl(self.control, "LoreEntryContainer")
     self.loreEntryTree = ZO_Tree:New(GetControl(self.control, "LoreEntryContainerScrollChild"), DEFAULT_INDENT, DEFAULT_SPACING, TREE_WIDTH)
     self.loreEntryTree:AddTemplate("ZO_IconChildlessHeader", TreeEntrySetup, TreeEntryOnSelected, TreeEntryEquality)
     self.loreEntryTree:AddTemplate("ZO_AntiquityLore_SetIconChildlessHeader", TreeEntrySetup, TreeEntryOnSelected, TreeEntryEquality)
@@ -341,6 +342,7 @@ function ZO_AntiquityLore_Keyboard:ScrollLoreEntries(directionMagnitude)
             end
             if targetNode then
                 self.loreEntryTree:SelectNode(targetNode)
+                ZO_Scroll_ScrollControlIntoCentralView(self.loreEntryTreeScroll, currentNode.control)
             end
         end
     end

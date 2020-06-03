@@ -42,6 +42,15 @@
                 <Label name="$(parent)Name" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontGameBold" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Anchor point="TOPLEFT" offsetX="30" offsetY="5" />
                     <Anchor point="TOPRIGHT" offsetY="5" />
+                    <OnMouseEnter name="Entry">
+                        ZO_MapAntiquities_Keyboard_OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+                    <OnMouseExit name="Entry">
+                        ZO_MapAntiquities_Keyboard_OnMouseExit(self:GetParent())
+                    </OnMouseExit>
+                    <OnMouseUp name="Entry">
+                        ZO_MapAntiquities_Keyboard_OnMouseUp(self:GetParent(), button, upInside)
+                    </OnMouseUp>
                 </Label>
 
                 <Texture name="$(parent)TrackedIcon" textureFile="EsoUI/Art/Antiquities/Keyboard/trackedAntiquityIcon.dds" hidden="true">

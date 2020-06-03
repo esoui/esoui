@@ -231,6 +231,10 @@
                 SCRYING:OnUnhandledReceiveDrag()
             </OnReceiveDrag>
 
+            <OnMouseWheel>
+                <!-- We are consuming mouse wheel input to prevent the user from moving out of the first person camera view. -->
+            </OnMouseWheel>
+
             <Controls>
                 <Control name="$(parent)Game">
                     <Dimensions x="2384" y="1180" />

@@ -46,7 +46,7 @@
         <Control name="ZO_AntiquityJournal_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
-                    <Dimensions x="227" />
+                    <Dimensions x="215" />
                 </Label>
             </Controls>
         </Control>
@@ -54,16 +54,18 @@
         <Control name="ZO_AntiquityJournal_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
-                    <Dimensions x="227" />
+                    <Dimensions x="215" />
                 </Label>
             </Controls>
         </Control>
 
         <Control name="ZO_AntiquityJournal_StatusIconDividedHeader" inherits="ZO_AntiquityJournal_StatusIconChildlessHeader" virtual="true">
+            <DimensionConstraints minX="300" minY="64" />
+
             <Controls>
                 <Texture name="$(parent)DividerTexture" inherits="ZO_HorizontalDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-55" offsetY="2" />
-                    <Dimensions x="300" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-105" offsetY="10" />
+                    <Dimensions x="380" />
                 </Texture>
             </Controls>
         </Control>
@@ -294,8 +296,8 @@
                     <Controls>
                         <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
                             <Dimensions x="300" />
-                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="72" />
-                            <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                            <Anchor point="TOPLEFT" offsetX="-34" offsetY="72" />
+                            <Anchor point="BOTTOMLEFT" offsetX="-34" />
                         </Control>
 
                         <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
@@ -339,7 +341,7 @@
                         </Control>
 
                         <Label name="$(parent)ContentEmptyLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ANTIQUITY_EMPTY_LIST" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetY="70" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetX="40" offsetY="70" />
                         </Label>
 
                         <Control name="$(parent)ContentList" inherits="ZO_ScrollContainer">
@@ -348,7 +350,7 @@
                         </Control>
 
                         <Control name="$(parent)LockedContentPanel" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="150" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="BOTTOMLEFT" offsetX="40" offsetY="150" />
                             <Anchor point="BOTTOMRIGHT" offsetX="-50" />
 
                             <Controls>
