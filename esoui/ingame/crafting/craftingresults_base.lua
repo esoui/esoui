@@ -365,7 +365,7 @@ do
     local CRAFTING_RESULT_SORT_ORDER =
     {
         displayQuality = { tiebreaker = "quality", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
-        -- quality is depricated, included here for addon backwards compatibility
+        -- quality is deprecated, included here for addon backwards compatibility
         quality = { tiebreaker = "stack", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
         stack = { tiebreaker = "resultIndex", isNumeric = true, tieBreakerSortOrder = ZO_SORT_ORDER_UP },
         resultIndex = { isNumeric = true },
@@ -426,7 +426,7 @@ do
                             itemType = itemType,
                             itemStyle = itemStyle,
                             displayQuality = displayQuality,
-                            -- quality is depricated, included here for addon backwards compatibility
+                            -- quality is deprecated, included here for addon backwards compatibility
                             quality = displayQuality,
                             itemSoundCategory = itemSoundCategory,
                             itemInstanceId = itemInstanceId,

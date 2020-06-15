@@ -603,7 +603,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
         elseif slotControl.isCollectible then
             nameControl:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
         else
-            -- data.quality is depricated, included here for addon backwards compatibility
+            -- data.quality is deprecated, included here for addon backwards compatibility
             local displayQuality = data.displayQuality or data.quality
             local qualityColor = nil
             if data.entryType == STORE_ENTRY_TYPE_ANTIQUITY_LEAD then

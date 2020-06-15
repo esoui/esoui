@@ -131,7 +131,7 @@ do
                             stackCount = stackCount,
                             functionalQuality = functionalQuality,
                             displayQuality = displayQuality,
-                            -- quality is depricated, included here for addon backwards compatibility
+                            -- quality is deprecated, included here for addon backwards compatibility
                             quality = displayQuality,
                             condition = condition,
                             repairCost = repairCost
@@ -177,7 +177,7 @@ function ZO_Repair:SetupRepairItem(control, data)
     ZO_Inventory_SetupSlot(slotControl, data.stackCount, data.icon)
 
     nameControl:SetText(data.name) -- already formatted
-    -- data.quality is depricated, included here for addon backwards compatibility
+    -- data.quality is deprecated, included here for addon backwards compatibility
     local displayQuality = data.displayQuality or data.quality
     nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
 

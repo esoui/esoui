@@ -74,7 +74,7 @@ function ZO_CraftingInventory:GetDefaultTemplateSetupFunction()
         inventorySlot.name = inventorySlot.name or rowControl:GetNamedChild("Name")
         inventorySlot.custom = inventorySlot.custom or rowControl:GetNamedChild("Custom")
 
-        -- data.quality is depricated, included here for addon backwards compatibility
+        -- data.quality is deprecated, included here for addon backwards compatibility
         local displayQuality =  data.displayQuality or data.quality
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         inventorySlot.name:SetText(data.name)
@@ -213,7 +213,7 @@ function ZO_CraftingInventory:AddItemData(bagId, slotIndex, totalStack, scrollDa
         stackSellPrice = totalStack * sellPrice,
         functionalQuality = functionalQuality,
         displayQuality = displayQuality,
-        -- quality is depricated, included here for addon backwards compatibility
+        -- quality is deprecated, included here for addon backwards compatibility
         quality = displayQuality,
         meetsUsageRequirements = meetsUsageRequirements,
         custom = customDataGetFunction and customDataGetFunction(bagId, slotIndex),
@@ -286,7 +286,7 @@ local sortKeys =
     stackCount = { tiebreaker = "slotIndex", isNumeric = true },
     name = { tiebreaker = "displayQuality" },
     displayQuality = { tiebreaker = "quality", isNumeric = true },
-    -- quality is depricated, included here for addon backwards compatibility
+    -- quality is deprecated, included here for addon backwards compatibility
     quality = { tiebreaker = "stackCount", isNumeric = true },
     statusSortOrder = { tiebreaker = "name", isNumeric = true },
     stackSellPrice = { tiebreaker = "name", isNumeric = true },

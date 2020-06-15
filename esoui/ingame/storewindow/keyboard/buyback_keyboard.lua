@@ -146,7 +146,7 @@ function BuyBack:UpdateList()
                 price = price,
                 functionalQuality = functionalQuality,
                 displayQuality = displayQuality,
-                -- quality is depricated, included here for addon backwards compatibility
+                -- quality is deprecated, included here for addon backwards compatibility
                 quality = displayQuality,
                 meetsRequirements = meetsRequirements,
                 stackBuyPrice = stack * price,
@@ -189,7 +189,7 @@ function BuyBack:SetupBuyBackSlot(control, data)
     ZO_ItemSlot_SetupSlotBase(slotControl, data.stack, data.icon, data.meetsRequirements)
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(control, data.meetsRequirements)
     nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, data.name))
-    -- data.quality is depricated, included here for addon backwards compatibility
+    -- data.quality is deprecated, included here for addon backwards compatibility
     nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, data.displayQuality or data.quality))
 
     -- Setup the currency fields for the price.

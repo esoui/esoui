@@ -462,7 +462,7 @@ function ZO_MailInbox_Gamepad:EnterViewAttachments()
                 text = itemName,
                 icon = icon,
                 displayQuality = displayQuality,
-                -- quality is depricated, included here for addon backwards compatibility
+                -- quality is deprecated, included here for addon backwards compatibility
                 quality = displayQuality,
                 stackCount = stack,
                 sellPrice = sellPrice,

@@ -6,9 +6,9 @@ function ZO_GamepadTradingHouse_Dialogs_DisplayConfirmationDialog(itemData, dial
     local itemName = itemData.name
 
     local price = displayPrice
-    -- itemData.quality is depricated, included here for addon backwards compatibility
+    -- itemData.quality is deprecated, included here for addon backwards compatibility
     local displayQuality = itemData.displayQuality or itemData.quality
-    local nameColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
+    local nameColor = GetItemQualityColor(displayQuality)
     local currencyType = itemData.currencyType or CURT_MONEY
 
     local itemNameWithQuantity = nameColor:Colorize(zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, itemName, stackCount))

@@ -413,7 +413,7 @@ function ZO_GamepadTradeWindow:RefreshOfferList(tradetype, list)
                 text = text,
                 icon = icon,
                 displayQuality = displayQuality,
-                -- quality is depricated, included here for addon backwards compatibility
+                -- quality is deprecated, included here for addon backwards compatibility
                 quality = displayQuality,
                 stackCount = stackCount,
                 sellPrice = sellPrice,

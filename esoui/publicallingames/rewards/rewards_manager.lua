@@ -40,7 +40,7 @@ end
 
 function ZO_RewardData:SetItemDisplayQuality(itemDisplayQuality)
     self.displayQuality = itemDisplayQuality
-    -- self.quality is depricated, included here for addon backwards compatibility
+    -- self.quality is deprecated, included here for addon backwards compatibility
     self.quality = itemDisplayQuality
 end
 
@@ -83,12 +83,12 @@ function ZO_RewardData:GetCurrencyType()
 end
 
 function ZO_RewardData:GetItemFunctionalQuality()
-    -- self.quality is depricated, included here for addon backwards compatibility
-    return self.functionalQuality or self.quality or ITEM_QUALITY_NORMAL
+    -- self.quality is deprecated, included here for addon backwards compatibility
+    return self.functionalQuality or self.quality or ITEM_FUNCTIONAL_QUALITY_NORMAL
 end
 
 function ZO_RewardData:GetItemDisplayQuality()
-    -- self.quality is depricated, included here for addon backwards compatibility
+    -- self.quality is deprecated, included here for addon backwards compatibility
     return self.displayQuality or self.quality or ITEM_DISPLAY_QUALITY_NORMAL
 end
 

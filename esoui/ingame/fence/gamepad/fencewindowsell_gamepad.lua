@@ -33,12 +33,14 @@ do
         itemData.itemName = targetData.text
         itemData.functionalQuality = GetItemFunctionalQuality(itemData.bag, itemData.slot)
         itemData.displayQuality = GetItemDisplayQuality(itemData.bag, itemData.slot)
+        -- itemData.quality is deprecated, included here for addon backwards compatibility
+        itemData.quality = itemData.functionalQuality
         itemData.stackCount = targetData.stackCount
 
         if self.confirmationMode then
             itemData.stackCount = STORE_WINDOW_GAMEPAD:GetSpinnerValue()
             if itemData.stackCount > 0 then
-                if itemData.functionalQuality >= ITEM_QUALITY_ARCANE then
+                if itemData.functionalQuality >= ITEM_FUNCTIONAL_QUALITY_ARCANE then
                     ZO_Dialogs_ShowGamepadDialog("CANT_BUYBACK_FROM_FENCE", itemData)
                 else
                     SellInventoryItem(itemData.bag, itemData.slot, itemData.stackCount)
@@ -52,7 +54,7 @@ do
                 local calcSellPrice = GetItemSellValueWithBonuses(itemData.bag, itemData.slot)
                 STORE_WINDOW_GAMEPAD:SetupSpinner(spinnerMax, spinnerMax, calcSellPrice, targetData.currencyType1)
             else
-                if itemData.functionalQuality >= ITEM_QUALITY_ARCANE then
+                if itemData.functionalQuality >= ITEM_FUNCTIONAL_QUALITY_ARCANE then
                     ZO_Dialogs_ShowGamepadDialog("CANT_BUYBACK_FROM_FENCE", itemData)
                 else
                     SellInventoryItem(itemData.bag, itemData.slot, 1)

@@ -162,7 +162,7 @@ do
                     createSound = createSound,
                     iconFile = resultIcon,
                     displayQuality = displayQuality,
-                    -- quality is depricated, included here for addon backwards compatibility
+                    -- quality is deprecated, included here for addon backwards compatibility
                     quality = displayQuality,
                     tradeskillsLevelReqs = tradeskillsLevelReqs,
                     name = recipeName,

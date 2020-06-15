@@ -68,7 +68,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
 
             self:Refresh()
 
-            -- selectedData.quality is depricated, included here for addon backwards compatibility
+            -- selectedData.quality is deprecated, included here for addon backwards compatibility
             local functionalQuality = selectedData.functionalQuality or selectedData.quality
             self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
 
@@ -155,7 +155,7 @@ function ZO_GamepadSmithingImprovement:Initialize(panelControl, floatingControl,
             self:RemoveItemFromCraft()
 
             if self.selectedItem then
-                -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+                -- self.selectedItem.quality is deprecated, included here for addon backwards compatibility
                 local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
                 self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
             end
@@ -219,7 +219,7 @@ function ZO_GamepadSmithingImprovement:ChangeMode(mode)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     if self.selectedItem then
-        -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+        -- self.selectedItem.quality is deprecated, included here for addon backwards compatibility
         local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
         self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
     else
@@ -274,7 +274,7 @@ end
 
 function ZO_GamepadSmithingImprovement:UpdateSelection()
     if self.selectedItem then
-        -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+        -- self.selectedItem.quality is deprecated, included here for addon backwards compatibility
         local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
         self:ColorizeText(self:GetBoosterRowForQuality(functionalQuality))
     else
@@ -347,7 +347,7 @@ function ZO_GamepadSmithingImprovement:ConfirmImprove()
 end
 
 function ZO_GamepadSmithingImprovement:CanImprove()
-    -- self.selectedItem.quality is depricated, included here for addon backwards compatibility
+    -- self.selectedItem.quality is deprecated, included here for addon backwards compatibility
     local functionalQuality = self.selectedItem.functionalQuality or self.selectedItem.quality
     return self.spinner:GetValue() <= self:GetBoosterRowForQuality(functionalQuality).currentStack
 end
@@ -440,7 +440,7 @@ function ZO_GamepadSmithingImprovement:RefreshImprovementChance()
     ZO_SharedSmithingImprovement.RefreshImprovementChance(self)
     local row = self:GetRowForSelection()
     if row then
-        -- row.quality is depricated, included here for addon backwards compatibility
+        -- row.quality is deprecated, included here for addon backwards compatibility
         local functionalQuality = row.functionalQuality or row.quality
         self.slotContainer.selectedLabel:SetText(zo_strformat(SI_GAMEPAD_SMITHING_IMPROVEMENT_REAGENT_SELECTION, GetString("SI_ITEMQUALITY", functionalQuality), self.spinner:GetValue(), row.reagentName))
     end
@@ -490,9 +490,9 @@ function ZO_GamepadSmithingImprovement:ColorizeText(qualityRow)
     if qualityRow ~= nil then
         if self.improvementSlot:HasItem() then
             self:HighlightBoosterRow(qualityRow)
-            -- qualityRow.quality is depricated, included here for addon backwards compatibility
+            -- qualityRow.quality is deprecated, included here for addon backwards compatibility
             local displayQuality = qualityRow.displayQuality or qualityRow.quality
-            local qualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
+            local qualityColor = GetItemQualityColor(displayQuality)
             self.slotContainer.selectedLabel:SetColor(qualityColor:UnpackRGBA())
         else
             self:ClearBoosterRowHighlight()

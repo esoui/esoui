@@ -874,7 +874,7 @@ function ZO_SharedSmithingCreation:GenerateMaterialDataForPattern(patternIndex)
                 name = name,
                 icon = icon,
                 displayQuality = displayQuality,
-                -- quality is depricated, included here for addon backwards compatibility
+                -- quality is deprecated, included here for addon backwards compatibility
                 quality = displayQuality,
                 rankRequirement = rankRequirement,
                 min = stack,
@@ -1075,7 +1075,7 @@ function ZO_SharedSmithingCreation:RefreshTraitList(patternData)
                 traitType = traitItemInfo.type,
                 icon = traitItemInfo.icon,
                 name = traitItemInfo.name,
-                -- traitItemInfo.quality is depricated, included here for addon backwards compatibility
+                -- traitItemInfo.quality is deprecated, included here for addon backwards compatibility
                 displayQuality = traitItemInfo.displayQuality or traitItemInfo.quality,
             })
         end

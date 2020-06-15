@@ -509,7 +509,7 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
 
         local nameControl = rowControl:GetNamedChild("Name")
         nameControl:SetText(ZO_TradingHouse_GetItemDataFormattedName(result))
-        -- result.quality is depricated, included here for addon backwards compatibility
+        -- result.quality is deprecated, included here for addon backwards compatibility
         local displayQuality = result.displayQuality or result.quality
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         nameControl:SetColor(r, g, b, 1)
@@ -583,7 +583,7 @@ function ZO_TradingHouseManager:InitializeListings(control)
 
         local nameControl = rowControl:GetNamedChild("Name")
         nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, postedItem.name))
-        -- postedItem.quality is depricated, included here for addon backwards compatibility
+        -- postedItem.quality is deprecated, included here for addon backwards compatibility
         local displayQuality = postedItem.displayQuality or postedItem.quality
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         nameControl:SetColor(r, g, b, 1)

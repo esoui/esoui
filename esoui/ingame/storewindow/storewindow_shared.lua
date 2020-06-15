@@ -91,7 +91,7 @@ function ZO_StoreManager_GetStoreItems()
                 requiredToBuyErrorText = requiredToBuyErrorText,
                 meetsRequirementsToEquip = meetsRequirementsToEquip,
                 displayQuality = displayQuality,
-                -- quality is depricated, included here for addon backwards compatibility
+                -- quality is deprecated, included here for addon backwards compatibility
                 quality = displayQuality,
                 questNameColor = questNameColor,
                 currencyType1 = currencyType1,

@@ -129,7 +129,7 @@ do
             headerTextId = SI_GAMEPAD_CRAFTING_COMPLETED_ITEM
         end
 
-        -- itemInfo.quality is depricated, included here for addon backwards compatibility
+        -- itemInfo.quality is deprecated, included here for addon backwards compatibility
         local displayQuality = itemInfo.displayQuality or itemInfo.quality
         local displayData =
         {
@@ -146,7 +146,7 @@ do
                     color = GetItemQualityColor(displayQuality),
                     meetsUsageRequirement = itemInfo.meetsUsageRequirement,
                     displayQuality = displayQuality,
-                    -- quality is depricated, included here for addon backwards compatibility
+                    -- quality is deprecated, included here for addon backwards compatibility
                     quality = displayQuality,
                     itemInstanceId = itemInfo.itemInstanceId,
                 }

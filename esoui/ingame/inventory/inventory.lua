@@ -119,7 +119,7 @@ local sortKeys =
     stackCount = { tiebreaker = "slotIndex", isNumeric = true },
     name = { tiebreaker = "stackCount" },
     displayQuality = { tiebreaker = "quality", isNumeric = true },
-    -- quality is depricated, included here for addon backwards compatibility
+    -- quality is deprecated, included here for addon backwards compatibility
     quality = { tiebreaker = "name", isNumeric = true },
     stackSellPrice = { tiebreaker = "name", tieBreakerSortOrder = ZO_SORT_ORDER_UP, isNumeric = true },
     statusSortOrder = { tiebreaker = "age", isNumeric = true},
@@ -229,7 +229,7 @@ end
 
 local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
     local options = overrideOptions or ITEM_SLOT_CURRENCY_OPTIONS
-    -- slot.quality is depricated, included here for addon backwards compatibility
+    -- slot.quality is deprecated, included here for addon backwards compatibility
     local displayQuality = slot.displayQuality or slot.quality
     local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
     local nameControl = rowControl:GetNamedChild("Name")

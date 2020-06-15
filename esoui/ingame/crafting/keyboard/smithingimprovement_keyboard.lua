@@ -215,13 +215,13 @@ function ZO_SmithingImprovementInventory:AddListDataTypes()
     local defaultSetup = self:GetDefaultTemplateSetupFunction()
 
     local function OnMouseEnter(rowControl)
-        -- rowControl.quality is depricated, included here for addon backwards compatibility
+        -- rowControl.quality is deprecated, included here for addon backwards compatibility
         local functionalQuality = rowControl.functionalQuality or rowControl.quality
         self.owner:OnMouseEnterInventoryRow(functionalQuality)
     end
 
     local function OnMouseExit(rowControl)
-        -- rowControl.quality is depricated, included here for addon backwards compatibility
+        -- rowControl.quality is deprecated, included here for addon backwards compatibility
         local functionalQuality = rowControl.functionalQuality or rowControl.quality
         self.owner:OnMouseExitInventoryRow(rowControl.functionalQuality)
     end
@@ -229,7 +229,7 @@ function ZO_SmithingImprovementInventory:AddListDataTypes()
     local function RowSetup(rowControl, data)
         defaultSetup(rowControl, data)
         rowControl.functionalQuality = data.functionalQuality
-        -- data.quality is depricated, included here for addon backwards compatibility
+        -- data.quality is deprecated, included here for addon backwards compatibility
         rowControl.displayQuality = data.displayQuality or data.quality
         rowControl.quality = rowControl.displayQuality
         if not rowControl.isMouseHooked then

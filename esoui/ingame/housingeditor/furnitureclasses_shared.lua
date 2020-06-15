@@ -219,7 +219,7 @@ end
 
 function ZO_PlaceableFurnitureItem:GetDisplayQuality()
     if self.slotData then
-        -- self.slotData.quality is depricated, included here for addon backwards compatibility
+        -- self.slotData.quality is deprecated, included here for addon backwards compatibility
         return self.slotData.displayQuality or self.slotData.quality
     end
     return ZO_FurnitureDataBase.GetDisplayQuality(self)
@@ -356,7 +356,7 @@ function ZO_RetrievableFurniture:GetDataType()
 end
 
 function ZO_RetrievableFurniture:GetDisplayQuality()
-    -- self.quality is depricated, included here for addon backwards compatibility
+    -- self.quality is deprecated, included here for addon backwards compatibility
     return self.displayQuality or self.quality
 end
 
@@ -441,7 +441,7 @@ function ZO_HousingMarketProduct:RefreshInfo(marketProductId, presentationIndex)
     self.costAfterDiscount = costAfterDiscount
     self.discountPercent = discountPercent
     self.displayQuality = GetMarketProductDisplayQuality(marketProductId)
-    -- self.quality is depricated, included here for addon backwards compatibility
+    -- self.quality is deprecated, included here for addon backwards compatibility
     self.quality = self.displayQuality
 
     self.furnitureDataId = GetMarketProductFurnitureDataId(marketProductId)
@@ -481,7 +481,7 @@ function ZO_HousingMarketProduct:IsBeingPreviewed()
 end
 
 function ZO_HousingMarketProduct:GetDisplayQuality()
-    -- self.quality is depricated, included here for addon backwards compatibility
+    -- self.quality is deprecated, included here for addon backwards compatibility
     return self.displayQuality or self.quality
 end
 

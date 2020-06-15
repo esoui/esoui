@@ -38,7 +38,7 @@ function ZO_TradingHouse_CreateItemData(index, icon, name, displayQuality, stack
             icon = icon,
             name = name,
             displayQuality = displayQuality,
-            -- quality is depricated, included here for addon backwards compatibility
+            -- quality is deprecated, included here for addon backwards compatibility
             quality = displayQuality,
             stackCount = stackCount,
             sellerName = sellerName,
@@ -155,7 +155,7 @@ function ZO_TradingHouse_Shared:CreateGuildSpecificItemData(index, fn)
             icon = icon,
             name = name,
             displayQuality = displayQuality,
-            -- quality is depricated, included here for addon backwards compatibility
+            -- quality is deprecated, included here for addon backwards compatibility
             quality = displayQuality,
             stackCount = stackCount,
             sellerName = GetString(SI_GUILD_HERALDRY_SELLER_NAME),

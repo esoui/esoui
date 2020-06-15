@@ -71,7 +71,7 @@ function ZO_SharedSmithingImprovement:RefreshBoosterRows()
         row.currentStack = stack
         row.functionalQuality = functionalQuality
         row.displayQuality = displayQuality
-        -- row.quality is depricated, included here for addon backwards compatibility
+        -- row.quality is deprecated, included here for addon backwards compatibility
         row.quality = displayQuality
         row.icon = icon
 
@@ -126,7 +126,7 @@ function ZO_SharedSmithingImprovement:OnSlotChanged()
             self.spinner:SetValue(maxBoosters)
             self.spinner:SetSoftMax(row.currentStack)
 
-            -- row.quality is depricated, included here for addon backwards compatibility
+            -- row.quality is deprecated, included here for addon backwards compatibility
             self.currentQuality = (row.functionalQuality and row.functionalQuality - 1) or (row.quality and row.quality -1) -- need the "from" quality
 
             self.boosterSlot.craftingType = GetCraftingInteractionType()
@@ -159,7 +159,7 @@ end
 
 function ZO_SharedSmithingImprovement:GetBoosterRowForQuality(functionalQuality)
     for i, row in ipairs(self.rows) do
-        -- row.quality is depricated, included here for addon backwards compatibility
+        -- row.quality is deprecated, included here for addon backwards compatibility
         local rowFunctionalQuality = row.functionalQuality or row.quality
         if rowFunctionalQuality - 1 == functionalQuality then
             return row

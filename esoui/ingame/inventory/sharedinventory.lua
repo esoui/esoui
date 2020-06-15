@@ -571,7 +571,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.locked = locked
     slot.functionalQuality = functionalQuality
     slot.displayQuality = displayQuality
-    -- slot.quality is depricated, included here for addon backwards compatibility
+    -- slot.quality is deprecated, included here for addon backwards compatibility
     slot.quality = displayQuality
     slot.equipType = equipType
     slot.isPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)

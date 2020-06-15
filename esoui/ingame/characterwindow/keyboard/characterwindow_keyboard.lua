@@ -196,7 +196,7 @@ local function InventorySlotUpdated(eventCode, bagId, slotId, isNewItem, itemSou
 end
 
 local function InventoryEquipMythicFailed(eventCode, bagId, slotId)
-    local mythicColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE))
+    local mythicColor = GetItemQualityColor(ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE)
     ZO_PlayColorSparkleAnimation(slots[slotId], mythicColor)
 end
 

@@ -88,7 +88,7 @@ do
         if data1EntryType == LOOT_ENTRY_TYPE_CURRENCY then
             return data1.currencyType == data2.currencyType
         elseif data1EntryType == LOOT_ENTRY_TYPE_ITEM then
-            -- dataX.quality is depricated, included here for addon backwards compatibility
+            -- dataX.quality is deprecated, included here for addon backwards compatibility
             return data1.itemId == data2.itemId and data1.displayQuality == data2.displayQuality and data1.isStolen == data2.isStolen and  data1.quality == data2.quality
         elseif data1EntryType == LOOT_ENTRY_TYPE_COLLECTIBLE then
             return data1.collectibleId == data2.collectibleId
@@ -401,7 +401,7 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
             color = color,
             itemId = itemId,
             displayQuality = displayQuality,
-            -- quality is depricated, included here for addon backwards compatibility
+            -- quality is deprecated, included here for addon backwards compatibility
             quality = displayQuality,
             isCraftBagItem = isVirtual,
             isStolen = isStolen,

@@ -461,13 +461,13 @@ do
     }
 
     local function AddColorizedQualityChoices(params)
-        local trashColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_QUALITY_TRASH))
+        local trashColor = GetItemQualityColor(ITEM_DISPLAY_QUALITY_TRASH)
         local anyQualityString = trashColor:Colorize(GetString(SI_TRADING_HOUSE_BROWSE_QUALITY_ANY))
         local ANY_VALUE = nil
         params:AddChoice(anyQualityString, ANY_VALUE)
 
         for _, displayQuality in ipairs(QUALITY_VALUES) do
-            local color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
+            local color = GetItemQualityColor(displayQuality)
             local qualityString = color:Colorize(GetString("SI_ITEMQUALITY", displayQuality))
             params:AddChoice(qualityString, displayQuality)
         end

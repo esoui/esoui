@@ -146,7 +146,7 @@ local REPAIR_ITEMS_SORT_KEYS =
     repairCost = { tiebreaker = "condition", isNumeric = true },
     condition = { tiebreaker = "displayQuality", isNumeric = true },
     displayQuality = { tiebreaker = "quality" },
-    -- quality is depricated, included here for addon backwards compatibility
+    -- quality is deprecated, included here for addon backwards compatibility
     quality = { tiebreaker = "stackCount" },
     stackCount = { tiebreaker = "slotIndex" },
     slotIndex = { isId64 = true },
@@ -226,7 +226,7 @@ local function GetBuybackItems()
                 sellPrice = totalPrice,
                 functionalQuality = functionalQuality,
                 displayQuality = displayQuality,
-                -- self.quality is depricated, included here for addon backwards compatibility
+                -- self.quality is deprecated, included here for addon backwards compatibility
                 quality = displayQuality,
                 meetsRequirementsToBuy = true,
                 meetsRequirementsToEquip = meetsRequirementsToEquip,

@@ -276,7 +276,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                     control.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
                 end
 
-                -- reward.quality is depricated, included here for addon backwards compatibility
+                -- reward.quality is deprecated, included here for addon backwards compatibility
                 local displayQuality = reward.displayQuality or reward.quality
                 creatorFunc(control, reward.name, reward.amount, reward.icon, reward.meetsUsageRequirement, displayQuality, reward.itemType)
 

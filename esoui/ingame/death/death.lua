@@ -108,7 +108,7 @@ function ZO_Death_GetResurrectSoulGemText(level)
     local coloredSoulGemIconMarkup
     local success
     if(soulGemStackCount > 0) then
-        local qualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, soulGemQuality))
+        local qualityColor = GetItemQualityColor(soulGemQuality)
         coloredFilledText = qualityColor:Colorize(SOUL_GEM_FILLED_TEXT)
         coloredSoulGemIconMarkup = string.format(SOUL_GEM_ICON_MARKUP, soulGemIcon)
         success = true

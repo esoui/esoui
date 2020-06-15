@@ -256,7 +256,7 @@ end
 function ZO_CraftingResults_Keyboard:DisplayCraftingResult(itemInfo)
     local entryText
     local entryColor
-    -- itemInfo.quality is depricated, included here for addon backwards compatibility
+    -- itemInfo.quality is deprecated, included here for addon backwards compatibility
     local displayQuality = itemInfo.displayQuality or itemInfo.quality
     local itemQualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
     if ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then

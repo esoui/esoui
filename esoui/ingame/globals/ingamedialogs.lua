@@ -516,7 +516,7 @@ ESO_Dialogs["CANT_BUYBACK_FROM_FENCE"] =
         },
     },
     updateFn = function(dialog)
-        -- dialog.data.quality is depricated, included here for addon backwards compatibility
+        -- dialog.data.quality is deprecated, included here for addon backwards compatibility
         local displayQuality = dialog.data.displayQuality or dialog.data.quality
         local itemColor = GetItemQualityColor(displayQuality)
         ZO_Dialogs_RefreshDialogText("CANT_BUYBACK_FROM_FENCE", dialog, { mainTextParams = { itemColor:Colorize(dialog.data.itemName) } } )

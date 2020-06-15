@@ -935,10 +935,11 @@ local function TrySellItem(inventorySlot)
 
             itemData.itemName = GetItemName(itemData.bag, itemData.slot)
             itemData.functionalQuality = GetItemFunctionalQuality(itemData.bag, itemData.slot)
-            -- itemData.quality is depricated, included here for addon backwards compatibility
+            itemData.displayQuality = GetItemDisplayQuality(itemData.bag, itemData.slot)
+            -- itemData.quality is deprecated, included here for addon backwards compatibility
             itemData.quality = itemData.functionalQuality
 
-            if SCENE_MANAGER:IsShowing("fence_keyboard") and itemData.functionalQuality >= ITEM_QUALITY_ARTIFACT then
+            if SCENE_MANAGER:IsShowing("fence_keyboard") and itemData.functionalQuality >= ITEM_FUNCTIONAL_QUALITY_ARTIFACT then
                 ZO_Dialogs_ShowDialog("CANT_BUYBACK_FROM_FENCE", itemData)
             else
                 SellInventoryItem(itemData.bag, itemData.slot, itemData.stackCount)

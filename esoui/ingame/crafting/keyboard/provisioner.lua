@@ -550,7 +550,7 @@ function ZO_ProvisionerRow:SetItem(name, icon, ingredientCount, displayQuality, 
     self.ingredientCount = ingredientCount
     self.requiredQuantity = requiredQuantity
     self.displayQuality = displayQuality
-    -- self.quality is depricated, included here for addon backwards compatibility
+    -- self.quality is deprecated, included here for addon backwards compatibility
     self.quality = displayQuality
 
     self.nameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, name))
@@ -593,7 +593,7 @@ function ZO_ProvisionerRow:UpdateColors()
     local requiredQuantity = self.requiredQuantity
 
     if ingredientCount >= requiredQuantity then
-        -- self.quality is depricated, included here for addon backwards compatibility
+        -- self.quality is deprecated, included here for addon backwards compatibility
         local displayQuality = self.displayQuality or self.quality
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         self.nameLabel:SetColor(r, g, b, 1)
