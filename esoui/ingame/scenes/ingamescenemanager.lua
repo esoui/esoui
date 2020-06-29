@@ -510,11 +510,6 @@ function ZO_IngameSceneManager:HideTopLevels()
 end
 
 function ZO_IngameSceneManager:OnToggleGameMenuBinding()
-    if SYSTEMS:IsShowing("restyle_station") then
-        SYSTEMS:GetObject("restyle_station"):AttemptExit()
-        return
-    end
-
     if self.hudUISceneName == "housingEditorHud" or self.hudUISceneName == "housingEditorHudUI" then
         HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
         return

@@ -1063,8 +1063,8 @@ function ZO_SkillsDataManager:RegisterForEvents()
 
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILLS_FULL_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnFullSystemUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_LINE_ADDED, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineAdded))
-    EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_RANK_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineUpdated))
-    EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_XP_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineUpdated))
+    EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_RANK_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineRankUpdated))
+    EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_XP_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineXPUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_ABILITY_PROGRESSION_RANK_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillProgressionUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_ABILITY_PROGRESSION_XP_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillProgressionUpdated))
 end
@@ -1157,6 +1157,22 @@ function ZO_SkillsDataManager:OnSkillLineUpdated(skillType, skillLineIndex)
     else
         local errorString = string.format("OnSkillLineUpdated fired with invalid indices - skillType: %d; skillLineIndex: %d", skillType, skillLineIndex)
         internalassert(false, errorString)
+    end
+end
+
+function ZO_SkillsDataManager:OnSkillLineRankUpdated(skillType, skillLineIndex)
+    self:OnSkillLineUpdated(skillType, skillLineIndex)
+    local skillLineData = self:GetSkillLineDataByIndices(skillType, skillLineIndex)
+    if skillLineData then
+        self:FireCallbacks("SkillLineRankUpdated", skillLineData)
+    end
+end
+
+function ZO_SkillsDataManager:OnSkillLineXPUpdated(skillType, skillLineIndex)
+    self:OnSkillLineUpdated(skillType, skillLineIndex)
+    local skillLineData = self:GetSkillLineDataByIndices(skillType, skillLineIndex)
+    if skillLineData then
+        self:FireCallbacks("SkillLineXPUpdated", skillLineData)
     end
 end
 

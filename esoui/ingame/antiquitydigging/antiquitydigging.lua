@@ -254,11 +254,11 @@ function ZO_AntiquityDigging:RefreshInputModeFragments()
     end
 
     if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:AddFragment(GAMEPAD_UI_MODE_FRAGMENT)
-        SCENE_MANAGER:AddFragment(HIDE_MOUSE_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:AddFragment(GAMEPAD_UI_MODE_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:AddFragment(HIDE_MOUSE_FRAGMENT)
     else
-        SCENE_MANAGER:RemoveFragment(GAMEPAD_UI_MODE_FRAGMENT)
-        SCENE_MANAGER:RemoveFragment(HIDE_MOUSE_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:RemoveFragment(GAMEPAD_UI_MODE_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:RemoveFragment(HIDE_MOUSE_FRAGMENT)
     end
 
     if not self.isGameOver then

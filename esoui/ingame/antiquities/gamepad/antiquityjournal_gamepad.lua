@@ -1115,7 +1115,7 @@ do
             },
             {
                 sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_REQUIRES_LEAD),
-                filterFunctions = {function(antiquityData) return antiquityData:HasDiscovered() and antiquityData:IsInCurrentPlayerZone() and not antiquityData:MeetsLeadRequirements() end},
+                filterFunctions = {function(antiquityData) return antiquityData:HasDiscovered() and antiquityData:IsInCurrentPlayerZone() and not antiquityData:MeetsLeadRequirements() and (antiquityData:IsRepeatable() or not antiquityData:HasRecovered()) end},
                 sortFunction = ZO_DefaultAntiquitySortComparison,
                 rowTemplate = SCRYABLE_ANTIQUITY_ROW_DATA,
                 list = {}

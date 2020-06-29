@@ -37,7 +37,7 @@ function SkillsAdvisor_Manager:Initialize()
     end
 
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", UpdateSkillBuildData)
-    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", RefreshVisibleAbilityLists)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineRankUpdated", RefreshVisibleAbilityLists)
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("OnSkillsCleared", RefreshVisibleAbilityLists)
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("PurchasedChanged", RefreshVisibleAbilityLists)
     SKILL_POINT_ALLOCATION_MANAGER:RegisterCallback("SkillProgressionKeyChanged", RefreshVisibleAbilityLists)

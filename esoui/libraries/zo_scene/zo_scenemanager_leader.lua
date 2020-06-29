@@ -222,7 +222,7 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
     local nextScene = self.scenes[sceneName]
 
     if nextScene == nil then
-        internalassert(false, string.format("Missing scene: %q", sceneName))
+        internalassert(false, string.format("Missing scene: %q", sceneName or "missing scene name"))
         return
     end
 

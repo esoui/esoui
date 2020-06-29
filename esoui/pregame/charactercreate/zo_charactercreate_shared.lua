@@ -283,6 +283,14 @@ function ZO_CharacterCreate_Base:GetTokenTypeForCharacterCreateMode(characterCre
     end
 end
 
+function ZO_CharacterCreate_Base:DoesCurrentCharacterCreateModeAllowAppearanceChange()
+    return self:GetCharacterCreateMode() ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+end
+
+function ZO_CharacterCreate_Base:DoesCurrentCharacterCreateModeAllowClassChange()
+    return self:GetCharacterCreateMode() == CHARACTER_CREATE_MODE_CREATE
+end
+
 -- Any functions that end up changing sliders need to be wrapped like this
 function ZO_CharacterCreate_Base:SetRace(race, options)
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()

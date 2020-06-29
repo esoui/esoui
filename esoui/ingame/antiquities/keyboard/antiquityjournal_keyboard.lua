@@ -954,216 +954,222 @@ do
         end
     end
 
-    do
-        -- Note that the order of these sections matters: lower-indexed sections are prioritized above subsequent sections.
-        local antiquitySections =
-        {
+    function ZO_AntiquityJournal_Keyboard:AcquireAntiquitySectionList()
+        if self.antiquitySectionData then
+            for _, sectionData in ipairs(self.antiquitySectionData) do
+                ZO_ClearNumericallyIndexedTable(sectionData.list)
+            end
+        else
+            -- Note that the order of these sections matters: lower-indexed sections are prioritized above subsequent sections.
+            self.antiquitySectionData =
             {
-                sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_IN_PROGRESS),
-                filterFunctions = {ZO_Antiquity.IsInProgress},
-                sortFunction = ZO_DefaultAntiquitySortComparison,
-                list = {}
-            },
-            {
-                sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_AVAILABLE),
-                filterFunctions =
                 {
-                    function(antiquityData)
-                        return antiquityData:MeetsAllScryingRequirements()
-                    end
+                    sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_IN_PROGRESS),
+                    filterFunctions = {ZO_Antiquity.IsInProgress},
+                    sortFunction = ZO_DefaultAntiquitySortComparison,
+                    list = {}
                 },
-                sortFunction = ZO_DefaultAntiquitySortComparison,
-                list = {}
-            },
-            {
-                sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_REQUIRES_LEAD),
-                filterFunctions =
                 {
-                    function(antiquityData)
-                        return antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsLeadRequirements()
-                    end,
+                    sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_AVAILABLE),
+                    filterFunctions =
+                    {
+                        function(antiquityData)
+                            return antiquityData:MeetsAllScryingRequirements()
+                        end
+                    },
+                    sortFunction = ZO_DefaultAntiquitySortComparison,
+                    list = {}
                 },
-                sortFunction = ZO_DefaultAntiquitySortComparison,
-                list = {}
-            },
-        }
-
-        for antiquityDifficulty = 1, ANTIQUITY_DIFFICULTY_MAX_VALUE do
-            local skillName, requiredRank, maximumRank = ZO_GetAntiquityScryingPassiveSkillInfo(antiquityDifficulty)
-            local antiquitySection =
-            {
-                sectionHeading = zo_strformat(SI_ANTIQUITY_SUBHEADING_REQUIRES_SKILL, skillName, requiredRank, maximumRank),
-                filterFunctions =
                 {
-                    function(antiquityData)
-                        local isMatch = antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsScryingSkillRequirements()
-                        return isMatch and antiquityData:GetDifficulty() == antiquityDifficulty
-                    end,
+                    sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_REQUIRES_LEAD),
+                    filterFunctions =
+                    {
+                        function(antiquityData)
+                            return antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsLeadRequirements() and (antiquityData:IsRepeatable() or not antiquityData:HasRecovered())
+                        end,
+                    },
+                    sortFunction = ZO_DefaultAntiquitySortComparison,
+                    list = {}
                 },
-                sortFunction = ZO_DefaultAntiquitySortComparison,
-                list = {}
             }
-            table.insert(antiquitySections, antiquitySection)
-        end
 
-        function ZO_AntiquityJournal_Keyboard:AddScryableAntiquityTiles(previousTileOrHeading, headingText, antiquities, sortFunction)
-            table.sort(antiquities, sortFunction)
-
-            local headingControl = self.antiquityHeadingControlPool:AcquireObject()
-            headingControl:GetNamedChild("Label"):SetText(headingText)
-            if previousTileOrHeading then
-                if type(previousTileOrHeading) ~= "userdata" then
-                    previousTileOrHeading = previousTileOrHeading.control
-                end
-                headingControl:SetAnchor(TOPLEFT, previousTileOrHeading, BOTTOMLEFT, 0, 10)
-            else
-                headingControl:SetAnchor(TOPLEFT, nil, nil, 0, 6)
+            for antiquityDifficulty = 1, ANTIQUITY_DIFFICULTY_MAX_VALUE do
+                local skillName, requiredRank, maximumRank = ZO_GetAntiquityScryingPassiveSkillInfo(antiquityDifficulty)
+                local antiquitySection =
+                {
+                    sectionHeading = zo_strformat(SI_ANTIQUITY_SUBHEADING_REQUIRES_SKILL, skillName, requiredRank, maximumRank),
+                    filterFunctions =
+                    {
+                        function(antiquityData)
+                            local isMatch = antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsScryingSkillRequirements()
+                            return isMatch and antiquityData:GetDifficulty() == antiquityDifficulty
+                        end,
+                    },
+                    sortFunction = ZO_DefaultAntiquitySortComparison,
+                    list = {}
+                }
+                table.insert(self.antiquitySectionData, antiquitySection)
             end
-            previousTileOrHeading = headingControl
+        end
 
-            for _, antiquityData in ipairs(antiquities) do
-                -- Add this scryable antiquity as a tile.
-                local antiquityId = antiquityData:GetId()
-                local tileControl = self.scryableAntiquityTileControlPool:AcquireObject()
-                local tileObject = tileControl.owner
-                tileObject:Layout(antiquityId)
-                tileObject:SetPredecessorTileOrHeading(previousTileOrHeading)
-                previousTileOrHeading = tileObject
-                self.antiquityTilesByAntiquityId[antiquityId] = tileObject
+        return self.antiquitySectionData
+    end
+
+    function ZO_AntiquityJournal_Keyboard:AddScryableAntiquityTiles(previousTileOrHeading, headingText, antiquities, sortFunction)
+        table.sort(antiquities, sortFunction)
+
+        local headingControl = self.antiquityHeadingControlPool:AcquireObject()
+        headingControl:GetNamedChild("Label"):SetText(headingText)
+        if previousTileOrHeading then
+            if type(previousTileOrHeading) ~= "userdata" then
+                previousTileOrHeading = previousTileOrHeading.control
             end
-            return previousTileOrHeading
+            headingControl:SetAnchor(TOPLEFT, previousTileOrHeading, BOTTOMLEFT, 0, 10)
+        else
+            headingControl:SetAnchor(TOPLEFT, nil, nil, 0, 6)
         end
+        previousTileOrHeading = headingControl
 
-        function ZO_AntiquityJournal_Keyboard:AddAntiquitySetTile(previousTileOrHeading, antiquitySetId)
-            -- Add this antiquity's set as a tile if the antiquity set has not already been added.
-            local tileControl = self.antiquitySetTileControlPool:AcquireObject()
-            local tileObject = tileControl.owner
-            tileObject:Layout(antiquitySetId)
-            tileObject:SetPredecessorTileOrHeading(previousTileOrHeading)
-            return tileObject
-        end
-
-        function ZO_AntiquityJournal_Keyboard:AddAntiquityTile(previousTileOrHeading, antiquityId)
-            -- Add this antiquity as a tile.
-            local tileControl = self.antiquityTileControlPool:AcquireObject()
+        for _, antiquityData in ipairs(antiquities) do
+            -- Add this scryable antiquity as a tile.
+            local antiquityId = antiquityData:GetId()
+            local tileControl = self.scryableAntiquityTileControlPool:AcquireObject()
             local tileObject = tileControl.owner
             tileObject:Layout(antiquityId)
             tileObject:SetPredecessorTileOrHeading(previousTileOrHeading)
-            return tileObject
+            previousTileOrHeading = tileObject
+            self.antiquityTilesByAntiquityId[antiquityId] = tileObject
+        end
+        return previousTileOrHeading
+    end
+
+    function ZO_AntiquityJournal_Keyboard:AddAntiquitySetTile(previousTileOrHeading, antiquitySetId)
+        -- Add this antiquity's set as a tile if the antiquity set has not already been added.
+        local tileControl = self.antiquitySetTileControlPool:AcquireObject()
+        local tileObject = tileControl.owner
+        tileObject:Layout(antiquitySetId)
+        tileObject:SetPredecessorTileOrHeading(previousTileOrHeading)
+        return tileObject
+    end
+
+    function ZO_AntiquityJournal_Keyboard:AddAntiquityTile(previousTileOrHeading, antiquityId)
+        -- Add this antiquity as a tile.
+        local tileControl = self.antiquityTileControlPool:AcquireObject()
+        local tileObject = tileControl.owner
+        tileObject:Layout(antiquityId)
+        tileObject:SetPredecessorTileOrHeading(previousTileOrHeading)
+        return tileObject
+    end
+
+    function ZO_AntiquityJournal_Keyboard:ResetCategoryTiles(antiquityCategoryId)
+        self:ResetTiles()
+        ZO_Scroll_ResetToTop(self.contentList)
+        self.contentList:SetHidden(true)
+        self.contentList:ClearAnchors()
+        self.contentList:SetAnchor(BOTTOMRIGHT, nil, nil, -10, -75)
+
+        if antiquityCategoryId == ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA:GetId() then
+            self.categoryProgress:SetHidden(true)
+            self.contentList:SetAnchor(TOPLEFT, self.categoryInset, BOTTOMLEFT, nil, 15)
+            self.filter:SetHidden(true)
+        else
+            self.contentList:SetAnchor(TOPLEFT, self.categoryInset, BOTTOMLEFT, nil, 25)
+        end
+    end
+
+    function ZO_AntiquityJournal_Keyboard:RefreshTiles(data)
+        local antiquityCategoryId = data:GetId()
+        local previousTileOrHeading
+        local isEmptyList = true
+        local horizontalScrollOffset
+        local verticalScrollOffset
+
+        if self.isRefreshingAll then
+            horizontalScrollOffset, verticalScrollOffset = self.contentList.scroll:GetScrollOffsets()
         end
 
-        function ZO_AntiquityJournal_Keyboard:ResetCategoryTiles(antiquityCategoryId)
-            self:ResetTiles()
-            ZO_Scroll_ResetToTop(self.contentList)
-            self.contentList:SetHidden(true)
-            self.contentList:ClearAnchors()
-            self.contentList:SetAnchor(BOTTOMRIGHT, nil, nil, -10, -75)
+        -- ResetCategoryTiles will end up clearing the mouseover control
+        -- so save it off before calling it
+        local oldMouseOverTile = self.mouseOverTile
 
-            if antiquityCategoryId == ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA:GetId() then
-                self.categoryProgress:SetHidden(true)
-                self.contentList:SetAnchor(TOPLEFT, self.categoryInset, BOTTOMLEFT, nil, 15)
-                self.filter:SetHidden(true)
-            else
-                self.contentList:SetAnchor(TOPLEFT, self.categoryInset, BOTTOMLEFT, nil, 25)
-            end
-        end
+        self:ResetCategoryTiles(antiquityCategoryId)
 
-        function ZO_AntiquityJournal_Keyboard:RefreshTiles(data)
-            local antiquityCategoryId = data:GetId()
-            local previousTileOrHeading
-            local isEmptyList = true
-            local horizontalScrollOffset
-            local verticalScrollOffset
+        if antiquityCategoryId == ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
+            local antiquitySections = self:AcquireAntiquitySectionList()
 
-            if self.isRefreshingAll then
-                horizontalScrollOffset, verticalScrollOffset = self.contentList.scroll:GetScrollOffsets()
-            end
-
-            -- ResetCategoryTiles will end up clearing the mouseover control
-            -- so save it off before calling it
-            local oldMouseOverTile = self.mouseOverTile
-
-            self:ResetCategoryTiles(antiquityCategoryId)
-
-            if antiquityCategoryId == ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
+            -- Iterate over all antiquities, adding each antiquity to the section whose criteria it meets (if any).
+            for _, antiquityData in ANTIQUITY_DATA_MANAGER:AntiquityIterator({ZO_Antiquity.IsVisible}) do
                 for _, antiquitySection in ipairs(antiquitySections) do
-                    ZO_ClearNumericallyIndexedTable(antiquitySection.list)
-                end
-
-                -- Iterate over all antiquities, adding each antiquity to the section whose criteria it meets (if any).
-                for _, antiquityData in ANTIQUITY_DATA_MANAGER:AntiquityIterator({ZO_Antiquity.IsVisible}) do
-                    for _, antiquitySection in ipairs(antiquitySections) do
-                        local passesFilter = true
-                        for _, filterFunction in ipairs(antiquitySection.filterFunctions) do
-                            if not filterFunction(antiquityData) then
-                                passesFilter = false
-                                break
-                            end
-                        end
-                        if passesFilter then
-                            table.insert(antiquitySection.list, antiquityData)
+                    local passesFilter = true
+                    for _, filterFunction in ipairs(antiquitySection.filterFunctions) do
+                        if not filterFunction(antiquityData) then
+                            passesFilter = false
                             break
                         end
                     end
-                end
-
-                -- Sort each sections' list by the associated sort function.
-                for _, antiquitySection in ipairs(antiquitySections) do
-                    if #antiquitySection.list ~= 0 then
-                        isEmptyList = false
-                        previousTileOrHeading = self:AddScryableAntiquityTiles(previousTileOrHeading, antiquitySection.sectionHeading, antiquitySection.list, antiquitySection.sortFunction)
+                    if passesFilter then
+                        table.insert(antiquitySection.list, antiquityData)
+                        break
                     end
                 end
-            else
-                local maxLoreEntries = 0
-                local unlockedLoreEntries = 0
+            end
 
-                for _, antiquityData in data:AntiquityIterator({ZO_Antiquity.IsVisible}) do
-                    local antiquityId = antiquityData:GetId()
-                    local antiquitySetData = antiquityData:GetAntiquitySetData()
-                    local antiquitySetId = antiquitySetData and antiquitySetData:GetId()
+            -- Sort each sections' list by the associated sort function.
+            for _, antiquitySection in ipairs(antiquitySections) do
+                if #antiquitySection.list ~= 0 then
+                    isEmptyList = false
+                    previousTileOrHeading = self:AddScryableAntiquityTiles(previousTileOrHeading, antiquitySection.sectionHeading, antiquitySection.list, antiquitySection.sortFunction)
+                end
+            end
+        else
+            local maxLoreEntries = 0
+            local unlockedLoreEntries = 0
 
-                    if self:MeetsFilterCriteria(antiquityData, antiquitySetData) then
-                        if not filterAntiquities or filterAntiquities[antiquityId] or (antiquitySetId and filterAntiquitySets[antiquitySetId]) then
-                            if antiquitySetId then
-                                local antiquitySetTile = self.antiquitySetTilesByAntiquitySetId[antiquitySetId]
-                                if not antiquitySetTile then
-                                    antiquitySetTile = self:AddAntiquitySetTile(previousTileOrHeading, antiquitySetId)
-                                    self.antiquitySetTilesByAntiquitySetId[antiquitySetId] = antiquitySetTile
-                                    previousTileOrHeading = antiquitySetTile
-                                end
-                                self.antiquityTilesByAntiquityId[antiquityId] = antiquitySetTile
-                            else
-                                previousTileOrHeading = self:AddAntiquityTile(previousTileOrHeading, antiquityId)
-                                self.antiquityTilesByAntiquityId[antiquityId] = previousTileOrHeading
+            for _, antiquityData in data:AntiquityIterator({ZO_Antiquity.IsVisible}) do
+                local antiquityId = antiquityData:GetId()
+                local antiquitySetData = antiquityData:GetAntiquitySetData()
+                local antiquitySetId = antiquitySetData and antiquitySetData:GetId()
+
+                if self:MeetsFilterCriteria(antiquityData, antiquitySetData) then
+                    if not filterAntiquities or filterAntiquities[antiquityId] or (antiquitySetId and filterAntiquitySets[antiquitySetId]) then
+                        if antiquitySetId then
+                            local antiquitySetTile = self.antiquitySetTilesByAntiquitySetId[antiquitySetId]
+                            if not antiquitySetTile then
+                                antiquitySetTile = self:AddAntiquitySetTile(previousTileOrHeading, antiquitySetId)
+                                self.antiquitySetTilesByAntiquitySetId[antiquitySetId] = antiquitySetTile
+                                previousTileOrHeading = antiquitySetTile
                             end
-                            maxLoreEntries = maxLoreEntries + previousTileOrHeading.tileData:GetNumLoreEntries()
-                            unlockedLoreEntries = unlockedLoreEntries + previousTileOrHeading.tileData:GetNumUnlockedLoreEntries()
+                            self.antiquityTilesByAntiquityId[antiquityId] = antiquitySetTile
+                        else
+                            previousTileOrHeading = self:AddAntiquityTile(previousTileOrHeading, antiquityId)
+                            self.antiquityTilesByAntiquityId[antiquityId] = previousTileOrHeading
                         end
+                        maxLoreEntries = maxLoreEntries + previousTileOrHeading.tileData:GetNumLoreEntries()
+                        unlockedLoreEntries = unlockedLoreEntries + previousTileOrHeading.tileData:GetNumUnlockedLoreEntries()
                     end
                 end
-
-                isEmptyList = previousTileOrHeading == nil
-                if maxLoreEntries > 0 then
-                    self.categoryProgress:SetValue(unlockedLoreEntries / maxLoreEntries)
-                else
-                    self.categoryProgress:SetValue(0)
-                end
-
-                self.categoryProgress:SetHidden(false)
-                self.filter:SetHidden(false)
             end
 
-            self.contentList:SetHidden(isEmptyList)
-            self.contentEmptyLabel:SetHidden(not isEmptyList)
-
-            if verticalScrollOffset then
-                ZO_Scroll_ScrollAbsoluteInstantly(self.contentList, verticalScrollOffset)
+            isEmptyList = previousTileOrHeading == nil
+            if maxLoreEntries > 0 then
+                self.categoryProgress:SetValue(unlockedLoreEntries / maxLoreEntries)
+            else
+                self.categoryProgress:SetValue(0)
             end
 
-            if oldMouseOverTile and not oldMouseOverTile:IsControlHidden() then
-                self:SetMouseOverTile(oldMouseOverTile)
-            end
+            self.categoryProgress:SetHidden(false)
+            self.filter:SetHidden(false)
+        end
+
+        self.contentList:SetHidden(isEmptyList)
+        self.contentEmptyLabel:SetHidden(not isEmptyList)
+
+        if verticalScrollOffset then
+            ZO_Scroll_ScrollAbsoluteInstantly(self.contentList, verticalScrollOffset)
+        end
+
+        if oldMouseOverTile and not oldMouseOverTile:IsControlHidden() then
+            self:SetMouseOverTile(oldMouseOverTile)
         end
     end
 
@@ -1255,7 +1261,7 @@ do
 
             for _, antiquityId in ipairs(searchResults) do
                 local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
-                if antiquityData then
+                if antiquityData and antiquityData:HasDiscovered() then
                     -- Construct a set of the Antiquities that match the filter criteria, if any.
                     filterAntiquities[antiquityId] = true
 

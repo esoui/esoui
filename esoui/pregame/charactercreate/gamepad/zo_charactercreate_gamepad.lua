@@ -219,14 +219,32 @@ function ZO_CharacterCreate_Gamepad:InitializeControls()
     self.header = self.containerControl:GetNamedChild("HeaderContainerHeader")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
+    local function IsAppearanceChangeEnabled()
+        return self:DoesCurrentCharacterCreateModeAllowAppearanceChange()
+    end
+
+    local function IsRaceChangeEnabled()
+        local mode = self:GetCharacterCreateMode()
+        return mode == CHARACTER_CREATE_MODE_CREATE or mode == CHARACTER_CREATE_MODE_EDIT_RACE
+    end
+
+    local function IsClassChangeEnabled()
+        return self:DoesCurrentCharacterCreateModeAllowClassChange()
+    end
+
+    local function IsAllianceChangeEnabled()
+        local mode = self:GetCharacterCreateMode()
+        return mode == CHARACTER_CREATE_MODE_CREATE or mode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+    end
+
     self.customBucketControls = 
     {
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER] = {control = self.genderSlider.control, updateFn = UpdateSlider, shouldAdd = true},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] = {control = ZO_CharacterCreate_GamepadAlliance, updateFn = function() self:UpdateRaceControl() end, shouldAdd = true},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE] = {control = ZO_CharacterCreate_GamepadRace, updateFn = function() self:UpdateRaceControl() end, shouldAdd = true},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS] = {control = ZO_CharacterCreate_GamepadClass, updateFn = function() self:UpdateClassControl() end, shouldAdd = true},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_PHYSIQUE] = {control = physiqueTriangleControl, updateFn = UpdateSlider, randomizeFn = RandomizeSlider, shouldAdd = true},
-        [GAMEPAD_BUCKET_CUSTOM_CONTROL_FACE] = {control = faceTriangleControl, updateFn = UpdateSlider, randomizeFn = RandomizeSlider, shouldAdd = true},
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER] = {control = self.genderSlider.control, updateFn = UpdateSlider, shouldAdd = IsAppearanceChangeEnabled},
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE] = {control = ZO_CharacterCreate_GamepadAlliance, updateFn = function() self:UpdateRaceControl() end, shouldAdd = IsAllianceChangeEnabled},
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE] = {control = ZO_CharacterCreate_GamepadRace, updateFn = function() self:UpdateRaceControl() end, shouldAdd = IsRaceChangeEnabled},
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS] = {control = ZO_CharacterCreate_GamepadClass, updateFn = function() self:UpdateClassControl() end, shouldAdd = IsClassChangeEnabled},
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_PHYSIQUE] = {control = physiqueTriangleControl, updateFn = UpdateSlider, randomizeFn = RandomizeSlider, shouldAdd = IsAppearanceChangeEnabled},
+        [GAMEPAD_BUCKET_CUSTOM_CONTROL_FACE] = {control = faceTriangleControl, updateFn = UpdateSlider, randomizeFn = RandomizeSlider, shouldAdd = IsAppearanceChangeEnabled},
     }
 end
 
@@ -919,10 +937,12 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
     for bucketIndex, bucket in pairs(ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD) do
         if bucket.controls then
             for index, controlItem in ipairs(bucket.controls) do
-                if controlItem[1] == GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM then
-                    local controlInfo = customControls[ controlItem[2] ]
+                local controlType = controlItem[1]
+                if controlType == GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM then
+                    local controlNameOrIndex = controlItem[2]
+                    local controlInfo = customControls[controlNameOrIndex]
 
-                    if controlInfo.shouldAdd then
+                    if controlInfo.shouldAdd == nil or controlInfo.shouldAdd() then
                         local control = controlInfo.control
                         if type(control) == "function" then
                             control = control()
@@ -955,8 +975,16 @@ function ZO_CharacterCreate_Gamepad:ResetControls()
         GAMEPAD_BUCKET_MANAGER:AddControl(orderingData.control, orderingData.bucketIndex, orderingData.updateFn, orderingData.randomizeFn)
     end
 
+    local appearanceControlsEnabled = self:DoesCurrentCharacterCreateModeAllowAppearanceChange()
+
     for category, bucket in pairs(ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD) do
-        GAMEPAD_BUCKET_MANAGER:SetEnabled(category, self.controls[category] ~= nil)
+        local bucketEnabled = self.controls[category] ~= nil
+        if category == CREATE_BUCKET_BODY or category == CREATE_BUCKET_BODY_SHAPE
+                or category == CREATE_BUCKET_HEAD_TYPE or category == CREATE_BUCKET_FEATURES
+                or category == CREATE_BUCKET_FACE then
+            bucketEnabled = bucketEnabled and appearanceControlsEnabled
+        end
+        GAMEPAD_BUCKET_MANAGER:SetEnabled(category, bucketEnabled)
     end
 
     GAMEPAD_BUCKET_MANAGER:Finalize()
@@ -1336,43 +1364,22 @@ function ZO_CharacterCreate_Gamepad:InitializeForEditChanges(characterInfo, mode
 
     local raceTemplate = characterInfo
     local allianceTemplate = characterInfo
-    local customControls = self.customBucketControls
     if mode == CHARACTER_CREATE_MODE_EDIT_RACE then
         raceTemplate =  {
                             race = 0,
                             alliance = characterInfo.alliance,
                         }
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = false
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = true
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = true
-    elseif mode == CHARACTER_CREATE_MODE_EDIT_APPEARANCE then
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = false
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = false
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = true
     elseif mode == CHARACTER_CREATE_MODE_EDIT_ALLIANCE then
         allianceTemplate = {
             alliance = ALLIANCE_NONE,
         }
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = true
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = false
-        customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = false
     end
-
-    -- none of the edit modes allow for changing class
-    customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS].shouldAdd = false
 
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateRaceSelectorsForTemplate(...) end, self.characterData:GetRaceInfo(), raceTemplate, self.raceRadioGroup)
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateClassSelectorsForTemplate(...) end, self.characterData:GetClassInfo(), characterInfo, self.classRadioGroup)
     self:UpdateSelectorsForTemplate(function(...) return self:UpdateAllianceSelectorsForTemplate(...) end, self.characterData:GetAllianceInfo(), allianceTemplate, self.allianceRadioGroup)
 
     self:Reset()
-
-    local appearanceControlsEnabled = mode ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
-    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_BODY, appearanceControlsEnabled)
-    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_BODY_SHAPE, appearanceControlsEnabled)
-    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_HEAD_TYPE, appearanceControlsEnabled)
-    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_FEATURES, appearanceControlsEnabled)
-    GAMEPAD_BUCKET_MANAGER:SetEnabled(CREATE_BUCKET_FACE, appearanceControlsEnabled)
 
     -- Make the controls match what you picked...
     self:UpdateRaceControl()
@@ -1394,12 +1401,6 @@ end
 
 function ZO_CharacterCreate_Gamepad:InitializeForCharacterCreate()
     self:SetCharacterCreateMode(CHARACTER_CREATE_MODE_CREATE)
-
-    local customControls = self.customBucketControls
-    customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_ALLIANCE].shouldAdd = true
-    customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_RACE].shouldAdd = true
-    customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_CLASS].shouldAdd = true
-    customControls[GAMEPAD_BUCKET_CUSTOM_CONTROL_GENDER].shouldAdd = true
 
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local templateData = self.characterData:GetTemplate(CharacterCreateGetTemplate(characterMode))

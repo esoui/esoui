@@ -739,12 +739,11 @@ do
         KEYBOARD_BUCKET_MANAGER:RemoveUnusedSubCategories()
         KEYBOARD_BUCKET_MANAGER:SwitchBuckets(CREATE_BUCKET_RACE)
 
-        local mode = self:GetCharacterCreateMode()
-        local appearanceControlsEnabled = mode ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+        local appearanceControlsEnabled = self:DoesCurrentCharacterCreateModeAllowAppearanceChange()
         KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_BODY, appearanceControlsEnabled)
         KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_FACE, appearanceControlsEnabled)
         
-        local classControlsEnabled = mode == CHARACTER_CREATE_MODE_CREATE
+        local classControlsEnabled = self:DoesCurrentCharacterCreateModeAllowClassChange()
         KEYBOARD_BUCKET_MANAGER:EnableBucketTab(CREATE_BUCKET_CLASS, classControlsEnabled)
 
         -- Update Gender Text
@@ -925,7 +924,7 @@ function ZO_CharacterCreate_Keyboard:InitializeForEditChanges(characterInfo, mod
 
     self:Reset()
 
-    local appearanceControlsEnabled = mode ~= CHARACTER_CREATE_MODE_EDIT_ALLIANCE
+    local appearanceControlsEnabled = self:DoesCurrentCharacterCreateModeAllowAppearanceChange()
     ZO_CharacterCreateRandomizeAppearance:SetEnabled(appearanceControlsEnabled)
 
     self.templateControl:SetHidden(true)

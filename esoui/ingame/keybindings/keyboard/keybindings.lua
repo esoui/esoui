@@ -70,6 +70,7 @@ function BindKeyDialog:Initialize(control)
     ZO_Dialogs_RegisterCustomDialog("BINDINGS", {
         customControl = function() return control end,
         setup = function(dialog, ...) self:SetupDialog(...) end,
+        finishedCallback = function() self:OnDialogFinished() end,
         title =
         {
             text = SI_KEYBINDINGS_BINDINGS,
@@ -104,6 +105,7 @@ function BindKeyDialog:Initialize(control)
             },
         }
     })
+    BlockAutomaticInputModeChange(false) -- call to avoid a situation where this value is "stuck" after a /reloadui
 end
 
 function BindKeyDialog:OnBindClicked()
@@ -151,6 +153,11 @@ function BindKeyDialog:SetupDialog(data)
 
     local canBeUnbound = self:HasValidKeyToBind()
     self.control.unbindButton:SetEnabled(canBeUnbound)
+    BlockAutomaticInputModeChange(true)
+end
+
+function BindKeyDialog:OnDialogFinished()
+    BlockAutomaticInputModeChange(false)
 end
 
 function BindKeyDialog:OnMouseDown(button, ctrl, alt, shift, command)

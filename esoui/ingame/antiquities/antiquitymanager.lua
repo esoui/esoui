@@ -22,6 +22,19 @@ function ZO_AntiquityManager:Initialize(...)
     local function OnContentLockChanged()
         self:FireCallbacks("OnContentLockChanged")
     end
+    SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", OnContentLockChanged)
+
+    local function OnSkillLineUpdated(skillLineData)
+        local skillLineId = skillLineData:GetId()
+        local diggingSkillLineId = GetAntiquityDiggingSkillLineId()
+        local scryingSkillLineId = GetAntiquityScryingSkillLineId()
+
+        if skillLineId == diggingSkillLineId or skillLineId == scryingSkillLineId then
+            OnContentLockChanged()
+        end
+    end
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillLineUpdated)
+    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineRankUpdated", OnSkillLineUpdated)
 
     local antiquarianGuildZoneCollectibleId = self:GetAntiquarianGuildZoneCollectibleData():GetId()
     local scryingToolCollectibleId = self:GetScryingToolCollectibleData():GetId()
@@ -44,13 +57,6 @@ function ZO_AntiquityManager:Initialize(...)
         end
     end
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
-
-    local function OnSkillsUpdated()
-        OnContentLockChanged()
-    end
-    SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", OnSkillsUpdated)
-    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillsUpdated)
-    SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillsUpdated)
 end
 
 function ZO_AntiquityManager:GetAntiquarianGuildZoneName()

@@ -89,10 +89,16 @@ local pregameStates =
                 WORLD_SELECT_GAMEPAD:SetImagesFragment(nil) -- Remove any previously set fragment.
                 WORLD_SELECT_GAMEPAD:SetBackgroundFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
 
-                -- Reset screen overscan/gamma and audio settings
-                SetOverscanOffsets(0, 0, 0, 0)
-                SetCVar("GAMMA_ADJUSTMENT", 100)
-                ResetToDefaultSettings(SETTING_TYPE_AUDIO)
+                if IsConsoleUI() then
+                    -- ESO-404970: reset overscan, gamma, and audio settings
+                    -- to default to handle the situation where a player loads
+                    -- between console profiles, which should have different
+                    -- user settings. For the IIS, we want to behave in an
+                    -- "agnostic" way and avoid settings leaking through both sides
+                    SetOverscanOffsets(0, 0, 0, 0)
+                    SetCVar("GAMMA_ADJUSTMENT", 100)
+                    ResetToDefaultSettings(SETTING_TYPE_AUDIO)
+                end
 
                 SetCurrentVideoPlaybackVolume(1.0, 4.0)
 
