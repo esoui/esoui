@@ -68,7 +68,7 @@ function LoginManager_Keyboard:SwitchToLoginFragment()
         SCENE_MANAGER:RemoveFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
         SCENE_MANAGER:AddFragment(LOGIN_FRAGMENT)
         self.showCreateLinkAccountFragment = false
-        LOGIN_KEYBOARD:SetLoginButtonHidden(false)
+        LOGIN_KEYBOARD:SetLoginControlsHidden(false)
     end
 end
 
@@ -78,7 +78,7 @@ function LoginManager_Keyboard:SwitchToCreateLinkAccountFragment()
         SCENE_MANAGER:RemoveFragment(LOGIN_FRAGMENT)
         SCENE_MANAGER:AddFragment(CREATE_LINK_ACCOUNT_FRAGMENT)
         self.showCreateLinkAccountFragment = true
-        LOGIN_KEYBOARD:SetLoginButtonHidden(true)
+        LOGIN_KEYBOARD:SetLoginControlsHidden(true)
     end
 end
 

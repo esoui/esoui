@@ -404,6 +404,22 @@ local ZO_OptionsPanel_Gameplay_ControlData =
                             StartWorldEffectOnPlayer(UI_WORLD_EFFECT_ENEMY_TELEGRAPH)
                         end,
         },
+        --Options_Gamepad_Reset_Controls
+        [OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS] =
+        {
+            controlType = OPTIONS_INVOKE_CALLBACK,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_GAMEPAD_OPTIONS_RESET_CONTROLS,
+            customResetToDefaultsFunction = function() ResetGamepadBindsToDefault() end,
+            exists = function()
+                return not IsConsoleUI()
+            end,
+            callback = function()
+                ZO_Dialogs_ShowPlatformDialog("KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS")
+            end,
+        },
     }
 }
 
@@ -434,6 +450,21 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
         valid = {GAMEPAD_TEMPLATE_DEFAULT, GAMEPAD_TEMPLATE_ALTERNATE_INTERACT, GAMEPAD_TEMPLATE_WEAPON_TRICKS,},
         valueStringPrefix = "SI_GAMEPADTEMPLATE",
         gamepadShowsControllerInfo = true,
+    },
+    [SETTING_TYPE_CUSTOM] =
+    {
+        --Options_Gamepad_Reset_Controls
+        [OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS] =
+        {
+            controlType = OPTIONS_INVOKE_CALLBACK,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_GAMEPAD_OPTIONS_RESET_CONTROLS,
+            callback = function()
+                ResetGamepadBindsToDefault()
+            end,
+        },
     },
 }
 

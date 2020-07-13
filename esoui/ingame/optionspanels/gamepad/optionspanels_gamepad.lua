@@ -127,6 +127,11 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_IN_WORLD,
             settingId = IN_WORLD_UI_SETTING_FOOT_INVERSE_KINEMATICS,
             header = SI_GAMEPLAY_OPTIONS_GENERAL,

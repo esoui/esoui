@@ -2546,6 +2546,10 @@ ESO_Dialogs["KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS"] =
 
 ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS"] = 
 {
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
     title =
     {
         text = SI_KEYBINDINGS_GAMEPAD_RESET_TITLE,

@@ -108,6 +108,8 @@ function Login_Keyboard:Initialize(control)
     self:InitializeTrustedSettingsBar(self.trustedSettingsBar)
     self.capsLockWarning:SetHidden(not IsCapsLockOn())
 
+    self.areLoginControlsHidden = false
+    self.hasServerAlertInfo = false
     self.credentialsContainer:SetHidden(requiresAccountLinking)
     self:ReanchorLoginButton()
 
@@ -153,27 +155,23 @@ function Login_Keyboard:Initialize(control)
         end
 
         local serverAlertMessage = success and GetServerAlertMessage()
+        self.hasServerAlertInfo = false
         if serverAlertMessage and serverAlertMessage ~= "" then
-            self.serverAlert:SetHidden(false)
             self.serverAlertImage:SetTexture("EsoUI/Art/Login/login_icon_yield.dds")
             self.serverAlertLabel:SetFont("ZoFontGameBold")
             self.serverAlertLabel:SetText(serverAlertMessage)
+            self.hasServerAlertInfo = true
         else
             local serverNoticeMessage = success and GetServerNoticeMessage()
             if serverNoticeMessage and serverNoticeMessage ~= "" then
-                self.serverAlert:SetHidden(false)
                 self.serverAlertImage:SetTexture("EsoUI/Art/Login/login_icon_info.dds")
                 self.serverAlertLabel:SetFont("ZoFontGame")
                 self.serverAlertLabel:SetText(serverNoticeMessage)
-            else
-                self.serverAlert:SetHidden(true)
+                self.hasServerAlertInfo = true
             end
         end
 
-        if IsUsingLinkedLogin() then
-            self.shouldShowServerAlert = not self.serverAlert:IsHidden()
-            self.serverAlert:SetHidden(true)
-        end
+        self:RefreshLoginControlsVisibility()
     end
 
     local function OnEnterMaintenanceMode(eventCode, requeryTime)
@@ -265,8 +263,14 @@ function Login_Keyboard:GetControl()
     return self.control
 end
 
-function Login_Keyboard:SetLoginButtonHidden(isHidden)
-    return self.loginButton:SetHidden(isHidden)
+function Login_Keyboard:SetLoginControlsHidden(isHidden)
+    self.areLoginControlsHidden = isHidden
+    self:RefreshLoginControlsVisibility()
+end
+
+function Login_Keyboard:RefreshLoginControlsVisibility()
+    self.loginButton:SetHidden(self.areLoginControlsHidden)
+    self.serverAlert:SetHidden(self.areLoginControlsHidden or (not self.hasServerAlertInfo))
 end
 
 function Login_Keyboard:OnUpdate(control, timeSeconds)
