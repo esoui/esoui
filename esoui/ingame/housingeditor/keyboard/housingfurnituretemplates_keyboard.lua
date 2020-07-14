@@ -65,6 +65,10 @@ function ZO_HousingFurnitureTemplates_Keyboard_OnMouseEnter(control)
             WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
         end
 
+        if furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+            return -- TODO: for now?
+        end
+
         InitializeTooltip(ItemTooltip, control, RIGHT, -15, 0, LEFT)
         if furnitureObject.bagId and furnitureObject.slotIndex then
             ItemTooltip:SetBagItem(furnitureObject.bagId, furnitureObject.slotIndex)

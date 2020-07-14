@@ -115,7 +115,7 @@ local function OnKeybindLabelChanged(label, bindingText, key, mod1, mod2, mod3, 
     label.owner:AdjustBindingAnchors(not ZO_Keybindings_ShouldUseIconKeyMarkup(key))
 end
 
-function ZO_KeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPreferredKeybind, alwaysPreferGamepadMode)
+function ZO_KeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPreferredKeybind, alwaysPreferGamepadMode, showAsHold)
     local hadKeybind = self:GetKeybind() ~= nil
 
     self.keybind = keybind
@@ -128,7 +128,7 @@ function ZO_KeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPreferred
         if hadKeybind then
             ZO_Keybindings_UnregisterLabelForBindingUpdate(self.keyLabel)
         end
-        ZO_Keybindings_RegisterLabelForBindingUpdate(self.keyLabel, self.keybind, showUnbound, self.gamepadPreferredKeybind, OnKeybindLabelChanged, alwaysPreferGamepadMode)
+        ZO_Keybindings_RegisterLabelForBindingUpdate(self.keyLabel, self.keybind, showUnbound, self.gamepadPreferredKeybind, OnKeybindLabelChanged, alwaysPreferGamepadMode, showAsHold)
     else
         ZO_Keybindings_UnregisterLabelForBindingUpdate(self.keyLabel)
     end

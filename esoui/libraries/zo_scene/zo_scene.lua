@@ -473,12 +473,16 @@ function ZO_Scene:RejectHideScene()
     ClearHideSceneConfirmationState(self)
 end
 
+function ZO_Scene:SetInputPreferredMode(mode)
+    self.inputPreferredMode = mode
+end
+
 function ZO_Scene:WasShownInGamepadPreferredMode()
     return self.wasShownInGamepadPreferredMode
 end
 
 function ZO_Scene:WasRequestedToShowInGamepadPreferredMode()
-    return self.wasRequestedToShowInGamepadPreferredMode
+    return self.wasRequestedToShowInGamepadPreferredMode or self.inputPreferredMode == INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
 end
 
 function ZO_Scene:SetWasRequestedToShowInGamepadPreferredMode(gamepad)

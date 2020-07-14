@@ -254,7 +254,7 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
 
         local function OnChatChannelUpdated()
             local channelData, channelTarget = CHAT_ROUTER:GetCurrentChannelData()
-            self:SetChannel(channelData.id, channelTarget)
+            self:SetChannelInternal(channelData.id, channelTarget)
         end
 
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)

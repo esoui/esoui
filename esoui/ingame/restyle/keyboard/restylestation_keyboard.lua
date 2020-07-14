@@ -53,6 +53,11 @@ function ZO_RestyleStation_Keyboard:OnShown()
     if currentMode == RESTYLE_MODE_OUTFIT or currentMode == RESTYLE_MODE_EQUIPMENT then
         TriggerTutorial(TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN)
     end
+
+    if currentMode == RESTYLE_MODE_OUTFIT then
+        local outfitManipulator = self:GetCurrentSheet():GetCurrentOutfitManipulator()
+        outfitManipulator:UpdatePreviews()
+    end
 end
 
 function ZO_RestyleStation_Keyboard:OnHidden()

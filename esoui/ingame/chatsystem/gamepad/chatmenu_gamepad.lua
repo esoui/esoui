@@ -265,7 +265,7 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
     end
 
     CHAT_ROUTER:RegisterCallback("FormattedChatMessage", AddMessage)
-    CALLBACK_MANAGER:RegisterCallback("OnChatSetChannel", DirtyActiveChannel)
+    CALLBACK_MANAGER:RegisterCallback("OnChatChannelUpdated", DirtyActiveChannel)
     self.control:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_JOINED, OnGroupMemberJoined)
     self.control:RegisterForEvent(EVENT_GROUP_MEMBER_LEFT, OnGroupMemberLeft)

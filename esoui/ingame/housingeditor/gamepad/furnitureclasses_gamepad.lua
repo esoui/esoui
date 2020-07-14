@@ -1,3 +1,6 @@
+ZO_HOUSING_CATEGORY_PATHING_ICON_GAMEPAD = "EsoUI/Art/Housing/Gamepad/gp_housing_category_npc_pathing.dds"
+ZO_HOUSING_PATH_STARTING_NODE_ICON_GAMEPAD = "EsoUI/Art/Housing/Gamepad/gp_npc_pathing_start.dds"
+
 --
 --[[ ZO_HousingFurnitureList_Gamepad ]]--
 --
@@ -53,6 +56,10 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
         if statusIndicator then
             if data.isFromCrownStore and not data.furnitureObject.marketProductId then
                 statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS))
+            end
+
+            if data.isStartingPathNode then
+                statusIndicator:AddIcon(ZO_HOUSING_PATH_STARTING_NODE_ICON_GAMEPAD)
             end
 
             statusIndicator:Show()
@@ -382,7 +389,9 @@ do
     local function CreateCategoryEntryData(categoryData)
         local categoryId = categoryData:GetCategoryId()
         local gamepadIcon = ZO_NO_TEXTURE_FILE
-        if categoryId ~= ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
+        if categoryId == ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY then
+            gamepadIcon = ZO_HOUSING_CATEGORY_PATHING_ICON_GAMEPAD
+        elseif categoryId ~= ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
             gamepadIcon = GetFurnitureCategoryGamepadIcon(categoryId)
         end
         -- Avoiding zo_strformat for performance, this will get run for every category every time the number of entries could have changed
@@ -428,6 +437,7 @@ function ZO_HousingFurnitureList_Gamepad:BuildFurnitureEntry(furnitureObject)
     entry.isGemmable = furnitureObject:IsGemmable()
     entry.stolen = furnitureObject:IsStolen()
     entry.isFromCrownStore = furnitureObject:IsFromCrownStore()
+    entry.isStartingPathNode = furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and furnitureObject:IsStartingPathNode()
 
     if furnitureObject:GetDataType() == ZO_RECALLABLE_HOUSING_DATA_TYPE then
         entry:SetShowUnselectedSublabels(true)
@@ -521,6 +531,7 @@ end
 
 function ZO_HousingFurnitureList_Gamepad:OnFurnitureTargetChanged(list, targetData, oldTargetData)
     self:RefreshFurnitureTooltip()
+    self:UpdateCurrentKeybinds()
 end
 
 --Returns the text that is shown when the list has nothing in it

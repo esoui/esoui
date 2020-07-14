@@ -1,7 +1,3 @@
-local BARS_PADDING_X = 8
-local BAR1_TOP_PADDING_Y = 16
-local BAR2_BOTTOM_PADDING_Y = -2
-
 local FULL_ALPHA_VALUE = 1
 local FADED_ALPHA_VALUE = 0.4
 
@@ -295,12 +291,12 @@ end
 
 function UnitFramesManager:DisableGroupAndRaidFrames()
     -- Disable the raid frames
-    for unitTag, unitFrame in pairs(self.raidFrames) do
+    for _, unitFrame in pairs(self.raidFrames) do
         unitFrame:SetHiddenForReason("disabled", true)
     end
 
     -- Disable the group frames
-    for unitTag, unitFrame in pairs(self.groupFrames) do
+    for _, unitFrame in pairs(self.groupFrames) do
         unitFrame:SetHiddenForReason("disabled", true)
     end
 end
@@ -320,13 +316,11 @@ function UnitFramesManager:UpdateGroupAnchorFrames()
     else
         for subgroupIndex = 1, NUM_SUBGROUPS do
             local frameIsHidden = true -- Label starts out hidden...
-            local isLocalPlayerInSubgroup = false
             for groupMemberIndex = 1, SMALL_GROUP_SIZE_THRESHOLD do
                 local unitTag = GetGroupUnitTagByIndex(((subgroupIndex - 1) * SMALL_GROUP_SIZE_THRESHOLD) + groupMemberIndex)
                 if unitTag then
                     frameIsHidden = false
                     if AreUnitsEqual("player", unitTag) then
-                        isLocalPlayerInSubgroup = true
                         break -- Found a reason to show the label, and determined if this is the local player's subgroup, so bail out
                     end
                 end
@@ -769,9 +763,9 @@ local function SetUnitFrameTexture(frame, styleData, showOption)
     end
 end
 
-local function LayoutUnitFrameStatus(statusLabel, statusData, showStatus)
-    if(statusLabel) then
-        if(statusData) then
+local function LayoutUnitFrameStatus(statusLabel, statusData)
+    if statusLabel then
+        if statusData then
             statusData.anchor1:Set(statusLabel)
             statusData.anchor2:AddToControl(statusLabel)
             statusLabel:SetHeight(statusData.height)
@@ -1225,7 +1219,7 @@ end
 function UnitFrame:UpdateRank()
     if(self.rankIcon) then
         local unitTag = self:GetUnitTag()
-        local rank, subRank = GetUnitAvARank(unitTag)
+        local rank = GetUnitAvARank(unitTag)
 
         local showRank = rank ~= 0 or IsUnitPlayer(unitTag)
         if showRank then
@@ -1422,7 +1416,7 @@ end
 
 function UnitFrame:SetBarMouseInside(inside)
     self.healthBar:SetMouseInside(inside)
-    for powerIndex, powerBar in pairs(self.powerBars) do
+    for _, powerBar in pairs(self.powerBars) do
         powerBar:SetMouseInside(inside)
     end
 end
@@ -1437,7 +1431,7 @@ end
 
 function UnitFrame:SetBarTextMode(alwaysShow)
     self.healthBar:SetBarTextMode(alwaysShow)
-    for powerIndex, powerBar in pairs(self.powerBars) do
+    for _, powerBar in pairs(self.powerBars) do
         powerBar:SetBarTextMode(alwaysShow)
     end
 end
@@ -1514,21 +1508,10 @@ local function UpdateLeaderIndicator()
     end
 end
 
-local function DoGroupUpdate(eventCode)
+local function DoGroupUpdate()
     UpdateLeaderIndicator()
     UnitFrames:UpdateGroupAnchorFrames()
 end
-
-local function GetCastBar(unitTag)
-    local frame = UnitFrames:GetFrame(unitTag)
-    return frame and frame.castBar or nil
-end
-
-local unitTypesWhoUseCastInfo =
-{
-    [UNIT_REACTION_HOSTILE] = true,
-    [UNIT_REACTION_NEUTRAL] = true,
-}
 
 local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS = 
 {
@@ -1815,7 +1798,7 @@ function UnitFrame_HandleMouseReceiveDrag(frame)
     end
 end
 
-function UnitFrame_HandleMouseUp(frame, button, upInside)
+function UnitFrame_HandleMouseUp(frame, button)
     local unitTag = frame.m_unitTag
 
     if GetCursorContentType() ~= MOUSE_CONTENT_EMPTY then
@@ -1845,8 +1828,8 @@ function UnitFrame_HandleMouseExit(frame)
     end
 end
 
-local function RefreshGroups(eventCode)
-    DoGroupUpdate(eventCode)
+local function RefreshGroups()
+    DoGroupUpdate()
 
     for i = 1, GROUP_SIZE_MAX do
         ZO_UnitFrames_UpdateWindow(ZO_Group_GetUnitTagForGroupIndex(i))
@@ -1881,15 +1864,15 @@ function ZO_UnitFrames_IsTargetOfTargetEnabled()
 end
 
 local function RegisterForEvents()
-    local function OnTargetChanged(evt, unitTag)
+    local function OnTargetChanged()
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
     
-    local function OnUnitCharacterNameChanged(evt, unitTag)
+    local function OnUnitCharacterNameChanged(_, unitTag)
         ZO_UnitFrames_UpdateWindow(unitTag)
     end
 
-    local function OnReticleTargetChanged(evt)
+    local function OnReticleTargetChanged(_)
         ZO_UnitFrames_UpdateWindow("reticleover", UNIT_CHANGED)
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
@@ -1912,7 +1895,7 @@ local function RegisterForEvents()
     end
     ZO_MostRecentPowerUpdateHandler:New("UnitFrames", PowerUpdateHandlerFunction)
 
-    local function OnUnitCreated(evt, unitTag)
+    local function OnUnitCreated(_, unitTag)
         if(ZO_Group_IsGroupUnitTag(unitTag)) then
             ReportUnitChanged(unitTag)
         else
@@ -1920,7 +1903,7 @@ local function RegisterForEvents()
         end
     end
 
-    local function OnUnitDestroyed(evt, unitTag)
+    local function OnUnitDestroyed(_, unitTag)
         if(ZO_Group_IsGroupUnitTag(unitTag)) then
             ReportUnitChanged(unitTag)
         else
@@ -1928,7 +1911,7 @@ local function RegisterForEvents()
         end
     end
 
-    local function OnLevelUpdate(eventCode, unitTag, level)
+    local function OnLevelUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
         if(unitFrame) then
@@ -1940,7 +1923,7 @@ local function RegisterForEvents()
         UpdateLeaderIndicator()
     end
 
-    local function OnDispositionUpdate(eventCode, unitTag)
+    local function OnDispositionUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
         if(unitFrame) then
@@ -1948,7 +1931,7 @@ local function RegisterForEvents()
         end
     end
 
-    local function OnGroupSupportRangeUpdate(evt, unitTag, isNearby)
+    local function OnGroupSupportRangeUpdate(_, unitTag, isNearby)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
         if(unitFrame) then
@@ -1968,7 +1951,7 @@ local function RegisterForEvents()
         end
     end
 
-    local function OnGroupUpdate(eventCode)
+    local function OnGroupUpdate()
         --Pretty much anything can happen on a full group update so refresh everything
         UnitFrames:SetGroupSize(GetGroupSize())
         UnitFrames:DisableGroupAndRaidFrames()
@@ -1976,28 +1959,28 @@ local function RegisterForEvents()
         UnitFrames:ClearDirty()
     end
 
-    local function OnGroupMemberLeft(eventCode, characterName, reason, wasLocalPlayer, amLeader)
+    local function OnGroupMemberLeft(_, characterName, reason, wasLocalPlayer)
         if(wasLocalPlayer) then
-            RefreshGroups(eventCode)
+            RefreshGroups()
         end
     end
 
-    local function OnGroupMemberConnectedStateChanged(event, unitTag, isOnline)
+    local function OnGroupMemberConnectedStateChanged(_, unitTag, isOnline)
         UpdateStatus(unitTag, IsUnitDead(unitTag), isOnline)
     end
     
-    local function OnGroupMemberRoleChanged(event, unitTag, role)
-        local unitFrame = UnitFrames:GetFrame(unitTag)    
+    local function OnGroupMemberRoleChanged(_, unitTag)
+        local unitFrame = UnitFrames:GetFrame(unitTag)
         if unitFrame then
             unitFrame:UpdateAssignment()
         end
     end
 
-    local function OnUnitDeathStateChanged(event, unitTag, isDead)
+    local function OnUnitDeathStateChanged(_, unitTag, isDead)
         UpdateStatus(unitTag, isDead, IsUnitOnline(unitTag))
     end
 
-    local function OnRankPointUpdate(eventCode, unitTag)
+    local function OnRankPointUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
         if(unitFrame) then
@@ -2005,7 +1988,7 @@ local function RegisterForEvents()
         end
     end
 
-    local function OnChampionPointsUpdate(eventCode, unitTag)
+    local function OnChampionPointsUpdate(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
         if(unitFrame) then
@@ -2013,7 +1996,7 @@ local function RegisterForEvents()
         end    
     end
 
-    local function OnTitleUpdated(eventCode, unitTag)
+    local function OnTitleUpdated(_, unitTag)
         local unitFrame = UnitFrames:GetFrame(unitTag)
     
         if(unitFrame) then
@@ -2021,7 +2004,7 @@ local function RegisterForEvents()
         end    
     end
 
-    local function OnPlayerActivated(eventCode)
+    local function OnPlayerActivated()
         ZO_UnitFrames_UpdateWindow("reticleover", UNIT_CHANGED)
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     
@@ -2031,7 +2014,7 @@ local function RegisterForEvents()
         CreateGroups()
     end
 
-    local function OnTargetOfTargetEnabledChanged(enabled)
+    local function OnTargetOfTargetEnabledChanged()
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
 
@@ -2085,7 +2068,7 @@ local function RegisterForEvents()
 end
 
 function ZO_UnitFrames_Initialize()
-    local function OnAddOnLoaded(event, name)
+    local function OnAddOnLoaded(_, name)
         if name == "ZO_Ingame" then
             CalculateDynamicPlatformConstants()
             RegisterForEvents()

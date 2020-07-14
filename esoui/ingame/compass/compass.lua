@@ -254,7 +254,7 @@ end
 
 function Compass:SetAreaTexturePlatformTextures(areaTexture, pinType)
     local platformModifier = IsInGamepadPreferredMode() and "Gamepad/gp_" or ""
-    local pinType = pinType or areaTexture.pinType
+    pinType = pinType or areaTexture.pinType
     local pinTypeAssisted = ZO_MapPin.ASSISTED_PIN_TYPES[pinType] or pinType == MAP_PIN_TYPE_TRACKED_ANTIQUITY_DIG_SITE
     if pinTypeAssisted then
         areaTexture.left:SetTexture("EsoUI/Art/Compass/"..platformModifier.."areapin2frame_ends.dds")
@@ -336,6 +336,8 @@ function Compass:CreateAreaTexture(areaPinName, objectPool)
     end
 
     areaTexture.animationIn = animationIn
+    -- This will allow the OnPlay event to trigger when running PlayInstantlyToEnd on the animation
+    areaTexture.animationIn:SetSkipAnimationsBehindPlayheadOnInitialPlay(false)
 
     areaTexture.resetAlphaAnimation = animationIn:GetLastAnimation()
     areaTexture.resetAlphaAnimation:SetEndAlpha(IsInGamepadPreferredMode() and AREA_TEXTURE_RESTING_ALPHA_GAMEPAD or AREA_TEXTURE_RESTING_ALPHA_KEYBOARD)
@@ -734,6 +736,10 @@ do
                     for _, param2Entry in pairs(param1Entry) do
                         for _, animation in pairs(param2Entry) do
                             self:ApplyTemplateToAreaTexture(animation.areaTexture, template, restingAlpha)
+                            -- [ESO-671175] We need to force an OnPlay event to trigger so that the size function can be called
+                            -- to resize the animation to fit the appropriately shown compass for the current platform.
+                            -- Only animationIn type animations are added to the list being iterated through here.
+                            animation.areaTexture.animationIn:PlayInstantlyToEnd()
                         end
                     end
                 end

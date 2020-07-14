@@ -64,6 +64,8 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                             if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
                                 if targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE] then
                                     self:SetPrimaryResidence()
+                                elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] then
+                                    self:RestartPaths()
                                 end
                             elseif self.activePanel then
                                 self.owner:DeactivateCurrentList()
@@ -76,6 +78,8 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                             if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
                                 if targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE] then
                                     return self.primaryResidence ~= GetCurrentZoneHouseId()
+                                elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] then
+                                    return SHARED_FURNITURE:HasAnyPathNodes()
                                 end
                             elseif self.activePanel then
                                 return self.activePanel:GetNumPossibleEntries() > 0
@@ -341,14 +345,20 @@ function ZO_HousingFurnitureSettings_Gamepad:ShowDefaultAccessTooltip()
 end
 
 function ZO_HousingFurnitureSettings_Gamepad:ShowPrimaryResidenceTooltip()
-    local title = GetStringFromData(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_TEXT)
+    local title = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_TEXT)
     local body = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_TOOLTIP_TEXT)
     GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
 end
 
 function ZO_HousingFurnitureSettings_Gamepad:ShowHomeShowTooltip()
-    local title = GetStringFromData(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOMESHOW_TEXT)
+    local title = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOMESHOW_TEXT)
     local body = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOMESHOW_TOOLTIP_TEXT)
+    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
+end
+
+function ZO_HousingFurnitureSettings_Gamepad:ShowRestartPathsTooltip()
+    local title = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TEXT)
+    local body = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TOOLTIP_TEXT)
     GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
 end
 

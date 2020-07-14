@@ -53,7 +53,11 @@ function ZO_Provisioner:Initialize(control)
     
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
-            local defaults = { haveIngredientsChecked = true, haveSkillsChecked = true, }
+            local defaults =
+            {
+                haveIngredientsChecked = true,
+                haveSkillsChecked = true,
+            }
 
             self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "Provisioner", defaults)
 

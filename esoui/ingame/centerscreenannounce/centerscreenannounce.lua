@@ -968,13 +968,19 @@ do
             end
 
             -- Check the waiting Queue for any lingering events that need to be pushed
-            for i,entry in ipairs(self.waitingQueue) do
+            local indicesToRemove = {}
+            for i, entry in ipairs(self.waitingQueue) do
                 if timeNow > entry.nextUpdateTimeSeconds then
                     local eventId = entry.eventId
-                    table.remove(self.waitingQueue, i)
+                    table.insert(indicesToRemove, i)
                     local handler = eventHandlers[eventId]
                     self:AddMessageWithParams(handler(unpack(entry.eventData)))
                 end
+            end
+
+            --Wait until the end to remove the newly queued entries, so we don't accidentally skip anything
+            for _, index in ZO_NumericallyIndexedTableReverseIterator(indicesToRemove) do
+                table.remove(self.waitingQueue, index)
             end
         end
 

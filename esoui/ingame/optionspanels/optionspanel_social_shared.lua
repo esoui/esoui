@@ -80,9 +80,11 @@ end
 
 function ZO_OptionsPanel_Social_ResetTextSizeToDefault(control)
     KEYBOARD_CHAT_SYSTEM:ResetFontSizeToDefault()
-    -- Gamepad does not pass in a control when resetting
-    -- So skip attempting to update the control itself
-    if not IsInGamepadPreferredMode() then
+    -- ESO-672217: We need to verify that the control exist
+    -- since we could have already switched out of gamepad mode
+    -- during the reset but the reset was prompted from the gamepad
+    -- menu where a nil control is passed in.
+    if control then
         ZO_OptionsPanel_Social_TextSizeOnShow(control)
     end
 end
@@ -122,9 +124,11 @@ end
 
 function ZO_OptionsPanel_Social_ResetMinAlphaToDefault(control)
     KEYBOARD_CHAT_SYSTEM:ResetMinAlphaToDefault()
-    -- Gamepad does not pass in a control when resetting
-    -- So skip attempting to update the control itself
-    if not IsInGamepadPreferredMode() then
+    -- ESO-672217: We need to verify that the control exist
+    -- since we could have already switched out of gamepad mode
+    -- during the reset but the reset was prompted from the gamepad
+    -- menu where a nil control is passed in.
+    if control then
         ZO_OptionsPanel_Social_MinAlphaOnShow(control)
     end
 end

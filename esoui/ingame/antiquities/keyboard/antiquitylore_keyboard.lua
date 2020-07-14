@@ -319,6 +319,13 @@ function ZO_AntiquityLore_Keyboard:ShowAntiquitySet(antiquitySetId)
     SCENE_MANAGER:Show("antiquityLoreKeyboard")
 end
 
+function ZO_AntiquityLore_Keyboard:SelectTreeNodeControl(control)
+    if control and control.treeNode then
+        self.loreEntryTree:SelectNode(control.treeNode)
+        ZO_Scroll_ScrollControlIntoCentralView(self.loreEntryTreeScroll, control.treeNode.control)
+    end
+end
+
 function ZO_AntiquityLore_Keyboard:ScrollLoreEntries(directionMagnitude)
     self.accumulatedScrollMagnitude = self.accumulatedScrollMagnitude + directionMagnitude
 
@@ -352,6 +359,10 @@ end
 
 function ZO_AntiquityLoreReader_OnMouseWheel(control, delta, ctrl, alt, shift)
     ANTIQUITY_LORE_KEYBOARD:ScrollLoreEntries(delta)
+end
+
+function ZO_AntiquityLoreEntry_OnClicked(control)
+    ANTIQUITY_LORE_KEYBOARD:SelectTreeNodeControl(control)
 end
 
 function ZO_AntiquityLore_IconHeader_UpdateSize(control)
@@ -388,10 +399,4 @@ end
 
 function ZO_AntiquityLoreReader_Keyboard_OnInitialized(control)
     ANTIQUITY_LORE_READER_KEYBOARD = ZO_AntiquityLoreReader_Keyboard:New(control)
-end
-
-function ZO_AntiquityLoreEntry_OnClicked(control)
-    if control.treeNode then
-        ANTIQUITY_LORE_KEYBOARD.loreEntryTree:SelectNode(control.treeNode)
-    end
 end

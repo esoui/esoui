@@ -421,10 +421,10 @@ function ZO_GamepadSmithingImprovement:InitializeKeybindStripDescriptors()
 
         -- Item Options
         {
-            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
+            name = GetString(SI_GAMEPAD_CRAFTING_OPTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                self:ShowItemActions()
+                self:ShowOptionsMenu()
             end,
             visible = function()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory:CurrentSelection() ~= nil
@@ -538,14 +538,17 @@ function ZO_GamepadSmithingImprovement:RemoveKeybinds()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_GamepadSmithingImprovement:ShowItemActions()
+function ZO_GamepadSmithingImprovement:ShowOptionsMenu()
     local dialogData = 
     {
         targetData = self.inventory:CurrentSelection(),
         itemActions = self.itemActions,
+        ignoreTooltips = true,
     }
-
-    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
+    if not self.craftingOptionsDialogGamepad then
+        self.craftingOptionsDialogGamepad = ZO_CraftingOptionsDialogGamepad:New()
+    end
+    self.craftingOptionsDialogGamepad:ShowOptionsDialog(dialogData)
 end
 
 do

@@ -566,15 +566,16 @@ function ZO_Achievements_Gamepad:PopulateCategories()
     -- Populate actual categories.
     for categoryIndex=1, GetNumAchievementCategories() do
         local categoryName, _, _, earnedPoints, totalPoints = GetAchievementCategoryInfo(categoryIndex)
-        local gamepadIcon = GetAchievementCategoryGamepadIcon(categoryIndex)
+        if totalPoints > 0 then
+            local gamepadIcon = GetAchievementCategoryGamepadIcon(categoryIndex)
+            local entryData = ZO_GamepadEntryData:New(zo_strformat(categoryName), gamepadIcon)
+            entryData:SetIconTintOnSelection(true)
+            entryData:SetBarValues(MIN_POINTS, totalPoints, earnedPoints)
+            entryData.categoryIndex = categoryIndex
+            entryData.canEnter = true
 
-        local entryData = ZO_GamepadEntryData:New(zo_strformat(categoryName), gamepadIcon)
-        entryData:SetIconTintOnSelection(true)
-        entryData:SetBarValues(MIN_POINTS, totalPoints, earnedPoints)
-        entryData.categoryIndex = categoryIndex
-        entryData.canEnter = true
-
-        self.itemList:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", entryData)
+            self.itemList:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", entryData)
+        end
     end
 end
 

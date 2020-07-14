@@ -315,6 +315,10 @@ function ZO_Smithing:UpdateSharedKeybindStrip()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
+function ZO_Smithing:GetResearchPanel()
+    return self.researchPanel
+end
+
 function ZO_Smithing_Initialize(control)
     SMITHING = ZO_Smithing:New(control)
 

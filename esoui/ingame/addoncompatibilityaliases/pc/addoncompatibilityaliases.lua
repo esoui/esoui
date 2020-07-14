@@ -810,6 +810,9 @@ function ZO_CrownCratesStateMachine:IsCurrentStateByName(stateName)
 end
 
 HousingEditorPushFurniture = HousingEditorPushSelectedObject
+HousingEditorMoveFurniture = HousingEditorMoveSelectedObject
+HousingEditorRotateFurniture = HousingEditorRotateSelectedObject
+HousingEditorStraightenFurniture = HousingEditorStraightenSelectedObject
 
 function ZO_ItemPreview_Shared:RemoveFragmentImmediately(fragment)
     SCENE_MANAGER:RemoveFragmentImmediately(fragment)
@@ -833,6 +836,10 @@ ITEM_QUALITY_MAGIC = ITEM_FUNCTIONAL_QUALITY_MAGIC
 ITEM_QUALITY_ARCANE = ITEM_FUNCTIONAL_QUALITY_ARCANE
 ITEM_QUALITY_ARTIFACT = ITEM_FUNCTIONAL_QUALITY_ARTIFACT
 ITEM_QUALITY_LEGENDARY = ITEM_FUNCTIONAL_QUALITY_LEGENDARY
+ITEM_QUALITY_MIN_VALUE = ITEM_FUNCTIONAL_QUALITY_MIN_VALUE
+ITEM_QUALITY_MAX_VALUE = ITEM_FUNCTIONAL_QUALITY_MAX_VALUE
+ITEM_QUALITY_ITERATION_BEGIN = ITEM_FUNCTIONAL_QUALITY_ITERATION_BEGIN
+ITEM_QUALITY_ITERATION_END = ITEM_FUNCTIONAL_QUALITY_ITERATION_END
 
 GetItemQuality = GetItemFunctionalQuality
 GetItemLinkQuality = GetItemLinkFunctionalQuality
@@ -858,3 +865,7 @@ end
 ZO_HelpManager = ZO_Help_Keyboard
 -- Renamed event to be more consistent with our naming conventions
 EVENT_HELP_SHOW_SPECIFIC_PAGE = EVENT_SHOW_SPECIFIC_HELP_PAGE
+
+function ResetHousingEditorTrackedFurnitureId()
+    ResetHousingEditorTrackedFurnitureOrNode()
+end

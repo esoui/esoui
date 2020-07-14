@@ -95,6 +95,7 @@ ZO_CATEGORY_LAYOUT_INFO =
         disableWhenReviving = true,
         disableWhenSwimming = true,
         disableWhenWerewolf = true,
+        disableWhenPassenger = true,
 
         indicators = function()
             if GetNumOwnedCrownCrateTypes() > 0 then
@@ -849,6 +850,8 @@ do
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_SWIMMING
         elseif MAIN_MENU_MANAGER:IsPlayerWerewolf() and categoryInfo.disableWhenWerewolf then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF
+        elseif MAIN_MENU_MANAGER:IsPlayerPassenger() and categoryInfo.disableWhenPassenger then
+            return MAIN_MENU_CATEGORY_DISABLED_WHILE_PASSENGER
         else
             return MAIN_MENU_CATEGORY_ENABLED
         end
@@ -868,6 +871,8 @@ do
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_SWIMMING)
         elseif categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF then
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_WEREWOLF)
+        elseif categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_PASSENGER then
+            ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_PASSENGER)
         else
             if(categoryLayoutInfo.visible == nil or categoryLayoutInfo.visible()) then
                 local categoryInfo = self.categoryInfo[category]

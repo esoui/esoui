@@ -1,7 +1,35 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_SmithingExtractionPanel" virtual="true">
-            <Controls>
+            <Controls>                
+                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate">
+                    <Controls>
+                        <Button name="$(parent)IncludeBanked" inherits="ZO_CheckButton">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="10" />
+                            
+                            <OnMouseEnter>
+                                ZO_SmithingExtraction_IncludeBankedItemsOnMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_SmithingExtraction_FilterOnMouseExit(self)
+                            </OnMouseExit>
+                        </Button>
+
+                        <Control name="$(parent)ButtonDivider" inherits="ZO_InventoryFilterDivider">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)IncludeBanked" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="14" />
+                        </Control>
+                        
+                        <Control name="$(parent)SortBy" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ButtonDivider" relativePoint="BOTTOMLEFT" offsetX="-13" />
+                        </Control>
+                        
+                        <Control name="$(parent)Backpack" override="true">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMRIGHT" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
                 <Control name="$(parent)SlotContainer">
                     <Dimensions x="512" y="256" />
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-100"/>
@@ -23,8 +51,6 @@
                         </Button>
                     </Controls>
                 </Control>
-
-                <Control name="$(parent)Inventory" inherits="ZO_CraftingInventoryTemplate" />
             </Controls>
         </Control>
         <Control name="ZO_SmithingRefinementPanel" virtual="true">

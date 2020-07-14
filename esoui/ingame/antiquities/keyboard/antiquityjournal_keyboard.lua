@@ -1,5 +1,7 @@
 local MAX_ICONS_PER_ROW = 7
 
+ZO_ANTIQUITY_JOURNAL_SCRYABLE_DIVIDER_HEADER_OFFSET_Y = 12
+
 -- Antiquity Tile Base
 
 ZO_AntiquityTileBase_Keyboard = ZO_Object:Subclass()
@@ -552,9 +554,15 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
         end
         self.difficulty:SetHidden(false)
 
-        local zoneName = GetZoneNameById(tileData:GetZoneId())
-        self.zoneLabel:SetText(zo_strformat(SI_ANTIQUITY_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName)))
-        self.zoneLabel:SetHidden(false)
+        local zoneId = tileData:GetZoneId()
+        --If the zone id is 0, it means that there is no zone to display
+        if zoneId ~= 0 then
+            local zoneName = GetZoneNameById(zoneId)
+            self.zoneLabel:SetText(zo_strformat(SI_ANTIQUITY_ZONE, ZO_SELECTED_TEXT:Colorize(zoneName)))
+            self.zoneLabel:SetHidden(false)
+        else
+            self.zoneLabel:SetHidden(true)
+        end
 
         local isLeadNearingExpiration, leadTimeRemaining = self.tileData:GetLeadExpirationStatus()
         if isLeadNearingExpiration then
@@ -741,11 +749,21 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     self.categories = self.control:GetNamedChild("ContentsCategories")
     self.categoryTree = ZO_Tree:New(self.categories:GetNamedChild("ScrollChild"), 0, -10, 290)
 
-    local function BaseTreeHeaderIconSetup(control, data, open)
+    local function UpdateSize_Divided(control)
+        local textWidth, textHeight = control.text:GetTextDimensions()
+        local textureHeight = control:GetNamedChild("DividerTexture"):GetHeight()
+        local height = textHeight + textureHeight + ZO_ANTIQUITY_JOURNAL_SCRYABLE_DIVIDER_HEADER_OFFSET_Y + ZO_TREE_ENTRY_ICON_HEADER_TEXT_PADDING_Y * 2
+        local width = textWidth + ZO_TREE_ENTRY_ICON_HEADER_TEXT_OFFSET_X
+        control:SetDimensions(width, height)
+    end
+
+    local function BaseTreeHeaderIconSetup(control, data, open, updateSizeFunction)
         local normalIcon, pressedIcon, mousedOverIcon = data:GetKeyboardIcons()
         control.icon:SetTexture(open and pressedIcon or normalIcon)
         control.iconHighlight:SetTexture(mousedOverIcon)
-        ZO_IconHeader_Setup(control, open)
+        local ENABLED = true
+        local DISABLE_SCALING = false
+        ZO_IconHeader_Setup(control, open, ENABLED, DISABLE_SCALING, updateSizeFunction)
     end
 
     local function BaseTreeHeaderSetup(node, control, data, open)
@@ -766,12 +784,24 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
         BaseTreeHeaderSetup(node, control, data, open)
     end
 
+    local function TreeHeaderSetup_Divided(node, control, data, open)
+        control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+        control.text:SetText(data:GetName())
+        BaseTreeHeaderIconSetup(control, data, open, UpdateSize_Divided)
+        self:UpdateCategoryNodeStatusIcon(node)
+    end
+
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
         control:SetSelected(selected)
         if selected and (not reselectingDuringRebuild or self.forceUpdateContentOnCategoryReselect) then
             local saveExpanded = reselectingDuringRebuild
             self:OnCategorySelected(data, saveExpanded)
         end
+    end
+
+    local function TreeEntryOnSelected_Divided(control, data, selected, reselectingDuringRebuild)
+        TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
+        BaseTreeHeaderIconSetup(control, data, selected, UpdateSize_Divided)
     end
 
     local function TreeEntryOnSelected_Childless(control, data, selected, reselectingDuringRebuild)
@@ -798,7 +828,7 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     local CHILD_SPACING = 0
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconHeader", TreeHeaderSetup_Child, nil, TreeEqualityFunction, CHILD_INDENT, CHILD_SPACING)
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
-    self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconDividedHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
+    self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconDividedHeader", TreeHeaderSetup_Divided, TreeEntryOnSelected_Divided, TreeEqualityFunction)
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_SubCategory", TreeEntrySetup, TreeEntryOnSelected, TreeEqualityFunction)
     self.categoryTree:SetExclusive(true)
     self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")

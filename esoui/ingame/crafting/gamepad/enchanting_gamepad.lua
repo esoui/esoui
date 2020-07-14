@@ -136,6 +136,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
     local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadEnchantingTopLevelSkillInfo)
 
     GAMEPAD_ENCHANTING_MODE_SCENE_ROOT = ZO_InteractScene:New(self.mainSceneName, SCENE_MANAGER, self.enchantingStationInteraction)
+    GAMEPAD_ENCHANTING_MODE_SCENE_ROOT:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_ENCHANTING_MODE_SCENE_ROOT:AddFragment(skillLineXPBarFragment)
     GAMEPAD_ENCHANTING_MODE_SCENE_ROOT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -181,6 +182,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
     end
 
     GAMEPAD_ENCHANTING_CREATION_SCENE = ZO_InteractScene:New("gamepad_enchanting_creation", SCENE_MANAGER, self.enchantingStationInteraction)
+    GAMEPAD_ENCHANTING_CREATION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_ENCHANTING_CREATION_SCENE:AddFragment(skillLineXPBarFragment)
     GAMEPAD_ENCHANTING_CREATION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -193,6 +195,7 @@ function ZO_GamepadEnchanting:InitializeEnchantingScenes()
     end)
 
     GAMEPAD_ENCHANTING_EXTRACTION_SCENE = ZO_InteractScene:New("gamepad_enchanting_extraction", SCENE_MANAGER, self.enchantingStationInteraction)
+    GAMEPAD_ENCHANTING_EXTRACTION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_ENCHANTING_EXTRACTION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
     GAMEPAD_ENCHANTING_EXTRACTION_SCENE:AddFragment(skillLineXPBarFragment)
         if newState == SCENE_SHOWING then

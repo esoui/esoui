@@ -22,17 +22,32 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
         keybind = "UI_SHORTCUT_PRIMARY",
         callback =  function() 
                         local targetData = self.furnitureList.list:GetTargetData()
-                        ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(targetData.furnitureObject)
+                        if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                            ZO_HousingFurnitureBrowser_Base.SelectNodeForReplacement(targetData.furnitureObject)
+                        else
+                            ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(targetData.furnitureObject)
+                        end
                         SCENE_MANAGER:HideCurrentScene()
                     end,
     })
 
     self:AddFurnitureListKeybind({    
-        name =  GetString(SI_HOUSING_EDITOR_PUT_AWAY),
+        name =  function()
+                    local targetData = self.furnitureList.list:GetTargetData()
+                    if targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                        return GetString(SI_HOUSING_EDITOR_PATH_REMOVE_NODE)
+                    else
+                        return GetString(SI_HOUSING_EDITOR_PUT_AWAY)
+                    end
+                end,
         keybind = "UI_SHORTCUT_SECONDARY",
         callback =  function() 
                         local targetData = self.furnitureList.list:GetTargetData()
-                        ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(targetData.furnitureObject)
+                        if targetData.furnitureObject:GetDataType() == ZO_RECALLABLE_HOUSING_DATA_TYPE then
+                            ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(targetData.furnitureObject)
+                        else
+                            ZO_HousingFurnitureBrowser_Base.PutAwayNode(targetData.furnitureObject)
+                        end
                     end,
     })
 
@@ -43,6 +58,28 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
             local targetData = self.furnitureList.list:GetTargetData()
             SHARED_FURNITURE:SetPlayerWaypointTo(targetData.furnitureObject)
         end,
+        enabled = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if not targetData then
+                return false
+            end
+            local dataType = targetData.furnitureObject:GetDataType()
+            return dataType == ZO_RECALLABLE_HOUSING_DATA_TYPE or dataType == ZO_HOUSING_PATH_NODE_DATA_TYPE
+        end
+    })
+
+    self:AddFurnitureListKeybind({
+        name =  GetString(SI_HOUSING_FURNITURE_SET_STARTING_NODE),
+        keybind = "HOUSING_EDITOR_QUINARY_ACTION",
+        order = 50,
+        callback =  function() 
+                        local targetData = self.furnitureList.list:GetTargetData()
+                        ZO_HousingFurnitureBrowser_Base.SetAsStartingNode(targetData.furnitureObject)
+                    end,
+        visible =   function()
+                        local targetData = self.furnitureList.list:GetTargetData()
+                        return targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and not targetData.furnitureObject:IsStartingPathNode()
+                    end,
     })
 end
 

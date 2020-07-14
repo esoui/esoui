@@ -11,7 +11,7 @@ function LoginManager_Keyboard:Initialize()
 
     local function FilterMethodCallback(method)
         return function(_, ...)
-            if self:IsLoginSceneShowing() then
+            if self:IsLoginSceneShowing() or ZO_Dialogs_IsShowing("LOGIN_QUEUED") then
                 -- calling self.method(self) is the same as calling self:method()
                 return method(self, ...)
             end
@@ -204,10 +204,10 @@ local function GetLoginQueueApproximateWaitTime(waitTime, queuePosition)
     -- if our position increases, the ETA we have "locked" is no longer valid
     if not currentLoginQueueWaitTime or queuePosition > lastQueuePosition then
         currentLoginQueueWaitTime = zo_max(waitTime * 1000, 1000) -- minimum wait time is that last second...
-        lastQueuePosition = queuePosition
     else
         currentLoginQueueWaitTime = zo_min(currentLoginQueueWaitTime, zo_max(waitTime * 1000, 1000))
     end
+    lastQueuePosition = queuePosition
 
     return currentLoginQueueWaitTime
 end

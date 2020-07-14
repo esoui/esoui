@@ -16,11 +16,8 @@ function ZO_Loot_Shared:New(...)
     return loot
 end
 
-function ZO_Loot_Shared:Initialize(control)
-    self.control = control
-
+function ZO_Loot_Shared:Initialize()
     local function UpdateLootWindow()
-
         local name, targetType, actionName, isOwned = GetLootTargetInfo()
         if name ~= "" then
             if targetType == INTERACT_TARGET_TYPE_ITEM then
@@ -102,8 +99,104 @@ function ZO_Loot_Shared:GetLootCurrencyInformation()
     return currencyInfo
 end
 
+do
+    local STOLEN = true
+
+    local LOOT_SORT_ORDER_CURRENCY = 0
+    local LOOT_SORT_ORDER_COLLECTIBLE = 1
+    local LOOT_SORT_ORDER_ITEM = 2
+
+    local sortKeys =
+    {
+        isStolen = { tiebreaker = "sortOrder" },
+        sortOrder = { tiebreaker = "displayQuality", tieBreakerSortOrder = ZO_SORT_ORDER_DOWN },
+        displayQuality = { tiebreaker = "sortName", tieBreakerSortOrder = ZO_SORT_ORDER_UP },
+        sortName = { tiebreaker = "lootId", caseInsensitive = true },
+        lootId = { }
+    }
+    local function LootSortFunction(left, right)
+        return ZO_TableOrderingFunction(left, right, "isStolen", sortKeys, ZO_SORT_ORDER_UP)
+    end
+
+    local function CreateCurrencyLootData(currencyType, currencyAmount, isStolen)
+        local formattedName
+        if IsInGamepadPreferredMode() then
+            local IS_UPPER = false
+            formattedName = GetCurrencyName(currencyType, IsCountSingularForm(currencyAmount), IS_UPPER)
+        else
+            formattedName = zo_strformat(SI_LOOT_CURRENCY_FORMAT, ZO_Currency_FormatPlatform(currencyType, currencyAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+        end
+        local IS_PLURAL = false
+        local IS_UPPER = false
+        local sortName = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)
+        local currencyData =
+        {
+            currencyType = currencyType,
+            currencyAmount = currencyAmount,
+            name = formattedName,
+            sortName = sortName,
+            count = 1,
+            displayQuality = ITEM_DISPLAY_QUALITY_NORMAL,
+            isStolen = isStolen,
+            sortOrder = LOOT_SORT_ORDER_CURRENCY,
+            lootId = -1,
+        }
+
+        return currencyData
+    end
+
+    function ZO_Loot_Shared:GetSortedLootData()
+        local lootData = {}
+
+        local lootCurrencyInfo = self:GetLootCurrencyInformation()
+        for currencyType, currencyInfo in pairs(lootCurrencyInfo) do
+            local nonStolenCurrencyAmount = currencyInfo.currencyAmount
+            if nonStolenCurrencyAmount > 0 then
+                local currencyData = CreateCurrencyLootData(currencyType, nonStolenCurrencyAmount, not STOLEN)
+                table.insert(lootData, currencyData)
+            end
+
+            local stolenCurrencyAmount = currencyInfo.stolenCurrencyAmount
+            if stolenCurrencyAmount > 0 then
+                local currencyData = CreateCurrencyLootData(currencyType, stolenCurrencyAmount, STOLEN)
+                table.insert(lootData, currencyData)
+            end
+        end
+
+        local numLootItems = GetNumLootItems()
+        for i = 1, numLootItems do
+            local lootId, name, icon, count, displayQuality, value, isQuest, isStolen, lootType = GetLootItemInfo(i)
+            local formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
+            local sortOrder = lootType == LOOT_TYPE_COLLECTIBLE and LOOT_SORT_ORDER_COLLECTIBLE or LOOT_SORT_ORDER_ITEM
+            local itemData =
+            {
+                lootId = lootId,
+                name = formattedName,
+                sortName = formattedName,
+                icon = icon,
+                count = count,
+                displayQuality = displayQuality,
+                -- quality is deprecated, included here for addon backwards compatibility
+                quality = displayQuality,
+                value = value,
+                isQuest = isQuest,
+                isStolen = isStolen,
+                -- itemType has been lootType for a long time, but we'll keep the tradition alive for compatibility
+                itemType = lootType,
+                sortOrder = sortOrder,
+            }
+
+            table.insert(lootData, itemData)
+        end
+
+        table.sort(lootData, LootSortFunction)
+
+        return lootData
+    end
+end
+
 --[[ Globals ]]--
-LOOT_SHARED = ZO_Loot_Shared:New(control)
+LOOT_SHARED = ZO_Loot_Shared:New()
 
 function ZO_PlayMonsterLootSound(isOpen)
     local isMonster = IsGameCameraInteractableUnitMonster()

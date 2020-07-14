@@ -4,13 +4,57 @@ function ZO_SmithingExtraction:New(...)
     return ZO_SharedSmithingExtraction.New(self, ...)
 end
 
-function ZO_SmithingExtraction:Initialize(control, owner, refinementOnly)
+function ZO_SmithingExtraction:Initialize(control, owner, isRefinementOnly)
     local slotContainer = control:GetNamedChild("SlotContainer")
     self.control = control
-    ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), slotContainer:GetNamedChild("ExtractLabel"), owner, refinementOnly)
+    ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), slotContainer:GetNamedChild("ExtractLabel"), owner, isRefinementOnly)
 
-    self.inventory = ZO_SmithingExtractionInventory:New(self, self.control:GetNamedChild("Inventory"), refinementOnly)
+    self.inventory = ZO_SmithingExtractionInventory:New(self, self.control:GetNamedChild("Inventory"), isRefinementOnly)
     self:InitExtractionSlot("smithing")
+
+    if not isRefinementOnly then
+        self.includeBankedItemsCheckbox = self.inventory.control:GetNamedChild("IncludeBanked")
+        self:InitializeFilters()
+        local function OnAddOnLoaded(event, name)
+            if name == "ZO_Ingame" then
+                self:SetupSavedVars()
+                self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+            end
+        end
+        self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+    end
+end
+
+function ZO_SmithingExtraction:InitializeFilters()
+    local function OnFilterChanged()
+        self:OnFilterChanged(ZO_CheckButton_IsChecked(self.includeBankedItemsCheckbox))
+    end
+
+    ZO_CheckButton_SetToggleFunction(self.includeBankedItemsCheckbox, OnFilterChanged)
+    ZO_CheckButton_SetLabelText(self.includeBankedItemsCheckbox, GetString(SI_CRAFTING_INCLUDE_BANKED))
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.includeBankedItemsCheckbox)
+    
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
+        ZO_CheckButton_SetCheckState(self.includeBankedItemsCheckbox, self.savedVars.includeBankedItemsChecked)
+    end)
+end
+
+function ZO_SmithingExtraction:SetupSavedVars()
+    local defaults =
+    {
+        includeBankedItemsChecked = true,
+    }
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "SmithingExtraction", defaults)
+    ZO_CheckButton_SetCheckState(self.includeBankedItemsCheckbox, self.savedVars.includeBankedItemsChecked)
+end
+
+function ZO_SmithingExtraction_IncludeBankedItemsOnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_INCLUDE_BANKED_TOOLTIP))
+end
+
+function ZO_SmithingExtraction_FilterOnMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end
 
 function ZO_SmithingExtraction:SetCraftingType(craftingType, oldCraftingType, isCraftingTypeDifferent)
@@ -37,6 +81,14 @@ function ZO_SmithingExtraction:OnFilterChanged()
     if deconstructionType then
         self.extractionSlot:SetMultipleItemsTexture(ZO_CraftingUtils_GetMultipleItemsTextureFromSmithingDeconstructionType(deconstructionType))
     end
+
+	if not self:IsInRefineMode() then
+		local includeBankedItemsChecked = ZO_CheckButton_IsChecked(self.includeBankedItemsCheckbox)
+		if self.savedVars.includeBankedItemsChecked ~= includeBankedItemsChecked then
+			self.savedVars.includeBankedItemsChecked = includeBankedItemsChecked
+			self.inventory:PerformFullRefresh()
+		end
+	end
 end
 
 ZO_SmithingRefinement = ZO_SmithingExtraction:Subclass()
@@ -119,12 +171,12 @@ function ZO_SmithingExtractionInventory:New(...)
     return ZO_CraftingInventory.New(self, ...)
 end
 
-function ZO_SmithingExtractionInventory:Initialize(owner, control, refinementOnly, ...)
+function ZO_SmithingExtractionInventory:Initialize(owner, control, isRefinementOnly, ...)
     ZO_CraftingInventory.Initialize(self, control, ...)
 
     self.owner = owner
 
-    if refinementOnly then
+    if isRefinementOnly then
         self:SetFilters{
             self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_RAW_MATERIALS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_RAW_MATERIALS), "EsoUI/Art/Inventory/inventory_tabIcon_crafting_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_crafting_disabled.dds"),
         }
@@ -190,7 +242,9 @@ function ZO_SmithingExtractionInventory:Refresh(data)
     if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
         validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
     else
-        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+        local DONT_USE_WORN_BAG = false
+        local excludeBanked = not self.owner.savedVars.includeBankedItemsChecked
+        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
     end
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 

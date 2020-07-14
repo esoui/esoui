@@ -868,7 +868,7 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
         local countText = ""
         if lootType == LOOT_TABLE_ENTRY_TYPE_CURRENCY then
             name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(id))
-            icon = ZO_Currency_GetPlatformCurrencyIcon(id)
+            icon = ZO_Currency_GetPlatformCurrencyLootIcon(id)
             local USE_SHORT_FORMAT = true
             countText = ZO_CurrencyControl_FormatCurrency(count, USE_SHORT_FORMAT)
         elseif lootType == LOOT_TABLE_ENTRY_TYPE_ITEM then

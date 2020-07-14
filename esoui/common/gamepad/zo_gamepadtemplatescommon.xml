@@ -329,6 +329,14 @@
                 </Button>
             </Controls>
         </Control>
+
+        <Control name="ZO_CheckBoxTemplate_WithPadding_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
+            <Controls>
+                <Button name="$(parent)CheckBox" override="true">
+                    <Anchor point="LEFT" offsetX="48"/>
+                </Button>
+            </Controls>
+        </Control>
         
         <Control name="ZO_CheckBoxTemplate_Pregame_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
             <OnInitialized>

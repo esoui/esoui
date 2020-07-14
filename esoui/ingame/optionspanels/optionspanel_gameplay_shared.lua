@@ -226,7 +226,17 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             },
             gamepadIsEnabledCallback = function()
                                             return tonumber(GetSetting(SETTING_TYPE_LOOT,LOOT_SETTING_AUTO_LOOT)) ~= 0
-                                        end
+                                       end
+        },
+        --Options_Gameplay_PreventStealingPlaced
+        [LOOT_SETTING_PREVENT_STEALING_PLACED] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_LOOT,
+            settingId = LOOT_SETTING_PREVENT_STEALING_PLACED,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_LOOT_PREVENT_STEALING_PLACED,
+            tooltipText = SI_INTERFACE_OPTIONS_LOOT_PREVENT_STEALING_PLACED_TOOLTIP,
         },
         --Options_Gameplay_AutoAddToCraftBag
         [LOOT_SETTING_AUTO_ADD_TO_CRAFT_BAG] =

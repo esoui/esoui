@@ -144,7 +144,14 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_LOOT,
     settingId = LOOT_SETTING_AUTO_LOOT_STOLEN,
     header = SI_GAMEPLAY_OPTIONS_ITEMS,
-    indented = true
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_PreventStealingPlaced",
+    settingType = SETTING_TYPE_LOOT,
+    settingId = LOOT_SETTING_PREVENT_STEALING_PLACED,
+    header = SI_GAMEPLAY_OPTIONS_ITEMS,
 })
 
 panelBuilder:AddSetting({

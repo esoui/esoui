@@ -80,6 +80,23 @@ function ZO_OptionsPanel_Video_CustomScale_RefreshEnabled(control)
     end
 end
 
+do
+    local DELAY_CHANGES_MS = 500
+    local g_applyChangesId = nil
+    EVENT_MANAGER:RegisterForEvent("ZO_Options_GamepadCustomScaleChanged", EVENT_INTERFACE_SETTING_CHANGED, function(_, systemType, settingId)
+        if systemType == SETTING_TYPE_UI and settingId == UI_SETTING_GAMEPAD_CUSTOM_SCALE then
+            -- Deliberately delay applying the custom scale to avoid artifacts caused by manipulating the slider during a resize
+            if g_applyChangesId then
+                zo_removeCallLater(g_applyChangesId)
+            end
+            g_applyChangesId = zo_callLater(function()
+                ApplySettings()
+                g_applyChangesId = nil
+            end, DELAY_CHANGES_MS)
+        end
+    end)
+end
+
 function ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting()
     if IsConsoleUI() then
         local numValidOptions = 0
@@ -336,6 +353,19 @@ local ZO_OptionsPanel_Video_ControlData =
             mustPushApply = true,
             exists = ZO_IsPCUI,
         },
+        --Options_Video_Clutter_2D_Quality
+        [GRAPHICS_SETTING_CLUTTER_2D_QUALITY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CLUTTER_2D_QUALITY,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D_QUALITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D_QUALITY_TOOLTIP,
+            valid = { CLUTTER_QUALITY_OFF, CLUTTER_QUALITY_LOW, CLUTTER_QUALITY_MEDIUM, CLUTTER_QUALITY_HIGH, CLUTTER_QUALITY_ULTRA, },
+            valueStringPrefix = "SI_CLUTTERQUALITY",
+            exists = ZO_IsPCUI,
+        },
         --Options_Video_Bloom
         [GRAPHICS_SETTING_BLOOM] =
         {
@@ -378,17 +408,6 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_GOD_RAYS,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_GOD_RAYS_TOOLTIP,
-            exists = ZO_IsPCUI,
-        },
-        --Options_Video_Clutter_2D
-        [GRAPHICS_SETTING_CLUTTER_2D] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_CLUTTER_2D,
-            panel = SETTING_PANEL_VIDEO,
-            text = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D,
-            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_CLUTTER_2D_TOOLTIP,
             exists = ZO_IsPCUI,
         },
         [GRAPHICS_SETTING_CONSOLE_ENHANCED_RENDER_QUALITY] =
@@ -445,12 +464,6 @@ local ZO_OptionsPanel_Video_ControlData =
                 [true] = "UseCustomScaleToggled",
                 [false] = "UseCustomScaleToggled",
             },
-            eventCallbacks =
-            {
-                ["UseCustomScaleToggled"] = function()
-                    ApplySettings()
-                end
-            }
         },
         --Options_Video_CustomScale
         [UI_SETTING_CUSTOM_SCALE] =
@@ -463,13 +476,39 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP,
             exists = ZO_IsIngameUI,
             valueFormat = "%.6f",
-            minValue = 0.64,
-            maxValue = 1.1,
+            minValue = KEYBOARD_CUSTOM_UI_SCALE_LOWER_BOUND,
+            maxValue = KEYBOARD_CUSTOM_UI_SCALE_UPPER_BOUND,
             onReleasedHandler = ZO_OptionsPanel_Video_SetCustomScale,
             eventCallbacks =
             {
                 ["UseCustomScaleToggled"] = ZO_OptionsPanel_Video_CustomScale_RefreshEnabled,
             }
+        },
+        [UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE,
+            tooltipText = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP,
+            exists = ZO_IsIngameUI,
+        },
+        [UI_SETTING_GAMEPAD_CUSTOM_SCALE] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_GAMEPAD_CUSTOM_SCALE,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE,
+            tooltipText = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP,
+            exists = ZO_IsIngameUI,
+            valueFormat = "%.6f",
+            minValue = GAMEPAD_CUSTOM_UI_SCALE_LOWER_BOUND,
+            maxValue = GAMEPAD_CUSTOM_UI_SCALE_UPPER_BOUND,
+            gamepadIsEnabledCallback = function() 
+                return GetSetting(SETTING_TYPE_UI, UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE) ~= "0"
+            end,
         },
     },
 

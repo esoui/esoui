@@ -10,8 +10,17 @@ ZO_FURNITURE_SETTINGS =
     },
 }
 
+ZO_PATH_SETTINGS =
+{
+    [HOUSE_PATH_SETTING_CATEGORIES_EDIT_PATH] =
+    {
+        HOUSE_PATH_SETTING_CATEGORIES_PATH_SETTINGS,
+    },
+}
+
 ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE = 1
 ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS = 2
+ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS = 3
 ZO_HOUSING_SETTINGS_CONTROL_DATA =
 {
     -- Primary Residence
@@ -28,6 +37,43 @@ ZO_HOUSING_SETTINGS_CONTROL_DATA =
         text = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_DEFAULT_ACCESS_TEXT,
         tooltipFunction = function(...) return SYSTEMS:GetObject("furniture_settings"):ShowDefaultAccessTooltip(...) end,
         gamepadTemplate = "ZO_GamepadHorizontalListRow",
+    },
+    -- Restart All Paths
+    [ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] =
+    {
+        text = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TEXT,
+        buttonText = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_BUTTON_TEXT,
+        tooltipFunction = function(...) return SYSTEMS:GetObject("furniture_settings"):ShowRestartPathsTooltip(...) end,
+        gamepadTemplate = "ZO_HousingPermissionsSettingsRow_Gamepad",
+    },
+}
+
+ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATH_TYPE = 1
+ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATHING_STATE = 2
+ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CHANGE_COLLECTIBLE = 3
+ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA =
+{
+    -- Path Type
+    [ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATH_TYPE] =
+    {
+        text = SI_HOUSING_PATH_SETTINGS_PATHING_TYPE_TEXT,
+        tooltipFunction = function(...) return SYSTEMS:GetObject("path_settings"):ShowPathTypeTooltip(...) end,
+        gamepadTemplate = "ZO_GamepadHorizontalListRow",
+    },
+    -- Pathing State
+    [ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATHING_STATE] =
+    {
+        text = SI_HOUSING_PATH_SETTINGS_PATHING_STATE_TEXT,
+        tooltipFunction = function(...) return SYSTEMS:GetObject("path_settings"):ShowPathingStateTooltip(...) end,
+        gamepadTemplate = "ZO_CheckBoxTemplate_Gamepad",
+    },
+    -- Change Collectible
+    [ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CHANGE_COLLECTIBLE] =
+    {
+        text = SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_TEXT,
+        buttonText = SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_BUTTON_TEXT,
+        tooltipFunction = function(...) return SYSTEMS:GetObject("path_settings"):ShowChangeCollectibleTooltip(...) end,
+        gamepadTemplate = "ZO_GamepadFullWidthLabelEntryTemplate",
     },
 }
 

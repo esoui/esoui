@@ -84,8 +84,7 @@ do
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
                 enabled = function(dialog)
-                    local platform = GetUIPlatform()
-                    if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
+                    if ZO_IsConsolePlatform() then
                         local targetData = dialog.entryList:GetTargetData()
                         if targetData.messageEntry then
                             if IsConsoleCommunicationRestricted() then
@@ -180,8 +179,7 @@ do
                 keybind = "DIALOG_PRIMARY",
                 text = GetString(SI_GAMEPAD_SELECT_OPTION),
                 enabled = function(dialog)
-                    local platform = GetUIPlatform()
-                    if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
+                    if ZO_IsConsolePlatform() then
                         local targetData = dialog.entryList:GetTargetData()
                         if targetData.messageEntry then
                             if IsConsoleCommunicationRestricted() then

@@ -4,6 +4,7 @@ MAIN_MENU_CATEGORY_DISABLED_WHILE_IN_COMBAT = 2
 MAIN_MENU_CATEGORY_DISABLED_WHILE_REVIVING = 3
 MAIN_MENU_CATEGORY_DISABLED_WHILE_SWIMMING = 4
 MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF = 5
+MAIN_MENU_CATEGORY_DISABLED_WHILE_PASSENGER = 6
 
 --Main Menu Categories
 
@@ -49,6 +50,7 @@ function MainMenu_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_ALIVE, function() self:OnPlayerAliveStateChanged(PLAYER_IS_ALIVE) end)
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_COMBAT_STATE, function(eventCode, inCombat) self:OnPlayerCombatStateChanged(inCombat) end)
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_WEREWOLF_STATE_CHANGED, function(eventCode, isWerewolf) self:OnPlayerWerewolfStateChanged(isWerewolf) end)
+    EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_MOUNTED_STATE_CHANGED, function(eventCode, isMounted) self:OnMountedStateChanged(isMounted) end)
 
     local PLAYER_IS_REVIVING = true
     EVENT_MANAGER:RegisterForEvent("MainMenu_Manager", EVENT_PLAYER_REINCARNATED, function() self:OnPlayerRevivingStateChanged(not PLAYER_IS_REVIVING) end)
@@ -82,6 +84,11 @@ end
 
 function MainMenu_Manager:OnPlayerWerewolfStateChanged(isWerewolf)
     self.playerStateTable.isWerewolf = isWerewolf
+    self:OnPlayerStateUpdate()
+end
+
+function MainMenu_Manager:OnMountedStateChanged(isMounted)
+    self.playerStateTable.isPassenger = isMounted and IsGroupMountPassenger()
     self:OnPlayerStateUpdate()
 end
 
@@ -121,6 +128,10 @@ end
 
 function MainMenu_Manager:IsPlayerWerewolf()
     return self.playerStateTable.isWerewolf
+end
+
+function MainMenu_Manager:IsPlayerPassenger()
+    return self.playerStateTable.isPassenger
 end
 
 --[[

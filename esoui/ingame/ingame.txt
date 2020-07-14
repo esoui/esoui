@@ -706,6 +706,7 @@ EsoUI\Ingame\Help\Gamepad\Help_SubmitFeedback_Gamepad.xml
 EsoUI\Ingame\Lockpick\Lockpick.lua
 EsoUI\Ingame\Lockpick\Lockpick.xml
 
+EsoUI\Ingame\Crafting\Gamepad\ZO_CraftingOptionsDialog_Gamepad.lua
 EsoUI\Ingame\Crafting\CraftingUtils.lua
 EsoUI\Ingame\Crafting\CraftingUtils.xml
 EsoUI\Ingame\Crafting\Keyboard\CraftingUtils_Keyboard.lua
@@ -1190,6 +1191,8 @@ EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureSettings_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureSettings_Keyboard.xml
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingPathSettings_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingPathSettings_Keyboard.xml
 EsoUI\Ingame\HousingEditor\Keyboard\HouseInformation_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HouseInformation_keyboard.xml
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurniturePlacement_Gamepad.lua
@@ -1199,6 +1202,8 @@ EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureSettings_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureSettings_Gamepad.xml
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.xml
+EsoUI\Ingame\HousingEditor\Gamepad\HousingPathSettings_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingPathSettings_Gamepad.xml
 EsoUI\Ingame\HousingEditor\Gamepad\HouseInformation_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HouseInformation_Gamepad.xml
 

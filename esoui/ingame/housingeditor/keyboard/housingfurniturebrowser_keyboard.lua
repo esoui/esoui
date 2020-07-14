@@ -14,7 +14,7 @@ function ZO_HousingFurnitureBrowser_Keyboard:Initialize(control)
 
     local function OnListMostRecentlySelectedDataChanged(data)
         -- selecting the list data will preview the furniture, so we will need to show/hide the house info as appropriate
-        if data and IsCharacterPreviewingAvailable() then
+        if data and data:IsPreviewable() and IsCharacterPreviewingAvailable() then
             SCENE_MANAGER:RemoveFragmentGroup(self.houseInfoFragmentGroup)
         else
             SCENE_MANAGER:AddFragmentGroup(self.houseInfoFragmentGroup)
@@ -136,6 +136,9 @@ function ZO_HousingFurnitureBrowser_Keyboard.SetupFurnitureRow(rowControl, furni
     end
     if furnitureObject:IsFromCrownStore() then
         statusControl:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWNS))
+    end
+    if furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and furnitureObject:IsStartingPathNode() then
+        statusControl:AddIcon("EsoUI/Art/Housing/Keyboard/npc_pathing_start.dds")
     end
 
     statusControl:Show()

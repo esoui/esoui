@@ -88,13 +88,6 @@
                         </Control>
                     </Controls>
                 </Control>
-
-                <Control name="$(parent)Options" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true">
-                    <AnchorFill/>
-                    <Controls>
-                        <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate ZO_GamepadGrid_ListAnchors"/>
-                    </Controls>
-                </Control>
             </Controls>
         </Control>
         

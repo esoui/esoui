@@ -213,8 +213,7 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeBlacklistPlayerDialog()
                 enabled = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     if targetData.messageEntry then
-                        local platform = GetUIPlatform()
-                        if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
+                        if ZO_IsConsolePlatform() then
                             if IsConsoleCommunicationRestricted() then
                                 return false, GetString(SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_GLOBALLY_RESTRICTED)
                             end

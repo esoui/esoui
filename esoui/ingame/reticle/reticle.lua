@@ -142,7 +142,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 interactKeybindButtonColor = ZO_ERROR_COLOR
             end
 
-            if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_BANK then
+            if additionalInteractInfo == ADDITIONAL_INTERACT_INFO_NONE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_BANK or additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_INSTANCE_DOOR then
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET, action))
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_EMPTY then
                 self.interactKeybindButton:SetText(zo_strformat(SI_FORMAT_BULLET_TEXT, GetString(SI_GAME_CAMERA_ACTION_EMPTY)))
@@ -233,6 +233,19 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
 							    interactContextString = zo_strformat(SI_RETICLE_HOUSE_BANK_WITH_NICKNAME_FORMAT, interactableName, nickname)
 						    end
 					    end
+                    end
+                end
+            elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_INSTANCE_DOOR then
+                local instanceType = INSTANCE_DISPLAY_TYPE_HOUSING
+                local instanceTypeString = zo_iconTextFormat(GetInstanceDisplayTypeIcon(instanceType), 34, 34, GetString("SI_INSTANCEDISPLAYTYPE", instanceType))
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(context)
+                if collectibleData then
+                    local nickname = collectibleData:GetNickname()
+                    --Theoretically it should be impossible for the nickname to be blank, but guard against it just in case
+                    if nickname ~= "" then
+                        interactContextString = zo_strformat(SI_HOUSE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, nickname, instanceTypeString)
+                    else
+                        interactContextString = zo_strformat(SI_ZONE_DOOR_RETICLE_INSTANCE_TYPE_FORMAT, interactableName, instanceTypeString)
                     end
                 end
             end

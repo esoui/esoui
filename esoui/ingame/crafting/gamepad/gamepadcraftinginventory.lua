@@ -154,8 +154,17 @@ function ZO_GamepadCraftingInventory:EnumerateInventorySlotsAndAddToScrollData(p
     return list
 end
 
-function ZO_GamepadCraftingInventory:GetIndividualInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data, useWornBag)
-    local bagsToUse = useWornBag and ZO_ALL_CRAFTING_INVENTORY_BAGS_AND_WORN or ZO_ALL_CRAFTING_INVENTORY_BAGS_WITHOUT_WORN
+function ZO_GamepadCraftingInventory:GetIndividualInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data, useWornBag, excludeBankedItems)
+	local bagsToUse = { BAG_BACKPACK }
+	if useWornBag then
+		table.insert(bagsToUse, BAG_WORN)
+	end 
+	-- Expressly using double-negative here to maintain compatibility
+	if not excludeBankedItems then
+		table.insert(bagsToUse, BAG_BANK)
+		table.insert(bagsToUse, BAG_SUBSCRIBER_BANK)
+	end
+
     local list = SHARED_INVENTORY:GenerateFullSlotData(predicate, unpack(bagsToUse))
 
     ZO_ClearTable(self.itemCounts)

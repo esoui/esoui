@@ -27,6 +27,7 @@ end
 function ZO_GamepadAlchemy:InitializeScenes()
     local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadAlchemyTopLevelSkillInfo)
     GAMEPAD_ALCHEMY_ROOT_SCENE = self:CreateInteractScene("gamepad_alchemy_mode")
+    GAMEPAD_ALCHEMY_ROOT_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_ALCHEMY_ROOT_SCENE:AddFragment(skillLineXPBarFragment)
     GAMEPAD_ALCHEMY_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -44,6 +45,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
     end)
 
     GAMEPAD_ALCHEMY_CREATION_SCENE = self:CreateInteractScene("gamepad_alchemy_creation")
+    GAMEPAD_ALCHEMY_CREATION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_ALCHEMY_CREATION_SCENE:AddFragment(skillLineXPBarFragment)
     GAMEPAD_ALCHEMY_CREATION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then

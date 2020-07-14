@@ -62,8 +62,10 @@ function ZO_DailyLoginRewards_Keyboard:InitializeKeybindStripDescriptors()
             end,
             visible = function()
                 if self.mouseOverData then
-                    return CanPreviewReward(self.mouseOverData:GetRewardId())
+                    return CanPreviewReward(self.mouseOverData:GetRewardId()) and IsCharacterPreviewingAvailable()
                 end
+
+                return false
             end,
         },
 

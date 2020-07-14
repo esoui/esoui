@@ -22,13 +22,14 @@ function ZO_HousingBrowserList:Initialize(control, owner)
 
     self:InitializeCategories(self.contents)
 
-    self.fragment = ZO_FadeSceneFragment:New(self.control)
+    local ALWAYS_ANIMATE = true
+    self.fragment = ZO_FadeSceneFragment:New(self.control, ALWAYS_ANIMATE)
 
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            self:OnHidden()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self:OnHiding()
         end
     end)
 
@@ -45,7 +46,7 @@ function ZO_HousingBrowserList:OnShowing()
     end
 end
 
-function ZO_HousingBrowserList:OnHidden()
+function ZO_HousingBrowserList:OnHiding()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end
@@ -56,6 +57,11 @@ function ZO_HousingBrowserList:GetCategoryInfo(categoryId, categoryObject)
     local isFakedSubcategory = false
     if categoryId == ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
         isFakedSubcategory = true
+    elseif categoryId == ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY then
+        isFakedSubcategory = true
+        normalIcon = "EsoUI/Art/Housing/Keyboard/housing_category_npc_pathing_up.dds"
+        pressedIcon = "EsoUI/Art/Housing/Keyboard/housing_category_npc_pathing_down.dds"
+        mouseoverIcon = "EsoUI/Art/Housing/Keyboard/housing_category_npc_pathing_over.dds"
     else
         normalIcon, pressedIcon, mouseoverIcon = GetFurnitureCategoryKeyboardIcons(categoryId)
     end
@@ -302,6 +308,8 @@ function ZO_HousingFurnitureList:Initialize(...)
         end)
     end
 
+    self.searchEditBox = searchEditBox
+
     self.freeSlotsLabel = self.contents:GetNamedChild("InfoBarFreeSlots")
 
     self:InitializeThemeSelector()
@@ -336,8 +344,8 @@ function ZO_HousingFurnitureList:OnShowing()
     self:UpdateFreeSlots()
 end
 
-function ZO_HousingFurnitureList:OnHidden()
-    ZO_HousingBrowserList.OnHidden(self)
+function ZO_HousingFurnitureList:OnHiding()
+    ZO_HousingBrowserList.OnHiding(self)
 
     self:ClearSelection()
 end
@@ -410,7 +418,7 @@ end
 function ZO_HousingFurnitureList:SetMostRecentlySelectedData(data)
     self.mostRecentlySelectedData = data
 
-    if self.mostRecentlySelectedData then
+    if self.mostRecentlySelectedData and self.mostRecentlySelectedData:IsPreviewable() then
         ZO_HousingFurnitureBrowser_Base.PreviewFurniture(self.mostRecentlySelectedData)
     else
         ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()

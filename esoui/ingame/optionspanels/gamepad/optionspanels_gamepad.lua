@@ -49,6 +49,16 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_GAMEPAD_CUSTOM_SCALE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE,
         },
@@ -222,6 +232,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_LOOT,
             settingId = LOOT_SETTING_AUTO_LOOT_STOLEN,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_LOOT,
+            settingId = LOOT_SETTING_PREVENT_STEALING_PLACED,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,

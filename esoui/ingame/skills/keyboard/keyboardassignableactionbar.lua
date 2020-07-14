@@ -67,6 +67,11 @@ function ZO_KeyboardAssignableActionBar:Initialize(control)
         end
     end
     EVENT_MANAGER:RegisterForEvent("KeyboardAssignableActionBar", EVENT_CURSOR_DROPPED, OnCursorDropped)
+
+    local function OnPlayerActivated(eventCode)
+        self:HideDropCallouts()
+    end
+    EVENT_MANAGER:RegisterForEvent("KeyboardAssignableActionBar", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 end
 
 function ZO_KeyboardAssignableActionBar:GetHotbarSwap()

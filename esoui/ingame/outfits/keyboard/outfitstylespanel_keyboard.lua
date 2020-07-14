@@ -486,7 +486,7 @@ local REFRESH_IMMEDIATELY = true
 function ZO_OutfitStylesPanel_Keyboard:TogglePreviewOutfitStyle(collectibleData, itemMaterialIndex, preferredOutfitSlot)
     preferredOutfitSlot = preferredOutfitSlot or ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(collectibleData)
 
-    if preferredOutfitSlot then
+    if preferredOutfitSlot and IsCharacterPreviewingAvailable() then
         local previewCollectionId = SYSTEMS:GetObject("itemPreview"):GetPreviewCollectionId()
 
         if self:IsPreviewingOutfitStyle(collectibleData, itemMaterialIndex, preferredOutfitSlot) then
@@ -569,8 +569,10 @@ function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryRightClick(entryData)
     local collectibleData = entryData.data
     if collectibleData and not collectibleData.isEmptyCell then
         ClearMenu()
-
-        AddMenuItem(GetString(SI_OUTFIT_STYLE_EQUIP_BIND), function() self:OnRestyleOutfitStyleEntrySelected(entryData) end)
+        
+        if IsCharacterPreviewingAvailable() then
+            AddMenuItem(GetString(SI_OUTFIT_STYLE_EQUIP_BIND), function() self:OnRestyleOutfitStyleEntrySelected(entryData) end)
+        end
 
         if not collectibleData.clearAction then
             if IsChatSystemAvailableForCurrentPlatform() then
@@ -633,7 +635,7 @@ do
             self.mouseOverEntryData = control.dataEntry
         end
 
-        if not ZO_RestyleCanApplyChanges() and collectibleData and not collectibleData.isEmptyCell then
+        if not ZO_RestyleCanApplyChanges() and collectibleData and not collectibleData.isEmptyCell and IsCharacterPreviewingAvailable() then
             WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
         end
 

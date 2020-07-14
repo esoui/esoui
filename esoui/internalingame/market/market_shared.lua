@@ -796,10 +796,6 @@ function ZO_Market_Shared:RequestShowCategoryById(categoryId)
     assert(false) -- must be overridden
 end
 
-function ZO_Market_Shared:CanPreviewMarketProductPreviewType(previewType)
-    return true
-end
-
 --[[Search]]--
 --------------
 function ZO_Market_Shared:SearchStart(searchString)

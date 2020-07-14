@@ -12,7 +12,16 @@ function ZO_SmithingResearch:Initialize(control, owner)
     self:InitializeResearchLineList(ZO_HorizontalScrollList, "ZO_SmithingResearchListSlot")
     self:InitializeFilterTypeBar()
 
-    ZO_InventoryInfoBar_ConnectStandardBar(control:GetNamedChild("InfoBar"))
+    self.includeBankedItemsCheckbox = self.control:GetNamedChild("IncludeBanked")
+    self:InitializeFilters()
+    
+    local function OnAddOnLoaded(event, name)
+        if name == "ZO_Ingame" then
+            self:SetupSavedVars()
+            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+        end
+    end
+    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 end
 
 function ZO_SmithingResearch:SetHidden(hidden)
@@ -59,10 +68,45 @@ function ZO_SmithingResearch:InitializeFilterTypeBar()
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.tabs)
 end
 
+function ZO_SmithingResearch:InitializeFilters()
+    local function SaveFilters()
+        self:SaveFilters()
+    end
+    ZO_CheckButton_SetToggleFunction(self.includeBankedItemsCheckbox, SaveFilters)
+    ZO_CheckButton_SetLabelText(self.includeBankedItemsCheckbox, GetString(SI_CRAFTING_INCLUDE_BANKED))
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.includeBankedItemsCheckbox)
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
+        ZO_CheckButton_SetCheckState(self.includeBankedItemsCheckbox, self.savedVars.includeBankedItemsChecked)
+    end)
+end
+
+function ZO_SmithingResearch:SetupSavedVars()
+    local defaults =
+    {
+        includeBankedItemsChecked = true
+    }
+    local savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "SmithingResearch", defaults)
+    self:SetSavedVars(savedVars)
+    ZO_CheckButton_SetCheckState(self.includeBankedItemsCheckbox, self.savedVars.includeBankedItemsChecked)
+end
+
+function ZO_SmithingResearch:IsIncludeBankedItemsChecked()
+    return self.savedVars.includeBankedItemsChecked
+end
+
 function ZO_SmithingResearch:RefreshAvailableFilters()
     ZO_MenuBar_ClearSelection(self.tabs)
     ZO_MenuBar_UpdateButtons(self.tabs)
     ZO_MenuBar_SelectLastVisibleButton(self.tabs, true)
+end
+
+function ZO_SmithingResearch:SaveFilters()
+    local includeBankedItemsChecked = ZO_CheckButton_IsChecked(self.includeBankedItemsCheckbox)
+    if self.savedVars.includeBankedItemsChecked ~= includeBankedItemsChecked then
+        self.savedVars.includeBankedItemsChecked = includeBankedItemsChecked
+        self:HandleDirtyEvent()
+    end
 end
 
 function ZO_SmithingResearch:SetupTooltip(row)
@@ -164,7 +208,6 @@ function ZO_SmithingResearch:RefreshCurrentResearchStatusDisplay(currentlyResear
     end
 end
 
-
 ZO_SmithingResearchSelect = ZO_SharedSmithingResearchSelect:Subclass()
 
 function ZO_SmithingResearchSelect:New(...)
@@ -226,7 +269,9 @@ function ZO_SmithingResearchSelect:SetupDialog(craftingType, researchLineIndex, 
     end
 
     local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsResearchableItem)
-    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsResearchableItem, virtualInventoryList)
+    if SMITHING:GetResearchPanel():IsIncludeBankedItemsChecked() then
+        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsResearchableItem, virtualInventoryList)
+    end
 
     for itemId, itemInfo in pairs(virtualInventoryList) do
         itemInfo.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(itemInfo.bag, itemInfo.index))

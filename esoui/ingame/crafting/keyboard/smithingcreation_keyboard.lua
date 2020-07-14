@@ -191,7 +191,12 @@ function ZO_SmithingCreation:InitializeFilters()
 end
 
 function ZO_SmithingCreation:SetupSavedVars(defaults)
-    local defaults = { haveMaterialChecked = false, haveKnowledgeChecked = true, useUniversalStyleItemChecked = false}
+    local defaults =
+    {
+        haveMaterialChecked = false,
+        haveKnowledgeChecked = true,
+        useUniversalStyleItemChecked = false
+    }
     self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "SmithingCreation", defaults)
 
     ZO_CheckButton_SetCheckState(self.haveMaterialsCheckBox, self.savedVars.haveMaterialChecked)

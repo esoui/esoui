@@ -101,9 +101,41 @@ local MAP_CONTAINER_LAYOUT =
     },
 }
 
-local INFORMATION_TOOLTIP = nil
-local KEEP_TOOLTIP = nil
-local MAP_LOCATION_TOOLTIP = nil
+local function GetInformationTooltip(isGamepadMode)
+    if isGamepadMode then
+        return ZO_MapLocationTooltip_Gamepad
+    else
+        return InformationTooltip
+    end
+end
+
+local function GetKeepTooltip(isGamepadMode)
+    if isGamepadMode then
+        return ZO_MapLocationTooltip_Gamepad
+    else
+        return ZO_KeepTooltip
+    end
+end
+
+local function GetMapLocationTooltip(isGamepadMode)
+    if isGamepadMode then
+        return ZO_MapLocationTooltip_Gamepad
+    else
+        return ZO_MapLocationTooltip
+    end
+end
+
+local function GetPlatformInformationTooltip()
+    return GetInformationTooltip(IsInGamepadPreferredMode())
+end
+
+local function GetPlatformKeepTooltip()
+    return GetKeepTooltip(IsInGamepadPreferredMode())
+end
+
+local function GetPlatformMapLocationTooltip()
+    return GetMapLocationTooltip(IsInGamepadPreferredMode())
+end
 
 local g_mapOverflowX = 0
 local g_mapOverflowY = 0
@@ -322,19 +354,20 @@ end
 
 function InformationTooltipMixin:AppendWayshrineTooltip(pin)
     local nodeIndex = pin:GetFastTravelNodeIndex()
+    local informationTooltip = GetPlatformInformationTooltip()
     local _, name, _, _, _, _, poiType = GetFastTravelNodeInfo(nodeIndex)
-    INFORMATION_TOOLTIP:AddLine(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+    informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
 
     local isCurrentLoc = g_fastTravelNodeIndex == nodeIndex
     local isOutboundOnly, outboundOnlyErrorStringId = GetFastTravelNodeOutboundOnlyInfo(nodeIndex)
     local nodeIsHousePreview = poiType == POI_TYPE_HOUSE and not HasCompletedFastTravelNodePOI(nodeIndex)
     if isCurrentLoc then --NO CLICK: Can't travel to origin
-        INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CURRENT_LOC), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
     elseif g_fastTravelNodeIndex == nil and IsInCampaign() then --NO CLICK: Can't recall while inside AvA zone
-        INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA), "", ZO_ERROR_COLOR:UnpackRGB())
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_AVA), "", ZO_ERROR_COLOR:UnpackRGB())
     elseif isOutboundOnly then --NO CLICK: Can't travel to this wayshrine, only from it
         local message = GetErrorString(outboundOnlyErrorStringId)
-        INFORMATION_TOOLTIP:AddLine(message, "", ZO_ERROR_COLOR:UnpackRGB())
+        informationTooltip:AddLine(message, "", ZO_ERROR_COLOR:UnpackRGB())
     elseif not CanLeaveCurrentLocationViaTeleport() then --NO CLICK: Current Zone or Subzone restricts jumping
         local cantLeaveStringId
         if IsInOutlawZone() then
@@ -342,38 +375,38 @@ function InformationTooltipMixin:AppendWayshrineTooltip(pin)
         else
             cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
         end
-        INFORMATION_TOOLTIP:AddLine(GetString(cantLeaveStringId), "", ZO_ERROR_COLOR:UnpackRGB())
+        informationTooltip:AddLine(GetString(cantLeaveStringId), "", ZO_ERROR_COLOR:UnpackRGB())
     elseif pin:IsLockedByLinkedCollectible() then --CLICK: Open the store
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE)
         local SET_TO_FULL_SIZE = true
-        INFORMATION_TOOLTIP:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
+        informationTooltip:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
 
         if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_UPGRADE_CHAPTER), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+            informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_UPGRADE_CHAPTER), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
         else
-            INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+            informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
         end
     elseif IsUnitDead("player") then --NO CLICK: Dead
-        INFORMATION_TOOLTIP:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD), "", ZO_ERROR_COLOR:UnpackRGB())
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD), "", ZO_ERROR_COLOR:UnpackRGB())
     elseif g_fastTravelNodeIndex == nil then --Recall
         local _, premiumTimeLeft = GetRecallCooldown()
         if premiumTimeLeft == 0 then --CLICK: Recall
             local text = GetString(nodeIsHousePreview and SI_TOOLTIP_WAYSHRINE_CLICK_TO_PREVIEW_HOUSE or SI_TOOLTIP_WAYSHRINE_CLICK_TO_RECALL)
-            INFORMATION_TOOLTIP:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+            informationTooltip:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
 
             local cost = GetRecallCost(nodeIndex)
             if cost > 0 then
                 local currency = GetRecallCurrency(nodeIndex)
                 local notEnoughCurrency = cost > GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
-                INFORMATION_TOOLTIP:AddMoney(INFORMATION_TOOLTIP, cost, SI_TOOLTIP_RECALL_COST, notEnoughCurrency)
+                informationTooltip:AddMoney(informationTooltip, cost, SI_TOOLTIP_RECALL_COST, notEnoughCurrency)
             end
         else --NO CLICK: Waiting on cooldown
             local cooldownText = zo_strformat(SI_TOOLTIP_WAYSHRINE_RECALL_COOLDOWN, ZO_FormatTimeMilliseconds(premiumTimeLeft, TIME_FORMAT_STYLE_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS))
-            INFORMATION_TOOLTIP:AddLine(cooldownText, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+            informationTooltip:AddLine(cooldownText, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
         end
     else --CLICK: Fast Travel
         local text = GetString(nodeIsHousePreview and SI_TOOLTIP_WAYSHRINE_CLICK_TO_PREVIEW_HOUSE or SI_TOOLTIP_WAYSHRINE_CLICK_TO_FAST_TRAVEL)
-        INFORMATION_TOOLTIP:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+        informationTooltip:AddLine(text, "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
     end
 end
 
@@ -381,17 +414,17 @@ function InformationTooltipMixin:AppendSuggestionActivity(pin)
     local shortDescription = pin:GetShortDescription()
 
     if shortDescription then
-        INFORMATION_TOOLTIP:AddLine(shortDescription, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
+        GetPlatformInformationTooltip():AddLine(shortDescription, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
     end
 end
 
 function ZO_WorldMap_GetTooltipForMode(mode)
     if mode == ZO_MAP_TOOLTIP_MODE.INFORMATION then
-        return INFORMATION_TOOLTIP
+        return GetPlatformInformationTooltip()
     elseif mode == ZO_MAP_TOOLTIP_MODE.KEEP then
-        return KEEP_TOOLTIP
+        return GetPlatformKeepTooltip()
     elseif mode == ZO_MAP_TOOLTIP_MODE.MAP_LOCATION then
-        return MAP_LOCATION_TOOLTIP
+        return GetPlatformMapLocationTooltip()
     else
         assert(false)
     end
@@ -437,15 +470,9 @@ do
     SetupWorldMap = function()
         local buttonTextures
         if IsInGamepadPreferredMode() then
-            INFORMATION_TOOLTIP = ZO_MapLocationTooltip_Gamepad
-            KEEP_TOOLTIP = ZO_MapLocationTooltip_Gamepad
-            MAP_LOCATION_TOOLTIP = ZO_MapLocationTooltip_Gamepad
             buttonTextures = GAMEPAD_DUNGEON_BUTTON_TEXTURES
             g_gamepadMode = true
         else
-            INFORMATION_TOOLTIP = InformationTooltip
-            KEEP_TOOLTIP = ZO_KeepTooltip
-            MAP_LOCATION_TOOLTIP = ZO_MapLocationTooltip
             buttonTextures = KEYBOARD_DUNGEON_BUTTON_TEXTURES
             g_gamepadMode = false
         end
@@ -667,17 +694,19 @@ end
 local usedTooltips = {}
 
 local function HideKeyboardTooltips()
+    local NOT_GAMEPAD_MODE = false
     if g_ownsTooltip then
-        ClearTooltip(INFORMATION_TOOLTIP)
+        ClearTooltip(GetInformationTooltip(NOT_GAMEPAD_MODE))
         g_ownsTooltip = false
     end
 
-    KEEP_TOOLTIP:SetHidden(true)
-    ClearTooltip(MAP_LOCATION_TOOLTIP)
+    GetKeepTooltip(NOT_GAMEPAD_MODE):SetHidden(true)
+    ClearTooltip(GetMapLocationTooltip(NOT_GAMEPAD_MODE))
 end
 
 local function HideGamepadTooltip()
-    MAP_LOCATION_TOOLTIP:ClearLines()
+    local GAMEPAD_MODE = true
+    GetMapLocationTooltip(GAMEPAD_MODE):ClearLines()
     SCENE_MANAGER:RemoveFragment(GAMEPAD_WORLD_MAP_TOOLTIP_FRAGMENT)
 end
 
@@ -905,6 +934,7 @@ local function UpdateMouseOverPins()
     local maxKeepTooltipPinLevel = 0
     local informationTooltipAppendedTo = false
     local lastGamepadCategory = nil
+    local informationTooltip = GetPlatformInformationTooltip()
 
     for index, pin in ipairs(foundTooltipMouseOverPins) do
         local pinType = pin:GetPinType()
@@ -981,15 +1011,15 @@ local function UpdateMouseOverPins()
                         if nextCategoryText and isDifferentCategory then
                             local categoryIcon = GetValueOrExecute(pinTooltipInfo.gamepadCategoryIcon, pin)
                             local titleStyleName = pinTooltipInfo.gamepadCategoryStyleName
-                            titleStyleName = titleStyleName and INFORMATION_TOOLTIP.tooltip:GetStyle(titleStyleName)
+                            titleStyleName = titleStyleName and informationTooltip.tooltip:GetStyle(titleStyleName)
 
-                            local groupSection = INFORMATION_TOOLTIP.tooltip:AcquireSection(titleStyleName, INFORMATION_TOOLTIP.tooltip:GetStyle("mapKeepCategorySpacing"))
-                            local mapIconTitleStyle = categoryIcon and INFORMATION_TOOLTIP.tooltip:GetStyle("mapIconTitle") or nil
-                            INFORMATION_TOOLTIP:LayoutGroupHeader(groupSection, categoryIcon, nextCategoryText, titleStyleName, mapIconTitleStyle, INFORMATION_TOOLTIP.tooltip:GetStyle("mapTitle"))
-                            INFORMATION_TOOLTIP.tooltip:AddSection(groupSection)
+                            local groupSection = informationTooltip.tooltip:AcquireSection(titleStyleName, informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
+                            local mapIconTitleStyle = categoryIcon and informationTooltip.tooltip:GetStyle("mapIconTitle") or nil
+                            informationTooltip:LayoutGroupHeader(groupSection, categoryIcon, nextCategoryText, titleStyleName, mapIconTitleStyle, informationTooltip.tooltip:GetStyle("mapTitle"))
+                            informationTooltip.tooltip:AddSection(groupSection)
                         elseif pinTooltipInfo.gamepadSpacing or isDifferentCategory then
-                            local groupSection = INFORMATION_TOOLTIP.tooltip:AcquireSection(INFORMATION_TOOLTIP.tooltip:GetStyle("mapKeepCategorySpacing"))
-                            INFORMATION_TOOLTIP.tooltip:AddSectionEvenIfEmpty(groupSection)
+                            local groupSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
+                            informationTooltip.tooltip:AddSectionEvenIfEmpty(groupSection)
                         end
 
                         lastGamepadCategory = nextCategory
@@ -1003,7 +1033,7 @@ local function UpdateMouseOverPins()
                     --space out the appended lines in the information tooltip
                     if usedTooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION and not isInGamepadPreferredMode then
                         informationTooltipAppendedTo = true
-                        INFORMATION_TOOLTIP:AddVerticalPadding(5)
+                        informationTooltip:AddVerticalPadding(5)
                     end
                 end
             end
@@ -1013,17 +1043,17 @@ local function UpdateMouseOverPins()
     if missedQuestPins > 0 then
         local text = string.format(zo_strformat(SI_TOOLTIP_MAP_MORE_QUESTS, missedQuestPins))
         if not IsInGamepadPreferredMode() then
-            INFORMATION_TOOLTIP:AddLine(text)
+            informationTooltip:AddLine(text)
         else
-            local lineSection = INFORMATION_TOOLTIP.tooltip:AcquireSection(INFORMATION_TOOLTIP.tooltip:GetStyle("mapMoreQuestsContentSection"))
-            lineSection:AddLine(text, INFORMATION_TOOLTIP.tooltip:GetStyle("mapLocationTooltipContentLabel"), INFORMATION_TOOLTIP.tooltip:GetStyle("gamepadElderScrollTooltipContent"))
-            INFORMATION_TOOLTIP.tooltip:AddSection(lineSection)
+            local lineSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapMoreQuestsContentSection"))
+            lineSection:AddLine(text, informationTooltip.tooltip:GetStyle("mapLocationTooltipContentLabel"), informationTooltip.tooltip:GetStyle("gamepadElderScrollTooltipContent"))
+            informationTooltip.tooltip:AddSection(lineSection)
         end
     end
 
     --Remove the last bit of extra padding on the end
     if informationTooltipAppendedTo and not isInGamepadPreferredMode then
-        INFORMATION_TOOLTIP:AddVerticalPadding(-5)
+        informationTooltip:AddVerticalPadding(-5)
     end
 
     -- Gamepad handles its own layout
@@ -4199,8 +4229,9 @@ function ZO_WorldMap_ChangeFloor(self)
 end
 
 function ZO_WorldMap_ShowDungeonFloorTooltip(self)
-    InitializeTooltip(INFORMATION_TOOLTIP, self, TOP, 0, 5)
-    SetTooltipText(INFORMATION_TOOLTIP, self.tooltipFormatString)
+    local informationTooltip = GetPlatformInformationTooltip()
+    InitializeTooltip(informationTooltip, self, TOP, 0, 5)
+    SetTooltipText(informationTooltip, self.tooltipFormatString)
 end
 
 --Global API
@@ -5618,7 +5649,7 @@ function ZO_WorldMap_SetGamepadKeybindsShown(enabled)
 end
 
 function ZO_WorldMap_HideAllTooltips()
-    if not INFORMATION_TOOLTIP then -- Tooltips aren't active
+    if not GetPlatformInformationTooltip() then -- Tooltips aren't active
         return
     end
 
@@ -5628,7 +5659,7 @@ function ZO_WorldMap_HideAllTooltips()
 end
 
 function ZO_WorldMap_ShowGamepadTooltip(resetScroll)
-    if not INFORMATION_TOOLTIP then -- Tooltips aren't active
+    if not GetPlatformInformationTooltip() then -- Tooltips aren't active
         return
     end
 

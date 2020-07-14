@@ -43,8 +43,17 @@ function ZO_AntiquityLoreGamepad:InitializeHeader()
 end
 
 function ZO_AntiquityLoreGamepad:InitializeKeybindStripDescriptors()
+    local function OnClickCallback()
+        if self.fromFanfare then
+            SYSTEMS:GetObject("mainMenu"):ShowAntiquityInJournal(self.currentAntiquityOrSetData)
+            self.fromFanfare = false
+        else
+            SCENE_MANAGER:HideCurrentScene()
+        end
+    end
+
     self.keybindStripDescriptor = {}
-    ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
+    ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnClickCallback)
     self:SetListsUseTriggerKeybinds(true)
 end
 
@@ -56,6 +65,10 @@ function ZO_AntiquityLoreGamepad:InitializeEvents()
     ANTIQUITY_DATA_MANAGER:RegisterCallback("AntiquitiesUpdated", OnAntiquitiesUpdated)
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityUpdated", OnAntiquitiesUpdated)
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", OnAntiquitiesUpdated)
+end
+
+function ZO_AntiquityLoreGamepad:SetFromFanfare(value)
+    self.fromFanfare = value
 end
 
 function ZO_AntiquityLoreGamepad:PerformUpdate()

@@ -49,6 +49,14 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_KeybindButton_LabelAligned" inherits="ZO_KeybindButton" virtual="true">
+            <DimensionConstraints minY="35" maxY="35" />
+
+            <Controls>
+                <Label name="$(parent)KeyLabel" override="true" font="ZoFontKeybindStripKey" inherits="ZO_LargeKeyMarkupLabel" excludeFromResizeToFitExtents="true" />
+            </Controls>
+        </Control>
+
         <Control name="ZO_KeybindButton_ChromaBehavior" virtual="true">
             <OnInitialized>
                 ZO_ChromaKeybindButtonTemplate_OnInitialized(self)

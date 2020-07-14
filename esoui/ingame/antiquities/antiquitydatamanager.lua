@@ -245,6 +245,7 @@ function ZO_AntiquityDataManager:OnAntiquityShowCodexEntry(antiquityId)
         local antiquityData = self:GetAntiquityData(antiquityId)
         internalassert(antiquityData ~= nil)
         if antiquityData then
+            ANTIQUITY_LORE_GAMEPAD:SetFromFanfare(true)
             ANTIQUITY_LORE_GAMEPAD:ShowAntiquityOrSet(antiquityData, DONT_PUSH)
         end
     else

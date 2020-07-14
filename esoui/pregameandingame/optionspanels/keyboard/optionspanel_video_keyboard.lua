@@ -181,6 +181,14 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Video_Clutter_2D_Quality",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_CLUTTER_2D_QUALITY,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Video_Bloom",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_BLOOM,
@@ -208,14 +216,6 @@ panelBuilder:AddSetting({
     controlName = "Options_Video_God_Rays",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_GOD_RAYS,
-    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
-    indentLevel = 1,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Video_Clutter_2D",
-    settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_CLUTTER_2D,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     indentLevel = 1,
 })

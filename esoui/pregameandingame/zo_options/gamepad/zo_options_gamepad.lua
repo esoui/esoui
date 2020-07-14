@@ -40,6 +40,7 @@ function ZO_GamepadOptions:InitializeScenes()
             self:RefreshCategoryList()
             self:RefreshHeader()
             self:SetCurrentList(self.categoryList)
+            self:RefreshGamepadInfoPanel()
 
             KEYBIND_STRIP:AddKeybindButtonGroup(self.rootKeybindDescriptor)
         elseif newState == SCENE_HIDDEN then
