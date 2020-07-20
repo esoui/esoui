@@ -1359,7 +1359,7 @@ EsoStrings =
     "You do not have room for any more Item Furnishings in this house.", -- SI_HOUSINGREQUESTRESULT8
     "This home is listed in the Home Show.", -- SI_HOUSINGREQUESTRESULT9
     "You are not currently touring in the Home Show.", -- SI_HOUSINGREQUESTRESULT10
-    "That furnishing is currently being moved by another player.", -- SI_HOUSINGREQUESTRESULT11
+    "That furnishing is currently being modified by a player.", -- SI_HOUSINGREQUESTRESULT11
     "You do not have room for any more Collectible Furnishings in this house.", -- SI_HOUSINGREQUESTRESULT14
     "You do not have room for any more Other Collectibles in this house.", -- SI_HOUSINGREQUESTRESULT15
     "You do not have enough furnishings in your home to list in the Home Show.", -- SI_HOUSINGREQUESTRESULT18
@@ -1386,12 +1386,12 @@ EsoStrings =
     "This furnishing does not have any children.", -- SI_HOUSINGREQUESTRESULT41
     "This furnishing cannot have any more children.", -- SI_HOUSINGREQUESTRESULT42
     "There is nothing wrong with this link.", -- SI_HOUSINGREQUESTRESULT43
-    "The furnishing selected is unable to be pathed.", -- SI_HOUSINGREQUESTRESULT44
-    "This furnishing cannot have any more path nodes placed for it.", -- SI_HOUSINGREQUESTRESULT45
-    "There are not enough nodes for this furniture to path.", -- SI_HOUSINGREQUESTRESULT46
+    "The object selected is unable to be pathed.", -- SI_HOUSINGREQUESTRESULT44
+    "This object cannot have any more path nodes placed for it.", -- SI_HOUSINGREQUESTRESULT45
+    "There are not enough nodes for this object to path.", -- SI_HOUSINGREQUESTRESULT46
     "Cannot find node.", -- SI_HOUSINGREQUESTRESULT47
-    "No path data has been created for furnishing.", -- SI_HOUSINGREQUESTRESULT48
-    "Furniture is currently pathing.", -- SI_HOUSINGREQUESTRESULT49
+    "No path data has been created for object.", -- SI_HOUSINGREQUESTRESULT48
+    "Object is currently pathing.", -- SI_HOUSINGREQUESTRESULT49
     "Cannot perform action on node at that position.", -- SI_HOUSINGREQUESTRESULT50
     "Can only perform this action in path mode.", -- SI_HOUSINGREQUESTRESULT51
     "Furnishings cannot be placed in that location.", -- SI_HOUSINGREQUESTRESULT52
@@ -1417,7 +1417,7 @@ EsoStrings =
     "Remove Node", -- SI_HOUSINGEDITORCOMMANDTYPE10
     "Replace Collectible", -- SI_HOUSINGEDITORCOMMANDTYPE11
     "The last command failed.", -- SI_HOUSINGEDITORCOMMANDRESULT1
-    "The furnishing is currently being moved by another player.", -- SI_HOUSINGEDITORCOMMANDRESULT2
+    "The furnishing is currently being modified by a player.", -- SI_HOUSINGEDITORCOMMANDRESULT2
     "The furniture item no longer exists.", -- SI_HOUSINGEDITORCOMMANDRESULT3
     "Inventory is full.", -- SI_HOUSINGEDITORCOMMANDRESULT4
     "You can only have one copy of that item in your inventory.", -- SI_HOUSINGEDITORCOMMANDRESULT5
@@ -1633,7 +1633,7 @@ EsoStrings =
     "Raw Material", -- SI_SPECIALIZEDITEMTYPE800
     "Container", -- SI_SPECIALIZEDITEMTYPE850
     "Event Container", -- SI_SPECIALIZEDITEMTYPE851
-    "Style Page Container", -- SI_SPECIALIZEDITEMTYPE852
+    "Style Page", -- SI_SPECIALIZEDITEMTYPE852
     "Currency Container", -- SI_SPECIALIZEDITEMTYPE875
     "Soul Gem", -- SI_SPECIALIZEDITEMTYPE900
     "Weapon Glyph", -- SI_SPECIALIZEDITEMTYPE950
@@ -4023,7 +4023,7 @@ EsoStrings =
     "LiveUpdate Defs", -- SI_PATCHOPTION_LIVE
     "Cached Defs", -- SI_PATCHOPTION_PATCH
     "Options", -- SI_PREGAME_OPEN_OPTIONS
-    "Login failed. Your username or password may be incorrect or inactive at this time. If you purchased the game through Steam, please start the game via the Steam Client to login.", -- SI_BAD_LOGIN_ZOS
+    "Login failed. Your username or password may be incorrect or inactive at this time. If you purchased the game through Steam or Stadia, please start the game on that platform.", -- SI_BAD_LOGIN_ZOS
     "Login failed.  Your username or password is incorrect or inactive at this time.", -- SI_BAD_LOGIN
     "Quit", -- SI_QUIT
     "Version", -- SI_VERSION_MENU_ENTRY
@@ -9002,6 +9002,7 @@ SafeAddVersion(SI_FURNITURETHEMETYPE15, 1)
 SafeAddVersion(SI_FURNITURETHEMETYPE16, 1)
 SafeAddVersion(SI_FURNITURETHEMETYPE17, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT8, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT11, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT14, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT15, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT23, 1)
@@ -9012,8 +9013,14 @@ SafeAddVersion(SI_HOUSINGREQUESTRESULT39, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT40, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT41, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT42, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT44, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT45, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT46, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT48, 1)
+SafeAddVersion(SI_HOUSINGREQUESTRESULT49, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT50, 1)
 SafeAddVersion(SI_HOUSINGREQUESTRESULT55, 1)
+SafeAddVersion(SI_HOUSINGEDITORCOMMANDRESULT2, 1)
 SafeAddVersion(SI_HOUSINGEDITORCOMMANDRESULT6, 1)
 SafeAddVersion(SI_EQUIPTYPE11, 2)
 SafeAddVersion(SI_EQUIPTYPE13, 1)
@@ -9482,6 +9489,7 @@ SafeAddVersion(SI_DELETE_CHARACTER_DIALOG_TEXT, 3)
 SafeAddVersion(SI_CHARACTER_SELECT_LEVEL_CLASS, 1)
 SafeAddVersion(SI_CHARACTER_SELECT_LEVEL_CHAMPION_CLASS, 1)
 SafeAddVersion(SI_CHARACTER_SELECT_NAME, 2)
+SafeAddVersion(SI_BAD_LOGIN_ZOS, 1)
 SafeAddVersion(SI_BAD_LOGIN, 1)
 SafeAddVersion(SI_VERSION, 2)
 SafeAddVersion(SI_LOGIN_REQUESTED, 1)

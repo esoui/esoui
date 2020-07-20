@@ -471,12 +471,16 @@ function ZO_HousingEditorHud:ClearTargetData()
     self:SetTargetData(NO_VALID_FURNITURE_ID, NO_VALID_PATH_INDEX)
 end
 
-function ZO_HousingEditorHud:UpdateTargetData(forceUpdate)
-    local furnitureId, pathIndex = HousingEditorGetTargetInfo()
-    if furnitureId ~= 0 then
-        self:SetTargetData(furnitureId, pathIndex)
+function ZO_HousingEditorHud:UpdateTargetData()
+    if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
+        self:SetTargetData(HousingEditorGetSelectedFurnitureId())
     else
-        self:ClearTargetData()
+        local furnitureId, pathIndex = HousingEditorGetTargetInfo()
+        if furnitureId ~= 0 then
+            self:SetTargetData(furnitureId, pathIndex)
+        else
+            self:ClearTargetData()
+        end
     end
 end
 
@@ -1793,6 +1797,18 @@ do
             self.precisionRotateHudButtons[6].axis = axes[4]
         end
 
+        local function CanEditPath()
+            if HousingEditorHasSelectablePathNode() then
+                return true
+            else
+                local furnitureId = HousingEditorGetTargetInfo()
+                if furnitureId ~= 0 then
+                    return HousingEditorCanFurnitureBePathed(furnitureId)
+                end
+            end
+            return false
+        end
+
         -- Edit Path
         local sharedEditPathKeybind = {
             name = function()
@@ -1816,17 +1832,9 @@ do
                                 PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
                             end
                         end,
-            visible = function()
-                if HousingEditorHasSelectablePathNode() then
-                    return true
-                else
-                    local furnitureId = HousingEditorGetTargetInfo()
-                    if furnitureId ~= 0 then
-                        return HousingEditorCanFurnitureBePathed(furnitureId)
-                    end
-                end
-                return false
-            end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible = CanEditPath,
+            enabled = CanEditPath,
             order = 30,
             ethereal = true,
         }
@@ -1853,6 +1861,10 @@ do
                             end
                             return false --if not successful return false so you can jump in editor with a gamepad
                         end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            enabled = function()
+                return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
+            end,
             visible = function()
                 return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
             end,
@@ -1876,7 +1888,11 @@ do
                             end
                             HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
                         end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
             visible = function()
+                return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
+            end,
+            enabled = function()
                 return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
             end,
             order = 20,
@@ -1895,7 +1911,12 @@ do
                                 PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
                             end
                         end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
             visible = function()
+                local furnitureId, nodeIndex = HousingEditorGetTargetInfo()
+                return (furnitureId ~= 0 and not nodeIndex and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0) and true or false
+            end,
+            enabled = function()
                 local furnitureId, nodeIndex = HousingEditorGetTargetInfo()
                 return (furnitureId ~= 0 and not nodeIndex and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0) and true or false
             end,
@@ -2614,7 +2635,11 @@ do
         {
             name = GetString(SI_HOUSING_EDITOR_PATH_SELECT_NODE),
             keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
             visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
                             return HousingEditorHasSelectablePathNode()
                         end,
             callback =  function()
@@ -2643,7 +2668,11 @@ do
                             end
                             HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
                         end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
             visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
                             return HousingEditorHasSelectablePathNode()
                         end,
             order = 12,
@@ -2657,7 +2686,11 @@ do
                         local placeSpeed = GetString("SI_HOUSINGPATHMOVEMENTSPEED", HousingEditorGetSelectedPathNodeSpeed())
                         return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_SPEED, ZO_SELECTED_TEXT:Colorize(placeSpeed))
                     end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
             visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
                             return HousingEditorHasSelectablePathNode()
                         end,
             callback =  function()
@@ -2684,7 +2717,11 @@ do
                         local delayTimeS = ZO_FormatTimeMilliseconds(delayTimeMS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_SECONDS)
                         return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_WAIT_TIME, ZO_SELECTED_TEXT:Colorize(delayTimeS))
                     end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
             visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
                             return HousingEditorHasSelectablePathNode()
                         end,
             callback =  function()

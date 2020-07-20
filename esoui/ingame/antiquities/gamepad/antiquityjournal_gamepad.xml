@@ -266,34 +266,5 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
-        <TopLevelControl name="ZO_AntiquityJournalLockedContent_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true">
-            <OnInitialized>
-                ZO_AntiquityJournalLockedContent_Gamepad_OnInitialized(self)
-            </OnInitialized>
-
-            <Controls>
-                <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
-                    <Controls>
-                        <Control name="$(parent)Content" resizeToFitDescendents="true">
-                            <Anchor point="TOPLEFT" offsetY="150" />
-                            <Anchor point="TOPRIGHT" offsetY="150" />
-
-                            <Controls>
-                                <Label name="$(parent)ScryingToolLockedLabel" font="ZoFontGamepadCondensed45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="10">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
-                                </Label>
-
-                                <Label name="$(parent)AntiquarianGuildZoneLockedLabel" font="ZoFontGamepadCondensed45" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="10">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ScryingToolLockedLabel" relativePoint="BOTTOMLEFT" offsetY="50" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ScryingToolLockedLabel" relativePoint="BOTTOMRIGHT" offsetY="50" />
-                                </Label>
-                            </Controls>
-                        </Control>
-                    </Controls>
-                </Control>
-            </Controls>
-        </TopLevelControl>
     </Controls>
 </GuiXml>

@@ -26,7 +26,7 @@
     <BackupFont originalFont="$(ANTIQUE_FONT)" backupFont="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf"/>
 
     <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/Handwritten_Bold.otf" />
-    <BackupFont originalFont="$(HANDWRITTEN_FONT)" backupFont="EsoUI/Common/Fonts/HandwrittenCyrillic_Bold.ttf"/>
+    <BackupFont originalFont="$(HANDWRITTEN_FONT)" backupFont="EsoUI/Common/Fonts/HandwrittenCyrillic_Bold.otf"/>
     <BackupFont originalFont="$(HANDWRITTEN_FONT)" backupFont="EsoUI/Common/Fonts/ESO_KafuPenji-M.ttf"/>
 
     <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/TrajanPro-Regular.otf" />

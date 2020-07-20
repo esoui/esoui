@@ -981,7 +981,7 @@ local function UpdateMouseOverPins()
                                     if not usedTooltips[i] then
                                         usedTooltips[i] = true
                                         if usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
-                                            KEEP_TOOLTIP:SetHidden(false)
+                                            GetPlatformKeepTooltip():SetHidden(false)
                                         else
                                             InitializeTooltip(ZO_WorldMap_GetTooltipForMode(usedTooltip), pin:GetControl())
                                         end
@@ -1114,8 +1114,9 @@ local function UpdateMouseOverPins()
 end
 
 local function OnGuildNameAvailable()
-    if not KEEP_TOOLTIP:IsHidden() then
-        KEEP_TOOLTIP:RefreshKeepInfo()
+    local keepTooltip = GetPlatformKeepTooltip()
+    if not keepTooltip:IsHidden() then
+        keepTooltip:RefreshKeepInfo()
     end
 end
 

@@ -70,7 +70,7 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
 
     self:AddFurnitureListKeybind({
         name =  GetString(SI_HOUSING_FURNITURE_SET_STARTING_NODE),
-        keybind = "HOUSING_EDITOR_QUINARY_ACTION",
+        keybind = "UI_SHORTCUT_QUATERNARY",
         order = 50,
         callback =  function() 
                         local targetData = self.furnitureList.list:GetTargetData()

@@ -668,25 +668,36 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         mainText =
         {
             text = function(dialog)
-                local stackCount = self.marketProductData:GetStackCount()
+                local marketProductData = self.marketProductData
+                local marketProductId = marketProductData:GetId()
+                local stackCount = marketProductData:GetStackCount()
+                local itemName = self.itemName
+                local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
+                local houseId = GetMarketProductHouseId(marketProductId)
+                if houseId > 0 then
+                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                    itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, self.itemName)
+                end
+
                 if self.isGift then
                     if stackCount > 1 then
-                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, stackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
+                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     else
-                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, self.itemName, ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
+                        return zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(self.recipientDisplayName))
                     end
                 else
                     local mainText
                     if self.useProductInfo then
-                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, self.itemName, stackCount)
+                        mainText = zo_strformat(self.useProductInfo.transactionCompleteText, color:Colorize(itemName), stackCount)
                     else
                         if stackCount > 1 then
-                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, self.itemName, stackCount)
+                            mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount)
                         else
                             if not self.isGift and self.marketProductData:GetNumAttachedCollectibles() > 0 then
-                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, self.itemName)
+                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, color:Colorize(itemName))
                             else
-                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, self.itemName)
+                                mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, color:Colorize(itemName))
                             end
                         end
                     end

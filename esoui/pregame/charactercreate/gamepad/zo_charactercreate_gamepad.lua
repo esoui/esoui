@@ -1387,18 +1387,6 @@ function ZO_CharacterCreate_Gamepad:InitializeForEditChanges(characterInfo, mode
     self.genderSlider:Update()
 end
 
-function ZO_CharacterCreate_Gamepad:InitializeForAppearanceChange(characterInfo)
-    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_APPEARANCE)
-end
-
-function ZO_CharacterCreate_Gamepad:InitializeForRaceChange(characterInfo)
-    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_RACE)
-end
-
-function ZO_CharacterCreate_Gamepad:InitializeForAllianceChange(characterInfo)
-    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_ALLIANCE)
-end
-
 function ZO_CharacterCreate_Gamepad:InitializeForCharacterCreate()
     self:SetCharacterCreateMode(CHARACTER_CREATE_MODE_CREATE)
 

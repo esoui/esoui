@@ -196,28 +196,31 @@ function ZO_CharacterCreate_Manager:GetCharacterUnsavedSetting(name, type)
     return self.characterUnsavedSettings[name][type].value, self.characterUnsavedSettings[name][type].locked
 end
 
-function ZO_CharacterCreate_Manager:InitializeForAppearanceChange(characterData)
+function ZO_CharacterCreate_Manager:ClearUnsavedSettings()
+    ZO_ClearTable(self.characterUnsavedSettings)
+end
+
+function ZO_CharacterCreate_Manager:InitializeForCharacterEditMode(characterData, characterCreateMode)
     self:SetCharacterMode(CHARACTER_MODE_EDIT)
     -- match the appearance set here to the default apperance set in PregameCharacterManager to avoid reloading the character
     SelectClothing(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
+    -- Blow away any unsaved settings because we're about to initialize all the settings to match the given characterData
+    self:ClearUnsavedSettings()
+
     local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
-    characterCreate:InitializeForAppearanceChange(characterData)
+    characterCreate:InitializeForEditChanges(characterData, characterCreateMode)
+end
+
+function ZO_CharacterCreate_Manager:InitializeForAppearanceChange(characterData)
+    self:InitializeForCharacterEditMode(characterData, CHARACTER_CREATE_MODE_EDIT_APPEARANCE)
 end
 
 function ZO_CharacterCreate_Manager:InitializeForRaceChange(characterData)
-    self:SetCharacterMode(CHARACTER_MODE_EDIT)
-    -- match the appearance set here to the default apperance set in PregameCharacterManager to avoid reloading the character
-    SelectClothing(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
-    local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
-    characterCreate:InitializeForRaceChange(characterData)
+    self:InitializeForCharacterEditMode(characterData, CHARACTER_CREATE_MODE_EDIT_RACE)
 end
 
 function ZO_CharacterCreate_Manager:InitializeForAllianceChange(characterData)
-    self:SetCharacterMode(CHARACTER_MODE_EDIT)
-    -- match the appearance set here to the default apperance set in PregameCharacterManager to avoid reloading the character
-    SelectClothing(DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES)
-    local characterCreate = SYSTEMS:GetObject(ZO_CHARACTER_CREATE_SYSTEM_NAME)
-    characterCreate:InitializeForAllianceChange(characterData)
+    self:InitializeForCharacterEditMode(characterData, CHARACTER_CREATE_MODE_EDIT_ALLIANCE)
 end
 
 function ZO_CharacterCreate_Manager:InitializeForCharacterCreate()
@@ -581,50 +584,51 @@ end
 
 function ZO_CharacterCreate_Base:Reset()
     -- Should be overridden
+    assert(false)
 end
 
 function ZO_CharacterCreate_Base:InitializeControls()
     -- Should be overridden
+    assert(false)
 end
 
 function ZO_CharacterCreate_Base:InitializeSelectors()
     -- Should be overridden
+    assert(false)
 end
 
 function ZO_CharacterCreate_Base:OnCharacterCreateRequested()
     -- Should be overridden
+    assert(false)
 end
 
 function ZO_CharacterCreate_Base:OnCharacterCreateFailed(reason)
     -- Should be overridden
+    assert(false)
 end
 
 function ZO_CharacterCreate_Base:ResetControls()
     -- Should be overridden
+    assert(false)
 end
 
 function ZO_CharacterCreate_Base:InitializeSelectorButtonTextures(buttonControl, data)
     -- Should be overridden
+    assert(false)
 end
 
-function ZO_CharacterCreate_Base:OnGenerateRandomCharacter()
-    -- optional override
-end
-
-function ZO_CharacterCreate_Base:InitializeForAppearanceChange(characterData)
-    -- optional override
-end
-
-function ZO_CharacterCreate_Base:InitializeForRaceChange(characterData)
-    -- optional override
-end
-
-function ZO_CharacterCreate_Base:InitializeForAllianceChange(characterData)
-    -- optional override
+function ZO_CharacterCreate_Base:InitializeForEditChanges(characterData, characterCreateMode)
+    -- Should be overridden
+    assert(false)
 end
 
 function ZO_CharacterCreate_Base:InitializeForCharacterCreate()
-    -- optional override
+    -- Should be overridden
+    assert(false)
+end
+
+function ZO_CharacterCreate_Base:OnGenerateRandomCharacter()
+    -- Optional override
 end
 
 --[[ Character Create Global functions ]]--

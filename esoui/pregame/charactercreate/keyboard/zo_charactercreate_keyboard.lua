@@ -940,18 +940,6 @@ function ZO_CharacterCreate_Keyboard:InitializeForEditChanges(characterInfo, mod
     self.createButton:SetHidden(true)
 end
 
-function ZO_CharacterCreate_Keyboard:InitializeForAppearanceChange(characterInfo)
-    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_APPEARANCE)
-end
-
-function ZO_CharacterCreate_Keyboard:InitializeForRaceChange(characterInfo)
-    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_RACE)
-end
-
-function ZO_CharacterCreate_Keyboard:InitializeForAllianceChange(characterInfo)
-    self:InitializeForEditChanges(characterInfo, CHARACTER_CREATE_MODE_EDIT_ALLIANCE)
-end
-
 function ZO_CharacterCreate_Keyboard:InitializeForCharacterCreate()
     self:SetCharacterCreateMode(CHARACTER_CREATE_MODE_CREATE)
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
