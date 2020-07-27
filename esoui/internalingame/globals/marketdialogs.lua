@@ -621,22 +621,13 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
             titleText = GetString(SI_TRANSACTION_COMPLETE_TITLE)
 
             local marketProductData = data.marketProductData
-            local marketProductId = marketProductData:GetId()
             local stackCount = marketProductData:GetStackCount()
-            local itemName = data.itemName
-            local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-            local houseId = GetMarketProductHouseId(marketProductId)
-            if houseId > 0 then
-                local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-                local houseDisplayName = GetCollectibleName(houseCollectibleId)
-                itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, data.itemName)
-            end
 
             if data.wasGift then
                 if stackCount > 1 then
-                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT_WITH_QUANTITY, data.itemName, stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 else
-                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                    mainText = zo_strformat(SI_MARKET_GIFTING_SUCCESS_TEXT, data.itemName, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 end
             else
                 local useProductInfo = ZO_Market_Shared.GetUseProductInfo(marketProductData)
@@ -644,7 +635,7 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                     if useProductInfo.transactionCompleteTitleText then
                         titleText = useProductInfo.transactionCompleteTitleText
                     end
-                    mainText = zo_strformat(useProductInfo.transactionCompleteText, color:Colorize(itemName), stackCount)
+                    mainText = zo_strformat(useProductInfo.transactionCompleteText, data.itemName, stackCount)
 
                     local useProductControl = dialog:GetNamedChild("UseProduct")
                     useProductControl:SetHidden(useProductInfo.visible and not useProductInfo.visible())
@@ -652,11 +643,11 @@ local function OnMarketPurchasingUpdate(dialog, currentTimeInSeconds)
                     useProductControl:SetText(useProductInfo.buttonText)
                 else
                     if stackCount > 1 then
-                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount)
+                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_QUANTITY, data.itemName, stackCount)
                     elseif marketProductData:GetNumAttachedCollectibles() > 0 then
-                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, color:Colorize(itemName))
+                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT_WITH_COLLECTIBLE, data.itemName)
                     else
-                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, color:Colorize(itemName))
+                        mainText = zo_strformat(SI_MARKET_PURCHASE_SUCCESS_TEXT, data.itemName)
                     end
                 end
 

@@ -1547,12 +1547,11 @@ do
 
     function ZO_HousingEditorHud:RefreshPlacementKeyPresses()
         local frameTimeMS = GetFrameTimeMilliseconds()
-        local x, y, z, pitch, yaw, roll = 0, 0, 0, 0, 0, 0
         local furnitureId = HousingEditorGetSelectedFurnitureId()
 
         if furnitureId and self:IsPrecisionEditingEnabled() then
-            x, y, z = HousingEditorGetFurnitureWorldCenter(furnitureId)
-            pitch, yaw, roll = HousingEditorGetFurnitureOrientation(furnitureId)
+            local x, y, z = HousingEditorGetSelectedObjectWorldCenter()
+            local pitch, yaw, roll = HousingEditorGetSelectedObjectOrientation()
 
             local nextPrecisionPositionOrOrientationUpdateMS = self.nextPrecisionPositionOrOrientationUpdateMS or 0
             if frameTimeMS > nextPrecisionPositionOrOrientationUpdateMS then

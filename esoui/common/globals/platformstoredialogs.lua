@@ -60,13 +60,23 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
     },
     mainText =
     {
-        text = zo_strformat(SI_OPEN_STORE_TO_BUY_PLUS_TEXT, ZO_GetPlatformStoreName()),
+        text = function()
+            if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
+                return SI_OPEN_STORE_TO_BUY_PLUS_TEXT_HERON
+            else
+                return zo_strformat(SI_OPEN_STORE_TO_BUY_PLUS_TEXT, ZO_GetPlatformStoreName())
+            end
+        end,
     },
     buttons =
     {
         {
             text = function()
-                return zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, ZO_GetPlatformStoreName())
+                if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
+                    return SI_START_HERON_PURCHASE_FLOW
+                else
+                    return zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, ZO_GetPlatformStoreName())
+                end
             end,
             callback =  function(dialog)
                 ShowPlatformESOPlusSubscriptionUI()
@@ -109,6 +119,8 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
             if dialog.data.isPreRelease then
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
                     return SI_OPEN_CHAPTER_PREPURCHASE_STEAM
+                elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
+                    return SI_OPEN_CHAPTER_PREPURCHASE_HERON
                 elseif DoesPlatformStoreUseExternalLinks() then
                     return zo_strformat(SI_OPEN_CHAPTER_PREPURCHASE_WEB, ZO_GetPlatformStoreName())
                 else
@@ -117,6 +129,8 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
             else
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_STEAM then
                     return SI_OPEN_CHAPTER_UPGRADE_STEAM
+                elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
+                    return SI_OPEN_CHAPTER_UPGRADE_HERON
                 elseif DoesPlatformStoreUseExternalLinks() then
                     return zo_strformat(SI_OPEN_CHAPTER_UPGRADE_WEB, ZO_GetPlatformStoreName())
                 else
@@ -129,7 +143,13 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
     buttons =
     {
         {
-            text = SI_DIALOG_UPGRADE,
+            text = function()
+                if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
+                    return SI_START_HERON_PURCHASE_FLOW
+                else
+                    return SI_DIALOG_UPGRADE
+                end
+            end,
             callback = function(dialog)
                 if DoesPlatformStoreUseExternalLinks() then
                     OpenChapterUpgradeURL(dialog.data.chapterId, dialog.data.isCollectorsEdition, dialog.data.chapterUpgradeSource)

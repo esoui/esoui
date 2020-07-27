@@ -62,21 +62,10 @@
                     <Dimensions x="64" y="64"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NoteRandomText" relativePoint="BOTTOMLEFT" offsetY="10"/>
                 </Texture>
-
-                <Control name="$(parent)GiftText" resizeToFitDescendents="true">
+                <Label name="$(parent)GiftName" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH3" maxLineCount="2">
                     <Anchor point="LEFT" relativeTo="$(parent)GiftIcon" relativePoint="RIGHT" offsetX="10"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)NoteRandomText" relativePoint="RIGHT" constrains="X"/>
-
-                    <Controls>
-                        <Label name="$(parent)GiftName" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH2" maxLineCount="2">
-                            <Anchor point="TOPLEFT" />
-                        </Label>
-
-                        <Label name="$(parent)GiftDetail" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)GiftName" relativePoint="BOTTOMLEFT" />
-                        </Label>
-                    </Controls>
-                </Control>
+                </Label>
 
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Send" inherits="ZO_CustomDialogButton"/>

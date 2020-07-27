@@ -21,15 +21,7 @@ do
         },
         mainText =
         {
-            text = function(dialog)
-                return dialog.data.formattedMainText or ""
-            end
-        },
-        subText =
-        {
-            text = function(dialog)
-                return dialog.data.formattedSubText or ""
-            end
+            text = SI_MARKET_PRODUCT_NAME_FORMATTER,
         },
         parametricList =
         {
@@ -224,26 +216,10 @@ end
 
 EVENT_MANAGER:RegisterForEvent("ZoConfirmSendGiftGamepad", EVENT_CONFIRM_SEND_GIFT, function(eventCode, giftId)
     if IsInGamepadPreferredMode() then
-        local mainText
-        local subText
         local marketProductId = GetGiftMarketProductId(giftId)
         local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-        local houseId = GetMarketProductHouseId(marketProductId)
-        if houseId > 0 then
-            local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-            local houseDisplayName = GetCollectibleName(houseCollectibleId)
-            mainText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, ZO_SELECTED_TEXT:Colorize(houseDisplayName))
-            subText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId)))
-        else
-            local marketProductData = ZO_MarketProductData:New(marketProductId)
-            local stackCount = marketProductData:GetStackCount()
-            if stackCount > 1 then
-                mainText = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, color:Colorize(GetMarketProductDisplayName(marketProductId)), stackCount)
-            else
-                mainText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId)))
-            end
-        end
-        ZO_Dialogs_ShowGamepadDialog("CONFIRM_SEND_GIFT_GAMEPAD", { giftId = giftId, formattedMainText = mainText, formattedSubText = subText })
+        local colorizedName = color:Colorize(GetMarketProductDisplayName(marketProductId))
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_SEND_GIFT_GAMEPAD", { giftId = giftId, itemName = colorizedName }, { mainTextParams = { colorizedName } })
     end
 end)
 
@@ -328,19 +304,10 @@ do
         {
             text = function(dialog)
                 local data = dialog.data
-                local itemName = data.itemName
-                local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-                local houseId = GetMarketProductHouseId(marketProductId)
-                if houseId > 0 then
-                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
-                    itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, data.itemName)
-                end
-
                 if data.stackCount > 1 then
-                    return zo_strformat(SI_GIFT_SENT_TEXT_WITH_QUANTITY, color:Colorize(itemName), data.stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                    return zo_strformat(SI_GIFT_SENT_TEXT_WITH_QUANTITY, data.itemName, data.stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 else
-                    return zo_strformat(SI_GIFT_SENT_TEXT,  color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                    return zo_strformat(SI_GIFT_SENT_TEXT, data.itemName, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
                 end
             end
         },

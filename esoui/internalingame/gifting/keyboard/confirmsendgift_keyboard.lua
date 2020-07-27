@@ -49,25 +49,8 @@ function ZO_ConfirmSendGiftDialog_Keyboard_OnInitialized(self)
             local name, description, icon = GetMarketProductInfo(marketProductId)
             local giftIconTexture = dialog:GetNamedChild("GiftIcon")
             giftIconTexture:SetTexture(icon)
-            local giftTextContainer = dialog:GetNamedChild("GiftText")
-            local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-            local houseId = GetMarketProductHouseId(marketProductId)
-            if houseId > 0 then
-                local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-                local houseDisplayName = GetCollectibleName(houseCollectibleId)
-                giftTextContainer:GetNamedChild("GiftName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(houseDisplayName)))
-                giftTextContainer:GetNamedChild("GiftDetail"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId))))
-            else
-                local marketProductData = ZO_MarketProductData:New(marketProductId)
-                local stackCount = marketProductData:GetStackCount()
-                if stackCount > 1 then
-                    giftTextContainer:GetNamedChild("GiftName"):SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, color:Colorize(GetMarketProductDisplayName(marketProductId)), stackCount))
-                else
-                    giftTextContainer:GetNamedChild("GiftName"):SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId))))
-                end
-                giftTextContainer:GetNamedChild("GiftDetail"):SetText("")
-            end
-
+            local giftNameLabel = dialog:GetNamedChild("GiftName")
+            giftNameLabel:SetText(zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name))
             UpdateSendRestrictions(dialog:GetNamedChild("NameEdit"))
 
             if not data.isRestart then
@@ -154,18 +137,11 @@ local function OnGiftSendingUpdate(dialog, currentTimeInSeconds)
 
             local itemName = GetMarketProductDisplayName(data.marketProductId)
             local stackCount = GetMarketProductStackCount(data.marketProductId)
-            local color = GetItemQualityColor(GetMarketProductDisplayQuality(data.marketProductId))
-            local houseId = GetMarketProductHouseId(data.marketProductId)
-            if houseId > 0 then
-                local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-                local houseDisplayName = GetCollectibleName(houseCollectibleId)
-                itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, data.itemName)
-            end
 
             if stackCount > 1 then
-                mainText = zo_strformat(SI_GIFT_SENT_TEXT_WITH_QUANTITY, color:Colorize(itemName), stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                mainText = zo_strformat(SI_GIFT_SENT_TEXT_WITH_QUANTITY, itemName, stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
             else
-                mainText = zo_strformat(SI_GIFT_SENT_TEXT, color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                mainText = zo_strformat(SI_GIFT_SENT_TEXT, itemName, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
             end
         else
             titleText = GetString(SI_TRANSACTION_FAILED_TITLE)

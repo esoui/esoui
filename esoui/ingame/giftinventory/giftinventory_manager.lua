@@ -18,18 +18,8 @@ function ZO_Gift_Base:Initialize(giftId, state, seen, marketProductId, senderNam
     self.note = note
     local description
     self.name, description, self.icon = GetMarketProductInfo(marketProductId)
-    self.stackCount = GetMarketProductStackCount(marketProductId)
-    self.qualityColor = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-
-    local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-    local houseId = GetMarketProductHouseId(marketProductId)
-    if houseId > 0 then
-        local houseCollectibleId = GetCollectibleIdForHouse(houseId)
-        local houseDisplayName = GetCollectibleName(houseCollectibleId)
-        self.formattedName = self.qualityColor:Colorize(ZO_CachedStrFormat(SI_MARKET_PRODUCT_HOUSE_NAME_FORMATTER, houseDisplayName, self.name))
-    else
-        self.formattedName = ZO_CachedStrFormat(SI_MARKET_PRODUCT_NAME_FORMATTER, self.qualityColor:Colorize(self.name))
-    end
+    self.stackCount = GetMarketProductStackCount(marketProductId)    
+    self.formattedName = ZO_CachedStrFormat(SI_MARKET_PRODUCT_NAME_FORMATTER, self.name)
 end
 
 function ZO_Gift_Base:GetGiftId()
@@ -38,10 +28,6 @@ end
 
 function ZO_Gift_Base:GetMarketProductId()
     return self.marketProductId
-end
-
-function ZO_Gift_Base:GetQualityColor()
-    return self.qualityColor
 end
 
 function ZO_Gift_Base:GetName()

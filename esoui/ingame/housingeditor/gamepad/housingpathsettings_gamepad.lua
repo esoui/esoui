@@ -13,20 +13,10 @@ end
 function ZO_HousingPathSettings_Gamepad:InitializeControls(control)
     GAMEPAD_HOUSING_PATH_SETTINGS_SCENE = ZO_Scene:New("gamepad_housing_path_settings", SCENE_MANAGER)
 
-    local DO_NOT_CREATE_TAB_BAR = false
     local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, DO_NOT_CREATE_TAB_BAR, ACTIVATE_ON_SHOW, GAMEPAD_HOUSING_PATH_SETTINGS_SCENE)
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_HOUSING_PATH_SETTINGS_SCENE)
 
-    local fragment = ZO_SimpleSceneFragment:New(control)
-    GAMEPAD_HOUSING_PATH_SETTINGS_FRAGMENT = fragment
-    fragment:SetHideOnSceneHidden(false)
-
-    local function OnSceneStateChanged(oldState, newState)
-        if newState == SCENE_HIDING then
-            self:OnHiding()
-        end
-    end
-    GAMEPAD_HOUSING_PATH_SETTINGS_SCENE:RegisterCallback("StateChange", OnSceneStateChanged)
+    GAMEPAD_HOUSING_PATH_SETTINGS_FRAGMENT = ZO_SimpleSceneFragment:New(control)
 
     SYSTEMS:RegisterGamepadObject("path_settings", self)
     SYSTEMS:RegisterGamepadRootScene("housing_path_settings", GAMEPAD_HOUSING_PATH_SETTINGS_SCENE)
@@ -231,6 +221,18 @@ function ZO_HousingPathSettings_Gamepad:PerformUpdate()
     self.dirty = false
 end
 
+function ZO_HousingPathSettings_Gamepad:OnHiding()
+    ZO_Gamepad_ParametricList_Screen.OnHiding(self)
+    self:DeactivateSelectedControl()
+end
+
+function ZO_HousingPathSettings_Gamepad:DeactivateSelectedControl()
+    local selectedControl = self.mainList:GetSelectedControl()
+    if selectedControl and selectedControl.horizontalListObject then
+        selectedControl.horizontalListObject:Deactivate()
+    end
+end
+
 function ZO_HousingPathSettings_Gamepad:RefreshHeader()
     if self:IsMainListActive() then
         local itemName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(HousingEditorGetSelectedFurnitureId())
@@ -245,10 +247,6 @@ function ZO_HousingPathSettings_Gamepad:RefreshHeader()
     end
 
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
-end
-
-function ZO_HousingPathSettings_Gamepad:OnHiding()
-    self:ShowMainList()
 end
 
 function ZO_HousingPathSettings_Gamepad:OnSelectTargetObject()
