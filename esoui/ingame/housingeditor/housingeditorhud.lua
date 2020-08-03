@@ -26,7 +26,6 @@ local AXIS_INDICATOR_SCALE_MIN = 1
 local AXIS_INDICATOR_PICKUP_YAW_OFFSET_ANGLE = math.rad(20)
 local AXIS_KEYBIND_RGB_WEIGHT_MIN_PERCENTAGE = 0.3
 local AXIS_KEYBIND_RGB_WEIGHT_MAX_PERCENTAGE = 0.7
-local AXIS_MAX_DRAW_LEVEL = 100000
 local ROTATION_AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE = 0.7
 local ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M = 1.5
 local TRANSLATION_AXIS_RANGE_MAX_CM = 10000
@@ -36,11 +35,6 @@ local TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M = 0.325
 local TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA = 0.26
 local TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M = 200
 local TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M = 0.07
-
--- Yaw offset, in radians, for the Y-axis indicator while in pickup mode.
--- This slight offset allows the axis to remain visible and interactive
--- while it is rotationally locked to the camera's heading.
-local Y_AXIS_INDICATOR_YAW_OFFSET_RAD = -(PI * 15 / 180)
 
 local X_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 0.5, 0.9, 1)
 local X_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 0.5, 0.9, 1)
@@ -58,9 +52,6 @@ local PRECISION_ROTATE_INTERVALS_MS = {[0.05] = 120000, [1] = 9000, [15] = 1200}
 local PICKUP_ROTATE_INTERVALS_MS = 2000
 local PICKUP_AXIS_INDICATOR_DISTANCE_CM = 1000
 
-local DEFAULT_PRECISION_MOVE_UNITS_CM = 10
-local DEFAULT_PRECISION_ROTATE_UNITS_DEG = math.rad(15)
-
 local PRECISION_UNIT_ADJUSTMENT_INCREMENT = 1
 local PRECISION_UNIT_ADJUSTMENT_DECREMENT = 2
 
@@ -68,7 +59,6 @@ local TEXTURE_ARROW_DIRECTION = "EsoUI/Art/Housing/translation_arrow.dds"
 local TEXTURE_ARROW_DIRECTION_INVERSE = "EsoUI/Art/Housing/translation_inverse_arrow.dds"
 local TEXTURE_ARROW_ROTATION_FORWARD = "EsoUI/Art/Housing/dual_rotation_arrow.dds"
 local TEXTURE_ARROW_ROTATION_REVERSE = "EsoUI/Art/Housing/dual_rotation_arrow_reverse.dds"
-local TEXTURE_HOUSE_ICON = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuicon_home.dds"
 
 local function AngleDistance(angle1, angle2)
     local delta = math.abs(angle1 - angle2) % TWO_PI
@@ -476,7 +466,7 @@ function ZO_HousingEditorHud:UpdateTargetData()
         self:SetTargetData(HousingEditorGetSelectedFurnitureId())
     else
         local furnitureId, pathIndex = HousingEditorGetTargetInfo()
-        if furnitureId ~= 0 then
+        if CompareId64ToNumber(furnitureId, 0) > 0 then
             self:SetTargetData(furnitureId, pathIndex)
         else
             self:ClearTargetData()
@@ -847,7 +837,6 @@ do
 
             -- Calculate the translation range using the selected item's center point.
             local centerX, centerY, centerZ = HousingEditorGetSelectedObjectWorldCenter(HousingEditorGetSelectedFurnitureId())
-            local centerOffsetX, centerOffsetY, centerOffsetZ = centerX - self.focusInitialX, centerY - self.focusInitialY, centerZ - self.focusInitialZ
             local isTranslation = false
 
             if axis.axis == HOUSING_EDITOR_POSITION_AXIS_X1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_X2 then
@@ -1019,8 +1008,6 @@ function ZO_HousingEditorHud:OnDragMouseRotation(cameraX, cameraY, cameraZ, norm
     local normalizedOffsetRadians = normalizedOffsetX * 2 * TWO_PI
     local axisIndicatorAngleRadians = normalizedOffsetRadians
     local indicatorX, indicatorY, indicatorZ = self:GetAxisIndicatorOrigin()
-    local currentX, currentY, currentZ = HousingEditorGetFurnitureWorldPosition(HousingEditorGetSelectedFurnitureId())
-    local relativeX, relativeY, relativeZ = cameraX - indicatorX, cameraY - indicatorY, cameraZ - indicatorZ
     local offsetAxis
 
     if axisType == HOUSING_EDITOR_ROTATION_AXIS_X1 or axisType == HOUSING_EDITOR_ROTATION_AXIS_X2 then
@@ -1034,12 +1021,14 @@ function ZO_HousingEditorHud:OnDragMouseRotation(cameraX, cameraY, cameraZ, norm
     -- Update the rotation offset and/or axis indicator values to match the focused axis.
     if self:IsPrecisionEditingEnabled() then
         if offsetAxis == AXIS_TYPE_X then
+            local relativeX = cameraX - indicatorX
             if relativeX > 0 then
                 normalizedOffsetRadians, axisIndicatorAngleRadians = -normalizedOffsetRadians, -axisIndicatorAngleRadians
             end
         elseif offsetAxis == AXIS_TYPE_Y then
             normalizedOffsetRadians = -normalizedOffsetRadians
         elseif offsetAxis == AXIS_TYPE_Z then
+            local relativeZ = cameraZ - indicatorZ
             if relativeZ > 0 then
                 normalizedOffsetRadians, axisIndicatorAngleRadians = -normalizedOffsetRadians, -axisIndicatorAngleRadians
             end
@@ -1084,10 +1073,10 @@ function ZO_HousingEditorHud:RotateAndScaleAxisIndicator(control, theta)
     local bottomLeftX, bottomLeftY = ZO_Rotate2D(theta, -0.5,  0.5)
     local bottomRightX, bottomRightY = ZO_Rotate2D(theta,  0.5,  0.5)
 
-	control:SetVertexUV(VERTEX_POINTS_TOPLEFT, 0.5 + topLeftX, 0.5 + topLeftY)
-	control:SetVertexUV(VERTEX_POINTS_TOPRIGHT, 0.5 + topRightX, 0.5 + topRightY)
-	control:SetVertexUV(VERTEX_POINTS_BOTTOMLEFT, 0.5 + bottomLeftX, 0.5 + bottomLeftY)
-	control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, 0.5 + bottomRightX, 0.5 + bottomRightY)
+    control:SetVertexUV(VERTEX_POINTS_TOPLEFT, 0.5 + topLeftX, 0.5 + topLeftY)
+    control:SetVertexUV(VERTEX_POINTS_TOPRIGHT, 0.5 + topRightX, 0.5 + topRightY)
+    control:SetVertexUV(VERTEX_POINTS_BOTTOMLEFT, 0.5 + bottomLeftX, 0.5 + bottomLeftY)
+    control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, 0.5 + bottomRightX, 0.5 + bottomRightY)
 end
 
 function ZO_HousingEditorHud:GetCameraOrigin()
@@ -1191,7 +1180,6 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
     if self.translationIndicators and self.rotationIndicators then
         local isPlacementMode = IsInHousingEditorPlacementMode()
         local isPrecisionMode = self:IsPrecisionEditingEnabled()
-        local isUIMode = IsGameCameraUIModeActive()
 
         if not isPlacementMode then
             EVENT_MANAGER:UnregisterForUpdate("HousingEditor_AxisIndicators")
@@ -1590,7 +1578,6 @@ do
             self.precisionOrientationLabel:SetHidden(true)
         end
 
-        local isAnyKeyPressed = false
         local activeIntervalMS = 0
 
         for keypress = KEYPRESS_MIN, KEYPRESS_MAX do
@@ -1603,7 +1590,6 @@ do
                     key.keypressDurationMS = frameTimeMS - key.keypressStartMS
                     key.keypressIntervalMS = ZO_EaseOutQuadratic(math.min(1, key.keypressDurationMS / PRESS_AND_HOLD_ACCELERATION_INTERVAL_MS))
                     activeIntervalMS = math.max(activeIntervalMS, key.keypressIntervalMS)
-                    isAnyKeyPressed = true
                 elseif key.keypressStartMS then
                     key.keypressStartMS = nil
                     key.keypressDurationMS = nil
@@ -1801,7 +1787,7 @@ do
                 return true
             else
                 local furnitureId = HousingEditorGetTargetInfo()
-                if furnitureId ~= 0 then
+                if CompareId64ToNumber(furnitureId, 0) > 0 then
                     return HousingEditorCanFurnitureBePathed(furnitureId)
                 end
             end
@@ -1813,7 +1799,7 @@ do
             name = function()
                 local targetingPathableFurniture = false
                 local furnitureId = HousingEditorGetTargetInfo()
-                if furnitureId ~= 0 then
+                if CompareId64ToNumber(furnitureId, 0) > 0 then
                     targetingPathableFurniture = HousingEditorCanFurnitureBePathed(furnitureId)
                 end
 
@@ -1898,6 +1884,12 @@ do
             ethereal = true,
         }
 
+        local function CanLinkFurniture()
+            local furnitureId, nodeIndex = HousingEditorGetTargetInfo()
+            local hasFurnitureId = CompareId64ToNumber(furnitureId, 0) > 0
+            return hasFurnitureId and nodeIndex == nil and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0
+        end
+
         -- Link Furniture
         local selectionLinkFurnitureDescriptor =
         {
@@ -1911,14 +1903,8 @@ do
                             end
                         end,
             -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-            visible = function()
-                local furnitureId, nodeIndex = HousingEditorGetTargetInfo()
-                return (furnitureId ~= 0 and not nodeIndex and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0) and true or false
-            end,
-            enabled = function()
-                local furnitureId, nodeIndex = HousingEditorGetTargetInfo()
-                return (furnitureId ~= 0 and not nodeIndex and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0) and true or false
-            end,
+            visible = CanLinkFurniture,
+            enabled = CanLinkFurniture,
             order = 40,
             ethereal = true,
         }
@@ -3058,7 +3044,7 @@ do
                 keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
                 ethereal = true,
                 callback = function()
-                                if not IsInGamepadPreferredMode() then 
+                                if not IsInGamepadPreferredMode() then
                                     SCENE_MANAGER:OnToggleHUDUIBinding()
                                 end
                             end,
