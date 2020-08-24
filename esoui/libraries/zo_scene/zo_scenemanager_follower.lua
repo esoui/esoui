@@ -31,7 +31,7 @@ function ZO_SceneManager_Follower:OnLeaderToFollowerSync(messageOrigin, syncType
             -- If the next scene has the fragments then we will not hide them because they will be showing
             -- However, it is possible that the next scene is changed before we fully hide the current scene
             -- so we need to refresh the current scene's fragments so they hide/show as appropriate for the next scene
-            if self.currentScene then
+            if self.currentScene and self.currentScene:IsHiding() then
                 self.currentScene:RefreshFragments()
             end            
         else

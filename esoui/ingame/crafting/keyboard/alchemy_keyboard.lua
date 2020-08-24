@@ -408,7 +408,9 @@ function ZO_AlchemyInventory:AddListDataTypes()
                     traitControl.label:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_ACCENT))
                     traitControl.label:SetText(traitName)
 
-                    ALCHEMY:SetupTraitIcon(traitControl.icon, traitName, normalTraitIcon, traitMatchIcon, traitConflictIcon)
+                    -- ESO-641401: This is only called from inventory and inventory will never be comparing icons with another reagent so we
+                    -- don't want to pass in the matching and conflicting icons here since we don't want them to display in inventory
+                    ALCHEMY:SetupTraitIcon(traitControl.icon, traitName, normalTraitIcon)
                     ZO_ItemSlot_SetupIconUsableAndLockedColor(traitControl.icon, true, locked)
                     traitControl.icon:SetHidden(false)
                 else

@@ -1475,6 +1475,25 @@ function ZO_ScrollList_GetDataIndex(self, data)
     return nil
 end
 
+function ZO_ScrollList_FindDataIndexByDataEntry(self, dataEntry, optionalTypeId)
+    if dataEntry then
+        for i, data in ipairs(self.data) do
+            if data.data == dataEntry then
+                return i
+            end
+
+            if not optionalTypeId or data.typeId == optionalTypeId then
+                local dataTypeInfo = GetDataTypeInfo(self, data.typeId)
+                local equalityFunction = dataTypeInfo.equalityFunction
+                if equalityFunction and equalityFunction(data.data, dataEntry) then
+                    return i
+                end
+            end
+        end
+    end
+    return nil
+end
+
 function ZO_ScrollList_SelectData(self, data, control, reselectingDuringRebuild, animateInstantly)
     if not AreSelectionsEnabled(self) then
         return
@@ -1938,6 +1957,11 @@ end
 
 function ZO_ScrollList_ResetAutoSelectIndex(self)
     self.lastSelectedDataIndex = nil
+end
+
+-- This should be used before a commit/activate. It won't affect an already commited/activated list.
+function ZO_ScrollList_SetAutoSelectToMatchingDataEntry(self, dataEntry, optionalTypeId)
+    self.lastSelectedDataIndex = ZO_ScrollList_FindDataIndexByDataEntry(self, dataEntry, optionalTypeId)
 end
 
 -- direction: ZO_SCROLL_SELECT_CATEGORY_PREVIOUS or ZO_SCROLL_SELECT_CATEGORY_NEXT

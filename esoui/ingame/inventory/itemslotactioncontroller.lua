@@ -124,6 +124,10 @@ function ZO_ItemSlotActionsController:GetSlotActions()
     return self.slotActions
 end
 
+function ZO_ItemSlotActionsController:GetSlotActionAtIndex(index)
+    return self.slotActions:GetSlotAction(index)
+end
+
 function ZO_ItemSlotActionsController:SetSelectedAction(action)
     self.selectedAction = action
 end

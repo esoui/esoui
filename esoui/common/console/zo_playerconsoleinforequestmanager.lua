@@ -125,9 +125,8 @@ function PlayerConsoleInfoRequestManager:RequestIdFromUserListDialog(callback, t
 end
 
 function PlayerConsoleInfoRequestManager:RequestTextValidation(text, callback)
-    local platform = GetUIPlatform()
-    if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
-        local data = 
+    if ZO_IsConsolePlatform() then
+        local data =
         {
             validationKey = RequestConsoleTextValidation(text),
             callback = callback,
@@ -143,9 +142,8 @@ function PlayerConsoleInfoRequestManager:RequestNameValidation(name, callback)
     if not IsValidName(name) then
         callback(false)
     else
-        local platform = GetUIPlatform()
-        if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
-        local data = 
+        if ZO_IsConsolePlatform() then
+        local data =
         {
             validationKey = RequestConsoleTextValidation(name),
             blockingDialogName = "WAIT_FOR_CONSOLE_NAME_VALIDATION"

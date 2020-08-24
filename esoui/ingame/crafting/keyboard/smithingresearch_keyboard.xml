@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_SmithingResearchSlot" inherits="ZO_ItemSlot" virtual="true">
-            <Dimensions x="48" y="43" />
+            <Dimensions x="48" y="41" />
             <OnInitialized>
                 ZO_SmithingResearchSlot_OnInitialized(self)
             </OnInitialized>
@@ -23,7 +23,7 @@
 
             <Controls>
                 <Texture name="$(parent)Bg" inherits="ZO_ThinListBgStrip" mouseEnabled="true">
-                    <Dimensions x="526" y="48" />
+                    <Dimensions x="526" y="43" />
                     <Anchor point="LEFT" />
 
                     <OnMouseDoubleClick>
@@ -88,22 +88,47 @@
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
 
                 <Label name="$(parent)NumResearching" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" offsetX="35" offsetY="18" />
+                    <Anchor point="TOPLEFT" offsetX="68" offsetY="18" />
                 </Label>
 
                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds">
                     <Dimensions x="32" y="32" />
                     <Anchor point="RIGHT" relativeTo="$(parent)NumResearching" relativePoint="LEFT" offsetX="-2" />
                 </Texture>
-                
+
+                <Control name="$(parent)ButtonDivider" inherits="ZO_InventoryFilterDivider">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetX="13" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y" />
+                </Control>
+
+                <Button name="$(parent)IncludeBanked" inherits="ZO_CheckButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ButtonDivider" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="10" />
+
+                    <OnMouseEnter>
+                        ZO_SmithingExtraction_IncludeBankedItemsOnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_SmithingExtraction_FilterOnMouseExit(self)
+                    </OnMouseExit>
+                </Button>
+
                 <Control name="$(parent)ResearchLineList" inherits="ZO_SmithingHorizontalListTemplate">
-                    <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)IncludeBanked" offsetX="-5" offsetY="30" />
                     <Dimensions y="155"/>
+                    <Controls>
+                        <Control name="$(parent)List" override="true">
+                            <Anchor point="CENTER" offsetY="-2"/>
+                        </Control>
+                        <Control name="$(parent)ExtraInfoLabel" override="true">
+                            <Anchor point="BOTTOMLEFT" offsetY="-8"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="-12"/>
+                        </Control>
+                    </Controls>
                 </Control>
 
                 <Control name="$(parent)TimerBar">
                     <Dimensions x="270" y="24" />
-                    <Anchor point="BOTTOM" relativeTo="$(parent)ResearchLineList" offsetY="-8"/>
+                    <Anchor point="BOTTOM" relativeTo="$(parent)ResearchLineList" offsetY="-12"/>
 
                     <Controls>
                         <StatusBar name="$(parent)Status" inherits="ZO_ArrowStatusBarWithBG">
@@ -124,7 +149,7 @@
                 </Control>
 
                 <Control name="$(parent)ContainerDivider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="TOP" relativeTo="$(parent)ResearchLineList" relativePoint="BOTTOM" offsetY="5"/>
+                    <Anchor point="TOP" relativeTo="$(parent)ResearchLineList" relativePoint="BOTTOM" offsetY="-1"/>
                 </Control>
 
                 <Label name="$(parent)ResearchProgressLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_SMITHING_RESEARCH_PROGRESS_HEADER">
@@ -134,11 +159,6 @@
                 <Control name="$(parent)TraitContainer">
                     <Dimensions x="576" y="700" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ResearchProgressLabel" relativePoint="BOTTOMLEFT" offsetY="8" />
-                </Control>
-
-                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
                 </Control>
             </Controls>
         </Control>

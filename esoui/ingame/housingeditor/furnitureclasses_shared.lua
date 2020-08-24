@@ -5,6 +5,7 @@ ZO_SETTINGS_BANLIST_DATA_TYPE = 4
 ZO_SETTINGS_GUILD_VISITOR_DATA_TYPE = 5
 ZO_SETTINGS_GUILD_BANLIST_DATA_TYPE = 6
 ZO_HOUSING_MARKET_PRODUCT_DATA_TYPE = 7
+ZO_HOUSING_PATH_NODE_DATA_TYPE = 8
 
 --
 --[[ FurnitureDataBase ]]--
@@ -304,8 +305,8 @@ end
 function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
     local rawName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(retrievableFurnitureId)
 
-    --Only update these on id change. 
-    if retrievableFurnitureId ~= self.retrievableFurnitureId then
+    --Only update these on id change.
+    if CompareId64s(retrievableFurnitureId, self.retrievableFurnitureId) ~= 0 then
         self.retrievableFurnitureId = retrievableFurnitureId
         self.icon = icon
         self.furnitureDataId = furnitureDataId
@@ -525,6 +526,104 @@ function ZO_HousingMarketProduct:CanBePurchased()
 end
 
 --
+--[[ FurniturePathNode ]]--
+--
+ZO_FurniturePathNode = ZO_FurnitureDataBase:Subclass()
+
+function ZO_FurniturePathNode:New(...)
+    return ZO_FurnitureDataBase.New(self, ...)
+end
+
+function ZO_FurniturePathNode:Initialize(...)
+    ZO_FurnitureDataBase.Initialize(self)
+    self:RefreshInfo(...)
+end
+
+function ZO_FurniturePathNode:RefreshInfo(furnitureId, index)
+    local rawName, icon = GetPlacedHousingFurnitureInfo(furnitureId)
+
+    --Only update these on id or index change.
+    if CompareId64s(furnitureId, self.furnitureId) ~= 0 or index ~= self.pathIndex then
+        self.furnitureId = furnitureId
+        self.pathIndex = index
+        self.icon = icon
+
+        local playerWorldX, playerWorldY, playerWorldZ = GetPlayerWorldPositionInHouse()
+        self:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, GetPlayerCameraHeading())
+    end
+
+    --Refresh the name which depends on the collectible nickname.
+    local itemLink, collectibleLink = GetPlacedFurnitureLink(retrievableFurnitureId)
+    if collectibleLink ~= "" then
+        local collectibleId = GetCollectibleIdFromLink(collectibleLink)
+        if collectibleId then
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            if collectibleData then
+                rawName = self:GetRawNameFromCollectibleData(collectibleData)
+            end
+        end
+    end
+
+    self.rawName = rawName
+    self.formattedName = zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_NAME, self.pathIndex, rawName)
+end
+
+function ZO_FurniturePathNode:GetFurnitureId()
+    return self.furnitureId
+end
+
+function ZO_FurniturePathNode:GetPathIndex()
+    return self.pathIndex
+end
+
+function ZO_FurniturePathNode:GetDataType()
+    return ZO_HOUSING_PATH_NODE_DATA_TYPE
+end
+
+function ZO_FurniturePathNode:IsStartingPathNode()
+    return self.pathIndex == HousingEditorGetStartingNodeIndexForPath(self.furnitureId)
+end
+
+function ZO_FurniturePathNode:IsPreviewable()
+    return false
+end
+
+function ZO_FurniturePathNode:IsBeingPreviewed()
+    return false
+end
+
+function ZO_FurniturePathNode:Preview()
+    -- can't be previewed
+end
+
+function ZO_FurniturePathNode:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, playerCameraHeadingRadians)
+    local worldX, worldY, worldZ = HousingEditorGetPathNodeWorldPosition(self.furnitureId, self.pathIndex)
+    self.distanceFromPlayerCM = zo_floor(zo_distance3D(worldX, worldY, worldZ, playerWorldX, playerWorldY, playerWorldZ))
+    self.distanceFromPlayerM = zo_floor(self.distanceFromPlayerCM / 100)
+
+    local vectorToFurnitureX = worldX - playerWorldX
+    local vectorToFurnitureZ = worldZ - playerWorldZ
+    local angleRadians = math.atan2(vectorToFurnitureX, vectorToFurnitureZ)
+    self.angleFromPlayerHeadingRadians = zo_mod(angleRadians - playerCameraHeadingRadians, math.pi * 2)
+end
+
+function ZO_FurniturePathNode:GetDistanceFromPlayerM()
+    return self.distanceFromPlayerM
+end
+
+function ZO_FurniturePathNode:GetDistanceFromPlayerCM()
+    return self.distanceFromPlayerCM
+end
+
+function ZO_FurniturePathNode:GetAngleFromPlayerHeadingRadians()
+    return self.angleFromPlayerHeadingRadians
+end
+
+function ZO_FurniturePathNode:CompareTo(other)
+    return self.pathIndex < other:GetPathIndex()
+end
+
+--
 --[[ FurnitureCategory ]]--
 --
 ZO_FurnitureCategory = ZO_Object:Subclass()
@@ -545,6 +644,9 @@ function ZO_FurnitureCategory:Initialize(parent, categoryId)
         self.categoryId = categoryId
         if categoryId == ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY then
             self.name = GetString(SI_HOUSING_FURNITURE_NEEDS_CATEGORIZATION)
+            self.categoryOrder = 0
+        elseif categoryId == ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY then
+            self.name = GetString(SI_HOUSING_CATEGORY_PATH_NODES)
             self.categoryOrder = 0
         else
             local categoryName, _, _, categoryOrder = GetFurnitureCategoryInfo(categoryId)
@@ -711,6 +813,32 @@ function ZO_RootFurnitureCategory:GetOrCreateMostSpecificCategory(categoryId, su
         end
         return categoryData
     end
+end
+
+--
+--[[ PathNodeFurnitureCategory ]]--
+--
+ZO_PathNodeFurnitureCategory = ZO_FurnitureCategory:Subclass()
+
+function ZO_PathNodeFurnitureCategory:New(...)
+    return ZO_FurnitureCategory.New(self, ...)
+end
+
+function ZO_PathNodeFurnitureCategory:Initialize(parentCategory, furnitureIdKey)
+    ZO_FurnitureCategory.Initialize(self, parentCategory, furnitureIdKey)
+    self.furnitureId = StringToId64(furnitureIdKey)
+
+    local rawName, icon = GetPlacedHousingFurnitureInfo(self.furnitureId)
+    self.name = zo_strformat(SI_HOUSING_FURNITURE_NAME_FORMAT, rawName)
+    self.icon = icon
+end
+
+function ZO_PathNodeFurnitureCategory:GetFurnitureId()
+    return self.furnitureId
+end
+
+function ZO_PathNodeFurnitureCategory:GetIcon()
+    return self.icon
 end
 
 -- HousingSettingsList Shared Functions --

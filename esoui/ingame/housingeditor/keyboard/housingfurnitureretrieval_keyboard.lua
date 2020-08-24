@@ -32,11 +32,22 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
             end,
         },
         {
-            name = GetString(SI_HOUSING_EDITOR_PUT_AWAY),
+            name = function()
+                local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+                if mostRecentlySelectedData and mostRecentlySelectedData:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                    return GetString(SI_HOUSING_EDITOR_PATH_REMOVE_NODE)
+                else
+                    return GetString(SI_HOUSING_EDITOR_PUT_AWAY)
+                end
+            end,
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function()
                 local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
-                ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(mostRecentlySelectedData)
+                if mostRecentlySelectedData:GetDataType() == ZO_RECALLABLE_HOUSING_DATA_TYPE then
+                    ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(mostRecentlySelectedData)
+                else
+                    ZO_HousingFurnitureBrowser_Base.PutAwayNode(mostRecentlySelectedData)
+                end
             end,
             enabled = function()
                 local hasMostRecentlySelectedData = self:GetMostRecentlySelectedData() ~= nil
@@ -54,11 +65,13 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
                 SHARED_FURNITURE:SetPlayerWaypointTo(mostRecentlySelectedData)
             end,
             enabled = function()
-                local hasMostRecentlySelectedData = self:GetMostRecentlySelectedData() ~= nil
+                local recentlySelectedData = self:GetMostRecentlySelectedData()
+                local hasMostRecentlySelectedData = recentlySelectedData ~= nil
                 if not hasMostRecentlySelectedData then
                     return false, GetString(SI_HOUSING_BROWSER_MUST_CHOOSE_TO_SET_PLAYER_WAYPOINT)
                 end
-                return true
+                local dataType = recentlySelectedData:GetDataType()
+                return dataType == ZO_RECALLABLE_HOUSING_DATA_TYPE or dataType == ZO_HOUSING_PATH_NODE_DATA_TYPE
             end
         },
         {
@@ -70,6 +83,18 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
             visible = function()
                 local hasSelection = self:GetMostRecentlySelectedData() ~= nil and IsCurrentlyPreviewing()
                 return hasSelection
+            end,
+        },
+        {
+            name = GetString(SI_HOUSING_FURNITURE_SET_STARTING_NODE),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                local recentlySelectedData = self:GetMostRecentlySelectedData()
+                ZO_HousingFurnitureBrowser_Base.SetAsStartingNode(recentlySelectedData)
+            end,
+            visible = function()
+                local recentlySelectedData = self:GetMostRecentlySelectedData()
+                return recentlySelectedData and recentlySelectedData:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE
             end,
         },
     }
@@ -95,10 +120,15 @@ function ZO_HousingFurnitureRetrieval_Keyboard:AddListDataTypes()
     end
 
     self:AddDataType(ZO_RECALLABLE_HOUSING_DATA_TYPE, "ZO_RetrievableFurnitureSlot", ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT, function(...) self:SetupRetrievableFurnitureRow(...) end, ZO_HousingFurnitureBrowser_Keyboard.OnHideFurnitureRow)
+    self:AddDataType(ZO_HOUSING_PATH_NODE_DATA_TYPE, "ZO_RetrievableFurnitureSlot", ZO_HOUSING_FURNITURE_LIST_ENTRY_HEIGHT, function(...) self:SetupRetrievableFurnitureRow(...) end, ZO_HousingFurnitureBrowser_Keyboard.OnHideFurnitureRow)
 end
 
 function ZO_HousingFurnitureRetrieval_Keyboard:Retrieve(data)
-    ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(data)
+    if data:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+        ZO_HousingFurnitureBrowser_Base.SelectNodeForReplacement(data)
+    else
+        ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(data)
+    end
     SCENE_MANAGER:HideCurrentScene()
 end
 
@@ -129,4 +159,13 @@ end
 --Overridden from ZO_HousingFurnitureList
 function ZO_HousingFurnitureRetrieval_Keyboard:CompareFurnitureEntries(a, b)
     return a:CompareTo(b)
+end
+
+--Overridden from ZO_HousingFurnitureList
+function ZO_HousingFurnitureRetrieval_Keyboard:OnCategorySelected(data)
+    local mostRecentlySelectedData = self:GetMostRecentlySelectedData()
+    if mostRecentlySelectedData and mostRecentlySelectedData:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+        self:ClearSelection()
+    end
+    ZO_HousingFurnitureList.OnCategorySelected(self, data)
 end

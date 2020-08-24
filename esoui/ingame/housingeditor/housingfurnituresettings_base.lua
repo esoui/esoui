@@ -89,6 +89,11 @@ function ZO_HousingFurnitureSettings_Base:SetPrimaryResidence()
     end
 end
 
+function ZO_HousingFurnitureSettings_Base:RestartPaths()
+    local result = HousingEditorRequestRestartAllFurniturePaths()
+    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+end
+
 function ZO_HousingFurnitureSettings_Base:ShowDefaultAccessTooltip()
     assert(false) -- override in derived classes
 end

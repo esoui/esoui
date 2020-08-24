@@ -1726,6 +1726,20 @@ local KEYBOARD_INTERACT_ICONS =
         enabledNormal = "EsoUI/Art/HUD/radialIcon_cancel_up.dds",
         enabledSelected = "EsoUI/Art/HUD/radialIcon_cancel_over.dds",
     },
+    [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_up.dds",
+        enabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_over.dds",
+        disabledNormal = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/radialIcon_joinMount_disabled.dds",
+    },
+    [SI_PLAYER_TO_PLAYER_DISMOUNT] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_up.dds",
+        enabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_over.dds",
+        disabledNormal = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/radialIcon_dismount_disabled.dds",
+    },
 }
 
 local GAMEPAD_INTERACT_ICONS =
@@ -1781,6 +1795,20 @@ local GAMEPAD_INTERACT_ICONS =
     {
         enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
         enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_cancel_down.dds",
+    },
+    [SI_PLAYER_TO_PLAYER_RIDE_MOUNT] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
+        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_down.dds",
+        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_joinMount_disabled.dds",
+    },
+    [SI_PLAYER_TO_PLAYER_DISMOUNT] =
+    {
+        enabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
+        enabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_down.dds",
+        disabledNormal = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
+        disabledSelected = "EsoUI/Art/HUD/Gamepad/gp_radialIcon_dismount_disabled.dds",
     },
 }
 
@@ -1838,7 +1866,9 @@ do
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_PLAYER_TO_PLAYER_GROUP_DISABLED))
         end
 
-        if IsPlayerInGroup(currentTargetCharacterNameRaw) then
+        local isInGroup = IsPlayerInGroup(currentTargetCharacterNameRaw)
+
+        if isInGroup then
             local groupKickEnabled = isGroupModificationAvailable and isSoloOrLeader and not groupModicationRequiresVoting
             local groupKickFunction = nil
             if groupKickEnabled then
@@ -1881,6 +1911,15 @@ do
                 end
             end
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], ENABLED_IF_NOT_IGNORED, ENABLED_IF_NOT_IGNORED and RequestFriendOption or AlertIgnored)
+        end
+
+        if isInGroup then
+            local mountedState, isRidingGroupMount, hasFreePassengerSlot = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
+            local isPassengerForTarget = IsGroupMountPassengerForTarget(currentTargetCharacterNameRaw)
+            local groupMountEnabled = (mountedState == PLAYER_MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
+            local function MountOption() UseMountAsPassenger(currentTargetCharacterNameRaw) end
+            local optionToShow = isPassengerForTarget and SI_PLAYER_TO_PLAYER_DISMOUNT or SI_PLAYER_TO_PLAYER_RIDE_MOUNT
+            self:AddMenuEntry(GetString(optionToShow), platformIcons[optionToShow], groupMountEnabled, MountOption)  
         end
 
         --Report--

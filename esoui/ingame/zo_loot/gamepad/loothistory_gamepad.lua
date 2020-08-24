@@ -64,20 +64,34 @@ do
     end
 end
 
-function ZO_LootHistory_Gamepad:GetCraftBagIcon()
-    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_craftBag.dds"
+do
+    local STATUS_ICONS =
+    {
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_craftBag.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN] = "EsoUI/Art/Inventory/GamePad/gp_inventory_icon_stolenItem.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_collections.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_antiquities.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_crownCrates.dds",
+    }
+
+    function ZO_LootHistory_Gamepad:GetStatusIcon(displayType)
+        return STATUS_ICONS[displayType]
+    end
 end
 
-function ZO_LootHistory_Gamepad:GetStolenIcon()
-    return "EsoUI/Art/Inventory/GamePad/gp_inventory_icon_stolenItem.dds"
-end
+do
+    local HIGHLIGHTS =
+    {
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight_stolen.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
+    }
 
-function ZO_LootHistory_Gamepad:GetCraftBagHighlight()
-    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds"
-end
-
-function ZO_LootHistory_Gamepad:GetStolenHighlight()
-    return "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight_stolen.dds"
+    function ZO_LootHistory_Gamepad:GetHighlight(displayType)
+        return HIGHLIGHTS[displayType]
+    end
 end
 
 function ZO_LootHistory_Gamepad_OnInitialized(control)

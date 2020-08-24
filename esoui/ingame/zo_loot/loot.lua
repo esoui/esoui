@@ -168,22 +168,22 @@ function ZO_Loot:SetUpLootItem(control, data)
     local nameControl = control:GetNamedChild("Name")
 
     if data.currencyType and data.currencyType ~= CURT_NONE then
-        nameControl:SetText(zo_strformat(SI_LOOT_CURRENCY_FORMAT, ZO_Currency_FormatPlatform(data.currencyType, data.currencyAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)))
+        nameControl:SetText(data.name)
         nameControl:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
     else
         if data.itemType == LOOT_TYPE_COLLECTIBLE then
             nameControl:SetColor(ZO_WHITE:UnpackRGBA())
         elseif data.itemType == LOOT_TYPE_ANTIQUITY_LEAD then
-            -- data.quality is depricated, included here for addon backwards compatibility
+            -- data.quality is deprecated, included here for addon backwards compatibility
             local displayQuality = data.displayQuality or data.quality
-            nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ANTIQUITY_QUALITY_COLORS, displayQuality))
+            nameControl:SetColor(GetAntiquityQualityColor(displayQuality):UnpackRGBA())
         else
             if data.isQuest then
                 nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_TOOLTIP, ITEM_TOOLTIP_COLOR_QUEST_ITEM_NAME))
             else
-                -- data.quality is depricated, included here for addon backwards compatibility
+                -- data.quality is deprecated, included here for addon backwards compatibility
                 local displayQuality = data.displayQuality or data.quality
-                nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
+                nameControl:SetColor(GetItemQualityColor(displayQuality):UnpackRGBA())
             end
         end
 
@@ -215,7 +215,6 @@ end
 
 do
     local BLANK_DATA = {}
-    local STOLEN = true
 
     function ZO_Loot:UpdateList()
         local scrollData = ZO_ScrollList_GetDataList(self.list)
@@ -225,20 +224,20 @@ do
         -- Assume that there's only stolen stuff present in this window until proven otherwise
         self.nonStolenItemsPresent = false
 
-        local numLootItems = GetNumLootItems()
-        local currencyInfo = LOOT_SHARED:GetLootCurrencyInformation()
+        local lootData = LOOT_SHARED:GetSortedLootData()
 
-        -- Add non-stolen (unowned) currency and items
-        for currencyType, currencyInfo in pairs(currencyInfo) do
-            self:UpdateListAddLootCurrency(scrollData, currencyType, currencyInfo.currencyAmount, not STOLEN)
-        end
-        self:UpdateListAddLootItems(scrollData, numLootItems, not STOLEN)
+        for _, data in ipairs(lootData) do
+            if data.currencyType then
+                data.icon = GetCurrencyLootKeyboardIcon(data.currencyType)
+            end
 
-        -- Add stolen (owned) money and items
-        for currencyType, currencyInfo in pairs(currencyInfo) do
-            self:UpdateListAddLootCurrency(scrollData, currencyType, currencyInfo.stolenCurrencyAmount, STOLEN)
+            local scrollEntryData = ZO_ScrollList_CreateDataEntry(DATA_TYPE_LOOT_ITEM, data)
+            table.insert(scrollData, scrollEntryData)
+
+            if not data.isStolen then
+                self.nonStolenItemsPresent = true
+            end
         end
-        self:UpdateListAddLootItems(scrollData, numLootItems, STOLEN)
 
         self.itemCount = #scrollData
 
@@ -250,56 +249,6 @@ do
 
         -- this text depends on the list itself
         self:UpdateAllControlText()
-    end
-end
-
-function ZO_Loot:UpdateListAddLootCurrency(scrollData, currencyType, currencyAmount, isCurrencyStolen)
-    if currencyAmount > 0 then
-        local currencyData =
-        {
-            currencyType = currencyType,
-            currencyAmount = currencyAmount,
-            icon = GetCurrencyLootKeyboardIcon(currencyType),
-            count = 1,
-            isStolen = isCurrencyStolen,
-        }
-
-        scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_LOOT_ITEM, currencyData)
-
-        if not currencyData.isStolen then
-            self.nonStolenItemsPresent = true
-        end
-    end
-end
-
-function ZO_Loot:UpdateListAddLootItems(scrollData, numLootItems, addStolenItems)
-    for i = 1, numLootItems do
-        local lootId, name, icon, count, displayQuality, value, isQuest, isStolen, itemType = GetLootItemInfo(i)
-
-        -- only add stolen items or non stolen items
-        if addStolenItems == isStolen then
-            name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
-            local lootData =
-            {
-                lootId = lootId,
-                name = name,
-                icon = icon,
-                count = count,
-                displayQuality = displayQuality,
-                -- quality is depricated, included here for addon backwards compatibility
-                quality = displayQuality,
-                value = value,
-                isQuest = isQuest,
-                isStolen = isStolen,
-                itemType = itemType
-            }
-
-            if not isStolen then
-                self.nonStolenItemsPresent = true
-            end
-
-            scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(DATA_TYPE_LOOT_ITEM, lootData)
-        end
     end
 end
 
@@ -336,7 +285,7 @@ function ZO_Loot:UpdateLootWindow(name, actionName, isOwned)
 end
 
 function ZO_Loot:GetButtonByKeybind(keybind)
-    if(keybind == "LOOT_ALL") then
+    if keybind == "LOOT_ALL" then
         return self.buttons[1]
     else
         return self.buttons[2]

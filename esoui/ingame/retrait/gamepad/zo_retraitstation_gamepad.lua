@@ -31,6 +31,7 @@ function ZO_RetraitStation_Gamepad:Initialize(control)
     SYSTEMS:RegisterGamepadObject("retrait", self)
 
     GAMEPAD_RETRAIT_SCENE = ZO_InteractScene:New(GAMEPAD_RETRAIT_SCENE_NAME, SCENE_MANAGER, self.retraitStationInteraction)
+    GAMEPAD_RETRAIT_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     local gamepadRetraitModeTopLevel = CreateControlFromVirtual("ZO_RetraitStation_RetraitMode_Gamepad", GuiRoot, "ZO_RetraitStation_Retrait_GamepadTopLevel")
     ZO_RETRAIT_STATION_RETRAIT_GAMEPAD = ZO_RetraitStation_Retrait_Gamepad:New(gamepadRetraitModeTopLevel, GAMEPAD_RETRAIT_SCENE)
 

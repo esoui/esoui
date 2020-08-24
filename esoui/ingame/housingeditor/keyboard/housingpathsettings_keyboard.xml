@@ -1,0 +1,88 @@
+<GuiXml> 
+    <Controls>
+        <TopLevelControl name="ZO_HousingPathChangeObject_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserListWithSearch_Keyboard" hidden="true" />
+
+        <TopLevelControl name="ZO_HousingPathSettingsPanel_KeyboardTopLevel" inherits="ZO_HousingFurnitureBrowserList_Keyboard" hidden="true">
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <Controls>
+                        <Control name="$(parent)General" inherits="ZO_HousingFurniture_ContentsAnchor">
+                            <Controls>
+                                <Control name="$(parent)Settings" inherits="ZO_ScrollContainer">
+                                    <AnchorFill />
+                                </Control>
+                                
+                                <Label name="$(parent)ChangeCollectibleTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SettingsScrollChild"  offsetX="20" offsetY="20" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CHANGE_COLLECTIBLE]
+                                    </OnInitialized>
+                                </Label>
+                                
+                                <Control name="$(parent)ChangeCollectible" inherits="ZO_HousingSettings_Button">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangeCollectibleTitle" relativePoint="BOTTOMLEFT" offsetY="15" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CHANGE_COLLECTIBLE]
+                                    </OnInitialized>
+                                </Control>
+                                
+                                <Label name="$(parent)ChangePathingStateTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangeCollectible" relativePoint="BOTTOMLEFT" offsetY="20" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATHING_STATE]
+                                    </OnInitialized>
+                                </Label>
+                                
+                                <Button name="$(parent)ChangePathingStateOn" inherits="ZO_LabeledRadioButton">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangePathingStateTitle" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                </Button>
+                                
+                                <Button name="$(parent)ChangePathingStateOff" inherits="ZO_LabeledRadioButton">
+                                    <Anchor point="LEFT" relativeTo="$(parent)ChangePathingStateOnLabel" relativePoint="RIGHT" offsetX="30" />
+                                </Button>
+                                
+                                <Label name="$(parent)ChangePathTypeTitle" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangePathingStateOn" relativePoint="BOTTOMLEFT" offsetY="20" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATH_TYPE]
+                                    </OnInitialized>
+                                </Label>
+
+                                <Control name="$(parent)ChangePathTypeDropDown" inherits="ZO_ComboBox">
+                                    <Dimensions x="230" y="35" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChangePathTypeTitle" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                    
+                                    <OnMouseEnter>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseEnter(self)
+                                    </OnMouseEnter>
+
+                                    <OnMouseExit>
+                                        ZO_HousingSettingsTemplates_Keyboard_OnMouseExit(self)
+                                    </OnMouseExit>
+                                    
+                                    <OnInitialized>
+                                        ZO_ComboBox:New(self)
+                                        self.data = ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA[ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATH_TYPE]
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_HousingPathSettingsMenu_KeyboardTopLevel" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550" y="ZO_SCENE_MENU_HEIGHT"/>
+
+            <OnInitialized>
+                ZO_HousingPathSettings_Keyboard_OnInitialize(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

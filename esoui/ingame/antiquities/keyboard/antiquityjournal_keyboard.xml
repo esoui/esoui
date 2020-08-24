@@ -61,10 +61,9 @@
 
         <Control name="ZO_AntiquityJournal_StatusIconDividedHeader" inherits="ZO_AntiquityJournal_StatusIconChildlessHeader" virtual="true">
             <DimensionConstraints minX="300" minY="64" />
-
             <Controls>
                 <Texture name="$(parent)DividerTexture" inherits="ZO_HorizontalDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-105" offsetY="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-105" offsetY="ZO_ANTIQUITY_JOURNAL_SCRYABLE_DIVIDER_HEADER_OFFSET_Y" />
                     <Dimensions x="380" />
                 </Texture>
             </Controls>

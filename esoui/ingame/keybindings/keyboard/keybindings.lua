@@ -15,6 +15,7 @@ function KeybindingsManager:Initialize(control)
     control:RegisterForEvent(EVENT_KEYBINDING_SET, function(eventCode, ...) self:HandleBindingSet(...) end)
     control:RegisterForEvent(EVENT_KEYBINDING_CLEARED, function(eventCode, ...) self:HandleBindingCleared(...) end)
     control:RegisterForEvent(EVENT_KEYBINDINGS_LOADED, function(eventCode, ...) self:HandleBindingsLoaded(...) end)
+    control:RegisterForEvent(EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED, function(eventCode, ...) self:HandleMostRecentGamepadChanged(...) end)
 
     KEYBINDINGS_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
@@ -45,6 +46,10 @@ function KeybindingsManager:HandleBindingCleared(layerIndex, categoryIndex, acti
 end
 
 function KeybindingsManager:HandleBindingsLoaded()
+    self:RefreshList()
+end
+
+function KeybindingsManager:HandleMostRecentGamepadChanged()
     self:RefreshList()
 end
 
@@ -318,7 +323,9 @@ function KeybindsScrollList:New(...)
 end
 
 local function SetBindingButtonData(button, data, bindingIndex)
-    local bindingText = ZO_Keybindings_GetBindingStringFromAction(data.actionName, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_NONE, bindingIndex)
+    local ICON_SIZE_PERCENT = 150
+    local bindingText = ZO_Keybindings_GetBindingStringFromAction(data.actionName, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, bindingIndex, ICON_SIZE_PERCENT, ICON_SIZE_PERCENT)
+
     button:SetText(bindingText)
 
     if data.isRebindable then
@@ -354,7 +361,7 @@ function KeybindsScrollList:Initialize(control, owner)
 
     ZO_ScrollList_AddDataType(self.list, LAYER_DATA_TYPE, "ZO_KeybindingListLayerHeader", 60, SetUpLayerHeaderEntry)
     ZO_ScrollList_AddDataType(self.list, CATEGORY_DATA_TYPE, "ZO_KeybindingListCategoryHeader", 48, SetUpCategoryHeaderEntry)
-    ZO_ScrollList_AddDataType(self.list, KEYBIND_DATA_TYPE, "ZO_KeybindingListRow", 30, SetUpRowEntry)
+    ZO_ScrollList_AddDataType(self.list, KEYBIND_DATA_TYPE, "ZO_KeybindingListRow", 36, SetUpRowEntry)
 end
 
 function KeybindsScrollList:SortScrollList()

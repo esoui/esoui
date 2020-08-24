@@ -37,6 +37,10 @@ function ZO_SharedSmithingResearch:Initialize(control, owner, slotContainerName)
     self.dirty = true
 end
 
+function ZO_SharedSmithingResearch:SetSavedVars(savedVars)
+    self.savedVars = savedVars
+end
+
 function ZO_SharedSmithingResearch:ChangeTypeFilter(filterData)
     self.typeFilter = filterData.descriptor
     self:HandleDirtyEvent()
@@ -193,7 +197,9 @@ do
         local numCurrentlyResearching = 0
 
         local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsNotLockedOrRetraitedItem)
-        PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsNotLockedOrRetraitedItem, virtualInventoryList)
+        if self.savedVars.includeBankedItemsChecked then
+            PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsNotLockedOrRetraitedItem, virtualInventoryList)
+        end
 
         for researchLineIndex = 1, GetNumSmithingResearchLines(craftingType) do
             local name, icon, numTraits, timeRequiredForNextResearchSecs = GetSmithingResearchLineInfo(craftingType, researchLineIndex)

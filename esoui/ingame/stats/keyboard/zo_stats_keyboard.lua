@@ -32,6 +32,7 @@ end
 function ZO_Stats:Initialize(control)
     ZO_Stats_Common.Initialize(self, control)
     self.control = control
+    self.previewAvailable = true
 
     STATS_SCENE = ZO_Scene:New("stats", SCENE_MANAGER)
     STATS_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -125,6 +126,12 @@ function ZO_Stats:OnUpdate()
     if attributesHeaderTitleInView ~= self.isAttributesHeaderTitleInScrollBounds then
         self.isAttributesHeaderTitleInScrollBounds = attributesHeaderTitleInView
         self:UpdateSpendAttributePointsTip(SHOW_HIDE_INSTANT)
+    end
+
+    local isPreviewingAvailable = IsCharacterPreviewingAvailable()
+    if self.previewAvailable ~= isPreviewingAvailable then
+        self.previewAvailable = isPreviewingAvailable
+        self.outfitDropdown:SetEnabled(self.previewAvailable)
     end
 end
 
@@ -262,6 +269,8 @@ function ZO_Stats:CreateBackgroundSection()
     local function UpdateOutfits()
         self:UpdateOutfitDropdownOutfits(outfitDropdown)
     end
+
+    self.outfitDropdown = outfitDropdown
 
     UpdateOutfits()
 

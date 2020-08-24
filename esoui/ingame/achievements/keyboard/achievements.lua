@@ -1263,6 +1263,9 @@ function Achievements:OnAchievementAwarded(achievementId)
 end
 
 function Achievements:OnAchievementUpdated(achievementId)
+    -- Needed if this is the first visible achievement in its category
+    self:BuildCategories()
+
     if self:IsSummaryOpen() then
         self:UpdateSummary()
         self:RefreshRecentAchievements()
@@ -1592,18 +1595,21 @@ function Achievements:UpdateSummary()
 
     local numCategories = GetNumAchievementCategories()
     local yOffset = SUMMARY_CATEGORY_PADDING
+    local categoryIndex = 1
     for i = 1, numCategories do
         local name, _, numAchievements, earnedPoints, totalPoints, hidesPoints = GetAchievementCategoryInfo(i)
+        if totalPoints > 0 then
+            local statusBar = self.summaryStatusBarPool:AcquireObject()
+            self:UpdateStatusBar(statusBar, name, earnedPoints, totalPoints, numAchievements, hidesPoints, FORCE_HIDE_PROGRESS_TEXT)
+            statusBar:ClearAnchors()
 
-        local statusBar = self.summaryStatusBarPool:AcquireObject()
-        self:UpdateStatusBar(statusBar, name, earnedPoints, totalPoints, numAchievements, hidesPoints, FORCE_HIDE_PROGRESS_TEXT)
-        statusBar:ClearAnchors()
-
-        if i % 2 == 0 then
-            statusBar:SetAnchor(TOPRIGHT, self.summaryTotal, BOTTOMRIGHT, 0, yOffset)
-            yOffset = yOffset + SUMMARY_CATEGORY_PADDING + SUMMARY_CATEGORY_BAR_HEIGHT
-        else
-            statusBar:SetAnchor(TOPLEFT, self.summaryTotal, BOTTOMLEFT, 0, yOffset)
+            if categoryIndex % 2 == 0 then
+                statusBar:SetAnchor(TOPRIGHT, self.summaryTotal, BOTTOMRIGHT, 0, yOffset)
+                yOffset = yOffset + SUMMARY_CATEGORY_PADDING + SUMMARY_CATEGORY_BAR_HEIGHT
+            else
+                statusBar:SetAnchor(TOPLEFT, self.summaryTotal, BOTTOMLEFT, 0, yOffset)
+            end
+            categoryIndex = categoryIndex + 1
         end
     end
 end
@@ -1842,8 +1848,11 @@ do
         elseif searchResults then
             hasFakedSubcategory = hasChildren and searchResults[categoryIndex][ZO_ACHIEVEMENTS_ROOT_SUBCATEGORY] ~= nil
         else
-            local numTopLevelAchievements = select(3, GetAchievementCategoryInfo(categoryIndex))
+            local _, _, numTopLevelAchievements, _, totalPoints = GetAchievementCategoryInfo(categoryIndex)
             hasFakedSubcategory = hasChildren and numTopLevelAchievements > 0
+            if totalPoints == 0 then
+                return nil
+            end
         end
 
         local parentNode = self:AddCategory(lookup, tree, nodeTemplate, nil, categoryIndex, name, hidesUnearned, normalIcon, pressedIcon, mouseoverIcon, isSummary)
@@ -1866,8 +1875,10 @@ do
                 end
             else
                 for subcategoryIndex = 1, numSubCategories do
-                    local subCategoryName, _, _, _, subcategoryHidesUnearned = GetAchievementSubCategoryInfo(categoryIndex, subcategoryIndex)
-                    self:AddCategory(lookup, tree, "ZO_TreeLabelSubCategory", parentNode, subcategoryIndex, subCategoryName, subcategoryHidesUnearned)
+                    local subCategoryName, subCategoryNumAchievements, _, totalPoints, subcategoryHidesUnearned = GetAchievementSubCategoryInfo(categoryIndex, subcategoryIndex)
+                    if subCategoryNumAchievements > 0 or totalPoints > 0 then
+                        self:AddCategory(lookup, tree, "ZO_TreeLabelSubCategory", parentNode, subcategoryIndex, subCategoryName, subcategoryHidesUnearned)
+                    end
                 end
             end
         end

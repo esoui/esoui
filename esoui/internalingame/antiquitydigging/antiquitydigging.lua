@@ -96,6 +96,8 @@ function ZO_AntiquityDigging:Initialize(control)
     ANTIQUITY_DIGGING_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.isReadyToPlay = false
+            self.selectedRow = nil
+            self.selectedColumn = nil
             control:RegisterForEvent(EVENT_ANTIQUITY_DIGGING_READY_TO_PLAY, function() self:OnAntiquityDiggingReadyToPlay() end)
             self:RefreshActiveToolKeybinds()
         elseif newState == SCENE_HIDING then
@@ -222,8 +224,10 @@ function ZO_AntiquityDigging:SetGamepadControlsEnabled(enabled)
             self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL, 8, GetStickMagnitude)
         end
         self.numRows, self.numColumns = GetDigSpotDimensions()
-        self.selectedRow = zo_floor(self.numRows * 0.5)
-        self.selectedColumn = zo_floor(self.numColumns * 0.5)
+        if not self.selectedRow then
+            self.selectedRow = zo_floor(self.numRows * 0.5)
+            self.selectedColumn = zo_floor(self.numColumns * 0.5)
+        end
         DIRECTIONAL_INPUT:Activate(self, self.control)
     else
         DIRECTIONAL_INPUT:Deactivate(self)

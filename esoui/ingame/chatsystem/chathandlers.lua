@@ -272,6 +272,7 @@ end
 function ZO_ChatRouter:SetCurrentChannelData(channelData, channelTarget)
     self.currentChannel = channelData
     self.currentTarget = channelTarget
+    CALLBACK_MANAGER:FireCallbacks("OnChatChannelUpdated")
 end
 
 function ZO_ChatRouter:GetCurrentChannelData()

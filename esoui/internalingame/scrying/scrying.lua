@@ -531,8 +531,16 @@ function ZO_ScryingModalCursor:Initialize(board, control)
     self.board = board
     self.control = control
     self.gamepadCursorEnabled = false
-    self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
-    self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
+    local function GetStickMagnitude(direction)
+        --When using a movement controller on the slightest input in a direction it will move in that direction and then start accumulating to do the following move. This is important for responsiveness.
+        --However it means that it's super touchy when using both X and Y. Pressing the stick at 89 degress will cause a movement to the right. So we apply these thresholds to get rid of those weird moves.
+        if direction == MOVEMENT_CONTROLLER_DIRECTION_VERTICAL then
+            return zo_abs(self.gamepadY) > 0.4 and self.gamepadY or 0
+        end
+        return zo_abs(self.gamepadX) > 0.4 and -self.gamepadX or 0
+    end
+    self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL, 8, GetStickMagnitude)
+    self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL, 8, GetStickMagnitude)
 
     self.gamepadTargetControl = self.control:GetNamedChild("GamepadTarget")
     self.lineStartControl = self.control:GetNamedChild("LineStart")
@@ -657,6 +665,9 @@ function ZO_ScryingModalCursor:IsGamepadVirtualCursorEnabled()
 end
 
 function ZO_ScryingModalCursor:UpdateDirectionalInput()
+    self.gamepadX, self.gamepadY = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
+    local dx, dy = self.gamepadX, self.gamepadY
+
     local targetHex = self.board:GetTargetHex()
     if internalassert(targetHex, "targetHex is nil") then
         local row, column = targetHex:GetCoordinates()
@@ -666,7 +677,6 @@ function ZO_ScryingModalCursor:UpdateDirectionalInput()
         if self.board:GetLineStartHex() then
             -- line drawing mode
             local lineStartHex = self.board:GetLineStartHex()
-            local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
             dy = -dy -- flip such that +1 is down
             local DEADZONE = 0.4
             if math.sqrt(dx * dx + dy * dy) > DEADZONE then
@@ -959,9 +969,11 @@ end
 function ZO_ScryingBoard:EnableVirtualCursor()
     self.modalCursor:SetGamepadVirtualCursorEnabled(true)
 
-    local rootHex = self:GetRootHex()
-    local NO_SOUND = true
-    self:ChangeTargetHex(rootHex, NO_SOUND)
+    if not self:GetTargetHex() then
+        local rootHex = self:GetRootHex()
+        local NO_SOUND = true
+        self:ChangeTargetHex(rootHex, NO_SOUND)
+    end
 end
 
 function ZO_ScryingBoard:DisableVirtualCursor()
@@ -1322,7 +1334,11 @@ function ZO_Scrying:Initialize(control)
 
     self.moreInfoButton = frameElements:GetNamedChild("MoreInfoKeybindButton")
     self.moreInfoButton:SetText(GetString(SI_SCRYING_MORE_INFO))
-    self.moreInfoButton:SetKeybind("SCRYING_MORE_INFO")
+    local DEFAULT_SHOW_UNBOUND = nil
+    local DEFAULT_GAMEPAD_PREFERRED_KEYBIND = nil
+    local DEFAULT_ALWAYS_PREFER_GAMEPAD_MODE = nil
+    local SHOW_AS_HOLD = true
+    self.moreInfoButton:SetKeybind("SCRYING_MORE_INFO", DEFAULT_SHOW_UNBOUND, DEFAULT_GAMEPAD_PREFERRED_KEYBIND, DEFAULT_ALWAYS_PREFER_GAMEPAD_MODE, SHOW_AS_HOLD)
     ApplyTemplateToControl(self.moreInfoButton, "ZO_KeybindButton_Gamepad_Template")
 
     SCRYING_SCENE = ZO_RemoteScene:New("Scrying", SCENE_MANAGER)
@@ -1342,7 +1358,6 @@ function ZO_Scrying:Initialize(control)
             self:RefreshEyeAnimations()
             self:RefreshMoreInfoButton()
             self:RefreshInputState()
-            SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_SCRYING)
             PlaySound(SOUNDS.SCRYING_START_INTRO)
         elseif newState == SCENE_HIDING then
             --clear the current tutorial when hiding so we don't push an extra action layer
@@ -1443,6 +1458,9 @@ function ZO_Scrying:RefreshInputState()
         if useVirtualCursor then
             self.board:EnableVirtualCursor()
         else
+            -- with input mode switching we can get into a situation where the hide more info release callback never gets triggered
+            -- manually hide here to deal with that
+            self:HideMoreInfo()
             self.board:DisableVirtualCursor()
         end
     end
@@ -1513,7 +1531,6 @@ function ZO_Scrying:ResetScryingPostGameElements()
     self:CancelEndOfGame()
     self.startedOutro = false
     self.waitingForOutro = false
-    SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
 end
 
 function ZO_Scrying:TryCompleteScrying()
@@ -1541,7 +1558,6 @@ function ZO_Scrying:TryCompleteScrying()
     if not self.startedOutro then
         self.startedOutro = true
         StartScryingOutro()
-        SetOverrideMusicMode(OVERRIDE_MUSIC_MODE_NONE)
         self.waitingForOutro = true
     end
     if self.waitingForOutro then
@@ -1654,8 +1670,8 @@ end
 
 function ZO_Scrying:StartEndOfGame()
     self.startedEndOfGame = true
-    
-    self.completedEndOfGameCallLaterId = zo_callLater(function() 
+
+    self.completedEndOfGameCallLaterId = zo_callLater(function()
         self.completedEndOfGameCallLaterId = nil
         self.waitingForEndOfGame = false
         self:TryCompleteScrying()

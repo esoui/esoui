@@ -22,26 +22,34 @@ end
 function ZO_WorldMapZoneStory_Keyboard:OnHiding()
     ZO_WorldMapZoneStory_Shared.OnHiding(self)
 
+    self:ClearMouseoverControl()
+end
+
+function ZO_WorldMapZoneStory_Keyboard:ClearMouseoverControl()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self.mouseoverRow = nil
+    ZONE_STORIES_KEYBOARD:HideActivityCompletionTooltip()
 end
 
 function ZO_WorldMapZoneStory_Keyboard:OnMouseEnterRow(control)
-    local OFFSET_X = 40
-    local anchor = ZO_Anchor:New(LEFT, control, RIGHT, OFFSET_X)
-    local data = control.dataEntry.data
-    ZONE_STORIES_KEYBOARD:ShowActivityCompletionTooltip(data.zoneId, data.zoneCompletionType, anchor, DESCRIPTION_TO_ACHIEVEMENT_ANCHOR)
+    if self:IsShowing() then
+        local OFFSET_X = 40
+        local anchor = ZO_Anchor:New(LEFT, control, RIGHT, OFFSET_X)
+        local data = control.dataEntry.data
+        ZONE_STORIES_KEYBOARD:ShowActivityCompletionTooltip(data.zoneId, data.zoneCompletionType, anchor, DESCRIPTION_TO_ACHIEVEMENT_ANCHOR)
 
-    self.mouseoverRow = control
+        self.mouseoverRow = control
 
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        if not KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor) then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
 end
 
 function ZO_WorldMapZoneStory_Keyboard:OnMouseExitRow(control)
-    ZONE_STORIES_KEYBOARD:HideActivityCompletionTooltip()
-
-    self.mouseoverRow = nil
-
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    if self:IsShowing() then
+        self:ClearMouseoverControl()
+    end
 end
 
 -- Begin ZO_WorldMapZoneStory_Shared Overrides --
@@ -143,14 +151,10 @@ end
 
 function ZO_WorldMapZoneStoryRow_Keyboard_OnMouseEnter(control)
     WORLD_MAP_ZONE_STORY_KEYBOARD:OnMouseEnterRow(control)
-
-    KEYBIND_STRIP:AddKeybindButtonGroup(WORLD_MAP_ZONE_STORY_KEYBOARD.keybindStripDescriptor)
 end
 
 function ZO_WorldMapZoneStoryRow_Keyboard_OnMouseExit(control)
     WORLD_MAP_ZONE_STORY_KEYBOARD:OnMouseExitRow(control)
-
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(WORLD_MAP_ZONE_STORY_KEYBOARD.keybindStripDescriptor)
 end
 
 function ZO_WorldMapZoneStory_Keyboard_OnInitialized(control)

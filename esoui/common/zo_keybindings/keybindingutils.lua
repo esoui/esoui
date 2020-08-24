@@ -123,17 +123,17 @@ do
         return TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent)
     end
 
-    function ZO_Keybindings_GetBindingStringFromAction(actionName, textOptions, textureOptions, bindingIndex)
+    function ZO_Keybindings_GetBindingStringFromAction(actionName, textOptions, textureOptions, bindingIndex, textureWidthPercent, textureHeightPercent)
         local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
         if layerIndex then
             local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex or 1)
-            return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions)
+            return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent)
         end
         return ""
     end
 
     -- Doesn't return the GetString(SI_ACTION_IS_NOT_BOUND) automatically, just nil if theres no binds
-    function ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, textOptions, textureOptions, alwaysPreferGamepadMode)
+    function ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, textOptions, textureOptions, alwaysPreferGamepadMode, showAsHold)
         local preferGamepadMode
         if alwaysPreferGamepadMode == nil then
             preferGamepadMode = IsInGamepadPreferredMode()
@@ -142,6 +142,12 @@ do
         end
         local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromName(actionName, preferGamepadMode)
         if key ~= KEY_INVALID then
+            if showAsHold then
+                local holdKey = ConvertKeyPressToHold(key)
+                if holdKey ~= KEY_INVALID then
+                    key = holdKey
+                end
+            end
             return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions), key, mod1, mod2, mod3, mod4
         end
 
@@ -149,15 +155,15 @@ do
     end
 end
 
-function ZO_Keybindings_RegisterLabelForBindingUpdate(label, actionName, showUnbound, gamepadActionName, onChangedCallback, alwaysPreferGamepadMode)
+function ZO_Keybindings_RegisterLabelForBindingUpdate(label, actionName, showUnbound, gamepadActionName, onChangedCallback, alwaysPreferGamepadMode, showAsHold)
     local function UpdateRegisteredKeybind()
         local bindingText, key, mod1, mod2, mod3, mod4
         if gamepadActionName and (alwaysPreferGamepadMode or IsInGamepadPreferredMode()) then
-            bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(gamepadActionName, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, alwaysPreferGamepadMode)
+            bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(gamepadActionName, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, alwaysPreferGamepadMode, showAsHold)
         end
 
         if not bindingText or #bindingText == 0 then
-            bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, alwaysPreferGamepadMode)
+            bindingText, key, mod1, mod2, mod3, mod4 = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, alwaysPreferGamepadMode, showAsHold)
         end
 
         if showUnbound or showUnbound == nil then

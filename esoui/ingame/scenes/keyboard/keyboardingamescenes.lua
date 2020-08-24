@@ -876,6 +876,23 @@ antiquityLoreScene:AddFragment(THIN_RIGHT_BG_FRAGMENT)
 antiquityLoreScene:AddFragment(CODEX_WINDOW_SOUNDS)
 
 -------------------
+--Housing Path Settings Scene
+-------------------
+
+local pathSettingsScene = SCENE_MANAGER:GetScene("keyboard_housing_path_settings_scene")
+pathSettingsScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+pathSettingsScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_FURNITURE_BROWSER_NO_BLUR)
+pathSettingsScene:AddFragment(TITLE_FRAGMENT)
+pathSettingsScene:AddFragment(RIGHT_BG_FRAGMENT)
+pathSettingsScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
+pathSettingsScene:AddFragment(FURNITURE_BROWSER_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+pathSettingsScene:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+pathSettingsScene:AddFragment(HOUSING_PATH_SETTINGS_FRAGMENT)
+pathSettingsScene:AddFragment(HOUSING_PATH_SETTINGS_TITLE_FRAGMENT)
+pathSettingsScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+pathSettingsScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
+
+-------------------
 --Main Menu
 -------------------
 

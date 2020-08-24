@@ -12,6 +12,12 @@ LOOT_ENTRY_TYPE_ANTIQUITY_LEAD = 10
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
 
+ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG = "craftBag"
+ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN = "stolen"
+ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS = "collections"
+ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES = "antiquities"
+ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE = "crownCrate"
+
 --
 --[[ ZO_LootHistory_Shared ]]--
 --
@@ -315,6 +321,8 @@ function ZO_LootHistory_Shared:AddCrownCrateEntry(lootCrateId, numCrates)
             lootCrateId = lootCrateId,
             color = ZO_SELECTED_TEXT,
             entryType = LOOT_ENTRY_TYPE_CROWN_CRATE,
+            statusIcon = self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE),
+            highlight = self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE),
             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
             showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
         }
@@ -349,6 +357,8 @@ function ZO_LootHistory_Shared:AddAntiquityLeadEntry(antiquityId)
             text = zo_strformat(SI_ANTIQUITY_LEAD_NAME_FORMATTER, antiquityData:GetName()),
             icon = GetAntiquityLeadIcon(),
             color = GetAntiquityQualityColor(antiquityData:GetQuality()),
+            statusIcon = self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES),
+            highlight = self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES),
             entryType = LOOT_ENTRY_TYPE_ANTIQUITY_LEAD,
             showIconOverlayText = false
         }
@@ -427,6 +437,8 @@ function ZO_LootHistory_Shared:OnNewCollectibleReceived(collectibleId)
             stackCount = 1,
             color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_DISPLAY_QUALITY_NORMAL)),
             collectibleId = collectibleId,
+            statusIcon = self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS),
+            highlight = self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS),
             entryType = LOOT_ENTRY_TYPE_COLLECTIBLE,
             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
             showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
@@ -550,20 +562,30 @@ function ZO_LootHistory_Shared:CanShowItemsInHistory()
     return false -- default value
 end
 
-function ZO_LootHistory_Shared:GetCraftBagIcon()
+function ZO_LootHistory_Shared:GetStatusIcon(displayType)
     -- To be overridden
+end
+
+function ZO_LootHistory_Shared:GetHighlight(displayType)
+    -- To be overridden
+end
+
+-- legacy functions
+
+function ZO_LootHistory_Shared:GetCraftBagIcon()
+    return self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG)
 end
 
 function ZO_LootHistory_Shared:GetStolenIcon()
-    -- To be overridden
+    return self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN)
 end
 
 function ZO_LootHistory_Shared:GetCraftBagHighlight()
-    -- To be overridden
+    return self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG)
 end
 
 function ZO_LootHistory_Shared:GetStolenHighlight()
-    -- To be overridden
+    return self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN)
 end
 
 -- global functions

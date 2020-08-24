@@ -30,10 +30,12 @@ do
             local keyboardTexture, keyboardPercentOfLineSize = GetCurrencyKeyboardIcon(currencyType)
             currencyInfo.keyboardTexture = keyboardTexture
             currencyInfo.keyboardPercentOfLineSize = keyboardPercentOfLineSize .. "%"
+            currencyInfo.keyboardLootTexture = GetCurrencyLootKeyboardIcon(currencyType)
 
             local gamepadTexture, gamepadPercentOfLineSize = GetCurrencyGamepadIcon(currencyType)
             currencyInfo.gamepadTexture = gamepadTexture
             currencyInfo.gamepadPercentOfLineSize = gamepadPercentOfLineSize .. "%"
+            currencyInfo.gamepadLootTexture = GetCurrencyLootGamepadIcon(currencyType)
 
             g_currenciesData[currencyType] = currencyInfo
         end
@@ -425,6 +427,14 @@ function ZO_Currency_GetPlatformCurrencyIcon(currencyType)
         return g_currenciesData[currencyType].gamepadTexture
     else
         return g_currenciesData[currencyType].keyboardTexture
+    end
+end
+
+function ZO_Currency_GetPlatformCurrencyLootIcon(currencyType)
+    if IsInGamepadPreferredMode() then
+        return g_currenciesData[currencyType].gamepadLootTexture
+    else
+        return g_currenciesData[currencyType].keyboardLootTexture
     end
 end
 

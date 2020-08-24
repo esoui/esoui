@@ -51,6 +51,17 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     self.defaultAccessDropDown = self.defaultAccessSetting:GetNamedChild("DropDown")
     self:BuildDefaultAccessSettings(self.defaultAccessSetting)
 
+    local function OnRestartPathsClicked()
+        self:RestartPaths()
+    end
+
+    self.restartPathsSetting = self.generalOptionsPanel:GetNamedChild("ResetPaths")
+    self.restartPathsSetting:SetParent(generalOptionsScrollChild)
+    self.restartPathsButton = self.restartPathsSetting:GetNamedChild("Button")
+    self.restartPathsButton:SetHandler("OnClicked", OnRestartPathsClicked)
+    local restartPathsButtonLabel = self.restartPathsButton:GetLabelControl()
+    restartPathsButtonLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+
     self.visitorsOptionsPanel = self.contents:GetNamedChild("Visitors")
     self.visitorsSocialList = ZO_HousingSettingsVisitorList_Keyboard:New(self.visitorsOptionsPanel, self, ZO_SETTINGS_VISITOR_DATA_TYPE, "ZO_HousingSettings_WhiteList_Row")
     self.visitorsOptionsPanel.list = self.visitorsSocialList
@@ -128,6 +139,9 @@ function ZO_HousingFurnitureSettings_Keyboard:UpdateGeneralSettings()
 
     self:UpdateButtonSettings(self.primaryResidenceSetting)
     self.primaryResidenceButton:SetEnabled(self.primaryResidence ~= currentHouse)
+
+    self:UpdateButtonSettings(self.restartPathsSetting)
+    self.restartPathsButton:SetEnabled(SHARED_FURNITURE:HasAnyPathNodes())
 
     local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouse)
     self.comboBox:SetSelectedItemText(GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING", defaultAccess))
@@ -245,6 +259,11 @@ end
 function ZO_HousingFurnitureSettings_Keyboard:ShowHomeShowTooltip(control)
     InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
     SetTooltipText(InformationTooltip, GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOMESHOW_TOOLTIP_TEXT))
+end
+
+function ZO_HousingFurnitureSettings_Keyboard:ShowRestartPathsTooltip(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TOOLTIP_TEXT))
 end
 
 -- XML Functions

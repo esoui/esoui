@@ -15,6 +15,7 @@ function ZO_Restyle_Station_Gamepad:Initialize(control)
     self.actionMode = ACTION_NONE
 
     GAMEPAD_RESTYLE_STATION_SCENE = ZO_InteractScene:New("gamepad_restyle_station", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
+    GAMEPAD_RESTYLE_STATION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     SYSTEMS:RegisterGamepadRootScene("restyle_station", GAMEPAD_RESTYLE_STATION_SCENE)
     ZO_Gamepad_MultiFocus_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, nil, GAMEPAD_RESTYLE_STATION_SCENE)
 

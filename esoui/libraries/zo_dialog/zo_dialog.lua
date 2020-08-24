@@ -500,12 +500,14 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 local buttonText
                 if textParams and textParams.buttonTextOverrides and textParams.buttonTextOverrides[i] then
                     buttonText = textParams.buttonTextOverrides[i]
-                elseif type(buttonInfo.text) == "number" then
-                    buttonText = GetString(buttonInfo.text)
-                elseif type(buttonInfo.text) == "function" then
-                    buttonText = buttonInfo.text(dialog)
                 else
                     buttonText = buttonInfo.text
+                    if type(buttonText) == "function" then
+                        buttonText = buttonText(dialog)
+                    end
+                    if type(buttonText) == "number" then
+                        buttonText = GetString(buttonText)
+                    end
                 end
                 button:SetText(buttonText)
                 button:SetHidden(false)

@@ -1047,6 +1047,35 @@ local AlertHandlers = {
     end,
 }
 
+ZO_AntiquityScryingResultsToAlert =
+{
+    [ANTIQUITY_SCRYING_RESULT_MAX_PROGRESS] = true,
+    [ANTIQUITY_SCRYING_RESULT_NOT_ENOUGH_SKILL] = true,
+    [ANTIQUITY_SCRYING_RESULT_NOT_REPEATABLE] = true,
+    [ANTIQUITY_SCRYING_RESULT_LEAD_NOT_ACQUIRED] = true,
+    [ANTIQUITY_SCRYING_RESULT_AWAITING_COMBINATION] = true,
+    [ANTIQUITY_SCRYING_RESULT_INTERNAL_ERROR] = true,
+    [ANTIQUITY_SCRYING_RESULT_INVALID_ANTIQUITY] = true,
+    [ANTIQUITY_SCRYING_RESULT_INCORRECT_ZONE] = true,
+    [ANTIQUITY_SCRYING_RESULT_SCRYING_TOOL_LOCKED] = true,
+    [ANTIQUITY_SCRYING_RESULT_MAX_IN_PROGRESS_ANTIQUITIES] = true,
+    [ANTIQUITY_SCRYING_RESULT_FAILED_REQUIREMENT] = true,
+    [ANTIQUITY_SCRYING_RESULT_IN_COMBAT] = true,
+    [ANTIQUITY_SCRYING_RESULT_IS_USING_FURNITURE] = true,
+}
+
+--Check if the new scrying result need to be alerted
+internalassert(ANTIQUITY_SCRYING_RESULT_MAX_VALUE == 15)
+
+AlertHandlers[EVENT_ANTIQUITY_SCRYING_RESULT] = function(result)
+    if ZO_AntiquityScryingResultsToAlert[result] then
+        local message = GetString("SI_ANTIQUITYSCRYINGRESULT", result)
+        if message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message
+        end
+    end
+end
+
 ZO_ClientInteractResultSpecificSound =
 {
     [CLIENT_INTERACT_RESULT_LOCK_TOO_DIFFICULT] = SOUNDS.LOCKPICKING_NO_LOCKPICKS,

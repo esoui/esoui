@@ -40,6 +40,7 @@ function ZO_GamepadOptions:InitializeScenes()
             self:RefreshCategoryList()
             self:RefreshHeader()
             self:SetCurrentList(self.categoryList)
+            self:RefreshGamepadInfoPanel()
 
             KEYBIND_STRIP:AddKeybindButtonGroup(self.rootKeybindDescriptor)
         elseif newState == SCENE_HIDDEN then
@@ -526,7 +527,7 @@ do
         control:GetNamedChild("Gamepad"):SetTexture(GetGamepadVisualReferenceArt())
         
         local mostRecentGamepadType = GetMostRecentGamepadType()
-        local backKeyCode = mostRecentGamepadType == GAMEPAD_TYPE_PS4 and KEY_GAMEPAD_TOUCHPAD_PRESSED or KEY_GAMEPAD_BACK
+        local backKeyCode = GetUIPlatform() == UI_PLATFORM_PS4 and KEY_GAMEPAD_TOUCHPAD_PRESSED or KEY_GAMEPAD_BACK
         self.keyCodeToLabelGroupControl = 
         {
             [KEY_GAMEPAD_BUTTON_1] = control:GetNamedChild("Right6"),

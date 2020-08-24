@@ -92,7 +92,11 @@ function ZO_AntiquityDigging:Initialize(control)
     self.meterContainer = control:GetNamedChild("MeterContainer")
     self.helpTutorialsKeybindButton = self.keybindContainer:GetNamedChild("HelpTutorialsKeybindButton")
     self.moreInfoKeybindButton = self.keybindContainer:GetNamedChild("MoreInfoKeybindButton")
-    self.moreInfoKeybindButton:SetKeybind("ANTIQUITY_DIGGING_MORE_INFO")
+    local DEFAULT_SHOW_UNBOUND = nil
+    local DEFAULT_GAMEPAD_PREFERRED_KEYBIND = nil
+    local DEFAULT_ALWAYS_PREFER_GAMEPAD_MODE = nil
+    local SHOW_AS_HOLD = true
+    self.moreInfoKeybindButton:SetKeybind("ANTIQUITY_DIGGING_MORE_INFO", DEFAULT_SHOW_UNBOUND, DEFAULT_GAMEPAD_PREFERRED_KEYBIND, DEFAULT_ALWAYS_PREFER_GAMEPAD_MODE, SHOW_AS_HOLD)
     self.stabilityControl = self.meterContainer:GetNamedChild("Stability")
     self.stabilityBarLeft = self.meterContainer:GetNamedChild("StabilityHealthBarLeft")
     self.stabilityBarRight = self.meterContainer:GetNamedChild("StabilityHealthBarRight")
@@ -249,8 +253,8 @@ function ZO_AntiquityDigging:RefreshInputModeFragments()
             self.meterContainerTimeline:PlayFromEnd()
         end
         --Remove the digging actions fragment so it can be on top of the gamepad UI mode fragment
-        SCENE_MANAGER:RemoveFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
-        SCENE_MANAGER:RemoveFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:RemoveFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:RemoveFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
     end
 
     if IsInGamepadPreferredMode() then
@@ -263,8 +267,8 @@ function ZO_AntiquityDigging:RefreshInputModeFragments()
 
     if not self.isGameOver then
         -- Re-add the digging actions fragment so it can be on top of the gamepad UI mode fragment
-        SCENE_MANAGER:AddFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
-        SCENE_MANAGER:AddFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:AddFragment(ANTIQUITY_DIGGING_ACTIONS_FRAGMENT)
+        ANTIQUITY_DIGGING_SCENE:AddFragment(SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT)
     end
 end
 
@@ -289,7 +293,14 @@ function ZO_AntiquityDigging:ApplyPlatformStyle(style)
     self:RefreshDigPowerConfiguration(style)
 end
 
-function ZO_AntiquityDigging:HandleGamepadPreferredModeChanged()
+function ZO_AntiquityDigging:HandleGamepadPreferredModeChanged(isGamepadPreferred)
+    self:HideMoreInfo()
+    if not isGamepadPreferred then
+        local mouseOverSkill = GetMouseOverDiggingActiveSkill()
+        if mouseOverSkill then
+            self:ShowMoreInfoBySkill(mouseOverSkill)
+        end
+    end
     self:RefreshInputModeFragments()
     -- We don't want to hide the scene.  The internal version will update the styles
     local HANDLED = true

@@ -1,5 +1,3 @@
-
-
 ZO_SmithingExtractionSlot = ZO_CraftingMultiSlotBase:Subclass()
 
 function ZO_SmithingExtractionSlot:New(...)
@@ -70,7 +68,7 @@ function ZO_SmithingExtractionSlot:Refresh()
     if self:IsInRefineMode() and self:HasOneItem() then
         local ALWAYS_SHOW_STACK_COUNT = true
         local minQuantity = GetRequiredSmithingRefinementStackSize()
-        ZO_ItemSlot_SetAlwaysShowStackCount(self.control, SHOW_STACK_COUNT, minQuantity)
+        ZO_ItemSlot_SetAlwaysShowStackCount(self.control, ALWAYS_SHOW_STACK_COUNT, minQuantity)
     else
         local AUTO_SHOW_STACK_COUNT = false
         local MIN_QUANTITY = 0
@@ -91,7 +89,7 @@ function ZO_SharedSmithingExtraction:New(...)
     return smithingExtraction
 end
 
-function ZO_SharedSmithingExtraction:Initialize(extractionSlotControl, extractLabel, owner, refinementOnly)
+function ZO_SharedSmithingExtraction:Initialize(extractionSlotControl, extractLabel, owner)
     self.extractionSlotControl = extractionSlotControl
     self.extractLabel = extractLabel
     self.owner = owner
@@ -311,9 +309,7 @@ do
 end
 
 function ZO_SharedSmithingExtraction:OnFilterChanged()
-    local filterType = self:GetFilterType()
-
     if self.extractLabel then
-         self.extractLabel:SetText(GetString("SI_SMITHINGDECONSTRUCTIONTYPE", self:GetDeconstructionType()))
+		self.extractLabel:SetText(GetString("SI_SMITHINGDECONSTRUCTIONTYPE", self:GetDeconstructionType()))
     end
 end

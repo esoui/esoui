@@ -25,6 +25,7 @@ function ZO_UISystemManager:Initialize()
         {
             keyboardOpen = function()
                 MAIN_MENU_KEYBOARD:ShowSceneGroup("journalSceneGroup", "guildBrowserKeyboard")
+                GUILD_SELECTOR:SelectGuildFinder()
             end,
             gamepadOpen = function()
                 SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "gamepad_guild_hub", "guildBrowserGamepad")

@@ -16,7 +16,7 @@ local TWO_PI = 2 * PI
 local HALF_PI = 0.5 * PI
 local QUARTER_PI = 0.25 * PI
 
-local AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE = 0.6
+local AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE = 0.4
 local AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE = 0
 local AXIS_INDICATOR_ALPHA_MAX_PERCENTAGE = 0.6
 local AXIS_INDICATOR_RGB_WEIGHT_MIN_PERCENTAGE = 1.4
@@ -26,22 +26,20 @@ local AXIS_INDICATOR_SCALE_MIN = 1
 local AXIS_INDICATOR_PICKUP_YAW_OFFSET_ANGLE = math.rad(20)
 local AXIS_KEYBIND_RGB_WEIGHT_MIN_PERCENTAGE = 0.3
 local AXIS_KEYBIND_RGB_WEIGHT_MAX_PERCENTAGE = 0.7
-local AXIS_MAX_DRAW_LEVEL = 100000
-local ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M = 2.25
+local ROTATION_AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE = 0.7
+local ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M = 1.5
 local TRANSLATION_AXIS_RANGE_MAX_CM = 10000
 -- Texture height / width, specified in pixels.
-local TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M = 1
-local TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M = 0.5
-
--- Yaw offset, in radians, for the Y-axis indicator while in pickup mode.
--- This slight offset allows the axis to remain visible and interactive
--- while it is rotationally locked to the camera's heading.
-local Y_AXIS_INDICATOR_YAW_OFFSET_RAD = -(PI * 15 / 180)
+local TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M = 0.65
+local TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M = 0.325
+local TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA = 0.26
+local TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M = 200
+local TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M = 0.07
 
 local X_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 0.5, 0.9, 1)
 local X_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 0.5, 0.9, 1)
-local Y_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(1, 0.2, 0, 1)
-local Y_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(1, 0.2, 0, 1)
+local Y_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(1, 0, 0.2, 1)
+local Y_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(1, 0, 0.2, 1)
 local Z_AXIS_NEGATIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 1, 0.2, 1)
 local Z_AXIS_POSITIVE_INDICATOR_COLOR = ZO_ColorDef:New(0, 1, 0.2, 1)
 
@@ -54,9 +52,6 @@ local PRECISION_ROTATE_INTERVALS_MS = {[0.05] = 120000, [1] = 9000, [15] = 1200}
 local PICKUP_ROTATE_INTERVALS_MS = 2000
 local PICKUP_AXIS_INDICATOR_DISTANCE_CM = 1000
 
-local DEFAULT_PRECISION_MOVE_UNITS_CM = 10
-local DEFAULT_PRECISION_ROTATE_UNITS_DEG = math.rad(15)
-
 local PRECISION_UNIT_ADJUSTMENT_INCREMENT = 1
 local PRECISION_UNIT_ADJUSTMENT_DECREMENT = 2
 
@@ -64,7 +59,6 @@ local TEXTURE_ARROW_DIRECTION = "EsoUI/Art/Housing/translation_arrow.dds"
 local TEXTURE_ARROW_DIRECTION_INVERSE = "EsoUI/Art/Housing/translation_inverse_arrow.dds"
 local TEXTURE_ARROW_ROTATION_FORWARD = "EsoUI/Art/Housing/dual_rotation_arrow.dds"
 local TEXTURE_ARROW_ROTATION_REVERSE = "EsoUI/Art/Housing/dual_rotation_arrow_reverse.dds"
-local TEXTURE_HOUSE_ICON = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuicon_home.dds"
 
 local function AngleDistance(angle1, angle2)
     local delta = math.abs(angle1 - angle2) % TWO_PI
@@ -261,12 +255,13 @@ function ZO_HousingEditorHud:Initialize(control)
             local currentMode = GetHousingEditorMode()
             if currentMode == HOUSING_EDITOR_MODE_BROWSE then -- If someone cancelled out of the browser without selecting anything.
                 HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-            elseif currentMode == HOUSING_EDITOR_MODE_SELECTION then
+            elseif currentMode == HOUSING_EDITOR_MODE_SELECTION or currentMode == HOUSING_EDITOR_MODE_PATH then
                 SCENE_MANAGER:AddFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
             end
             self:ClearPlacementKeyPresses()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RemoveDefaultExit()
+            SCENE_MANAGER:AddFragment(HOUSING_EDITOR_KEYBIND_PALETTE_FRAGMENT)
             self:UpdateKeybinds()
         elseif newState == SCENE_HIDDEN then
             self:ClearPlacementKeyPresses()
@@ -275,6 +270,7 @@ function ZO_HousingEditorHud:Initialize(control)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
+            SCENE_MANAGER:RemoveFragment(HOUSING_EDITOR_KEYBIND_PALETTE_FRAGMENT)
             self.currentKeybindDescriptor = nil
         end
     end)
@@ -283,6 +279,7 @@ function ZO_HousingEditorHud:Initialize(control)
     HOUSING_EDITOR_HUD_UI_SCENE:RegisterCallback("StateChange",  function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:OnDeferredInitialization()
+            HOUSING_EDITOR_KEYBIND_PALETTE:RemoveKeybinds()
             if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_SELECTION then
                 -- Add the HUD UI keybinds for any mode other than Selection.
                 -- This is to prevent duplicate keybind registration that would result from Selection
@@ -300,15 +297,22 @@ function ZO_HousingEditorHud:Initialize(control)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
+            local currentMode = GetHousingEditorMode()
+            local currentModeStripDescriptor, currentModePaletteDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
+            if currentModePaletteDescriptor then
+                self.currentPaletteKeybindDescriptor = currentModePaletteDescriptor
+                HOUSING_EDITOR_KEYBIND_PALETTE:AddKeybinds(currentModePaletteDescriptor)
+            end
             self:UpdateAxisIndicators()
         end
     end)
     SCENE_MANAGER:SetSceneRestoresBaseSceneOnGameMenuToggle("housingEditorHudUI", true)
 
-    local HOUSING_EDITOR_HUD_SCENE_GROUP = ZO_SceneGroup:New("housingEditorHud", "housingEditorHudUI")
+    HOUSING_EDITOR_HUD_SCENE_GROUP = ZO_SceneGroup:New("housingEditorHud", "housingEditorHudUI")
     HOUSING_EDITOR_HUD_SCENE_GROUP:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_GROUP_HIDDEN then
-            if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_BROWSE then
+            local currentMode = GetHousingEditorMode()
+            if currentMode ~= HOUSING_EDITOR_MODE_BROWSE and currentMode ~= HOUSING_EDITOR_MODE_PATH then
                 HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED)
                 PlaySound(SOUNDS.HOUSING_EDITOR_CLOSED)
             end
@@ -329,6 +333,14 @@ function ZO_HousingEditorHud:Initialize(control)
 
     local function OnFurnitureChanged()
         self:UpdateKeybinds()
+    end
+
+    local function OnFurniturePathDataChanged(eventId, ...)
+        HOUSING_EDITOR_SHARED:UpdateKeybinds()
+    end
+
+    local function OnPathNodeSelectionChanged(eventId)
+        HOUSING_EDITOR_SHARED:UpdateKeybinds()
     end
 
     local function OnAddOnLoaded(event, addOnName)
@@ -352,6 +364,9 @@ function ZO_HousingEditorHud:Initialize(control)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_MOVED, OnFurnitureChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_COMMAND_RESULT, OnFurnitureChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_LINK_TARGET_CHANGED, OnFurnitureChanged)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PATH_DATA_CHANGED, OnFurniturePathDataChanged)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_PATH_NODE_SELECTION_CHANGED, OnPathNodeSelectionChanged)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PATH_NODES_RESTORED, OnFurnitureChanged)
 
     do
         local EPSILON_CM = 1
@@ -360,10 +375,11 @@ function ZO_HousingEditorHud:Initialize(control)
 
         self.axisIndicatorUpdateHandler = function()
             if self.translationIndicators then
-                local furnitureId = HousingEditorGetSelectedFurnitureId()
-                if furnitureId then
-                    local pitch, yaw, roll = HousingEditorGetFurnitureOrientation(furnitureId)
-                    local centerX, centerY, centerZ = HousingEditorGetFurnitureWorldCenter(furnitureId)
+                local isSelectingAnything = HousingEditorIsSelectingHousingObject()
+
+                if isSelectingAnything then
+                    local pitch, yaw, roll = HousingEditorGetSelectedObjectOrientation()
+                    local centerX, centerY, centerZ = HousingEditorGetSelectedObjectWorldCenter()
 
                     if AngleDistance(pitch, g_previousPitch) > EPSILON_RAD or AngleDistance(yaw, g_previousYaw) > EPSILON_RAD or AngleDistance(roll, g_previousRoll) > EPSILON_RAD then
                         g_previousPitch, g_previousYaw, g_previousRoll = pitch, yaw, roll
@@ -385,8 +401,15 @@ function ZO_HousingEditorHud:Initialize(control)
         end
     end
 
+    ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
+
     control:SetHandler("OnUpdate", function(_, currentFrameTimeMS) self:OnUpdate(currentFrameTimeMS) end)
     self.isDirty = true
+end
+
+function ZO_HousingEditorHud:ApplyPlatformStyle()
+    self.precisionPositionLabel:SetFont(IsInGamepadPreferredMode() and "ZoFontGamepad34" or "ZoFontGameLargeBold")
+    self.precisionOrientationLabel:SetFont(IsInGamepadPreferredMode() and "ZoFontGamepad34" or "ZoFontGameLargeBold")
 end
 
 function ZO_HousingEditorHud:RefreshConstants()
@@ -419,47 +442,112 @@ function ZO_HousingEditorHud:InitializeMovementControllers()
     self.movementControllers = {self.yawMovementController, self.pitchMovementController, self.rollMovementController}
 end
 
+function ZO_HousingEditorHud:SetKeybindPaletteHidden(hidden)
+    EVENT_MANAGER:UnregisterForUpdate("ZO_HousingEditorHud_ShowKeybindPalette")
+    if hidden then
+        SCENE_MANAGER:RemoveFragment(HOUSING_EDITOR_KEYBIND_PALETTE_FRAGMENT)
+    else
+        SCENE_MANAGER:AddFragment(HOUSING_EDITOR_KEYBIND_PALETTE_FRAGMENT)
+    end
+end
+
+function ZO_HousingEditorHud:SetTargetData(furnitureId, pathIndex)
+    HOUSING_EDITOR_KEYBIND_PALETTE:SetTargetData(furnitureId, pathIndex)
+end
+
+function ZO_HousingEditorHud:ClearTargetData()
+    local NO_VALID_FURNITURE_ID = 0
+    local NO_VALID_PATH_INDEX = nil
+    self:SetTargetData(NO_VALID_FURNITURE_ID, NO_VALID_PATH_INDEX)
+end
+
+function ZO_HousingEditorHud:UpdateTargetData()
+    if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
+        self:SetTargetData(HousingEditorGetSelectedFurnitureId())
+    else
+        local furnitureId, pathIndex = HousingEditorGetTargetInfo()
+        if CompareId64ToNumber(furnitureId, 0) > 0 then
+            self:SetTargetData(furnitureId, pathIndex)
+        else
+            self:ClearTargetData()
+        end
+    end
+end
+
+do
+    local function OnTargetFurnitureChanged(event)
+        HOUSING_EDITOR_SHARED:UpdateTargetData()
+    end
+
+    function ZO_HousingEditorHud:SetLiveTargetingEnabled(enabled)
+        if enabled then
+            EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_TARGET_FURNITURE_CHANGED, OnTargetFurnitureChanged)
+        else
+            EVENT_MANAGER:UnregisterForEvent("HousingEditor", EVENT_HOUSING_TARGET_FURNITURE_CHANGED)
+        end
+    end
+end
+
 function ZO_HousingEditorHud:OnHousingModeEnabled()
     OpenMarket(MARKET_DISPLAY_GROUP_HOUSE_EDITOR)
     self:CleanDirty()
     SCENE_MANAGER:SetHUDScene("housingEditorHud")
     SCENE_MANAGER:SetHUDUIScene("housingEditorHudUI", true)
+    self:SetLiveTargetingEnabled(true)
 end
 
-function ZO_HousingEditorHud:OnHousingModeDisabled()
+function ZO_HousingEditorHud:OnHousingModeDisabled(oldMode)
     OnMarketClose()
+    if oldMode == HOUSING_EDITOR_MODE_PATH then
+        if SCENE_MANAGER:GetCurrentScene() ~= nil then
+            SCENE_MANAGER:ShowBaseScene()
+        end
+    end
     SCENE_MANAGER:RestoreHUDScene()
     SCENE_MANAGER:RestoreHUDUIScene()
 end
 
 function ZO_HousingEditorHud:OnHousingModeChanged(oldMode, newMode)
+    self:UpdateTargetData()
+    self:SetKeybindPaletteHidden(false)
+
     if newMode == HOUSING_EDITOR_MODE_DISABLED then
-        self:OnHousingModeDisabled()
+        self:OnHousingModeDisabled(oldMode)
+        self:SetKeybindPaletteHidden(true)
     elseif oldMode == HOUSING_EDITOR_MODE_DISABLED then
         self:OnHousingModeEnabled()
     end
 
-    if newMode == HOUSING_EDITOR_MODE_SELECTION then
+    if newMode == HOUSING_EDITOR_MODE_SELECTION or newMode == HOUSING_EDITOR_MODE_PATH then
         SCENE_MANAGER:AddFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
-    elseif oldMode == HOUSING_EDITOR_MODE_SELECTION then
+        self:SetKeybindPaletteHidden(false)
+    elseif oldMode == HOUSING_EDITOR_MODE_SELECTION or oldMode == HOUSING_EDITOR_MODE_PATH then
         SCENE_MANAGER:RemoveFragment(ZO_HOUSING_EDITOR_HISTORY_FRAGMENT)
     end
 
     if newMode == HOUSING_EDITOR_MODE_BROWSE then
         HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
         SYSTEMS:PushScene("housing_furniture_browser")
+        self:SetKeybindPaletteHidden(true)
     elseif oldMode == HOUSING_EDITOR_MODE_BROWSE then -- If something external exited the housing mode hide everything.
         if SYSTEMS:IsShowing("housing_furniture_browser") then
             SCENE_MANAGER:HideCurrentScene()
         end
     end
 
-    if oldMode == HOUSING_EDITOR_MODE_PLACEMENT then
+    if newMode == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
+        PushActionLayerByName("PathNodeRotationBlockCrouchLayer")
+        self:SetKeybindPaletteHidden(false)
+    end
+    
+    if oldMode == HOUSING_EDITOR_MODE_PLACEMENT or oldMode == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
+        RemoveActionLayerByName("PathNodeRotationBlockCrouchLayer")
         HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
         self:ClearPlacementKeyPresses()
         self:UpdateAxisIndicators()
     end
 
+    self:UpdateRotationButtonVisuals(newMode)
     self:UpdateKeybinds()
 end
 
@@ -474,22 +562,30 @@ end
 
 function ZO_HousingEditorHud:UpdateKeybinds()
     if not HOUSING_EDITOR_HUD_UI_SCENE:IsShowing() then
+        HOUSING_EDITOR_KEYBIND_PALETTE:RemoveKeybinds()
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
+
         local currentMode = GetHousingEditorMode()
-        local currentModeKeybindDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
-        if self.currentKeybindDescriptor ~= currentModeKeybindDescriptor then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindDescriptor)
-            self.currentKeybindDescriptor = currentModeKeybindDescriptor
-            if currentModeKeybindDescriptor then
-                KEYBIND_STRIP:AddKeybindButtonGroup(currentModeKeybindDescriptor)
-            end
-        else
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindDescriptor)
+        local currentModeStripDescriptor, currentModePaletteDescriptor = self:GetKeybindStripDescriptorForMode(currentMode)
+
+        self.currentPaletteKeybindDescriptor = currentModePaletteDescriptor
+        if self.currentPaletteKeybindDescriptor then
+            HOUSING_EDITOR_KEYBIND_PALETTE:AddKeybinds(self.currentPaletteKeybindDescriptor)
         end
+
+        self.currentKeybindDescriptor = currentModeStripDescriptor
+        if self.currentKeybindDescriptor then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.currentKeybindDescriptor)
+        end
+    else
+        HOUSING_EDITOR_KEYBIND_PALETTE:RefreshKeybinds()
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentKeybindDescriptor)
     end
+
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.UIModeKeybindStripDescriptor)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.exitKeybindButtonStripDescriptor)
 
-    if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
+    if IsInHousingEditorPlacementMode() then
         local hideRotate = false
         local hidePrecisionRotate = true
         local hidePrecisionMove = true
@@ -505,6 +601,9 @@ function ZO_HousingEditorHud:UpdateKeybinds()
             else
                 hidePrecisionMove = false
             end
+        elseif IsInGamepadPreferredMode() and GetHousingEditorMode() == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullEtherealKeybindGroup)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
         else
             if HousingEditorIsSurfaceDragModeEnabled() then
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
@@ -525,7 +624,7 @@ function ZO_HousingEditorHud:UpdateKeybinds()
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.pushAndPullVisibleKeybindGroup)
     end 
 
-    local rotationHidden = GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_PLACEMENT
+    local rotationHidden = not IsInHousingEditorPlacementMode()
 
     if rotationHidden then
         HOUSING_EDITOR_HUD_SCENE:RemoveFragment(HOUSING_EDITOR_ACTION_BAR_FRAGMENT)
@@ -566,7 +665,6 @@ end
 
 function ZO_HousingEditorHud:InitializeAxisIndicators()
     local indicatorName = "ZO_HousingEditorAxisIndicators"
-
     local window = WINDOW_MANAGER:CreateTopLevelWindow(indicatorName)
     self.axisIndicatorWindow = window
     window:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
@@ -576,6 +674,16 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
     window:SetDrawTier(DT_LOW)
     window:SetHidden(true)
 
+    local translationIndicatorName = "ZO_HousingEditorTranslationAxisIndicators"
+    local translationWindow = WINDOW_MANAGER:CreateTopLevelWindow(translationIndicatorName)
+    self.translationAxisIndicatorWindow = translationWindow
+    translationWindow:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
+    translationWindow:SetMouseEnabled(false)
+    translationWindow:Create3DRenderSpace()
+    translationWindow:SetDrawLayer(DL_BACKGROUND)
+    translationWindow:SetDrawTier(DT_LOW)
+    translationWindow:SetHidden(true)
+
     self.cameraControlName = indicatorName .. "CameraControl"
     local cameraControl = WINDOW_MANAGER:CreateControl(self.cameraControlName, window, CT_TEXTURE)
     self.cameraControl = cameraControl
@@ -583,25 +691,32 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
     cameraControl:Create3DRenderSpace()
     cameraControl:SetHidden(true)
 
+    local function ShouldShowPitchIndiciator()
+        return GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_NODE_PLACEMENT
+    end
+
+    local function ShouldShowRollIndiciator()
+        return GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_NODE_PLACEMENT
+    end
+
     -- Array order matters here for visual control ordering.
     self.translationIndicators = {
-        {axis = HOUSING_EDITOR_POSITION_AXIS_X1, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_X2, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetX = -0.5, color = X_AXIS_NEGATIVE_INDICATOR_COLOR, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = 0},
-        {axis = HOUSING_EDITOR_POSITION_AXIS_X2, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_X1, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetX =  0.5, color = X_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_DIRECTION_INVERSE, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = PI},
-        {axis = HOUSING_EDITOR_POSITION_AXIS_Y1, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Y2, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, offsetY = -0.5, color = Y_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_DIRECTION_INVERSE, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, rotation = HALF_PI},
-        {axis = HOUSING_EDITOR_POSITION_AXIS_Y2, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Y1, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, offsetY =  0.5, color = Y_AXIS_POSITIVE_INDICATOR_COLOR, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, rotation = -HALF_PI},
-        {axis = HOUSING_EDITOR_POSITION_AXIS_Z1, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Z2, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetZ = -0.5, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = -HALF_PI},
-        {axis = HOUSING_EDITOR_POSITION_AXIS_Z2, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Z1, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetZ =  0.5, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_DIRECTION_INVERSE, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = HALF_PI},
+        {axis = HOUSING_EDITOR_POSITION_AXIS_X1, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_X2, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetX = -0.75, color = X_AXIS_NEGATIVE_INDICATOR_COLOR, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = 0},
+        {axis = HOUSING_EDITOR_POSITION_AXIS_X2, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_X1, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetX =  0.75, color = X_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_DIRECTION_INVERSE, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = PI},
+        {axis = HOUSING_EDITOR_POSITION_AXIS_Y1, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Y2, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, offsetY = -0.75, color = Y_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_DIRECTION_INVERSE, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, rotation = HALF_PI},
+        {axis = HOUSING_EDITOR_POSITION_AXIS_Y2, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Y1, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, offsetY =  0.75, color = Y_AXIS_POSITIVE_INDICATOR_COLOR, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, rotation = -HALF_PI},
+        {axis = HOUSING_EDITOR_POSITION_AXIS_Z1, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Z2, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetZ = -0.75, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = -HALF_PI},
+        {axis = HOUSING_EDITOR_POSITION_AXIS_Z2, pairedAxis = HOUSING_EDITOR_POSITION_AXIS_Z1, sizeX = TRANSLATION_AXIS_INDICATOR_LOCAL_X_DIMENSION_M, sizeY = TRANSLATION_AXIS_INDICATOR_LOCAL_Y_DIMENSION_M, offsetZ =  0.75, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_DIRECTION_INVERSE, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE, yaw = HALF_PI},
     }
     self.rotationIndicators = {
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_X1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 1.0, color = X_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, pitch = HALF_PI, yaw = -HALF_PI},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_X2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 1.0, color = X_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, pitch = HALF_PI, yaw =  HALF_PI},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.66, color = Y_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw = 0},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.66, color = Y_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, roll = PI, yaw = 0},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.44, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw =  HALF_PI},
-        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.44, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, yaw = -HALF_PI, roll = PI},
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_X1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = ROTATION_AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 1, color = X_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, pitch = HALF_PI, yaw = -HALF_PI },
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_X2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 1, color = X_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, pitch = HALF_PI, yaw =  HALF_PI },
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = ROTATION_AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.66, color = Y_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw = 0, visible = ShouldShowPitchIndiciator },
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Y2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.66, color = Y_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, roll = PI, yaw = 0, visible = ShouldShowPitchIndiciator },
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z1, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = ROTATION_AXIS_INDICATOR_ALPHA_ACTIVE_PERCENTAGE,   scale = 0.44, color = Z_AXIS_NEGATIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_FORWARD, yaw =  HALF_PI, visible = ShouldShowRollIndiciator },
+        {axis = HOUSING_EDITOR_ROTATION_AXIS_Z2, sizeX = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, sizeY = ROTATION_AXIS_INDICATOR_LOCAL_DIMENSIONS_M, inactiveAlpha = AXIS_INDICATOR_ALPHA_INACTIVE_PERCENTAGE, scale = 0.44, color = Z_AXIS_POSITIVE_INDICATOR_COLOR, texture = TEXTURE_ARROW_ROTATION_REVERSE, yaw = -HALF_PI, roll = PI, visible = ShouldShowRollIndiciator },
     }
 
-    self.allAxisIndicators = {}
     local axisIndicators = {}
     for _, indicator in ipairs(self.translationIndicators) do
         table.insert(axisIndicators, indicator)
@@ -620,11 +735,13 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
         self:OnMouseDownAxis(...)
     end
 
+    self.allAxisIndicators = {}
     for _, indicator in ipairs(axisIndicators) do
         local control = WINDOW_MANAGER:CreateControl(indicatorName .. indicator.axis, window, CT_TEXTURE)
         indicator.control = control
         self.allAxisIndicators[indicator.axis] = indicator
         control.axis = indicator
+        control:SetHidden(true)
         control:SetAddressMode(TEX_MODE_CLAMP)
         control:SetAnchor(CENTER, window, CENTER, 0, 0)
         control:SetBlendMode(TEX_BLEND_MODE_ALPHA)
@@ -646,6 +763,19 @@ function ZO_HousingEditorHud:InitializeAxisIndicators()
         control:SetHandler("OnMouseEnter", OnMouseEnter)
         control:SetHandler("OnMouseExit", OnMouseExit)
         control:SetHandler("OnMouseDown", OnMouseDown)
+    end
+
+    self.translationAxisIndicators = {}
+    for index = 1, 2 do
+        local control = WINDOW_MANAGER:CreateControl(translationIndicatorName .. tostring(index), translationWindow, CT_TEXTURE)
+        self.translationAxisIndicators[index] = control
+        control:SetBlendMode(TEX_BLEND_MODE_ADD)
+        control:SetColor(1, 1, 1, 0.2)
+        control:Create3DRenderSpace()
+        control:Set3DLocalDimensions(1, 1)
+        control:Set3DRenderSpaceOrigin(0, 0, 0)
+        control:Set3DRenderSpaceOrientation(0, 0, 0)
+        control:Set3DRenderSpaceUsesDepthBuffer(true)
     end
 end
 
@@ -669,102 +799,69 @@ function ZO_HousingEditorHud:OnMouseDownAxis(control, mouseButton)
 end
 
 do
-    local function GetVisibleTranslationRange(originX, originY, originZ, horizontalAngleRadians, invertWorldOffsets)
-        -- Offset horizontally based on the optional horizontalAngleRadians parameter.
-        local worldOffsetX, worldOffsetY, worldOffsetZ = 0, 0, 0
-        if horizontalAngleRadians then
-            worldOffsetX = math.sin(horizontalAngleRadians) * TRANSLATION_AXIS_RANGE_MAX_CM
-            worldOffsetZ = math.cos(horizontalAngleRadians) * TRANSLATION_AXIS_RANGE_MAX_CM
-        else
-            worldOffsetY = -TRANSLATION_AXIS_RANGE_MAX_CM
+    local function GetVisibleTranslationRange(originX, originY, originZ, horizontalAngleRadians, axisType)
+        local offsetY = TRANSLATION_AXIS_RANGE_MAX_CM
+        local offsetX, offsetZ
+
+        if axisType == AXIS_TYPE_X or axisType == AXIS_TYPE_Y then
+            horizontalAngleRadians = horizontalAngleRadians + HALF_PI
         end
-        if invertWorldOffsets then
-            worldOffsetX, worldOffsetZ = -worldOffsetX, -worldOffsetZ
-        end
-
-        -- Clip the translation range's end points at the camera view frustum bounds.
-        local worldX1 = originX - 0.5 * worldOffsetX
-        local worldY1 = originY - 0.5 * worldOffsetY
-        local worldZ1 = originZ - 0.5 * worldOffsetZ
-        local worldX2 = originX + 0.5 * worldOffsetX
-        local worldY2 = originY + 0.5 * worldOffsetY
-        local worldZ2 = originZ + 0.5 * worldOffsetZ
-        local clippedX1, clippedY1, clippedZ1, clippedX2, clippedY2, clippedZ2 = HousingEditorClipLineSegmentToViewFrustum(worldX1, worldY1, worldZ1, worldX2, worldY2, worldZ2)
-
-        -- Calculate the normalized base offset of the initial furniture position.
-        local translationDistance = zo_distance3D(clippedX1, clippedY1, clippedZ1, clippedX2, clippedY2, clippedZ2)
-        local originOffset = zo_distance3D(clippedX1, clippedY1, clippedZ1, originX, originY, originZ)
-        local normalizedOffset = originOffset / translationDistance
-
-        -- Check if the translation range is too constrained by the view frustum
-        -- by ensuring that the dot product of the two vectors, clippedXYZ2 - clippedXYZ1
-        -- and originXYZ - clippedXYZ1, is roughly positive.
-        local vecX1, vecY1, vecZ1 = clippedX2 - clippedX1, clippedY2 - clippedY1, clippedZ2 - clippedZ1
-        local vecX2, vecY2, vecZ2 = originX - clippedX1, originY - clippedY1, originZ - clippedZ1
-        local dotProduct = vecX1 * vecX2 + vecY1 * vecY2 + vecZ1 * vecZ2
-
-        -- The MIN_SQRT_DOT_PRODUCT allows for a slight overshot on any given axis for situations
-        -- where the vector extends just beyond the view frustum boundary but is still valid.
-        local MIN_SQRT_DOT_PRODUCT = -50
-        if math.sqrt(dotProduct) < MIN_SQRT_DOT_PRODUCT then
-            return
-        end
+        offsetX = math.sin(horizontalAngleRadians) * TRANSLATION_AXIS_RANGE_MAX_CM
+        offsetZ = math.cos(horizontalAngleRadians) * TRANSLATION_AXIS_RANGE_MAX_CM
 
         local translationRange =
         {
-            minX = clippedX1,
-            minY = clippedY1,
-            minZ = clippedZ1,
-            maxX = clippedX2,
-            maxY = clippedY2,
-            maxZ = clippedZ2,
-            deltaX = clippedX2 - clippedX1,
-            deltaY = clippedY2 - clippedY1,
-            deltaZ = clippedZ2 - clippedZ1,
-            baseOffset = normalizedOffset,
+            x1 = originX - offsetX,
+            y1 = originY + offsetY,
+            z1 = originZ - offsetZ,
+            x2 = originX + offsetX,
+            y2 = originY + offsetY,
+            z2 = originZ + offsetZ,
+            x3 = originX - offsetX,
+            y3 = originY - offsetY,
+            z3 = originZ - offsetZ,
         }
         return translationRange
     end
 
     function ZO_HousingEditorHud:RegisterDragMouseAxis(axis, mouseX, mouseY)
-        local selectedFurnitureId = HousingEditorGetSelectedFurnitureId()
-        if selectedFurnitureId and not self.focusAxis then
+        if HousingEditorIsSelectingHousingObject() and not self.focusAxis then
             local cameraX, cameraY, cameraZ, originX, originY, originZ = self:GetCameraAndAxisIndicatorOrigins()
             self.focusAngle = math.atan2(cameraX - originX, cameraZ - originZ)
             self.focusAxis = axis
             self.focusOffset = 0
             self.focusOriginX = mouseX
             self.focusOriginY = mouseY
-            self.focusInitialX, self.focusInitialY, self.focusInitialZ = HousingEditorGetFurnitureWorldPosition(selectedFurnitureId)
-            self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll = HousingEditorGetFurnitureOrientation(selectedFurnitureId)
+            self.focusInitialX, self.focusInitialY, self.focusInitialZ = HousingEditorGetSelectedObjectWorldPosition()
+            self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll = HousingEditorGetSelectedObjectOrientation()
 
             -- Calculate the translation range using the selected item's center point.
-            local centerX, centerY, centerZ = HousingEditorGetFurnitureWorldCenter(HousingEditorGetSelectedFurnitureId())
-            local centerOffsetX, centerOffsetY, centerOffsetZ = centerX - self.focusInitialX, centerY - self.focusInitialY, centerZ - self.focusInitialZ
+            local centerX, centerY, centerZ = HousingEditorGetSelectedObjectWorldCenter(HousingEditorGetSelectedFurnitureId())
             local isTranslation = false
 
             if axis.axis == HOUSING_EDITOR_POSITION_AXIS_X1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_X2 then
-                local horizontalAngleRadians = self.focusInitialYaw + HALF_PI
-                local cameraOffsetRadians = (GetPlayerCameraHeading() - horizontalAngleRadians) % TWO_PI
-                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, horizontalAngleRadians, cameraOffsetRadians < PI)
+                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, self.focusInitialYaw, AXIS_TYPE_X)
                 isTranslation = true
             elseif axis.axis == HOUSING_EDITOR_POSITION_AXIS_Y1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_Y2 then
-                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ)
+                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, GetPlayerCameraHeading(), AXIS_TYPE_Y)
                 isTranslation = true
             elseif axis.axis == HOUSING_EDITOR_POSITION_AXIS_Z1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_Z2 then
-                local horizontalAngleRadians = self.focusInitialYaw
-                local cameraOffsetRadians = (GetPlayerCameraHeading() - horizontalAngleRadians) % TWO_PI
-                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, horizontalAngleRadians, cameraOffsetRadians < PI)
+                self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, self.focusInitialYaw, AXIS_TYPE_Z)
                 isTranslation = true
             end
 
+            if self.focusRangeAxis then
+                local range = self.focusRangeAxis
+                local targetX, targetY, targetZ = HousingEditorGetScreenPointWorldPlaneIntersection(mouseX, mouseY, range.x1, range.y1, range.z1, range.x2, range.y2, range.z2, range.x3, range.y3, range.z3)
+                local offsetX, offsetY, offsetZ = self.focusInitialX - targetX, self.focusInitialY - targetY, self.focusInitialZ - targetZ
+
+                self.focusCenterOffsetX, self.focusCenterOffsetY, self.focusCenterOffsetZ = offsetX, offsetY, offsetZ
+            else
+                self.focusCenterOffsetX, self.focusCenterOffsetY, self.focusCenterOffsetZ = 0, 0, 0
+            end
+
             if isTranslation then
-                if self.focusRangeAxis then
-                    -- Remove the item's center offset from the translation range.
-                    local range = self.focusRangeAxis
-                    range.minX, range.minY, range.minZ = range.minX - centerOffsetX, range.minY - centerOffsetY, range.minZ - centerOffsetZ
-                    range.maxX, range.maxY, range.maxZ = range.maxX - centerOffsetX, range.maxY - centerOffsetY, range.maxZ - centerOffsetZ
-                else
+                if not self.focusRangeAxis then
                     self.focusAxis, self.focusOffset, self.focusOriginX, self.focusOriginY, self.focusAngle = nil, nil, nil, nil, nil
                     self.focusInitialX, self.focusInitialY, self.focusInitialZ = nil, nil, nil
                     self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll = nil, nil, nil
@@ -774,10 +871,54 @@ do
 
             for _, indicator in pairs(self.allAxisIndicators) do
                 local isActiveAxis = indicator.axis == self.focusAxis.axis or indicator.axis == self.focusAxis.pairedAxis
+
                 if isActiveAxis then
                     indicator.control:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, AXIS_INDICATOR_RGB_WEIGHT_MAX_PERCENTAGE)
                 end
+
                 indicator.control:SetHidden(not isActiveAxis)
+            end
+
+            do
+                local window = self.translationAxisIndicatorWindow
+                local indicator1 = self.translationAxisIndicators[1]
+                local indicator2 = self.translationAxisIndicators[2]
+                local activeAxis = self.focusAxis.axis
+                local hideAxes = true
+
+                if activeAxis == HOUSING_EDITOR_POSITION_AXIS_X1 or activeAxis == HOUSING_EDITOR_POSITION_AXIS_X2 then
+                    indicator1:Set3DRenderSpaceOrientation(0, 0, 0)
+                    indicator1:Set3DLocalDimensions(TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M, TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M)
+                    indicator1:SetColor(0.05, 0, 0.65, TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA)
+                    indicator2:Set3DRenderSpaceOrientation(HALF_PI, 0, 0)
+                    indicator2:Set3DLocalDimensions(TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M, TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M)
+                    indicator2:SetColor(0.05, 0, 0.65, TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA)
+                    hideAxes = false
+                elseif activeAxis == HOUSING_EDITOR_POSITION_AXIS_Y1 or activeAxis == HOUSING_EDITOR_POSITION_AXIS_Y2 then
+                    indicator1:Set3DRenderSpaceOrientation(0, 0, 0)
+                    indicator1:Set3DLocalDimensions(TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M, TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M)
+                    indicator1:SetColor(0.65, 0, 0.05, TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA)
+                    indicator2:Set3DRenderSpaceOrientation(0, HALF_PI, 0)
+                    indicator2:Set3DLocalDimensions(TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M, TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M)
+                    indicator2:SetColor(0.65, 0, 0.05, TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA)
+                    hideAxes = false
+                elseif activeAxis == HOUSING_EDITOR_POSITION_AXIS_Z1 or activeAxis == HOUSING_EDITOR_POSITION_AXIS_Z2 then
+                    indicator1:Set3DRenderSpaceOrientation(0, HALF_PI, 0)
+                    indicator1:Set3DLocalDimensions(TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M, TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M)
+                    indicator1:SetColor(0, 0.65, 0.05, TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA)
+                    indicator2:Set3DRenderSpaceOrientation(0, HALF_PI, HALF_PI)
+                    indicator2:Set3DLocalDimensions(TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_X_DIMENSION_M, TRANSLATION_AXIS_RANGE_INDICATOR_LOCAL_Y_DIMENSION_M)
+                    indicator2:SetColor(0, 0.65, 0.05, TRANSLATION_AXIS_RANGE_INDICATOR_ALPHA)
+                    hideAxes = false
+                end
+
+                if not hideAxes then
+                    local renderX, renderY, renderZ = WorldPositionToGuiRender3DPosition(centerX, centerY, centerZ)
+                    window:Set3DRenderSpaceOrigin(renderX, renderY, renderZ)
+                    window:Set3DRenderSpaceOrientation(0, self.focusInitialYaw, 0)
+                end
+
+                window:SetHidden(hideAxes)
             end
 
             EVENT_MANAGER:RegisterForUpdate("ZO_HousingEditorHud_DragMouseAxis", 1, function() self:OnDragMouseAxis() end)
@@ -798,6 +939,7 @@ function ZO_HousingEditorHud:UnregisterDragMouseAxis()
             end
             indicator.control:SetHidden(false)
         end
+        self.translationAxisIndicatorWindow:SetHidden(true)
 
         self.focusOffset, self.focusAxis, self.focusOriginX, self.focusOriginY = nil, nil, nil, nil
         self.focusInitialX, self.focusInitialY, self.focusInitialZ = nil, nil, nil
@@ -808,60 +950,55 @@ function ZO_HousingEditorHud:UnregisterDragMouseAxis()
 end
 
 function ZO_HousingEditorHud:OnDragMouseAxis()
-    local selectedFurnitureId = HousingEditorGetSelectedFurnitureId()
+    local isSelectingHousingObject = HousingEditorIsSelectingHousingObject()
     local axis = self.focusAxis
-    if not selectedFurnitureId or not axis or not IsGameCameraUIModeActive() then
+    if not isSelectingHousingObject or not axis or not IsGameCameraUIModeActive() then
         self:UnregisterDragMouseAxis()
         return
     end
 
-    local screenX, screenY = GuiRoot:GetDimensions()
     local mouseX, mouseY = GetUIMousePosition()
-    local normalizedMouseX, normalizedMouseY = mouseX / screenX, mouseY / screenY
-    local normalizedMouseOriginX, normalizedMouseOriginY = self.focusOriginX / screenX, self.focusOriginY / screenY
-    local normalizedOffsetX = normalizedMouseX - normalizedMouseOriginX
-    local normalizedOffsetY = normalizedMouseY - normalizedMouseOriginY
     local axisType = axis.axis
-
     if axisType >= HOUSING_EDITOR_POSITION_AXIS_X1 and axisType <= HOUSING_EDITOR_POSITION_AXIS_Z2 then
-        self:OnDragMousePosition(normalizedOffsetX, normalizedOffsetY)
+        self:OnDragMousePosition(mouseX, mouseY)
         return
     end
 
     if axisType >= HOUSING_EDITOR_ROTATION_AXIS_X1 and axisType <= HOUSING_EDITOR_ROTATION_AXIS_Z2 then
         local cameraX, cameraY, cameraZ = self:GetCameraOrigin()
+        local screenX, screenY = GuiRoot:GetDimensions()
+        local normalizedMouseX, normalizedMouseY = mouseX / screenX, mouseY / screenY
+        local normalizedMouseOriginX, normalizedMouseOriginY = self.focusOriginX / screenX, self.focusOriginY / screenY
+        local normalizedOffsetX = normalizedMouseX - normalizedMouseOriginX
+        local normalizedOffsetY = normalizedMouseY - normalizedMouseOriginY
+
         self:OnDragMouseRotation(cameraX, cameraY, cameraZ, normalizedOffsetX, normalizedOffsetY)
         return
     end
 end
 
-do
-    local function InterpolateTranslationRange(translationRange, progress)
-        local x = translationRange.minX + translationRange.deltaX * progress
-        local y = translationRange.minY + translationRange.deltaY * progress
-        local z = translationRange.minZ + translationRange.deltaZ * progress
-        return x, y, z
-    end
+function ZO_HousingEditorHud:OnDragMousePosition(mouseX, mouseY)
+    local range = self.focusRangeAxis
+    if range then
+        local axisType = self.focusAxis.axis
+        local x, y, z = HousingEditorGetScreenPointWorldPlaneIntersection(mouseX, mouseY, range.x1, range.y1, range.z1, range.x2, range.y2, range.z2, range.x3, range.y3, range.z3)
 
-    function ZO_HousingEditorHud:OnDragMousePosition(normalizedOffsetX, normalizedOffsetY)
-        local translationRange = self.focusRangeAxis
-
-        if translationRange then
-            local axisType = self.focusAxis.axis
-            local baseOffset = translationRange.baseOffset
-            local normalizedOffset
-
+        if x ~= 0 and y ~= 0 and z ~= 0 then
             if axisType == HOUSING_EDITOR_POSITION_AXIS_Y1 or axisType == HOUSING_EDITOR_POSITION_AXIS_Y2 then
-                normalizedOffset = baseOffset + normalizedOffsetY
+                x, z = self.focusInitialX, self.focusInitialZ
+                y = y + self.focusCenterOffsetY
             else
-                normalizedOffset = baseOffset + normalizedOffsetX
+                y = self.focusInitialY
+                x, z = x + self.focusCenterOffsetX, z + self.focusCenterOffsetZ
             end
 
-            local x, y, z = InterpolateTranslationRange(translationRange, zo_clamp(normalizedOffset, 0, 1))
-            local result = HousingEditorAdjustPrecisionEditingPosition(x, y, z)
-            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-            self.axisIndicatorUpdateHandler()
+            if zo_distance3D(self.focusInitialX, self.focusInitialY, self.focusInitialZ, x, y, z) <= TRANSLATION_AXIS_RANGE_MAX_CM then
+                local result = HousingEditorAdjustPrecisionEditingPosition(x, y, z)
+                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+            end
         end
+
+        self.axisIndicatorUpdateHandler()
     end
 end
 
@@ -871,8 +1008,6 @@ function ZO_HousingEditorHud:OnDragMouseRotation(cameraX, cameraY, cameraZ, norm
     local normalizedOffsetRadians = normalizedOffsetX * 2 * TWO_PI
     local axisIndicatorAngleRadians = normalizedOffsetRadians
     local indicatorX, indicatorY, indicatorZ = self:GetAxisIndicatorOrigin()
-    local currentX, currentY, currentZ = HousingEditorGetFurnitureWorldPosition(HousingEditorGetSelectedFurnitureId())
-    local relativeX, relativeY, relativeZ = cameraX - indicatorX, cameraY - indicatorY, cameraZ - indicatorZ
     local offsetAxis
 
     if axisType == HOUSING_EDITOR_ROTATION_AXIS_X1 or axisType == HOUSING_EDITOR_ROTATION_AXIS_X2 then
@@ -886,12 +1021,14 @@ function ZO_HousingEditorHud:OnDragMouseRotation(cameraX, cameraY, cameraZ, norm
     -- Update the rotation offset and/or axis indicator values to match the focused axis.
     if self:IsPrecisionEditingEnabled() then
         if offsetAxis == AXIS_TYPE_X then
+            local relativeX = cameraX - indicatorX
             if relativeX > 0 then
                 normalizedOffsetRadians, axisIndicatorAngleRadians = -normalizedOffsetRadians, -axisIndicatorAngleRadians
             end
         elseif offsetAxis == AXIS_TYPE_Y then
             normalizedOffsetRadians = -normalizedOffsetRadians
         elseif offsetAxis == AXIS_TYPE_Z then
+            local relativeZ = cameraZ - indicatorZ
             if relativeZ > 0 then
                 normalizedOffsetRadians, axisIndicatorAngleRadians = -normalizedOffsetRadians, -axisIndicatorAngleRadians
             end
@@ -908,7 +1045,7 @@ function ZO_HousingEditorHud:OnDragMouseRotation(cameraX, cameraY, cameraZ, norm
 
     if normalizedOffsetRadians then
         if self:IsPrecisionEditingEnabled() then
-            HousingEditorAdjustPendingFurnitureRotation(HousingEditorCalculateRotationAboutAxis(offsetAxis, normalizedOffsetRadians, self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll))
+            HousingEditorAdjustSelectedObjectRotation(HousingEditorCalculateRotationAboutAxis(offsetAxis, normalizedOffsetRadians, self.focusInitialPitch, self.focusInitialYaw, self.focusInitialRoll))
             self:RotateAndScaleAxisIndicator(axis.control, axisIndicatorAngleRadians)
         else
             local pitch, yaw, roll = 0, 0, 0
@@ -923,7 +1060,7 @@ function ZO_HousingEditorHud:OnDragMouseRotation(cameraX, cameraY, cameraZ, norm
                 roll = normalizedOffsetRadians + previousOffset
             end
 
-            HousingEditorAdjustPendingFurnitureRotation(pitch, yaw, roll)
+            HousingEditorAdjustSelectedObjectRotation(pitch, yaw, roll)
             self:RotateAndScaleAxisIndicator(axis.control, axisIndicatorAngleRadians)
         end
     end
@@ -936,10 +1073,10 @@ function ZO_HousingEditorHud:RotateAndScaleAxisIndicator(control, theta)
     local bottomLeftX, bottomLeftY = ZO_Rotate2D(theta, -0.5,  0.5)
     local bottomRightX, bottomRightY = ZO_Rotate2D(theta,  0.5,  0.5)
 
-	control:SetVertexUV(VERTEX_POINTS_TOPLEFT, 0.5 + topLeftX, 0.5 + topLeftY)
-	control:SetVertexUV(VERTEX_POINTS_TOPRIGHT, 0.5 + topRightX, 0.5 + topRightY)
-	control:SetVertexUV(VERTEX_POINTS_BOTTOMLEFT, 0.5 + bottomLeftX, 0.5 + bottomLeftY)
-	control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, 0.5 + bottomRightX, 0.5 + bottomRightY)
+    control:SetVertexUV(VERTEX_POINTS_TOPLEFT, 0.5 + topLeftX, 0.5 + topLeftY)
+    control:SetVertexUV(VERTEX_POINTS_TOPRIGHT, 0.5 + topRightX, 0.5 + topRightY)
+    control:SetVertexUV(VERTEX_POINTS_BOTTOMLEFT, 0.5 + bottomLeftX, 0.5 + bottomLeftY)
+    control:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, 0.5 + bottomRightX, 0.5 + bottomRightY)
 end
 
 function ZO_HousingEditorHud:GetCameraOrigin()
@@ -1041,9 +1178,8 @@ end
 
 function ZO_HousingEditorHud:UpdateAxisIndicators()
     if self.translationIndicators and self.rotationIndicators then
-        local isPlacementMode = GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+        local isPlacementMode = IsInHousingEditorPlacementMode()
         local isPrecisionMode = self:IsPrecisionEditingEnabled()
-        local isUIMode = IsGameCameraUIModeActive()
 
         if not isPlacementMode then
             EVENT_MANAGER:UnregisterForUpdate("HousingEditor_AxisIndicators")
@@ -1093,7 +1229,11 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
 
             for _, indicator in ipairs(self.rotationIndicators) do
                 local alpha = indicator.control:GetAlpha()
-                indicator.control:SetHidden(hideRotation or alpha <= 0)
+                local shouldBeVisible = true
+                if indicator.visible then
+                    shouldBeVisible = indicator.visible()
+                end
+                indicator.control:SetHidden(hideRotation or alpha <= 0 or not shouldBeVisible)
             end
 
             EVENT_MANAGER:RegisterForUpdate("HousingEditor_AxisIndicators", 1, self.axisIndicatorUpdateHandler)
@@ -1102,6 +1242,14 @@ function ZO_HousingEditorHud:UpdateAxisIndicators()
 end
 
 function ZO_HousingEditorHud:InitializeHudControls()
+    local function IsEnabledPitch(mode)
+        return mode ~= HOUSING_EDITOR_MODE_NODE_PLACEMENT
+    end
+
+    local function IsEnabledRoll(mode)
+        return mode ~= HOUSING_EDITOR_MODE_NODE_PLACEMENT
+    end
+
     do
         local yawLeftButton = self.buttonContainer:GetNamedChild("YawLeftButton")
         yawLeftButton.icon = yawLeftButton:GetNamedChild("Icon")
@@ -1114,21 +1262,25 @@ function ZO_HousingEditorHud:InitializeHudControls()
         ZO_Keybindings_RegisterLabelForBindingUpdate(yawRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_RIGHT")
 
         local pitchForwardButton = self.buttonContainer:GetNamedChild("PitchForwardButton")
+        pitchForwardButton.enabledFunction = IsEnabledPitch
         pitchForwardButton.icon = pitchForwardButton:GetNamedChild("Icon")
         pitchForwardButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(pitchForwardButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_FORWARD")
 
         local pitchBackButton = self.buttonContainer:GetNamedChild("PitchBackButton")
+        pitchBackButton.enabledFunction = IsEnabledPitch
         pitchBackButton.icon = pitchBackButton:GetNamedChild("Icon")
         pitchBackButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(pitchBackButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_BACKWARD")
 
         local rollLeftButton = self.buttonContainer:GetNamedChild("RollLeftButton")
+        rollLeftButton.enabledFunction = IsEnabledRoll
         rollLeftButton.icon = rollLeftButton:GetNamedChild("Icon")
         rollLeftButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rollLeftButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_LEFT")
 
         local rollRightButton = self.buttonContainer:GetNamedChild("RollRightButton")
+        rollRightButton.enabledFunction = IsEnabledRoll
         rollRightButton.icon = rollRightButton:GetNamedChild("Icon")
         rollRightButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rollRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_RIGHT")
@@ -1200,21 +1352,25 @@ function ZO_HousingEditorHud:InitializeHudControls()
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotateYawRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_YAW_RIGHT")
 
         local rotatePitchForwardButton = self.precisionRotateButtons:GetNamedChild("PrecisionPitchForwardButton")
+        rotatePitchForwardButton.enabledFunction = IsEnabledPitch
         rotatePitchForwardButton.icon = rotatePitchForwardButton:GetNamedChild("Icon")
         rotatePitchForwardButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotatePitchForwardButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_FORWARD")
 
         local rotatePitchBackButton = self.precisionRotateButtons:GetNamedChild("PrecisionPitchBackButton")
+        rotatePitchBackButton.enabledFunction = IsEnabledPitch
         rotatePitchBackButton.icon = rotatePitchBackButton:GetNamedChild("Icon")
         rotatePitchBackButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_pitchCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotatePitchBackButton:GetNamedChild("Text"), "HOUSING_EDITOR_PITCH_BACKWARD")
 
         local rotateRollLeftButton = self.precisionRotateButtons:GetNamedChild("PrecisionRollLeftButton")
+        rotateRollLeftButton.enabledFunction = IsEnabledRoll
         rotateRollLeftButton.icon = rotateRollLeftButton:GetNamedChild("Icon")
         rotateRollLeftButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotateRollLeftButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_LEFT")
 
         local rotateRollRightButton = self.precisionRotateButtons:GetNamedChild("PrecisionRollRightButton")
+        rotateRollRightButton.enabledFunction = IsEnabledRoll
         rotateRollRightButton.icon = rotateRollRightButton:GetNamedChild("Icon")
         rotateRollRightButton.icon:SetTexture("EsoUI/Art/Housing/housing_axisControlIcon_rollCW.dds")
         ZO_Keybindings_RegisterLabelForBindingUpdate(rotateRollRightButton:GetNamedChild("Text"), "HOUSING_EDITOR_ROLL_RIGHT")
@@ -1379,12 +1535,11 @@ do
 
     function ZO_HousingEditorHud:RefreshPlacementKeyPresses()
         local frameTimeMS = GetFrameTimeMilliseconds()
-        local x, y, z, pitch, yaw, roll = 0, 0, 0, 0, 0, 0
         local furnitureId = HousingEditorGetSelectedFurnitureId()
 
         if furnitureId and self:IsPrecisionEditingEnabled() then
-            x, y, z = HousingEditorGetFurnitureWorldCenter(furnitureId)
-            pitch, yaw, roll = HousingEditorGetFurnitureOrientation(furnitureId)
+            local x, y, z = HousingEditorGetSelectedObjectWorldCenter()
+            local pitch, yaw, roll = HousingEditorGetSelectedObjectOrientation()
 
             local nextPrecisionPositionOrOrientationUpdateMS = self.nextPrecisionPositionOrOrientationUpdateMS or 0
             if frameTimeMS > nextPrecisionPositionOrOrientationUpdateMS then
@@ -1411,7 +1566,7 @@ do
                     local rollText = string.format("%.1f", roll)
                     local orientationText = GetString(SI_HOUSING_EDITOR_CURRENT_FURNITURE_ORIENTATION)
 
-                    orientationText = string.gsub(string.gsub(string.gsub(orientationText, "<<1>>", pitchText), "<<2>>", yawText), "<<3>>", rollText)
+                    orientationText = string.gsub(string.gsub(string.gsub(orientationText, "<<1>>", yawText), "<<2>>", pitchText), "<<3>>", rollText)
                     self.precisionOrientationLabel:SetText(orientationText)
                 end
 
@@ -1423,7 +1578,6 @@ do
             self.precisionOrientationLabel:SetHidden(true)
         end
 
-        local isAnyKeyPressed = false
         local activeIntervalMS = 0
 
         for keypress = KEYPRESS_MIN, KEYPRESS_MAX do
@@ -1436,7 +1590,6 @@ do
                     key.keypressDurationMS = frameTimeMS - key.keypressStartMS
                     key.keypressIntervalMS = ZO_EaseOutQuadratic(math.min(1, key.keypressDurationMS / PRESS_AND_HOLD_ACCELERATION_INTERVAL_MS))
                     activeIntervalMS = math.max(activeIntervalMS, key.keypressIntervalMS)
-                    isAnyKeyPressed = true
                 elseif key.keypressStartMS then
                     key.keypressStartMS = nil
                     key.keypressDurationMS = nil
@@ -1522,7 +1675,7 @@ do
 
     function ZO_HousingEditorHud:InitializeKeybindDescriptors()
         local function PlacementCallback(direction, isUp)
-            self.placementKeyPresses[direction] = not isUp and GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+            self.placementKeyPresses[direction] = not isUp and IsInHousingEditorPlacementMode()
         end
 
         local function RefreshUnits()
@@ -1629,39 +1782,152 @@ do
             self.precisionRotateHudButtons[6].axis = axes[4]
         end
 
+        local function CanEditPath()
+            if HousingEditorHasSelectablePathNode() then
+                return true
+            else
+                local furnitureId = HousingEditorGetTargetInfo()
+                if CompareId64ToNumber(furnitureId, 0) > 0 then
+                    return HousingEditorCanFurnitureBePathed(furnitureId)
+                end
+            end
+            return false
+        end
+
+        -- Edit Path
+        local sharedEditPathKeybind = {
+            name = function()
+                local targetingPathableFurniture = false
+                local furnitureId = HousingEditorGetTargetInfo()
+                if CompareId64ToNumber(furnitureId, 0) > 0 then
+                    targetingPathableFurniture = HousingEditorCanFurnitureBePathed(furnitureId)
+                end
+
+                if targetingPathableFurniture and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0 then
+                    return GetString(SI_HOUSING_EDITOR_CREATE_PATH)
+                else
+                    return GetString(SI_HOUSING_EDITOR_PATH)
+                end
+            end,
+            callback =  function()
+                            local result = HousingEditorEditTargettedFurniturePath()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                TriggerTutorial(TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PATH_MODE)
+                                PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                            end
+                        end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible = CanEditPath,
+            enabled = CanEditPath,
+            order = 30,
+            ethereal = true,
+        }
+        local keyboardEditPathDescriptor = {}
+        ZO_ShallowTableCopy(sharedEditPathKeybind, keyboardEditPathDescriptor)
+        keyboardEditPathDescriptor.keybind = "HOUSING_EDITOR_BEGIN_EDIT_PATH"
+
+        local gamepadEditPathDescriptor = {}
+        ZO_ShallowTableCopy(sharedEditPathKeybind, gamepadEditPathDescriptor)
+        gamepadEditPathDescriptor.keybind = "HOUSING_EDITOR_QUINARY_ACTION"
+
+        --Primary (Selection/Placement)
+        local selectionPrimaryDescriptor =
+        {
+            name =  GetString(SI_HOUSING_EDITOR_SELECT),
+            keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
+            callback =  function()
+                            HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
+                            local result = HousingEditorSelectTargetUnderReticle()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                                return true
+                            end
+                            return false --if not successful return false so you can jump in editor with a gamepad
+                        end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            enabled = function()
+                return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
+            end,
+            visible = function()
+                return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
+            end,
+            order = 10,
+            ethereal = true,
+        }
+
+        --Tertiary 
+        local selectionTertiaryDescriptor =
+        {
+            name = GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
+            keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
+            callback =  function()
+                            HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PRECISION)
+                            local result = HousingEditorSelectTargetUnderReticle()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                TriggerTutorial(TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PRECISION_PLACEMENT_MODE)
+                                PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                                return
+                            end
+                            HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
+                        end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible = function()
+                return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
+            end,
+            enabled = function()
+                return HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode()
+            end,
+            order = 20,
+            ethereal = true,
+        }
+
+        local function CanLinkFurniture()
+            local furnitureId, nodeIndex = HousingEditorGetTargetInfo()
+            local hasFurnitureId = CompareId64ToNumber(furnitureId, 0) > 0
+            return hasFurnitureId and nodeIndex == nil and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0
+        end
+
+        -- Link Furniture
+        local selectionLinkFurnitureDescriptor =
+        {
+            name = GetString(SI_HOUSING_EDITOR_LINK),
+            keybind = "HOUSING_EDITOR_BEGIN_FURNITURE_LINKING",
+            callback =  function()
+                            local result = HousingEditorBeginLinkingTargettedFurniture()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                            end
+                        end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible = CanLinkFurniture,
+            enabled = CanLinkFurniture,
+            order = 40,
+            ethereal = true,
+        }
+
+        self.selectionModeKeybindPaletteDescriptor =
+        {
+           selectionPrimaryDescriptor,
+           selectionTertiaryDescriptor,
+           selectionLinkFurnitureDescriptor,
+           keyboardEditPathDescriptor
+        }
+
+        self.selectionModeKeybindPaletteGamepadDescriptor =
+        {
+           selectionPrimaryDescriptor,
+           selectionTertiaryDescriptor,
+           selectionLinkFurnitureDescriptor,
+           gamepadEditPathDescriptor
+        }
+
         self.selectionModeKeybindStripDescriptor =
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            --Primary (Selection/Placement)
-            {
-                name =  GetString(SI_HOUSING_EDITOR_SELECT),
-                keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
-                callback =  function()
-                                HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
-                                local result = HousingEditorSelectTargettedFurniture()
-                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                                    PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
-                                    return true
-                                end
-                                return false --if not successful return false so you can jump in editor with a gamepad
-                            end,
-                order = 10,
-            },
-
-            -- Link Furniture
-            {
-                name = GetString(SI_HOUSING_EDITOR_LINK),
-                keybind = "HOUSING_EDITOR_BEGIN_FURNITURE_LINKING",
-                callback =  function()
-                                local result = HousingEditorBeginLinkingTargettedFurniture()
-                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                                    PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
-                                end
-                            end,
-                order = 15,
-            },
 
             --Secondary 
             {
@@ -1674,24 +1940,6 @@ do
                                 HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
                             end,
                 order = 20,
-            },
-
-            --Tertiary 
-            {
-                name = GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
-                keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
-                callback =  function()
-                                HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PRECISION)
-                                local result = HousingEditorSelectTargettedFurniture()
-                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                                    TriggerTutorial(TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PRECISION_PLACEMENT_MODE)
-                                    PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
-                                    return
-                                end
-                                HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
-                            end,
-                order = 12,
             },
 
              --Jump to safe loc
@@ -1727,19 +1975,8 @@ do
             },
         }
 
-        self.placementModeKeybindStripDescriptor =
+        self.placementModeKeybindPaletteDescriptor =
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            --Negative
-            {
-                name = GetString(SI_HOUSING_EDITOR_CANCEL),
-                keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
-                callback = function()
-                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-                            end,
-                alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            },
-
             --Primary (Selection/Placement)
             {
                 name =  function()
@@ -1760,6 +1997,22 @@ do
                                 self:ClearPlacementKeyPresses()
                             end,
                 order = 10,
+                ethereal = true,
+            },
+        }
+
+        self.placementModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            --Negative
+            {
+                name = GetString(SI_HOUSING_EDITOR_CANCEL),
+                keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
+                callback = function()
+                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                            end,
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
             },
 
             --Secondary 
@@ -1898,27 +2151,15 @@ do
                 name = GetString(SI_HOUSING_EDITOR_ALIGN),
                 keybind = "HOUSING_EDITOR_ALIGN_TO_SURFACE",
                 callback =  function()
-                                HousingEditorAlignFurnitureToSurface()
+                                HousingEditorAlignSelectedObjectToSurface()
                             end,
                 order = 50,
             },
         }
 
-        self.precisionMovePlacementModeKeybindStripDescriptor =
+        self.precisionMovePlacementModeKeybindPaletteDescriptor =
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            --Negative
-            {
-                name = GetString(SI_HOUSING_EDITOR_CANCEL),
-                keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
-                callback = function()
-                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-                            end,
-                alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            },
-
-
-            --Primary (Placement)
+            --Primary (Selection/Placement)
             {
                 name =  GetString(SI_HOUSING_EDITOR_PLACE),
                 keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
@@ -1931,6 +2172,25 @@ do
                                 self:ClearPlacementKeyPresses()
                             end,
                 order = 10,
+                ethereal = true,
+            },
+        }
+
+        self.precisionMovePlacementModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            --Negative
+            {
+                name = GetString(SI_HOUSING_EDITOR_CANCEL),
+                keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
+                callback = function()
+                                if GetHousingEditorMode() == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
+                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_PATH)
+                                else
+                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                                end
+                            end,
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
             },
 
             --Secondary (Swap to Rotate Mode)
@@ -1985,8 +2245,11 @@ do
             {
                 name = GetString(SI_HOUSING_EDITOR_STRAIGHTEN),
                 keybind = "HOUSING_EDITOR_JUMP_TO_SAFE_LOC",
+                visible = function()
+                                return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+                          end,
                 callback = function() 
-                                HousingEditorStraightenFurniture()
+                                HousingEditorStraightenSelectedObject()
                            end,
                 order = 50,
             },
@@ -2068,26 +2331,14 @@ do
                 name = GetString(SI_HOUSING_EDITOR_ALIGN),
                 keybind = "HOUSING_EDITOR_ALIGN_TO_SURFACE",
                 callback =  function()
-                                HousingEditorAlignFurnitureToSurface()
+                                HousingEditorAlignSelectedObjectToSurface()
                             end,
                 order = 50,
             },
         }
 
-        self.precisionRotatePlacementModeKeybindStripDescriptor =
+        self.precisionRotatePlacementModeKeybindPaletteDescriptor =
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
-            --Negative
-            {
-                name = GetString(SI_HOUSING_EDITOR_CANCEL),
-                keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
-                callback = function()
-                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-                            end,
-                alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            },
-
             --Primary (Placement)
             {
                 name =  GetString(SI_HOUSING_EDITOR_PLACE),
@@ -2101,6 +2352,26 @@ do
                                 self:ClearPlacementKeyPresses()
                             end,
                 order = 10,
+                ethereal = true,
+            },
+        }
+
+        self.precisionRotatePlacementModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            --Negative
+            {
+                name = GetString(SI_HOUSING_EDITOR_CANCEL),
+                keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
+                callback = function()
+                                if GetHousingEditorMode() == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
+                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_PATH)
+                                else
+                                    HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                                end
+                            end,
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
             },
 
             --Secondary (Swap to Move Mode)
@@ -2155,13 +2426,16 @@ do
             {
                 name = GetString(SI_HOUSING_EDITOR_STRAIGHTEN),
                 keybind = "HOUSING_EDITOR_JUMP_TO_SAFE_LOC",
+                visible = function()
+                                return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+                          end,
                 callback = function() 
-                                HousingEditorStraightenFurniture()
+                                HousingEditorStraightenSelectedObject()
                            end,
                 order = 50,
             },
 
-            --Precision Roll Right
+            --Precision Yaw Right
             {
                 --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
                 name = "Furniture Yaw Right",
@@ -2173,7 +2447,7 @@ do
                             end,
             },
 
-            --Precision Roll Left
+            --Precision Yaw Left
             {
                 --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
                 name = "Furniture Yaw Left",
@@ -2192,6 +2466,9 @@ do
                 keybind = "HOUSING_EDITOR_PITCH_FORWARD",
                 ethereal = true,
                 handlesKeyUp = true,
+                enabled = function()
+                                return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+                          end,
                 callback =  function(isUp)
                                 PlacementCallback(PRECISION_ROTATE_PITCH_FORWARD, isUp)
                             end,
@@ -2204,6 +2481,9 @@ do
                 keybind = "HOUSING_EDITOR_PITCH_BACKWARD",
                 ethereal = true,
                 handlesKeyUp = true,
+                enabled = function()
+                                return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+                          end,
                 callback =  function(isUp)
                                 PlacementCallback(PRECISION_ROTATE_PITCH_BACKWARD, isUp)
                             end,
@@ -2216,6 +2496,9 @@ do
                 keybind = "HOUSING_EDITOR_ROLL_RIGHT",
                 ethereal = true,
                 handlesKeyUp = true,
+                enabled = function()
+                                return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+                          end,
                 callback =  function(isUp)
                                 PlacementCallback(PRECISION_ROTATE_ROLL_RIGHT, isUp)
                             end,
@@ -2228,6 +2511,9 @@ do
                 keybind = "HOUSING_EDITOR_ROLL_LEFT",
                 ethereal = true,
                 handlesKeyUp = true,
+                enabled = function()
+                                return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT
+                          end,
                 callback =  function(isUp)
                                 PlacementCallback(PRECISION_ROTATE_ROLL_LEFT, isUp)
                             end,
@@ -2238,25 +2524,14 @@ do
                 name = GetString(SI_HOUSING_EDITOR_ALIGN),
                 keybind = "HOUSING_EDITOR_ALIGN_TO_SURFACE",
                 callback =  function()
-                                HousingEditorAlignFurnitureToSurface()
+                                HousingEditorAlignSelectedObjectToSurface()
                             end,
                 order = 50,
             },
         }
 
-        self.linkModeKeybindStripDescriptor =
+        self.linkModeKeybindPaletteDescriptor =
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            --Negative
-            {
-                name = GetString(SI_HOUSING_EDITOR_EXIT_LINK),
-                keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
-                callback = function()
-                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
-                            end,
-                alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            },
-
             --Primary (Unlink/Link As Child)
             {
                 name = function()
@@ -2289,6 +2564,22 @@ do
                                 HousingEditorPerformPendingLinkOperation()
                             end,
                 order = 10,
+                ethereal = true,
+            },
+        }
+
+        self.linkModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            --Negative
+            {
+                name = GetString(SI_HOUSING_EDITOR_EXIT_LINK),
+                keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
+                callback = function()
+                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                            end,
+                alignment = KEYBIND_STRIP_ALIGN_LEFT,
             },
 
             --Secondary (Remove My Parent)
@@ -2324,6 +2615,427 @@ do
             },
         }
 
+        --Primary (Place New Node)
+        local pathPrimaryDescriptor =
+        {
+            name = GetString(SI_HOUSING_EDITOR_PATH_SELECT_NODE),
+            keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            callback =  function()
+                            local result = HousingEditorSelectTargettedPathNode()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                        end,
+            order = 10,
+            ethereal = true,
+        }
+
+        -- Tertiary (Precision Edit Mode)
+        local pathTertiaryDescriptor =
+        {
+            name = GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
+            keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
+            callback =  function()
+                            if HousingEditorHasSelectablePathNode() then
+                                HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PRECISION)
+                                local result = HousingEditorSelectTargettedPathNode()
+                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                                if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                    TriggerTutorial(TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PRECISION_PLACEMENT_MODE)
+                                    PlaySound(SOUNDS.HOUSING_EDITOR_PICKUP_ITEM)
+                                    return
+                                end
+                            end
+                            HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
+                        end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            order = 12,
+            ethereal = true,
+        }
+
+        --Quarternary (Change node speed)
+        local pathChangeSpeedDescriptor =
+        {
+            name =  function()
+                        local placeSpeed = GetString("SI_HOUSINGPATHMOVEMENTSPEED", HousingEditorGetSelectedPathNodeSpeed())
+                        return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_SPEED, ZO_SELECTED_TEXT:Colorize(placeSpeed))
+                    end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            callback =  function()
+                            local result = HousingEditorToggleSelectedPathNodeSpeed()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            self:UpdateKeybinds()
+                        end,
+            order = 40,
+            ethereal = true,
+        }
+        local keyboardPathChangeSpeedDescriptor = {}
+        ZO_ShallowTableCopy(pathChangeSpeedDescriptor, keyboardPathChangeSpeedDescriptor)
+        keyboardPathChangeSpeedDescriptor.keybind = "HOUSING_EDITOR_TOGGLE_NODE_SPEED"
+
+        local gamepadPathChangeSpeedDescriptor = {}
+        ZO_ShallowTableCopy(pathChangeSpeedDescriptor, gamepadPathChangeSpeedDescriptor)
+        gamepadPathChangeSpeedDescriptor.keybind = "HOUSING_EDITOR_QUATERNARY_ACTION"
+
+        --Quinary (Change node delay time)
+        local pathChangeDelayDescriptor =
+        {
+            name =  function()
+                        local delayTimeMS = HousingEditorGetSelectedPathNodeDelayTime()
+                        local delayTimeS = ZO_FormatTimeMilliseconds(delayTimeMS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_SECONDS)
+                        return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_WAIT_TIME, ZO_SELECTED_TEXT:Colorize(delayTimeS))
+                    end,
+            -- pallet descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
+            visible =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            enabled =   function()
+                            return HousingEditorHasSelectablePathNode()
+                        end,
+            callback =  function()
+                            local result = HousingEditorToggleSelectedPathNodeDelayTime()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            self:UpdateKeybinds()
+                        end,
+            order = 50,
+            ethereal = true,
+        }
+
+        local keyboardPathChangeDelayDescriptor = {}
+        ZO_ShallowTableCopy(pathChangeDelayDescriptor, keyboardPathChangeDelayDescriptor)
+        keyboardPathChangeDelayDescriptor.keybind = "HOUSING_EDITOR_TOGGLE_NODE_DELAY"
+
+        local gamepadPathChangeDelayDescriptor = {}
+        ZO_ShallowTableCopy(pathChangeDelayDescriptor, gamepadPathChangeDelayDescriptor)
+        gamepadPathChangeDelayDescriptor.keybind = "HOUSING_EDITOR_QUINARY_ACTION"
+
+        self.pathModeKeybindPaletteDescriptor =
+        {
+            pathPrimaryDescriptor,
+            pathTertiaryDescriptor,
+            keyboardPathChangeSpeedDescriptor,
+            keyboardPathChangeDelayDescriptor
+        }
+
+        self.pathModeKeybindPaletteGamepadDescriptor =
+        {
+            pathPrimaryDescriptor,
+            pathTertiaryDescriptor,
+            gamepadPathChangeSpeedDescriptor,
+            gamepadPathChangeDelayDescriptor
+        }
+
+        -- Edit Path
+        local pathEditDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_HOUSING_EDITOR_EXIT_PATH),
+            callback =  function()
+                            local result = HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                        end,
+        }
+        local keyboardPathEditDescriptor = {}
+        ZO_ShallowTableCopy(pathEditDescriptor, keyboardPathEditDescriptor)
+        keyboardPathEditDescriptor.keybind = "HOUSING_EDITOR_BEGIN_EDIT_PATH"
+
+        local gamepadPathEditDescriptor = {}
+        ZO_ShallowTableCopy(pathEditDescriptor, gamepadPathEditDescriptor)
+        gamepadPathEditDescriptor.keybind = "HOUSING_EDITOR_SECONDARY_ACTION"
+
+        -- Undo
+        local pathUndoDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_HOUSING_EDITOR_UNDO),
+            keybind = "HOUSING_EDITOR_UNDO_ACTION",
+            enabled = function() return CanUndoLastHousingEditorCommand() end,
+            callback = UndoLastHousingEditorCommand,
+        }
+
+        -- Redo
+        local pathRedoDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_HOUSING_EDITOR_REDO),
+            keybind = "HOUSING_EDITOR_REDO_ACTION",
+            enabled = function() return CanRedoLastHousingEditorCommand() end,
+            callback = RedoLastHousingEditorCommand,
+        }
+
+        --Linking Button (Add Node Before)
+        local pathAddNodeBeforeDescriptor =
+        {
+            name =  function()
+                        local numLeft = HOUSING_MAX_FURNITURE_PATH_NODES - HousingEditorGetNumPathNodesInSelectedFurniture()
+                        if HousingEditorHasSelectablePathNode() then
+                            return zo_strformat(SI_HOUSING_EDITOR_PATH_ADD_NODE_BEFORE, ZO_SELECTED_TEXT:Colorize(numLeft))
+                        else
+                            return zo_strformat(SI_HOUSING_EDITOR_PATH_ADD_NEW_NODE, ZO_SELECTED_TEXT:Colorize(numLeft))
+                        end
+                    end,
+            keybind = "HOUSING_EDITOR_BEGIN_FURNITURE_LINKING",
+            enabled = function()
+                            local numLeft = HOUSING_MAX_FURNITURE_PATH_NODES - HousingEditorGetNumPathNodesInSelectedFurniture()
+                            return numLeft > 0
+                        end,
+            callback =  function()
+                            local insertIndex
+                            if HousingEditorHasSelectablePathNode() then
+                                local furnitureId, pathIndex = HousingEditorGetTargetInfo()
+                                insertIndex = pathIndex
+                            else
+                                local numNodes = HousingEditorGetNumPathNodesInSelectedFurniture()
+                                insertIndex = numNodes + 1
+                            end
+                            local result = HousingEditorBeginPlaceNewPathNode(insertIndex)
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                        end,
+            order = 10,
+        }
+
+        -- Secondary (Path Settings)
+        local pathSettingsDescriptor =
+        {
+            name =  GetString(SI_HOUSING_EDITOR_PATH_SETTINGS),
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            callback = function()
+                            local furnitureId = HousingEditorGetSelectedFurnitureId()
+                            SYSTEMS:GetObject("path_settings"):SetPathData(furnitureId)
+                            SYSTEMS:PushScene("housing_path_settings")
+                        end,
+            order = 27,
+        }
+        local keyboardPathSettingsDescriptor = {}
+        ZO_ShallowTableCopy(pathSettingsDescriptor, keyboardPathSettingsDescriptor)
+        keyboardPathSettingsDescriptor.keybind = "HOUSING_EDITOR_SECONDARY_ACTION"
+
+        local gamepadPathSettingsDescriptor = {}
+        ZO_ShallowTableCopy(pathSettingsDescriptor, gamepadPathSettingsDescriptor)
+        gamepadPathSettingsDescriptor.keybind = "HOUSING_EDITOR_JUMP_TO_SAFE_LOC"
+
+        self.pathModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            keyboardPathEditDescriptor,
+            pathUndoDescriptor,
+            pathRedoDescriptor,
+            pathAddNodeBeforeDescriptor,
+            keyboardPathSettingsDescriptor
+        }
+
+        self.pathModeKeybindStripGamepadDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            gamepadPathEditDescriptor,
+            pathUndoDescriptor,
+            pathRedoDescriptor,
+            pathAddNodeBeforeDescriptor,
+            gamepadPathSettingsDescriptor
+        }
+
+        self.nodePlacementModeKeybindPaletteDescriptor =
+        {
+            -- Primary (Confirm Node)
+            {
+                name = function()
+                            local numLeft = HOUSING_MAX_FURNITURE_PATH_NODES - HousingEditorGetNumPathNodesInSelectedFurniture()
+                            return zo_strformat(SI_HOUSING_EDITOR_CONFIRM_NODE_PLACEMENT, ZO_SELECTED_TEXT:Colorize(numLeft))
+                       end,
+                keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
+                callback =  function()
+                                local result = HousingEditorRequestPlaceSelectedPathNode()
+                                ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                                self:ClearPlacementKeyPresses()
+                            end,
+                ethereal = true,
+            },
+        }
+
+
+        --Secondary (Remove Node)
+        local nodePlacementRemoveNodeDescriptor =
+        {
+            name =  function()
+                        if HousingEditorIsPlacingNewNode() then
+                            return GetString(SI_HOUSING_EDITOR_PATH_FINISH_PLACEMENT)
+                        else
+                            return GetString(SI_HOUSING_EDITOR_PATH_REMOVE_NODE)
+                        end
+                    end,
+            keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
+            callback =  function()
+                            local result = HousingEditorRequestRemoveSelectedPathNode()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            self:ClearPlacementKeyPresses()
+                        end,
+            order = 10,
+        }
+
+        --Quaternary (Change insert node speed)
+        local nodePlacementNodeSpeedDescriptor =
+        {
+            name =  function()
+                        local placeSpeed = GetString("SI_HOUSINGPATHMOVEMENTSPEED", HousingEditorGetSelectedPathNodeSpeed())
+                        return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_SPEED, ZO_SELECTED_TEXT:Colorize(placeSpeed))
+                    end,
+            callback =  function()
+                            local result = HousingEditorToggleSelectedPathNodeSpeed()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            self:UpdateKeybinds()
+                        end,
+            order = 20,
+        }
+        local keyboardNodePlacementNodeSpeedDescriptor = {}
+        ZO_ShallowTableCopy(nodePlacementNodeSpeedDescriptor, keyboardNodePlacementNodeSpeedDescriptor)
+        keyboardNodePlacementNodeSpeedDescriptor.keybind = "HOUSING_EDITOR_TOGGLE_NODE_SPEED"
+
+        local gamepadNodePlacementNodeSpeedDescriptor = {}
+        ZO_ShallowTableCopy(nodePlacementNodeSpeedDescriptor, gamepadNodePlacementNodeSpeedDescriptor)
+        gamepadNodePlacementNodeSpeedDescriptor.keybind = "HOUSING_EDITOR_QUATERNARY_ACTION"
+
+        --Quinary (Change insert node delay time)
+        local nodePlacementNodeDelayDescriptor =
+        {
+            name =  function()
+                        local delayTimeMS = HousingEditorGetSelectedPathNodeDelayTime()
+                        local delayTimeS = ZO_FormatTimeMilliseconds(delayTimeMS, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_SECONDS)
+                        return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_WAIT_TIME, ZO_SELECTED_TEXT:Colorize(delayTimeS))
+                    end,
+            callback =  function()
+                            local result = HousingEditorToggleSelectedPathNodeDelayTime()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            self:UpdateKeybinds()
+                        end,
+            order = 25,
+        }
+        local keyboardNodePlacementNodeDelayDescriptor = {}
+        ZO_ShallowTableCopy(nodePlacementNodeDelayDescriptor, keyboardNodePlacementNodeDelayDescriptor)
+        keyboardNodePlacementNodeDelayDescriptor.keybind = "HOUSING_EDITOR_TOGGLE_NODE_DELAY"
+
+        local gamepadNodePlacementNodeDelayDescriptor = {}
+        ZO_ShallowTableCopy(nodePlacementNodeDelayDescriptor, gamepadNodePlacementNodeDelayDescriptor)
+        gamepadNodePlacementNodeDelayDescriptor.keybind = "HOUSING_EDITOR_QUINARY_ACTION"
+
+        --Align to Surface
+        local nodePlacementAlignDescriptor =
+        {
+            name = GetString(SI_HOUSING_EDITOR_ALIGN),
+            keybind = "HOUSING_EDITOR_ALIGN_TO_SURFACE",
+            callback =  function()
+                            local result = HousingEditorAlignSelectedPathNodeToSurface()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                        end,
+            order = 50,
+        }
+
+        --Surface Drag Toggle
+        local nodePlacementSurfaceDragDescriptor =
+        {
+            name = function()
+                        if HousingEditorIsSurfaceDragModeEnabled() then 
+                            return GetString(SI_HOUSING_EDITOR_SURFACE_DRAG_OFF)
+                        else
+                            return GetString(SI_HOUSING_EDITOR_SURFACE_DRAG_ON)
+                        end
+                    end,
+            keybind = "HOUSING_EDITOR_QUATERNARY_ACTION",
+            callback = function() 
+                            HousingEditorToggleSurfaceDragMode()
+                            self:UpdateKeybinds()
+                        end,
+            order = 40,
+        }
+
+        -- Negative (Cancel placement)
+        local nodePlacementCancelDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
+            name = GetString(SI_HOUSING_EDITOR_CANCEL),
+            keybind = "HOUSING_EDITOR_NEGATIVE_ACTION",
+            visible = function()
+                            return not HousingEditorIsPlacingNewNode()
+                        end,
+            callback = function()
+                            local result = HousingEditorReleaseSelectedPathNode()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            self:UpdateKeybinds()
+                        end,
+            order = 30,
+        }
+
+        --Yaw Right
+        local nodePlacementYawRightDescriptor =
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Node Yaw Right",
+            keybind = "HOUSING_EDITOR_YAW_RIGHT",
+            ethereal = true,
+            handlesKeyUp = true,
+            callback =  function(isUp)
+                            PlacementCallback(ROTATE_YAW_RIGHT, isUp)
+                        end,
+        }
+
+        --Yaw Left
+        local nodePlacementYawLeftDescriptor =
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Node Yaw Left",
+            keybind = "HOUSING_EDITOR_YAW_LEFT",
+            ethereal = true,
+            handlesKeyUp = true,
+            callback =  function(isUp)
+                            PlacementCallback(ROTATE_YAW_LEFT, isUp)
+                        end,
+        }
+
+        self.nodePlacementModeKeybindStripDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            nodePlacementRemoveNodeDescriptor,
+            keyboardNodePlacementNodeSpeedDescriptor,
+            keyboardNodePlacementNodeDelayDescriptor,
+            nodePlacementAlignDescriptor,
+            nodePlacementSurfaceDragDescriptor,
+            nodePlacementCancelDescriptor,
+            nodePlacementYawRightDescriptor,
+            nodePlacementYawLeftDescriptor
+        }
+
+        self.nodePlacementModeKeybindStripGamepadDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+            nodePlacementRemoveNodeDescriptor,
+            gamepadNodePlacementNodeSpeedDescriptor,
+            gamepadNodePlacementNodeDelayDescriptor,
+            nodePlacementAlignDescriptor,
+            nodePlacementCancelDescriptor,
+            nodePlacementYawRightDescriptor,
+            nodePlacementYawLeftDescriptor
+        }
+
         self.UIModeKeybindStripDescriptor =
         {
             {
@@ -2332,7 +3044,7 @@ do
                 keybind = "HOUSING_EDITOR_TERTIARY_ACTION",
                 ethereal = true,
                 callback = function()
-                                if not IsInGamepadPreferredMode() then 
+                                if not IsInGamepadPreferredMode() then
                                     SCENE_MANAGER:OnToggleHUDUIBinding()
                                 end
                             end,
@@ -2347,7 +3059,7 @@ do
             
                 name = GetString(SI_HOUSING_EDITOR_PUSH_FORWARD),
                 keybind = "HOUSING_EDITOR_PUSH_FORWARD",
-                visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT and not HousingEditorIsSurfaceDragModeEnabled() end,
+                visible = function() return not HousingEditorIsSurfaceDragModeEnabled() end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 if IsInGamepadPreferredMode() then
@@ -2361,7 +3073,7 @@ do
             {
                 name = GetString(SI_HOUSING_EDITOR_PUSH_BACKWARD),
                 keybind = "HOUSING_EDITOR_PULL_BACKWARD",
-                visible = function() return GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT and not HousingEditorIsSurfaceDragModeEnabled() end,
+                visible = function() return not HousingEditorIsSurfaceDragModeEnabled() end,
                 handlesKeyUp = true,
                 callback =  function(isUp)
                                 if IsInGamepadPreferredMode() then
@@ -2410,19 +3122,43 @@ do
 
     function ZO_HousingEditorHud:GetKeybindStripDescriptorForMode(mode)
         if mode == HOUSING_EDITOR_MODE_SELECTION then
-            return self.selectionModeKeybindStripDescriptor
+            if IsInGamepadPreferredMode() then
+                return self.selectionModeKeybindStripDescriptor, self.selectionModeKeybindPaletteGamepadDescriptor
+            else
+                return self.selectionModeKeybindStripDescriptor, self.selectionModeKeybindPaletteDescriptor
+            end
         elseif mode == HOUSING_EDITOR_MODE_PLACEMENT then
             if self:IsPrecisionEditingEnabled() then
                 if self:IsPrecisionPlacementRotationMode() then
-                    return self.precisionRotatePlacementModeKeybindStripDescriptor
+                    return self.precisionRotatePlacementModeKeybindStripDescriptor, self.precisionRotatePlacementModeKeybindPaletteDescriptor
                 else
-                    return self.precisionMovePlacementModeKeybindStripDescriptor
+                    return self.precisionMovePlacementModeKeybindStripDescriptor, self.precisionMovePlacementModeKeybindPaletteDescriptor
                 end
             else
-                return self.placementModeKeybindStripDescriptor
+                return self.placementModeKeybindStripDescriptor, self.placementModeKeybindPaletteDescriptor
             end
         elseif mode == HOUSING_EDITOR_MODE_LINK then
-            return self.linkModeKeybindStripDescriptor
+            return self.linkModeKeybindStripDescriptor, self.linkModeKeybindPaletteDescriptor
+        elseif mode == HOUSING_EDITOR_MODE_PATH then
+            if IsInGamepadPreferredMode() then
+                return self.pathModeKeybindStripGamepadDescriptor, self.pathModeKeybindPaletteGamepadDescriptor
+            else
+                return self.pathModeKeybindStripDescriptor, self.pathModeKeybindPaletteDescriptor
+            end
+        elseif mode == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
+            if self:IsPrecisionEditingEnabled() then
+                if self:IsPrecisionPlacementRotationMode() then
+                    return self.precisionRotatePlacementModeKeybindStripDescriptor, self.precisionRotatePlacementModeKeybindPaletteDescriptor
+                else
+                    return self.precisionMovePlacementModeKeybindStripDescriptor, self.precisionMovePlacementModeKeybindPaletteDescriptor
+                end
+            else
+                if IsInGamepadPreferredMode() then
+                    return self.nodePlacementModeKeybindStripGamepadDescriptor, self.nodePlacementModeKeybindPaletteDescriptor
+                else
+                    return self.nodePlacementModeKeybindStripDescriptor, self.nodePlacementModeKeybindPaletteDescriptor
+                end
+            end
         end
     end
 
@@ -2463,60 +3199,86 @@ do
     end
 
     function ZO_HousingEditorHud:OnUpdate()
-        if GetHousingEditorMode() == HOUSING_EDITOR_MODE_PLACEMENT then
+        if IsInHousingEditorPlacementMode() then
             self:UpdateAxisIndicators()
 
             local x = self:GetAxisDelta(AXIS_TYPE_X)
             local y = self:GetAxisDelta(AXIS_TYPE_Y)
             local z = self:GetAxisDelta(AXIS_TYPE_Z)
+            local active = false
 
             if self:IsPrecisionEditingEnabled() then
                 if self:IsPrecisionPlacementRotationMode() then
                     if x ~= 0 then
-                        HousingEditorRotateFurniture(AXIS_TYPE_X, x)
+                        HousingEditorRotateSelectedObject(AXIS_TYPE_X, x)
+                        active = true
                     end
                     if y ~= 0 then
-                        HousingEditorRotateFurniture(AXIS_TYPE_Y, y)
+                        HousingEditorRotateSelectedObject(AXIS_TYPE_Y, y)
+                        active = true
                     end
                     if z ~= 0 then
-                        HousingEditorRotateFurniture(AXIS_TYPE_Z, z)
+                        HousingEditorRotateSelectedObject(AXIS_TYPE_Z, z)
+                        active = true
                     end
                 else
                     local result = HOUSING_REQUEST_RESULT_SUCCESS
                     if x ~= 0 then
-                        result = HousingEditorMoveFurniture(AXIS_TYPE_X, x)
+                        result = HousingEditorMoveSelectedObject(AXIS_TYPE_X, x)
+                        active = true
                     end
                     if y ~= 0 then
-                        result = HousingEditorMoveFurniture(AXIS_TYPE_Y, y)
+                        result = HousingEditorMoveSelectedObject(AXIS_TYPE_Y, y)
+                        active = true
                     end
                     if z ~= 0 then
-                        result = HousingEditorMoveFurniture(AXIS_TYPE_Z, z)
+                        result = HousingEditorMoveSelectedObject(AXIS_TYPE_Z, z)
+                        active = true
                     end
                     ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
                 end
             else
                 if x ~= 0 then
-                    HousingEditorRotateFurniture(AXIS_TYPE_X, x)
+                    HousingEditorRotateSelectedObject(AXIS_TYPE_X, x)
+                    active = true
                 end
                 if y ~= 0 then
-                    HousingEditorRotateFurniture(AXIS_TYPE_Y, y)
+                    HousingEditorRotateSelectedObject(AXIS_TYPE_Y, y)
+                    active = true
                 end
                 if z ~= 0 then
-                    HousingEditorRotateFurniture(AXIS_TYPE_Z, z)
+                    HousingEditorRotateSelectedObject(AXIS_TYPE_Z, z)
+                    active = true
                 end
             end
                 
             if self.placementKeyPresses[PUSH_FORWARD] then
                 HousingEditorPushSelectedObject(self.pushSpeedPerSecond * GetFrameDeltaTimeSeconds())
+                active = true
             end
 
             if self.placementKeyPresses[PULL_BACKWARD] then
                 HousingEditorPushSelectedObject(-self.pushSpeedPerSecond * GetFrameDeltaTimeSeconds())
+                active = true
+            end
+
+            if active then
+                self:SetKeybindPaletteHidden(true)
+            else
+                EVENT_MANAGER:RegisterForUpdate("ZO_HousingEditorHud_ShowKeybindPalette", 200, function() self:SetKeybindPaletteHidden(false) end)
             end
 
             self:RefreshPlacementKeyPresses()
         end
     end
+end
+
+function ZO_HousingEditorHud:GetPathNodeInfo(furnitureId, nodeIndex)
+    local worldX, worldY, worldZ = HousingEditorGetPathNodeWorldPosition(furnitureId, nodeIndex)
+    local pitch, yaw, roll = HousingEditorGetPathNodeOrientation(furnitureId, nodeIndex)
+    local speed = HousingEditorPathNodeSpeed(furnitureId, nodeIndex)
+    local delayMS = HousingEditorPathNodeDelayTime(furnitureId, nodeIndex)
+    return worldX, worldY, worldZ, yaw, speed, delayMS
 end
 
 function ZO_HousingEditorHud:CleanDirty()
@@ -2539,6 +3301,22 @@ function ZO_HousingEditorHud:SetupHousingEditorHudScene()
 
         HOUSING_EDITOR_HUD_UI_SCENE:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
         HOUSING_EDITOR_HUD_UI_SCENE:RemoveFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
+    end
+end
+
+do
+    local function UpdateRotationButtonsForList(buttons, newMode)
+        for k, buttonData in ipairs(buttons) do
+            if buttonData.enabledFunction then
+                local desaturateAmount = buttonData.enabledFunction(newMode) and 0 or 1
+                buttonData:GetNamedChild("Icon"):SetDesaturation(desaturateAmount)
+            end
+        end
+    end
+
+    function ZO_HousingEditorHud:UpdateRotationButtonVisuals(newMode)
+        UpdateRotationButtonsForList(self.pickupRotateHudButtons, newMode)
+        UpdateRotationButtonsForList(self.precisionRotateHudButtons, newMode)
     end
 end
 
@@ -2695,7 +3473,202 @@ function ZO_HousingEditorHistory:ApplyPlatformStyle()
     self.historyTitle:SetFont(IsInGamepadPreferredMode() and "ZoFontGamepadBold34" or "ZoFontWinH2")
 end
 
+---------------------------------
+-- Housing Editor Keybind Palette
+---------------------------------
+
+ZO_HousingEditorKeybindPalette = ZO_Object:Subclass()
+
+function ZO_HousingEditorKeybindPalette:New(...)
+    local instance = ZO_Object.New(self)
+    instance:Initialize(...)
+    return instance
+end
+
+function ZO_HousingEditorKeybindPalette:Initialize(control)
+    self.control = control
+    self.targetName = self.control:GetNamedChild("TargetName")
+
+    self.numActiveKeybindButtons = 0
+    self.keybindButtons = {}
+    self:InitializePlatformStyle()
+
+    local ALWAYS_ANIMATE = true
+    local ANIMATION_DURATION_MS = 250
+    HOUSING_EDITOR_KEYBIND_PALETTE_FRAGMENT = ZO_FadeSceneFragment:New(self.control, ALWAYS_ANIMATE, ANIMATION_DURATION_MS)
+end
+
+do
+    local KEYBOARD_PLATFORM_STYLE =
+    {
+        targetNameFont = "ZoInteractionPrompt",
+        keybindButtonTemplate = "ZO_KeybindButton_Keyboard_Template",
+    }
+
+    local GAMEPAD_PLATFORM_STYLE =
+    {
+        targetNameFont = "ZoFontGamepad42",
+        keybindButtonTemplate = "ZO_KeybindButton_Gamepad_Template",
+    }
+
+    function ZO_HousingEditorKeybindPalette:InitializePlatformStyle()
+        local function ApplyPlatformStyle(style)
+            self:ApplyPlatformStyle(style)
+        end
+
+        self.platformStyle = ZO_PlatformStyle:New(ApplyPlatformStyle, KEYBOARD_PLATFORM_STYLE, GAMEPAD_PLATFORM_STYLE)
+    end
+end
+
+function ZO_HousingEditorKeybindPalette:ApplyPlatformStyle(style)
+    style = style or self.currentPlatformStyle
+    self.currentPlatformStyle = style
+    self.targetName:SetFont(style.targetNameFont)
+
+    local previousKeybindButton
+    for keybindButtonIndex, keybindButton in ipairs(self.keybindButtons) do
+        ApplyTemplateToControl(keybindButton, style.keybindButtonTemplate)
+
+        keybindButton:ClearAnchors()
+        if previousKeybindButton then
+            keybindButton:SetAnchor(TOPLEFT, previousKeybindButton, BOTTOMLEFT, nil, 10)
+        else
+            keybindButton:SetAnchor(TOPLEFT, self.targetName, BOTTOMLEFT, 80, 10)
+        end
+
+        previousKeybindButton = keybindButton
+    end
+end
+
+function ZO_HousingEditorKeybindPalette:CreateKeybindButton()
+    -- ZO_KeybindButtonTemplate_Setup registers a global reference to each keybind control, even if the control was previously registered.
+    -- For this reason, we only create keybind button controls but we never call ZO_KeybindButtonTemplate_Setup for a control after its initial creation.
+
+    local keybindButtonIndex = #self.keybindButtons + 1
+    local controlName = string.format("%sKeybindButton%d", self.control:GetName(), keybindButtonIndex)
+    local keybindButton = CreateControlFromVirtual(controlName, self.control, "ZO_KeybindButton_LabelAligned")
+    table.insert(self.keybindButtons, keybindButton)
+
+    local NO_KEYBIND = nil
+    local NO_CALLBACK = nil
+    local NO_LABEL = nil
+    ZO_KeybindButtonTemplate_Setup(keybindButton, NO_KEYBIND, NO_CALLBACK, NO_LABEL)
+
+    return keybindButton
+end
+
+function ZO_HousingEditorKeybindPalette:GetOrCreateKeybindButton()
+    local keybindButtonIndex = self.numActiveKeybindButtons + 1
+    self.numActiveKeybindButtons = keybindButtonIndex
+
+    local keybindButton = self.keybindButtons[keybindButtonIndex] or self:CreateKeybindButton()
+    return keybindButton
+end
+
+do
+    local function EvaluateLiteralOrFunction(expression, ...)
+        if type(expression) == "function" then
+            return expression(...)
+        end
+        return expression
+    end
+
+    local function EvaluateLiteralOrFunctionWithDefault(expression, default, ...)
+        local result = EvaluateLiteralOrFunction(expression, ...)
+        if result == nil then
+            return default
+        end
+        return result
+    end
+
+    local function CompareKeybindOrder(left, right)
+        if left.order and right.order then
+            return left.order < right.order
+        elseif left.order then
+            return true
+        end
+        return false
+    end
+
+    function ZO_HousingEditorKeybindPalette:AddKeybinds(descriptors)
+        self:RemoveKeybinds()
+        self.keybindDescriptors = descriptors
+
+        if self.keybindDescriptors then
+            local numKeybindButtons = #self.keybindButtons
+
+            if not self.keybindDescriptors.sorted then
+                table.sort(self.keybindDescriptors, CompareKeybindOrder)
+                self.keybindDescriptors.sorted = true
+            end
+
+            for keybindDescriptorIndex, keybindDescriptor in ipairs(self.keybindDescriptors) do
+                local DEFAULT_VISIBLE = true
+                local isVisible = EvaluateLiteralOrFunctionWithDefault(keybindDescriptor.visible, DEFAULT_VISIBLE, keybindDescriptor)
+                if isVisible then
+                    local keybindButton = self:GetOrCreateKeybindButton()
+                    keybindButton:SetHidden(false)
+                    keybindButton:ShowKeyIcon()
+                    keybindButton:SetKeybindButtonDescriptor(keybindDescriptor)
+
+                    local DEFAULT_ENABLED = true
+                    local isEnabled = EvaluateLiteralOrFunctionWithDefault(keybindDescriptor.enabled, DEFAULT_ENABLED, keybindDescriptor)
+                    keybindButton:SetEnabled(isEnabled)
+                    keybindButton:SetKeybindEnabled(isEnabled)
+                end
+            end
+
+            if self.numActiveKeybindButtons > numKeybindButtons then
+                -- New keybind button controls have been added. Apply the current platform style to them.
+                self:ApplyPlatformStyle()
+            end
+
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindDescriptors)
+        end
+    end
+end
+
+function ZO_HousingEditorKeybindPalette:RemoveKeybinds()
+    if self.keybindDescriptors then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindDescriptors)
+    end
+
+    for keybindButtonIndex, keybindButton in ipairs(self.keybindButtons) do
+        if keybindButtonIndex > self.numActiveKeybindButtons then
+            break
+        end
+
+        keybindButton:HideKeyIcon()
+        keybindButton:SetHidden(true)
+    end
+
+    self.keybindDescriptors = nil
+    self.numActiveKeybindButtons = 0
+end
+
+function ZO_HousingEditorKeybindPalette:RefreshKeybinds()
+    self:AddKeybinds(self.keybindDescriptors)
+end
+
+function ZO_HousingEditorKeybindPalette:SetTargetData(furnitureId, pathIndex)
+    local itemName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(furnitureId)
+    if pathIndex then
+        itemName = zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_NAME, pathIndex, itemName or "")
+    elseif itemName then
+        itemName = zo_strformat(SI_HOUSING_FURNITURE_NAME_FORMAT, itemName)
+    else
+        itemName = ""
+    end
+
+    self.targetFurnitureId = furnitureId
+    self.targetFurniturePathIndex = pathIndex
+    self.targetFurnitureName = itemName
+    self.targetName:SetText(self.targetFurnitureName)
+    self:RefreshKeybinds()
+end
+
 --[[ Globals ]]--
+
 function ZO_HousingEditorActionBar_OnInitialize(control)
     HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_DISABLED) -- Disable if someone reloads ui from editor mode.
     HOUSING_EDITOR_SHARED = ZO_HousingEditorHud:New(control)
@@ -2703,6 +3676,10 @@ end
 
 function ZO_HousingHUDFragmentTopLevel_Initialize(control)
     HOUSING_HUD_FRAGMENT = HousingHUDFragment:New(control)
+end
+
+function ZO_HousingEditorKeybindPalette_Initialize(control)
+    HOUSING_EDITOR_KEYBIND_PALETTE = ZO_HousingEditorKeybindPalette:New(control)
 end
 
 function ZO_HousingEditorHistory_Initialize(control)

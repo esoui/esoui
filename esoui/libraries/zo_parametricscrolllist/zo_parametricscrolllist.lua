@@ -115,6 +115,12 @@ function ZO_ParametricScrollList:AddDataTemplate(templateName, setupFunction, pa
     end
 end
 
+function ZO_ParametricScrollList:SetDataTemplateSetupFunction(templateName, setupFunction)
+    if self.dataTypes[templateName] then
+        self.dataTypes[templateName].setupFunction = setupFunction
+    end
+end
+
 function ZO_ParametricScrollList:SetDataTemplateReleaseFunction(templateName, releaseFunction)
     if self.dataTypes[templateName] then
         self.dataTypes[templateName].pool:SetCustomResetBehavior(releaseFunction)

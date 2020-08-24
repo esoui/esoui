@@ -106,7 +106,7 @@ function ZO_DailyLoginRewards_Gamepad:InitializeKeybinds()
             local selectedReward = self.gridListPanelList:GetSelectedData()
 
             if selectedReward and selectedReward.day then
-                return CanPreviewReward(selectedReward:GetRewardId())
+                return CanPreviewReward(selectedReward:GetRewardId()) and IsCharacterPreviewingAvailable()
             end
 
             return false

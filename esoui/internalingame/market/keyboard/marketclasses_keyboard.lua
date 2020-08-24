@@ -261,7 +261,7 @@ end
 
 function MarketProduct_Keyboard:OnClicked(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
-        -- We don't use CanPreviewMarketProductPreviewType here because we don't want clicking on bundles to actually preview, lest we wouldn't be able to double click
+        -- We don't want clicking on bundles to actually preview, lest we wouldn't be able to double click
         if self.owner:IsReadyToPreview() then
             self:Preview()
         end
@@ -286,17 +286,18 @@ function MarketProduct_Keyboard:OnClicked(button)
             end
         end
 
-        local previewType = self:GetMarketProductPreviewType()
-        local canPreview = self.owner:CanPreviewMarketProductPreviewType(previewType)
-        if canPreview then
+        if self:IsActivelyPreviewing() then
+            AddMenuItem(GetString(SI_MARKET_ACTION_END_PREVIEW), function() self:EndPreview() end)
+        else
+            local previewType = self:GetMarketProductPreviewType()
             local function PreviewFunction() self:Preview() end
             if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
                 AddMenuItem(GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT), PreviewFunction)
-            else -- ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE, ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
+            elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
+                AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), PreviewFunction)
+            elseif IsCharacterPreviewingAvailable() then -- ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE
                 AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), PreviewFunction)
             end
-        elseif self:IsActivelyPreviewing() then
-            AddMenuItem(GetString(SI_MARKET_ACTION_END_PREVIEW), function() self:EndPreview() end)
         end
 
         ShowMenu(self.control)

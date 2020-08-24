@@ -1,14 +1,28 @@
+local GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED = 1
+
+local g_filters =
+{
+    [GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED] =
+    {
+        header = GetString(SI_GAMEPAD_SMITHING_FILTERS),
+        filterName = GetString(SI_CRAFTING_INCLUDE_BANKED),
+        filterTooltip = GetString(SI_CRAFTING_INCLUDE_BANKED_TOOLTIP),
+        checked = false,
+    },
+}
+
 ZO_GamepadSmithingExtraction = ZO_SharedSmithingExtraction:Subclass()
 
 function ZO_GamepadSmithingExtraction:New(...)
     return ZO_SharedSmithingExtraction.New(self, ...)
 end
 
-function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, owner, refinementOnly, scene)
+function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, owner, isRefinementOnly, scene)
+    self.isRefinementOnly = isRefinementOnly
     self.panelControl = panelControl
     self.floatingControl = floatingControl
     local slotContainer = floatingControl:GetNamedChild("SlotContainer")
-    ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), nil, owner, refinementOnly)
+    ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), nil, owner, isRefinementOnly)
 
     self.tooltip = floatingControl:GetNamedChild("Tooltip")
 
@@ -16,13 +30,20 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
     local DONT_USE_KEYBIND_STRIP = false
     self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT, ADDITIONAL_MOUSEOVER_BINDS, DONT_USE_KEYBIND_STRIP)
 
-    self:InitializeInventory(refinementOnly)
+    self:InitializeInventory(isRefinementOnly)
     self:InitExtractionSlot(scene.name)
 
-    if refinementOnly then
+    if isRefinementOnly then
         self:SetFilterType(SMITHING_FILTER_TYPE_RAW_MATERIALS)
     else
         self:SetFilterType(SMITHING_FILTER_TYPE_WEAPONS)
+        local function OnAddOnLoaded(event, name)
+            if name == "ZO_Ingame" then
+                self:SetupSavedVars()
+                panelControl:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+            end
+        end
+        panelControl:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
     end
 
     self:InitializeKeybindStripDescriptors()
@@ -61,7 +82,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
 
             local tabBarEntries = {}
 
-            if not refinementOnly then
+            if not isRefinementOnly then
                 AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_WEAPONS)
                 AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_ARMOR)
                 AddTabEntry(tabBarEntries, SMITHING_FILTER_TYPE_JEWELRY)
@@ -137,9 +158,9 @@ function ZO_GamepadSmithingExtraction:SetCraftingType(craftingType, oldCraftingT
     self.inventory:HandleDirtyEvent()
 end
 
-function ZO_GamepadSmithingExtraction:InitializeInventory(refinementOnly)
+function ZO_GamepadSmithingExtraction:InitializeInventory(isRefinementOnly)
     local inventory = self.panelControl:GetNamedChild("Inventory")
-    self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, refinementOnly, SLOT_TYPE_CRAFTING_COMPONENT)
+    self.inventory = ZO_GamepadExtractionInventory:New(self, inventory, isRefinementOnly, SLOT_TYPE_CRAFTING_COMPONENT)
 
     self.inventory:SetCustomExtraData(function(bagId, slotIndex, data)
         if self:GetFilterType() == SMITHING_FILTER_TYPE_RAW_MATERIALS then
@@ -320,15 +341,15 @@ function ZO_GamepadSmithingExtraction:InitializeKeybindStripDescriptors()
 
         -- Item Options
         {
-            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
+            name = GetString(SI_GAMEPAD_CRAFTING_OPTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
             gamepadOrder = 1020,
             callback = function()
-                self:ShowItemActions()
+                self:ShowOptionsMenu()
             end,
             visible = function()
-                return not ZO_CraftingUtils_IsPerformingCraftProcess() and self.inventory:CurrentSelection() ~= nil
-            end
+                return not ZO_CraftingUtils_IsPerformingCraftProcess() and (self.inventory:CurrentSelection() ~= nil or not self:IsInRefineMode())
+            end,
         },
     }
 
@@ -345,16 +366,52 @@ function ZO_GamepadSmithingExtraction:RemoveKeybinds()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_GamepadSmithingExtraction:ShowItemActions()
+function ZO_GamepadSmithingExtraction:SetupSavedVars()
+    local defaults =
+    {
+        includeBankedItemsChecked = true
+    }
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "GamepadSmithingExtraction", defaults)
+    g_filters[GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED].checked = self.savedVars.includeBankedItemsChecked
+end
+
+function ZO_GamepadSmithingExtraction:ShowOptionsMenu()
     local dialogData = 
     {
         targetData = self.inventory:CurrentSelection(),
         itemActions = self.itemActions,
+        finishedCallback =  function()
+            local targetData = self.inventory.list:GetTargetData()
+            if targetData then
+                GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, targetData.bagId, targetData.slotIndex, SHOW_COMBINED_COUNT)
+            else
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            end
+            if not self.isRefinementOnly then
+                self:SaveFilters()
+            end
+        end
     }
-
-    ZO_Dialogs_ShowPlatformDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG, dialogData)
+    if not self.isRefinementOnly then
+        dialogData.filters = g_filters
+    end
+    if not self.craftingOptionsDialogGamepad then
+        self.craftingOptionsDialogGamepad = ZO_CraftingOptionsDialogGamepad:New()
+    end
+    self.craftingOptionsDialogGamepad:ShowOptionsDialog(dialogData)
 end
 
+function ZO_GamepadSmithingExtraction:SaveFilters()
+    local filterChanged = self.savedVars.includeBankedItemsChecked ~= g_filters[GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED].checked
+    if filterChanged then
+        self.savedVars.includeBankedItemsChecked = g_filters[GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED].checked
+        self.inventory:PerformFullRefresh()
+    end
+end
+
+--------------------------
+-- Extraction Inventory --
+--------------------------
 ZO_GamepadExtractionInventory = ZO_GamepadCraftingInventory:Subclass()
 
 function ZO_GamepadExtractionInventory:New(...)
@@ -367,11 +424,11 @@ local GAMEPAD_CRAFTING_RAW_MATERIAL_SORT =
     text = {},
 }
 
-function ZO_GamepadExtractionInventory:Initialize(owner, control, refinementOnly, ...)
+function ZO_GamepadExtractionInventory:Initialize(owner, control, isRefinementOnly, ...)
     local inventory = ZO_GamepadCraftingInventory.Initialize(self, control, ...)
     self.owner = owner
 
-    if refinementOnly then
+    if isRefinementOnly then
         self.filterType = SMITHING_FILTER_TYPE_RAW_MATERIALS
         self:SetOverrideItemSort(function(left, right)
             return ZO_TableOrderingFunction(left, right, "customSortData", GAMEPAD_CRAFTING_RAW_MATERIAL_SORT, ZO_SORT_ORDER_UP)
@@ -407,7 +464,9 @@ function ZO_GamepadExtractionInventory:Refresh(data)
     if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
         validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
     else
-        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+        local DONT_USE_WORN_BAG = false
+        local excludeBanked = not self.owner.savedVars.includeBankedItemsChecked
+        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
     end
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 

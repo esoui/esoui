@@ -196,6 +196,7 @@ function ZO_GamepadStats:Initialize(control)
     self.mainList = self:GetMainList()
 
     self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.TITLE
+    self.previewAvailable = true
 
     --Only allow the window to update once every quarter second so if buffs are updating like crazy we're not tanking the frame rate
     self:SetUpdateCooldown(250)
@@ -262,6 +263,18 @@ do
         self.control:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED, OnUpdate)
         STABLE_MANAGER:RegisterCallback("StableMountInfoUpdated", OnUpdate)
         ZO_LEVEL_UP_REWARDS_MANAGER:RegisterCallback("OnLevelUpRewardsUpdated", OnUpdate)
+        self.control:SetHandler("OnUpdate", function()
+            local isPreviewingAvailable = IsCharacterPreviewingAvailable()
+            if self.previewAvailable ~= isPreviewingAvailable then
+                self.previewAvailable = isPreviewingAvailable
+                if self.previewAvailable then
+                    self.outfitSelectorHeaderFocus:Enable()
+                else
+                    self.outfitSelectorHeaderFocus:Disable()
+                end
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            end
+        end)
     end
 
     function ZO_GamepadStats:UnregisterForEvents()
@@ -278,6 +291,7 @@ do
         self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED)
         STABLE_MANAGER:UnregisterCallback("StableMountInfoUpdated", OnUpdate)
         ZO_LEVEL_UP_REWARDS_MANAGER:UnregisterCallback("OnLevelUpRewardsUpdated", OnUpdate)
+        self.control:SetHandler("OnUpdate", nil)
     end
 end
 
@@ -416,6 +430,13 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
+            enabled = function()
+                if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT and not self.previewAvailable then
+                    return false, GetString("SI_EQUIPOUTFITRESULT", EQUIP_OUTFIT_RESULT_OUTFIT_SWITCHING_UNAVAILABLE)
+                end
+
+                return true
+            end,
             visible = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE

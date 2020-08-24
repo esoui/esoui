@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 100031
+h1. ESO UI Documentation for API Version 100032
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -410,6 +410,7 @@ h5. ClientInteractResult
 * CLIENT_INTERACT_RESULT_SHUNNED
 * CLIENT_INTERACT_RESULT_SHUNNED_FEARFUL_VAMPIRE
 * CLIENT_INTERACT_RESULT_SHUNNED_FEARFUL_WEREWOLF
+* CLIENT_INTERACT_RESULT_STEALING_PLACED_PREVENTED
 * CLIENT_INTERACT_RESULT_SUCCESS
 * CLIENT_INTERACT_RESULT_SUSPICIOUS
 * CLIENT_INTERACT_RESULT_WEREWOLF
@@ -582,6 +583,7 @@ h5. DerivedStats
 * STAT_ARMOR_RATING
 * STAT_ATTACK_POWER
 * STAT_BLOCK
+* STAT_CRITICAL_CHANCE
 * STAT_CRITICAL_RESISTANCE
 * STAT_CRITICAL_STRIKE
 * STAT_DAMAGE_RESIST_COLD
@@ -611,6 +613,7 @@ h5. DerivedStats
 * STAT_MOUNT_STAMINA_REGEN_COMBAT
 * STAT_MOUNT_STAMINA_REGEN_MOVING
 * STAT_NONE
+* STAT_OFFENSIVE_PENETRATION
 * STAT_PHYSICAL_PENETRATION
 * STAT_PHYSICAL_RESIST
 * STAT_POWER
@@ -680,6 +683,12 @@ h5. EmoteCategory
 * EMOTE_CATEGORY_SOCIAL
 
 
+h5. EmoteHidesHelmet
+* EMOTE_HIDES_HELMET_ALL
+* EMOTE_HIDES_HELMET_CLOSE_FACED_ONLY
+* EMOTE_HIDES_HELMET_NONE
+
+
 h5. FastTravelLinkType
 * FAST_TRAVEL_LINK_ACTIVE
 * FAST_TRAVEL_LINK_INACTIVE
@@ -696,6 +705,7 @@ h5. GameCameraAdditionalInfo
 * ADDITIONAL_INTERACT_INFO_EMPTY
 * ADDITIONAL_INTERACT_INFO_FISHING_NODE
 * ADDITIONAL_INTERACT_INFO_HOUSE_BANK
+* ADDITIONAL_INTERACT_INFO_HOUSE_INSTANCE_DOOR
 * ADDITIONAL_INTERACT_INFO_INSTANCE_TYPE
 * ADDITIONAL_INTERACT_INFO_IN_HIDEYHOLE
 * ADDITIONAL_INTERACT_INFO_LOCKED
@@ -1202,6 +1212,13 @@ h5. OwnershipStatusType
 * OWNERSHIP_STATUS_STOLEN
 
 
+h5. PathFollowType
+* PATH_FOLLOW_TYPE_LOOP
+* PATH_FOLLOW_TYPE_ONE_WAY
+* PATH_FOLLOW_TYPE_PINGPONG
+* PATH_FOLLOW_TYPE_RANDOM
+
+
 h5. PendingFeedbackType
 * FEEDBACK_TYPE_INVALID
 * FEEDBACK_TYPE_QUEST
@@ -1606,6 +1623,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_HEAVY_SHOVEL_UNLOCKED
 * TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_HEAVY_SHOVEL_UPGRADED
 * TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_OPENED
+* TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_RADAR_OUT_OF_ENERGY
 * TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_RADAR_SENSE_UNLOCKED
 * TUTORIAL_TRIGGER_ANTIQUITY_DIGGING_RADAR_SENSE_UPGRADED
 * TUTORIAL_TRIGGER_ANTIQUITY_JOURNAL_OPENED
@@ -1737,6 +1755,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_HERON_THIRD_PARTY_CONTROLLER_SHOWING
 * TUTORIAL_TRIGGER_HOME_STORAGE_OPENED
 * TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_LINK_MODE
+* TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PATH_MODE
 * TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PRECISION_PLACEMENT_MODE
 * TUTORIAL_TRIGGER_IMPORTANT_DIALOGUE
 * TUTORIAL_TRIGGER_INCOMING_PLAYER_TO_PLAYER_NOTIFICATION
@@ -1857,10 +1876,13 @@ h5. UIPlatform
 
 h5. UISystem
 * UI_SYSTEM_ALLIANCE_WAR
+* UI_SYSTEM_ANTIQUITY_DIGGING
 * UI_SYSTEM_ANTIQUITY_JOURNAL_SCRYABLE
-* UI_SYSTEM_BATTLEGROUNDS
+* UI_SYSTEM_ANTIQUITY_SCRYING
+* UI_SYSTEM_BATTLEGROUND_FINDER
 * UI_SYSTEM_DUNGEON_FINDER
 * UI_SYSTEM_GUILD_FINDER
+* UI_SYSTEM_NONE
 
 
 h5. UnitAttributeVisual
@@ -1941,6 +1963,7 @@ h5. VoiceChatSpeakState
 
 
 h5. Globals
+* MAX_ACHIEVEMENTS
 * ACTION_BAR_EMOTE_QUICK_SLOT_SIZE
 * ACTION_BAR_FIRST_EMOTE_QUICK_SLOT_INDEX
 * ACTION_BAR_FIRST_NORMAL_SLOT_INDEX
@@ -2863,6 +2886,7 @@ h5. CollectibleUsageBlockReason
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLACKLISTED
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_SUBZONE
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_ZONE
+* COLLECTIBLE_USAGE_BLOCK_REASON_CATEGORY_REQUIREMENT_FAILED
 * COLLECTIBLE_USAGE_BLOCK_REASON_DEAD
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_ALLIANCE
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_CLASS
@@ -2926,6 +2950,7 @@ h5. DaedricArtifactVisualType
 
 
 h5. DamageType
+* DAMAGE_TYPE_BLEED
 * DAMAGE_TYPE_COLD
 * DAMAGE_TYPE_DISEASE
 * DAMAGE_TYPE_DROWN
@@ -3225,6 +3250,7 @@ h5. Globals
 
 
 h5. GuildActivityAttributeValue
+* GUILD_ACTIVITY_ATTRIBUTE_VALUE_ANTIQUITIES
 * GUILD_ACTIVITY_ATTRIBUTE_VALUE_CRAFTING
 * GUILD_ACTIVITY_ATTRIBUTE_VALUE_DUNGEONS
 * GUILD_ACTIVITY_ATTRIBUTE_VALUE_FISHING
@@ -3533,6 +3559,11 @@ h5. AxisTypes
 * AXIS_TYPE_Z
 
 
+h5. FurniturePathState
+* HOUSING_FURNITURE_PATH_STATE_OFF
+* HOUSING_FURNITURE_PATH_STATE_ON
+
+
 h5. FurnitureThemeType
 * FURNITURE_THEME_TYPE_ALL
 * FURNITURE_THEME_TYPE_ARGONIAN
@@ -3559,6 +3590,12 @@ h5. HouseCategoryType
 * HOUSE_CATEGORY_TYPE_NONE
 * HOUSE_CATEGORY_TYPE_NOTABLE
 * HOUSE_CATEGORY_TYPE_STAPLE
+
+
+h5. HousePathSettingCategories
+* HOUSE_PATH_SETTING_CATEGORIES_EDIT_PATH
+* HOUSE_PATH_SETTING_CATEGORIES_NODE_SETTINGS
+* HOUSE_PATH_SETTING_CATEGORIES_PATH_SETTINGS
 
 
 h5. HousePermissionDefaultAccessSetting
@@ -3597,6 +3634,7 @@ h5. HousePermissionSetting
 * HOUSE_PERMISSION_SETTING_BOOL_SECTION_END
 * HOUSE_PERMISSION_SETTING_LINK_FURNITURE
 * HOUSE_PERMISSION_SETTING_MOVE_FURNITURE
+* HOUSE_PERMISSION_SETTING_PATH_FURNITURE
 * HOUSE_PERMISSION_SETTING_PLACE_TEMP_ITEMS
 * HOUSE_PERMISSION_SETTING_USE_ASSISTANTS
 * HOUSE_PERMISSION_SETTING_USE_INTERACTABLE_FIXTURES
@@ -3621,15 +3659,21 @@ h5. HousingEditorCommandResult
 * HOUSING_EDITOR_COMMAND_RESULT_LINK_INVALID
 * HOUSING_EDITOR_COMMAND_RESULT_METRICS_CRITICAL
 * HOUSING_EDITOR_COMMAND_RESULT_NOT_ENOUGH_INVENTORY_SPACE
+* HOUSING_EDITOR_COMMAND_RESULT_PATH_OPERATION_INVALID
 * HOUSING_EDITOR_COMMAND_RESULT_SUCCESS
 
 
 h5. HousingEditorCommandType
+* HOUSING_EDITOR_COMMAND_TYPE_CHANGE_PATH_STATE
+* HOUSING_EDITOR_COMMAND_TYPE_INSERT_PATH_NODE
 * HOUSING_EDITOR_COMMAND_TYPE_LINK
+* HOUSING_EDITOR_COMMAND_TYPE_MODIFY_PATH_NODE
 * HOUSING_EDITOR_COMMAND_TYPE_MOVE
 * HOUSING_EDITOR_COMMAND_TYPE_NONE
 * HOUSING_EDITOR_COMMAND_TYPE_PLACE
 * HOUSING_EDITOR_COMMAND_TYPE_REMOVE
+* HOUSING_EDITOR_COMMAND_TYPE_REMOVE_PATH_NODE
+* HOUSING_EDITOR_COMMAND_TYPE_REPLACE_PATH_COLLECTIBLE
 * HOUSING_EDITOR_COMMAND_TYPE_UNLINK
 * HOUSING_EDITOR_COMMAND_TYPE_UNLINK_ALL
 
@@ -3638,6 +3682,8 @@ h5. HousingEditorMode
 * HOUSING_EDITOR_MODE_BROWSE
 * HOUSING_EDITOR_MODE_DISABLED
 * HOUSING_EDITOR_MODE_LINK
+* HOUSING_EDITOR_MODE_NODE_PLACEMENT
+* HOUSING_EDITOR_MODE_PATH
 * HOUSING_EDITOR_MODE_PLACEMENT
 * HOUSING_EDITOR_MODE_SELECTION
 
@@ -3668,6 +3714,23 @@ h5. HousingMetricsState
 * HOUSING_METRICS_STATE_CAUTION
 * HOUSING_METRICS_STATE_CRITICAL
 * HOUSING_METRICS_STATE_SAFE
+
+
+h5. HousingPathDelayTime
+* HOUSING_PATH_DELAY_TIME_CUSTOM
+* HOUSING_PATH_DELAY_TIME_EXTREMELY_LONG
+* HOUSING_PATH_DELAY_TIME_LONG
+* HOUSING_PATH_DELAY_TIME_MEDIUM
+* HOUSING_PATH_DELAY_TIME_NONE
+* HOUSING_PATH_DELAY_TIME_SHORT
+* HOUSING_PATH_DELAY_TIME_VERY_LONG
+
+
+h5. HousingPathMovementSpeed
+* HOUSING_PATH_MOVEMENT_SPEED_JOG
+* HOUSING_PATH_MOVEMENT_SPEED_RUN
+* HOUSING_PATH_MOVEMENT_SPEED_SPRINT
+* HOUSING_PATH_MOVEMENT_SPEED_WALK
 
 
 h5. HousingPendingLinkRelationship
@@ -3714,8 +3777,23 @@ h5. HousingRequestResult
 * HOUSING_REQUEST_RESULT_MOVE_FAILED
 * HOUSING_REQUEST_RESULT_NOT_HOME_SHOW
 * HOUSING_REQUEST_RESULT_NOT_IN_HOUSE
+* HOUSING_REQUEST_RESULT_NO_CHANGES
 * HOUSING_REQUEST_RESULT_NO_DUPLICATES
 * HOUSING_REQUEST_RESULT_NO_SUCH_FURNITURE
+* HOUSING_REQUEST_RESULT_NO_TARGET
+* HOUSING_REQUEST_RESULT_PATH_CANT_RESTART_ALL_PATHS
+* HOUSING_REQUEST_RESULT_PATH_FURNITURE_PATHING
+* HOUSING_REQUEST_RESULT_PATH_INDEX_OUT_OF_RANGE
+* HOUSING_REQUEST_RESULT_PATH_INVALID_FURNITURE
+* HOUSING_REQUEST_RESULT_PATH_INVALID_NODE
+* HOUSING_REQUEST_RESULT_PATH_MODE_ONLY
+* HOUSING_REQUEST_RESULT_PATH_NODE_TOO_CLOSE
+* HOUSING_REQUEST_RESULT_PATH_NOT_ENOUGH_NODES
+* HOUSING_REQUEST_RESULT_PATH_NO_PATH_DATA
+* HOUSING_REQUEST_RESULT_PATH_TOO_MANY_NODES
+* HOUSING_REQUEST_RESULT_PATH_TOO_MANY_PATHS
+* HOUSING_REQUEST_RESULT_PATH_UNSUPPORTED_PATH_TYPE
+* HOUSING_REQUEST_RESULT_PATH_WAIT_TIME_OUT_OF_RANGE
 * HOUSING_REQUEST_RESULT_PERMISSION_FAILED
 * HOUSING_REQUEST_RESULT_PERSONAL_TEMP_ITEM_PLACE_LIMIT
 * HOUSING_REQUEST_RESULT_PLACE_FAILED
@@ -3735,7 +3813,11 @@ h5. HousingVisitorRole
 
 h5. Globals
 * HOUSING_MAX_FURNITURE_CHILDREN
+* HOUSING_MAX_PATH_NODE_WAIT_TIME
+* HOUSING_MAX_FURNITURE_PATH_NODES
+* HOUSING_MAX_PATHS
 * HOUSING_MAX_UNDO_REDO_COMMANDS
+* HOUSING_MIN_PATH_NODE_WAIT_TIME
 
 
 h5. AbilityTooltipTextColors
@@ -3966,6 +4048,7 @@ h5. LoadingScreenColors
 
 h5. MapPinColors
 * MAP_PIN_COLOR_ASSISTED
+* MAP_PIN_COLOR_DIG_SITE
 * MAP_PIN_COLOR_DIG_SITE_BORDER
 * MAP_PIN_COLOR_NORMAL
 * MAP_PIN_COLOR_TRACKED_DIG_SITE
@@ -4531,6 +4614,7 @@ h5. ItemUISoundCategory
 
 
 h5. ItemUseType
+* ITEM_USE_TYPE_BOOK
 * ITEM_USE_TYPE_COLLECTIBLE_GRANT
 * ITEM_USE_TYPE_COMBINATION
 * ITEM_USE_TYPE_COSTUME_DYE_STAMP
@@ -4540,6 +4624,7 @@ h5. ItemUseType
 * ITEM_USE_TYPE_NONE
 * ITEM_USE_TYPE_PLEDGE_OF_MARA
 * ITEM_USE_TYPE_RECIPE
+* ITEM_USE_TYPE_RECIPE_LIST
 * ITEM_USE_TYPE_SKILL_RESPEC
 * ITEM_USE_TYPE_TREASURE_MAP
 * ITEM_USE_TYPE_VANITY_PET
@@ -4699,6 +4784,7 @@ h5. SpecializedItemType
 * SPECIALIZED_ITEMTYPE_TRASH
 * SPECIALIZED_ITEMTYPE_TREASURE
 * SPECIALIZED_ITEMTYPE_TROPHY_COLLECTIBLE_FRAGMENT
+* SPECIALIZED_ITEMTYPE_TROPHY_DUNGEON_BUFF_INGREDIENT
 * SPECIALIZED_ITEMTYPE_TROPHY_KEY
 * SPECIALIZED_ITEMTYPE_TROPHY_KEY_FRAGMENT
 * SPECIALIZED_ITEMTYPE_TROPHY_MATERIAL_UPGRADER
@@ -4868,6 +4954,7 @@ h5. QuestRemovedType
 
 h5. QuestRepeatableType
 * QUEST_REPEAT_DAILY
+* QUEST_REPEAT_EVENT_RESET
 * QUEST_REPEAT_NOT_REPEATABLE
 * QUEST_REPEAT_REPEATABLE
 * QUEST_REPEAT_REPEATABLE_PER_DURATION
@@ -5030,6 +5117,14 @@ h5. ChatBubbleSetting
 * CHAT_BUBBLE_SETTING_SPEED_MODIFIER
 
 
+h5. ClutterQuality
+* CLUTTER_QUALITY_HIGH
+* CLUTTER_QUALITY_LOW
+* CLUTTER_QUALITY_MEDIUM
+* CLUTTER_QUALITY_OFF
+* CLUTTER_QUALITY_ULTRA
+
+
 h5. CombatSetting
 * COMBAT_SETTING_CLAMP_GROUND_TARGET_ENABLED
 * COMBAT_SETTING_ENCOUNTER_LOG_APPEAR_ANONYMOUS
@@ -5120,6 +5215,7 @@ h5. LootSetting
 * LOOT_SETTING_AUTO_LOOT
 * LOOT_SETTING_AUTO_LOOT_STOLEN
 * LOOT_SETTING_LOOT_HISTORY
+* LOOT_SETTING_PREVENT_STEALING_PLACED
 
 
 h5. NameplateDisplayChoice
@@ -5195,6 +5291,7 @@ h5. OptionsCustomSetting
 * OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_ENEMY_TEST
 * OPTIONS_CUSTOM_SETTING_MONSTER_TELLS_FRIENDLY_TEST
 * OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION
+* OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS
 * OPTIONS_CUSTOM_SETTING_RESET_TUTORIALS
 * OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE
 * OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST
@@ -5357,6 +5454,7 @@ h5. UISetting
 * UI_SETTING_FADE_PLAYER_BARS
 * UI_SETTING_FRAMERATE_LATENCY_LOCK
 * UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED
+* UI_SETTING_GAMEPAD_CUSTOM_SCALE
 * UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD
 * UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD
 * UI_SETTING_RESOURCE_NUMBERS
@@ -5375,6 +5473,7 @@ h5. UISetting
 * UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE
 * UI_SETTING_ULTIMATE_NUMBER
 * UI_SETTING_USE_CUSTOM_SCALE
+* UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE
 
 
 h5. Globals
@@ -5869,7 +5968,6 @@ h5. OverrideMusicMode
 * OVERRIDE_MUSIC_MODE_CREDITS
 * OVERRIDE_MUSIC_MODE_DUELING
 * OVERRIDE_MUSIC_MODE_NONE
-* OVERRIDE_MUSIC_MODE_SCRYING
 
 
 h5. Globals
@@ -6157,6 +6255,7 @@ h5. AntiquityScryingResult
 * ANTIQUITY_SCRYING_RESULT_INTERNAL_ERROR
 * ANTIQUITY_SCRYING_RESULT_INVALID_ANTIQUITY
 * ANTIQUITY_SCRYING_RESULT_IN_COMBAT
+* ANTIQUITY_SCRYING_RESULT_IS_USING_FURNITURE
 * ANTIQUITY_SCRYING_RESULT_LEAD_NOT_ACQUIRED
 * ANTIQUITY_SCRYING_RESULT_MAX_IN_PROGRESS_ANTIQUITIES
 * ANTIQUITY_SCRYING_RESULT_MAX_PROGRESS
@@ -6175,6 +6274,7 @@ h5. DiggingActiveSkillUseResult
 * DIGGING_ACTIVE_SKILL_USE_RESULT_INVALID_LOCATION
 * DIGGING_ACTIVE_SKILL_USE_RESULT_LOCKED
 * DIGGING_ACTIVE_SKILL_USE_RESULT_NOT_ENOUGH_DIG_POWER
+* DIGGING_ACTIVE_SKILL_USE_RESULT_NO_MORE_RADARS
 * DIGGING_ACTIVE_SKILL_USE_RESULT_RADAR_TOO_DEEP
 * DIGGING_ACTIVE_SKILL_USE_RESULT_SUCCESS
 
@@ -6576,6 +6676,7 @@ h5. FastTravelKeepResult
 h5. GroupInviteResponse
 * GROUP_INVITE_RESPONSE_ACCEPTED
 * GROUP_INVITE_RESPONSE_ALREADY_GROUPED
+* GROUP_INVITE_RESPONSE_ALREADY_GROUPED_CANT_JOIN
 * GROUP_INVITE_RESPONSE_CANNOT_CREATE_GROUPS
 * GROUP_INVITE_RESPONSE_CONSIDERING_OTHER
 * GROUP_INVITE_RESPONSE_DECLINED
@@ -6770,6 +6871,7 @@ h5. LogoutType
 
 
 h5. LootItemResult
+* LOOT_ITEM_RESULT_ALREADY_OBTAINED
 * LOOT_ITEM_RESULT_INVENTORY_FULL
 * LOOT_ITEM_RESULT_INVENTORY_FULL_LOOT_ALL
 * LOOT_ITEM_RESULT_IS_UNIQUE
@@ -6802,12 +6904,20 @@ h5. MountFailureReason
 * MOUNT_FAILURE_REASON_BUSY
 * MOUNT_FAILURE_REASON_CARRYING_OBJECTIVE
 * MOUNT_FAILURE_REASON_COLLECTIBLE_BLACKLISTED
+* MOUNT_FAILURE_REASON_CROUCHING
+* MOUNT_FAILURE_REASON_GROUP_MOUNT_ALREADY_MOUNTED
+* MOUNT_FAILURE_REASON_GROUP_MOUNT_INVALID_TARGET
+* MOUNT_FAILURE_REASON_GROUP_MOUNT_NOT_IN_GROUP
+* MOUNT_FAILURE_REASON_GROUP_MOUNT_NO_FREE_SLOTS
+* MOUNT_FAILURE_REASON_GROUP_MOUNT_TARGET_MOVING
+* MOUNT_FAILURE_REASON_GROUP_MOUNT_TOO_FAR
 * MOUNT_FAILURE_REASON_INVALID_LOCATION
 * MOUNT_FAILURE_REASON_INVENTORY_BUSY
 * MOUNT_FAILURE_REASON_INVENTORY_TOO_FULL
 * MOUNT_FAILURE_REASON_IN_COMBAT
 * MOUNT_FAILURE_REASON_IS_BLOCKING
 * MOUNT_FAILURE_REASON_IS_WEREWOLF
+* MOUNT_FAILURE_REASON_NOT_GROUP_MOUNT
 * MOUNT_FAILURE_REASON_NO_ACTIVE_MOUNT
 
 
@@ -7086,6 +7196,12 @@ h5. OnlineStatus
 * ONLINE_STATUS_OFFLINE
 
 
+h5. PlayerMountedState
+* PLAYER_MOUNTED_STATE_MOUNT_PASSENGER
+* PLAYER_MOUNTED_STATE_MOUNT_RIDER
+* PLAYER_MOUNTED_STATE_NOT_MOUNTED
+
+
 h5. PledgeOfMaraResult
 * PLEDGE_OF_MARA_RESULT_BEGIN_PLEDGE
 * PLEDGE_OF_MARA_RESULT_DEAD
@@ -7165,6 +7281,7 @@ h5. QueueForCampaignResponseType
 * QUEUE_FOR_CAMPAIGN_RESULT_GROUP_CROSS_ALLIANCE
 * QUEUE_FOR_CAMPAIGN_RESULT_GROUP_MEMBER_WITH_INSUFFICIENT_LEVEL
 * QUEUE_FOR_CAMPAIGN_RESULT_GROUP_NOT_ASSIGNED_TO_CAMPAIGN
+* QUEUE_FOR_CAMPAIGN_RESULT_GROUP_TOO_LARGE
 * QUEUE_FOR_CAMPAIGN_RESULT_IMPERIAL_CITY_NOT_CONTROLLED
 * QUEUE_FOR_CAMPAIGN_RESULT_INSUFFICIENT_LEVEL
 * QUEUE_FOR_CAMPAIGN_RESULT_INTERNAL_ERROR
@@ -7337,6 +7454,7 @@ h5. SoulGemItemChargingReason
 h5. StoreFailure
 * STORE_FAILURE_ALREADY_HAVE_ANTIQUITY_LEAD
 * STORE_FAILURE_ALREADY_HAVE_COLLECTIBLE
+* STORE_FAILURE_ALREADY_UNEARTHED_ANTIQUITY
 * STORE_FAILURE_AT_FENCE_LIMIT
 * STORE_FAILURE_AWARDS_ALREADY_OWNED_COLLECTIBLE
 * STORE_FAILURE_BUY_ITEM_FAILED_REQS
@@ -8276,6 +8394,10 @@ h5. Globals
 * LOOP_INDEFINITELY
 * COMPASS_PIN_INHERIT_MAX_DISTANCE
 * COMPASS_PIN_NO_MAX_DISTANCE
+* KEYBOARD_CUSTOM_UI_SCALE_LOWER_BOUND
+* KEYBOARD_CUSTOM_UI_SCALE_UPPER_BOUND
+* GAMEPAD_CUSTOM_UI_SCALE_LOWER_BOUND
+* GAMEPAD_CUSTOM_UI_SCALE_UPPER_BOUND
 * IME_UNDERLINE_THICKNESS_PIXELS
 * MAX_ANCHORS
 
@@ -8462,6 +8584,12 @@ h2. Game API
 
 * StringToId64(*string* _stringId_)
 ** _Returns:_ *id64* _id_
+
+* CompareId64s(*id64* _firstId_, *id64* _secondId_)
+** _Returns:_ *integer* _result_
+
+* CompareId64ToNumber(*id64* _id_, *integer* _number_)
+** _Returns:_ *integer* _result_
 
 * HideMouse(*bool* _onlyConsiderWhileMoving_)
 
@@ -9140,6 +9268,8 @@ h2. Game API
 
 * DoesPlatformAllowConfiguringAutomaticInputChanging()
 ** _Returns:_ *bool* _doesPlatformAllowConfiguringAutomaticInputChanging_
+
+* BlockAutomaticInputModeChange(*bool* _shouldBlock_)
 
 * IsInGamepadPreferredMode()
 ** _Returns:_ *bool* _inGamepadPreferredMode_
@@ -10407,7 +10537,7 @@ h2. Game API
 ** _Returns:_ *bool* _weaponsAreSheathed_
 
 * GetSynergyInfo()
-** _Returns:_ *string:nilable* _synergyName_, *textureName:nilable* _iconFilename_
+** _Returns:_ *string:nilable* _synergyName_, *textureName:nilable* _iconFilename_, *integer:nilable* _priority_
 
 * HasSynergyEffects()
 ** _Returns:_ *bool* _hasSynergy_
@@ -10766,16 +10896,24 @@ h2. Game API
 * IsMounted()
 ** _Returns:_ *bool* _mounted_
 
+* IsGroupMountPassenger()
+** _Returns:_ *bool* _isPassenger_
+
+* IsGroupMountPassengerForTarget(*string* _characterOrDisplayName_)
+** _Returns:_ *bool* _isPassenger_
+
 * ToggleMount *private* ()
+
+* UseMountAsPassenger(*string* _characterOrDisplayName_)
+
+* GetTargetMountedStateInfo(*string* _characterOrDisplayName_)
+** _Returns:_ *[PlayerMountedState|#PlayerMountedState]* _mountedState_, *bool* _isRidingGroupMount_, *bool* _hasFreePassengerSlot_
 
 * GetAbilityIdByIndex(*luaindex* _abilityIndex_)
 ** _Returns:_ *integer* _abilityId_
 
 * DoesAbilityExist(*integer* _abilityId_)
 ** _Returns:_ *bool* _exists_
-
-* IsAbilityPassive(*integer* _abilityId_)
-** _Returns:_ *bool* _isPassive_
 
 * IsAbilityPermanent(*integer* _abilityId_)
 ** _Returns:_ *bool* _isPermanent_
@@ -11317,6 +11455,9 @@ h2. Game API
 
 * GetMapInfo(*luaindex* _index_)
 ** _Returns:_ *string* _name_, *[UIMapType|#UIMapType]* _mapType_, *[MapContentType|#MapContentType]* _mapContentType_, *integer* _zoneId_, *string* _description_
+
+* GetUniversallyNormalizedMapInfo(*integer* _mapId_)
+** _Returns:_ *number* _normalizedOffsetX_, *number* _normalizedOffsetZ_, *number* _normalizedWidth_, *number* _normalizedHeight_
 
 * GetZoneDescription(*luaindex* _zoneIndex_)
 ** _Returns:_ *string* _description_
@@ -12993,6 +13134,9 @@ h2. Game API
 * GetHelpInfo(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
 ** _Returns:_ *string* _name_, *string* _description_, *string* _description2_, *textureName:nilable* _image_, *string* _descriptionGamepad_, *string* _descriptionGamepad2_, *[HelpShowOptions|#HelpShowOptions]* _showOptions_
 
+* GetUISystemAssociatedWithHelpEntry(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
+** _Returns:_ *[UISystem|#UISystem]* _uiSystem_
+
 * GetHelpSearchResults()
 ** _Uses variable returns..._
 ** _Returns:_ *luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_
@@ -13042,6 +13186,8 @@ h2. Game API
 
 * GetHelpLink(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
+
+* BroadcastHelpOverlayVisibilityChange(*bool* _isVisible_)
 
 * StopSettingChamber *private* ()
 
@@ -14301,6 +14447,15 @@ h2. Game API
 * HousingEditorGetFurnitureWorldOffset(*id64* _furnitureId_)
 ** _Returns:_ *number* _offsetX_, *number* _offsetY_, *number* _offsetZ_
 
+* HousingEditorGetSelectedObjectWorldPosition()
+** _Returns:_ *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_
+
+* HousingEditorGetSelectedObjectOrientation()
+** _Returns:_ *number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_
+
+* HousingEditorGetSelectedObjectWorldCenter()
+** _Returns:_ *number* _centerX_, *number* _centerY_, *number* _centerZ_
+
 * HousingEditorRequestRemoveSelectedFurniture()
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
@@ -14310,19 +14465,22 @@ h2. Game API
 * HousingEditorGetSelectedFurnitureId()
 ** _Returns:_ *id64:nilable* _furnitureId_
 
+* HousingEditorIsSelectingHousingObject()
+** _Returns:_ *bool* _isSelectingAnyObject_
+
 * HousingEditorGetSelectedFurnitureStackCount()
 ** _Returns:_ *integer* _stackCount_
 
 * HousingEditorSelectFurnitureById(*id64* _furnitureId_)
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
-* HousingEditorMoveFurniture(*[AxisTypes|#AxisTypes]* _aAxis_, *number* _aMovementForce_)
+* HousingEditorMoveSelectedObject(*[AxisTypes|#AxisTypes]* _aAxis_, *number* _aMovementForce_)
 
-* HousingEditorRotateFurniture(*[AxisTypes|#AxisTypes]* _aAxis_, *number* _aRotationForce_)
+* HousingEditorRotateSelectedObject(*[AxisTypes|#AxisTypes]* _aAxis_, *number* _aRotationForce_)
 
 * HousingEditorAdjustPrecisionEditingPosition(*integer* _aWorldX_, *integer* _aWorldY_, *integer* _aWorldZ_)
 
-* HousingEditorAdjustPendingFurnitureRotation(*number* _aPitchRadians_, *number* _aYawRadians_, *number* _aRollRadians_)
+* HousingEditorAdjustSelectedObjectRotation(*number* _aPitchRadians_, *number* _aYawRadians_, *number* _aRollRadians_)
 
 * HousingEditorCalculateRotationAboutAxis(*[AxisTypes|#AxisTypes]* _aAxis_, *number* _aOffsetRadians_, *number* _aInitialPitchRadians_, *number* _aInitialYawRadians_, *number* _aInitialRollRadians_)
 ** _Returns:_ *number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_
@@ -14330,11 +14488,18 @@ h2. Game API
 * HousingEditorClipLineSegmentToViewFrustum(*integer* _aWorldX1_, *integer* _aWorldY1_, *integer* _aWorldZ1_, *integer* _aWorldX2_, *integer* _aWorldY2_, *integer* _aWorldZ2_)
 ** _Returns:_ *integer* _aClippedWorldX1_, *integer* _aClippedWorldY1_, *integer* _aClippedWorldZ1_, *integer* _aClippedWorldX2_, *integer* _aClippedWorldY2_, *integer* _aClippedWorldZ2_
 
-* HousingEditorStraightenFurniture()
+* HousingEditorGetScreenPointWorldPlaneIntersection(*integer* _aScreenX_, *integer* _aScreenY_, *integer* _aWorldX1_, *integer* _aWorldY1_, *integer* _aWorldZ1_, *integer* _aWorldX2_, *integer* _aWorldY2_, *integer* _aWorldZ2_, *integer* _aWorldX3_, *integer* _aWorldY3_, *integer* _aWorldZ3_)
+** _Returns:_ *integer* _aWorldX_, *integer* _aWorldY_, *integer* _aWorldZ_
+
+* HousingEditorStraightenSelectedObject()
 
 * HousingEditorPushSelectedObject(*number* _aPushDistance_)
 
 * HousingEditorAlignFurnitureToSurface()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorAlignSelectedObjectToSurface()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
 * HousingEditorCreateItemFurnitureForPlacement(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _success_
@@ -14347,6 +14512,9 @@ h2. Game API
 
 * HousingEditorEndCurrentPreview()
 
+* HousingEditorGetTargetInfo()
+** _Returns:_ *id64* _furnitureId_, *luaindex:nilable* _pathIndex_
+
 * HousingEditorSelectTargettedFurniture()
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
@@ -14358,6 +14526,9 @@ h2. Game API
 
 * GetHousingEditorMode()
 ** _Returns:_ *[HousingEditorMode|#HousingEditorMode]* _mode_
+
+* IsInHousingEditorPlacementMode()
+** _Returns:_ *bool* _isPlacementMode_
 
 * GetHousingVisitorRole()
 ** _Returns:_ *[HousingVisitorRole|#HousingVisitorRole]* _role_
@@ -14386,6 +14557,12 @@ h2. Game API
 
 * HousingEditorCanPlaceCollectible(*integer* _collectibleId_)
 ** _Returns:_ *bool* _success_
+
+* HousingEditorCanFurnitureBePathed(*id64* _furnitureId_)
+** _Returns:_ *bool* _canBePathed_
+
+* HousingEditorCanCollectibleBePathed(*integer* _collectibleId_)
+** _Returns:_ *bool* _canBePathed_
 
 * HousingEditorJumpToSafeLocation()
 
@@ -14444,7 +14621,9 @@ h2. Game API
 
 * SetHousingEditorTrackedFurnitureId(*id64* _placedFurnitureId_)
 
-* ResetHousingEditorTrackedFurnitureId()
+* SetHousingEditorTrackedPathNode(*id64* _placedFurnitureId_, *luaindex* _pathIndex_)
+
+* ResetHousingEditorTrackedFurnitureOrNode()
 
 * HousingEditorRequestSetFurnitureParent(*id64* _childFurnitureId_, *id64* _parentFurnitureId_)
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
@@ -14475,6 +14654,129 @@ h2. Game API
 
 * HousingEditorRemoveAllChildrenFromPendingFurniture()
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorGetPathNodeWorldPosition(*id64* _furnitureId_, *luaindex* _index_)
+** _Returns:_ *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_
+
+* HousingEditorGetPathNodeOrientation(*id64* _furnitureId_, *luaindex* _index_)
+** _Returns:_ *number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_
+
+* HousingEditorRequestChangeFurniturePathData(*id64* _furnitureId_, *[FurniturePathState|#FurniturePathState]* _newState_, *[PathFollowType|#PathFollowType]* _newFollowType_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestInsertPathNode(*id64* _furnitureId_, *luaindex* _index_, *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_, *number* _headingRadians_, *[HousingPathMovementSpeed|#HousingPathMovementSpeed]* _speed_, *integer* _reachDestinationDelayTime_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestModifyPathNode(*id64* _furnitureId_, *luaindex* _index_, *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_, *number* _headingRadians_, *[HousingPathMovementSpeed|#HousingPathMovementSpeed]* _speed_, *integer* _reachDestinationDelayTime_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestRemovePathNode(*id64* _furnitureId_, *luaindex* _index_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestReplacePathCollectible(*id64* _furnitureId_, *integer* _collectiblieId_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestSetStartingNodeIndex(*id64* _furnitureId_, *luaindex* _startingIndex_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* GetNextPathedHousingFurnitureId(*id64:nilable* _lastFurnitureId_)
+** _Returns:_ *id64:nilable* _nextFurnitureId_
+
+* HousingEditorSelectPathNodeByIndex(*id64* _furnitureId_, *luaindex* _index_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorSelectTargetUnderReticle()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorEditTargettedFurniturePath()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorSelectTargettedPathNode()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorBeginPlaceNewPathNode(*luaindex* _index_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestPlaceSelectedPathNode()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestRemoveSelectedPathNode()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorReleaseSelectedPathNode()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRotatePathNode(*number* _rotationForce_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorRequestRestartAllFurniturePaths()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorHasSelectablePathNode()
+** _Returns:_ *bool* _hasTarget_
+
+* HousingEditorIsPlacingNewNode()
+** _Returns:_ *bool* _placingNewNode_
+
+* HousingEditorToggleSelectedFurniturePathState()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorSetSelectedFurniturePathFollowType(*[PathFollowType|#PathFollowType]* _newPathType_)
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorToggleSelectedPathNodeSpeed()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorToggleSelectedPathNodeDelayTime()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorAlignSelectedPathNodeToSurface()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
+* HousingEditorGetSelectedPathNodeFurnitureId()
+** _Returns:_ *id64* _furnitureId_
+
+* HousingEditorGetSelectedPathNodeIndex()
+** _Returns:_ *luaindex* _pathIndex_
+
+* HousingEditorGetSelectedPathNodeSpeed()
+** _Returns:_ *[HousingPathMovementSpeed|#HousingPathMovementSpeed]* _movementSpeed_
+
+* HousingEditorGetSelectedPathNodeDelayTime()
+** _Returns:_ *integer* _timeMS_
+
+* HousingEditorGetSelectedFurniturePathState()
+** _Returns:_ *[FurniturePathState|#FurniturePathState]* _pathState_
+
+* HousingEditorGetSelectedFurniturePathFollowType()
+** _Returns:_ *[PathFollowType|#PathFollowType]* _followType_
+
+* HousingEditorPathNodeSpeed(*id64* _furnitureId_, *luaindex* _index_)
+** _Returns:_ *[HousingPathMovementSpeed|#HousingPathMovementSpeed]* _movementSpeed_
+
+* HousingEditorPathNodeDelayTime(*id64* _furnitureId_, *luaindex* _index_)
+** _Returns:_ *integer* _timeMS_
+
+* HousingEditorGetFurniturePathState(*id64* _furnitureId_)
+** _Returns:_ *[FurniturePathState|#FurniturePathState]* _pathState_
+
+* HousingEditorGetFurniturePathFollowType(*id64* _furnitureId_)
+** _Returns:_ *[PathFollowType|#PathFollowType]* _followType_
+
+* HousingEditorGetPathNodeDelayTimeFromValue(*[HousingPathDelayTime|#HousingPathDelayTime]* _pathDelayTime_)
+** _Returns:_ *integer* _timeMS_
+
+* HousingEditorGetPathNodeValueFromDelayTime(*integer* _timeMS_)
+** _Returns:_ *[HousingPathDelayTime|#HousingPathDelayTime]* _pathDelayTime_
+
+* HousingEditorGetNumPathNodesInSelectedFurniture()
+** _Returns:_ *integer* _numPathNodes_
+
+* HousingEditorGetNumPathNodesForFurniture(*id64* _furnitureId_)
+** _Returns:_ *integer* _numNodes_
+
+* HousingEditorGetStartingNodeIndexForPath(*id64* _furnitureId_)
+** _Returns:_ *luaindex* _nodeIndex_
 
 * GetItemUniqueIdFromFurnitureId(*id64* _furnitureId_)
 ** _Returns:_ *id64* _itemUniqueId_
@@ -17065,17 +17367,32 @@ h2. Game API
 * GetDigSpotDigPower()
 ** _Returns:_ *integer* _current_, *integer* _max_
 
+* IsDigSpotRadarLimited()
+** _Returns:_ *bool* _isLimited_
+
+* GetDigSpotNumRadars()
+** _Returns:_ *integer* _current_, *integer* _max_
+
+* GetRadarCountUIPosition()
+** _Returns:_ *number* _x_, *number* _y_
+
 * GetDigSpotMinPowerPerSpender()
 ** _Returns:_ *integer* _minPower_
 
 * GetDiggingAntiquityHasNewLoreEntryToShow()
 ** _Returns:_ *bool* _hasNewLoreEntryToShow_
 
+* IsDiggingGameActive()
+** _Returns:_ *bool* _isGameActive_
+
 * IsDiggingGameOver()
 ** _Returns:_ *bool* _isGameOver_
 
 * IsDiggingActiveSkillUnlocked(*[DiggingActiveSkills|#DiggingActiveSkills]* _diggingActiveSkill_)
 ** _Returns:_ *bool* _isUnlocked_
+
+* GetMouseOverDiggingActiveSkill()
+** _Returns:_ *[DiggingActiveSkills|#DiggingActiveSkills]:nilable* _diggingActiveSkill_
 
 * RequestAntiquityDiggingExit()
 
@@ -17122,6 +17439,9 @@ h2. Game API
 
 * GetAbilityDescription(*integer* _abilityId_, *integer:nilable* _overrideRank_)
 ** _Returns:_ *string* _description_
+
+* IsAbilityPassive(*integer* _abilityId_)
+** _Returns:_ *bool* _isPassive_
 
 
 h2. Object API
@@ -18369,6 +18689,12 @@ h3. PolygonControl
 * GetCenterTextureCoords()
 ** _Returns:_ *number* _left_, *number* _right_, *number* _top_, *number* _bottom_
 
+* GetNumPoints()
+** _Returns:_ *integer* _numPoints_
+
+* GetPoint(*luaindex* _index_)
+** _Returns:_ *number* _normalizedX_, *number* _normalizedY_
+
 * GetPointLayout()
 ** _Returns:_ *[PolygonPointLayout|#PolygonPointLayout]* _pointLayout_
 
@@ -18398,6 +18724,8 @@ h3. PolygonControl
 * SetCenterTextureAddressMode(*[TextureAddressMode|#TextureAddressMode]* _addressMode_)
 
 * SetCenterTextureCoords(*number* _left_, *number* _right_, *number* _top_, *number* _bottom_)
+
+* SetPoint(*luaindex* _index_, *number* _normalizedX_, *number* _normalizedY_)
 
 * SetPointLayout(*[PolygonPointLayout|#PolygonPointLayout]* _pointLayout_)
 
@@ -18807,6 +19135,8 @@ h3. TooltipControl
 
 * SetGuildSpecificItem(*luaindex* _guildSpecificItemIndex_)
 
+* SetHeaderCellEmptyHorizontalSpace(*number* _headerCellEmptyHorizontalSpace_)
+
 * SetHeaderRowSpacing(*number* _spacing_)
 
 * SetHeaderVerticalOffset(*number* _verticalOffset_)
@@ -19119,6 +19449,7 @@ h2. Events
 * EVENT_ANTIQUITY_DIGGING_ACTIVE_SKILL_USE_RESULT (*[DiggingActiveSkillUseResult|#DiggingActiveSkillUseResult]* _result_)
 * EVENT_ANTIQUITY_DIGGING_EXIT_RESPONSE (*bool* _accept_)
 * EVENT_ANTIQUITY_DIGGING_MOUSE_OVER_ACTIVE_SKILL_CHANGED (*[DiggingActiveSkills|#DiggingActiveSkills]:nilable* _mousedOverSkill_)
+* EVENT_ANTIQUITY_DIGGING_NUM_RADARS_REMAINING_CHANGED (*integer* _numRadarsRemaining_)
 * EVENT_ANTIQUITY_DIG_SITES_UPDATED (*integer* _antiquityId_)
 * EVENT_ANTIQUITY_JOURNAL_SHOW_SCRYABLE
 * EVENT_ANTIQUITY_LEAD_ACQUIRED (*integer* _antiquityId_)
@@ -19364,7 +19695,6 @@ h2. Events
 * EVENT_GUI_WORLD_PARTICLE_EFFECT_READY (*integer* _particleEffectId_)
 * EVENT_HELP_INITIALIZED
 * EVENT_HELP_SEARCH_RESULTS_READY
-* EVENT_HELP_SHOW_SPECIFIC_PAGE (*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
 * EVENT_HERALDRY_CUSTOMIZATION_END
 * EVENT_HERALDRY_CUSTOMIZATION_START
 * EVENT_HERALDRY_FUNDS_UPDATED
@@ -19382,13 +19712,21 @@ h2. Events
 * EVENT_HOUSING_EDITOR_MODE_CHANGED (*[HousingEditorMode|#HousingEditorMode]* _oldMode_, *[HousingEditorMode|#HousingEditorMode]* _newMode_)
 * EVENT_HOUSING_EDITOR_REQUEST_RESULT (*[HousingRequestResult|#HousingRequestResult]* _requestResult_)
 * EVENT_HOUSING_FURNITURE_MOVED (*id64* _furnitureId_)
+* EVENT_HOUSING_FURNITURE_PATH_DATA_CHANGED (*id64* _furnitureId_)
+* EVENT_HOUSING_FURNITURE_PATH_NODES_RESTORED (*id64* _furnitureId_)
+* EVENT_HOUSING_FURNITURE_PATH_NODE_ADDED (*id64* _furnitureId_, *luaindex* _pathIndex_)
+* EVENT_HOUSING_FURNITURE_PATH_NODE_MOVED (*id64* _furnitureId_, *luaindex* _pathIndex_)
+* EVENT_HOUSING_FURNITURE_PATH_NODE_REMOVED (*id64* _furnitureId_, *luaindex* _pathIndex_)
+* EVENT_HOUSING_FURNITURE_PATH_STARTING_NODE_INDEX_CHANGED (*id64* _furnitureId_, *luaindex* _startingPathIndex_)
 * EVENT_HOUSING_FURNITURE_PLACED (*id64* _furnitureId_, *integer* _collectibleId_)
 * EVENT_HOUSING_FURNITURE_REMOVED (*id64* _furnitureId_, *integer* _collectibleId_)
 * EVENT_HOUSING_LOAD_PERMISSIONS_RESULT (*[HousingLoadPermissionsResult|#HousingLoadPermissionsResult]* _loadResult_)
+* EVENT_HOUSING_PATH_NODE_SELECTION_CHANGED
 * EVENT_HOUSING_PERMISSIONS_CHANGED (*[HousePermissionUserGroup|#HousePermissionUserGroup]* _userGroup_)
 * EVENT_HOUSING_PLAYER_INFO_CHANGED (*bool* _wasOwner_, *bool* _permissionsChanged_, *[HousingVisitorRole|#HousingVisitorRole]* _oldVisitorRole_)
 * EVENT_HOUSING_POPULATION_CHANGED (*integer* _newPopulation_)
 * EVENT_HOUSING_PRIMARY_RESIDENCE_SET (*integer* _houseId_)
+* EVENT_HOUSING_TARGET_FURNITURE_CHANGED
 * EVENT_IMPACTFUL_HIT
 * EVENT_INSTANCE_KICK_TIME_UPDATE (*integer* _timeRemainingMs_)
 * EVENT_INTERACTION_ENDED (*[InteractionType|#InteractionType]* _interactType_, *[InteractCancelContext|#InteractCancelContext]* _cancelContext_)
@@ -19595,6 +19933,7 @@ h2. Events
 * EVENT_SELL_RECEIPT (*string* _itemName_, *integer* _itemQuantity_, *integer* _money_)
 * EVENT_SHOW_BOOK (*string* _bookTitle_, *string* _body_, *[BookMedium|#BookMedium]* _medium_, *bool* _showTitle_, *integer* _bookId_)
 * EVENT_SHOW_DAILY_LOGIN_REWARDS_SCENE
+* EVENT_SHOW_SPECIFIC_HELP_PAGE (*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
 * EVENT_SHOW_SUBTITLE (*[MsgChannelType|#MsgChannelType]* _channelType_, *string* _speakerName_, *string* _text_)
 * EVENT_SHOW_TREASURE_MAP (*luaindex* _treasureMapIndex_)
 * EVENT_SHOW_WORLD_MAP
@@ -19647,6 +19986,7 @@ h2. Events
 * EVENT_TARGET_CHANGED (*string* _unitTag_)
 * EVENT_TELVAR_STONE_UPDATE (*integer* _newTelvarStones_, *integer* _oldTelvarStones_, *[CurrencyChangeReason|#CurrencyChangeReason]* _reason_, *integer* _reasonSupplementaryInfo_)
 * EVENT_TITLE_UPDATE (*string* _unitTag_)
+* EVENT_TOGGLE_HELP
 * EVENT_TRACKED_ZONE_STORY_ACTIVITY_COMPLETED (*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *integer* _activityId_)
 * EVENT_TRACKING_UPDATE
 * EVENT_TRADE_ACCEPT_FAILED_NOT_ENOUGH_MONEY

@@ -4,6 +4,12 @@ function ZO_HousingFurniturePlacement_Keyboard:New(...)
     return ZO_HousingFurnitureList.New(self, ...)
 end
 
+function ZO_HousingFurniturePlacement_Keyboard:OnShowing()
+    ZO_HousingFurnitureList.OnShowing(self)
+
+    self.searchEditBox:SetText(SHARED_FURNITURE:GetPlaceableTextFilter())
+end
+
 function ZO_HousingFurniturePlacement_Keyboard:InitializeKeybindStrip()
     self.keybindStripDescriptor =
     {

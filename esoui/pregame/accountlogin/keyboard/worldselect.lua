@@ -61,34 +61,45 @@ function ZO_WorldSelect_SortListAndCommit(sortKey)
 end
 
 function ZO_WorldSelect_UpdateWorlds()
+    local worldDataToSelect = nil
+    local realmNameToSelect = nil
+    local isInitialUpdate = ZO_ScrollList_GetSelectedData(ZO_WorldSelectScrollList) == nil
+    if isInitialUpdate then
+        realmNameToSelect = GetCVar("LastRealm")
+    end
+
     local dataList = ZO_ScrollList_GetDataList(ZO_WorldSelectScrollList)
     ZO_ClearNumericallyIndexedTable(dataList)
-
     local numWorlds = GetNumWorlds()
-    if numWorlds > 0 then
-        for worldIndex = 0, numWorlds - 1 do
-            local worldName, worldStatus = GetWorldInfo(worldIndex)
+    for worldIndex = 0, numWorlds - 1 do
+        local worldName, worldStatus = GetWorldInfo(worldIndex)
 
-            if worldName ~= "" and (worldStatus ~= SERVER_STATUS_OUT) then
-                worldStatus = GetString(worldStatusStrings[worldStatus])
+        if worldName ~= "" and worldStatus ~= SERVER_STATUS_OUT then
+            worldStatus = GetString(worldStatusStrings[worldStatus])
 
-                if worldStatus == "" then
-                    worldStatus = GetString(SI_SERVER_STATUS_INVALID)
-                end
-
-                local worldData =
-                {
-                    name = worldName,
-                    status = worldStatus,
-                    worldIndex = worldIndex,
-                }
-
-                table.insert(dataList, ZO_ScrollList_CreateDataEntry(SERVER_DATA, worldData))
+            if worldStatus == "" then
+                worldStatus = GetString(SI_SERVER_STATUS_INVALID)
             end
+
+            local worldData =
+            {
+                name = worldName,
+                status = worldStatus,
+                worldIndex = worldIndex,
+            }
+
+            if worldName == realmNameToSelect then
+                worldDataToSelect = worldData
+            end
+
+            table.insert(dataList, ZO_ScrollList_CreateDataEntry(SERVER_DATA, worldData))
         end
     end
 
     ZO_WorldSelect_SortListAndCommit()
+    if worldDataToSelect then
+        ZO_ScrollList_SelectDataAndScrollIntoView(ZO_WorldSelectScrollList, worldDataToSelect)
+    end
 end
 
 local worldSelectionEnabled = true

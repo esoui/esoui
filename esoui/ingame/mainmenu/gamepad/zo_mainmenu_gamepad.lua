@@ -101,6 +101,7 @@ local MENU_ENTRY_DATA =
                 disableWhenReviving = true,
                 disableWhenSwimming = true,
                 disableWhenWerewolf = true,
+                disableWhenPassenger = true,
                 isNewCallback = function()
                     return GetNumOwnedCrownCrateTypes() > 0
                 end,
@@ -627,6 +628,8 @@ local function ShouldDisableEntry(entryData)
         return true
     elseif entryData.disableWhenWerewolf and MAIN_MENU_MANAGER:IsPlayerWerewolf() then
         return true
+    elseif entryData.disableWhenPassenger and MAIN_MENU_MANAGER:IsPlayerPassenger() then
+        return true
     elseif entryData.shouldDisableFunction and entryData.shouldDisableFunction() then
         return true
     end
@@ -959,13 +962,22 @@ function ZO_MainMenuManager_Gamepad:ShowDailyLoginRewardsEntry()
     SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu")
 end
 
-function ZO_MainMenuManager_Gamepad:ShowScryableAntiquities()
+function ZO_MainMenuManager_Gamepad:ShowAntiquityJournal()
     self.mainList:SetSelectedIndexWithoutAnimation(self.mainMenuEntryToListIndex[MENU_MAIN_ENTRIES.JOURNAL])
     local entry = self.mainList:GetTargetData()
     self:RefreshSubList(entry)
     self.subList:SetSelectedIndexWithoutAnimation(self.subMenuEntryToListIndex[MENU_JOURNAL_ENTRIES.ANTIQUITIES])
     SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "playerSubmenu", "gamepad_antiquity_journal")
-    ANTIQUITY_JOURNAL_GAMEPAD:ShowScryable()
+end
+
+function ZO_MainMenuManager_Gamepad:ShowScryableAntiquities()
+    ANTIQUITY_JOURNAL_GAMEPAD:QueueBrowseToScryable()
+    self:ShowAntiquityJournal()
+end
+
+function ZO_MainMenuManager_Gamepad:ShowAntiquityInJournal(antiquityData)
+    ANTIQUITY_JOURNAL_GAMEPAD:QueueBrowseToAntiquityOrSetData(antiquityData)
+    self:ShowAntiquityJournal()
 end
 
 function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)

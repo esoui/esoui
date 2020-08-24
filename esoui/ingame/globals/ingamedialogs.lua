@@ -2903,6 +2903,60 @@ do
     }
 end
 
+do
+    ESO_Dialogs["GAMEPAD_CRAFTING_OPTIONS_DIALOG"] =
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+        },
+
+        setup = function(dialog, data)
+            dialog.entryList:SetOnTargetDataChangedCallback(function(owner, targetData)
+                if targetData.onSelected ~= nil then
+                    targetData.onSelected()
+                end
+            end)
+            dialog.info.parametricList = data.parametricList
+            dialog:setupFunc()
+
+            local targetData = dialog.entryList:GetTargetData()
+            if targetData.onSelected ~= nil then
+                targetData.onSelected()
+            end
+        end,
+        onHidingCallback = function(dialog)
+            if dialog.data.finishedCallback then
+                dialog.data.finishedCallback()
+            end
+        end,
+        title =
+        {
+            text = SI_GAMEPAD_OPTIONS_MENU,
+        },
+        blockDialogReleaseOnPress = true,
+        buttons =	
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                callback  = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    targetData.callback(dialog)
+                end
+            },
+
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_GAMEPAD_BACK_OPTION,
+                callback =  function(dialog)
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_CRAFTING_OPTIONS_DIALOG")
+                end
+            },
+        },
+    }
+end
+
 ESO_Dialogs["EXTRACT_ALL_PROMPT"] =
 {
     gamepadInfo =

@@ -2022,17 +2022,8 @@ function SharedChatSystem:ReplyToLastTarget(channelType)
     end
 end
 
-function SharedChatSystem:SetChannel(newChannel, channelTarget)
-    newChannel = newChannel or CHAT_CHANNEL_SAY
+function SharedChatSystem:SetChannelInternal(newChannel, channelTarget)
     local channelData = self.channelData[newChannel]
-
-    if self.currentChannel then
-        if self.textEntry:IsOpen() then
-            self.textEntry:GetEditControl():TakeFocus()
-        else
-            self.textEntry:Close()
-        end
-    end
 
     if channelData and (newChannel ~= self.currentChannel or channelTarget ~= self.currentTarget) then
         self.lastValidChannel = self.currentChannel
@@ -2041,15 +2032,26 @@ function SharedChatSystem:SetChannel(newChannel, channelTarget)
         self.channelRequirement = channelData.requires
         self.currentChannel = newChannel
         self.currentTarget = channelTarget
-        CHAT_ROUTER:SetCurrentChannelData(channelData, channelTarget)
-        CALLBACK_MANAGER:FireCallbacks("OnChatChannelUpdated")
 
         self:UpdateTextEntryChannel()
     end
+end
+
+function SharedChatSystem:SetChannel(newChannel, channelTarget)
+    if self.currentChannel then
+        if self.textEntry:IsOpen() then
+            self.textEntry:GetEditControl():TakeFocus()
+        else
+            self.textEntry:Close()
+        end
+    end
+
+    newChannel = newChannel or CHAT_CHANNEL_SAY
+    local channelData = self.channelData[newChannel]
+    CHAT_ROUTER:SetCurrentChannelData(channelData, channelTarget)
 
     --Check for trial limitations
     GetTrialChatIsRestrictedAndWarn(newChannel, channelTarget)
-    CALLBACK_MANAGER:FireCallbacks("OnChatSetChannel")
 end
 
 function SharedChatSystem:GetCurrentChannelData()

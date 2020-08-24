@@ -8,6 +8,7 @@ end
 
 function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
     self.control = control
+    self.isPreviewAvailable = true
     self.sheetsContainer = control:GetNamedChild("Containers")
     self.sheetsByMode = {}
 
@@ -19,6 +20,8 @@ function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
     self.currentSheet = self.equipmentSheet
     
     self.outfitSelectorTutorialAnchor = ZO_Anchor:New(LEFT, self.modeSelectorDropdownControl, RIGHT, 10, 0)
+
+    self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
 	local function OnRefreshOutfitName(outfitIndex)
         if self.currentSheet ~= self.collectiblesSheet then
@@ -292,6 +295,14 @@ function ZO_RestyleSheetWindow_Keyboard:PopulateCollectiblesModeDropdown()
     self:OnUpdateModeSelectorDropdown()
 end
 
+function ZO_RestyleSheetWindow_Keyboard:OnUpdate()
+    local isPreviewingAvailable = IsCharacterPreviewingAvailable()
+    if self.isPreviewAvailable ~= isPreviewingAvailable then
+        self.isPreviewAvailable = isPreviewingAvailable
+        self.modeSelectorDropdown:SetEnabled(self.isPreviewAvailable)
+    end
+end
+
 function ZO_RestyleSheetWindow_Keyboard:OnUpdateModeSelectorDropdown()
     local isEthereal = self.modeSelectorDropdown:GetNumItems() == 1
     self.modeSelectorHeader:SetHidden(isEthereal)
@@ -385,13 +396,6 @@ do
                 if playerDyeInfo then
                     local anchoringControl = dyeControl
                     local isRightAnchored = false
-                    if KEYBOARD_DYEING_FRAGMENT:IsShowing() then
-                        local swatch = ZO_DYEING_KEYBOARD:GetSwatchControlFromDyeId(dyeId)
-                        if swatch then
-                            anchoringControl = swatch
-                            isRightAnchored = true
-                        end
-                    end
                     ZO_Dyeing_CreateTooltipOnMouseEnter(anchoringControl, playerDyeInfo.dyeName, playerDyeInfo.known, playerDyeInfo.achievementId, IS_PLAYER_DYE, isRightAnchored)
                 else
                     local nonPlayerDye = ZO_DYEING_MANAGER:GetOrCreateNonPlayerDyeInfoById(dyeId)

@@ -312,19 +312,13 @@ do
         end
         local dyeId = select(dyeChannel, GetSavedDyeSetDyes(dyeSetIndex))
         if dyeId ~= 0 then
-            local swatchObject = self.dyeIdToSwatch[dyeId]
-            if swatchObject then
-                ZO_Dyeing_CreateTooltipOnMouseEnter(swatchObject.control, swatchObject.dyeName, swatchObject.known, swatchObject.achievementId)
+            local playerDyeInfo = ZO_DYEING_MANAGER:GetPlayerDyeInfoById(dyeId)
+            if playerDyeInfo then
+                ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, playerDyeInfo.dyeName, playerDyeInfo.known, playerDyeInfo.achievementId)
             else
-                --If a color in a saved set is currently filtered out of the general view, we get here
-                local playerDyeInfo = ZO_DYEING_MANAGER:GetPlayerDyeInfoById(dyeId)
-                if playerDyeInfo then
-                    ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, playerDyeInfo.dyeName, playerDyeInfo.known, playerDyeInfo.achievementId)
-                else
-                    -- Technically should never be able to get here, but you never know
-                    local nonPlayerDye = ZO_DYEING_MANAGER:GetOrCreateNonPlayerDyeInfoById(dyeId)
-                    ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, nonPlayerDye.dyeName, UNKNOWN_DYE, nonPlayerDye.achievementId, IS_NON_PLAYER_DYE)
-                end
+                -- Technically should never be able to get here, but you never know
+                local nonPlayerDye = ZO_DYEING_MANAGER:GetOrCreateNonPlayerDyeInfoById(dyeId)
+                ZO_Dyeing_CreateTooltipOnMouseEnter(dyeControl, nonPlayerDye.dyeName, UNKNOWN_DYE, nonPlayerDye.achievementId, IS_NON_PLAYER_DYE)
             end
         end
     end

@@ -11,6 +11,7 @@ function ZO_Outfit_Selector_Header_Focus_Gamepad:Initialize(control)
     self.label = control:GetNamedChild("OutfitName")
     self.dropdownChevron = control:GetNamedChild("OpenDropdown")
     self.active = false
+    self.enabled = true
 end
 
 function ZO_Outfit_Selector_Header_Focus_Gamepad:Activate()
@@ -19,17 +20,35 @@ function ZO_Outfit_Selector_Header_Focus_Gamepad:Activate()
     self:FireCallbacks("FocusActivated")
 end
 
+function ZO_Outfit_Selector_Header_Focus_Gamepad:Enable()
+    self.enabled = true
+    self:Update()
+end
+
 function ZO_Outfit_Selector_Header_Focus_Gamepad:Deactivate()
     self.active = false
     self:Update()
     self:FireCallbacks("FocusDeactivated")
 end
 
+function ZO_Outfit_Selector_Header_Focus_Gamepad:Disable()
+    self.enabled = false
+    self:Update()
+end
+
 function ZO_Outfit_Selector_Header_Focus_Gamepad:Update()
     if self.active then
-        self.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        if self.enabled then
+            self.label:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        else
+            self.label:SetColor(ZO_GAMEPAD_DISABLED_SELECTED_COLOR:UnpackRGBA())
+        end
     else
-        self.label:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        if self.enabled then
+            self.label:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        else
+            self.label:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGBA())
+        end
     end
 end
 
@@ -55,6 +74,7 @@ function ZO_Outfit_Selector_Gamepad:Initialize(control)
     end
 
     GAMEPAD_OUTFITS_SELECTION_SCENE = ZO_InteractScene:New("gamepad_outfits_selection", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
+    GAMEPAD_OUTFITS_SELECTION_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_OUTFITS_SELECTION_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:PerformDeferredInitialization()

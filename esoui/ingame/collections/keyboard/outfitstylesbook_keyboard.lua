@@ -13,6 +13,9 @@ function ZO_OutfitStylesBook_Keyboard:Initialize(control)
     self.onModeDropdownChangedCallback = function()
         ZO_OUTFIT_STYLES_PANEL_KEYBOARD:ClearAllCurrentSlotPreviews()
     end
+
+    self.previewAvailable = true
+    control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 end
 
 function ZO_OutfitStylesBook_Keyboard:InitializeKeybindStripDescriptors()
@@ -50,7 +53,7 @@ function ZO_OutfitStylesBook_Keyboard:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
 
             visible = function()
-                return ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData() ~= nil
+                return self.previewAvailable and ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData() ~= nil
             end,
 
             callback = function()
@@ -103,6 +106,14 @@ function ZO_OutfitStylesBook_Keyboard:OnHidden()
     ZO_RestyleCommon_Keyboard.OnHidden(self)
 
     ZO_OUTFIT_STYLES_PANEL_KEYBOARD:ClearAllCurrentSlotPreviews()
+end
+
+function ZO_OutfitStylesBook_Keyboard:OnUpdate()
+    local isPreviewingAvailable = IsCharacterPreviewingAvailable()
+    if self.previewAvailable ~= isPreviewingAvailable then
+        self.previewAvailable = isPreviewingAvailable
+        self.updateKeybindCallback()
+    end
 end
 
 do

@@ -1173,6 +1173,21 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
+            <Action name="HOUSING_EDITOR_QUINARY_ACTION">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_TOGGLE_NODE_SPEED">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_TOGGLE_NODE_DELAY">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
             <Action name="HOUSING_EDITOR_JUMP_TO_SAFE_LOC">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
@@ -1194,6 +1209,11 @@
             </Action>
 
             <Action name="HOUSING_EDITOR_BEGIN_FURNITURE_LINKING">
+                <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+
+            <Action name="HOUSING_EDITOR_BEGIN_EDIT_PATH">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
@@ -1278,6 +1298,13 @@
                 <Down> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindPressed() </Down>
                 <Up> return ANTIQUITY_DIGGING:OnShowMoreInfoKeybindReleased() </Up>
             </Action>
+        </Category>
+    </Layer>
+
+    <!-- Special scenario where crouch button is not being used, but shown as disabled, so we have to pretend it is disabled.-->
+    <Layer name="PathNodeRotationBlockCrouchLayer">
+        <Category>
+            <BlockAction name="SPECIAL_MOVE_CROUCH"/>
         </Category>
     </Layer>
 </Bindings>

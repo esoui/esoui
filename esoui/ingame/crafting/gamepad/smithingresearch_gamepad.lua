@@ -2,6 +2,19 @@ local CONFIRM_SCENE_NAME = "gamepad_smithing_research_confirm"
 local CONFIRM_TEMPLATE_NAME = "ZO_GamepadSubMenuEntryTemplate"
 ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG = "GAMEPAD_CONFIRM_CANCEL_RESEARCH"
 
+local GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED = 1
+
+local g_filters =
+{
+    [GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED] =
+    {
+        header = SI_GAMEPAD_SMITHING_FILTERS,
+        filterName = GetString(SI_CRAFTING_INCLUDE_BANKED),
+        filterTooltip = GetString(SI_CRAFTING_INCLUDE_BANKED_TOOLTIP),
+        checked = false,
+    },
+}
+
 ZO_GamepadSmithingResearch = ZO_SharedSmithingResearch:Subclass()
 
 function ZO_GamepadSmithingResearch:New(...)
@@ -61,7 +74,9 @@ function ZO_GamepadSmithingResearch:Initialize(panelContent, owner, scene)
             self.confirmList:Clear()
 
             local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsResearchableItem)
-            PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsResearchableItem, virtualInventoryList)
+            if self.savedVars.includeBankedItemsChecked then
+                PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsResearchableItem, virtualInventoryList)
+            end
 
             for itemId, itemInfo in pairs(virtualInventoryList) do
                 itemInfo.name = zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(itemInfo.bag, itemInfo.index))
@@ -88,6 +103,7 @@ function ZO_GamepadSmithingResearch:PerformDeferredInitialization()
     self:InitializeFocusItems()
     self:InitializeConfirmDestroyDialog()
     self:AnchorTimerBar()
+    self:SetupSavedVars()
 end
 
 function ZO_GamepadSmithingResearch:AnchorTimerBar()
@@ -182,7 +198,7 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
                 if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                     return self:IsResearchable()
                 end
-            end
+            end,
         },
 
         -- Cancel research
@@ -201,7 +217,24 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
                 if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                     return self:CanCancelResearch()
                 end
-            end
+            end,
+        },
+
+        -- Item Options
+        {
+            name = GetString(SI_GAMEPAD_CRAFTING_OPTIONS),
+
+            keybind = "UI_SHORTCUT_TERTIARY",
+
+            gamepadOrder = 1020,
+
+            callback = function()
+                self:ShowOptionsMenu()
+            end,
+
+            enabled = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess()
+            end,
         },
     }
 
@@ -291,6 +324,39 @@ function ZO_GamepadSmithingResearch:AcceptResearch(bagId, slotIndex)
     ResearchSmithingTrait(bagId, slotIndex)
     --go back to the trait selection screen
     SCENE_MANAGER:HideCurrentScene()
+end
+
+function ZO_GamepadSmithingResearch:SetupSavedVars()
+    local defaults =
+    {
+        includeBankedItemsChecked = true
+    }
+    local savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "GamepadSmithingResearch", defaults)
+    self:SetSavedVars(savedVars)
+    g_filters[GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED].checked = self.savedVars.includeBankedItemsChecked
+end
+
+function ZO_GamepadSmithingResearch:ShowOptionsMenu()
+    local dialogData = 
+    {
+        filters = g_filters,
+        finishedCallback =  function()
+            self:SaveFilters()
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end
+    }
+    if not self.craftingOptionsDialogGamepad then
+        self.craftingOptionsDialogGamepad = ZO_CraftingOptionsDialogGamepad:New()
+    end
+    self.craftingOptionsDialogGamepad:ShowOptionsDialog(dialogData)
+end
+
+function ZO_GamepadSmithingResearch:SaveFilters()
+    local filterChanged = self.savedVars.includeBankedItemsChecked ~= g_filters[GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED].checked
+    if filterChanged then
+        self.savedVars.includeBankedItemsChecked = g_filters[GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED].checked 
+        self:HandleDirtyEvent()
+    end
 end
 
 function ZO_GamepadSmithingResearch:InitializeConfirmList()

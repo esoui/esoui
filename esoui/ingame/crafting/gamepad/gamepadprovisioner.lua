@@ -5,17 +5,21 @@ local GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE = "ZO_GamepadLeftCheckboxOptionTempla
 local GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS = 1
 local GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS = 2
 
-local GAMEPAD_PROVISIONER_OPTION_INFO =
+local g_filters =
 {
     [GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS] =
     {
         header = GetString(SI_GAMEPAD_PROVISIONER_OPTIONS),
-        optionName = GetString(SI_PROVISIONER_HAVE_INGREDIENTS),
+        filterName = GetString(SI_PROVISIONER_HAVE_INGREDIENTS),
+        filterTooltip = GetString(SI_CRAFTING_HAVE_INGREDIENTS_TOOLTIP),
+        checked = false,
     },
 
     [GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS] =
     {
-        optionName = GetString(SI_PROVISIONER_HAVE_SKILLS),
+        filterName = GetString(SI_PROVISIONER_HAVE_SKILLS),
+        filterTooltip = GetString(SI_CRAFTING_HAVE_SKILLS_TOOLTIP),
+        checked = false,
     },
 }
 
@@ -32,16 +36,14 @@ function ZO_GamepadProvisioner:Initialize(control)
     local skillLineXPBarFragment = ZO_FadeSceneFragment:New(ZO_GamepadProvisionerTopLevelSkillInfo)
 
     GAMEPAD_PROVISIONER_ROOT_SCENE = self:CreateInteractScene(self.mainSceneName)
+    GAMEPAD_PROVISIONER_ROOT_SCENE:SetInputPreferredMode(INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD)
     GAMEPAD_PROVISIONER_ROOT_SCENE:AddFragment(skillLineXPBarFragment)
     GAMEPAD_PROVISIONER_ROOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
+            ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"), GetCraftingInteractionType())
+
             if GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING then
                 TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
-            end
-
-            if self.optionsChanged then
-                self:DirtyRecipeList()
-                self.optionsChanged = false
             end
 
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(self.resultTooltip)
@@ -57,6 +59,8 @@ function ZO_GamepadProvisioner:Initialize(control)
             -- and we may not have had a change in our list to trigger a refresh
             self:RefreshRecipeDetails(self:GetRecipeData())
         elseif newState == SCENE_HIDDEN then
+            self:SetDefaultProvisioningSettings()
+            ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"))
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(nil)
             ZO_GamepadGenericHeader_Deactivate(self.header)
             self.recipeList:Deactivate()
@@ -74,49 +78,11 @@ function ZO_GamepadProvisioner:Initialize(control)
         end
     end)
 
-    GAMEPAD_PROVISIONER_OPTIONS_SCENE = self:CreateInteractScene("gamepad_provisioner_options")
-    GAMEPAD_PROVISIONER_OPTIONS_SCENE:AddFragment(skillLineXPBarFragment)
-    GAMEPAD_PROVISIONER_OPTIONS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self.recipeList:RefreshVisible()
-            self:RefreshOptionList()
-            self.optionList:Activate()
-
-            KEYBIND_STRIP:RemoveDefaultExit()
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.optionsKeybindStripDescriptor)
-        elseif newState == SCENE_HIDDEN then
-            self.optionList:Deactivate()
-
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.optionsKeybindStripDescriptor)
-            KEYBIND_STRIP:RestoreDefaultExit()
-
-            self:SaveFilters()
-            ZO_SavePlayerConsoleProfile()
-        end
-    end)
-
-    local sceneGroup = ZO_SceneGroup:New(GAMEPAD_PROVISIONER_ROOT_SCENE:GetName(), GAMEPAD_PROVISIONER_OPTIONS_SCENE:GetName())
-    sceneGroup:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_GROUP_SHOWING then
-            ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"), GetCraftingInteractionType())
-        elseif newState == SCENE_GROUP_HIDDEN then
-            self:SetDefaultProvisioningSettings()
-            ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"))
-        end
-    end)
-
     self:InitializeSettings()
-    self:InitializeOptionList()
 
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
-            local defaults = { haveIngredientsChecked = false, haveSkillsChecked = false, }
-            self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "GamepadProvisioner", defaults)
-
-            self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].currentValue = self.savedVars.haveIngredientsChecked
-            self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].currentValue = self.savedVars.haveSkillsChecked
-            
-            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+            self:SetupSavedVars()
         end
     end
 
@@ -193,15 +159,12 @@ end
 function ZO_GamepadProvisioner:SetDefaultProvisioningSettings()
     self:ConfigureFromSettings(ZO_GamepadProvisioner.PROVISIONING_SETTINGS)
     GAMEPAD_PROVISIONER_ROOT_SCENE:SetInteractionInfo(self.provisionerStationInteraction)
-    GAMEPAD_PROVISIONER_OPTIONS_SCENE:SetInteractionInfo(self.provisionerStationInteraction)
 end
 
 function ZO_GamepadProvisioner:EmbedInCraftingScene(interactionInfo)
     --Set the provisioner interact scenes to have the interaction of the current crafting station so it doesn't terminate the crafting interaction
     --when we go into the provisioning UI
     GAMEPAD_PROVISIONER_ROOT_SCENE:SetInteractionInfo(interactionInfo)
-    GAMEPAD_PROVISIONER_OPTIONS_SCENE:SetInteractionInfo(interactionInfo)
-    
     SCENE_MANAGER:Push(self.mainSceneName)
 
     self:ConfigureFromSettings(ZO_GamepadProvisioner.EMBEDDED_SETTINGS)
@@ -280,11 +243,11 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
 
         -- Options (filtering)
         {
-            name = GetString(SI_CHAT_CONFIG_OPTIONS),
+            name = GetString(SI_GAMEPAD_CRAFTING_OPTIONS),
             keybind = "UI_SHORTCUT_TERTIARY",
             gamepadOrder = 1020,
             callback = function()
-                self:ShowOptions()
+                self:ShowOptionsMenu()
             end,
             visible = function()
                 return not ZO_CraftingUtils_IsPerformingCraftProcess()
@@ -324,16 +287,36 @@ function ZO_GamepadProvisioner:InitializeKeybindStripDescriptors()
     table.insert(self.mainKeybindStripDescriptor, backButton)
 
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.mainKeybindStripDescriptor)
-
-    -- options list keybinds
-    self.optionsKeybindStripDescriptor = {}
-    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.optionsKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() self:SelectOption() end)
-    table.insert(self.optionsKeybindStripDescriptor, startButton)
-    table.insert(self.optionsKeybindStripDescriptor, optionsBackButton)
 end
 
-function ZO_GamepadProvisioner:ShowOptions()
-    SCENE_MANAGER:Push("gamepad_provisioner_options")
+function ZO_GamepadProvisioner:ShowOptionsMenu()
+    local dialogData = 
+    {
+        targetData = self.recipeList:GetTargetData(),
+        filters = g_filters,
+        finishedCallback =  function()
+            self:SaveFilters()
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end
+    }
+    if not self.craftingOptionsDialogGamepad then
+        self.craftingOptionsDialogGamepad = ZO_CraftingOptionsDialogGamepad:New()
+    end
+    self.craftingOptionsDialogGamepad:ShowOptionsDialog(dialogData)
+end
+
+function ZO_GamepadProvisioner:SetupSavedVars()
+    local defaults = 
+    { 
+        haveIngredientsChecked = false, 
+        haveSkillsChecked = false, 
+    }
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "GamepadProvisioner", defaults)
+    
+    g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked = self.savedVars.haveIngredientsChecked
+    g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked = self.savedVars.haveSkillsChecked
+    
+    self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
 end
 
 function ZO_GamepadProvisioner:InitializeRecipeList()
@@ -355,30 +338,13 @@ function ZO_GamepadProvisioner:InitializeRecipeList()
     end)
 end
 
-function ZO_GamepadProvisioner:InitializeOptionList()
-    self.optionList = ZO_GamepadVerticalItemParametricScrollList:New(self.control:GetNamedChild("ContainerOptionsList"))
-    self.optionList:SetAlignToScreenCenter(true)
-
-    self.optionList:AddDataTemplate(GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE, ZO_GamepadCheckboxOptionTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.optionList:AddDataTemplateWithHeader(GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE, ZO_GamepadCheckboxOptionTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadOptionsMenuEntryHeaderTemplate")
-    -- populate option data
-    self.optionDataList = {}
-    self:BuildOptionList()
-end
-
 function ZO_GamepadProvisioner:SaveFilters()
-    self.savedVars.haveIngredientsChecked = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].currentValue
-    self.savedVars.haveSkillsChecked = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].currentValue
-end
-
-function ZO_GamepadProvisioner:BuildOptionList()
-    if self.optionDataList == nil then return end
-
-    for key, optionInfo in pairs(GAMEPAD_PROVISIONER_OPTION_INFO) do
-        local newOptionData = ZO_GamepadEntryData:New(optionInfo.optionName)
-        newOptionData:SetDataSource(optionInfo)
-
-        self.optionDataList[key] = newOptionData
+    local filterChanged = self.savedVars.haveIngredientsChecked ~= g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked or
+                          self.savedVars.haveSkillsChecked ~= g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked
+    if filterChanged then
+        self.savedVars.haveIngredientsChecked = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked
+        self.savedVars.haveSkillsChecked = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked
+        self:DirtyRecipeList()
     end
 end
 
@@ -418,8 +384,8 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
     -- first construct the full table of filtered recipes
     local recipeDataEntries = {}
 
-    local requireIngredients = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].currentValue
-    local requireSkills = self.optionDataList[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].currentValue
+    local requireIngredients = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked
+    local requireSkills = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked
     local craftingInteractionType = GetCraftingInteractionType()
     local hasKnownRecipesInCurrentFilter = false
 
@@ -543,28 +509,6 @@ function ZO_GamepadProvisioner:RefreshRecipeDetails(selectedData)
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindStripDescriptor)
-end
-
-function ZO_GamepadProvisioner:RefreshOptionList()
-    self.optionList:Clear()
-
-    local i = 1
-    for key, optionData in pairs(self.optionDataList) do
-        if i == 1 then
-            self.optionList:AddEntryWithHeader(GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE, optionData)
-        else
-            self.optionList:AddEntry(GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE, optionData)
-        end
-
-        i = i + 1
-    end
-
-    self.optionList:Commit()
-end
-
-function ZO_GamepadProvisioner:SelectOption()
-    ZO_GamepadCraftingUtils_SelectOptionFromOptionList(self)
-    self.optionsChanged = true
 end
 
 function ZO_GamepadProvisioner:GetRecipeData()

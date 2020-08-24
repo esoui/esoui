@@ -105,8 +105,7 @@ do
                 enabled = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     if targetData.messageEntry then
-                        local platform = GetUIPlatform()
-                        if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
+                        if ZO_IsConsolePlatform() then
                             if IsConsoleCommunicationRestricted() then
                                 return false, GetString(SI_CONSOLE_COMMUNICATION_PERMISSION_ERROR_GLOBALLY_RESTRICTED)
                             end
@@ -117,7 +116,12 @@ do
                         if result == GIFT_ACTION_RESULT_SUCCESS then
                             return true
                         else
-                            local errorText = zo_strformat(GetString("SI_GIFTBOXACTIONRESULT", result), recipientDisplayName)
+                            local errorText
+                            if result == GIFT_ACTION_RESULT_RECIPIENT_IGNORED then
+                                errorText = zo_strformat(GetString("SI_GIFTBOXACTIONRESULT", result), recipientDisplayName)
+                            else
+                                errorText = GetString("SI_GIFTBOXACTIONRESULT", result)
+                            end
                             return false, errorText
                         end
                     end
@@ -129,7 +133,7 @@ do
                     local targetControl = dialog.entryList:GetTargetControl()
                     if targetData.messageEntry and targetControl then
                         targetControl.editBoxControl:TakeFocus()
-                    elseif targetData.recipientNameEntry and targetControl then                        
+                    elseif targetData.recipientNameEntry and targetControl then
                         local platform = GetUIPlatform()
                         if platform == UI_PLATFORM_PS4 then
                             --On PS4 the primary action opens the first party dialog to get a playstation id since it can select any player on PS4

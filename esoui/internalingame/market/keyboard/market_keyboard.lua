@@ -1220,7 +1220,7 @@ end
 
 function ZO_Market_Keyboard:OnBackLabelClicked(control, upInside)
     if upInside then
-        PlaySound(SOUNDS.NEGATIVE_CLICK)
+        PlaySound(SOUNDS.TREE_SUBCATEGORY_CLICK)
         self:ShowMarket(true)
     end
 end

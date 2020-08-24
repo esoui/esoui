@@ -40,6 +40,7 @@ EsoUI\Common\Gamepad\GenericFooters\GenericFooters.xml
 
 EsoUI\Common\Gamepad\GenericDialogs\GenericDialogs.xml
 
+EsoUI\Common\ZO_EntryData\ZO_EntryData.lua
 EsoUI\Common\ZO_EntryData\ZO_GridSquareEntryData_Shared.lua
 EsoUI\Common\Gamepad\ZO_GamepadEntryData.lua
 

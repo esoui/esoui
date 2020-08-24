@@ -142,8 +142,26 @@ function ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(data)
     PlaySound(SOUNDS.DEFAULT_CLICK)
 end
 
+function ZO_HousingFurnitureBrowser_Base.SelectNodeForReplacement(data)
+    local result = HousingEditorSelectPathNodeByIndex(data.furnitureId, data.pathIndex)
+    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+    PlaySound(SOUNDS.DEFAULT_CLICK)
+end
+
 function ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(data)
     local result = HousingEditorRequestRemoveFurniture(data.retrievableFurnitureId)
+    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+    PlaySound(SOUNDS.DEFAULT_CLICK)
+end
+
+function ZO_HousingFurnitureBrowser_Base.PutAwayNode(data)
+    local result = HousingEditorRequestRemovePathNode(data.furnitureId, data.pathIndex)
+    ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+    PlaySound(SOUNDS.DEFAULT_CLICK)
+end
+
+function ZO_HousingFurnitureBrowser_Base.SetAsStartingNode(data)
+    local result = HousingEditorRequestSetStartingNodeIndex(data.furnitureId, data.pathIndex)
     ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
     PlaySound(SOUNDS.DEFAULT_CLICK)
 end

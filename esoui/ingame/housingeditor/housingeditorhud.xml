@@ -49,6 +49,19 @@
             </Controls>
         </Control>
 
+        <TopLevelControl name="ZO_HousingEditorKeybindPaletteTopLevel" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_HousingEditorKeybindPalette_Initialize(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)TargetName" tier="HIGH" verticalAlignment="TOP">
+                    <Anchor point="BOTTOMLEFT" relativePoint="CENTER" offsetX="40" offsetY="10" maxLineCount="2" />
+                    <Dimensions x="400" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+
         <TopLevelControl name="ZO_HousingHUDFragmentTopLevel" hidden="true">
             <AnchorFill />
             <OnInitialized>
@@ -162,7 +175,7 @@
                             <Anchor point="TOP" relativeTo="$(parent)PrecisionMoveButtons" relativePoint="BOTTOM" offsetY="25" />
                         </Label>
                         <Label name="$(parent)PrecisionPositionLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" maxLineCount="1" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameLargeBold">
-                            <Anchor point="TOP" relativeTo="$(parent)PrecisionMoveUnitsLabel" relativePoint="BOTTOM" offsetY="5" />
+                            <Anchor point="TOP" relativeTo="$(parent)PrecisionMoveUnitsLabel" relativePoint="BOTTOM" offsetY="15" />
                         </Label>
                     </Controls>
                 </Control>
@@ -188,7 +201,7 @@
 							<Anchor point="TOP" relativeTo="$(parent)PrecisionRotateButtons" relativePoint="BOTTOM" offsetY="25" />
 						</Label>
 						<Label name="$(parent)PrecisionOrientationLabel" wrapMode="ELLIPSIS" horizontalAlignment="CENTER" maxLineCount="1" tier="HIGH" verticalAlignment="TOP" font="ZoFontGameLargeBold">
-							<Anchor point="TOP" relativeTo="$(parent)PrecisionRotateUnitsLabel" relativePoint="BOTTOM" offsetY="5" />
+							<Anchor point="TOP" relativeTo="$(parent)PrecisionRotateUnitsLabel" relativePoint="BOTTOM" offsetY="15" />
 						</Label>
                     </Controls>
                 </Control>

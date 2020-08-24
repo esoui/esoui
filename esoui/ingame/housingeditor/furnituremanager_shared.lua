@@ -1,4 +1,5 @@
 ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY = "NEEDS_CATEGORY"
+ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY = "PATH_NODES"
 
 ZO_PLACEABLE_TYPE_ITEM = 1
 ZO_PLACEABLE_TYPE_COLLECTIBLE = 2
@@ -25,9 +26,16 @@ ZO_PLACEABLE_FURNITURE_BAGS =
 internalassert(BAG_MAX_VALUE == 17, "Update ZO_SharedFurnitureManager to handle new bag")
 
 local FURNITURE_COMMAND_REMOVE = 1
+local FURNITURE_COMMAND_REMOVE_PATH_NODE = 2
+local FURNITURE_COMMAND_ADD_PATH_NODE = 3
+local FURNITURE_COMMAND_REMOVE_PATH = 4
 
 local function GetNextPlacedFurnitureIdIter(state, var1)
     return GetNextPlacedHousingFurnitureId(var1)
+end
+
+local function GetNextPathedFurnitureIdIter(state, var1)
+    return GetNextPathedHousingFurnitureId(var1)
 end
 
 local function PlaceableFurnitureFilter(itemData)
@@ -65,6 +73,10 @@ function ZO_SharedFurnitureManager:Initialize()
     self.marketProductTextFilter = ""
 	self.isMarketFiltered = false
 
+    self.pathableFurnitureCategoryTreeData = ZO_RootFurnitureCategory:New("pathable")
+
+    self.pathNodesPerFurniture = {}
+
     self.placementFurnitureTheme = FURNITURE_THEME_TYPE_ALL
     self.purchaseFurnitureTheme = FURNITURE_THEME_TYPE_ALL
 
@@ -89,6 +101,12 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
     local function ApplyFurnitureCommand(categoryTreeData, furnitureCommand)
         if furnitureCommand.command == FURNITURE_COMMAND_REMOVE then
             self:RemoveFurnitureFromCategory(categoryTreeData, furnitureCommand.target)
+        elseif furnitureCommand.command == FURNITURE_COMMAND_REMOVE_PATH_NODE then
+            self:RemovePathNodeFromCategory(categoryTreeData, furnitureCommand.target, furnitureCommand.pathIndex)
+        elseif furnitureCommand.command == FURNITURE_COMMAND_REMOVE_PATH then
+             self:RemovePathFromCategory(categoryTreeData, furnitureCommand.target)
+        elseif furnitureCommand.command == FURNITURE_COMMAND_ADD_PATH_NODE then
+            self:AddPathNodeToCategory(categoryTreeData, furnitureCommand.target, furnitureCommand.pathIndex)
         end
     end
 
@@ -97,15 +115,25 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
     {
         RefreshAll = function()
             self.placeableFurnitureCategoryTreeData:Clear()
+            self.pathableFurnitureCategoryTreeData:Clear()
+
             local itemFurnitureCache = self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_ITEM)
             for bagId, bagEntries in pairs(itemFurnitureCache) do
                 self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, bagEntries, self.placementFurnitureTheme)
             end
-            self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE), self.placementFurnitureTheme)
+            local collectibleFurnitureCache = self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)
+            self:BuildCategoryTreeData(self.placeableFurnitureCategoryTreeData, collectibleFurnitureCache, self.placementFurnitureTheme)
             self.placeableFurnitureCategoryTreeData:SortCategoriesRecursive()
+
+            local function IsFurniturePathable(furniture)
+                return HousingEditorCanCollectibleBePathed(furniture.collectibleId)
+            end
+            self:BuildCategoryTreeData(self.pathableFurnitureCategoryTreeData, collectibleFurnitureCache, FURNITURE_THEME_TYPE_ALL, IsFurniturePathable)
+            self.pathableFurnitureCategoryTreeData:SortCategoriesRecursive()
         end,
         RefreshSingle = function(furnitureCommand)
             ApplyFurnitureCommand(self.placeableFurnitureCategoryTreeData, furnitureCommand)
+            ApplyFurnitureCommand(self.pathableFurnitureCategoryTreeData, furnitureCommand)
         end,
     })
 
@@ -114,6 +142,7 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
         RefreshAll = function()
             self.retrievableFurnitureCategoryTreeData:Clear()
             self:BuildCategoryTreeData(self.retrievableFurnitureCategoryTreeData, self:GetRetrievableFurnitureCache())
+            self:AppendPathNodes(self.retrievableFurnitureCategoryTreeData)
             self.retrievableFurnitureCategoryTreeData:SortCategoriesRecursive()
         end,
         RefreshSingle = function(furnitureCommand)
@@ -138,13 +167,38 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
         self:OnFurnitureRemovedFromHouse(furnitureId, collectibleId)
     end
 
-    local function FurnitureMoved(eventId, furnitureId, collectibleId)
+    local function FurnitureMoved(eventId, furnitureId)
         self.forcePositionalDataUpdate = true
+    end
+
+    local function PathNodeAdded(eventId, furnitureId, pathIndex)
+        self:OnPathNodeAddedToFurniture(furnitureId, pathIndex)
+    end
+
+    local function PathNodeRemoved(eventId, furnitureId, pathIndex)
+        self:OnPathNodeRemovedFromFurniture(furnitureId, pathIndex)
+    end
+
+    local function PathNodeMoved(eventId, furnitureId, pathIndex)
+        self.forcePositionalDataUpdate = true
+    end
+
+    local function PathNodesRestored(eventId, furnitureId)
+        self:OnPathNodesRestoredToFurniture(furnitureId)
+    end
+
+    local function PathStartingNodeIndexChanged(eventId, furnitureId)
+        self:OnPathStartingNodeIndexChanged(furnitureId)
     end
 
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_PLACED, FurniturePlaced)
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_REMOVED, FurnitureRemoved)
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_MOVED, FurnitureMoved)
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_PATH_NODE_ADDED, PathNodeAdded)
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_PATH_NODE_REMOVED, PathNodeRemoved)
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_PATH_NODE_MOVED, PathNodeMoved)
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_PATH_NODES_RESTORED, PathNodesRestored)
+    EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_FURNITURE_PATH_STARTING_NODE_INDEX_CHANGED, PathStartingNodeIndexChanged)
 
     local function InHouseOnUpdate()
         self:InHouseOnUpdate()
@@ -190,14 +244,28 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("SharedFurniture", EVENT_HOUSING_EDITOR_MODE_CHANGED, function(eventId, ...) self:OnHousingEditorModeChanged(...) end)
 end
 
-function ZO_SharedFurnitureManager:SetPlayerWaypointTo(retrievableFurniture)
-    local furnitureId = retrievableFurniture:GetRetrievableFurnitureId()
-    SetHousingEditorTrackedFurnitureId(furnitureId)
-    local worldX, worldY, worldZ = HousingEditorGetFurnitureWorldPosition(furnitureId)
-    if SetPlayerWaypointByWorldLocation(worldX, worldY, worldZ) then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_HOUSING_FURNIUTRE_SET_WAYPOINT_SUCCESS))
-        self.waypointToFurnitureId = furnitureId
-        self.ourWaypointAdd = true
+function ZO_SharedFurnitureManager:SetPlayerWaypointTo(housingObject)
+    if housingObject:GetDataType() == ZO_RECALLABLE_HOUSING_DATA_TYPE then
+        local furnitureId = housingObject:GetRetrievableFurnitureId()
+        SetHousingEditorTrackedFurnitureId(furnitureId)
+        local worldX, worldY, worldZ = HousingEditorGetFurnitureWorldPosition(furnitureId)
+        if SetPlayerWaypointByWorldLocation(worldX, worldY, worldZ) then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_HOUSING_FURNIUTRE_SET_WAYPOINT_SUCCESS))
+            self.waypointToFurnitureId = furnitureId
+            self.waypointToPathIndex = nil
+            self.ourWaypointAdd = true
+        end
+    elseif housingObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+        local furnitureId = housingObject:GetFurnitureId()
+        local pathIndex = housingObject:GetPathIndex()
+        SetHousingEditorTrackedPathNode(furnitureId, pathIndex)
+        local worldX, worldY, worldZ = HousingEditorGetPathNodeWorldPosition(furnitureId, pathIndex)
+        if SetPlayerWaypointByWorldLocation(worldX, worldY, worldZ) then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_HOUSING_FURNIUTRE_SET_WAYPOINT_SUCCESS))
+            self.waypointToFurnitureId = furnitureId
+            self.waypointToPathIndex = pathIndex
+            self.ourWaypointAdd = true
+        end
     end
 end
 
@@ -212,7 +280,8 @@ function ZO_SharedFurnitureManager:OnMapPing(pingEventType, pingType, pingTag, x
             --Otherwise something else removed the player waypoint so clear out our state info.
             if not self.ourWaypointAdd then
                 self.waypointToFurnitureId = nil
-                ResetHousingEditorTrackedFurnitureId()
+                self.waypointToPathIndex = nil
+                ResetHousingEditorTrackedFurnitureOrNode()
             end
         end
     end
@@ -220,9 +289,16 @@ end
 
 function ZO_SharedFurnitureManager:OnHousingEditorModeChanged(oldMode, newMode)
     --If they picked up the furniture clear the player waypoint if it was showing the location of that furniture
-    if newMode == HOUSING_EDITOR_MODE_PLACEMENT and self.waypointToFurnitureId and HousingEditorGetSelectedFurnitureId() == self.waypointToFurnitureId then
-        RemovePlayerWaypoint()
-        ResetHousingEditorTrackedFurnitureId()
+    if self.waypointToFurnitureId then
+        local selectedFurnitureId = HousingEditorGetSelectedFurnitureId()
+        local selectedPathIndex = HousingEditorGetSelectedPathNodeIndex()
+
+        local selectedInPlacement = newMode == HOUSING_EDITOR_MODE_PLACEMENT and AreId64sEqual(selectedFurnitureId, self.waypointToFurnitureId) and self.waypointToPathIndex == nil
+        local selectedInNodePlacement = newMode == HOUSING_EDITOR_MODE_NODE_PLACEMENT and selectedPathIndex == self.waypointToPathIndex and AreId64sEqual(selectedFurnitureId, self.waypointToFurnitureId)
+        if selectedInPlacement or selectedInNodePlacement then
+            RemovePlayerWaypoint()
+            ResetHousingEditorTrackedFurnitureOrNode()
+        end
     end
 end
 
@@ -240,6 +316,14 @@ function ZO_SharedFurnitureManager:InitializeFurnitureCaches()
     for furnitureId in GetNextPlacedFurnitureIdIter do
         self.retrievableFurniture[zo_getSafeId64Key(furnitureId)] = self:CreatePlacedFurnitureData(furnitureId)
     end
+
+    ZO_ClearTable(self.pathNodesPerFurniture)
+
+    for furnitureId in GetNextPathedFurnitureIdIter do
+        local numNodes = HousingEditorGetNumPathNodesForFurniture(furnitureId)
+        self.pathNodesPerFurniture[zo_getSafeId64Key(furnitureId)] = numNodes
+    end
+
     self.refreshGroups:RefreshAll("UpdateRetrievableFurniture")
     self:RequestApplyRetrievableTextFilterToData()
 end
@@ -278,6 +362,8 @@ function ZO_SharedFurnitureManager:OnFurnitureRemovedFromHouse(furnitureId, coll
     --if an item just remove, the inventory update will handle the placeable list changes
     self.refreshGroups:RefreshSingle("UpdateRetrievableFurniture", { target=self.retrievableFurniture[furnitureIdKey], command=FURNITURE_COMMAND_REMOVE })
     self.retrievableFurniture[furnitureIdKey] = nil
+    self.refreshGroups:RefreshSingle("UpdateRetrievableFurniture", { target=furnitureId, command=FURNITURE_COMMAND_REMOVE_PATH })
+    self.pathNodesPerFurniture[furnitureIdKey] = nil
     --No need to run the text filter since this is just a remove. We can notify others immediately.
     self:FireCallbacks("RetrievableFurnitureChanged")
 
@@ -285,9 +371,53 @@ function ZO_SharedFurnitureManager:OnFurnitureRemovedFromHouse(furnitureId, coll
     if self.waypointToFurnitureId then
         if AreId64sEqual(furnitureId, self.waypointToFurnitureId) then
             RemovePlayerWaypoint()
-            ResetHousingEditorTrackedFurnitureId()
+            ResetHousingEditorTrackedFurnitureOrNode()
         end
     end
+end
+
+function ZO_SharedFurnitureManager:OnPathNodeAddedToFurniture(furnitureId, pathIndex)
+    local furnitureIdKey = zo_getSafeId64Key(furnitureId)
+    local numNodes = HousingEditorGetNumPathNodesForFurniture(furnitureId)
+    self.pathNodesPerFurniture[furnitureIdKey] = numNodes
+
+    self.refreshGroups:RefreshSingle("UpdateRetrievableFurniture", { pathIndex=pathIndex, target=furnitureId, command=FURNITURE_COMMAND_ADD_PATH_NODE })
+    self:FireCallbacks("RetrievableFurnitureChanged")
+end
+
+function ZO_SharedFurnitureManager:OnPathNodeRemovedFromFurniture(furnitureId, pathIndex)
+    local furnitureIdKey = zo_getSafeId64Key(furnitureId)
+    local numNodes = HousingEditorGetNumPathNodesForFurniture(furnitureId)
+    if numNodes == 0 then
+        self.pathNodesPerFurniture[furnitureIdKey] = nil
+    else
+        self.pathNodesPerFurniture[furnitureIdKey] = numNodes
+    end
+
+    --If we removed this path node and it had a waypoint then remove the waypoint
+    if self.waypointToFurnitureId and self.waypointToPathIndex then
+        if AreId64sEqual(furnitureId, self.waypointToFurnitureId) and self.waypointToPathIndex == pathIndex then
+            RemovePlayerWaypoint()
+            ResetHousingEditorTrackedFurnitureOrNode()
+        end
+    end
+
+    self.refreshGroups:RefreshSingle("UpdateRetrievableFurniture", { pathIndex=pathIndex, target=furnitureId, command=FURNITURE_COMMAND_REMOVE_PATH_NODE })
+    self:FireCallbacks("RetrievableFurnitureChanged")
+end
+
+function ZO_SharedFurnitureManager:OnPathNodesRestoredToFurniture(furnitureId)
+    local furnitureIdKey = zo_getSafeId64Key(furnitureId)
+    local numNodes = HousingEditorGetNumPathNodesForFurniture(furnitureId)
+    self.pathNodesPerFurniture[furnitureIdKey] = numNodes
+
+    self.refreshGroups:RefreshSingle("UpdateRetrievableFurniture", { pathIndex=-1, target=furnitureId, command=FURNITURE_COMMAND_ADD_PATH_NODE })
+    self:FireCallbacks("RetrievableFurnitureChanged")
+end
+
+function ZO_SharedFurnitureManager:OnPathStartingNodeIndexChanged(furnitureId)
+    self.refreshGroups:RefreshAll("UpdateRetrievableFurniture")
+    self:FireCallbacks("RetrievableFurnitureChanged")
 end
 
 function ZO_SharedFurnitureManager:OnFullInventoryUpdate(bagId)
@@ -362,10 +492,14 @@ do
         categoryData:AddEntry(entry)
     end
 
-    function ZO_SharedFurnitureManager:BuildCategoryTreeData(categoryTreeData, data, theme)
+    function ZO_SharedFurnitureManager:BuildCategoryTreeData(categoryTreeData, data, theme, filterFunction)
         local furnitureTheme = theme or FURNITURE_THEME_TYPE_ALL
         for _, furniture in pairs(data) do
-            if furniture:GetPassesTextFilter() and furniture:PassesTheme(furnitureTheme) then
+            local passesOptionalFilter = true
+            if filterFunction then
+                passesOptionalFilter = filterFunction(furniture) 
+            end
+            if passesOptionalFilter and furniture:GetPassesTextFilter() and furniture:PassesTheme(furnitureTheme) then
                 AddEntryToCategory(categoryTreeData, furniture)
             end
         end
@@ -399,15 +533,102 @@ do
 				local isFiltered = (categoryTreeData == self.placeableFurnitureCategoryTreeData and self.isPlaceableFiltered)
 								or (categoryTreeData == self.retrievableFurnitureCategoryTreeData and self.isRetrievableFiltered)
 								or (categoryTreeData == self.marketProductCategoryTreeData and self.isMarketFiltered)
+                local isSpecialTree = categoryTreeData == self.pathableFurnitureCategoryTreeData
 
-				-- Only assert if the category or subcategory genuinely does not exist or if there is no filter currently being applied to the relevant category tree.
-	            if not isFiltered or not GetFurnitureCategoryInfo(categoryId) or not GetFurnitureCategoryInfo(subcategoryId) then
-					internalassert(false, string.format("Removing non-existent furniture from %s.", categoryTreeData:GetRootCategoryName()))
-				end
+                -- special trees will have specific subsets of furniture and we expect them to not have furniture in them at times
+                if not isSpecialTree then
+				    -- Only assert if the category or subcategory genuinely does not exist or if there is no filter currently being applied to the relevant category tree.
+	                if not isFiltered or not GetFurnitureCategoryInfo(categoryId) or not GetFurnitureCategoryInfo(subcategoryId) then
+					    internalassert(false, string.format("Removing non-existent furniture from %s.", categoryTreeData:GetRootCategoryName()))
+				    end
+                end
             end
         else
             local categoryData = categoryTreeData:GetSubcategory(ZO_FURNITURE_NEEDS_CATEGORIZATION_FAKE_CATEGORY)
             categoryData:RemoveEntry(furniture)
+        end
+    end
+
+    function ZO_SharedFurnitureManager:RemovePathNodeFromCategory(categoryTreeData, furnitureId, pathIndex)
+        local pathNodesCategory = categoryTreeData:GetSubcategory(ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY)
+        if not pathNodesCategory then
+            return
+        end
+
+        local furnitureIdKey = zo_getSafeId64Key(furnitureId)
+        local furniturePathCategory = pathNodesCategory:GetSubcategory(furnitureIdKey)
+        if not furniturePathCategory then
+            return
+        end
+
+        local numNodes = self.pathNodesPerFurniture[furnitureIdKey]
+
+        if numNodes == 0 or numNodes == nil then
+            furniturePathCategory:Clear()
+            pathNodesCategory:RemoveSubcategory(furniturePathCategory:GetCategoryId())
+        else
+            local currentNumNodes = furniturePathCategory:GetNumEntryItemsRecursive()
+            if currentNumNodes ~= numNodes then
+                -- if we remove from the middle we would have to update a lot of datas, so just refresh all
+                furniturePathCategory:Clear()
+                for i = 1, numNodes do
+                    local newPathData = ZO_FurniturePathNode:New(furnitureId, i)
+                    furniturePathCategory:AddEntry(newPathData)
+                end
+            end
+        end
+    end
+
+    function ZO_SharedFurnitureManager:RemovePathFromCategory(categoryTreeData, furnitureId)
+        local pathNodesCategory = categoryTreeData:GetSubcategory(ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY)
+        if not pathNodesCategory then
+            return
+        end
+
+        local furnitureIdKey = zo_getSafeId64Key(furnitureId)
+        local furniturePathCategory = pathNodesCategory:GetSubcategory(furnitureIdKey)
+        if not furniturePathCategory then
+            return
+        end
+
+        furniturePathCategory:Clear()
+        pathNodesCategory:RemoveSubcategory(furniturePathCategory:GetCategoryId())
+    end
+
+    function ZO_SharedFurnitureManager:AddPathNodeToCategory(categoryTreeData, furnitureId, pathIndex)
+        local furnitureIdKey = zo_getSafeId64Key(furnitureId)
+        local numNodes = self.pathNodesPerFurniture[furnitureIdKey]
+        if numNodes == nil or numNodes == 0 then
+            return -- we probably removed the nodes we wanted to add, nothing to do here
+        end
+
+        local addedCategory = false
+        local pathNodesCategory = categoryTreeData:GetSubcategory(ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY)
+        if not pathNodesCategory then
+            pathNodesCategory = ZO_FurnitureCategory:New(categoryTreeData, ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY)
+            categoryTreeData:AddSubcategory(ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY, pathNodesCategory)
+            addedCategory = true
+        end
+
+        local furniturePathCategory = pathNodesCategory:GetSubcategory(furnitureIdKey)
+        if not furniturePathCategory then
+            furniturePathCategory = ZO_PathNodeFurnitureCategory:New(pathNodesCategory, furnitureIdKey)
+            pathNodesCategory:AddSubcategory(furnitureIdKey, furniturePathCategory)
+            addedCategory = true
+        end
+
+        if addedCategory then
+            categoryTreeData:SortCategoriesRecursive()
+        end
+
+        -- if we insert in the middle we would have to update a lot of datas, so just refresh all
+        local currentNumNodes = furniturePathCategory:GetNumEntryItemsRecursive()
+        if currentNumNodes ~= numNodes then
+            furniturePathCategory:Clear()
+            for i = 1, numNodes do
+                local newPathData = ZO_FurniturePathNode:New(furnitureId, i)
+                furniturePathCategory:AddEntry(newPathData)
+            end
         end
     end
 end
@@ -437,6 +658,11 @@ end
 function ZO_SharedFurnitureManager:GetMarketProductCategoryTreeData()
     self.refreshGroups:UpdateRefreshGroups()
     return self.marketProductCategoryTreeData
+end
+
+function ZO_SharedFurnitureManager:GetPathableFurnitureCategoryTreeData()
+    self.refreshGroups:UpdateRefreshGroups()
+    return self.pathableFurnitureCategoryTreeData
 end
 
 function ZO_SharedFurnitureManager:CreateOrUpdateItemCache(bagId)
@@ -553,6 +779,10 @@ function ZO_SharedFurnitureManager:DoesPlayerHavePlaceableFurniture()
         next(self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]) ~= nil
 end
 
+function ZO_SharedFurnitureManager:DoesPlayerHavePathableFurniture()
+    return next(self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]) ~= nil
+end
+
 function ZO_SharedFurnitureManager:DoesPlayerHaveRetrievableFurniture()
     return next(self.retrievableFurniture) ~= nil
 end
@@ -613,6 +843,17 @@ do
             if updateDistances or updateHeading then
                 for furnitureIdKey, retrievableFurniture in pairs(self.retrievableFurniture) do
                     retrievableFurniture:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, playerCameraHeading)
+                end
+
+                local pathNodesCategory = self.retrievableFurnitureCategoryTreeData:GetSubcategory(ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY)
+                if pathNodesCategory then
+                    local allSubcategories = pathNodesCategory:GetAllSubcategories()
+                    for _, subCategory in ipairs(allSubcategories) do
+                        local allEntries = subCategory:GetAllEntries()
+                        for i, entry in ipairs(allEntries) do
+                            entry:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, playerCameraHeading)
+                        end
+                    end
                 end
             end
 
@@ -928,6 +1169,35 @@ function ZO_SharedFurnitureManager:OnBackgroundListFilterComplete(taskId)
             self:FireCallbacks("PlaceableFurnitureChanged", CHANGED_FROM_SEARCH)
         end
     end
+end
+
+function ZO_SharedFurnitureManager:AppendPathNodes(rootCategory)
+    if next(self.pathNodesPerFurniture) == nil then
+        return
+    end
+
+    local pathNodes = ZO_FurnitureCategory:New(rootCategory, ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY)
+    rootCategory:AddSubcategory(ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY, pathNodes)
+    
+    for furnitureIdKey, numNodes in pairs(self.pathNodesPerFurniture) do
+        local furnitureId = StringToId64(furnitureIdKey)
+        local categoryFurnitureData = ZO_PathNodeFurnitureCategory:New(pathNodes, furnitureIdKey)
+        pathNodes:AddSubcategory(furnitureIdKey, categoryFurnitureData)
+
+        for i = 1, numNodes do
+            local newPathData = ZO_FurniturePathNode:New(furnitureId, i)
+            categoryFurnitureData:AddEntry(newPathData)
+        end
+    end
+end
+
+function ZO_SharedFurnitureManager:HasAnyPathNodes()
+    local pathNodesCategory = self.retrievableFurnitureCategoryTreeData:GetSubcategory(ZO_FURNITURE_PATH_NODES_FAKE_CATEGORY)
+    if not pathNodesCategory then
+        return false
+    end
+
+    return #pathNodesCategory:GetAllSubcategories() > 0 
 end
 
 SHARED_FURNITURE = ZO_SharedFurnitureManager:New()

@@ -70,7 +70,7 @@
         </TopLevelControl>
         
         <Button name="ZO_KeybindingListButton" virtual="true" inherits="ZO_DefaultButton">
-            <Dimensions x="300" />
+            <Dimensions x="300" y="35"/>
             <OnMouseEnter>
                 ZO_Tooltips_ShowTruncatedTextTooltip(self:GetLabelControl())
             </OnMouseEnter>
@@ -96,7 +96,7 @@
         </Label>
         
         <Control name="ZO_KeybindingListRow" virtual="true">
-            <Dimensions x="945" y="29" />
+            <Dimensions x="945" y="35" />
 
             <OnInitialized>
                 self.actionLabel = self:GetNamedChild("ActionName")

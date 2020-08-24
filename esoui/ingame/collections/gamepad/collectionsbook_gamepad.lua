@@ -19,6 +19,7 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_COLLECTIONS_BOOK_SCENE)
     self:SetListsUseTriggerKeybinds(true)
+    self.isPreviewAvailable = true
     
     self.categoryList =
         {
@@ -83,6 +84,19 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
     EVENT_MANAGER:RegisterForUpdate("ZO_GamepadCollectionsBook", 250, function() self:UpdateActiveCollectibleCooldownTimer() end)
+    self.control:SetHandler("OnUpdate", function()
+        local isPreviewingAvailable = IsCharacterPreviewingAvailable()
+        if self.isPreviewAvailable ~= isPreviewingAvailable then
+            self.isPreviewAvailable = isPreviewingAvailable
+            if self.isPreviewAvailable then
+                self.outfitSelectorHeaderFocus:Enable()
+            else
+                self.outfitSelectorHeaderFocus:Disable()
+            end
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.subcategoryKeybindStripDescriptor)
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.gridKeybindStripDescriptor)
+        end
+    end)
 end
 
 function ZO_GamepadCollectionsBook:InitializeDLCPanel()
@@ -325,6 +339,13 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
         {
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
+            enabled = function()
+                if self.outfitSelectorHeaderFocus:IsActive() and not self.isPreviewAvailable then
+                    return false, GetString("SI_EQUIPOUTFITRESULT", EQUIP_OUTFIT_RESULT_OUTFIT_SWITCHING_UNAVAILABLE)
+                end
+
+                return true
+            end,
             callback = function()
                 if self.outfitSelectorHeaderFocus:IsActive() then
                     self:ShowOutfitSelector()
@@ -395,7 +416,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             end,
             visible = function()
                  local currentlySelectedCollectibleData = self.gridListPanelList:GetSelectedData()
-                 return currentlySelectedCollectibleData and not currentlySelectedCollectibleData.isEmptyCell
+                 return self.isPreviewAvailable and currentlySelectedCollectibleData and not currentlySelectedCollectibleData.isEmptyCell
             end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
