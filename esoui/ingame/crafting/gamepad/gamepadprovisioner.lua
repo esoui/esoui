@@ -59,6 +59,7 @@ function ZO_GamepadProvisioner:Initialize(control)
             -- and we may not have had a change in our list to trigger a refresh
             self:RefreshRecipeDetails(self:GetRecipeData())
         elseif newState == SCENE_HIDDEN then
+            self:SetDefaultProvisioningSettings()
             ZO_Skills_UntieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"))
             SYSTEMS:GetObject("craftingResults"):SetCraftingTooltip(nil)
             ZO_GamepadGenericHeader_Deactivate(self.header)
