@@ -1677,6 +1677,7 @@ SafeAddString(SI_GROUPINVITERESPONSE13, "Impossible de rejoindre <<1>>. Le group
 SafeAddString(SI_GROUPINVITERESPONSE14, "Impossible de rejoindre <<1>>. Vous appartenez déjà à un groupe.", 0)
 SafeAddString(SI_GROUPINVITERESPONSE15, "<<1>> est actuellement sur le Champ de bataille.", 2)
 SafeAddString(SI_GROUPINVITERESPONSE16, "<<1>> vous a invité dans son groupe. Vous devez quitter votre groupe actuel avant de pouvoir en rejoindre un autre.", 1)
+SafeAddString(SI_GROUPINVITERESPONSE17, "Impossible de demander une invitation au joueur. ", 1)
 SafeAddString(SI_GROUPINVITERESPONSE2, "<<C:1>> a décliné votre invitation à rejoindre le groupe.", 2)
 SafeAddString(SI_GROUPINVITERESPONSE3, "<<C:1>> vous ignore. Vous ne pouvez pas l'inviter en groupe.", 1)
 SafeAddString(SI_GROUPINVITERESPONSE4, "<<C:1>> envisage déjà une autre invitation. Vous ne pouvez pas l'inviter dans un groupe.", 2)
