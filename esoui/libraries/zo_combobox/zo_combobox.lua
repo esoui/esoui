@@ -7,9 +7,6 @@
 
 ZO_ComboBox = ZO_ComboBox_Base:Subclass()
 
-ZO_COMBOBOX_UPDATE_NOW = 1
-ZO_COMBOBOX_SUPRESS_UPDATE = 2
-
 function ZO_ComboBox:New(container)
     local comboBox = ZO_ComboBox_Base.New(self, container)
     return comboBox

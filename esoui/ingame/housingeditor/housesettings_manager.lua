@@ -50,7 +50,8 @@ ZO_HOUSING_SETTINGS_CONTROL_DATA =
 
 ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATH_TYPE = 1
 ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATHING_STATE = 2
-ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CHANGE_COLLECTIBLE = 3
+ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CONFORM_TO_GROUND = 3
+ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CHANGE_COLLECTIBLE = 4
 ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA =
 {
     -- Path Type
@@ -65,6 +66,13 @@ ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA =
     {
         text = SI_HOUSING_PATH_SETTINGS_PATHING_STATE_TEXT,
         tooltipFunction = function(...) return SYSTEMS:GetObject("path_settings"):ShowPathingStateTooltip(...) end,
+        gamepadTemplate = "ZO_CheckBoxTemplate_Gamepad",
+    },
+    -- Conform To Ground
+    [ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_CONFORM_TO_GROUND] =
+    {
+        text = SI_HOUSING_PATH_SETTINGS_CONFORM_TO_GROUND_TEXT,
+        tooltipFunction = function(...) return SYSTEMS:GetObject("path_settings"):ShowConformToGroundTooltip(...) end,
         gamepadTemplate = "ZO_CheckBoxTemplate_Gamepad",
     },
     -- Change Collectible

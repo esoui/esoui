@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 100032
+h1. ESO UI Documentation for API Version 100033
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -86,6 +86,7 @@ h5. BackgroundListFilterTarget
 * BACKGROUND_LIST_FILTER_TARGET_DYE_ID
 * BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID
 * BACKGROUND_LIST_FILTER_TARGET_HELP_ID
+* BACKGROUND_LIST_FILTER_TARGET_ITEM_SET_ID
 * BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID
 * BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID_BREADTH
 
@@ -154,21 +155,21 @@ h5. BuffEffectType
 
 
 h5. BuffType
-* BUFF_TYPE_DEPRECATED_MAJOR_WARD
-* BUFF_TYPE_DEPRECATED_MINOR_WARD
+* BUFF_TYPE_DEPRECATED_INCREASE_ULT_COST
 * BUFF_TYPE_EMPOWER
 * BUFF_TYPE_MAJOR_AEGIS
 * BUFF_TYPE_MAJOR_BERSERK
 * BUFF_TYPE_MAJOR_BREACH
+* BUFF_TYPE_MAJOR_BRITTLE
 * BUFF_TYPE_MAJOR_BRUTALITY
 * BUFF_TYPE_MAJOR_COURAGE
+* BUFF_TYPE_MAJOR_COWARDICE
 * BUFF_TYPE_MAJOR_DEFILE
 * BUFF_TYPE_MAJOR_ENDURANCE
 * BUFF_TYPE_MAJOR_EVASION
 * BUFF_TYPE_MAJOR_EXPEDITION
 * BUFF_TYPE_MAJOR_FORCE
 * BUFF_TYPE_MAJOR_FORTITUDE
-* BUFF_TYPE_MAJOR_FRACTURE
 * BUFF_TYPE_MAJOR_GALLOP
 * BUFF_TYPE_MAJOR_HEROISM
 * BUFF_TYPE_MAJOR_INTELLECT
@@ -187,6 +188,7 @@ h5. BuffType
 * BUFF_TYPE_MINOR_AEGIS
 * BUFF_TYPE_MINOR_BERSERK
 * BUFF_TYPE_MINOR_BREACH
+* BUFF_TYPE_MINOR_BRITTLE
 * BUFF_TYPE_MINOR_BRUTALITY
 * BUFF_TYPE_MINOR_COURAGE
 * BUFF_TYPE_MINOR_COWARDICE
@@ -197,7 +199,6 @@ h5. BuffType
 * BUFF_TYPE_MINOR_EXPEDITION
 * BUFF_TYPE_MINOR_FORCE
 * BUFF_TYPE_MINOR_FORTITUDE
-* BUFF_TYPE_MINOR_FRACTURE
 * BUFF_TYPE_MINOR_GALLOP
 * BUFF_TYPE_MINOR_HEROISM
 * BUFF_TYPE_MINOR_INTELLECT
@@ -723,10 +724,10 @@ h5. GameCameraFramingScreenType
 * FRAMING_SCREEN_CROWN_STORE
 * FRAMING_SCREEN_DEFAULT
 * FRAMING_SCREEN_INVENTORY
+* FRAMING_SCREEN_ITEM_SETS_BOOK
 * FRAMING_SCREEN_JOURNAL
 * FRAMING_SCREEN_LOOT
 * FRAMING_SCREEN_MAP
-* FRAMING_SCREEN_REUSE_ME
 * FRAMING_SCREEN_REUSE_ME_2
 * FRAMING_SCREEN_SKILLS
 * FRAMING_SCREEN_SOCIAL
@@ -759,6 +760,7 @@ h5. GamepadType
 * GAMEPAD_TYPE_NONE
 * GAMEPAD_TYPE_PS4
 * GAMEPAD_TYPE_PS4_NO_TOUCHPAD
+* GAMEPAD_TYPE_PS5
 * GAMEPAD_TYPE_SWITCH
 * GAMEPAD_TYPE_XBOX
 
@@ -1115,6 +1117,7 @@ h5. NonCombatBonusType
 * NON_COMBAT_BONUS_PROVISIONING_LEVEL
 * NON_COMBAT_BONUS_PROVISIONING_RARITY_LEVEL
 * NON_COMBAT_BONUS_PROVISIONING_SHOW_NODES
+* NON_COMBAT_BONUS_PVP_EXP
 * NON_COMBAT_BONUS_SECONDARY_WITNESS_RANGE_REDUCTION
 * NON_COMBAT_BONUS_SHADOWY_CONNECTIONS
 * NON_COMBAT_BONUS_SLY
@@ -1235,6 +1238,7 @@ h5. PlatformAccountLabel
 * ACCOUNT_LABEL_HERON
 * ACCOUNT_LABEL_PC
 * ACCOUNT_LABEL_PS4
+* ACCOUNT_LABEL_PS5
 * ACCOUNT_LABEL_XBOX
 
 
@@ -1871,6 +1875,7 @@ h5. UIPlatform
 * UI_PLATFORM_HERON
 * UI_PLATFORM_PC
 * UI_PLATFORM_PS4
+* UI_PLATFORM_PS5
 * UI_PLATFORM_XBOX
 
 
@@ -1979,7 +1984,6 @@ h5. Globals
 * MAX_BOSSES
 * MAXIMUM_CHAMPION_RANK
 * MAX_GUILD_RANKS
-* MAX_HOUSES_FOR_PERMISSIONS
 * NUM_POWER_POOLS
 * MIN_REQUIRED_LEVEL_TO_CREATE_GUILD
 * NO_POWER_INDEX
@@ -2010,7 +2014,6 @@ h5. AbilityType
 * ABILITY_TYPE_BONUS
 * ABILITY_TYPE_CHANGEAPPEARANCE
 * ABILITY_TYPE_CHARGE
-* ABILITY_TYPE_CLAIRVOYANCE
 * ABILITY_TYPE_CLIENTFX
 * ABILITY_TYPE_COMBATRESOURCE
 * ABILITY_TYPE_CREATEINTERACTABLE
@@ -2018,6 +2021,7 @@ h5. AbilityType
 * ABILITY_TYPE_CUSTOMTARGETAREA
 * ABILITY_TYPE_DEPRECATED2
 * ABILITY_TYPE_DEPRECATED3
+* ABILITY_TYPE_DEPRECATED4
 * ABILITY_TYPE_DAMAGE
 * ABILITY_TYPE_DAMAGEIMMUNE
 * ABILITY_TYPE_DAMAGELIMIT
@@ -2887,6 +2891,7 @@ h5. CollectibleUsageBlockReason
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_SUBZONE
 * COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_ZONE
 * COLLECTIBLE_USAGE_BLOCK_REASON_CATEGORY_REQUIREMENT_FAILED
+* COLLECTIBLE_USAGE_BLOCK_REASON_COLLECTIBLE_ALREADY_QUEUED
 * COLLECTIBLE_USAGE_BLOCK_REASON_DEAD
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_ALLIANCE
 * COLLECTIBLE_USAGE_BLOCK_REASON_INVALID_CLASS
@@ -3124,6 +3129,7 @@ h5. CurrencyChangeReason
 * CURRENCY_CHANGE_REASON_DECONSTRUCT
 * CURRENCY_CHANGE_REASON_DEFENSIVE_KEEP_REWARD
 * CURRENCY_CHANGE_REASON_DEPRECATED_0
+* CURRENCY_CHANGE_REASON_DEPRECATED_1
 * CURRENCY_CHANGE_REASON_DEPRECATED_2
 * CURRENCY_CHANGE_REASON_EDIT_GUILD_HERALDRY
 * CURRENCY_CHANGE_REASON_FEED_MOUNT
@@ -3133,7 +3139,6 @@ h5. CurrencyChangeReason
 * CURRENCY_CHANGE_REASON_GUILD_STANDARD
 * CURRENCY_CHANGE_REASON_GUILD_TABARD
 * CURRENCY_CHANGE_REASON_HARVEST_REAGENT
-* CURRENCY_CHANGE_REASON_HOOKPOINT_STORE
 * CURRENCY_CHANGE_REASON_ITEM_CONVERTED_TO_GEMS
 * CURRENCY_CHANGE_REASON_JUMP_FAILURE_REFUND
 * CURRENCY_CHANGE_REASON_KEEP_REPAIR
@@ -3153,6 +3158,7 @@ h5. CurrencyChangeReason
 * CURRENCY_CHANGE_REASON_PVP_RESURRECT
 * CURRENCY_CHANGE_REASON_QUESTREWARD
 * CURRENCY_CHANGE_REASON_RECIPE
+* CURRENCY_CHANGE_REASON_RECONSTRUCTION
 * CURRENCY_CHANGE_REASON_REFORGE
 * CURRENCY_CHANGE_REASON_RESEARCH_TRAIT
 * CURRENCY_CHANGE_REASON_RESPEC_ATTRIBUTES
@@ -3794,6 +3800,9 @@ h5. HousingRequestResult
 * HOUSING_REQUEST_RESULT_PATH_TOO_MANY_PATHS
 * HOUSING_REQUEST_RESULT_PATH_UNSUPPORTED_PATH_TYPE
 * HOUSING_REQUEST_RESULT_PATH_WAIT_TIME_OUT_OF_RANGE
+* HOUSING_REQUEST_RESULT_PERMISSIONS_AT_LIMIT_GUILD
+* HOUSING_REQUEST_RESULT_PERMISSIONS_AT_LIMIT_INDIVIDUAL
+* HOUSING_REQUEST_RESULT_PERMISSIONS_AT_TOTAL_LIMIT
 * HOUSING_REQUEST_RESULT_PERMISSION_FAILED
 * HOUSING_REQUEST_RESULT_PERSONAL_TEMP_ITEM_PLACE_LIMIT
 * HOUSING_REQUEST_RESULT_PLACE_FAILED
@@ -3815,6 +3824,9 @@ h5. Globals
 * HOUSING_MAX_FURNITURE_CHILDREN
 * HOUSING_MAX_PATH_NODE_WAIT_TIME
 * HOUSING_MAX_FURNITURE_PATH_NODES
+* HOUSING_MAX_GUILD_USER_GROUP_ENTRIES
+* MAX_HOUSES_FOR_PERMISSIONS
+* HOUSING_MAX_INDIVIDUAL_USER_GROUP_ENTRIES
 * HOUSING_MAX_PATHS
 * HOUSING_MAX_UNDO_REDO_COMMANDS
 * HOUSING_MIN_PATH_NODE_WAIT_TIME
@@ -4271,6 +4283,21 @@ h5. EquipmentBonus
 * EQUIPMENT_BONUS_SUPERIOR
 
 
+h5. EquipmentFilterType
+* EQUIPMENT_FILTER_TYPE_BOW
+* EQUIPMENT_FILTER_TYPE_DESTRO_STAFF
+* EQUIPMENT_FILTER_TYPE_HEAVY
+* EQUIPMENT_FILTER_TYPE_LIGHT
+* EQUIPMENT_FILTER_TYPE_MEDIUM
+* EQUIPMENT_FILTER_TYPE_NECK
+* EQUIPMENT_FILTER_TYPE_NONE
+* EQUIPMENT_FILTER_TYPE_ONE_HANDED
+* EQUIPMENT_FILTER_TYPE_RESTO_STAFF
+* EQUIPMENT_FILTER_TYPE_RING
+* EQUIPMENT_FILTER_TYPE_SHIELD
+* EQUIPMENT_FILTER_TYPE_TWO_HANDED
+
+
 h5. GamepadItemCategory
 * GAMEPAD_ITEM_CATEGORY_ALCHEMY
 * GAMEPAD_ITEM_CATEGORY_AMULET
@@ -4383,6 +4410,14 @@ h5. ItemFilterType
 * ITEMFILTERTYPE_WOODWORKING
 
 
+h5. ItemListSortType
+* ITEM_LIST_SORT_TYPE_CATEGORY
+* ITEM_LIST_SORT_TYPE_ITEM_NAME
+* ITEM_LIST_SORT_TYPE_ITEM_QUALITY
+* ITEM_LIST_SORT_TYPE_STACK_COUNT
+* ITEM_LIST_SORT_TYPE_VALUE
+
+
 h5. ItemQuality
 * ITEM_FUNCTIONAL_QUALITY_ARCANE
 * ITEM_FUNCTIONAL_QUALITY_ARTIFACT
@@ -4398,6 +4433,16 @@ h5. ItemSellInformation
 * ITEM_SELL_INFORMATION_INTRICATE
 * ITEM_SELL_INFORMATION_NONE
 * ITEM_SELL_INFORMATION_PRIORITY_SELL
+* ITEM_SELL_INFORMATION_RECONSTRUCTED
+
+
+h5. ItemSetType
+* ITEM_SET_TYPE_CRAFTED
+* ITEM_SET_TYPE_DUNGEON
+* ITEM_SET_TYPE_MONSTER
+* ITEM_SET_TYPE_NONE
+* ITEM_SET_TYPE_WEAPON
+* ITEM_SET_TYPE_WORLD
 
 
 h5. ItemStyleChapter
@@ -4430,6 +4475,7 @@ h5. ItemTraitInformation
 * ITEM_TRAIT_INFORMATION_INTRICATE
 * ITEM_TRAIT_INFORMATION_NONE
 * ITEM_TRAIT_INFORMATION_ORNATE
+* ITEM_TRAIT_INFORMATION_RECONSTRUCTED
 * ITEM_TRAIT_INFORMATION_RETRAITED
 
 
@@ -4551,6 +4597,50 @@ h5. ItemType
 * ITEMTYPE_WOODWORKING_BOOSTER
 * ITEMTYPE_WOODWORKING_MATERIAL
 * ITEMTYPE_WOODWORKING_RAW_MATERIAL
+
+
+h5. ItemTypeDisplayCategory
+* ITEM_TYPE_DISPLAY_CATEGORY_ALCHEMY
+* ITEM_TYPE_DISPLAY_CATEGORY_ALL
+* ITEM_TYPE_DISPLAY_CATEGORY_APPEARANCE
+* ITEM_TYPE_DISPLAY_CATEGORY_ARMOR
+* ITEM_TYPE_DISPLAY_CATEGORY_BLACKSMITHING
+* ITEM_TYPE_DISPLAY_CATEGORY_CLOTHING
+* ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE
+* ITEM_TYPE_DISPLAY_CATEGORY_CONTAINER
+* ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING
+* ITEM_TYPE_DISPLAY_CATEGORY_CROWN_ITEM
+* ITEM_TYPE_DISPLAY_CATEGORY_DRINK
+* ITEM_TYPE_DISPLAY_CATEGORY_DRINK_INGREDIENT
+* ITEM_TYPE_DISPLAY_CATEGORY_ENCHANTING
+* ITEM_TYPE_DISPLAY_CATEGORY_FOOD
+* ITEM_TYPE_DISPLAY_CATEGORY_FOOD_INGREDIENT
+* ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING
+* ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING_MATERIAL
+* ITEM_TYPE_DISPLAY_CATEGORY_GLYPH
+* ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY
+* ITEM_TYPE_DISPLAY_CATEGORY_JEWELRYCRAFTING
+* ITEM_TYPE_DISPLAY_CATEGORY_JUNK
+* ITEM_TYPE_DISPLAY_CATEGORY_LURE
+* ITEM_TYPE_DISPLAY_CATEGORY_MASTER_WRIT
+* ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS
+* ITEM_TYPE_DISPLAY_CATEGORY_POISON
+* ITEM_TYPE_DISPLAY_CATEGORY_POTION
+* ITEM_TYPE_DISPLAY_CATEGORY_PROVISIONING
+* ITEM_TYPE_DISPLAY_CATEGORY_QUEST
+* ITEM_TYPE_DISPLAY_CATEGORY_RARE_INGREDIENT
+* ITEM_TYPE_DISPLAY_CATEGORY_RECIPE
+* ITEM_TYPE_DISPLAY_CATEGORY_REPAIR_ITEM
+* ITEM_TYPE_DISPLAY_CATEGORY_SIEGE
+* ITEM_TYPE_DISPLAY_CATEGORY_SOUL_GEM
+* ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL
+* ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MOTIF
+* ITEM_TYPE_DISPLAY_CATEGORY_TOOL
+* ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM
+* ITEM_TYPE_DISPLAY_CATEGORY_TRASH
+* ITEM_TYPE_DISPLAY_CATEGORY_TROPHY
+* ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS
+* ITEM_TYPE_DISPLAY_CATEGORY_WOODWORKING
 
 
 h5. ItemUISoundAction
@@ -5173,6 +5263,13 @@ h5. DefaultSoulGemChoice
 * DEFAULT_SOUL_GEM_CHOICE_GOLD
 
 
+h5. DepthOfFieldMode
+* DEPTH_OF_FIELD_MODE_CIRCULAR
+* DEPTH_OF_FIELD_MODE_OFF
+* DEPTH_OF_FIELD_MODE_SIMPLE
+* DEPTH_OF_FIELD_MODE_SMOOTH
+
+
 h5. GamepadChatTextSizeSetting
 * GAMEPAD_CHAT_TEXT_SIZE_SETTING_LARGE
 * GAMEPAD_CHAT_TEXT_SIZE_SETTING_MEDIUM
@@ -5329,6 +5426,14 @@ h5. OptionsCustomSetting
 * OPTIONS_CUSTOM_SETTING_SOCIAL_TEXT_SIZE
 
 
+h5. PlanarWaterReflectionQuality
+* PLANAR_WATER_REFLECTION_QUALITY_HIGH
+* PLANAR_WATER_REFLECTION_QUALITY_LOW_DEPRECATED
+* PLANAR_WATER_REFLECTION_QUALITY_MEDIUM
+* PLANAR_WATER_REFLECTION_QUALITY_OFF
+* PLANAR_WATER_REFLECTION_QUALITY_SCORPIO
+
+
 h5. PrimaryPlayerNameSetting
 * PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER
 * PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID
@@ -5371,6 +5476,14 @@ h5. ResourceNumbersSetting
 * RESOURCE_NUMBERS_SETTING_NUMBER_ONLY
 * RESOURCE_NUMBERS_SETTING_OFF
 * RESOURCE_NUMBERS_SETTING_PERCENT_ONLY
+
+
+h5. ScreenspaceWaterReflectionQuality
+* SCREENSPACE_WATER_REFLECTION_QUALITY_HIGH
+* SCREENSPACE_WATER_REFLECTION_QUALITY_LOW
+* SCREENSPACE_WATER_REFLECTION_QUALITY_MEDIUM
+* SCREENSPACE_WATER_REFLECTION_QUALITY_OFF
+* SCREENSPACE_WATER_REFLECTION_QUALITY_ULTRA
 
 
 h5. SettingSystemPanel
@@ -6566,9 +6679,17 @@ h5. CampaignReassignmentErrorReason
 
 
 h5. ChampionPurchaseResult
-* CHAMPION_PURCHASE_ALL_BUYS_INVALID
+* CHAMPION_PURCHASE_ABILITY_CAP_EXCEEDED
+* CHAMPION_PURCHASE_ABILITY_LINE_LEVEL_NOT_MET
+* CHAMPION_PURCHASE_ATTRIBUTE_CAP_EXCEEDED
+* CHAMPION_PURCHASE_CARRYING_DAEDRIC_ARTIFACT
+* CHAMPION_PURCHASE_CP_DISABLED
+* CHAMPION_PURCHASE_INTERNAL_ERROR
+* CHAMPION_PURCHASE_INVALID_ABILITY
+* CHAMPION_PURCHASE_INVALID_ATTRIBUTE
+* CHAMPION_PURCHASE_IN_COMBAT
+* CHAMPION_PURCHASE_NOT_ENOUGH_POINTS
 * CHAMPION_PURCHASE_RESPEC_FAILED
-* CHAMPION_PURCHASE_SOME_BUYS_INVALID
 * CHAMPION_PURCHASE_SUCCESS
 
 
@@ -6680,6 +6801,7 @@ h5. GroupInviteResponse
 * GROUP_INVITE_RESPONSE_CANNOT_CREATE_GROUPS
 * GROUP_INVITE_RESPONSE_CONSIDERING_OTHER
 * GROUP_INVITE_RESPONSE_DECLINED
+* GROUP_INVITE_RESPONSE_FAIL_JOIN_ON_LOAD
 * GROUP_INVITE_RESPONSE_GENERIC_JOIN_FAILURE
 * GROUP_INVITE_RESPONSE_GROUP_FULL
 * GROUP_INVITE_RESPONSE_IGNORED
@@ -6808,6 +6930,7 @@ h5. JumpResult
 * JUMP_RESULT_JUMP_FAILED_NO_HOUSE_PERMISSION
 * JUMP_RESULT_JUMP_FAILED_NO_SOCIAL
 * JUMP_RESULT_JUMP_FAILED_QUEUING
+* JUMP_RESULT_JUMP_FAILED_READY_CHECK
 * JUMP_RESULT_JUMP_FAILED_RECALL_BLOCKED
 * JUMP_RESULT_JUMP_FAILED_SOCIAL_TARGET_ZONE_COLLECTIBLE_LOCKED
 * JUMP_RESULT_JUMP_FAILED_TOO_DIFFICULT
@@ -7051,7 +7174,6 @@ h5. MsgInteractType
 * CHATTER_LOOT_UPDATE
 * CHATTER_OFFER_QUEST_BESTOWAL
 * CHATTER_OPEN_GUILDBANK
-* CHATTER_OPEN_HOOKPOINT_STORE
 * CHATTER_OPEN_MAIL
 * CHATTER_OPEN_SKILL_RESPEC
 * CHATTER_OPEN_TRADINGHOUSE
@@ -7299,6 +7421,21 @@ h5. QueueForCampaignResponseType
 * QUEUE_FOR_CAMPAIGN_RESULT_SUCCESS
 
 
+h5. ReconstructResponse
+* RECONSTRUCT_RESPONSE_BAD_INTERACT_MODE
+* RECONSTRUCT_RESPONSE_INSUFFICIENT_FUNDS
+* RECONSTRUCT_RESPONSE_INSUFFICIENT_INVENTORY_SPACE
+* RECONSTRUCT_RESPONSE_INSUFFICIENT_UPGRADE_MATERIALS
+* RECONSTRUCT_RESPONSE_INVALID_CURRENCY
+* RECONSTRUCT_RESPONSE_INVALID_ITEM
+* RECONSTRUCT_RESPONSE_INVALID_QUALITY
+* RECONSTRUCT_RESPONSE_INVALID_TRAIT_FOR_ITEM
+* RECONSTRUCT_RESPONSE_ITEM_LOCKED
+* RECONSTRUCT_RESPONSE_SUCCESS
+* RECONSTRUCT_RESPONSE_TRAIT_NOT_RESEARCHED
+* RECONSTRUCT_RESPONSE_UNKNOWN_FAILURE
+
+
 h5. ResurrectResult
 * RESURRECT_RESULT_ALREADY_CONSIDERING
 * RESURRECT_RESULT_DECLINED
@@ -7460,7 +7597,6 @@ h5. StoreFailure
 * STORE_FAILURE_BUY_ITEM_FAILED_REQS
 * STORE_FAILURE_CANT_BE_SOLD
 * STORE_FAILURE_CANT_BUY_MULTIPLES
-* STORE_FAILURE_HOOKPOINT_NOT_ACTIVE
 * STORE_FAILURE_ITEM_BUY_UNIQUE
 * STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS
 * STORE_FAILURE_NOT_ENOUGH_CHAOS_CREATIA
@@ -8591,6 +8727,18 @@ h2. Game API
 * CompareId64ToNumber(*id64* _id_, *integer* _number_)
 ** _Returns:_ *integer* _result_
 
+* BitAnd(*integer* _valueA_, *integer* _valueB_)
+** _Returns:_ *integer* _result_
+
+* BitOr(*integer* _valueA_, *integer* _valueB_)
+** _Returns:_ *integer* _result_
+
+* BitLShift(*integer* _value_, *integer* _numBits_)
+** _Returns:_ *integer* _result_
+
+* BitRShift(*integer* _value_, *integer* _numBits_)
+** _Returns:_ *integer* _result_
+
 * HideMouse(*bool* _onlyConsiderWhileMoving_)
 
 * ShowMouse(*bool* _onlyConsiderWhileMoving_)
@@ -9034,7 +9182,7 @@ h2. Game API
 ** _Returns:_ *integer* _numEvents_
 
 * GetGuildEventInfo(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
-** _Returns:_ *integer* _eventType_, *integer* _secsSinceEvent_, *variant* _param1_, *variant* _param2_, *variant* _param3_, *variant* _param4_, *variant* _param5_, *variant* _param6_, *integer* _eventId_
+** _Returns:_ *[GuildEventType|#GuildEventType]* _eventType_, *integer* _secsSinceEvent_, *variant* _param1_, *variant* _param2_, *variant* _param3_, *variant* _param4_, *variant* _param5_, *variant* _param6_, *integer* _eventId_
 
 * GetGuildEventId(*integer* _guildId_, *[GuildHistoryCategory|#GuildHistoryCategory]* _category_, *luaindex* _eventIndex_)
 ** _Returns:_ *id64* _guildEventId_
@@ -9259,6 +9407,9 @@ h2. Game API
 
 * IsHeronUI()
 ** _Returns:_ *bool* _isHeronUI_
+
+* IsMacUI()
+** _Returns:_ *bool* _isMacUI_
 
 * IsKeyboardUISupported()
 ** _Returns:_ *bool* _isKeyboardUISupported_
@@ -9518,7 +9669,7 @@ h2. Game API
 * GetCollectibleName(*integer* _collectibleId_)
 ** _Returns:_ *string* _name_
 
-* GetCollectibleCategoryName(*integer* _collectibleId_)
+* GetCollectibleCategoryNameByCollectibleId(*integer* _collectibleId_)
 ** _Returns:_ *string* _categoryName_
 
 * IsCollectiblePurchasable(*integer* _collectibleId_)
@@ -11098,6 +11249,12 @@ h2. Game API
 * GetJournalQuestZoneStoryZoneId(*luaindex* _journalQuestIndex_)
 ** _Returns:_ *integer* _zoneId_
 
+* GetQuestConditionItemInfo(*luaindex* _journalQuestIndex_, *luaindex* _stepIndex_, *luaindex* _conditionIndex_)
+** _Returns:_ *integer* _itemId_, *integer* _materialItemId_, *[TradeskillType|#TradeskillType]* _craftingType_, *[ItemQuality|#ItemQuality]* _itemQuality_
+
+* GetQuestConditionMasterWritInfo(*luaindex* _journalQuestIndex_, *luaindex* _stepIndex_, *luaindex* _conditionIndex_)
+** _Returns:_ *integer:nilable* _itemId_, *integer:nilable* _materialItemId_, *[TradeskillType|#TradeskillType]:nilable* _craftingType_, *[ItemQuality|#ItemQuality]:nilable* _itemQuality_, *integer:nilable* _itemTemplateId_, *integer:nilable* _itemSetId_, *[ItemTraitType|#ItemTraitType]:nilable* _itemTraitType_, *integer:nilable* _itemStyleId_, *integer:nilable* _encodedAlchemyTraits_
+
 * GetDynamicChatChannelName(*integer* _channelId_)
 ** _Returns:_ *string* _name_
 
@@ -11189,6 +11346,12 @@ h2. Game API
 * IsUnderArrest()
 ** _Returns:_ *bool* _beingArrested_
 
+* IsGameCameraClickableFixture()
+** _Returns:_ *bool* _isClickableFixture_
+
+* IsGameCameraClickableFixtureActive()
+** _Returns:_ *bool* _isClickableFixtureActive_
+
 * GetGameCameraInteractableUnitAudioInfo()
 ** _Returns:_ *integer* _audioModelType_, *integer* _audioModelMaterial_, *integer* _audioModelSize_
 
@@ -11236,6 +11399,15 @@ h2. Game API
 
 * CheckInventorySpaceSilently(*integer* _numItems_)
 ** _Returns:_ *bool* _haveSpace_
+
+* HasItemToImproveForWrit(*integer* _itemId_, *integer* _materialItemId_, *[ItemTraitType|#ItemTraitType]* _itemTraitType_, *integer* _itemStyleId_, *[ItemQuality|#ItemQuality]* _targetFunctionalQuality_)
+** _Returns:_ *bool* _hasItem_
+
+* GetItemTraitInformation(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *[ItemTraitInformation|#ItemTraitInformation]* _itemTraitInformation_
+
+* GetItemTraitInformationFromItemLink(*string* _itemLink_)
+** _Returns:_ *[ItemTraitInformation|#ItemTraitInformation]* _itemTraitInformation_
 
 * PlayItemSound(*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_, *[ItemUISoundAction|#ItemUISoundAction]* _itemSoundAction_)
 
@@ -11414,6 +11586,9 @@ h2. Game API
 * SetMapToMapListIndex(*luaindex* _index_)
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
 
+* SetMapToMapId(*integer* _mapId_)
+** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
+
 * SetMapToAutoMapNavigationTargetPosition()
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
 
@@ -11424,6 +11599,15 @@ h2. Game API
 ** _Returns:_ *integer* _mapId_
 
 * GetMapIndexByZoneId(*integer* _zoneId_)
+** _Returns:_ *luaindex:nilable* _index_
+
+* GetMapIdByZoneId(*integer* _zoneId_)
+** _Returns:_ *integer* _mapId_
+
+* GetMapIdByIndex(*luaindex* _mapIndex_)
+** _Returns:_ *integer* _mapId_
+
+* GetMapIndexById(*integer* _mapId_)
 ** _Returns:_ *luaindex:nilable* _index_
 
 * GetCyrodiilMapIndex()
@@ -11441,6 +11625,9 @@ h2. Game API
 * GetMapNameByIndex(*luaindex* _mapIndex_)
 ** _Returns:_ *string* _mapName_
 
+* GetMapNameById(*integer* _mapId_)
+** _Returns:_ *string* _mapName_
+
 * GetNumMaps()
 ** _Returns:_ *integer* _numMaps_
 
@@ -11453,8 +11640,11 @@ h2. Game API
 * ProcessMapClick(*number* _normalizedClickX_, *number* _normalizedClickY_)
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
 
-* GetMapInfo(*luaindex* _index_)
-** _Returns:_ *string* _name_, *[UIMapType|#UIMapType]* _mapType_, *[MapContentType|#MapContentType]* _mapContentType_, *integer* _zoneId_, *string* _description_
+* GetMapInfoByIndex(*luaindex* _index_)
+** _Returns:_ *string* _name_, *[UIMapType|#UIMapType]* _mapType_, *[MapContentType|#MapContentType]* _mapContentType_, *luaindex* _zoneIndex_, *string* _description_
+
+* GetMapInfoById(*integer* _mapId_)
+** _Returns:_ *string* _name_, *[UIMapType|#UIMapType]* _mapType_, *[MapContentType|#MapContentType]* _mapContentType_, *luaindex* _zoneIndex_, *string* _description_
 
 * GetUniversallyNormalizedMapInfo(*integer* _mapId_)
 ** _Returns:_ *number* _normalizedOffsetX_, *number* _normalizedOffsetZ_, *number* _normalizedWidth_, *number* _normalizedHeight_
@@ -11677,6 +11867,11 @@ h2. Game API
 
 * WorldPositionToGuiRender3DPosition(*integer* _worldX_, *integer* _worldY_, *integer* _worldZ_)
 ** _Returns:_ *number* _renderX_, *number* _renderY_, *number* _renderZ_
+
+* ExitInstanceImmediately()
+
+* CanExitInstanceImmediately()
+** _Returns:_ *bool* _canExitInstanceImmediately_
 
 * CanJumpToPlayerInZone(*integer* _zoneId_)
 ** _Returns:_ *bool* _canJump_, *[JumpToPlayerResult|#JumpToPlayerResult]* _result_
@@ -13217,6 +13412,9 @@ h2. Game API
 * StartSettingChamber *private* (*luaindex* _chamberIndex_)
 ** _Returns:_ *bool* _succesfullyStarted_
 
+* GetLockpickingDefaultGamepadVibration()
+** _Returns:_ *number* _defaultVibration_
+
 * GetCraftingInteractionType()
 ** _Returns:_ *[TradeskillType|#TradeskillType]* _currentCraftingInteraction_
 
@@ -13296,8 +13494,23 @@ h2. Game API
 * IsAlchemyItemTraitKnown(*[Bag|#Bag]* _reagentBagId_, *integer* _reagentSlotIndex_, *luaindex* _traitIndex_)
 ** _Returns:_ *bool* _isKnown_
 
+* DoesAlchemyItemHaveKnownTrait(*[Bag|#Bag]* _reagentBagId_, *integer* _reagentSlotIndex_, *integer* _traitId_)
+** _Returns:_ *bool* _isKnown_
+
+* DoesAlchemyItemHaveKnownEncodedTrait(*[Bag|#Bag]* _reagentBagId_, *integer* _reagentSlotIndex_, *integer* _encodedTraits_)
+** _Returns:_ *bool* _isKnown_
+
+* GetTraitIdFromBasePotion(*integer* _itemId_)
+** _Returns:_ *integer* _traitId_
+
 * IsAlchemySolvent(*[ItemType|#ItemType]* _itemType_)
 ** _Returns:_ *bool* _isAlchemySolvent_
+
+* IsAlchemySolventForItemAndMaterialId(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *integer* _targetItemId_, *integer* _targetMaterialItemId_)
+** _Returns:_ *bool* _isCorrectSolvent_
+
+* GetAlchemyResultingItemIdIfKnown(*[Bag|#Bag]* _solventBagId_, *integer* _solventSlotIndex_, *[Bag|#Bag]* _reagent1BagId_, *integer* _reagent1SlotIndex_, *[Bag|#Bag]* _reagent2BagId_, *integer* _reagent2SlotIndex_, *[Bag|#Bag]:nilable* _reagent3BagId_, *integer:nilable* _reagent3SlotIndex_, *integer:nilable* _desiredEncodedTraits_)
+** _Returns:_ *integer:nilable* _resultingItemId_
 
 * GetNumRecipeLists()
 ** _Returns:_ *integer* _numRecipeLists_
@@ -13309,7 +13522,7 @@ h2. Game API
 ** _Returns:_ *integer* _maxIngredients_
 
 * GetRecipeInfo(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_)
-** _Returns:_ *bool* _known_, *string* _name_, *integer* _numIngredients_, *integer* _provisionerLevelReq_, *integer* _qualityReq_, *[ProvisionerSpecialIngredientType|#ProvisionerSpecialIngredientType]* _specialIngredientType_, *[TradeskillType|#TradeskillType]* _requiredCraftingStationType_
+** _Returns:_ *bool* _known_, *string* _name_, *integer* _numIngredients_, *integer* _provisionerLevelReq_, *integer* _qualityReq_, *[ProvisionerSpecialIngredientType|#ProvisionerSpecialIngredientType]* _specialIngredientType_, *[TradeskillType|#TradeskillType]* _requiredCraftingStationType_, *integer* _resultItemId_
 
 * GetNextKnownRecipeForCraftingStation(*luaindex* _recipeListIndex_, *[TradeskillType|#TradeskillType]* _requiredCraftingStationType_, *luaindex:nilable* _lastRecipeIndex_)
 ** _Returns:_ *luaindex:nilable* _nextRecipeIndex_
@@ -13355,6 +13568,9 @@ h2. Game API
 * GetUpdatedRecipeIndices(*luaindex* _index_)
 ** _Returns:_ *luaindex* _recipeListIndex_, *luaindex* _recipeIndex_
 
+* GetRecipeInfoFromItemId(*integer* _itemId_)
+** _Returns:_ *[TradeskillType|#TradeskillType]:nilable* _craftingStationType_, *luaindex:nilable* _recipeListIndex_, *luaindex:nilable* _recipeIndex_
+
 * GetCostToCraftEnchantingItem(*[Bag|#Bag]* _potencyRuneBagId_, *integer* _potencyRuneSlotIndex_, *[Bag|#Bag]* _essenceRuneBagId_, *integer* _essenceRuneSlotIndex_, *[Bag|#Bag]* _aspectRuneBagId_, *integer* _aspectRuneSlotIndex_, *integer* _numIterations_)
 ** _Returns:_ *integer* _cost_
 
@@ -13387,6 +13603,12 @@ h2. Game API
 * GetEnchantProcAbilityId(*integer* _enchantId_)
 ** _Returns:_ *integer* _abilityId_
 
+* GetRunesForItemIdIfKnown(*integer* _itemId_, *integer* _materialItemId_, *[ItemQuality|#ItemQuality]* _itemQuality_)
+** _Returns:_ *integer:nilable* _potencyRuneId_, *integer:nilable* _essenceRuneId_, *integer:nilable* _aspectRuneId_
+
+* DoesPlayerHaveRunesForEnchanting(*integer* _aspectItemId_, *integer* _essenceItemId_, *integer* _potencyItemId_)
+** _Returns:_ *bool* _hasRunes_
+
 * IsSmithingCraftingType(*[TradeskillType|#TradeskillType]* _tradeskillType_)
 ** _Returns:_ *bool* _isSmithingType_
 
@@ -13416,11 +13638,20 @@ h2. Game API
 * CanSmithingSetPatternsBeCraftedHere()
 ** _Returns:_ *bool* _canBeCrafted_
 
+* CanSpecificSmithingItemSetPatternBeCraftedHere(*integer* _itemSetId_)
+** _Returns:_ *bool* _canBeCrafted_
+
 * GetNumSmithingPatterns()
 ** _Returns:_ *integer* _smithingPatterns_
 
 * GetSmithingPatternInfo(*luaindex* _patternIndex_, *luaindex:nilable* _materialIndexOverride_, *integer:nilable* _materialQuanityOverride_, *integer:nilable* _styleOverride_, *[ItemTraitType|#ItemTraitType]:nilable* _traitTypeOverride_)
 ** _Returns:_ *string* _patternName_, *string* _baseName_, *textureName* _icon_, *integer* _numMaterials_, *integer* _numTraitsRequired_, *integer* _numTraitsKnown_, *[ItemFilterType|#ItemFilterType]* _resultItemFilterType_
+
+* GetSmithingPatternInfoForItemId(*integer* _itemId_, *integer* _materialItemId_, *[TradeskillType|#TradeskillType]* _craftingSkillType_)
+** _Returns:_ *luaindex:nilable* _patternIndex_, *luaindex:nilable* _materialIndex_
+
+* GetSmithingPatternInfoForItemSet(*integer* _itemTemplateId_, *integer* _itemSetId_, *integer* _materialItemId_, *[ItemTraitType|#ItemTraitType]* _traitType_)
+** _Returns:_ *luaindex:nilable* _patternIndex_, *luaindex:nilable* _materialIndex_, *integer:nilable* _resultingItemId_
 
 * GetSmithingPatternMaterialItemInfo(*luaindex* _patternIndex_, *luaindex* _materialIndex_)
 ** _Returns:_ *string* _itemName_, *textureName* _icon_, *integer* _stack_, *integer* _sellPrice_, *bool* _meetsUsageRequirement_, *[EquipType|#EquipType]* _equipType_, *integer* _itemStyleId_, *[ItemDisplayQuality|#ItemDisplayQuality]* _displayQuality_, *integer* _itemInstanceId_, *integer* _skillRequirement_, *integer* _createsItemOfLevel_, *bool* _isChampionPoint_
@@ -13472,6 +13703,9 @@ h2. Game API
 
 * IsSmithingTraitKnownForPattern(*luaindex* _patternIndex_, *[ItemTraitType|#ItemTraitType]* _traitType_)
 ** _Returns:_ *bool* _known_
+
+* IsTraitKnownForItem(*integer* _itemId_, *[ItemTraitType|#ItemTraitType]* _traitType_)
+** _Returns:_ *bool* _isKnown_
 
 * GetNumSmithingResearchLines(*[TradeskillType|#TradeskillType]* _craftingSkillType_)
 ** _Returns:_ *integer* _numLines_
@@ -13531,6 +13765,9 @@ h2. Game API
 * GetSmithingImprovementItemLink(*[TradeskillType|#TradeskillType]* _craftingSkillType_, *luaindex* _improvementItemIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
 
+* GetSmithingGuaranteedImprovementItemAmount(*[TradeskillType|#TradeskillType]* _craftingSkillType_, *luaindex* _improvementItemIndex_)
+** _Returns:_ *integer* _numImprovementItemsRequired_
+
 * GetSmithingImprovedItemInfo(*[Bag|#Bag]* _itemToImproveBagId_, *integer* _itemToImproveSlotIndex_, *[TradeskillType|#TradeskillType]* _craftingSkillType_)
 ** _Returns:_ *string* _itemName_, *textureName* _icon_, *integer* _sellPrice_, *bool* _meetsUsageRequirement_, *[EquipType|#EquipType]* _equipType_, *integer* _itemStyleId_, *[ItemQuality|#ItemQuality]* _functionalQuality_, *[ItemDisplayQuality|#ItemDisplayQuality]* _displayQuality_
 
@@ -13551,11 +13788,11 @@ h2. Game API
 * GetValidItemStyleId(*luaindex* _index_)
 ** _Returns:_ *integer* _validItemStyle_
 
-* GetItemTraitInformation(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
-** _Returns:_ *[ItemTraitInformation|#ItemTraitInformation]* _itemTraitInformation_
+* GetSmithingRefinedItemId(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *integer:nilable* _refinedItemId_
 
-* GetItemTraitInformationFromItemLink(*string* _itemLink_)
-** _Returns:_ *[ItemTraitInformation|#ItemTraitInformation]* _itemTraitInformation_
+* DoesItemMatchSmithingMaterialTraitAndStyle(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *integer* _materialItemId_, *[ItemTraitType|#ItemTraitType]* _itemTraitType_, *integer* _itemStyleId_)
+** _Returns:_ *bool* _isMatchingItem_
 
 * GetNonCombatBonus(*[NonCombatBonusType|#NonCombatBonusType]* _nonCombatBonus_)
 ** _Returns:_ *integer* _bonusValue_
@@ -14337,9 +14574,6 @@ h2. Game API
 * GetCurrentHousePopulationCap()
 ** _Returns:_ *integer* _popCap_
 
-* GetCollectibleIdForHouse(*integer* _houseId_)
-** _Returns:_ *integer* _collectibleId_
-
 * GetNumFurnitureCategories()
 ** _Returns:_ *integer* _numCategories_
 
@@ -14363,12 +14597,6 @@ h2. Game API
 
 * GetHouseZoneId(*integer* _houseId_)
 ** _Returns:_ *integer* _zoneId_
-
-* GetHouseFoundInZoneId(*integer* _houseId_)
-** _Returns:_ *integer* _zoneId_
-
-* GetHouseCategoryType(*integer* _houseId_)
-** _Returns:_ *[HouseCategoryType|#HouseCategoryType]* _houseType_
 
 * GetHousePreviewBackgroundImage(*integer* _houseId_)
 ** _Returns:_ *textureName* _previewBackgroundFileIndex_
@@ -14661,7 +14889,7 @@ h2. Game API
 * HousingEditorGetPathNodeOrientation(*id64* _furnitureId_, *luaindex* _index_)
 ** _Returns:_ *number* _pitchRadians_, *number* _yawRadians_, *number* _rollRadians_
 
-* HousingEditorRequestChangeFurniturePathData(*id64* _furnitureId_, *[FurniturePathState|#FurniturePathState]* _newState_, *[PathFollowType|#PathFollowType]* _newFollowType_)
+* HousingEditorRequestChangeFurniturePathData(*id64* _furnitureId_, *[FurniturePathState|#FurniturePathState]* _newState_, *[PathFollowType|#PathFollowType]* _newFollowType_, *bool* _newConformToGround_)
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
 * HousingEditorRequestInsertPathNode(*id64* _furnitureId_, *luaindex* _index_, *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_, *number* _headingRadians_, *[HousingPathMovementSpeed|#HousingPathMovementSpeed]* _speed_, *integer* _reachDestinationDelayTime_)
@@ -14721,6 +14949,9 @@ h2. Game API
 * HousingEditorToggleSelectedFurniturePathState()
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
+* HousingEditorToggleSelectedFurniturePathConformToGround()
+** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
+
 * HousingEditorSetSelectedFurniturePathFollowType(*[PathFollowType|#PathFollowType]* _newPathType_)
 ** _Returns:_ *[HousingRequestResult|#HousingRequestResult]* _result_
 
@@ -14747,6 +14978,9 @@ h2. Game API
 
 * HousingEditorGetSelectedFurniturePathState()
 ** _Returns:_ *[FurniturePathState|#FurniturePathState]* _pathState_
+
+* HousingEditorGetSelectedFurniturePathConformToGround()
+** _Returns:_ *bool* _conformToGround_
 
 * HousingEditorGetSelectedFurniturePathFollowType()
 ** _Returns:_ *[PathFollowType|#PathFollowType]* _followType_
@@ -14777,6 +15011,11 @@ h2. Game API
 
 * HousingEditorGetStartingNodeIndexForPath(*id64* _furnitureId_)
 ** _Returns:_ *luaindex* _nodeIndex_
+
+* HousingEditorIsLocalPlayerInPairedFurnitureInteraction()
+** _Returns:_ *bool* _isInteracting_
+
+* HousingEditorEndLocalPlayerPairedFurnitureInteraction()
 
 * GetItemUniqueIdFromFurnitureId(*id64* _furnitureId_)
 ** _Returns:_ *id64* _itemUniqueId_
@@ -15376,6 +15615,94 @@ h2. Game API
 
 * RequestAntiquityDiggingExit()
 
+* RequestItemReconstruction(*integer* _itemDefId_, *[ItemTraitType|#ItemTraitType]* _itemTrait_, *[ItemQuality|#ItemQuality]* _itemQuality_, *[CurrencyType|#CurrencyType]* _currencyType_)
+
+* GetNextItemSetCollectionId(*integer:nilable* _lastItemSetId_)
+** _Returns:_ *integer:nilable* _nextItemSetId_
+
+* GetItemSetCollectionSlotsInMask(*id64* _slotMask_)
+** _Uses variable returns..._
+** _Returns:_ *id64* _slot_
+
+* GetItemSetCollectionCategoryId(*integer* _itemSetId_)
+** _Returns:_ *integer* _categoryId_
+
+* GetItemSetName(*integer* _itemSetId_)
+** _Returns:_ *string* _name_
+
+* GetItemSetType(*integer* _itemSetId_)
+** _Returns:_ *[ItemSetType|#ItemSetType]* _type_
+
+* GetItemSetUnperfectedSetId(*integer* _itemSetId_)
+** _Returns:_ *integer* _unperfectedSetId_
+
+* GetNumItemSetCollectionPieces(*integer* _itemSetId_)
+** _Returns:_ *integer* _numPieces_
+
+* GetItemSetCollectionPieceInfo(*integer* _itemSetId_, *luaindex* _index_)
+** _Returns:_ *integer* _pieceId_, *id64* _slot_
+
+* GetNumItemSetCollectionSlotsUnlocked(*integer* _itemSetId_)
+** _Returns:_ *integer* _numSlotsUnlocked_
+
+* IsItemSetCollectionSlotUnlocked(*integer* _itemSetId_, *id64* _slot_)
+** _Returns:_ *bool* _isUnlocked_
+
+* ItemSetCollectionHasNewPieces(*integer* _itemSetId_)
+** _Returns:_ *bool* _hasNewPieces_
+
+* IsItemSetCollectionSlotNew(*integer* _itemSetId_, *id64* _slot_)
+** _Returns:_ *bool* _isNew_
+
+* ClearItemSetCollectionSlotNew(*integer* _itemSetId_, *id64* _slot_, *bool* _sendUpdate_)
+
+* GetNumItemReconstructionCurrencyOptions()
+** _Returns:_ *integer* _numCurrencyOptions_
+
+* GetItemReconstructionCurrencyOptionType(*luaindex* _currencyOptionIndex_)
+** _Returns:_ *[CurrencyType|#CurrencyType]* _currencyType_
+
+* GetItemReconstructionCurrencyOptionCost(*integer* _itemSetId_, *[CurrencyType|#CurrencyType]* _currencyType_)
+** _Returns:_ *integer:nilable* _cost_
+
+* GetItemSetCollectionCategoryName(*integer* _categoryId_)
+** _Returns:_ *string* _name_
+
+* GetItemSetCollectionCategoryGamepadIcon(*integer* _categoryId_)
+** _Returns:_ *textureName* _gamepadIcon_
+
+* GetItemSetCollectionCategoryKeyboardIcons(*integer* _categoryId_)
+** _Returns:_ *textureName* _unpressedButtonIcon_, *textureName* _pressedButtonIcon_, *textureName* _mouseoverButtonIcon_
+
+* GetItemSetCollectionCategoryOrder(*integer* _categoryId_)
+** _Returns:_ *integer* _order_
+
+* GetItemSetCollectionCategoryParentId(*integer* _categoryId_)
+** _Returns:_ *integer* _parentCategoryId_
+
+* GetItemSetCollectionPieceItemLink(*integer* _pieceId_, *[LinkStyle|#LinkStyle]* _linkStyle_, *[ItemTraitType|#ItemTraitType]* _traitType_, *[ItemQuality|#ItemQuality]:nilable* _upgradeItemFunctionalQuality_)
+** _Returns:_ *string* _itemLink_
+
+* GetEquipmentFilterTypeForItemSetCollectionSlot(*id64* _slot_)
+** _Returns:_ *[EquipmentFilterType|#EquipmentFilterType]* _equipmentFilterType_
+
+* StartItemSetCollectionSearch(*string* _searchString_)
+
+* GetNumItemSetCollectionSearchResults()
+** _Returns:_ *integer* _numSearchResults_
+
+* GetItemSetCollectionSearchResult(*luaindex* _searchResultIndex_)
+** _Returns:_ *integer* _itemSetId_
+
+* GetCollectibleCategoryNameByCategoryId(*integer* _categoryId_)
+** _Returns:_ *string* _categoryName_
+
+* GetNumSubcategoriesInCollectibleCategory(*luaindex* _topLevelIndex_)
+** _Returns:_ *integer* _numSubcategories_
+
+* GetNumCollectiblesInCollectibleCategory(*luaindex* _topLevelIndex_, *luaindex:nilable* _subCategoryIndex_)
+** _Returns:_ *integer* _numCollectibles_
+
 
 * IsGameCameraActive()
 ** _Returns:_ *bool* _isActive_
@@ -15549,6 +15876,9 @@ h2. Game API
 * IsItemBound(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _isBound_
 
+* IsItemReconstructed(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *bool* _isReconstructed_
+
 * IsItemEnchantable(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _enchantable_
 
@@ -15662,6 +15992,9 @@ h2. Game API
 
 * GetItemWeaponType(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *[WeaponType|#WeaponType]* _weaponType_
+
+* GetItemEquipmentFilterType(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *[EquipmentFilterType|#EquipmentFilterType]* _equipmentFilterType_
 
 * GetItemUniqueId(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *id64:nilable* _id_
@@ -15848,6 +16181,9 @@ h2. Game API
 * GetItemLinkSetInfo(*string* _itemLink_, *bool* _equipped_)
 ** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numEquipped_, *integer* _maxEquipped_, *integer* _setId_
 
+* IsItemLinkSetCollectionPiece(*string* _itemLink_)
+** _Returns:_ *bool* _isSetCollectionPiece_
+
 * GetItemLinkSetBonusInfo(*string* _itemLink_, *bool* _equipped_, *luaindex* _index_)
 ** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_
 
@@ -15988,6 +16324,9 @@ h2. Game API
 
 * IsItemLinkOnlyUsableFromQuickslot(*string* _itemLink_)
 ** _Returns:_ *bool* _onlyUsableFromQuickslot_
+
+* IsItemLinkReconstructed(*string* _itemLink_)
+** _Returns:_ *bool* _isReconstructed_
 
 * IsItemLinkStolen(*string* _itemLink_)
 ** _Returns:_ *bool* _itemStolen_
@@ -16420,6 +16759,12 @@ h2. Game API
 
 * CanCombinationFragmentBeUnlocked(*integer* _collectibleId_)
 ** _Returns:_ *bool* _canBeUnlocked_
+
+* GetNumCollectibleTags(*integer* _collectibleId_)
+** _Returns:_ *integer* _numTags_
+
+* GetCollectibleTagInfo(*integer* _collectibleId_, *luaindex* _tagIndex_)
+** _Returns:_ *string* _tagDescription_, *[ItemTagCategory|#ItemTagCategory]* _tagCategory_
 
 * UpdateMarketDisplayGroup *private* (*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_)
 
@@ -17051,6 +17396,18 @@ h2. Game API
 * GetDefaultHouseTemplateIdForHouse(*integer* _houseId_)
 ** _Returns:_ *integer* _houseTemplateId_
 
+* GetCollectibleIdForHouse(*integer* _houseId_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetHouseFoundInZoneId(*integer* _houseId_)
+** _Returns:_ *integer* _zoneId_
+
+* GetHouseCategoryType(*integer* _houseId_)
+** _Returns:_ *[HouseCategoryType|#HouseCategoryType]* _houseType_
+
+* GetHouseTemplateBaseFurnishingCountInfo(*integer* _houseTemplateId_, *[HousingFurnishingLimitType|#HousingFurnishingLimitType]* _furnishingType_)
+** _Returns:_ *integer* _initialFurnishingCount_, *integer* _furnishingLimit_
+
 * SetInteractionUsingInteractCamera(*bool* _enabled_)
 
 * IsInteractionUsingInteractCamera()
@@ -17442,6 +17799,12 @@ h2. Game API
 
 * IsAbilityPassive(*integer* _abilityId_)
 ** _Returns:_ *bool* _isPassive_
+
+* DoesPlatformSupportCodeRedemption()
+** _Returns:_ *bool* _supportsCodeRedemption_
+
+* IsItemSetCollectionPieceUnlocked(*integer* _pieceId_)
+** _Returns:_ *bool* _isUnlocked_
 
 
 h2. Object API
@@ -18617,6 +18980,9 @@ h3. LineControl
 * GetTextureFileName()
 ** _Returns:_ *string* _filename_
 
+* GetThickness()
+** _Returns:_ *number* _thickness_
+
 * IsPixelRoundingEnabled()
 ** _Returns:_ *bool* _pixelRoundingEnabled_
 
@@ -19133,6 +19499,8 @@ h3. TooltipControl
 
 * SetFont(*string* _fontStr_)
 
+* SetGenericItemSet(*integer* _itemSetId_)
+
 * SetGuildSpecificItem(*luaindex* _guildSpecificItemIndex_)
 
 * SetHeaderCellEmptyHorizontalSpace(*number* _headerCellEmptyHorizontalSpace_)
@@ -19140,6 +19508,8 @@ h3. TooltipControl
 * SetHeaderRowSpacing(*number* _spacing_)
 
 * SetHeaderVerticalOffset(*number* _verticalOffset_)
+
+* SetItemSetCollectionPieceLink(*string* _aLink_, *bool* _aHideTrait_)
 
 * SetItemUsingEnchantment(*[Bag|#Bag]* _itemBagIndex_, *integer* _itemSlotIndex_, *[Bag|#Bag]* _enchantmentBagIndex_, *integer* _enchantmentSlotIndex_)
 
@@ -19408,7 +19778,6 @@ h3. WindowManager
 
 
 h2. Events
-* EVENT_ABILITY_COOLDOWN_UPDATED (*integer* _abilityId_)
 * EVENT_ABILITY_LIST_CHANGED
 * EVENT_ABILITY_PROGRESSION_RANK_UPDATE (*luaindex* _progressionIndex_, *integer* _rank_, *integer* _maxRank_, *integer* _morph_)
 * EVENT_ABILITY_PROGRESSION_RESULT (*[AbilityProgressionResult|#AbilityProgressionResult]* _reason_)
@@ -19483,7 +19852,7 @@ h2. Events
 * EVENT_BEGIN_LOCKPICK
 * EVENT_BEGIN_SIEGE_CONTROL
 * EVENT_BEGIN_SIEGE_UPGRADE
-* EVENT_BOSSES_CHANGED
+* EVENT_BOSSES_CHANGED (*bool* _forceReset_)
 * EVENT_BROADCAST (*string* _message_)
 * EVENT_BUYBACK_RECEIPT (*string* _itemLink_, *integer* _itemQuantity_, *integer* _money_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
 * EVENT_BUY_RECEIPT (*string* _entryName_, *[StoreEntryType|#StoreEntryType]* _entryType_, *integer* _entryQuantity_, *integer* _money_, *[CurrencyType|#CurrencyType]* _specialCurrencyType1_, *string* _specialCurrencyInfo1_, *integer* _specialCurrencyQuantity1_, *[CurrencyType|#CurrencyType]* _specialCurrencyType2_, *string* _specialCurrencyInfo2_, *integer* _specialCurrencyQuantity2_, *[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
@@ -19751,6 +20120,10 @@ h2. Events
 * EVENT_ITEM_LAUNDER_RESULT (*[ItemLaunderResult|#ItemLaunderResult]* _result_)
 * EVENT_ITEM_ON_COOLDOWN
 * EVENT_ITEM_REPAIR_FAILURE (*[ItemRepairReason|#ItemRepairReason]* _reason_)
+* EVENT_ITEM_SET_COLLECTIONS_SEARCH_RESULTS_READY
+* EVENT_ITEM_SET_COLLECTIONS_UPDATED
+* EVENT_ITEM_SET_COLLECTION_SLOT_NEW_STATUS_CLEARED (*integer* _itemSetId_, *id64* _itemSetCollectionSlot_)
+* EVENT_ITEM_SET_COLLECTION_UPDATED (*integer* _itemSetId_, *id64* _slotsJustUnlockedMask_)
 * EVENT_ITEM_SLOT_CHANGED (*[ItemUISoundCategory|#ItemUISoundCategory]* _itemSoundCategory_)
 * EVENT_JUSTICE_BEING_ARRESTED (*bool* _quitGame_)
 * EVENT_JUSTICE_BOUNTY_PAYOFF_AMOUNT_UPDATED (*integer* _oldBounty_, *integer* _newBounty_, *bool* _isInitialize_)
@@ -19908,6 +20281,8 @@ h2. Events
 * EVENT_RECALL_KEEP_USE_RESULT (*[KeepRecallStoneUseResult|#KeepRecallStoneUseResult]* _result_)
 * EVENT_RECIPE_ALREADY_KNOWN
 * EVENT_RECIPE_LEARNED (*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_)
+* EVENT_RECONSTRUCT_RESPONSE (*[ReconstructResponse|#ReconstructResponse]* _responseCode_)
+* EVENT_RECONSTRUCT_STARTED
 * EVENT_REMOVE_ACTIVE_COMBAT_TIP (*integer* _activeCombatTipId_, *[ActiveCombatTipConditionResult|#ActiveCombatTipConditionResult]* _result_)
 * EVENT_REMOVE_TUTORIAL (*luaindex* _tutorialIndex_)
 * EVENT_REQUEST_ALERT (*[UIAlertCategory|#UIAlertCategory]* _alertCategory_, *string* _soundId_, *string* _message_)

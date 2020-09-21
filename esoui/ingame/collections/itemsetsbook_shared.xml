@@ -1,0 +1,30 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ItemSetsBook_Entry_Header_Shared" virtual="true">
+            <OnInitialized>
+                ZO_ItemSetsBook_Entry_Header_Shared_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="1" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" offsetX="-10" />
+                </Label>
+
+                <StatusBar name="$(parent)Progress">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="RIGHT" relativePoint="CENTER" offsetX="60" constrains="X" />
+                </StatusBar>
+
+                <Label name="$(parent)Cost">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="RIGHT" constrains="X"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" constrains="Y"/>
+                </Label>
+
+                <Label name="$(parent)CostHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ITEM_RECONSTRUCTION_COST_HEADER">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Cost" relativePoint="LEFT" offsetX="-5" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

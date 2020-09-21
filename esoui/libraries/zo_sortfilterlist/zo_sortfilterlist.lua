@@ -252,11 +252,11 @@ end
 function ZO_SortFilterList:GetRowColors(data, mouseIsOver, control)
     local textColor = ZO_SECOND_CONTRAST_TEXT
     local iconColor = ZO_DEFAULT_ENABLED_COLOR
-    if(mouseIsOver or data == self.selectedData) then
-        textColor = ZO_SELECTED_TEXT
+    if mouseIsOver or data == self.selectedData then
+        textColor = control.selectedColor or ZO_SELECTED_TEXT
         iconColor = ZO_SELECTED_TEXT
     else
-        if(control.normalColor) then
+        if control.normalColor then
             textColor = control.normalColor
         end
     end
@@ -271,11 +271,11 @@ function ZO_SortFilterList:ColorRow(control, data, mouseIsOver)
             if not child.nonRecolorable then
                 local childType = child:GetType()
                 local textColor, iconColor = self:GetRowColors(data, mouseIsOver, child)
-                if(childType == CT_LABEL and textColor ~= nil) then
-                    local r, g, b = textColor:UnpackRGB() 
+                if childType == CT_LABEL and textColor ~= nil then
+                    local r, g, b = textColor:UnpackRGB()
                     child:SetColor(r, g, b, child:GetControlAlpha())
-                elseif(childType == CT_TEXTURE and iconColor ~= nil) then
-                    local r, g, b = iconColor:UnpackRGB() 
+                elseif childType == CT_TEXTURE and iconColor ~= nil then
+                    local r, g, b = iconColor:UnpackRGB()
                     child:SetColor(r, g, b, child:GetControlAlpha())
                 end
             end

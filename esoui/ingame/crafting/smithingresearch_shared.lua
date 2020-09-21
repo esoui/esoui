@@ -179,13 +179,13 @@ function ZO_SharedSmithingResearch:FindResearchingTraitIndex(craftingType, resea
 end
 
 do
-    local function IsNotLockedOrRetraitedItem(bagId, slotIndex)
-        return not IsItemPlayerLocked(bagId, slotIndex) and GetItemTraitInformation(bagId, slotIndex) ~= ITEM_TRAIT_INFORMATION_RETRAITED
+    local function DoesNotBlockResearch(bagId, slotIndex)
+        return not IsItemPlayerLocked(bagId, slotIndex) and GetItemTraitInformation(bagId, slotIndex) ~= ITEM_TRAIT_INFORMATION_RETRAITED and GetItemTraitInformation(bagId, slotIndex) ~= ITEM_TRAIT_INFORMATION_RECONSTRUCTED
     end
 
     function ZO_SharedSmithingResearch.IsResearchableItem(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
         return CanItemBeSmithingTraitResearched(bagId, slotIndex, craftingType, researchLineIndex, traitIndex)
-                and IsNotLockedOrRetraitedItem(bagId, slotIndex)
+                and DoesNotBlockResearch(bagId, slotIndex)
     end
 
     function ZO_SharedSmithingResearch:Refresh()
@@ -196,9 +196,9 @@ do
 
         local numCurrentlyResearching = 0
 
-        local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, IsNotLockedOrRetraitedItem)
+        local virtualInventoryList = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, DoesNotBlockResearch)
         if self.savedVars.includeBankedItemsChecked then
-            PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, IsNotLockedOrRetraitedItem, virtualInventoryList)
+            PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, DoesNotBlockResearch, virtualInventoryList)
         end
 
         for researchLineIndex = 1, GetNumSmithingResearchLines(craftingType) do

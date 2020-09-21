@@ -343,6 +343,10 @@ function ZO_HousingEditorHud:Initialize(control)
         HOUSING_EDITOR_SHARED:UpdateKeybinds()
     end
 
+    local function OnApplySavedOptions()
+        self:InitializePlacementSettings()
+    end
+
     local function OnAddOnLoaded(event, addOnName)
         if addOnName == "ZO_Ingame" then
             EVENT_MANAGER:UnregisterForEvent("HousingEditor", EVENT_ADD_ON_LOADED)
@@ -352,11 +356,12 @@ function ZO_HousingEditorHud:Initialize(control)
                 rotateUnitsRadians = math.rad(15),
             }
             self.savedOptions = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", 1, "ZO_HousingEditor_Options", defaults)
-            self:OnSavedOptionsLoaded()
+            OnApplySavedOptions()
         end
     end
 
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+    EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_PLAYER_ACTIVATED, OnApplySavedOptions)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_EDITOR_MODE_CHANGED, OnHousingModeChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadModeChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PLACED, OnFurnitureChanged)
@@ -419,10 +424,6 @@ function ZO_HousingEditorHud:RefreshConstants()
         self.pitchMovementController:SetAccumulationPerSecondForChange(self.numTickForRotationChange)
         self.rollMovementController:SetAccumulationPerSecondForChange(self.numTickForRotationChange)
     end
-end
-
-function ZO_HousingEditorHud:OnSavedOptionsLoaded()
-    self:InitializePlacementSettings()
 end
 
 function ZO_HousingEditorHud:InitializePlacementSettings()

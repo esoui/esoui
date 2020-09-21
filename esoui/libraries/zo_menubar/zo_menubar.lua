@@ -373,6 +373,10 @@ local function IsVisible(buttonData)
     end
 end
 
+local function IsEnabled(buttonData)
+    return not buttonData.enabled or buttonData.enabled(buttonData)
+end
+
 local function GetBarPadding(buttonData)
     return buttonData.barPadding
 end
@@ -416,6 +420,7 @@ function MenuBar:UpdateButtons(forceSelection)
 
         local isVisible = IsVisible(buttonData)
         buttonControl:SetHidden(not isVisible)
+        self:SetDescriptorEnabled(buttonData.descriptor, IsEnabled(buttonData))
 
         if(isVisible) then
             if lastDivider and lastDividerPadding then

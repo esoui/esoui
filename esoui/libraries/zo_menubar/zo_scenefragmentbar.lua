@@ -51,6 +51,10 @@ function ZO_SceneFragmentBar:UpdateActiveKeybind()
     end
 end
 
+function ZO_SceneFragmentBar:GetActiveKeybind()
+    return self.currentKeybindButton
+end
+
 function ZO_SceneFragmentBar:Clear()
     ZO_MenuBar_ClearSelection(self.menuBar)
     self:RemoveActiveKeybind()

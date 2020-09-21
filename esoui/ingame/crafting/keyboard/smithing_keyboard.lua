@@ -24,7 +24,7 @@ function ZO_Smithing:Initialize(control)
             local craftingType = GetCraftingInteractionType()
             ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"), craftingType)
 
-            local isCraftingTypeDifferent = not self.interactingWithSameStation
+            local isCraftingTypeDifferent = not self.interactingWithSameStation or self.oldCraftingType ~= craftingType
             self.refinementPanel:SetCraftingType(craftingType, self.oldCraftingType, isCraftingTypeDifferent)
             self.creationPanel:SetCraftingType(craftingType, self.oldCraftingType, isCraftingTypeDifferent)
             self.improvementPanel:SetCraftingType(craftingType, self.oldCraftingType, isCraftingTypeDifferent)
@@ -256,12 +256,12 @@ function ZO_Smithing:AddTabsToMenuBar(craftingType, isCraftingTypeDifferent)
     recipeTab.disabled = disabled
 
     ZO_MenuBar_ClearButtons(self.modeBar)
-    ZO_MenuBar_AddButton(self.modeBar, self.refinementTab)
-    ZO_MenuBar_AddButton(self.modeBar, self.creationTab)
+    self.refinementButton = ZO_MenuBar_AddButton(self.modeBar, self.refinementTab)
+    self.creationButton = ZO_MenuBar_AddButton(self.modeBar, self.creationTab)
     ZO_MenuBar_AddButton(self.modeBar, self.deconstructionTab)
-    ZO_MenuBar_AddButton(self.modeBar, self.improvementTab)
+    self.improvementButton = ZO_MenuBar_AddButton(self.modeBar, self.improvementTab)
     ZO_MenuBar_AddButton(self.modeBar, self.researchTab)
-    ZO_MenuBar_AddButton(self.modeBar, self.recipeTab)
+    self.recipeButton = ZO_MenuBar_AddButton(self.modeBar, self.recipeTab)
 
     if isCraftingTypeDifferent or not oldMode then
         ZO_MenuBar_SelectDescriptor(self.modeBar, SMITHING_MODE_REFINEMENT)
@@ -317,6 +317,24 @@ end
 
 function ZO_Smithing:GetResearchPanel()
     return self.researchPanel
+end
+
+function ZO_Smithing:UpdateQuestPins()
+    if self.refinementButton then
+        self.refinementButton.questPin:SetHidden(not self.shouldRefineForQuest)
+    end
+
+    if self.creationButton then
+        self.creationButton.questPin:SetHidden(not self.shouldCraftForQuest)
+    end
+
+    if self.improvementButton then
+        self.improvementButton.questPin:SetHidden(not self.shouldImproveForQuest)
+    end
+
+    if self.recipeButton then
+        self.recipeButton.questPin:SetHidden(not self.usesProvisioningForQuest)
+    end
 end
 
 function ZO_Smithing_Initialize(control)

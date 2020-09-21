@@ -82,8 +82,7 @@ function ZO_GamepadGuildRosterManager:GetAddKeybind()
 
         callback = function()
             local guildId = GUILD_ROSTER_MANAGER:GetGuildId()
-            local platform = GetUIPlatform()
-            if platform == UI_PLATFORM_PS4 then
+            if ZO_IsPlaystationPlatform() then
                 ZO_ShowConsoleInviteToGuildFromUserListSelector(guildId)
             else
                 local name = GetGuildName(guildId)

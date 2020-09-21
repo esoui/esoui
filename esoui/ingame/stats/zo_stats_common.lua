@@ -105,9 +105,9 @@ end
 function ZO_Stats_Common:UpdateTitleDropdownTitles(dropdown)
     dropdown:ClearItems()
 
-    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_STATS_NO_TITLE), function() SelectTitle(nil) end), ZO_COMBOBOX_SUPRESS_UPDATE)
+    dropdown:AddItem(ZO_ComboBox:CreateItemEntry(GetString(SI_STATS_NO_TITLE), function() SelectTitle(nil) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
     for i=1, GetNumTitles() do
-        dropdown:AddItem(ZO_ComboBox:CreateItemEntry(zo_strformat(GetTitle(i), GetRawUnitName("player")) , function() SelectTitle(i) end), ZO_COMBOBOX_SUPRESS_UPDATE)
+        dropdown:AddItem(ZO_ComboBox:CreateItemEntry(zo_strformat(GetTitle(i), GetRawUnitName("player")) , function() SelectTitle(i) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     dropdown:UpdateItems()

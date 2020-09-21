@@ -11,6 +11,14 @@ ZO_PARAMETRIC_MOVEMENT_TYPES =
     LAST = 5,
 }
 
+ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR =
+{
+    RESELECT_OLD_INDEX = 1,
+    RESET_TO_DEFAULT = 2,
+    MATCH_OR_RESELECT_OLD_INDEX = 3,
+    MATCH_OR_RESET_TO_DEFAULT = 4,
+}
+
 ZO_ParametricScrollList = ZO_CallbackObject:Subclass()
 
 --[[ Public  API ]]--
@@ -72,6 +80,7 @@ function ZO_ParametricScrollList:Initialize(control, mode, onActivatedChangedFun
     self.handleDynamicViewProperties = false
     self.validGradientDirty = true
     self.anchorOppositeSide = false
+    self.reselectBehavior = ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESELECT_OLD_INDEX
 
     self:SetActive(false)
     self.enabled = true
@@ -190,6 +199,10 @@ function ZO_ParametricScrollList:SetEqualityFunction(templateName, equalityFunct
     end
 end
 
+function ZO_ParametricScrollList:SetReselectBehavior(reselectBehavior)
+    self.reselectBehavior = reselectBehavior
+end
+
 function ZO_ParametricScrollList:AddEntryAtIndex(index, templateName, data, prePadding, postPadding, preSelectedOffsetAdditionalPadding, postSelectedOffsetAdditionalPadding, selectedCenterOffset)
     if self.dataTypes[templateName] then
         --Keep these parallel arrays in sync with RemoveEntry below
@@ -226,6 +239,14 @@ end
 
 function ZO_ParametricScrollList:GetNumEntries()
     return #self.dataList
+end
+
+function ZO_ParametricScrollList:HasEntries()
+    return #self.dataList > 0
+end
+
+function ZO_ParametricScrollList:IsEmpty()
+    return #self.dataList == 0
 end
 
 function ZO_ParametricScrollList:GetEntryData(index)
@@ -284,6 +305,10 @@ end
 
 function ZO_ParametricScrollList:RemoveAllOnSelectedDataChangedCallbacks()
     self:UnregisterAllCallbacks("SelectedDataChanged")
+end
+
+function ZO_ParametricScrollList:SetOnHitBeginningOfListCallback(onHitBeginningOfListCallback)
+    self:RegisterCallback("HitBeginningOfList", onHitBeginningOfListCallback)
 end
 
 function ZO_ParametricScrollList:SetDrawScrollArrows(drawScrollArrows)
@@ -673,7 +698,7 @@ local function FindMatchingIndex(oldSelectedData, newDataList, equalityFunction,
         end
     end
 
-    return oldSelectedIndex
+    return nil
 end
 
 function ZO_ParametricScrollList:SetKeyForNextCommit(key)
@@ -699,52 +724,57 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
             table.sort(self.dataList, self.sortFunction)
         end
 
-        local nextSelectedIndex
-        if self.nextCommitHistoryKey then
-            local nextCommitHistory = self.commitHistoryDictionary[self.nextCommitHistoryKey]
-            if nextCommitHistory then
-                nextSelectedIndex = nextCommitHistory.selectedIndex
-            end
+        local nextSelectedIndex = nil
+        if dontReselect or self.reselectBehavior == ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.RESET_TO_DEFAULT then
+            nextSelectedIndex = self.defaultSelectedIndex
         else
-            nextSelectedIndex = self.oldSelectedIndex
-        end
-        
-        local matchingIndex = self.targetSelectedIndex or nextSelectedIndex or self.defaultSelectedIndex
-        if dontReselect then
-            matchingIndex = self.defaultSelectedIndex
-        else
-            local oldSelectedData, oldSelectedDataTemplate
-
-            if self.nextCommitHistoryKey and self.nextCommitHistoryKey ~= self.currentCommitHistoryKey then
+            if self.nextCommitHistoryKey then
                 local nextCommitHistory = self.commitHistoryDictionary[self.nextCommitHistoryKey]
                 if nextCommitHistory then
-                    oldSelectedData, oldSelectedDataTemplate = nextCommitHistory.data, nextCommitHistory.template
+                    nextSelectedIndex = nextCommitHistory.selectedIndex
                 end
             else
-                oldSelectedData, oldSelectedDataTemplate = self.oldSelectedData, self.oldSelectedDataTemplate
+                nextSelectedIndex = self.oldSelectedIndex
             end
 
-            if oldSelectedDataTemplate then
-                local equalityFunction = self.dataTypes[oldSelectedDataTemplate].equalityFunction
-                matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, equalityFunction, matchingIndex)
+            nextSelectedIndex = nextSelectedIndex or self.defaultSelectedIndex
 
-                if matchingIndex > dataListSize then
-                    matchingIndex = dataListSize
+            if self.reselectBehavior == ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESELECT_OLD_INDEX or self.reselectBehavior == ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT then
+                local oldSelectedData, oldSelectedDataTemplate
+
+                if self.nextCommitHistoryKey and self.nextCommitHistoryKey ~= self.currentCommitHistoryKey then
+                    local nextCommitHistory = self.commitHistoryDictionary[self.nextCommitHistoryKey]
+                    if nextCommitHistory then
+                        oldSelectedData, oldSelectedDataTemplate = nextCommitHistory.data, nextCommitHistory.template
+                    end
+                else
+                    oldSelectedData, oldSelectedDataTemplate = self.oldSelectedData, self.oldSelectedDataTemplate
+                end
+
+                if oldSelectedDataTemplate then
+                    local equalityFunction = self.dataTypes[oldSelectedDataTemplate].equalityFunction
+                    local matchingIndex = FindMatchingIndex(oldSelectedData, self.dataList, equalityFunction, nextSelectedIndex)
+                    if matchingIndex then
+                        nextSelectedIndex = matchingIndex
+                    elseif self.reselectBehavior ==  ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT then
+                        nextSelectedIndex = self.defaultSelectedIndex
+                    end
+                    -- If neither condition was met, it was already set to the oldSelectedIndex/history key info (MATCH_OR_RESELECT_OLD_INDEX)
                 end
             end
         end
 
-        while (matchingIndex <= dataListSize) and (self:CanSelect(matchingIndex) == false) do
-            matchingIndex = matchingIndex + 1
+        while (nextSelectedIndex <= dataListSize) and (self:CanSelect(nextSelectedIndex) == false) do
+            nextSelectedIndex = nextSelectedIndex + 1
         end
-        if matchingIndex > dataListSize then
-            matchingIndex = dataListSize
+        if nextSelectedIndex > dataListSize then
+            nextSelectedIndex = dataListSize
         end
 
         local ALLOW_EVEN_IF_DISABLED = true
         local FORCE_ANIMATION = true
         local DEFAULT_JUMP_TYPE = nil
-        self:SetSelectedIndex(matchingIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION, DEFAULT_JUMP_TYPE, blockSelectionChangedCallback)
+        self:SetSelectedIndex(nextSelectedIndex, ALLOW_EVEN_IF_DISABLED, FORCE_ANIMATION, DEFAULT_JUMP_TYPE, blockSelectionChangedCallback)
 
         local INITIAL_UPDATE = true
         local RESELECTING_DURING_REBUILD = true
@@ -1415,10 +1445,6 @@ end
 
 function ZO_ParametricScrollList:SetGradient(gradientIndex, gradientSize)
     self.scrollControl:SetFadeGradient(gradientIndex, gradientSize)
-end
-
-function ZO_ParametricScrollList:IsEmpty()
-    return #self.dataList == 0
 end
 
 function ZO_ParametricScrollList:SetJumping(isJumping)

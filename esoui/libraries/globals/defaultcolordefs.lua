@@ -182,6 +182,19 @@ end
 
 do
     local itemColors = {}
+    local INCREASE_AMOUNT = 0.15
+    function GetBrightItemQualityColor(quality)
+        if not itemColors[quality] then
+            local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
+            r, g, b = zo_saturate(r + INCREASE_AMOUNT), zo_saturate(g + INCREASE_AMOUNT), zo_saturate(b + INCREASE_AMOUNT)
+            itemColors[quality] = ZO_ColorDef:New(r, g, b)
+        end
+        return itemColors[quality]
+    end
+end
+
+do
+    local itemColors = {}
     function GetItemQualityColor(displayQuality)
         if not itemColors[displayQuality] then
             itemColors[displayQuality] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
@@ -196,7 +209,7 @@ do
     function GetDimItemQualityColor(quality)
         if not itemColors[quality] then
             local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, quality)
-            r, g, b = zo_saturate(r - REDUCE_AMOUNT), zo_saturate(g - REDUCE_AMOUNT), zo_saturate(b - REDUCE_AMOUNT)    
+            r, g, b = zo_saturate(r - REDUCE_AMOUNT), zo_saturate(g - REDUCE_AMOUNT), zo_saturate(b - REDUCE_AMOUNT)
             itemColors[quality] = ZO_ColorDef:New(r, g, b)
         end
         return itemColors[quality]

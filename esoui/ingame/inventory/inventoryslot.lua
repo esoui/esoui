@@ -2676,10 +2676,10 @@ local InventoryDragStart =
             if not ZO_CraftingUtils_IsPerformingCraftProcess() then
                 local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
                 if bag and index then
-                    if ZO_RETRAIT_STATION_KEYBOARD then
+                    if ZO_RETRAIT_KEYBOARD then
                         local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
                         if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
-                            ZO_RETRAIT_STATION_KEYBOARD:RemoveItemFromCraft(bag, index)
+                            ZO_RETRAIT_KEYBOARD:RemoveItemFromCraft(bag, index)
                             PickupInventoryItem(bag, index)
                         end
                     end
@@ -2830,10 +2830,10 @@ local InventoryReceiveDrag =
                 local bagId, slotIndex = GetCursorBagId(), GetCursorSlotIndex()
                 if bagId and slotIndex then
                     ClearCursor()
-                    if ZO_RETRAIT_STATION_KEYBOARD then
+                    if ZO_RETRAIT_KEYBOARD then
                         local keyboardRetraitSceneName = SYSTEMS:GetKeyboardRootScene("retrait"):GetName()
                         if SCENE_MANAGER:IsShowing(keyboardRetraitSceneName) then
-                            ZO_RETRAIT_STATION_KEYBOARD:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
+                            ZO_RETRAIT_KEYBOARD:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
                         end
                     end
                     return true
@@ -2877,6 +2877,8 @@ function ZO_InventorySlot_TraitInfo_OnMouseEnter(control)
         InformationTooltip:AddLine(zo_strformat(SI_INVENTORY_TRAIT_STATUS_TOOLTIP, traitName, ZO_SELECTED_TEXT:Colorize(traitInformationString)), "", ZO_NORMAL_TEXT:UnpackRGB())
         if traitInformation == ITEM_TRAIT_INFORMATION_RETRAITED then
             InformationTooltip:AddLine(GetString(SI_INVENTORY_TRAIT_STATUS_RETRAITED_NOT_RESEARCHABLE), "", ZO_NORMAL_TEXT:UnpackRGB())
+        elseif traitInformation == ITEM_TRAIT_INFORMATION_RECONSTRUCTED then
+            InformationTooltip:AddLine(GetString(SI_INVENTORY_TRAIT_STATUS_RECONSTRUCTED_NOT_RESEARCHABLE), "", ZO_NORMAL_TEXT:UnpackRGB())
         end
     end
 end

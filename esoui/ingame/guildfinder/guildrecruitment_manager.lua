@@ -115,7 +115,7 @@ function ZO_GuildRecruitment_Manager.PopulateDropdown(dropDownControl, iterBegin
             if data.currentValue == value then
                 selectedEntryIndex = currentIndex
             end
-            dropDownControl:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            dropDownControl:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
             currentIndex = currentIndex + 1
         end
     end

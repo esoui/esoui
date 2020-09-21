@@ -1406,6 +1406,34 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
         end,
     },
 
+    {
+        callbackManager = ITEM_SET_COLLECTIONS_DATA_MANAGER,
+        callbackRegistration = "SlotsJustUnlocked",
+        callbackFunction = function(slotsJustUnlocked)
+            if #slotsJustUnlocked > 4 then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                messageParams:SetText(GetString(SI_ITEM_SET_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_ITEM_SET_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, #slotsJustUnlocked))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
+                return messageParams
+            else
+                local messageParamsObjects = {}
+                for _, slotJustUnlocked in ipairs(slotsJustUnlocked) do
+                    local itemSetCollectionData = ITEM_SET_COLLECTIONS_DATA_MANAGER:GetItemSetCollectionData(slotJustUnlocked.itemSetId)
+                    local itemSetCollectionPieceData = itemSetCollectionData:GetPieceDataBySlot(slotJustUnlocked.slot)
+
+                    local pieceName = itemSetCollectionPieceData:GetRawName()
+                    local icon = itemSetCollectionPieceData:GetIcon()
+
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
+                    messageParams:SetText(GetString(SI_ITEM_SET_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_ITEM_SET_COLLECTION_UPDATED_ANNOUNCEMENT_BODY, pieceName))
+                    messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+                    table.insert(messageParamsObjects, messageParams)
+                end
+                return unpack(messageParamsObjects)
+            end
+        end,
+    },
 }
 
 function ZO_CenterScreenAnnounce_GetCallbackHandlers()

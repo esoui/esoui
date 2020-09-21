@@ -59,16 +59,6 @@
             </Controls>
         </Control>
 
-        <Control name="ZO_AntiquityJournal_StatusIconDividedHeader" inherits="ZO_AntiquityJournal_StatusIconChildlessHeader" virtual="true">
-            <DimensionConstraints minX="300" minY="64" />
-            <Controls>
-                <Texture name="$(parent)DividerTexture" inherits="ZO_HorizontalDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-105" offsetY="ZO_ANTIQUITY_JOURNAL_SCRYABLE_DIVIDER_HEADER_OFFSET_Y" />
-                    <Dimensions x="380" />
-                </Texture>
-            </Controls>
-        </Control>
-
         <Texture name="ZO_AntiquityProgressIcon" level="2" virtual="true">
             <Dimensions x="28" y="28" />
         </Texture>
@@ -84,14 +74,6 @@
             </Controls>
         </Control>
 
-        <StatusBar name="ZO_AntiquityStatusBar" inherits="ZO_ArrowProgressBarWithBG" virtual="true">
-            <Controls>
-                <Label name="$(parent)Label" inherits="ZO_AntiquityLabel_Keyboard" font="ZoFontWinH4">
-                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-4" />
-                </Label>
-            </Controls>
-        </StatusBar>
-
         <Control name="ZO_AntiquityIcon" mouseEnabled="true" virtual="true">
             <Dimensions x="52" y="52" />
 
@@ -100,20 +82,20 @@
             </OnInitialized>
 
             <Controls>
-                <Texture name="$(parent)Backdrop" color="000000" level="4">
+                <Texture name="$(parent)Backdrop" color="000000">
                     <AnchorFill />
                 </Texture>
 
-                <Texture name="$(parent)Icon" level="5">
+                <Texture name="$(parent)Icon" level="1">
                     <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
                 </Texture>
 
-                <Texture name="$(parent)HighlightTexture" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" layer="OVERLAY">
+                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" level="2">
                     <AnchorFill />
                 </Texture>
 
-                <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS" level="7">
+                <Texture name="$(parent)HighlightTexture" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" level="3">
                     <AnchorFill />
                 </Texture>
             </Controls>
@@ -327,7 +309,7 @@
                                     <Anchor point="TOPLEFT" offsetX="40" />
                                 </Label>
 
-                                <StatusBar name="$(parent)Progress" inherits="ZO_AntiquityStatusBar">
+                                <StatusBar name="$(parent)Progress" inherits="ZO_ArrowProgressBarWithBG">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
                                     <Dimensions x="275" />
                                 </StatusBar>

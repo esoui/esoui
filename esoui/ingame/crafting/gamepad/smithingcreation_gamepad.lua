@@ -1,25 +1,29 @@
 local GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS = 1
 local GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE = 2
+local GAMEPAD_SMITHING_CREATION_OPTION_FILTER_QUESTS = 3
 
 local GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE = 1
 
-local g_filters =
+local optionFilterMaterials =
 {
-    [GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS] =
-    {
-        header = SI_GAMEPAD_SMITHING_FILTERS,
-        filterName = GetString(SI_SMITHING_HAVE_MATERIALS),
-        filterTooltip = GetString(SI_CRAFTING_HAVE_MATERIALS_TOOLTIP),
-        checked = false,
-    },
-
-    [GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE] =
-    {
-        filterName = GetString(SI_SMITHING_HAVE_KNOWLEDGE),
-        filterTooltip = GetString(SI_CRAFTING_HAVE_KNOWLEDGE_TOOLTIP),
-        checked = false,
-    },
+    header = SI_GAMEPAD_SMITHING_FILTERS,
+    filterName = GetString(SI_SMITHING_HAVE_MATERIALS),
+    filterTooltip = GetString(SI_CRAFTING_HAVE_MATERIALS_TOOLTIP),
+    checked = false,
 }
+local optionFilterKnowledge =
+{
+    filterName = GetString(SI_SMITHING_HAVE_KNOWLEDGE),
+    filterTooltip = GetString(SI_CRAFTING_HAVE_KNOWLEDGE_TOOLTIP),
+    checked = false,
+}
+local optionFilterQuests =
+{
+    filterName = GetString(SI_SMITHING_IS_QUEST_ITEM),
+    filterTooltip = GetString(SI_CRAFTING_IS_QUEST_ITEM_TOOLTIP),
+    checked = false,
+}
+
 
 local GAMEPAD_SMITHING_CREATION_OPTION_ACTION_CROWN_STORE = 1
 
@@ -311,9 +315,10 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
                 end,
 
         callback = function()
-            local haveMaterialChecked = g_filters[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].checked
-            local haveKnowledgeChecked = g_filters[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].checked
-            self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked, not  self:GetIsUsingUniversalStyleItem())
+            local haveMaterialChecked = optionFilterMaterials.checked
+            local haveKnowledgeChecked = optionFilterKnowledge.checked
+            local questOnlyChecked = optionFilterQuests.checked
+            self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked, not self:GetIsUsingUniversalStyleItem(), questOnlyChecked)
             self:RefreshStyleList()
             self:RefreshUniversalStyleItemTooltip()
         end,
@@ -579,6 +584,7 @@ function ZO_GamepadSmithingCreation:InitializeInventoryChangedCallback()
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
 end
 
+--TODO: Is this function even used?
 function ZO_GamepadSmithingCreation:UpdateOptionLeftTooltip(selectedData)
     if selectedData then
         if selectedData.optionType == GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE then
@@ -595,11 +601,13 @@ function ZO_GamepadSmithingCreation:SetupSavedVars()
         haveMaterialChecked = false,
         haveKnowledgeChecked = false,
         useUniversalStyleItemChecked = false,
+        questsOnlyChecked = false,
     }
-    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "GamepadSmithingCreation", defaults)
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 3, "GamepadSmithingCreation", defaults)
 
     self:AddCheckedStateToOption(GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS, self.savedVars.haveMaterialChecked)
     self:AddCheckedStateToOption(GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE, self.savedVars.haveKnowledgeChecked)
+    self:AddCheckedStateToOption(GAMEPAD_SMITHING_CREATION_OPTION_FILTER_QUESTS, self.savedVars.questsOnlyChecked)
 
     if self.savedVars.haveKnowledgeChecked then
         self:SelectValidKnowledgeIndices()
@@ -608,15 +616,24 @@ function ZO_GamepadSmithingCreation:SetupSavedVars()
 end
 
 function ZO_GamepadSmithingCreation:AddCheckedStateToOption(option, checkedState)
-    if g_filters[option] then
-        g_filters[option].checked = checkedState
+    if option == GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS then
+        optionFilterMaterials.checked = checkedState
+    elseif option == GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE then
+        optionFilterKnowledge.checked = checkedState
+    elseif option == GAMEPAD_SMITHING_CREATION_OPTION_FILTER_QUESTS then
+        optionFilterQuests.checked = checkedState
     end
 end
 
 function ZO_GamepadSmithingCreation:ShowOptionsMenu()
     local dialogData = 
     {
-        filters = g_filters,
+        filters = 
+        {
+            [GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS] = optionFilterMaterials,
+            [GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE] = optionFilterKnowledge,
+            [GAMEPAD_SMITHING_CREATION_OPTION_FILTER_QUESTS] = optionFilterQuests,
+        },
         globalActions = g_globalActions,
         finishedCallback =  function()
             self:SaveFilters()
@@ -630,14 +647,17 @@ function ZO_GamepadSmithingCreation:ShowOptionsMenu()
 end
 
 function ZO_GamepadSmithingCreation:SaveFilters()
-    local haveMaterialChecked = g_filters[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].checked
-    local haveKnowledgeChecked = g_filters[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].checked
+    local haveMaterialChecked = optionFilterMaterials.checked
+    local haveKnowledgeChecked = optionFilterKnowledge.checked
+    local questOnlyChecked = optionFilterQuests.checked
     local filterChanged = (haveMaterialChecked ~= self.savedVars.haveMaterialChecked) or
-                          (haveKnowledgeChecked ~= self.savedVars.haveKnowledgeChecked)
+                          (haveKnowledgeChecked ~= self.savedVars.haveKnowledgeChecked) or
+                          (questOnlyChecked ~= self.savedVars.questsOnlyChecked)
     if filterChanged then
-        self.savedVars.haveMaterialChecked = g_filters[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_MATERIALS].checked
-        self.savedVars.haveKnowledgeChecked = g_filters[GAMEPAD_SMITHING_CREATION_OPTION_FILTER_KNOWLEDGE].checked
-        self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked, self:GetIsUsingUniversalStyleItem())
+        self.savedVars.haveMaterialChecked = optionFilterMaterials.checked
+        self.savedVars.haveKnowledgeChecked = optionFilterKnowledge.checked
+        self.savedVars.questsOnlyChecked = optionFilterQuests.checked
+        self:OnFilterChanged(haveMaterialChecked, haveKnowledgeChecked, self:GetIsUsingUniversalStyleItem(), questOnlyChecked)
     end
 end
 

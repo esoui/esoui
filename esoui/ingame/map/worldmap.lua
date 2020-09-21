@@ -2156,21 +2156,21 @@ local function GetSquareMapWindowDimensions(dimension, widthDriven, mapSize)
         conformedWidth, conformedHeight = dimension - squareDiff, dimension
     end
 
-    local UIWidth, UIHeight = GuiRoot:GetDimensions()
+    local uiWidth, uiHeight = GuiRoot:GetDimensions()
     if conformedWidth < CONSTANTS.MAP_MIN_SIZE then
         conformedWidth = CONSTANTS.MAP_MIN_SIZE
         conformedHeight = conformedWidth + squareDiff
     end
-    if conformedWidth > UIWidth then
-        conformedWidth = UIWidth
+    if conformedWidth > uiWidth then
+        conformedWidth = uiWidth
         conformedHeight = conformedWidth + squareDiff
     end
     if conformedHeight < CONSTANTS.MAP_MIN_SIZE then
         conformedHeight = CONSTANTS.MAP_MIN_SIZE
         conformedWidth = conformedHeight - squareDiff
     end
-    if conformedHeight > UIHeight then
-        conformedHeight = UIHeight
+    if conformedHeight > uiHeight then
+        conformedHeight = uiHeight
         conformedWidth = conformedHeight - squareDiff
     end
 
@@ -2198,7 +2198,7 @@ local ZOOM_KEYBIND_STRIP_PADDING_Y = 10
 
 --this is a total hack function to fix sizing issues on gamepad PC until map can be redone
 local function GetGamepadAdjustedMapDimensions()
-    local UIWidth, UIHeight = GuiRoot:GetDimensions()
+    local uiWidth, uiHeight = GuiRoot:GetDimensions()
 
     -- Get location tooltip left, get info box right, calculate the difference, send that as your square.
     local left = GAMEPAD_WORLD_MAP_TOOLTIP_FRAGMENT.control:GetLeft()
@@ -2210,10 +2210,9 @@ local function GetGamepadAdjustedMapDimensions()
     local headerHeight = ZO_WorldMapHeader_Gamepad:GetNamedChild("ZoomKeybind"):GetHeight() + ZOOM_KEYBIND_STRIP_PADDING_Y -- use the zoomkeybind so we don't create a cyclical dependancy between the header title and map extants
     local buttonsHeight = ZO_WorldMapButtons:GetHeight()
     local keybindStripHeight = ZO_KeybindStripGamepadBackgroundTexture:GetHeight()
-    local safeHeight = UIHeight - ZO_GAMEPAD_SAFE_ZONE_INSET_Y - headerHeight - buttonsHeight - keybindStripHeight - padding
+    local safeHeight = uiHeight - ZO_GAMEPAD_SAFE_ZONE_INSET_Y - headerHeight - buttonsHeight - keybindStripHeight - padding
 
     newMapWidth = zo_min(newMapWidth, safeHeight)
-
 
     return newMapWidth, newMapWidth
 end
@@ -2285,8 +2284,8 @@ local function SetMapWindowSize(newWidth, newHeight)
 end
 
 local function ResizeAndReanchorMap()
-    local UIWidth, UIHeight = GuiRoot:GetDimensions()
-    ZO_WorldMap:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, UIWidth, UIHeight)
+    local uiWidth, uiHeight = GuiRoot:GetDimensions()
+    ZO_WorldMap:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, uiWidth, uiHeight)
 
     local modeData = WORLD_MAP_MANAGER:GetModeData()
 
@@ -2298,7 +2297,7 @@ local function ResizeAndReanchorMap()
         if modeData.keepSquare then
             newMapWidth, newMapHeight = GetSquareMapWindowDimensions(oldMapWidth, CONSTANTS.WORLDMAP_RESIZE_WIDTH_DRIVEN)
         else
-            newMapWidth, newMapHeight = zo_min(oldMapWidth, UIWidth), zo_min(oldMapHeight, UIHeight)
+            newMapWidth, newMapHeight = zo_min(oldMapWidth, uiWidth), zo_min(oldMapHeight, uiHeight)
         end
     end
     SetMapWindowSize(newMapWidth, newMapHeight)
@@ -2631,18 +2630,8 @@ function ZO_MapPanAndZoom:GetCurrentNormalizedZoom()
     return self.currentNormalizedZoom
 end
 
-do
-    --The actual zoom level we use to size things does not go linearly from min to mix. Going linearly causes the zoom to feel like it is moving very fast to start
-    --and then moving more and more slowly as we reach max zoom. To counteract this we treat the progression from min to max as a curve that increases more slowly to
-    --start and then faster later. Research has shown that the curve y=e^px best matches human expectations of an even zoom speed with a p value of 6^0.25 ~= 1.57. We
-    --normalized this curve so that y goes from 0 to 1 as x goes from 0 to 1 since we operate on a normalized value between min and max zoom.
-    local exp = math.exp
-    local P = 1.57
-    local DIVISOR = exp(P) - 1
-    function ZO_MapPanAndZoom:ComputeCurvedZoom(normalizedZoom)
-        normalizedZoom = (exp(P * normalizedZoom) - 1) / DIVISOR
-        return self.minZoom + normalizedZoom * (self.maxZoom - self.minZoom)
-    end
+function ZO_MapPanAndZoom:ComputeCurvedZoom(normalizedZoom)
+    return zo_lerp(self.minZoom, self.maxZoom, ZO_EaseNormalizedZoom(normalizedZoom))
 end
 
 function ZO_MapPanAndZoom:GetCurrentCurvedZoom()
@@ -4724,319 +4713,6 @@ do
         end
     end
 
-    --Initialize Keybinds
-    -----------------------
-    local function InitializeKeybinds(self)
-        local zoomKeybind = self:GetNamedChild("ZoomKeybind")
-        zoomKeybind:SetCustomKeyText(GetString(SI_WORLD_MAP_ZOOM_KEY))
-        zoomKeybind:SetText(GetString(SI_WORLD_MAP_ZOOM))
-        zoomKeybind:SetKeybindEnabledInEdit(true)
-        zoomKeybind:SetMouseOverEnabled(false)
-        g_keybindStrips.zoomKeybind = zoomKeybind
-
-        local function EndDigSiteReveal()
-            WORLD_MAP_MANAGER:EndDigSiteReveal()
-        end
-
-        local sharedKeybindStrip =
-        {
-            -- Recenter
-            {
-                name = GetString(SI_WORLD_MAP_CURRENT_LOCATION),
-                keybind = "UI_SHORTCUT_SECONDARY",
-                visible = function()
-                    return WORLD_MAP_MANAGER:IsMapChangingAllowed()
-                end,
-                enabled = function()
-                    return not WORLD_MAP_MANAGER:IsAutoNavigating()
-                end,
-                callback = function()
-                    if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
-                        local forceGameSelectedMap = false
-                        PlayerChosenMapUpdate(forceGameSelectedMap)
-                    end
-                    ZO_WorldMap_PanToPlayer()
-                end,
-            },
-        }
-
-        local function AddSharedKeybindStrip(descriptor)
-            for i, v in ipairs(sharedKeybindStrip) do
-                table.insert(descriptor, v)
-            end
-        end
-
-        local zoomPCDescriptor =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
-            -- Zoom
-            {
-                customKeybindControl = zoomKeybind,
-                keybind = "",
-                visible = function()
-                    return g_mapPanAndZoom:CanMapZoom() and not WORLD_MAP_MANAGER:IsAnimatingDigSites()
-                end,
-                enabled = function()
-                    return not WORLD_MAP_MANAGER:IsAutoNavigating()
-                end,
-            },
-            {
-                keybind = "UI_SHORTCUT_PRIMARY",
-                ethereal = true,
-                enabled = function()
-                    return WORLD_MAP_MANAGER:IsAnimatingDigSites()
-                end,
-                callback = EndDigSiteReveal,
-            },
-        }
-
-        AddSharedKeybindStrip(zoomPCDescriptor)
-
-        g_keybindStrips.PC = ZO_MapZoomKeybindStrip:New(self, zoomPCDescriptor)
-
-        local gamepadDescriptor =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
-            KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
-
-            -- Gamepad zoom in
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Gamepad World Map Zoom In",
-                keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
-                ethereal = true,
-            },
-            -- Gamepad zoom out
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Gamepad World Map Zoom Out",
-                keybind = "UI_SHORTCUT_LEFT_TRIGGER",
-                ethereal = true,
-            },
-            -- Gamepad go up a level on a map with floors
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Gamepad World Map Up Level",
-                keybind = "UI_SHORTCUT_LEFT_SHOULDER",
-                ethereal = true,
-                enabled = function()
-                    return not WORLD_MAP_MANAGER:IsPreventingMapNavigation()
-                end,
-                callback = function()
-                    local currentFloor, numFloors = GetMapFloorInfo()
-                    if numFloors > 0 and currentFloor ~= numFloors then
-                        ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsDown)
-                    else
-                        if WORLD_MAP_MANAGER:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT) and MapZoomOut() == SET_MAP_RESULT_MAP_CHANGED then
-                            g_gamepadMap:StopMotion()
-                            local NAVIGATE_OUT = false
-                            PlayerChosenMapUpdate(nil, NAVIGATE_OUT)
-                        end
-                    end
-                end,
-            },
-            -- Gamepad go down a level on a map with floors
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Gamepad World Map Down Level",
-                keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
-                ethereal = true,
-                enabled = function()
-                    return not WORLD_MAP_MANAGER:IsPreventingMapNavigation()
-                end,
-                callback = function()
-                    local currentFloor, numFloors = GetMapFloorInfo()
-                    if numFloors > 0 then
-                        ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsUp)
-                    else
-                        if WORLD_MAP_MANAGER:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN) and ProcessMapClick(NormalizePreferredMousePositionToMap()) == SET_MAP_RESULT_MAP_CHANGED then
-                            g_gamepadMap:StopMotion()
-                            local NAVIGATE_IN = true
-                            PlayerChosenMapUpdate(nil, NAVIGATE_IN)
-                        end
-                    end
-                end,
-            },
-            -- Gamepad selection of pins
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Gamepad World Map Select Pin",
-                ethereal = true,
-                keybind = "UI_SHORTCUT_PRIMARY",
-                enabled = function()
-                    if WORLD_MAP_MANAGER:IsAnimatingDigSites() then
-                        return true
-                    end
-                    return ZO_WorldMap_WouldPinHandleClick(nil, MOUSE_BUTTON_INDEX_LEFT) and not WORLD_MAP_MANAGER:IsAutoNavigating()
-                end,
-                callback = function()
-                    if WORLD_MAP_MANAGER:IsAnimatingDigSites() then
-                        EndDigSiteReveal()
-                    else
-                        ZO_WorldMap_HandlePinClicked(nil, MOUSE_BUTTON_INDEX_LEFT)
-                    end
-                end,
-            },
-            -- Gamepad bring up Quests, Locations etc
-            {
-                name = GetString(SI_GAMEPAD_WORLD_MAP_OPTIONS),
-                keybind = "UI_SHORTCUT_TERTIARY",
-                enabled = function()
-                    return not WORLD_MAP_MANAGER:IsPreventingMapNavigation()
-                end,
-                callback = function()
-                    ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
-
-                    -- Hide Legend if it is showing
-                    SCENE_MANAGER:RemoveFragment(GAMEPAD_WORLD_MAP_KEY_FRAGMENT)
-                    ZO_WorldMap_HideAllTooltips()
-
-                    -- Add the World Map Info
-                    GAMEPAD_WORLD_MAP_INFO:Show()
-                end,
-                sound = SOUNDS.GAMEPAD_MENU_FORWARD,
-            },
-            -- Gamepad navigate to Zone Stories
-            {
-                name = GetString(SI_ZONE_STORY_OPEN_FROM_MAP_ACTION),
-                keybind = "UI_SHORTCUT_QUATERNARY",
-                visible = function()
-                    local currentZoneIndex = GetCurrentMapZoneIndex()
-                    local zoneStoryZoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(currentZoneIndex)
-                    return zoneStoryZoneId ~= 0
-                end,
-                enabled = function()
-                    return not WORLD_MAP_MANAGER:IsPreventingMapNavigation()
-                end,
-                callback = function()
-                    local currentZoneIndex = GetCurrentMapZoneIndex()
-                    local zoneStoryZoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(currentZoneIndex)
-                    ZONE_STORIES_MANAGER:ShowZoneStoriesScene(zoneStoryZoneId)
-                end,
-                sound = SOUNDS.GAMEPAD_MENU_FORWARD,
-            },
-            -- Gamepad bring up keys/legend
-            {
-                name = GetString(SI_GAMEPAD_WORLD_MAP_LEGEND),
-                keybind = "UI_SHORTCUT_LEFT_STICK",
-                enabled = function()
-                    return not WORLD_MAP_MANAGER:IsPreventingMapNavigation()
-                end,
-                callback = function()
-                    if GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing() then
-                        SCENE_MANAGER:RemoveFragment(GAMEPAD_WORLD_MAP_KEY_FRAGMENT)
-                    else
-                        SCENE_MANAGER:AddFragment(GAMEPAD_WORLD_MAP_KEY_FRAGMENT)
-                        PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
-                    end
-                end,
-            },
-            -- Add Waypoint
-            {
-                name = function()
-                    if g_keybindStrips.gamepad:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
-                        return GetString(SI_WORLD_MAP_ACTION_REMOVE_PLAYER_WAYPOINT)
-                    else
-                        return GetString(SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT)
-                    end
-                end,
-                keybind = "UI_SHORTCUT_RIGHT_STICK",
-                visible = function()
-                    return not IsShowingCosmicMap() and IsMouseOverMap()
-                end,
-                callback = function()
-                    if g_keybindStrips.gamepad:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
-                        ZO_WorldMap_RemovePlayerWaypoint()
-                    else
-                        local x, y = NormalizePreferredMousePositionToMap()
-                        if ZO_WorldMap_IsNormalizedPointInsideMapBounds(x, y) then
-                            PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, x, y)
-                            g_keybindStrips.gamepad:DoMouseEnterForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
-                        end
-                    end
-                end,
-            }
-        }
-
-        AddSharedKeybindStrip(gamepadDescriptor)
-
-        -- Gamepad uses fake mouseover (the cursor acts like a mouse) events to handle tooltips and keybinds.
-        g_keybindStrips.gamepad = ZO_MapMouseoverKeybindStrip:New(self, gamepadDescriptor)
-
-        local gamepadDescriptorCloseOptions =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
-            -- Gamepad bring up Quests, Locations etc
-            {
-                --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
-                name = "Gamepad World Map Hide Info",
-                keybind = "UI_SHORTCUT_NEGATIVE",
-                ethereal = true,
-                callback = function()
-                    -- Remove the World Map Info
-                    KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseOptions:GetDescriptor())
-                    GAMEPAD_WORLD_MAP_INFO:Hide()
-                end,
-            },
-        }
-
-        -- Gamepad has an options mode. This is the keybind for closing the options
-        g_keybindStrips.gamepadCloseOptions = ZO_MapZoomKeybindStrip:New(self, gamepadDescriptorCloseOptions)
-
-        local gamepadDescriptorCloseKeep =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
-            -- Gamepad bring up Quests, Locations etc
-            {
-                keybind = "UI_SHORTCUT_NEGATIVE",
-                name = GetString(SI_GAMEPAD_BACK_OPTION),
-                callback = function()
-                    GAMEPAD_WORLD_MAP_KEEP_INFO:HideKeep()
-                end,
-            },
-        }
-
-        -- Gamepad has a keep mode. This is the keybind for closing the keep
-        g_keybindStrips.gamepadCloseKeep = ZO_MapZoomKeybindStrip:New(self, gamepadDescriptorCloseKeep)
-
-        local mouseoverDescriptor =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
-            -- Add Waypoint
-            {
-                name = function()
-                    if g_keybindStrips.mouseover:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
-                        return GetString(SI_WORLD_MAP_ACTION_REMOVE_PLAYER_WAYPOINT)
-                    else
-                        return GetString(SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT)
-                    end
-                end,
-                keybind = "UI_SHORTCUT_TERTIARY",
-                visible = function()
-                    return not IsShowingCosmicMap() and IsMouseOverMap()
-                end,
-                callback = function()
-                    if g_keybindStrips.mouseover:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
-                        ZO_WorldMap_RemovePlayerWaypoint()
-                    else
-                        local x, y = NormalizePreferredMousePositionToMap()
-                        if ZO_WorldMap_IsNormalizedPointInsideMapBounds(x, y) then
-                            PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, x, y)
-                            g_keybindStrips.mouseover:DoMouseEnterForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
-                        end
-                    end
-                end,
-            },
-        }
-
-        g_keybindStrips.mouseover = ZO_MapMouseoverKeybindStrip:New(self, mouseoverDescriptor)
-    end
-
     --Initialize Refresh Groups
     ----------------------------
 
@@ -5086,91 +4762,17 @@ do
 
     --Initialize
     ---------------
-
-    local function CreateWorldMapScene()
-        WORLD_MAP_SCENE = ZO_Scene:New("worldMap", SCENE_MANAGER)
-        WORLD_MAP_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_SHOWING then
-                g_keybindStrips.zoomKeybind:SetHidden(false)
-                SCENE_MANAGER:AddFragment(WORLD_MAP_ZONE_STORY_KEYBOARD_FRAGMENT)
-                KEYBIND_STRIP:AddKeybindButtonGroup(g_keybindStrips.PC:GetDescriptor())
-                if g_pendingKeepInfo then
-                    WORLD_MAP_KEEP_INFO:ShowKeep(g_pendingKeepInfo)
-                    g_pendingKeepInfo = nil
-                end
-            elseif newState == SCENE_HIDDEN then
-                g_keybindStrips.zoomKeybind:SetHidden(true)
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.PC:GetDescriptor())
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.mouseover:GetDescriptor())
-            end
-        end)
-    end
-
-    local function CreateGamepadWorldMapScene()
-        GAMEPAD_WORLD_MAP_SCENE = ZO_Scene:New("gamepad_worldMap", SCENE_MANAGER)
-        GAMEPAD_WORLD_MAP_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_SHOWING then
-                ZO_WorldMap_SetGamepadKeybindsShown(true)
-                SCENE_MANAGER:AddFragment(WORLD_MAP_ZONE_STORY_GAMEPAD_FRAGMENT)
-                if g_pendingKeepInfo then
-                    GAMEPAD_WORLD_MAP_KEEP_INFO:ShowKeep(g_pendingKeepInfo)
-                    g_pendingKeepInfo = nil
-                end
-                if ZO_WorldMapButtonsToggleSize then
-                    ZO_WorldMapButtonsToggleSize:SetHidden(true)
-                end
-            elseif newState == SCENE_HIDING then
-                ZO_WorldMap_SetDirectionalInputActive(false)
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepad:GetDescriptor())
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseOptions:GetDescriptor())
-            elseif newState == SCENE_HIDDEN then
-                g_gamepadMap:StopMotion()
-                if ZO_WorldMapButtonsToggleSize then
-                    ZO_WorldMapButtonsToggleSize:SetHidden(false)
-                end
-
-                ZO_SavePlayerConsoleProfile()
-                ZO_WorldMap_SetGamepadKeybindsShown(false)
-            end
-        end)
-    end
-
-    function ZO_WorldMap_Initialize(self)
-        g_mapLocationManager = ZO_MapLocations:New(ZO_WorldMapContainer)
-        g_mouseoverMapBlobManager = ZO_MouseoverMapBlobManager:New(ZO_WorldMapContainer)
-        g_mapTileManager = ZO_WorldMapTiles:New(ZO_WorldMapContainer)
-        g_mapPinManager = ZO_WorldMapPins:New(ZO_WorldMapContainer)
+    function ZO_WorldMap_Initialize(control)
+        local worldMapContainer = control:GetNamedChild("Container")
+        g_mapLocationManager = ZO_MapLocations:New(worldMapContainer)
+        g_mouseoverMapBlobManager = ZO_MouseoverMapBlobManager:New(worldMapContainer)
+        g_mapTileManager = ZO_WorldMapTiles:New(worldMapContainer)
+        g_mapPinManager = ZO_WorldMapPins:New(worldMapContainer)
         InitializeRefreshGroups()
 
         g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER, "player")
 
         g_nextRespawnTimeMS = GetNextForwardCampRespawnTime()
-
-        local function TryTriggeringTutorials()
-            if WORLD_MAP_FRAGMENT:IsShowing() then
-                local interactionType = GetInteractionType()
-                if interactionType == INTERACTION_NONE then
-                    local mapFilterType = GetMapFilterType()
-                    if mapFilterType == MAP_FILTER_TYPE_AVA_CYRODIIL then
-                        TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_CYRODIIL)
-                    elseif mapFilterType == MAP_FILTER_TYPE_AVA_IMPERIAL then
-                        TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_IMPERIAL_CITY)
-                    elseif mapFilterType == MAP_FILTER_TYPE_BATTLEGROUND then
-                        TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_BATTLEGROUND)
-                    else
-                        TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_PVE)
-                    end
-
-                    if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES) then
-                        TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_ANTIQUITY_DIG_SITES)
-                    end
-                elseif interactionType == INTERACTION_FAST_TRAVEL_KEEP then
-                    TriggerTutorial(TUTORIAL_TRIGGER_AVA_FAST_TRAVEL)
-                elseif interactionType == INTERACTION_FAST_TRAVEL then
-                    TriggerTutorial(TUTORIAL_TRIGGER_PVE_FAST_TRAVEL)
-                end
-            end
-        end
 
         --delay a lot of initialization until after the addon loads
         local function OnAddOnLoaded(eventCode, addOnName)
@@ -5386,8 +4988,8 @@ do
                 CALLBACK_MANAGER:FireCallbacks("OnWorldMapSavedVarsReady", g_savedVars)
 
                 --Constrain any bad custom sizes
-                local UIWidth, UIHeight = GuiRoot:GetDimensions()
-                if smallCustom.width > UIWidth or smallCustom.height > UIHeight then
+                local uiWidth, uiHeight = GuiRoot:GetDimensions()
+                if smallCustom.width > uiWidth or smallCustom.height > uiHeight then
                     smallCustom.width = DEFAULT_SMALL_WIDTH
                     smallCustom.height = DEFAULT_SMALL_HEIGHT
                 end
@@ -5429,19 +5031,12 @@ do
                     g_mapPanAndZoom:OnWorldMapChanged(wasNavigateIn)
                     ZO_WorldMap_MarkKeybindStripsDirty()
                     g_dataRegistration:Refresh()
-                    TryTriggeringTutorials()
+                    WORLD_MAP_MANAGER:TryTriggeringTutorials()
                 end)
             end
         end
 
         EVENT_MANAGER:RegisterForEvent("ZO_WorldMap_Add_On_Loaded", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-
-        -- NOTE: The update loop queries to see if it needs to update the current map, so we don't have to register for the ZONE_CHANGED event.
-        ZO_WorldMap:SetHandler("OnUpdate", Update)
-
-        --Constrain map to screen
-        local UIWidth, UIHeight = GuiRoot:GetDimensions()
-        ZO_WorldMap:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, UIWidth, UIHeight)
 
         --setup history
         ZO_WorldMapButtonsHistorySlider:SetMinMax(0, CONSTANTS.HISTORY_SLIDER_RANGE)
@@ -5461,41 +5056,12 @@ do
             end
         end)
 
-        --Information tooltip mixin
-        zo_mixin(InformationTooltip, InformationTooltipMixin)
-
-        --keybinds
-        InitializeKeybinds(self)
-
-        --world map fragment
-        WORLD_MAP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_WorldMap)
-        WORLD_MAP_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                            if newState == SCENE_FRAGMENT_SHOWING then
-                                                                UpdateMovingPins()
-                                                                g_dataRegistration:Refresh()
-                                                                g_mapPanAndZoom:OnWorldMapShowing()
-                                                                WORLD_MAP_MANAGER:OnShowing()
-                                                                TryTriggeringTutorials()
-                                                            elseif newState == SCENE_FRAGMENT_HIDING then
-                                                                HideAllTooltips()
-                                                                ResetMouseOverPins()
-                                                                WORLD_MAP_MANAGER:OnHiding()
-                                                            elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                                g_dataRegistration:Refresh()
-                                                                WORLD_MAP_MANAGER:OnHidden()
-                                                            end
-                                                        end)
-
-        --Scenes
-        CreateWorldMapScene()
-        CreateGamepadWorldMapScene()
-
         if GetKeepFastTravelInteraction() then
             CloseChatter()
         end
 
         --TODO: Move WAY more into the object
-        WORLD_MAP_MANAGER = ZO_WorldMapManager:New(self)
+        WORLD_MAP_MANAGER = ZO_WorldMapManager:New(control)
     end
 end
 
@@ -5768,6 +5334,13 @@ end
 function ZO_WorldMapManager:Initialize(control)
     self.control = control
 
+    -- NOTE: The update loop queries to see if it needs to update the current map, so we don't have to register for the ZONE_CHANGED event.
+    control:SetHandler("OnUpdate", Update)
+
+    --Constrain map to screen
+    local uiWidth, uiHeight = GuiRoot:GetDimensions()
+    control:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, uiWidth, uiHeight)
+
     self.autoNavigationState = AUTO_NAVIGATION_STATE.INACTIVE
     self.autoNavigationDelayUntilFrameTimeS = nil
 
@@ -5779,6 +5352,10 @@ function ZO_WorldMapManager:Initialize(control)
     self.mode = nil
     self.modeData = nil
     self.inSpecialMode = false
+
+    --Scenes
+    self:CreateKeyboardWorldMapScene()
+    self:CreateGamepadWorldMapScene()
 
     WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_WorldMapAutoNavigationOverlay)
     WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT:SetConditional(function() return self:IsPreventingMapNavigation() end)
@@ -5806,6 +5383,29 @@ function ZO_WorldMapManager:Initialize(control)
     WORLD_MAP_SCENE:AddFragment(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT)
     WORLD_MAP_SCENE:AddFragment(WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD)
     GAMEPAD_WORLD_MAP_SCENE:AddFragment(WORLD_MAP_AUTO_NAVIGATION_OVERLAY_FRAGMENT)
+
+    WORLD_MAP_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    WORLD_MAP_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            UpdateMovingPins()
+            g_dataRegistration:Refresh()
+            g_mapPanAndZoom:OnWorldMapShowing()
+            self:OnShowing()
+            self:TryTriggeringTutorials()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            HideAllTooltips()
+            ResetMouseOverPins()
+            self:OnHiding()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            g_dataRegistration:Refresh()
+            self:OnHidden()
+        end
+    end)
+
+    --Information tooltip mixin
+    zo_mixin(InformationTooltip, InformationTooltipMixin)
+
+    self:InitializeKeybinds()
 
     self:RegisterForEvents()
 
@@ -5866,6 +5466,54 @@ function ZO_WorldMapManager:Update(currentFrameTimeS)
     self:RefreshAntiquityDigSitePings(currentFrameTimeS)
 end
 
+function ZO_WorldMapManager:CreateKeyboardWorldMapScene()
+    WORLD_MAP_SCENE = ZO_Scene:New("worldMap", SCENE_MANAGER)
+    WORLD_MAP_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            g_keybindStrips.zoomKeybind:SetHidden(false)
+            SCENE_MANAGER:AddFragment(WORLD_MAP_ZONE_STORY_KEYBOARD_FRAGMENT)
+            KEYBIND_STRIP:AddKeybindButtonGroup(g_keybindStrips.PC:GetDescriptor())
+            if g_pendingKeepInfo then
+                WORLD_MAP_KEEP_INFO:ShowKeep(g_pendingKeepInfo)
+                g_pendingKeepInfo = nil
+            end
+        elseif newState == SCENE_HIDDEN then
+            g_keybindStrips.zoomKeybind:SetHidden(true)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.PC:GetDescriptor())
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.mouseover:GetDescriptor())
+        end
+    end)
+end
+
+function ZO_WorldMapManager:CreateGamepadWorldMapScene()
+    GAMEPAD_WORLD_MAP_SCENE = ZO_Scene:New("gamepad_worldMap", SCENE_MANAGER)
+    GAMEPAD_WORLD_MAP_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            ZO_WorldMap_SetGamepadKeybindsShown(true)
+            SCENE_MANAGER:AddFragment(WORLD_MAP_ZONE_STORY_GAMEPAD_FRAGMENT)
+            if g_pendingKeepInfo then
+                GAMEPAD_WORLD_MAP_KEEP_INFO:ShowKeep(g_pendingKeepInfo)
+                g_pendingKeepInfo = nil
+            end
+            if ZO_WorldMapButtonsToggleSize then
+                ZO_WorldMapButtonsToggleSize:SetHidden(true)
+            end
+        elseif newState == SCENE_HIDING then
+            ZO_WorldMap_SetDirectionalInputActive(false)
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepad:GetDescriptor())
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseOptions:GetDescriptor())
+        elseif newState == SCENE_HIDDEN then
+            g_gamepadMap:StopMotion()
+            if ZO_WorldMapButtonsToggleSize then
+                ZO_WorldMapButtonsToggleSize:SetHidden(false)
+            end
+
+            ZO_SavePlayerConsoleProfile()
+            ZO_WorldMap_SetGamepadKeybindsShown(false)
+        end
+    end)
+end
+
 function ZO_WorldMapManager:OnShowing()
     self:FireCallbacks("Showing")
 end
@@ -5883,6 +5531,317 @@ end
 
 function ZO_WorldMapManager:OnWorldMapChanged()
     self:HidePinPointerBox()
+end
+
+function ZO_WorldMapManager:InitializeKeybinds()
+    local zoomKeybind = self.control:GetNamedChild("ZoomKeybind")
+    zoomKeybind:SetCustomKeyText(GetString(SI_WORLD_MAP_ZOOM_KEY))
+    zoomKeybind:SetText(GetString(SI_WORLD_MAP_ZOOM))
+    zoomKeybind:SetKeybindEnabledInEdit(true)
+    zoomKeybind:SetMouseOverEnabled(false)
+    g_keybindStrips.zoomKeybind = zoomKeybind
+
+    local function EndDigSiteReveal()
+        self:EndDigSiteReveal()
+    end
+
+    local sharedKeybindStrip =
+    {
+        -- Recenter
+        {
+            name = GetString(SI_WORLD_MAP_CURRENT_LOCATION),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            visible = function()
+                return self:IsMapChangingAllowed()
+            end,
+            enabled = function()
+                return not self:IsAutoNavigating()
+            end,
+            callback = function()
+                if SetMapToPlayerLocation() == SET_MAP_RESULT_MAP_CHANGED then
+                    local forceGameSelectedMap = false
+                    PlayerChosenMapUpdate(forceGameSelectedMap)
+                end
+                ZO_WorldMap_PanToPlayer()
+            end,
+        },
+    }
+
+    local function AddSharedKeybindStrip(descriptor)
+        for i, v in ipairs(sharedKeybindStrip) do
+            table.insert(descriptor, v)
+        end
+    end
+
+    local zoomPCDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+        -- Zoom
+        {
+            customKeybindControl = zoomKeybind,
+            keybind = "",
+            visible = function()
+                return g_mapPanAndZoom:CanMapZoom() and not self:IsAnimatingDigSites()
+            end,
+            enabled = function()
+                return not self:IsAutoNavigating()
+            end,
+        },
+        {
+            keybind = "UI_SHORTCUT_PRIMARY",
+            ethereal = true,
+            enabled = function()
+                return self:IsAnimatingDigSites()
+            end,
+            callback = EndDigSiteReveal,
+        },
+    }
+
+    AddSharedKeybindStrip(zoomPCDescriptor)
+
+    g_keybindStrips.PC = ZO_MapZoomKeybindStrip:New(self.control, zoomPCDescriptor)
+
+    local gamepadDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
+
+        -- Gamepad zoom in
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Zoom In",
+            keybind = "UI_SHORTCUT_RIGHT_TRIGGER",
+            ethereal = true,
+        },
+        -- Gamepad zoom out
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Zoom Out",
+            keybind = "UI_SHORTCUT_LEFT_TRIGGER",
+            ethereal = true,
+        },
+        -- Gamepad go up a level on a map with floors
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Up Level",
+            keybind = "UI_SHORTCUT_LEFT_SHOULDER",
+            ethereal = true,
+            enabled = function()
+                return not self:IsPreventingMapNavigation()
+            end,
+            callback = function()
+                local currentFloor, numFloors = GetMapFloorInfo()
+                if numFloors > 0 and currentFloor ~= numFloors then
+                    ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsDown)
+                else
+                    if self:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_OUT) and MapZoomOut() == SET_MAP_RESULT_MAP_CHANGED then
+                        g_gamepadMap:StopMotion()
+                        local NAVIGATE_OUT = false
+                        PlayerChosenMapUpdate(nil, NAVIGATE_OUT)
+                    end
+                end
+            end,
+        },
+        -- Gamepad go down a level on a map with floors
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Down Level",
+            keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
+            ethereal = true,
+            enabled = function()
+                return not self:IsPreventingMapNavigation()
+            end,
+            callback = function()
+                local currentFloor, numFloors = GetMapFloorInfo()
+                if numFloors > 0 then
+                    ZO_WorldMap_ChangeFloor(ZO_WorldMapButtonsFloorsUp)
+                else
+                    if self:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN) and ProcessMapClick(NormalizePreferredMousePositionToMap()) == SET_MAP_RESULT_MAP_CHANGED then
+                        g_gamepadMap:StopMotion()
+                        local NAVIGATE_IN = true
+                        PlayerChosenMapUpdate(nil, NAVIGATE_IN)
+                    end
+                end
+            end,
+        },
+        -- Gamepad selection of pins
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Select Pin",
+            ethereal = true,
+            keybind = "UI_SHORTCUT_PRIMARY",
+            enabled = function()
+                if WORLD_MAP_MANAGER:IsAnimatingDigSites() then
+                    return true
+                end
+                return ZO_WorldMap_WouldPinHandleClick(nil, MOUSE_BUTTON_INDEX_LEFT) and not self:IsAutoNavigating()
+            end,
+            callback = function()
+                if WORLD_MAP_MANAGER:IsAnimatingDigSites() then
+                    EndDigSiteReveal()
+                else
+                    ZO_WorldMap_HandlePinClicked(nil, MOUSE_BUTTON_INDEX_LEFT)
+                end
+            end,
+        },
+        -- Gamepad bring up Quests, Locations etc
+        {
+            name = GetString(SI_GAMEPAD_WORLD_MAP_OPTIONS),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            enabled = function()
+                return not self:IsPreventingMapNavigation()
+            end,
+            callback = function()
+                ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
+
+                -- Hide Legend if it is showing
+                SCENE_MANAGER:RemoveFragment(GAMEPAD_WORLD_MAP_KEY_FRAGMENT)
+                ZO_WorldMap_HideAllTooltips()
+
+                -- Add the World Map Info
+                GAMEPAD_WORLD_MAP_INFO:Show()
+            end,
+            sound = SOUNDS.GAMEPAD_MENU_FORWARD,
+        },
+        -- Gamepad navigate to Zone Stories
+        {
+            name = GetString(SI_ZONE_STORY_OPEN_FROM_MAP_ACTION),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            visible = function()
+                local currentZoneIndex = GetCurrentMapZoneIndex()
+                local zoneStoryZoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(currentZoneIndex)
+                return zoneStoryZoneId ~= 0
+            end,
+            enabled = function()
+                return not self:IsPreventingMapNavigation()
+            end,
+            callback = function()
+                local currentZoneIndex = GetCurrentMapZoneIndex()
+                local zoneStoryZoneId = ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(currentZoneIndex)
+                ZONE_STORIES_MANAGER:ShowZoneStoriesScene(zoneStoryZoneId)
+            end,
+            sound = SOUNDS.GAMEPAD_MENU_FORWARD,
+        },
+        -- Gamepad bring up keys/legend
+        {
+            name = GetString(SI_GAMEPAD_WORLD_MAP_LEGEND),
+            keybind = "UI_SHORTCUT_LEFT_STICK",
+            enabled = function()
+                return not self:IsPreventingMapNavigation()
+            end,
+            callback = function()
+                if GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing() then
+                    SCENE_MANAGER:RemoveFragment(GAMEPAD_WORLD_MAP_KEY_FRAGMENT)
+                else
+                    SCENE_MANAGER:AddFragment(GAMEPAD_WORLD_MAP_KEY_FRAGMENT)
+                    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+                end
+            end,
+        },
+        -- Add Waypoint
+        {
+            name = function()
+                if g_keybindStrips.gamepad:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
+                    return GetString(SI_WORLD_MAP_ACTION_REMOVE_PLAYER_WAYPOINT)
+                else
+                    return GetString(SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT)
+                end
+            end,
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            visible = function()
+                return not IsShowingCosmicMap() and IsMouseOverMap()
+            end,
+            callback = function()
+                if g_keybindStrips.gamepad:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
+                    ZO_WorldMap_RemovePlayerWaypoint()
+                else
+                    local x, y = NormalizePreferredMousePositionToMap()
+                    if ZO_WorldMap_IsNormalizedPointInsideMapBounds(x, y) then
+                        PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, x, y)
+                        g_keybindStrips.gamepad:DoMouseEnterForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
+                    end
+                end
+            end,
+        }
+    }
+
+    AddSharedKeybindStrip(gamepadDescriptor)
+
+    -- Gamepad uses fake mouseover (the cursor acts like a mouse) events to handle tooltips and keybinds.
+    g_keybindStrips.gamepad = ZO_MapMouseoverKeybindStrip:New(self.control, gamepadDescriptor)
+
+    local gamepadDescriptorCloseOptions =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        -- Gamepad bring up Quests, Locations etc
+        {
+            --Ethereal binds show no text, the name field is used to help identify the keybind when debugging. This text does not have to be localized.
+            name = "Gamepad World Map Hide Info",
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            ethereal = true,
+            callback = function()
+                -- Remove the World Map Info
+                KEYBIND_STRIP:RemoveKeybindButtonGroup(g_keybindStrips.gamepadCloseOptions:GetDescriptor())
+                GAMEPAD_WORLD_MAP_INFO:Hide()
+            end,
+        },
+    }
+
+    -- Gamepad has an options mode. This is the keybind for closing the options
+    g_keybindStrips.gamepadCloseOptions = ZO_MapZoomKeybindStrip:New(self.control, gamepadDescriptorCloseOptions)
+
+    local gamepadDescriptorCloseKeep =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+        -- Gamepad bring up Quests, Locations etc
+        {
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            name = GetString(SI_GAMEPAD_BACK_OPTION),
+            callback = function()
+                GAMEPAD_WORLD_MAP_KEEP_INFO:HideKeep()
+            end,
+        },
+    }
+
+    -- Gamepad has a keep mode. This is the keybind for closing the keep
+    g_keybindStrips.gamepadCloseKeep = ZO_MapZoomKeybindStrip:New(self.control, gamepadDescriptorCloseKeep)
+
+    local mouseoverDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+        -- Add Waypoint
+        {
+            name = function()
+                if g_keybindStrips.mouseover:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
+                    return GetString(SI_WORLD_MAP_ACTION_REMOVE_PLAYER_WAYPOINT)
+                else
+                    return GetString(SI_WORLD_MAP_ACTION_SET_PLAYER_WAYPOINT)
+                end
+            end,
+            keybind = "UI_SHORTCUT_TERTIARY",
+            visible = function()
+                return not IsShowingCosmicMap() and IsMouseOverMap()
+            end,
+            callback = function()
+                if g_keybindStrips.mouseover:IsOverPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) then
+                    ZO_WorldMap_RemovePlayerWaypoint()
+                else
+                    local x, y = NormalizePreferredMousePositionToMap()
+                    if ZO_WorldMap_IsNormalizedPointInsideMapBounds(x, y) then
+                        PingMap(MAP_PIN_TYPE_PLAYER_WAYPOINT, MAP_TYPE_LOCATION_CENTERED, x, y)
+                        g_keybindStrips.mouseover:DoMouseEnterForPinType(MAP_PIN_TYPE_PLAYER_WAYPOINT) -- this should have been called by the mouseover update, but it's not getting called
+                    end
+                end
+            end,
+        },
+    }
+
+    g_keybindStrips.mouseover = ZO_MapMouseoverKeybindStrip:New(self.control, mouseoverDescriptor)
 end
 
 --
@@ -6556,3 +6515,29 @@ end
 --
 -- End Map Mode Functions
 --
+
+function ZO_WorldMapManager:TryTriggeringTutorials()
+    if WORLD_MAP_FRAGMENT:IsShowing() then
+        local interactionType = GetInteractionType()
+        if interactionType == INTERACTION_NONE then
+            local mapFilterType = GetMapFilterType()
+            if mapFilterType == MAP_FILTER_TYPE_AVA_CYRODIIL then
+                TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_CYRODIIL)
+            elseif mapFilterType == MAP_FILTER_TYPE_AVA_IMPERIAL then
+                TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_IMPERIAL_CITY)
+            elseif mapFilterType == MAP_FILTER_TYPE_BATTLEGROUND then
+                TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_BATTLEGROUND)
+            else
+                TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_PVE)
+            end
+
+            if self:IsInMode(MAP_MODE_DIG_SITES) then
+                TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_ANTIQUITY_DIG_SITES)
+            end
+        elseif interactionType == INTERACTION_FAST_TRAVEL_KEEP then
+            TriggerTutorial(TUTORIAL_TRIGGER_AVA_FAST_TRAVEL)
+        elseif interactionType == INTERACTION_FAST_TRAVEL then
+            TriggerTutorial(TUTORIAL_TRIGGER_PVE_FAST_TRAVEL)
+        end
+    end
+end

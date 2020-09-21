@@ -52,6 +52,8 @@ EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.lua
 
 EsoUI\Ingame\Gamepad\GamepadGamercard.lua
 
+EsoUI\Ingame\Inventory\ItemFilterUtils.lua
+
 EsoUI\Ingame\Inventory\Gamepad\InventoryUtils_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\InventoryList_Gamepad.lua
 
@@ -70,6 +72,9 @@ EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.lua
 EsoUI\Ingame\PlayerProgressBar\PlayerProgressBar.xml
 
 EsoUI\Ingame\Collections\CollectibleDataManager.lua
+EsoUI\Ingame\Collections\ItemSetCollectionsData.lua
+EsoUI\Ingame\Collections\ItemSetCollectionsDataManager.lua
+EsoUI\Ingame\Collections\ItemSetCollectionsManager.lua
 
 EsoUI\Ingame\Skills\SkillsDataManager.lua
 EsoUI\Ingame\Skills\SkillsAndActionBarManager.lua
@@ -560,6 +565,7 @@ EsoUI\Ingame\Restyle\Gamepad\Restyle_Station_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Staging_Equipment_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.xml
 
+
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
 
@@ -568,6 +574,15 @@ EsoUI\Ingame\Outfits\Keyboard\OutfitStylesPanel_Keyboard.xml
 
 EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\OutfitStylesBook_Keyboard.xml
+
+EsoUI\Ingame\Collections\ItemSetsBook_Shared.lua
+EsoUI\Ingame\Collections\ItemSetsBook_Shared.xml
+EsoUI\Ingame\Collections\Keyboard\ItemSetCollectionPieceTile_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\ItemSetCollectionPieceTile_Keyboard.xml
+EsoUI\Ingame\Collections\Keyboard\ItemSetsBook_Keyboard.lua
+EsoUI\Ingame\Collections\Keyboard\ItemSetsBook_Keyboard.xml
+EsoUI\Ingame\Collections\Gamepad\ItemSetsBook_Gamepad.lua
+EsoUI\Ingame\Collections\Gamepad\ItemSetsBook_Gamepad.xml
 
 EsoUI\Ingame\ChapterUpgrade\ChapterUpgradeUtils.lua
 EsoUI\Ingame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.lua
@@ -713,6 +728,13 @@ EsoUI\Ingame\Crafting\Keyboard\CraftingUtils_Keyboard.lua
 EsoUI\Ingame\Crafting\Keyboard\CraftingUtils_Keyboard.xml
 EsoUI\Ingame\Crafting\Gamepad\CraftingUtils_Gamepad.lua
 EsoUI\Ingame\Crafting\Gamepad\CraftingUtils_Gamepad.xml
+EsoUI\Ingame\Crafting\CraftAdvisor_Manager.lua
+EsoUI\Ingame\Crafting\Gamepad\CraftAdvisor_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\CraftAdvisor_Gamepad.xml
+EsoUI\Ingame\Crafting\Keyboard\CraftAdvisor_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\CraftAdvisor_Keyboard.xml
+EsoUI\Ingame\Crafting\Keyboard\CraftAdvisor_ActiveWrit_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\CraftAdvisor_ActiveWrit_Keyboard.xml
 
 EsoUI\Ingame\Crafting\CraftingCreateSlotAnimation.lua
 EsoUI\Ingame\Crafting\CraftingEnchantExtractSlotAnimation.lua
@@ -726,6 +748,8 @@ EsoUI\Ingame\Crafting\Keyboard\CraftingInventory.xml
 EsoUI\Ingame\Crafting\Gamepad\GamepadCraftingInventory.lua
 EsoUI\Ingame\Crafting\Gamepad\GamepadCraftingInventory.xml
 
+EsoUI\Ingame\Crafting\Gamepad\CraftingAlertText_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\CraftingAlertText_Gamepad.xml
 EsoUI\Ingame\Crafting\CraftingResults_Base.lua
 EsoUI\Ingame\Crafting\CraftingResults_Base.xml
 EsoUI\Ingame\Crafting\Gamepad\CraftingResults_Gamepad.lua
@@ -790,10 +814,17 @@ EsoUI\Ingame\Crafting\Gamepad\Smithing_Gamepad.xml
 
 EsoUI\Ingame\Retrait\ZO_RetraitStation_Manager.lua
 EsoUI\Ingame\Retrait\ZO_RetraitStation_Retrait_Base.lua
+EsoUI\Ingame\Retrait\RetraitStation_Reconstruct_Dialogs.lua
 EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Retrait_Keyboard.lua
 EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Retrait_Keyboard.xml
+EsoUI\Ingame\Retrait\Keyboard\RetraitStation_Reconstruct_Dialogs_Keyboard.xml
+EsoUI\Ingame\Retrait\Keyboard\RetraitStation_Reconstruct_Keyboard.lua
+EsoUI\Ingame\Retrait\Keyboard\RetraitStation_Reconstruct_Keyboard.xml
 EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Retrait_Gamepad.lua
 EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Retrait_Gamepad.xml
+EsoUI\Ingame\Retrait\Gamepad\RetraitStation_Reconstruct_Dialogs_Gamepad.xml
+EsoUI\Ingame\Retrait\Gamepad\RetraitStation_Reconstruct_Gamepad.lua
+EsoUI\Ingame\Retrait\Gamepad\RetraitStation_Reconstruct_Gamepad.xml
 
 EsoUI\Ingame\Retrait\ZO_RetraitStation_Base.lua
 EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Keyboard.lua

@@ -6,37 +6,6 @@ local REQUEST_GOLD_ICON = "EsoUI/Art/Mail/Gamepad/gp_mailMenu_requestGold.dds"
 local ATTACHING_GOLD = "attach"
 local REQUESTING_GOLD = "request"
 
--- TODO: This needs to be figured out for localization.
-local LETTER_GROUPS =
-{
-    a = "A-E",
-    b = "A-E",
-    c = "A-E",
-    d = "A-E",
-    e = "A-E",
-    f = "F-J",
-    g = "F-J",
-    h = "F-J",
-    i = "F-J",
-    j = "F-J",
-    k = "K-O",
-    l = "K-O",
-    m = "K-O",
-    n = "K-O",
-    o = "K-O",
-    p = "P-T",
-    q = "P-T",
-    r = "P-T",
-    s = "P-T",
-    t = "P-T",
-    u = "U-Z",
-    v = "U-Z",
-    w = "U-Z",
-    x = "U-Z",
-    y = "U-Z",
-    z = "U-Z",
-}
-
 -- For a given inventory item, return the attachment slot index, or nil if the item is not attached.
 local function GetItemAttachedIndex(bagId, slotIndex)
     for i = 1, MAIL_MAX_ATTACHED_ITEMS do
@@ -82,7 +51,7 @@ end
 -- Removes the item attached in the specified slot, behaving as design requested.
 local function RemoveQueuedAttachment(attachmentIndex)
     RemoveQueuedItemAttachment(attachmentIndex)
-    for i = attachmentIndex+1, MAIL_MAX_ATTACHED_ITEMS do
+    for i = attachmentIndex + 1, MAIL_MAX_ATTACHED_ITEMS do
         local queuedBagId, queuedSlotIndex = GetQueuedItemAttachmentInfo(i)
         if queuedBagId ~= 0 then -- Slot is filled.
             RemoveQueuedItemAttachment(i)
@@ -181,11 +150,11 @@ function ZO_MailSend_Gamepad:InitializeFragment()
     GAMEPAD_MAIL_SEND_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()
-        elseif(newState == SCENE_SHOWN) then
-            if(self.pendingMailChanged) then
+        elseif newState == SCENE_SHOWN then
+            if self.pendingMailChanged then
                 ZO_Dialogs_ShowGamepadDialog("MAIL_ATTACHMENTS_CHANGED")
                 self.pendingMailChanged = nil
-            end   
+            end
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             ZO_MailSendShared_SavePendingMail()
             self:OnHidden()
@@ -271,11 +240,11 @@ function ZO_MailSend_Gamepad:InitializeKeybindDescriptors()
                 end
 
                 for i = 1, self.mainList:GetNumItems() do
-		            local itemData = self.mainList:GetDataForDataIndex(i)
-		            if itemData.text and itemData.text == GetString(SI_MAIL_SEND_SEND) then
-			            itemData.disabled = not validEntry
-			            break
-		            end
+                    local itemData = self.mainList:GetDataForDataIndex(i)
+                    if itemData.text and itemData.text == GetString(SI_MAIL_SEND_SEND) then
+                        itemData.disabled = not validEntry
+                        break
+                    end
                 end
 
                 return isEnabled
@@ -392,13 +361,13 @@ function ZO_MailSend_Gamepad:InitializeKeybindDescriptors()
                         if attachedSlotIndex then -- Item is attached, detach it.
                             RemoveQueuedAttachment(attachedSlotIndex)
                             local soundCategory = GetItemSoundCategory(bagId, slotIndex)
-	                        PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
+                            PlayItemSound(soundCategory, ITEM_SOUND_ACTION_UNEQUIP)
                         else -- Item is not attached, attach it.
                             attachedSlotIndex = GetNextOpenAttachIndex()
                             if attachedSlotIndex then
                                 QueueItemAttachment(bagId, slotIndex, attachedSlotIndex)
                                 local soundCategory = GetItemSoundCategory(bagId, slotIndex)
-	                            PlayItemSound(soundCategory, ITEM_SOUND_ACTION_EQUIP)
+                                PlayItemSound(soundCategory, ITEM_SOUND_ACTION_EQUIP)
                             end
                         end
                     end,
@@ -501,10 +470,10 @@ end
 
 function ZO_MailSend_Gamepad:PopulateMainList()
     local function RefreshKeybind()
-		MAIL_MANAGER_GAMEPAD:RefreshKeybind()
-	end
+        MAIL_MANAGER_GAMEPAD:RefreshKeybind()
+    end
 
-	self.mainList:Clear()
+    self.mainList:Clear()
 
     self.onUserListDialogIdSelectedForMailTo = function(hasResult, displayName, consoleId)
         local editControl = self.mailView.addressEdit.edit
@@ -524,11 +493,10 @@ function ZO_MailSend_Gamepad:PopulateMainList()
             self.mailView.addressEdit.edit:TakeFocus()
         end
 
-        local platform = GetUIPlatform()
-        if platform == UI_PLATFORM_PS4 then
+        if ZO_IsPlaystationPlatform() then
             self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, userListCallback)
-        elseif platform == UI_PLATFORM_XBOX then
-            if(GetNumberConsoleFriends() > 0) then
+        elseif GetUIPlatform() == UI_PLATFORM_XBOX then
+            if GetNumberConsoleFriends() > 0 then
                 self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), userListCallback)
             else
                 self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), nil, nil, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), nil)
@@ -543,11 +511,11 @@ function ZO_MailSend_Gamepad:PopulateMainList()
     self:AddMainListEntry(GetString(SI_MAIL_SEND_ATTACH_MONEY), GetString(SI_GAMEPAD_MAIL_SEND_GOLD_HEADER), SEND_GOLD_ICON, function() self:ShowSliderControl(ATTACHING_GOLD, GetQueuedMoneyAttachment(), GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)) end)
     self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_COD), nil, REQUEST_GOLD_ICON, function() self:ShowSliderControl(REQUESTING_GOLD, GetQueuedCOD(), MAX_PLAYER_CURRENCY) end)
 
-	self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox) 
+    self.mailView.subjectEdit.edit:SetHandler("OnFocusLost", function(editBox) 
                                                                     RefreshKeybind()
                                                                     ZO_GamepadEditBox_FocusLost(editBox) 
                                                              end)
-	self.mailView.addressEdit.edit:SetHandler("OnFocusLost", function(editBox) 
+    self.mailView.addressEdit.edit:SetHandler("OnFocusLost", function(editBox) 
                                                                     RefreshKeybind()
                                                                     ZO_GamepadEditBox_FocusLost(editBox) 
                                                              end)
@@ -684,27 +652,9 @@ function ZO_MailSend_Gamepad:AddContact(text, header, callback)
     self.contactsList:AddEntry(template, newEntry)
 end
 
-local function GetHeaderForName(name)
-    for i=1, #name do
-        local letter = zo_strlower(string.sub(name, i, i))
-        local header = LETTER_GROUPS[letter]
-        if header then
-            return header
-        end
-    end
-end
-
-local function FriendSort(a,b)
-    return a < b
-end
-
 local RECIPIENT_HEADER_TEXT = GetString(SI_GAMEPAD_MAIL_SEND_RECIPIENT)
 
 function ZO_MailSend_Gamepad:EnterContactsList()
-    local function FillWithName(selectedData)
-        self.mailView:Display(nil, nil, selectedData.text)
-    end
-
     self.contactsList:Clear()
 
     -- Text edit

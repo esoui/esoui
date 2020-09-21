@@ -51,6 +51,7 @@ function ZO_Alchemy:InitializeScenes()
 
             TriggerTutorial(TUTORIAL_TRIGGER_ALCHEMY_OPENED)
             self.inventory:SetActiveFilterByDescriptor(nil)
+            self.inventory:UpdateMode()
 
             -- Reselect so we re-add the temporary fragment for the recipe mode
             -- and setup/update the tooltip and corresponding sounds correctly
@@ -62,6 +63,9 @@ function ZO_Alchemy:InitializeScenes()
             else
                 ZO_MenuBar_SelectDescriptor(self.modeBar, oldMode)
             end
+            if CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+                SCENE_MANAGER:AddFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
+            end
         elseif newState == SCENE_HIDDEN then
             ZO_InventorySlot_RemoveMouseOverKeybinds()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -69,6 +73,7 @@ function ZO_Alchemy:InitializeScenes()
             self.inventory:HandleDirtyEvent()
 
             CRAFTING_RESULTS:SetCraftingTooltip(nil)
+            SCENE_MANAGER:RemoveFragmentGroup(WRIT_ADVISOR_KEYBOARD_FRAGMENT_GROUP)
         end
     end)
 
@@ -109,7 +114,7 @@ function ZO_Alchemy:InitializeModeBar()
         "EsoUI/Art/Crafting/smithing_tabIcon_creation_disabled.dds"
     )
 
-    ZO_MenuBar_AddButton(self.modeBar, creationTab)
+    self.creationButton = ZO_MenuBar_AddButton(self.modeBar, creationTab)
 
     local recipeCraftingSystem = GetTradeskillRecipeCraftingSystem(CRAFTING_TYPE_ALCHEMY)
     local recipeCraftingSystemNameStringId = _G["SI_RECIPECRAFTINGSYSTEM"..recipeCraftingSystem]
@@ -118,7 +123,7 @@ function ZO_Alchemy:InitializeModeBar()
         ZO_ALCHEMY_MODE_RECIPES,
         GetKeyboardRecipeCraftingSystemButtonTextures(recipeCraftingSystem))
 
-    ZO_MenuBar_AddButton(self.modeBar, recipeTab)
+    self.recipeButton = ZO_MenuBar_AddButton(self.modeBar, recipeTab)
 
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
 
@@ -321,13 +326,23 @@ function ZO_Alchemy:SetMode(mode)
     end
 end
 
+function ZO_Alchemy:UpdateQuestPins()
+    if self.creationButton then
+        self.creationButton.questPin:SetHidden(not self:HasValidCombinationForQuest())
+    end
+
+    if self.recipeButton then
+        self.recipeButton.questPin:SetHidden(not self.inventory.hasRecipesForQuest)
+    end
+end
+
 --Alchemy Inventory
 -------------------------
 
 ZO_AlchemyInventory = ZO_CraftingInventory:Subclass()
 
-local SCROLL_DATA_TYPE_SOLVENT = 1
-local SCROLL_DATA_TYPE_REAGENT = 2
+local QUEST_PIN_DEFAULT_TEXTURE = "EsoUI/Art/WritAdvisor/advisor_trackedPin_icon.dds"
+local QUEST_PIN_DISABLED_TEXTURE = "EsoUI/Art/WritAdvisor/advisor_trackedPin_icon_disabled.dds"
 
 function ZO_AlchemyInventory:New(...)
     return ZO_CraftingInventory.New(self, ...)
@@ -353,6 +368,19 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
 
     self:SetCustomSort(IngredientSortOrder)
     self.sortKey = "custom"
+    self.questFilterCheckButton = control:GetNamedChild("QuestItemsOnly")
+    self.filterDivider = control:GetNamedChild("ButtonDivider")
+    self.sortByControl = control:GetNamedChild("SortBy")
+
+    local function OnAddOnLoaded(event, name)
+        if name == "ZO_Ingame" then
+            self:SetupSavedVars()
+            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+        end
+    end
+    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+
+    self:InitializeFilters()
 
     self:SetFilters{
         self:CreateNewTabFilterData(ITEMTYPE_REAGENT, GetString(SI_ALCHEMY_REAGENTS_TAB), "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_up.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_down.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_over.dds", "EsoUI/Art/Crafting/alchemy_tabIcon_reagent_disabled.dds"),
@@ -361,6 +389,43 @@ function ZO_AlchemyInventory:Initialize(owner, control, ...)
     }
 
     self:SetSortColumnHidden({ stackSellPrice = true, statusSortOrder = true, traitInformationSortOrder = true, sellInformationSortOrder = true, }, true)
+end
+
+function ZO_AlchemyInventory:UpdateMode()
+    local DEFAULT_RELATIVE_POINT = nil
+    local DEFAULT_RELATIVE_TO = nil
+    local DEFAULT_OFFSET_X = nil
+    local DEFAULT_OFFSET_Y = 63
+    self.filterDivider:SetHidden(false)
+    self.questFilterCheckButton:SetHidden(false)
+    self.sortByControl:ClearAnchors()
+    local OFFSET_X = -13
+    self.sortByControl:SetAnchor(TOPLEFT, self.filterDivider, BOTTOMLEFT, OFFSET_X)
+end
+
+function ZO_AlchemyInventory:InitializeFilters()
+    local function OnFilterChanged()
+        self.savedVars.questsOnlyChecked = ZO_CheckButton_IsChecked(self.questFilterCheckButton)
+        self:HandleDirtyEvent()
+    end
+
+    ZO_CheckButton_SetToggleFunction(self.questFilterCheckButton, OnFilterChanged)
+    ZO_CheckButton_SetLabelText(self.questFilterCheckButton, GetString(SI_SMITHING_IS_QUEST_ITEM))
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
+        ZO_CheckButton_SetCheckState(self.questFilterCheckButton, self.savedVars.questsOnlyChecked)
+    end)
+
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.questFilterCheckButton)
+end
+
+function ZO_AlchemyInventory:SetupSavedVars()
+    local defaults = 
+    {
+        questsOnlyChecked = false,
+    }
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "AlchemyCreation", defaults)
+    ZO_CheckButton_SetCheckState(self.questFilterCheckButton, self.savedVars.questsOnlyChecked)
 end
 
 function ZO_AlchemyInventory:IsLocked(bagId, slotIndex)
@@ -372,8 +437,20 @@ function ZO_AlchemyInventory:AddListDataTypes()
 
     local function SolventSetup(rowControl, data)
         defaultSetup(rowControl, data)
-
         local levelLabel = rowControl:GetNamedChild("Level")
+        local questPin = rowControl:GetNamedChild("QuestPin")
+        local itemId = GetItemId(data.bagId, data.slotIndex)
+        local pinState = self.owner:GetPinStateForItem(itemId, self.alchemyQuestInfo, ZO_ALCHEMY_DATA_TYPE_SOLVENT)
+
+        if pinState == ZO_ALCHEMY_PIN_STATE_HIDDEN then
+            questPin:SetHidden(true)
+        elseif pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
+            questPin:SetHidden(false)
+            questPin:SetTexture(QUEST_PIN_DISABLED_TEXTURE)
+        elseif pinState == ZO_ALCHEMY_PIN_STATE_VALID then
+            questPin:SetHidden(false)
+            questPin:SetTexture(QUEST_PIN_DEFAULT_TEXTURE)
+        end
 
         local usedInCraftingType, craftingSubItemType, rankRequirement, resultingItemLevel, requiredChampionPoints = GetItemCraftingInfo(data.bagId, data.slotIndex)
 
@@ -427,21 +504,30 @@ function ZO_AlchemyInventory:AddListDataTypes()
 
     local function ReagentSetup(rowControl, data)
         defaultSetup(rowControl, data)
+        local questPin = rowControl:GetNamedChild("QuestPin")
+        local itemId = GetItemId(data.bagId, data.slotIndex)
+        local pinState = self.owner:GetPinStateForItem(itemId, self.alchemyQuestInfo, ZO_ALCHEMY_DATA_TYPE_REAGENT)
+
+        if pinState == ZO_ALCHEMY_PIN_STATE_HIDDEN then
+            questPin:SetHidden(true)
+        elseif pinState == ZO_ALCHEMY_PIN_STATE_INVALID then
+            questPin:SetHidden(false)
+            questPin:SetTexture(QUEST_PIN_DISABLED_TEXTURE)
+        elseif pinState == ZO_ALCHEMY_PIN_STATE_VALID then
+            questPin:SetHidden(false)
+            questPin:SetTexture(QUEST_PIN_DEFAULT_TEXTURE)
+        end
+
         local locked = self:IsLocked(data.bagId, data.slotIndex)
         SetupTrait(rowControl.traits, locked, GetAlchemyItemTraits(data.bagId, data.slotIndex))
     end
 
-    ZO_ScrollList_AddDataType(self.list, SCROLL_DATA_TYPE_SOLVENT, "ZO_AlchemyInventorySolventRow", 72, SolventSetup, nil, nil, ZO_InventorySlot_OnPoolReset)
-    ZO_ScrollList_AddDataType(self.list, SCROLL_DATA_TYPE_REAGENT, "ZO_AlchemyInventoryReagentRow", 108, ReagentSetup, nil, nil, ZO_InventorySlot_OnPoolReset)
+    ZO_ScrollList_AddDataType(self.list, ZO_ALCHEMY_DATA_TYPE_SOLVENT, "ZO_AlchemyInventorySolventRow", 72, SolventSetup, nil, nil, ZO_InventorySlot_OnPoolReset)
+    ZO_ScrollList_AddDataType(self.list, ZO_ALCHEMY_DATA_TYPE_REAGENT, "ZO_AlchemyInventoryReagentRow", 108, ReagentSetup, nil, nil, ZO_InventorySlot_OnPoolReset)
 end
 
 function ZO_AlchemyInventory:GetScrollDataType(bagId, slotIndex)
-    local usedInCraftingType, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
-    if IsAlchemySolvent(craftingSubItemType) then
-        return SCROLL_DATA_TYPE_SOLVENT
-    elseif craftingSubItemType == ITEMTYPE_REAGENT then
-        return SCROLL_DATA_TYPE_REAGENT
-    end
+    return self.owner:GetDataType(bagId, slotIndex)
 end
 
 function ZO_AlchemyInventory:ChangeFilter(filterData)
@@ -466,6 +552,25 @@ function ZO_AlchemyInventory:Refresh(data)
     self:SetNoItemLabelHidden(#data > 0)
 end
 
+function ZO_AlchemyInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
+    local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
+
+    self.owner:UpdatePotentialQuestItems(list, self.alchemyQuestInfo)
+
+    ZO_ClearTable(self.itemCounts)
+
+    for itemId, itemInfo in pairs(list) do
+        if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.questsOnlyChecked, self.owner.questItems) then
+            self:AddItemData(itemInfo.bag, itemInfo.index, itemInfo.stack, self:GetScrollDataType(itemInfo.bag, itemInfo.index), data, self.customDataGetFunction)
+        end
+        self.itemCounts[itemId] = itemInfo.stack
+    end
+
+    return list
+end
+
 function ZO_AlchemyInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)
     local _, craftingSubItemType, rankRequirement = GetItemCraftingInfo(bagId, slotIndex)
     self.owner:ShowAppropriateSlotDropCallouts(craftingSubItemType, rankRequirement)
@@ -477,4 +582,13 @@ end
 
 function ZO_Alchemy_Initialize(control)
     ALCHEMY = ZO_Alchemy:New(control)
+end
+
+function ZO_Alchemy_IsQuestItemOnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_IS_QUEST_ITEM_TOOLTIP))
+end
+
+function ZO_Alchemy_FilterOnMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end

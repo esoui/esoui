@@ -1,0 +1,61 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ItemSetsBook_Entry_Header_Gamepad" inherits="ZO_ItemSetsBook_Entry_Header_Shared" virtual="true">
+            <Dimensions y="70" />
+
+            <OnInitialized name="Gamepad">
+                ZO_ItemSetsBook_Entry_Header_Gamepad_OnInitialize(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Name" override="true" font="ZoFontGamepad27" modifyTextType="UPPERCASE" />
+
+                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_GamepadArrowStatusBarWithBGMedium" />
+
+                <Label name="$(parent)Cost" override="true" font="ZoFontGamepadCondensed27" />
+
+                <Label name="$(parent)CostHeader" override="true" font="ZoFontGamepadCondensed27" />
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_ItemSetCollectionPiece_GridEntry_Template_Gamepad" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_GAMEPAD_ITEM_SET_COLLECTION_PIECE_GRID_ENTRY_DIMENSIONS" y="ZO_GAMEPAD_ITEM_SET_COLLECTION_PIECE_GRID_ENTRY_DIMENSIONS" />
+
+            <OnInitialized>
+                self.borderBackground = self:GetNamedChild("BorderedBackground")
+                self.statusMultiIcon = self:GetNamedChild("Status")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="1" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Texture>
+
+                <Backdrop name="$(parent)BorderedBackground" centerColor="FFFFFF">
+                    <AnchorFill />
+                    <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                    <Edge file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+                
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon" level="2">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                </Texture>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_ItemSetsBook_Gamepad_Base" inherits="ZO_Gamepad_ParametricList_Screen" virtual="true">
+            <Controls>
+                <Control name="$(parent)GridListPanel" inherits="ZO_AnchoredToQuadrant_2_3_Background ZO_GridScrollList_Gamepad" hidden="true" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_ItemSetsBook_Gamepad_TopLevel" inherits="ZO_ItemSetsBook_Gamepad_Base">
+            <OnInitialized>
+                ZO_ItemSetsBook_Gamepad_OnInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

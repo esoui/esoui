@@ -92,6 +92,28 @@ function ZO_ControlPool:AcquireObject(objectKey)
 end
 
 --[[
+    Entry Data Pool
+--]]
+
+ZO_EntryDataPool = ZO_ObjectPool:Subclass()
+
+function ZO_EntryDataPool:New(entryDataObjectClass, factoryFunction, resetFunction)
+    local factoryFunction = factoryFunction or function()
+        return entryDataObjectClass:New()
+    end
+
+    local resetFunction = resetFunction or function(data)
+        data:SetDataSource(nil)
+    end
+
+    local pool = ZO_ObjectPool.New(self, factoryFunction, resetFunction)
+
+    pool.entryDataObjectClass = entryDataObjectClass
+
+    return pool
+end
+
+--[[
     Meta Pool
 ]]--
 

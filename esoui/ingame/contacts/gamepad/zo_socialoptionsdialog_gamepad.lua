@@ -13,9 +13,9 @@ function ZO_SocialOptionsDialogGamepad:Initialize(control)
     self.conditionResults = {}
     self:BuildOptionsList()
 
-	self.dialogData = {}
-	self.control:RegisterForEvent(EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
-	self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
+    self.dialogData = {}
+    self.control:RegisterForEvent(EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
+    self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
 end
 
 function ZO_SocialOptionsDialogGamepad:ShowOptionsDialog()
@@ -24,9 +24,9 @@ function ZO_SocialOptionsDialogGamepad:ShowOptionsDialog()
     local data = {
         parametricList = parametricList,
     }
-	--Saving the displayName and online state of the person the dialog is being opened for.
-	self.dialogData.displayName = self.socialData.displayName
-	self.dialogData.online = self.socialData.online
+    --Saving the displayName and online state of the person the dialog is being opened for.
+    self.dialogData.displayName = self.socialData.displayName
+    self.dialogData.online = self.socialData.online
     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_OPTIONS_DIALOG", data)
 end
 
@@ -107,7 +107,7 @@ end
 
 function ZO_SocialOptionsDialogGamepad:AddOption(list, option)
     if option == nil then 
-        return 
+        return
     end
 
     if list.header then
@@ -140,12 +140,12 @@ end
 
 --Hiding the options dialog if the player's online status changes.
 function ZO_SocialOptionsDialogGamepad:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus)
-	if self.dialogData and self.dialogData.displayName == displayName and newStatus ~= nil then
-		local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
-		if(self.dialogData.online ~= isOnline) then
-			ZO_Dialogs_ReleaseAllDialogsOfName("GAMEPAD_SOCIAL_OPTIONS_DIALOG")
-		end
-	end
+    if self.dialogData and self.dialogData.displayName == displayName and newStatus ~= nil then
+        local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
+        if self.dialogData.online ~= isOnline then
+            ZO_Dialogs_ReleaseAllDialogsOfName("GAMEPAD_SOCIAL_OPTIONS_DIALOG")
+        end
+    end
 end
 
 --Shared Options
@@ -234,7 +234,7 @@ end
 
 function ZO_SocialOptionsDialogGamepad:BuildVisitPlayerHouseOption()
     local callback = function()
-		JumpToHouse(DecorateDisplayName(self.socialData.displayName))
+        JumpToHouse(DecorateDisplayName(self.socialData.displayName))
         SCENE_MANAGER:ShowBaseScene()
     end
     return self:BuildOptionEntry(nil, SI_SOCIAL_MENU_VISIT_HOUSE, callback)
@@ -245,17 +245,17 @@ function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()
         local callback = function()
             local data = self.socialData
             local displayName = data.displayName
-            if(data.friendIndex) then
+            if data.friendIndex then
                 --To make sure we use the correct index if friends list was updated while the dialog is being displayed.
                 local updatedData = FRIENDS_LIST_MANAGER:FindDataByDisplayName(displayName)
-                if(updatedData) then
+                if updatedData then
                     ZO_ShowGamerCardFromDisplayNameOrFallback(displayName, ZO_ID_REQUEST_TYPE_DISPLAY_NAME, displayName)
                 end
-            elseif(data.ignoreIndex) then
+            elseif data.ignoreIndex then
                 ZO_ShowGamerCardFromDisplayNameOrFallback(displayName, ZO_ID_REQUEST_TYPE_IGNORE_INFO, data.ignoreIndex)
-            elseif(data.isGroup) then
+            elseif data.isGroup then
                 ZO_ShowGamerCardFromDisplayNameOrFallback(displayName, ZO_ID_REQUEST_TYPE_GROUP_INFO, data.index)
-            elseif(displayName) then
+            elseif displayName then
                 ZO_ShowGamerCardFromDisplayName(displayName)
             else
                 ZO_Dialogs_ShowGamepadDialog("GAMERCARD_UNAVAILABLE")
@@ -267,11 +267,11 @@ function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildInviteToGameOption()
-    if IsConsoleUI() and GetUIPlatform() == UI_PLATFORM_PS4 then
+    if ZO_IsPlaystationPlatform() then
         local callback = function()
             local accountName = UndecorateDisplayName(self.socialData.displayName)
 
-            if(accountName) then
+            if accountName then
                 TriggerSendOrbisFriendInviteDialog(accountName)
             end
         end

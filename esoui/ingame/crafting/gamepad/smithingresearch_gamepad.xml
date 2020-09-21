@@ -46,6 +46,11 @@
                     <!-- Allow extra space for large stack counts like 898.8k -->
                     <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
                 </Label>
+
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\Gamepad\gp_advisor_trackedPin_icon.dds" inheritScale="false" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="5" />
+                </Texture>
             </Controls>
         </Control>
 

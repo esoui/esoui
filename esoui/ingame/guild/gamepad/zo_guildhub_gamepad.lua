@@ -859,12 +859,11 @@ do
 
         local data
         -- Options
-        local platform = GetUIPlatform()
         if DoesPlayerHaveGuildPermission(self.optionsGuildId, GUILD_PERMISSION_INVITE) then
             data = ZO_GamepadEntryData:New(GetString(SI_GUILD_INVITE_ACTION), ICON_INVITE)
             data.guildId = self.optionsGuildId
             data.selectCallback = function(optionsSelectedData)
-                if platform == UI_PLATFORM_PS4 then
+                if ZO_IsPlaystationPlatform() then
                     ZO_ShowConsoleInviteToGuildFromUserListSelector(self.optionsGuildId)
                 else
                     local name = GetGuildName(self.optionsGuildId)
@@ -874,7 +873,7 @@ do
             end
             AddEntry(data)
 
-            if platform == UI_PLATFORM_XBOX  and GetNumberConsoleFriends() > 0 then
+            if GetUIPlatform() == UI_PLATFORM_XBOX and GetNumberConsoleFriends() > 0 then
                 data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_ADD_FRIEND), ICON_INVITE)
                 data.guildId = self.optionsGuildId
                 data.selectCallback = function(optionsSelectedData)

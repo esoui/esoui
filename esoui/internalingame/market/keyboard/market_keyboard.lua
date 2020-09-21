@@ -133,8 +133,7 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
             keybind =   "UI_SHORTCUT_QUATERNARY",
             visible =   function()
                             local isPreviewing = self:GetPreviewState()
-                            local serviceType = GetPlatformServiceType()
-                            return not isPreviewing and serviceType ~= PLATFORM_SERVICE_TYPE_DMM and self.selectedMarketProduct == nil
+                            return not isPreviewing and self.selectedMarketProduct == nil and DoesPlatformSupportCodeRedemption()
                         end,
             callback =  function()
                             ZO_KeyboardCodeRedemption_StartCodeRedemptionFlow()
@@ -340,7 +339,7 @@ function ZO_Market_Keyboard:InitializeCategories()
     local function TreeHeaderSetup_Child(node, control, data, open, userRequested)
         BaseTreeHeaderSetup(node, control, data, open)
 
-        if open and userRequested and not self.refreshingCategoryView then
+        if open and userRequested then
             self.categoryTree:SelectFirstChild(node)
         end
     end
@@ -516,6 +515,8 @@ function ZO_Market_Keyboard:RequestShowMarketProduct(marketProductId)
                 self:SetQueuedMarketProductId(marketProductId)
                 self.categoryTree:SelectNode(targetNode)
             end
+        else
+            internalassert(false, string.format("Category not found for market product id: %s", tostring(marketProductId) or "nil"))
         end
     else
         self:SetQueuedMarketProductId(marketProductId)
@@ -587,6 +588,8 @@ function ZO_Market_Keyboard:TryScrollToQueuedMarketProduct()
                 local preview = self:ShouldAutomaticallyPreviewMarketProduct(queuedMarketProductId)
                 self:ScrollToMarketProduct(queuedMarketProductId, preview)
             end
+        else
+            internalassert(false, string.format("Category not found for market product id: %s", tostring(queuedMarketProductId) or "nil"))
         end
     end
 end
@@ -634,7 +637,7 @@ do
 
     local function AddCategory(lookup, tree, nodeTemplate, parent, categoryIndex, name, normalIcon, pressedIcon, mouseoverIcon, categoryType, isFakedSubcategory, showGemIcon, showNewIcon)
         categoryType = categoryType or ZO_MARKET_CATEGORY_TYPE_NONE
-        local entryData = 
+        local entryData =
         {
             isFakedSubcategory = isFakedSubcategory,
             categoryIndex = categoryIndex,
@@ -995,7 +998,11 @@ do
     end
     local IS_PURCHASE = false
     function ZO_Market_Keyboard:PurchaseMarketProduct(marketProductData)
-        self:StartPurchaseFlow(marketProductData, GetPurchaseErrorInfo, IS_PURCHASE)
+        if marketProductData:IsHouseCollectible() then
+            ZO_Dialogs_ShowDialog("MARKET_PURCHASE_HOUSE_TEMPLATE_SELECTION", { marketProductData = marketProductData, isGift = IS_PURCHASE })
+        else
+            self:StartPurchaseFlow(marketProductData, GetPurchaseErrorInfo, IS_PURCHASE)
+        end
     end
 end
 
@@ -1005,7 +1012,11 @@ do
     end
     local IS_GIFTING = true
     function ZO_Market_Keyboard:GiftMarketProduct(marketProductData)
-        self:StartPurchaseFlow(marketProductData, GetGiftErrorInfo, IS_GIFTING)
+        if marketProductData:IsHouseCollectible() then
+            ZO_Dialogs_ShowDialog("MARKET_PURCHASE_HOUSE_TEMPLATE_SELECTION", { marketProductData = marketProductData, isGift = IS_GIFTING })
+        else
+            self:StartPurchaseFlow(marketProductData, GetGiftErrorInfo, IS_GIFTING)
+        end
     end
 end
 
@@ -1029,9 +1040,9 @@ function ZO_Market_Keyboard:StartPurchaseFlow(marketProductData, errorInfoFuncti
     elseif not allowContinue then
         ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DIALOG_DATA, dialogParams)
     elseif hasErrors then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", {marketProductData = marketProductData}, dialogParams)
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", { marketProductData = marketProductData }, dialogParams)
     else
-        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", {marketProductData = marketProductData, isGift = isGift})
+        ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", { marketProductData = marketProductData, isGift = isGift })
     end
 
     OnMarketStartPurchase(marketProductData:GetId())
@@ -1169,9 +1180,8 @@ function ZO_Market_Keyboard:RefreshCategoryTree()
     -- We want to refresh the category tree in order to update the new
     -- state on the categories, however we don't want to reset the view
     -- so when we call RefreshVisible we need to make sure not to reselect any nodes
-    self.refreshingCategoryView = true
-    self.categoryTree:RefreshVisible()
-    self.refreshingCategoryView = false
+    local NOT_USER_REQUESTED = false
+    self.categoryTree:RefreshVisible(NOT_USER_REQUESTED)
 end
 
 function ZO_Market_Keyboard:RestoreActionLayerForTutorial()

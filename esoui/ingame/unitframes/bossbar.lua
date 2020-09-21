@@ -32,7 +32,7 @@ function BossBar:Initialize(control)
     powerUpdateEventHandler:AddFilterForEvent(REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH)
     powerUpdateEventHandler:AddFilterForEvent(REGISTER_FILTER_UNIT_TAG_PREFIX, "boss")
 
-    control:RegisterForEvent(EVENT_BOSSES_CHANGED, function() self:RefreshAllBosses() end)
+    control:RegisterForEvent(EVENT_BOSSES_CHANGED, function(_, forceReset) self:RefreshAllBosses(forceReset) end)
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
     control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, settingSystem, settingId) self:OnInterfaceSettingChanged(settingSystem, settingId) end)
 
@@ -88,7 +88,7 @@ function BossBar:RefreshBossHealthBar(smoothAnimate)
     COMPASS_FRAME:SetBossBarActive(totalHealth > 0)
 end
 
-function BossBar:RefreshAllBosses()
+function BossBar:RefreshAllBosses(forceReset)
     --if there are multiple bosses and one of them dies and despawns in the middle of the fight we
     --still want to show them as part of the boss bar (otherwise it will reset to 100%).
     local currentBossCount = 0
@@ -100,7 +100,7 @@ function BossBar:RefreshAllBosses()
     end
 
     --if there are no bosses left it's safe to reset everything
-    if(currentBossCount == 0 and next(self.bossHealthValues) ~= nil) then
+    if(forceReset or (currentBossCount == 0 and next(self.bossHealthValues) ~= nil)) then
         self.bossHealthValues = {}
     end
 

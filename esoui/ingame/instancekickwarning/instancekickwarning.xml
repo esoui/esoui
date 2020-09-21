@@ -4,15 +4,18 @@
             <AnchorFill />
             <Controls>
                 <Control name="$(parent)Container">
-                    <Anchor point="BOTTOM" offsetY="-220"/>
                     <Controls>
+                        <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton">
+                            <Anchor point="BOTTOM" offsetY="-7"/>
+                        </Control>
+                        
                         <Label name="$(parent)Text" text="SI_INSTANCE_KICK_WARNING">
-                            <Anchor point="BOTTOM" />
+                            <Anchor point="BOTTOM" relativeTo="$(parent)KeybindButton" relativePoint="TOP" offsetX="19" offsetY="-13"/>
                         </Label>
 
                         <Cooldown name="$(parent)Timer" inherits="ZO_RadialCountdownTimer">
                             <Dimensions x="32" y="32" />
-                            <Anchor point="CENTER" relativeTo="$(parent)Text" relativePoint="LEFT" offsetX="-19"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)Text" relativePoint="LEFT" offsetX="-2"/>
                         </Cooldown>
                     </Controls>
                 </Control>

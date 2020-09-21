@@ -5,12 +5,12 @@
 
 function NonContiguousCount(tableObject)
     local count = 0
-    
+
     for _, _ in pairs(tableObject)
     do
         count = count + 1
     end
-    
+
     return count
 end
 
@@ -42,32 +42,32 @@ end
 --]]
 local validOrderingTypes =
 {
-    ["number"]  = true, 
-    ["string"]  = true, 
+    ["number"]  = true,
+    ["string"]  = true,
     ["boolean"] = true
 }
 
-local function NumberFromBoolean(boolean) 
+local function NumberFromBoolean(boolean)
     if(boolean == true) then return 1 end
-    return 0 
+    return 0
 end
 
-local type      = type
-local tonumber  = tonumber
+local type = type
+local tonumber = tonumber
 
 --[[
     Common constants and types to make sorting a little easier.
 --]]
 
 -- Sort from A - Z
-ZO_SORT_ORDER_UP        = true                      
+ZO_SORT_ORDER_UP = true
 
 -- Sort from Z - A
-ZO_SORT_ORDER_DOWN      = false                     
+ZO_SORT_ORDER_DOWN = false
 
 -- Sort by the name field of your entry.  Assumes the table being sorted is full of entries which are
 -- also tables; those entries having a key named "name".
-ZO_SORT_BY_NAME         = { ["name"] = {} } 
+ZO_SORT_BY_NAME         = { ["name"] = {} }
 ZO_SORT_BY_NAME_NUMERIC = { ["name"] = { isNumeric = true } }
 
 local IS_LESS_THAN = -1
@@ -78,7 +78,7 @@ function ZO_TableOrderingFunction(entry1, entry2, sortKey, sortKeys, sortOrder)
     local value1 = entry1[sortKey]
     local value2 = entry2[sortKey]
     local value1Type = type(value1)
-    
+
     if value1Type ~= type(value2) or not validOrderingTypes[value1Type] then
         local value1Text
         if value1 == nil then
@@ -96,7 +96,7 @@ function ZO_TableOrderingFunction(entry1, entry2, sortKey, sortKeys, sortOrder)
         return false
     end
     
-    if value1Type == "boolean" then        
+    if value1Type == "boolean" then
         value1 = NumberFromBoolean(value1)
         value2 = NumberFromBoolean(value2)
     end
@@ -130,7 +130,7 @@ function ZO_TableOrderingFunction(entry1, entry2, sortKey, sortKeys, sortOrder)
     -- alliances, the tiebreaker would sort within the "name" key of the table entry.
     if compareResult == IS_EQUAL_TO then
         local tiebreaker = sortKeys[sortKey].tiebreaker
-        
+
         if tiebreaker then
             local nextSortOrder
             if sortKeys[sortKey].tieBreakerSortOrder ~= nil then
@@ -156,7 +156,7 @@ function ZO_TableOrderingFunction(entry1, entry2, sortKey, sortKeys, sortOrder)
 end
 
 function ZO_ClearNumericallyIndexedTable(t)
-    for i=#t, 1, -1 do
+    for i = #t, 1, -1 do
         t[i] = nil
     end
 end
@@ -177,18 +177,18 @@ end
 
 function ZO_ShallowTableCopy(source, dest)
     dest = dest or {}
-    
+
     for k, v in pairs(source) do
         dest[k] = v
     end
-    
+
     return dest
 end
 
 function ZO_DeepTableCopy(source, dest)
     dest = dest or {}
-	setmetatable (dest, getmetatable(source))
-    
+    setmetatable (dest, getmetatable(source))
+
     for k, v in pairs(source) do
         if type(v) == "table" then
             dest[k] = ZO_DeepTableCopy(v)
@@ -196,8 +196,13 @@ function ZO_DeepTableCopy(source, dest)
             dest[k] = v
         end
     end
-    
+
     return dest
+end
+
+-- Returns true if table is nil or empty
+function ZO_IsTableEmpty(table)
+    return not table or next(table) == nil
 end
 
 -- The dest table is mutable and will take in the values of all subsequent tables.  It must be initialized.
@@ -246,14 +251,7 @@ function ZO_TableRandomInsert(t, element)
 end
 
 function ZO_NumericallyIndexedTableIterator(t)
-    local i = 0
-    local count = #t
-    return function()
-        if i < count then
-            i = i + 1
-            return i, t[i]
-        end
-    end
+    return ipairs(t)
 end
 
 function ZO_NumericallyIndexedTableReverseIterator(t)
@@ -267,50 +265,58 @@ function ZO_NumericallyIndexedTableReverseIterator(t)
 end
 
 function ZO_FilteredNumericallyIndexedTableIterator(table, filterFunctions)
-    local index = 0
-    local count = #table
     local numFilters = filterFunctions and #filterFunctions or 0
-    return function()
-        index = index + 1
-        while index <= count do
-            local passesFilter = true
-            local data = table[index]
-            for filterIndex = 1, numFilters do
-                if not filterFunctions[filterIndex](data) then
-                    passesFilter = false
-                    break
+    if numFilters > 0  then
+        local index = 0
+        local count = #table
+        return function()
+            index = index + 1
+            while index <= count do
+                local passesFilter = true
+                local data = table[index]
+                for filterIndex = 1, numFilters do
+                    if not filterFunctions[filterIndex](data) then
+                        passesFilter = false
+                        break
+                    end
+                end
+
+                if passesFilter then
+                    return index, data
+                else
+                    index = index + 1
                 end
             end
-
-            if passesFilter then
-                return index, data
-            else
-                index = index + 1
-            end
         end
+    else
+        return ipairs(table)
     end
 end
 
 function ZO_FilteredNonContiguousTableIterator(table, filterFunctions)
-    local nextKey, nextData = next(table)
     local numFilters = filterFunctions and #filterFunctions or 0
-    return function()
-        while nextKey do
-            local currentKey, currentData = nextKey, nextData
-            nextKey, nextData = next(table, nextKey)
+    if numFilters > 0 then
+        local nextKey, nextData = next(table)
+        return function()
+            while nextKey do
+                local currentKey, currentData = nextKey, nextData
+                nextKey, nextData = next(table, nextKey)
 
-            local passesFilter = true
-            for filterIndex = 1, numFilters do
-                if not filterFunctions[filterIndex](currentData) then
-                    passesFilter = false
-                    break
+                local passesFilter = true
+                for filterIndex = 1, numFilters do
+                    if not filterFunctions[filterIndex](currentData) then
+                        passesFilter = false
+                        break
+                    end
+                end
+
+                if passesFilter then
+                    return currentKey, currentData
                 end
             end
-
-            if passesFilter then
-                return currentKey, currentData
-            end
         end
+    else
+        return pairs(table)
     end
 end
 
@@ -363,6 +369,18 @@ function ZO_CreateSetFromArguments(...)
     for i = 1, select('#', ...) do
         set[select(i, ...)] = true
     end
-    
+
     return set
+end
+
+function ZO_AreNumericallyIndexedTablesEqual(left, right)
+    if #left == #right then
+        for index, value in ipairs(left) do
+            if right[index] ~= value then
+                return false
+            end
+        end
+        return true
+    end
+    return false
 end

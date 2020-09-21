@@ -451,10 +451,10 @@ function ZO_BankingCommon_Gamepad:SetPlayerCapacityHeaderText(control)
     return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, usedSlots, bagSize)
 end
 
-function ZO_BankingCommon_Gamepad:OnTargetChanged(list, targetData)
+function ZO_BankingCommon_Gamepad:OnTargetChanged(list, targetData, oldTargetData)
     self:SetCurrencyType(targetData and targetData.currencyType or nil)
     self:LayoutBankingEntryTooltip(targetData)
-    self:OnTargetChangedCallback()
+    self:OnTargetChangedCallback(targetData, oldTargetData)
 
     self:RefreshHeaderData()
 end

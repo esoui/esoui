@@ -1003,6 +1003,14 @@ function ZO_AntiquityDiggingSummary:AcquireAndLayoutLoreDocumentControl()
     local USE_MAGIC_VIEW = true
     local loreDocumentControl = ANTIQUITY_LORE_DOCUMENT_MANAGER:AcquireWideDocumentForLoreEntry(self.loreControl, GetDigSpotAntiquityId(), GetNumAntiquityLoreEntriesAcquired(GetDigSpotAntiquityId()), USE_MAGIC_VIEW)
     loreDocumentControl:SetAnchor(TOP, self.loreHeaderLabel, BOTTOM, 0, 20)
+
+    -- The XL size is large enough that we need to move the header up in the post-dig summary to avoid the bottom being cut off
+    -- If we ever did need more than XL we'd need to rethink our approach and design
+    if loreDocumentControl.sizeDescriptor == "XL" then
+        self.loreHeaderLabel:SetAnchor(BOTTOM, nil, CENTER, 0, -450)
+    else
+        self.loreHeaderLabel:SetAnchor(BOTTOM, nil, CENTER, 0, -275)
+    end
 end
 
 function ZO_AntiquityDiggingSummary:HandleCommand(command)

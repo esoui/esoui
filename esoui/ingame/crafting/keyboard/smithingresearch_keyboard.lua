@@ -74,11 +74,13 @@ function ZO_SmithingResearch:InitializeFilters()
     end
     ZO_CheckButton_SetToggleFunction(self.includeBankedItemsCheckbox, SaveFilters)
     ZO_CheckButton_SetLabelText(self.includeBankedItemsCheckbox, GetString(SI_CRAFTING_INCLUDE_BANKED))
-    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.includeBankedItemsCheckbox)
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
         ZO_CheckButton_SetCheckState(self.includeBankedItemsCheckbox, self.savedVars.includeBankedItemsChecked)
     end)
+
+    --This needs to happen AFTER the above CraftingAnimationsStarted callback is registered, so the disabled state doesn't get clobbered by setting the check state for the button
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.includeBankedItemsCheckbox)
 end
 
 function ZO_SmithingResearch:SetupSavedVars()

@@ -83,18 +83,24 @@ end
 function ZO_SceneGraph:CreateNode(name)
     local node = ZO_SceneGraphNode:New(self, name)
 
-    if(self.debugModeEnabled) then
-        local debugTexture = GetWindowManager():CreateControl(string.format("%sDebugTexture%d", self.canvasControl:GetName(), self.debugTextureId), self.canvasControl, CT_TEXTURE)
-        self.debugTextureId = self.debugTextureId + 1
-        debugTexture:SetDimensions(20, 20)
-        debugTexture:SetColor(0.7, 0.7, 1, 1)
-        debugTexture:SetPixelRoundingEnabled(false)
-        node:AddControl(debugTexture, 0, 0, 0)
+    if self.debugModeEnabled then
+        self:AddDebugTexture(node)
     end
 
     self.nodes[name] = node
 
     return node
+end
+
+function ZO_SceneGraph:AddDebugTextureToNode(node)
+    -- shortcut so you can see where a node is placed visually
+    -- draws a purple box centered on the node's origin point
+    local debugTexture = GetWindowManager():CreateControl(string.format("%sDebugTexture%d", self.canvasControl:GetName(), self.debugTextureId), self.canvasControl, CT_TEXTURE)
+    self.debugTextureId = self.debugTextureId + 1
+    debugTexture:SetDimensions(20, 20)
+    debugTexture:SetColor(0.7, 0.7, 1, 1)
+    debugTexture:SetPixelRoundingEnabled(false)
+    node:AddControl(debugTexture, 0, 0, 0)
 end
 
 function ZO_SceneGraph:OnSceneNodeDirty()

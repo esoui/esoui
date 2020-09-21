@@ -91,6 +91,7 @@ function ZO_SmithingCreation:InitializeFilterTypeBar()
 
     self.tabs = self.control:GetNamedChild("Tabs")
     self.activeTab = self.control:GetNamedChild("TabsActive")
+    self.tabButtons = {}
 
     ZO_MenuBar_SetData(self.tabs, MENU_BAR_DATA)
 
@@ -134,12 +135,12 @@ function ZO_SmithingCreation:InitializeFilterTypeBar()
     local function CanCraftSetJewelry()
         return CanCraftJewelry() and CanSmithingSetPatternsBeCraftedHere()
     end
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_JEWELRY), "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_jewelry_disabled.dds", CanCraftJewelry))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanCraftArmor))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanCraftWeapons))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_JEWELRY), "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_over.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_disabled.dds", CanCraftSetJewelry))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_ARMOR), "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_disabled.dds", CanCraftSetArmor))
-    ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_WEAPONS), "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_disabled.dds", CanCraftSetWeapons))
+    self.tabButtons[SMITHING_FILTER_TYPE_JEWELRY] = ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_JEWELRY), "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_jewelry_disabled.dds", CanCraftJewelry))
+    self.tabButtons[SMITHING_FILTER_TYPE_ARMOR] = ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_ARMOR), "EsoUI/Art/Inventory/inventory_tabIcon_armor_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_armor_disabled.dds", CanCraftArmor))
+    self.tabButtons[SMITHING_FILTER_TYPE_WEAPONS] = ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_WEAPONS), "EsoUI/Art/Inventory/inventory_tabIcon_weapons_up.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_down.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_weapons_disabled.dds", CanCraftWeapons))
+    self.tabButtons[SMITHING_FILTER_TYPE_SET_JEWELRY] = ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_JEWELRY), "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_over.dds", "EsoUI/Art/Crafting/jewelrySet_tabIcon_icon_disabled.dds", CanCraftSetJewelry))
+    self.tabButtons[SMITHING_FILTER_TYPE_SET_ARMOR] = ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_ARMOR, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_ARMOR), "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_armorSet_disabled.dds", CanCraftSetArmor))
+    self.tabButtons[SMITHING_FILTER_TYPE_SET_WEAPONS] = ZO_MenuBar_AddButton(self.tabs, CreateNewTabFilterData(SMITHING_FILTER_TYPE_SET_WEAPONS, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_SET_WEAPONS), "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_up.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_down.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_over.dds", "EsoUI/Art/Crafting/smithing_tabIcon_weaponSet_disabled.dds", CanCraftSetWeapons))
 
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.tabs)
 end
@@ -150,13 +151,31 @@ function ZO_SmithingCreation:UpdateUniversalStyleItemCheckBox()
     ZO_CheckButton_SetLabelText(checkBox, zo_strformat(SI_CRAFTING_USE_UNIVERSAL_STYLE_ITEM, universalStyleItemCount))
 end
 
+function ZO_SmithingCreation:UpdateQuestPins()
+    for filterType, tabButton in pairs(self.tabButtons) do
+        local doesFilterMatch = false
+        if self.isSetQuest then
+            doesFilterMatch = not ZO_CraftingUtils_IsBaseSmithingFilter(filterType)
+        else
+            doesFilterMatch = ZO_CraftingUtils_IsBaseSmithingFilter(filterType)
+        end
+
+        if not self.hasItemToImproveForWrit and doesFilterMatch and self.tabsWithQuests[ZO_CraftingUtils_GetItemFilterFromSmithingFilter(filterType)] then
+            tabButton.questPin:SetHidden(false)
+        else
+            tabButton.questPin:SetHidden(true)
+        end
+    end
+end
+
 function ZO_SmithingCreation:InitializeFilters()
     self.haveMaterialsCheckBox = self.control:GetNamedChild("HaveMaterials")
     self.haveKnowledgeCheckBox = self.control:GetNamedChild("HaveKnowledge")
+    self.isQuestItemCheckbox = self.control:GetNamedChild("IsQuestItem")
     self.useUniversalStyleItemCheckBox = self.control:GetNamedChild("StyleListUniversalStyleItem")
 
     local function OnFilterChanged()
-        self:OnFilterChanged(ZO_CheckButton_IsChecked(self.haveMaterialsCheckBox), ZO_CheckButton_IsChecked(self.haveKnowledgeCheckBox), ZO_CheckButton_IsChecked(self.useUniversalStyleItemCheckBox))
+        self:OnFilterChanged(ZO_CheckButton_IsChecked(self.haveMaterialsCheckBox), ZO_CheckButton_IsChecked(self.haveKnowledgeCheckBox), ZO_CheckButton_IsChecked(self.useUniversalStyleItemCheckBox), ZO_CheckButton_IsChecked(self.isQuestItemCheckbox))
     end
 
     local function HandleInventoryChanged()
@@ -166,17 +185,20 @@ function ZO_SmithingCreation:InitializeFilters()
     ZO_CheckButton_SetToggleFunction(self.haveMaterialsCheckBox, OnFilterChanged)
     ZO_CheckButton_SetToggleFunction(self.haveKnowledgeCheckBox, OnFilterChanged)
     ZO_CheckButton_SetToggleFunction(self.useUniversalStyleItemCheckBox, OnFilterChanged)
+    ZO_CheckButton_SetToggleFunction(self.isQuestItemCheckbox, OnFilterChanged)
 
     ZO_CheckButton_SetLabelText(self.haveMaterialsCheckBox, GetString(SI_SMITHING_HAVE_MATERIALS))
+
+    local FILTER_SPACING = 20
     ZO_CheckButton_SetLabelText(self.haveKnowledgeCheckBox, GetString(SI_SMITHING_HAVE_KNOWLEDGE))
+    self.haveKnowledgeCheckBox:SetAnchor(LEFT, self.haveMaterialsCheckBox.label, RIGHT, FILTER_SPACING, 0)
+
+    ZO_CheckButton_SetLabelText(self.isQuestItemCheckbox, GetString(SI_SMITHING_IS_QUEST_ITEM))
+    self.isQuestItemCheckbox:SetAnchor(LEFT, self.haveKnowledgeCheckBox.label, RIGHT, FILTER_SPACING, 0)
 
     self:UpdateUniversalStyleItemCheckBox()
     ZO_CheckButtonLabel_SetDefaultColors(self.useUniversalStyleItemCheckBox.label, ZO_COLOR_UNIVERSAL_ITEM, ZO_COLOR_UNIVERSAL_ITEM_SELECTED)
     ZO_CheckButton_Enable(self.useUniversalStyleItemCheckBox, true)
-
-    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.haveMaterialsCheckBox)
-    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.haveKnowledgeCheckBox)
-    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.useUniversalStyleItemCheckBox)
 
     -- crappy hack to make sure no one gets in a bad state because we have connected the checkbuttons to the smithing process,
     -- which means we are going to logically set the state of the check buttons without user input, which will interfere with
@@ -184,7 +206,14 @@ function ZO_SmithingCreation:InitializeFilters()
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() ZO_CheckButton_SetCheckState(self.haveMaterialsCheckBox, self.savedVars.haveMaterialChecked)
                                                                               ZO_CheckButton_SetCheckState(self.haveKnowledgeCheckBox, self.savedVars.haveKnowledgeChecked)
                                                                               ZO_CheckButton_SetCheckState(self.useUniversalStyleItemCheckBox, self.savedVars.useUniversalStyleItemChecked)
+                                                                              ZO_CheckButton_SetCheckState(self.isQuestItemCheckbox, self.savedVars.questsOnlyChecked)
                                                                               end)
+
+    --This needs to happen AFTER the above CraftingAnimationsStarted callback is registered, so the disabled state doesn't get clobbered by setting the check state for the button
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.haveMaterialsCheckBox)
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.haveKnowledgeCheckBox)
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.isQuestItemCheckbox)
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.useUniversalStyleItemCheckBox)
 
     self.useUniversalStyleItemCheckBox:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
     self.useUniversalStyleItemCheckBox:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
@@ -195,13 +224,15 @@ function ZO_SmithingCreation:SetupSavedVars(defaults)
     {
         haveMaterialChecked = false,
         haveKnowledgeChecked = true,
-        useUniversalStyleItemChecked = false
+        useUniversalStyleItemChecked = false,
+        questsOnlyChecked = false,
     }
-    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "SmithingCreation", defaults)
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 3, "SmithingCreation", defaults)
 
     ZO_CheckButton_SetCheckState(self.haveMaterialsCheckBox, self.savedVars.haveMaterialChecked)
     ZO_CheckButton_SetCheckState(self.haveKnowledgeCheckBox, self.savedVars.haveKnowledgeChecked)
     ZO_CheckButton_SetCheckState(self.useUniversalStyleItemCheckBox, self:GetIsUsingUniversalStyleItem())
+    ZO_CheckButton_SetCheckState(self.isQuestItemCheckbox, self.savedVars.questsOnlyChecked)
 end
 
 function ZO_SmithingCreation:RefreshAvailableFilters()
@@ -283,6 +314,11 @@ function ZO_SmithingCreation_HaveKnowledgeOnMouseEnter(control)
     SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_HAVE_KNOWLEDGE_TOOLTIP))
 end
 
+function ZO_SmithingCreation_IsQuestItemOnMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+    SetTooltipText(InformationTooltip, GetString(SI_CRAFTING_IS_QUEST_ITEM_TOOLTIP))
+end
+
 function ZO_SmithingCreation_FilterOnMouseExit(control)
     ClearTooltip(InformationTooltip)
 end
@@ -306,4 +342,18 @@ function ZO_SmithingCreation_UniversalStyleItemOnMouseExit(control)
     end
 
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_SmithingCreationTabs_OnInitialized(control)
+    ZO_MenuBar_OnInitialized(control)
+    local filterBarData =
+    {
+        initialButtonAnchorPoint = RIGHT,
+        buttonTemplate = "ZO_SmithingCreationFilterTab",
+        normalSize = 40,
+        downSize = 51,
+        buttonPadding = -5,
+        animationDuration = 180,
+    }
+    ZO_MenuBar_SetData(control, filterBarData)
 end

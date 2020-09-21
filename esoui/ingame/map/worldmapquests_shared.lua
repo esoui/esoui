@@ -77,7 +77,7 @@ end
 function ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList()
     local mapType = GetMapType()
     --We don't want to track any quests when we are showing these high map levels
-    if mapType == MAPTYPE_WORLD or mapType == MAPTYPE_COSMIC or mapType == MAPTYPE_ALLIANCE then
+    if mapType >= MAPTYPE_WORLD then
         return false
     end
     return true

@@ -8,7 +8,7 @@
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
                             <OnInitialized>
-                                ZO_EditDefaultText_Initialize(self, GetString(SI_RESTYLE_SEARCH_EDIT_DEFAULT))
+                                ZO_EditDefaultText_Initialize(self, GetString(SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT))
                             </OnInitialized>
                         </EditBox>
                     </Controls>

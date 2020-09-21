@@ -182,6 +182,8 @@ do
 
         self:AddSection(restrictionsSection)
 
+        self:AddCollectibleTags(collectibleId)
+
         if GetCurrentZoneHouseId() ~= 0 and IsCollectibleCategoryPlaceableFurniture(categoryType) then
             local furnishingLimitTypeSection = self:AcquireSection(self:GetStyle("furnishingLimitTypeSection"))
             furnishingLimitTypeSection:AddLine(GetString(SI_TOOLTIP_FURNISHING_LIMIT_TYPE), self:GetStyle("furnishingLimitTypeTitle"))
@@ -206,5 +208,38 @@ do
         end
 
         self:AddSection(bodySection)
+    end
+end
+
+
+function ZO_Tooltip:AddCollectibleTags(collectibleId)
+    local numTags = GetNumCollectibleTags(collectibleId)
+    if numTags > 0 then
+        local tagStrings = {}
+
+        -- Build a map of tag category -> table of tags in that category
+        for i = 1, numTags do
+            local tagDescription, tagCategory = GetCollectibleTagInfo(collectibleId, i)
+            if tagDescription ~= "" then
+                if not tagStrings[tagCategory] then
+                    tagStrings[tagCategory] = {}
+                end
+                table.insert(tagStrings[tagCategory], zo_strformat(SI_TOOLTIP_ITEM_TAG_FORMATER, tagDescription)) 
+            end
+        end
+
+        -- Iterate through categories, and build a section for each category with tags in it
+        for i = TAG_CATEGORY_MIN_VALUE, TAG_CATEGORY_MAX_VALUE do
+            if tagStrings[i] then
+                local itemTagsSection = self:AcquireSection(self:GetStyle("itemTagsSection"))
+                local categoryName = GetString("SI_ITEMTAGCATEGORY", i)
+                if categoryName ~= "" then
+                    itemTagsSection:AddLine(categoryName, self:GetStyle("itemTagTitle"))
+                end
+                table.sort(tagStrings[i])
+                itemTagsSection:AddLine(table.concat(tagStrings[i], GetString(SI_LIST_COMMA_SEPARATOR)), self:GetStyle("itemTagDescription"))
+                self:AddSection(itemTagsSection)
+            end
+        end
     end
 end

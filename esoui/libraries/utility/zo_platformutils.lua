@@ -123,9 +123,14 @@ do
         return IsHeronUI() or IsConsoleUI()
     end
 
+    function ZO_IsPlaystationPlatform()
+        local platform = GetUIPlatform()
+        return platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_PS5
+    end
+
     function ZO_IsConsolePlatform()
         local platform = GetUIPlatform()
-        return platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX
+        return ZO_IsPlaystationPlatform() or platform == UI_PLATFORM_XBOX
     end
 end
 

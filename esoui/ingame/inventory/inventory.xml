@@ -34,10 +34,28 @@
             </OnMouseExit>
 
             <Controls>
-                <Texture name="$(parent)Flash" alpha="0" textureFile="EsoUI/Art/Miscellaneous/Icon_highlight_pulse.dds" excludeFromResizeToFitExtents="true">
+                <Texture name="$(parent)Flash" alpha="0" textureFile="EsoUI/Art/Miscellaneous/icon_highlight_pulse.dds" excludeFromResizeToFitExtents="true">
                     <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20" />
                     <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
                 </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventoryFilterSubTab" inherits="ZO_InventoryFilterTab" virtual="true">
+            <Dimensions x="16" y="16" />
+        </Control>
+
+        <!-- This control is being inherited into SearchFilters and the search operations are now tied to TextSearch within this control rather than at the top level of the inventory -->
+        <Control name="ZO_InventorySubFiltersWithSearch" resizeToFitDescendents="true" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)TextSearch" inherits="ZO_InventorySearch">
+                    <Anchor point="TOPRIGHT" />
+                    <Dimensions x="170" />
+                </Backdrop>
+
+                <Control name="$(parent)SubTabs" inherits="ZO_InventorySubTabs">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TextSearch" relativePoint="LEFT" offsetX="-12"/>
+                </Control>
             </Controls>
         </Control>
 
@@ -115,23 +133,34 @@
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
 
             <Controls>
-                <!-- Currently not part of the design -->
-                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
-                    <Dimensions x="240" />
-                    <Anchor point="TOPRIGHT" offsetX="-26" offsetY="68" />
-                </Backdrop>
-
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 
-                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true"/>
+                <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
+                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="TOPLEFT" offsetX="50" offsetY="180"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="BOTTOMRIGHT" offsetX="-50" offsetY="-50" />
+                </Label>
 
                 <!-- Sort Headers -->
-                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
+                </Control>
 
                 <!-- Item Lists  -->
                 <Control name="$(parent)List" inherits="ZO_InventoryList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
@@ -166,21 +195,34 @@
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
 
             <Controls>
-                <!-- Currently not part of the design -->
-                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
-                    <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
-                    <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
-                </Backdrop>
-
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 
+                <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
                 <!-- Sort Headers -->
-                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
-                
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
+                </Control>
+
+                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="TOPLEFT" offsetX="50" offsetY="180"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="BOTTOMRIGHT" offsetX="-50" offsetY="-50" />
+                </Label>
+
                 <!-- Item Lists -->
                 <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
@@ -225,7 +267,7 @@
                         <Control name="$(parent)Amounts">
                             <Dimensions x="200" y="70" />
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="TOPRIGHT" offsetX="10" />
-                            
+
                             <Controls>
                                 <Label name="$(parent)Banked" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
                                     <Anchor point="TOPRIGHT" offsetX="-22" offsetY="7" />
@@ -240,7 +282,7 @@
                                 </Control>
                             </Controls>
                         </Control>
-                        
+
                         <Backdrop name="$(parent)DepositWithdrawCurrency" inherits="ZO_DefaultCurrencyInputField">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Amounts" relativePoint="BOTTOMLEFT" offsetY="20"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Amounts" relativePoint="BOTTOMRIGHT" offsetX="-40" offsetY="20" />
@@ -267,21 +309,29 @@
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
 
             <Controls>
-                <!-- Currently not part of the design -->
-                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
-                    <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
-                    <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
-                </Backdrop>
-
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 
+                <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
                 <!-- Sort Headers -->
-                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
+                </Control>
 
                 <!-- Item Lists -->
                 <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
@@ -311,26 +361,34 @@
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
 
             <Controls>
-                <!-- Currently not part of the design -->
-                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
-                    <Anchor point="TOPLEFT" offsetX="4" offsetY="65" />
-                    <Anchor point="TOPRIGHT" offsetX="-42" offsetY="65" />
-                </Backdrop>
-
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 
-                <!-- Sort Headers -->
-                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
+                <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                </Control>
 
+                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
+                </Control>
+                
                 <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true" >
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="TOPLEFT" offsetX="50" offsetY="145"/>
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="TOPLEFT" offsetX="50" offsetY="180"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="BOTTOMRIGHT" offsetX="-50" offsetY="-50" />
                 </Label>
                 
                 <!-- Item Lists -->
                 <Control name="$(parent)Backpack" inherits="ZO_InventoryList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
@@ -373,23 +431,34 @@
             </OnInitialized>
 
             <Controls>
-                <!-- Currently not part of the design -->
-                <Backdrop name="$(parent)Search" inherits="ZO_InventorySearch" hidden="true">
-                    <Dimensions x="240" />
-                    <Anchor point="TOPRIGHT" offsetX="-26" offsetY="68" />
-                </Backdrop>
-
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
 
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
 
-                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true"/>
+                <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
+                <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="TOPLEFT" offsetX="50" offsetY="180"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedRightPanelBackground" relativePoint="BOTTOMRIGHT" offsetX="-50" offsetY="-50" />
+                </Label>
 
                 <!-- Sort Headers -->
-                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders" />
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchDivider" relativePoint="BOTTOMRIGHT" />
+                </Control>
 
                 <!-- Item Lists -->
                 <Control name="$(parent)List" inherits="ZO_InventoryList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SortBy" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
                             <OnInitialized>
@@ -398,13 +467,12 @@
                         </Control>
                     </Controls>
                 </Control>
-                
+
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" />
                 </Control>
             </Controls>
         </TopLevelControl>
-        
     </Controls>
 </GuiXml>

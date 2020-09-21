@@ -1,4 +1,4 @@
-ZO_KeybindStrip = ZO_Object:New()
+ZO_KeybindStrip = ZO_Object:Subclass()
 
 KEYBIND_STRIP_ALIGN_LEFT = 1
 KEYBIND_STRIP_ALIGN_CENTER = 2

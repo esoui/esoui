@@ -114,7 +114,7 @@
             </Controls>
         </Label>
 
-        <TopLevelControl name="ZO_CraftingResultsTopLevel" hidden="true">
+        <TopLevelControl name="ZO_CraftingResultsTopLevel" hidden="true" tier="HIGH">
             <Dimensions x="500" y="750" />
             <Anchor point="TOP" offsetY="258" />
 

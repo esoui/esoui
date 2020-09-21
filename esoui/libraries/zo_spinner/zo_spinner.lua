@@ -3,8 +3,8 @@ ZO_Spinner = ZO_CallbackObject:Subclass()
 SPINNER_MODE_CLAMP = 1
 SPINNER_MODE_WRAP = 2
 
-local SMALL_INCREMENT = 1
-local LARGE_INCREMENT = 10
+ZO_SPINNER_SMALL_INCREMENT = 1
+ZO_SPINNER_LARGE_INCREMENT = 10
 
 -- Wrap for arbitrary ranges including negative numbers
 -- Does *not* support floats
@@ -109,7 +109,7 @@ end
 
 function ZO_Spinner:OnMouseWheel(delta)
     if self.enabled then
-        self:ModifyValue((delta > 0 and DIRECTION_INCREMENT or DIRECTION_DECREMENT) * (IsShiftKeyDown() and LARGE_INCREMENT or SMALL_INCREMENT))
+        self:ModifyValue((delta > 0 and DIRECTION_INCREMENT or DIRECTION_DECREMENT) * (IsShiftKeyDown() and ZO_SPINNER_LARGE_INCREMENT or ZO_SPINNER_SMALL_INCREMENT))
     end
 end
 
@@ -140,7 +140,7 @@ do
             if self.timeUntilNextModify < 0 then
                 self.timeUntilNextModify = self.timeUntilNextModify + TIME_BETWEEN_MODIFIES
 
-                self:ModifyValue(self.direction * (IsShiftKeyDown() and LARGE_INCREMENT or SMALL_INCREMENT))
+                self:ModifyValue(self.direction * (IsShiftKeyDown() and ZO_SPINNER_LARGE_INCREMENT or ZO_SPINNER_SMALL_INCREMENT))
             end
 
             self.lastUpdate = now
@@ -158,9 +158,9 @@ do
         self.control:SetHandler("OnUpdate", self:GetOnUpdateFunction())
 
         if IsShiftKeyDown() then
-            self:ModifyValue(self.direction * LARGE_INCREMENT)
+            self:ModifyValue(self.direction * ZO_SPINNER_LARGE_INCREMENT)
         else
-            self:ModifyValue(self.direction * SMALL_INCREMENT)
+            self:ModifyValue(self.direction * ZO_SPINNER_SMALL_INCREMENT)
         end
     end
 

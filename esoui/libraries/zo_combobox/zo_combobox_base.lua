@@ -6,7 +6,7 @@
 ZO_ComboBox_Base = ZO_Object:Subclass()
 
 ZO_COMBOBOX_UPDATE_NOW = 1
-ZO_COMBOBOX_SUPRESS_UPDATE = 2
+ZO_COMBOBOX_SUPPRESS_UPDATE = 2
 
 function ZO_ComboBox_Base:ShowDropdownInternal()
     -- this is meant to be overridden by a subclass it's called when the combo dropdown is to be shown
@@ -128,7 +128,7 @@ end
 function ZO_ComboBox_Base:AddItem(itemEntry, updateOptions)
     table.insert(self.m_sortedItems, itemEntry)
     
-    if(updateOptions ~= ZO_COMBOBOX_SUPRESS_UPDATE) then
+    if(updateOptions ~= ZO_COMBOBOX_SUPPRESS_UPDATE) then
         self:UpdateItems()
     end
 
@@ -165,7 +165,7 @@ end
 
 function ZO_ComboBox_Base:AddItems(items)
     for k, v in pairs(items) do
-        self:AddItem(v, ZO_COMBOBOX_SUPRESS_UPDATE)
+        self:AddItem(v, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
     
     self:UpdateItems()

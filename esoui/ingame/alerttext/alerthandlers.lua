@@ -920,6 +920,12 @@ local AlertHandlers = {
         return ALERT, GetString("SI_TRADESKILLRESULT", result)
     end,
 
+    [EVENT_RECONSTRUCT_RESPONSE] = function(result)
+        if result ~= RECONSTRUCT_RESPONSE_SUCCESS then
+            return ALERT, GetString("SI_RECONSTRUCTRESPONSE", result)
+        end
+    end,
+
     [EVENT_RETRAIT_RESPONSE] = function(result)
         if result ~= RETRAIT_RESPONSE_SUCCESS then
             return ALERT, GetString("SI_RETRAITRESPONSE", result)
@@ -989,6 +995,13 @@ local AlertHandlers = {
 
     [EVENT_SKILL_RESPEC_RESULT] = function(result)
         local message = GetString("SI_RESPECRESULT", result)
+        if message and message ~= "" then
+            return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_CHAMPION_PURCHASE_RESULT] = function(result)
+        local message = GetString("SI_CHAMPIONPURCHASERESULT", result)
         if message and message ~= "" then
             return UI_ALERT_CATEGORY_ERROR, message, SOUNDS.GENERAL_ALERT_ERROR
         end

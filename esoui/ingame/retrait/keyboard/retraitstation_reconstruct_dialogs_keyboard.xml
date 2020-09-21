@@ -1,0 +1,93 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ReconstructionCostLineItem" hidden="true" virtual="true">
+            <Dimensions x="316" y="42" />
+
+            <Controls>
+                <Texture name="$(parent)IconTexture">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="40" y="40" />
+
+                    <Controls>
+                        <Label name="$(parent)QuantityLabel" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT" level="1">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="4" />
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)NameLabel" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontGameBold" maxLineCount="2">
+                    <Anchor point="LEFT" relativeTo="$(parent)IconTexture" relativePoint="RIGHT" offsetX="8" />
+                    <Anchor point="RIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ConfirmItemReconstructionDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_ConfirmItemReconstructionDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Item" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">
+                    <Controls>
+                        <Texture name="$(parent)Texture">
+                            <Anchor point="LEFT" />
+                            <Dimensions x="42" y="42" />
+                        </Texture>
+
+                        <Label name="$(parent)Label" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="LEFT" relativeTo="$(parent)Texture" relativePoint="RIGHT" offsetX="15" />
+                            <Anchor point="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)SummaryLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_RETRAIT_STATION_CONFIRM_ITEM_RECONSTRUCTION_DESCRIPTION">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Item" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Item" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)CostContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SummaryLabel" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SummaryLabel" relativePoint="BOTTOMRIGHT" offsetY="10" />
+
+                    <Controls>
+                        <Label name="$(parent)TotalCostLabel" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ITEM_RECONSTRUCTION_TOTAL_COST">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Control name="$(parent)LineItemContainer">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TotalCostLabel" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TotalCostLabel" relativePoint="BOTTOMRIGHT" offsetY="10" />
+
+                            <Controls>
+                                <Control name="$(parent)CurrencyCostLineItem" inherits="ZO_ReconstructionCostLineItem">
+                                    <Anchor point="TOPLEFT" />
+                                </Control>
+                                <Control name="$(parent)CostLineItem1" inherits="ZO_ReconstructionCostLineItem">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CurrencyCostLineItem" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                                <Control name="$(parent)CostLineItem2" inherits="ZO_ReconstructionCostLineItem">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CostLineItem1" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                                <Control name="$(parent)CostLineItem3" inherits="ZO_ReconstructionCostLineItem">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CostLineItem2" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                                <Control name="$(parent)CostLineItem4" inherits="ZO_ReconstructionCostLineItem">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CostLineItem3" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                                <Control name="$(parent)CostLineItem5" inherits="ZO_ReconstructionCostLineItem">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CostLineItem4" relativePoint="BOTTOMLEFT" />
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

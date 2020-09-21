@@ -8,199 +8,130 @@ end
 
 function ZO_RetraitStation_Keyboard:Initialize(control)
     ZO_RetraitStation_Base.Initialize(self, control, KEYBOARD_RETRAIT_ROOT_SCENE_NAME)
-    self.retraitPanel = ZO_RetraitStation_Retrait_Keyboard:New(self.control:GetNamedChild("RetraitPanel"), self)
 
-    self:InitializeKeybindStripDescriptors()
+    ZO_RETRAIT_KEYBOARD = ZO_RetraitStation_Retrait_Keyboard:New(self.control:GetNamedChild("RetraitPanel"), self)
+    ZO_RECONSTRUCT_KEYBOARD = ZO_RetraitStation_Reconstruct_Keyboard:New(self.control:GetNamedChild("ReconstructPanel"), self)
+
     self:InitializeModeBar()
-
-    KEYBOARD_RETRAIT_ROOT_SCENE = self.interactScene
-
-    local fragment = ZO_FadeSceneFragment:New(control)
-    self.interactScene:AddFragment(fragment)
-
-    SYSTEMS:RegisterKeyboardRootScene("retrait", self.interactScene)
-    SYSTEMS:RegisterKeyboardObject("retrait", self)
-end
-
-function ZO_RetraitStation_Keyboard:OnInteractSceneShowing()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
-function ZO_RetraitStation_Keyboard:OnInteractSceneHiding()
-    ZO_InventorySlot_RemoveMouseOverKeybinds()
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-
-    CRAFTING_RESULTS:SetCraftingTooltip(nil)
-end
-
-function ZO_RetraitStation_Keyboard:OnInteractSceneHidden()
-    -- this needs to be called on hidden or else the inventory will
-    -- attempt a full refresh instead of flagging itself as dirty
-    self:HandleDirtyEvent()
-
-    self.retraitPanel:RemoveItemFromRetrait()
-end
-
-function ZO_RetraitStation_Keyboard:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor =
-    {
-        alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
-        -- Clear selections
-        {
-            name = GetString(SI_CRAFTING_CLEAR_SELECTIONS),
-
-            keybind = "UI_SHORTCUT_NEGATIVE",
-
-            callback = function()
-                if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-                    self.retraitPanel:SetRetraitSlotItem()
-                end
-            end,
-
-            visible = function()
-                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-                        return self.retraitPanel:HasItemSlotted()
-                    end
-                end
-                return false
-            end,
-        },
-
-        -- Perform craft
-        {
-            name = function()
-                if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-                    return GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT)
-                end
-            end,
-
-            keybind = "UI_SHORTCUT_SECONDARY",
-
-            callback = function()
-                if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-                    self.retraitPanel:PerformRetrait()
-                end
-            end,
-
-            enabled = function()
-                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-                        return self.retraitPanel:HasValidSelections()
-                    end
-                end
-                return false
-            end,
-
-            visible = function()
-                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-                        return self.retraitPanel:HasItemSlotted()
-                    end
-                end
-                return false
-            end,
-        },
-    }
-
-    ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
+    self:InitializeInteractScene()
 end
 
 function ZO_RetraitStation_Keyboard:InitializeModeBar()
-    self.modeBar = self.control:GetNamedChild("ModeMenuBar")
-    self.modeBarLabel = self.modeBar:GetNamedChild("Label")
+    self.modeMenu = self.control:GetNamedChild("ModeMenu")
+    self.modeBar = self.modeMenu:GetNamedChild("Bar")
 
-    local function CreateModeData(name, mode, normal, pressed, highlight, disabled)
-        return {
-            categoryName = name,
+    local MENU_BAR_DATA =
+    {
+        initialButtonAnchorPoint = RIGHT,
+        buttonTemplate = "ZO_MenuBarTooltipButton",
+        normalSize = 51,
+        downSize = 64,
+        buttonPadding = -15,
+        animationDuration = 180,
+    }
 
-            descriptor = mode,
-            normal = normal,
-            pressed = pressed,
-            highlight = highlight,
-            disabled = disabled,
-            callback = function(tabData)
-                self.modeBarLabel:SetText(GetString(name))
-                self:SetMode(mode)
-            end,
-        }
-    end
+    ZO_MenuBar_SetData(self.modeBar, MENU_BAR_DATA)
+    self.tabs = ZO_SceneFragmentBar:New(self.modeBar)
 
-    self.retraitTab = CreateModeData(SI_RETRAIT_STATION_RETRAIT_MODE, ZO_RETRAIT_MODE_RETRAIT, "EsoUI/Art/Crafting/retrait_tabIcon_up.dds", "EsoUI/Art/Crafting/retrait_tabIcon_down.dds", "EsoUI/Art/Crafting/retrait_tabIcon_over.dds", "EsoUI/Art/Crafting/retrait_tabIcon_disabled.dds")
+    self.retraitTab =
+    {
+        categoryName = SI_RETRAIT_STATION_RETRAIT_MODE,
+        descriptor = ZO_RETRAIT_MODE_RETRAIT,
+        normal = "EsoUI/Art/Crafting/retrait_tabIcon_up.dds",
+        pressed = "EsoUI/Art/Crafting/retrait_tabIcon_down.dds",
+        highlight = "EsoUI/Art/Crafting/retrait_tabIcon_over.dds",
+        disabled = "EsoUI/Art/Crafting/retrait_tabIcon_disabled.dds",
+        callback = function() self:SetMode(ZO_RETRAIT_MODE_RETRAIT) end,
+    }
 
-    ZO_MenuBar_AddButton(self.modeBar, self.retraitTab)
-    ZO_MenuBar_SelectDescriptor(self.modeBar, ZO_RETRAIT_MODE_RETRAIT)
+    self.reconstructTab =
+    {
+        categoryName = SI_RETRAIT_STATION_RECONSTRUCT_MODE,
+        descriptor = ZO_RETRAIT_MODE_RECONSTRUCT,
+        normal = "EsoUI/Art/Crafting/reconstruct_tabIcon_up.dds",
+        pressed = "EsoUI/Art/Crafting/reconstruct_tabIcon_down.dds",
+        highlight = "EsoUI/Art/Crafting/reconstruct_tabIcon_over.dds",
+        disabled = "EsoUI/Art/Crafting/reconstruct_tabIcon_disabled.dds",
+        callback = function() self:SetMode(ZO_RETRAIT_MODE_RECONSTRUCT) end,
+    }
 
+    self.tabs:SetStartingFragment(self.retraitTab.categoryName)
     ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
 end
 
-function ZO_RetraitStation_Keyboard:UpdateKeybinds()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+function ZO_RetraitStation_Keyboard:InitializeInteractScene()
+    KEYBOARD_RETRAIT_ROOT_SCENE = self.interactScene
+
+    local fragment = ZO_FadeSceneFragment:New(self.control)
+    self.interactScene:AddFragment(fragment)
+
+    SYSTEMS:RegisterKeyboardRootScene("retrait", self.interactScene)
 end
 
-function ZO_RetraitStation_Keyboard:OnItemReceiveDrag(slotControl, bagId, slotIndex)
-    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-        self.retraitPanel:OnItemReceiveDrag(slotControl, bagId, slotIndex)
+function ZO_RetraitStation_Keyboard:OnInteractSceneShowing()
+    if not self.initializedTabs then
+        local retraitFragments =
+        {
+            RIGHT_PANEL_BG_FRAGMENT,
+            RETRAIT_STATION_RETRAIT_FRAGMENT,
+            CRAFTING_RESULTS_FRAGMENT,
+        }
+        ZO_CombineNumericallyIndexedTables(retraitFragments, FRAGMENT_GROUP.READ_ONLY_EQUIPPED_ITEMS)
+        self.tabs:Add(self.retraitTab.categoryName, retraitFragments, self.retraitTab, ZO_RETRAIT_KEYBOARD:GetKeybindDescriptor())
+
+        local reconstructFragments =
+        {
+            RIGHT_BG_FRAGMENT,
+            RETRAIT_STATION_RECONSTRUCT_FRAGMENT,
+            CRAFTING_RESULTS_FRAGMENT,
+        }
+        self.tabs:Add(self.reconstructTab.categoryName, reconstructFragments, self.reconstructTab, ZO_RECONSTRUCT_KEYBOARD:GetKeybindDescriptor())
+
+        ZO_CraftingUtils_ConnectMenuBarToCraftingProcess(self.modeBar)
+        self.initializedTabs = true
     end
+
+    self.tabs:UpdateButtons()
+    self.tabs:SelectFragment(self.retraitTab.categoryName)
+end
+
+function ZO_RetraitStation_Keyboard:OnInteractSceneHiding()
+    self.tabs:Clear()
+end
+
+function ZO_RetraitStation_Keyboard:OnInteractSceneHidden()
+    CRAFTING_RESULTS:SetCraftingTooltip(nil)
+end
+
+function ZO_RetraitStation_Keyboard:UpdateKeybinds()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.tabs:GetActiveKeybind())
 end
 
 function ZO_RetraitStation_Keyboard:SetMode(mode)
     if self.mode ~= mode then
         self.mode = mode
+        self:RefreshModeMenuAnchors()
 
-        CRAFTING_RESULTS:SetCraftingTooltip(nil)
-
-        self:UpdateKeybinds()
-
-        self.retraitPanel:SetHidden(mode ~= ZO_RETRAIT_MODE_RETRAIT)
+        ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.tabs:GetActiveKeybind())
     end
 end
 
-function ZO_RetraitStation_Keyboard:IsItemAlreadySlottedToCraft(bag, slot)
+function ZO_RetraitStation_Keyboard:RefreshModeMenuAnchors()
+    local modeBackground
+
     if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-        return self.retraitPanel:IsItemAlreadySlottedToCraft(bag, slot)
+        modeBackground = ZO_SharedRightPanelBackground
+    elseif self.mode == ZO_RETRAIT_MODE_RECONSTRUCT then
+        modeBackground = ZO_SharedRightBackground
     end
-    return false
-end
 
-function ZO_RetraitStation_Keyboard:CanItemBeAddedToCraft(bag, slot)
-    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-        return self.retraitPanel:CanItemBeAddedToCraft(bag, slot)
+    if modeBackground then
+        self.modeMenu:ClearAnchors()
+
+        local DIVIDER_OFFSET_X = 40
+        self.modeMenu:SetAnchor(TOPLEFT, modeBackground, nil, DIVIDER_OFFSET_X)
+        self.modeMenu:SetAnchor(TOPRIGHT, modeBackground, nil, -DIVIDER_OFFSET_X)
     end
-    return false
-end
-
-function ZO_RetraitStation_Keyboard:AddItemToCraft(bag, slot)
-    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-        self.retraitPanel:AddItemToCraft(bag, slot)
-    end
-end
-
-function ZO_RetraitStation_Keyboard:RemoveItemFromCraft(bag, slot)
-    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-        self.retraitPanel:RemoveItemFromCraft(bag, slot)
-    end
-end
-
-function ZO_RetraitStation_Keyboard:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
-     if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-        self.retraitPanel:OnItemReceiveDrag(inventorySlot, bagId, slotIndex)
-    end
-end
-
-function ZO_RetraitStation_Keyboard:OnRetraitResult(result)
-    if self.mode == ZO_RETRAIT_MODE_RETRAIT then
-        self.retraitPanel:OnRetraitResult(result)
-    end
-end
-
-function ZO_RetraitStation_Keyboard:HandleDirtyEvent()
-    self.retraitPanel:HandleDirtyEvent()
-end
-
-function ZO_RetraitStation_Keyboard:GetRetraitObject()
-    return self.retraitPanel
 end
 
 -- Global XML functions

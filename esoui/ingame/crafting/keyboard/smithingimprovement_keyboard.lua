@@ -170,6 +170,7 @@ function ZO_SmithingImprovementInventory:Initialize(owner, control, ...)
     infoBar:SetAnchor(TOPRIGHT, backpack, BOTTOMRIGHT, 0, 145)
 
     self.owner = owner
+    self.tabWithQuest = nil
 
     self:SetFilters{
         self:CreateNewTabFilterData(SMITHING_FILTER_TYPE_JEWELRY, GetString("SI_SMITHINGFILTERTYPE", SMITHING_FILTER_TYPE_JEWELRY), "EsoUI/Art/Crafting/jewelry_tabIcon_icon_up.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_down.dds", "EsoUI/Art/Crafting/jewelry_tabIcon_icon_over.dds", "EsoUI/Art/Inventory/inventory_tabIcon_jewelry_disabled.dds", CanSmithingJewelryPatternsBeCraftedHere),
@@ -198,6 +199,34 @@ end
 function ZO_SmithingImprovementInventory:Refresh(data)
     local USE_WORN_BAG = true
     local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
+
+    --First, make sure any existing quest pins on the tabs are hidden (if the tab still needs a quest pin, it will be re-added in the code block below)
+    if self.tabWithQuest then
+        self.tabWithQuest.questPin:SetHidden(true)
+        self.tabWithQuest = nil
+    end
+
+    --We only need to check this if we are actually on a quest that requires us to potentially improve something
+    if self.improvementQuestInfo.desiredItemId then
+        local questInfo = self.improvementQuestInfo
+        for _, improvementItem in ipairs(validItems) do
+            local itemId = GetItemId(improvementItem.bagId, improvementItem.slotIndex)
+            if itemId == questInfo.desiredItemId then
+                local doesItemMatch = DoesItemMatchSmithingMaterialTraitAndStyle(improvementItem.bagId, improvementItem.slotIndex, questInfo.desiredMaterial, questInfo.desiredTrait, questInfo.desiredStyle)
+                if doesItemMatch and (improvementItem.functionalQuality < questInfo.desiredQuality) then
+                    self.tabWithQuest = ZO_MenuBar_GetButtonControl(self.tabs, ZO_CraftingUtils_GetSmithingFilterFromItem(improvementItem.bagId, improvementItem.slotIndex))
+                    if self.tabWithQuest then
+                        self.tabWithQuest.questPin:SetHidden(false)
+                    end
+                    --There can be only one tab at a time that can have a quest pin, so as soon as we find one, we can stop searching
+                    --This is because the only writs that involve improvement are master writs, which are 1 item at a time
+                    --If this ever changes, we will want to update this code
+                    break
+                end
+            end
+        end
+    end
+
     self.owner:OnInventoryUpdate(validItems)
 
     self:SetNoItemLabelHidden(#data > 0)
@@ -227,6 +256,16 @@ function ZO_SmithingImprovementInventory:AddListDataTypes()
     end
 
     local function RowSetup(rowControl, data)
+        local itemId = GetItemId(data.bagId, data.slotIndex)
+        local shouldShowQuestPin = false
+        if itemId == self.improvementQuestInfo.desiredItemId and itemId ~= nil then
+            shouldShowQuestPin = DoesItemMatchSmithingMaterialTraitAndStyle(data.bagId, data.slotIndex, self.improvementQuestInfo.desiredMaterial, self.improvementQuestInfo.desiredTrait, self.improvementQuestInfo.desiredStyle) and (data.functionalQuality < self.improvementQuestInfo.desiredQuality)
+        end
+        if shouldShowQuestPin then
+            data.additionalIcons = {"EsoUI/Art/WritAdvisor/advisor_trackedPin_icon.dds"}
+        else
+            data.additionalIcons = nil
+        end
         defaultSetup(rowControl, data)
         rowControl.functionalQuality = data.functionalQuality
         -- data.quality is deprecated, included here for addon backwards compatibility

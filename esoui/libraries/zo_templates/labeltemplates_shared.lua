@@ -48,14 +48,14 @@ do
     end
 
     function ZO_SelectableLabel_OnMouseEnter(label)
-        if(label.mouseoverEnabled) then
+        if label.mouseoverEnabled then
             label.mouseover = true
         end
         label:RefreshTextColor()
     end
 
     function ZO_SelectableLabel_OnMouseExit(label)
-        if(label.mouseoverEnabled) then
+        if label.mouseoverEnabled then
             label.mouseover = false
         end
         label:RefreshTextColor()
@@ -194,15 +194,37 @@ end
 --FontAdjustingWrapLabel--
 --------------------------
 do
+    local function RefreshStyle(label)
+        local fonts = label.fonts
+        local numFonts = #fonts
+        local lastFont = fonts[numFonts]
+        local maxLines = lastFont.lineLimit or numFonts
+        label.maxLines = maxLines
+        label.dontUseMaxLinesForAdjusting = lastFont.dontUseForAdjusting
+        label:SetMaxLineCount(maxLines)
+    end
+
+    local function GetFonts(label)
+        return label.fonts
+    end
+
+    local function GetFontsFromFunction(label)
+        label.fonts = label.fontsFunction()
+        RefreshStyle(label)
+        return label.fonts
+    end
+
     -- dontUseMaxLinesForAdjusting is used when multiple fonts have fontData.lineLimit == label.maxLines
     -- With MaxLineCount non-zero the text will be truncated on the larger font so the smaller font will not be tested
     -- To see the true number of lines with the given font, we SetMaxLineCount(0) before adjusting and then set it back to label.maxLines
     local function AdjustWrappingLabelFont(label)
+        local fonts = label:GetFonts()
+
         if label.dontUseMaxLinesForAdjusting then
             label:SetMaxLineCount(0)
         end
 
-        for i, fontData in ipairs(label.fonts) do
+        for i, fontData in ipairs(fonts) do
             local fontLineLimit = fontData.lineLimit or i
             label:SetFont(fontData.font)
             local lines = label:GetNumLines()
@@ -215,41 +237,52 @@ do
             label:SetMaxLineCount(label.maxLines)
         end
     end
-    
+
     local function FontAdjustingWrapLabel_Update(label)
         local width = label:GetWidth()
         if label.forceUpdate or label.width ~= width then
             label.width = width
             label.forceUpdate = false
             AdjustWrappingLabelFont(label)
+
+            if label.onUpdatedFunction then
+                label.onUpdatedFunction()
+            end
         end
     end
 
-    local function SetTextOverride(label, text)
-        ZO_LABEL_TEMPLATE_DUMMY_LABEL.SetText(label, text)
+    local function MarkDirty(label)
         label.forceUpdate = true
         FontAdjustingWrapLabel_Update(label)
     end
 
     local function ApplyStyle(label, fonts)
-        label.fonts = fonts
-        local numFonts = #fonts
-        local lastFont = fonts[numFonts]
-        local maxLines = lastFont.lineLimit or numFonts
-        label.maxLines = maxLines
-        label.dontUseMaxLinesForAdjusting = lastFont.dontUseForAdjusting
-        label:SetMaxLineCount(maxLines)
+        if type(fonts) == "function" then
+            label.fontsFunction = fonts
+            label.GetFonts = GetFontsFromFunction
+        else
+            label.fonts = fonts
+            label.GetFonts = GetFonts
+        end
+        label:GetFonts()
         label.forceUpdate = true
+        label.MarkDirty = MarkDirty
     end
 
-    local function FontAdjustingWrapLabel_Initialize(label, wrapMode)
+    local function SetTextOverride(label, text)
+        ZO_LABEL_TEMPLATE_DUMMY_LABEL.SetText(label, text)
+        label:MarkDirty()
+    end
+
+    local function FontAdjustingWrapLabel_Initialize(label, wrapMode, onUpdatedFunction)
         label.SetText = SetTextOverride
+        label.onUpdatedFunction = onUpdatedFunction
         label:SetWrapMode(wrapMode)
         label:SetHandler("OnUpdate", FontAdjustingWrapLabel_Update)
     end
 
-    function ZO_FontAdjustingWrapLabel_OnInitialized(label, fonts, wrapMode)
-        FontAdjustingWrapLabel_Initialize(label, wrapMode)
+    function ZO_FontAdjustingWrapLabel_OnInitialized(label, fonts, wrapMode, onUpdatedFunction)
+        FontAdjustingWrapLabel_Initialize(label, wrapMode, onUpdatedFunction)
         ApplyStyle(label, fonts)
     end
 

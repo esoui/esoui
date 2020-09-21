@@ -4,23 +4,27 @@ local GAMEPAD_PROVISIONER_OPTIONS_TEMPLATE = "ZO_GamepadLeftCheckboxOptionTempla
 
 local GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS = 1
 local GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS = 2
+local GAMEPAD_PROVISIONER_OPTION_FILTER_QUESTS = 3
 
-local g_filters =
+
+local optionFilterIngredients = 
 {
-    [GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS] =
-    {
-        header = GetString(SI_GAMEPAD_PROVISIONER_OPTIONS),
-        filterName = GetString(SI_PROVISIONER_HAVE_INGREDIENTS),
-        filterTooltip = GetString(SI_CRAFTING_HAVE_INGREDIENTS_TOOLTIP),
-        checked = false,
-    },
-
-    [GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS] =
-    {
-        filterName = GetString(SI_PROVISIONER_HAVE_SKILLS),
-        filterTooltip = GetString(SI_CRAFTING_HAVE_SKILLS_TOOLTIP),
-        checked = false,
-    },
+    header = GetString(SI_GAMEPAD_PROVISIONER_OPTIONS),
+    filterName = GetString(SI_PROVISIONER_HAVE_INGREDIENTS),
+    filterTooltip = GetString(SI_CRAFTING_HAVE_INGREDIENTS_TOOLTIP),
+    checked = false,
+}
+local optionFilterSkills  =
+{
+    filterName = GetString(SI_PROVISIONER_HAVE_SKILLS),
+    filterTooltip = GetString(SI_CRAFTING_HAVE_SKILLS_TOOLTIP),
+    checked = false,
+}
+local optionFilterQuests =
+{
+    filterName = GetString(SI_SMITHING_IS_QUEST_ITEM),
+    filterTooltip = GetString(SI_CRAFTING_IS_QUEST_ITEM_TOOLTIP),
+    checked = false,
 }
 
 ZO_GamepadProvisioner = ZO_SharedProvisioner:Subclass()
@@ -293,7 +297,12 @@ function ZO_GamepadProvisioner:ShowOptionsMenu()
     local dialogData = 
     {
         targetData = self.recipeList:GetTargetData(),
-        filters = g_filters,
+        filters = 
+        {
+            [GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS] = optionFilterIngredients,
+            [GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS] = optionFilterSkills,
+            [GAMEPAD_PROVISIONER_OPTION_FILTER_QUESTS] = optionFilterQuests,
+        },
         finishedCallback =  function()
             self:SaveFilters()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
@@ -310,11 +319,13 @@ function ZO_GamepadProvisioner:SetupSavedVars()
     { 
         haveIngredientsChecked = false, 
         haveSkillsChecked = false, 
+        questsOnlyChecked = false,
     }
-    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 2, "GamepadProvisioner", defaults)
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 3, "GamepadProvisioner", defaults)
     
-    g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked = self.savedVars.haveIngredientsChecked
-    g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked = self.savedVars.haveSkillsChecked
+    optionFilterIngredients.checked = self.savedVars.haveIngredientsChecked
+    optionFilterSkills.checked = self.savedVars.haveSkillsChecked
+    optionFilterQuests.checked = self.savedVars.questsOnlyChecked
     
     self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
 end
@@ -330,8 +341,14 @@ function ZO_GamepadProvisioner:InitializeRecipeList()
         return left.recipeListIndex == right.recipeListIndex and left.recipeIndex == right.recipeIndex and left.name == right.name
     end
 
-    self.recipeList:AddDataTemplate("ZO_GamepadItemSubEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
-    self.recipeList:AddDataTemplateWithHeader("ZO_GamepadItemSubEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality, "ZO_GamepadMenuEntryHeaderTemplate")
+    local function MenuEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        local shouldHide = self.questRecipes[data.dataSource.resultItemId] ~= true
+        control.questPin:SetHidden(shouldHide)
+    end
+
+    self.recipeList:AddDataTemplate("ZO_Provisioner_GamepadItemSubEntryTemplate", MenuEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality)
+    self.recipeList:AddDataTemplateWithHeader("ZO_Provisioner_GamepadItemSubEntryTemplate", MenuEntryTemplateSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality, "ZO_GamepadMenuEntryHeaderTemplate")
 
     self.recipeList:SetOnSelectedDataChangedCallback(function(list, selectedData)
         self:RefreshRecipeDetails(selectedData)
@@ -339,11 +356,13 @@ function ZO_GamepadProvisioner:InitializeRecipeList()
 end
 
 function ZO_GamepadProvisioner:SaveFilters()
-    local filterChanged = self.savedVars.haveIngredientsChecked ~= g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked or
-                          self.savedVars.haveSkillsChecked ~= g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked
+    local filterChanged = self.savedVars.haveIngredientsChecked ~= optionFilterIngredients.checked or
+                          self.savedVars.haveSkillsChecked ~= optionFilterSkills.checked or
+                          self.savedVars.questsOnlyChecked ~= optionFilterQuests.checked
     if filterChanged then
-        self.savedVars.haveIngredientsChecked = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked
-        self.savedVars.haveSkillsChecked = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked
+        self.savedVars.haveIngredientsChecked = optionFilterIngredients.checked
+        self.savedVars.haveSkillsChecked = optionFilterSkills.checked
+        self.savedVars.questsOnlyChecked = optionFilterQuests.checked
         self:DirtyRecipeList()
     end
 end
@@ -384,8 +403,9 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
     -- first construct the full table of filtered recipes
     local recipeDataEntries = {}
 
-    local requireIngredients = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_INGREDIENTS].checked
-    local requireSkills = g_filters[GAMEPAD_PROVISIONER_OPTION_FILTER_SKILLS].checked
+    local requireIngredients = optionFilterIngredients.checked
+    local requireSkills = optionFilterSkills.checked
+    local requireQuests = optionFilterQuests.checked
     local craftingInteractionType = GetCraftingInteractionType()
     local hasKnownRecipesInCurrentFilter = false
 
@@ -394,7 +414,7 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
         for _, recipe in ipairs(recipeList.recipes) do
             if recipe.requiredCraftingStationType == craftingInteractionType and self.filterType == recipe.specialIngredientType then
                 hasKnownRecipesInCurrentFilter = true
-                if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType) then
+                if self:DoesRecipePassFilter(recipe.specialIngredientType, requireIngredients, recipe.maxIterationsForIngredients, requireSkills, recipe.tradeskillsLevelReqs, recipe.qualityReq, craftingInteractionType, recipe.requiredCraftingStationType, requireQuests, recipe.resultItemId) then
                     local dataEntry = ZO_GamepadEntryData:New(zo_strformat(SI_PROVISIONER_RECIPE_NAME_COUNT_NONE, recipe.name), recipe.iconFile, recipe.iconFile)
                     dataEntry:SetDataSource(recipe)
                     -- recipe.quality is deprecated, included here for addon backwards compatibility
@@ -450,9 +470,9 @@ function ZO_GamepadProvisioner:RefreshRecipeList()
             lastRecipeListName = recipeData.recipeListName
             recipeData.header = lastRecipeListName
 
-            self.recipeList:AddEntry("ZO_GamepadItemSubEntryTemplateWithHeader", recipeData, nil, isNextEntryAHeader and GAMEPAD_HEADER_DEFAULT_PADDING, GAMEPAD_HEADER_SELECTED_PADDING, postSelectedOffsetAdditionalPadding)
+            self.recipeList:AddEntry("ZO_Provisioner_GamepadItemSubEntryTemplateWithHeader", recipeData, nil, isNextEntryAHeader and GAMEPAD_HEADER_DEFAULT_PADDING, GAMEPAD_HEADER_SELECTED_PADDING, postSelectedOffsetAdditionalPadding)
         else
-            self.recipeList:AddEntry("ZO_GamepadItemSubEntryTemplate", recipeData, nil, isNextEntryAHeader and GAMEPAD_HEADER_DEFAULT_PADDING, nil, postSelectedOffsetAdditionalPadding)
+            self.recipeList:AddEntry("ZO_Provisioner_GamepadItemSubEntryTemplate", recipeData, nil, isNextEntryAHeader and GAMEPAD_HEADER_DEFAULT_PADDING, nil, postSelectedOffsetAdditionalPadding)
         end
     end
 

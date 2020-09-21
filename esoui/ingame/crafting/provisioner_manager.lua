@@ -133,7 +133,7 @@ do
         for recipeListIndex = 1, GetNumRecipeLists() do
             local recipeListName, numRecipes, upIcon, downIcon, overIcon, _, recipeListCreateSound = GetRecipeListInfo(recipeListIndex)
             for recipeIndex in IterateKnownRecipes(recipeListIndex, currentCraftingStation) do
-                local _, recipeName, numIngredients, _, qualityReq, specialIngredientType, requiredCraftingStationType = GetRecipeInfo(recipeListIndex, recipeIndex)
+                local _, recipeName, numIngredients, _, qualityReq, specialIngredientType, requiredCraftingStationType, itemId = GetRecipeInfo(recipeListIndex, recipeIndex)
                 local _, resultIcon = GetRecipeResultItemInfo(recipeListIndex, recipeIndex)
                 local maxIterationsForIngredients = self:CalculateMaxIterationsForIngredients(recipeListIndex, recipeIndex, numIngredients)
                 local tradeskillsLevelReqs = {}
@@ -167,6 +167,7 @@ do
                     tradeskillsLevelReqs = tradeskillsLevelReqs,
                     name = recipeName,
                     requiredCraftingStationType = requiredCraftingStationType,
+                    resultItemId = itemId,
                 }
 
                 local recipeList = self.recipeLists[recipeListIndex]

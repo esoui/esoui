@@ -516,7 +516,7 @@ function ZO_MultiSelection_ComboBox_Gamepad:LoadData(data)
     self:ClearItems()
 
     for i, item in ipairs(data.entryItems) do
-        self:AddItem(item, ZO_COMBOBOX_SUPRESS_UPDATE)
+        self:AddItem(item, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     self:UpdateItems()
@@ -570,7 +570,7 @@ end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:Clear()
     ZO_ClearNumericallyIndexedTable(self.entryItems)
-    ZO_ClearNumericallyIndexedTable(self.selectedItems)
+    self:ClearAllSelections()
 end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:AddItem(item)
@@ -604,6 +604,10 @@ function ZO_MultiSelection_ComboBox_Data_Gamepad:GetNumSelectedItems()
     return #self.selectedItems
 end
 
+function ZO_MultiSelection_ComboBox_Data_Gamepad:GetSelectedItems()
+    return self.selectedItems
+end
+
 function ZO_MultiSelection_ComboBox_Data_Gamepad:AddItemToSelected(item)
     table.insert(self.selectedItems, item)
 end
@@ -615,6 +619,10 @@ function ZO_MultiSelection_ComboBox_Data_Gamepad:RemoveItemFromSelected(item)
             return
         end
     end
+end
+
+function ZO_MultiSelection_ComboBox_Data_Gamepad:ClearAllSelections()
+    ZO_ClearNumericallyIndexedTable(self.selectedItems)
 end
 
 function ZO_MultiSelection_ComboBox_Data_Gamepad:IsItemSelected(item)

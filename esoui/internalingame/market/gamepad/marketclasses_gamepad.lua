@@ -36,6 +36,32 @@ function ZO_GamepadMarketProduct:Initialize(controlId, parent, controlName)
     }
 end
 
+function ZO_GamepadMarketProduct:InitializeFonts()
+    local function OnTextCallbackTextUpdated()
+        local textCalloutBackground = self.control.textCallout:GetNamedChild("Background")
+        local textCalloutHeight = self.control.textCallout:GetHeight()
+        textCalloutBackground:SetHeight(textCalloutHeight + 12)
+    end
+
+    -- Initialize Textcallout Fonts
+    local fonts =
+    {
+        {
+            font = "ZoMarketGamepadCalloutFont",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepadCondensed34",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepadCondensed27",
+            lineLimit = 1,
+        },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(self.control.textCallout, fonts, TEXT_WRAP_MODE_ELLIPSIS, OnTextCallbackTextUpdated)
+end
+
 -- override of ZO_MarketProductBase:GetEsoPlusIcon()
 function ZO_GamepadMarketProduct:GetEsoPlusIcon()
     return zo_iconFormatInheritColor("EsoUI/Art/Market/Gamepad/gp_ESOPlus_Chalice_WHITE_64.dds", "100%", "100%")

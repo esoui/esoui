@@ -1,9 +1,10 @@
 function ZO_Tooltip:AddAntiquityLeadStatus(antiquityId)
     local antiquityData = ANTIQUITY_DATA_MANAGER:GetAntiquityData(antiquityId)
     if antiquityData and antiquityData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
-        local nearExpiration, timeRemaining = antiquityData:GetLeadExpirationStatus()
-        if nearExpiration then
-            self:AddLine(ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, timeRemaining)), self:GetStyle("bodyDescription"))
+        local leadTimeRemainingS = antiquityData:GetLeadTimeRemainingS()
+        if leadTimeRemainingS > 0 then
+            local leadTimeRemainingText = ZO_FormatAntiquityLeadTime(leadTimeRemainingS)
+            self:AddLine(ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, leadTimeRemainingText)), self:GetStyle("bodyDescription"))
         end
     end
 end
@@ -40,7 +41,6 @@ function ZO_Tooltip:LayoutAntiquityLead(antiquityId)
         self:AddSection(bodySection)
 
         self:AddAntiquityZone(antiquityId)
-        self:AddAntiquityLeadStatus(antiquityId)
     end
 end
 

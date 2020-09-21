@@ -1,0 +1,42 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_Gamepad_ActiveWritCondition" font="ZoFontGamepad34" virtual="true" verticalAlignment="CENTER" horizontalAlignment="RIGHT">
+            <DimensionConstraints maxX="350"/>
+            <Controls>
+                <Texture name="$(parent)Icon" level="3" hidden="true" mouseEnabled="true">
+                    <Dimensions x="22" y="22"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-2"/>
+                </Texture>
+            </Controls>
+        </Label>
+        <Label name="ZO_Gamepad_ActiveWritHeader" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" horizontalAlignment="RIGHT" mouseEnabled="true" virtual="true">
+            <Anchor point="TOPRIGHT" />
+            <OnInitialized>
+                ZO_Gamepad_ActiveWritHeader_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Keybind" inherits="ZO_KeybindButton_Gamepad" excludeFromResizeToFitExtents="true">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
+                </Control>
+            </Controls>
+        </Label>
+
+        <TopLevelControl name="ZO_CraftAdvisor_Gamepad_TopLevel" resizeToFitDescendents="true">
+            <Dimensions x="275"/>
+            <Anchor point="TOPRIGHT" offsetX="-22" offsetY="100" />
+            <OnInitialized>
+                ZO_CraftAdvisor_Gamepad_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)QuestContainer" hidden="true" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" />
+                    <Controls>
+                        <Label name="$(parent)QuestName" inherits="ZO_Gamepad_ActiveWritHeader" hidden="true"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

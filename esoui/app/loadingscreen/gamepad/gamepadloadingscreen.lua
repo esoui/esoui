@@ -30,7 +30,7 @@ function LoadingScreen_Gamepad:GetSystemName()
 end
 
 function LoadingScreen_Gamepad:OnLongLoadTime(event)
-    if(not self:IsHidden()) then
+    if not self:IsHidden() then
         self.longLoadAnimation:PlayFromStart()
     end
 end
@@ -44,8 +44,7 @@ function LoadingScreen_Gamepad:OnHidden()
     self.longLoadAnimation:Stop()
     CheckForControllerDisconnect()
 
-    local platform = GetUIPlatform()
-    if platform == UI_PLATFORM_PS4 or platform == UI_PLATFORM_XBOX then
+    if IsConsoleUI() then
         StopLongLoadTimer()
     end
 end

@@ -40,14 +40,14 @@
         <Control name="ZO_AntiquityLoreDocument_Keyboard_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontBookScrollTitle" />
-                <Label name="$(parent)Body" font="ZoFontBookScroll" maxLineCount="12" />
+                <Label name="$(parent)Body" font="ZoFontBookScroll" maxLineCount="17" />
             </Controls>
         </Control>
 
         <Control name="ZO_AntiquityLoreDocument_Gamepad_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontGamepadBookScrollTitle" />
-                <Label name="$(parent)Body" font="ZoFontGamepadBookScroll" maxLineCount="8" />
+                <Label name="$(parent)Body" font="ZoFontGamepadBookScroll" maxLineCount="12" />
             </Controls>
         </Control>
 

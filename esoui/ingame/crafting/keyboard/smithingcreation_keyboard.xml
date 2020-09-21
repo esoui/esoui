@@ -1,8 +1,25 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_SmithingCreationFilterTab" inherits="ZO_InventoryFilterTab" virtual="true">
+            <OnInitialized>
+                ZO_MenuBarButtonTemplate_OnInitialized(self)
+                self.questPin = self:GetNamedChild("QuestPin")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="15" offsetY="-10"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_SmithingCreationTabs" inherits="ZO_InventoryTabs" virtual="true">
+            <OnInitialized>
+                ZO_SmithingCreationTabs_OnInitialized(self)
+            </OnInitialized>
+        </Control>
         <Control name="ZO_SmithingCreationPanel" virtual="true">
             <Controls>
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
+                <Control name="$(parent)Tabs" inherits="ZO_SmithingCreationTabs" />
 
                 <Control name="$(parent)TabsDivider" inherits="ZO_InventoryFilterDivider" />
 
@@ -27,7 +44,19 @@
                         ZO_SmithingCreation_FilterOnMouseExit(self)
                     </OnMouseExit>
                     
-                    <Anchor point="LEFT" relativeTo="$(parent)HaveMaterials" relativePoint="RIGHT" offsetX="200" />
+                    <Anchor point="LEFT" relativeTo="$(parent)HaveMaterials" relativePoint="RIGHT" offsetX="175" />
+                </Button>
+
+                <Button name="$(parent)IsQuestItem" inherits="ZO_CheckButton">
+                    <OnMouseEnter>
+                        ZO_SmithingCreation_IsQuestItemOnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_SmithingCreation_FilterOnMouseExit(self)
+                    </OnMouseExit>
+
+                    <Anchor point="LEFT" relativeTo="$(parent)HaveKnowledge" relativePoint="RIGHT" offsetX="175" />
                 </Button>
                 
                 <Control name="$(parent)PatternList" inherits="ZO_SmithingHorizontalListTemplate">

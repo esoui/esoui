@@ -1,49 +1,30 @@
 ZO_Object = {}
+ZO_Object.__index = ZO_Object
 
 function ZO_Object:New(template)
-    --
-    -- The new instance of the object needs an index table.
-    -- This next statement prefers to use "template" as the
-    -- index table, but will fall back to self.
-    -- Without the proper index table, your new object will
-    -- not have the proper behavior.
-    --
-    template = template or self
-    
-    --
-    -- This call to setmetatable does 3 things:
-    -- 1. Makes a new table.
-    -- 2. Sets its metatable to the "index" table
-    -- 3. Returns that table.
-    --    
-    local newObject = setmetatable ({}, template)
-    
-    --
-    -- Obtain the metatable of the newly instantiated table.
-    -- Make sure that if the user attempts to access newObject[key]
-    -- and newObject[key] is nil, that it will actually fall
-    -- back to looking up template[key]...and so on, because template
-    -- should also have a metatable with the correct __index metamethod.
-    --
-    local mt = getmetatable (newObject)
-    mt.__index = template
-    
+    local class = template or self
+    local newObject = setmetatable({}, class)
     return newObject
 end
 
+---
+-- Call ZO_Object:Subclass() to create a new class that inherits from this one.
+--
 function ZO_Object:Subclass()
-    --
-    -- This is just a convenience function/semantic extension
-    -- so that objects which need to inherit from a base object
-    -- use a clearer function name to describe what they are doing.
-    --
-    return setmetatable({}, {__index = self})
+    local newClass = setmetatable({}, self)
+    newClass.__index = newClass
+    return newClass
 end
 
-function ZO_Object.MultiSubclass(...)
-    local parentClasses = {...}
-    return setmetatable({}, 
-    {
+---
+-- Call ZO_Object:MultiSubclass() to create a new class that
+-- inherits from multiple parent classes. In situations where the same method is
+-- defined on multiple classes, the leftmost class in the argument list takes
+-- priority. It is recommended that you override to avoid this!
+--
+function ZO_Object:MultiSubclass(...)
+    local parentClasses = { self, ... }
+    local newClass = setmetatable({}, {
         __index = function(table, key)
             for _, parentClassTable in ipairs(parentClasses) do
                 local value = parentClassTable[key]
@@ -53,6 +34,8 @@ function ZO_Object.MultiSubclass(...)
             end
         end
     })
+    newClass.__index = newClass
+    return newClass
 end
 
 --[[
@@ -119,7 +102,38 @@ function ZO_DataSourceObject:SetDataSource(dataSource)
 end
 
 function ZO_DataSourceObject:Subclass()
-    local newTemplate = setmetatable({}, {__index = self})
-    newTemplate.instanceMetaTable = {__index = ZO_GenerateDataSourceMetaTableIndexFunction(newTemplate) }
+    local newTemplate = setmetatable({}, { __index = self })
+    newTemplate.instanceMetaTable = { __index = ZO_GenerateDataSourceMetaTableIndexFunction(newTemplate) }
     return newTemplate
+end
+
+---
+-- ZO_InitializingObject is a new Object definition that more directly encodes
+-- the practices most current ZO_Objects are actually using. in most cases, you
+-- can directly replace a ZO_Object with a ZO_InitializingObject, and delete the
+-- redundant :New() definition that most ZO_Object classes create.
+--
+ZO_InitializingObject = {}
+zo_mixin(ZO_InitializingObject, ZO_Object)
+ZO_InitializingObject.__index = ZO_InitializingObject
+
+---
+-- This is the external constructor for each object. should be called like so:
+--     myObject = MyClass:New([arguments])
+--
+function ZO_InitializingObject:New(...)
+    local newObject = setmetatable({}, self)
+    newObject:Initialize(...)
+    return newObject
+end
+
+---
+-- Override this initialization function to define how your object should be constructed. example:
+--     function MyClass:Initialize(argument1, argument2)
+--         self.myField = argument1
+--     end
+-- You can still create an InitializingObject that doesn't have an Initialize
+-- definition, it will just call this empty method instead.
+function ZO_InitializingObject:Initialize()
+    -- To be overridden
 end

@@ -451,6 +451,7 @@ do
         [ITEM_TRAIT_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/inventory_trait_intricate_icon.dds",
         [ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED] = "EsoUI/Art/Inventory/inventory_trait_not_researched_icon.dds",
         [ITEM_TRAIT_INFORMATION_RETRAITED] = "EsoUI/Art/Inventory/inventory_trait_retrait_icon.dds",
+        [ITEM_TRAIT_INFORMATION_RECONSTRUCTED] = "EsoUI/Art/Inventory/inventory_trait_reconstruct_icon.dds",
     }
 
     local ITEM_TRAIT_INFORMATION_GAMEPAD_ICON_PATHS =
@@ -459,6 +460,7 @@ do
         [ITEM_TRAIT_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_intricate_icon.dds",
         [ITEM_TRAIT_INFORMATION_CAN_BE_RESEARCHED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_not_researched_icon.dds",
         [ITEM_TRAIT_INFORMATION_RETRAITED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_retrait_icon.dds",
+        [ITEM_TRAIT_INFORMATION_RECONSTRUCTED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_reconstruct_icon.dds",
     }
 
     function GetPlatformTraitInformationIcon(itemTraitInformation)
@@ -479,6 +481,7 @@ do
         [ITEM_SELL_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/inventory_trait_intricate_icon.dds",
         [ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED] = "EsoUI/Art/Inventory/inventory_trait_not_researched_icon.dds",
         [ITEM_SELL_INFORMATION_CANNOT_SELL] = "EsoUI/Art/Inventory/inventory_sell_forbidden_icon.dds",
+        [ITEM_SELL_INFORMATION_RECONSTRUCTED] = "EsoUI/Art/Inventory/inventory_trait_reconstruct_icon.dds",
     }
 
     function GetItemSellInformationIcon(itemSellInformation)

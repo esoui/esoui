@@ -85,6 +85,17 @@ function Achievements_Manager:GetSearchResults()
     return nil
 end
 
+function Achievements_Manager:IsInSearchResults(categoryIndex, subcategoryIndex, achievementIndex)
+    local searchResults = self:GetSearchResults()
+
+    if searchResults then
+        local effectiveSubcategoryIndex = subcategoryIndex or ZO_ACHIEVEMENTS_ROOT_SUBCATEGORY
+        return searchResults[categoryIndex] and searchResults[categoryIndex][effectiveSubcategoryIndex] and searchResults[categoryIndex][effectiveSubcategoryIndex][achievementIndex]
+    else
+        return true
+    end
+end
+
 function Achievements_Manager:GetAchievementStatus(achievementId)
     local completed = 0
     local total = 0

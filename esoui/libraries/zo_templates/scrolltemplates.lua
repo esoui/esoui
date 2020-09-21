@@ -833,6 +833,10 @@ function ZO_ScrollListOperation:Initialize()
     self.selectable = false
 end
 
+function ZO_ScrollListOperation:IsDataVisible(data)
+    return true -- Can be overriden in derived classes
+end
+
 function ZO_ScrollListOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, data)
     assert(false) -- Override in derived classes
 end
@@ -953,6 +957,13 @@ end
 
 function ZO_ScrollList_AddControl_Operation:SetOnSelectedSound(onSelectSound)
     self.onSelectSound = onSelectSound
+end
+
+function ZO_ScrollList_AddControl_Operation:IsDataVisible(data)
+    if self.visibilityFunction then
+        return self.visibilityFunction(data)
+    end
+    return true
 end
 
 function ZO_ScrollList_AddControl_Operation:SetScrollUpdateCallbacks(setupCallback, hideCallback)
@@ -1093,6 +1104,10 @@ function ZO_ScrollList_SetEqualityFunction(self, typeId, equalityFunction)
     self.dataTypes[typeId].equalityFunction = equalityFunction
 end
 
+function ZO_ScrollList_SetVisibilityFunction(self, typeId, visibilityFunction)
+    self.dataTypes[typeId].visibilityFunction = visibilityFunction
+end
+
 function ZO_ScrollList_SetDeselectOnReselect(self, deselectOnReselect)
     self.deselectOnReselect = deselectOnReselect
 end
@@ -1128,6 +1143,7 @@ end
 
 function ZO_ScrollList_Clear(self)
     ZO_ClearNumericallyIndexedTable(self.data)
+    ZO_ClearNumericallyIndexedTable(self.visibleData)
     self.categories = {}
     if AreSelectionsEnabled(self) then
         ZO_ScrollList_SelectData(self, NO_SELECTED_DATA, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
@@ -2025,11 +2041,10 @@ function ZO_ScrollList_Commit(self)
 
     CheckRunHandler(self, "OnMouseExit")
     
-    self.visibleData = {}
+    ZO_ClearNumericallyIndexedTable(self.visibleData)
     
     local scrollableDistance = 0
     local foundSelected = false
-    local numData = #self.data
     if self.mode == SCROLL_LIST_UNIFORM then
         for i, currentData in ipairs(self.data) do
             table.insert(self.visibleData, i)
@@ -2040,7 +2055,7 @@ function ZO_ScrollList_Commit(self)
             end
         end
 
-        scrollableDistance = numData * self.uniformControlHeight - windowHeight
+        scrollableDistance = #self.data * self.uniformControlHeight - windowHeight
     elseif self.mode == SCROLL_LIST_NON_UNIFORM then
         local currentY = 0
         for i, currentData in ipairs(self.data) do
@@ -2070,16 +2085,19 @@ function ZO_ScrollList_Commit(self)
         local currentY = 0
         for i, currentData in ipairs(self.data) do
             local currentOperation = GetDataTypeInfo(self, currentData.typeId)
-            currentX, currentY = currentOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, currentData)
-            table.insert(self.visibleData, i)
+            if currentOperation:IsDataVisible(currentData.data) then
+                currentX, currentY = currentOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, currentData)
+                table.insert(self.visibleData, i)
 
-            if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
-                foundSelected = true
-                ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+                if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
+                    foundSelected = true
+                    ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
+                end
             end
         end
-        if numData > 0 then
-            scrollableDistance = self.data[numData].bottom - windowHeight
+        if #self.visibleData > 0 then
+            local lastVisibleDataIndex = self.visibleData[#self.visibleData]
+            scrollableDistance = self.data[lastVisibleDataIndex].bottom - windowHeight
         else
             scrollableDistance = 0
         end
@@ -2270,16 +2288,17 @@ function ZO_ScrollList_ShowCategory(self, categoryId)
     end
 end
 
-local function CompareEntries(topEdge, compareData)
-    return topEdge - compareData.bottom
-end
-
 --Used to locate the point in the data list where we should start looking for in view controls
 local function FindStartPoint(self, topEdge)
     if self.mode == SCROLL_LIST_UNIFORM then
         return zo_floor(topEdge / self.uniformControlHeight) + 1
     else
-        local _, insertPoint = zo_binarysearch(topEdge, self.data, CompareEntries)
+        local function CompareEntries(topEdge, compareDataIndex)
+            local compareData = self.data[compareDataIndex]
+            return topEdge - compareData.bottom
+        end
+
+        local _, insertPoint = zo_binarysearch(topEdge, self.visibleData, CompareEntries)
         return insertPoint
     end
 end
@@ -2309,17 +2328,16 @@ function ZO_ScrollList_UpdateScroll(self)
         end
         consideredMap[currentDataEntry] = true
     end
-        
-    --add revealed controls
-    local firstInViewIndex = FindStartPoint(self, offset)
-   
-    local data = self.data
-    local visibleData = self.visibleData
+
+    local allData = self.data
+    local visibleDataIndices = self.visibleData
     local mode = self.mode
-    
-    local nextCandidateIndex = firstInViewIndex
-    local visibleDataIndex = visibleData[nextCandidateIndex]
-    local dataEntry = data[visibleDataIndex]
+
+    --add revealed controls
+    local firstInViewVisibleIndex = FindStartPoint(self, offset)
+    local nextCandidateVisibleIndex = firstInViewVisibleIndex
+    local currentDataIndex = visibleDataIndices[nextCandidateVisibleIndex]
+    local dataEntry = allData[currentDataIndex]
     local bottomEdge = offset + windowHeight
     
     local controlTop
@@ -2327,7 +2345,7 @@ function ZO_ScrollList_UpdateScroll(self)
 
     if dataEntry then
         if mode == SCROLL_LIST_UNIFORM then
-            controlTop = (nextCandidateIndex - 1) * uniformControlHeight 
+            controlTop = (nextCandidateVisibleIndex - 1) * uniformControlHeight 
         else
             controlTop = dataEntry.top
         end
@@ -2346,7 +2364,7 @@ function ZO_ScrollList_UpdateScroll(self)
                 control.dataEntry = dataEntry
                 dataEntry.control = control
                 control.key = key
-                control.index = visibleDataIndex
+                control.index = currentDataIndex
                 if setupCallback then
                     setupCallback(control, dataEntry.data, self)
                 end
@@ -2364,12 +2382,12 @@ function ZO_ScrollList_UpdateScroll(self)
                 dataEntry.bottom = controlTop + uniformControlHeight
             end
         end
-        nextCandidateIndex = nextCandidateIndex + 1
-        visibleDataIndex = visibleData[nextCandidateIndex]
-        dataEntry = data[visibleDataIndex]
+        nextCandidateVisibleIndex = nextCandidateVisibleIndex + 1
+        currentDataIndex = visibleDataIndices[nextCandidateVisibleIndex]
+        dataEntry = allData[currentDataIndex]
         if dataEntry then
             if mode == SCROLL_LIST_UNIFORM then
-                controlTop = (nextCandidateIndex - 1) * uniformControlHeight 
+                controlTop = (nextCandidateVisibleIndex - 1) * uniformControlHeight 
             else
                 controlTop = dataEntry.top
             end

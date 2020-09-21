@@ -373,7 +373,7 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
                     return false
                 end
                 local selectedData = self.inventory:CurrentSelection() 
-                local canSlotItem = selectedData and selectedData.meetsUsageRequirement
+                local canSlotItem = (selectedData ~= nil) and selectedData.meetsUsageRequirement
                 return canSlotItem
             end,
         },
@@ -461,6 +461,23 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
             end,
             enabled = function()
                 return self:HasSelections()
+            end,
+        },
+        -- Toggle quest filter
+        {
+            name = function() return self.inventory:ShouldFilterQuests() and GetString(SI_SMITHING_IS_QUEST_ITEM) or GetString(SI_GAMEPAD_ENCHANTING_ALL_MATERIALS) end,
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
+            gamepadOrder = 1030,
+            callback = function()
+                self.inventory:ToggleQuestFilter()
+                self.inventory:PerformFullRefresh()
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindEnchantingStripDescriptor)
+            end,
+            visible = function()
+                return self.enchantingMode == ENCHANTING_MODE_CREATION
+            end,
+            enabled = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess()
             end,
         },
     }
@@ -613,6 +630,49 @@ function ZO_GamepadEnchantingInventory:Initialize(owner, control, ...)
     self.owner = owner
     self.filterType = NO_FILTER
     self.runeSlots = self.owner.runeSlots
+    local function OnAddOnLoaded(event, name)
+        if name == "ZO_Ingame" then
+            self:SetupSavedVars()
+            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+        end
+    end
+    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+end
+
+function ZO_GamepadEnchantingInventory:SetupSavedVars()
+    local defaults = 
+    {
+        shouldFilterQuests = false,
+    }
+    self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "GamepadEnchantingCreation", defaults)
+end
+
+function ZO_GamepadEnchantingInventory:ToggleQuestFilter()
+    self.savedVars.shouldFilterQuests = not self.savedVars.shouldFilterQuests
+end
+
+function ZO_GamepadEnchantingInventory:ShouldFilterQuests()
+    return self.savedVars.shouldFilterQuests
+end
+
+function ZO_GamepadEnchantingInventory:AddListDataTypes()
+    local function MenuEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        --Determine whether or not we need to show the quest pin
+        local itemId = GetItemId(data.bagId, data.slotIndex)
+        if self.questRunes.potency == itemId or self.questRunes.essence == itemId or self.questRunes.aspect == itemId then
+            data.hasCraftingQuestPin = DoesPlayerHaveRunesForEnchanting(self.questRunes.aspect, self.questRunes.essence, self.questRunes.potency)
+            --If there is an override status indicator icon, we need to explicitly add the quest pin here
+            if data.overrideStatusIndicatorIcons and data.hasCraftingQuestPin then
+                data.overrideStatusIndicatorIcons =  {"EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds"}
+            end
+        else
+            data.hasCraftingQuestPin = false
+        end
+
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    end
+
+    self:AddVerticalScrollDataTypes("ZO_GamepadItemSubEntry", MenuEntryTemplateSetup)
 end
 
 function ZO_GamepadEnchantingInventory:IsLocked(bagId, slotIndex)
@@ -627,6 +687,24 @@ function ZO_GamepadEnchantingInventory:Refresh(data)
     if enchantingMode == ENCHANTING_MODE_CREATION then
         filterType = self.filterType
         titleString = GetString(SI_ENCHANTING_CREATION)
+        if self.savedVars.shouldFilterQuests then
+            --If any of the runes are nil, then they all will be, so just nil check any of them
+            if self.questRunes.aspect == nil then
+                --We need to differentiate between whether or not it is nil because we have fufilled the requirement, don't have a writ, or because we have unknown runes
+                if self.questRunes.hasRequiredGlyph or not CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+                    self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
+                else
+                    self:SetNoItemLabelText(GetString(SI_GAMEPAD_ENCHANTING_UNKNOWN_RUNES_MESSAGE))
+                end
+            elseif not DoesPlayerHaveRunesForEnchanting(self.questRunes.aspect, self.questRunes.essence, self.questRunes.potency) then
+                --If we get here, that means we know the necessary translations, but do not have the required runes in our inventory
+                self:SetNoItemLabelText(GetString(SI_GAMEPAD_ENCHANTING_MISSING_ITEMS_MESSAGE))
+            else
+                self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
+            end
+        else
+            self:SetNoItemLabelText(GetString(SI_ENCHANTING_NO_RUNES))
+        end
     elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
         filterType = EXTRACTION_FILTER
         titleString = GetString(SI_ENCHANTING_EXTRACTION)
@@ -638,6 +716,26 @@ function ZO_GamepadEnchantingInventory:Refresh(data)
         ZO_GamepadCraftingUtils_SetupGenericHeader(self.owner, titleString)
         ZO_GamepadCraftingUtils_RefreshGenericHeader(self.owner)
     end
+end
+
+function ZO_GamepadEnchantingInventory:EnumerateInventorySlotsAndAddToScrollData(predicate, filterFunction, filterType, data)
+    local list = PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BACKPACK, predicate)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_BANK, predicate, list)
+    PLAYER_INVENTORY:GenerateListOfVirtualStackedItems(INVENTORY_CRAFT_BAG, predicate, list)
+
+    ZO_ClearTable(self.itemCounts)
+
+    local filteredDataTable = {}
+    for itemId, itemInfo in pairs(list) do
+        if not filterFunction or filterFunction(itemInfo.bag, itemInfo.index, filterType, self.savedVars.shouldFilterQuests, self.questRunes) then
+            filteredDataTable[#filteredDataTable + 1] = self:GenerateCraftingInventoryEntryData(itemInfo.bag, itemInfo.index, itemInfo.stack)
+        end
+        self.itemCounts[itemId] = itemInfo.stack
+    end
+
+    self:AddFilteredDataToList(filteredDataTable)
+
+    return list
 end
 
 function ZO_GamepadEnchantingInventory:ShowAppropriateSlotDropCallouts(bagId, slotIndex)

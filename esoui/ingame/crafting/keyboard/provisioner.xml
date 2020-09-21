@@ -36,10 +36,23 @@
                 </Label>
             </Controls>
         </Control>
-        
-        <Label name="ZO_ProvisionerNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+        <Control name="ZO_ProvisionerNavigationHeader" inherits="ZO_StatusIconHeader" virtual="true" >
+            <OnInitialized>
+                ZO_IconHeader_OnInitialized(self)
+                self.questPin = self:GetNamedChild("StatusIcon")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)StatusIcon" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" inherits="ZO_MultiIcon" hidden="true" override="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Label name="ZO_ProvisionerNavigationEntry" virtual="true" font="ZoFontHeader" maxLineCount="2" inherits="ZO_SelectableLabel">
+            <Dimensions x="450" />
             <OnInitialized>
                 ZO_SelectableLabel_OnInitialized(self, ZO_ProvisionerRow_GetTextColor)
+                self.questPin = self:GetNamedChild("QuestPin")
             </OnInitialized>
             
             <OnMouseUp>
@@ -53,7 +66,30 @@
             <OnMouseExit>
                 ZO_ProvisionerNavigationEntry_OnMouseExit(self)
             </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-2"/>
+                </Texture>
+            </Controls>
         </Label>
+        <Control name="ZO_ProvisionerTabButton" inherits="ZO_MenuBarTooltipButton" virtual="true">
+            <OnInitialized>
+                ZO_MenuBarButtonTemplate_OnInitialized(self)
+                self.questPin = self:GetNamedChild("QuestPin")
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPRIGHT" offsetX="15" offsetY="-10"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_ProvisionerTabs" inherits="ZO_LabelButtonBar" virtual="true">
+            <OnInitialized>
+                ZO_ProvisionerTabs_OnInitialized(self)
+            </OnInitialized>
+        </Control>
         
         <TopLevelControl name="ZO_ProvisionerTopLevel" hidden="true">
             <OnInitialized>
@@ -67,18 +103,46 @@
                     <Anchor point="TOPLEFT" offsetX="12" offsetY="5" />
                 </Control>
 
-                <Control name="$(parent)Tabs" inherits="ZO_LabelButtonBar"/>
+                <Control name="$(parent)Tabs" inherits="ZO_ProvisionerTabs"/>
                     
                 <Control name="$(parent)MenuBarDivider" inherits="ZO_WideHorizontalDivider">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Tabs" offsetX="-10" offsetY="47" />
                 </Control>
 
                 <Button name="$(parent)HaveIngredients" inherits="ZO_CheckButton">
+                    <OnMouseEnter>
+                        ZO_Provisioner_HaveIngredientsOnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Provisioner_FilterOnMouseExit(self)
+                    </OnMouseExit>
+                    
                     <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBarDivider" offsetX="50" offsetY="16" />
                 </Button>
 
                 <Button name="$(parent)HaveSkills" inherits="ZO_CheckButton">
-                    <Anchor point="LEFT" relativeTo="$(parent)HaveIngredients" relativePoint="RIGHT" offsetX="200" />
+                    <OnMouseEnter>
+                        ZO_Provisioner_HaveSkillsOnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Provisioner_FilterOnMouseExit(self)
+                    </OnMouseExit>
+                    
+                    <Anchor point="LEFT" relativeTo="$(parent)HaveIngredients" relativePoint="RIGHT" offsetX="175" />
+                </Button>
+
+                <Button name="$(parent)IsQuestItem" inherits="ZO_CheckButton">
+                    <OnMouseEnter>
+                        ZO_Provisioner_IsQuestItemOnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_Provisioner_FilterOnMouseExit(self)
+                    </OnMouseExit>
+                    
+                    <Anchor point="LEFT" relativeTo="$(parent)HaveSkills" relativePoint="RIGHT" offsetX="175" />
                 </Button>
 
                 <Control name="$(parent)NavigationDivider" inherits="ZO_WideHorizontalDivider">

@@ -152,8 +152,7 @@ function ZO_CollectibleTile_Keyboard:ShowMenu()
 
         if IsChatSystemAvailableForCurrentPlatform() then
             --Link in chat
-            local link = GetCollectibleLink(collectibleId, LINK_STYLE_BRACKETS)
-            AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link)) end)
+            AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(GetCollectibleLink(collectibleId, LINK_STYLE_BRACKETS)) end)
         end
 
         --Rename

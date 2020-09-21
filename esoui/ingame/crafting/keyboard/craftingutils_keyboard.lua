@@ -104,3 +104,16 @@ function ZO_KeyboardCraftingUtils_RequestCraftingCreate(craftingObject, numItera
 
     ZO_Dialogs_ShowDialog("CRAFTING_CREATE_MULTIPLE_KEYBOARD", { craftingObject = craftingObject, numIterations = numIterations }, { mainTextParams = { colorizedItemName, itemQuantity } })
 end
+
+function ZO_CraftingModeTabs_OnInitialized(control)
+    ZO_MenuBar_OnInitialized(control)
+    local barData =
+    {
+        buttonPadding = 20,
+        normalSize = 51,
+        downSize = 64,
+        animationDuration = DEFAULT_SCENE_TRANSITION_TIME,
+        buttonTemplate = "ZO_CraftingModeButton",
+    }
+    ZO_MenuBar_SetData(control, barData)
+end

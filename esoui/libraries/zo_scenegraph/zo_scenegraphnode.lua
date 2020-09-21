@@ -27,6 +27,9 @@ function ZO_SceneGraphNode:GetName()
 end
 
 function ZO_SceneGraphNode:SetParent(parent)
+    if self.parent then
+        self.parent:OnChildRemoved(parent)
+    end
     self.parent = parent
     self.parent:OnChildAdded(self)
     self:SetDirty(true)
@@ -193,11 +196,6 @@ function ZO_SceneGraphNode:BuildWorldViewMatrix()
         zo_setToIdentityMatrix33(self.worldViewMatrix)
     end
 
-    if self.controls then
-        for i, control in ipairs(self.controls) do
-            control:SetDrawLevel(self:ComputeDrawLevel(self.finalTranslateZ + self.controlZ[i]))
-        end
-    end
 end
 
 local ANCHOR_TO_NORMALIZED_X =
@@ -228,17 +226,16 @@ local ANCHOR_TO_NORMALIZED_Y =
 
 function ZO_SceneGraphNode:Render()
     local customScale = GetUICustomScale()
-    if self.controls and #self.controls > 0 then
+    if self.controls then
+        local worldViewMatrix : Matrix33 = self.worldViewMatrix
         for i, control in ipairs(self.controls) do
             local distanceFromCamera = self.finalTranslateZ + self.controlZ[i] - self.sceneGraph:GetCameraZ()
             if distanceFromCamera > 0 then
                 local depthScale = 1 / distanceFromCamera
                 local positionX = self.controlX[i]
                 local positionY = self.controlY[i]
-                local worldViewMatrix : Matrix33 = self.worldViewMatrix
 
-                local finalX = worldViewMatrix._11 * positionX + worldViewMatrix._12 * positionY + worldViewMatrix._13
-                local finalY = worldViewMatrix._21 * positionX + worldViewMatrix._22 * positionY + worldViewMatrix._23
+                local finalX, finalY = zo_matrixTransformPoint(worldViewMatrix, positionX, positionY)
 
                 finalX = finalX * depthScale
                 finalY = finalY * depthScale
@@ -254,12 +251,81 @@ function ZO_SceneGraphNode:Render()
                     control:SetTextureRotation(0)
                 end
                 control:SetScale((self.finalScale * depthScale * self.controlScale[i]) / customScale)
+                control:SetDrawLevel(self:ComputeDrawLevel(self.finalTranslateZ + self.controlZ[i]))
                 control:SetHidden(self.controlHidden[i])
             else
                 control:SetHidden(true)
             end
         end
     end
+
+    if self.lines then
+        for _, line in ipairs(self.lines) do
+            local distanceFromCamera = self.finalTranslateZ + line.sceneZ - self.sceneGraph:GetCameraZ()
+            if distanceFromCamera > 0 then
+                local thickness = self.finalScale * line.sceneThickness / distanceFromCamera / customScale
+                line:SetThickness(thickness)
+                line:SetDrawLevel(self:ComputeDrawLevel(self.finalTranslateZ + line.sceneZ))
+            else
+                line:SetHidden(true)
+            end
+        end
+    end
+end
+
+function ZO_SceneGraphNode:TransformPoint(inputPointX, inputPointY, referencePlaneZ)
+    if not self.finalTranslateZ then
+        -- waiting for control to be rendered at least once
+        return nil
+    end
+    local distanceFromCamera = self.finalTranslateZ + referencePlaneZ - self.sceneGraph:GetCameraZ()
+    if distanceFromCamera <= 0 then
+        return nil
+    end
+
+    local inputX, inputY = zo_matrixTransformPoint(self.worldViewMatrix, inputPointX, inputPointY)
+
+    local depthScale = 1 / distanceFromCamera
+    inputX = inputX * depthScale
+    inputY = inputY * depthScale
+
+    local customScale = GetUICustomScale()
+    inputX = inputX / customScale
+    inputY = inputY / customScale
+
+    local canvasCenterX, canvasCenterY = self.sceneGraph:GetCanvasControl():GetCenter()
+    local inputX, inputY = screenPointX + canvasCenterX, screenPointY + canvasCenterY
+
+    return inputX, inputY
+end
+
+function ZO_SceneGraphNode:InvertPoint(screenPointX, screenPointY, referencePlaneZ)
+    if not self.finalTranslateZ then
+        -- waiting for control to be rendered at least once
+        return nil
+    end
+    local distanceFromCamera = self.finalTranslateZ + referencePlaneZ - self.sceneGraph:GetCameraZ()
+    if distanceFromCamera <= 0 then
+        return nil
+    end
+
+    local canvasCenterX, canvasCenterY = self.sceneGraph:GetCanvasControl():GetCenter()
+    local inputX, inputY = screenPointX - canvasCenterX, screenPointY - canvasCenterY
+
+    local customScale = GetUICustomScale()
+    inputX = inputX * customScale
+    inputY = inputY * customScale
+
+    local depthScale = 1 / distanceFromCamera
+    inputX = inputX / depthScale
+    inputY = inputY / depthScale
+
+    local worldViewMatrix : Matrix33 = self.worldViewMatrix
+    local inverseMatrix : Matrix33 = self:AcquireWorkingMatrix()
+    zo_invertMatrix33(self.worldViewMatrix, inverseMatrix)
+
+    inputX, inputY = zo_matrixTransformPoint(inverseMatrix, inputX, inputY)
+    return inputX, inputY
 end
 
 function ZO_SceneGraphNode:OnChildAdded(child)
@@ -269,10 +335,32 @@ function ZO_SceneGraphNode:OnChildAdded(child)
     table.insert(self.children, child)
 end
 
+function ZO_SceneGraphNode:OnChildRemoved(child)
+    if self.children then
+        local childIndex = ZO_IndexOfElementInNumericallyIndexedTable(self.children, child)
+        table.remove(self.children, childIndex)
+    end
+end
+
 function ZO_SceneGraphNode:ComputeDrawLevel(z)
     return 10000 - z * 100
 end
 
+function ZO_SceneGraphNode:AddLine(lineControl, startControl, endControl, z)
+    -- It's assumed that startControl and endControl are part of the
+    -- scenegraph. The line is fixed to draw in between those two control points.
+    lineControl.sceneZ = z
+    lineControl.sceneThickness = lineControl:GetThickness()
+    lineControl:ClearAnchors()
+    lineControl:SetAnchor(TOPLEFT, startControl, CENTER)
+    lineControl:SetAnchor(BOTTOMRIGHT, endControl, CENTER)
+    if not self.lines then
+        self.lines = {}
+    end
+    table.insert(self.lines, lineControl)
+end
+
+-- TODO: rename to AddTexture?
 function ZO_SceneGraphNode:AddControl(control, x, y, z)
     if x and y and z then
         if not self.controls then

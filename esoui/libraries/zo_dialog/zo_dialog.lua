@@ -171,28 +171,28 @@ function ZO_Dialogs_SetDialogLoadingIcon(loadingIcon, textControl, showLoadingIc
     local shouldShowLoadingIcon = false
     local iconAnchor
     local showType = type(showLoadingIconData)
-    
-    if(showType == "boolean") then
+
+    if showType == "boolean" then
         shouldShowLoadingIcon = showLoadingIconData
-    elseif(showType == "table") then
+    elseif showType == "table" then
         shouldShowLoadingIcon = true
         iconAnchor = showLoadingIconData
     end
 
-    if(shouldShowLoadingIcon) then
+    if shouldShowLoadingIcon then
         loadingIcon:Show()
 
-        if(not iconAnchor) then
+        if not iconAnchor then
             local horizontalAlignment = textControl:GetHorizontalAlignment()
             loadingIcon:ClearAnchors()
-            if(horizontalAlignment == TEXT_ALIGN_LEFT) then
+            if horizontalAlignment == TEXT_ALIGN_LEFT then
                 loadingIcon:SetAnchor(RIGHT, textControl, LEFT, -5, 0)
-            elseif(horizontalAlignment == TEXT_ALIGN_RIGHT) then
+            elseif horizontalAlignment == TEXT_ALIGN_RIGHT then
                 loadingIcon:SetAnchor(LEFT, textControl, RIGHT, 5, 0)
             else
-                local textWidth = textControl:GetTextDimensions()            
+                local textWidth = textControl:GetTextDimensions()
                 loadingIcon:SetAnchor(RIGHT, textControl, CENTER, -textWidth * 0.5 - 5, 0)
-            end            
+            end
         else
             iconAnchor:Set(loadingIcon)
         end
@@ -216,7 +216,7 @@ local function ReanchorDialog(dialog, isGamepad)
     if(not dialog) then
         return
     end
-    
+
     local dialogNumber = dialog.id
 
     dialog:ClearAnchors()
@@ -231,17 +231,13 @@ local function ReanchorDialog(dialog, isGamepad)
             dialog:SetAnchor(LEFT, GuiRoot, LEFT, anchor1:GetOffsetX())
         end
     else
-        if(dialogNumber == 1)
-        then
+        if dialogNumber == 1 then
             dialog:SetAnchor(CENTER, GuiRoot, CENTER, 0, -55)
-        elseif(dialogNumber == 2)
-        then
+        elseif dialogNumber == 2 then
             dialog:SetAnchor(TOP, ZO_Dialog1, BOTTOM, 0, 24)
-        elseif(dialogNumber == 3)
-        then
+        elseif dialogNumber == 3 then
             dialog:SetAnchor(BOTTOM, ZO_Dialog1, TOP, 0, -24)
-        elseif(dialogNumber == 4)
-        then
+        elseif dialogNumber == 4 then
             dialog:SetAnchor(TOP, ZO_Dialog2, BOTTOM, 0, 24)
         end
     end
@@ -249,12 +245,12 @@ end
 
 local function GetButtonControl(dialog, index)
     local dialogInfo = dialog.info
-    if(index <= dialog.numButtons) then
-        if(dialog.buttonControls) then
+    if index <= dialog.numButtons then
+        if dialog.buttonControls then
             return dialog.buttonControls[index]
         end
 
-        if(dialogInfo.customControl and dialogInfo.buttons) then
+        if dialogInfo.customControl and dialogInfo.buttons then
             return dialogInfo.buttons[index].control
         end
     end
@@ -270,14 +266,16 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
         textParams = {}
     end
 
-    local mainText, textControl
+    local mainText
+    local textControl
 
     local isGamepadDialog = dialog.isGamepad and dialogInfo.gamepadInfo and dialogInfo.gamepadInfo.dialogType -- There is a legacy gamepad dialog still in use (for now).
     if isGamepadDialog then
         local title = GetFormattedText(dialog, dialogInfo.title, textParams.titleParams)
         mainText = GetFormattedText(dialog, dialogInfo.mainText, textParams.mainTextParams)
         local warningText = GetFormattedText(dialog, dialogInfo.warning, textParams.warningParams)
-        ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText)
+        local subText = GetFormattedText(dialog, dialogInfo.subText, textParams.subTextParams)
+        ZO_GenericGamepadDialog_RefreshText(dialog, title, mainText, warningText, subText)
     else
         textControl = dialog:GetNamedChild("Text")
         mainText = dialogInfo.mainText
@@ -289,7 +287,7 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
                     dialog.mainText = mainText
                 end
 
-                if(dialog.mainText.lineSpacing) then
+                if dialog.mainText.lineSpacing then
                     textControl:SetLineSpacing(dialog.mainText.lineSpacing)
                 else
                     textControl:SetLineSpacing(0)
@@ -306,17 +304,16 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
     return mainText, textControl
 end
 
-
 function ZO_Dialogs_RefreshDialogText(name, dialog, textParams)
     local dialogInfo = ESO_Dialogs[name]
-    if(type(dialogInfo) ~= "table") then
+    if type(dialogInfo) ~= "table" then
         return
     end
 
-    if(ZO_Dialogs_IsShowingDialog()) then
+    if ZO_Dialogs_IsShowingDialog() then
         RefreshMainText(dialog, dialogInfo, textParams)
     end
-end 
+end
 
 -- To show a gamepad style sidebar dialog, call this function.
 -- See comments about ZO_Dialogs_ShowDialog for more information
@@ -358,21 +355,26 @@ end
 -- mainTextParams which itself contains 2 members, the first will go into the <<1>> and the second will go into the <<2>>. The 3rd parameter
 -- in ZO_Dialogs_ShowDialog can also contain a titleParams subtable which is used to fill in the parameters in the title, if needed.
 --
+-- If the sub text in the dialog has 2 parameters (e.g "Hello <<1>> <<2>>"), then the 3rd parameter should contain a subtable called
+-- subTextParams which itself contains 2 members, the first will go into the <<1>> and the second will go into the <<2>>.
+--
 -- So as an example, let's say you had defined a dialog in InGameDialogs called "TEST_DIALOG" with
---      title = { text = "Dialog <<1>>" } and mainText = { text = "Main <<1>> Text <<2>>" }
--- And you called 
---      ZO_Dialogs_ShowDialog("TEST_DIALOG", {5}, {titleParams={"Test1"}, mainTextParams={"Test2", "Test3"}})
--- The resulting dialog would have a title that read "Dialog Test1" and a main text field that read "Main Test2 Text Test3".
+--      title = { text = "Dialog <<1>>" } and mainText = { text = "Main <<1>> Text <<2>>" } and subText = { text = "Sub <<1>> Text <<2>>" }
+-- And you called
+--      ZO_Dialogs_ShowDialog("TEST_DIALOG", {5}, {titleParams={"Test1"}, mainTextParams={"Test2", "Test3"},  subTextParams={"Test4", "Test5"}})
+-- The resulting dialog would have a title that read "Dialog Test1" and a main text field that read "Main Test2 Text Test3" and a sub text field that read "Sub Test4 Text Test5".
 -- The 5 passed in the second parameter could be used by the callback functions to perform various tasks based on this value.
 
 -- Dialogs themselves (see InGameDialogs.lua, etc.) must contain at least a "mainText" table, with at least the "text" member.
--- mainText.text is filled in using the mainTextParams subtable of the table passed in the 3rd parameter to ZO_Dialogs_ShowDialog. 
+-- mainText.text is filled in using the mainTextParams subtable of the table passed in the 3rd parameter to ZO_Dialogs_ShowDialog.
 
 -- The mainText table can also optionally contain:
 -- An "align" member to set the alignment of the text (TEXT_ALIGN_LEFT, TEXT_ALIGN_RIGHT, or TEXT_ALIGN_CENTER....left is default).
 -- A "timer" field, which indicates that a certain parameter should be treated as a sceonds in a timer, and converted to time format
 --      (so if mainText contains "timer = 1", the 1st parameter in mainText.text is converted to time format before being placed
 --      in the string).
+--
+-- subText should just not be shown if not set and will not be shown if no mainText exists
 --
 -- Dialogs can also optionally contain:
 -- 
@@ -500,14 +502,12 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 local buttonText
                 if textParams and textParams.buttonTextOverrides and textParams.buttonTextOverrides[i] then
                     buttonText = textParams.buttonTextOverrides[i]
+                elseif type(buttonInfo.text) == "number" then
+                    buttonText = GetString(buttonInfo.text)
+                elseif type(buttonInfo.text) == "function" then
+                    buttonText = buttonInfo.text(dialog)
                 else
                     buttonText = buttonInfo.text
-                    if type(buttonText) == "function" then
-                        buttonText = buttonText(dialog)
-                    end
-                    if type(buttonText) == "number" then
-                        buttonText = GetString(buttonText)
-                    end
                 end
                 button:SetText(buttonText)
                 button:SetHidden(false)
@@ -1004,11 +1004,14 @@ function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
     if dialog then
         if dialog.isGamepad then
             if dialog.info and dialog.headerData then
-                textTable = textTable or dialog.info.mainText
+                local mainTextTable = textTable or dialog.info.mainText
+                local subTextTable = textTable or dialog.info.subText
 
-                local mainText = GetFormattedText(dialog, textTable, params)
+                local mainText = GetFormattedText(dialog, mainTextTable, params)
+                local subText = GetFormattedText(dialog, subTextTable, params)
                 if mainText and mainText ~= "" then
-                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, mainText)
+                    local NO_WARNING_TEXT = nil
+                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, mainText, NO_WARNING_TEXT, subText)
                 end
             end
         else
@@ -1016,7 +1019,7 @@ function ZO_Dialogs_UpdateDialogMainText(dialog, textTable, params)
             if textTable then
                 dialog.mainText = textTable
             end
-        
+
             SetDialogTextFormatted(dialog, textControl, dialog.mainText, params)
         end
     end
@@ -1041,7 +1044,7 @@ function ZO_Dialogs_UpdateDialogWarningText(dialog, textTable, params)
 
                 local warningText = GetFormattedText(dialog, textTable, params)
                 if warningText and warningText ~= "" then
-                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, dialog.mainTextControl:GetText(), warningText)
+                    ZO_GenericGamepadDialog_RefreshText(dialog, dialog.headerData.titleText, dialog.mainTextControl:GetText(), warningText, dialog.subTextControl:GetText())
                 end
             end
         else

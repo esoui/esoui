@@ -79,11 +79,19 @@ do
             -- Name
             local displayName = GetMarketProductDisplayName(productId)
             local stackCount = GetMarketProductStackCount(productId)
-            if stackCount > 1 then
+            if productType == MARKET_PRODUCT_TYPE_HOUSING then
+                local houseId = GetMarketProductHouseId(productId)
+                if houseId > 0 then
+                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                    displayName = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_FORMATTER, houseDisplayName, displayName))
+                end
+            elseif stackCount > 1 then
                 displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, displayName, stackCount)
             else
                 displayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, displayName)
             end
+
             self:AddLine(displayName, self:GetStyle("title"))
 
             -- Description

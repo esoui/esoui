@@ -73,7 +73,7 @@ ESO_Dialogs["BUY_ESO_PLUS_FROM_PLATFORM_STORE"] =
         {
             text = function()
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    return SI_START_HERON_PURCHASE_FLOW
+                    return GetString(SI_START_HERON_PURCHASE_FLOW)
                 else
                     return zo_strformat(SI_OPEN_FIRST_PARTY_STORE_KEYBIND, ZO_GetPlatformStoreName())
                 end
@@ -145,9 +145,9 @@ ESO_Dialogs["CHAPTER_UPGRADE_STORE"] =
         {
             text = function()
                 if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_HERON then
-                    return SI_START_HERON_PURCHASE_FLOW
+                    return GetString(SI_START_HERON_PURCHASE_FLOW)
                 else
-                    return SI_DIALOG_UPGRADE
+                    return GetString(SI_DIALOG_UPGRADE)
                 end
             end,
             callback = function(dialog)

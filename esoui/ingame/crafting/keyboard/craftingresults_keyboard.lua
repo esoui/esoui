@@ -259,7 +259,7 @@ function ZO_CraftingResults_Keyboard:DisplayCraftingResult(itemInfo)
     -- itemInfo.quality is deprecated, included here for addon backwards compatibility
     local displayQuality = itemInfo.displayQuality or itemInfo.quality
     local itemQualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
-    if ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+    if ZO_RETRAIT_STATION_MANAGER:IsRetraitFragmentShowing() then
         local itemTrait = GetItemLinkTraitInfo(itemInfo.itemLink)
         local itemTraitString = GetString("SI_ITEMTRAITTYPE", itemTrait)
         local itemNameString = itemQualityColor:Colorize(itemInfo.name)

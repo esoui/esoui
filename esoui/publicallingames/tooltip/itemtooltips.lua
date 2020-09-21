@@ -168,6 +168,20 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
         topSubsection:AddLine(boundLabel, self:GetStyle("bind"))
     end
 
+    -- Item Set Collection pieces
+    if IsItemLinkReconstructed(itemLink) then
+        topSubsection:AddLine(GetString(SI_ITEM_FORMAT_STR_SET_COLLECTION_PIECE_RECONSTRUCTED), self:GetStyle("itemSetCollection"))
+    else
+        if IsItemLinkSetCollectionPiece(itemLink) then
+            local itemId = GetItemLinkItemId(itemLink)
+            if IsItemSetCollectionPieceUnlocked(itemId) then
+                topSubsection:AddLine(GetString(SI_ITEM_FORMAT_STR_SET_COLLECTION_PIECE_UNLOCKED), self:GetStyle("itemSetCollection"))
+            else
+                topSubsection:AddLine(GetString(SI_ITEM_FORMAT_STR_SET_COLLECTION_PIECE_LOCKED), self:GetStyle("itemSetCollection"))
+            end
+        end
+    end
+
     -- Stolen
     if IsItemLinkStolen(itemLink) then
         topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Inventory/inventory_stolenItem_icon.dds", 24, 24, GetString(SI_GAMEPAD_ITEM_STOLEN_LABEL)), self:GetStyle("stolen"))
@@ -246,6 +260,20 @@ function ZO_Tooltip:AddBaseStats(itemLink, ignoreLevel)
     end
 
     self:AddSection(statsSection)
+end
+
+function ZO_Tooltip:AddItemSetCollectionText(itemLink)
+    local itemSetCollectionSection = self:AcquireSection(self:GetStyle("bodySection"))
+
+    -- Collection Status
+    if IsItemLinkSetCollectionPiece(itemLink) then
+        local itemId = GetItemLinkItemId(itemLink)
+        if not IsItemSetCollectionPieceUnlocked(itemId) then
+            itemSetCollectionSection:AddLine(ZO_SUCCEEDED_TEXT:Colorize(GetString(SI_ITEM_FORMAT_STR_ADD_SET_COLLECTION_PIECE)), self:GetStyle("bodyDescription"))
+        end
+    end
+
+    self:AddSection(itemSetCollectionSection)
 end
 
 function ZO_Tooltip:AddItemValue(itemLink)
@@ -456,29 +484,31 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
 end
 
 function ZO_Tooltip:AddTrait(itemLink, extraData)
-    local traitType, traitDescription = GetItemLinkTraitInfo(itemLink)
-    if traitType ~= ITEM_TRAIT_TYPE_NONE and traitDescription ~= "" then
-        local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
-        if traitName ~= "" then
-            local traitSection = self:AcquireSection(self:GetStyle("bodySection"))
-            local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
-            local traitInformationIconPath = GetPlatformTraitInformationIcon(traitInformation)
+    if not (extraData and extraData.hideTrait) then
+        local traitType, traitDescription = GetItemLinkTraitInfo(itemLink)
+        if traitType ~= ITEM_TRAIT_TYPE_NONE and traitDescription ~= "" then
+            local traitName = GetString("SI_ITEMTRAITTYPE", traitType)
+            if traitName ~= "" then
+                local traitSection = self:AcquireSection(self:GetStyle("bodySection"))
+                local traitInformation = GetItemTraitInformationFromItemLink(itemLink)
+                local traitInformationIconPath = GetPlatformTraitInformationIcon(traitInformation)
 
-            local formattedTraitName
-            if traitInformationIconPath then
-                formattedTraitName = zo_strformat(SI_ITEM_FORMAT_STR_ITEM_TRAIT_WITH_ICON_HEADER, zo_iconFormat(traitInformationIconPath, 32, 32), traitName)
-            else
-                formattedTraitName = zo_strformat(SI_ITEM_FORMAT_STR_ITEM_TRAIT_HEADER, traitName)
+                local formattedTraitName
+                if traitInformationIconPath then
+                    formattedTraitName = zo_strformat(SI_ITEM_FORMAT_STR_ITEM_TRAIT_WITH_ICON_HEADER, zo_iconFormat(traitInformationIconPath, 32, 32), traitName)
+                else
+                    formattedTraitName = zo_strformat(SI_ITEM_FORMAT_STR_ITEM_TRAIT_HEADER, traitName)
+                end
+
+                local additionalTooltipStyle
+                if extraData and extraData.showTraitAsNew then
+                    additionalTooltipStyle = self:GetStyle("succeeded")
+                end
+
+                traitSection:AddLine(formattedTraitName, self:GetStyle("bodyHeader"), additionalTooltipStyle)
+                traitSection:AddLine(traitDescription, self:GetStyle("bodyDescription"), additionalTooltipStyle)
+                self:AddSection(traitSection)
             end
-
-            local additionalTooltipStyle
-            if extraData and extraData.showTraitAsNew then
-                additionalTooltipStyle = self:GetStyle("succeeded")
-            end
-
-            traitSection:AddLine(formattedTraitName, self:GetStyle("bodyHeader"), additionalTooltipStyle)
-            traitSection:AddLine(traitDescription, self:GetStyle("bodyDescription"), additionalTooltipStyle)
-            self:AddSection(traitSection)
         end
     end
 end
@@ -564,7 +594,7 @@ function ZO_Tooltip:GetRequiredCollectibleText(collectibleId)
             else
                 formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM
             end
-            return zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryName(collectibleId))
+            return zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryNameByCollectibleId(collectibleId))
         end
     end
 
@@ -732,6 +762,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         self:LayoutFurnishingLimitType(itemLink)
     end
     self:LayoutTradeBoPInfo(tradeBoPData)
+    self:AddItemSetCollectionText(itemLink)
     self:AddItemValue(itemLink)
     self:AddItemForcedNotDeconstructable(itemLink)
 end
@@ -1480,6 +1511,7 @@ do
     -- AvailableOptions:
     --      enchantDiffMode - Controls the display of enchantment information as being added, removed, or default
     --      showTraitAsNew - Displays the trait information of an item as if it's being added to the item or otherwise new
+    --      hideTrait - Show the item as if it had no trait, even if it does
     function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData, extraData)
         local isValidItemLink = itemLink ~= ""
         if isValidItemLink then
@@ -1713,6 +1745,14 @@ function ZO_Tooltip:LayoutQuestItem(questItemId)
     local flavorSection = self:AcquireSection(self:GetStyle("bodySection"))
     flavorSection:AddLine(tooltipText, self:GetStyle("flavorText"))
     self:AddSection(flavorSection)
+end
+
+function ZO_Tooltip:LayoutItemSetCollectionPieceLink(itemLink, hideTrait)
+    local extraData = 
+    {
+        hideTrait = hideTrait,
+    }
+    return self:LayoutItem(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, NO_ITEM_NAME, EQUIP_SLOT_NONE, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
 end
 
 function ZO_Tooltip:LayoutItemStatComparison(bagId, slotId, comparisonSlot)

@@ -22,6 +22,14 @@ end
 function ZO_SharedSmithingCreation:Initialize(control, owner)
     self.control = control
     self.owner = owner
+    self.questPatterns = {}
+    self.questMaterial = nil
+    self.questStyle = nil
+    self.questTrait = nil
+    self.hasQuestPatterns = false
+    self.tabsWithQuests = {}
+    self.isSetQuest = false
+    self.savedVars = {}
 
     local function DirtyAllLists()
         self:DirtyAllLists()
@@ -41,6 +49,24 @@ function ZO_SharedSmithingCreation:Initialize(control, owner)
     end)
     self.refreshGroup:SetActive(function()
         return ZO_Smithing_IsSceneShowing() and self.owner:IsCreating()
+    end)
+
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestInformationUpdated", function(updatedQuestInfo) 
+        self.questPatterns = updatedQuestInfo.patternIndices
+        self.questMaterial = updatedQuestInfo.materialIndex
+        self.questStyle = updatedQuestInfo.styleId
+        self.questTrait = updatedQuestInfo.traitId
+        self.hasQuestPatterns = updatedQuestInfo.hasPatterns
+        self.isSetQuest = self.questTrait ~= nil and self.questStyle ~= nil
+        self.hasItemToImproveForWrit = updatedQuestInfo.hasItemToImproveForWrit
+
+        --Determine which crafting tabs need to have quest pins
+        ZO_ClearTable(self.tabsWithQuests)
+        for patternIndex, _ in pairs(self.questPatterns) do
+            local resultingItemFilterType = select(7, GetSmithingPatternInfo(patternIndex))
+            self.tabsWithQuests[resultingItemFilterType] = true
+        end
+        DirtyAllLists()
     end)
 end
 
@@ -235,7 +261,8 @@ function ZO_SharedSmithingCreation:SelectValidKnowledgeIndices()
     end
 end
 
-function ZO_SharedSmithingCreation:OnFilterChanged(haveMaterialsChecked, haveKnowledgeChecked, useUniversalStyleItemChecked)
+function ZO_SharedSmithingCreation:OnFilterChanged(haveMaterialsChecked, haveKnowledgeChecked, useUniversalStyleItemChecked, questsOnlyChecked)
+    self.savedVars.questsOnlyChecked = questsOnlyChecked
     self.savedVars.haveMaterialChecked = haveMaterialsChecked
     local hadKnowledgeChecked = self.savedVars.haveKnowledgeChecked
     self.savedVars.haveKnowledgeChecked = haveKnowledgeChecked
@@ -316,6 +343,10 @@ function ZO_SharedSmithingCreation:SetLastListSelection(key, data)
     memory[key] = data
 end
 
+function ZO_SharedSmithingCreation:UpdateQuestPins()
+    --Meant to be overridden
+end
+
 function ZO_SharedSmithingCreation:InitializePatternList(scrollListClass, listSlotTemplate)
     local listContainer = self.control:GetNamedChild("PatternList")
     listContainer.titleLabel:SetText(GetString(SI_SMITHING_HEADER_ITEM))
@@ -328,6 +359,10 @@ function ZO_SharedSmithingCreation:InitializePatternList(scrollListClass, listSl
         local materialQuantityOverride = select(3, GetSmithingPatternMaterialItemInfo(patternIndex, materialOverride))
         local styleOverride = self:GetSelectedItemStyleId()
         local traitOverride = self.traitList:GetSelectedData() and self.traitList:GetSelectedData().traitType
+
+        local questPinIcon = control:GetNamedChild("QuestPin")
+        local shouldHide = self.hasItemToImproveForWrit or self.questPatterns[patternIndex] ~= true
+        questPinIcon:SetHidden(shouldHide)
 
         local _, _, icon, _, _, _, _ = GetSmithingPatternInfo(patternIndex, materialOverride, materialQuantityOverride, styleOverride, traitOverride)
         local meetsTraitRequirement = data.numTraitsRequired <= data.numTraitsKnown
@@ -433,18 +468,10 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
             listContainer.extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
         else
             local text
-            if combination.stack > 1 then
-                if usable then
-                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_PLURAL, ZO_WHITE:Colorize(combination.stack), materialData.name)
-                else
-                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_PLURAL, combination.stack, materialData.name)
-                end
+            if usable then
+                text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, ZO_WHITE:Colorize(combination.stack), materialData.name)
             else
-                if usable then
-                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, ZO_WHITE:Colorize(combination.stack), materialData.name)
-                else
-                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, combination.stack, materialData.name)
-                end
+                text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, combination.stack, materialData.name)
             end
             listContainer.extraInfoLabel:SetText(text)
 
@@ -516,6 +543,14 @@ function ZO_SharedSmithingCreation:InitializeMaterialList(scrollListClass, spinn
         local stackCount, currentSelectedQuantity, currentRank, meetsRankRequirement, hasAboveMin, hasEnoughInInventory, usable = self:GetMaterialInformation(data)
         ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, meetsRankRequirement, not enabled)
         ZO_ItemSlot_SetAlwaysShowStackCount(control, true)
+
+        local questPinIcon = control:GetNamedChild("QuestPin")
+        if not self.hasItemToImproveForWrit and control.materialIndex == self.questMaterial then
+            --Make sure we only put a pin on the material if we are in the right tab
+            questPinIcon:SetHidden(not self:DoesCurrentTabHaveQuest())
+        else
+            questPinIcon:SetHidden(true)
+        end
 
         --Needs to be refreshed when the material changes and also when the selected material's combination (level) changes
         local stackCountLabel = control:GetNamedChild("StackCount")
@@ -602,6 +637,14 @@ function ZO_SharedSmithingCreation:InitializeStyleList(scrollListClass, styleUnk
         local stackCountLabel = GetControl(control, "StackCount")
         stackCountLabel:SetHidden(usesUniversalStyleItem)
 
+        local questPinIcon = control:GetNamedChild("QuestPin")
+
+        if self.isSetQuest and not self.hasItemToImproveForWrit and data.itemStyleId == self.questStyle then
+            questPinIcon:SetHidden(not self:DoesCurrentTabHaveQuest())
+        else
+            questPinIcon:SetHidden(true)
+        end
+
         if selected then
             local hasStyleMaterial = (stackCount > 0 and not usesUniversalStyleItem) or (usesUniversalStyleItem and universalStyleItemCount > 0)
             local usable = hasStyleMaterial and isStyleKnown
@@ -613,18 +656,19 @@ function ZO_SharedSmithingCreation:InitializeStyleList(scrollListClass, styleUnk
                 extraInfoLabel:SetText(GetString(SI_SMITHING_UNKNOWN_STYLE))
                 extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
             else
-                local text
                 local name
                 if usesUniversalStyleItem then
                     name = GetString(SI_SMITHING_UNIVERSAL_STYLE_ITEM_NAME)
                 else
                     name = data.name
                 end
+                local NUM_MATERIAL_ITEMS_REQUIRED = "1"
+                local text
                 if usable then
-                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, ZO_WHITE:Colorize("1"), name)
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, ZO_WHITE:Colorize(NUM_MATERIAL_ITEMS_REQUIRED), name)
                     extraInfoLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
                 else
-                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, "1", name)
+                    text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, NUM_MATERIAL_ITEMS_REQUIRED, name)
                     extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
                 end
                 extraInfoLabel:SetText(text)
@@ -703,6 +747,15 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListClass, traitUnk
         local isTraitKnown = patternIndex ~= nil and IsSmithingTraitKnownForPattern(patternIndex, data.traitType)
         ZO_ItemSlot_SetupSlot(control, stackCount, data.icon, isTraitKnown, not enabled)
 
+        local questPinIcon = control:GetNamedChild("QuestPin")
+
+        local typeToCheck = self.isSetQuest and self.questTrait or ITEM_TRAIT_TYPE_NONE
+        if not self.hasItemToImproveForWrit and self.hasQuestPatterns and (self.isSetQuest or isTraitKnown) and data.traitType == typeToCheck and CRAFT_ADVISOR_MANAGER:HasActiveWrits() then
+            questPinIcon:SetHidden(not self:DoesCurrentTabHaveQuest())
+        else
+            questPinIcon:SetHidden(true)
+        end
+
         if selected then
             local usable = data.traitType == ITEM_TRAIT_TYPE_NONE or (hasEnoughInInventory and isTraitKnown)
             local extraInfoLabel = listContainer.extraInfoLabel
@@ -715,12 +768,13 @@ function ZO_SharedSmithingCreation:InitializeTraitList(scrollListClass, traitUnk
                     extraInfoLabel:SetText(GetString(SI_SMITHING_TRAIT_MUST_BE_RESEARCHED))
                     extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
                 else
+                    local NUM_MATERIAL_ITEMS_REQUIRED = "1"
                     local text
                     if usable then
-                        text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, ZO_WHITE:Colorize("1"), data.name)
+                        text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, ZO_WHITE:Colorize(NUM_MATERIAL_ITEMS_REQUIRED), data.name)
                         extraInfoLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
                     else
-                        text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED_SINGULAR, "1", data.name)
+                        text = zo_strformat(SI_SMITHING_MATERIAL_REQUIRED, NUM_MATERIAL_ITEMS_REQUIRED, data.name)
                         extraInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
                     end
                     extraInfoLabel:SetText(text)
@@ -792,6 +846,12 @@ function ZO_SharedSmithingCreation:DoesPatternPassFilter(patternData)
         end
     end
 
+    if self.savedVars.questsOnlyChecked then
+        if self.hasItemToImproveForWrit or not self.questPatterns[patternData.patternIndex] then
+            return false
+        end
+    end
+
     if self.savedVars.haveKnowledgeChecked then
         if patternData.numTraitsKnown < patternData.numTraitsRequired then
             return false
@@ -811,11 +871,11 @@ end
 
 function ZO_SharedSmithingCreation:CreatePatternList()
     self.patternList:Clear()
-
+    self:UpdateQuestPins()
     for patternIndex = 1, GetNumSmithingPatterns() do
         local patternName, baseName, _, numMaterials, numTraitsRequired, numTraitsKnown, resultingItemFilterType = GetSmithingPatternInfo(patternIndex)
         if numMaterials > 0 then
-            local patternData = { craftingType = GetCraftingInteractionType(), patternIndex = patternIndex, patternName = patternName, baseName = baseName, numTraitsRequired = numTraitsRequired, numTraitsKnown = numTraitsKnown, resultingItemFilterType = resultingItemFilterType }
+            local patternData = { craftingType = GetCraftingInteractionType(), patternIndex = patternIndex, patternName = patternName, baseName = baseName, numTraitsRequired = numTraitsRequired, numTraitsKnown = numTraitsKnown, resultingItemFilterType = resultingItemFilterType }         
             if self:DoesPatternPassFilter(patternData) then
                 self.patternList:AddEntry(patternData)
             end
@@ -840,6 +900,12 @@ function ZO_SharedSmithingCreation:DoesMaterialPassFilter(data)
 
     if self.savedVars.haveMaterialChecked then
         if GetCurrentSmithingMaterialItemCount(data.patternIndex, data.materialIndex) < data.min then
+            return false
+        end
+    end
+
+    if self.savedVars.questsOnlyChecked then
+        if self.hasItemToImproveForWrit or self.questMaterial ~= data.materialIndex then
             return false
         end
     end
@@ -958,6 +1024,16 @@ function ZO_SharedSmithingCreation:DoesStylePassFilter(itemStyleId, alwaysHideIf
         return false
     end
 
+    if self.savedVars.questsOnlyChecked then
+        if self.hasItemToImproveForWrit or not self:DoesCurrentTabHaveQuest() then
+            return false
+        end
+
+        if self.questStyle and self.questStyle ~= itemStyleId then
+            return false
+        end
+    end
+
     local patternData = self.patternList:GetSelectedData()
 
     if patternData then
@@ -1031,6 +1107,16 @@ function ZO_SharedSmithingCreation:RefreshStyleList()
 end
 
 function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType, craftingType, typeFilter, patternIndex)
+    --Special case: We don't want to show the No Trait option for master writs, since the trait is relevant
+    --However, normally, the No Trait option would not be put through this filter at all, and we need to make sure it still acts normally when redirected through this filter in other cases
+    if traitType == ITEM_TRAIT_TYPE_NONE then
+      if self.savedVars.questsOnlyChecked and not self.hasItemToImproveForWrit and self:DoesCurrentTabHaveQuest() then
+        return false
+      else
+        return true
+      end
+    end
+
     if ZO_CraftingUtils_GetSmithingFilterFromTrait(traitType) ~= ZO_CraftingUtils_GetBaseSmithingFilter(typeFilter) then
         return false
     end
@@ -1043,6 +1129,16 @@ function ZO_SharedSmithingCreation:DoesTraitPassFilter(traitIndex, traitType, cr
 
     if self.savedVars.haveMaterialChecked then
         if GetCurrentSmithingTraitItemCount(traitIndex) == 0 then
+            return false
+        end
+    end
+
+    if self.savedVars.questsOnlyChecked then
+        if self.hasItemToImproveForWrit or not self:DoesCurrentTabHaveQuest() then
+            return false
+        end
+
+        if self.questTrait ~= traitType then
             return false
         end
     end
@@ -1061,14 +1157,7 @@ function ZO_SharedSmithingCreation:RefreshTraitList(patternData)
     local traitItems = ZO_CraftingUtils_GetSmithingTraitItemInfo()
     for _, traitItemInfo in ipairs(traitItems) do
         local craftingType = GetCraftingInteractionType()
-        if traitItemInfo.type == ITEM_TRAIT_TYPE_NONE then
-            self.traitList:AddEntry({
-                craftingType = craftingType,
-                traitIndex = traitItemInfo.index,
-                traitType = traitItemInfo.type,
-                icon = "EsoUI/Art/Crafting/crafting_smithing_noTrait.dds",
-            })
-        elseif self:DoesTraitPassFilter(traitItemInfo.index, traitItemInfo.type, craftingType, self.typeFilter, patternIndex) then
+        if (not self.isSetQuest and traitItemInfo.type == ITEM_TRAIT_TYPE_NONE) or self:DoesTraitPassFilter(traitItemInfo.index, traitItemInfo.type, craftingType, self.typeFilter, patternIndex) then
             self.traitList:AddEntry({
                 craftingType = craftingType,
                 traitIndex = traitItemInfo.index,
@@ -1230,4 +1319,15 @@ end
 
 function ZO_SharedSmithingCreation:UpdateKeybindStrip()
     -- Should be overidden
+end
+
+function ZO_SharedSmithingCreation:DoesCurrentTabHaveQuest()
+    local doesFilterMatch = false
+    --Since set and non-set items map to the same item filter, we need to do some shenanigans to differentiate between them
+    if self.isSetQuest then
+        doesFilterMatch = not ZO_CraftingUtils_IsBaseSmithingFilter(self.typeFilter)
+    else
+        doesFilterMatch = ZO_CraftingUtils_IsBaseSmithingFilter(self.typeFilter)
+    end
+    return doesFilterMatch and self.tabsWithQuests[ZO_CraftingUtils_GetItemFilterFromSmithingFilter(self.typeFilter)]
 end

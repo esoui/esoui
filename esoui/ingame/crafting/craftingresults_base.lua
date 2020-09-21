@@ -36,6 +36,12 @@ function ZO_CraftingResults_Base:Initialize(control, showInGamepadPreferredModeO
     control:RegisterForEvent(EVENT_RETRAIT_RESPONSE, function(eventCode, ...) self:OnRetraitCompleted(...) end)
     control:AddFilterForEvent(EVENT_RETRAIT_RESPONSE, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
 
+    control:RegisterForEvent(EVENT_RECONSTRUCT_STARTED, function(eventCode, ...) self:OnReconstructStarted(...) end)
+    control:AddFilterForEvent(EVENT_RECONSTRUCT_STARTED, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
+
+    control:RegisterForEvent(EVENT_RECONSTRUCT_RESPONSE, function(eventCode, ...) self:OnReconstructCompleted(...) end)
+    control:AddFilterForEvent(EVENT_RECONSTRUCT_RESPONSE, REGISTER_FILTER_IS_IN_GAMEPAD_PREFERRED_MODE, showInGamepadPreferredModeOnly)
+
     self.enchantSoundPlayer = ZO_QueuedSoundPlayer:New()
     self.enchantSoundPlayer:SetFinishedAllSoundsCallback(function() self:OnAllEnchantSoundsFinished() end)
 
@@ -197,8 +203,13 @@ function ZO_CraftingResults_Base:OnCraftStarted(craftingType)
 end
 
 function ZO_CraftingResults_Base:OnRetraitStarted()
-    local playStopTooltipAnimation = true
-    self:StartCraftProcess(playStopTooltipAnimation)
+    local PLAY_STOP_TOOLTIP_ANIMATION = true
+    self:StartCraftProcess(PLAY_STOP_TOOLTIP_ANIMATION)
+end
+
+function ZO_CraftingResults_Base:OnReconstructStarted()
+    local PLAY_STOP_TOOLTIP_ANIMATION = true
+    self:StartCraftProcess(PLAY_STOP_TOOLTIP_ANIMATION)
 end
 
 function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalResult, craftingType)
@@ -271,6 +282,12 @@ function ZO_CraftingResults_Base:OnRetraitCompleted(result)
     self:CompleteCraftProcess(craftFailed, EXCEPTIONAL_RESULT)
 end
 
+function ZO_CraftingResults_Base:OnReconstructCompleted(result)
+    local craftFailed = result ~= RECONSTRUCT_RESPONSE_SUCCESS
+    local EXCEPTIONAL_RESULT = true
+    self:CompleteCraftProcess(craftFailed, EXCEPTIONAL_RESULT)
+end
+
 function ZO_CraftingResults_Base:OnAllEnchantSoundsFinished()
     if not self.craftingProcessCompleted then
         if self.processCompletedArguments then
@@ -288,19 +305,6 @@ function ZO_CraftingResults_Base:OnTooltipAnimationStopped(craftingType)
     if self.tooltipAnimationCompleted == false then
         self.tooltipAnimationCompleted = true
         self:CheckCraftProcessCompleted(craftingType)
-    end
-end
-
-local function GetBoosterItemTypeForCraftingType()
-    local craftingType = GetCraftingInteractionType()
-    if craftingType == CRAFTING_TYPE_BLACKSMITHING then
-        return ITEMTYPE_BLACKSMITHING_BOOSTER
-    elseif craftingType == CRAFTING_TYPE_CLOTHIER then
-        return ITEMTYPE_CLOTHIER_BOOSTER
-    elseif craftingType == CRAFTING_TYPE_WOODWORKING then
-        return ITEMTYPE_WOODWORKING_BOOSTER
-    elseif craftingType == CRAFTING_TYPE_JEWELRYCRAFTING then
-        return ITEMTYPE_JEWELRYCRAFTING_BOOSTER
     end
 end
 
@@ -332,7 +336,8 @@ end
 local function DidLastCraftGainBooster(numItemsGained)
     local smithingObject = ZO_Smithing_GetActiveObject()
     if smithingObject and smithingObject:IsExtracting() then
-        local boosterItemType = GetBoosterItemTypeForCraftingType()
+        local craftingType = GetCraftingInteractionType()
+        local boosterItemType = ZO_CraftingUtils_GetBoosterItemType(craftingType)
         for i = 1, numItemsGained do
             local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType = GetLastCraftingResultItemInfo(i)
             if itemType == boosterItemType then
@@ -472,7 +477,7 @@ do
 end
 
 function ZO_CraftingResults_Base:ForceCompleteCraftProcess()
-    if self:IsCraftInProgress() then
+    if not (self.craftingProcessCompleted and self.tooltipAnimationCompleted) then
         self.craftingProcessCompleted = true
         self.tooltipAnimationCompleted = true
         CALLBACK_MANAGER:FireCallbacks("CraftingAnimationsStopped")

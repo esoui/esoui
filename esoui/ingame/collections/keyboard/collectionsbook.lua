@@ -180,15 +180,7 @@ do
 end
 
 function ZO_CollectionsBook:InitializeGridListPanel()
-    local function CreateEntryData()
-        return ZO_GridSquareEntryData_Shared:New()
-    end
-
-    local function ResetEntryData(data)
-        data:SetDataSource(nil)
-    end
-
-    self.entryDataObjectPool = ZO_ObjectPool:New(CreateEntryData, ResetEntryData)
+    self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_GridSquareEntryData_Shared)
 
     local gridListPanel = self.control:GetNamedChild("List")
     self.gridListPanelControl = gridListPanel

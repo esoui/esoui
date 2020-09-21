@@ -757,8 +757,7 @@ function ZO_Pregame_DisplayServerDisconnectedError()
 end
 
 local function OnDisconnectedFromServer()
-    local FORCE = true
-    ZO_Dialogs_ReleaseAllDialogs(FORCE)
+    ZO_Dialogs_ReleaseAllDialogsExcept("HANDLE_ERROR", "HANDLE_ERROR_WITH_HELP")
 
     ZO_Pregame_DisplayServerDisconnectedError()
 

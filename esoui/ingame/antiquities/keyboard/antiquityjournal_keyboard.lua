@@ -1,7 +1,5 @@
 local MAX_ICONS_PER_ROW = 7
 
-ZO_ANTIQUITY_JOURNAL_SCRYABLE_DIVIDER_HEADER_OFFSET_Y = 12
-
 -- Antiquity Tile Base
 
 ZO_AntiquityTileBase_Keyboard = ZO_Object:Subclass()
@@ -16,6 +14,7 @@ function ZO_AntiquityTileBase_Keyboard:Initialize(control)
     self.control = control
     control.owner = self
     self.predecessorTile = nil
+
     self.header = control:GetNamedChild("Header")
     self.antiquityType = self.header:GetNamedChild("AntiquityType")
     self.icon = control:GetNamedChild("Icon")
@@ -24,6 +23,7 @@ function ZO_AntiquityTileBase_Keyboard:Initialize(control)
     self.highlightAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("AntiquityJournalTileHighlight_Keyboard", self.highlight)
     self.numRecoveredLabel = self.header:GetNamedChild("NumRecovered")
     self.title = self.header:GetNamedChild("Title")
+
     local function GetRewardData()
         if not self.rewardData and self.tileData then
             if self.tileData:GetType() == ZO_ANTIQUITY_TYPE_INDIVIDUAL then
@@ -41,6 +41,7 @@ function ZO_AntiquityTileBase_Keyboard:Initialize(control)
         return self.rewardData
     end
     control.GetRewardData = GetRewardData
+
     self.mouseInputGroup = ZO_MouseInputGroup:New(control)
     self.mouseInputGroup:Add(self.icon, ZO_MOUSE_INPUT_GROUP_MOUSE_OVER)
 end
@@ -299,13 +300,15 @@ function ZO_AntiquityTile_Keyboard:Initialize(control)
     self.logBookProgressContainer = control:GetNamedChild("HeaderLogBookProgress")
     self.logBookProgress = self.logBookProgressContainer:GetNamedChild("Progress")
     self.logBook = self.logBookProgressContainer:GetNamedChild("LogBook")
-    self.actions = {
-        ["primary"] = {
+    self.actions =
+    {
+        ["primary"] =
+        {
             label = GetString(SI_ANTIQUITY_LOG_BOOK),
-            visible = function(self)
+            visible = function()
                 return self.tileData:HasDiscovered() and self.tileData:GetNumLoreEntries() > 0
             end,
-            execute = function(self)
+            execute = function()
                 ANTIQUITY_LORE_KEYBOARD:ShowAntiquity(self:GetAntiquityId())
             end,
         },
@@ -358,13 +361,15 @@ function ZO_AntiquitySetTile_Keyboard:Initialize(control)
     self.logBookProgressContainer = control:GetNamedChild("HeaderLogBookProgress")
     self.logBookProgress = self.logBookProgressContainer:GetNamedChild("Progress")
     self.logBook = self.logBookProgressContainer:GetNamedChild("LogBook")
-    self.actions = {
-        ["primary"] = {
+    self.actions =
+    {
+        ["primary"] =
+        {
             label = GetString(SI_ANTIQUITY_LOG_BOOK),
-            visible = function(self)
+            visible = function()
                 return self.tileData:HasDiscovered() and self.tileData:GetNumLoreEntries() > 0
             end,
-            execute = function(self)
+            execute = function()
                 ANTIQUITY_LORE_KEYBOARD:ShowAntiquitySet(self:GetAntiquitySetId())
             end,
         },
@@ -477,46 +482,49 @@ function ZO_ScryableAntiquityTile_Keyboard:Initialize(control)
     self.zoneLabel = self.header:GetNamedChild("Zone")
     self.leadExpiration = self.header:GetNamedChild("LeadExpiration")
     self.progressIcons = control:GetNamedChild("ProgressIcons")
-    self.actions = {
-        ["showOnMap"] = {
+    self.actions =
+    {
+        ["showOnMap"] =
+        {
             label = GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP),
-            visible = function(self)
+            visible = function()
                 return self.tileData:HasDiscoveredDigSites()
             end,
-            execute = function(self)
+            execute = function()
                 local antiquityId = self:GetAntiquityId()
                 SetTrackedAntiquityId(antiquityId)
                 WORLD_MAP_MANAGER:ShowAntiquityOnMap(antiquityId)
             end,
         },
-        ["negative"] = {
+        ["negative"] =
+        {
             label = GetString(SI_ANTIQUITY_ABANDON),
-            visible = function(self)
+            visible = function()
                 return self.tileData:HasDiscoveredDigSites()
             end,
-            execute = function(self)
+            execute = function()
                 ZO_Dialogs_ShowDialog("CONFIRM_ABANDON_ANTIQUITY_SCRYING_PROGRESS", { antiquityId = self:GetAntiquityId() })
             end,
         },
-        ["tertiary"] = {
+        ["tertiary"] =
+        {
             label = GetString(SI_ANTIQUITY_VIEW_IN_CODEX),
-            execute = function(self)
-                local NOT_REBUILDING = false
-                local BRING_PARENT_INTO_VIEW = true
-                local node = self.tileData:GetAntiquityCategoryData().nodeKeyboard
-                node:GetTree():SelectNode(node, NOT_REBUILDING, BRING_PARENT_INTO_VIEW)
+            execute = function()
+                local categoryData = self.tileData:GetAntiquityCategoryData()
+                ANTIQUITY_JOURNAL_KEYBOARD:ShowCategory(categoryData:GetId())
             end,
         },
-        ["primary"] = {
+        ["primary"] =
+        {
             label = GetString(SI_ANTIQUITY_SCRY),
-            enabled = function(self)
+            enabled = function()
                 local canScry, scryResultMessage = self.tileData:CanScry()
                 return canScry, scryResultMessage
             end,
-            visible = function(self)
+            visible = function()
                 return self.tileData:HasDiscovered()
             end,
-            execute = function(self)
+            execute = function()
                 ScryForAntiquity(self:GetAntiquityId())
             end,
         },
@@ -543,11 +551,15 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
     local hasDiscovered = tileData:HasDiscovered()
 
     if hasDiscovered then
-        local difficulty = ZO_SELECTED_TEXT:Colorize(GetString("SI_ANTIQUITYDIFFICULTY", tileData:GetDifficulty()))
-        self.difficulty:SetText(zo_strformat(SI_ANTIQUITY_DIFFICULTY_FORMATTER, difficulty))
+        local difficultyColor = ZO_SELECTED_TEXT
+        if not tileData:MeetsScryingSkillRequirements() then
+            difficultyColor = ZO_ERROR_COLOR
+        end
+        local difficultyString = difficultyColor:Colorize(GetString("SI_ANTIQUITYDIFFICULTY", tileData:GetDifficulty()))
+        self.difficulty:SetText(zo_strformat(SI_ANTIQUITY_DIFFICULTY_FORMATTER, difficultyString))
         self.difficulty:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
         self.difficulty:ClearAnchors()
-        if tileData:HasReward() or tileData:IsRepeatable() then    
+        if tileData:HasReward() or tileData:IsRepeatable() then
             self.difficulty:SetAnchor(TOPLEFT, self.title, BOTTOMLEFT, 0, 22)
         else
             self.difficulty:SetAnchor(TOPLEFT, self.title, BOTTOMLEFT)
@@ -564,11 +576,14 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
             self.zoneLabel:SetHidden(true)
         end
 
-        local isLeadNearingExpiration, leadTimeRemaining = self.tileData:GetLeadExpirationStatus()
-        if isLeadNearingExpiration then
-            self.leadExpiration:SetText(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, ZO_SELECTED_TEXT:Colorize(leadTimeRemaining)))
+        local leadTimeRemainingS = tileData:GetLeadTimeRemainingS()
+        if leadTimeRemainingS > 0 then
+            local leadTimeRemainingText = ZO_FormatAntiquityLeadTime(leadTimeRemainingS)
+            self.leadExpiration:SetText(zo_strformat(SI_ANTIQUITY_TOOLTIP_LEAD_EXPIRATION, leadTimeRemainingText))
+            self.leadExpiration:SetHidden(false)
+        else
+            self.leadExpiration:SetHidden(true)
         end
-        self.leadExpiration:SetHidden(not isLeadNearingExpiration)
 
         local numGoalsAchieved = tileData:GetNumGoalsAchieved()
         if numGoalsAchieved > 0 then
@@ -591,7 +606,7 @@ function ZO_ScryableAntiquityTile_Keyboard:Refresh(...)
             end
         end
         self.progressIcons:ClearAnchors()
-        if isLeadNearingExpiration then
+        if leadTimeRemainingS > 0 then
             self.progressIcons:SetAnchor(TOPLEFT, self.leadExpiration, BOTTOMLEFT, 0, 4)
         else
             self.progressIcons:SetAnchor(TOPLEFT, self.difficulty, BOTTOMLEFT, 0, 4)
@@ -624,7 +639,7 @@ function ZO_AntiquityJournal_Keyboard:Initialize(control)
     self.control = control
     self.antiquityTilesByAntiquityId = {}
     self.antiquitySetTilesByAntiquitySetId = {}
-    self.antiquityCategoryTreeNodes = {}
+    self.categoryNodeLookupData = {}
 
     self:InitializeKeybindDescriptors()
     self:InitializeControls()
@@ -723,21 +738,21 @@ function ZO_AntiquityJournal_Keyboard:InitializeControls()
     self.scryableAntiquityTileControlPool:SetCustomResetBehavior(ResetTileControl)
 end
 
-function ZO_AntiquityJournal_Keyboard:UpdateCategoryStatusIcon(categoryData)
-    local categoryNode = categoryData.nodeKeyboard
+function ZO_AntiquityJournal_Keyboard:UpdateCategoryStatusIcon(categoryId)
+    local categoryNode = self.categoryNodeLookupData[categoryId]
     if categoryNode then
         self:UpdateCategoryNodeStatusIcon(categoryNode)
     end
 end
 
 function ZO_AntiquityJournal_Keyboard:UpdateCategoryNodeStatusIcon(categoryNode)
-    local categoryData = categoryNode.data
     if categoryNode then
         local categoryControl = categoryNode.control
         if not categoryControl.statusIcon then
             categoryControl.statusIcon = categoryControl:GetNamedChild("StatusIcon")
         end
         categoryControl.statusIcon:ClearIcons()
+        local categoryData = categoryNode.data
         if categoryData:HasNewLead() then
             categoryControl.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
         end
@@ -749,14 +764,6 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     self.categories = self.control:GetNamedChild("ContentsCategories")
     self.categoryTree = ZO_Tree:New(self.categories:GetNamedChild("ScrollChild"), 0, -10, 290)
 
-    local function UpdateSize_Divided(control)
-        local textWidth, textHeight = control.text:GetTextDimensions()
-        local textureHeight = control:GetNamedChild("DividerTexture"):GetHeight()
-        local height = textHeight + textureHeight + ZO_ANTIQUITY_JOURNAL_SCRYABLE_DIVIDER_HEADER_OFFSET_Y + ZO_TREE_ENTRY_ICON_HEADER_TEXT_PADDING_Y * 2
-        local width = textWidth + ZO_TREE_ENTRY_ICON_HEADER_TEXT_OFFSET_X
-        control:SetDimensions(width, height)
-    end
-
     local function BaseTreeHeaderIconSetup(control, data, open, updateSizeFunction)
         local normalIcon, pressedIcon, mousedOverIcon = data:GetKeyboardIcons()
         control.icon:SetTexture(open and pressedIcon or normalIcon)
@@ -766,10 +773,10 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
         ZO_IconHeader_Setup(control, open, ENABLED, DISABLE_SCALING, updateSizeFunction)
     end
 
-    local function BaseTreeHeaderSetup(node, control, data, open)
+    local function BaseTreeHeaderSetup(node, control, data, open, updateSizeFunction)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(data:GetName())
-        BaseTreeHeaderIconSetup(control, data, open)
+        BaseTreeHeaderIconSetup(control, data, open, updateSizeFunction)
         self:UpdateCategoryNodeStatusIcon(node)
     end
 
@@ -784,24 +791,11 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
         BaseTreeHeaderSetup(node, control, data, open)
     end
 
-    local function TreeHeaderSetup_Divided(node, control, data, open)
-        control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
-        control.text:SetText(data:GetName())
-        BaseTreeHeaderIconSetup(control, data, open, UpdateSize_Divided)
-        self:UpdateCategoryNodeStatusIcon(node)
-    end
-
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
         control:SetSelected(selected)
         if selected and (not reselectingDuringRebuild or self.forceUpdateContentOnCategoryReselect) then
-            local saveExpanded = reselectingDuringRebuild
-            self:OnCategorySelected(data, saveExpanded)
+            self:OnCategorySelected(data)
         end
-    end
-
-    local function TreeEntryOnSelected_Divided(control, data, selected, reselectingDuringRebuild)
-        TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
-        BaseTreeHeaderIconSetup(control, data, selected, UpdateSize_Divided)
     end
 
     local function TreeEntryOnSelected_Childless(control, data, selected, reselectingDuringRebuild)
@@ -816,11 +810,7 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     end
 
     local function TreeEqualityFunction(left, right)
-        if left.isScryableCategory or right.isScryableCategory then
-            return left.isScryableCategory == right.isScryableCategory
-        else
-            return left:GetId() == right:GetId()
-        end
+        return left:GetId() == right:GetId()
     end
 
     -- Define the templates that are to be used by the tree view control.
@@ -828,7 +818,6 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     local CHILD_SPACING = 0
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconHeader", TreeHeaderSetup_Child, nil, TreeEqualityFunction, CHILD_INDENT, CHILD_SPACING)
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
-    self.categoryTree:AddTemplate("ZO_AntiquityJournal_StatusIconDividedHeader", TreeHeaderSetup_Divided, TreeEntryOnSelected_Divided, TreeEqualityFunction)
     self.categoryTree:AddTemplate("ZO_AntiquityJournal_SubCategory", TreeEntrySetup, TreeEntryOnSelected, TreeEqualityFunction)
     self.categoryTree:SetExclusive(true)
     self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")
@@ -984,67 +973,6 @@ do
         end
     end
 
-    function ZO_AntiquityJournal_Keyboard:AcquireAntiquitySectionList()
-        if self.antiquitySectionData then
-            for _, sectionData in ipairs(self.antiquitySectionData) do
-                ZO_ClearNumericallyIndexedTable(sectionData.list)
-            end
-        else
-            -- Note that the order of these sections matters: lower-indexed sections are prioritized above subsequent sections.
-            self.antiquitySectionData =
-            {
-                {
-                    sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_IN_PROGRESS),
-                    filterFunctions = {ZO_Antiquity.IsInProgress},
-                    sortFunction = ZO_DefaultAntiquitySortComparison,
-                    list = {}
-                },
-                {
-                    sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_AVAILABLE),
-                    filterFunctions =
-                    {
-                        function(antiquityData)
-                            return antiquityData:MeetsAllScryingRequirements()
-                        end
-                    },
-                    sortFunction = ZO_DefaultAntiquitySortComparison,
-                    list = {}
-                },
-                {
-                    sectionHeading = GetString(SI_ANTIQUITY_SUBHEADING_REQUIRES_LEAD),
-                    filterFunctions =
-                    {
-                        function(antiquityData)
-                            return antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsLeadRequirements() and (antiquityData:IsRepeatable() or not antiquityData:HasRecovered())
-                        end,
-                    },
-                    sortFunction = ZO_DefaultAntiquitySortComparison,
-                    list = {}
-                },
-            }
-
-            for antiquityDifficulty = 1, ANTIQUITY_DIFFICULTY_MAX_VALUE do
-                local skillName, requiredRank, maximumRank = ZO_GetAntiquityScryingPassiveSkillInfo(antiquityDifficulty)
-                local antiquitySection =
-                {
-                    sectionHeading = zo_strformat(SI_ANTIQUITY_SUBHEADING_REQUIRES_SKILL, skillName, requiredRank, maximumRank),
-                    filterFunctions =
-                    {
-                        function(antiquityData)
-                            local isMatch = antiquityData:IsInCurrentPlayerZone() and antiquityData:HasDiscovered() and not antiquityData:MeetsScryingSkillRequirements()
-                            return isMatch and antiquityData:GetDifficulty() == antiquityDifficulty
-                        end,
-                    },
-                    sortFunction = ZO_DefaultAntiquitySortComparison,
-                    list = {}
-                }
-                table.insert(self.antiquitySectionData, antiquitySection)
-            end
-        end
-
-        return self.antiquitySectionData
-    end
-
     function ZO_AntiquityJournal_Keyboard:AddScryableAntiquityTiles(previousTileOrHeading, headingText, antiquities, sortFunction)
         table.sort(antiquities, sortFunction)
 
@@ -1091,14 +1019,14 @@ do
         return tileObject
     end
 
-    function ZO_AntiquityJournal_Keyboard:ResetCategoryTiles(antiquityCategoryId)
+    function ZO_AntiquityJournal_Keyboard:ResetCategoryTiles(shouldHideProgressBar)
         self:ResetTiles()
         ZO_Scroll_ResetToTop(self.contentList)
         self.contentList:SetHidden(true)
         self.contentList:ClearAnchors()
         self.contentList:SetAnchor(BOTTOMRIGHT, nil, nil, -10, -75)
 
-        if antiquityCategoryId == ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA:GetId() then
+        if shouldHideProgressBar then
             self.categoryProgress:SetHidden(true)
             self.contentList:SetAnchor(TOPLEFT, self.categoryInset, BOTTOMLEFT, nil, 15)
             self.filter:SetHidden(true)
@@ -1107,9 +1035,7 @@ do
         end
     end
 
-    function ZO_AntiquityJournal_Keyboard:RefreshTiles(data)
-        local antiquityCategoryId = data:GetId()
-        local previousTileOrHeading
+    function ZO_AntiquityJournal_Keyboard:BuildCategoryAntiquityTiles(categoryData)
         local isEmptyList = true
         local horizontalScrollOffset
         local verticalScrollOffset
@@ -1122,29 +1048,33 @@ do
         -- so save it off before calling it
         local oldMouseOverTile = self.mouseOverTile
 
-        self:ResetCategoryTiles(antiquityCategoryId)
+        local isScryableSubcategory = ZO_IsAntiquityScryableSubcategory(categoryData)
+        self:ResetCategoryTiles(isScryableSubcategory)
 
-        if antiquityCategoryId == ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID then
-            local antiquitySections = self:AcquireAntiquitySectionList()
+        if isScryableSubcategory then
+            local antiquitySections = ANTIQUITY_MANAGER:GetOrCreateAntiquitySectionList()
 
-            -- Iterate over all antiquities, adding each antiquity to the section whose criteria it meets (if any).
-            for _, antiquityData in ANTIQUITY_DATA_MANAGER:AntiquityIterator({ZO_Antiquity.IsVisible}) do
+            -- Iterate over all antiquities in the subcategory, adding each antiquity to the section whose criteria it meets (if any).
+            for _, antiquityData in categoryData:AntiquityIterator({ZO_Antiquity.IsVisible}) do
                 for _, antiquitySection in ipairs(antiquitySections) do
-                    local passesFilter = true
-                    for _, filterFunction in ipairs(antiquitySection.filterFunctions) do
-                        if not filterFunction(antiquityData) then
-                            passesFilter = false
+                    if ANTIQUITY_MANAGER:ShouldScryableSubcategoryShowSection(categoryData, antiquitySection) then
+                        local passesFilter = true
+                        for _, filterFunction in ipairs(antiquitySection.filterFunctions) do
+                            if not filterFunction(antiquityData) then
+                                passesFilter = false
+                                break
+                            end
+                        end
+                        if passesFilter then
+                            table.insert(antiquitySection.list, antiquityData)
                             break
                         end
-                    end
-                    if passesFilter then
-                        table.insert(antiquitySection.list, antiquityData)
-                        break
                     end
                 end
             end
 
             -- Sort each sections' list by the associated sort function.
+            local previousTileOrHeading
             for _, antiquitySection in ipairs(antiquitySections) do
                 if #antiquitySection.list ~= 0 then
                     isEmptyList = false
@@ -1155,12 +1085,13 @@ do
             local maxLoreEntries = 0
             local unlockedLoreEntries = 0
 
-            for _, antiquityData in data:AntiquityIterator({ZO_Antiquity.IsVisible}) do
-                local antiquityId = antiquityData:GetId()
+            local previousTileOrHeading
+            for _, antiquityData in categoryData:AntiquityIterator({ZO_Antiquity.IsVisible}) do
                 local antiquitySetData = antiquityData:GetAntiquitySetData()
-                local antiquitySetId = antiquitySetData and antiquitySetData:GetId()
 
                 if self:MeetsFilterCriteria(antiquityData, antiquitySetData) then
+                    local antiquityId = antiquityData:GetId()
+                    local antiquitySetId = antiquitySetData and antiquitySetData:GetId()
                     if not filterAntiquities or filterAntiquities[antiquityId] or (antiquitySetId and filterAntiquitySets[antiquitySetId]) then
                         if antiquitySetId then
                             local antiquitySetTile = self.antiquitySetTilesByAntiquitySetId[antiquitySetId]
@@ -1203,21 +1134,21 @@ do
         end
     end
 
-    function ZO_AntiquityJournal_Keyboard:UpdateCategoryLabels(data, saveExpanded)
+    function ZO_AntiquityJournal_Keyboard:UpdateCategoryLabels(categoryData)
         -- Refresh category-specific controls and all tiles.
         self.categoryInset:ClearAnchors()
         self.categoryInset:SetAnchor(TOPRIGHT, nil, nil, -12, 11)
-        if data == ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA then
+        if ZO_IsAntiquityScryableSubcategory(categoryData) then
             self.categoryInset:SetAnchor(BOTTOMLEFT, self.contentsCategories, TOPRIGHT, 38, -40)
         else
             self.categoryInset:SetAnchor(BOTTOMLEFT, self.contentsCategories, TOPRIGHT, 38, -12)
         end
 
-        local parentData = data.parentCategoryData
+        local parentData = categoryData:GetParentCategoryData()
         if parentData then
-            self.categoryLabel:SetText(zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY_SUBCATEGORY, parentData:GetName(), data:GetName()))
+            self.categoryLabel:SetText(zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY_SUBCATEGORY, parentData:GetName(), categoryData:GetName()))
         else
-            self.categoryLabel:SetText(zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY, data:GetName()))
+            self.categoryLabel:SetText(zo_strformat(SI_JOURNAL_PROGRESS_CATEGORY, categoryData:GetName()))
         end
         self.filter:SetHidden(false)
     end
@@ -1235,20 +1166,29 @@ do
     end
 
     function ZO_AntiquityJournal_Keyboard:AddScryableCategory()
-        local treeNode = self.categoryTree:AddNode("ZO_AntiquityJournal_StatusIconDividedHeader", ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
-        ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA.nodeKeyboard = treeNode
+        -- Scryables parent category
+        local scryableEntryData = ZO_EntryData:New(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
+        local scryableTreeNode = self.categoryTree:AddNode("ZO_AntiquityJournal_StatusIconHeader", scryableEntryData)
+        self.categoryNodeLookupData[scryableEntryData:GetId()] = scryableTreeNode
+
+        -- Current zone subcategory
+        local currentZoneEntryData = ZO_EntryData:New(ZO_SCRYABLE_ANTIQUITY_CURRENT_ZONE_SUBCATEGORY_DATA)
+        local currentZoneTreeNode = self.categoryTree:AddNode("ZO_AntiquityJournal_SubCategory", currentZoneEntryData, scryableTreeNode)
+        self.categoryNodeLookupData[currentZoneEntryData:GetId()] = currentZoneTreeNode
+
+        -- All leads subcategory
+        local allLeadsEntryData = ZO_EntryData:New(ZO_SCRYABLE_ANTIQUITY_ALL_LEADS_SUBCATEGORY_DATA)
+        local allLeadsTreeNode = self.categoryTree:AddNode("ZO_AntiquityJournal_SubCategory", allLeadsEntryData, scryableTreeNode)
+        self.categoryNodeLookupData[allLeadsEntryData:GetId()] = allLeadsTreeNode
     end
 
     function ZO_AntiquityJournal_Keyboard:AddCategory(category, parentCategory)
-        local tree = self.categoryTree
-        local isTopLevel = not parentCategory
-        local hasChildren = category:GetNumSubcategories() > 0
         local nodeTemplate
 
         -- Identify the Category's template type.
-        if not isTopLevel then
+        if parentCategory then
             nodeTemplate = "ZO_AntiquityJournal_SubCategory"
-        elseif hasChildren then
+        elseif category:GetNumSubcategories() > 0 then
             nodeTemplate = "ZO_AntiquityJournal_StatusIconHeader"
         else
             nodeTemplate = "ZO_AntiquityJournal_StatusIconChildlessHeader"
@@ -1266,16 +1206,20 @@ do
             -- If any child Categories match the filter criteria, or if this parent Category matches the filter criteria,
             -- then add the matching child Categories and this parent Category to the tree view control.
             if #matchedSubcategories > 0 or filterCategories[category:GetId()] then
-                local treeNode = tree:AddNode(nodeTemplate, category, parentCategory and parentCategory.nodeKeyboard or nil)
-                category.nodeKeyboard = treeNode
+                local categoryEntryData = ZO_EntryData:New(category)
+                local parentNode = parentCategory and self.categoryNodeLookupData[parentCategory:GetId()] or nil
+                local treeNode = self.categoryTree:AddNode(nodeTemplate, categoryEntryData, parentNode)
+                self.categoryNodeLookupData[category:GetId()] = treeNode
                 for _, subcategory in ipairs(matchedSubcategories) do
                     self:AddCategory(subcategory, category)
                 end
             end
         else
             -- Add this Category and any child Categories to the tree view control.
-            local treeNode = tree:AddNode(nodeTemplate, category, parentCategory and parentCategory.nodeKeyboard or nil)
-            category.nodeKeyboard = treeNode
+            local categoryEntryData = ZO_EntryData:New(category)
+            local parentNode = parentCategory and self.categoryNodeLookupData[parentCategory:GetId()] or nil
+            local treeNode = self.categoryTree:AddNode(nodeTemplate, categoryEntryData, parentNode)
+            self.categoryNodeLookupData[category:GetId()] = treeNode
             for _, subcategory in category:SubcategoryIterator() do
                 self:AddCategory(subcategory, category)
             end
@@ -1318,20 +1262,27 @@ do
     function ZO_AntiquityJournal_Keyboard:RefreshCategories()
         self.isRefreshingAll = true
         self:ApplySearchCriteria()
+
         self.categoryTree:Reset()
+        ZO_ClearTable(self.categoryNodeLookupData)
+
         self:AddScryableCategory()
+
+        local NO_PARENT_CATEGORY = nil
         for _, category in ANTIQUITY_DATA_MANAGER:TopLevelAntiquityCategoryIterator() do
-            self:AddCategory(category, nil)
+            self:AddCategory(category, NO_PARENT_CATEGORY)
         end
+
         self.categoryTree:Commit()
+
         self:RefreshVisibleCategoryFilter()
         self.isRefreshingAll = false
     end
 
     function ZO_AntiquityJournal_Keyboard:RefreshVisibleCategoryFilter()
-        local data = self.categoryTree:GetSelectedData()
-        if data then
-            self:OnCategorySelected(data)
+        local selectedCategoryData = self.categoryTree:GetSelectedData()
+        if selectedCategoryData then
+            self:OnCategorySelected(selectedCategoryData)
         end
     end
 end
@@ -1357,13 +1308,11 @@ function ZO_AntiquityJournal_Keyboard:OnSingleAntiquityLeadUpdated(data)
     -- Refresh this antiquity's category and predecessor category(ies).
     local categoryData = data:GetAntiquityCategoryData()
     while categoryData do
-        self:UpdateCategoryStatusIcon(categoryData)
+        self:UpdateCategoryStatusIcon(categoryData:GetId())
         categoryData = categoryData:GetParentCategoryData()
     end
 
-    if ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA then
-        self:UpdateCategoryStatusIcon(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
-    end
+    self:UpdateCategoryStatusIcon(ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID)
 
     -- Refresh the main menu and scene group's new indicators.
     MAIN_MENU_KEYBOARD:RefreshCategoryBar()
@@ -1394,13 +1343,13 @@ function ZO_AntiquityJournal_Keyboard:GetMouseOverTile()
     return self.mouseOverTile
 end
 
-function ZO_AntiquityJournal_Keyboard:OnCategorySelected(data, saveExpanded)
-    self:UpdateCategoryLabels(data, saveExpanded)
-    if data == ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA and not ZO_IsScryingUnlocked() then
+function ZO_AntiquityJournal_Keyboard:OnCategorySelected(categoryData)
+    self:UpdateCategoryLabels(categoryData)
+    if (ZO_IsAntiquityScryableCategory(categoryData) or ZO_IsAntiquityScryableSubcategory(categoryData)) and not ZO_IsScryingUnlocked() then
         self:ShowLockedContentPanel()
         return
     end
-    self:RefreshTiles(data, saveExpanded)
+    self:BuildCategoryAntiquityTiles(categoryData)
     self:HideLockedContentPanel()
 end
 
@@ -1408,12 +1357,16 @@ function ZO_AntiquityJournal_Keyboard:OnAntiquitiesUpdated()
     self:RefreshCategories()
 end
 
-function ZO_AntiquityJournal_Keyboard:ShowScryable()
-    local scryableCategoryNode = self.categoryTree:GetTreeNodeByData(ZO_SCRYABLE_ANTIQUITY_CATEGORY_DATA)
-    if scryableCategoryNode ~= nil then
+function ZO_AntiquityJournal_Keyboard:ShowCategory(categoryId)
+    local categoryNode = self.categoryNodeLookupData[categoryId]
+    if categoryNode ~= nil then
         self.contentSearchEditBox:SetText("")
-        self.categoryTree:SelectNode(scryableCategoryNode)
+        self.categoryTree:SelectNode(categoryNode)
     end
+end
+
+function ZO_AntiquityJournal_Keyboard:ShowScryable()
+    self:ShowCategory(ZO_SCRYABLE_ANTIQUITY_CATEGORY_ID)
 end
 
 -- Global XML

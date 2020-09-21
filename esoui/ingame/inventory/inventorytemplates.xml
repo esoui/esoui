@@ -74,6 +74,45 @@
             </OnInitialized>
             <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14" />
             <Controls>
+                <Label name="$(parent)Active" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontHeader2" verticalAlignment="CENTER" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontHeader2",
+                            },
+                            {
+                                font = "ZoFontHeader",
+                            },
+                            {
+                                font = "ZoFontGameSmall",
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                    <Dimensions y="64" />
+                    <Anchor point="LEFT" relativeTo="$(grandparent)" offsetX="-10" constrains="X"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_InventorySubTabs" inherits="ZO_MenuBarTemplate" virtual="true">
+            <OnInitialized>
+                ZO_MenuBar_OnInitialized(self)
+                local filterBarData =
+                {
+                    initialButtonAnchorPoint = RIGHT,
+                    buttonTemplate = "ZO_InventoryFilterSubTab",
+                    normalSize = 30,
+                    downSize = 40,
+                    buttonPadding = -12,
+                    animationDuration = 180,
+                }
+                ZO_MenuBar_SetData(self, filterBarData)
+            </OnInitialized>
+            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14" />
+            <Controls>
                 <Label name="$(parent)Active" font="ZoFontHeader2" verticalAlignment="CENTER" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
                     <Dimensions y="64" />
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20"/>

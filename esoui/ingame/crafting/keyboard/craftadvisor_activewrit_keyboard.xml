@@ -1,0 +1,58 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_ActiveWritNavigationEntry" font="ZoFontHeader" mouseEnabled="true" virtual="true" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+            <Dimensions x="270"/>
+            <OnMouseEnter>
+                ZO_ActiveWritNavigationEntry_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_ActiveWritNavigationEntry_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Icon" level="3" hidden="true">
+                    <Dimensions x="22" y="22"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-2"/>
+                </Texture>
+            </Controls>
+        </Label>
+        <Control name="ZO_ActiveWritHeader" inherits="ZO_IconHeader" mouseEnabled="true" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Text" override="true" font="ZoFontHeader2" inherits="ZO_SelectableLabel ZO_IconHeaderMouseArea" wrapMode="ELLIPSIS">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="CENTER" offsetX="15" offsetY="-12"/>
+                    <DimensionConstraints maxX="230"/>
+                </Label>
+                <Texture name="$(parent)Icon" resizeToFitFile="true" override="true">
+                    <Dimensions x="48" y="48" />
+                </Texture>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_WritAdvisor_Keyboard_TopLevel" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="-20" offsetY="-15"/>
+            <OnInitialized>
+                ZO_WritAdvisor_Keyboard_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="14" offsetY="-4"/>
+                    <Dimensions x="485" y="32"/>
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CRAFT_ADVISOR_WRITS_TITLE">
+                            <Anchor point="TOPLEFT" offsetX="14" offsetY="-14"/>
+                            <Dimensions x="256" y="4"/>
+                        </Label>
+                        <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider" >
+                            <Anchor point="TOPLEFT" offsetY="22"/>
+                            <Anchor point="RIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" relativePoint="RIGHT" offsetX="-20" constrains="X" />
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainer" relativePoint="BOTTOMLEFT" offsetX="-20" offsetY="-5" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

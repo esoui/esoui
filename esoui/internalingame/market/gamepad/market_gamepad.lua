@@ -291,7 +291,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                 local selectedEntry = self.selectedGridEntry
                 if selectedEntry then
                     if selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
-                        return not (selectedEntry:IsPurchaseLocked() or selectedEntry:IsHouseCollectible())
+                        return not selectedEntry:IsPurchaseLocked()
                     elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MEMBERSHIP_INFO_TILE then
                         return not IsESOPlusSubscriber() or IsOnESOPlusFreeTrial()
                     elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_FREE_TRIAL_TILE then
@@ -1701,7 +1701,7 @@ end
 -- [[ Market Locked Screen ]]--
 --
 
-local GamepadMarketLockedScreen = ZO_Object:New()
+local GamepadMarketLockedScreen = ZO_Object:Subclass()
 
 function GamepadMarketLockedScreen:New(...)
     local locked = ZO_Object.New(self)
@@ -1747,7 +1747,7 @@ end
 -- [[ Market Pre Scene ]]--
 --
 
-local GamepadMarketPreScene = ZO_Object:New()
+local GamepadMarketPreScene = ZO_Object:Subclass()
 
 function GamepadMarketPreScene:New(...)
     local preScene = ZO_Object.New(self)

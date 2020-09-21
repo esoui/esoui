@@ -4,7 +4,8 @@ do
 
     local dialogInfo =
     {
-        gamepadInfo = {
+        gamepadInfo =
+        {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
 
@@ -21,14 +22,23 @@ do
         },
         mainText =
         {
-            text = SI_MARKET_PRODUCT_NAME_FORMATTER,
+            text = function(dialog)
+                return dialog.data.formattedMainText or ""
+            end
+        },
+        subText =
+        {
+            text = function(dialog)
+                return dialog.data.formattedSubText or ""
+            end
         },
         parametricList =
         {
             -- recipient name edit box
             {
                 template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
-                templateData = {
+                templateData =
+                {
                     recipientNameEntry = true,
                     textChangedCallback = function(control)
                         local displayName = control:GetText()
@@ -56,7 +66,8 @@ do
             -- gift message
             {
                 template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem_Multiline",
-                templateData = {
+                templateData =
+                {
                     messageEntry = true,
                     textChangedCallback = function(control)
                         local giftMessage = control:GetText()
@@ -77,7 +88,8 @@ do
             -- Confirm
             {
                 template = "ZO_GamepadTextFieldSubmitItem",
-                templateData = {
+                templateData =
+                {
                     confirmEntry = true,
                     text = GetString(SI_DIALOG_ACCEPT),
                     setup = ZO_SharedGamepadEntry_OnSetup,
@@ -134,9 +146,8 @@ do
                     if targetData.messageEntry and targetControl then
                         targetControl.editBoxControl:TakeFocus()
                     elseif targetData.recipientNameEntry and targetControl then
-                        local platform = GetUIPlatform()
-                        if platform == UI_PLATFORM_PS4 then
-                            --On PS4 the primary action opens the first party dialog to get a playstation id since it can select any player on PS4
+                        if ZO_IsPlaystationPlatform() then
+                            --On PlayStation the primary action opens the first party dialog to get a playstation id since it can select any player
                             local function OnUserChosen(hasResult, displayName, consoleId)
                                 if hasResult then
                                     targetControl.editBoxControl:SetText(displayName)
@@ -157,9 +168,10 @@ do
                         local data = dialog.data
                         local marketProductId = GetGiftMarketProductId(data.giftId)
 
-                        local sendingData = {
+                        local sendingData =
+                        {
                             giftId = data.giftId,
-                            itemName = data.itemName,
+                            itemName = data.formattedMainText,
                             stackCount = GetMarketProductStackCount(marketProductId),
                             recipientDisplayName = data.recipientDisplayName,
                             giftMessage = data.giftMessage,
@@ -216,10 +228,26 @@ end
 
 EVENT_MANAGER:RegisterForEvent("ZoConfirmSendGiftGamepad", EVENT_CONFIRM_SEND_GIFT, function(eventCode, giftId)
     if IsInGamepadPreferredMode() then
+        local mainText
+        local subText
         local marketProductId = GetGiftMarketProductId(giftId)
         local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
-        local colorizedName = color:Colorize(GetMarketProductDisplayName(marketProductId))
-        ZO_Dialogs_ShowGamepadDialog("CONFIRM_SEND_GIFT_GAMEPAD", { giftId = giftId, itemName = colorizedName }, { mainTextParams = { colorizedName } })
+        local houseId = GetMarketProductHouseId(marketProductId)
+        if houseId > 0 then
+            local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+            local houseDisplayName = GetCollectibleName(houseCollectibleId)
+            mainText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, ZO_SELECTED_TEXT:Colorize(houseDisplayName))
+            subText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId)))
+        else
+            local marketProductData = ZO_MarketProductData:New(marketProductId)
+            local stackCount = marketProductData:GetStackCount()
+            if stackCount > 1 then
+                mainText = zo_strformat(SI_TOOLTIP_ITEM_NAME_WITH_QUANTITY, color:Colorize(GetMarketProductDisplayName(marketProductId)), stackCount)
+            else
+                mainText = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, color:Colorize(GetMarketProductDisplayName(marketProductId)))
+            end
+        end
+        ZO_Dialogs_ShowGamepadDialog("CONFIRM_SEND_GIFT_GAMEPAD", { giftId = giftId, formattedMainText = mainText, formattedSubText = subText })
     end
 end)
 
@@ -272,15 +300,11 @@ do
         {
             text = "",
         },
-        loading = 
+        loading =
         {
-            text =  function(dialog)
+            text = function(dialog)
                 local data = dialog.data
-                if data.stackCount > 1 then
-                    return zo_strformat(SI_GIFT_SENDING_TEXT_WITH_QUANTITY, data.itemName, data.stackCount)
-                else
-                    return zo_strformat(SI_GIFT_SENDING_TEXT, data.itemName)
-                end
+                return zo_strformat(SI_GIFT_SENDING_TEXT, data.itemName)
             end,
         },
         canQueue = true,
@@ -304,11 +328,16 @@ do
         {
             text = function(dialog)
                 local data = dialog.data
-                if data.stackCount > 1 then
-                    return zo_strformat(SI_GIFT_SENT_TEXT_WITH_QUANTITY, data.itemName, data.stackCount, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
-                else
-                    return zo_strformat(SI_GIFT_SENT_TEXT, data.itemName, ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
+                local itemName = data.itemName
+                local color = GetItemQualityColor(GetMarketProductDisplayQuality(marketProductId))
+                local houseId = GetMarketProductHouseId(marketProductId)
+                if houseId > 0 then
+                    local houseCollectibleId = GetCollectibleIdForHouse(houseId)
+                    local houseDisplayName = GetCollectibleName(houseCollectibleId)
+                    itemName = zo_strformat(SI_MARKET_PRODUCT_HOUSE_NAME_GRAMMARLESS_FORMATTER, houseDisplayName, data.itemName)
                 end
+
+                return zo_strformat(SI_GIFT_SENT_TEXT,  color:Colorize(itemName), ZO_SELECTED_TEXT:Colorize(data.recipientDisplayName))
             end
         },
         canQueue = true,

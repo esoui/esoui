@@ -15,6 +15,11 @@ function ZO_QuestJournal_Manager:New(...)
 end
 
 function ZO_QuestJournal_Manager:Initialize(control)
+    self.categories = {}
+    self.quests = {}
+
+    self:BuildQuestListData()
+
     self:RegisterForEvents()
 end
 
@@ -23,26 +28,35 @@ function ZO_QuestJournal_Manager:RegisterForEvents()
         self.focusedQuestIndex = questIndex
     end
 
+    EVENT_MANAGER:RegisterForEvent("QuestJournal_Manager", EVENT_QUEST_SHOW_JOURNAL_ENTRY, OnFocusQuestIndexChanged)
+
     local function OnAssistChanged(unassistedData, assistedData)
         if assistedData and assistedData.arg1 then
             self.focusedQuestIndex = assistedData.arg1
         end
     end
 
-    EVENT_MANAGER:RegisterForEvent("QuestJournal_Manager", EVENT_QUEST_SHOW_JOURNAL_ENTRY, OnFocusQuestIndexChanged)
-
     FOCUSED_QUEST_TRACKER:RegisterCallback("QuestTrackerAssistStateChanged", OnAssistChanged)
+
+    local function OnQuestsUpdated()
+        self:BuildQuestListData()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("QuestJournal_Manager", EVENT_QUEST_ADDED, OnQuestsUpdated)
+    EVENT_MANAGER:RegisterForEvent("QuestJournal_Manager", EVENT_QUEST_REMOVED, OnQuestsUpdated)
+    EVENT_MANAGER:RegisterForEvent("QuestJournal_Manager", EVENT_QUEST_LIST_UPDATED, OnQuestsUpdated)
 end
 
 local function BuildTextHelper(questIndex, stepIndex, conditionStep, questStrings)
     local conditionText, currentCount, maxCount, isFailCondition, isComplete, _, isVisible = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionStep)
 
-    if(isVisible and not isFailCondition and conditionText ~= "") then
+    if isVisible and not isFailCondition and conditionText ~= "" then
         if isComplete then
             conditionText = ZO_DISABLED_TEXT:Colorize(conditionText)
         end
 
-        local taskInfo = {
+        local taskInfo =
+        {
             name = conditionText,
             isComplete = isComplete,
         }
@@ -71,7 +85,7 @@ function ZO_QuestJournal_Manager:DoesShowMultipleOrSteps(stepOverrideText, stepT
         return false
     else
         local conditionCount = GetJournalQuestNumConditions(questIndex, QUEST_MAIN_STEP_INDEX)
-        if(stepType == QUEST_STEP_TYPE_OR and conditionCount > 1) then
+        if stepType == QUEST_STEP_TYPE_OR and conditionCount > 1 then
             return true
         else
             return false
@@ -154,31 +168,33 @@ function ZO_QuestJournal_Manager:FindQuestWithSameCategoryAsCompletedQuest(quest
     return nil
 end
 
-function ZO_QuestJournal_Manager:GetQuestListData()
-    local seenCategories = {}
-    local categories = {}
-    local quests = {}
+function ZO_QuestJournal_Manager:BuildQuestListData()
+    ZO_ClearNumericallyIndexedTable(self.categories)
+    ZO_ClearNumericallyIndexedTable(self.quests)
+
+    local addedCategories = {}
 
     -- Create a table for categories and one for quests
     for i = 1, MAX_JOURNAL_QUESTS do
-        if IsValidQuestIndex(i) then  
+        if IsValidQuestIndex(i) then
             local zone = GetJournalQuestLocationInfo(i)
             local questType = GetJournalQuestType(i)
-            local name = GetJournalQuestName(i)
-            local level = GetJournalQuestLevel(i)
-            local instanceDisplayType = GetJournalQuestInstanceDisplayType(i)
             local categoryName, categoryType = self:GetQuestCategoryNameAndType(questType, zone)
 
-            if not seenCategories[categoryName] then
-                table.insert(categories, {name = categoryName, type = categoryType})
-                seenCategories[categoryName] = true
+            if not addedCategories[categoryName] then
+                table.insert(self.categories, {name = categoryName, type = categoryType})
+                addedCategories[categoryName] = true
             end
 
+            local name = GetJournalQuestName(i)
             if name == "" then
                 name = GetString(SI_QUEST_JOURNAL_UNKNOWN_QUEST_NAME)
             end
 
-            table.insert(quests,
+            local level = GetJournalQuestLevel(i)
+            local instanceDisplayType = GetJournalQuestInstanceDisplayType(i)
+
+            table.insert(self.quests,
                 {
                     name = name,
                     questIndex = i,
@@ -193,10 +209,31 @@ function ZO_QuestJournal_Manager:GetQuestListData()
     end
 
     -- Sort the tables
-    table.sort(categories, ZO_QuestJournal_Manager_SortQuestCategories)
-    table.sort(quests, ZO_QuestJournal_Manager_SortQuestEntries)
+    table.sort(self.categories, ZO_QuestJournal_Manager_SortQuestCategories)
+    table.sort(self.quests, ZO_QuestJournal_Manager_SortQuestEntries)
 
-    return quests, categories, seenCategories
+    self:FireCallbacks("QuestListUpdated")
+end
+
+function ZO_QuestJournal_Manager:GetQuestListData()
+    return self.quests, self.categories
+end
+
+function ZO_QuestJournal_Manager:GetQuestList()
+    return self.quests
+end
+
+function ZO_QuestJournal_Manager:GetQuestCategories()
+    return self.categories
+end
+
+function ZO_QuestJournal_Manager:GetNextSortedQuestForQuestIndex(questIndex)
+    for i, quest in ipairs(self.quests) do
+        if quest.questIndex == questIndex then
+            local nextQuest = (i == #self.quests) and 1 or (i + 1)
+            return self.quests[nextQuest].questIndex
+        end
+    end
 end
 
 function ZO_QuestJournal_Manager:ConfirmAbandonQuest(questIndex)

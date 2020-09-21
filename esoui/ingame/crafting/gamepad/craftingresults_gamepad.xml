@@ -1,7 +1,8 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_GamepadCraftingResultsHeaderTemplate" font="ZoFontGamepad54" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
-            <Anchor point="TOPRIGHT" offsetX="-40" />
+        <Label name="ZO_GamepadCraftingResultsHeaderTemplate" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" horizontalAlignment="RIGHT" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
+            <Anchor point="TOPRIGHT" />
+            <DimensionConstraints maxX="275"/>
         </Label>
 
         <Control name="ZO_GamepadCraftingResultsTemplate" virtual="true">

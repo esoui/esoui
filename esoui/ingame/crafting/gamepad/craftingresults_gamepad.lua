@@ -90,7 +90,6 @@ do
         end
     end
 
-
     function ZO_CraftingResults_Gamepad:InitializeResultBuffer()
         local templateData =
         {
@@ -102,7 +101,7 @@ do
             headerEqualityCheck = AreHeadersEqual,
             displayOlderLinesFirst = true,
         }
-        ZO_AlertAddTemplate_Gamepad(GAMEPAD_CRAFTING_RESULTS_TEMPLATE, templateData)
+        ZO_CraftingAlertAddTemplate_Gamepad(GAMEPAD_CRAFTING_RESULTS_TEMPLATE, templateData)
     end
 end
 
@@ -121,7 +120,7 @@ do
         local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()
 
         local headerTextId
-        if ZO_RETRAIT_STATION_MANAGER:IsRetraitSceneShowing() then
+        if ZO_RETRAIT_STATION_MANAGER:IsRetraitFragmentShowing() then
             headerTextId = SI_GAMEPAD_RETRAIT_COMPLETED_RESULT_HEADER
         elseif currentSceneName and IS_DECONSTRUCTION_SCENE_NAME[currentSceneName] then
             headerTextId = SI_GAMEPAD_CRAFTING_DECONSTRUCTED_ITEM
@@ -153,16 +152,17 @@ do
             }
         }
 
-        ZO_AlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
+        local DEFAULT_SOUND_ID = nil
+        ZO_CraftingAlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, DEFAULT_SOUND_ID, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
     end
 end
 
 function ZO_CraftingResults_Gamepad:ClearAll()
-    ZO_AlertClearAll_Gamepad()
+    ZO_CraftingAlertClearAll_Gamepad()
 end
 
 function ZO_CraftingResults_Gamepad:FadeAll()
-    ZO_AlertFadeAll_Gamepad()
+    ZO_CraftingAlertFadeAll_Gamepad()
 end
 
 function ZO_CraftingResults_Gamepad:DisplayDiscoveryHelper(titleString, numDiscoveries, lastLearnedDiscoveryFn)
@@ -185,7 +185,7 @@ function ZO_CraftingResults_Gamepad:DisplayDiscoveryHelper(titleString, numDisco
         table.insert(displayData.lines, { text = lineText, icon = icon })
     end
 
-    ZO_AlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
+    ZO_CraftingAlertNoSuppressionTemplated_Gamepad(UI_ALERT_CATEGORY_ALERT, nil, displayData, GAMEPAD_CRAFTING_RESULTS_TEMPLATE)
 end
 
 function ZO_CraftingResults_Gamepad:DisplayDiscoveredTraits()

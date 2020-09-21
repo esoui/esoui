@@ -56,6 +56,10 @@ do
         self.control:RegisterForEvent(EVENT_GROUP_INVITE_REMOVED, OnGroupInviteUpdate)
 
         self.container = self.control:GetNamedChild("Container")
+        self.keybindButton = self.container:GetNamedChild("KeybindButton")
+        self.keybindButton:SetKeybind("INSTANCE_KICK_LEAVE_INSTANCE")
+        self.keybindButton:SetText(GetString(SI_INSTANCE_KICK_LEAVE_NOW_KEYBIND))
+
         self.timerCooldown = self.container:GetNamedChild("Timer")
         self.timerCooldown:SetNumWarningSounds(5)
         self.kickLabel = self.container:GetNamedChild("Text")
@@ -88,6 +92,12 @@ end
 
 function ZO_InstanceKickWarning:SetHidden(hidden)
     self.control:SetHidden(hidden)
+
+    if hidden then
+        RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
+    else 
+        PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING))
+    end
 end
 
 -- ZO_InstanceKickWarning_Alive...Used when the player is alive (in shared info area)

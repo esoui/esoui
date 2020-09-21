@@ -11,21 +11,6 @@ function RetraitStationManager:Initialize()
     self:InitializeTraitData()
 end
 
-function RetraitStationManager:RegisterForEvents()
-    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_RETRAIT_STATION_INTERACT_START, function(eventCode) SYSTEMS:ShowScene("retrait") end)
-    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_RETRAIT_RESPONSE, function(eventCode, result) SYSTEMS:GetObject("retrait"):OnRetraitResult(result) end)
-
-    local function HandleDirtyEvent()
-        self:FireCallbacks("OnRetraitDirtyEvent")
-    end
-
-    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_INVENTORY_FULL_UPDATE, HandleDirtyEvent)
-    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleDirtyEvent)
-
-    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_SMITHING_TRAIT_RESEARCH_STARTED, HandleDirtyEvent)
-    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, HandleDirtyEvent)
-end
-
 function RetraitStationManager:InitializeTraitData()
     self.traitInfo = {
         [ITEM_TRAIT_TYPE_CATEGORY_WEAPON] = {},
@@ -47,12 +32,18 @@ function RetraitStationManager:InitializeTraitData()
     end
 end
 
-function RetraitStationManager:GetTraitInfo()
-    return self.traitInfo
-end
+function RetraitStationManager:RegisterForEvents()
+    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_RETRAIT_STATION_INTERACT_START, function(eventCode) SYSTEMS:ShowScene("retrait") end)
+    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_RETRAIT_RESPONSE, function(eventCode, result) SYSTEMS:GetObject("retrait"):OnRetraitResult(result) end)
 
-function RetraitStationManager:GetTraitInfoForCategory(itemTraitTypeCategory)
-    return self.traitInfo[itemTraitTypeCategory]
+    local function HandleDirtyEvent()
+        self:FireCallbacks("OnRetraitDirtyEvent")
+    end
+
+    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_INVENTORY_FULL_UPDATE, HandleDirtyEvent)
+    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleDirtyEvent)
+    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_SMITHING_TRAIT_RESEARCH_STARTED, HandleDirtyEvent)
+    EVENT_MANAGER:RegisterForEvent("RetraitStationManager", EVENT_SMITHING_TRAIT_RESEARCH_COMPLETED, HandleDirtyEvent)
 end
 
 do
@@ -69,6 +60,30 @@ do
 
         return false
     end
+
+    function RetraitStationManager:IsRetraitFragmentShowing()
+        if IsInGamepadPreferredMode() then
+            return GAMEPAD_RETRAIT_FRAGMENT:IsShowing()
+        else
+            return RETRAIT_STATION_RETRAIT_FRAGMENT:IsShowing()
+        end
+    end
+
+    function RetraitStationManager:IsReconstructFragmentShowing()
+        if IsInGamepadPreferredMode() then
+            return GAMEPAD_RECONSTRUCT_FRAGMENT:IsShowing()
+        else
+            return RETRAIT_STATION_RECONSTRUCT_FRAGMENT:IsShowing()
+        end
+    end
+end
+
+function RetraitStationManager:GetTraitInfo()
+    return self.traitInfo
+end
+
+function RetraitStationManager:GetTraitInfoForCategory(itemTraitTypeCategory)
+    return self.traitInfo[itemTraitTypeCategory]
 end
 
 ZO_RETRAIT_STATION_MANAGER = RetraitStationManager:New()

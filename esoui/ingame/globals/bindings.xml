@@ -47,8 +47,9 @@
                 <Down>
                     ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_NOTHING)
                     local interactPromptVisible = RETICLE:GetInteractPromptVisible()
+                    local isInactiveClickableFixture = IsGameCameraClickableFixture() and not IsGameCameraClickableFixtureActive()
                     if not IsBlockActive() then  --don't allow Interactions or Jumps while blocking on Gamepad as it will trigger a roll anyway.
-                        if interactPromptVisible then
+                        if interactPromptVisible and not isInactiveClickableFixture then
                             ZO_SetJumpOrInteractDownAction(ZO_JUMP_OR_INTERACT_DID_INTERACT)
                             if not FISHING_MANAGER:StartInteraction() then GameCameraInteractStart() end
                         else
@@ -659,6 +660,13 @@
 
             <Action name="PLAYER_TO_PLAYER_INTERACT_DECLINE">
                 <Down>PLAYER_TO_PLAYER:Decline()</Down>
+            </Action>
+        </Category>
+    </Layer>
+    <Layer name="SI_KEYBINDINGS_LAYER_INSTANCE_KICK_WARNING">
+        <Category>
+            <Action name="INSTANCE_KICK_LEAVE_INSTANCE">
+                <Down>ExitInstanceImmediately()</Down>
             </Action>
         </Category>
     </Layer>

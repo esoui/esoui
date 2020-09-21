@@ -7,9 +7,9 @@
 ZO_VoiceChatSocialOptions_Gamepad = ZO_SocialOptionsDialogGamepad:Subclass()
 
 function ZO_VoiceChatSocialOptions_Gamepad:New(...)
-	local object = ZO_Object.New(self)
-	object:Initialize(...)
-	return object
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
 function ZO_VoiceChatSocialOptions_Gamepad:Initialize(control)
@@ -59,7 +59,8 @@ function ZO_VoiceChatSocialOptions_Gamepad:SetupOptions(data)
         alliance = self.playerAlliance
     end
 
-    local socialData = {
+    local socialData =
+    {
         displayName = displayName,
         alliance = alliance,
         voiceChannelType = channelType,
@@ -106,9 +107,9 @@ end
 ZO_VoiceChat_Gamepad = ZO_Object:Subclass()
 
 function ZO_VoiceChat_Gamepad:New(...)
-	local object = ZO_Object.New(self)
-	object:Initialize(...)
-	return object
+    local object = ZO_Object.New(self)
+    object:Initialize(...)
+    return object
 end
 
 function ZO_VoiceChat_Gamepad:Initialize(control)
@@ -165,5 +166,5 @@ end
 
 -- XML Calls
 function ZO_VoiceChatGamepad_OnInitialize(control)
-	VOICE_CHAT_GAMEPAD = ZO_VoiceChat_Gamepad:New(control)
+    VOICE_CHAT_GAMEPAD = ZO_VoiceChat_Gamepad:New(control)
 end

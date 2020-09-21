@@ -79,6 +79,12 @@ end
 function ZO_MarketProductBase:Initialize(control)
     self.textCalloutYOffset = 0
     self.control = control
+
+    self:InitializeFonts()
+end
+
+function ZO_MarketProductBase:InitializeFonts()
+    -- To be overridden
 end
 
 function ZO_MarketProductBase:SetTextCalloutYOffset(yOffset)
@@ -91,6 +97,10 @@ end
 
 function ZO_MarketProductBase:GetControl()
     return self.control
+end
+
+function ZO_MarketProductBase:SetControlDimensions(width, height)
+    self.control:SetDimensions(width, height)
 end
 
 function ZO_MarketProductBase:SetMarketProductData(marketProductData)
@@ -159,7 +169,7 @@ function ZO_MarketProductBase:IsPurchaseLocked()
 end
 
 function ZO_MarketProductBase:CanBePurchased()
-    return not (self:IsPurchaseLocked() or self:IsHouseCollectible() or self:IsPromo())
+    return not (self:IsPurchaseLocked() or self:IsPromo())
 end
 
 function ZO_MarketProductBase:IsBundle()
@@ -195,12 +205,7 @@ function ZO_MarketProductBase:GetBackgroundDesaturation(isPurchased)
 end
 
 function ZO_MarketProductBase:LayoutCostAndText()
-    -- setup the callouts for new, on sale, and LTO
-    self:SetupCalloutsDisplay()
-
-    -- layout the price labels
-    self:SetupPricingDisplay()
-
+    -- Setup default anchoring without any font resizing
     local control = self.control
     control.cost:ClearAnchors()
     control.textCallout:ClearAnchors()
@@ -230,10 +235,19 @@ function ZO_MarketProductBase:LayoutCostAndText()
         end
     end
 
+    -- Setup default anchors before setting any text so that we will know if fonts need to be resized to fit the text
+    -- Setup the callouts for new, on sale, and LTO
+    self:SetupCalloutsDisplay()
+
+    -- layout the price labels
+    self:SetupPricingDisplay()
+
     self:SetupBundleDisplay()
 
     self:SetupPurchaseLabelDisplay()
     self:SetupEsoPlusDealLabelDisplay()
+
+    self:UpdateTextCalloutAnchors()
 
     ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.title, self:IsFocused(), self.displayState)
 end
@@ -416,6 +430,47 @@ function ZO_MarketProductBase:AnchorLabelBetweenBundleIndicatorAndCost(label)
     end
 end
 
+function ZO_MarketProductBase:UpdateTextCalloutAnchors()
+    -- Text callout anchors are only going to need to be readjusted in the case where we have and eso plus cost and the item is a bundle
+    if self:IsBundle() and self:HasEsoPlusCost() then
+        local textCalloutWidth = self.control.textCallout:GetTextWidth()
+        local bundleLabelWidth = self.control.bundledProductsItemsLabel:GetTextWidth()
+        local bundleNumLabelWidth = self.control.numBundledProductsLabel:GetTextWidth()
+        local isTextCalloutAnchorValid, _, _, _, textCalloutOffsetX = self.control.textCallout:GetAnchor(0)
+        local isBundleLabelAnchorValid, _, _, _, bundleLabelOffsetX = self.control.bundledProductsItemsLabel:GetAnchor(0)
+        local isBundleNumLabelAnchorValid, _, _, _, bundleNumLabelOffsetX = self.control.numBundledProductsLabel:GetAnchor(0)
+        local isEsoPlusDealLabelAnchorValid, _, _, _, esoPlusDealLabelOffsetX = self.control.esoPlusDealLabelControl:GetAnchor(0)
+
+        -- Subtract x offsets for bundle elements because they right justified
+        local bundleLabelWidthWithOffset = bundleLabelWidth - (isBundleLabelAnchorValid and bundleLabelOffsetX or 0)
+        local bundleNumLabelWidthWithOffset = bundleNumLabelWidth - (isBundleNumLabelAnchorValid and bundleNumLabelOffsetX or 0)
+        -- Bundle will be right anchored to the eso plus deal label so it's offset needs to be considered as well
+        local totalBundleWidthWithOffsets = bundleLabelWidthWithOffset + bundleNumLabelWidthWithOffset - (isEsoPlusDealLabelAnchorValid and esoPlusDealLabelOffsetX or 0)
+        local totalTextCalloutLineWidthWithOffset = textCalloutWidth + (isTextCalloutAnchorValid and textCalloutOffsetX or 0)
+        local totalLineContentWidth = totalTextCalloutLineWidthWithOffset + totalBundleWidthWithOffsets
+
+        local tileWidth = self.control:GetWidth()
+
+        if totalLineContentWidth > tileWidth then
+            self:AnchorLabelBetweenBundleIndicatorAndCalloutText(self.control.textCallout)
+        end
+    end
+end
+
+function ZO_MarketProductBase:AnchorLabelBetweenBundleIndicatorAndCalloutText(label)
+    local control = self.control
+    -- Bundle text is only in line with callout when there's an eso plus deal
+    if self:HasEsoPlusCost() and self:IsBundle() then
+        if self.productData:GetNumBundledProducts() > 1 then
+            label:SetAnchor(BOTTOMRIGHT, control.bundledProductsItemsLabel, BOTTOMLEFT, -10, 0)
+        else
+            label:SetAnchor(BOTTOMRIGHT, control.numBundledProductsLabel, BOTTOMRIGHT, 0, -2)
+        end
+    else
+        label:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -10, -10)
+    end
+end
+
 function ZO_MarketProductBase:SetupEsoPlusDealLabelDisplay()
     local esoPlusDealLabelControl = self.control.esoPlusDealLabelControl
     local shouldShowDealLabel = self:CanBePurchased() and self:HasEsoPlusCost()
@@ -536,7 +591,7 @@ function ZO_MarketProductBase:UpdatingPricingInformation()
             currencyType = houseCurrencyType
             cost = houseCost
             costAfterDiscount = houseCostAfterDiscount
-            discountPercent = houseDiscountPercent
+            discountPercent = houseDiscountPercent or 0
             esoPlusCost = houseEsoPlusCost
             self.hasMultiplePriceOptions = hasMultiplePriceOptions
             self.defaultHouseTemplateMarketProductId = defaultHouseTemplateMarketProductId
@@ -639,6 +694,8 @@ function ZO_MarketProductBase:GetEsoPlusIcon()
     return nil
 end
 
+-- global functions
+
 function ZO_MarketProduct_IsHouseCollectible(marketProductId)
     if GetMarketProductType(marketProductId) == MARKET_PRODUCT_TYPE_COLLECTIBLE then
         local collectibleType = select(4, GetMarketProductCollectibleInfo(marketProductId))
@@ -650,56 +707,82 @@ function ZO_MarketProduct_IsHouseCollectible(marketProductId)
     return false
 end
 
--- global functions
+function ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductId, getMarketProductListingsCallback)
+    local isHouseMarketProduct = false
+    local defaultHouseTemplateIndex
+    local houseTemplateDataList = {}
 
-function ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(marketProductId, getMarketProductListingsCallback)
-    local houseCurrencyType = MKCT_NONE
-    local houseCost = nil
-    local houseCostAfterDiscount = nil
-    local houseDiscountPercent = 0
-    local houseEsoPlusCost = nil
-    local defaultHouseTemplateMarketProductId = nil
-    local hasMultiplePriceOptions = false
-    if ZO_MarketProduct_IsHouseCollectible(marketProductId) then
-        local marketProductHouseId = GetMarketProductHouseId(marketProductId)
-
-        -- Iterate through all known house template defs and verify they have an equivalent market product.
-        -- Only those with market products will be considered in determining the number of pricing options.
-        local numHouseTemplates = GetNumHouseTemplatesForHouse(marketProductHouseId)
-        local numEnabledTemplates = 0
-        for index = 1, numHouseTemplates do
-            local houseTemplateId = GetHouseTemplateIdByIndexForHouse(marketProductHouseId, index)
+    local houseId = GetMarketProductHouseId(marketProductId)
+    if ZO_MarketProduct_IsHouseCollectible(marketProductId) and houseId > 0 then
+        isHouseMarketProduct = true
+        local defaultHouseTemplateId = GetDefaultHouseTemplateIdForHouse(houseId)
+        local houseCollectibleId = GetMarketProductCollectibleId(marketProductId)
+        local isHouseOwned = IsCollectibleOwnedByDefId(houseCollectibleId)
+        for index = 1, GetNumHouseTemplatesForHouse(houseId) do
+            local houseTemplateId = GetHouseTemplateIdByIndexForHouse(houseId, index)
             local marketProductListings = getMarketProductListingsCallback(houseTemplateId, MARKET_DISPLAY_GROUP_CROWN_STORE)
+
+            local houseTemplateData =
+            {
+                houseTemplateId = houseTemplateId,
+                marketPurchaseOptions = {}
+            }
+
+            if houseTemplateId == defaultHouseTemplateId then
+                defaultHouseTemplateIndex = index
+            end
+
             if #marketProductListings > 0 then
-                numEnabledTemplates = numEnabledTemplates + 1
+                --There could be multiple listings per template, one for each currency type.
+                local PRODUCT_LISTINGS_STRIDE = 2
+                for i = 1, #marketProductListings, PRODUCT_LISTINGS_STRIDE do
+                    local houseTemplateMarketProductId = marketProductListings[i]
+                    local presentationIndex = marketProductListings[i + 1]
+
+                    local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = GetMarketProductPricingByPresentation(houseTemplateMarketProductId, presentationIndex)
+
+                    --Don't allow the same currency twice. This is a nonsense scenario but technically possible.
+                    if not houseTemplateData.marketPurchaseOptions[currencyType] then
+                        local marketPurchaseData =
+                        {
+                            currencyType = currencyType,
+                            marketProductId = houseTemplateMarketProductId,
+                            presentationIndex = presentationIndex,
+                            houseId = houseId,
+                            houseTemplateId = houseTemplateId,
+                            isGiftable = IsMarketProductGiftable(houseTemplateMarketProductId),
+                            isHouseOwned = isHouseOwned,
+                            cost = cost,
+                            costAfterDiscount = costAfterDiscount,
+                            discountPercent = discountPercent,
+                            esoPlusCost = esoPlusCost,
+                        }
+                        houseTemplateData.marketPurchaseOptions[currencyType] = marketPurchaseData
+                        houseTemplateData.name = houseTemplateData.name or GetMarketProductDisplayName(houseTemplateMarketProductId)
+                    end
+                end
             end
-        end
 
-        hasMultiplePriceOptions = numEnabledTemplates > 1
-
-        local defaultHouseTemplateId = GetDefaultHouseTemplateIdForHouse(marketProductHouseId)
-        local defaultMarketProductListings = getMarketProductListingsCallback(defaultHouseTemplateId, MARKET_DISPLAY_GROUP_CROWN_STORE)
-        -- There could be multiple listings per template, such as one for each currency type or for each category it should appear in,
-        -- or just multiple market products for the same template
-        local PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE = 2
-        for i = 1, #defaultMarketProductListings, PRODUCT_LISTINGS_FOR_HOUSE_TEMPLATE_STRIDE do
-            local houseTemplateMarketProductId = defaultMarketProductListings[i]
-            local presentationIndex = defaultMarketProductListings[i + 1]
-
-            local currencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = GetMarketProductPricingByPresentation(houseTemplateMarketProductId, presentationIndex)
-
-            if not houseCostAfterDiscount or costAfterDiscount < houseCostAfterDiscount then
-                houseCurrencyType = currencyType
-                houseCost = cost
-                houseCostAfterDiscount = costAfterDiscount
-                houseDiscountPercent = discountPercent
-                houseEsoPlusCost = esoPlusCost
-                defaultHouseTemplateMarketProductId = houseTemplateMarketProductId
-            end
+            table.insert(houseTemplateDataList, houseTemplateData)
         end
     end
 
-    return houseCurrencyType, houseCost, houseCostAfterDiscount, houseDiscountPercent, houseEsoPlusCost, defaultHouseTemplateMarketProductId, hasMultiplePriceOptions
+    return isHouseMarketProduct, houseTemplateDataList, defaultHouseTemplateIndex
+end
+
+function ZO_MarketProduct_GetDefaultHousingTemplatePricingInfo(marketProductId, getMarketProductListingsCallback)
+    if ZO_MarketProduct_IsHouseCollectible(marketProductId) then
+        local isHouseMarketProduct, houseTemplateDataList, defaultHouseTemplateIndex = ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductId, getMarketProductListingsCallback)
+
+        local defaultHouseTemplateData = houseTemplateDataList[defaultHouseTemplateIndex]
+        local currencyType, marketData = next(defaultHouseTemplateData.marketPurchaseOptions)
+
+        if marketData then
+            return currencyType, marketData.cost, marketData.costAfterDiscount, marketData.discountPercent, marketData.esoPlusCost, marketData.marketProductId, #defaultHouseTemplateData.marketPurchaseOptions > 1
+        else
+            return currencyType
+        end
+    end
 end
 
 --

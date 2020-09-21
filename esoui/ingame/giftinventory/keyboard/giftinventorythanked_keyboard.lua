@@ -64,6 +64,9 @@ function ZO_GiftInventoryThanked_Keyboard:SetupThanked(control, gift)
     self:SetupStackCount(control, gift)
 
     local nameLabel = control:GetNamedChild("Name")
+    -- Override default ZO_SortFilterList default color with quality color for name
+    nameLabel.normalColor = gift:GetQualityColor()
+    nameLabel.selectedColor = gift:GetQualityColor()
     nameLabel:SetText(gift:GetFormattedName())
 
     local recipientNameLabel = control:GetNamedChild("RecipientName")

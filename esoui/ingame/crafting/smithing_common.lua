@@ -78,6 +78,15 @@ function ZO_Smithing_Common:Initialize(control)
         end,
         interactTypes = { INTERACTION_CRAFT },
     }
+
+    local function OnQuestInformationUpdated(updatedQuestInfo)
+        self.shouldRefineForQuest = updatedQuestInfo.smithingItemId ~= nil
+        self.shouldCraftForQuest = updatedQuestInfo.hasPatterns and (not updatedQuestInfo.hasItemToImproveForWrit)
+        self.shouldImproveForQuest = updatedQuestInfo.hasItemToImproveForWrit
+        self.usesProvisioningForQuest = updatedQuestInfo.hasRecipesForQuest
+        self:UpdateQuestPins()
+    end
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestInformationUpdated", OnQuestInformationUpdated)
 end
 
 function ZO_Smithing_Common:CreateInteractScene(sceneName)
@@ -255,4 +264,8 @@ end
 
 function ZO_Smithing_Common:GetMode()
 	return self.mode
+end
+
+function ZO_Smithing_Common:UpdateQuestPins()
+    -- To be overridden
 end

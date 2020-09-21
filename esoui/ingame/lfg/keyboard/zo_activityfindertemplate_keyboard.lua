@@ -260,7 +260,7 @@ do
                                     reselectedEntry = entry
                                 end
 
-                                self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                                self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
                             else
                                 addListViewSubmenuEntry = true
                             end
@@ -283,7 +283,7 @@ do
                 reselectedEntry = entry
             end
 
-            self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+            self.filterComboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         end
 
         if reselectedEntry then

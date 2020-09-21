@@ -358,8 +358,13 @@ function ZO_Character_Initialize(control)
     ZO_Character:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnActiveWeaponPairChanged)
     OnActiveWeaponPairChanged(nil, GetActiveWeaponPairInfo())
 
-    local apparelHiddenLabel = control:GetNamedChild("ApparelHidden")
-    apparelHiddenLabel:SetText(ZO_SELECTED_TEXT:Colorize(GetString(SI_HIDDEN_GENERAL)))
+    local apparelText = control:GetNamedChild("ApparelSectionText")
+    local isApparelHidden = IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+    local apparelString = isApparelHidden and GetString(SI_CHARACTER_EQUIP_APPAREL_HIDDEN) or GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
+    apparelText:SetText(apparelString)
+
+    local headerSection = control:GetNamedChild("HeaderSection")
+    CHARACTER_WINDOW_HEADER_FRAGMENT = ZO_SimpleSceneFragment:New(headerSection)
 
     OnUnitCreated(nil, "player")
 end

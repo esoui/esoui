@@ -32,11 +32,13 @@ function ZO_SmithingExtraction:InitializeFilters()
 
     ZO_CheckButton_SetToggleFunction(self.includeBankedItemsCheckbox, OnFilterChanged)
     ZO_CheckButton_SetLabelText(self.includeBankedItemsCheckbox, GetString(SI_CRAFTING_INCLUDE_BANKED))
-    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.includeBankedItemsCheckbox)
     
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function() 
         ZO_CheckButton_SetCheckState(self.includeBankedItemsCheckbox, self.savedVars.includeBankedItemsChecked)
     end)
+
+    --This needs to happen AFTER the above CraftingAnimationsStarted callback is registered, so the disabled state doesn't get clobbered by setting the check state for the button
+    ZO_CraftingUtils_ConnectCheckBoxToCraftingProcess(self.includeBankedItemsCheckbox)
 end
 
 function ZO_SmithingExtraction:SetupSavedVars()
@@ -206,12 +208,17 @@ function ZO_SmithingExtractionInventory:AddListDataTypes()
 
     local function RowSetup(rowControl, data)
         local inventorySlot = rowControl:GetNamedChild("Button")
+        local questPin = rowControl:GetNamedChild("QuestPin")
         ZO_ItemSlot_SetAlwaysShowStackCount(inventorySlot, false, self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS and GetRequiredSmithingRefinementStackSize())
 
         defaultSetup(rowControl, data)
 
         if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
+            local isQuestItem = self.owner:CanRefineToQuestItem(data.bagId, data.slotIndex)
+            questPin:SetHidden(not isQuestItem)
             ZO_ItemSlot_SetupUsableAndLockedColor(inventorySlot, data.stackCount >= GetRequiredSmithingRefinementStackSize())
+        else
+            questPin:SetHidden(true)
         end
     end
 

@@ -5,7 +5,26 @@ ZO_ALCHEMY_MODE_RECIPES = 2
 
 local REQUIRED_SLOTTED_REAGENTS = 2
 
-function ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType)
+ZO_ALCHEMY_DATA_TYPE_SOLVENT = 1
+ZO_ALCHEMY_DATA_TYPE_REAGENT = 2
+
+ZO_ALCHEMY_PIN_STATE_HIDDEN = 1
+ZO_ALCHEMY_PIN_STATE_INVALID = 2
+ZO_ALCHEMY_PIN_STATE_VALID = 3 
+
+function ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
+    if isQuestFilterChecked then
+        --If no there is no valid combination at all, then everything fails the filter
+        if not questInfo.validCombinationFound then
+            return false
+        end
+        local itemId = GetItemId(bagId, slotIndex)
+        --If this item does not match any solvents or reagents that are quest related, then it does not pass the filter
+        if (not questInfo.reagents or questInfo.reagents[itemId] == nil) and (not questInfo.solvent or questInfo.solvent.itemId ~= itemId) then
+            return false
+        end
+    end
+
     if filterType == nil then
         return true
     end
@@ -47,6 +66,10 @@ ZO_SharedAlchemy.initializedEvents = false
 function ZO_SharedAlchemy:Initialize(control)
     self.control = control
     self.skillInfo = self.control:GetNamedChild("SkillInfo")
+    self.cachedValidItemIds = nil
+    self.questItems = {}
+    self.slottedSolvent = nil
+    self.slottedReagents = {}
 
     self:InitializeInventory()
     self:InitializeTooltip()
@@ -131,6 +154,10 @@ function ZO_SharedAlchemy:UpdateThirdAlchemySlot()
 end
 
 function ZO_SharedAlchemy:ResetSelectedTab()
+    -- Should be overridden
+end
+
+function ZO_SharedAlchemy:UpdateQuestPins()
     -- Should be overridden
 end
 
@@ -362,6 +389,262 @@ function ZO_SharedAlchemy:HideAllSlotDropCallouts()
     end
 end
 
+function ZO_SharedAlchemy:GetPinStateForItem(itemId, alchemyQuestInfo, dataType)
+    local slottedSolvent = self.slottedSolvent
+    local slottedReagents = self.slottedReagents
+    --First, check if we even have any valid combinations
+    if self:HasValidCombinationForQuest() then
+        --Check to see if this item is one that will need a quest pin
+        if self.questItems.reagents[itemId] or self.questItems.solvent.itemId == itemId then
+            --Now we need to determine what type of pin
+            local isInvalid = false
+
+            --If we have an incorrect solvent slotted, then the item is invalid
+            if dataType == ZO_ALCHEMY_DATA_TYPE_SOLVENT then
+                isInvalid = slottedSolvent ~= nil and slottedSolvent.itemId ~= itemId
+            elseif dataType == ZO_ALCHEMY_DATA_TYPE_REAGENT then
+                isInvalid = slottedSolvent ~= nil and slottedSolvent.itemId ~= self.questItems.solvent.itemId
+            end
+
+            --The checks here vary depending on the number of reagents that are already slotted
+            if #slottedReagents == 1 then
+                local reagent1 = slottedReagents[1]
+                local slottedItemId = GetItemId(reagent1.bagId, reagent1.slotIndex)
+
+                if dataType == ZO_ALCHEMY_DATA_TYPE_SOLVENT then
+                    --If we are checking a solvent, simply see if the slotted reagent is part of a valid combo
+                    isInvalid = isInvalid or (not self.questItems.reagents[slottedItemId])
+                elseif dataType == ZO_ALCHEMY_DATA_TYPE_REAGENT then
+                    --If we are checking a reagent, see if the slotted reagent and the reagent we are checking form a valid combination together 
+                    if slottedItemId ~= itemId then
+                        isInvalid = isInvalid or (not self.questItems.reagents[itemId] or not self.questItems.reagents[itemId][slottedItemId])
+                    end
+                end
+            elseif #slottedReagents == 2 then
+                local reagent1 = slottedReagents[1]
+                local reagent2 = slottedReagents[2]
+
+                itemIdReagent1 = GetItemId(reagent1.bagId, reagent1.slotIndex)
+                itemIdReagent2 = GetItemId(reagent2.bagId, reagent2.slotIndex)
+
+                if alchemyQuestInfo.isMasterWrit then
+                    if dataType == ZO_ALCHEMY_DATA_TYPE_SOLVENT then
+                        --If we are checking a solvent, simply see if the slotted reagents are part of a valid combo
+                        isInvalid = isInvalid or (not self.questItems.reagents[itemIdReagent1] or not self.questItems.reagents[itemIdReagent1][itemIdReagent2])
+                    elseif dataType == ZO_ALCHEMY_DATA_TYPE_REAGENT then
+                        --If we are checking a reagent, see if the slotted reagents and the reagent we are checking form a valid combination together 
+                        if itemIdReagent1 ~= itemId and itemIdReagent2 ~= itemId then
+                            isInvalid = isInvalid or (not self.questItems.reagents[itemIdReagent1] or not self.questItems.reagents[itemIdReagent1][itemIdReagent2] or not self.questItems.reagents[itemIdReagent1][itemIdReagent2][itemId])
+                        else
+                            isInvalid = isInvalid or (not self.questItems.reagents[itemIdReagent1] or not self.questItems.reagents[itemIdReagent1][itemIdReagent2])
+                        end
+                    end
+                else
+                    --If there are 2 reagents slotted, check and see if they make the desired potion when used with the solvent
+                    local result = GetAlchemyResultingItemIdIfKnown(self.questItems.solvent.bagId, self.questItems.solvent.slotIndex, reagent1.bagId, reagent1.slotIndex, reagent2.bagId, reagent2.slotIndex)
+                    isInvalid = isInvalid or alchemyQuestInfo.basePotionItemId ~= result
+                    if dataType == ZO_ALCHEMY_DATA_TYPE_REAGENT then
+                        --If we are checking a reagent, it is only valid if it is one of the slotted items 
+                        isInvalid = isInvalid or (itemIdReagent1 ~= itemId and itemIdReagent2 ~= itemId) 
+                    end
+                end
+            elseif #slottedReagents == 3 then
+                local reagent1 = slottedReagents[1]
+                local reagent2 = slottedReagents[2]
+                local reagent3 = slottedReagents[3]
+
+                itemIdReagent1 = GetItemId(reagent1.bagId, reagent1.slotIndex)
+                itemIdReagent2 = GetItemId(reagent2.bagId, reagent2.slotIndex)
+                itemIdReagent3 = GetItemId(reagent3.bagId, reagent3.slotIndex)
+
+                local encodedTraits = nil
+
+                if alchemyQuestInfo.isMasterWrit then
+                    encodedTraits = alchemyQuestInfo.encodedTraits
+                end
+
+                --If all 3 reagents are slotted, check and see if they make the desired potion when used with the solvent
+                local result = GetAlchemyResultingItemIdIfKnown(self.questItems.solvent.bagId, self.questItems.solvent.slotIndex, reagent1.bagId, reagent1.slotIndex, reagent2.bagId, reagent2.slotIndex, reagent3.bagId, reagent3.slotIndex, encodedTraits)
+                isInvalid = isInvalid or alchemyQuestInfo.basePotionItemId ~= result
+                if dataType == ZO_ALCHEMY_DATA_TYPE_REAGENT then
+                    --If we are checking a reagent, it is only valid if it is one of the slotted items 
+                    isInvalid = isInvalid or (itemIdReagent1 ~= itemId and itemIdReagent2 ~= itemId and itemIdReagent3 ~= itemId) 
+                end
+            end
+
+            if isInvalid then
+                return ZO_ALCHEMY_PIN_STATE_INVALID
+            else
+                return ZO_ALCHEMY_PIN_STATE_VALID
+            end
+        else
+            return ZO_ALCHEMY_PIN_STATE_HIDDEN
+        end
+    else
+        return ZO_ALCHEMY_PIN_STATE_HIDDEN
+    end
+end
+
+function ZO_SharedAlchemy:UpdatePotentialQuestItems(validItemIds, alchemyQuestInfo)
+    self.slottedSolvent, self.slottedReagents = self:GetAllCraftingBagAndSlotsFormatted()
+    --TODO: Determine if the self.cachedValidItemIds variable is even needed
+    local filteredItemData = validItemIds or self.cachedValidItemIds
+    local solvents = {}
+    local reagents = {}
+
+    --Check each item
+    for _, data in pairs(filteredItemData) do
+        local typeId = self:GetDataType(data.bag, data.index)
+        --If this is a solvent
+        if typeId == ZO_ALCHEMY_DATA_TYPE_SOLVENT then
+            --If this is a valid solvent for the item and material id, then add it to the list of potential solvents
+            if alchemyQuestInfo.basePotionItemId and alchemyQuestInfo.materialItemId and IsAlchemySolventForItemAndMaterialId(data.bag, data.index, alchemyQuestInfo.basePotionItemId, alchemyQuestInfo.materialItemId) then
+                local item = 
+                {
+                    bagId = data.bag,
+                    slotIndex = data.index,
+                    itemId = GetItemId(data.bag, data.index)
+                }
+                table.insert(solvents, item)
+            end
+        --If this is a reagent
+        elseif typeId == ZO_ALCHEMY_DATA_TYPE_REAGENT then
+            --If this reagent has the (known) trait that we want, add it to the list of potential reagents
+            local hasMasterWritTrait = alchemyQuestInfo.isMasterWrit and DoesAlchemyItemHaveKnownEncodedTrait(data.bag, data.index, alchemyQuestInfo.encodedTraits)
+            local hasNormalWritTrait = alchemyQuestInfo.desiredTrait ~= nil and DoesAlchemyItemHaveKnownTrait(data.bag, data.index, alchemyQuestInfo.desiredTrait)
+            if hasMasterWritTrait or hasNormalWritTrait then
+                local item = 
+                {
+                    bagId = data.bag,
+                    slotIndex = data.index,
+                    itemId = GetItemId(data.bag, data.index)
+                }
+                table.insert(reagents, item)
+            end
+        end
+    end
+
+    self.cachedValidItemIds = filteredItemData
+    
+    --Now we need to narrow it down further
+    self:DetermineQuestPinInfo(solvents, reagents, alchemyQuestInfo)
+end
+
+function ZO_SharedAlchemy:DetermineQuestPinInfo(solvents, reagents, alchemyQuestInfo)
+    local requiredSolvent = nil
+    local validCombinations = {}
+    local validCombinationFound = false
+
+    --If we didn't find any solvents in the first place, don't bother
+    if #solvents > 0 then
+        if #solvents > 1 then
+            --This should never happen, but in case it does, we should know about it
+            internalassert(false, "Multiple solvents found that match the crafting goal")
+        end
+
+        requiredSolvent = solvents[1]
+
+        --Master writs get to look for combinations of 3 instead of combinations of 2
+        if alchemyQuestInfo.isMasterWrit then
+            --First, determine what the valid combinations are
+            for _, reagent1 in ipairs(reagents) do
+                for _, reagent2 in ipairs(reagents) do
+                    --Skip over combinations of the same reagent
+                    if reagent1.itemId ~= reagent2.itemId then
+                        for _, reagent3 in ipairs(reagents) do
+                            --Skip over combinations of the same reagent
+                            if reagent1.itemId ~= reagent3.itemId and reagent2.itemId ~= reagent3.itemId then
+                                --Form a table of potential combinations
+                                local resultItemId = GetAlchemyResultingItemIdIfKnown(requiredSolvent.bagId, requiredSolvent.slotIndex, reagent1.bagId, reagent1.slotIndex, reagent2.bagId, reagent2.slotIndex, reagent3.bagId, reagent3.slotIndex, alchemyQuestInfo.encodedTraits)
+                                if alchemyQuestInfo.basePotionItemId == resultItemId then
+                                    if validCombinations[reagent1.itemId] == nil then
+                                        validCombinations[reagent1.itemId] = {}
+                                    end
+
+                                    if validCombinations[reagent1.itemId][reagent2.itemId] == nil then
+                                        validCombinations[reagent1.itemId][reagent2.itemId] = {}
+                                    end 
+                                    validCombinations[reagent1.itemId][reagent2.itemId][reagent3.itemId] = true
+                                    validCombinationFound = true
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            --First, determine what the valid combinations are
+            for _, reagent1 in ipairs(reagents) do
+                for _, reagent2 in ipairs(reagents) do
+                    --Skip over combinations of the same reagent
+                    if reagent1.itemId ~= reagent2.itemId then
+                        --Form a table of potential combinations
+                        local resultItemId = GetAlchemyResultingItemIdIfKnown(requiredSolvent.bagId, requiredSolvent.slotIndex, reagent1.bagId, reagent1.slotIndex, reagent2.bagId, reagent2.slotIndex)
+                        if alchemyQuestInfo.basePotionItemId == resultItemId then
+                            if validCombinations[reagent1.itemId] == nil then
+                                validCombinations[reagent1.itemId] = {}
+                            end
+                            validCombinations[reagent1.itemId][reagent2.itemId] = true
+                            validCombinationFound = true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    self.questItems = {solvent = requiredSolvent, reagents = validCombinations, validCombinationFound = validCombinationFound}
+    self:UpdateQuestPins()
+    CALLBACK_MANAGER:FireCallbacks("AlchemyInfoReady")
+end
+
+function ZO_SharedAlchemy:GetAllCraftingBagAndSlotsFormatted()
+    local slottedSolvent = nil
+    local slottedReagents = {}
+
+    --Basically take this data and return it as something slightly more organized for use with the quest pin stuff
+    local slottedSolventBagId, slottedSolventIndex, slottedReagentBagId1, slottedReagentIndex1, slottedReagentBagId2, slottedReagentIndex2, slottedReagentBagId3, slottedReagentIndex3 = self:GetAllCraftingBagAndSlots()
+
+    if slottedSolventBagId then
+        slottedSolvent =
+        {
+            bagId = slottedSolventBagId,
+            slotIndex = slottedSolventIndex,
+            itemId = GetItemId(slottedSolventBagId, slottedSolventIndex)
+        }
+    end
+
+    --Created a table of the slotted reagents
+    if slottedReagentBagId1 then
+        local reagent1 =                 
+        {
+            bagId = slottedReagentBagId1, 
+            slotIndex = slottedReagentIndex1,
+            itemId = GetItemId(slottedReagentBagId1, slottedReagentIndex1)
+        }
+        table.insert(slottedReagents, reagent1)
+        if slottedReagentBagId2 then
+            local reagent2 =                 
+            { 
+                bagId = slottedReagentBagId2, 
+                slotIndex = slottedReagentIndex2,
+                itemId = GetItemId(slottedReagentBagId2, slottedReagentIndex2)
+            }  
+            table.insert(slottedReagents, reagent2)
+            if slottedReagentBagId3 then
+                local reagent3 =                 
+                {
+                    bagId = slottedReagentBagId3, 
+                    slotIndex = slottedReagentIndex3,
+                    itemId = GetItemId(slottedReagentBagId3, slottedReagentIndex3)
+                }
+                table.insert(slottedReagents, reagent3)
+            end
+        end
+    end
+
+    return slottedSolvent, slottedReagents
+end
+
 function ZO_SharedAlchemy:OnInventoryUpdate(validItemIds)
     local changed = false
     self.solventSlot:ValidateItemId(validItemIds)
@@ -507,7 +790,10 @@ function ZO_SharedAlchemy:OnSlotChanged(bagId, slotIndex)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     self:UpdateTooltip()
     self:UpdateMultiCraft()
-    self.inventory:HandleVisibleDirtyEvent()
+    self.slottedSolvent, self.slottedReagents = self:GetAllCraftingBagAndSlotsFormatted()
+    if self.inventory then
+        self.inventory:HandleVisibleDirtyEvent()
+    end
 end
 
 function ZO_SharedAlchemy:FindReagentSlotIndexBySlotControl(slotControl)
@@ -515,6 +801,19 @@ function ZO_SharedAlchemy:FindReagentSlotIndexBySlotControl(slotControl)
         if slot:IsSlotControl(slotControl) then
             return i
         end
+    end
+end
+
+function ZO_SharedAlchemy:HasValidCombinationForQuest()
+    return self.questItems.validCombinationFound
+end
+
+function ZO_SharedAlchemy:GetDataType(bagId, slotIndex)
+    local usedInCraftingType, craftingSubItemType = GetItemCraftingInfo(bagId, slotIndex)
+    if IsAlchemySolvent(craftingSubItemType) then
+        return ZO_ALCHEMY_DATA_TYPE_SOLVENT
+    elseif craftingSubItemType == ITEMTYPE_REAGENT then
+        return ZO_ALCHEMY_DATA_TYPE_REAGENT
     end
 end
 

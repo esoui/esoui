@@ -78,6 +78,7 @@ function ZO_PostHookHandler(control, handlerName, hookFunction)
 end
 
 --where ... are the handler args after self
+-- ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, upInside)
 function ZO_PropagateHandler(propagateTo, handlerName, ...)
     if propagateTo then
         local handler = propagateTo:GetHandler(handlerName)
@@ -85,4 +86,16 @@ function ZO_PropagateHandler(propagateTo, handlerName, ...)
             handler(propagateTo, ...)
         end
     end
+end
+
+-- For when you want to propagate to the control's parent without breaking self out of the args
+-- ZO_PropagateHandlerToParent("OnMouseUp", ...)
+function ZO_PropagateHandlerToParent(handlerName, propagateFrom, ...)
+    ZO_PropagateHandler(propagateFrom:GetParent(), handlerName, ...)
+end
+
+-- For when you want to propagate without breaking self out of the args
+-- ZO_PropagateHandlerFromControl(self:GetParent():GetParent(), "OnMouseUp", ...)
+function ZO_PropagateHandlerFromControl(propagateTo, handlerName, propagateFrom, ...)
+    ZO_PropagateHandler(propagateTo, handlerName, ...)
 end

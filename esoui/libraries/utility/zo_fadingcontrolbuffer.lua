@@ -145,6 +145,10 @@ function ZO_FadingControlBuffer:AddEntry(templateName, entry)
     end
 end
 
+function ZO_FadingControlBuffer:SetMaxHeight(maxHeight)
+    self.maxHeight = maxHeight
+end
+
 function ZO_FadingControlBuffer:ClearAll()
     ZO_ClearNumericallyIndexedTable(self.queue)
 

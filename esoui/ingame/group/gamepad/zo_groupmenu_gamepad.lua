@@ -12,6 +12,7 @@ local MENU_ENTRY_TYPE_INVITE_FRIEND = 5
 local MENU_ENTRY_TYPE_LEAVE_GROUP = 6
 local MENU_ENTRY_TYPE_DISBAND_GROUP = 7
 local MENU_ENTRY_TYPE_READY_CHECK = 8
+local MENU_ENTRY_TYPE_LEAVE_INSTANCE = 9
 
 local CATEGORY_HEADER_TEMPLATE = "ZO_GamepadMenuEntryHeaderTemplate"
 local MENU_ENTRY_TEMPLATE = "ZO_GamepadMenuEntryTemplate"
@@ -30,7 +31,7 @@ end
 
 function ZO_GroupMenu_Gamepad:InitializeScene()
     local function OnStateChanged(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
             self:PerformDeferredInitialization()
 
             self:UpdateMenuList()
@@ -40,7 +41,7 @@ function ZO_GroupMenu_Gamepad:InitializeScene()
 
             SCENE_MANAGER:AddFragment(GAMEPAD_GROUP_ROLES_FRAGMENT)
             TriggerTutorial(TUTORIAL_TRIGGER_YOUR_GROUP_OPENED)
-        elseif(newState == SCENE_HIDDEN) then
+        elseif newState == SCENE_HIDDEN then
             self:DisableCurrentList()
             if self.currentFragmentGroup then
                 SCENE_MANAGER:RemoveFragmentGroup(self.currentFragmentGroup)
@@ -93,7 +94,7 @@ function ZO_GroupMenu_Gamepad:InitializeKeybindDescriptors()
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
-            visible = function() 
+            visible = function()
                 local data = self:GetMainList():GetTargetData()
                 local type = data.type
 
@@ -112,7 +113,7 @@ function ZO_GroupMenu_Gamepad:InitializeKeybindDescriptors()
 
                 return true
             end,
-            callback = function() 
+            callback = function()
                 local data = self:GetMainList():GetTargetData()
                 local type = data.type
 
@@ -120,32 +121,26 @@ function ZO_GroupMenu_Gamepad:InitializeKeybindDescriptors()
                     self:DeactivateCurrentList()
                     self.dungeonDifficultyDropdown:Activate()
                     self.dungeonDifficultyDropdown:SetHighlightedItem(ZO_GetEffectiveDungeonDifficulty() == DUNGEON_DIFFICULTY_VETERAN and DIFFICULTY_VETERAN_INDEX or DIFFICULTY_NORMAL_INDEX)
-
                 elseif type == MENU_ENTRY_TYPE_CURRENT_GROUP then
                     self:SelectGroupList(SOUNDS.GAMEPAD_MENU_FORWARD)
-
                 elseif type == MENU_ENTRY_TYPE_INVITE_PLAYER then
-                    local platform = GetUIPlatform()
-                    if platform == UI_PLATFORM_PS4 then
+                    if ZO_IsPlaystationPlatform() then
                         ZO_ShowConsoleInviteToGroupFromUserListSelector()
                     else
                         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_GROUP_INVITE_DIALOG")
                     end
-
                 elseif type == MENU_ENTRY_TYPE_INVITE_FRIEND then
                     ZO_ShowConsoleInviteToGroupFromUserListSelector()
-
                 elseif type == MENU_ENTRY_TYPE_DISBAND_GROUP then
                     ZO_Dialogs_ShowGamepadDialog("GROUP_DISBAND_DIALOG")
-
                 elseif type == MENU_ENTRY_TYPE_LEAVE_GROUP then
                     ZO_Dialogs_ShowGamepadDialog("GROUP_LEAVE_DIALOG")
-
                 elseif type == MENU_ENTRY_TYPE_ROLES then
                     GAMEPAD_GROUP_ROLES_BAR:ToggleSelected()
-                
                 elseif type == MENU_ENTRY_TYPE_READY_CHECK then
                     ZO_SendReadyCheck()
+                elseif type == MENU_ENTRY_TYPE_LEAVE_INSTANCE then
+                    ZO_Dialogs_ShowGamepadDialog("INSTANCE_LEAVE_DIALOG")
                 end
             end,
         },
@@ -284,6 +279,10 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_DISBAND_GROUP])
     end
 
+    if CanExitInstanceImmediately() then
+        table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_LEAVE_INSTANCE])
+    end
+
     for i, entry in ipairs(groupActionEntries) do
         if i == 1 then
             entry:SetHeader(GetString(SI_GAMEPAD_GROUP_ACTIONS_MENU_HEADER))
@@ -367,11 +366,11 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         dropdown:ClearItems()
         local normalEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_GAMEPAD_GROUP_DUNGEON_MODE_NORMAL), OnSelectedDungeonDifficulty)
         normalEntry.isVeteran = false
-        dropdown:AddItem(normalEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        dropdown:AddItem(normalEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         
         local veteranEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_GAMEPAD_GROUP_DUNGEON_MODE_VETERAN), OnSelectedDungeonDifficulty)
         veteranEntry.isVeteran = true
-        dropdown:AddItem(veteranEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        dropdown:AddItem(veteranEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
         
         dropdown:UpdateItems()
 
@@ -430,6 +429,7 @@ function ZO_GroupMenu_Gamepad:SetupList(list)
         [MENU_ENTRY_TYPE_LEAVE_GROUP] = CreateListEntry(SI_GROUP_LIST_MENU_LEAVE_GROUP, MENU_ENTRY_TYPE_LEAVE_GROUP),
         [MENU_ENTRY_TYPE_DISBAND_GROUP] = CreateListEntry(SI_GROUP_LIST_MENU_DISBAND_GROUP, MENU_ENTRY_TYPE_DISBAND_GROUP),
         [MENU_ENTRY_TYPE_READY_CHECK] = CreateListEntry(SI_GROUP_LIST_READY_CHECK_BIND, MENU_ENTRY_TYPE_READY_CHECK),
+        [MENU_ENTRY_TYPE_LEAVE_INSTANCE] = CreateListEntry(SI_GROUP_MENU_LEAVE_INSTANCE_KEYBIND, MENU_ENTRY_TYPE_LEAVE_INSTANCE),
     }
 
     self.menuEntries[MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY]:SetHeader(GetString(SI_GAMEPAD_GROUP_DUNGEON_DIFFICULTY))

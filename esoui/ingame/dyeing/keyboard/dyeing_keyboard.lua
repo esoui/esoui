@@ -262,11 +262,11 @@ function ZO_Dyeing_Keyboard:InitializeSortsAndFilters()
 
     self.sortByRarityEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_RARITY), SetSortStyle)
     self.sortByRarityEntry.sortStyleType = ZO_DYEING_SORT_STYLE_RARITY
-    self.sortDropDown:AddItem(self.sortByRarityEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+    self.sortDropDown:AddItem(self.sortByRarityEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
     self.sortByHueEntry = ZO_ComboBox:CreateItemEntry(GetString(SI_DYEING_SORT_BY_HUE), SetSortStyle)
     self.sortByHueEntry.sortStyleType = ZO_DYEING_SORT_STYLE_HUE
-    self.sortDropDown:AddItem(self.sortByHueEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+    self.sortDropDown:AddItem(self.sortByHueEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
     self.sortDropDown:UpdateItems()
 end

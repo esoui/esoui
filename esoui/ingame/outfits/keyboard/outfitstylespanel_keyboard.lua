@@ -19,16 +19,8 @@ function ZO_OutfitStylesPanel_Keyboard:Initialize(control)
     self.collectibleCategoryData = nil
     self.noStylesLabel = control:GetNamedChild("NoStylesLabel")
     self.currentSlotPreviews = {}
-
-    local function CreateEntryData(objectPool)
-        return ZO_GridSquareEntryData_Shared:New()
-    end
-
-    local function ResetEntryData(data)
-        data:SetDataSource(nil)
-    end
     
-    self.entryDataObjectPool = ZO_ObjectPool:New(CreateEntryData, ResetEntryData)
+    self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_GridSquareEntryData_Shared)
 
     self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
 
@@ -243,7 +235,7 @@ do
         local autoSelectTypeFilterEntry = self.allTypesFilterEntry
 
         typeFilterDropDown:ClearItems()
-        typeFilterDropDown:AddItem(self.allTypesFilterEntry, ZO_COMBOBOX_SUPRESS_UPDATE)
+        typeFilterDropDown:AddItem(self.allTypesFilterEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
         if self.collectibleCategoryData then
             local unlockedCount = 0
@@ -272,7 +264,7 @@ do
                 if FOUND_VISUAL_ARMOR_TYPES[visualArmorType] then
                     local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_VISUALARMORTYPE", visualArmorType), RefreshVisible)
                     entry.visualArmorType = visualArmorType
-                    typeFilterDropDown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                    typeFilterDropDown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
                     if previouslySelectedTypeFilterEntry and (visualArmorType == previouslySelectedTypeFilterEntry.visualArmorType) then
                         autoSelectTypeFilterEntry = entry
@@ -284,7 +276,7 @@ do
                 if FOUND_WEAPON_MODEL_TYPES[weaponModelType] then
                     local entry = ZO_ComboBox:CreateItemEntry(GetString("SI_WEAPONMODELTYPE", weaponModelType), RefreshVisible)
                     entry.weaponModelType = weaponModelType
-                    typeFilterDropDown:AddItem(entry, ZO_COMBOBOX_SUPRESS_UPDATE)
+                    typeFilterDropDown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
                     if previouslySelectedTypeFilterEntry and (weaponModelType == previouslySelectedTypeFilterEntry.weaponModelType) then
                         autoSelectTypeFilterEntry = entry
@@ -577,8 +569,7 @@ function ZO_OutfitStylesPanel_Keyboard:OnOutfitStyleEntryRightClick(entryData)
         if not collectibleData.clearAction then
             if IsChatSystemAvailableForCurrentPlatform() then
                 --Link in chat
-                local link = GetCollectibleLink(collectibleData:GetId(), LINK_STYLE_BRACKETS)
-                AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(zo_strformat(SI_TOOLTIP_ITEM_NAME, link)) end)
+                AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(GetCollectibleLink(collectibleData:GetId(), LINK_STYLE_BRACKETS)) end)
             end
 
             if collectibleData:IsLocked() and collectibleData:IsPurchasable() then

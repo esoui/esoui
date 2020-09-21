@@ -92,7 +92,11 @@ end
 function ZO_SharedSmithingExtraction:Initialize(extractionSlotControl, extractLabel, owner)
     self.extractionSlotControl = extractionSlotControl
     self.extractLabel = extractLabel
+    self.questItemId = nil
     self.owner = owner
+    CRAFT_ADVISOR_MANAGER:RegisterCallback("QuestInformationUpdated", function(updatedQuestInfo) 
+        self.questItemId = updatedQuestInfo.smithingItemId
+    end)
 end
 
 function ZO_SharedSmithingExtraction:InitExtractionSlot(sceneName)
@@ -196,6 +200,15 @@ end
 
 function ZO_SharedSmithingExtraction:IsSlotted(bagId, slotIndex)
     return self.extractionSlot:ContainsBagAndSlot(bagId, slotIndex)
+end
+
+function ZO_SharedSmithingExtraction:CanRefineToQuestItem(bagId, slotIndex)
+    if self.questItemId then
+        local refinedItemId = GetSmithingRefinedItemId(bagId, slotIndex)
+        return refinedItemId == self.questItemId
+    else
+        return false
+    end
 end
 
 function ZO_SharedSmithingExtraction:ExtractSingle()
