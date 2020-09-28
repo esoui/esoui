@@ -2,7 +2,7 @@
     Menubar usage notes:
         A bar of buttons that resize when you mouse over them and act like a radio button group.
         Create a control that inherits from ZO_MenuBarTemplate, and use ZO_MenuBar_AddButton to add buttons to it.
-        
+
         *   ZO_MenuBar_AddButton takes a table describing the states of the new button:
             buttonData =
             {
@@ -29,13 +29,13 @@
                 callback = function(<fancyButton>) ...do stuff... end,
                 statusIcon = function() return "EsoUI/Art/Miscellaneous/new_icon.dds" end,
             }
-    
+
             local newControl = ZO_MenuBar_AddButton(menuBar, fancyButton)
 
             NOTE: The actual control that was added is returned by this function.  Do whatever you want to it.
 
         *   If you want to set up the bar to use different button templates, padding, anchoring styles, etc...use:
-            
+
             Example:
             local barData =
             {
@@ -125,7 +125,7 @@ function MenuBarButton:GetState()
 end
 
 function MenuBarButton:SetState(state, adjustSizeInstant)
-    if(legalStates[state] and state ~= self.m_state) then
+    if legalStates[state] and state ~= self.m_state then
         self.m_state = state
         self:UpdateTexturesFromState()
 
@@ -137,17 +137,17 @@ function MenuBarButton:SetState(state, adjustSizeInstant)
                 self.m_image:SetDimensions(normalSize, normalSize)
             end
 
-            if(self.m_anim) then
+            if self.m_anim then
                 local timeline = self.m_anim:GetTimeline()
                 timeline:Stop()
-                if(state == BSTATE_PRESSED) then
+                if state == BSTATE_PRESSED then
                     timeline:SetProgress(0)
                 else
                     timeline:SetProgress(1)
                 end
             end
         else
-            if(state == BSTATE_PRESSED) then
+            if state == BSTATE_PRESSED then
                 self:SizeUp()
             else
                 self:SizeDown()
@@ -172,14 +172,14 @@ function MenuBarButton:SetState(state, adjustSizeInstant)
 end
 
 function MenuBarButton:SetHighlightHidden(hidden)
-    if(hidden ~= self.m_highlightHidden) then
+    if hidden ~= self.m_highlightHidden then
         self.m_highlightHidden = hidden
         self:UpdateTexturesFromState()
     end
 end
 
 function MenuBarButton:CreateAnim(sizingUp)
-    if(not self.m_anim) then
+    if not self.m_anim then
         self.m_anim = CreateSimpleAnimation(ANIMATION_SIZE, self.m_image)
 
         local normalSize, downSize, duration = self:GetAnimationData()
@@ -216,7 +216,7 @@ function MenuBarButton:SetData(owner, buttonData)
 end
 
 function MenuBarButton:MouseEnter()
-    if(self.m_state ~= BSTATE_PRESSED and self.m_state ~= BSTATE_DISABLED) then
+    if self.m_state ~= BSTATE_PRESSED and self.m_state ~= BSTATE_DISABLED then
         self:SetHighlightHidden(false)
         self:SizeUp()
     end
@@ -224,7 +224,7 @@ function MenuBarButton:MouseEnter()
 end
 
 function MenuBarButton:MouseExit()
-    if(self.m_state ~= BSTATE_PRESSED and self.m_state ~= BSTATE_DISABLED) then
+    if self.m_state ~= BSTATE_PRESSED and self.m_state ~= BSTATE_DISABLED then
         self:SetHighlightHidden(true)
         self:SizeDown()
     end
@@ -232,13 +232,13 @@ function MenuBarButton:MouseExit()
 end
 
 function MenuBarButton:Press(adjustSizeInstant)
-    if(self.m_state ~= BSTATE_DISABLED) then
+    if self.m_state ~= BSTATE_DISABLED then
         self:SetState(BSTATE_PRESSED, adjustSizeInstant)
     end
 end
 
 function MenuBarButton:UnPress(adjustSizeInstant)
-    if(self.m_state ~= BSTATE_DISABLED) then
+    if self.m_state ~= BSTATE_DISABLED then
         self.m_highlightHidden = true -- batch update, don't allow texture update from this
         self:SetState(BSTATE_NORMAL, adjustSizeInstant)
     end
@@ -273,19 +273,21 @@ local PLAYER_DRIVEN = true
 local CODE_DRIVEN = false
 
 function MenuBarButton:Release(upInside, skipAnimation, playerDriven)
-    if(self.m_locked) then return end
+    if self.m_locked then
+        return
+    end
 
-    if(self.m_state ~= BSTATE_DISABLED) then
-        if(upInside) then
+    if self.m_state ~= BSTATE_DISABLED then
+        if upInside then
             self.m_menuBar:SetClickedButton(self, skipAnimation)
 
             local buttonData = self.m_buttonData
-            if(buttonData.callback) then
+            if buttonData.callback then
                 buttonData:callback(playerDriven)
             end
-            
+
             local clickSound = buttonData.clickSound or self.m_menuBar:GetClickSound()
-            if(clickSound and playerDriven) then
+            if clickSound and playerDriven then
                 PlaySound(clickSound)
             end
         else
@@ -386,7 +388,7 @@ function MenuBar:SelectFirstVisibleButton(skipAnimation)
         local buttonControl = button[INDEX_BUTTON]
         local isVisible = IsVisible(buttonControl.m_object.m_buttonData)
 
-        if(isVisible) then
+        if isVisible then
             self:SelectDescriptor(button[INDEX_DESCRIPTOR], skipAnimation)
             return
         end
@@ -399,7 +401,7 @@ function MenuBar:SelectLastVisibleButton(skipAnimation)
         local buttonControl = button[INDEX_BUTTON]
         local isVisible = IsVisible(buttonControl.m_object.m_buttonData)
 
-        if(isVisible) then
+        if isVisible then
             self:SelectDescriptor(button[INDEX_DESCRIPTOR], skipAnimation)
             return
         end
@@ -422,10 +424,10 @@ function MenuBar:UpdateButtons(forceSelection)
         buttonControl:SetHidden(not isVisible)
         self:SetDescriptorEnabled(buttonData.descriptor, IsEnabled(buttonData))
 
-        if(isVisible) then
+        if isVisible then
             if lastDivider and lastDividerPadding then
                 buttonControl:SetAnchor(self.m_point, lastDivider, self.m_relativePoint, lastDividerPadding)
-            elseif(lastVisibleButton) then
+            elseif lastVisibleButton then
                 local previousButtonExtraPadding = buttonData.previousButtonExtraPadding or 0
                 buttonControl:SetAnchor(self.m_point, lastVisibleButton, self.m_relativePoint, self.m_buttonPadding + previousButtonExtraPadding)
             else
@@ -436,7 +438,7 @@ function MenuBar:UpdateButtons(forceSelection)
 
             buttonControl.m_object:RefreshStatus()
         end
-        
+
         local barPadding = GetBarPadding(buttonData)
 
         if barPadding then
@@ -451,7 +453,7 @@ function MenuBar:UpdateButtons(forceSelection)
         end
     end
 
-    if(self.m_clickedButton and not IsVisible(self.m_clickedButton.m_buttonData)) then
+    if self.m_clickedButton and not IsVisible(self.m_clickedButton.m_buttonData) then
         if forceSelection then
             local SKIP_ANIM = true
             self:SelectFirstVisibleButton(SKIP_ANIM)
@@ -478,9 +480,18 @@ function MenuBar:AddButton(buttonData)
     return button
 end
 
+function MenuBar:ButtonControlIterator()
+    local buttons = {}
+    for _, button in ipairs(self.m_buttons) do
+        table.insert(buttons, button[INDEX_BUTTON])
+    end
+
+    return ipairs(buttons)
+end
+
 function MenuBar:GetButtonControl(descriptor)
     local buttonObject = self:ButtonObjectForDescriptor(descriptor)
-    if(buttonObject) then
+    if buttonObject then
         return buttonObject:GetControl()
     end
 end
@@ -519,14 +530,14 @@ function MenuBar:GetLastSelectedDescriptor()
 end
 
 function MenuBar:SetClickedButton(buttonObject, skipAnimation)
-    if(self.m_clickedButton) then
+    if self.m_clickedButton then
         self.m_clickedButton:SetLocked(false)
         self.m_clickedButton:UnPress(skipAnimation)
         self.m_lastClickedButton = self.m_clickedButton
         self.m_clickedButton = nil
     end
 
-    if(buttonObject) then
+    if buttonObject then
         self.m_clickedButton = buttonObject
         self.m_clickedButton:SetLocked(true)
         self.m_clickedButton:Press(skipAnimation)
@@ -540,9 +551,11 @@ function MenuBar:RestoreLastClickedButton(skipAnimation)
 end
 
 function MenuBar:SetData(data)
-    if(self.m_pool ~= nil) then return end
+    if self.m_pool ~= nil then
+        return
+    end
 
-    if(data.initialButtonAnchorPoint and data.initialButtonAnchorPoint == RIGHT) then
+    if data.initialButtonAnchorPoint and data.initialButtonAnchorPoint == RIGHT then
         self.m_point = RIGHT
         self.m_relativePoint = LEFT
     else
@@ -551,9 +564,9 @@ function MenuBar:SetData(data)
     end
 
     self.m_pool = ZO_ControlPool:New(data.buttonTemplate or "ZO_MenuBarButtonTemplate1", self.m_control, "Button")
-    self.m_pool:SetCustomResetBehavior( function(control)
-                                            control.m_object:Reset()
-                                        end)
+    self.m_pool:SetCustomResetBehavior(function(control)
+        control.m_object:Reset()
+    end)
 
     self.m_barPool = ZO_ControlPool:New(data.barTemplate or "ZO_MenuBarPaddingBarTemplate", self.m_control, "PaddingBar")
 
@@ -565,7 +578,7 @@ end
 
 function MenuBar:ButtonObjectForDescriptor(descriptor)
     for _, data in ipairs(self.m_buttons) do
-        if(data[INDEX_DESCRIPTOR] == descriptor) then
+        if data[INDEX_DESCRIPTOR] == descriptor then
             return data[INDEX_BUTTON].m_object
         end
     end
@@ -631,13 +644,13 @@ function ZO_MenuBarButtonTemplate_OnMouseExit(self)
 end
 
 function ZO_MenuBarButtonTemplate_OnPress(self, button)
-    if(button == MOUSE_BUTTON_INDEX_LEFT) then
+    if button == MOUSE_BUTTON_INDEX_LEFT then
         self.m_object:Press()
     end
 end
 
 function ZO_MenuBarButtonTemplate_OnMouseUp(self, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_LEFT) then
+    if button == MOUSE_BUTTON_INDEX_LEFT then
         self.m_object:Release(upInside, ADJUST_SIZE_ANIMATED, PLAYER_DRIVEN)
     end
 end
@@ -674,11 +687,11 @@ function ZO_MenuBar_GenerateButtonTabData(name, descriptor, normal, pressed, hig
         disabled = disabled,
         CustomTooltipFunction = customTooltipFunction,
         alwaysShowTooltip = alwaysShowTooltip ~= false,
-        callback = function(tabData, playerDriven) 
-                        if playerDriven then 
-                            playerDrivenCallback(tabData) 
-                        end 
-                    end,
+        callback = function(tabData, playerDriven)
+            if playerDriven then
+                playerDrivenCallback(tabData)
+            end
+        end,
     }
 end
 
@@ -688,6 +701,10 @@ end
 
 function ZO_MenuBar_UpdateButtons(self, forceSelection)
     return self.m_object:UpdateButtons(forceSelection)
+end
+
+function ZO_MenuBar_ButtonControlIterator(self)
+    return self.m_object:ButtonControlIterator()
 end
 
 function ZO_MenuBar_ClearButtons(self)

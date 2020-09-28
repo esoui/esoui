@@ -32,10 +32,21 @@ function ZO_ItemSetCollectionPieceData:MarkItemLinkDirty()
     self.isItemLinkDirty = true
 end
 
+function ZO_ItemSetCollectionPieceData:InternalCreateItemLink()
+    return GetItemSetCollectionPieceItemLink(self.pieceId, LINK_STYLE_DEFAULT, ITEM_TRAIT_TYPE_NONE)
+end
+
 function ZO_ItemSetCollectionPieceData:RefreshItemLink()
-    self.itemLink = GetItemSetCollectionPieceItemLink(self.pieceId, LINK_STYLE_DEFAULT, ITEM_TRAIT_TYPE_NONE)
-    -- In order to keep this hefty system more lightweight, let the garbage collector clean this up. It shouldn't dirty often, so no reason to keep the memory around
-    self.isItemLinkDirty = nil
+    -- As these are often accessed from entry instance data, make sure that the refreshed info actually gets applied to the source data and not the entry instance data
+    -- In order to keep this hefty system more lightweight, let the garbage collector clean up isItemLinkDirty. It shouldn't dirty often, so no reason to keep the memory around
+    local itemLink = self:InternalCreateItemLink()
+    if self.dataSource then
+        self.dataSource.itemLink = itemLink
+        self.dataSource.isItemLinkDirty = nil
+    else
+        self.itemLink = itemLink
+        self.isItemLinkDirty = nil
+    end
 end
 
 function ZO_ItemSetCollectionPieceData:GetItemLink()
@@ -164,9 +175,8 @@ function ZO_ItemSetCollectionReconstructionPieceData:SetUpgradeFunctionalQuality
     end
 end
 
-function ZO_ItemSetCollectionReconstructionPieceData:RefreshItemLink()
-    self.itemLink = GetItemSetCollectionPieceItemLink(self.pieceId, LINK_STYLE_DEFAULT, self.overrideTraitType, self.upgradeFunctionalQuality)
-    self.isItemLinkDirty = nil
+function ZO_ItemSetCollectionReconstructionPieceData:InternalCreateItemLink()
+    return GetItemSetCollectionPieceItemLink(self.pieceId, LINK_STYLE_DEFAULT, self.overrideTraitType, self.upgradeFunctionalQuality)
 end
 
 function ZO_ItemSetCollectionReconstructionPieceData:GetCostInfo(overrideFunctionalQuality)

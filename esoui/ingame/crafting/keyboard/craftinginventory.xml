@@ -36,7 +36,7 @@
             </OnMouseExit>
         </Control>
 
-        <Control name="ZO_CraftingInventoryFilterTab" inherits="ZO_InventoryFilterTab" virtual="true">
+        <Control name="ZO_CraftingInventoryFilterTab" inherits="ZO_InventoryFilterTabTemplate" virtual="true">
             <OnInitialized name="ZO_CraftingInventoryFilterTab">
                 self.questPin = self:GetNamedChild("QuestPin")
             </OnInitialized>

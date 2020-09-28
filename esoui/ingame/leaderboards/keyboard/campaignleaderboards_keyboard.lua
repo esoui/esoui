@@ -68,20 +68,21 @@ end
 function ZO_LeaderboardCampaignSelector_Keyboard:RefreshQueryTypes()
     ZO_MenuBar_ClearButtons(self.tabs)
 
+    local defaultTabQueryType = nil
     if self:IsHomeSelectable() then
         ZO_MenuBar_AddButton(self.tabs, self.homeTabData)
-
-        if not self.selectedQueryType or (self.homeTabData.queryType == self.selectedQueryType) then
-            ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_ASSIGNED_CAMPAIGN)
-        end
+        defaultTabQueryType = self.homeTabData.queryType
     end
 
     if self:IsLocalSelectable() then
         ZO_MenuBar_AddButton(self.tabs, self.localTabData)
+        defaultTabQueryType = self.localTabData.queryType
+    end
 
-        if not self.selectedQueryType or (self.localTabData.queryType == self.selectedQueryType) then
-            ZO_MenuBar_SelectDescriptor(self.tabs, BGQUERY_LOCAL)
-        end
+    if self.selectedQueryType and self:IsSelectedQueryStillValid() then
+        ZO_MenuBar_SelectDescriptor(self.tabs, self.selectedQueryType)
+    elseif defaultTabQueryType then
+        ZO_MenuBar_SelectDescriptor(self.tabs, defaultTabQueryType)
     end
 
     self.activeTab:SetText(GetCampaignName(self:GetCampaignId()))

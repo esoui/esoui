@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_SmithingCreationFilterTab" inherits="ZO_InventoryFilterTab" virtual="true">
+        <Control name="ZO_SmithingCreationFilterTab" inherits="ZO_InventoryFilterTabTemplate" virtual="true">
             <OnInitialized>
                 ZO_MenuBarButtonTemplate_OnInitialized(self)
                 self.questPin = self:GetNamedChild("QuestPin")

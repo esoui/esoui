@@ -1,56 +1,30 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_Inventory_NewItemCategory_FlashAnimation" playbackType="PING_PONG" loopCount="11">
+            <Animations>
+                <CustomAnimation duration="700">
+                    <UpdateFunction>
+                        ZO_Inventory_NewItemCategory_FlashAnimation_OnUpdate(self, progress)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
     <Controls>
-        <Backdrop name="ZO_InventorySearch" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
-            <Controls>
-                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText">
-                    <OnInitialized>
-                        ZO_EditDefaultText_Initialize(self, GetString(SI_ITEM_FILTER_BY_TEXT))
-                    </OnInitialized>
-
-                    <OnEscape>
-                        ZO_PlayerInventory_EndSearch(self)
-                    </OnEscape>
-
-                    <OnTextChanged>
-                        ZO_EditDefaultText_OnTextChanged(self)
-                        ZO_PlayerInventory_OnSearchTextChanged(self)
-                    </OnTextChanged>
-
-                    <OnEnter>
-                        ZO_PlayerInventory_OnSearchEnterKeyPressed(self)
-                    </OnEnter>
-
-                </EditBox>
-            </Controls>
-        </Backdrop>
-
-        <Control name="ZO_InventoryFilterTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
-            <OnMouseEnter>
-                ZO_PlayerInventory_FilterButtonOnMouseEnter(self)
-            </OnMouseEnter>
-
-            <OnMouseExit>
-                ZO_PlayerInventory_FilterButtonOnMouseExit(self)
-            </OnMouseExit>
-
-            <Controls>
-                <Texture name="$(parent)Flash" alpha="0" textureFile="EsoUI/Art/Miscellaneous/icon_highlight_pulse.dds" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
-                </Texture>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_InventoryFilterSubTab" inherits="ZO_InventoryFilterTab" virtual="true">
-            <Dimensions x="16" y="16" />
-        </Control>
-
         <!-- This control is being inherited into SearchFilters and the search operations are now tied to TextSearch within this control rather than at the top level of the inventory -->
         <Control name="ZO_InventorySubFiltersWithSearch" resizeToFitDescendents="true" virtual="true">
             <Controls>
-                <Backdrop name="$(parent)TextSearch" inherits="ZO_InventorySearch">
+                <Backdrop name="$(parent)TextSearch" inherits="ZO_InventorySearchTemplate">
                     <Anchor point="TOPRIGHT" />
                     <Dimensions x="170" />
+                    <Controls>
+                        <EditBox name="$(parent)Box" override="true">
+                            <OnTextChanged name="Inventory">
+                                ZO_PlayerInventory_OnSearchTextChanged(self)
+                            </OnTextChanged>
+                        </EditBox>
+                    </Controls>
                 </Backdrop>
 
                 <Control name="$(parent)SubTabs" inherits="ZO_InventorySubTabs">

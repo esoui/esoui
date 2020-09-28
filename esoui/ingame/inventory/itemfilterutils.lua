@@ -1197,10 +1197,96 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
     }
 }
 
+-- Text Search Types
+ZO_TEXT_SEARCH_TYPE_INVENTORY = 1
+ZO_TEXT_SEARCH_TYPE_QUEST_ITEM = 2
+ZO_TEXT_SEARCH_TYPE_QUEST_TOOL = 3
+ZO_TEXT_SEARCH_TYPE_COLLECTIBLE = 4
+
+-- Text Search Attributes
+ZO_TEXT_SEARCH_CACHE_DATA = true
+
 --
 -- ZO_ItemFilterUtils
 --
 ZO_ItemFilterUtils = ZO_Object:Subclass()
+
+-- Text Search Functions
+
+local function GetInventoryItemInformationForTextSearch(bagId, slotIndex)
+    local name = GetItemName(bagId, slotIndex)
+    name = name:lower()
+
+    local _, _, _, _, _, equipType, itemStyle = GetItemInfo(bagId, slotIndex)
+
+    return name, equipType, itemStyle
+end
+
+do
+    local EQUIP_TYPE_NAMES = {}
+    local ITEM_STYLE_NAME = {}
+    function ZO_ItemFilterUtils.TextSearchProcessInventoryItem(stringSearch, data, searchTerm, cache)
+        local name, equipType, itemStyle = stringSearch:GetFromCache(data, cache, GetInventoryItemInformationForTextSearch, data.bagId, data.slotIndex)
+
+        if zo_plainstrfind(name, searchTerm) then
+            return true
+        end
+
+        if equipType ~= EQUIP_TYPE_INVALID then
+            local equipTypeName = EQUIP_TYPE_NAMES[equipType]
+            if not equipTypeName then
+                equipTypeName = GetString("SI_EQUIPTYPE", equipType):lower()
+                EQUIP_TYPE_NAMES[equipType] = equipTypeName
+            end
+            if zo_plainstrfind(equipTypeName, searchTerm) then
+                return true
+            end
+        end
+
+        if itemStyle ~= 0 then
+            local itemStyleName = ITEM_STYLE_NAME[itemStyle]
+            if not itemStyleName then
+                itemStyleName = zo_strlower(GetItemStyleName(itemStyle))
+                ITEM_STYLE_NAME[itemStyle] = itemStyleName
+            end
+            if zo_plainstrfind(itemStyleName, searchTerm) then
+                return true
+            end
+        end
+
+        return false
+    end
+end
+
+local function GetQuestItemInformationForTextSearch(questIndex, stepIndex, conditionIndex)
+    local _, _, name = GetQuestItemInfo(questIndex, stepIndex, conditionIndex)
+    return name:lower()
+end
+
+function ZO_ItemFilterUtils.TextSearchProcessQuestItem(stringSearch, data, searchTerm, cache)
+    local name = stringSearch:GetFromCache(data, cache, GetQuestItemInformationForTextSearch, data.questIndex, data.stepIndex, data.conditionIndex)
+    return zo_plainstrfind(name, searchTerm)
+end
+
+local function GetQuestToolInformationForTextSearch(questIndex, toolIndex)
+    local _, _, _, name = GetQuestToolInfo(questIndex, toolIndex)
+    return name:lower()
+end
+
+function ZO_ItemFilterUtils.TextSearchProcessQuestTool(stringSearch, data, searchTerm, cache)
+    local name = stringSearch:GetFromCache(data, cache, GetQuestToolInformationForTextSearch, data.questIndex, data.toolIndex)
+    return zo_plainstrfind(name, searchTerm)
+end
+
+local function GetCollectibleInformationForTextSearch(collectibleId)
+    local name = GetCollectibleInfo(collectibleId)
+    return name:lower()
+end
+
+function ZO_ItemFilterUtils.TextSearchProcessCollectible(stringSearch, data, searchTerm, cache)
+    local name = stringSearch:GetFromCache(data, cache, GetCollectibleInformationForTextSearch, data.collectibleId)
+    return zo_plainstrfind(name, searchTerm)
+end
 
 -- Type List Getter Functions
 
@@ -1386,6 +1472,14 @@ do
 end
 
 function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, itemTypeDisplayCategory, itemTypeSubCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    if not ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeDisplayCategory) then
+        return false
+    end
+
     local itemTypeDisplayCategoryFilterInfoType = ITEM_TYPE_DISPLAY_CATEGORY_FILTER_INFO_TYPE[itemTypeDisplayCategory]
 
     if itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY then
@@ -1478,7 +1572,7 @@ function ZO_ItemFilterUtils.IsSlotInConsumableSubcategory(slot, itemTypeDisplayC
     return false
 end
 
--- Returns true if slot is not a specialized item type
+-- Returns true if slot is of the type passed in
 function ZO_ItemFilterUtils.IsSlotInItemType(slot, itemType)
     if itemType == ITEMTYPE_NONE then
         return true

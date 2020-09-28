@@ -607,6 +607,11 @@ function ZO_WorldMap_InvalidateTooltip()
 end
 
 local function ResetMouseOverPins()
+    for pin, mousedOver in pairs(currentMouseOverPins) do
+        if mousedOver then
+            pin:SetTargetScale(1)
+        end
+    end
     currentMouseOverPins = {}
     previousMouseOverPins = {}
 end

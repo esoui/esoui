@@ -29,14 +29,14 @@ function ZO_LeaderboardsManager_Gamepad:SetupList(list)
     list:AddDataTemplateWithHeader(CATEGORY_LIST_TEMPLATE, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, HEADER_TEMPLATE)
 end
 
-function ZO_LeaderboardsManager_Gamepad:OnSelectionChanged(list, selectedLeaderboard)
+function ZO_LeaderboardsManager_Gamepad:OnTargetChanged(list, targetLeaderboard)
     local listWasActivated
     if self.leaderboardObject then
         listWasActivated = GAMEPAD_LEADERBOARD_LIST:IsActivated()
         self:DeactivateLeaderboard()
     end
 
-    self:OnLeaderboardSelected(selectedLeaderboard)
+    self:OnLeaderboardSelected(targetLeaderboard)
     self:ActivateLeaderboard()
 
     if listWasActivated then
@@ -93,6 +93,12 @@ function ZO_LeaderboardsManager_Gamepad:PerformUpdate()
     ZO_GamepadGenericHeader_RefreshData(self.header, self.categoryHeaderData)
 end
 
+function ZO_LeaderboardsManager_Gamepad:OnShowing()
+    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+
+    self:TryAddLeaderboardObjectKeybind()
+end
+
 function ZO_LeaderboardsManager_Gamepad:OnShow()
     self:QueryData()
     self:RefreshCategoryList()
@@ -100,7 +106,7 @@ function ZO_LeaderboardsManager_Gamepad:OnShow()
     TriggerTutorial(TUTORIAL_TRIGGER_LEADERBOARDS_OPENED)
 end
 
-function ZO_LeaderboardsManager_Gamepad:OnHide()
+function ZO_LeaderboardsManager_Gamepad:OnHiding()
     self:DeactivateLeaderboard()
 end
 
@@ -206,15 +212,34 @@ function ZO_LeaderboardsManager_Gamepad:RefreshData()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
+function ZO_LeaderboardsManager_Gamepad:TryAddLeaderboardObjectKeybind()
+    if self.leaderboardObject then
+        local keybind = self.leaderboardObject:GetKeybind()
+        if self.currentLeaderboardObjectKeybind ~= keybind then
+            self:RemoveLeaderboardObjectKeybind()
+            self.currentLeaderboardObjectKeybind = keybind
+            if keybind then
+                KEYBIND_STRIP:AddKeybindButton(keybind)
+            end
+        end
+    end
+end
+
+function ZO_LeaderboardsManager_Gamepad:RemoveLeaderboardObjectKeybind()
+    if self.currentLeaderboardObjectKeybind then
+        KEYBIND_STRIP:RemoveKeybindButton(self.currentLeaderboardObjectKeybind)
+        self.currentLeaderboardObjectKeybind = nil
+    end
+end
+
 function ZO_LeaderboardsManager_Gamepad:ActivateLeaderboard()
     self.leaderboardObject:OnSelected()
-    self.leaderboardObject:TryAddKeybind()
+    self:TryAddLeaderboardObjectKeybind()
 end
 
 function ZO_LeaderboardsManager_Gamepad:DeactivateLeaderboard()
+    self:RemoveLeaderboardObjectKeybind()
     if self.leaderboardObject then
-        self.leaderboardObject:TryRemoveKeybind()
-
         self.leaderboardObject:OnUnselected()
         GAMEPAD_LEADERBOARD_LIST:Deactivate()
     end
@@ -222,14 +247,14 @@ end
 
 function ZO_LeaderboardsManager_Gamepad:ActivateCategories()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-    self.leaderboardObject:TryAddKeybind()
+    self:TryAddLeaderboardObjectKeybind()
     self:ActivateCurrentList()
 end
 
 function ZO_LeaderboardsManager_Gamepad:ActivateLeaderboardList()
     self:DeactivateCurrentList()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    self.leaderboardObject:TryRemoveKeybind()
+    self:RemoveLeaderboardObjectKeybind()
     GAMEPAD_LEADERBOARD_LIST:Activate()
 end
 

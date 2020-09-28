@@ -915,3 +915,16 @@ end
 ZO_COMBOBOX_SUPRESS_UPDATE = ZO_COMBOBOX_SUPPRESS_UPDATE
 
 GetCollectibleCategoryName = GetCollectibleCategoryNameByCollectibleId
+
+-- No longer let the leaderboardObject do the adding and removing directly itself, in case the leaderboard object is no longer around when we need to remove it (ESO-596810)
+function ZO_LeaderboardBase_Shared:TryAddKeybind()
+    if self.keybind then
+        KEYBIND_STRIP:AddKeybindButton(self.keybind)
+    end
+end
+
+function ZO_LeaderboardBase_Shared:TryRemoveKeybind()
+    if self.keybind then
+        KEYBIND_STRIP:RemoveKeybindButton(self.keybind)
+    end
+end
