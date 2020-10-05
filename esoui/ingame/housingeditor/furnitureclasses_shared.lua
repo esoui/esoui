@@ -95,6 +95,10 @@ function ZO_FurnitureDataBase:IsBeingPreviewed()
     return false
 end
 
+function ZO_FurnitureDataBase:IsPathable()
+    return false
+end
+
 function ZO_FurnitureDataBase:PassesTheme(theme)
     return theme == FURNITURE_THEME_TYPE_ALL or self.theme == theme
 end
@@ -280,6 +284,10 @@ function ZO_PlaceableFurnitureCollectible:Preview()
     SYSTEMS:GetObject("itemPreview"):PreviewCollectibleAsFurniture(self.collectibleId)
 end
 
+function ZO_PlaceableFurnitureCollectible:IsPathable()
+    return HousingEditorCanCollectibleBePathed(self.collectibleId)
+end
+
 function ZO_PlaceableFurnitureCollectible:SelectForPlacement()
     HousingEditorCreateCollectibleFurnitureForPlacement(self.collectibleId)
 end
@@ -371,6 +379,10 @@ end
 
 function ZO_RetrievableFurniture:Preview()
     SYSTEMS:GetObject("itemPreview"):PreviewPlacedFurniture(self.retrievableFurnitureId)
+end
+
+function ZO_RetrievableFurniture:IsPathable()
+    return CanFurnitureBePathed(self:GetFurnitureId())
 end
 
 function ZO_RetrievableFurniture:RefreshPositionalData(playerWorldX, playerWorldY, playerWorldZ, playerCameraHeadingRadians)

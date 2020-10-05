@@ -123,6 +123,7 @@ BACKPACK_PLAYER_TRADE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
             return TRADE_WINDOW:CanTradeItem(slot)
         end,
         waitUntilInventoryOpensToClearNewStatus = true,
+        alwaysReapplyLayout = true,
     })
 
 BACKPACK_STORE_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(

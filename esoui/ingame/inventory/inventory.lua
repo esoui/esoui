@@ -1471,6 +1471,16 @@ function ZO_InventoryManager:AddInventoryItem(inventoryType, slotIndex, bagId)
         -- Default bagId to backingBags[1] for addon backwards-compatibility
         bagId = bagId or inventory.backingBags[1]
         inventory.slots[bagId][slotIndex] = SHARED_INVENTORY:GenerateSingleSlotData(bagId, slotIndex)
+
+        local searchData =
+        {
+            type = ZO_TEXT_SEARCH_TYPE_INVENTORY,
+            bagId = bagId,
+            slotIndex = slotIndex,
+        }
+
+        inventory.stringSearch:Insert(searchData)
+        inventory.stringSearch.cache = false
     end
 end
 
