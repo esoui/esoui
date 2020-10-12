@@ -613,7 +613,7 @@ do
         balanceLabel:SetText(GetString(SI_GAMEPAD_MAIN_MENU_MARKET_BALANCE_TITLE))
 
         local remainingCrownsLabel = control:GetNamedChild("RemainingCrowns")
-        local currencyString = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(GetPlayerCrowns()))
+        local currencyString = zo_strformat(SI_NUMBER_FORMAT, GetPlayerCrowns())
         remainingCrownsLabel:SetText(currencyString)
 
         local color = data:GetNameColor(selected)

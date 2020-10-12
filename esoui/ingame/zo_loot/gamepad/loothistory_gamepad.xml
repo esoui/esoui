@@ -3,12 +3,17 @@
         <Control name="ZO_LootHistory_GamepadEntry" inherits="ZO_LootHistory_SharedEntry" virtual="true">
             <Dimensions x="315" y="58" />
             <Anchor point="BOTTOMLEFT"/>
+            <OnInitialized name="GamepadEntry">
+                ZO_LootHistory_GamepadEntry_OnInitialized(self)
+            </OnInitialized>
 
             <Controls>
                 <Texture name="$(parent)Icon" override="true">
                     <Anchor point="LEFT" offsetX="20" />
                     <Controls>
-                        <Label name="$(parent)OverlayText" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
+                        <Label name="$(parent)OverlayText" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate" >
+                            <Dimensions x="55" />
+                        </Label>
                         
                         <Texture name="$(parent)StatusIcon" override="true">
                             <Anchor point="LEFT" relativeTo="$(grandparent)" relativePoint="RIGHT" offsetX="-5"/>
@@ -54,7 +59,7 @@
         </Control>
       
         <TopLevelControl name="ZO_LootHistoryControl_Gamepad" inherits="ZO_LootHistory_Shared" >
-            <Anchor point="BOTTOMLEFT" offsetY="-120"/>
+            <Anchor point="BOTTOMLEFT" offsetY="-120" />
             <OnInitialized>
                 ZO_LootHistory_Gamepad_OnInitialized(self)
             </OnInitialized>

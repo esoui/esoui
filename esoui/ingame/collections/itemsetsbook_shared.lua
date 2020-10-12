@@ -15,6 +15,10 @@ function ZO_ItemSetsBook_Shared:Initialize(control, scene)
     self.setFilters = {}
     self.pieceFilters = {}
 
+    -- Rather than having every piece sort for every player, we'll only sort the ones we look at, as an optimization since the system is so big
+    self.tempUnlockedEntriesForRefresh = {}
+    self.tempLockedEntriesForRefresh = {}
+
     self:InitializeControls()
     self:InitializeCategories()
     self:InitializeGridList()
@@ -105,7 +109,8 @@ function ZO_ItemSetsBook_Shared:OnItemSetCollectionsUpdated(itemSetIds)
             local itemSetCollectionData = ITEM_SET_COLLECTIONS_DATA_MANAGER:GetItemSetCollectionData(itemSetId)
             local itemSetCollectionCategoryData = itemSetCollectionData:GetCategoryData()
             if self:IsViewingCategory(itemSetCollectionCategoryData) then
-                self.categoryContentRefreshGroup:MarkDirty("Visible")
+                -- Lock state changes result in a re-sorting, so the list needs to be rebuilt
+                self.categoryContentRefreshGroup:MarkDirty("List")
                 break
             end
         end
@@ -175,6 +180,11 @@ end
 
 function ZO_ItemSetsBook_Shared:GetGridHeaderEntryDataObjectPool()
     assert(false) -- Must be overridden
+end
+
+function ZO_ItemSetsBook_Shared:IsSetHeaderCollapsed(itemSetId)
+     -- Can be overriden
+    return false
 end
 
 function ZO_ItemSetsBook_Shared:IsSearchSupported()
@@ -260,6 +270,8 @@ function ZO_ItemSetsBook_Shared:RefreshCategoryContentList()
     local gridListPanelList = self.gridListPanelList
     local entryDataObjectPool = self:GetGridEntryDataObjectPool()
     local headerEntryDataObjectPool = self:GetGridHeaderEntryDataObjectPool()
+    local tempUnlockedEntriesForRefresh = self.tempUnlockedEntriesForRefresh
+    local tempLockedEntriesForRefresh = self.tempLockedEntriesForRefresh
 
     gridListPanelList:ClearGridList()
     entryDataObjectPool:ReleaseAllObjects()
@@ -270,11 +282,26 @@ function ZO_ItemSetsBook_Shared:RefreshCategoryContentList()
         for _, itemSetCollectionData in itemSetCollectionCategoryData:CollectionIterator(self.setFilters) do
             local headerEntryData = headerEntryDataObjectPool:AcquireObject()
             headerEntryData:SetDataSource(itemSetCollectionData)
-            headerEntryData.collapsed = false
+            headerEntryData.collapsed = self:IsSetHeaderCollapsed(itemSetCollectionData:GetId())
+            ZO_ClearNumericallyIndexedTable(tempUnlockedEntriesForRefresh)
+            ZO_ClearNumericallyIndexedTable(tempLockedEntriesForRefresh)
             for _, itemSetCollectionPieceData in itemSetCollectionData:PieceIterator(self.pieceFilters) do
                 local entryData = entryDataObjectPool:AcquireObject()
                 entryData:SetDataSource(itemSetCollectionPieceData)
                 entryData.gridHeaderData = headerEntryData
+                if itemSetCollectionPieceData:IsUnlocked() then
+                    table.insert(tempUnlockedEntriesForRefresh, entryData)
+                else
+                    table.insert(tempLockedEntriesForRefresh, entryData)
+                end
+            end
+
+            -- All unlocked go before all locked
+            for _, entryData in ipairs(tempUnlockedEntriesForRefresh) do
+                gridListPanelList:AddEntry(entryData)
+            end
+
+            for _, entryData in ipairs(tempLockedEntriesForRefresh) do
                 gridListPanelList:AddEntry(entryData)
             end
         end

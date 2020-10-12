@@ -156,6 +156,17 @@ function ZO_MarketProductBase:GetHidesChildProducts()
 end
 
 function ZO_MarketProductBase:IsGiftable()
+    if self.productData:IsHouseCollectible() then
+        local isGiftable = false
+        local isHouseMarketProduct, houseTemplateDataList, defaultHouseTemplateIndex = ZO_MarketProduct_GetMarketProductHouseTemplateDataList(self.productData.marketProductId, function(...) return { GetActiveMarketProductListingsForHouseTemplate(...) } end)
+
+        for index, houseTemplateData in pairs(houseTemplateDataList) do
+            local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
+            local houseTemplateMarketProductData = ZO_MarketProductData:New(marketData.marketProductId, marketData.presentationIndex)
+            isGiftable = isGiftable or houseTemplateMarketProductData:IsGiftable()
+        end
+        return isGiftable
+    end
     return self.productData:IsGiftable()
 end
 
@@ -313,7 +324,7 @@ function ZO_MarketProductBase:SetupPricingDisplay()
     if self:HasCost() then
         -- layout the previous cost
         if self:IsOnSale() and not self:IsFree() then
-            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(self.cost))
+            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, self.cost)
             local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
             control.previousCost:SetText(strikethroughAmountString)
             control.previousCost:SetHidden(false)
@@ -331,7 +342,7 @@ function ZO_MarketProductBase:SetupPricingDisplay()
             local INHERIT_ICON_COLOR = true
             local CURRENCY_ICON_SIZE = "100%"
             local currencyIcon = ZO_Currency_GetPlatformFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(self.currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
-            local currencyString = string.format(priceFormat, zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(self.costAfterDiscount)), currencyIcon)
+            local currencyString = string.format(priceFormat, zo_strformat(SI_NUMBER_FORMAT, self.costAfterDiscount), currencyIcon)
             control.cost:SetText(currencyString)
         else
             control.cost:SetText(GetString(SI_MARKET_FREE_LABEL))
@@ -358,7 +369,7 @@ function ZO_MarketProductBase:SetupPricingDisplay()
                 currencyIcon = iconColor:Colorize(currencyIcon)
             end
 
-            local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(self.esoPlusCost)), currencyIcon)
+            local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, self.esoPlusCost), currencyIcon)
             control.esoPlusCost:SetText(currencyString)
         else
             control.esoPlusCost:SetText(GetString(SI_MARKET_FREE_LABEL))

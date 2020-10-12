@@ -202,8 +202,8 @@ end
 
 do
     local function SetupItem(control, data)
-        if data.entryColor then
-            control:SetColor(data.entryColor:UnpackRGB())
+        if data.color then
+            control:SetColor(data.color:UnpackRGB())
         else
             control:SetColor(ZO_SELECTED_TEXT:UnpackRGB())
         end
@@ -225,8 +225,8 @@ do
         ZO_CraftingResults_Base_PlayPulse(inventorySlot)
     end
 
-    local function AreLinesEqual(oldLines, newLines)
-        return oldLines[1].itemInstanceId == newLines[1].itemInstanceId
+    function ZO_CraftingResults_Keyboard:AreCraftingResultLinesEqual(oldLines, newLines)
+        return self:AreCraftingResultsEqual(oldLines[1], newLines[1])
     end
 
     function ZO_CraftingResults_Keyboard:InitializeResultBuffer()
@@ -242,7 +242,7 @@ do
         local templateData =
         {
             setup = SetupItem,
-            equalityCheck = AreLinesEqual,
+            equalityCheck = function(...) return self:AreCraftingResultLinesEqual(...) end,
             equalitySetup = EntryEqualitySetup,
         }
         self.notifier:AddTemplate(CRAFTING_RESULTS_TEMPLATE, templateData)
@@ -253,29 +253,28 @@ function ZO_CraftingResults_Keyboard:IsActive()
     return not IsInGamepadPreferredMode()
 end
 
-function ZO_CraftingResults_Keyboard:DisplayCraftingResult(itemInfo)
-    local entryText
-    local entryColor
-    -- itemInfo.quality is deprecated, included here for addon backwards compatibility
-    local displayQuality = itemInfo.displayQuality or itemInfo.quality
-    local itemQualityColor = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
+function ZO_CraftingResults_Keyboard:DisplayCraftingResult(resultData)
+    local resultEntryData = ZO_EntryData:New(resultData)
+    -- Alias for backwards compatibility:
+    resultEntryData.entryColor = resultData.color
+
     if ZO_RETRAIT_STATION_MANAGER:IsRetraitFragmentShowing() then
-        local itemTrait = GetItemLinkTraitInfo(itemInfo.itemLink)
+        local itemTrait = GetItemLinkTraitInfo(resultData.itemLink)
         local itemTraitString = GetString("SI_ITEMTRAITTYPE", itemTrait)
-        local itemNameString = itemQualityColor:Colorize(itemInfo.name)
-        entryText = zo_strformat(SI_KEYBOARD_RETRAIT_COMPLETED_RESULT_FORMATTER, itemNameString, itemTraitString)
-        entryColor = ZO_NORMAL_TEXT
+        local itemNameString = resultData.color:Colorize(resultData.name)
+        resultEntryData.text = zo_strformat(SI_KEYBOARD_RETRAIT_COMPLETED_RESULT_FORMATTER, itemNameString, itemTraitString)
     else
-        entryText = zo_strformat(SI_TOOLTIP_ITEM_NAME, itemInfo.name)
-        entryColor = itemQualityColor
+        resultEntryData.text = zo_strformat(SI_TOOLTIP_ITEM_NAME, resultData.name)
     end
 
-    local entry = {
-            lines = {
-                {text = entryText, icon = itemInfo.icon, stack = itemInfo.stack, meetsUsageRequirement = itemInfo.meetsUsageRequirement, entryColor = entryColor, itemInstanceId = itemInfo.itemInstanceId}
-            }
+    local displayData =
+    {
+        lines =
+        {
+            resultEntryData
         }
-    self.notifier:AddEntry(CRAFTING_RESULTS_TEMPLATE, entry)
+    }
+    self.notifier:AddEntry(CRAFTING_RESULTS_TEMPLATE, displayData)
 end
 
 function ZO_CraftingResults_Keyboard:ClearAll()

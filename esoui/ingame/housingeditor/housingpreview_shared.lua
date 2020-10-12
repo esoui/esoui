@@ -211,7 +211,7 @@ do
 
             local previousPriceLabel = buttonControl:GetNamedChild("PreviousPrice")
             if onSale then
-                local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(price))
+                local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, price)
                 local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
                 previousPriceLabel:SetText(strikethroughAmountString)
                 previousPriceLabel:ClearAnchors()

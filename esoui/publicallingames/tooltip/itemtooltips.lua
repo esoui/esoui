@@ -1823,7 +1823,7 @@ do
                 local amount = GetCurrencyAmount(currencyType, currencyLocation)
                 FORMAT_EXTRA_OPTIONS.currencyLocation = currencyLocation
                 local valueString = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS)
-                statValuePair:SetValue(zo_strformat(SI_NUMBER_FORMAT, valueString), self:GetStyle("currencyStatValuePairValue"))
+                statValuePair:SetValue(valueString, self:GetStyle("currencyStatValuePairValue"))
                 locationCurrenciesSection:AddStatValuePair(statValuePair)
             end 
         end

@@ -2466,6 +2466,7 @@ SafeAddString(SI_ITEM_FORMAT_STR_SET_COLLECTION_PIECE_LOCKED, "Not Collected", 0
 SafeAddString(SI_ITEM_FORMAT_STR_SET_COLLECTION_PIECE_RECONSTRUCTED, "Reconstructed", 0)
 SafeAddString(SI_ITEM_FORMAT_STR_SET_COLLECTION_PIECE_UNLOCKED, "Collected", 0)
 SafeAddString(SI_ITEM_FORMAT_STR_SET_NAME, "Part of the <<1>> set (<<2>>/<<3>> items)", 4)
+SafeAddString(SI_ITEM_FORMAT_STR_SET_NAME_NO_COUNT, "<<1>>", 0)
 SafeAddString(SI_ITEM_FORMAT_STR_SET_OR_SEPARATOR, "OR", 0)
 SafeAddString(SI_ITEM_FORMAT_STR_SET_PROC_BONUS, "(<<1[1 item/$d items]>>)", 6)
 SafeAddString(SI_ITEM_FORMAT_STR_SET_PROPERTY_BONUS, "(<<1[1 item/$d items]>>) Adds |cffffff<<2>>|r <<3>>", 6)

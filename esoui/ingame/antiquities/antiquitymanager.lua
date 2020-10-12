@@ -35,7 +35,7 @@ ZO_SCRYABLE_ANTIQUITY_CURRENT_ZONE_SUBCATEGORY_DATA = g_scryableAntiquityInCurre
 -- all leads subcategory
 local g_allLeadsAntiquityCategoryData = ZO_AntiquityFilterCategory:New(ZO_SCRYABLE_ANTIQUITY_ALL_LEADS_SUBCATEGORY_ID, GetString(SI_ANTIQUITY_SCRYABLE_ALL_LEADS_SUBCATEGORY), 1)
 local function MatchAllAntiquitiesWithLeads(antiquityData)
-    return antiquityData:IsInProgress() or (not antiquityData:HasAchievedAllGoals() and antiquityData:MeetsLeadRequirements() and antiquityData:MeetsAllScryingRequirements()) or antiquityData:HasDiscovered()
+    return antiquityData:IsInProgress() or antiquityData:MeetsLeadRequirements()
 end
 g_allLeadsAntiquityCategoryData:SetAntiquityFilterFunction(MatchAllAntiquitiesWithLeads)
 g_scryableAntiquityCategoryData:AddSubcategoryData(g_allLeadsAntiquityCategoryData)
@@ -294,6 +294,8 @@ function ZO_GetAntiquityScryingPassiveSkillInfo(passiveSkillRank)
             end
         end
     end
+
+    internalassert(false, "Unable to get passive rank data.")
 end
 
 function ZO_LayoutAntiquityRewardTooltip_Keyboard(antiquityOrSetData, control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY)

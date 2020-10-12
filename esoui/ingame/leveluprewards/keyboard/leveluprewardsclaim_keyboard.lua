@@ -105,7 +105,7 @@ function ZO_LevelUpRewardsClaim_Keyboard:SetupRewardRow(rowControl, data)
         end
         if stackCount and stackCount > 1 then
             local USE_LOWERCASE_NUMBER_SUFFIXES = false
-            local formattedCount = zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+            local formattedCount = ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
             rowControl.stackCountControl:SetText(formattedCount)
             rowControl.stackCountControl:SetHidden(false)
         else

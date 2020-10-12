@@ -157,7 +157,7 @@ function ZO_PlaceableFurnitureItem:RefreshInfo(bagId, slotIndex)
 
     local stackCount = self:GetStackCount()
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
-    self.formattedStackCount = zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+    self.formattedStackCount = ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
 end
 
 function ZO_PlaceableFurnitureItem:Preview()

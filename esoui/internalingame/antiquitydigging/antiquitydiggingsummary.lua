@@ -870,7 +870,7 @@ function ZO_AntiquityDiggingSummary:BeginEndOfGameFanfare(gameOverFlags)
             name = zo_strformat(SI_CURRENCY_CUSTOM_TOOLTIP_FORMAT, ZO_Currency_GetAmountLabel(id))
             icon = ZO_Currency_GetPlatformCurrencyLootIcon(id)
             local USE_SHORT_FORMAT = true
-            countText = ZO_CurrencyControl_FormatCurrency(count, USE_SHORT_FORMAT)
+            countText = ZO_CurrencyControl_FormatAndLocalizeCurrency(count, USE_SHORT_FORMAT)
         elseif lootType == LOOT_TABLE_ENTRY_TYPE_ITEM then
             name = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
             qualityColorDef = GetItemQualityColor(quality)

@@ -2297,8 +2297,8 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:UpdateMoneyInputAndDisplay(
     if self.singularCurrency then
         local bankedAmount = GetCurrencyAmount(currentCurrencyType, self.currencyBankLocation)
         local carriedAmount = GetCurrencyAmount(currentCurrencyType, GetCurrencyPlayerStoredLocation(self.currencyType))
-        local bankedText = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, bankedAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
-        local carriedText = zo_strformat(SI_NUMBER_FORMAT, ZO_Currency_FormatKeyboard(CURT_MONEY, carriedAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON))
+        local bankedText = ZO_Currency_FormatKeyboard(CURT_MONEY, bankedAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+        local carriedText = ZO_Currency_FormatKeyboard(CURT_MONEY, carriedAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
         self.bankedCurrencyLabel:SetText(bankedText)
         self.carriedCurrencyLabel:SetText(carriedText)
     else

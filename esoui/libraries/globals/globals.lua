@@ -112,12 +112,24 @@ function ZO_StripGrammarMarkupFromCharacterName(characterName)
 end
 
 local ABBREVIATION_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
-
+-- Anywhere using ZO_AbbreviateNumber needs to ultimately run through ZO_FastFormatDecimalNumber because <<f:1>> does not work with suffixes.
 function ZO_AbbreviateNumber(amount, precision, useUppercaseSuffixes)
     if amount >= ABBREVIATION_THRESHOLD then
         local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes)
 
         return ZO_CommaDelimitDecimalNumber(shortAmount) .. suffix
+    else
+        return amount
+    end
+end
+
+-- Anywhere using ZO_AbbreviateAndLocalizeNumber must NOT get passed through a <<f:1>> grammar format
+function ZO_AbbreviateAndLocalizeNumber(amount, precision, useUppercaseSuffixes)
+    if amount >= ABBREVIATION_THRESHOLD then
+        local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes)
+
+        local formattedNumber = ZO_CommaDelimitDecimalNumber(shortAmount) .. suffix
+        return ZO_FastFormatDecimalNumber(formattedNumber)
     else
         return amount
     end

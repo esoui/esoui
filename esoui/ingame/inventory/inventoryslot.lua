@@ -140,7 +140,7 @@ function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsage
     slotControl.stackCount = stackCount
     local stackCountLabel = GetControl(slotControl, "StackCount")
     if stackCount > 1 or slotControl.alwaysShowStackCount then
-        stackCountLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_AbbreviateNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)))
+        stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
     else
         stackCountLabel:SetText("")
     end

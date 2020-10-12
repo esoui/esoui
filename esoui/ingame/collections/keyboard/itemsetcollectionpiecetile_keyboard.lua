@@ -148,18 +148,9 @@ function ZO_ItemSetCollectionPieceTile_Keyboard:LayoutPlatform(data)
     iconTexture:SetTexture(iconFile)
 
     local isUnlocked = itemSetCollectionPieceData:IsUnlocked()
-    local desaturation = 1
-    local textureSampleProcessingWeightTable = ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE
-    if isUnlocked then
-        desaturation = 0
-        textureSampleProcessingWeightTable = ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE
-    end
-    iconTexture:SetDesaturation(desaturation)
+    local desaturation = isUnlocked and 0 or 1
     self:GetHighlightControl():SetDesaturation(desaturation)
-
-    for type, weight in pairs(textureSampleProcessingWeightTable) do
-        iconTexture:SetTextureSampleProcessingWeight(type, weight)
-    end
+    ZO_SetDefaultIconSilhouette(iconTexture, not isUnlocked)
     iconTexture:SetHidden(false)
 
     -- Status

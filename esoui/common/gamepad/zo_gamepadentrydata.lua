@@ -334,6 +334,11 @@ function ZO_GamepadEntryData:SetIconSampleProcessingWeightTable(typeToWeightTabl
     self.textureSampleProcessingWeights = typeToWeightTable
 end
 
+-- See comment for SetIconDesaturation
+function ZO_GamepadEntryData:SetIconColor(color)
+    self.iconColor = color
+end
+
 function ZO_GamepadEntryData:AddSubLabel(text)
     if not self.subLabels then
         self.subLabels = {}

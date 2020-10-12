@@ -1,3 +1,9 @@
+ZO_CRAFTING_RESULT_TYPE =
+{
+    ITEM = 1,
+    CURRENCY = 2,
+}
+
 local g_forceCenterResultsText = false
 
 function ZO_CraftingResults_Base_PlayPulse(control)
@@ -385,13 +391,14 @@ do
                 self:DisplayDiscoveredTraits()
             end
 
+            local numResultCurrencies = GetNumLastCraftingResultCurrencies()
             local numItemsGained, penaltyApplied = GetNumLastCraftingResultItemsAndPenalty()
 
             if penaltyApplied then
                 TriggerTutorial(TUTORIAL_TRIGGER_DECONSTRUCTION_LEVEL_PENALTY)
             end
 
-            if numItemsGained == 0 then
+            if numItemsGained == 0 and numResultCurrencies == 0 then
                 if craftingType == CRAFTING_TYPE_ALCHEMY then
                     -- Crafted inert potion
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_ALCHEMY_NO_YIELD)
@@ -413,18 +420,22 @@ do
             else
                 local shouldDisplayMessages = self:ShouldDisplayMessages()
                 local finalItemSoundCategory = ITEM_SOUND_CATEGORY_NONE
-
+                local resultIndex = 0
                 local resultItems = {}
                 for i = 1, numItemsGained do
                     local name, icon, stack, sellPrice, meetsUsageRequirement, equipType, itemType, itemStyle, displayQuality, itemSoundCategory, itemInstanceId = GetLastCraftingResultItemInfo(i)
+
                     -- Don't save messages if we can't display them immediately
                     if shouldDisplayMessages then
+                        resultIndex = resultIndex + 1
                         table.insert(resultItems,
                         {
-                            resultIndex = i,
+                            resultType = ZO_CRAFTING_RESULT_TYPE.ITEM,
+                            resultIndex = resultIndex,
                             name = name,
                             icon = icon,
                             stack = stack,
+                            color = GetItemQualityColor(displayQuality),
                             sellPrice = sellPrice,
                             meetsUsageRequirement = meetsUsageRequirement,
                             equipType = equipType,
@@ -445,9 +456,30 @@ do
                 end
 
                 table.sort(resultItems, CompareCraftingResultItems)
+                for _, resultItem in ipairs(resultItems) do
+                    self:DisplayCraftingResult(resultItem)
+                end
 
-                for _, result in ipairs(resultItems) do
-                    self:DisplayCraftingResult(result)
+                if numResultCurrencies ~= 0 and shouldDisplayMessages then
+                    -- Append any resulting currencies after any resulting items.
+                    for currencyIndex = 1, numResultCurrencies do
+                        resultIndex = resultIndex + 1
+                        local currencyType, currencyAmount = GetLastCraftingResultCurrencyInfo(currencyIndex)
+                        local IS_SINGULAR = true
+                        local IS_NOT_UPPERCASE = false
+                        local currencyName = GetCurrencyName(currencyType, IS_SINGULAR, IS_NOT_UPPERCASE)
+                        local resultData =
+                        {
+                            resultType = ZO_CRAFTING_RESULT_TYPE.CURRENCY,
+                            resultIndex = resultIndex,
+                            currencyType = currencyType,
+                            name = currencyName,
+                            icon = ZO_Currency_GetPlatformCurrencyIcon(currencyType),
+                            stack = currencyAmount,
+                            color = ZO_Currency_GetPlatformColor(currencyType),
+                        }
+                        self:DisplayCraftingResult(resultData)
+                    end
                 end
 
                 local gainedBooster = DidLastCraftGainBooster(numItemsGained)
@@ -492,8 +524,24 @@ function ZO_CraftingResults_Base:HasEntries()
     return false
 end
 
-function ZO_CraftingResults_Base:IsActive()
-    assert(false, "You must override the IsActive function when inheriting from ZO_CraftingResults_Base")
+function ZO_CraftingResults_Base:AreCraftingResultsEqual(left, right)
+    local resultType = left.resultType
+    if resultType ~= right.resultType then
+        return false
+    end
+
+    if resultType == ZO_CRAFTING_RESULT_TYPE.ITEM then
+        return left.itemInstanceId == right.itemInstanceId
+    elseif resultType == ZO_CRAFTING_RESULT_TYPE.CURRENCY then
+        return left.currencyType == right.currencyType
+    else
+        internalassert(false, "No equality has been defined for crafting result type %d.", resultType)
+        return false
+    end
+end
+
+function ZO_CraftingResults_Base:DisplayCraftingResult()
+    assert(false, "You must override the DisplayCraftingResult function when inheriting from ZO_CraftingResults_Base")
 end
 
 function ZO_CraftingResults_Base:DisplayDiscoveredTraits()
@@ -504,10 +552,14 @@ function ZO_CraftingResults_Base:DisplayTranslatedRunes()
     assert(false, "You must override the DisplayTranslatedRunes function when inheriting from ZO_CraftingResults_Base")
 end
 
-function ZO_CraftingResults_Base:ShouldDisplayMessages()
-    assert(false, "You must override the ShouldDisplayMessages function when inheriting from ZO_CraftingResults_Base")
-end
-
 function ZO_CraftingResults_Base:FadeAll()
     assert(false, "You must override the FadeAll function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:IsActive()
+    assert(false, "You must override the IsActive function when inheriting from ZO_CraftingResults_Base")
+end
+
+function ZO_CraftingResults_Base:ShouldDisplayMessages()
+    assert(false, "You must override the ShouldDisplayMessages function when inheriting from ZO_CraftingResults_Base")
 end

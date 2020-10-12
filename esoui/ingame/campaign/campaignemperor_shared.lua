@@ -208,7 +208,7 @@ function CampaignEmperor_Shared:SetupLeaderboardEntry(control, data)
 
     local userFacingName = ZO_GetPlatformUserFacingName(data.name, data.displayName)
     control.nameLabel:SetText(userFacingName)
-    control.pointsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(data.points)))
+    control.pointsLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, data.points))
     
     local allianceTexture = GetPlatformAllianceSymbolIcon(data.alliance)
     if allianceTexture then

@@ -138,7 +138,7 @@ do
         rowControl.textCallout:ClearAnchors()
 
         if onSale then
-            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(cost))
+            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, cost)
             local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
             rowControl.previousCost:SetText(strikethroughAmountString)
 
@@ -152,7 +152,7 @@ do
         -- format the price with the currency icon
         -- done this way so we can easily change the color of the string
         local currencyIcon = ZO_Currency_GetKeyboardFormattedCurrencyIcon(ZO_Currency_MarketCurrencyToUICurrency(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
-        local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(costAfterDiscount)), currencyIcon)
+        local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, costAfterDiscount), currencyIcon)
 
         rowControl.cost:SetText(currencyString)
         rowControl.cost:SetColor(currencyColorR, currencyColorG, currencyColorB, 1)

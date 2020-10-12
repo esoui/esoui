@@ -1409,18 +1409,12 @@ function ZO_AntiquityIcon_SetData(control, tileData)
     control.antiquityData = tileData
     local textureControl = control:GetNamedChild("Icon")
     local textureIcon = tileData:HasDiscovered() and tileData:GetIcon() or ZO_ANTIQUITY_UNKNOWN_ICON_TEXTURE
-    local showSilhouette = textureIcon ~= ZO_ANTIQUITY_UNKNOWN_ICON_TEXTURE and not tileData:HasRecovered()
-
     textureControl:SetTexture(textureIcon)
-    if showSilhouette then
+
+    local isLocked = textureIcon ~= ZO_ANTIQUITY_UNKNOWN_ICON_TEXTURE and not tileData:HasRecovered()
+    ZO_SetDefaultIconSilhouette(textureControl, isLocked)
+    if not tileData:IsComplete() then
         textureControl:SetDesaturation(1)
-        textureControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 0.7)
-        textureControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB, 0.3)
-    else
-        local desaturation = tileData:IsComplete() and 0 or 1
-        textureControl:SetDesaturation(desaturation)
-        textureControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
-        textureControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB, 0)
     end
 
     if control.status then

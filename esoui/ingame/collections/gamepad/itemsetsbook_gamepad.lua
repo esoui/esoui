@@ -81,6 +81,8 @@ function ZO_ItemSetsBook_Gamepad_Base:OnGridListSelectedDataChanged(previousData
         local HIDE_TRAIT = true
         GAMEPAD_TOOLTIPS:LayoutItemSetCollectionPieceLink(GAMEPAD_RIGHT_TOOLTIP, newData:GetItemLink(), HIDE_TRAIT)
     end
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.gridKeybindStripDescriptor)
 end
 
 function ZO_ItemSetsBook_Gamepad_Base:BuildSubcategoryList(parentCategoryData)
@@ -306,23 +308,17 @@ function ZO_ItemSetsBook_Gamepad_Base:InitializeGridList()
     self.headerEntryDataObjectPool = ZO_EntryDataPool:New(ZO_EntryData)
 
     local function ItemSetCollectionPieceGridEntrySetup(control, data, list)
+        ZO_DefaultGridEntrySetup(control, data, list)
+        self:RefreshGridEntryMultiIcon(control, data)
+
         if data.isEmptyCell then
             control:SetAlpha(0.4)
         else
-            local locked = data:IsLocked()
-            if locked then
-                data:SetIconDesaturation(1)
-                data:SetIconSampleProcessingWeightTable(ZO_LOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
-                control:SetAlpha(0.4)
-            else
-                data:SetIconDesaturation(0)
-                data:SetIconSampleProcessingWeightTable(ZO_UNLOCKED_ICON_SAMPLE_PROCESSING_WEIGHT_TABLE)
-                control:SetAlpha(1)
+            control:SetAlpha(1)
+            if control.icon then
+                ZO_SetDefaultIconSilhouette(control.icon, data:IsLocked())
             end
         end
-
-        ZO_DefaultGridEntrySetup(control, data, list)
-        self:RefreshGridEntryMultiIcon(control, data)
     end
 
     local HIDE_CALLBACK = nil

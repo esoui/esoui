@@ -12,6 +12,8 @@ end
 function ZO_ItemSetsBook_Keyboard:Initialize(control)
     ZO_ItemSetsBook_Shared.Initialize(self, control)
 
+    self.collapsedSetIds = {}
+
     ITEM_SETS_BOOK_SCENE = self:GetScene()
     ITEM_SETS_BOOK_FRAGMENT = self:GetFragment()
 end
@@ -55,11 +57,54 @@ function ZO_ItemSetsBook_Keyboard:RefreshCategoryProgress()
     end
 end
 
+function ZO_ItemSetsBook_Keyboard:SetAllHeadersCollapseState(collapsed)
+    if collapsed then
+        for _, itemSetCollectionData in ITEM_SET_COLLECTIONS_DATA_MANAGER:ItemSetCollectionIterator() do
+            self.collapsedSetIds[itemSetCollectionData:GetId()] = true
+        end
+    else
+        ZO_ClearTable(self.collapsedSetIds)
+    end
+
+    local dataList = self.gridListPanelList:GetData()
+    for _, entryData in ipairs(dataList) do
+        local header = entryData.data.header
+        if header then
+            header.collapsed = collapsed
+        end
+    end
+    self.gridListPanelList:RecalculateVisibleEntries()
+end
+
 function ZO_ItemSetsBook_Keyboard:OnContentHeaderMouseUp(control, button, upInside)
-    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+    if upInside then
         local headerData = control.dataEntry.data.header
-        headerData.collapsed = not headerData.collapsed
-        self.gridListPanelList:RecalculateVisibleEntries()
+        local function ToggleHeaderExpansion()
+            headerData.collapsed = not headerData.collapsed
+            if headerData.collapsed then
+                self.collapsedSetIds[headerData:GetId()] = true
+            else
+                self.collapsedSetIds[headerData:GetId()] = nil
+            end
+            self.gridListPanelList:RecalculateVisibleEntries()
+        end
+
+        if button == MOUSE_BUTTON_INDEX_LEFT then
+            ToggleHeaderExpansion()
+        elseif button == MOUSE_BUTTON_INDEX_RIGHT then
+            ClearMenu()
+
+            if headerData.collapsed then
+                AddMenuItem(GetString(SI_ITEM_SETS_BOOK_HEADER_EXPAND), ToggleHeaderExpansion)
+            else
+                AddMenuItem(GetString(SI_ITEM_SETS_BOOK_HEADER_COLLAPSE), ToggleHeaderExpansion)
+            end
+
+            AddMenuItem(GetString(SI_ITEM_SETS_BOOK_HEADER_EXPAND_ALL), function() self:SetAllHeadersCollapseState(false) end)
+            AddMenuItem(GetString(SI_ITEM_SETS_BOOK_HEADER_COLLAPSE_ALL), function() self:SetAllHeadersCollapseState(true) end)
+
+            ShowMenu(control)
+        end
     end
 end
 
@@ -324,6 +369,10 @@ end
 
 function ZO_ItemSetsBook_Keyboard:GetGridHeaderEntryDataObjectPool()
     return self.entryDataObjectPool
+end
+
+function ZO_ItemSetsBook_Keyboard:IsSetHeaderCollapsed(itemSetId)
+    return self.collapsedSetIds[itemSetId] or false
 end
 
 function ZO_ItemSetsBook_Keyboard:IsSearchSupported()

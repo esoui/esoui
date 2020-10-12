@@ -199,6 +199,10 @@ function ZO_DefaultGridEntrySetup(control, data, list)
 
     local icon = control.icon
 
+    if data.iconColor then
+        icon:SetColor(data.iconColor:UnpackRGBA())
+    end
+
     if data.iconDesaturation then
         icon:SetDesaturation(data.iconDesaturation)
     end

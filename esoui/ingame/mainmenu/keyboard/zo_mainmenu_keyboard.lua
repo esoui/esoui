@@ -35,10 +35,10 @@ ZO_CATEGORY_LAYOUT_INFO =
             membershipControl:SetText(esoPlusString)
             remainingCrownsControl:SetHidden(false)
             local currentCrownBalance = GetPlayerCrowns()
-            remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(currentCrownBalance)))
+            remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, currentCrownBalance))
             button:RegisterForEvent(EVENT_CROWN_UPDATE, function(currencyAmount)
                 local playerCrownBalance = GetPlayerCrowns()
-                remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, ZO_CommaDelimitNumber(playerCrownBalance)))
+                remainingCrownsControl:SetText(zo_strformat(SI_NUMBER_FORMAT, playerCrownBalance))
             end)
         end,
         onResetCallback = function(button)

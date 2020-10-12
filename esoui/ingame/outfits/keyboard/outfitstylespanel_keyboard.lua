@@ -87,15 +87,13 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
     local function OutfitStyleGridEntrySetup(control, data, selected)
         ZO_DefaultGridEntrySetup(control, data, selected)
 
-        if data.iconDesaturation == 1 then
+        self:RefreshGridEntryMultiIcon(control, data)
+
+        if data.isEmptyCell then
             control:SetAlpha(0.4)
         else
             control:SetAlpha(1)
-        end
-
-        self:RefreshGridEntryMultiIcon(control, data)
-
-        if not data.isEmptyCell then
+            ZO_SetDefaultIconSilhouette(control.icon, not data.clearAction and data:IsLocked())
             control.highlight:SetDesaturation(data.iconDesaturation)
             local isCurrent = false
             local isPending = false

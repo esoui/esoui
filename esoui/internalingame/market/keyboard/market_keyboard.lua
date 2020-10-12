@@ -1006,6 +1006,34 @@ do
     end
 end
 
+function ZO_Market_Keyboard:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult)
+    local NO_DIALOG_DATA = nil
+    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DIALOG_DATA, dialogParams)
+        return true
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", NO_DIALOG_DATA, dialogParams)
+        return true
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_GRACE_PERIOD_ACTIVE then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD", {}, dialogParams)
+        return true
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_NOT_ALLOWED then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED", NO_DIALOG_DATA, dialogParams)
+        return true
+    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY", NO_DIALOG_DATA, dialogParams)
+        return true
+    elseif not allowContinue then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DIALOG_DATA, dialogParams)
+        return true
+    elseif hasErrors then
+        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", { marketProductData = marketProductData }, dialogParams)
+        return true
+    else
+        return false
+    end
+end
+
 do
     local function GetGiftErrorInfo(...)
         return ZO_MARKET_MANAGER:GetMarketProductGiftErrorInfo(...)
@@ -1013,7 +1041,31 @@ do
     local IS_GIFTING = true
     function ZO_Market_Keyboard:GiftMarketProduct(marketProductData)
         if marketProductData:IsHouseCollectible() then
-            ZO_Dialogs_ShowDialog("MARKET_PURCHASE_HOUSE_TEMPLATE_SELECTION", { marketProductData = marketProductData, isGift = IS_GIFTING })
+            local isHouseMarketProduct, houseTemplateDataList, defaultHouseTemplateIndex = ZO_MarketProduct_GetMarketProductHouseTemplateDataList(marketProductData.marketProductId, function(...) return { GetActiveMarketProductListingsForHouseTemplate(...) } end)
+
+            local hasGiftableTemplate = false
+            local firstErrorResult = nil
+            for index, houseTemplateData in pairs(houseTemplateDataList) do
+                local currencyType, marketData = next(houseTemplateData.marketPurchaseOptions)
+                local houseTemplateMarketProductData = ZO_MarketProductData:New(marketData.marketProductId, marketData.presentationIndex)
+
+                local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = GetGiftErrorInfo(houseTemplateMarketProductData)
+
+                if hasErrors and not firstErrorResult then
+                    firstErrorResult =
+                    {
+                        hasErrors = hasErrors,
+                        dialogParams = dialogParams,
+                        allowContinue = allowContinue,
+                        expectedPurchaseResult = expectedPurchaseResult,
+                    }
+                end
+                hasGiftableTemplate = hasGiftableTemplate or not hasErrors
+            end
+
+            if hasGiftableTemplate or not self:ShowExpectedErrorDialog(firstErrorResult.hasErrors, firstErrorResult.dialogParams, firstErrorResult.allowContinue, firstErrorResult.expectedPurchaseResult) then
+                ZO_Dialogs_ShowDialog("MARKET_PURCHASE_HOUSE_TEMPLATE_SELECTION", { marketProductData = marketProductData, isGift = IS_GIFTING })
+            end
         else
             self:StartPurchaseFlow(marketProductData, GetGiftErrorInfo, IS_GIFTING)
         end
@@ -1026,22 +1078,7 @@ function ZO_Market_Keyboard:StartPurchaseFlow(marketProductData, errorInfoFuncti
 
     local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(marketProductData)
 
-    local NO_DIALOG_DATA = nil
-    if expectedPurchaseResult == MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DIALOG_DATA, dialogParams)
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_PURCHASE_CROWNS", NO_DIALOG_DATA, dialogParams)
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_GRACE_PERIOD_ACTIVE then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_GRACE_PERIOD", {}, dialogParams)
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_GIFTING_NOT_ALLOWED then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_GIFTING_NOT_ALLOWED", NO_DIALOG_DATA, dialogParams)
-    elseif expectedPurchaseResult == MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_ALREADY_HAVE_PRODUCT_IN_GIFT_INVENTORY", NO_DIALOG_DATA, dialogParams)
-    elseif not allowContinue then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_EXIT", NO_DIALOG_DATA, dialogParams)
-    elseif hasErrors then
-        ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_CONTINUE", { marketProductData = marketProductData }, dialogParams)
-    else
+    if not self:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult) then
         ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", { marketProductData = marketProductData, isGift = isGift })
     end
 

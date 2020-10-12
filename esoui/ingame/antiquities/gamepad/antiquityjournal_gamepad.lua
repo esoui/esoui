@@ -226,6 +226,8 @@ do
                 dropdown:SetSortsItems(false)
                 dropdown:ClearItems()
 
+                table.insert(data.dialog.dropdowns, dropdown)
+
                 local entries = {}
                 for i = ANTIQUITY_FILTER_MIN_VALUE, ANTIQUITY_FILTER_MAX_VALUE do
                     local function OnItemSelected()
@@ -247,6 +249,14 @@ do
 end
 
 function ZO_AntiquityJournalGamepad:InitializeOptionsDialog()
+    local function OnReleaseDialog(dialog)
+        if dialog.dropdowns then
+            for i, dropdown in pairs(dialog.dropdowns) do
+                dropdown:Deactivate()
+            end
+        end
+        dialog.dropdowns = nil
+    end
     -- Initialize filter to show all
     self.currentFilter = ANTIQUITY_FILTER_SHOW_ALL
 
@@ -263,7 +273,7 @@ function ZO_AntiquityJournalGamepad:InitializeOptionsDialog()
         setup = function(dialog)
            local parametricListEntries = dialog.info.parametricList
             ZO_ClearNumericallyIndexedTable(parametricListEntries)
-
+            dialog.dropdowns = {}
             local filterDropdown =
             {
                 template = "ZO_GamepadDropdownItem",
@@ -298,17 +308,7 @@ function ZO_AntiquityJournalGamepad:InitializeOptionsDialog()
                 end,
             },
         },
-        noChoiceCallback = function(dialog)
-            local parametricList = dialog.info.parametricList
-            for i, entry in ipairs(parametricList) do
-                if entry.entryData.action.isDropdown then
-                    local control = dialog.entryList:GetControlFromData(entry.entryData)
-                    if control then
-                        control.dropdown:Deactivate()
-                    end
-                end
-            end
-        end
+        noChoiceCallback = OnReleaseDialog,
     })
 end
 
@@ -832,7 +832,8 @@ function ZO_AntiquityJournalListGamepad:InitializeLists()
             end,
             visible = function()
                 local categoryData = self:GetCurrentSubcategoryData()
-                return ZO_IsAntiquityScryableSubcategory(categoryData)
+                local antiquityData = self:GetCurrentAntiquityData()
+                return ZO_IsAntiquityScryableSubcategory(categoryData) and antiquityData ~= nil
             end,
         },
         {
@@ -949,10 +950,13 @@ function ZO_AntiquityJournalListGamepad:CreateOptionActionDataViewInCodex()
 end
 
 function ZO_AntiquityJournalListGamepad:CreateOptionsDialogActions()
+    local antiquityData = self:GetCurrentAntiquityData()
     local actionsTable = {}
 
-    table.insert(actionsTable, self:CreateOptionActionDataAbandonFragments())
-    table.insert(actionsTable, self:CreateOptionActionDataShowOnMap())
+    if antiquityData and antiquityData:IsInProgress() then
+        table.insert(actionsTable, self:CreateOptionActionDataAbandonFragments())
+        table.insert(actionsTable, self:CreateOptionActionDataShowOnMap())
+    end
     table.insert(actionsTable, self:CreateOptionActionDataViewInCodex())
 
     return actionsTable
@@ -1183,10 +1187,6 @@ do
 
             if ZO_IsAntiquityScryableSubcategory(currentSubcategoryData) then
                 local scryableAntiquitySections = ANTIQUITY_MANAGER:GetOrCreateAntiquitySectionList()
-                if not internalassert(scryableAntiquitySections ~= nil, "Scryable antiquity section list is nil. This list should not be requested prior to player activation.") then
-                    -- This should not happen.
-                    return
-                end
 
                 for _, antiquitySection in ipairs(scryableAntiquitySections) do
                     ZO_ClearNumericallyIndexedTable(antiquitySection.list)
@@ -1366,17 +1366,13 @@ function ZO_AntiquityJournalListGamepad:SetupBaseRow(control, data)
 
     local iconTextureFile = hasDiscovered and data:GetIcon() or ZO_ANTIQUITY_UNKNOWN_ICON_TEXTURE
     local iconTexture = control.iconTexture
-    if hasDiscovered and not hasRecovered then
-        iconTexture:SetDesaturation(1)
-        iconTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 0.7)
-        iconTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB, 0.3)
-    else
-        local desaturation = data:IsComplete() and 0 or 1
-        iconTexture:SetDesaturation(desaturation)
-        iconTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
-        iconTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB, 0)
-    end
     iconTexture:SetTexture(iconTextureFile)
+
+    local isLocked = hasDiscovered and not hasRecovered
+    ZO_SetDefaultIconSilhouette(iconTexture, isLocked)
+    if not data:IsComplete() then
+        iconTexture:SetDesaturation(1)
+    end
 end
 
 function ZO_AntiquityJournalListGamepad:SetupBaseLogbookRow(control, data)
