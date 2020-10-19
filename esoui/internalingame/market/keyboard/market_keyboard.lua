@@ -1006,7 +1006,7 @@ do
     end
 end
 
-function ZO_Market_Keyboard:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult)
+function ZO_Market_Keyboard:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult, marketProductData)
     local NO_DIALOG_DATA = nil
     if expectedPurchaseResult == MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS then
         ZO_Dialogs_ShowDialog("MARKET_CROWN_STORE_PURCHASE_ERROR_JOIN_ESO_PLUS", NO_DIALOG_DATA, dialogParams)
@@ -1063,7 +1063,7 @@ do
                 hasGiftableTemplate = hasGiftableTemplate or not hasErrors
             end
 
-            if hasGiftableTemplate or not self:ShowExpectedErrorDialog(firstErrorResult.hasErrors, firstErrorResult.dialogParams, firstErrorResult.allowContinue, firstErrorResult.expectedPurchaseResult) then
+            if hasGiftableTemplate or not self:ShowExpectedErrorDialog(firstErrorResult.hasErrors, firstErrorResult.dialogParams, firstErrorResult.allowContinue, firstErrorResult.expectedPurchaseResult, marketProductData) then
                 ZO_Dialogs_ShowDialog("MARKET_PURCHASE_HOUSE_TEMPLATE_SELECTION", { marketProductData = marketProductData, isGift = IS_GIFTING })
             end
         else
@@ -1078,7 +1078,7 @@ function ZO_Market_Keyboard:StartPurchaseFlow(marketProductData, errorInfoFuncti
 
     local hasErrors, dialogParams, allowContinue, expectedPurchaseResult = errorInfoFunction(marketProductData)
 
-    if not self:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult) then
+    if not self:ShowExpectedErrorDialog(hasErrors, dialogParams, allowContinue, expectedPurchaseResult, marketProductData) then
         ZO_Dialogs_ShowDialog("MARKET_PURCHASE_CONFIRMATION", { marketProductData = marketProductData, isGift = isGift })
     end
 

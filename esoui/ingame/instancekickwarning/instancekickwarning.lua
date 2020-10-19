@@ -26,6 +26,7 @@ do
 
         self.container:ClearAnchors()
         self.container:SetAnchor(BOTTOM, nil, BOTTOM, 0, style.anchorOffsetY)
+        ApplyTemplateToControl(self.keybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
     end
 
     function ZO_InstanceKickWarning:Initialize(control)

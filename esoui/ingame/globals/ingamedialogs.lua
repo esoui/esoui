@@ -2860,6 +2860,36 @@ ESO_Dialogs["CONFIRM_EQUIP_ITEM"] =
     },
 }
 
+ESO_Dialogs["CONFIRM_BIND_ITEM"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_DIALOG_CONFIRM_BINDING_ITEM_TITLE,
+    },
+    mainText =
+    {
+        text = SI_DIALOG_CONFIRM_BIND_ITEM_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                dialog.data.onAcceptCallback()
+            end,
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
 do
     ZO_GAMEPAD_INVENTORY_ACTION_DIALOG = "GAMEPAD_INVENTORY_ACTIONS_DIALOG"
     local function ActionsDialogSetup(dialog, data)

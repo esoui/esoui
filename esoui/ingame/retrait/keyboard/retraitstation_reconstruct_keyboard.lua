@@ -37,6 +37,7 @@ function ZO_RetraitStation_Reconstruct_Keyboard:Initialize(control, owner)
         end
     end)
 
+    self.isCraftInProgress = false
     self.isCurrencyValid = false
     self.isQualityValid = false
     self.isTraitValid = false
@@ -54,11 +55,20 @@ end
 function ZO_RetraitStation_Reconstruct_Keyboard:InitializeEvents()
     ZO_RETRAIT_STATION_MANAGER:RegisterCallback("OnRetraitDirtyEvent", function(...) self:HandleDirtyEvent(...) end)
 
-    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
+    local function OnCraftStarted()
+        self.isCraftInProgress = true
+    end
+
+    local function OnCraftStopped()
+        self.isCraftInProgress = false
+
         if self:IsOptionsModeShowing() then
             self:ShowSelectionMode()
         end
-    end)
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", OnCraftStarted)
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftStopped)
 end
 
 function ZO_RetraitStation_Reconstruct_Keyboard:InitializeOptionsPanel()
@@ -267,6 +277,8 @@ function ZO_RetraitStation_Reconstruct_Keyboard:InitializeKeybindStripDescriptor
             end,
         },
     }
+
+    ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 
 function ZO_RetraitStation_Reconstruct_Keyboard:GetKeybindDescriptor()
@@ -339,7 +351,7 @@ function ZO_RetraitStation_Reconstruct_Keyboard:IsSelectionModeShowing()
 end
 
 function ZO_RetraitStation_Reconstruct_Keyboard:IsReconstructionEnabled()
-    return self.isCurrencyValid and self.isQualityValid and self.isTraitValid
+    return not self.isCraftInProgress and self.isCurrencyValid and self.isQualityValid and self.isTraitValid
 end
 
 function ZO_RetraitStation_Reconstruct_Keyboard:ResetOptions()
@@ -618,7 +630,7 @@ function ZO_RetraitStation_Reconstruct_Keyboard:OnHorizonalScrollListCleared(lis
 end
 
 function ZO_RetraitStation_Reconstruct_Keyboard:OnImprovementQualityMouseDown(control, button)
-    if button == MOUSE_BUTTON_INDEX_LEFT and not control.tierData.isDisabled then
+    if button == MOUSE_BUTTON_INDEX_LEFT and not control.tierData.isDisabled and not self.isCraftInProgress then
         if self:GetSelectedQuality() == control.tierData.quality then
             self:ClearSelectedQuality()
         else
@@ -629,6 +641,10 @@ function ZO_RetraitStation_Reconstruct_Keyboard:OnImprovementQualityMouseDown(co
 end
 
 function ZO_RetraitStation_Reconstruct_Keyboard:OnImprovementQualityMouseEnter(control)
+    if self.isCraftInProgress then
+        return
+    end
+
     local tierData = control.tierData
     tierData.isMouseOver = not tierData.isDisabled
     self:Refresh()

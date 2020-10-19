@@ -1166,7 +1166,7 @@ do
                 end
             end
             inventory.currentFilter, activeTabText, inventory.hiddenColumns = self:GetTabFilterInfo(inventoryType, currentFilter)
-            inventory.additionalFilter, activeSubTabText = self:GetTabFilterInfo(inventoryType, filterTab)
+            inventory.subFilter, activeSubTabText = self:GetTabFilterInfo(inventoryType, filterTab)
 
             formattedTabText = zo_strformat(SI_INVENTORY_FILTER_WITH_SUB_TAB, activeTabText, activeSubTabText)
         else
@@ -1585,6 +1585,16 @@ do
     end
 end
 
+local function DoesSlotPassSubFilter(slot, currentFilter, subFilter)
+    if type(subFilter) == "function" then
+        return subFilter(slot)
+    elseif type(subFilter) == "number" then
+        return ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter)
+    end
+
+    return true
+end
+
 local function DoesSlotPassAdditionalFilter(slot, currentFilter, additionalFilter)
     if type(additionalFilter) == "function" then
         return additionalFilter(slot)
@@ -1606,11 +1616,15 @@ function ZO_InventoryManager:ShouldAddSlotToList(inventory, slot)
 
     local currentFilter = inventory.currentFilter
 
-    if not DoesSlotPassAdditionalFilter(slot, currentFilter, inventory.additionalFilter) then
+    if not DoesSlotPassSubFilter(slot, currentFilter, inventory.subFilter) then
         return false
     end
 
-    if self.appliedLayout and self.appliedLayout.additionalFilter and not DoesSlotPassAdditionalFilter(slot, currentFilter, self.appliedLayout.additionalFilter) then
+    if not DoesSlotPassAdditionalFilter(slot,  currentFilter, inventory.additionalFilter) then
+        return false
+    end
+
+    if self.appliedLayout and self.appliedLayout.additionalFilter and not DoesSlotPassAdditionalFilter(slot,  currentFilter, self.appliedLayout.additionalFilter) then
         return false
     end
 

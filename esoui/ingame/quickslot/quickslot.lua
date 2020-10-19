@@ -567,10 +567,12 @@ function ZO_QuickslotManager:AppendQuestItemData(scrollData)
             else
                 questItemData.searchData =
                 {
-                    type = ZO_TEXT_SEARCH_TYPE_QUEST_TOOL,
-                    questIndex = questItemId,
+                    type = ZO_TEXT_SEARCH_TYPE_QUEST_ITEM,
+                    questIndex = questItemData.questIndex,
+                    stepIndex = questItemData.stepIndex,
+                    conditionIndex = questItemData.conditionIndex,
                     toolIndex = questItemData.toolIndex,
-                    index = questItemId.index,
+                    index = questItemData.slotIndex,
                 }
             end
 

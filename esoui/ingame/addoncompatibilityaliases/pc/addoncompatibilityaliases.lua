@@ -46,11 +46,17 @@ PLAYER_DIFFICULTY_LEVEL_THIRD_ALLIANCE = CADWELL_PROGRESSION_LEVEL_GOLD
 -- Player Inventory List Control
 ZO_PlayerInventoryBackpack = ZO_PlayerInventoryList
 
-ZO_PlayerInventorySearch = ZO_PlayerInventorySearchTextSearch
-ZO_PlayerBankSearch = ZO_PlayerBankSearchTextSearch
-ZO_HouseBankSearch = ZO_HouseBankSearchTextSearch
-ZO_GuildBankSearch = ZO_GuildBankSearchTextSearch
-ZO_CraftBagSearch = ZO_CraftBagSearchTextSearch
+ZO_PlayerInventorySearch = ZO_PlayerInventorySearchFiltersTextSearch
+ZO_PlayerBankSearch = ZO_PlayerBankSearchFiltersTextSearch
+ZO_HouseBankSearch = ZO_HouseBankSearchFiltersTextSearch
+ZO_GuildBankSearch = ZO_GuildBankSearchFiltersTextSearch
+ZO_CraftBagSearch = ZO_CraftBagSearchFiltersTextSearch
+
+ZO_PlayerInventorySearchBox = ZO_PlayerInventorySearchFiltersTextSearchBox
+ZO_PlayerBankSearchBox = ZO_PlayerBankSearchFiltersTextSearchBox
+ZO_HouseBankSearchBox = ZO_HouseBankSearchFiltersTextSearchBox
+ZO_GuildBankSearchBox = ZO_GuildBankSearchFiltersTextSearchBox
+ZO_CraftBagSearchBox = ZO_CraftBagSearchFiltersTextSearchBox
 
 --Raid function rename
 GetRaidReviveCounterInfo = GetRaidReviveCountersRemaining
@@ -928,3 +934,5 @@ function ZO_LeaderboardBase_Shared:TryRemoveKeybind()
         KEYBIND_STRIP:RemoveKeybindButton(self.keybind)
     end
 end
+
+ZO_RETRAIT_STATION_KEYBOARD.retraitPanel = ZO_RETRAIT_KEYBOARD

@@ -906,7 +906,7 @@ function ZO_GuildBank_Gamepad:InitializeKeybindStripDescriptors()
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.withdrawKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
         local targetData = self:GetTargetData()
-        if targetData.isTextSearchEntry then
+        if targetData and targetData.isTextSearchEntry then
             self:UnhighlightSearch()
             self.withdrawList:MoveNext()
         end

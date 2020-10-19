@@ -34,11 +34,19 @@ function ZO_RetraitStation_Reconstruct_Gamepad:Initialize(control, scene)
     self.materialContainer = self.costContainer:GetNamedChild("SummaryMaterials")
     self.materialPool = ZO_ControlPool:New("ZO_GamepadDisplayEntryTemplateLowercase34", self.materialContainer)
 
-    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
+    local function OnCraftStarted()
+        self.isCraftInProgress = true
+    end
+
+    local function OnCraftStopped()
+        self.isCraftInProgress = false
         if self:IsOptionsModeShowing() then
             self:ShowItemSetsBook()
         end
-    end)
+    end
+
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", OnCraftStarted)
+    CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", OnCraftStopped)
 end
 
 function ZO_RetraitStation_Reconstruct_Gamepad:OnHorizonalScrollListCleared(list)
@@ -395,6 +403,10 @@ function ZO_RetraitStation_Reconstruct_Gamepad:RequestReconstruction()
 end
 
 function ZO_RetraitStation_Reconstruct_Gamepad:IsReconstructionEnabled()
+    if self.isCraftInProgress then
+        return false
+    end
+
     if not self.isTraitValid then
         return false
     end
@@ -449,6 +461,8 @@ function ZO_RetraitStation_Reconstruct_Gamepad:InitializeKeybindStripDescriptors
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.reconstructKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function()
         self:ShowItemSetsBook()
     end)
+
+    ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.reconstructKeybindStripDescriptor)
 end
 
 -- End ZO_ItemSetsBook_Gamepad_Base Overrides --
